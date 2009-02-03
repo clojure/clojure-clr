@@ -481,7 +481,12 @@ namespace clojure.lang
             m = ratioRE.Match(s);
             if (m.Success)
             {
-                return Numbers.BIDivide(new BigInteger(m.Groups[1].Value), new BigInteger(m.Groups[2].Value));
+                // There is a bug in the BigInteger c-tor that causes it barf on a leading +.
+                string numerString = m.Groups[1].Value;
+                string denomString = m.Groups[2].Value;
+                if (numerString[0] == '+')
+                    numerString = numerString.Substring(1);
+                return Numbers.BIDivide(new BigInteger(numerString), new BigInteger(denomString));
             }
             return null;
         }
@@ -1030,7 +1035,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackReader r, char leftbracket)
             {
-                return PersistentHashSet.create(readDelimitedList('}', r, true));
+                return PersistentHashSet.create1(readDelimitedList('}', r, true));
             }
         }
 

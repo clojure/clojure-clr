@@ -299,9 +299,8 @@ namespace DataTests
             _mocks.ReplayAll();
 
             Symbol sym1 = Symbol.intern("def", "abc");
-            Keyword k1 = Keyword.intern(sym1);
 
-            _objWithNullMeta = (IObj)k1;
+            _objWithNullMeta = (IObj)sym1;
             _obj = _objWithNullMeta.withMeta(meta);
             _expectedType = typeof(Symbol);
         }

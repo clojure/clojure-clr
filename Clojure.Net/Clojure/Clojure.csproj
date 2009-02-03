@@ -57,7 +57,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Compiler\ClojureGenerator.cs" />
+    <Compile Include="Compiler\Generator.cs" />
     <Compile Include="Readers\ArgumentNullException.cs" />
     <Compile Include="Readers\ArgumentOutOfRangeException.cs" />
     <Compile Include="Lib\AFn.cs" />

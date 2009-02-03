@@ -172,7 +172,7 @@ namespace DataTests
         {
             CPV v1 = new CPV(new object[] { 1, 2, 3 });
 
-            Expect(v1.Equals(7), False);
+            Expect(v1.equiv(7), False);
         }
 
         [Test]
@@ -183,9 +183,9 @@ namespace DataTests
             CPV v3 = new CPV(new object[] { 1, 2 });
             CPV v4 = new CPV(new object[] { 1, 2, 3, 4 });
 
-            Expect(v1.Equals(v2), False);
-            Expect(v1.Equals(v3), False);
-            Expect(v1.Equals(v4), False);
+            Expect(v1.equiv(v2), False);
+            Expect(v1.equiv(v3), False);
+            Expect(v1.equiv(v4), False);
         }
 
         [Test]
@@ -198,9 +198,9 @@ namespace DataTests
             CPV v5 = new CPV(new object[] { });
             CPV v6 = new CPV(new object[] { });
 
-            Expect(v1.Equals(v2));
-            Expect(v3.Equals(v4));
-            Expect(v5.Equals(v6));
+            Expect(v1.equiv(v2));
+            Expect(v3.equiv(v4));
+            Expect(v5.equiv(v6));
         }
 
         [Test]
@@ -209,7 +209,7 @@ namespace DataTests
             CPV v1 = new CPV(new object[] { 'a', 'b', 'c' });
             StringSeq s1 = StringSeq.create("abc");
 
-            Expect(v1.Equals(s1));
+            Expect(v1.equiv(s1));
         }
 
         [Test]
@@ -220,9 +220,9 @@ namespace DataTests
             StringSeq s2 = StringSeq.create("abd");
             StringSeq s3 = StringSeq.create("abcd");
 
-            Expect(v1.Equals(s1), False);
-            Expect(v1.Equals(s2), False);
-            Expect(v1.Equals(s3), False);
+            Expect(v1.equiv(s1), False);
+            Expect(v1.equiv(s2), False);
+            Expect(v1.equiv(s3), False);
         }
 
 

@@ -343,7 +343,7 @@ namespace DataTests
 
             IPersistentMap m = PersistentArrayMap.create(d);
 
-            Expect(m.Equals(d));
+            Expect(m.equiv(d));
         }
 
         [Test]

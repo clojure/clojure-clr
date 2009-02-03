@@ -24,7 +24,7 @@ namespace DataTests
         public void CreateOnEmptyListReturnsEmptySet()
         {
             ArrayList a = new ArrayList();
-            IPersistentSet m = PersistentHashSet.create(a);
+            IPersistentSet m = PersistentHashSet.create1(a);
 
             Expect(m.count(), EqualTo(0));
         }
@@ -35,7 +35,7 @@ namespace DataTests
             object[] items = new object[] { 1, "a" };
             ArrayList a = new ArrayList(items);
 
-            IPersistentSet m = PersistentHashSet.create(a);
+            IPersistentSet m = PersistentHashSet.create1(a);
 
             Expect(m.count(), EqualTo(2));
             Expect(m.contains(1));

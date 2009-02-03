@@ -88,6 +88,18 @@ namespace clojure.lang
 
         #endregion
 
+        #region IObj members
+
+        public override IObj withMeta(IPersistentMap meta)
+        {
+            // Java version does not do identity check
+            return (meta == _meta)
+                ? this
+                : new PersistentVector(meta, _cnt, _shift, _root, _tail);
+        }
+
+        #endregion
+
         #region IPersistentVector members
 
         /// <summary>

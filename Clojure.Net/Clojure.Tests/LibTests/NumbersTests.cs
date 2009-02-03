@@ -52,9 +52,9 @@ namespace DataTests
         [Test]
         public void ReduceOnBigIntReturnsLargerValues()
         {
-            BigInteger b1 = new BigInteger("100000000", 16);
+            BigInteger b1 = new BigInteger("100000000000000000000", 16);
             BigInteger b2 = b1.negate();
-            BigInteger b3 = new BigInteger("123456789000");
+            BigInteger b3 = new BigInteger("123456789012345678901234567890");
             BigInteger b4 = b3.negate();
 
             ExpectSameObject(b1, Numbers.reduce(b1));

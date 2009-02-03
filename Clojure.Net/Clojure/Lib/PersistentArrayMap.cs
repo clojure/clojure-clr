@@ -104,6 +104,8 @@ namespace clojure.lang
         /// <remarks>The array is used directly.  Do not modify externally or immutability is sacrificed.</remarks>
         public  PersistentArrayMap(object[] init)
         {
+            if (init.Length % 2 != 0)
+                throw new ArgumentException("Key/value array must have an even number of elements.");
             _array = init;
         }
 
@@ -116,6 +118,9 @@ namespace clojure.lang
         protected PersistentArrayMap(IPersistentMap meta, object[] init)
             : base(meta)
         {
+            if (init.Length % 2 != 0)
+                throw new ArgumentException("Key/value array must have an even number of elements.");
+
             _array = init;
         }
 
