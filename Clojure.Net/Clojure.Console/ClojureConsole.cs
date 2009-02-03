@@ -17,7 +17,11 @@ using System.Resources;
 using System.Threading;
 
 
-namespace SimpleREPL
+using clojure.runtime;
+using clojure.compiler;
+
+
+namespace clojure.console
 {
     class ClojureConsole : ConsoleHost, Compiler.EEHooks
     {
@@ -118,9 +122,9 @@ namespace SimpleREPL
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            LoadFromStream(new StringReader(SimpleREPL.Properties.Resources.core));
-            LoadFromStream(new StringReader(SimpleREPL.Properties.Resources.core_print));
-            LoadFromStream(new StringReader(SimpleREPL.Properties.Resources.test));
+            LoadFromStream(new StringReader(clojure.properties.Resources.core));
+            LoadFromStream(new StringReader(clojure.properties.Resources.core_print));
+            LoadFromStream(new StringReader(clojure.properties.Resources.test));
 
             sw.Stop();
             Console.WriteLine("Loading took {0} milliseconds.", sw.ElapsedMilliseconds);

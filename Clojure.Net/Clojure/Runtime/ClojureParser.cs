@@ -7,7 +7,7 @@ using clojure.lang;
 using ZO.SmartCore.IO;
 using System.IO;
 
-namespace SimpleREPL
+namespace clojure.runtime
 {
     class ClojureParser
     {

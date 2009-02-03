@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 
-namespace SimpleREPL
+namespace clojure.runtime
 {
     public sealed class Reflector
     {

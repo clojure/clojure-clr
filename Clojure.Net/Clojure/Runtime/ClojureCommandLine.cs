@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using Microsoft.Scripting.Hosting.Shell;
 
-namespace SimpleREPL
+namespace clojure.runtime
 {
-    class ClojureCommandLine : CommandLine
+    public class ClojureCommandLine : CommandLine
     {
         protected override string Logo
         {

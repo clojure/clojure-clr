@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.Scripting.Runtime;
 using Microsoft.Scripting.Actions;
 
-namespace SimpleREPL
+namespace clojure.runtime
 {
     class ClojureBinder : DefaultBinder
     {

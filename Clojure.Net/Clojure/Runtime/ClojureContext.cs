@@ -7,10 +7,11 @@ using Microsoft.Linq.Expressions;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Generation;
 using clojure.lang;
+using clojure.compiler;
 
-namespace SimpleREPL
+namespace clojure.runtime
 {
-    class ClojureContext : LanguageContext
+    public class ClojureContext : LanguageContext
     {
         public ClojureContext(ScriptDomainManager manager, IDictionary<string, object> options)
             : base(manager)

@@ -10,9 +10,11 @@ using System.IO;
 using System.Threading;
 using AstUtils = Microsoft.Scripting.Ast.Utils;
 
-namespace SimpleREPL
+using clojure.runtime;
+
+namespace clojure.compiler
 {
-    sealed class ClojureGenerator
+    public sealed class ClojureGenerator
     {
         #region Data
 
@@ -209,7 +211,7 @@ namespace SimpleREPL
         //    _clc = clc;
         //}
 
-        internal static LambdaExpression Generate(ClojureContext clc, object form, bool addPrint)
+        public static LambdaExpression Generate(ClojureContext clc, object form, bool addPrint)
         {
             //Expression formExpr = new ClojureGenerator(clc).Generate(form);
             Expression formExpr = new ClojureGenerator().Generate(form);
@@ -233,19 +235,19 @@ namespace SimpleREPL
             return x == null ? string.Empty : x.ToString();
         }
 
-        internal static LambdaExpression Generate(ClojureContext clojureLanguageContext, object p, Microsoft.Scripting.SourceUnit sourceUnit)
+        public  static LambdaExpression Generate(ClojureContext clojureLanguageContext, object p, Microsoft.Scripting.SourceUnit sourceUnit)
         {
             // TODO: Deal with sourceUnit
             return Generate(clojureLanguageContext, p,false);
         }
 
-        internal static Expression Eval(ClojureContext clc, object form)
+        public static Expression Eval(ClojureContext clc, object form)
         {
             //return new ClojureGenerator(clc).Generate(form);
             return new ClojureGenerator().Generate(form);
         }
 
-        internal static object Macroexpand1(ClojureContext clc, object form)
+        public static object Macroexpand1(ClojureContext clc, object form)
         {
             if (!(form is ISeq))
                 return form;
@@ -254,7 +256,7 @@ namespace SimpleREPL
         }
 
 
-        internal static LambdaExpression GenerateTypedDelegateExpression(ClojureContext clc, Type delegateType, Symbol name, IPersistentVector parameters, ISeq body)
+        public static LambdaExpression GenerateTypedDelegateExpression(ClojureContext clc, Type delegateType, Symbol name, IPersistentVector parameters, ISeq body)
         {
             Console.WriteLine("GeneratedTypedDelegate {0} {1}", Thread.CurrentThread.ManagedThreadId,name.Name);
             //return new ClojureGenerator(clc).GenerateTypedDelegateExpression(delegateType, name, parameters, body);
