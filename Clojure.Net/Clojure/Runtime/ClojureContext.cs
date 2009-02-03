@@ -16,13 +16,14 @@ namespace clojure.runtime
         public ClojureContext(ScriptDomainManager manager, IDictionary<string, object> options)
             : base(manager)
         {
-            Binder = new ClojureBinder(manager);
+            //Binder = new ClojureBinder(manager);
             manager.LoadAssembly(typeof(string).Assembly);
-            //manager.LoadAssembly(typeof(System.Windows.Forms.Form).Assembly);
             manager.LoadAssembly(typeof(ISeq).Assembly);
+
+            // Set this to true to get Snippets written.
             //manager.Configuration.DebugMode = true;
         }
-         
+
         protected override Microsoft.Scripting.ScriptCode CompileSourceCode(Microsoft.Scripting.SourceUnit sourceUnit, Microsoft.Scripting.CompilerOptions options, Microsoft.Scripting.ErrorSink errorSink)
         {
             ClojureParser cp = new ClojureParser(sourceUnit);
@@ -37,13 +38,13 @@ namespace clojure.runtime
                         sourceUnit.CodeProperties = result;
                         if (result != ScriptCodeParseResult.Complete)
                             return null;
-                        ast = ClojureGenerator.Generate(this, code,true);
+                        ast = Generator.Generate(code, true);
                     }
                     break;
 
                 default:
                     sourceUnit.CodeProperties = ScriptCodeParseResult.Complete;
-                    ast = ClojureGenerator.Generate(this, cp.ParseFile(), sourceUnit);
+                    ast = Generator.Generate(cp.ParseFile(), sourceUnit);
                     break;
             }
 

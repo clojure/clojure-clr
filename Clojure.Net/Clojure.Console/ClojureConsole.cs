@@ -140,7 +140,7 @@ namespace clojure.console
         {
             ScriptSource scriptSource = Engine.CreateScriptSourceFromString("<internal>");
 
-            Expression expr = ClojureGenerator.Eval(GetLanguageContext(), form);
+            Expression expr = Generator.Eval(GetLanguageContext(), form);
             LambdaExpression ast = Expression.Lambda(expr);
             ast = new GlobalLookupRewriter().RewriteLambda(ast);
             ScriptCode code = new ScriptCode(ast, GetSourceUnit(scriptSource));
@@ -149,7 +149,7 @@ namespace clojure.console
 
         public object Macroexpand1(object form)
         {
-            return ClojureGenerator.Macroexpand1(GetLanguageContext(), form);
+            return Generator.Macroexpand1(GetLanguageContext(), form);
         }
 
         public object LoadFromStream(TextReader rdr)
@@ -176,7 +176,7 @@ namespace clojure.console
             object form;
             while ((form = LispReader.read(pbr, false, eofVal, false)) != eofVal)
             {
-                LambdaExpression ast = ClojureGenerator.Generate(null, form, addPrint);
+                LambdaExpression ast = Generator.Generate(form, addPrint);
                 ast = new GlobalLookupRewriter().RewriteLambda(ast);
 
                 ScriptCode code = new ScriptCode(ast, GetSourceUnit(scriptSource));
@@ -190,7 +190,7 @@ namespace clojure.console
         {
             ScriptSource scriptSource = Engine.CreateScriptSourceFromString("<internal>");
 
-            LambdaExpression ast = ClojureGenerator.GenerateTypedDelegateExpression(GetLanguageContext(), delegateType, optName, argList, body);
+            LambdaExpression ast = Generator.GenerateTypedDelegateExpression(GetLanguageContext(), delegateType, optName, argList, body);
             return ast.Compile(); 
 
             //ast = new GlobalLookupRewriter().RewriteLambda(ast);  -- doesn't work unless no args

@@ -59,7 +59,7 @@ namespace clojure.runtime
             while ((form = LispReader.read(pbr, false, eofVal, false)) != eofVal)
                 pv = pv.cons(form);
 
-            return pv.seq(); 
+            return pv.seq();
         }
     }
 }

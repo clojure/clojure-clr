@@ -14,11 +14,9 @@ using clojure.runtime;
 
 namespace clojure.compiler
 {
-    public sealed class ClojureGenerator
+    public static class Generator
     {
         #region Data
-
-        //private ClojureContext _clc;
 
         static readonly Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
         static readonly Symbol NS = Symbol.create("ns");
@@ -33,9 +31,9 @@ namespace clojure.compiler
 
         static readonly MethodInfo Method_ArraySeq_create_array_int = typeof(ArraySeq).GetMethod("create",new Type[] { typeof(object[]),typeof(int)});
 
-        static readonly MethodInfo Method_CGen_MakeMap = typeof(ClojureGenerator).GetMethod("MakeMap");
-        static readonly MethodInfo Method_CGen_MakeSet = typeof(ClojureGenerator).GetMethod("MakeSet");
-        static readonly MethodInfo Method_CGen_MakeVector = typeof(ClojureGenerator).GetMethod("MakeVector");
+        static readonly MethodInfo Method_CGen_MakeMap = typeof(Generator).GetMethod("MakeMap");
+        static readonly MethodInfo Method_CGen_MakeSet = typeof(Generator).GetMethod("MakeSet");
+        static readonly MethodInfo Method_CGen_MakeVector = typeof(Generator).GetMethod("MakeVector");
 
         static readonly MethodInfo Method_IObj_withMeta = typeof(IObj).GetMethod("withMeta");
 
@@ -76,28 +74,28 @@ namespace clojure.compiler
 
         #region Special forms map
 
-        delegate Expression ExprGenerator(ISeq form,ClojureGenerator g);
+        delegate Expression ExprGenerator(ISeq form);
 
         private static readonly Dictionary<Symbol, ExprGenerator> _specials = new Dictionary<Symbol, ExprGenerator>();
 
-        static ClojureGenerator()
+        static Generator()
         {
-            _specials.Add(Compiler.DEF, DefGenerator);
-            _specials.Add(Compiler.LOOP, LetGenerator);
-            _specials.Add(Compiler.RECUR, RecurGenerator);
-            _specials.Add(Compiler.IF, IfGenerator);
-            _specials.Add(Compiler.LET, LetGenerator);
-            _specials.Add(Compiler.DO, BodyGenerator);
-            _specials.Add(Compiler.FN, FnGenerator);
-            _specials.Add(Compiler.QUOTE, QuoteGenerator);
-            _specials.Add(Compiler.THE_VAR, TheVarGenerator);
-            _specials.Add(Compiler.DOT, HostGenerator);
-            _specials.Add(Compiler.ASSIGN, AssignGenerator);
-            _specials.Add(Compiler.TRY, TryGenerator);
-            _specials.Add(Compiler.THROW, ThrowGenerator);
-            _specials.Add(Compiler.MONITOR_ENTER, MonitorEnterGenerator);
-            _specials.Add(Compiler.MONITOR_EXIT, MonitorExitGenerator);
-            _specials.Add(Compiler.NEW, NewGenerator);
+            _specials.Add(Compiler.DEF, GenerateDefExpr);
+            _specials.Add(Compiler.LOOP, GenerateLetExpr);
+            _specials.Add(Compiler.RECUR, GenerateRecurExpr);
+            _specials.Add(Compiler.IF, GenerateIfExpr);
+            _specials.Add(Compiler.LET, GenerateLetExpr);
+            _specials.Add(Compiler.DO, GenerateBodyExpr);
+            _specials.Add(Compiler.FN, GenerateFnExpr);
+            _specials.Add(Compiler.QUOTE, GenerateQuoteExpr);
+            _specials.Add(Compiler.THE_VAR, GenerateTheVarExpr);
+            _specials.Add(Compiler.DOT, GenerateHostExpr);
+            _specials.Add(Compiler.ASSIGN, GenerateAssignExpr);
+            _specials.Add(Compiler.TRY, GenerateTryExpr);
+            _specials.Add(Compiler.THROW, GenerateThrowExpr);
+            _specials.Add(Compiler.MONITOR_ENTER, GenerateMonitorEnterExpr);
+            _specials.Add(Compiler.MONITOR_EXIT, GenerateMonitorExitExpr);
+            _specials.Add(Compiler.NEW, GenerateNewExpr);
 
             for (int i = 0; i <= MAX_POSITIONAL_ARITY; i++)
                 Methods_IFn_invoke[i] = typeof(IFn).GetMethod("invoke", CreateObjectTypeArray(i));
@@ -126,95 +124,15 @@ namespace clojure.compiler
             return _specials[head as Symbol];
         }
 
-        private static Expression DefGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateDefExpr(form);
-        }
 
-        private static Expression LetGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateLetExpr(form);
-        }
-
-        private static Expression RecurGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateRecurExpr(form);
-        }
-
-        private static Expression IfGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateIfExpr(form);
-        }
-
-        private static Expression BodyGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateBodyExpr(form);
-        }
-
-        private static Expression FnGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateFnExpr(form);
-        }
-
-
-        private static Expression QuoteGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateQuoteExpr(form);
-        }
-
-        private static Expression TheVarGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateTheVarExpr(form);
-        }
-
-        private static Expression HostGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateHostExpr(form);
-        }
-
-        private static Expression AssignGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateAssignExpr(form);
-        }
-
-        private static Expression TryGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateTryExpr(form);
-        }
-
-        private static Expression ThrowGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateThrowExpr(form);
-        }
-
-        private static Expression MonitorEnterGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateMonitorEnterExpr(form);
-        }
-
-        private static Expression MonitorExitGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateMonitorExitExpr(form);
-        }
-
-        private static Expression NewGenerator(ISeq form, ClojureGenerator g)
-        {
-            return g.GenerateNewExpr(form);
-        }
 
         #endregion
         
         #region C-tors & factory methods
 
-        //private ClojureGenerator(ClojureContext clc)
-        //{
-        //    _clc = clc;
-        //}
-
-        public static LambdaExpression Generate(ClojureContext clc, object form, bool addPrint)
+        public static LambdaExpression Generate(object form, bool addPrint)
         {
-            //Expression formExpr = new ClojureGenerator(clc).Generate(form);
-            Expression formExpr = new ClojureGenerator().Generate(form);
+            Expression formExpr = Generate(form);
 
             Expression finalExpr = formExpr; 
             
@@ -235,41 +153,36 @@ namespace clojure.compiler
             return x == null ? string.Empty : x.ToString();
         }
 
-        public  static LambdaExpression Generate(ClojureContext clojureLanguageContext, object p, Microsoft.Scripting.SourceUnit sourceUnit)
+        public  static LambdaExpression Generate(object p, Microsoft.Scripting.SourceUnit sourceUnit)
         {
             // TODO: Deal with sourceUnit
-            return Generate(clojureLanguageContext, p,false);
+            return Generate(p,false);
         }
 
         public static Expression Eval(ClojureContext clc, object form)
         {
-            //return new ClojureGenerator(clc).Generate(form);
-            return new ClojureGenerator().Generate(form);
+            return Generate(form);
         }
 
         public static object Macroexpand1(ClojureContext clc, object form)
         {
             if (!(form is ISeq))
                 return form;
-            //return new ClojureGenerator(clc).MacroexpandSeq1((ISeq)form);
-            return new ClojureGenerator().MacroexpandSeq1((ISeq)form);
+            return MacroexpandSeq1((ISeq)form);
         }
 
 
         public static LambdaExpression GenerateTypedDelegateExpression(ClojureContext clc, Type delegateType, Symbol name, IPersistentVector parameters, ISeq body)
         {
-            Console.WriteLine("GeneratedTypedDelegate {0} {1}", Thread.CurrentThread.ManagedThreadId,name.Name);
-            //return new ClojureGenerator(clc).GenerateTypedDelegateExpression(delegateType, name, parameters, body);
-            return new ClojureGenerator().GenerateTypedDelegateExpression(delegateType, name, parameters, body);
+            return GenerateTypedDelegateExpression(delegateType, name, parameters, body);
         }
 
         #endregion
 
         #region Entry points
 
-        private Expression Generate(object form)
+        private static Expression Generate(object form)
         {
-
             if (form == null)
                 return GenerateNilExpr();
             else if (form is Boolean)
@@ -307,27 +220,27 @@ namespace clojure.compiler
         private static ConstantExpression TRUE_EXPR = Expression.Constant(RT.T);
         private static ConstantExpression FALSE_EXPR = Expression.Constant(RT.F);
         
-        private Expression GenerateConstExpr(object form)
+        private static Expression GenerateConstExpr(object form)
         {
             return Expression.Constant(form);
         }
 
-        private Expression GenerateNilExpr()
+        private static Expression GenerateNilExpr()
         {
             return NIL_EXPR;
         }
 
-        private Expression GenerateTrueExpr()
+        private static Expression GenerateTrueExpr()
         {
             return TRUE_EXPR;
         }
 
-        private Expression GenerateFalseExpr()
+        private static Expression GenerateFalseExpr()
         {
             return FALSE_EXPR;
         }
 
-        private Expression GenerateKeywordExpr(Keyword keyword)
+        private static Expression GenerateKeywordExpr(Keyword keyword)
         {
             // in the Java version:
             //if (!KEYWORDS.isBound())
@@ -343,7 +256,7 @@ namespace clojure.compiler
             return Expression.Constant(keyword);
         }
 
-        private Expression GenerateStringExpr(string p)
+        private static Expression GenerateStringExpr(string p)
         {
             return Expression.Constant(String.Intern(p));
         }
@@ -356,7 +269,7 @@ namespace clojure.compiler
 
         private static Namespace CurrentNamespace
         {
-            get { return Compiler.CurrentNamespace; }
+            get { return Generator.CurrentNamespace; }
         }
 
         private static IPersistentMap CHAR_MAP = PersistentHashMap.create('-', "_",
@@ -426,7 +339,7 @@ namespace clojure.compiler
         // var > constid
 
         // this ties into local variables and vars
-        private Expression GenerateSymbolExpr(Symbol symbol)
+        private static Expression GenerateSymbolExpr(Symbol symbol)
         {
             Symbol tag = TagOf(symbol);
 
@@ -500,7 +413,7 @@ namespace clojure.compiler
             // However, this may be needed when writing out a binary file
         }
 
-        private Var IsMacro(Object op)
+        private static Var IsMacro(Object op)
         {
             if (op is Symbol && ReferenceLocal((Symbol)op) != null)
                 return null;
@@ -518,7 +431,7 @@ namespace clojure.compiler
         }
 
 
-        private LocalBinding ReferenceLocal(Symbol symbol)
+        private static LocalBinding ReferenceLocal(Symbol symbol)
         {
             if (!LOCAL_ENV.IsBound)
                 return null;
@@ -575,12 +488,12 @@ namespace clojure.compiler
             return var;
         }
 
-        private Expression GenerateUnresolvedVarExpr(Symbol symbol)
+        private static Expression GenerateUnresolvedVarExpr(Symbol symbol)
         {
             return null;  // ??????
         }
 
-        private Expression GenerateVarExpr(Var v, Symbol tag)
+        private static Expression GenerateVarExpr(Var v, Symbol tag)
         {
             object tagToUse = tag ?? v.Tag;
 
@@ -590,7 +503,7 @@ namespace clojure.compiler
             return expr;
         }
 
-        private Expression GenerateStaticFieldExpr(Type t, string fieldName)
+        private static Expression GenerateStaticFieldExpr(Type t, string fieldName)
         {
             //return Expression.Field(Expression.Constant(t), fieldName);
             return Expression.Field(null, t, fieldName);
@@ -606,7 +519,7 @@ namespace clojure.compiler
         static Expression EMPTY_HASHMAP_EXPR = Expression.Constant(PersistentArrayMap.EMPTY);
         static Expression EMPTY_HASHSET_EXPR = Expression.Constant(PersistentHashSet.EMPTY);
 
-        private Expression GenerateEmptyExpr(object form)
+        private static Expression GenerateEmptyExpr(object form)
         {
             Expression expr = null;
 
@@ -628,7 +541,7 @@ namespace clojure.compiler
             return expr;
         }
 
-        private Expression GenerateVectorExpr(IPersistentVector v)
+        private static Expression GenerateVectorExpr(IPersistentVector v)
         {
             int n = v.count();
             Expression[] args = new Expression[v.count()];
@@ -643,7 +556,7 @@ namespace clojure.compiler
         }
 
 
-        private Expression GenerateMapExpr(IPersistentMap m)
+        private static Expression GenerateMapExpr(IPersistentMap m)
         {
             Expression[] args = new Expression[m.count() * 2];
             int i = 0;
@@ -661,7 +574,7 @@ namespace clojure.compiler
             return ret;
         }
 
-        private Expression GenerateSetExpr(IPersistentSet set)
+        private static Expression GenerateSetExpr(IPersistentSet set)
         {
             Expression[] args = new Expression[set.count()];
             int i = 0;
@@ -694,7 +607,7 @@ namespace clojure.compiler
             return PersistentHashSet.create(elements);
         }
 
-        private Expression OptionallyGenerateMetaInit(object form, Expression expr)
+        private static Expression OptionallyGenerateMetaInit(object form, Expression expr)
         {
             Expression ret = expr;
 
@@ -712,7 +625,7 @@ namespace clojure.compiler
 
         #region ISeq forms = calls
 
-        private Expression GenerateSeqExpr(ISeq form)
+        private static Expression GenerateSeqExpr(ISeq form)
         {
             object exp = MacroexpandSeq1(form);
             if (exp != form)
@@ -725,12 +638,12 @@ namespace clojure.compiler
             if (inline != null)
                 return Generate(inline.applyTo(RT.rest(form)));
             else if (HasSpecialFormGenerator(op))
-                return GetSpecialFormGenerator(op)(form, this);
+                return GetSpecialFormGenerator(op)(form);
             else
                 return GenerateInvoke(form);
         }
 
-        private Expression GenerateInvoke(ISeq form)
+        private static Expression GenerateInvoke(ISeq form)
         {
             Expression fn = Generate(form.first());
 
@@ -749,7 +662,7 @@ namespace clojure.compiler
             return call;
         }
 
-        private Type ComputeInvocationReturnType(object op, ISeq form)
+        private static Type ComputeInvocationReturnType(object op, ISeq form)
         {
             Symbol tag = TagOf(form);
             if (tag == null && op is Symbol)
@@ -769,13 +682,13 @@ namespace clojure.compiler
         }
 
         // Tremendously duplicative of GenerateSymbolExpr -- maybe just cache the info somewhere.
-        Var SymbolMapsToVar(Symbol symbol)
+        static Var SymbolMapsToVar(Symbol symbol)
         {
             if ( symbol.Namespace == null  && ReferenceLocal(symbol) != null )
                 // maps to local
                 return null;
 
-            if ( symbol.Namespace != null && Compiler.namespaceFor(symbol) == null )
+            if (symbol.Namespace != null && Compiler.namespaceFor(symbol) == null)
             {
                   Symbol nsSym = Symbol.create(symbol.Namespace);
                     Type t = MaybeType(nsSym, false);
@@ -791,7 +704,7 @@ namespace clojure.compiler
             return null;
         }
 
-        private Expression GenerateInvocation(Type returnType, Expression fn, Expression[] args)
+        private static Expression GenerateInvocation(Type returnType, Expression fn, Expression[] args)
         {
             MethodInfo mi;
             Expression[] actualArgs;
@@ -824,7 +737,7 @@ namespace clojure.compiler
             return call;
         }
 
-        private object MacroexpandSeq1(ISeq form)
+        private static object MacroexpandSeq1(ISeq form)
         {
             object op = RT.first(form);
             if (Compiler.isSpecial(op))
@@ -895,7 +808,7 @@ namespace clojure.compiler
         }
 
 
-        private IFn IsInline(object op, int arity)
+        private static IFn IsInline(object op, int arity)
         {
             // Java:  	//no local inlines for now
             if (op is Symbol && ReferenceLocal((Symbol)op) != null)
@@ -923,14 +836,14 @@ namespace clojure.compiler
 
         #region Special form generation
 
-        private Expression GenerateQuoteExpr(ISeq form)
+        private static Expression GenerateQuoteExpr(ISeq form)
         {
             object v = form.rest().first();
 
             return v == null ? GenerateNilExpr() : GenerateConstExpr(v);
         }
 
-        private Expression GenerateIfExpr(ISeq form)
+        private static Expression GenerateIfExpr(ISeq form)
         {
             if (form.count() > 4)
                 throw new Exception("Too many arguments to if");
@@ -977,7 +890,7 @@ namespace clojure.compiler
             return Expression.Condition(realExpr, thenExpr, elseExpr);
         }
 
-        private Expression GenerateBodyExpr(ISeq form)
+        private static Expression GenerateBodyExpr(ISeq form)
         {
             ISeq forms = (Compiler.DO.Equals(RT.first(form))) ? RT.rest(form) : form;
 
@@ -1015,7 +928,7 @@ namespace clojure.compiler
             return Expression.Block(exprs);
         }
 
-        private Expression GenerateTheVarExpr(ISeq form)
+        private static Expression GenerateTheVarExpr(ISeq form)
         {
             Symbol sym = RT.second(form) as Symbol;
             Var v = lookupVar(sym, false);
@@ -1024,7 +937,7 @@ namespace clojure.compiler
             throw new Exception(string.Format("Unable to resolve var: {0} in this context", sym));
         }
 
-        private Expression GenerateDefExpr(ISeq form)
+        private static Expression GenerateDefExpr(ISeq form)
         {
             if (form.count() > 3)
                 throw new Exception("Too many arguments to def");
@@ -1098,7 +1011,7 @@ namespace clojure.compiler
 
         //  DLR TryStatement has void type, so we must wrap it in a scope
         //  that has a target to return to.
-        private Expression GenerateTryExpr(ISeq form)
+        private static Expression GenerateTryExpr(ISeq form)
         {
             // (try try-expr* catch-expr* finall-expr?)
             // catch-expr: (catch classname sym expr*)
@@ -1113,7 +1026,7 @@ namespace clojure.compiler
             {
                 object f = fs.first();
                 object op = (f is ISeq) ? ((ISeq)f).first() : null;
-                if (! Compiler.CATCH.Equals(op) && ! Compiler.FINALLY.Equals(op) )
+                if (!Compiler.CATCH.Equals(op) && !Compiler.FINALLY.Equals(op))
                 {
                     if ( caught )
                         throw new Exception("Only catch or finally clause can follow catch in try expression");
@@ -1121,7 +1034,7 @@ namespace clojure.compiler
                 }
                 else 
                 {
-                    if ( Compiler.CATCH.Equals(op))
+                    if (Compiler.CATCH.Equals(op))
                     {
                         ISeq f1 = f as ISeq;
                         Type t = MaybeType(RT.second(f1),false);
@@ -1184,17 +1097,17 @@ namespace clojure.compiler
             return whole;
         }
 
-        private Expression GenerateThrowExpr(ISeq form)
+        private static Expression GenerateThrowExpr(ISeq form)
         {
             return Expression.Throw(Expression.Convert(Generate(RT.second(form)), typeof(Exception)));
         }
 
-        private Expression GenerateMonitorEnterExpr(ISeq form)
+        private static Expression GenerateMonitorEnterExpr(ISeq form)
         {
             return Expression.Call(Method_Monitor_Enter, Generate(RT.second(form)));
         }
 
-        private Expression GenerateMonitorExitExpr(ISeq form)
+        private static Expression GenerateMonitorExitExpr(ISeq form)
         {
             return Expression.Call(Method_Monitor_Exit, Generate(RT.second(form)));
         }
@@ -1433,7 +1346,7 @@ namespace clojure.compiler
             return false;
         }
 
-        private Expression GenerateFnExpr(ISeq form)
+        private static Expression GenerateFnExpr(ISeq form)
         {
             // This naming convention drawn from the Java code.
             FnDef fn = new FnDef();
@@ -1497,7 +1410,7 @@ namespace clojure.compiler
         enum ParamParseState { Required, Rest, Done };
 
 
-        private MethodDef GenerateFnMethod(FnDef fn, ISeq form)
+        private static MethodDef GenerateFnMethod(FnDef fn, ISeq form)
         {
             // form == ([args] body ... )
             IPersistentVector parms = (IPersistentVector)RT.first(form);
@@ -1629,7 +1542,7 @@ namespace clojure.compiler
             }
         }
 
-        private Expression GenerateFnLambda(FnDef fn, SortedDictionary<int, MethodDef> methods, MethodDef variadicMethod)
+        private static Expression GenerateFnLambda(FnDef fn, SortedDictionary<int, MethodDef> methods, MethodDef variadicMethod)
         {
             Type fnType = fn.IsVariadic ? typeof(RestFnImpl) : typeof(AFnImpl);
 
@@ -1660,7 +1573,7 @@ namespace clojure.compiler
 
 
         // There is a tremendous overlap between this and GenerateFnExpr+GenerateFnMethod.  TODO: DRY it.
-        private LambdaExpression GenerateTypedDelegateExpression(Type delegateType, Symbol name, IPersistentVector parms, ISeq body)
+        private static LambdaExpression GenerateTypedDelegateExpression(Type delegateType, Symbol name, IPersistentVector parms, ISeq body)
         {
              // Create the form that is more or less correct
 
@@ -2026,12 +1939,12 @@ namespace clojure.compiler
         //    return ret;
         //}
 
-        private Expression GetParamArrayItem(Expression e, int i)
+        private static Expression GetParamArrayItem(Expression e, int i)
         {
             return Expression.ArrayIndex(e, Expression.Constant(i));
         }
 
-        private Expression ConvertParamArrayToISeq(Expression e, int i)
+        private static Expression ConvertParamArrayToISeq(Expression e, int i)
         {
             return Expression.Call(Method_ArraySeq_create_array_int, e, Expression.Constant(i));
         }
@@ -2064,7 +1977,7 @@ namespace clojure.compiler
 
         public static readonly Var LOOP_LABEL = Var.create(null);
 
-        private Expression GenerateLetExpr(ISeq form)
+        private static Expression GenerateLetExpr(ISeq form)
         {
             // form => (let [var1 val1 var2 val2 ... ] body ... )
             //      or (loop [var1 val1 var2 val2 ... ] body ... )
@@ -2166,7 +2079,7 @@ namespace clojure.compiler
         // Don't do what I did the first time:  Evaluate the forms/assignments sequentially.
         // Need to evaluate all the forms, then assign them.
 
-        private Expression GenerateRecurExpr(ISeq form)
+        private static Expression GenerateRecurExpr(ISeq form)
         {
             IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.get();
             if ( IN_TAIL_POSITION.get() == null || loopLocals == null )
@@ -2217,7 +2130,7 @@ namespace clojure.compiler
 
         #region Assign
 
-        private Expression GenerateAssignExpr(ISeq form)
+        private static Expression GenerateAssignExpr(ISeq form)
         {
             if (form.count() != 3)
                 throw new ArgumentException("Malformed assignment, expecting (set! target val)");
@@ -2243,7 +2156,7 @@ namespace clojure.compiler
 
         }
 
-        private Var FindAsVar(object target)
+        private static Var FindAsVar(object target)
         {
             Symbol sym = target as Symbol;
             if (sym == null)
@@ -2259,7 +2172,7 @@ namespace clojure.compiler
             return o as Var;
         }
 
-        private Type FindAsDirectStaticFieldReference(object target)
+        private static Type FindAsDirectStaticFieldReference(object target)
         {
             Symbol sym = target as Symbol;
             if (sym == null)
@@ -2278,7 +2191,7 @@ namespace clojure.compiler
             return null;
         }
 
-        private bool IsFieldReference(object target)
+        private static bool IsFieldReference(object target)
         {
             ISeq form = target as ISeq;
             if (form == null)
@@ -2296,7 +2209,7 @@ namespace clojure.compiler
             return true;
         }
 
-        private Expression GenerateVarAssignExpr(Var v, object init)
+        private static Expression GenerateVarAssignExpr(Var v, object init)
         {
             Expression initExpr = Generate(init);
 
@@ -2304,7 +2217,7 @@ namespace clojure.compiler
         }
 
 
-        private Expression GenerateDirectStaticFieldAssignExpr(Type t, string fieldName, object init)
+        private static Expression GenerateDirectStaticFieldAssignExpr(Type t, string fieldName, object init)
         {
             Expression initExpr = Generate(init);
 
@@ -2319,7 +2232,7 @@ namespace clojure.compiler
             throw new ArgumentException(string.Format("No field/property named: {0} for type: {1}", fieldName, t.Name));
         }
 
-        private Expression GenerateFieldAssignExpr(object classOrInstance, string fieldName, object init)
+        private static Expression GenerateFieldAssignExpr(object classOrInstance, string fieldName, object init)
         {
             Type t = MaybeType(classOrInstance, false);
             if (t != null)
@@ -2345,7 +2258,7 @@ namespace clojure.compiler
 
         #region .NET-interop special forms
 
-        private Expression GenerateHostExpr(ISeq form)
+        private static Expression GenerateHostExpr(ISeq form)
         {
             // form is one of:
             //  (. x fieldname-sym)
@@ -2454,7 +2367,7 @@ namespace clojure.compiler
 
 
 
-        private Expression GenerateNewExpr(ISeq form)
+        private static Expression GenerateNewExpr(ISeq form)
         {
             // form => (new Classname args ... )
             if (form.count() < 2)
