@@ -85,7 +85,7 @@ namespace clojure.lang
             {
                 try
                 {
-                    _rest = (ISeq)_restFn.invoke(null);
+                    _rest = (ISeq)_restFn.invoke();
                 }
                 catch ( Exception ex )
                 {

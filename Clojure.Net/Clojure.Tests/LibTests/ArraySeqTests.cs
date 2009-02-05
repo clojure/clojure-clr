@@ -103,59 +103,6 @@ namespace Clojure.Tests.LibTests
 
         #endregion
 
-        #region ISeq tests
-
-        [Test]
-        public void First_yields_first_element_1()
-        {
-            object[] array = new object[] { 1, 2, 3 };
-            ArraySeq a = ArraySeq.create(array);
-
-            Expect(a.first(), EqualTo(1));
-        }
-
-        public void First_yields_first_element_2()
-        {
-            object[] array = new object[] { 1, 2, 3 };
-            ArraySeq a = ArraySeq.create(array,1);
-
-            Expect(a.first(), EqualTo(2));
-        }
-
-
-        public void Rest_has_correct_count_and_first_element_1()
-        {
-            object[] array = new object[] { 1, 2, 3 };
-            ArraySeq a = ArraySeq.create(array);
-            ISeq s = a.rest();
-
-            Expect(s.first(), EqualTo(2));
-            Expect(s.count(), EqualTo(2));
-        }
-
-        public void Rest_has_correct_count_and_first_element_2()
-        {
-            object[] array = new object[] { 1, 2, 3 };
-            ArraySeq a = ArraySeq.create(array,1);
-            ISeq s = a.rest();
-
-            Expect(s.first(), EqualTo(3));
-            Expect(s.count(), EqualTo(1));
-        }
-
-        public void Rest_eventually_yields_null()
-        {
-            object[] array = new object[] { 1, 2, 3 };
-            ArraySeq a = ArraySeq.create(array);
-
-            Expect(a.first(), EqualTo(1));
-            Expect(a.rest().first(), EqualTo(2));
-            Expect(a.rest().rest().first(), EqualTo(3));
-            Expect(a.rest().rest().rest(), Null);
-        }
-
-
-        #endregion
 
         #region IReduce tests
 

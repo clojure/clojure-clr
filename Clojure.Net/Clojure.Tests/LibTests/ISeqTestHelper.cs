@@ -26,5 +26,19 @@ namespace Clojure.Tests.LibTests
             Expect(newSeq.first(), EqualTo(newVal));
             VerifyISeqContents(newSeq.rest(), values);
         }
+
+        public void VerifyISeqRestTypes(ISeq s, Type type)
+        {
+            for ( ; s.rest() != null; s = s.rest())
+                Expect(s.rest(), InstanceOfType(type));
+        }
+
+        public void VerifyISeqRestMaintainsMeta(ISeq s)
+        {
+            IPersistentMap meta = ((IMeta)s).meta();
+
+            for (; s.rest() != null; s = s.rest())
+                Expect(((IMeta)s.rest()).meta(), EqualTo(meta));
+        }
     }
 }

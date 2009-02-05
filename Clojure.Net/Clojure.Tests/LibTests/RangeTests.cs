@@ -53,74 +53,6 @@ namespace Clojure.Tests.LibTests
 
         #endregion
 
-        #region ISeq tests
-
-        [Test]
-        public void First_yields_start_of_range()
-        {
-            Range r = new Range(2, 5);
-
-            Expect(r.first(), EqualTo(2));
-        }
-
-        [Test]
-        public void Rest_yields_another_range()
-        {
-            Range r = new Range(2, 5);
-            ISeq s = r.rest();
-
-            Expect(s, TypeOf(typeof(Range)));
-        }
-
-        [Test]
-        public void Rest_range_has_correct_count_and_first_element()
-        {
-            Range r = new Range(2, 5);
-            ISeq s = r.rest();
-
-            Expect(s.first(), EqualTo(3));
-            Expect(s.count(), EqualTo(2));
-        }
-
-        [Test]
-        public void Rest_eventually_yields_null()
-        {
-            Range r = new Range(2, 4);
-
-            Expect(r.first(), EqualTo(2));
-            Expect(r.rest().first(), EqualTo(3));
-            Expect(r.rest().rest(), Null);
-        }
-
-        [Test]
-        public void Rest_preserves_meta()
-        {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
-
-            Range r = new Range(meta, 2, 5);
-            IObj obj = (IObj) r.rest();
-
-            Expect(obj.meta(), EqualTo(meta));
-
-            mocks.VerifyAll();
-        }
-
-
-        [Test]
-        public void Cons_puts_anything_on_front_from_ASeq()
-        {
-            Range r = new Range(2, 4);
-            ISeq s = r.cons("abc");
-
-            Expect(s.first(), EqualTo("abc"));
-            Expect(s.rest(),SameAs(r));
-         }
-
-
-        #endregion
-
         #region IReduce tests
 
         [Test]
@@ -160,10 +92,56 @@ namespace Clojure.Tests.LibTests
 
         #endregion
 
-        // TODO: test stream capability of Range
-        
+        // TODO: test stream capability of Range        
     }
 
+    [TestFixture]
+    public class Range_ISeq_Tests : ISeqTestHelper
+    {
+        Range _r;
+        Range _rWithMeta;
+        object[] _values;
+
+        [SetUp]
+        public void Setup()
+        {
+            IPersistentMap meta = PersistentHashMap.create("a", 1, "b", 2);
+
+            _r = new Range(2, 5);
+            _rWithMeta = new Range(meta, 2, 5);
+            _values = new object[] { 2, 3, 4 };
+        }
+
+        [Test]
+        public void Range_has_correct_values()
+        {
+            VerifyISeqContents(_r, _values);
+        }
+
+        [Test]
+        public void Range_with_meta_has_correct_values()
+        {
+            VerifyISeqContents(_rWithMeta, _values);
+        }
+
+        [Test]
+        public void Rest_preserves_meta()
+        {
+            VerifyISeqRestMaintainsMeta(_rWithMeta);
+        }
+
+        [Test]
+        public void Rest_preserves_type()
+        {
+            VerifyISeqRestTypes(_r, typeof(Range));
+        }
+
+        [Test]
+        public void Cons_works()
+        {
+            VerifyISeqCons(_r, 12, _values);
+        }
+    }
 
     [TestFixture]
     public class Range_IObj_Tests : IObjTests

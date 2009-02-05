@@ -29,70 +29,64 @@ namespace Clojure.Tests.LibTests
         }
 
         #endregion
+    }
 
-        #region ISeq tests
+    [TestFixture]
+    public class LazyCons_ISeq_Tests : ISeqTestHelper
+    {
+        MockRepository _mocks ;
+        IFn _fn;
+        LazyCons _lc;
+        object[] _values;
 
-        [Test]
-        public void FirstCallsFnOnceAndReturnsFnValue()
+        [SetUp]
+        public void Setup()
+        {             
+            _mocks = new MockRepository();
+            _fn = _mocks.StrictMock<IFn>();
+            RMExpect.Call(_fn.invoke()).Return(10);
+            RMExpect.Call(_fn.invoke(null)).Return(new Cons(20,null));
+            _lc = new LazyCons(_fn);
+            _values = new object[] { 10, 20 };
+            _mocks.ReplayAll();
+        }
+
+        [TearDown]
+        public void Teardown()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke()).Return(10);
-            mocks.ReplayAll();
-
-            LazyCons lc = new LazyCons(fn);
-
-            Expect(lc.first(), EqualTo(10));
-            mocks.VerifyAll();
+            _mocks.VerifyAll();
         }
 
         [Test]
-        public void FirstCachesResult()
+        public void ISeq_has_proper_values()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke()).Return(10);
-            mocks.ReplayAll();
-
-            LazyCons lc = new LazyCons(fn);
-
-            Expect(lc.first(), EqualTo(10));
-            Expect(lc.first(), EqualTo(10));
-            mocks.VerifyAll();
+            VerifyISeqContents(_lc, _values);
         }
 
         [Test]
-        public void RestCallsFnTwiceAndReturnsSecondValue()
+        public void First_caches()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke()).Return(10);
-            RMExpect.Call(fn.invoke(null)).Return(null);
-            mocks.ReplayAll();
+            _lc.first();
+            _lc.first();
 
-            LazyCons lc = new LazyCons(fn);
-
-            Expect(lc.rest(), Null);
-            mocks.VerifyAll();
+            // Need to meet expectation that _rest is called.
+            _lc.rest();
         }
 
-        public void RestCachesResult()
+        [Test]
+        public void Rest_calcs_first()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke()).Return(10);
-            RMExpect.Call(fn.invoke(null)).Return(null);
-            mocks.ReplayAll();
-
-            LazyCons lc = new LazyCons(fn);
-
-            Expect(lc.rest(), Null);
-            Expect(lc.rest(), Null);
-
-            mocks.VerifyAll();
+            _lc.rest();
         }
 
-        #endregion
+        [Test]
+        public void Rest_caches()
+        {
+            _lc.rest();
+            _lc.rest();
+        }
+
+
 
     }
 

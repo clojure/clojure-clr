@@ -50,36 +50,6 @@ namespace Clojure.Tests.LibTests
 
         #endregion
 
-        #region ISeq tests
-
-        [Test]
-        public void First_yields_first_character()
-        {
-            StringSeq s = StringSeq.create("abcde");
-
-            Expect(s.first(), EqualTo('a'));
-        }
-
-        [Test]
-        public void Rest_yields_stringSeq_with_correct_count()
-        {
-            StringSeq s = StringSeq.create("abcde");
-            ISeq r = s.rest();
-
-            Expect(r, TypeOf(typeof(StringSeq)));
-            Expect(r.count(), EqualTo(4));
-            Expect(r.first(), EqualTo('b'));
-        }
-
-        [Test]
-        public void Repeated_rest_yields_null_eventually()
-        {
-            StringSeq s = StringSeq.create("abc");
-            Expect(s.rest().rest().rest(), Null);
-        }
-
-        #endregion
-
         #region IndexedSeq tests
 
         [Test]
@@ -103,6 +73,54 @@ namespace Clojure.Tests.LibTests
 
     }
 
+    [TestFixture]
+    public class StringSeq_ISeq_Tests : ISeqTestHelper
+    {
+        StringSeq _s;
+        StringSeq _sWithMeta;
+        object[] _values;
+
+        [SetUp]
+        public void Setup()
+        {
+            IPersistentMap meta = PersistentHashMap.create("a", 1, "b", 2);
+
+            _s = StringSeq.create("abcde");
+            _sWithMeta = (StringSeq)((IObj)StringSeq.create("abcde")).withMeta(meta);
+            _values = new object[] { 'a', 'b', 'c', 'd', 'e' };
+        }
+
+        [Test]
+        public void StringSeq_has_correct_ISeq_values()
+        {
+            VerifyISeqContents(_s, _values);
+        }
+
+        [Test]
+        public void StringSeq_with_meta_has_correct_ISeq_values()
+        {
+            VerifyISeqContents(_sWithMeta, _values);
+        }
+
+        [Test]
+        public void StringSeq_ISeq_rest_preserves_meta()
+        {
+            VerifyISeqRestMaintainsMeta(_sWithMeta);
+        }
+
+        [Test]
+        public void StringSeq_ISeq_rest_preserves_type()
+        {
+            VerifyISeqRestTypes(_s,typeof(StringSeq));
+        }
+
+        [Test]
+        public void StringSeq_ISeq_cons_works()
+        {
+            VerifyISeqCons(_s, 12, _values);
+        }
+
+    }
 
     [TestFixture]
     public class StringSeq_IObj_Tests : IObjTests

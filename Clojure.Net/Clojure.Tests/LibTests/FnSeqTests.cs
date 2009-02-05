@@ -15,7 +15,6 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class FnSeqTests : AssertionHelper
     {
-
         #region C-tor tests
 
         // Couldn't think of anything except to make sure it doesn't throw an exception.
@@ -74,54 +73,59 @@ namespace Clojure.Tests.LibTests
         }
 
         #endregion
+    }
 
-        #region ISeq tests
+    [TestFixture]
+    public class FnSeq_ISeq_Tests : ISeqTestHelper
+    {
+        object[] _restValues;
+        object[] _values;
+        MockRepository _mocks;
+        IFn _fn;
+        FnSeq _fs;
 
-        [Test]
-        public void FirstReturnsCachedValue()
+        [SetUp]
+        public void Setup()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            mocks.ReplayAll();
+            _restValues = new object[] { 2, 3, 4 };
+            _values = new object[] { "abc", 2, 3, 4 };
+            _mocks = new MockRepository();
+            IFn _fn = _mocks.StrictMock<IFn>();
+            RMExpect.Call(_fn.invoke()).Return(PersistentList.create(_restValues));
 
-            FnSeq fs = new FnSeq("abc", fn);
+            _fs = new FnSeq("abc", _fn);
 
-            Expect(fs.first(), EqualTo("abc"));
-            mocks.VerifyAll();
+            _mocks.ReplayAll();
+        }
+
+        [TearDown]
+        public void Teardown()
+        {
+            _mocks.VerifyAll();
         }
 
 
         [Test]
-        public void RestCallsFnAndReturnsValue()
+        public void FnSeq_ISeq_has_correct_values()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(null)).Return(null);
-            mocks.ReplayAll();
-
-            FnSeq fs = new FnSeq("abc", fn);
-
-            Expect(fs.rest(), Null);
-            mocks.VerifyAll();
+            VerifyISeqContents(_fs, _values);
         }
 
+        [Test]
+        public void FnSeq_ISeq_conses()
+        {
+            VerifyISeqCons(_fs, 12, _values);
+        }
+
+        [Test]
         public void RestCachesResult()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(null)).Return(null);
-            mocks.ReplayAll();
-
-            FnSeq fs = new FnSeq("abc", fn);
-
-            Expect(fs.rest(), Null);
-            Expect(fs.rest(), Null);
-
-            mocks.VerifyAll();
+            _fs.rest();
+            _fs.rest();
         }
 
-        #endregion
 
+    
     }
 
     [TestFixture]
