@@ -12,7 +12,7 @@ using clojure.lang;
 using RMExpect = Rhino.Mocks.Expect;
 
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
  
   //TODO: NEed to fix NS tests to clear the created namespaces after each test.

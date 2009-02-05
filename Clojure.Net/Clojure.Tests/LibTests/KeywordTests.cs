@@ -13,7 +13,7 @@ using RMExpect = Rhino.Mocks.Expect;
 using System.Collections;
 
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
     [TestFixture]
     public class KeywordTests : AssertionHelper

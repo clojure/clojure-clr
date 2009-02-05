@@ -12,7 +12,7 @@ using clojure.lang;
 using RMExpect = Rhino.Mocks.Expect;
 using System.Collections;
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
     [TestFixture]
     public class PersistentHashSetTests : AssertionHelper

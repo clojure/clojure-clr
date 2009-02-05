@@ -7,7 +7,7 @@ using NUnit.Framework;
 using Rhino.Mocks;
 using clojure.lang;
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
     /// <summary>
     /// Base class for testing the IMeta interface functionality.

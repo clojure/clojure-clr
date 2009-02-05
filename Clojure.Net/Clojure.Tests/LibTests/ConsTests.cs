@@ -9,7 +9,7 @@ using Rhino.Mocks;
 using clojure.lang;
 using System.Collections;
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
     [TestFixture]
     public class ConsTests : AssertionHelper
@@ -24,25 +24,6 @@ namespace DataTests
         }
 
         [Test]
-        public void NoMetaCtorHoldsFirst()
-        {
-            Cons c = new Cons("abc",null);
-            Expect(c.first(),EqualTo("abc"));
-        }
-
-        [Test]
-        public void NoMetaCtorHoldsRest()
-        {
-            Cons c1 = new Cons("abc",null);
-            Cons c2 = new Cons("def",c1);
-
-            Expect( c2.first(), EqualTo("def"));
-            Expect( c2.rest(), SameAs(c1));
-            Expect( c2.rest().first(), EqualTo("abc"));
-            Expect( c2.rest().rest(),Null);
-        }
-
-        [Test]
         public void MetaCtorHasMeta()
         {
             MockRepository mocks = new MockRepository();
@@ -54,44 +35,6 @@ namespace DataTests
             Expect(c.meta(), SameAs(meta));
             mocks.VerifyAll();
         }
-
-        [Test]
-        public void MetaCtorHoldsFirst()
-        {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
-
-            Cons c = new Cons(meta, "abc", null);
-
-            Expect(c.first(), EqualTo("abc"));
-            mocks.VerifyAll();
-        }
-
-        [Test]
-        public void MetaCtorHoldsRest()
-        {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
-
-            Cons c1 = new Cons("abc", null);
-            Cons c2 = new Cons(meta,"def", c1);
-
-            Expect(c2.first(), EqualTo("def"));
-            Expect(c2.rest(), SameAs(c1));
-            Expect(c2.rest().first(), EqualTo("abc"));
-            Expect(c2.rest().rest(), Null);
-            mocks.VerifyAll();
-        }
-        
-
-
-        #endregion
-
-        #region ISeq tests
-
-        // already tested above
 
         #endregion
 
@@ -414,6 +357,48 @@ namespace DataTests
 
         #endregion
     }
+
+    [TestFixture]
+    public class Cons_ISeq_Tests : ISeqTestHelper
+    {
+
+        [Test]
+        public void Cons_ISeq_has_correct_values()
+        {
+            Cons c1 = new Cons("def", null);
+            Cons c2 = new Cons("abc", c1);
+
+            VerifyISeqContents(c2, new object[] { "abc", "def" });
+        }
+
+        [Test]
+        public void Cons_ISeq_with_meta_has_correct_values()
+        {
+            MockRepository mocks = new MockRepository();
+            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
+            mocks.ReplayAll();
+
+            Cons c1 = new Cons("def", null);
+            Cons c2 = new Cons(meta,"abc", c1);
+
+            VerifyISeqContents(c2, new object[] { "abc", "def" });
+            mocks.VerifyAll();
+        }
+
+        [Test]
+        public void Cons_ISeq_conses()
+        {
+
+            Cons c1 = new Cons("def", null);
+            Cons c2 = new Cons("abc", c1);
+
+            VerifyISeqCons(c2, "ghi", new object[] { "abc", "def" });
+        }
+
+
+
+    }
+
 
     [TestFixture]
     public class Cons_IMeta_Tests : IObjTests

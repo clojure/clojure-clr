@@ -8,7 +8,7 @@ using System.Text;
 using NUnit.Framework;
 
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
 
 

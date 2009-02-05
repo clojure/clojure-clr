@@ -13,7 +13,7 @@ using System.Collections;
 
 
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
     [TestFixture]
     public class SymbolTests : AssertionHelper
@@ -307,7 +307,7 @@ namespace DataTests
 
         [TearDown]
         public void Teardown()
-        {
+       { 
             _mocks.VerifyAll();
         }
 

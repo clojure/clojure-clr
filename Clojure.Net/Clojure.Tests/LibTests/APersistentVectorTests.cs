@@ -11,7 +11,7 @@ using clojure.lang;
 using RMExpect = Rhino.Mocks.Expect;
 
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
 
     // TODO: Add tests for APersistentVector.SubVector

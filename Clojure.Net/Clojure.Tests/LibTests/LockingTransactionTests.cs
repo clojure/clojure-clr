@@ -12,7 +12,7 @@ using clojure.lang;
 using RMExpect = Rhino.Mocks.Expect;
 using System.Threading;
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
     // TODO: Add tests for LockingTransaction
     [TestFixture]

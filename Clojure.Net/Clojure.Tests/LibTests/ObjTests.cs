@@ -9,7 +9,7 @@ using Rhino.Mocks;
 using clojure.lang;
 
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
     [TestFixture]
     public class ObjTests : IObjTests

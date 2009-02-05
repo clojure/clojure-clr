@@ -19,7 +19,7 @@ using PBR = ZO.SmartCore.IO.PushbackReader;
 using Clojure.Readers;
 
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
     [TestFixture]
     public class LispReaderTests : AssertionHelper

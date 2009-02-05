@@ -10,7 +10,7 @@ using clojure.lang;
 
 using RMExpect = Rhino.Mocks.Expect;
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
     [TestFixture]
     public class ArraySeqTests : AssertionHelper
@@ -196,6 +196,50 @@ namespace DataTests
             mocks.VerifyAll();
         }
         #endregion
+
+    }
+
+    [TestFixture]
+    public class ArraySeq_ISeq_Tests : ISeqTestHelper
+    {
+        object[] _array0;
+        object[] _array1;
+        ArraySeq _a0;
+        ArraySeq _a1;
+
+        [SetUp]
+        public void Setup()
+        {
+            _array0 = new object[] { 1, 2, 3 };
+            _array1 = new object[] {    2, 3 };
+            _a0 = ArraySeq.create(_array0);
+            _a1 = ArraySeq.create(_array0, 1);
+        }
+
+        [Test]
+        public void ArraySeq_ISeq_std_ctor_has_correct_elements()
+        {
+            VerifyISeqContents(_a0, _array0);
+        }
+
+        [Test]
+        public void ArraySeq_ISeq_index_ctor_has_correct_elements()
+        {
+            VerifyISeqContents(_a1, _array1 );
+        }
+
+        [Test]
+        public void ArraySeq_ISeq_std_ctor_conses()
+        {
+            VerifyISeqCons(_a0, 4, _array0);
+        }
+
+        [Test]
+        public void ArraySeq_ISeq_index_ctor_conses()
+        {
+            VerifyISeqCons(_a1, 4, _array1);
+        }
+
 
     }
 

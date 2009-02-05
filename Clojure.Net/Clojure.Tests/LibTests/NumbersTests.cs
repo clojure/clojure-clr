@@ -9,7 +9,7 @@ using Rhino.Mocks;
 using clojure.lang;
 using java.math;
 
-namespace DataTests
+namespace Clojure.Tests.LibTests
 {
     [TestFixture]
     public class NumbersTests : AssertionHelper

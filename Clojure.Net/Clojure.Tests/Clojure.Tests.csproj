@@ -74,6 +74,7 @@
     <Compile Include="LibTests\DelayTests.cs" />
     <Compile Include="LibTests\FnSeqTests.cs" />
     <Compile Include="LibTests\IObjTests.cs" />
+    <Compile Include="LibTests\ISeqTestHelper.cs" />
     <Compile Include="LibTests\IteratorStreamTests.cs" />
     <Compile Include="LibTests\KeywordTests.cs" />
     <Compile Include="LibTests\LazilyPersistentVectorTests.cs" />
