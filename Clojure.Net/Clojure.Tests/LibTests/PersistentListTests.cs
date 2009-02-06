@@ -47,37 +47,6 @@ namespace Clojure.Tests.LibTests
 
         #endregion
 
-        #region ISeq tests
-
-        [Test]
-        public void MultipleConsesOnPersistentList()
-        {
-            PersistentList p1 = new PersistentList("abc");
-            PersistentList p2 = (PersistentList) p1.cons("def");
-            PersistentList p3 = (PersistentList) p2.cons(7);
-
-            Expect(p3.first(), EqualTo(7));
-            Expect(p3.rest(), SameAs(p2));
-        }
-
-        [Test]
-        public void ConsPreservesMeta()
-        {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
-
-            PersistentList p1 = (PersistentList) new PersistentList("abc").withMeta(meta);
-            PersistentList p2 = (PersistentList)p1.cons("def");
-
-            Expect(p2.meta(), SameAs(meta));
-            mocks.VerifyAll();
-
-        }
-
-
-        #endregion
-
         #region IPersistentStack tests
 
         [Test]
@@ -184,6 +153,57 @@ namespace Clojure.Tests.LibTests
         #endregion
 
     }
+
+    [TestFixture]
+    public class PersistentList_ISeq_Tests : ISeqTestHelper
+    {
+        PersistentList _pl;
+        PersistentList _plWithMeta;
+        object[] _values;
+
+
+        [SetUp]
+        public void Setup()
+        {
+            PersistentList p1 = new PersistentList("abc");
+            PersistentList p2 = (PersistentList)p1.cons("def");
+            _pl = (PersistentList)p2.cons(7);
+            _values = new object[] { 7, "def", "abc" };
+            _plWithMeta = (PersistentList)_pl.withMeta(PersistentHashMap.create("a", 1));
+        }
+
+        [Test]
+        public void ISeq_has_correct_valuess()
+        {
+            VerifyISeqContents(_pl, _values);
+        }
+
+        [Test]
+        public void ISeq_with_meta_has_correct_valuess()
+        {
+            VerifyISeqContents(_plWithMeta, _values);
+        }
+
+        [Test]
+        public void Rest_has_correct_type()
+        {
+            VerifyISeqRestTypes(_pl, typeof(PersistentList));
+        }
+
+        [Test]
+        public void Cons_works()
+        {
+            VerifyISeqCons(_pl, "pqr", _values);
+        }
+
+        [Test]
+        public void ConsPreservesMeta()
+        {
+            PersistentList p2 = (PersistentList)_plWithMeta.cons("def");
+            Expect(p2.meta(), SameAs(_plWithMeta.meta()));
+        }
+    }
+
 
     [TestFixture]
     public class PersistentList_IObj_Tests : IObjTests
