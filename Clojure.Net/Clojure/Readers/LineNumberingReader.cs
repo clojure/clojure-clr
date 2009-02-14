@@ -1,4 +1,14 @@
-﻿using System;
+﻿/**
+ *   Copyright (c) David Miller. All rights reserved.
+ *   The use and distribution terms for this software are covered by the
+ *   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+ *   which can be found in the file epl-v10.html at the root of this distribution.
+ *   By using this software in any fashion, you are agreeing to be bound by
+ * 	 the terms of this license.
+ *   You must not remove this notice, or any other, from this software.
+ **/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +16,7 @@ using System.IO;
 
 namespace clojure.lang.Readers
 {
-    class LineNumberingReader : TextReader
+    public class LineNumberingReader : TextReader
     {
         #region Data
 
@@ -18,7 +28,7 @@ namespace clojure.lang.Readers
         }
 
 
-        private int _lineNumber = 0;
+        private int _lineNumber = 1;
 
         public int LineNumber
         {
@@ -54,12 +64,11 @@ namespace clojure.lang.Readers
 
         #endregion
 
-
         #region Lookahead
 
         public override int Peek()
         {
-            return base.Peek();
+            return _baseReader.Peek();
         }
 
         #endregion
@@ -68,7 +77,7 @@ namespace clojure.lang.Readers
 
         public override int Read()
         {
-            int ret = base.Read();
+            int ret = _baseReader.Read();
             switch (ret)
             {
                 case '\n':
@@ -79,7 +88,7 @@ namespace clojure.lang.Readers
                 case '\r':
                     if (Peek() == '\n')
                     {
-                        ret = base.Read();
+                        ret = _baseReader.Read();
                         goto case '\n';
                     }
                     break;
@@ -152,6 +161,5 @@ namespace clojure.lang.Readers
         }
 
         #endregion
-
     }
 }

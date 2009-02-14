@@ -37,52 +37,6 @@ namespace Clojure.Tests.LibTests
         }
 
         #endregion
-
-        #region IObj tests
-
-        [Test]
-        public void BasicFnSeqHasNoMeta()
-        {
-            FnSeq fs = new FnSeq("abc", null);
-
-            Expect(fs.meta(), Null);
-        }
-
-
-        [Test]
-        public void WithMetaAddsMeta()
-        {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(null)).Return(null);
-            mocks.ReplayAll();
-
-            FnSeq fs = new FnSeq("abc", fn);
-            IObj obj = fs.withMeta(meta);
-
-            Expect(obj.meta(), EqualTo(meta));
-            mocks.VerifyAll();
-        }
-
-        [Test]
-        public void WithMetaDuplicateReturnsSame()
-        {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(null)).Return(null);
-            mocks.ReplayAll();
-
-            FnSeq fs = new FnSeq("abc", fn);
-            IObj obj1 = fs.withMeta(meta);
-            IObj obj2 = obj1.withMeta(meta);
-
-            Expect(obj2, SameAs(obj1));
-            mocks.VerifyAll();
-        }
-
-        #endregion
     }
 
     [TestFixture]
@@ -91,7 +45,6 @@ namespace Clojure.Tests.LibTests
         object[] _restValues;
         object[] _values;
         MockRepository _mocks;
-        IFn _fn;
         FnSeq _fs;
 
         [SetUp]
@@ -148,7 +101,7 @@ namespace Clojure.Tests.LibTests
         {
             _mocks = new MockRepository();
             IFn fn = _mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(null)).Return(null);
+            RMExpect.Call(fn.invoke()).Return(null);
             _mocks.ReplayAll();
 
             FnSeq fs = new FnSeq("abc", fn);

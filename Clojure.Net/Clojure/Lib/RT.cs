@@ -313,7 +313,7 @@ namespace clojure.lang
         public static readonly Var ERR = Var.intern(CLOJURE_NS, Symbol.create("*err*"), System.Console.Error);
         public static readonly Var IN =
             Var.intern(CLOJURE_NS, Symbol.create("*in*"),
-            new Clojure.Readers.LineNumberingPushbackReader(System.Console.In));
+            new clojure.lang.Readers.LineNumberingReader(System.Console.In));
         static readonly Var PRINT_READABLY = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), T);
         static readonly Var PRINT_META = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), F);
         static readonly Var PRINT_DUP = Var.intern(CLOJURE_NS, Symbol.create("*print-dup*"), F);
@@ -471,7 +471,7 @@ namespace clojure.lang
 
         static public Object readString(String s)
         {
-            ZO.SmartCore.IO.PushbackReader r = new ZO.SmartCore.IO.PushbackReader(new StringReader(s));
+            TextReader r = new StringReader(s);
             return LispReader.read(r, true, null, false);
         }
         

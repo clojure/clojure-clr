@@ -23,10 +23,7 @@ using clojure.lang;
 using RMExpect = Rhino.Mocks.Expect;
 using java.math;
 
-
-
-using PBR = ZO.SmartCore.IO.PushbackReader;
-using Clojure.Readers;
+using clojure.lang.Readers;
 
 
 namespace Clojure.Tests.LibTests
@@ -193,9 +190,9 @@ namespace Clojure.Tests.LibTests
 
         #region Helpers
 
-        static PBR CreatePushbackReaderFromString(string s)
+        static TextReader CreatePushbackReaderFromString(string s)
         {
-            return new PBR(new StringReader(s));
+            return new StringReader(s);
         }
 
         static object ReadFromString(string s)
@@ -203,9 +200,9 @@ namespace Clojure.Tests.LibTests
             return LispReader.read(CreatePushbackReaderFromString(s),true,null,false);
         }
 
-        static LineNumberingPushbackReader CreateLNPBRFromString(string s)
+        static LineNumberingReader CreateLNPBRFromString(string s)
         {
-            return new LineNumberingPushbackReader(new StringReader(s));
+            return new LineNumberingReader(new StringReader(s));
         }
 
         static object ReadFromStringNumbering(string s)

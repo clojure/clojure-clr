@@ -2212,7 +2212,7 @@
   string"
   [s]
   (let [rdr (-> (System.IO.StringReader. s)     ;;; was (java.io.StringReader. s)
-                (Clojure.Readers.LineNumberingPushbackReader.))]   ;;; was (clojure.lang.LineNumberingPushbackReader.))]
+                (clojure.lang.Readers.LineNumberingReader.))]   ;;; was (clojure.lang.LineNumberingPushbackReader.))]
     (load-reader rdr)))
 ;;; NOT CLEAR WHAT TO WORK AGAINST HERE.  MAYBE THIS SHOULD NOT BE IN THE CORE?
 ;(defn resultset-seq
@@ -2640,7 +2640,7 @@
   "Evaluates body in a context in which *in* is bound to a fresh
   StringReader initialized with the string s."
   [s & body]
-  `(with-open s# (-> (System.IO.StringReader. ~s) Clojure.Readers.LineNumberingPushbackReader.)  ;;; were java.io.StringReader & clojure.lang.LineNumberingPushbackReader
+  `(with-open s# (-> (System.IO.StringReader. ~s) clojure.lang.Readers.LineNumberingReader.)  ;;; were java.io.StringReader & clojure.lang.LineNumberingPushbackReader
      (binding [*in* s#]
        ~@body)))
 

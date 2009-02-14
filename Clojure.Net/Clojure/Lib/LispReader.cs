@@ -12,12 +12,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Clojure.Readers;
-using ZO.SmartCore.IO;
 using System.Text.RegularExpressions;
 using java.math;
 using System.IO;
 using System.Collections;
+using clojure.lang.Readers;
 
 namespace clojure.lang
 {
@@ -50,7 +49,7 @@ namespace clojure.lang
 
         //symbol->gensymbol
         /// <summary>
-        /// Dynamically bound var to a map from <see cref="Symbol">Symbol</see>s to 
+        /// Dynamically bound var to a map from <see cref="Symbol">Symbol</see>s to ...
         /// </summary>
         static Var GENSYM_ENV = Var.create(null);
 
@@ -117,7 +116,7 @@ namespace clojure.lang
 
         // There is really no reason for the main entry point to have an isRecursive flag, is there?
 
-        public static object read(PushbackReader r,
+        public static object read(TextReader r,
             bool eofIsError,
             object eofValue,
             bool isRecursive)
@@ -135,7 +134,7 @@ namespace clojure.lang
             }
         }
 
-        public static object ReadAux(PushbackReader r, bool isRecursive)
+        public static object ReadAux(TextReader r, bool isRecursive)
         {
             try
             {
@@ -174,14 +173,12 @@ namespace clojure.lang
 
                     if (ch == '+' || ch == '-')
                     {
-                        int ch2 = r.Read();
+                        int ch2 = r.Peek();
                         if (Char.IsDigit((char)ch2))
                         {
-                            unread(r, ch2);
                             object n = readNumber(r, (char)ch);
                             return RT.suppressRead() ? null : n;
                         }
-                        unread(r, ch2);
                     }
 
                     string token = readToken(r, (char)ch);
@@ -190,9 +187,9 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                if (isRecursive || !(r is LineNumberingPushbackReader))
+                if (isRecursive || !(r is LineNumberingReader))
                     throw e;
-                LineNumberingPushbackReader rdr = r as LineNumberingPushbackReader;
+                LineNumberingReader rdr = r as LineNumberingReader;
                 throw new ReaderException(rdr.LineNumber, e);
             }
         }
@@ -207,11 +204,7 @@ namespace clojure.lang
         }
 
 
-        static void unread(PushbackReader r, int ch)
-        {
-            if (ch != -1)
-                r.Unread(ch);
-        }
+
 
         // Roughly a match to Java Character.digit(char,int),
         // though I don't handle all unicode digits.
@@ -244,7 +237,7 @@ namespace clojure.lang
             return (char)uc;
         }
 
-        static int readUnicodeChar(PushbackReader r, int initch, int radix, int length, bool exact)
+        static int readUnicodeChar(TextReader r, int initch, int radix, int length, bool exact)
         {
 
             int uc = CharValueInRadix(initch, radix);
@@ -253,12 +246,13 @@ namespace clojure.lang
             int i = 1;
             for (; i < length; ++i)
             {
-                int ch = r.Read();
+                int ch = r.Peek();
                 if (ch == -1 || isWhitespace(ch) || isMacro(ch))
                 {
-                    unread(r, ch);
                     break;
                 }
+                else
+                    r.Read();
                 int d = CharValueInRadix(ch, radix);
                 if (d == -1)
                     throw new ArgumentException("Invalid digit: " + (char)ch);
@@ -274,26 +268,33 @@ namespace clojure.lang
         #region  Other 
 
         
-        public static List<Object> readDelimitedList(char delim, PushbackReader r, bool isRecursive)
+        public static List<Object> readDelimitedList(char delim, TextReader r, bool isRecursive)
         {
             List<Object> a = new List<object>();
 
             for (; ; )
             {
-                int ch = r.Read();
+                int ch = r.Peek();
 
                 while (isWhitespace(ch))
-                    ch = r.Read();
+                {
+                    r.Read();
+                    ch = r.Peek();
+                }
 
                 if (ch == -1)
                     throw new EndOfStreamException("EOF while reading");
 
                 if (ch == delim)
+                {
+                    r.Read();
                     break;
+                }
 
                 IFn macroFn = getMacro(ch);
                 if (macroFn != null)
                 {
+                    r.Read();
                     Object mret = macroFn.invoke(r, (char)ch);
                     //no op macros return the reader
                     if (mret != r)
@@ -301,8 +302,6 @@ namespace clojure.lang
                 }
                 else
                 {
-                    unread(r, ch);
-
                     //object o = read(r, true, null, isRecursive);
                     object o = ReadAux(r, isRecursive);
                     if (o != r)
@@ -323,20 +322,20 @@ namespace clojure.lang
 
         #region Reading tokens
 
-        static string readToken(PushbackReader r, char initch) 
+        static string readToken(TextReader r, char initch) 
         {
 	        StringBuilder sb = new StringBuilder();
             sb.Append(initch);
             
             for(; ;)
             {
-                int ch = r.Read();
+                int ch = r.Peek();
                 if(ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
                 {
-                    unread(r, ch);
                     return sb.ToString();
                 }
                 sb.Append((char) ch);
+                r.Read();
             }
         }
 
@@ -420,19 +419,17 @@ namespace clojure.lang
         static Regex floatRE = new Regex("^[-+]?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?[M]?$");
 
 
-        static object readNumber(PushbackReader r, char initch)
+        static object readNumber(TextReader r, char initch)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(initch);
 
             for (; ; )
             {
-                int ch = r.Read();
+                int ch = r.Peek();
                 if (ch == -1 || isWhitespace(ch) || isMacro(ch))
-                {
-                    unread(r, ch);
                     break;
-                }
+                r.Read();
                 sb.Append((char)ch);
             }
 
@@ -510,15 +507,15 @@ namespace clojure.lang
         {
            public override object invoke(object arg1, object arg2)
             {
-                return Read((PushbackReader)arg1, (Char)arg2);
+                return Read((TextReader)arg1, (Char)arg2);
             }
 
-            protected abstract object Read(PushbackReader r, char c);
+            protected abstract object Read(TextReader r, char c);
         }
 
         public sealed class CharacterReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char backslash)
+            protected override object Read(TextReader r, char backslash)
             {
                 int ch = r.Read();
                 if (ch == -1)
@@ -561,7 +558,7 @@ namespace clojure.lang
 
         public sealed class StringReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char doublequote)
+            protected override object Read(TextReader r, char doublequote)
             {
                 StringBuilder sb = new StringBuilder();
 
@@ -599,13 +596,13 @@ namespace clojure.lang
                                 ch = r.Read();
                                 if (CharValueInRadix(ch, 16) == -1)
                                     throw new Exception("Invalid unicode escape: \\u" + (char)ch);
-                                ch = readUnicodeChar((PushbackReader)r, ch, 16, 4, true);
+                                ch = readUnicodeChar((TextReader)r, ch, 16, 4, true);
                                 break;
                             default:
                                 {
                                     if (CharValueInRadix(ch, 8) != -1)
                                     {
-                                        ch = readUnicodeChar((PushbackReader)r, ch, 8, 3, false);
+                                        ch = readUnicodeChar((TextReader)r, ch, 8, 3, false);
                                         if (ch > 255) //octal377
                                             throw new Exception("Octal escape sequence must be in range [0, 377].");
                                     }
@@ -623,7 +620,7 @@ namespace clojure.lang
 
         public sealed class CommentReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char semicolon)
+            protected override object Read(TextReader r, char semicolon)
             {
                 int ch;
                 do
@@ -636,11 +633,11 @@ namespace clojure.lang
 
         public sealed class ListReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char leftparen)
+            protected override object Read(TextReader r, char leftparen)
             {
                 int line = -1;
-                if (r is LineNumberingPushbackReader)
-                    line = ((LineNumberingPushbackReader)r).LineNumber;
+                if (r is LineNumberingReader)
+                    line = ((LineNumberingReader)r).LineNumber;
                 IList<Object> list = readDelimitedList(')', r, true);
                 if (list.Count == 0)
                     return PersistentList.EMPTY;
@@ -655,7 +652,7 @@ namespace clojure.lang
 
         public sealed class VectorReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char leftparen)
+            protected override object Read(TextReader r, char leftparen)
             {
                 return LazilyPersistentVector.create(readDelimitedList(']', r, true));
             }
@@ -663,7 +660,7 @@ namespace clojure.lang
 
         public sealed class MapReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char leftbrace)
+            protected override object Read(TextReader r, char leftbrace)
             {
                 //return PersistentHashMap.create(readDelimitedList('}', r, true));
                 return RT.map(readDelimitedList('}', r, true).ToArray());
@@ -672,7 +669,7 @@ namespace clojure.lang
 
         public sealed class UnmatchedDelimiterReader : ReaderBase
         {
-            protected override object Read(PushbackReader reader, char rightdelim)
+            protected override object Read(TextReader reader, char rightdelim)
             {
                 throw new Exception("Unmatched delimiter: " + rightdelim);
             }
@@ -687,7 +684,7 @@ namespace clojure.lang
                 _sym = sym;
             }
 
-            protected override object Read(PushbackReader r, char quote)
+            protected override object Read(TextReader r, char quote)
             {
                 //object o = read(r, true, null, true);
                 object o = ReadAux(r, true);
@@ -697,7 +694,7 @@ namespace clojure.lang
 
         public sealed class SyntaxQuoteReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char backquote)
+            protected override object Read(TextReader r, char backquote)
             {
                 try
                 {
@@ -828,20 +825,20 @@ namespace clojure.lang
 
         sealed class UnquoteReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char comma)
+            protected override object Read(TextReader r, char comma)
             {
-                int ch = r.Read();
+                int ch = r.Peek();
                 if (ch == -1)
                     throw new EndOfStreamException("EOF while reading character");
                 if (ch == '@')
                 {
                     //object o = read(r, true, null, true);
+                    r.Read();
                     object o = ReadAux(r, true);
                     return new UnquoteSplicing(o);
                 }
                 else
                 {
-                    unread(r, ch);
                     //object o = read(r, true, null, true);
                     object o = ReadAux(r, true);
                     //return new Unquote(o);
@@ -875,7 +872,7 @@ namespace clojure.lang
 
         public sealed class DispatchReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char hash)
+            protected override object Read(TextReader r, char hash)
             {
                 int ch = r.Read();
                 if (ch == -1)
@@ -889,11 +886,11 @@ namespace clojure.lang
 
         public sealed class MetaReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char caret)
+            protected override object Read(TextReader r, char caret)
             {
                 int line = -1;
-                if (r is LineNumberingPushbackReader)
-                    line = ((LineNumberingPushbackReader)r).LineNumber;
+                if (r is LineNumberingReader)
+                    line = ((LineNumberingReader)r).LineNumber;
                 //object meta = read(r, true, null, true);
                 object meta = ReadAux(r, true);
                 if (meta is Symbol || meta is Keyword || meta is String)
@@ -921,7 +918,7 @@ namespace clojure.lang
 
         public sealed class VarReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char quote)
+            protected override object Read(TextReader r, char quote)
             {
                 //object o = read(r, true, null, true);
                 object o = ReadAux(r, true);
@@ -939,7 +936,7 @@ namespace clojure.lang
         {
             static readonly StringReader stringrdr = new StringReader();
 
-            protected override object Read(PushbackReader r, char doublequote)
+            protected override object Read(TextReader r, char doublequote)
             {
                 StringBuilder sb = new StringBuilder();
                 for (int ch = r.Read(); ch != '"'; ch = r.Read())
@@ -961,16 +958,19 @@ namespace clojure.lang
 
         public sealed class FnReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char lparen)
+            static ListReader _listReader = new ListReader();
+
+            protected override object Read(TextReader r, char lparen)
             {
                 if (ARG_ENV.get() != null)
                     throw new InvalidOperationException("Nested #()s are not allowed");
                 try
                 {
                     Var.pushThreadBindings(RT.map(ARG_ENV, PersistentTreeMap.EMPTY));
-                    r.Unread('(');
-                    //object form = ReadAux(r, true, null, true);
-                    object form = ReadAux(r, true);
+                    //r.Unread('(');
+                    ////object form = ReadAux(r, true, null, true);
+                    //object form = ReadAux(r, true);
+                    object form = _listReader.invoke(r, '(');
 
                     IPersistentVector args = PersistentVector.EMPTY;
                     PersistentTreeMap argsyms = (PersistentTreeMap)ARG_ENV.get();
@@ -1006,10 +1006,9 @@ namespace clojure.lang
 
         sealed class ArgReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char pct)
+            protected override object Read(TextReader r, char pct)
             {
-                int ch = r.Read();
-                unread(r, ch);
+                int ch = r.Peek();
                 //% alone is first arg
                 if (ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
                 {
@@ -1043,7 +1042,7 @@ namespace clojure.lang
 
         public sealed class SetReader : ReaderBase
         {
-            protected override object Read(PushbackReader r, char leftbracket)
+            protected override object Read(TextReader r, char leftbracket)
             {
                 return PersistentHashSet.create1(readDelimitedList('}', r, true));
             }
@@ -1052,7 +1051,7 @@ namespace clojure.lang
         //public sealed class EvalReader : ReaderBase
         // TODO: Need to figure out who to deal with typenames in the context of multiple loaded assemblies.
         //{
-        //    object Read(PushbackReader r, char eq)
+        //    object Read(TextReader r, char eq)
         //    {
         //        Object o = read(r, true, null, true);
         //        if (o is Symbol)
@@ -1092,7 +1091,7 @@ namespace clojure.lang
 
         public sealed class UnreadableReader : ReaderBase
         {
-            protected override object Read(PushbackReader reader, char leftangle)
+            protected override object Read(TextReader reader, char leftangle)
             {
                 throw new Exception("Unreadable form");
             }
