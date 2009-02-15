@@ -196,6 +196,35 @@ namespace clojure.lang
             return Convert.ToUInt64(ToDouble(provider));
         }
 
+        // Java Rev 1256.
+        // TODO: figure out the roundingModes in  this implementation.
+        // TODO:  Make this an explicit cast opearator?
+        // TODO: Look at all these conversions.
+        public BigDecimal ToBigDecimal()
+        {
+            BigDecimal numerator = new BigDecimal(this.Numerator);
+            BigDecimal denominator = new BigDecimal(this.Denominator);
+            return numerator.divide(denominator, 0);
+        }
+
+        //public double doubleValue()
+        //{
+        //    return decimalValue(MathContext.DECIMAL64).doubleValue();
+        //}
+
+        //public BigDecimal decimalValue()
+        //{
+        //    return decimalValue(MathContext.UNLIMITED);
+        //}
+
+        //public BigDecimal decimalValue(MathContext mc)
+        //{
+        //    BigDecimal numerator = new BigDecimal(this.numerator);
+        //    BigDecimal denominator = new BigDecimal(this.denominator);
+
+        //    return numerator.divide(denominator, mc);
+        //}
+
         #endregion
     }
 }
