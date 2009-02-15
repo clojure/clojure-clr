@@ -30,6 +30,7 @@ namespace clojure.lang
         static readonly Symbol QUOTE = Symbol.create("quote");
         static readonly Symbol THE_VAR = Symbol.create("var");
         static readonly Symbol UNQUOTE = Symbol.create("clojure.core", "unquote");
+        static readonly Symbol UNQUOTE_SPLICING = Symbol.create("clojure.core", "unquote-splicing");
         static readonly Symbol DEREF = Symbol.create("clojure.core", "deref");
         static readonly Symbol META = Symbol.create("clojure.core", "meta");
         static readonly Symbol APPLY = Symbol.create("clojure.core", "apply");
@@ -758,7 +759,7 @@ namespace clojure.lang
                 // Rev 1184
                 else if (isUnquote(form))
                     return RT.second(form);
-                else if (form is UnquoteSplicing)
+                else if (isUnquoteSplicing(form))
                     throw new ArgumentException("splice not in list");
                 else if (form is IPersistentCollection)
                 {
@@ -815,8 +816,8 @@ namespace clojure.lang
                     // REV 1184
                     if (isUnquote(item))
                         ret = ret.cons(RT.list(LIST, RT.second(item)));
-                    else if (item is UnquoteSplicing)
-                        ret = ret.cons(((UnquoteSplicing)item).Obj);
+                    else if (isUnquoteSplicing(item))
+                        ret = ret.cons(RT.second(item));
                     else
                         ret = ret.cons(RT.list(LIST, syntaxQuote(item)));
                 }
@@ -848,7 +849,7 @@ namespace clojure.lang
                     //object o = read(r, true, null, true);
                     r.Read();
                     object o = ReadAux(r, true);
-                    return new UnquoteSplicing(o);
+                    return RT.list(UNQUOTE_SPLICING, o);
                 }
                 else
                 {
@@ -867,20 +868,9 @@ namespace clojure.lang
             return form is ISeq && RT.first(form).Equals(UNQUOTE);
         }
 
-        public sealed class UnquoteSplicing
+        static bool isUnquoteSplicing(object form)
         {
-            readonly Object _obj;
-
-            public Object Obj
-            {
-                get { return _obj; }
-            } 
-
-
-            public UnquoteSplicing(Object o)
-            {
-                _obj = o;
-            }
+            return form is ISeq && RT.first(form).Equals(UNQUOTE_SPLICING);
         }
 
         public sealed class DispatchReader : ReaderBase

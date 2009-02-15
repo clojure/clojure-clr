@@ -1341,6 +1341,7 @@ namespace Clojure.Tests.LibTests
             ISeq s = o1 as ISeq;
             Expect(s.first(), EqualTo(Symbol.intern("clojure.core/unquote")));
             Expect(s.rest().first(), EqualTo(Symbol.intern("x")));
+            Expect(s.count(), EqualTo(2));
 
         }
 
@@ -1349,9 +1350,11 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromString("~@x");
 
-            Expect(o1, InstanceOfType(typeof(LispReader.UnquoteSplicing)));
-            LispReader.UnquoteSplicing u = o1 as LispReader.UnquoteSplicing;
-            Expect(u.Obj, EqualTo(Symbol.intern("x")));
+            Expect(o1, InstanceOfType(typeof(ISeq)));
+            ISeq s = o1 as ISeq;
+            Expect(s.first(), EqualTo(Symbol.intern("clojure.core/unquote-splicing")));
+            Expect(s.rest().first(), EqualTo(Symbol.intern("x")));
+            Expect(s.count(), EqualTo(2));
         }
 
         [Test]

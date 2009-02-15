@@ -9,6 +9,7 @@
 (in-ns 'clojure.core)
 
 (def unquote)
+(def unquote-splicing)
 
 (def
  #^{:arglists '([& items])
