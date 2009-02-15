@@ -775,10 +775,13 @@ namespace clojure.lang
                     {
                         ret = RT.list(APPLY, HASHSET, RT.cons(CONCAT, sqExpandList(((IPersistentSet)form).seq())));
                     }
-                    else if (form is ISeq)
+                    else if (form is ISeq || form is IPersistentList)
                     {
                         ISeq seq = RT.seq(form);
-                        ret = RT.cons(CONCAT, sqExpandList(seq));
+                        if (seq == null)
+                            ret = PersistentList.EMPTY;
+                        else
+                            ret = RT.cons(CONCAT, sqExpandList(seq));
                     }
                     else
                         throw new InvalidOperationException("Unknown Collection type");

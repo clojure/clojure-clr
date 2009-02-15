@@ -1429,6 +1429,13 @@ namespace Clojure.Tests.LibTests
 
         // We should test to see that 'line' meta info is not preserved.
 
+        [Test]
+        public void SQOnLparenRParenReturnsEmptyList()
+        {
+            object o1 = ReadFromString("`()");
+            Expect(o1,EqualTo(PersistentList.EMPTY));
+        }
+
         #endregion
 
         #region #-dispatch tests
