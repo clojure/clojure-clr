@@ -1098,6 +1098,20 @@ namespace clojure.lang
             return (int)Convert.ToDouble(x);
         }
 
+        static public int intCast(char x)
+        {
+            return x;
+        }
+
+        static public int intCast(byte x)
+        {
+            return x;
+        }
+
+        static public int intCast(short x)
+        {
+            return x;
+        }
 
         public static long longCast(object x)
         {
