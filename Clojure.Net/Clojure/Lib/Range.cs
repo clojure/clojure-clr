@@ -18,7 +18,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents a (contiguous) range of integers.
     /// </summary>
-    public class Range: ASeq, IReduce, Streamable
+    public class Range: ASeq, IReduce, Streamable, Counted
     {
         #region Data
 

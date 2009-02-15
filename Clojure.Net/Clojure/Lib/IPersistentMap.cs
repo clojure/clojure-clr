@@ -18,7 +18,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents an immutable map (key/value collection).
     /// </summary>
-    public interface IPersistentMap:  Associative, IEnumerable<IMapEntry>
+    public interface IPersistentMap:  Associative, IEnumerable<IMapEntry>, Counted
     {
         /// <summary>
         /// Add a new key/value pair.
@@ -56,5 +56,13 @@ namespace clojure.lang
         /// <c>KeyValuePair&lt;,&gt;</c>, an <see cref="IMapEntry">IMapEntry</see>, an <see cref="IPersistentVector">IPersistentVector</see>
         /// of two elements, etc.</para></remarks>
         new IPersistentMap cons(object obj);
+
+        /// <summary>
+        /// Gets the number of items in the collection.
+        /// </summary>
+        /// <returns>The number of items in the collection.</returns>
+        /// <remarks>Overrides <c>count()</c> in both <see cref="IPersistentCollection">IPersistentCollection</see> 
+        /// and <see cref="Counted">Counted</see> to resolve ambiguity for callers.</remarks>
+        new int count();
     }
 }

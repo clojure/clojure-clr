@@ -107,14 +107,6 @@ namespace clojure.lang
 
         #region IPersistentCollection members
 
-        // I'm not sure of the value of overriding the ASeq implementation.
-        // It would seem that the we just get the overhead of an extra method call 
-        // and a type-dispatch in RT.count.
-        // public override int count()
-        //{
-        //    return 1 + RT.count(_rest);
-        //}
-
          /// <summary>
          /// Gets an ISeq to allow first/rest iteration through the collection.
          /// </summary>

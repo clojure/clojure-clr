@@ -18,7 +18,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents an immutable vector (int-indexing).
     /// </summary>
-    public interface IPersistentVector: Associative, Sequential, IPersistentStack, Reversible
+    public interface IPersistentVector: Associative, Sequential, IPersistentStack, Reversible, Counted
     {
         /// <summary>
         /// Gets the number of items in the vector.
@@ -50,5 +50,13 @@ namespace clojure.lang
         /// <returns>A new (immutable) vector with the objected added at the end.</returns>
         /// <remarks>Overrides <c>cons</c> in <see cref="IPersistentCollection">IPersistentCollection</see> to specialize the return value.</remarks>
         new IPersistentVector cons(Object o);
+
+        /// <summary>
+        /// Gets the number of items in the collection.
+        /// </summary>
+        /// <returns>The number of items in the collection.</returns>
+        /// <remarks>Overrides <c>count()</c> in both <see cref="IPersistentCollection">IPersistentCollection</see> 
+        /// and <see cref="Counted">Counted</see> to resolve ambiguity for callers.</remarks>
+        new int count();
     }
 }

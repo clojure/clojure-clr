@@ -160,7 +160,8 @@ namespace clojure.lang
         {
             int i = 1;  // if it is here, it is non-empty.
             for (ISeq s = rest(); s != null; s = s.rest(), i++)
-                ;
+                if (s is Counted)
+                    return i + s.count();
 
             return i;
         }

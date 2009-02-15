@@ -363,7 +363,7 @@ namespace clojure.lang
         /// Internal class providing an <see cref="ISeq">ISeq</see> 
         /// for <see cref="PersistentArrayMap">PersistentArrayMap</see>s.
         /// </summary>
-        protected sealed class Seq : ASeq
+        protected sealed class Seq : ASeq, Counted
         {
             #region Data
 

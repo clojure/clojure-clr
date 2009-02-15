@@ -547,7 +547,7 @@ namespace clojure.lang
         /// Internal class providing <see cref="ISeq">ISeq</see> functionality for <see cref="APersistentVector">APersistentVector</see>.
         /// </summary>
         /// <remarks>This class should be private.  Public only for DLR debugging output.</remarks>
-        public sealed class Seq : ASeq, IndexedSeq, IReduce
+        public sealed class Seq : ASeq, IndexedSeq, IReduce, Counted  // Counted left out of Java version
         {
             // TODO: something more efficient  (todo = from Java)
 
@@ -694,7 +694,7 @@ namespace clojure.lang
         /// Internal class providing reverse <see cref="ISeq">ISeq</see> functionality for <see cref="APersistentVector">APersistentVector</see>.
         /// </summary>
         /// <remarks>This class should be private.  Public only for DLR debugging output.</remarks>
-        public sealed class RSeq : ASeq, IndexedSeq, IReduce  // IReduce left out of Java
+        public sealed class RSeq : ASeq, IndexedSeq, IReduce, Counted  // IReduce left out of Java version
         {
 
             #region Data

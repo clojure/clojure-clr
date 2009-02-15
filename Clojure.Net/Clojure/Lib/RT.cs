@@ -348,8 +348,21 @@ namespace clojure.lang
         {
             if (o == null)
                 return 0;
+            else if (o is Counted)
+                return ((Counted)o).count();
             else if (o is IPersistentCollection)
-                return ((IPersistentCollection)o).count();
+            {
+                ISeq s = seq(o);
+                o = null;
+                int i=0;
+                for ( ; s != null; s = s.rest())
+                {
+                    if ( s is Counted )
+                        return i + s.count();
+                    i++;
+                }
+                return i;
+            }
             else if (o is String)
                 return ((String)o).Length;
             else if (o is ICollection)
@@ -358,6 +371,7 @@ namespace clojure.lang
                 return ((IDictionary)o).Count;
             else if (o is Array)
                 return ((Array)o).GetLength(0);
+
             throw new InvalidOperationException("count not supported on this type: " + o.GetType().Name);
         }
 

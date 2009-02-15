@@ -19,7 +19,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents a persistent list.
     /// </summary>
-    public class PersistentList: ASeq, IPersistentList, IReduce, IList
+    public class PersistentList: ASeq, IPersistentList, IReduce, IList, Counted
     {
 
         #region Data
@@ -260,7 +260,7 @@ namespace clojure.lang
         /// <summary>
         /// Represents an empty <see cref="IPersistentList">IPersistentList</see>.
         /// </summary>
-        public class EmptyList : Obj, IPersistentList, IList
+        public class EmptyList : Obj, IPersistentList, IList, Counted
         {
             #region C-tors
 

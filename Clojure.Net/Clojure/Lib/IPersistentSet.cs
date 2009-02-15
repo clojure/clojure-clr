@@ -18,7 +18,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents an immutable set (collection of unique elements).
     /// </summary>
-    public interface IPersistentSet: IPersistentCollection
+    public interface IPersistentSet: IPersistentCollection, Counted
     {
         /// <summary>
         /// Get a set with the given item removed.
@@ -40,5 +40,13 @@ namespace clojure.lang
         /// <param name="key">The value to test for membership in the set.</param>
         /// <returns>the key if the key is in the set, else null.</returns>
         object get(object key);
+
+        /// <summary>
+        /// Gets the number of items in the collection.
+        /// </summary>
+        /// <returns>The number of items in the collection.</returns>
+        /// <remarks>Overrides <c>count()</c> in both <see cref="IPersistentCollection">IPersistentCollection</see> 
+        /// and <see cref="Counted">Counted</see> to resolve ambiguity for callers.</remarks>
+        new int count();
     }
 }

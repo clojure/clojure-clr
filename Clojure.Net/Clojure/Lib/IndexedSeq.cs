@@ -18,7 +18,7 @@ namespace clojure.lang
     /// <summary>
     /// Indicates a sequence that has a current index.
     /// </summary>
-    public interface IndexedSeq
+    public interface IndexedSeq : ISeq, Counted
     {
         /// <summary>
         /// Gets the index associated with this sequence.
