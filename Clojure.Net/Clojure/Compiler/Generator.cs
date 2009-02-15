@@ -61,7 +61,7 @@ namespace clojure.compiler
         static readonly MethodInfo Method_RT_vector = typeof(RT).GetMethod("vector");
 
         static readonly MethodInfo Method_Var_BindRoot = typeof(Var).GetMethod("BindRoot");
-        static readonly MethodInfo Method_Var_get = typeof(Var).GetMethod("get");
+        static readonly MethodInfo Method_Var_get = typeof(Var).GetMethod("deref");
         static readonly MethodInfo Method_Var_set = typeof(Var).GetMethod("set");
         static readonly MethodInfo Method_Var_SetMeta = typeof(Var).GetMethod("SetMeta");
 
@@ -445,7 +445,7 @@ namespace clojure.compiler
         {
             if (!LOCAL_ENV.IsBound)
                 return null;
-            LocalBinding b = (LocalBinding)((IPersistentMap)LOCAL_ENV.get()).valAt(symbol);
+            LocalBinding b = (LocalBinding)((IPersistentMap)LOCAL_ENV.deref()).valAt(symbol);
             //if (b != null)
             //{
             //    MethodDef method = (MethodDef)METHODS.get();
@@ -1056,7 +1056,7 @@ namespace clojure.compiler
                         if ( sym.Namespace != null )
                             throw new Exception("Can't bind qualified name: " + sym);
 
-                        IPersistentMap dynamicBindings = RT.map( LOCAL_ENV, LOCAL_ENV.get(),
+                        IPersistentMap dynamicBindings = RT.map( LOCAL_ENV, LOCAL_ENV.deref(),
                             IN_CATCH_FINALLY, RT.T);
 
                         try
@@ -1184,7 +1184,7 @@ namespace clojure.compiler
 
             internal void ComputeNames(ISeq form)
             {
-                MethodDef enclosingMethod = (MethodDef)METHODS.get();
+                MethodDef enclosingMethod = (MethodDef)METHODS.deref();
 
                 string baseName = enclosingMethod != null
                     ? (enclosingMethod.Fn.Name + "$")
@@ -1326,9 +1326,9 @@ namespace clojure.compiler
         private static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expression init )
         {
             LocalBinding b = new LocalBinding(sym,tag,init);
-            IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.get();
+            IPersistentMap localsMap = (IPersistentMap) LOCAL_ENV.deref();
             LOCAL_ENV.set(localsMap.assoc(b.Symbol,b));
-            MethodDef method = (MethodDef)METHODS.get();
+            MethodDef method = (MethodDef)METHODS.deref();
             if ( method != null )
                 method.Locals = (IPersistentMap)method.Locals.assoc(b,b);
             return b;
@@ -1426,7 +1426,7 @@ namespace clojure.compiler
             IPersistentVector parms = (IPersistentVector)RT.first(form);
             ISeq body = RT.rest(form);
 
-            MethodDef method = new MethodDef(fn, (MethodDef)METHODS.get());
+            MethodDef method = new MethodDef(fn, (MethodDef)METHODS.deref());
 
             try
             {
@@ -1435,7 +1435,7 @@ namespace clojure.compiler
                 Var.pushThreadBindings(PersistentHashMap.create(
                     METHODS, method,
                     LOOP_LABEL, loopLabel,
-                    LOCAL_ENV, LOCAL_ENV.get(),
+                    LOCAL_ENV, LOCAL_ENV.deref(),
                     LOOP_LOCALS, null));
                 
                 // register 'this' as local 0  
@@ -1594,7 +1594,7 @@ namespace clojure.compiler
             FnDef fnDef = new FnDef();
             fnDef.ComputeNames(form);
 
-            MethodDef methodDef = new MethodDef(fnDef, (MethodDef)METHODS.get());
+            MethodDef methodDef = new MethodDef(fnDef, (MethodDef)METHODS.deref());
 
             try
             {
@@ -1603,7 +1603,7 @@ namespace clojure.compiler
                 Var.pushThreadBindings(PersistentHashMap.create(
                     METHODS, methodDef,
                     LOOP_LABEL, loopLabel,
-                    LOCAL_ENV, LOCAL_ENV.get(),
+                    LOCAL_ENV, LOCAL_ENV.deref(),
                     LOOP_LOCALS, null));
                 
                 // register 'this' as local 0  
@@ -2013,7 +2013,7 @@ namespace clojure.compiler
             //if (isLoop)
             //    Generate(RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)));
 
-            IPersistentMap dynamicBindings = PersistentHashMap.create(LOCAL_ENV, LOCAL_ENV.get());
+            IPersistentMap dynamicBindings = PersistentHashMap.create(LOCAL_ENV, LOCAL_ENV.deref());
 
             if (isLoop)
                 dynamicBindings = dynamicBindings.assoc(LOOP_LOCALS, null);
@@ -2091,10 +2091,10 @@ namespace clojure.compiler
 
         private static Expression GenerateRecurExpr(ISeq form)
         {
-            IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.get();
-            if ( IN_TAIL_POSITION.get() == null || loopLocals == null )
+            IPersistentVector loopLocals = (IPersistentVector) LOOP_LOCALS.deref();
+            if ( IN_TAIL_POSITION.deref() == null || loopLocals == null )
                 throw new InvalidOperationException("Can only recur from tail position");
-            if ( IN_CATCH_FINALLY.get() != null )
+            if (IN_CATCH_FINALLY.deref() != null)
                 throw new InvalidOperationException("Cannot recur from catch/finally.");
             IPersistentVector args = PersistentVector.EMPTY;
             for ( ISeq s = form.rest(); s != null; s = s.rest() )
@@ -2102,7 +2102,7 @@ namespace clojure.compiler
             if ( args.count() != loopLocals.count())
                 throw new ArgumentException(string.Format("Mismatched argument count to recur, expected: {0} args, got {1}",loopLocals.count(),args.count()));
 
-            LabelTarget loopLabel = (LabelTarget)LOOP_LABEL.get();
+            LabelTarget loopLabel = (LabelTarget)LOOP_LABEL.deref();
             if (loopLabel == null)
                 throw new InvalidOperationException("Recur not in proper context.");
 
@@ -2357,10 +2357,10 @@ namespace clojure.compiler
             }
             else
             {
-                if (RT.BooleanCast(RT.WARN_ON_REFLECTION.get()))
+                if (RT.BooleanCast(RT.WARN_ON_REFLECTION.deref()))
                 {
                     // TODO: use DLR IO
-                    ((TextWriter)RT.ERR.get()).WriteLine(string.Format("Reflection warning, line: {0} - call to {1} can't be resolved.\n", /* line ,*/0, methodName));
+                    ((TextWriter)RT.ERR.deref()).WriteLine(string.Format("Reflection warning, line: {0} - call to {1} can't be resolved.\n", /* line ,*/0, methodName));
                 }
 
                 Expression[] moreArgs = new Expression[3];
@@ -2411,10 +2411,10 @@ namespace clojure.compiler
             {
                 // we must defer to runtime
 
-                if (RT.BooleanCast(RT.WARN_ON_REFLECTION.get()))
+                if (RT.BooleanCast(RT.WARN_ON_REFLECTION.deref()))
                 {
                     // TODO: use DLR IO
-                    ((TextWriter)RT.ERR.get()).WriteLine(string.Format("Reflection warning, line: {0} - call to new can't be resolved.\n", /* line ,*/0));
+                    ((TextWriter)RT.ERR.deref()).WriteLine(string.Format("Reflection warning, line: {0} - call to new can't be resolved.\n", /* line ,*/0));
                 }
 
                 Expression[] moreArgs = new Expression[2];

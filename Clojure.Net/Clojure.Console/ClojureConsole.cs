@@ -94,7 +94,7 @@ namespace clojure.console
             Debug.Assert(Engine != null);
 
             Var.pushThreadBindings(
-                RT.map(RT.CURRENT_NS, RT.CURRENT_NS.get()));
+                RT.map(RT.CURRENT_NS, RT.CURRENT_NS.deref()));
             try
             {
                 Snippets.SetSaveAssemblies(true, ".");

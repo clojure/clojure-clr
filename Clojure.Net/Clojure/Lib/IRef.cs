@@ -23,8 +23,9 @@ namespace clojure.lang
     /// by <see cref="Ref">Ref</see>s, <see cref="Agent">Agent</see>s, 
     /// <see cref="Atom">Atom</see>s, <see cref="Var">Var</see>s, and 
     /// other references to values.  Many</para>
-    /// <para>This interface supports getting the referred-to value, 
+    /// <para>This interface supports  
     /// getting/setting the validator for the value, and getting/setting watchers.  
+    /// Dereferencing is supplied in interface <see cref="IDeref">IDeref</see>.
     /// This interface does not support changes to values.  Changes are the responsibility of the implementations of this interface,
     /// and often have to be done in concert with <see cref="LockingTransaction">LockingTransaction</see>.</para>
     /// <para>The validator function will be applied to any new value before that value is applied.  
@@ -32,14 +33,8 @@ namespace clojure.lang
     /// When setting a new validator, it must validate the current value.</para>
     /// <para>A reference can be watched by one or more <see cref="Agent">Agent</see>s. The agent will be sent a message when the value changes.</para>
     /// </remarks>
-    public interface IRef
+    public interface IRef : IDeref
     {
-        /// <summary>
-        /// Gets the (immutable) value the reference is holding.
-        /// </summary>
-        /// <returns>The value</returns>
-        object get();
-
         /// <summary>
         /// Sets the validator.
         /// </summary>

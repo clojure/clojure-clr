@@ -423,7 +423,7 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromString("::abc");
             Expect(o1, TypeOf(typeof(Keyword)));
-            Expect(((Keyword)o1).Namespace, EqualTo(((Namespace)RT.CURRENT_NS.get()).Name.Name));
+            Expect(((Keyword)o1).Namespace, EqualTo(((Namespace)RT.CURRENT_NS.deref()).Name.Name));
             Expect(((Keyword)o1).Name, EqualTo("abc"));
         }
 
@@ -734,6 +734,32 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromString("  #! ignore \n 123");
             Expect(o1, EqualTo(123));
+        }
+
+        #endregion
+
+        #region Discard tests
+
+        [Test]
+        public void SharpUnderscoreIgnoresNextForm()
+        {
+            object o1 = ReadFromString("#_ (1 2 3) 4");
+            Expect(o1, EqualTo(4));
+        }
+
+        [Test]
+        public void SharpUnderscoreIgnoresNextFormInList()
+        {
+            object o1 = ReadFromString("( abc #_ (1 2 3) 12)");
+            Expect(o1, TypeOf(typeof(PersistentList)));
+            PersistentList pl = o1 as PersistentList;
+            Expect(pl.count(), EqualTo(2));
+            Expect(pl.first(), TypeOf(typeof(Symbol)));
+            Expect(((Symbol)pl.first()).Name, EqualTo("abc"));
+            Expect(((Symbol)pl.first()).Namespace, Null);
+            Expect(pl.rest().first(), TypeOf(typeof(int)));
+            Expect(pl.rest().first(), EqualTo(12));
+            Expect(pl.rest().rest(), Null);
         }
 
         #endregion
@@ -1082,7 +1108,7 @@ namespace Clojure.Tests.LibTests
             Expect(s.first(), EqualTo(Symbol.intern("quote")));
             Expect(s.rest().first(), InstanceOfType(typeof(Symbol)));
             Symbol sym = s.rest().first() as Symbol;
-            Expect(sym.Namespace, EqualTo(((Namespace)RT.CURRENT_NS.get()).Name.Name));
+            Expect(sym.Namespace, EqualTo(((Namespace)RT.CURRENT_NS.deref()).Name.Name));
             Expect(sym.Name, EqualTo("abc"));
         }
 
@@ -1353,7 +1379,7 @@ namespace Clojure.Tests.LibTests
 
             Expect(s3.count(), EqualTo(2));
             Expect(s3.first(), EqualTo(Symbol.intern("quote")));
-            Expect(s3.rest().first(), EqualTo(Symbol.intern(((Namespace)RT.CURRENT_NS.get()).Name.Name,"a")));
+            Expect(s3.rest().first(), EqualTo(Symbol.intern(((Namespace)RT.CURRENT_NS.deref()).Name.Name,"a")));
 
 
             s1 = s1.rest();
@@ -1394,7 +1420,7 @@ namespace Clojure.Tests.LibTests
 
             Expect(s3.count(), EqualTo(2));
             Expect(s3.first(), EqualTo(Symbol.intern("quote")));
-            Expect(s3.rest().first(), EqualTo(Symbol.intern(((Namespace)RT.CURRENT_NS.get()).Name.Name, "a")));
+            Expect(s3.rest().first(), EqualTo(Symbol.intern(((Namespace)RT.CURRENT_NS.deref()).Name.Name, "a")));
 
 
             s1 = s1.rest();

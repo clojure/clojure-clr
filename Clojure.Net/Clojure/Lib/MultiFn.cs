@@ -210,7 +210,7 @@ namespace clojure.lang
         private IPersistentMap ResetCache()
         {
             _methodCache = MethodTable;
-            _cachedHierarchy = _hierarchy.get();
+            _cachedHierarchy = _hierarchy.deref();
             return _methodCache;
         }
 
@@ -222,7 +222,7 @@ namespace clojure.lang
         [MethodImpl(MethodImplOptions.Synchronized)]
         private IFn GetFn(object dispatchVal)
         {
-            if (_cachedHierarchy != _hierarchy.get())
+            if (_cachedHierarchy != _hierarchy.deref())
                 ResetCache();
 
             IFn targetFn = (IFn)_methodCache.valAt(dispatchVal);
@@ -263,7 +263,7 @@ namespace clojure.lang
                 return null;
 
             // ensure basis has stayed stable throughout, else redo
-            if (_cachedHierarchy == _hierarchy.get())
+            if (_cachedHierarchy == _hierarchy.deref())
             {
                 // place in cache
                 _methodCache = _methodCache.assoc(dispatchVal, bestEntry.val());

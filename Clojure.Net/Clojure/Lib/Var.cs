@@ -322,7 +322,7 @@ namespace clojure.lang
         /// <param name="m">The metadata to attach.</param>
         /// <remarks>The metadata must contain entries for the namespace and name.</remarks>
         public void SetMeta(IPersistentMap m)
-        {
+        { 
             // ensure these basis keys
             resetMeta(m.assoc(_nameKey, _sym).assoc(_nsKey, _ns));
         }
@@ -393,6 +393,13 @@ namespace clojure.lang
         {
             return _root;
         }
+
+        // In the Java version, haven't missed it yet.
+        //public object alter(IFn fn, ISeq args)
+        //{
+        //    set(fn.applyTo(RT.cons(deref(), args)));
+        //    return this;
+        //}
 
         /// <summary>
         /// Set the value of the var.
@@ -557,7 +564,7 @@ namespace clojure.lang
 
         public IFn fn()
         {
-            return (IFn)get();
+            return (IFn)deref();
         }
 
 
@@ -706,13 +713,26 @@ namespace clojure.lang
 
         #endregion
 
-        #region IRef Members
+        #region IDeref Members
+
+        ///// <summary>
+        ///// Gets the (immutable) value the reference is holding.
+        ///// </summary>
+        ///// <returns>The value</returns>
+        ///// <remarks>When IDeref was added and get() was renamed to deref(), this was put in.  
+        ///// Why?  Perhaps to avoid having to change Var.get() references all over.  
+        ///// I don't know.
+        ///// But then they rename all uses anyway.</remarks>
+        //public object get()
+        //{
+        //    return deref();
+        //}
 
         /// <summary>
         /// Gets the (immutable) value the reference is holding.
         /// </summary>
         /// <returns>The value</returns>
-        public override object get()
+        public override object deref()
         {
             Box b = GetThreadBinding();
             if (b != null)

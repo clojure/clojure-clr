@@ -19,7 +19,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements a delay of a function call.
     /// </summary>
-    public class Delay
+    public class Delay : IDeref
     {
         #region Data
 
@@ -59,10 +59,13 @@ namespace clojure.lang
         public static object force(object x)
         {
             return (x is Delay)
-                ? ((Delay)x).get()
+                ? ((Delay)x).deref()
                 : x;
         }
 
+        #endregion
+
+        #region IDeref Members
 
         /// <summary>
         /// Get the value.
@@ -70,7 +73,7 @@ namespace clojure.lang
         /// <returns>The value</returns>
         /// <remarks>Forces the computation if it has not happened yet.</remarks>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        private object get()
+        public object deref()
         {
             if (_fn != null)
             {

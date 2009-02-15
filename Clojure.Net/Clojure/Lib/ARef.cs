@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.CompilerServices;
 
 namespace clojure.lang
 {
@@ -31,7 +32,7 @@ namespace clojure.lang
         /// <summary>
         /// The set of watchers for the reference.
         /// </summary>
-        AtomicReference<IPersistentMap> _watchers = new AtomicReference<IPersistentMap>(PersistentHashMap.EMPTY);
+        private volatile IPersistentMap _watchers = PersistentHashMap.EMPTY;
 
         #endregion
 
@@ -57,15 +58,18 @@ namespace clojure.lang
 
         #endregion
 
-        #region IRef Members
+        #region IDeref Members
 
         /// <summary>
         /// Gets the (immutable) value the reference is holding.
         /// </summary>
         /// <returns>The value</returns>
-        public abstract object get();
+        public abstract object deref();
 
-   
+        #endregion
+
+        #region IRef Members
+
         /// <summary>
         /// Invoke an <see cref="IFn">IFn</see> on a value to validate it.
         /// </summary>
@@ -110,7 +114,7 @@ namespace clojure.lang
         /// <remarks>The current value must validate in order for this validator to be accepted.  If not, an exception will be thrown.</remarks>
         public virtual void setValidator(IFn vf)
         {
-            Validate(vf, get());
+            Validate(vf, deref());
             _validator = vf;
         }
 
@@ -126,14 +130,14 @@ namespace clojure.lang
         #endregion
 
         #region Watches
-
-         /// <summary>
-         /// Gets a map of watchers (key=Agent, value=IFn).
-         /// </summary>
-         /// <returns>An immutable map of watchers (key=Agent, value=IFn). </returns>
-         public IPersistentMap getWatches()
+        
+        /// <summary>
+        /// Gets a map of watchers (key=Agent, value=IFn).
+        /// </summary>
+        /// <returns>An immutable map of watchers (key=Agent, value=IFn). </returns>
+        public IPersistentMap getWatches()
         {
-            return _watchers.Get();
+            return _watchers;
         }
 
 
@@ -144,15 +148,10 @@ namespace clojure.lang
          /// <param name="action">The 'message' to send when the value changes.</param>
          /// <param name="sendOff">If true, use <see cref="Agent.sendOff">send-off</see> to send the message, else use <see cref="Agent.send()">send</see>.</param>
          /// <returns></returns>
+         [MethodImpl( MethodImplOptions.Synchronized)]
          public IRef addWatch(Agent watcher, IFn action, bool sendOff)
          {
-             bool added = false;
-             IPersistentMap prior = null;
-             while (!added)
-             {
-                 prior = _watchers.Get();
-                 added = _watchers.CompareAndSet(prior, prior.assoc(watcher, new object[] { action, sendOff }));
-             }
+            _watchers = _watchers.assoc(watcher, new object[] { action, sendOff });
              return this;
          }
 
@@ -162,15 +161,10 @@ namespace clojure.lang
          /// </summary>
          /// <param name="watcher">The <see cref="Agent">Agent</see> to be removed.</param>
          /// <returns>This IRef (for chaining).</returns>
+         [MethodImpl(MethodImplOptions.Synchronized)]
          public IRef removeWatch(Agent watcher)
          {
-             bool removed = false;
-             IPersistentMap prior = null;
-             while (!removed)
-             {
-                 prior = _watchers.Get();
-                 removed = _watchers.CompareAndSet(prior, prior.without(watcher));
-             }
+             _watchers = _watchers.without(watcher);
              return this;
          }
 
@@ -180,8 +174,8 @@ namespace clojure.lang
          /// </summary>
          public void notifyWatches()
          {
-             IPersistentMap ws = _watchers.Get();
-             if (ws != null)
+             IPersistentMap ws = _watchers;
+             if (ws.count() > 0)
              {
                  ISeq args = new Cons(this, null);
                  for (ISeq s = RT.seq(ws); s != null; s = s.rest())

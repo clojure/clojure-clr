@@ -93,6 +93,7 @@ namespace clojure.lang
             //dispatchMacros['='] = new EvalReader();
             _dispatchMacros['!'] = new CommentReader();
             _dispatchMacros['<'] = new UnreadableReader();
+            _dispatchMacros['_'] = new DiscardReader();
         }
 
         static bool isMacro(int ch)
@@ -675,6 +676,15 @@ namespace clojure.lang
             }
         }
 
+        public sealed class DiscardReader : ReaderBase
+        {
+            protected override object Read(TextReader r, char underscore)
+            {
+                ReadAux(r,true);
+                return r;
+            }
+        }
+
         public sealed class WrappingReader : ReaderBase
         {
             readonly Symbol _sym;
@@ -719,7 +729,7 @@ namespace clojure.lang
                     Symbol sym = (Symbol)form;
                     if (sym.Namespace == null && sym.Name.EndsWith("#"))
                     {
-                        IPersistentMap gmap = (IPersistentMap)GENSYM_ENV.get();
+                        IPersistentMap gmap = (IPersistentMap)GENSYM_ENV.deref();
                         if (gmap == null)
                             throw new InvalidDataException("Gensym literal not in syntax-quote");
                         Symbol gs = (Symbol)gmap.valAt(sym);
@@ -962,7 +972,7 @@ namespace clojure.lang
 
             protected override object Read(TextReader r, char lparen)
             {
-                if (ARG_ENV.get() != null)
+                if (ARG_ENV.deref() != null)
                     throw new InvalidOperationException("Nested #()s are not allowed");
                 try
                 {
@@ -973,7 +983,7 @@ namespace clojure.lang
                     object form = _listReader.invoke(r, '(');
 
                     IPersistentVector args = PersistentVector.EMPTY;
-                    PersistentTreeMap argsyms = (PersistentTreeMap)ARG_ENV.get();
+                    PersistentTreeMap argsyms = (PersistentTreeMap)ARG_ENV.deref();
                     ISeq rargs = argsyms.rseq();
                     if (rargs != null)
                     {
@@ -1025,7 +1035,7 @@ namespace clojure.lang
 
             static Symbol registerArg(int n)
             {
-                PersistentTreeMap argsyms = (PersistentTreeMap)ARG_ENV.get();
+                PersistentTreeMap argsyms = (PersistentTreeMap)ARG_ENV.deref();
                 if (argsyms == null)
                 {
                     throw new InvalidOperationException("arg literal not in #()");

@@ -268,13 +268,13 @@ namespace clojure.lang
 
         #endregion
 
-        #region IRef Members
+        #region IDeref Members
 
         /// <summary>
         /// Gets the (immutable) value the reference is holding.
         /// </summary>
         /// <returns>The value</returns>
-        public override object get()
+        public override object deref()
         {
             LockingTransaction t = LockingTransaction.getRunning();
             if (t == null)
@@ -437,7 +437,7 @@ namespace clojure.lang
 
         public IFn fn()
         {
-            return (IFn)get();
+            return (IFn)deref();
         }
 
         public object invoke()

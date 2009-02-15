@@ -148,7 +148,7 @@ namespace clojure.lang
 
         public static Namespace CurrentNamespace
         {
-            get { return (Namespace)RT.CURRENT_NS.get(); }
+            get { return (Namespace)RT.CURRENT_NS.deref(); }
         }
 
 
@@ -190,7 +190,7 @@ namespace clojure.lang
                 object o = n.GetMapping(symbol);
                 if (o == null)
                 {
-                    if (RT.BooleanCast(RT.ALLOW_UNRESOLVED_VARS.get()))
+                    if (RT.BooleanCast(RT.ALLOW_UNRESOLVED_VARS.deref()))
                         return symbol;
                     else
                         throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));

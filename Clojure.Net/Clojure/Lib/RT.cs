@@ -481,19 +481,19 @@ namespace clojure.lang
         static public void print(Object x, TextWriter w)
         {
             //call multimethod
-            if (PRINT_INITIALIZED.IsBound && RT.BooleanCast(PRINT_INITIALIZED.get()))
+            if (PRINT_INITIALIZED.IsBound && RT.BooleanCast(PRINT_INITIALIZED.deref()))
             {
                 PR_ON.invoke(x, w);
                 return;
             }
 
-            bool readably = BooleanCast(PRINT_READABLY.get());
+            bool readably = BooleanCast(PRINT_READABLY.deref());
 
             // Print meta, if exists & should be printed
             if ( x is Obj )
             {
                 Obj o = x as Obj;
-                if ( RT.count(o.meta()) > 0 && readably && BooleanCast(PRINT_META.get()))
+                if (RT.count(o.meta()) > 0 && readably && BooleanCast(PRINT_META.deref()))
                 {
                     IPersistentMap meta = o.meta();
                     w.Write("#^");

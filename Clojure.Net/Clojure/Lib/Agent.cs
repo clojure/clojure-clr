@@ -223,13 +223,13 @@ namespace clojure.lang
 
         #endregion
 
-        #region IRef Members
+        #region IDeref Members
 
         /// <summary>
         /// Gets the (immutable) value the reference is holding.
         /// </summary>
         /// <returns>The value</returns>
-        public override object get()
+        public override object deref()
         {
             if (_errors != null)
                 throw new Exception("Agent has errors", (Exception)RT.first(_errors));

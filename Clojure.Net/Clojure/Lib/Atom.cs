@@ -55,13 +55,13 @@ namespace clojure.lang
 
         #endregion
 
-        #region IRef methods
+        #region IDeref methods
 
         /// <summary>
         /// Gets the (immutable) value the reference is holding.
         /// </summary>
         /// <returns>The value</returns>
-        public override object get()
+        public override object deref()
         {
             return _state.Get();
         }
@@ -80,7 +80,7 @@ namespace clojure.lang
         {
             for (; ; )
             {
-                object v = get();
+                object v = deref();
                 object newv = f.invoke(v);
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
@@ -103,7 +103,7 @@ namespace clojure.lang
         {
             for (; ; )
             {
-                object v = get();
+                object v = deref();
                 object newv = f.invoke(v, arg);
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
@@ -127,7 +127,7 @@ namespace clojure.lang
         {
             for (; ; )
             {
-                object v = get();
+                object v = deref();
                 object newv = f.invoke(v, arg1, arg2);
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
@@ -152,7 +152,7 @@ namespace clojure.lang
         {
             for (; ; )
             {
-                object v = get();
+                object v = deref();
                 object newv = f.applyTo(RT.listStar(v, x, y, args));
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
