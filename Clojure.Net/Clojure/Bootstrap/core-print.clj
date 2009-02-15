@@ -302,10 +302,9 @@
   (.Write w ")"))
 
 (defmethod print-method clojure.lang.IDeref [o #^System.IO.TextWriter w]
-  (.write w (format "#<%s@%x: "
-                    (.Name (class o))     ;;; .getSimpleName => .Name
-                    (.GetHashCode o)))    ;;; No easy equivelent in CLR: (System/identityHashCode o)))
-  (print-method @o w)
-  (.write w ">"))
+  (print-sequential (format "#<%s@%x: "
+                            (.Name (class o))     ;;; .getSimpleName => .Name
+                            (.GetHashCode o))    ;;; No easy equivelent in CLR: (System/identityHashCode o)))
+                    pr-on, "", ">", (list @o), w))
 
 (def #^{:private true} print-initialized true)  
