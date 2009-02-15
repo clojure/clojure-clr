@@ -14,7 +14,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.Scripting.Hosting.Shell;
 using clojure.lang;
-using ZO.SmartCore.IO;
 using System.IO;
 using Microsoft.Linq.Expressions;
 using Microsoft.Scripting.Generation;
@@ -165,21 +164,19 @@ namespace clojure.console
         public object LoadFromStream(TextReader rdr)
         {
             ScriptSource scriptSource = Engine.CreateScriptSourceFromString("<already opened TextReader>");
-            PushbackReader pbr = new PushbackReader(rdr);
+            //PushbackReader pbr = new PushbackReader(rdr);
 
-            return LoadFromPushbackReader(scriptSource, pbr, false);
+            return LoadFromPushbackReader(scriptSource, rdr, false);
         }
 
         public object LoadFile(string filename)
         {
             ScriptSource scriptSource = Engine.CreateScriptSourceFromFile(filename);
 
-            PushbackReader pbr = new PushbackReader(scriptSource.GetReader());
-
-            return LoadFromPushbackReader(scriptSource, pbr, false);
+            return LoadFromPushbackReader(scriptSource, scriptSource.GetReader(), false);
         }
 
-        private static object LoadFromPushbackReader(ScriptSource scriptSource, PushbackReader pbr, bool addPrint)
+        private static object LoadFromPushbackReader(ScriptSource scriptSource, TextReader pbr, bool addPrint)
         {
             object ret = null;
             object eofVal = new object();

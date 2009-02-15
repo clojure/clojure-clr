@@ -14,7 +14,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.Scripting;
 using clojure.lang;
-using ZO.SmartCore.IO;
 using System.IO;
 
 namespace clojure.runtime
@@ -39,7 +38,7 @@ namespace clojure.runtime
 
             try
             {
-                s = LispReader.read(new PushbackReader(new StringReader(_text)), false, _eof, false);
+                s = LispReader.read(new StringReader(_text), false, _eof, false);
             }
             catch (Exception)
             {
@@ -60,13 +59,13 @@ namespace clojure.runtime
         {
             IPersistentVector pv = PersistentVector.EMPTY;
 
-            PushbackReader pbr = new PushbackReader(new StringReader(_text));
+            StringReader sr = new StringReader(_text);
 
             pv = pv.cons(Compiler.DO);
 
             object eofVal = new object();
             object form;
-            while ((form = LispReader.read(pbr, false, eofVal, false)) != eofVal)
+            while ((form = LispReader.read(sr, false, eofVal, false)) != eofVal)
                 pv = pv.cons(form);
 
             return pv.seq();

@@ -59,8 +59,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Compiler\Generator.cs" />
-    <Compile Include="Readers\ArgumentNullException.cs" />
-    <Compile Include="Readers\ArgumentOutOfRangeException.cs" />
     <Compile Include="Lib\AFn.cs" />
     <Compile Include="Lib\AFnImpl.cs" />
     <Compile Include="Lib\AFunction.cs" />
@@ -127,9 +125,6 @@
     <Compile Include="Lib\PersistentTreeMap.cs" />
     <Compile Include="Lib\PersistentTreeSet.cs" />
     <Compile Include="Lib\PersistentVector.cs" />
-    <Compile Include="Readers\LineNumberingPushbackReader.cs" />
-    <Compile Include="Readers\LineNumberReader.cs" />
-    <Compile Include="Readers\PositiveNumberRequiredException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Lib\Range.cs" />
     <Compile Include="Lib\Ratio.cs" />
@@ -148,10 +143,6 @@
     <Compile Include="Lib\Symbol.cs" />
     <Compile Include="Lib\Util.cs" />
     <Compile Include="Lib\Var.cs" />
-    <Compile Include="Readers\PushbackReader.cs" />
-    <Compile Include="Readers\Resources.Designer.cs" />
-    <Compile Include="Readers\StreamDisposedException.cs" />
-    <Compile Include="Readers\StringHelper.cs" />
     <Compile Include="Runtime\Reflector.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -159,7 +150,6 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Readers\Resources.resx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\DLR_Main\Runtime\src\Microsoft.Scripting.Core\Microsoft.Scripting.Core.csproj">
