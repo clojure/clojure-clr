@@ -1,4 +1,4 @@
-;   Copyright (c) David Miller. All rights reserved.
+;   Copyright (c) Rich Hickey. All rights reserved.
 ;   The use and distribution terms for this software are covered by the
 ;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
 ;   which can be found in the file epl-v10.html at the root of this distribution.
@@ -142,13 +142,8 @@
   (print-sequential "(" print-method " " ")" o w))
 
 
-(defmethod print-method System.Collections.ICollection [o, #^System.IO.TextWriter w]                     ;; java.util.Collection => System.Collections.ICollection
+(defmethod print-dup System.Collections.ICollection [o, #^System.IO.TextWriter w]                     ;; java.util.Collection => System.Collections.ICollection
  (print-ctor o #(print-sequential "[" print-method " " "]" %1 %2) w))
-
-(prefer-method print-method clojure.lang.IPersistentCollection System.Collections.ICollection) ;; java.util.Collection => System.Collections.ICollection
-
-(defmethod print-dup System.Collections.ICollection [o, #^System.IO.TextWriter w]                        ;; java.util.Collection => System.Collections.ICollection
- (print-ctor o #(print-sequential "[" print-dup " " "]" %1 %2) w))
 
 (defmethod print-dup clojure.lang.IPersistentCollection [o, #^System.IO.TextWriter w]
   (print-meta o w)
@@ -201,13 +196,8 @@
   (print-meta m w)
   (print-map m pr-on w))
 
-(defmethod print-method java.util.Map [m, #^System.IO.TextWriter w]
-  (print-ctor m #(print-map (seq %1) print-method %2) w))
-
-(prefer-method print-method clojure.lang.IPersistentMap java.util.Map)
-
 (defmethod print-dup java.util.Map [m, #^System.IO.TextWriter w]
-  (print-ctor m #(print-map (seq %1) print-dup %2) w))
+  (print-ctor m #(print-map (seq %1) print-method %2) w))
 
 (defmethod print-dup clojure.lang.IPersistentMap [m, #^System.IO.TextWriter w]
   (print-meta m w)
@@ -216,19 +206,12 @@
   (.Write w "/create ")
   (print-map m print-dup w)
   (.Write w ")"))
-
-(prefer-method print-dup clojure.lang.IPersistentCollection System.Collections.IDictionary)    ;; java.util.Map  -> System.Collections.IDictionary
+  
+(prefer-method print-dup clojure.lang.IPersistentMap System.Collections.IDictionary)    ;; java.util.Map  -> System.Collections.IDictionary
 
 (defmethod print-method clojure.lang.IPersistentSet [s, #^System.IO.TextWriter w]
   (print-meta s w)
   (print-sequential "#{" pr-on " " "}" (seq s) w))
-;;; No equivalent in CLR
-;(defmethod print-method java.util.Set [s, #^System.IO.TextWriter w]
-;  (print-ctor s
-;              #(print-sequential "#{" print-method " " "}" (seq %1) %2)
-;              w))
-; Next item commented out in Java original
-;(prefer-method print-method clojure.lang.IPersistentSet java.util.Set)
 
 (def #^{:tag String 
         :doc "Returns name string for char or nil if none"} 
@@ -256,6 +239,7 @@
 (defmethod print-dup clojure.lang.PersistentHashMap [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentHashSet [o w] (print-method o w)) 
 (defmethod print-dup clojure.lang.PersistentVector [o w] (print-method o w))
+(defmethod print-dup clojure.lang.LazilyPersistentVector [o w] (print-method o w))
 
 (def primitives-classnames    ;; not clear what the equiv should be
   {Single  "Single"   ;;{Float/TYPE "Float/TYPE"
@@ -316,5 +300,12 @@
   (.Write w "#=(find-ns ")
   (print-dup (.Name n) w)    ;; .name
   (.Write w ")"))
+
+(defmethod print-method clojure.lang.IDeref [o #^System.IO.TextWriter w]
+  (.write w (format "#<%s@%x: "
+                    (.Name (class o))     ;;; .getSimpleName => .Name
+                    (.GetHashCode o)))    ;;; No easy equivelent in CLR: (System/identityHashCode o)))
+  (print-method @o w)
+  (.write w ">"))
 
 (def #^{:private true} print-initialized true)  
