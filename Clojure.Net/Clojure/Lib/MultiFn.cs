@@ -35,6 +35,11 @@ namespace clojure.lang
         readonly object _defaultDispatchVal;
 
         /// <summary>
+        /// The hierarchy for this defmulti.
+        /// </summary>
+        readonly IRef _hierarchy;
+
+        /// <summary>
         /// The methods defined for this multifunction.
         /// </summary>
         IPersistentMap _methodTable;
@@ -74,7 +79,7 @@ namespace clojure.lang
         static readonly Var _dissoc = RT.var("clojure.core", "dissoc");
         static readonly Var _isa = RT.var("clojure.core", "isa?", null);
         static readonly Var _parents = RT.var("clojure.core", "parents");
-        static readonly Var _hierarchy = RT.var("clojure.core", "global-hierarchy", null);
+        //static readonly Var _hierarchy = RT.var("clojure.core", "global-hierarchy", null);
 
         #endregion
 
@@ -85,13 +90,14 @@ namespace clojure.lang
         /// </summary>
         /// <param name="dispatchFn">The dispatch function.</param>
         /// <param name="defaultDispatchVal">The default dispatch value.</param>
-        public MultiFn(IFn dispatchFn, object defaultDispatchVal)
+        public MultiFn(IFn dispatchFn, object defaultDispatchVal, IRef hierarchy)
         {
             _dispatchFn = dispatchFn;
             _defaultDispatchVal = defaultDispatchVal;
             _methodTable = PersistentHashMap.EMPTY;
             _methodCache = MethodTable;
             _preferTable = PersistentHashMap.EMPTY;
+            _hierarchy = hierarchy;
             _cachedHierarchy = null;
         }
 
@@ -188,7 +194,7 @@ namespace clojure.lang
         /// <returns></returns>
         private bool IsA(object x, object y)
         {
-            return RT.BooleanCast(_isa.invoke(x, y));
+            return RT.BooleanCast(_isa.invoke(_hierarchy.deref(),x, y));
         }
 
         /// <summary>
