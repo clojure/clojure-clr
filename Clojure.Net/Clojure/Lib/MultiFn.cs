@@ -194,7 +194,7 @@ namespace clojure.lang
         /// <returns></returns>
         private bool IsA(object x, object y)
         {
-            return RT.BooleanCast(_isa.invoke(_hierarchy.deref(),x, y));
+            return RT.booleanCast(_isa.invoke(_hierarchy.deref(),x, y));
         }
 
         /// <summary>

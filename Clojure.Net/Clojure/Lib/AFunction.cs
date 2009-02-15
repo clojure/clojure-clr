@@ -58,9 +58,9 @@ namespace clojure.lang
 
             if (o is Boolean)
             {
-                if (RT.BooleanCast(o))
+                if (RT.booleanCast(o))
                     return -1;
-                return RT.BooleanCast(invoke(y, x)) ? 1 : 0;
+                return RT.booleanCast(invoke(y, x)) ? 1 : 0;
             }
             return Util.ConvertToInt(o);
         }

@@ -341,7 +341,7 @@ namespace clojure.lang
         /// </summary>
         public bool IsMacro
         {
-            get { return RT.BooleanCast(meta().valAt(_macroKey)); }
+            get { return RT.booleanCast(meta().valAt(_macroKey)); }
         }
 
         /// <summary>
@@ -349,7 +349,7 @@ namespace clojure.lang
         /// </summary>
         public bool IsPublic
         {
-            get { return !RT.BooleanCast(meta().valAt(_privateKey)); }
+            get { return !RT.booleanCast(meta().valAt(_privateKey)); }
         }
 
         /// <summary>

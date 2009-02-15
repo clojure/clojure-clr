@@ -481,19 +481,19 @@ namespace clojure.lang
         static public void print(Object x, TextWriter w)
         {
             //call multimethod
-            if (PRINT_INITIALIZED.IsBound && RT.BooleanCast(PRINT_INITIALIZED.deref()))
+            if (PRINT_INITIALIZED.IsBound && RT.booleanCast(PRINT_INITIALIZED.deref()))
             {
                 PR_ON.invoke(x, w);
                 return;
             }
 
-            bool readably = BooleanCast(PRINT_READABLY.deref());
+            bool readably = booleanCast(PRINT_READABLY.deref());
 
             // Print meta, if exists & should be printed
             if ( x is Obj )
             {
                 Obj o = x as Obj;
-                if (RT.count(o.meta()) > 0 && readably && BooleanCast(PRINT_META.deref()))
+                if (RT.count(o.meta()) > 0 && readably && booleanCast(PRINT_META.deref()))
                 {
                     IPersistentMap meta = o.meta();
                     w.Write("#^");
@@ -1070,7 +1070,7 @@ namespace clojure.lang
 
         #region boxing/casts
 
-        static public bool BooleanCast(object x)
+        static public bool booleanCast(object x)
         {
             if (x is Boolean)
                 return ((Boolean)x);

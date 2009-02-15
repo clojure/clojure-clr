@@ -87,7 +87,7 @@ namespace clojure.lang
 
             try
             {
-               ret = RT.BooleanCast(vf.invoke(val));
+               ret = RT.booleanCast(vf.invoke(val));
             }
             catch (Exception e)
             {

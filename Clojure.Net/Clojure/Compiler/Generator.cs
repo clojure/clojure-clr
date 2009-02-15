@@ -2357,7 +2357,7 @@ namespace clojure.compiler
             }
             else
             {
-                if (RT.BooleanCast(RT.WARN_ON_REFLECTION.deref()))
+                if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                 {
                     // TODO: use DLR IO
                     ((TextWriter)RT.ERR.deref()).WriteLine(string.Format("Reflection warning, line: {0} - call to {1} can't be resolved.\n", /* line ,*/0, methodName));
@@ -2411,7 +2411,7 @@ namespace clojure.compiler
             {
                 // we must defer to runtime
 
-                if (RT.BooleanCast(RT.WARN_ON_REFLECTION.deref()))
+                if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                 {
                     // TODO: use DLR IO
                     ((TextWriter)RT.ERR.deref()).WriteLine(string.Format("Reflection warning, line: {0} - call to new can't be resolved.\n", /* line ,*/0));
