@@ -1894,6 +1894,7 @@
   [x] (cond
        (decimal? x) x
        (float? x) (. BigDecimal valueOf (double x))
+       (ratio? x) (/ (BigDecimal. (.numerator x)) (.denominator x))
        (instance? BigInteger x) (BigDecimal. #^BigInteger x)
        (number? x) (BigDecimal/valueOf (long x))
        :else (BigDecimal. x)))
@@ -3387,7 +3388,7 @@
        ~@(map process-reference references))))
 
 (defmacro refer-clojure
-  "Same as (refer 'clojure <filters>)"
+  "Same as (refer 'clojure.core <filters>)"
   [& filters]
   `(clojure.core/refer '~'clojure.core ~@filters))
  
