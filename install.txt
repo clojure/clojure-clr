@@ -8,8 +8,12 @@ Platform:
 
 Microsoft .NET Framework Version 3.5 SP1
 Visual Studio 2008 SP1
-	I have not tested this under any other versions.  You are on your own.
+	I have not tested this under any other versions.  
+	You are on your own if you go another way.
 
+
+Visual J# Redistributable 
+	Need vjslib to provide BigInteger and BigDecimal.
 
 Unit testing:
 -------------
@@ -57,6 +61,7 @@ Clojure:
 	Microsoft.Scripting.Core
 	Microsoft.Scripting
 	Microsoft.Scripting.ExtensionAttribute 
+	vjslib
 
 Clojure.Console
 	Clojure
@@ -66,6 +71,7 @@ Clojure.Console
 
 Clojure.Tests
 	Clojure
+	vjslib
 	nunit.framework
 	Castle.Core
 	Castle.DynamicProxy2
