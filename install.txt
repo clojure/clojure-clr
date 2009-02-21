@@ -26,7 +26,7 @@ I'm currently using http://www.testdriven.net/download.aspx
 
 
 Download RhinoMocks from http://ayende.com/projects/rhino-mocks/downloads.aspx
-Get Version 3.5.  You will probably need the one with the include Castle assemblies.
+Get Version 3.5.  You will probably need the one that includes the Castle assemblies.
 
 Mocking is used sparingly.  I'll take suggestions for better mocking solutions.
 
@@ -35,7 +35,7 @@ Mocking is used sparingly.  I'll take suggestions for better mocking solutions.
 Dynamic Language Runtime:
 -------------------------
 
-You will need to download the DLR.  I try to keep the code up to the latest release.
+You will need to download the DLR.  I try to keep the ClojureCLR code up to the latest DLR release.
 See versions.txt for the most recent DLR release known to work.
 
 The main page for DLR is http://www.codeplex.com/dlr
@@ -47,7 +47,7 @@ Download, unzip, compile it in VS.
 Clojure/CLR
 -----------
 
-Download the code from the clojure-contrib distribution: http://code.google.com/p/clojure-contrib/
+Download the code from the clojure-contrib distribution: http://code.google.com/p/clojure-contrib/ClojureCLR
 The most up-to-date version will be at github/TBD.
 
 Being a developer's release, DLR dlls are not distributed.  Instead, it is expected you will link in the DLR project.  
