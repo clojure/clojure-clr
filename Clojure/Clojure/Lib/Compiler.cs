@@ -25,7 +25,7 @@ namespace clojure.lang
         public static readonly Symbol DEF = Symbol.create("def");
         public static readonly Symbol LOOP = Symbol.create("loop*");
         public static readonly Symbol RECUR = Symbol.create("recur");
-        public static readonly Symbol IF = Symbol.create("if");
+        public static readonly Symbol IF = Symbol.create("if*");
         public static readonly Symbol LET = Symbol.create("let*");
         public static readonly Symbol DO = Symbol.create("do");
         public static readonly Symbol FN = Symbol.create("fn*");

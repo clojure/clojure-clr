@@ -193,6 +193,9 @@ namespace clojure.compiler
 
         private static Expression Generate(object form)
         {
+            if (form is LazySeq)
+                form = RT.seq(form);
+
             if (form == null)
                 return GenerateNilExpr();
             else if (form is Boolean)
@@ -570,7 +573,7 @@ namespace clojure.compiler
         {
             Expression[] args = new Expression[m.count() * 2];
             int i = 0;
-            for ( ISeq s = RT.seq(m); s != null; s = s.rest(), i+=2)
+            for ( ISeq s = RT.seq(m); s != null; s = s.next(), i+=2)
             {
                 IMapEntry me = (IMapEntry)s.first();
                 args[i] = MaybeBox(Generate(me.key()));
@@ -588,7 +591,7 @@ namespace clojure.compiler
         {
             Expression[] args = new Expression[set.count()];
             int i = 0;
-            for (ISeq s = RT.seq(set); s != null; s = s.rest(), i++)
+            for (ISeq s = RT.seq(set); s != null; s = s.next(), i++)
                 args[i] = MaybeBox(Generate(s.first()));
 
             Expression argArray = Expression.NewArrayInit(typeof(object), args);
@@ -643,10 +646,11 @@ namespace clojure.compiler
 
             object op = RT.first(form);
 
-            IFn inline = IsInline(op, RT.count(RT.rest(form)));
+            //IFn inline = IsInline(op, RT.count(RT.next(form)));
+            IFn inline = null;
 
             if (inline != null)
-                return Generate(inline.applyTo(RT.rest(form)));
+                return Generate(inline.applyTo(RT.next(form)));
             else if (HasSpecialFormGenerator(op))
                 return GetSpecialFormGenerator(op)(form);
             else
@@ -659,10 +663,10 @@ namespace clojure.compiler
 
             fn = Expression.Convert(fn,typeof(IFn));
 
-            ISeq s = RT.seq(form.rest());
+            ISeq s = RT.seq(form.next());
             int n = s == null ? 0 : s.count();
             Expression[] args = new Expression[n];
-            for (int i = 0; s != null; s = s.rest(), i++)
+            for (int i = 0; s != null; s = s.next(), i++)
                 args[i] = MaybeBox(Generate(s.first()));
 
             Type returnType = ComputeInvocationReturnType(form.first(), form);
@@ -760,7 +764,7 @@ namespace clojure.compiler
                 try
                 {
                     Var.pushThreadBindings(RT.map(RT.MACRO_META, RT.meta(form)));
-                    return v.applyTo(form.rest());
+                    return v.applyTo(form.next());
                 }
                 finally
                 {
@@ -785,8 +789,8 @@ namespace clojure.compiler
                         //object target = Second(form);
                         //if (MaybeType(target, false) != null)
                         //    target = RT.list(Compiler.IDENTITY, target);
-                        //return RT.listStar(Compiler.DOT, target, method, form.rest().rest());
-                        return RT.listStar(Compiler.DOT, RT.second(form), method, form.rest().rest());
+                        //return RT.listStar(Compiler.DOT, target, method, form.next().next());
+                        return RT.listStar(Compiler.DOT, RT.second(form), method, form.next().next());
                     }
                     else if (NamesStaticMember(sym))
                     {
@@ -795,7 +799,7 @@ namespace clojure.compiler
                         if (t != null)
                         {
                             Symbol method = Symbol.intern(sym.Name);
-                            return RT.listStar(Compiler.DOT, target, method, form.rest());
+                            return RT.listStar(Compiler.DOT, target, method, form.next());
                         }
                     }
                     else
@@ -803,7 +807,7 @@ namespace clojure.compiler
                         // (x.substring 2 5) =>  (. s substring 2 5)
                         int index = sname.LastIndexOf('.');
                         if (index == sname.Length - 1)
-                            return RT.listStar(Compiler.NEW, Symbol.intern(sname.Substring(0, index)), form.rest());
+                            return RT.listStar(Compiler.NEW, Symbol.intern(sname.Substring(0, index)), form.next());
                     }
                 }
 
@@ -848,7 +852,7 @@ namespace clojure.compiler
 
         private static Expression GenerateQuoteExpr(ISeq form)
         {
-            object v = form.rest().first();
+            object v = RT.second(form);
 
             return v == null ? GenerateNilExpr() : GenerateConstExpr(v);
         }
@@ -861,12 +865,7 @@ namespace clojure.compiler
             if (form.count() < 3)
                 throw new Exception("Too few arguments to if");
 
-            //form = form.rest();
-            //object test = form.first();
-            //form = form.rest();
-            //object trueClause = form.first();
-            //form = form.rest();
-            //object falseClause = form == null ? null : form.first();
+
             object test = RT.second(form);
             object trueClause = RT.third(form);
             object falseClause = RT.fourth(form);
@@ -902,7 +901,7 @@ namespace clojure.compiler
 
         private static Expression GenerateBodyExpr(ISeq form)
         {
-            ISeq forms = (Compiler.DO.Equals(RT.first(form))) ? RT.rest(form) : form;
+            ISeq forms = (Compiler.DO.Equals(RT.first(form))) ? RT.next(form) : form;
 
             Expression[] exprs;
 
@@ -915,9 +914,9 @@ namespace clojure.compiler
             {
                 exprs = new Expression[forms.count()];
                 int i=0;
-                for (ISeq s = forms; s != null; s = s.rest(), i++)
+                for (ISeq s = forms; s != null; s = s.next(), i++)
                 {
-                    if (s.rest() == null)
+                    if (s.next() == null)
                     {
                         // in tail recurive position
                         try
@@ -1032,7 +1031,7 @@ namespace clojure.compiler
             Expression finallyExpr = null;
             bool caught = false;
 
-            for ( ISeq fs = form.rest(); fs != null; fs = fs.rest() )
+            for ( ISeq fs = form.next(); fs != null; fs = fs.next() )
             {
                 object f = fs.first();
                 object op = (f is ISeq) ? ((ISeq)f).first() : null;
@@ -1067,7 +1066,7 @@ namespace clojure.compiler
                                 null);
                             ParameterExpression exParam = Expression.Parameter(typeof(object),sym.Name); //asdf-tag
                             lb.ParamExpression = exParam;
-                            Expression handler = GenerateBodyExpr(f1.rest().rest().rest());
+                            Expression handler = GenerateBodyExpr(RT.next(RT.next(RT.next(f1))));
                             catches.Add(Expression.Catch(t, exParam, handler));
                         }
                         finally
@@ -1078,12 +1077,12 @@ namespace clojure.compiler
                     }
                     else // finally
                     {
-                        if ( fs.rest() != null )
+                        if ( fs.next() != null )
                             throw new Exception("finally clause must be last in try expression");
                         try
                         {
                             Var.pushThreadBindings(RT.map(IN_CATCH_FINALLY,RT.T));
-                            finallyExpr = GenerateBodyExpr(RT.rest(f));
+                            finallyExpr = GenerateBodyExpr(RT.next(f));
                         }
                         finally
                         {
@@ -1130,6 +1129,18 @@ namespace clojure.compiler
 
         sealed class FnDef
         {
+
+            public FnDef(object tag)
+            {
+                _tag = tag;
+            }
+
+            readonly object _tag;
+            public object Tag
+            {
+                get { return _tag; }
+            } 
+
             string _name;
             public string Name
             {
@@ -1175,13 +1186,35 @@ namespace clojure.compiler
                 set { _isVariadic = value; }
             }
 
+            bool _onceOnly = false;
 
-            public Type ImplType
+            public bool OnceOnly
             {
-                get { return IsVariadic ? typeof(RestFnImpl) : typeof(AFnImpl); }
+                get { return _onceOnly; }
+                set { _onceOnly = value; }
+            }
+
+            string _superName = null;
+
+            public string SuperName
+            {
+                get { return _superName; }
+                set { _superName = value.Replace('/','.'); }
             }
 
 
+            public Type ImplType
+            {
+                get {
+                    Type superNameType = null;
+                    if ( _superName != null ) 
+                        superNameType = RT.classForName(_superName);
+                    return superNameType ?? ( IsVariadic ? typeof(RestFnImpl) : typeof(AFnImpl) ); 
+                }
+            }
+
+
+            // This naming convention drawn from the Java code.
             internal void ComputeNames(ISeq form)
             {
                 MethodDef enclosingMethod = (MethodDef)METHODS.deref();
@@ -1190,10 +1223,10 @@ namespace clojure.compiler
                     ? (enclosingMethod.Fn.Name + "$")
                     : (munge(CurrentNamespace.Name.Name) + "$");
 
-                if (form.rest().first() is Symbol)
-                    _thisName = ((Symbol)form.rest().first()).Name;
+                if (RT.second(form) is Symbol)
+                    _thisName = ((Symbol)RT.second(form)).Name;
 
-                _simpleName = (_thisName == null ? "fn" : munge(_thisName).Replace(".","_DOT_"));
+                _simpleName = (_thisName == null ? "fn" : munge(_thisName).Replace(".", "_DOT_")) + "__" + RT.nextID();
                 _name = baseName + _simpleName;
                 _internalName = _name.Replace('.','/');
                 // fn.fntype = Type.getObjectType(fn.internalName) -- JAVA            
@@ -1344,7 +1377,7 @@ namespace clojure.compiler
         // Do a quick scan to determine.
         static bool ComputeIsVariadicQuickly(ISeq body)
         {
-            for (ISeq s = body; s != null; s = s.rest())
+            for (ISeq s = body; s != null; s = s.next())
             {
                 if (!(((ISeq)s.first()).first() is IPersistentVector))  // bad syntax -- will be caught later
                     return false;
@@ -1356,17 +1389,27 @@ namespace clojure.compiler
             return false;
         }
 
+        static readonly Keyword KW_ONCE = Keyword.intern(null,"once");
+        static readonly Keyword KW_SUPER_NAME = Keyword.intern(null,"super-name");
+
         private static Expression GenerateFnExpr(ISeq form)
         {
-            // This naming convention drawn from the Java code.
-            FnDef fn = new FnDef();
+            FnDef fn = new FnDef(TagOf(form));
+
+            if (((IMeta)form.first()).meta() != null)
+            {
+                fn.OnceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), KW_ONCE));
+                fn.SuperName = (string)RT.get(RT.meta(form.first()), KW_SUPER_NAME);
+            }
+
+
             fn.ComputeNames(form);
 
             Symbol name = null;
             if ( RT.second(form) is Symbol )
             {
                 name = (Symbol)RT.second(form);
-                form = RT.cons(Compiler.FN, RT.rest(RT.rest(form)));
+                form = RT.cons(Compiler.FN, RT.next(RT.next(form)));
             }
 
             // Normalize body
@@ -1374,10 +1417,10 @@ namespace clojure.compiler
             //  (fn ([arg...] body...))
             // so that we can treat uniformly as (fn ([arg...] body...) ([arg...] body...) ... )
             if (RT.second(form) is IPersistentVector)
-                form = RT.list(Compiler.FN, RT.rest(form));
+                form = RT.list(Compiler.FN, RT.next(form));
 
             // needs to be called after normalization
-            fn.IsVariadic = ComputeIsVariadicQuickly(RT.rest(form));
+            fn.IsVariadic = ComputeIsVariadicQuickly(RT.next(form));
 
 
             // Create the 'this' parameter needed for recursion
@@ -1392,7 +1435,7 @@ namespace clojure.compiler
             MethodDef variadicMethod = null;
             SortedDictionary<int, MethodDef> methods = new SortedDictionary<int, MethodDef>();
 
-            for (ISeq s = RT.rest(form); s != null; s = s.rest())
+            for (ISeq s = RT.next(form); s != null; s = s.next())
             {
                 MethodDef method = GenerateFnMethod(fn, (ISeq) s.first());
                 if (method.IsVariadic)
@@ -1424,7 +1467,7 @@ namespace clojure.compiler
         {
             // form == ([args] body ... )
             IPersistentVector parms = (IPersistentVector)RT.first(form);
-            ISeq body = RT.rest(form);
+            ISeq body = RT.next(form);
 
             MethodDef method = new MethodDef(fn, (MethodDef)METHODS.deref());
 
@@ -1554,15 +1597,23 @@ namespace clojure.compiler
 
         private static Expression GenerateFnLambda(FnDef fn, SortedDictionary<int, MethodDef> methods, MethodDef variadicMethod)
         {
-            Type fnType = fn.IsVariadic ? typeof(RestFnImpl) : typeof(AFnImpl);
+            // TODO: Supername metadata on form can change the implementation superclass.
+            Type fnType = fn.ImplType;
+
+            if (fn.SuperName != null)
+                Console.WriteLine("Crap");
 
             ParameterExpression p1 = fn.ThisParam ?? Expression.Parameter(fnType, "____x");
             List<Expression> exprs = new List<Expression>();
 
-            if (fn.IsVariadic)
+            if ( p1.Type == typeof(AFnImpl) )
+                exprs.Add(Expression.Assign(p1, Expression.New(Ctor_AFnImpl_0)));
+            else if (p1.Type == typeof(RestFnImpl))
                 exprs.Add(Expression.Assign(p1, Expression.New(Ctor_RestFnImpl_1, Expression.Constant(variadicMethod.RequiredArity))));
             else
-                exprs.Add(Expression.Assign(p1, Expression.New(Ctor_AFnImpl_0)));
+                exprs.Add(Expression.Assign(p1,Expression.New(p1.Type)));
+
+
 
             foreach (KeyValuePair<int, MethodDef> pair in methods)
             {
@@ -1591,7 +1642,7 @@ namespace clojure.compiler
                 ? RT.cons(Compiler.FN, RT.cons(parms, body))
                 : RT.cons(Compiler.FN, RT.cons(name, RT.cons(parms, body)));
 
-            FnDef fnDef = new FnDef();
+            FnDef fnDef = new FnDef(null); // compute tag from delegateType?
             fnDef.ComputeNames(form);
 
             MethodDef methodDef = new MethodDef(fnDef, (MethodDef)METHODS.deref());
@@ -2001,7 +2052,7 @@ namespace clojure.compiler
             if ((bindings.count() % 2) != 0)
                 throw new ArgumentException("Bad binding form, expected matched symbol/value pairs.");
 
-            ISeq body = RT.rest(RT.rest(form));
+            ISeq body = RT.next(RT.next(form));
 
             // TODO: This is one place where context makes a difference.  Need to figure this out.
             //  Second test clause added in Rev 1216.
@@ -2097,7 +2148,7 @@ namespace clojure.compiler
             if (IN_CATCH_FINALLY.deref() != null)
                 throw new InvalidOperationException("Cannot recur from catch/finally.");
             IPersistentVector args = PersistentVector.EMPTY;
-            for ( ISeq s = form.rest(); s != null; s = s.rest() )
+            for (ISeq s = form.next(); s != null; s = s.next())
                 args = args.cons(Generate(s.first()));
             if ( args.count() != loopLocals.count())
                 throw new ArgumentException(string.Format("Mismatched argument count to recur, expected: {0} args, got {1}",loopLocals.count(),args.count()));
@@ -2276,7 +2327,7 @@ namespace clojure.compiler
             //  (. x propertyname-sym)
             //  (. x methodname-sym args+)
             //  (. x (methodname-sym args?))
-            if (form.count() < 3)
+            if (RT.Length(form) < 3)
                 throw new ArgumentException("Malformed member expression, expecting (. target member ... )");
             // determine static or instance
             // static target must be symbol, either fully.qualified.Typename or Typename that has been imported
@@ -2312,7 +2363,7 @@ namespace clojure.compiler
                 }
             }
 
-            ISeq call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.rest(RT.rest(form));
+            ISeq call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));
 
             if (!(RT.first(call) is Symbol))
                 throw new ArgumentException("Malformed member exception");
@@ -2322,7 +2373,7 @@ namespace clojure.compiler
             
             Expression[] args = new Expression[numArgs];
             int i = 0;
-            for (ISeq s = call.rest(); s != null; s = s.rest(), i++)
+            for (ISeq s = call.next(); s != null; s = s.next(), i++)
                 args[i] = Generate(s.first());
 
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
@@ -2389,7 +2440,7 @@ namespace clojure.compiler
             int numArgs = form.count() - 2;
             Expression[] args = new Expression[numArgs];
             int i = 0;
-            for (ISeq s = RT.rest(RT.rest(form)); s != null; s = s.rest(), i++)
+            for (ISeq s = RT.next(RT.next(form)); s != null; s = s.next(), i++)
                 args[i] = Generate(s.first());
 
             List<ConstructorInfo> cinfos = new List<ConstructorInfo>(t.GetConstructors().Where(x => x.GetParameters().Length == numArgs && x.IsPublic));

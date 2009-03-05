@@ -19,7 +19,7 @@ using System.Runtime.CompilerServices;
 namespace clojure.lang
 {
     /// <summary>
-    /// Provides basic implementation of <see cref="ISeq">ISeq</see> functionality.
+    /// Provides basic implementation of <see cref="ISeq"/> functionality.
     /// </summary>
     public abstract class ASeq: Obj, ISeq, IList, Streamable
     {
@@ -77,7 +77,7 @@ namespace clojure.lang
 
             ISeq ms = RT.seq(obj);
 
-            for( ISeq s = seq();  s != null; s = s.rest(), ms = ms.rest() )
+            for (ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
             {
                 if ( ms == null || !Util.equals(s.first(),ms.first())) 
                     return false;
@@ -96,7 +96,7 @@ namespace clojure.lang
             if ( _hash == -1 )
             {
                 int h = 0;
-                for (ISeq s = seq(); s != null; s = s.rest())
+                for (ISeq s = seq(); s != null; s = s.next())
                     h = 31 * h + (s.first() == null ? 0 : s.first().GetHashCode());
                 _hash = h;
             }
@@ -113,11 +113,27 @@ namespace clojure.lang
         /// <returns>The first item.</returns>
         public abstract object first();
 
+
+        ///// <summary>
+        ///// Gets the rest of the sequence.
+        ///// </summary>
+        ///// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
+        //public abstract ISeq rest();
+
         /// <summary>
-        /// Gets the rest of the sequence.
+        /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
         /// </summary>
-        /// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
-        public abstract ISeq rest();
+        /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
+        public abstract ISeq next();
+
+
+        public virtual ISeq more()
+        {
+            ISeq s = next();
+            if (s == null)
+                return LazySeq.EMPTY;
+            return s;
+        }
 
         /// <summary>
         /// Adds an item to the beginning of the sequence.
@@ -159,7 +175,7 @@ namespace clojure.lang
         public virtual int count()
         {
             int i = 1;  // if it is here, it is non-empty.
-            for (ISeq s = rest(); s != null; s = s.rest(), i++)
+            for (ISeq s = next(); s != null; s = s.next(), i++)
                 if (s is Counted)
                     return i + s.count();
 
@@ -198,7 +214,7 @@ namespace clojure.lang
 
             ISeq ms = RT.seq(obj);
 
-            for (ISeq s = seq(); s != null; s = s.rest(), ms = ms.rest())
+            for (ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
             {
                 if (ms == null || !Util.equiv(s.first(), ms.first()))
                     return false;
@@ -231,7 +247,7 @@ namespace clojure.lang
                 throw new ArgumentOutOfRangeException("Index cannot be negative.");
 
             ISeq s = seq();
-            for (int i = index; i < array.Length && s != null; ++i, s = s.rest())
+            for (int i = index; i < array.Length && s != null; ++i, s = s.next())
                 array.SetValue(s.first(), i);
         }
 
@@ -293,7 +309,7 @@ namespace clojure.lang
                 if (_s != null)
                 {
                     object ret = _s.first();
-                    _s = _s.rest();
+                    _s = _s.next();
                     return ret;
                 }
                 return RT.eos();
@@ -327,7 +343,7 @@ namespace clojure.lang
 
         public bool Contains(object value)
         {
-            for (ISeq s = seq(); s != null; s = s.rest())
+            for (ISeq s = seq(); s != null; s = s.next())
                 if (Util.equiv(s.first(), value))
                     return true;
 
@@ -337,7 +353,7 @@ namespace clojure.lang
         public int IndexOf(object value)
         {
             int i = 0;
-            for (ISeq s = seq(); s != null; s = s.rest(),i++)
+            for (ISeq s = seq(); s != null; s = s.next(),i++)
                 if (Util.equiv(s.first(), value))
                     return i;
 
@@ -379,7 +395,7 @@ namespace clojure.lang
                 // CLR does not have the equivalent notion, so I just left it at IList.  BOOM!
                 // So, I have to do a sequential search, duplicating some of the code in RT.nth.
                 ISeq seq = this;
-                for (int i = 0; i <= index && seq != null; ++i, seq = seq.rest())
+                for (int i = 0; i <= index && seq != null; ++i, seq = seq.next())
                 {
                     if (i == index)
                         return seq.first();

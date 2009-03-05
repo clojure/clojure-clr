@@ -177,10 +177,10 @@ namespace clojure.lang
             IPersistentSet xprefs = (IPersistentSet)PreferTable.valAt(x);
             if (xprefs != null && xprefs.contains(y))
                 return true;
-            for (ISeq ps = RT.seq(_parents.invoke(y)); ps != null; ps = ps.rest())
+            for (ISeq ps = RT.seq(_parents.invoke(y)); ps != null; ps = ps.next())
                 if (Prefers(x, ps.first()))
                     return true;
-            for (ISeq ps = RT.seq(_parents.invoke(x)); ps != null; ps = ps.rest())
+            for (ISeq ps = RT.seq(_parents.invoke(x)); ps != null; ps = ps.next())
                 if (Prefers(ps.first(), y))
                     return true;
             return false;

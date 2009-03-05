@@ -93,7 +93,7 @@ namespace Clojure.Tests.LibTests
             ISeq s = ipc2.seq();
 
             Expect(s.first(), EqualTo("def"));
-            Expect(s.rest(), SameAs(c1));
+            Expect(s.next(), SameAs(c1));
         }
 
         #endregion

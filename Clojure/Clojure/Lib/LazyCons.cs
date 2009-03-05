@@ -98,11 +98,11 @@ namespace clojure.lang
 
 
         /// <summary>
-        /// Gets the rest of the sequence.
+        /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
         /// </summary>
-        /// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
+        /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public override ISeq rest()
+        public override ISeq next()
         {
             if (_rest == sentinel)
             {
@@ -132,7 +132,7 @@ namespace clojure.lang
             if (meta == _meta)
                 return this;
             //force eval before copying
-            rest();
+            next();
             return new LazyCons(meta, _first, _rest);
         }
 

@@ -76,7 +76,7 @@ namespace clojure.console
 
             // Set this to true to force snippets to be written out.
             // Or you can put -D on the command line.
-            setup.DebugMode = false;
+            setup.DebugMode = true;
 
             return setup;
         }

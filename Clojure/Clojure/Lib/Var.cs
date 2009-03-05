@@ -496,7 +496,7 @@ namespace clojure.lang
         {
             Frame f = CurrentFrame;
             Associative bmap = f.Bindings;
-            for (ISeq bs = bindings.seq(); bs != null; bs = bs.rest())
+            for (ISeq bs = bindings.seq(); bs != null; bs = bs.next())
             {
                 IMapEntry e = (IMapEntry)bs.first();
                 Var v = (Var)e.key();
@@ -516,7 +516,7 @@ namespace clojure.lang
             Frame f = CurrentFrame;
             if (f.Prev == null)
                 throw new InvalidOperationException("Pop without matching push");
-            for (ISeq bs = RT.keys(f.FrameBindings); bs != null; bs = bs.rest())
+            for (ISeq bs = RT.keys(f.FrameBindings); bs != null; bs = bs.next())
             {
                 Var v = (Var)bs.first();
                 v._count.decrementAndGet();
@@ -533,7 +533,7 @@ namespace clojure.lang
             Frame f = CurrentFrame;
             if (f.Prev == null)
                 throw new InvalidOperationException("Release without full unwind");
-            for (ISeq bs = RT.keys(f.Bindings); bs != null; bs = bs.rest())
+            for (ISeq bs = RT.keys(f.Bindings); bs != null; bs = bs.next())
             {
                 Var v = (Var)bs.first();
                 v._count.decrementAndGet(); ;

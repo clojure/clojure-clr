@@ -118,7 +118,7 @@ namespace clojure.lang
                 }
 
                 List<object> list = new List<object>();
-                for (ISeq s = RT.seq(args); s != null; s = s.rest())
+                for (ISeq s = RT.seq(args); s != null; s = s.next())
                     list.Add(s.first());
                 return create(list);
             }
@@ -158,10 +158,10 @@ namespace clojure.lang
         }
 
         /// <summary>
-        /// Gets the rest of the sequence.
+        /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
         /// </summary>
-        /// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
-        public override ISeq rest()
+        /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
+        public override ISeq next()
         {
             if ( _count == 1 )
                 return null;
@@ -236,7 +236,7 @@ namespace clojure.lang
         public object reduce(IFn f)
         {
             object ret = first();
-            for (ISeq s = rest(); s != null; s = s.rest())
+            for (ISeq s = next(); s != null; s = s.next())
                 ret = f.invoke(ret, s.first());
             return ret;
         }
@@ -250,7 +250,7 @@ namespace clojure.lang
         public object reduce(IFn f, object start)
         {
             object ret = f.invoke(start, first());
-            for (ISeq s = rest(); s != null; s = s.rest())
+            for (ISeq s = next(); s != null; s = s.next())
                 ret = f.invoke(ret, s.first());
             return ret;
         }
@@ -442,7 +442,7 @@ namespace clojure.lang
             public bool Contains(object value)
             {
                 
-                for (ISeq s = seq(); s != null; s = s.rest())
+                for (ISeq s = seq(); s != null; s = s.next())
                     if (Util.equiv(s.first(), value))
                         return true;
                 return false;
@@ -451,7 +451,7 @@ namespace clojure.lang
             public int IndexOf(object value)
             {
                 ISeq s = seq();
-                for (int i = 0; s != null; s = s.rest(), i++)
+                for (int i = 0; s != null; s = s.next(), i++)
                     if (Util.equiv(s.first(), value))
                         return i;
                 return -1;

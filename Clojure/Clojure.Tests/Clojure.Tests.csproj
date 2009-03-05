@@ -73,13 +73,13 @@
     <Compile Include="LibTests\CachedSeqTests.cs" />
     <Compile Include="LibTests\ConsTests.cs" />
     <Compile Include="LibTests\DelayTests.cs" />
-    <Compile Include="LibTests\FnSeqTests.cs" />
     <Compile Include="LibTests\IObjTests.cs" />
     <Compile Include="LibTests\ISeqTestHelper.cs" />
     <Compile Include="LibTests\IteratorStreamTests.cs" />
     <Compile Include="LibTests\KeywordTests.cs" />
     <Compile Include="LibTests\LazilyPersistentVectorTests.cs" />
     <Compile Include="LibTests\LazyConsTests.cs" />
+    <Compile Include="LibTests\LazySeqTests.cs" />
     <Compile Include="LibTests\LispReaderTests.cs" />
     <Compile Include="LibTests\LockingTransactionTests.cs" />
     <Compile Include="LibTests\MapEntryTests.cs" />

@@ -178,7 +178,7 @@ namespace clojure.lang
              if (ws.count() > 0)
              {
                  ISeq args = new Cons(this, null);
-                 for (ISeq s = RT.seq(ws); s != null; s = s.rest())
+                 for (ISeq s = RT.seq(ws); s != null; s = s.next())
                  {
                      IMapEntry me = (IMapEntry)s.first();
                      object[] a = (object[])me.val();

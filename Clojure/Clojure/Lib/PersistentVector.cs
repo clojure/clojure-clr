@@ -44,7 +44,7 @@ namespace clojure.lang
         static public PersistentVector create(ISeq items)
         {
             IPersistentVector ret = EMPTY;
-            for (; items != null; items = items.rest())
+            for (; items != null; items = items.next())
                 ret = ret.cons(items.first());
             return (PersistentVector)ret;
         }

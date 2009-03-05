@@ -40,6 +40,7 @@ namespace clojure.lang
         static readonly Symbol VECTOR = Symbol.create("clojure.core", "vector");
         static readonly Symbol WITH_META = Symbol.create("clojure.core", "with-meta");
         static readonly Symbol LIST = Symbol.create("clojure.core", "list");
+        static readonly Symbol SEQ = Symbol.create("clojure.core","seq");
 
         static readonly Symbol SLASH = Symbol.create("/");
         static readonly Symbol CLOJURE_SLASH = Symbol.create("clojure.core","/");
@@ -766,23 +767,23 @@ namespace clojure.lang
                     if (form is IPersistentMap)
                     {
                         IPersistentVector keyvals = flattenMap(form);
-                        ret = RT.list(APPLY, HASHMAP, RT.cons(CONCAT, sqExpandList(keyvals.seq())));
+                        ret = RT.list(APPLY, HASHMAP, RT.list(SEQ,RT.cons(CONCAT, sqExpandList(keyvals.seq()))));
                     }
                     else if (form is IPersistentVector)
                     {
-                        ret = RT.list(APPLY, VECTOR, RT.cons(CONCAT, sqExpandList(((IPersistentVector)form).seq())));
+                        ret = RT.list(APPLY, VECTOR, RT.list(SEQ,RT.cons(CONCAT, sqExpandList(((IPersistentVector)form).seq()))));
                     }
                     else if (form is IPersistentSet)
                     {
-                        ret = RT.list(APPLY, HASHSET, RT.cons(CONCAT, sqExpandList(((IPersistentSet)form).seq())));
+                        ret = RT.list(APPLY, HASHSET,  RT.list(SEQ,RT.cons(CONCAT, sqExpandList(((IPersistentSet)form).seq()))));
                     }
                     else if (form is ISeq || form is IPersistentList)
                     {
                         ISeq seq = RT.seq(form);
                         if (seq == null)
-                            ret = PersistentList.EMPTY;
+                            ret = RT.cons(LIST, null);
                         else
-                            ret = RT.cons(CONCAT, sqExpandList(seq));
+                            ret =  RT.list(SEQ,RT.cons(CONCAT, sqExpandList(seq)));
                     }
                     else
                         throw new InvalidOperationException("Unknown Collection type");
@@ -808,7 +809,7 @@ namespace clojure.lang
             private static ISeq sqExpandList(ISeq seq)
             {
                 IPersistentVector ret = PersistentVector.EMPTY;
-                for (; seq != null; seq = seq.rest())
+                for (; seq != null; seq = seq.next())
                 {
                     Object item = seq.first();
                     //if (item is Unquote)
@@ -827,7 +828,7 @@ namespace clojure.lang
             private static IPersistentVector flattenMap(object form)
             {
                 IPersistentVector keyvals = PersistentVector.EMPTY;
-                for (ISeq s = RT.seq(form); s != null; s = s.rest())
+                for (ISeq s = RT.seq(form); s != null; s = s.next())
                 {
                     IMapEntry e = (IMapEntry)s.first();
                     keyvals = (IPersistentVector)keyvals.cons(e.key());
@@ -1072,18 +1073,18 @@ namespace clojure.lang
         //            }
         //            if (fs.Name.EndsWith("."))
         //            {
-        //                Object[] args = RT.toArray(pl.rest());
+        //                Object[] args = RT.toArray(pl.next());
         //                return Reflector.invokeConstructor(RT.classForName(fs.name.substring(0, fs.name.length() - 1)), args);
         //            }
         //            if (Compiler.namesStaticMember(fs))
         //            {
-        //                Object[] args = RT.toArray(pl.rest());
+        //                Object[] args = RT.toArray(pl.next());
         //                return Reflector.invokeStaticMethod(fs.ns, fs.name, args);
         //            }
         //            Object v = Compiler.maybeResolveIn(Compiler.currentNS(), fs);
         //            if (v is Var)
         //            {
-        //                return ((IFn)v).applyTo(pl.rest());
+        //                return ((IFn)v).applyTo(pl.next());
         //            }
         //            throw new Exception("Can't resolve " + fs);
         //        }

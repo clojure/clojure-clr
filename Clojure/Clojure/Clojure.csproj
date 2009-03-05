@@ -51,6 +51,8 @@
     <Compile Include="Lib\Counted.cs" />
     <Compile Include="Lib\EnumeratorSeq.cs" />
     <Compile Include="Lib\IDeref.cs" />
+    <Compile Include="Lib\LazySeq.cs" />
+    <Compile Include="Lib\Seqable.cs" />
     <Compile Include="Readers\LineNumberingReader.cs" />
     <Compile Include="Runtime\ClojureBinder.cs" />
     <Compile Include="Runtime\ClojureCommandLine.cs" />
@@ -81,13 +83,11 @@
     <Compile Include="Lib\AtomicLong.cs" />
     <Compile Include="Lib\AtomicReference.cs" />
     <Compile Include="Lib\Box.cs" />
-    <Compile Include="Lib\CachedSeq.cs" />
     <Compile Include="Lib\ClojureException.cs" />
     <Compile Include="Lib\Compiler.cs" />
     <Compile Include="Lib\Cons.cs" />
     <Compile Include="Lib\Delay.cs" />
     <Compile Include="Lib\Fn.cs" />
-    <Compile Include="Lib\FnSeq.cs" />
     <Compile Include="Lib\FuncTypes.cs" />
     <Compile Include="Lib\IFn.cs" />
     <Compile Include="Lib\IMapEntry.cs" />

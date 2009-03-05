@@ -80,20 +80,20 @@ namespace Clojure.Tests.LibTests
             _lc.first();
 
             // Need to meet expectation that _rest is called.
-            _lc.rest();
+            _lc.next();
         }
 
         [Test]
         public void Rest_calcs_first()
         {
-            _lc.rest();
+            _lc.next();
         }
 
         [Test]
         public void Rest_caches()
         {
-            _lc.rest();
-            _lc.rest();
+            _lc.next();
+            _lc.next();
         }
 
 

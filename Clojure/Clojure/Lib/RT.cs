@@ -251,7 +251,8 @@ namespace clojure.lang
             // ADDED THESE TO SUPPORT THE BOOTSTRAPPING IN THE JAVA CORE.CLJ
             Symbol.create("StringBuilder"), typeof(StringBuilder),
             Symbol.create("BigInteger"), typeof(java.math.BigInteger),
-            Symbol.create("BigDecimal"), typeof(java.math.BigDecimal)
+            Symbol.create("BigDecimal"), typeof(java.math.BigDecimal),
+            Symbol.create("Environment"), typeof(System.Environment)
      );
 
         #endregion
@@ -522,17 +523,19 @@ namespace clojure.lang
         {
             if (coll == null)
                 return null;
-            else if (coll is ISeq)
-                return (ISeq)coll;
-            else if (coll is IPersistentCollection)
-                return ((IPersistentCollection)coll).seq();
+            else if (coll is ASeq)
+                return (ASeq)coll;
+            //else if (coll is IPersistentCollection)
+            //    return ((IPersistentCollection)coll).seq();
             else
                 return seqFrom(coll);
         }
 
         private static ISeq seqFrom(object coll)
         {
-            if (coll is IEnumerable)  // java: Iterable
+            if (coll is Seqable)
+                return ((Seqable)coll).seq();
+            else if (coll is IEnumerable)  // java: Iterable
                 return EnumeratorSeq.create(((IEnumerable)coll).GetEnumerator());  // IteratorSeq
             else if (coll.GetType().IsArray)
                 return ArraySeq.createFromObject(coll);
@@ -541,8 +544,9 @@ namespace clojure.lang
             // The equivalent for Java:Map is IDictionary.  IDictionary is IEnumerable, so is handled above.
             //else if(coll isntanceof Map)  
             //     return seq(((Map) coll).entrySet());
-            else if (coll is IEnumerator)  // java: Iterator
-                return EnumeratorSeq.create((IEnumerator)coll);
+                // Used to be in the java version:
+            //else if (coll is IEnumerator)  // java: Iterator
+            //    return EnumeratorSeq.create((IEnumerator)coll);
              else
                 throw new ArgumentException("Don't know how to create ISeq from: " + coll.GetType().Name);
         }
@@ -599,7 +603,7 @@ namespace clojure.lang
                 ISeq s = seq(o);
                 o = null;
                 int i = 0;
-                for (; s != null; s = s.rest())
+                for (; s != null; s = s.next())
                 {
                     if (s is Counted)
                         return i + s.count();
@@ -628,10 +632,13 @@ namespace clojure.lang
 
         public static ISeq cons(object x, object coll)
         {
-            ISeq y = seq(coll);
-            return y == null
-                ? new PersistentList(x)
-                : y.cons(x);
+            //ISeq y = seq(coll);
+            if (coll == null)
+                return new PersistentList(x);
+            else if (coll is ISeq)
+                return new Cons(x, (ISeq)coll);
+            else
+                return new Cons(x, seq(coll));
         }
 
         public static object first(object x)
@@ -646,33 +653,40 @@ namespace clojure.lang
 
         public static object second(object x)
         {
-            return first(rest(x));
+            return first(next(x));
         }
 
         public static object third(object x)
         {
-            return first(rest(rest(x)));
+            return first(next(next(x)));
         }
 
         public static object fourth(object x)
         {
-            return first(rest(rest(rest(x))));
+            return first(next(next(next(x))));
         }
 
-        public static ISeq rest(object x)
+        public static ISeq next(object x)
         {
             if (x is ISeq)
-                return ((ISeq)x).rest();
+                return ((ISeq)x).next();
             ISeq seq = RT.seq(x);
             if (seq == null)
                 return null;
-            return seq.rest();
+            return seq.next();
         }
 
-        public static ISeq rrest(object x)
+        public static ISeq more(object x)
         {
-            return rest(rest(x));
+            if (x is ISeq)
+                return ((ISeq)x).more();
+            ISeq seq = RT.seq(x);
+            if (seq == null)
+                return LazySeq.EMPTY;
+            return seq.more();
         }
+
+
 
         public static object peek(object x)
         {
@@ -834,10 +848,9 @@ namespace clojure.lang
             }
             else if (coll is Sequential)
             {
-                // TODO: FIX: Another assumption that Sequential implies castable to IPersistentCollection
-                ISeq seq = ((IPersistentCollection)coll).seq();
+                ISeq seq = RT.seq(coll);
                 coll = null;  
-                for (int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
+                for (int i = 0; i <= n && seq != null; ++i, seq = seq.next())
                 {
                     if (i == n)
                         return seq.first();
@@ -918,10 +931,9 @@ namespace clojure.lang
             }
             else if (coll is Sequential)
             {
-                // TODO: FIX: ANother place where Sequential => IPersistentCollection
-                ISeq seq = ((IPersistentCollection)coll).seq();
+                ISeq seq = RT.seq(coll);
                 coll = null;  // release in case GC
-                for (int i = 0; i <= n && seq != null; ++i, seq = seq.rest())
+                for (int i = 0; i <= n && seq != null; ++i, seq = seq.next())
                 {
                     if (i == n)
                         return seq.first();
@@ -1209,7 +1221,7 @@ namespace clojure.lang
             {
                 ISeq s = (seq(coll));
                 object[] ret = new object[count(s)];
-                for (int i = 0; i < ret.Length; i++, s = s.rest())
+                for (int i = 0; i < ret.Length; i++, s = s.next())
                     ret[i] = s.first();
                 return ret;
             }
@@ -1242,7 +1254,7 @@ namespace clojure.lang
 
             T[] array = new T[RT.Length(x)];
             int i = 0;
-            for (ISeq s = x; s != null; s = s.rest(), i++)
+            for (ISeq s = x; s != null; s = s.next(), i++)
                 array[i] = (T)s.first();
             return array;
         }
@@ -1258,7 +1270,7 @@ namespace clojure.lang
         static public object seqToTypedArray(Type type, ISeq seq)
         {
             Array ret = Array.CreateInstance(type, seq == null ? 0 : seq.count());
-            for (int i = 0; seq != null; ++i, seq = seq.rest())
+            for (int i = 0; seq != null; ++i, seq = seq.next())
                 ret.SetValue(seq.first(), i);
             return ret;
         }
@@ -1266,7 +1278,7 @@ namespace clojure.lang
         static public int Length(ISeq list)
         {
             int i = 0;
-            for (ISeq c = list; c != null; c = c.rest())
+            for (ISeq c = list; c != null; c = c.next())
                 i++;
             return i;
         }
@@ -1274,7 +1286,7 @@ namespace clojure.lang
         public static int BoundedLength(ISeq list, int limit)
         {
             int i = 0;
-            for (ISeq c = list; c != null && i <= limit; c = c.rest())
+            for (ISeq c = list; c != null && i <= limit; c = c.next())
             {
                 i++;
             }
@@ -1319,7 +1331,9 @@ namespace clojure.lang
             if (x is Obj)
             {
                 Obj o = x as Obj;
-                if (RT.count(o.meta()) > 0 && readably && booleanCast(PRINT_META.deref()))
+                if (RT.count(o.meta()) > 0 && 
+                     ((readably && booleanCast(PRINT_META.deref()))
+                    || booleanCast(PRINT_DUP.deref())))
                 {
                     IPersistentMap meta = o.meta();
                     w.Write("#^");
@@ -1383,13 +1397,13 @@ namespace clojure.lang
             else if (x is IPersistentMap)
             {
                 w.Write('{');
-                for (ISeq s = seq(x); s != null; s = s.rest())
+                for (ISeq s = seq(x); s != null; s = s.next())
                 {
                     IMapEntry e = (IMapEntry)s.first();
                     print(e.key(), w);
                     w.Write(' ');
                     print(e.val(), w);
-                    if (s.rest() != null)
+                    if (s.next() != null)
                         w.Write(", ");
                 }
                 w.Write('}');
@@ -1410,10 +1424,10 @@ namespace clojure.lang
             else if (x is IPersistentSet)
             {
                 w.Write("#{");
-                for (ISeq s = seq(x); s != null; s = s.rest())
+                for (ISeq s = seq(x); s != null; s = s.next())
                 {
                     print(s.first(), w);
-                    if (s.rest() != null)
+                    if (s.next() != null)
                         w.Write(" ");
                 }
                 w.Write('}');
@@ -1474,10 +1488,10 @@ namespace clojure.lang
 
         private static void printInnerSeq(ISeq x, TextWriter w)
         {
-            for (ISeq s = x; s != null; s = s.rest())
+            for (ISeq s = x; s != null; s = s.next())
             {
                 print(s.first(), w);
-                if (s.rest() != null)
+                if (s.next() != null)
                     w.Write(' ');
             }
         }

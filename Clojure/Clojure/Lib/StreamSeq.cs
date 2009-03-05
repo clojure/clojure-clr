@@ -98,7 +98,7 @@ namespace clojure.lang
         {
             if (meta != _meta)
             {
-                rest();
+                next();
                 return new StreamSeq(meta, _first, _rest);
             }
             return this;
@@ -118,10 +118,10 @@ namespace clojure.lang
         }
 
         /// <summary>
-        /// Gets the rest of the sequence.
+        /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
         /// </summary>
-        /// <returns>The rest of the sequence, or <c>null</c> if no more elements.</returns>
-        public override ISeq rest()
+        /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
+        public override ISeq next()
         {
             if (_stream != null)
             {
