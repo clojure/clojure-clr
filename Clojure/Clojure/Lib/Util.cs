@@ -108,6 +108,12 @@ namespace clojure.lang
         	return (hash >> shift) & 0x01f;
         }
 
+
+        public static bool IsPrimitive(Type t)
+        {
+            return t != null && t.IsPrimitive && t != typeof(void);
+        }
+
         #region core.clj compatibility
 
         public static int hash(object o)

@@ -1,0 +1,879 @@
+﻿
+/**
+ *   Copyright (c) David Miller. All rights reserved.
+ *   The use and distribution terms for this software are covered by the
+ *   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+ *   which can be found in the file epl-v10.html at the root of this distribution.
+ *   By using this software in any fashion, you are agreeing to be bound by
+ * 	 the terms of this license.
+ *   You must not remove this notice, or any other, from this software.
+ **/
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+using System.Threading;
+using Microsoft.Linq.Expressions;
+using clojure.lang.CljCompiler.Ast;
+using clojure.runtime;
+
+
+namespace clojure.lang
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>Originally, I tried to do this as one-pass compiler, direct from SEXPRs to DLR Expression Trees.  And it was working just fine.
+    /// <para>Then Rich added a change in the new lazy version of Clojure that required a variable base class for implementations of <see cref="AFn"/>.  
+    /// Due to the fact that DLR can only generate lambda expressions to static methods in assemblies, some nasty workarounds are required
+    /// that force a multi-pass compiler.  With that, I gave up and added an AST intermediate stage.</para>
+    /// <para>So now we go SEXPR -> AST -> ExpressionTree.  As a result, once again, my code converges toward the JVM code.</para>
+    /// </remarks>
+    public static class Compiler
+    {
+
+        #region Symbols
+
+        public static readonly Symbol DEF = Symbol.create("def");
+        public static readonly Symbol LOOP = Symbol.create("loop*");
+        public static readonly Symbol RECUR = Symbol.create("recur");
+        public static readonly Symbol IF = Symbol.create("if*");
+        public static readonly Symbol LET = Symbol.create("let*");
+        public static readonly Symbol LETFN = Symbol.create("letfn*");
+        public static readonly Symbol DO = Symbol.create("do");
+        public static readonly Symbol FN = Symbol.create("fn*");
+        public static readonly Symbol QUOTE = Symbol.create("quote");
+        public static readonly Symbol THE_VAR = Symbol.create("var");
+        public static readonly Symbol DOT = Symbol.create(".");
+        public static readonly Symbol ASSIGN = Symbol.create("set!");
+        public static readonly Symbol TRY = Symbol.create("try");
+        public static readonly Symbol CATCH = Symbol.create("catch");
+        public static readonly Symbol FINALLY = Symbol.create("finally");
+        public static readonly Symbol THROW = Symbol.create("throw");
+        public static readonly Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
+        public static readonly Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
+        public static readonly Symbol NEW = Symbol.create("new");
+        public static readonly Symbol _AMP_ = Symbol.create("&");
+
+
+        public static readonly Symbol IDENTITY = Symbol.create("clojure.core", "identity");
+
+        static readonly Symbol NS = Symbol.create("ns");
+        static readonly Symbol IN_NS = Symbol.create("in-ns");
+
+        #endregion
+
+        #region Keywords
+
+        static readonly Keyword INLINE_KEY = Keyword.intern(null, "inline");
+        static readonly Keyword INLINE_ARITIES_KEY = Keyword.intern(null, "inline-arities");
+
+        #endregion
+
+        #region Vars
+
+        //boolean
+        static readonly Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+                                                 Symbol.create("*compile-files*"), false);  //JAVA: Boolean.FALSE -- changed from RT.F in rev 1108, not sure why
+
+        //String
+        static readonly Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+                                                 Symbol.create("*compile-path*"), null);
+        // String
+        static readonly Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+            Symbol.create("*file*"), null);
+
+
+        static readonly Var METHODS = Var.create(null);
+        static readonly Var LOCAL_ENV = Var.create(PersistentHashMap.EMPTY);
+        static readonly Var LOOP_LOCALS = Var.create(null);
+        
+        //var->constid
+        static readonly Var VARS = Var.create();
+
+        //vector<object>
+        static readonly Var CONSTANTS = Var.create();
+
+        #endregion
+
+        #region Special forms
+
+        static readonly IPersistentMap _specials = PersistentHashMap.create(
+            DEF, new DefExpr.Parser(),
+            LOOP, new LetExpr.Parser(),
+            RECUR, new RecurExpr.Parser(),
+            IF, new IfExpr.Parser(),
+            LET, new LetExpr.Parser(),
+            LETFN, new LetFnExpr.Parser(),
+            DO, new BodyExpr.Parser(),
+            FN, new FnExpr.Parser(),
+            QUOTE, new ConstantExpr.Parser(),
+            THE_VAR, new TheVarExpr.Parser(),
+            DOT, new HostExpr.Parser(),
+            ASSIGN, new AssignExpr.Parser(),
+            TRY, new TryExpr.Parser(),
+            THROW, new ThrowExpr.Parser(),
+            MONITOR_ENTER, new MonitorEnterExpr.Parser(),
+            MONITOR_EXIT, new MonitorExitExpr.Parser(),
+            CATCH, null,
+            FINALLY, null,
+            NEW, new NewExpr.Parser(),
+            _AMP_, null
+        );
+
+        public static bool isSpecial(Object sym)
+        {
+            return _specials.containsKey(sym);
+        }
+
+        static IParser GetSpecialFormParser(object op)
+        {
+            return (IParser)_specials.valAt(op);
+        }
+
+        #endregion
+
+        #region MethodInfos, etc.
+
+        //static readonly MethodInfo Method_ArraySeq_create_array_int = typeof(ArraySeq).GetMethod("create", new Type[] { typeof(object[]), typeof(int) });
+
+        //static readonly MethodInfo Method_CGen_MakeMap = typeof(Generator).GetMethod("MakeMap");
+        //static readonly MethodInfo Method_CGen_MakeSet = typeof(Generator).GetMethod("MakeSet");
+        //static readonly MethodInfo Method_CGen_MakeVector = typeof(Generator).GetMethod("MakeVector");
+
+        //static readonly MethodInfo Method_IObj_withMeta = typeof(IObj).GetMethod("withMeta");
+
+        //static readonly MethodInfo Method_Monitor_Enter = typeof(Monitor).GetMethod("Enter");
+        //static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit");
+
+        //static readonly MethodInfo Method_Reflector_CallInstanceMethod = typeof(Reflector).GetMethod("CallInstanceMethod");
+        //static readonly MethodInfo Method_Reflector_CallStaticMethod = typeof(Reflector).GetMethod("CallStaticMethod");
+        //static readonly MethodInfo Method_Reflector_InvokeConstructor = typeof(Reflector).GetMethod("InvokeConstructor");
+
+        //static readonly MethodInfo Method_RT_ConvertToCRD = typeof(RT).GetMethod("ConvertToCRD");
+        //static readonly MethodInfo Method_RT_IsTrue = typeof(RT).GetMethod("IsTrue");
+        //static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
+        static readonly MethodInfo Method_RT_printToConsole = typeof(RT).GetMethod("printToConsole");
+        //static readonly MethodInfo Method_RT_vector = typeof(RT).GetMethod("vector");
+
+        //static readonly MethodInfo Method_Var_BindRoot = typeof(Var).GetMethod("BindRoot");
+        //static readonly MethodInfo Method_Var_get = typeof(Var).GetMethod("deref");
+        //static readonly MethodInfo Method_Var_set = typeof(Var).GetMethod("set");
+        //static readonly MethodInfo Method_Var_SetMeta = typeof(Var).GetMethod("SetMeta");
+
+        //static readonly ConstructorInfo Ctor_AFnImpl_0 = typeof(AFnImpl).GetConstructor(Type.EmptyTypes);
+        //static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
+
+        //static readonly MethodInfo[] Methods_IFn_invoke = new MethodInfo[MAX_POSITIONAL_ARITY + 2];
+
+        //static Type[] CreateObjectTypeArray(int size)
+        //{
+        //    Type[] typeArray = new Type[size];
+        //    for (int i = 0; i < size; i++)
+        //        typeArray[i] = typeof(Object);
+        //    return typeArray;
+        //}
+
+
+
+        #endregion
+
+        #region C-tors & factory methods
+
+        //public static LambdaExpression Generate(object form, bool addPrint)
+        //{
+        //    Expression formExpr = Generate(form);
+
+        //    Expression finalExpr = formExpr;
+
+        //    if (formExpr.Type == typeof(void))
+        //        finalExpr = Expression.Block(formExpr, Expression.Constant(null));
+
+
+        //    if (addPrint)
+        //    {
+        //        finalExpr = Expression.Call(Method_RT_printToConsole, finalExpr);
+        //    }
+
+        //    return Expression.Lambda(finalExpr, "REPLCall", null);
+        //}
+
+        #endregion
+
+        #region Entry points
+
+
+
+        #endregion
+
+        #region  AST generation
+
+        static LiteralExpr<object> NIL_EXPR = new LiteralExpr<object>(null);
+        static LiteralExpr<bool> TRUE_EXPR = new LiteralExpr<bool>(true);
+        static LiteralExpr<bool> FALSE_EXPR = new LiteralExpr<bool>(false);
+
+        private static Expr GenerateAST(object form)
+        {
+            if (form is LazySeq)
+                form = RT.seq(form);
+
+            if (form == null)
+                return NIL_EXPR;
+            else if (form is Boolean)
+                return ((bool)form) ? TRUE_EXPR : FALSE_EXPR;
+
+            Type type = form.GetType();
+
+            if (type == typeof(Symbol))
+                return AnalyzeSymbol((Symbol)form);
+            else if (type == typeof(Keyword))
+                return new KeywordExpr((Keyword)form);
+            else if (type == typeof(String))
+                return new StringExpr((String)form);
+            //else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
+            //    return OptionallyGenerateMetaInit(form,new EmptyExpr(form));
+            else if (form is ISeq)
+                return AnalyzeSeq((ISeq)form);
+            //else if (form is IPersistentVector)
+            //    return GenerateVectorExpr((IPersistentVector)form);
+            //else if (form is IPersistentMap)
+            //    return GenerateMapExpr((IPersistentMap)form);
+            //else if (form is IPersistentSet)
+            //    return GenerateSetExpr((IPersistentSet)form);
+            else
+                return new ConstantExpr(form);
+        }
+
+
+        private static Expr AnalyzeSymbol(Symbol symbol)
+        {
+            Symbol tag = TagOf(symbol);
+
+            if (symbol.Namespace == null)
+            {
+                LocalBinding b = ReferenceLocal(symbol);
+                if (b != null)
+                    return new LocalBindingExpr(b, tag);
+            }
+            else
+            {
+                if (namespaceFor(symbol) == null)
+                {
+                    Symbol nsSym = Symbol.create(symbol.Namespace);
+                    Type t = MaybeType(nsSym, false);
+                    if (t != null)
+                        if (Reflector.GetField(t, symbol.Name, true) != null)
+                            return new StaticFieldExpr(t, symbol.Name);
+                }
+            }
+
+            object o = Compiler.Resolve(symbol);
+            if (o is Var)
+            {
+                Var v = (Var)o;
+                if (IsMacro(v) != null)
+                    throw new Exception("Can't take the value of a macro: " + v);
+                RegisterVar(v);
+                return new VarExpr(v, tag);
+            }
+            else if (o is Type)
+                return new ConstantExpr(o);
+            else if (o is Symbol)
+                return new UnresolvedVarExpr((Symbol)o);
+
+            throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));
+        }
+
+        static IParser _invokeParser = new InvokeExpr.Parser();
+
+        private static Expr AnalyzeSeq(ISeq form)
+        {
+            object exp = MacroexpandSeq1(form);
+            if (exp != form)
+                return GenerateAST(exp);
+
+            object op = RT.first(form);
+
+            if (op == null)
+                throw new ArgumentNullException("Can't call nil");
+
+            IFn inline = IsInline(op, RT.count(RT.next(form)));
+
+            if (inline != null)
+                return GenerateAST(inline.applyTo(RT.next(form)));
+
+            IParser p = GetSpecialFormParser(op);
+            if (p != null)
+                return p.Parse(form);
+            else 
+                return _invokeParser.Parse(form);
+        }
+
+
+        #endregion
+
+        static object Macroexpand1(object form)
+        {
+            return (form is ISeq)
+                ? MacroexpandSeq1((ISeq)form)
+                : form;
+        }
+
+        private static object MacroexpandSeq1(ISeq form)
+        {
+            object op = RT.first(form);
+
+            if (isSpecial(op))
+                return form;
+
+            // macro expansion
+            Var v = IsMacro(op);
+            if (v != null)
+            {
+                try
+                {
+                    Var.pushThreadBindings(RT.map(RT.MACRO_META, RT.meta(form)));
+                    return v.applyTo(form.next());
+                }
+                finally
+                {
+                    Var.popThreadBindings();
+                }
+            }
+            else
+            {
+                if (op is Symbol)
+                {
+                    Symbol sym = (Symbol)op;
+                    string sname = sym.Name;
+                    // (.substring s 2 5) => (. x substring 2 5)
+                    if (sname[0] == '.')
+                    {
+                        if (form.count() < 2)
+                            throw new ArgumentException("Malformed member expression, expecting (.member target ...)");
+                        Symbol method = Symbol.intern(sname.Substring(1));
+                        // TODO:  Figure out why the following change made in Java Rev 1158 breaks ants.clj
+                        // Note on that revision: force instance member interpretation of (.method ClassName), e.g. (.getMethods String) works
+                        //  However, when I do this, it makes ants.clj choke on: (def white-brush (new SolidBrush (.White Color)))
+                        object target = RT.second(form);
+                        if (MaybeType(target, false) != null)
+                            target = RT.list(IDENTITY, target);
+                        return RT.listStar(DOT, target, method, form.next().next());
+                        // safe substitute: return RT.listStar(Compiler.DOT, RT.second(form), method, form.next().next());
+                    }
+                    else if (NamesStaticMember(sym))
+                    {
+                        Symbol target = Symbol.intern(sym.Namespace);
+                        Type t = MaybeType(target, false);
+                        if (t != null)
+                        {
+                            Symbol method = Symbol.intern(sym.Name);
+                            return RT.listStar(Compiler.DOT, target, method, form.next());
+                        }
+                    }
+                    else
+                    {
+                        // (x.substring 2 5) =>  (. s substring 2 5)
+                        int index = sname.LastIndexOf('.');
+                        if (index == sname.Length - 1)
+                            return RT.listStar(Compiler.NEW, Symbol.intern(sname.Substring(0, index)), form.next());
+                    }
+                }
+
+            }
+            return form;
+        }
+
+        static bool NamesStaticMember(Symbol sym)
+        {
+            return sym.Namespace != null && NamespaceFor(sym) == null;
+        }
+
+        private static IFn IsInline(object op, int arity)
+        {
+            // Java:  	//no local inlines for now
+            if (op is Symbol && ReferenceLocal((Symbol)op) != null)
+                return null;
+
+            if (op is Symbol || op is Var)
+            {
+                Var v = (op is Var) ? (Var)op : LookupVar((Symbol)op, false);
+                if (v != null)
+                {
+                    if (v.Namespace != CurrentNamespace && !v.isPublic())
+                        throw new InvalidOperationException("var: " + v + " is not public");
+                    IFn ret = (IFn)RT.get(v.meta(), INLINE_KEY);
+                    if (ret != null)
+                    {
+                        IPersistentSet arities = (IPersistentSet)RT.get(v.meta(), INLINE_ARITIES_KEY);
+                        if (arities == null || arities.contains(arity))
+                            return ret;
+                    }
+                }
+            }
+            return null;
+        }
+
+        static Var LookupVar(Symbol sym, bool internNew)
+        {
+            Var var = null;
+
+            // Note: ns-qualified vars in other namespaces must exist already
+            if (sym.Namespace != null)
+            {
+                Namespace ns = Compiler.NamespaceFor(sym);
+                if (ns == null)
+                    return null;
+                Symbol name = Symbol.create(sym.Name);
+                if (internNew && ns == CurrentNamespace)
+                    var = CurrentNamespace.intern(name);
+                else
+                    var = ns.FindInternedVar(name);
+            }
+            else if (sym.Equals(NS))
+                var = RT.NS_VAR;
+            else if (sym.Equals(IN_NS))
+                var = RT.IN_NS_VAR;
+            else
+            {
+                // is it mapped?
+                Object o = CurrentNamespace.GetMapping(sym);
+                if (o == null)
+                {
+                    // introduce a new var in the current ns
+                    if (internNew)
+                        var = CurrentNamespace.intern(Symbol.create(sym.Name));
+                }
+                else if (o is Var)
+                    var = (Var)o;
+                else
+                    throw new Exception(string.Format("Expecting var, but {0} is mapped to {1}", sym, o));
+            }
+            if (var != null)
+                RegisterVar(var);
+            return var;
+        }
+
+        private static Var IsMacro(Object op)
+        {
+            if (op is Symbol && ReferenceLocal((Symbol)op) != null)
+                return null;
+            if (op is Symbol || op is Var)
+            {
+                Var v = (op is Var) ? (Var)op : LookupVar((Symbol)op, false);
+                if (v != null && v.IsMacro)
+                {
+                    if (v.Namespace != CurrentNamespace && !v.IsPublic)
+                        throw new InvalidOperationException(string.Format("Var: {0} is not public", v));
+                    return v;
+                }
+            }
+            return null;
+        }
+
+        private static void RegisterVar(Var v)
+        {
+            if (!VARS.IsBound)
+                return;
+            IPersistentMap varsMap = (IPersistentMap)VARS.deref();
+            Object id = RT.get(varsMap, v);
+            if (id == null)
+            {
+                VARS.set(RT.assoc(varsMap, v, RegisterConstant(v)));
+            }
+        }
+
+
+        internal static int RegisterConstant(Object o)
+        {
+            if (!CONSTANTS.IsBound)
+                return -1;
+            PersistentVector v = (PersistentVector)CONSTANTS.deref();
+            CONSTANTS.set(RT.conj(v, o));
+            return v.count();
+        }
+
+        internal static LocalBinding ReferenceLocal(Symbol symbol)
+        {
+            if (!LOCAL_ENV.IsBound)
+                return null;
+
+            LocalBinding b = (LocalBinding)RT.get(LOCAL_ENV.deref(), symbol);
+
+            // TODO: Closeovers
+
+            //if (b != null)
+            //{
+            //    FnMethod method = (FnMethod)METHODS.deref();
+            //    CloseOver(b, method);
+            //}
+
+            return b;
+        }
+
+        private static Symbol TagOf(object o)
+        {
+            object tag = RT.get(RT.meta(o), RT.TAG_KEY);
+            if (tag is Symbol)
+                return (Symbol)tag;
+            else if (tag is string)
+                return Symbol.intern(null, (String)tag);
+            return null;
+        }
+
+
+        private static Type MaybeType(object form, bool stringOk)
+        {
+            if (form is Type)
+                return (Type)form;
+
+            Type t = null;
+            if (form is Symbol)
+            {
+                Symbol sym = (Symbol)form;
+                if (sym.Namespace == null) // if ns-qualified, can't be classname
+                {
+                    // TODO:  This uses Java  [whatever  notation.  Figure out what to do here.
+                    if (sym.Name.IndexOf('.') > 0 || sym.Name[0] == '[')
+                        t = RT.classForName(sym.Name);
+                    else
+                    {
+                        object o = CurrentNamespace.GetMapping(sym);
+                        if (o is Type)
+                            t = (Type)o;
+                    }
+
+                }
+            }
+            else if (stringOk && form is string)
+                t = RT.classForName((string)form);
+
+            return t;
+        }
+
+        internal static Type TagToType(object tag)
+        {
+            Type t = MaybeType(tag, true);
+            if (tag is Symbol)
+            {
+                Symbol sym = (Symbol)tag;
+                if (sym.Namespace == null) // if ns-qualified, can't be classname
+                {
+                    switch (sym.Name)
+                    {
+                        case "ints": t = typeof(int[]); break;
+                        case "longs": t = typeof(long[]); break;
+                        case "floats": t = typeof(float[]); break;
+                        case "doubles": t = typeof(double[]); break;
+                        case "chars": t = typeof(char[]); break;
+                        case "shorts": t = typeof(short[]); break;
+                        case "bytes": t = typeof(byte[]); break;
+                        case "booleans":
+                        case "bools": t = typeof(bool[]); break;
+                    }
+                }
+            }
+            if (t != null)
+                return t;
+
+            throw new ArgumentException("Unable to resolve typename: " + tag);
+        }    
+
+        private static IPersistentMap CHAR_MAP = PersistentHashMap.create('-', "_",
+            //		                         '.', "_DOT_",
+             ':', "_COLON_",
+             '+', "_PLUS_",
+             '>', "_GT_",
+             '<', "_LT_",
+             '=', "_EQ_",
+             '~', "_TILDE_",
+             '!', "_BANG_",
+             '@', "_CIRCA_",
+             '#', "_SHARP_",
+             '$', "_DOLLARSIGN_",
+             '%', "_PERCENT_",
+             '^', "_CARET_",
+             '&', "_AMPERSAND_",
+             '*', "_STAR_",
+             '|', "_BAR_",
+             '{', "_LBRACE_",
+             '}', "_RBRACE_",
+             '[', "_LBRACK_",
+             ']', "_RBRACK_",
+             '/', "_SLASH_",
+             '\\', "_BSLASH_",
+             '?', "_QMARK_"
+             );
+
+
+        public static string Munge(string name)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in name)
+            {
+                string sub = (string)CHAR_MAP.valAt(c);
+                if (sub == null)
+                    sb.Append(c);
+                else
+                    sb.Append(sub);
+            }
+            return sb.ToString();
+        }
+
+
+        //private static Expr OptionallyGenerateMetaInit(object form, Expr expr)
+        //{
+        //    Expr ret = expr;
+
+        //    if (RT.meta(form) != null )
+        //    {
+        //        Expression metaExpr = new MetaExpr(expr, GenerateMapExpr(o.meta());
+        //        ret = Expression.Call(Expression.Convert(expr, typeof(IObj)), Method_IObj_withMeta, metaExpr);
+        //    }
+        //    return ret;
+        //}
+
+        #region Symbol/namespace resolving
+
+        // TODO: we have duplicate code below.
+
+        public static Symbol resolveSymbol(Symbol sym)
+        {
+            //already qualified or classname?
+            if (sym.Name.IndexOf('.') > 0)
+                return sym;
+            if (sym.Namespace != null)
+            {
+                Namespace ns = namespaceFor(sym);
+                if (ns == null || ns.Name.Name == sym.Namespace)
+                    return sym;
+                return Symbol.create(ns.Name.Name, sym.Name);
+            }
+            Object o = CurrentNamespace.GetMapping(sym);
+            if (o == null)
+                return Symbol.intern(CurrentNamespace.Name.Name, sym.Name);
+            else if (o is Type)
+                return Symbol.intern(null, ((Type)o).Name);
+            else if (o is Var)
+            {
+                Var v = (Var)o;
+                return Symbol.create(v.Namespace.Name.Name, v.Symbol.Name);
+            }
+            return null;
+
+        }
+
+
+        public static Namespace namespaceFor(Symbol sym)
+        {
+            return namespaceFor(CurrentNamespace, sym);
+        }
+
+        public static Namespace namespaceFor(Namespace inns, Symbol sym)
+        {
+            //note, presumes non-nil sym.ns
+            // first check against currentNS' aliases...
+            Symbol nsSym = Symbol.create(sym.Namespace);
+            Namespace ns = inns.LookupAlias(nsSym);
+            if (ns == null)
+            {
+                // ...otherwise check the Namespaces map.
+                ns = Namespace.find(nsSym);
+            }
+            return ns;
+        }
+
+        public static Namespace CurrentNamespace
+        {
+            get { return (Namespace)RT.CURRENT_NS.deref(); }
+        }
+
+
+
+        public static object Resolve(Symbol symbol, bool allowPrivate)
+        {
+            return ResolveIn(CurrentNamespace, symbol, allowPrivate);
+        }
+
+        public static object Resolve(Symbol symbol)
+        {
+            return ResolveIn(CurrentNamespace, symbol, false);
+        }
+
+        private static object ResolveIn(Namespace n, Symbol symbol, bool allowPrivate)
+        {
+            // note: ns-qualified vars must already exist
+            if (symbol.Namespace != null)
+            {
+                Namespace ns = NamespaceFor(n, symbol);
+                if (ns == null)
+                    throw new Exception("No such namespace: " + symbol.Namespace);
+
+                Var v = ns.FindInternedVar(Symbol.create(symbol.Name));
+                if (v == null)
+                    throw new Exception("No such var: " + symbol);
+                else if (v.Namespace != CurrentNamespace && !v.IsPublic && !allowPrivate)
+                    throw new InvalidOperationException(string.Format("var: {0} is not public", symbol));
+                return v;
+            }
+            else if (symbol.Name.IndexOf('.') > 0 || symbol.Name[0] == '[')
+                return RT.classForName(symbol.Name);
+            else if (symbol.Equals(NS))
+                return RT.NS_VAR;
+            else if (symbol.Equals(IN_NS))
+                return RT.IN_NS_VAR;
+            else
+            {
+                object o = n.GetMapping(symbol);
+                if (o == null)
+                {
+                    if (RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.deref()))
+                        return symbol;
+                    else
+                        throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));
+                }
+                return o;
+            }
+        }
+
+        // core.clj compatibility
+        public static object maybeResolveIn(Namespace n, Symbol symbol)
+        {
+            // note: ns-qualified vars must already exist
+            if (symbol.Namespace != null)
+            {
+                Namespace ns = NamespaceFor(n, symbol);
+                if (ns == null)
+                    return null;
+
+                Var v = ns.FindInternedVar(Symbol.create(symbol.Name));
+                if (v == null)
+                    return null;
+                 return v;
+            }
+            else if (symbol.Name.IndexOf('.') > 0 || symbol.Name[0] == '[')
+                return RT.classForName(symbol.Name);
+            else if (symbol.Equals(NS))
+                return RT.NS_VAR;
+            else if (symbol.Equals(IN_NS))
+                return RT.IN_NS_VAR;
+            else
+            {
+                object o = n.GetMapping(symbol);
+                return o;
+            }
+        }
+
+        public  static Namespace NamespaceFor(Symbol symbol)
+        {
+            return NamespaceFor(CurrentNamespace, symbol);
+        }
+
+        public  static Namespace NamespaceFor(Namespace n, Symbol symbol)
+        {
+            // Note: presumes non-nil sym.ns
+            // first check against CurrentNamespace's aliases
+            Symbol nsSym = Symbol.create(symbol.Namespace);
+            Namespace ns = n.LookupAlias(nsSym);
+            if (ns == null)
+                // otherwise, check the namespaces map
+                ns = Namespace.find(nsSym);
+            return ns;
+        }
+
+        #endregion
+
+        #region Hooks from execution engine
+
+        public interface EEHooks
+        {
+            object Eval(object form);
+            object Macroexpand1(object form);
+            object LoadFromStream(TextReader rdr);
+            object LoadFile(string filename);
+            Delegate GenerateTypedDelegate(Type delegateType, Symbol optName, IPersistentVector argList, ISeq body);
+        }
+
+        // Needs to be initialized by the execution engine.
+        private static EEHooks _hooks;
+
+        public static bool SetHooks(EEHooks hooks)
+        {
+            return null == Interlocked.CompareExchange(ref _hooks,hooks,null);
+        }
+
+
+        // The following methods are named (and initial LC) for core.clj compatibility
+
+        public static object eval(object form)
+        {
+            ValidateHooks();
+
+            return _hooks.Eval(form);
+        }
+
+        public static object macroexpand1(object form)
+        {
+            ValidateHooks();
+
+            return _hooks.Macroexpand1(form);
+        }
+
+        public static object load(TextReader rdr)
+        {
+            ValidateHooks();
+            return _hooks.LoadFromStream(rdr);
+        }
+
+
+        // This one is mine.
+        public static object GenerateTypedDelegate(Type delegateType, Symbol optName, IPersistentVector argList, ISeq body)
+        {
+            ValidateHooks();
+            return _hooks.GenerateTypedDelegate(delegateType, optName, argList, body);
+        }
+
+        private static void ValidateHooks()
+        {
+            if ( _hooks == null )
+                throw new InvalidOperationException("Hooks from execution engine not set yet.  Major blowage.");
+        }
+
+        #endregion
+
+        // Added in revision 1108, not sure where it is used.  (Made public in rev 1109)
+        public static void pushNS()
+        {
+            Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.create("clojure.core"),
+                                                                       Symbol.create("*ns*")), null));
+        }
+
+
+        // Java version has this in Reflector, but that is in my SimpleREPL. DOn't want to embed calls there.
+        public static Object prepRet(Object x)
+        {
+            //	if(c == boolean.class)
+            //		return ((Boolean) x).booleanValue() ? RT.T : null;
+            if (x is Boolean)
+                return ((Boolean)x) ? RT.T : RT.F;
+            return x;
+        }
+
+
+
+
+
+
+        internal static Type MaybePrimitiveType(Expr e)
+        {
+            if (e is MaybePrimitiveExpr && e.HasClrType)
+            {
+                Type t = e.ClrType;
+                if (Util.IsPrimitive(t))
+                    return t;
+            }
+            return null;
+        }
+    }
+}

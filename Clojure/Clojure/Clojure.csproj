@@ -48,6 +48,42 @@
     <Reference Include="vjslib" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CljCompiler\Ast\AssignableExpr.cs" />
+    <Compile Include="CljCompiler\Ast\AssignExpr.cs" />
+    <Compile Include="CljCompiler\Ast\ConstantExpr.cs" />
+    <Compile Include="CljCompiler\Ast\DefExpr.cs" />
+    <Compile Include="CljCompiler\Ast\BodyExpr.cs" />
+    <Compile Include="CljCompiler\Ast\EmptyExpr.cs" />
+    <Compile Include="CljCompiler\Ast\Expr.cs" />
+    <Compile Include="CljCompiler\Ast\FieldExpr.cs" />
+    <Compile Include="CljCompiler\Ast\FnExpr.cs" />
+    <Compile Include="CljCompiler\Ast\HostExpr.cs" />
+    <Compile Include="CljCompiler\Ast\IfExpr.cs" />
+    <Compile Include="CljCompiler\Ast\InvokeExpr.cs" />
+    <Compile Include="CljCompiler\Ast\IParser.cs" />
+    <Compile Include="CljCompiler\Ast\KeywordExpr.cs" />
+    <Compile Include="CljCompiler\Ast\LetExpr.cs" />
+    <Compile Include="CljCompiler\Ast\LetFnExpr.cs" />
+    <Compile Include="CljCompiler\Ast\LiteralExpr.cs" />
+    <Compile Include="CljCompiler\Ast\LocalBinding.cs" />
+    <Compile Include="CljCompiler\Ast\LocalBindingExpr.cs" />
+    <Compile Include="CljCompiler\Ast\MapExpr.cs" />
+    <Compile Include="CljCompiler\Ast\MaybePrimitiveExpr.cs" />
+    <Compile Include="CljCompiler\Ast\MonitorEnterExpr.cs" />
+    <Compile Include="CljCompiler\Ast\MonitorExitExpr.cs" />
+    <Compile Include="CljCompiler\Ast\NewExpr.cs" />
+    <Compile Include="CljCompiler\Ast\Node.cs" />
+    <Compile Include="CljCompiler\Ast\RecurExpr.cs" />
+    <Compile Include="CljCompiler\Ast\SetExpr.cs" />
+    <Compile Include="CljCompiler\Ast\StaticFieldExpr.cs" />
+    <Compile Include="CljCompiler\Ast\TheVarExpr.cs" />
+    <Compile Include="CljCompiler\Ast\ThrowExpr.cs" />
+    <Compile Include="CljCompiler\Ast\TryExpr.cs" />
+    <Compile Include="CljCompiler\Ast\UnresolvedVarExpr.cs" />
+    <Compile Include="CljCompiler\Ast\UntypedExpr.cs" />
+    <Compile Include="CljCompiler\Ast\VarExpr.cs" />
+    <Compile Include="CljCompiler\Ast\VectorExpr.cs" />
+    <Compile Include="CljCompiler\Ast\StringExpr.cs" />
     <Compile Include="Lib\Counted.cs" />
     <Compile Include="Lib\EnumeratorSeq.cs" />
     <Compile Include="Lib\IDeref.cs" />
@@ -63,7 +99,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Compiler\Generator.cs" />
+    <Compile Include="CljCompiler\Generator.cs" />
     <Compile Include="Lib\AFn.cs" />
     <Compile Include="Lib\AFnImpl.cs" />
     <Compile Include="Lib\AFunction.cs" />
@@ -84,7 +120,7 @@
     <Compile Include="Lib\AtomicReference.cs" />
     <Compile Include="Lib\Box.cs" />
     <Compile Include="Lib\ClojureException.cs" />
-    <Compile Include="Lib\Compiler.cs" />
+    <Compile Include="CljCompiler\Compiler.cs" />
     <Compile Include="Lib\Cons.cs" />
     <Compile Include="Lib\Delay.cs" />
     <Compile Include="Lib\Fn.cs" />
