@@ -36,7 +36,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             public Expr Parse(object form)
             {
-                throw new NotImplementedException();
+                return new MonitorEnterExpr(Compiler.GenerateAST(RT.second(form)));
             }
         }
     }

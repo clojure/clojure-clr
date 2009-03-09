@@ -19,7 +19,7 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        readonly PersistentVector _bindingInits;
+        readonly IPersistentVector _bindingInits;
         readonly Expr _body;
         readonly bool _isLoop;
 
@@ -27,7 +27,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public LetExpr(PersistentVector bindingInits, Expr body, bool isLoop)
+        public LetExpr(IPersistentVector bindingInits, Expr body, bool isLoop)
         {
             _bindingInits = bindingInits;
             _body = body;
@@ -52,9 +52,78 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form)
+            public Expr Parse(object frm)
             {
-                throw new NotImplementedException();
+                ISeq form = (ISeq) frm;
+
+                // form => (let  [var1 val1 var2 val2 ... ] body ... )
+                //      or (loop [var1 val1 var2 val2 ... ] body ... )
+
+                bool isLoop = RT.first(form).Equals(Compiler.LOOP);
+
+                IPersistentVector bindings = RT.second(form) as IPersistentVector;
+
+                if (bindings == null)
+                    throw new ArgumentException("Bad binding form, expected vector");
+
+                if ((bindings.count() % 2) != 0)
+                    throw new ArgumentException("Bad binding form, expected matched symbol/value pairs.");
+
+                ISeq body = RT.next(RT.next(form));
+
+                // TODO: This is one place where context makes a difference.  Need to figure this out.
+                //  Second test clause added in Rev 1216.
+                // if (ctxt == C.EVAL || (context == c.EXPRESSION && isLoop))
+                //    return Generate(RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)));
+
+                // As of Rev 1216, I tried tjos out. 
+                // However, it goes into an infinite loop.  Still need to figure this out.
+                //if (isLoop)
+                //    Generate(RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)));
+
+                IPersistentMap dynamicBindings = RT.map(
+                    Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
+                    Compiler.NEXT_LOCAL_NUM,Compiler.NEXT_LOCAL_NUM.deref());
+
+                if (isLoop)
+                    dynamicBindings = dynamicBindings.assoc(Compiler.LOOP_LOCALS, null);
+
+                try
+                {
+                    Var.pushThreadBindings(dynamicBindings);
+
+                    IPersistentVector bindingInits = PersistentVector.EMPTY;
+                    IPersistentVector loopLocals = PersistentVector.EMPTY;
+
+                    for (int i = 0; i < bindings.count(); i += 2)
+                    {
+                        if (!(bindings.nth(i) is Symbol))
+                            throw new ArgumentException("Bad binding form, expected symbol, got " + bindings.nth(i));
+
+                        Symbol sym = (Symbol)bindings.nth(i);
+                        if (sym.Namespace != null)
+                            throw new Exception("Can't let qualified name: " + sym);
+
+                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1));
+                        // Sequential enhancement of env (like Lisp let*)
+                        LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), init);
+                        BindingInit bi = new BindingInit(b, init);
+                        bindingInits = bindingInits.cons(bi);
+
+                        if (isLoop)
+                            loopLocals = loopLocals.cons(b);
+                    }
+                    if (isLoop)
+                        Compiler.LOOP_LOCALS.set(loopLocals);
+
+                    return new LetExpr(bindingInits,
+                        new BodyExpr.Parser().Parse(body),
+                        isLoop);
+                }
+                finally
+                {
+                    Var.popThreadBindings();
+                }
             }
         }
     }

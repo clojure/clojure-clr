@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="CljCompiler\Ast\AssignableExpr.cs" />
     <Compile Include="CljCompiler\Ast\AssignExpr.cs" />
+    <Compile Include="CljCompiler\Ast\BindingInit.cs" />
     <Compile Include="CljCompiler\Ast\ConstantExpr.cs" />
     <Compile Include="CljCompiler\Ast\DefExpr.cs" />
     <Compile Include="CljCompiler\Ast\BodyExpr.cs" />
@@ -57,8 +58,11 @@
     <Compile Include="CljCompiler\Ast\Expr.cs" />
     <Compile Include="CljCompiler\Ast\FieldExpr.cs" />
     <Compile Include="CljCompiler\Ast\FnExpr.cs" />
+    <Compile Include="CljCompiler\Ast\FnMethod.cs" />
     <Compile Include="CljCompiler\Ast\HostExpr.cs" />
     <Compile Include="CljCompiler\Ast\IfExpr.cs" />
+    <Compile Include="CljCompiler\Ast\InstanceFieldExpr.cs" />
+    <Compile Include="CljCompiler\Ast\InstanceMethodExpr.cs" />
     <Compile Include="CljCompiler\Ast\InvokeExpr.cs" />
     <Compile Include="CljCompiler\Ast\IParser.cs" />
     <Compile Include="CljCompiler\Ast\KeywordExpr.cs" />
@@ -69,6 +73,8 @@
     <Compile Include="CljCompiler\Ast\LocalBindingExpr.cs" />
     <Compile Include="CljCompiler\Ast\MapExpr.cs" />
     <Compile Include="CljCompiler\Ast\MaybePrimitiveExpr.cs" />
+    <Compile Include="CljCompiler\Ast\MetaExpr.cs" />
+    <Compile Include="CljCompiler\Ast\MethodExpr.cs" />
     <Compile Include="CljCompiler\Ast\MonitorEnterExpr.cs" />
     <Compile Include="CljCompiler\Ast\MonitorExitExpr.cs" />
     <Compile Include="CljCompiler\Ast\NewExpr.cs" />
@@ -76,6 +82,7 @@
     <Compile Include="CljCompiler\Ast\RecurExpr.cs" />
     <Compile Include="CljCompiler\Ast\SetExpr.cs" />
     <Compile Include="CljCompiler\Ast\StaticFieldExpr.cs" />
+    <Compile Include="CljCompiler\Ast\StaticMethodExpr.cs" />
     <Compile Include="CljCompiler\Ast\TheVarExpr.cs" />
     <Compile Include="CljCompiler\Ast\ThrowExpr.cs" />
     <Compile Include="CljCompiler\Ast\TryExpr.cs" />

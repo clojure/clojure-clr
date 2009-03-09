@@ -15,32 +15,9 @@ using System.Text;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class LiteralExpr<T> : Expr
+    abstract class MethodExpr : HostExpr
     {
-        protected T _val;
-
-        public LiteralExpr(T val)
-        {
-            _val = val;
-        }
-
-        public T val()
-        {
-            return _val;
-        }
 
 
-
-        public override bool HasClrType
-        {
-            get { return true; }
-        }
-
-        public override Type ClrType
-        {
-            get { return typeof(T); }
-        }
     }
-
-
 }

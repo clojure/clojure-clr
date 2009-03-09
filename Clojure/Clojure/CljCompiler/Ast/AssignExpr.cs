@@ -50,9 +50,16 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form)
+            public Expr Parse(object frm)
             {
-                throw new NotImplementedException();
+                ISeq form = (ISeq)frm;
+                if (RT.Length(form) != 3)
+                    throw new ArgumentException("Malformed assignment, expecting (set! target val)");
+                Expr target = Compiler.GenerateAST(RT.second(form));
+                if (!(target is AssignableExpr))
+                    throw new ArgumentException("Invalid assignment target");
+                return new AssignExpr((AssignableExpr)target,
+                    Compiler.GenerateAST(RT.third(form)));
             }
         }
 

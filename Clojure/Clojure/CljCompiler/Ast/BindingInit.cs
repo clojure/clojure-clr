@@ -15,35 +15,24 @@ using System.Text;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class ThrowExpr : UntypedExpr
+    struct BindingInit
     {
-        #region Data
-
-        readonly Expr _excExpr;
-
-        #endregion
-
-        #region Ctors
-
-        public ThrowExpr(Expr excExpr)
+        private readonly LocalBinding _binding;
+        public LocalBinding Binding
         {
-            _excExpr = excExpr;
+            get { return _binding; }
         }
 
-        #endregion
-
-        public sealed class Parser : IParser
+        private readonly Expr _init;
+        public Expr Init
         {
-            public Expr Parse(object form)
-            {
-                // Java:
-                // TODO: figure out if it matters
-                //if (context == C.EVAL)
-                //    return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+            get { return _init; }
+        }
 
-                return new ThrowExpr(Compiler.GenerateAST(RT.second(form)));
-               
-            }
+        public BindingInit(LocalBinding binding, Expr init)
+        {
+            _binding = binding;
+            _init = init;
         }
 
     }

@@ -45,5 +45,22 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+        #region Parsing
+
+        public static Expr Parse(IPersistentMap form)
+        {
+            IPersistentVector keyvals = PersistentVector.EMPTY;
+            for (ISeq s = RT.seq(form); s != null; s = s.next())
+            {
+                IMapEntry e = (IMapEntry)s.first();
+                keyvals = (IPersistentVector)keyvals.cons(Compiler.GenerateAST(e.key()));
+                keyvals = (IPersistentVector)keyvals.cons(Compiler.GenerateAST(e.val()));
+            }
+            Expr ret = new MapExpr(keyvals);
+            return Compiler.OptionallyGenerateMetaInit(form, ret);
+        }
+
+        #endregion
     }
 }

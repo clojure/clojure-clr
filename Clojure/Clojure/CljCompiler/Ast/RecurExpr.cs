@@ -50,9 +50,27 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form)
+            public Expr Parse(object frm)
             {
-                throw new NotImplementedException();
+                ISeq form = (ISeq)frm;
+
+                IPersistentVector loopLocals = (IPersistentVector)Compiler.LOOP_LOCALS.deref();
+
+                if (Compiler.IN_TAIL_POSITION.deref() == null || loopLocals == null)
+                    throw new InvalidOperationException("Can only recur from tail position");
+
+                if (Compiler.IN_CATCH_FINALLY.deref() != null)
+                    throw new InvalidOperationException("Cannot recur from catch/finally.");
+
+                IPersistentVector args = PersistentVector.EMPTY;
+
+                for (ISeq s = form.next(); s != null; s = s.next())
+                    args = args.cons(Compiler.GenerateAST(s.first()));
+                if (args.count() != loopLocals.count())
+                    throw new ArgumentException(string.Format("Mismatched argument count to recur, expected: {0} args, got {1}", 
+                        loopLocals.count(), args.count()));
+
+                return new RecurExpr(loopLocals, args);
             }
         }
     }

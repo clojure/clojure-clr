@@ -15,36 +15,37 @@ using System.Text;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class ThrowExpr : UntypedExpr
+    class MetaExpr : Expr
     {
         #region Data
 
-        readonly Expr _excExpr;
+        readonly Expr _expr;
+        readonly MapExpr _meta;
 
         #endregion
 
         #region Ctors
 
-        public ThrowExpr(Expr excExpr)
+        public MetaExpr(Expr expr, MapExpr meta)
         {
-            _excExpr = excExpr;
+            _expr = expr;
+            _meta = meta;
         }
 
         #endregion
 
-        public sealed class Parser : IParser
-        {
-            public Expr Parse(object form)
-            {
-                // Java:
-                // TODO: figure out if it matters
-                //if (context == C.EVAL)
-                //    return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+        #region Type mangling
 
-                return new ThrowExpr(Compiler.GenerateAST(RT.second(form)));
-               
-            }
+        public override bool HasClrType
+        {
+            get { return _expr.HasClrType; }
         }
 
+        public override Type ClrType
+        {
+            get { return _expr.ClrType; }
+        }
+
+        #endregion
     }
 }

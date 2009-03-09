@@ -19,7 +19,7 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        readonly PersistentVector _exprs;
+        readonly IPersistentVector _exprs;
 
         Expr LastExpr
         {
@@ -33,7 +33,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public BodyExpr(PersistentVector exprs)
+        public BodyExpr(IPersistentVector exprs)
         {
             _exprs = exprs;
         }
@@ -56,9 +56,38 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form)
+            public Expr Parse(object frms)
             {
-                throw new NotImplementedException();
+                ISeq forms = (ISeq)frms;
+
+                if (Util.equals(RT.first(forms), Compiler.DO))
+                    forms = RT.next(forms);
+
+                IPersistentVector exprs = PersistentVector.EMPTY;
+
+                for (ISeq s = forms; s != null; s = s.next())
+                {
+                    if (s.next() == null)
+                    {
+                        // in tail recurive position
+                        try
+                        {
+                            Var.pushThreadBindings(PersistentHashMap.create(Compiler.IN_TAIL_POSITION, RT.T));
+                            exprs = exprs.cons(Compiler.GenerateAST(s.first()));
+                        }
+                        finally
+                        {
+                            Var.popThreadBindings();
+                        }
+                    }
+                    else
+                        exprs = exprs.cons(Compiler.GenerateAST(s.first()));
+                }
+                if (exprs.count() == 0)
+                    exprs = exprs.cons(Compiler.NIL_EXPR);
+
+                return new BodyExpr(exprs);
+
             }
         }
 

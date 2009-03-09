@@ -59,9 +59,24 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form)
+            public Expr Parse(object frm)
             {
-                throw new NotImplementedException();
+                ISeq form = (ISeq)frm;
+
+                // form => (new Typename args ... )
+
+                if (form.count() < 2)
+                    throw new Exception("wrong number of arguments, expecting: (new Typename args ...)");
+
+                Type t = Compiler.MaybeType(RT.second(form), false);
+                if (t == null)
+                    throw new ArgumentException("Unable to resolve classname: " + RT.second(form));
+
+                IPersistentVector args = PersistentVector.EMPTY;
+                for (ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
+                    args = args.cons(Compiler.GenerateAST(s.first()));
+
+                return new NewExpr(t, args);
             }
         }
     }

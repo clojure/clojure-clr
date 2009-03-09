@@ -52,7 +52,11 @@ namespace clojure.lang.CljCompiler.Ast
         {
             public Expr Parse(object form)
             {
-                throw new NotImplementedException();
+                object v = RT.second(form);
+                if (v == null)
+                    return Compiler.NIL_EXPR;
+                else
+                    return new ConstantExpr(v);
             }
         }
 

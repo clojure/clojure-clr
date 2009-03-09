@@ -50,7 +50,11 @@ namespace clojure.lang.CljCompiler.Ast
         {
             public Expr Parse(object form)
             {
-                throw new NotImplementedException();
+                Symbol sym = (Symbol)RT.second(form);
+                Var v = Compiler.LookupVar(sym, false);
+                if (v != null)
+                    return new TheVarExpr(v);
+                throw new Exception(string.Format("Unable to resolve var: {0} in this context", sym));
             }
         }
 

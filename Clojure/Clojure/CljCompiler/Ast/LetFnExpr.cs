@@ -17,16 +17,16 @@ namespace clojure.lang.CljCompiler.Ast
 {
     class LetFnExpr : Expr
     {
-       #region Data
+        #region Data
 
-        readonly PersistentVector _bindingInits;
+        readonly IPersistentVector _bindingInits;
         readonly Expr _body;
 
         #endregion
 
         #region Ctors
 
-        public LetFnExpr(PersistentVector bindingInits, Expr body)
+        public LetFnExpr(IPersistentVector bindingInits, Expr body)
         {
             _bindingInits = bindingInits;
             _body = body;
@@ -51,9 +51,69 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form)
+            public Expr Parse(object frm)
             {
-                throw new NotImplementedException();
+                ISeq form = (ISeq)frm;
+
+                // form => (letfn*  [var1 (fn [args] body) ... ] body ... )
+
+                IPersistentVector bindings = RT.second(form) as IPersistentVector;
+
+                if (bindings == null)
+                    throw new ArgumentException("Bad binding form, expected vector");
+
+                if ((bindings.count() % 2) != 0)
+                    throw new ArgumentException("Bad binding form, expected matched symbol/value pairs.");
+
+                ISeq body = RT.next(RT.next(form));
+
+                // TODO: This is one place where context makes a difference.  Need to figure this out.
+                // if (ctxt == C.EVAL)
+                //    return Generate(RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)));
+
+
+                IPersistentMap dynamicBindings = RT.map(
+                    Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
+                    Compiler.NEXT_LOCAL_NUM, Compiler.NEXT_LOCAL_NUM.deref());
+
+                try
+                {
+                    Var.pushThreadBindings(dynamicBindings);
+
+                    // pre-seed env (like Lisp labels)
+                    IPersistentVector lbs = PersistentVector.EMPTY;
+                    for (int i = 0; i < bindings.count(); i += 2)
+                    {
+                        if (!(bindings.nth(i) is Symbol))
+                            throw new ArgumentException("Bad binding form, expected symbol, got " + bindings.nth(i));
+
+                        Symbol sym = (Symbol)bindings.nth(i);
+                        if (sym.Namespace != null)
+                            throw new Exception("Can't let qualified name: " + sym);
+
+                        LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), null);
+                        lbs = lbs.cons(b);
+                    }
+
+                    IPersistentVector bindingInits = PersistentVector.EMPTY;
+
+                    for (int i = 0; i < bindings.count(); i += 2)
+                    {
+                        Symbol sym = (Symbol)bindings.nth(i);
+                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1));
+                        // Sequential enhancement of env (like Lisp let*)
+                        LocalBinding b = (LocalBinding)lbs.nth(i / 2);
+                        b.Init = init;
+                        BindingInit bi = new BindingInit(b, init);
+                        bindingInits = bindingInits.cons(bi);
+                    }
+
+                    return new LetFnExpr(bindingInits,new BodyExpr.Parser().Parse(body));
+                }
+                finally
+                {
+                    Var.popThreadBindings();
+                }
             }
         }
     }

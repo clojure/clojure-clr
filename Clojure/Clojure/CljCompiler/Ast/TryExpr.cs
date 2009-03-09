@@ -17,11 +17,29 @@ namespace clojure.lang.CljCompiler.Ast
 {
     class TryExpr : Expr
     {
-       #region Data
+        #region Nested classes
+
+        public sealed class CatchClause
+        {
+            readonly Type _type;
+            readonly LocalBinding _lb;
+            readonly Expr _handler;
+
+            public CatchClause(Type type, LocalBinding lb, Expr handler)
+            {
+                _type = type;
+                _lb = lb;
+                _handler = handler;
+            }
+        }
+
+        #endregion
+
+        #region Data
 
         readonly Expr _tryExpr;
         readonly Expr _finallyExpr;
-        readonly PersistentVector _catchExprs;
+        readonly IPersistentVector _catchExprs;
         readonly int _retLocal;
         readonly int _finallyLocal;
 
@@ -29,7 +47,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public TryExpr(Expr tryExpr, PersistentVector catchExprs, Expr finallyExpr, int retLocal, int finallyLocal)
+        public TryExpr(Expr tryExpr, IPersistentVector catchExprs, Expr finallyExpr, int retLocal, int finallyLocal)
         {
             _tryExpr = tryExpr;
             _catchExprs = catchExprs;
@@ -57,10 +75,91 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form)
+            public Expr Parse(object frm)
             {
-                throw new NotImplementedException();
-            }
+                ISeq form = (ISeq)frm;
+
+                // Java version has this:
+                //if (context != C.RETURN)
+                //    return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
+                // TODO: figure out why it matters.
+
+                // (try try-expr* catch-expr* finally-expr?)
+                // catch-expr: (catch class sym expr*)
+                // finally-expr: (finally expr*)
+
+                IPersistentVector body = PersistentVector.EMPTY;
+                IPersistentVector catches = PersistentVector.EMPTY;
+                Expr finallyExpr = null;
+                bool caught = false;
+
+                int retLocal = Compiler.GetAndIncLocalNum();
+                int finallyLocal = Compiler.GetAndIncLocalNum();
+
+                for (ISeq fs = form.next(); fs != null; fs = fs.next())
+                {
+                    object f = fs.first();
+                    object op = (f is ISeq) ? ((ISeq)f).first() : null;
+                    if (!Util.equals(op, Compiler.CATCH) && !Util.equals(op, Compiler.FINALLY))
+                    {
+                        if (caught)
+                            throw new Exception("Only catch or finally clause can follow catch in try expression");
+                        body = body.cons(f);
+                    }
+                    else
+                    {
+                        if (Util.equals(op, Compiler.CATCH))
+                        {
+                            Type t = Compiler.MaybeType(RT.second(f), false);
+                            if (t == null)
+                                throw new ArgumentException("Unable to resolve classname: " + RT.second(f));
+                            if (!(RT.third(f) is Symbol))
+                                throw new ArgumentException("Bad binding form, expected symbol, got: " + RT.third(f));
+                            Symbol sym = (Symbol)RT.third(f);
+                            if (sym.Namespace != null)
+                                throw new Exception("Can't bind qualified name: " + sym);
+
+                            IPersistentMap dynamicBindings = RT.map(
+                                Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
+                                Compiler.NEXT_LOCAL_NUM, Compiler.NEXT_LOCAL_NUM.deref(),
+                                Compiler.IN_CATCH_FINALLY, RT.T);
+
+                            try
+                            {
+                                Var.pushThreadBindings(dynamicBindings);
+                                LocalBinding lb = Compiler.RegisterLocal(sym,
+                                    (Symbol)(RT.second(f) is Symbol ? RT.second(f) : null),
+                                    null);
+                                Expr handler = (new BodyExpr.Parser()).Parse(RT.next(RT.next(RT.next(f))));
+                                catches = catches.cons(new CatchClause(t, lb, handler)); ;
+                            }
+                            finally
+                            {
+                                Var.popThreadBindings();
+                            }
+                            caught = true;
+                        }
+                        else // finally
+                        {
+                            if (fs.next() != null)
+                                throw new Exception("finally clause must be last in try expression");
+                            try
+                            {
+                                Var.pushThreadBindings(RT.map(Compiler.IN_CATCH_FINALLY, RT.T));
+                                finallyExpr = (new BodyExpr.Parser()).Parse(RT.next(f));
+                            }
+                            finally
+                            {
+                                Var.popThreadBindings();
+                            }
+                        }
+                    }
+                }
+
+                Expr bodyExpr = (new BodyExpr.Parser()).Parse(RT.seq(body));
+                return new TryExpr(bodyExpr, catches, finallyExpr, retLocal, finallyLocal);
+
+              }
         }
     }
 }

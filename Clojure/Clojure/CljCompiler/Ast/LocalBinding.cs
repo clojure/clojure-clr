@@ -31,10 +31,11 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _tag; }
         }
 
-        private readonly Expr _init;
+        private Expr _init;
         public Expr Init
         {
             get { return _init; }
+            set { _init = value; }
         }
 
         private readonly String _name;

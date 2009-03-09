@@ -17,6 +17,7 @@ using System.Threading;
 using Microsoft.Linq.Expressions;
 using clojure.lang.CljCompiler.Ast;
 using clojure.runtime;
+using System.Reflection;
 
 
 namespace clojure.lang
@@ -32,6 +33,11 @@ namespace clojure.lang
     /// </remarks>
     public static class Compiler
     {
+        #region other constants
+
+        internal const int MAX_POSITIONAL_ARITY = 20;
+
+        #endregion
 
         #region Symbols
 
@@ -62,6 +68,9 @@ namespace clojure.lang
         static readonly Symbol NS = Symbol.create("ns");
         static readonly Symbol IN_NS = Symbol.create("in-ns");
 
+        internal static readonly Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
+
+
         #endregion
 
         #region Keywords
@@ -85,15 +94,20 @@ namespace clojure.lang
             Symbol.create("*file*"), null);
 
 
-        static readonly Var METHODS = Var.create(null);
-        static readonly Var LOCAL_ENV = Var.create(PersistentHashMap.EMPTY);
-        static readonly Var LOOP_LOCALS = Var.create(null);
-        
-        //var->constid
-        static readonly Var VARS = Var.create();
+        internal static readonly Var METHODS = Var.create(null);
+        internal static readonly Var LOCAL_ENV = Var.create(PersistentHashMap.EMPTY);
+        //Integer
+        internal static readonly Var NEXT_LOCAL_NUM = Var.create(0);
+        internal static readonly Var LOOP_LOCALS = Var.create(null);
 
-        //vector<object>
-        static readonly Var CONSTANTS = Var.create();
+
+        internal static readonly Var IN_CATCH_FINALLY = Var.create(null);          //null or not
+        internal static readonly Var IN_TAIL_POSITION = Var.create(null);        //null or not
+
+
+        internal static readonly Var VARS = Var.create();           //var->constid
+        internal static readonly Var CONSTANTS = Var.create();      //vector<object>
+        internal static readonly Var KEYWORDS = Var.create();       //keyword->constid
 
         #endregion
 
@@ -209,11 +223,11 @@ namespace clojure.lang
 
         #region  AST generation
 
-        static LiteralExpr<object> NIL_EXPR = new LiteralExpr<object>(null);
+        internal static LiteralExpr<object> NIL_EXPR = new LiteralExpr<object>(null);
         static LiteralExpr<bool> TRUE_EXPR = new LiteralExpr<bool>(true);
         static LiteralExpr<bool> FALSE_EXPR = new LiteralExpr<bool>(false);
 
-        private static Expr GenerateAST(object form)
+        internal static Expr GenerateAST(object form)
         {
             if (form is LazySeq)
                 form = RT.seq(form);
@@ -231,18 +245,29 @@ namespace clojure.lang
                 return new KeywordExpr((Keyword)form);
             else if (type == typeof(String))
                 return new StringExpr((String)form);
-            //else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
-            //    return OptionallyGenerateMetaInit(form,new EmptyExpr(form));
+            else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
+                return OptionallyGenerateMetaInit(form, new EmptyExpr(form));
             else if (form is ISeq)
                 return AnalyzeSeq((ISeq)form);
-            //else if (form is IPersistentVector)
-            //    return GenerateVectorExpr((IPersistentVector)form);
-            //else if (form is IPersistentMap)
-            //    return GenerateMapExpr((IPersistentMap)form);
-            //else if (form is IPersistentSet)
-            //    return GenerateSetExpr((IPersistentSet)form);
+            else if (form is IPersistentVector)
+                return VectorExpr.Parse((IPersistentVector)form);
+            else if (form is IPersistentMap)
+                return MapExpr.Parse((IPersistentMap)form);
+            else if (form is IPersistentSet)
+                return SetExpr.Parse((IPersistentSet)form);
             else
                 return new ConstantExpr(form);
+        }
+
+        internal static Expr OptionallyGenerateMetaInit(object form, Expr expr)
+        {
+            Expr ret = expr;
+
+            IObj o = form as IObj;
+            if (o != null && o.meta() != null)
+                ret = new MetaExpr(ret, (MapExpr)MapExpr.Parse(o.meta()));
+                    
+            return ret;
         }
 
 
@@ -285,7 +310,7 @@ namespace clojure.lang
             throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));
         }
 
-        static IParser _invokeParser = new InvokeExpr.Parser();
+        static readonly IParser _invokeParser = new InvokeExpr.Parser();
 
         private static Expr AnalyzeSeq(ISeq form)
         {
@@ -415,7 +440,7 @@ namespace clojure.lang
             return null;
         }
 
-        static Var LookupVar(Symbol sym, bool internNew)
+        internal static Var LookupVar(Symbol sym, bool internNew)
         {
             Var var = null;
 
@@ -494,6 +519,31 @@ namespace clojure.lang
             return v.count();
         }
 
+
+        internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init)
+        {
+            int num = GetAndIncLocalNum();
+
+            LocalBinding b = new LocalBinding(num,sym, tag, init);
+
+            IPersistentMap localsMap = (IPersistentMap)LOCAL_ENV.deref();
+            LOCAL_ENV.set(RT.assoc(localsMap,b.Symbol, b));
+            FnMethod method = (FnMethod)METHODS.deref();
+            method.Locals = (IPersistentMap)RT.assoc(method.Locals,b, b);
+            method.IndexLocals = (IPersistentMap)RT.assoc(method.IndexLocals, num, b);
+            return b;
+        }
+
+        internal static int GetAndIncLocalNum()
+        {
+            int num = (int)NEXT_LOCAL_NUM.deref();
+            FnMethod m = (FnMethod)METHODS.deref();
+            if (num > m.MaxLocal)
+                m.MaxLocal = num;
+            NEXT_LOCAL_NUM.set(num + 1);
+            return num;
+        }
+
         internal static LocalBinding ReferenceLocal(Symbol symbol)
         {
             if (!LOCAL_ENV.IsBound)
@@ -512,7 +562,7 @@ namespace clojure.lang
             return b;
         }
 
-        private static Symbol TagOf(object o)
+        internal static Symbol TagOf(object o)
         {
             object tag = RT.get(RT.meta(o), RT.TAG_KEY);
             if (tag is Symbol)
@@ -523,7 +573,7 @@ namespace clojure.lang
         }
 
 
-        private static Type MaybeType(object form, bool stringOk)
+        internal static Type MaybeType(object form, bool stringOk)
         {
             if (form is Type)
                 return (Type)form;

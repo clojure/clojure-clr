@@ -61,9 +61,24 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form)
+            public Expr Parse(object frm)
             {
-                throw new NotImplementedException();
+                ISeq form = (ISeq)frm;
+
+                // (if test then) or (if test then else)
+
+                if (form.count() > 4)
+                    throw new Exception("Too many arguments to if");
+
+                if (form.count() < 3)
+                    throw new Exception("Too few arguments to if");
+
+
+                Expr testExpr = Compiler.GenerateAST(RT.second(form));
+                Expr thenExpr = Compiler.GenerateAST(RT.third(form));
+                Expr elseExpr = Compiler.GenerateAST(RT.fourth(form));
+
+                return new IfExpr(testExpr, thenExpr, elseExpr);
             }
         }
 

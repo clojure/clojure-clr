@@ -56,10 +56,42 @@ namespace clojure.lang.CljCompiler.Ast
         {
             public Expr Parse(object form)
             {
-                throw new NotImplementedException();
+                // (def x) or (def x initexpr)
+                if (RT.count(form) > 3)
+                    throw new Exception("Too many arguments to def");
+
+                if (RT.count(form) < 2)
+                    throw new Exception("Too few arguments to def");
+
+                Symbol sym = RT.second(form) as Symbol;
+
+                if (sym == null)
+                    throw new Exception("Second argument to def must be a Symbol.");
+
+                Var v = Compiler.LookupVar(sym, true);
+
+                if (v == null)
+                    throw new Exception("Can't refer to qualified var that doesn't exist");
+
+                if (!v.Namespace.Equals(Compiler.CurrentNamespace))
+                {
+                    if (sym.Namespace == null)
+                        throw new Exception(string.Format("Name conflict, can't def {0} because namespace: {1} refers to: {2}",
+                                    sym, Compiler.CurrentNamespace.Name, v));
+                    else
+                        throw new Exception("Can't create defs outside of current namespace");
+                }
+
+                IPersistentMap mm = sym.meta();
+                // TODO: add source line info metadata.
+                //mm = (IPersistentMap) RT.assoc(RT.LINE_KEY, LINE.deref()).assoc(RT.FILE_KEY, SOURCE.deref());
+
+                Expr meta = Compiler.GenerateAST(mm);
+                Expr init = Compiler.GenerateAST(RT.third(form));
+                bool initProvided = RT.count(form) == 3;
+
+                return new DefExpr(v, init, meta, initProvided);
             }
         }
-
-
     }
 }

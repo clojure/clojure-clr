@@ -12,22 +12,36 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class SetExpr : Expr
+    class InstanceMethodExpr : MethodExpr
     {
         #region Data
 
-        readonly IPersistentVector _keys;
+        readonly Expr _target;
+        readonly string _methodName;
+        readonly IPersistentVector _args;
+        readonly MethodInfo _method;
 
         #endregion
 
         #region Ctors
 
-        public SetExpr(IPersistentVector keys)
+        public InstanceMethodExpr(Expr target, string methodName, IPersistentVector args)
         {
-            _keys = keys;
+            _target = target;
+            _methodName = methodName;
+            _args = args;
+
+            _method = ComputeMethod();
+        }
+
+        // TODO: ComputeMethod
+        private MethodInfo ComputeMethod()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -36,30 +50,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override bool HasClrType
         {
-            get { return true; }
+            get { return _method != null; }
         }
 
         public override Type ClrType
         {
-            get { return typeof(IPersistentSet); }
+            get { return _method.ReturnType; }
         }
 
         #endregion
-        
-        #region Parsing
 
-        public static Expr Parse(IPersistentSet form)
-        {
-            IPersistentVector keys = PersistentVector.EMPTY;
-            for (ISeq s = RT.seq(form); s != null; s = s.next())
-            {
-                object e = s.first();
-                keys = (IPersistentVector)keys.cons(Compiler.GenerateAST(e));
-            }
-            Expr ret = new SetExpr(keys);
-            return Compiler.OptionallyGenerateMetaInit(form, ret);
-        }
-
-        #endregion
     }
 }
