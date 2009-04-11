@@ -16,24 +16,18 @@ using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class KeywordExpr : Expr
+    class NilExpr : LiteralExpr
     {
         #region Data
 
-        readonly Keyword _kw;
-
-        #endregion
-
-        #region Ctors
-
-        public KeywordExpr(Keyword kw)
+        public override object val()
         {
-            _kw = kw;
+            return null;
         }
 
         #endregion
 
-        #region Type mangling
+        #region Type mangling 
 
         public override bool HasClrType
         {
@@ -42,7 +36,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return typeof(Keyword); }
+            get { return null; }
         }
 
         #endregion
@@ -51,7 +45,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            return context.FnExpr.GenKeyword(_kw);
+            return Expression.Constant(null);
         }
 
         #endregion

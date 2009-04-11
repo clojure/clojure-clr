@@ -126,7 +126,7 @@
   (print-simple o w))
 
 (defmethod print-dup clojure.lang.Var [#^clojure.lang.Var o, #^System.IO.TextWriter w]
-  (.Write w (str "#=(var " (.name (.ns o)) "/" (.sym o) ")")))   ;;; .name => .Name, .sym => .Symbol
+  (.Write w (str "#=(var " (.Name (.ns o)) "/" (.Symbol o) ")")))   ;;; .name => .Name, .sym => .Symbol
 
 (defmethod print-method clojure.lang.ISeq [o, #^System.IO.TextWriter w]
   (print-meta o w)

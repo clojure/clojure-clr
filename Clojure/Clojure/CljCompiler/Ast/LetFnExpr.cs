@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -115,6 +116,11 @@ namespace clojure.lang.CljCompiler.Ast
                     Var.popThreadBindings();
                 }
             }
+        }
+
+        public override Expression GenDlr(GenContext context)
+        {
+            throw new NotImplementedException();
         }
     }
 }

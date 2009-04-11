@@ -39,7 +39,7 @@
 (def
  #^{:macro true}
  if (fn* if [& decl] (cons 'if* decl)))
-
+ 
 (def 
  #^{:arglists '([coll])
     :doc "Returns the first item in the collection. Calls seq on its
@@ -59,7 +59,7 @@
     :doc "Returns a possibly empty seq of the items after the first. Calls seq on its
   argument."}  
  rest (fn rest [x] (. clojure.lang.RT (more x))))
-
+ 
 (def
  #^{:arglists '([coll x] [coll x & xs])
     :doc "conj[oin]. Returns a new collection with the xs
@@ -71,7 +71,7 @@
          (if xs
            (recur (conj coll x) (first xs) (next xs))
            (conj coll x)))))
-
+           
 (def
  #^{:doc "Same as (first (next x))"
     :arglists '([x])}
@@ -189,7 +189,7 @@
              (if (next s)
                (recur (conj ret (first s)) (next s))
                (seq ret)))))  
-               
+
 (def 
 
  #^{:doc "Same as (def name (fn [params* ] exprs*)) or (def
@@ -277,7 +277,7 @@
   ([comparator & keyvals]
    (. clojure.lang.PersistentTreeMap (create comparator keyvals))))
  
-;;;;;;;;;;;;;;;;;;;;
+ ;;;;;;;;;;;;;;;;;;;;
 (def
 
  #^{:doc "Like defn, but the resulting function name is declared as a
@@ -425,7 +425,7 @@
   seq calls. Any closed over locals will be cleared prior to the tail
   call of body."  
   [& body]
-    (list* '#^{:once true :super-name "clojure/lang/LazySeq"} fn* [] body))
+    (list* '#^{:once true :super-name "clojure.lang.LazySeq"} fn* [] body))   ;;; "clojure/lang/LazySeq"
 
 (defn concat
   "Returns a lazy seq representing the concatenation of the elements in the supplied colls."
@@ -506,7 +506,7 @@
   than' y, else 1. Same as Java x.compareTo(y) except it also works
   for nil, and compares numbers and collections in a type-independent 
   manner. x must implement Comparable"
-  {:tag Int32  ; was Integer
+  {:tag Int32  ;;; was Integer
    :inline (fn [x y] `(. clojure.lang.Util compare ~x ~y))}
   [x y] (. clojure.lang.Util (compare x y)))
 
@@ -985,7 +985,7 @@
   {:tag String}
   [#^clojure.lang.Named x]
     (. x (getNamespace)))
-
+  
 (defmacro locking
   "Executes exprs in an implicit do, while holding the monitor of x.
   Will release the monitor of x in all circumstances."
@@ -1013,7 +1013,6 @@
   but is easier to write, read, and understand."
   ([x form] `(. ~x ~form))
   ([x form & more] `(.. (. ~x ~form) ~@more)))
-
 (defmacro ->
   "Threads the expr through the forms. Inserts x as the
   second item in the first form, making a list of it if it is not a
@@ -1157,7 +1156,7 @@
   "Returns the global var named by the namespace-qualified symbol, or
   nil if no var with that name."
  [sym] (. clojure.lang.Var (find sym)))
-
+ 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Refs ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn #^{:private true}
   setup-reference [#^clojure.lang.ARef r options]
@@ -1961,7 +1960,7 @@
   [x] (cond
        (decimal? x) x
        (float? x) (. BigDecimal valueOf (double x))
-       (ratio? x) (/ (BigDecimal. (.numerator x)) (.denominator x))
+       (ratio? x) (/ (BigDecimal. (.numerator x)) (.denominator x))  ;;; THIS FAILS TO COMPUTE PROPERLY
        (instance? BigInteger x) (BigDecimal. #^BigInteger x)
        (number? x) (BigDecimal/valueOf (long x))
        :else (BigDecimal. x)))
@@ -2041,9 +2040,9 @@
   ([stream eof-error? eof-value recursive?]
    (. clojure.lang.LispReader (read stream (boolean eof-error?) eof-value recursive?))))
 
-(defn read-line  ;; ALSO HAS A PROBLEM -- interference from REPL?
+(defn read-line  
   "Reads the next line from stream that is the current value of *in* ."
-  [] (. #^System.IO.Reader *in* (ReadLine)))   ;;; readLine => ReadLine     #^java.io.BufferedReader 
+  [] (. #^System.IO.TextReader *in* (ReadLine)))   ;;; readLine => ReadLine     #^java.io.BufferedReader 
 
 (defn read-string
   "Reads one object from the string s"
@@ -2060,7 +2059,7 @@
   ([v start end]
    (. clojure.lang.RT (subvec v start end))))
    
-   (defmacro with-open
+(defmacro with-open
   "bindings => name init
 
   Evaluates body in a try expression with names bound to the values
@@ -2247,7 +2246,7 @@
   "Same as (def name (create-struct keys...))"
   [name & keys]
   `(def ~name (create-struct ~@keys)))
-;;; In current java version, missing basis keys cause an error  
+ 
 (defn struct-map
   "Returns a new structmap instance with the keys of the
   structure-basis. keyvals may contain all, some or none of the basis
@@ -2277,7 +2276,7 @@
   stream/file"
   [rdr] (. clojure.lang.Compiler (load rdr)))
 
-(defn load-string
+(defn load-string  ;;; EOF problem here.
   "Sequentially read and evaluate the set of forms contained in the
   string"
   [s]
@@ -3106,7 +3105,7 @@
            (aset ~ret ~idx ~expr)
            (recur (unchecked-inc ~idx)))
          ~ret))))
-;;; How do you use this?  How can you get the value of the array at the current index?
+
 (defmacro areduce
   "Reduces an expression across an array a, using an index named idx,
   and return value named ret, initialized to init, setting ret to the evaluation of expr at
@@ -4006,3 +4005,5 @@
 ;  [& exprs]
 ;  `(pcalls ~@(map #(list `fn [] %) exprs)))
 ;
+
+

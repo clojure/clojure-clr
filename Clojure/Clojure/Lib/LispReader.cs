@@ -17,6 +17,7 @@ using java.math;
 using System.IO;
 using System.Collections;
 using clojure.lang.Readers;
+using clojure.runtime;
 
 namespace clojure.lang
 {
@@ -91,8 +92,7 @@ namespace clojure.lang
             _dispatchMacros['"'] = new RegexReader();
             _dispatchMacros['('] = new FnReader();
             _dispatchMacros['{'] = new SetReader();
-            // TODO: add EvalReader
-            //dispatchMacros['='] = new EvalReader();
+            _dispatchMacros['='] = new EvalReader();
             _dispatchMacros['!'] = new CommentReader();
             _dispatchMacros['<'] = new UnreadableReader();
             _dispatchMacros['_'] = new DiscardReader();
@@ -883,7 +883,7 @@ namespace clojure.lang
                     throw new EndOfStreamException("EOF while reading character");
                 IFn fn = _dispatchMacros[ch];
                 if (fn == null)
-                    throw new Exception(String.Format("No dispatch macro for: %c", (char)ch));
+                    throw new Exception(String.Format("No dispatch macro for: {0}", (char)ch));
                 return fn.invoke(r, (char)ch);
             }
         }
@@ -1052,46 +1052,45 @@ namespace clojure.lang
             }
         }
 
-        //public sealed class EvalReader : ReaderBase
-        // TODO: Need to figure out who to deal with typenames in the context of multiple loaded assemblies.
-        //{
-        //    object Read(TextReader r, char eq)
-        //    {
-        //        Object o = read(r, true, null, true);
-        //        if (o is Symbol)
-        //        {
-        //            return RT.classForName(o.ToString());
-        //        }
-        //        else if (o is IPersistentList)
-        //        {
-        //            ISeq pl = ((IPersistentList)o).seq();
-        //            Symbol fs = (Symbol)pl.first();
-        //            if (fs.Equals(THE_VAR))
-        //            {
-        //                Symbol vs = (Symbol)pl.rest().first();
-        //                return RT.var(vs.Namespace, vs.Name);  //Compiler.resolve((Symbol) RT.second(o),true);
-        //            }
-        //            if (fs.Name.EndsWith("."))
-        //            {
-        //                Object[] args = RT.toArray(pl.next());
-        //                return Reflector.invokeConstructor(RT.classForName(fs.name.substring(0, fs.name.length() - 1)), args);
-        //            }
-        //            if (Compiler.namesStaticMember(fs))
-        //            {
-        //                Object[] args = RT.toArray(pl.next());
-        //                return Reflector.invokeStaticMethod(fs.ns, fs.name, args);
-        //            }
-        //            Object v = Compiler.maybeResolveIn(Compiler.currentNS(), fs);
-        //            if (v is Var)
-        //            {
-        //                return ((IFn)v).applyTo(pl.next());
-        //            }
-        //            throw new Exception("Can't resolve " + fs);
-        //        }
-        //        else
-        //            throw new ArgumentException("Unsupported #= form");
-        //    }
-        //}
+        public sealed class EvalReader : ReaderBase
+         //TODO: Need to figure out who to deal with typenames in the context of multiple loaded assemblies.
+        {
+            protected override object Read(TextReader r, char eq)
+            {
+                Object o = read(r, true, null, true);
+                if (o is Symbol)
+                {
+                    return RT.classForName(o.ToString());
+                }
+                else if (o is IPersistentList)
+                {
+                    Symbol fs = (Symbol)RT.first(o);
+                    if (fs.Equals(THE_VAR))
+                    {
+                        Symbol vs = (Symbol)RT.second(o);
+                        return RT.var(vs.Namespace, vs.Name);  //Compiler.resolve((Symbol) RT.second(o),true);
+                    }
+                    if (fs.Name.EndsWith("."))
+                    {
+                        Object[] args = RT.toArray(RT.next(o));
+                        return Reflector.InvokeConstructor(RT.classForName(fs.Name.Substring(0, fs.Name.Length - 1)), args);
+                    }
+                    if (Compiler.NamesStaticMember(fs))
+                    {
+                        Object[] args = RT.toArray(RT.next(o));
+                        return Reflector.InvokeStaticMethod(fs.Namespace, fs.Name, args);
+                    }
+                    Object v = Compiler.maybeResolveIn(Compiler.CurrentNamespace, fs);
+                    if (v is Var)
+                    {
+                        return ((IFn)v).applyTo(RT.next(o));
+                    }
+                    throw new Exception("Can't resolve " + fs);
+                }
+                else
+                    throw new ArgumentException("Unsupported #= form");
+            }
+        }
 
         public sealed class UnreadableReader : ReaderBase
         {

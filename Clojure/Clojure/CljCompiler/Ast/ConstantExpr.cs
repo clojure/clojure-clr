@@ -12,25 +12,31 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class ConstantExpr : LiteralExpr<object>
+    class ConstantExpr : LiteralExpr
     {
         #region Data
 
+        readonly object _v;
         readonly int _id;
+
+        public override object val()
+        {
+            return _v;
+        }
 
         #endregion
 
         #region Ctors
 
         public ConstantExpr(object v)
-            : base(v)
         {
+            _v = v;
             _id = Compiler.RegisterConstant(v);
-        }
-            
+        }            
 
         #endregion
 
@@ -38,15 +44,17 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override bool HasClrType
         {
-            get { return _val.GetType().IsPublic; }
+            get { return _v.GetType().IsPublic; }
         }
 
         public override Type ClrType
         {
-            get { return _val.GetType(); }
+            get { return _v.GetType(); }
         }
 
         #endregion
+
+        #region Parsing
 
         public sealed class Parser : IParser
         {
@@ -60,5 +68,17 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+        #endregion
+
+        #region Code generation
+
+        public override Expression GenDlr(GenContext context)
+        {
+            // Java: fn.emitConstant(gen,id)
+            //return Expression.Constant(_v);
+            return context.FnExpr.GenConstant(_id);
+        }
+
+        #endregion
     }
 }

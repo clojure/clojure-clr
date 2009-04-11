@@ -1817,5 +1817,12 @@ namespace Clojure.Tests.LibTests
 
         #endregion
 
+        #region Eval reader tests
+
+        // TODO: EvalReader tests
+
+
+        #endregion
+
     }
 }

@@ -1,7 +1,20 @@
-﻿using System;
+﻿/**
+ *   Copyright (c) David Miller. All rights reserved.
+ *   The use and distribution terms for this software are covered by the
+ *   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+ *   which can be found in the file epl-v10.html at the root of this distribution.
+ *   By using this software in any fashion, you are agreeing to be bound by
+ * 	 the terms of this license.
+ *   You must not remove this notice, or any other, from this software.
+ **/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection.Emit;
+using System.Reflection;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -13,6 +26,11 @@ namespace clojure.lang.CljCompiler.Ast
         // Java: when closures are defined inside other closures,
         // the closed over locals need to be propagated to the enclosing fn
         readonly FnMethod _parent;
+        internal FnMethod Parent
+        {
+            get { return _parent; }
+        } 
+
 
         IPersistentMap _locals = null;       // localbinding => localbinding
         public IPersistentMap Locals
@@ -28,7 +46,7 @@ namespace clojure.lang.CljCompiler.Ast
             set { _indexLocals = value; }
         }
 
-        IPersistentVector _reqParms = null;  // localbinding => localbinding
+        IPersistentVector _reqParms = PersistentVector.EMPTY;  // localbinding => localbinding
 
         LocalBinding _restParm = null;
 
@@ -50,9 +68,16 @@ namespace clojure.lang.CljCompiler.Ast
             set { _maxLocal = value; }
         }
 
+        LocalBinding _thisBinding;
+
         // int line;
 
         IPersistentSet _localsUsedInCatchFinally = PersistentHashSet.EMPTY;
+        public IPersistentSet LocalsUsedInCatchFinally
+        {
+            get { return _localsUsedInCatchFinally; }
+            set { _localsUsedInCatchFinally = value; }
+        }
 
         internal bool IsVariadic
         {
@@ -82,6 +107,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region Parsing
+
         enum ParamParseState { Required, Rest, Done };
 
         internal static FnMethod Parse(FnExpr fn, ISeq form)
@@ -104,7 +131,7 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.NEXT_LOCAL_NUM, 0));
 
                 // register 'this' as local 0  
-                Compiler.RegisterLocal(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null);
+                method._thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null);
 
                 ParamParseState paramState = ParamParseState.Required;
                 IPersistentVector argLocals = PersistentVector.EMPTY;
@@ -159,6 +186,87 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+        #endregion
 
+        #region Code generation
+
+        internal void GenerateCode(GenContext context)
+        {
+            MethodBuilder mb = GenerateStaticMethod(context);
+            GenerateMethod(mb,context);
+        }
+
+        void GenerateMethod(MethodInfo staticMethodInfo, GenContext context)
+        {
+            string methodName = IsVariadic ? "doInvoke" : "invoke";
+
+            TypeBuilder tb = context.FnExpr.TypeBuilder;
+
+            // TODO: Cache all the CreateObjectTypeArray values
+            MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.ReuseSlot|MethodAttributes.Public|MethodAttributes.Virtual, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
+            ILGenerator gen = mb.GetILGenerator();
+            gen.Emit(OpCodes.Ldarg_0);
+            for (int i = 1; i <= _argLocals.count(); i++)
+                gen.Emit(OpCodes.Ldarg, i);
+            gen.Emit(OpCodes.Call, staticMethodInfo);
+            gen.Emit(OpCodes.Ret);            
+        }
+
+        MethodBuilder GenerateStaticMethod(GenContext context)
+        {
+            string methodName = GetStaticMethodName();
+            FnExpr fn = context.FnExpr;
+            TypeBuilder tb = fn.TypeBuilder;
+
+            List<ParameterExpression> parms = new List<ParameterExpression>(_argLocals.count() + 1);
+
+            ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
+            _thisBinding.ParamExpression = thisParm;
+            fn.ThisParam = thisParm;
+            parms.Add(thisParm);
+
+            try
+            {
+                LabelTarget loopLabel = Expression.Label("top");
+
+                Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHODS, this));
+
+
+
+                for (int i = 0; i < _argLocals.count(); i++)
+                {
+                    LocalBinding lb = (LocalBinding)_argLocals.nth(i);
+                    ParameterExpression parm = Expression.Parameter(typeof(object), lb.Name);
+                    lb.ParamExpression = parm;
+                    parms.Add(parm);
+                }
+
+                Expression body =
+                    Expression.Block(
+                        Expression.Label(loopLabel),
+                        Compiler.MaybeBox(_body.GenDlr(context)));
+                LambdaExpression lambda = Expression.Lambda(body, parms);
+                // TODO: Figure out why the Java code nulls all the local variables here.
+
+
+                // TODO: Cache all the CreateObjectTypeArray values
+                MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
+
+                lambda.CompileToMethod(mb, true);
+                return mb;
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+
+        }
+
+        private string GetStaticMethodName()
+        {
+            return String.Format("__invokeHelper_{0}{1}", RequiredArity, IsVariadic ? "v" : string.Empty);
+        }
+
+        #endregion
     }
 }

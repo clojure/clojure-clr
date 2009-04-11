@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -56,6 +57,17 @@ namespace clojure.lang.CljCompiler.Ast
 
             Expr ret = new VectorExpr(args);
             return Compiler.OptionallyGenerateMetaInit(form, ret);
+        }
+
+        #endregion
+
+        #region Code generation
+
+        public override Expression GenDlr(GenContext context)
+        {
+            Expression argArray = Compiler.GenArgArray(context, _args);
+            Expression ret = Expression.Call(Compiler.Method_RT_vector, argArray);
+            return ret;
         }
 
         #endregion

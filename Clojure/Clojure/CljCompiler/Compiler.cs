@@ -99,6 +99,8 @@ namespace clojure.lang
         //Integer
         internal static readonly Var NEXT_LOCAL_NUM = Var.create(0);
         internal static readonly Var LOOP_LOCALS = Var.create(null);
+        // Label
+        internal static readonly Var LOOP_LABEL = Var.create();
 
 
         internal static readonly Var IN_CATCH_FINALLY = Var.create(null);          //null or not
@@ -113,7 +115,9 @@ namespace clojure.lang
 
         #region Special forms
 
-        static readonly IPersistentMap _specials = PersistentHashMap.create(
+        // TODO: Figure out why clojure's special-form?  shows if as special, instead of if*.
+
+        public static readonly IPersistentMap _specials = PersistentHashMap.create(
             DEF, new DefExpr.Parser(),
             LOOP, new LetExpr.Parser(),
             RECUR, new RecurExpr.Parser(),
@@ -156,38 +160,40 @@ namespace clojure.lang
         //static readonly MethodInfo Method_CGen_MakeSet = typeof(Generator).GetMethod("MakeSet");
         //static readonly MethodInfo Method_CGen_MakeVector = typeof(Generator).GetMethod("MakeVector");
 
-        //static readonly MethodInfo Method_IObj_withMeta = typeof(IObj).GetMethod("withMeta");
+        internal static readonly MethodInfo Method_IObj_withMeta = typeof(IObj).GetMethod("withMeta");
 
-        //static readonly MethodInfo Method_Monitor_Enter = typeof(Monitor).GetMethod("Enter");
-        //static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit");
+        internal static readonly MethodInfo Method_Monitor_Enter = typeof(Monitor).GetMethod("Enter");
+        internal static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit");
 
-        //static readonly MethodInfo Method_Reflector_CallInstanceMethod = typeof(Reflector).GetMethod("CallInstanceMethod");
-        //static readonly MethodInfo Method_Reflector_CallStaticMethod = typeof(Reflector).GetMethod("CallStaticMethod");
-        //static readonly MethodInfo Method_Reflector_InvokeConstructor = typeof(Reflector).GetMethod("InvokeConstructor");
+        internal static readonly MethodInfo Method_Reflector_CallInstanceMethod = typeof(Reflector).GetMethod("CallInstanceMethod");
+        internal static readonly MethodInfo Method_Reflector_CallStaticMethod = typeof(Reflector).GetMethod("CallStaticMethod");
+        internal static readonly MethodInfo Method_Reflector_InvokeConstructor = typeof(Reflector).GetMethod("InvokeConstructor");
 
-        //static readonly MethodInfo Method_RT_ConvertToCRD = typeof(RT).GetMethod("ConvertToCRD");
-        //static readonly MethodInfo Method_RT_IsTrue = typeof(RT).GetMethod("IsTrue");
-        //static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
+        internal static readonly MethodInfo Method_RT_classForName = typeof(RT).GetMethod("classForName");
+        internal static readonly MethodInfo Method_RT_IsTrue = typeof(RT).GetMethod("IsTrue");
+        internal static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
         static readonly MethodInfo Method_RT_printToConsole = typeof(RT).GetMethod("printToConsole");
-        //static readonly MethodInfo Method_RT_vector = typeof(RT).GetMethod("vector");
-
-        //static readonly MethodInfo Method_Var_BindRoot = typeof(Var).GetMethod("BindRoot");
-        //static readonly MethodInfo Method_Var_get = typeof(Var).GetMethod("deref");
+        internal static readonly MethodInfo Method_RT_set = typeof(RT).GetMethod("set");
+        internal static readonly MethodInfo Method_RT_vector = typeof(RT).GetMethod("vector");
+        internal static readonly MethodInfo Method_RT_readString = typeof(RT).GetMethod("readString");
+        
+        internal static readonly MethodInfo Method_Var_BindRoot = typeof(Var).GetMethod("BindRoot");
+        internal static readonly MethodInfo Method_Var_get = typeof(Var).GetMethod("deref");
         //static readonly MethodInfo Method_Var_set = typeof(Var).GetMethod("set");
-        //static readonly MethodInfo Method_Var_SetMeta = typeof(Var).GetMethod("SetMeta");
+        internal static readonly MethodInfo Method_Var_SetMeta = typeof(Var).GetMethod("SetMeta");
 
         //static readonly ConstructorInfo Ctor_AFnImpl_0 = typeof(AFnImpl).GetConstructor(Type.EmptyTypes);
         //static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
 
-        //static readonly MethodInfo[] Methods_IFn_invoke = new MethodInfo[MAX_POSITIONAL_ARITY + 2];
+        internal static readonly MethodInfo[] Methods_IFn_invoke = new MethodInfo[MAX_POSITIONAL_ARITY + 2];
 
-        //static Type[] CreateObjectTypeArray(int size)
-        //{
-        //    Type[] typeArray = new Type[size];
-        //    for (int i = 0; i < size; i++)
-        //        typeArray[i] = typeof(Object);
-        //    return typeArray;
-        //}
+        internal static Type[] CreateObjectTypeArray(int size)
+        {
+            Type[] typeArray = new Type[size];
+            for (int i = 0; i < size; i++)
+                typeArray[i] = typeof(Object);
+            return typeArray;
+        }
 
 
 
@@ -195,23 +201,77 @@ namespace clojure.lang
 
         #region C-tors & factory methods
 
-        //public static LambdaExpression Generate(object form, bool addPrint)
-        //{
-        //    Expression formExpr = Generate(form);
+        static Compiler()
+        {
+            for (int i = 0; i <= Compiler.MAX_POSITIONAL_ARITY; i++)
+                Methods_IFn_invoke[i] = typeof(IFn).GetMethod("invoke", CreateObjectTypeArray(i));
 
-        //    Expression finalExpr = formExpr;
+            Type[] types = new Type[Compiler.MAX_POSITIONAL_ARITY + 1];
+            CreateObjectTypeArray(Compiler.MAX_POSITIONAL_ARITY).CopyTo(types, 0);
+            types[Compiler.MAX_POSITIONAL_ARITY] = typeof(object[]);
+            Methods_IFn_invoke[Compiler.MAX_POSITIONAL_ARITY + 1]
+                = typeof(IFn).GetMethod("invoke",
+                       BindingFlags.Public | BindingFlags.InvokeMethod,
+                       Type.DefaultBinder,
+                       CallingConventions.VarArgs | CallingConventions.HasThis,
+                       types,
+                       null);
 
-        //    if (formExpr.Type == typeof(void))
-        //        finalExpr = Expression.Block(formExpr, Expression.Constant(null));
+        }
+
+        static GenContext _context = new GenContext("eval");
+
+        static int _saveId = 0;
+        public static void SaveContext()
+        {
+            _context.AssyBldr.Save("done" + _saveId++ + ".dll");
+            _context = new GenContext("eval");
+        }
 
 
-        //    if (addPrint)
-        //    {
-        //        finalExpr = Expression.Call(Method_RT_printToConsole, finalExpr);
-        //    }
+        public static LambdaExpression GenerateLambda(object form, bool addPrint)
+        {
+            // TODO: Clean this up.
+            form = RT.list(FN, PersistentVector.EMPTY, form);
 
-        //    return Expression.Lambda(finalExpr, "REPLCall", null);
-        //}
+            Expr ast = GenerateAST(form);
+
+            Expression formExpr = GenerateDlrExpression(_context,ast);
+
+            Expression finalExpr = Expression.Call(formExpr, "invoke", new Type[0]); ;
+
+            //if (formExpr.Type == typeof(void))
+            //    finalExpr = Expression.Block(formExpr, Expression.Constant(null));
+            //else
+            //    finalExpr = MaybeBox(formExpr);
+
+            if (addPrint)
+            {
+                finalExpr = Expression.Call(Method_RT_printToConsole, finalExpr);
+            }
+
+            return Expression.Lambda(finalExpr, "REPLCall", null);
+        }
+
+        static Expression[] MaybeBox(Expression[] args)
+        {
+            // TODO: avoid copying array if not necessary
+            Expression[] boxedArgs = new Expression[args.Length];
+            for (int i1 = 0; i1 < args.Length; ++i1)
+                boxedArgs[i1] = MaybeBox(args[i1]);
+            return boxedArgs;
+        }
+
+        internal static Expression MaybeBox(Expression expr)
+        {
+            if (expr.Type == typeof(void))
+                // I guess we'll pass a void.  This happens when we have a throw, for example.
+                return Expression.Block(expr, Expression.Default(typeof(object)));
+
+            return expr.Type.IsValueType
+                ? Expression.Convert(expr, typeof(object))
+                : expr;
+        }
 
         #endregion
 
@@ -223,15 +283,14 @@ namespace clojure.lang
 
         #region  AST generation
 
-        internal static LiteralExpr<object> NIL_EXPR = new LiteralExpr<object>(null);
-        static LiteralExpr<bool> TRUE_EXPR = new LiteralExpr<bool>(true);
-        static LiteralExpr<bool> FALSE_EXPR = new LiteralExpr<bool>(false);
+        internal static LiteralExpr NIL_EXPR = new NilExpr();
+        static LiteralExpr TRUE_EXPR = new BooleanExpr(true);
+        static LiteralExpr FALSE_EXPR = new BooleanExpr(false);
 
         internal static Expr GenerateAST(object form)
         {
             if (form is LazySeq)
                 form = RT.seq(form);
-
             if (form == null)
                 return NIL_EXPR;
             else if (form is Boolean)
@@ -242,7 +301,7 @@ namespace clojure.lang
             if (type == typeof(Symbol))
                 return AnalyzeSymbol((Symbol)form);
             else if (type == typeof(Keyword))
-                return new KeywordExpr((Keyword)form);
+                return RegisterKeyword((Keyword)form);
             else if (type == typeof(String))
                 return new StringExpr((String)form);
             else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
@@ -310,7 +369,6 @@ namespace clojure.lang
             throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));
         }
 
-        static readonly IParser _invokeParser = new InvokeExpr.Parser();
 
         private static Expr AnalyzeSeq(ISeq form)
         {
@@ -332,11 +390,9 @@ namespace clojure.lang
             if (p != null)
                 return p.Parse(form);
             else 
-                return _invokeParser.Parse(form);
+                return InvokeExpr.Parse(form);
         }
 
-
-        #endregion
 
         static object Macroexpand1(object form)
         {
@@ -410,7 +466,7 @@ namespace clojure.lang
             return form;
         }
 
-        static bool NamesStaticMember(Symbol sym)
+        internal static bool NamesStaticMember(Symbol sym)
         {
             return sym.Namespace != null && NamespaceFor(sym) == null;
         }
@@ -519,6 +575,18 @@ namespace clojure.lang
             return v.count();
         }
 
+        internal static KeywordExpr RegisterKeyword(Keyword keyword)
+        {
+            if (!KEYWORDS.IsBound)
+                return new KeywordExpr(keyword);
+
+            IPersistentMap keywordsMap = (IPersistentMap)KEYWORDS.deref();
+            object id = RT.get(keywordsMap, keyword);
+            if (id == null)
+                KEYWORDS.set(RT.assoc(keywordsMap, keyword, RegisterConstant(keyword)));
+            return new KeywordExpr(keyword);
+        }
+
 
         internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init)
         {
@@ -550,16 +618,29 @@ namespace clojure.lang
                 return null;
 
             LocalBinding b = (LocalBinding)RT.get(LOCAL_ENV.deref(), symbol);
-
-            // TODO: Closeovers
-
-            //if (b != null)
-            //{
-            //    FnMethod method = (FnMethod)METHODS.deref();
-            //    CloseOver(b, method);
-            //}
+            if (b != null)
+            {
+                FnMethod method = (FnMethod)METHODS.deref();
+                CloseOver(b, method);
+            }
 
             return b;
+        }
+
+        static void CloseOver(LocalBinding b, FnMethod method)
+        {
+            if (b != null && method != null)
+            {
+                if (RT.get(method.Locals, b) == null)
+                {
+                    method.Fn.Closes = (IPersistentMap)RT.assoc(method.Fn.Closes, b, b);
+                    CloseOver(b, method.Parent);
+                }
+                else if (IN_CATCH_FINALLY.deref() != null)
+                {
+                    method.LocalsUsedInCatchFinally = (PersistentHashSet)method.LocalsUsedInCatchFinally.cons(b.Index);
+                }
+            }
         }
 
         internal static Symbol TagOf(object o)
@@ -624,6 +705,23 @@ namespace clojure.lang
                     }
                 }
             }
+            else if (tag is String)
+            {
+                // TODO: Find a general solution to this problem.
+                string strTag = (string)tag;
+                switch (strTag)
+                {
+                    case "Object[]":
+                    case "object[]":
+                        t = typeof(object[]);
+                        break;
+                    case "Object[][]":
+                    case "object[][]":
+                        t = typeof(object[][]);
+                        break;
+                }
+            }
+                    
             if (t != null)
                 return t;
 
@@ -683,6 +781,19 @@ namespace clojure.lang
         //    }
         //    return ret;
         //}
+
+        #endregion
+
+        #region Code generation
+
+        internal static Expression GenerateDlrExpression(GenContext context, Expr expr)
+        {
+
+            return expr.GenDlr(context);
+        }
+
+        #endregion
+
 
         #region Symbol/namespace resolving
 
@@ -912,9 +1023,6 @@ namespace clojure.lang
 
 
 
-
-
-
         internal static Type MaybePrimitiveType(Expr e)
         {
             if (e is MaybePrimitiveExpr && e.HasClrType)
@@ -924,6 +1032,40 @@ namespace clojure.lang
                     return t;
             }
             return null;
+        }
+
+
+
+        internal static Expression GenArgArray(GenContext context, IPersistentVector args)
+        {
+            Expression[] exprs = new Expression[args.count()];
+
+            for (int i = 0; i < args.count(); i++)
+            {
+                Expr arg = (Expr)args.nth(i);
+                exprs[i] = Compiler.MaybeBox(arg.GenDlr(context));
+            }
+
+            Expression argArray = Expression.NewArrayInit(typeof(object), exprs);
+            return argArray;
+        }
+
+        internal static Expression[] GenTypedArgArray(GenContext context, ParameterInfo[] infos, IPersistentVector args)
+        {
+            Expression[] exprs = new Expression[args.count()];
+
+            for (int i = 0; i < infos.Length; i++)
+            {
+                Expr e = (Expr)args.nth(i);
+                // Java: this is in a try/catch, where the catch prints a stack trace
+                if (MaybePrimitiveType(e) == infos[i].ParameterType)
+                    exprs[i] = ((MaybePrimitiveExpr)e).GenDlrUnboxed(context);
+                else
+                    // Java follows this with: HostExpr.emitUnboxArg(fn, gen, parameterTypes[i]);
+                    //exprs[i] = e.GenDlr(context);
+                    exprs[i] = Expression.Convert(e.GenDlr(context), infos[i].ParameterType); ;
+            }
+            return exprs;
         }
     }
 }

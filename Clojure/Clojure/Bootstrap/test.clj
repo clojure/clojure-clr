@@ -12,6 +12,6 @@
 (defn len2 [#^String x]
   (. x Length))
 
-(defn test1 [] (time (f1 nil 100000)))
-(defn test2 [] (time (reduce + (map len (replicate 100000 "asdf")))))
-(defn test3 [] (time (reduce + (map len2 (replicate 100000 "asdf")))))
+(defn test1 [] (time (f1 nil 10000)))
+(defn test2 [] (time (reduce + (map len (replicate 10000 "asdf")))))
+(defn test3 [] (time (reduce + (map len2 (replicate 10000 "asdf")))))

@@ -163,7 +163,7 @@ namespace clojure.lang
         /// <summary>
         /// Get the symbol naming this var, if named.
         /// </summary>
-        internal Symbol Symbol
+        public Symbol Symbol
         {
             get { return _sym; }
         }

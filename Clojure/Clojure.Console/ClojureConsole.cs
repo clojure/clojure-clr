@@ -108,10 +108,10 @@ namespace clojure.console
                 RT.map(RT.CURRENT_NS, RT.CURRENT_NS.deref()));
             try
             {
-                Snippets.SetSaveAssemblies(true, ".");
+                //Snippets.SetSaveAssemblies(true, ".");
                 MaybeInitialize();
-                RT.PostBootstrapInit();
-                Snippets.SaveAndVerifyAssemblies();
+                //RT.PostBootstrapInit();
+                //Snippets.SaveAndVerifyAssemblies();
                 base.ExecuteInternal();
             }
             catch (Exception e)
@@ -121,7 +121,7 @@ namespace clojure.console
 
             finally
             {
-                Snippets.SaveAndVerifyAssemblies();
+                //Snippets.SaveAndVerifyAssemblies();
                 Var.popThreadBindings();
             }
         }
@@ -164,7 +164,7 @@ namespace clojure.console
             Expression expr = Generator.Eval(GetLanguageContext(), form);
             LambdaExpression ast = Expression.Lambda(expr);
             ast = new GlobalLookupRewriter().RewriteLambda(ast);
-            ScriptCode code = new ScriptCode(ast, GetSourceUnit(scriptSource));
+            ScriptCode code = new LegacyScriptCode(ast, GetSourceUnit(scriptSource));
             return code.Run();
         }
 
@@ -178,7 +178,7 @@ namespace clojure.console
             ScriptSource scriptSource = Engine.CreateScriptSourceFromString("<already opened TextReader>",".");
             //PushbackReader pbr = new PushbackReader(rdr);
 
-            return LoadFromPushbackReader(scriptSource, rdr, false);
+            return LoadFromPushbackReader(scriptSource, rdr, false );
         }
 
         public object LoadFile(string filename)
@@ -195,10 +195,11 @@ namespace clojure.console
             object form;
             while ((form = LispReader.read(pbr, false, eofVal, false)) != eofVal)
             {
-                LambdaExpression ast = Generator.Generate(form, addPrint);
+                //LambdaExpression ast = Generator.Generate(form, addPrint);
+                LambdaExpression ast = Compiler.GenerateLambda(form, addPrint);
                 ast = new GlobalLookupRewriter().RewriteLambda(ast);
 
-                ScriptCode code = new ScriptCode(ast, GetSourceUnit(scriptSource));
+                ScriptCode code = new LegacyScriptCode(ast, GetSourceUnit(scriptSource));
                 ret = code.Run();
             }
 

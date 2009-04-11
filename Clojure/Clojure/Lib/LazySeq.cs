@@ -183,7 +183,7 @@ namespace clojure.lang
         {
             get
             {
-                if ( index <= 0 )
+                if ( index < 0 )
                     throw new ArgumentOutOfRangeException("Index must be non-negative.");
 
                 ISeq s = seq();

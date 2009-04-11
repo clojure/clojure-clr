@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using Microsoft.Linq.Expressions;
+using System.IO;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -32,13 +34,38 @@ namespace clojure.lang.CljCompiler.Ast
         {
             _args = args;
             _type = type;
-            
-            ComputeCtor();
+            _ctor = ComputeCtor();
         }
 
-        private void ComputeCtor()
+        private ConstructorInfo ComputeCtor()
         {
- 	        throw new NotImplementedException();
+            int numArgs = _args.count();
+
+            List<ConstructorInfo> cinfos 
+                = new List<ConstructorInfo>(_type.GetConstructors()
+                    .Where(x => x.GetParameters().Length == numArgs && x.IsPublic));
+
+            if (cinfos.Count == 0)
+                throw new InvalidOperationException(string.Format("No constructor in type: {0} with {1} arguments", _type.Name, numArgs));
+
+            int index = 0;
+            if (cinfos.Count > 1)
+            {
+                List<ParameterInfo[]> parms = new List<ParameterInfo[]>(cinfos.Count);
+                List<Type> rets = new List<Type>(cinfos.Count);
+                foreach (ConstructorInfo cinfo in cinfos)
+                {
+                    parms.Add(cinfo.GetParameters());
+                    rets.Add(_type);
+                }
+
+                index = HostExpr.GetMatchingParams(".ctor", parms, _args, rets);
+            }
+            ConstructorInfo ctor = index >= 0 ? cinfos[index] : null;
+            if (ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                ((TextWriter)RT.ERR.deref()).WriteLine("Reflection warning, line: {0} - call to {1} ctor can't be resolved.",
+                    /* line */ 0, _type.FullName);
+            return ctor;
         }
 
         #endregion
@@ -56,6 +83,8 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+        #region Parsing
 
         public sealed class Parser : IParser
         {
@@ -79,5 +108,32 @@ namespace clojure.lang.CljCompiler.Ast
                 return new NewExpr(t, args);
             }
         }
+
+        #endregion
+
+        #region Code generation
+
+        public override Expression GenDlr(GenContext context)
+        {
+            if ( _ctor != null )
+            {
+                // The ctor is uniquely determined.
+
+                Expression[] args = Compiler.GenTypedArgArray(context, _ctor.GetParameters(), _args);
+                return Expression.New(_ctor, args);
+
+                // JAVA: emitClearLocals
+            }
+            else
+            {
+                Expression typeExpr = Expression.Call(Compiler.Method_RT_classForName, Expression.Constant(_type.FullName));
+                Expression args = Compiler.GenArgArray(context, _args);
+                // Java: emitClearLocals
+
+                return Expression.Call(Compiler.Method_Reflector_InvokeConstructor,typeExpr,args);
+            }        
+        }
+
+        #endregion
     }
 }

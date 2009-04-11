@@ -12,34 +12,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class LiteralExpr<T> : Expr
+    abstract class LiteralExpr : Expr
     {
-        protected T _val;
-
-        public LiteralExpr(T val)
-        {
-            _val = val;
-        }
-
-        public T val()
-        {
-            return _val;
-        }
-
-
-
-        public override bool HasClrType
-        {
-            get { return true; }
-        }
-
-        public override Type ClrType
-        {
-            get { return typeof(T); }
-        }
+        public abstract object val();
     }
 
 

@@ -13,12 +13,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using Microsoft.Linq.Expressions;
+using AstUtils = Microsoft.Scripting.Ast.Utils;
+using System.IO;
 
 namespace clojure.lang.CljCompiler.Ast
 {
     class StaticMethodExpr : MethodExpr
     {
-          #region Data
+        #region Data
 
         readonly Type _type;
         readonly string _methodName;
@@ -35,14 +38,10 @@ namespace clojure.lang.CljCompiler.Ast
             _methodName = methodName;
             _args = args;
 
-            _method = ComputeMethod();
+            _method  = GetMatchingMethod(_type, _args, _methodName);
         }
 
-        // TODO: ComputeMethod
-        private MethodInfo ComputeMethod()
-        {
-            throw new NotImplementedException();
-        }
+
 
         #endregion
 
@@ -57,6 +56,68 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get { return _method.ReturnType; }
         }
+
+        #endregion
+
+        #region Code generation
+
+        public override Expression GenDlr(GenContext context)
+        {
+            if (_method != null)
+                return Compiler.MaybeBox(GenDlrForMethod(context));
+            else
+                return GenDlrViaReflection(context);
+        }
+
+        public override Expression GenDlrUnboxed(GenContext context)
+        {
+            if (_method != null)
+                return GenDlrForMethod(context);
+            else
+                throw new InvalidOperationException("Unboxed emit of unknown member.");
+        }
+
+
+        private Expression GenDlrForMethod(GenContext context)
+        {
+            Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
+
+            return AstUtils.SimpleCallHelper(_method, args); ;
+
+        }
+
+        internal static Expression[] GenTypedArgs(GenContext context, ParameterInfo[] parms, IPersistentVector args)
+        {
+            Expression[] exprs = new Expression[parms.Length];
+            for ( int i=0; i<parms.Length; i++ )
+                exprs[i] = GenTypedArg(context, parms[i].ParameterType, (Expr)args.nth(i));
+            return exprs;
+        }
+
+        internal static Expression GenTypedArg(GenContext context, Type type, Expr arg)
+        {
+            if (Compiler.MaybePrimitiveType(arg) == type)
+                return ((MaybePrimitiveExpr)arg).GenDlrUnboxed(context);
+            else
+                // Java has emitUnboxArg -- should we do something similar?
+                return arg.GenDlr(context);
+        }
+
+
+        private Expression GenDlrViaReflection(GenContext context)
+        {
+            Expression[] parms = new Expression[_args.count()];
+            for ( int i=0; i<_args.count(); i++ )
+                parms[i] = Compiler.MaybeBox(((Expr)_args.nth(i)).GenDlr(context));
+
+            Expression[] moreArgs = new Expression[3];
+            moreArgs[0] = Expression.Constant(_methodName);
+            moreArgs[1] = Expression.Constant(_type);
+            moreArgs[2] = Expression.NewArrayInit(typeof(object), parms);
+
+            return Expression.Call(Compiler.Method_Reflector_CallStaticMethod, moreArgs);
+        }
+
 
         #endregion
     }

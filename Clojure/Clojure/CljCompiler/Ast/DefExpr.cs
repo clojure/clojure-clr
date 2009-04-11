@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -52,6 +53,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region Parsing
+
         public sealed class Parser : IParser
         {
             public Expr Parse(object form)
@@ -86,12 +89,39 @@ namespace clojure.lang.CljCompiler.Ast
                 // TODO: add source line info metadata.
                 //mm = (IPersistentMap) RT.assoc(RT.LINE_KEY, LINE.deref()).assoc(RT.FILE_KEY, SOURCE.deref());
 
-                Expr meta = Compiler.GenerateAST(mm);
+                Expr meta =  mm == null ? null : Compiler.GenerateAST(mm);
                 Expr init = Compiler.GenerateAST(RT.third(form));
                 bool initProvided = RT.count(form) == 3;
 
                 return new DefExpr(v, init, meta, initProvided);
             }
         }
+
+        #endregion
+
+        #region Code generation
+
+        public override Expression GenDlr(GenContext context)
+        {
+            List<Expression> exprs = new List<Expression>();
+
+            ParameterExpression parm = Expression.Parameter(typeof(Var), "v");
+
+            Expression varExpr = context.FnExpr.GenVar(_var);
+
+            exprs.Add(Expression.Assign(parm, varExpr));
+
+            if (_initProvided)
+                exprs.Add(Expression.Call(parm, Compiler.Method_Var_BindRoot, Compiler.MaybeBox(_init.GenDlr(context))));
+
+            if (_meta != null)
+                exprs.Add(Expression.Call(parm, Compiler.Method_Var_SetMeta, _meta.GenDlr(context)));
+
+            exprs.Add(parm);
+
+            return Expression.Block(new ParameterExpression[] { parm }, exprs);
+        }
+
+        #endregion
     }
 }

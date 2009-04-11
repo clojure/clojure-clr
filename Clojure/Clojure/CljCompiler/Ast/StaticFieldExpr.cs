@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -23,6 +24,7 @@ namespace clojure.lang.CljCompiler.Ast
         readonly string _fieldName;
         readonly Type _type;
         readonly FieldInfo _field;
+        readonly PropertyInfo _property;
 
         #endregion
 
@@ -32,7 +34,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             _fieldName = fieldName;
             _type = type;
-            _field = type.GetField(_fieldName, BindingFlags.Static);
+            _field = type.GetField(_fieldName, BindingFlags.Static | BindingFlags.Public);
+            _property = type.GetProperty(_fieldName, BindingFlags.Static | BindingFlags.Public);
         }
 
         #endregion
@@ -51,5 +54,20 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region Code generation
+
+        public override Expression GenDlr(GenContext context)
+        {
+            return Compiler.MaybeBox(GenDlrUnboxed(context));
+        }
+
+        public override Expression GenDlrUnboxed(GenContext context)
+        {
+            return _property != null
+                ? Expression.Property(null, _property)
+                : Expression.Field(null, _field);
+        }
+
+        #endregion
     }
 }

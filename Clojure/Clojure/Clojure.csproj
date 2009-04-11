@@ -51,6 +51,7 @@
     <Compile Include="CljCompiler\Ast\AssignableExpr.cs" />
     <Compile Include="CljCompiler\Ast\AssignExpr.cs" />
     <Compile Include="CljCompiler\Ast\BindingInit.cs" />
+    <Compile Include="CljCompiler\Ast\BooleanExpr.cs" />
     <Compile Include="CljCompiler\Ast\ConstantExpr.cs" />
     <Compile Include="CljCompiler\Ast\DefExpr.cs" />
     <Compile Include="CljCompiler\Ast\BodyExpr.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="CljCompiler\Ast\FieldExpr.cs" />
     <Compile Include="CljCompiler\Ast\FnExpr.cs" />
     <Compile Include="CljCompiler\Ast\FnMethod.cs" />
+    <Compile Include="CljCompiler\Ast\GenContext.cs" />
     <Compile Include="CljCompiler\Ast\HostExpr.cs" />
     <Compile Include="CljCompiler\Ast\IfExpr.cs" />
     <Compile Include="CljCompiler\Ast\InstanceFieldExpr.cs" />
@@ -78,6 +80,7 @@
     <Compile Include="CljCompiler\Ast\MonitorEnterExpr.cs" />
     <Compile Include="CljCompiler\Ast\MonitorExitExpr.cs" />
     <Compile Include="CljCompiler\Ast\NewExpr.cs" />
+    <Compile Include="CljCompiler\Ast\NilExpr.cs" />
     <Compile Include="CljCompiler\Ast\Node.cs" />
     <Compile Include="CljCompiler\Ast\RecurExpr.cs" />
     <Compile Include="CljCompiler\Ast\SetExpr.cs" />
@@ -213,6 +216,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Bootstrap\ants.clj" />
+    <None Include="Bootstrap\Copy of core.clj" />
     <None Include="Bootstrap\core-print.clj" />
     <None Include="Bootstrap\core.clj" />
     <None Include="Bootstrap\test.clj" />

@@ -13,11 +13,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using Microsoft.Linq.Expressions;
+using clojure.runtime;
+using System.IO;
 
 namespace clojure.lang.CljCompiler.Ast
 {
     abstract class HostExpr : Expr, MaybePrimitiveExpr
     {
+        #region Parsing
+        
         public sealed class Parser : IParser
         {
             public Expr Parse(object frm)
@@ -54,9 +59,12 @@ namespace clojure.lang.CljCompiler.Ast
                             t.GetField(sym.Name, BindingFlags.Static | BindingFlags.Public) != null
                             || t.GetProperty(sym.Name, BindingFlags.Static | BindingFlags.Public) != null;
                     else if (instance != null && instance.HasClrType && instance.ClrType != null)
+                    {
+                        Type instanceType = instance.ClrType;
                         isFieldOrProperty =
-                            t.GetField(sym.Name, BindingFlags.Instance | BindingFlags.Public) != null
-                            || t.GetProperty(sym.Name, BindingFlags.Instance | BindingFlags.Public) != null;
+                            instanceType.GetField(sym.Name, BindingFlags.Instance | BindingFlags.Public) != null
+                            || instanceType.GetProperty(sym.Name, BindingFlags.Instance | BindingFlags.Public) != null;
+                    }
                 }
 
                 if (isFieldOrProperty)
@@ -85,5 +93,151 @@ namespace clojure.lang.CljCompiler.Ast
                     : (MethodExpr)(new InstanceMethodExpr(instance, methodName, args));
             }
         }
+
+        public abstract Expression GenDlrUnboxed(GenContext context);
+
+
+        protected static List<MethodInfo> GetMethods(Type targetType, int arity,  string methodName, bool getStatics)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
+
+            flags |= getStatics ? BindingFlags.Static : BindingFlags.Instance;
+
+            IEnumerable<MethodInfo> einfo 
+                = targetType.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
+            List<MethodInfo> infos = new List<MethodInfo>(einfo);
+
+            return infos;
+        }
+
+
+        protected static MethodInfo GetMatchingMethod(Type targetType, IPersistentVector args, string methodName)
+        {
+            MethodInfo method = GetMatchingMethodAux(targetType, args, methodName, true);
+
+            MaybeReflectionWarn(method, methodName);
+
+            return method;
+        }
+
+        protected static MethodInfo GetMatchingMethod(Expr target, IPersistentVector args, string methodName)
+        {
+            MethodInfo method = target.HasClrType ? GetMatchingMethodAux(target.ClrType, args, methodName, false) : null;
+
+            MaybeReflectionWarn(method, methodName);
+
+            return method;
+        }
+
+        private static void MaybeReflectionWarn(MethodInfo method, string methodName)
+        {
+            if ( method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()) )
+                // TODO: use DLR IO
+                ((TextWriter)RT.ERR.deref()).WriteLine(string.Format("Reflection warning, line: {0} - call to {1} can't be resolved.\n",
+                    /* line ,*/0, methodName));
+        }
+
+        private static MethodInfo GetMatchingMethodAux(Type targetType, IPersistentVector args, string methodName, bool getStatics)
+        {
+            MethodInfo method = null;
+
+            List<MethodInfo> methods = HostExpr.GetMethods(targetType, args.count(), methodName, getStatics);
+
+            if (methods.Count == 0)
+                method = null;
+            else
+            {
+
+                int index = 0;
+                if (methods.Count > 1)
+                {
+                    List<ParameterInfo[]> parms = new List<ParameterInfo[]>(methods.Count);
+                    List<Type> rets = new List<Type>(methods.Count);
+
+                    foreach (MethodInfo mi in methods)
+                    {
+                        parms.Add(mi.GetParameters());
+                        rets.Add(mi.ReturnType);
+                    }
+                    index = GetMatchingParams(methodName, parms, args, rets);
+                }
+                method = (index >= 0 ? methods[index] : null);
+            }
+
+            return method;
+        }
+
+
+
+ 
+ 
+        internal static int GetMatchingParams(string methodName, List<ParameterInfo[]> parmlists, IPersistentVector argexprs, List<Type> rets)
+        {
+            // Assume matching lengths
+            int matchIndex = -1;
+            bool tied = false;
+
+            for (int i = 0; i < parmlists.Count; i++)
+            {
+                bool match = true;
+                ISeq aseq = argexprs.seq();
+                int exact = 0;
+                for (int p = 0; match && p < argexprs.count() && aseq != null; ++p, aseq = aseq.next())
+                {
+                    Expr arg = (Expr)aseq.first();
+                    Type atype = arg.HasClrType ? arg.ClrType : typeof(object);
+                    Type ptype = parmlists[i][p].ParameterType;
+                    if (arg.HasClrType && atype == ptype)
+                        exact++;
+                    else
+                        match = Reflector.ParamArgTypeMatch(ptype, atype);
+                }
+
+                if (exact == argexprs.count())
+                    return i;
+                if (match)
+                {
+                    if (matchIndex == -1)
+                        matchIndex = i;
+                    else
+                    {
+                        if (Reflector.Subsumes(parmlists[i], parmlists[matchIndex]))
+                        {
+                            matchIndex = i;
+                            tied = false;
+                        }
+                        else if (Array.Equals(parmlists[i], parmlists[matchIndex]))
+                            if (rets[matchIndex].IsAssignableFrom(rets[i]))
+                                matchIndex = i;
+                            else if (!Reflector.Subsumes(parmlists[matchIndex], parmlists[i]))
+                                tied = true;
+                    }
+                }
+            }
+
+            if (tied)
+                throw new ArgumentException("More than one matching method found: " + methodName);
+
+            return matchIndex;
+        }
+
+        internal static Expression[] GenTypedArgs(GenContext context, ParameterInfo[] parms, IPersistentVector args)
+        {
+            Expression[] exprs = new Expression[parms.Length];
+            for (int i = 0; i < parms.Length; i++)
+                exprs[i] = GenTypedArg(context,parms[i].ParameterType, (Expr)args.nth(i));
+            return exprs;
+        }
+
+        internal static Expression GenTypedArg(GenContext context, Type type, Expr arg)
+        {
+            if (Compiler.MaybePrimitiveType(arg) == type)
+                return ((MaybePrimitiveExpr)arg).GenDlrUnboxed(context);
+            else
+                // Java has emitUnboxArg -- should we do something similar?
+                return arg.GenDlr(context);
+        }
+
+        #endregion
     }
 }

@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using clojure.lang;
 
 namespace clojure.runtime
 {
@@ -52,8 +53,31 @@ namespace clojure.runtime
             //return InvokeMatchingMethod(methodName, infos, t, null, args);
         }
 
+        public static Object InvokeStaticMethod(String typeName, String methodName, Object[] args)
+        {
+            Type t = RT.classForName(typeName);
+            return InvokeStaticMethod(t, methodName, args);
+        }
 
+        public static Object InvokeStaticMethod(Type t, String methodName, Object[] args)
+        {
+            if (methodName.Equals("new"))
+                return InvokeConstructor(t, args);
+            List<MethodInfo> methods = GetMethods(t, args.Length, methodName, true);
+            return InvokeMatchingMethod(methodName,methods, t, null, args);
+        }
 
+        public static List<MethodInfo> GetMethods(Type t, int arity, string name, bool getStatics)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
+            if (getStatics)
+                flags |= BindingFlags.Static;
+
+            IEnumerable<MethodInfo> einfo = t.GetMethods(flags).Where(mi => mi.Name == name && mi.GetParameters().Length == arity);
+            List<MethodInfo> infos = new List<MethodInfo>(einfo);
+
+            return infos;
+        }
 
         public static object CallInstanceMethod(string methodName, object target, params object[] args)
         {
@@ -166,7 +190,7 @@ namespace clojure.runtime
         }
 
 
-        private static bool Subsumes(ParameterInfo[] c1, ParameterInfo[] c2)
+        internal static bool Subsumes(ParameterInfo[] c1, ParameterInfo[] c2)
         {
             //presumes matching lengths
             Boolean better = false;
@@ -251,7 +275,7 @@ namespace clojure.runtime
             return ret;
         }
 
-        private static bool ParamArgTypeMatch(Type paramType, Type argType)
+        internal static bool ParamArgTypeMatch(Type paramType, Type argType)
         {
             if (argType == null)
                 return !paramType.IsPrimitive;

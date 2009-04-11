@@ -1061,7 +1061,7 @@ namespace clojure.lang
 
             public object dec(object x)
             {
-                return Convert.ToDouble(x) + 1;
+                return Convert.ToDouble(x) - 1;
             }
 
             #endregion
@@ -1113,52 +1113,52 @@ namespace clojure.lang
             public bool isZero(object x)
             {
                 Ratio r =  toRatio(x);
-                return r.Numerator.signum()== 0;
+                return r.numerator.signum()== 0;
             }
 
             public bool isPos(object x)
             {
                 Ratio r = toRatio(x);
-                return r.Numerator.signum() > 0;
+                return r.numerator.signum() > 0;
             }
 
             public bool isNeg(object x)
             {
                 Ratio r = toRatio(x);
-                return r.Numerator.signum() < 0;
+                return r.numerator.signum() < 0;
             }
 
             public object add(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return divide(ry.Numerator.multiply(rx.Denominator)
-                    .add(rx.Numerator.multiply(ry.Denominator)),
-                    ry.Denominator.multiply(rx.Denominator));
+                return divide(ry.numerator.multiply(rx.denominator)
+                    .add(rx.numerator.multiply(ry.denominator)),
+                    ry.denominator.multiply(rx.denominator));
             }
 
             public object multiply(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return Numbers.divide(ry.Numerator.multiply(rx.Numerator),
-                    ry.Denominator.multiply(rx.Denominator));
+                return Numbers.divide(ry.numerator.multiply(rx.numerator),
+                    ry.denominator.multiply(rx.denominator));
             }
 
             public object divide(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return Numbers.divide(ry.Denominator.multiply(rx.Numerator),
-                    ry.Numerator.multiply(rx.Denominator));
+                return Numbers.divide(ry.denominator.multiply(rx.numerator),
+                    ry.numerator.multiply(rx.denominator));
             }
 
             public object quotient(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                BigInteger q = rx.Numerator.multiply(ry.Denominator)
-                    .divide(rx.Denominator.multiply(ry.Numerator));
+                BigInteger q = rx.numerator.multiply(ry.denominator)
+                    .divide(rx.denominator.multiply(ry.numerator));
                 return reduce(q);
             }
 
@@ -1166,8 +1166,8 @@ namespace clojure.lang
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                BigInteger q = rx.Numerator.multiply(ry.Denominator)
-                    .divide(rx.Denominator.multiply(ry.Numerator));
+                BigInteger q = rx.numerator.multiply(ry.denominator)
+                    .divide(rx.denominator.multiply(ry.numerator));
                 return Numbers.minus(x, Numbers.multiply(q, y));
             }
 
@@ -1175,22 +1175,22 @@ namespace clojure.lang
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return rx.Numerator.Equals(ry.Numerator)
-                    && rx.Denominator.Equals(ry.Denominator);
+                return rx.numerator.Equals(ry.numerator)
+                    && rx.denominator.Equals(ry.denominator);
             }
 
             public bool lt(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return Numbers.lt(rx.Numerator.multiply(ry.Denominator),
-                    ry.Numerator.multiply(rx.Denominator));
+                return Numbers.lt(rx.numerator.multiply(ry.denominator),
+                    ry.numerator.multiply(rx.denominator));
             }
 
             public object negate(object x)
             {
                 Ratio rx = toRatio(x);
-                return new Ratio(rx.Numerator.negate(), rx.Denominator);
+                return new Ratio(rx.numerator.negate(), rx.denominator);
             }
 
             public object inc(object x)

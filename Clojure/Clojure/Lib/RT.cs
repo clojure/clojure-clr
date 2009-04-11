@@ -337,7 +337,7 @@ namespace clojure.lang
         static readonly Var PRINT_META 
             = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), F);
         
-        static readonly Var PRINT_DUP 
+        public static readonly Var PRINT_DUP 
             = Var.intern(CLOJURE_NS, Symbol.create("*print-dup*"), F);
         
         static readonly Var FLUSH_ON_NEWLINE 
@@ -355,9 +355,9 @@ namespace clojure.lang
 
         public static readonly Var ALLOW_UNRESOLVED_VARS 
             = Var.intern(CLOJURE_NS, Symbol.create("*allow-unresolved-vars*"), F);
-        
-        public static readonly Var WARN_ON_REFLECTION 
-            = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), F);
+
+        public static readonly Var WARN_ON_REFLECTION
+            = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), T); // DEBUG_ONLY, should be F in production.
 
         public static readonly Var MACRO_META 
             = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);
@@ -396,7 +396,11 @@ namespace clojure.lang
         {
             public override object invoke(object arg1, object arg2)
             {
-                return Object.ReferenceEquals(arg1, arg2) ? RT.T : RT.F;
+                //return Object.ReferenceEquals(arg1, arg2) ? RT.T : RT.F;
+                if ( arg1 is ValueType )
+                    return arg1.Equals(arg2) ? RT.T : RT.F;
+                else
+                    return arg1 == arg2 ? RT.T : RT.F;
             }
         }
 
@@ -423,7 +427,7 @@ namespace clojure.lang
 
             OUT.Tag = Symbol.create("System.IO.TextWriter");
 
-            CURRENT_NS.Tag = Symbol.create("closure.lang.Namespace");
+            CURRENT_NS.Tag = Symbol.create("clojure.lang.Namespace");
 
             AGENT.SetMeta(map(dockw, "The agent currently running an action on this thread, else nil."));
             AGENT.Tag = Symbol.create("clojure.lang.Agent");
@@ -1480,6 +1484,22 @@ namespace clojure.lang
             {
                 Var v = x as Var;
                 w.Write("#=(var {0}/{1})", v.Namespace.Name, v.Symbol);
+            }
+            //else
+            //    w.Write(x.ToString());
+            // The clause above is what Java has, and would have been nice.
+            // Doesn't work for me, for one reason:  
+            // When generating initializations for static variables in the classes representing IFns,
+            //    let's say the value is the double 7.0.
+            //    we generate code that says   (double)RT.readFromString("7")
+            //    so we get a boxed int, which CLR won't cast to double.  Sigh.
+            //    So I need double/float to print a trailing .0 even when integer-valued.
+            else if (x is double || x is float)
+            {
+                string s = x.ToString();
+                if (!s.Contains('.') && !s.Contains('E'))
+                    s = s + ".0";
+                w.Write(s);
             }
             else
                 w.Write(x.ToString());

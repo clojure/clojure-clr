@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -48,14 +49,14 @@ namespace clojure.lang.CljCompiler.Ast
         public int Index
         {
             get { return _index; }
-        } 
+        }
 
-        //private Expression _paramExpression;
-        //public Expression ParamExpression
-        //{
-        //    get { return _paramExpression; }
-        //    set { _paramExpression = value; }
-        //}
+        private Expression _paramExpression;
+        public Expression ParamExpression
+        {
+            get { return _paramExpression; }
+            set { _paramExpression = value; }
+        }
 
         #endregion
 

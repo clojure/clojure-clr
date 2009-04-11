@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -42,6 +43,15 @@ namespace clojure.lang.CljCompiler.Ast
         public override Type ClrType
         {
             get { return typeof(string); }
+        }
+
+        #endregion
+
+        #region Code generation
+
+        public override Expression GenDlr(GenContext context)
+        {
+            return Expression.Constant(String.Intern(_str));
         }
 
         #endregion

@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.IO;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -61,6 +62,41 @@ namespace clojure.lang.CljCompiler.Ast
                     ? _fieldInfo.FieldType
                     : _propertyInfo.PropertyType;
             }
+        }
+
+        #endregion
+
+        #region Code generation
+
+        public override Expression GenDlr(GenContext context)
+        {
+            Expression target = _target.GenDlr(context);
+            if (_targetType != null && (_fieldInfo != null || _propertyInfo != null))
+            {
+                Expression convTarget = Expression.Convert(target, _targetType);
+                Expression access = _fieldInfo != null
+                    ? Expression.Field(convTarget, _fieldInfo)
+                    : Expression.Property(convTarget, _propertyInfo);
+                return Compiler.MaybeBox(access);
+            }
+            else
+                return Compiler.MaybeBox(Expression.PropertyOrField(target,_fieldName));
+            //Or maybe this should call Reflector.invokeNoArgInstanceMember
+        }
+
+        public override Expression GenDlrUnboxed(GenContext context)
+        {
+            Expression target = _target.GenDlr(context);
+            if (_targetType != null && (_fieldInfo != null || _propertyInfo != null))
+            {
+                Expression convTarget = Expression.Convert(target, _targetType);
+                Expression access = _fieldInfo != null
+                    ? Expression.Field(convTarget, _fieldInfo)
+                    : Expression.Property(convTarget, _propertyInfo);
+                return access;
+            }
+            else
+                throw new InvalidOperationException("Unboxed emit of unknown member.");
         }
 
         #endregion

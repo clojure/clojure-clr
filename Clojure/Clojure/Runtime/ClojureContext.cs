@@ -45,7 +45,8 @@ namespace clojure.runtime
                         sourceUnit.CodeProperties = result;
                         if (result != ScriptCodeParseResult.Complete)
                             return null;
-                        ast = Generator.Generate(code, true);
+                        //ast = Generator.Generate(code, true);
+                        ast = Compiler.GenerateLambda(code, true);
                     }
                     break;
 
@@ -56,7 +57,11 @@ namespace clojure.runtime
             }
 
             ast = new GlobalLookupRewriter().RewriteLambda(ast);
-            return new ScriptCode(ast, sourceUnit);
+
+            //DEBUG!!!
+            //Compiler.SaveContext();
+
+            return new LegacyScriptCode(ast, sourceUnit);
         }
     }
 }

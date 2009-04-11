@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using Microsoft.Linq.Expressions;
+using AstUtils = Microsoft.Scripting.Ast.Utils;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -35,13 +37,7 @@ namespace clojure.lang.CljCompiler.Ast
             _methodName = methodName;
             _args = args;
 
-            _method = ComputeMethod();
-        }
-
-        // TODO: ComputeMethod
-        private MethodInfo ComputeMethod()
-        {
-            throw new NotImplementedException();
+            _method = GetMatchingMethod(target, _args, _methodName);
         }
 
         #endregion
@@ -60,5 +56,47 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region DLR emit
+
+        public override Expression GenDlr(GenContext context)
+        {
+            if (_method != null)
+                return Compiler.MaybeBox(GenDlrForMethod(context));
+            else
+                return GenDlrViaReflection(context);
+        }
+
+        public override Expression GenDlrUnboxed(GenContext context)
+        {
+            if (_method != null)
+                return GenDlrForMethod(context);
+            else
+                throw new InvalidOperationException("Unboxed emit of unknown member.");
+        }
+
+        private Expression GenDlrForMethod(GenContext context)
+        {
+            Expression target = _target.GenDlr(context);
+            Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
+
+            return AstUtils.SimpleCallHelper(target,_method, args); ;
+
+        }
+
+        private Expression GenDlrViaReflection(GenContext context)
+        {
+            Expression[] parms = new Expression[_args.count()];
+            for (int i = 0; i < _args.count(); i++)
+                parms[i] = Compiler.MaybeBox(((Expr)_args.nth(i)).GenDlr(context));
+
+            Expression[] moreArgs = new Expression[3];
+            moreArgs[0] = Expression.Constant(_methodName);
+            moreArgs[1] = _target.GenDlr(context);
+            moreArgs[2] = Expression.NewArrayInit(typeof(object), parms);
+
+            return Expression.Call(Compiler.Method_Reflector_CallInstanceMethod, moreArgs);
+        }
+
+        #endregion
     }
 }

@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -53,6 +54,28 @@ namespace clojure.lang.CljCompiler.Ast
                 else
                     throw new InvalidOperationException("Unknown Collection type.");
             }
+        }
+
+        #endregion
+
+        #region Code generation
+
+        public override Expression GenDlr(GenContext context)
+        {
+            Type collType;
+
+            if (_coll is IPersistentList)
+                collType = typeof(PersistentList);
+            else if (_coll is IPersistentVector)
+                collType = typeof(PersistentVector);
+            else if (_coll is IPersistentMap)
+                collType = typeof(PersistentArrayMap);
+            else if (_coll is IPersistentSet)
+                collType = typeof(PersistentHashSet);
+            else
+                throw new InvalidOperationException("Unknown collection type.");
+
+            return Expression.Field(null, collType, "EMPTY");
         }
 
         #endregion

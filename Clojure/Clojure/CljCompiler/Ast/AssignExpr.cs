@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -48,6 +49,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region Parsing
+
         public sealed class Parser : IParser
         {
             public Expr Parse(object frm)
@@ -63,6 +66,15 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+        #endregion
 
+        #region Code generation
+
+        public override Expression GenDlr(GenContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

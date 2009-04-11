@@ -1099,8 +1099,6 @@ namespace clojure.compiler
             TryExpression tryStmt = finallyExpr == null
                 ? Expression.TryCatch(tryBody,catches.ToArray())
                 : Expression.TryCatchFinally(tryBody, finallyExpr, catches.ToArray());
-            // TODO: What if basicBody.Type is typeof(void)?  What if Enum?
-            //Expression defaultValue = basicBody.Type.IsValueType ? Expression.Constant(0, basicBody.Type) : Expression.Null(basicBody.Type);
             Expression defaultValue = Expression.Default(basicBody.Type);
             Expression whole = Expression.Block(tryStmt, Expression.Label(target, defaultValue));
             return whole;

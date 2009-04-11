@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -22,5 +23,7 @@ namespace clojure.lang.CljCompiler.Ast
     {
      	public abstract bool HasClrType { get; }
         public abstract Type ClrType { get; }
+
+        public abstract Expression GenDlr(GenContext context);
     }
 }

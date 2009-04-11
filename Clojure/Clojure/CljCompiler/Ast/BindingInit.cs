@@ -17,6 +17,8 @@ namespace clojure.lang.CljCompiler.Ast
 {
     struct BindingInit
     {
+        #region Data
+
         private readonly LocalBinding _binding;
         public LocalBinding Binding
         {
@@ -35,5 +37,6 @@ namespace clojure.lang.CljCompiler.Ast
             _init = init;
         }
 
+        #endregion
     }
 }

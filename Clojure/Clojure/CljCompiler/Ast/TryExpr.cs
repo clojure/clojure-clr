@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -22,8 +23,23 @@ namespace clojure.lang.CljCompiler.Ast
         public sealed class CatchClause
         {
             readonly Type _type;
+            public Type Type
+            {
+              get { return _type; }  
+            } 
+
             readonly LocalBinding _lb;
+            internal LocalBinding Lb
+            {
+              get { return _lb; }  
+            } 
+
             readonly Expr _handler;
+            internal Expr Handler
+            {
+              get { return _handler; }  
+            } 
+
 
             public CatchClause(Type type, LocalBinding lb, Expr handler)
             {
@@ -72,6 +88,8 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+        #region Parsing
 
         public sealed class Parser : IParser
         {
@@ -158,8 +176,37 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Expr bodyExpr = (new BodyExpr.Parser()).Parse(RT.seq(body));
                 return new TryExpr(bodyExpr, catches, finallyExpr, retLocal, finallyLocal);
-
               }
         }
+
+        #endregion
+
+        #region Code generation
+
+        public override Expression GenDlr(GenContext context)
+        {
+            Expression basicBody = _tryExpr.GenDlr(context);
+            // Wrap the basic body, a Comma, in a return to a label
+            LabelTarget target = Expression.Label(basicBody.Type, "ret_label");
+            Expression tryBody = Expression.Return(target, basicBody);
+
+            CatchBlock[] catches = new CatchBlock[_catchExprs.count()];
+            for ( int i=0; i<_catchExprs.count(); i++ )
+            {
+                CatchClause clause = (CatchClause) _catchExprs.nth(i);
+                // TODO: I'm pretty sure this is wrong.
+                catches[i] = Expression.Catch(clause.Type,clause.Lb.ParamExpression,clause.Handler.GenDlr(context));
+            }
+
+            TryExpression tryStmt = _finallyExpr == null
+                ? Expression.TryCatch(tryBody, catches)
+                : Expression.TryCatchFinally(tryBody, _finallyExpr.GenDlr(context), catches);
+
+            Expression defaultValue = Expression.Default(basicBody.Type);
+            Expression whole = Expression.Block(tryStmt, Expression.Label(target, defaultValue));
+            return whole;
+        }
+
+        #endregion
     }
 }
