@@ -252,7 +252,7 @@ namespace clojure.lang.CljCompiler.Ast
                 // TODO: Cache all the CreateObjectTypeArray values
                 MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
 
-                lambda.CompileToMethod(mb, true);
+                lambda.CompileToMethod(mb);
                 return mb;
             }
             finally

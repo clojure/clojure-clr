@@ -144,13 +144,12 @@ namespace clojure.console
             sw.Start();
 
             LoadFromStream(new StringReader(clojure.properties.Resources.core));
-            LoadFromStream(new StringReader(clojure.properties.Resources.core_print));
-            LoadFromStream(new StringReader(clojure.properties.Resources.test));
+            //LoadFromStream(new StringReader(clojure.properties.Resources.core_print));
+            //LoadFromStream(new StringReader(clojure.properties.Resources.test));
 
             sw.Stop();
             Console.WriteLine("Loading took {0} milliseconds.", sw.ElapsedMilliseconds);
-
-
+ 
         }
 
         #endregion
@@ -162,8 +161,12 @@ namespace clojure.console
             ScriptSource scriptSource = Engine.CreateScriptSourceFromString("<internal>");
 
             Expression expr = Generator.Eval(GetLanguageContext(), form);
-            LambdaExpression ast = Expression.Lambda(expr);
-            ast = new GlobalLookupRewriter().RewriteLambda(ast);
+            //LambdaExpression ast = Expression.Lambda(expr);
+            //ast = new GlobalLookupRewriter().RewriteLambda(ast);
+            LambdaExpression ast = Expression.Lambda(expr,
+                Expression.Parameter(typeof(Scope), "#scope"),
+                Expression.Parameter(typeof(LanguageContext), "#context"));
+
             ScriptCode code = new LegacyScriptCode(ast, GetSourceUnit(scriptSource));
             return code.Run();
         }
@@ -195,9 +198,13 @@ namespace clojure.console
             object form;
             while ((form = LispReader.read(pbr, false, eofVal, false)) != eofVal)
             {
-                //LambdaExpression ast = Generator.Generate(form, addPrint);
                 LambdaExpression ast = Compiler.GenerateLambda(form, addPrint);
-                ast = new GlobalLookupRewriter().RewriteLambda(ast);
+                //ast = new GlobalLookupRewriter().RewriteLambda(ast);
+                ast = Expression.Lambda(ast,
+                    Expression.Parameter(typeof(Scope), "#scope"),
+                    Expression.Parameter(typeof(LanguageContext), "#context"));
+
+
 
                 ScriptCode code = new LegacyScriptCode(ast, GetSourceUnit(scriptSource));
                 ret = code.Run();

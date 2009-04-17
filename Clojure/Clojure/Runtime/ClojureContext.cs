@@ -27,8 +27,8 @@ namespace clojure.runtime
             : base(manager)
         {
             //Binder = new ClojureBinder(manager);
-            manager.LoadAssembly(typeof(string).Assembly);
-            manager.LoadAssembly(typeof(ISeq).Assembly);
+            //manager.LoadAssembly(typeof(string).Assembly);
+            //manager.LoadAssembly(typeof(ISeq).Assembly);
         }
 
         protected override Microsoft.Scripting.ScriptCode CompileSourceCode(Microsoft.Scripting.SourceUnit sourceUnit, Microsoft.Scripting.CompilerOptions options, Microsoft.Scripting.ErrorSink errorSink)
@@ -56,7 +56,7 @@ namespace clojure.runtime
                     break;
             }
 
-            ast = new GlobalLookupRewriter().RewriteLambda(ast);
+            //ast = new GlobalLookupRewriter().RewriteLambda(ast);
 
             //DEBUG!!!
             //Compiler.SaveContext();

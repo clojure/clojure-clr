@@ -216,7 +216,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Bootstrap\ants.clj" />
-    <None Include="Bootstrap\Copy of core.clj" />
     <None Include="Bootstrap\core-print.clj" />
     <None Include="Bootstrap\core.clj" />
     <None Include="Bootstrap\test.clj" />
