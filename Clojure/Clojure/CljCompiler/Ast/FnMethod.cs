@@ -253,6 +253,7 @@ namespace clojure.lang.CljCompiler.Ast
                 MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
 
                 lambda.CompileToMethod(mb);
+                //lambda.CompileToMethod(mb, true);
                 return mb;
             }
             finally

@@ -188,7 +188,7 @@ namespace clojure.console
         {
             ScriptSource scriptSource = Engine.CreateScriptSourceFromFile(filename);
 
-            return LoadFromPushbackReader(scriptSource, scriptSource.GetReader(), false);
+            return LoadFromPushbackReader(scriptSource, scriptSource.GetReader(), true);  // debug -- should be false for real
         }
 
         private static object LoadFromPushbackReader(ScriptSource scriptSource, TextReader pbr, bool addPrint)

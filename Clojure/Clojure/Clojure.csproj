@@ -201,24 +201,20 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\DLR_Main\Runtime\src\Microsoft.Scripting.Core\Microsoft.Scripting.Core.csproj">
-      <Project>{2AE75F5A-CD1F-4925-9647-AF4D1C282FB4}</Project>
-      <Name>Microsoft.Scripting.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\DLR_Main\Runtime\src\Microsoft.Scripting.Core\Microsoft.Scripting.ExtensionAttribute.csproj">
-      <Project>{8B0F1074-750E-4D64-BF23-A1E0F54261E5}</Project>
-      <Name>Microsoft.Scripting.ExtensionAttribute</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\DLR_Main\Runtime\src\Microsoft.Scripting\Microsoft.Scripting.csproj">
-      <Project>{EB66B766-6354-4208-A3D4-AACBDCB5C3B3}</Project>
-      <Name>Microsoft.Scripting</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Bootstrap\ants.clj" />
     <None Include="Bootstrap\core-print.clj" />
     <None Include="Bootstrap\core.clj" />
     <None Include="Bootstrap\test.clj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\DLR_Main\Src\Runtime\Microsoft.Scripting.Core\Microsoft.Scripting.Core.csproj">
+      <Project>{2AE75F5A-CD1F-4925-9647-AF4D1C282FB4}</Project>
+      <Name>Microsoft.Scripting.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\DLR_Main\Src\Runtime\Microsoft.Scripting\Microsoft.Scripting.csproj">
+      <Project>{EB66B766-6354-4208-A3D4-AACBDCB5C3B3}</Project>
+      <Name>Microsoft.Scripting</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

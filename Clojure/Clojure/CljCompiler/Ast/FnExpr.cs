@@ -452,7 +452,8 @@ namespace clojure.lang.CljCompiler.Ast
                 Expression block = Expression.Block(inits);
                 LambdaExpression lambda = Expression.Lambda(block);
                 MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME, MethodAttributes.Private | MethodAttributes.Static);
-                lambda.CompileToMethod(methodBuilder,Microsoft.Runtime.CompilerServices.DebugInfoGenerator.CreatePdbGenerator());
+                //lambda.CompileToMethod(methodBuilder,true);
+                lambda.CompileToMethod(methodBuilder);
                 return methodBuilder;
             }
             finally
