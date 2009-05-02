@@ -56,7 +56,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region DLR emit
+        #region Code generation
 
         public override Expression GenDlr(GenContext context)
         {

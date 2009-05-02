@@ -51,7 +51,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            return Expression.Default(typeof(void));
+            return Expression.Empty();
         }
 
         #endregion

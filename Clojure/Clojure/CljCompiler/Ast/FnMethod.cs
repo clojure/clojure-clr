@@ -29,7 +29,7 @@ namespace clojure.lang.CljCompiler.Ast
         internal FnMethod Parent
         {
             get { return _parent; }
-        } 
+        }
 
 
         IPersistentMap _locals = null;       // localbinding => localbinding
@@ -60,7 +60,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         IPersistentVector _argLocals;
-        
+
         int _maxLocal = 0;
         public int MaxLocal
         {
@@ -94,7 +94,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get { return _reqParms.count(); }
         }
-    
+
         #endregion
 
         #region C-tors
@@ -193,7 +193,7 @@ namespace clojure.lang.CljCompiler.Ast
         internal void GenerateCode(GenContext context)
         {
             MethodBuilder mb = GenerateStaticMethod(context);
-            GenerateMethod(mb,context);
+            GenerateMethod(mb, context);
         }
 
         void GenerateMethod(MethodInfo staticMethodInfo, GenContext context)
@@ -203,13 +203,13 @@ namespace clojure.lang.CljCompiler.Ast
             TypeBuilder tb = context.FnExpr.TypeBuilder;
 
             // TODO: Cache all the CreateObjectTypeArray values
-            MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.ReuseSlot|MethodAttributes.Public|MethodAttributes.Virtual, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
+            MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
             ILGenerator gen = mb.GetILGenerator();
             gen.Emit(OpCodes.Ldarg_0);
             for (int i = 1; i <= _argLocals.count(); i++)
                 gen.Emit(OpCodes.Ldarg, i);
             gen.Emit(OpCodes.Call, staticMethodInfo);
-            gen.Emit(OpCodes.Ret);            
+            gen.Emit(OpCodes.Ret);
         }
 
         MethodBuilder GenerateStaticMethod(GenContext context)
@@ -269,5 +269,79 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+        internal LambdaExpression GenerateImmediateLambda(GenContext context)
+        {
+            List<ParameterExpression> parmExprs = new List<ParameterExpression>(_argLocals.count());
+            List<ParameterExpression> typedParmExprs = new List<ParameterExpression>();
+            List<Expression> typedParmInitExprs = new List<Expression>();
+
+            //FnExpr fn = context.FnExpr;
+            //ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
+            //_thisBinding.ParamExpression = thisParm;
+            //fn.ThisParam = thisParm;
+            FnExpr fn = context.FnExpr;
+            _thisBinding.ParamExpression = fn.ThisParam;
+
+            try
+            {
+
+                LabelTarget loopLabel = Expression.Label("top");
+
+                Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHODS, this));
+
+                for (int i = 0; i < _argLocals.count(); i++)
+                {
+                    LocalBinding b = (LocalBinding)_argLocals.nth(i);
+
+                    ParameterExpression pexpr = Expression.Parameter(typeof(object), b.Name);  //asdf-tag
+                    b.ParamExpression = pexpr;
+                    parmExprs.Add(pexpr);
+
+                    if (b.Tag != null)
+                    {
+                        // we have a type hint
+                        // The ParameterExpression above will be the parameter to the function.
+                        // We need to generate another local parameter that is typed.  
+                        // This will be the parameter tied to the LocalBinding so that the typing information is seen in the body.
+                        Type t = Compiler.TagToType(b.Tag);
+                        ParameterExpression p2 = Expression.Parameter(t, b.Name);
+                        b.ParamExpression = p2;
+                        typedParmExprs.Add(p2);
+                        typedParmInitExprs.Add(Expression.Assign(p2, Expression.Convert(pexpr, t)));
+                    }
+                }
+
+
+                // TODO:  Eventually, type this param to ISeq.  
+                // This will require some reworking with signatures in various places around here.
+                //if (fn.IsVariadic)
+                //    parmExprs.Add(Expression.Parameter(typeof(object), "____REST"));
+
+                // If we have any typed parameters, we need to add an extra block to do the initialization.
+
+                List<Expression> bodyExprs = new List<Expression>();
+                bodyExprs.AddRange(typedParmInitExprs);
+                bodyExprs.Add(Expression.Label(loopLabel));
+                bodyExprs.Add(Compiler.MaybeBox(_body.GenDlr(context)));
+
+
+                Expression block;
+                if (typedParmExprs.Count > 0)
+                    block = Expression.Block(typedParmExprs, bodyExprs);
+                else
+                    block = Expression.Block(bodyExprs);
+
+                return Expression.Lambda(
+                    FuncTypeHelpers.GetFFuncType(parmExprs.Count),
+                    block,
+                    _fn.ThisName,
+                    parmExprs);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+        }
     }
 }

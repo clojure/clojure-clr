@@ -217,6 +217,117 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
+            switch (context.Mode)
+            {
+                case CompilerMode.Immediate:
+                    return GenDlrImmediate(context);
+                case CompilerMode.File:
+                    return GenDlrForFile(context);
+                default:
+                    throw Util.UnreachableCode();
+            }
+        }
+
+        #endregion
+        
+        #region Immediate-mode compilation
+
+        Expression GenDlrImmediate(GenContext context)
+        {
+            Type baseClass = GetBaseClass(context,GetSuperType());
+
+            _baseType = baseClass;
+
+            return GenerateImmediateLambda(context, baseClass);
+            //MethodInfo info = baseClass.GetMethod("invoke", new Type[0]);
+            //AFunction x = (AFunction)Activator.CreateInstance(baseClass);
+            //x.invoke();
+            //return null;
+
+        }
+
+        private Expression GenerateImmediateLambda(GenContext context, Type baseClass)
+        {
+         //   ParameterExpression p1 = ThisParam ?? Expression.Parameter(baseClass, "____x");
+            ParameterExpression p1 = Expression.Parameter(baseClass, "____x");
+            _thisParam = p1;
+            List<Expression> exprs = new List<Expression>();
+
+            if (baseClass == typeof(RestFnImpl))
+                exprs.Add(Expression.Assign(p1, 
+                          Expression.New(Compiler.Ctor_RestFnImpl_1, Expression.Constant(_variadicMethod.RequiredArity))));
+            else
+                exprs.Add(Expression.Assign(p1, Expression.New(p1.Type)));
+
+            GenContext newContext = CreateContext(context, null, baseClass);
+
+            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+            {
+                FnMethod method = (FnMethod)s.first();
+                LambdaExpression lambda = method.GenerateImmediateLambda(newContext);
+                string fieldName = IsVariadic && method.IsVariadic
+                    ? "_fnDo" + method.RequiredArity
+                    : "_fn" + method.NumParams;
+                exprs.Add(Expression.Assign(Expression.Field(p1, fieldName), lambda));
+            }
+
+            exprs.Add(p1);
+
+            Expression expr = Expression.Block(new ParameterExpression[] { p1 }, exprs);
+            return expr;
+        }
+
+        private static Type GetBaseClass(GenContext context,Type superType)
+        {
+            Type baseClass = LookupBaseClass(superType);
+            if (baseClass != null)
+                return baseClass;
+
+            baseClass = GenerateBaseClass(context,superType);
+            baseClass = RegisterBaseClass(superType, baseClass);
+            return baseClass;
+        }
+
+        static AtomicReference<IPersistentMap> _baseClassMapRef = new AtomicReference<IPersistentMap>(PersistentHashMap.EMPTY);
+
+        static FnExpr()
+        {
+            _baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(RestFn),typeof(RestFnImpl)));
+            //_baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(AFn),typeof(AFnImpl)));
+        }
+
+
+        private static Type LookupBaseClass(Type superType)
+        {
+            return (Type)_baseClassMapRef.Get().valAt(superType);
+        }
+
+        private static Type RegisterBaseClass(Type superType, Type baseType)
+        {
+            IPersistentMap map = _baseClassMapRef.Get();
+
+            while (!map.containsKey(superType))
+            {
+                IPersistentMap newMap = map.assoc(superType, baseType);
+                _baseClassMapRef.CompareAndSet(map, newMap);
+                map = _baseClassMapRef.Get();
+            }
+
+            return LookupBaseClass(superType);  // may not be the one we defined -- race condition
+        }
+
+
+        private static Type GenerateBaseClass(GenContext context, Type superType)
+        {
+            return AFnImplGenerator.Create(context, superType);
+        }
+
+        #endregion
+
+        #region File-mode compilation
+
+        Expression GenDlrForFile(GenContext context)
+        {
             EnsureTypeBuilt(context);
 
             //ConstructorInfo ctorInfo = _ctorInfo;
@@ -241,7 +352,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Expression GenLocal(GenContext context, LocalBinding lb)
         {
-            if (_closes.containsKey(lb))
+            if (context.Mode == CompilerMode.File && _closes.containsKey(lb))
             {
                 Expression expr = Expression.Field(_thisParam,lb.Name);
                 Type primtType = lb.PrimitiveType;
@@ -258,7 +369,7 @@ namespace clojure.lang.CljCompiler.Ast
         internal Expression GenUnboxedLocal(GenContext context, LocalBinding lb)
         {
             Type primType = lb.PrimitiveType;
-            if (_closes.containsKey(lb))
+            if (context.Mode == CompilerMode.File && _closes.containsKey(lb))
                 return Expression.Convert(Expression.Field(_thisParam, lb.Name), primType);
             else
                 return lb.ParamExpression;
@@ -530,23 +641,33 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation support
 
-        internal Expression GenConstant(int id)
+
+        internal Expression GenConstant(GenContext context, int id, object val)
         {
-            return Expression.Field(null, _baseType, ConstantName(id));
+            switch (context.Mode)
+            {
+                case CompilerMode.Immediate:
+                    return Expression.Constant(val);
+                case CompilerMode.File:
+                    return Expression.Field(null, _baseType, ConstantName(id));
+                default:
+                    throw Util.UnreachableCode();
+            }
         }
 
-        internal Expression GenVar(Var var)
+        internal Expression GenVar(GenContext context, Var var)
         {
             int i = (int)_vars.valAt(var);
-            return GenConstant(i);
+            return GenConstant(context,i,var);
         }
 
-        internal Expression GenKeyword(Keyword kw)
+        internal Expression GenKeyword(GenContext context, Keyword kw)
         {
             int i = (int)_keywords.valAt(kw);
-            return GenConstant(i);
+            return GenConstant(context,i,kw);
         }
 
+        
         #endregion
     }
 }

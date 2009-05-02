@@ -22,7 +22,7 @@
     the rest."}
 
  cons (fn* cons [x seq] (. clojure.lang.RT (cons x seq))))
- 
+
  ;during bootstrap we don't have destructuring let, loop or fn, will redefine later
 (def
  #^{:macro true}

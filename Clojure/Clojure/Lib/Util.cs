@@ -187,5 +187,10 @@ namespace clojure.lang
 
         #endregion
 
+
+        internal static Exception UnreachableCode()
+        {
+            return new InvalidOperationException("Invalid value in switch: default should not be reached.");
+        }
     }
 }

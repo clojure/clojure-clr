@@ -51,7 +51,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            return context.FnExpr.GenKeyword(_kw);
+            return context.FnExpr.GenKeyword(context,_kw);
         }
 
         #endregion

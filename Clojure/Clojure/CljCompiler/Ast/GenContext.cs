@@ -18,9 +18,21 @@ using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
+
+    enum CompilerMode { Immediate, File };
+
     class GenContext
     {
         #region Data
+
+        readonly CompilerMode _mode;
+
+        internal CompilerMode Mode
+        {
+            get { return _mode; }
+        } 
+
+
 
         readonly AssemblyBuilder _assyBldr;
         public AssemblyBuilder AssyBldr
@@ -68,15 +80,17 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region C-tors & factory methods
 
-        public GenContext(string assyName)
+        public GenContext(string assyName, CompilerMode mode)
         {
             AssemblyName aname = new AssemblyName(assyName);
             _assyBldr = AppDomain.CurrentDomain.DefineDynamicAssembly(aname, AssemblyBuilderAccess.RunAndSave);
             _moduleBldr = _assyBldr.DefineDynamicModule(aname.Name, aname.Name + ".dll", true);
+            _mode = mode;
         }
 
-        private GenContext()
+        private GenContext(CompilerMode mode)
         {
+            _mode = mode;
         }
 
         public GenContext CreateWithNewType(FnExpr fnExpr)

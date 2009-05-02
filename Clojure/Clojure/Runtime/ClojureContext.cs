@@ -21,8 +21,12 @@ using clojure.compiler;
 
 namespace clojure.runtime
 {
-    public class ClojureContext : LanguageContext
+    public sealed class ClojureContext : LanguageContext
     {
+        internal const string ClojureDisplayName = "ClojureCLR 0.2 Alpha";
+        internal const string ClojureNames = "ClojureCLR;Clojure;clj";
+        internal const string ClojureFileExtensions = ".clj";
+
         public ClojureContext(ScriptDomainManager manager, IDictionary<string, object> options)
             : base(manager)
         {
@@ -33,35 +37,37 @@ namespace clojure.runtime
 
         protected override Microsoft.Scripting.ScriptCode CompileSourceCode(Microsoft.Scripting.SourceUnit sourceUnit, Microsoft.Scripting.CompilerOptions options, Microsoft.Scripting.ErrorSink errorSink)
         {
-            ClojureParser cp = new ClojureParser(sourceUnit);
-            LambdaExpression ast;
+            return null;
 
-            switch (sourceUnit.Kind)
-            {
-                case SourceCodeKind.InteractiveCode:
-                    {
-                        ScriptCodeParseResult result;
-                        object code = cp.ParseInteractiveStatement(out result);
-                        sourceUnit.CodeProperties = result;
-                        if (result != ScriptCodeParseResult.Complete)
-                            return null;
-                        //ast = Generator.Generate(code, true);
-                        ast = Compiler.GenerateLambda(code, true);
-                    }
-                    break;
+        //    ClojureParser cp = new ClojureParser(sourceUnit);
+        //    LambdaExpression ast;
 
-                default:
-                    sourceUnit.CodeProperties = ScriptCodeParseResult.Complete;
-                    ast = Generator.Generate(cp.ParseFile(), sourceUnit);
-                    break;
-            }
+        //    switch (sourceUnit.Kind)
+        //    {
+        //        case SourceCodeKind.InteractiveCode:
+        //            {
+        //                ScriptCodeParseResult result;
+        //                object code = cp.ParseInteractiveStatement(out result);
+        //                sourceUnit.CodeProperties = result;
+        //                if (result != ScriptCodeParseResult.Complete)
+        //                    return null;
+        //                //ast = Generator.Generate(code, true);
+        //                ast = Compiler.GenerateLambda(code, true);
+        //            }
+        //            break;
 
-            //ast = new GlobalLookupRewriter().RewriteLambda(ast);
+        //        default:
+        //            sourceUnit.CodeProperties = ScriptCodeParseResult.Complete;
+        //            ast = Generator.Generate(cp.ParseFile(), sourceUnit);
+        //            break;
+        //    }
 
-            //DEBUG!!!
-            //Compiler.SaveContext();
+        //    //ast = new GlobalLookupRewriter().RewriteLambda(ast);
 
-            return new LegacyScriptCode(ast, sourceUnit);
+        //    //DEBUG!!!
+        //    //Compiler.SaveContext();
+
+        //    return new LegacyScriptCode(ast, sourceUnit);
         }
     }
 }

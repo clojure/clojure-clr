@@ -67,7 +67,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            return context.FnExpr.GenVar(_var);
+            return context.FnExpr.GenVar(context,_var);
         }
 
         #endregion

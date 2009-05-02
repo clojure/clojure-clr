@@ -500,6 +500,13 @@ namespace clojure.lang
                 (suffix == -1 ? name : name.Substring(0, suffix)).Replace('_', '-')));
         }
 
+        public Exception WrongArityException2()
+        {
+            Console.WriteLine("Do-dah!");
+            return WrongArityException();
+        }
+
+
         #endregion
     }
 }

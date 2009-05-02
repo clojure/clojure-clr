@@ -76,7 +76,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             // Java: fn.emitConstant(gen,id)
             //return Expression.Constant(_v);
-            return context.FnExpr.GenConstant(_id);
+            return context.FnExpr.GenConstant(context,_id,_v);
         }
 
         #endregion

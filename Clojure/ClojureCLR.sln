@@ -66,6 +66,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShapeScript", "..\..\DLR_Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Dynamic", "..\..\DLR_Main\Src\Runtime\Microsoft.Dynamic\Microsoft.Dynamic.csproj", "{D4AE44AD-07B9-41DC-BB3B-1FDCDE3C987D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clojure.Console.Old", "Clojure.Console.Old\Clojure.Console.Old.csproj", "{1B343DCA-03EF-406E-B35A-59AD878C6A5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple.Console", "Simple.Console\Simple.Console.csproj", "{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -430,6 +434,38 @@ Global
 		{D4AE44AD-07B9-41DC-BB3B-1FDCDE3C987D}.Silverlight Release|Any CPU.Build.0 = Release|Any CPU
 		{D4AE44AD-07B9-41DC-BB3B-1FDCDE3C987D}.SpecSharp|Any CPU.ActiveCfg = Release|Any CPU
 		{D4AE44AD-07B9-41DC-BB3B-1FDCDE3C987D}.SpecSharp|Any CPU.Build.0 = Release|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.DelaySigned Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.DelaySigned Release|Any CPU.Build.0 = Release|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.DelaySigned Silverlight Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.DelaySigned Silverlight Release|Any CPU.Build.0 = Release|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.FxCop|Any CPU.ActiveCfg = Release|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.FxCop|Any CPU.Build.0 = Release|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.Silverlight Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.Silverlight Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.Silverlight Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.Silverlight Release|Any CPU.Build.0 = Release|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.SpecSharp|Any CPU.ActiveCfg = Release|Any CPU
+		{1B343DCA-03EF-406E-B35A-59AD878C6A5A}.SpecSharp|Any CPU.Build.0 = Release|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.DelaySigned Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.DelaySigned Release|Any CPU.Build.0 = Release|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.DelaySigned Silverlight Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.DelaySigned Silverlight Release|Any CPU.Build.0 = Release|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.FxCop|Any CPU.ActiveCfg = Release|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.FxCop|Any CPU.Build.0 = Release|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.Silverlight Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.Silverlight Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.Silverlight Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.Silverlight Release|Any CPU.Build.0 = Release|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.SpecSharp|Any CPU.ActiveCfg = Release|Any CPU
+		{B57B71C6-A952-41A1-ABF1-9B9BACDD12ED}.SpecSharp|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -60,7 +60,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            Expression varExpr = context.FnExpr.GenVar(_var);
+            Expression varExpr = context.FnExpr.GenVar(context,_var);
             return Expression.Call(varExpr, Compiler.Method_Var_get);
         }
 

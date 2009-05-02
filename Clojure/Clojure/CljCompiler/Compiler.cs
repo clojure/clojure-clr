@@ -183,7 +183,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Var_SetMeta = typeof(Var).GetMethod("SetMeta");
 
         //static readonly ConstructorInfo Ctor_AFnImpl_0 = typeof(AFnImpl).GetConstructor(Type.EmptyTypes);
-        //static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
+        internal static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
 
         internal static readonly MethodInfo[] Methods_IFn_invoke = new MethodInfo[MAX_POSITIONAL_ARITY + 2];
 
@@ -219,13 +219,13 @@ namespace clojure.lang
 
         }
 
-        static GenContext _context = new GenContext("eval");
+        static GenContext _context = new GenContext("eval", CompilerMode.Immediate);
 
         static int _saveId = 0;
         public static void SaveContext()
         {
             _context.AssyBldr.Save("done" + _saveId++ + ".dll");
-            _context = new GenContext("eval");
+            _context = new GenContext("eval",CompilerMode.Immediate);
         }
 
 
@@ -238,7 +238,8 @@ namespace clojure.lang
 
             Expression formExpr = GenerateDlrExpression(_context,ast);
 
-            Expression finalExpr = Expression.Call(formExpr, "invoke", new Type[0]); ;
+            //Expression finalExpr = Expression.Call(formExpr, "invoke", new Type[0]); ;
+            Expression finalExpr = Expression.Call(formExpr, formExpr.Type.GetMethod("invoke", System.Type.EmptyTypes));
 
             //if (formExpr.Type == typeof(void))
             //    finalExpr = Expression.Block(formExpr, Expression.Constant(null));

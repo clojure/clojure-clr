@@ -37,6 +37,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.ServiceModel">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -48,6 +51,7 @@
     <Reference Include="vjslib" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CljCompiler\Ast\AFnImplGenerator.cs" />
     <Compile Include="CljCompiler\Ast\AssignableExpr.cs" />
     <Compile Include="CljCompiler\Ast\AssignExpr.cs" />
     <Compile Include="CljCompiler\Ast\BindingInit.cs" />
@@ -102,7 +106,10 @@
     <Compile Include="Readers\LineNumberingReader.cs" />
     <Compile Include="Runtime\ClojureBinder.cs" />
     <Compile Include="Runtime\ClojureCommandLine.cs" />
+    <Compile Include="Runtime\ClojureConsoleOptions.cs" />
     <Compile Include="Runtime\ClojureContext.cs" />
+    <Compile Include="Runtime\ClojureHostUtils.cs" />
+    <Compile Include="Runtime\ClojureOptionsParser.cs" />
     <Compile Include="Runtime\ClojureParser.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
