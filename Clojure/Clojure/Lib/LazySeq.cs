@@ -52,8 +52,6 @@ namespace clojure.lang
         public override bool Equals(object obj)
         {
             ISeq s = seq();
-            if (s == obj)
-                return true;
             if (s != null)
                 return s.equiv(obj);
             else
