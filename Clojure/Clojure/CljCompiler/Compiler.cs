@@ -295,7 +295,11 @@ namespace clojure.lang
         internal static Expr GenerateAST(object form)
         {
             if (form is LazySeq)
+            {
                 form = RT.seq(form);
+                if (form == null)
+                    form = PersistentList.EMPTY;
+            }
             if (form == null)
                 return NIL_EXPR;
             else if (form is Boolean)
