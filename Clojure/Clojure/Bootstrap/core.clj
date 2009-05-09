@@ -1657,8 +1657,8 @@
   "Returns the lines of text from rdr as a lazy sequence of strings.
   rdr must implement java.io.BufferedReader."
   [#^System.IO.TextReader rdr ] ;;;  [#^java.io.BufferedReader rdr]
+  (lazy-seq
     (let [line  (. rdr (ReadLine))]   ;;; was (readLine)
-      (lazy-seq
        (when line
         (cons line (line-seq rdr))))))
         
