@@ -1860,6 +1860,11 @@
 (defn #^Type class               ;;;#^Class class
   "Returns the Class of x"
   [#^Object x] (if (nil? x) x (. x (GetType))))  ;;; getClass => GetType
+  
+(defn type 
+  "Returns the :type metadata of x, or its Class if none"
+  [x]
+  (or (:type (meta x)) (class x)))  
 ;;; Don't know what to do with this.  No equivalent to Number in CLR.
 ;(defn num
 ;  "Coerce to Number"
@@ -1977,7 +1982,7 @@
 
 (def #^{:private true} print-initialized false)
 
-(defmulti print-method (fn [x writer] (class x)))
+(defmulti print-method (fn [x writer] (type x)))
 (defmulti print-dup (fn [x writer] (class x)))
 
 (defn pr-on
