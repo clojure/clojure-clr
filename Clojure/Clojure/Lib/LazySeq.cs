@@ -52,7 +52,12 @@ namespace clojure.lang
         public override bool Equals(object obj)
         {
             ISeq s = seq();
-            return s == obj || (s != null && s.Equals(obj));
+            if (s == obj)
+                return true;
+            if (s != null)
+                return s.equiv(obj);
+            else
+                return (obj is Sequential || obj is IList) && RT.seq(obj) == null;
         }
 
         #endregion
@@ -95,8 +100,7 @@ namespace clojure.lang
 
         public bool equiv(object o)
         {
-            ISeq s = seq();
-            return s == o || (s != null && s.equiv(o));
+            return Equals(o);
         }
 
         #endregion

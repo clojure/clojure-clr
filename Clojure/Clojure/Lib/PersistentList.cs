@@ -304,8 +304,7 @@ namespace clojure.lang
             /// </remarks>
             public override bool Equals(object obj)
             {
-                // TODO: rethink Sequential and maybe use boundedCount.
-                return (obj is Sequential || obj is IList) && RT.count(obj) == 0;
+                return (obj is Sequential || obj is IList) && RT.seq(obj) == null;
             }
 
             #endregion
