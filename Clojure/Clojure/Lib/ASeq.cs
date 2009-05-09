@@ -131,7 +131,7 @@ namespace clojure.lang
         {
             ISeq s = next();
             if (s == null)
-                return LazySeq.EMPTY;
+                return PersistentList.EMPTY;
             return s;
         }
 
@@ -186,7 +186,7 @@ namespace clojure.lang
         /// Gets an ISeq to allow first/rest iteration through the collection.
         /// </summary>
         /// <returns>This item itself.</returns>
-        virtual public ISeq seq()
+        public ISeq seq()
         {
             return this;
         }

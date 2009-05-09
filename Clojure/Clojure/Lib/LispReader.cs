@@ -866,12 +866,12 @@ namespace clojure.lang
         // Per rev 1184
         static bool isUnquote(object form)
         {
-            return form is ISeq && RT.first(form).Equals(UNQUOTE);
+            return form is ISeq && Util.equals(RT.first(form),UNQUOTE);
         }
 
         static bool isUnquoteSplicing(object form)
         {
-            return form is ISeq && RT.first(form).Equals(UNQUOTE_SPLICING);
+            return form is ISeq && Util.equals(RT.first(form), UNQUOTE_SPLICING);
         }
 
         public sealed class DispatchReader : ReaderBase

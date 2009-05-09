@@ -525,12 +525,10 @@ namespace clojure.lang
 
         public static ISeq seq(object coll)
         {
-            if (coll == null)
-                return null;
-            else if (coll is ASeq)
+            if (coll is ASeq)
                 return (ASeq)coll;
-            //else if (coll is IPersistentCollection)
-            //    return ((IPersistentCollection)coll).seq();
+            else if (coll is LazySeq)
+                return ((LazySeq)coll).seq();
             else
                 return seqFrom(coll);
         }
@@ -539,6 +537,8 @@ namespace clojure.lang
         {
             if (coll is Seqable)
                 return ((Seqable)coll).seq();
+            else if (coll == null)
+                return null;
             else if (coll is IEnumerable)  // java: Iterable
                 return EnumeratorSeq.create(((IEnumerable)coll).GetEnumerator());  // IteratorSeq
             else if (coll.GetType().IsArray)
@@ -548,10 +548,10 @@ namespace clojure.lang
             // The equivalent for Java:Map is IDictionary.  IDictionary is IEnumerable, so is handled above.
             //else if(coll isntanceof Map)  
             //     return seq(((Map) coll).entrySet());
-                // Used to be in the java version:
+            // Used to be in the java version:
             //else if (coll is IEnumerator)  // java: Iterator
             //    return EnumeratorSeq.create((IEnumerator)coll);
-             else
+            else
                 throw new ArgumentException("Don't know how to create ISeq from: " + coll.GetType().Name);
         }
 
@@ -686,7 +686,7 @@ namespace clojure.lang
                 return ((ISeq)x).more();
             ISeq seq = RT.seq(x);
             if (seq == null)
-                return LazySeq.EMPTY;
+                return PersistentList.EMPTY;
             return seq.more();
         }
 

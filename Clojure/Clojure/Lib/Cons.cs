@@ -106,22 +106,13 @@ namespace clojure.lang
          public override ISeq more()
         {
             return (_more == null )
-             ? LazySeq.EMPTY
+             ? PersistentList.EMPTY
              : _more;
         }
 
         #endregion
 
         #region IPersistentCollection members
-
-         /// <summary>
-         /// Gets an ISeq to allow first/rest iteration through the collection.
-         /// </summary>
-         /// <returns>An ISeq for iteration.</returns>
-         public override ISeq seq()
-        {
-            return this;
-        }
 
          /// <summary>
          /// Gets the number of items in the collection.

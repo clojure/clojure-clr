@@ -260,7 +260,7 @@ namespace clojure.lang
         /// <summary>
         /// Represents an empty <see cref="IPersistentList">IPersistentList</see>.
         /// </summary>
-        public class EmptyList : Obj, IPersistentList, IList, Counted
+        public class EmptyList : Obj, IPersistentList, IList, ISeq, Counted
         {
             #region C-tors
 
@@ -325,6 +325,30 @@ namespace clojure.lang
 
             #endregion
 
+            #region ISeq Members
+
+            public object first()
+            {
+                return null;
+            }
+
+            public ISeq next()
+            {
+                return null;
+            }
+
+            public ISeq more()
+            {
+                return this;
+            }
+
+            public ISeq cons(object o)
+            {
+                return new PersistentList(meta(), o, null, 1);
+            }
+
+            #endregion
+            
             #region IPersistentStack Members
 
             /// <summary>
@@ -367,9 +391,9 @@ namespace clojure.lang
                 return null;
             }
 
-            public IPersistentCollection cons(object o)
+            IPersistentCollection IPersistentCollection.cons(object o)
             {
-                return new PersistentList(meta(), o, null, 1);
+                return cons(o);
             }
 
             /// <summary>

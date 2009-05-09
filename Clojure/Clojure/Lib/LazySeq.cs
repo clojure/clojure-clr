@@ -17,26 +17,26 @@ using System.Runtime.CompilerServices;
 
 namespace clojure.lang
 {
-    public class LazySeq : AFn, ISeq, ICollection, IList  // Should we do IList -- has index accessor
+    public sealed class LazySeq : Obj, ISeq, ICollection, IList  // Should we do IList -- has index accessor
     {
         #region Data
 
-        static readonly ISeq DUMMY = new Cons(null, null);
-        public static readonly LazySeq EMPTY = new LazySeq(null);
-
+        private IFn _fn;
         private ISeq _s;
 
         #endregion
 
         #region C-tors & factory methods
 
-        public LazySeq()
-            : this(DUMMY)
+        public LazySeq(IFn fn)
         {
+            _fn = fn;
         }
 
-        LazySeq(ISeq s)
+        private LazySeq(IPersistentMap meta, ISeq s)
+            : base(meta)
         {
+            _fn = null;
             _s = s;
         }
 
@@ -60,6 +60,15 @@ namespace clojure.lang
 
         #endregion
 
+        #region IObj members
+
+        public override IObj withMeta(IPersistentMap meta)
+        {
+           return new LazySeq(meta,seq());
+        }
+
+        #endregion
+
         #region Seqable Members
 
         /// <summary>
@@ -69,8 +78,11 @@ namespace clojure.lang
         [MethodImpl(MethodImplOptions.Synchronized)]
         public ISeq seq()
         {
-            if ( _s == DUMMY )
-                _s = RT.seq(invoke());
+            if (_fn != null)
+            {
+                _s = RT.seq(_fn.invoke());
+                _fn = null;
+            }
             return _s;
         }
 
@@ -107,17 +119,26 @@ namespace clojure.lang
 
         public object first()
         {
-            return RT.first(seq());
+            seq();
+            if (_s == null)
+                return null;
+            return _s.first();
         }
 
         public ISeq next()
         {
-            return RT.next(seq());
+            seq();
+            if (_s == null)
+                return null;
+            return _s.next();
         }
 
         public ISeq more()
         {
-            return RT.more(seq());
+            seq();
+            if (_s == null)
+                return PersistentList.EMPTY;
+            return _s.more();
         }
 
         public ISeq cons(object o)
