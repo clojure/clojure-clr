@@ -89,6 +89,10 @@ namespace clojure.lang
         //String
         static readonly Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
                                                  Symbol.create("*compile-path*"), null);
+
+        // String
+        static readonly Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+                                        Symbol.create("*source-path*"), "NO_SOURCE_FILE");
         // String
         static readonly Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
             Symbol.create("*file*"), null);

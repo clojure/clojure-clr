@@ -162,7 +162,6 @@
     <Compile Include="Lib\JavaConcurrentDictionary.cs" />
     <Compile Include="Lib\Keyword.cs" />
     <Compile Include="Lib\LazilyPersistentVector.cs" />
-    <Compile Include="Lib\LazyCons.cs" />
     <Compile Include="Lib\LispReader.cs" />
     <Compile Include="Lib\LockingTransaction.cs" />
     <Compile Include="Lib\MapEntry.cs" />
