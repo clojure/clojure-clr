@@ -1013,6 +1013,7 @@
   but is easier to write, read, and understand."
   ([x form] `(. ~x ~form))
   ([x form & more] `(.. (. ~x ~form) ~@more)))
+  
 (defmacro ->
   "Threads the expr through the forms. Inserts x as the
   second item in the first form, making a list of it if it is not a
@@ -1565,8 +1566,10 @@
     
 (defn cycle
   "Returns a lazy (infinite!) sequence of repetitions of the items in   coll."
-  [coll] (lazy-seq (concat coll (cycle coll))))
-
+  [coll] (lazy-seq 
+          (when-let [s (seq coll)] 
+              (concat s (cycle s)))))
+              
 (defn split-at
   "Returns a vector of [(take n coll) (drop n coll)]"
   [n coll]
