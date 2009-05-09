@@ -1795,15 +1795,76 @@ namespace clojure.lang
             }
         }
 
-        // TODO: Figure out how to do a load.
-        public static object load(object pathname)
+        public static void load(String pathname)
         {
-            return null;
+            load(pathname, true);
         }
 
-        public static void LookAtMe(object o)
+        public static void load(String pathname, Boolean failIfNotFound)
         {
-            Console.WriteLine("Here it is: {0}", o);
+            string assemblyname = pathname + ".dll";
+            string cljname = pathname + ".clj";
+
+            FileInfo assyInfo = FindFile(assemblyname);
+            FileInfo cljInfo = FindFile(cljname);
+
+            bool loaded = false;
+
+            if ((assyInfo != null &&
+                (cljInfo == null || assyInfo.LastWriteTime > cljInfo.LastWriteTime)))
+            {
+                try
+                {
+                    Var.pushThreadBindings(RT.map(CURRENT_NS, CURRENT_NS.deref(),
+                        WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
+                    loaded = Compiler.LoadAssembly(assyInfo);
+                }
+                finally
+                {
+                    Var.popThreadBindings();
+                }
+            }
+
+            if (!loaded && cljInfo != null)
+            {
+                if (booleanCast(Compiler.COMPILE_FILES.deref()))
+                    Compile(cljInfo);
+                else
+                    Compiler.load(cljInfo.OpenText()); ;
+            }
+            else if (!loaded && failIfNotFound)
+                throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));
+
+
+        }
+
+        private static void Compile(FileInfo cljInfo)
+        {
+            throw new NotImplementedException();
+        }
+
+        const string CLOJURE_LOAD_PATH_VAR = "clojure.load.path";
+
+        static FileInfo FindFile(string filename)
+        {
+            // check the current directory, then any directory in environment variable clojure.load.path
+            string currDir = Directory.GetCurrentDirectory();
+            string probePath = currDir + Path.PathSeparator + filename;
+            if (File.Exists(probePath))
+                return new FileInfo(probePath);
+
+            string rawpaths = (string)System.Environment.GetEnvironmentVariables()[CLOJURE_LOAD_PATH_VAR];
+            if (rawpaths == null)
+                return null;
+            string[] paths = rawpaths.Split(';');
+            foreach (string path in paths)
+            {
+                probePath = path + Path.PathSeparator + filename;
+                if (File.Exists(probePath))
+                    return new FileInfo(probePath);
+            }
+
+            return null;
         }
 
         #endregion

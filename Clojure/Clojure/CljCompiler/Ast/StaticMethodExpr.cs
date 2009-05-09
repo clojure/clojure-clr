@@ -86,23 +86,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         }
 
-        internal static Expression[] GenTypedArgs(GenContext context, ParameterInfo[] parms, IPersistentVector args)
-        {
-            Expression[] exprs = new Expression[parms.Length];
-            for ( int i=0; i<parms.Length; i++ )
-                exprs[i] = GenTypedArg(context, parms[i].ParameterType, (Expr)args.nth(i));
-            return exprs;
-        }
-
-        internal static Expression GenTypedArg(GenContext context, Type type, Expr arg)
-        {
-            if (Compiler.MaybePrimitiveType(arg) == type)
-                return ((MaybePrimitiveExpr)arg).GenDlrUnboxed(context);
-            else
-                // Java has emitUnboxArg -- should we do something similar?
-                return arg.GenDlr(context);
-        }
-
 
         private Expression GenDlrViaReflection(GenContext context)
         {

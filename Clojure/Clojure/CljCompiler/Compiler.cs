@@ -83,7 +83,7 @@ namespace clojure.lang
         #region Vars
 
         //boolean
-        static readonly Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+        internal static readonly Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
                                                  Symbol.create("*compile-files*"), false);  //JAVA: Boolean.FALSE -- changed from RT.F in rev 1108, not sure why
 
         //String
@@ -1067,6 +1067,11 @@ namespace clojure.lang
                     exprs[i] = Expression.Convert(e.GenDlr(context), infos[i].ParameterType); ;
             }
             return exprs;
+        }
+
+        internal static bool LoadAssembly(FileInfo assyInfo)
+        {
+            throw new NotImplementedException();
         }
     }
 }
