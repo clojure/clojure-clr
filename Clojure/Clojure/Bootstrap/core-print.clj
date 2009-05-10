@@ -68,6 +68,9 @@
           (pr-on m w))
       (.Write w " "))))
 
+(defmethod print-method :default [o, #^System.IO.TextWriter w]
+  (print-method (vary-meta o #(dissoc % :type)) w))
+
 (defmethod print-method nil [o, #^System.IO.TextWriter w]
   (.Write w "nil"))
 
@@ -80,7 +83,7 @@
   (print-args o w)
   (.Write w ")"))
 
-(defmethod print-method :default [o, #^System.IO.TextWriter w]
+(defmethod print-method Object [o, #^System.IO.TextWriter w]
   (.Write w "#<")
   (.Write w (.Name (class o)))     ;;; .getSimpleName => .Name
   (.Write w " ")
