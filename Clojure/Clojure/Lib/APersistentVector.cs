@@ -845,6 +845,13 @@ namespace clojure.lang
             public SubVector(IPersistentMap meta, IPersistentVector v, int start, int end)
                 : base(meta)
             {
+                if (v is SubVector)
+                {
+                    SubVector sv = (SubVector)v;
+                    start += sv._start;
+                    end += sv._start;
+                    v = sv._v;
+                }
                 _v = v;
                 _start = start;
                 _end = end;
