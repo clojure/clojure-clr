@@ -391,7 +391,9 @@ namespace clojure.lang
         /// <returns>The root value.</returns>
         object getRoot()
         {
-            return _root;
+            if ( hasRoot() )
+                return _root;
+            throw new InvalidOperationException(String.Format("Var {0}/{1} is unbound.", _ns, _sym));
         }
 
         // In the Java version, haven't missed it yet.
@@ -425,9 +427,10 @@ namespace clojure.lang
         public void BindRoot(object root)
         {
             Validate(getValidator(), root);
+            object oldroot = hasRoot() ? _root : null;
             _root = root;
             alterMeta(_assoc,RT.list(_macroKey, RT.F));
-            notifyWatches();
+            notifyWatches(oldroot,_root);
         }
 
 
@@ -439,8 +442,8 @@ namespace clojure.lang
         //void SwapRoot(object root)
         //{
         //    Validate(getValidator(), root);
-        //    _root = root;
-        //    notifyWatches();
+        //    object oldroot = hasRoot() ? _root : null;
+        //    notifyWatches(oldroot,root);
         //}
 
         ///// <summary>
@@ -461,8 +464,9 @@ namespace clojure.lang
         //{
         //    object newRoot = fn.invoke(_root);
         //    Validate(getValidator(), newRoot);
+        //    object oldroot = getRoot();
         //    _root = newRoot;
-        //    notifyWatches();
+        //    notifyWatches(oldRoot,newRoot);
         //}
 
         /// <summary>
@@ -477,8 +481,9 @@ namespace clojure.lang
         {
             object newRoot = fn.applyTo(RT.cons(_root, args));
             Validate(getValidator(), newRoot);
+            object oldroot = getRoot();
             _root = newRoot;
-            notifyWatches();
+            notifyWatches(oldroot,newRoot);
             return newRoot;
         }
 
@@ -749,7 +754,7 @@ namespace clojure.lang
         /// <param name="vf">The new validtor</param>
         public override void setValidator(IFn vf)
         {
-            if (IsBound)
+            if (hasRoot())
                 Validate(vf, getRoot());
             _validator = vf;
         }
