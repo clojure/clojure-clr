@@ -121,6 +121,21 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenDlr(GenContext context)
         {
             throw new NotImplementedException();
+
+            //List<ParameterExpression> parms = new List<ParameterExpression>();
+            //List<Expression> forms = new List<Expression>();
+
+            //for (int i = 0; i < _bindingInits.count(); i++)
+            //{
+            //    BindingInit bi = (BindingInit)_bindingInits.nth(i);
+            //    Type primType = Compiler.MaybePrimitiveType(bi.Init);
+            //    ParameterExpression parmExpr = Expression.Parameter(primType ?? typeof(object), bi.Binding.Name);
+            //    bi.Binding.ParamExpression = parmExpr;
+            //    parms.Add(parmExpr);
+            //    //forms.Add(Expression.Assign(parmExpr, Compiler.MaybeBox(bi.Init.GenDlr(context))));
+            //    Expression initExpr = primType != null ? ((MaybePrimitiveExpr)bi.Init).GenDlrUnboxed(context) : Compiler.MaybeBox(bi.Init.GenDlr(context));
+            //    forms.Add(Expression.Assign(parmExpr, initExpr));
+            //}
         }
     }
 }
