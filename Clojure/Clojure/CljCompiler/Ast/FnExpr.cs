@@ -668,7 +668,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        internal Expression GenLetFnInits(GenContext context, ParameterExpression fn,FnExpr fn, IPersistentSet leFnLocals)
+        internal Expression GenLetFnInits(GenContext context, ParameterExpression parm ,FnExpr fn, IPersistentSet leFnLocals)
         {
             // fn is the enclosing IFn, not this.
             throw new NotImplementedException();
