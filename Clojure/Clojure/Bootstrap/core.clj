@@ -2721,42 +2721,42 @@
   (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)]  [x y]))"
   [seq-exprs body-expr]
   (assert-args for
-     (vector? seq-exprs) "a vector for its binding"
-     (even? (count seq-exprs)) "an even number of forms in binding vector")
+    (vector? seq-exprs) "a vector for its binding"
+    (even? (count seq-exprs)) "an even number of forms in binding vector")
   (let [to-groups (fn [seq-exprs]
-                    (reduce (fn [groups [k v]]
-                              (if (keyword? k)
-                                (conj (pop groups) (conj (peek groups) [k v]))
-                                (conj groups [k v])))
-                            [] (partition 2 seq-exprs)))
-        err (fn [& msg] (throw (ArgumentException. (apply str msg))))   ;;;  IllegalArgumentException.
-        emit-bind (fn emit-bind [[[bind expr & mod-pairs]
-                                  & [[_ next-expr] :as next-groups]]]
-                    (let [giter (gensym "iter__")
-                          gxs (gensym "s__")
-                          do-mod (fn do-mod [[[k v :as pair] & etc]]
-                                   (cond
-                                     (= k :let) `(let ~v ~(do-mod etc))
-                                     (= k :while) `(when ~v ~(do-mod etc))
-                                     (= k :when) `(if ~v
-                                                    ~(do-mod etc)
-                                                    (recur (rest ~gxs)))
-                                     (keyword? k) (err "Invalid 'for' keyword " k)
-                                     next-groups
-                                      `(let [iterys# ~(emit-bind next-groups)
-                                             fs# (seq (iterys# ~next-expr))]
-                                         (if fs#
-                                           (concat fs# (~giter (rest ~gxs)))
-                                           (recur (rest ~gxs))))
-                                     :else `(cons ~body-expr
-                                                  (~giter (rest ~gxs)))))]
-                      `(fn ~giter [~gxs]
-                         (lazy-seq
-                           (loop [~gxs ~gxs]
-                             (when-let [[~bind] (seq ~gxs)]
-                               ~(do-mod mod-pairs)))))))]
+    (reduce (fn [groups [k v]]
+      (if (keyword? k)
+        (conj (pop groups) (conj (peek groups) [k v]))
+        (conj groups [k v])))
+      [] (partition 2 seq-exprs)))
+       err (fn [& msg] (throw (ArgumentException. (apply str msg))))  ;;; IllegalArgumentException
+       emit-bind (fn emit-bind [[[bind expr & mod-pairs]
+                                & [[_ next-expr] :as next-groups]]]
+      (let [giter (gensym "iter__")
+           gxs (gensym "s__")
+           do-mod (fn do-mod [[[k v :as pair] & etc]]
+          (cond
+            (= k :let) `(let ~v ~(do-mod etc))
+            (= k :while) `(when ~v ~(do-mod etc))
+            (= k :when) `(if ~v
+            ~(do-mod etc)
+            (recur (rest ~gxs)))
+            (keyword? k) (err "Invalid 'for' keyword " k)
+            next-groups
+            `(let [iterys# ~(emit-bind next-groups)
+                  fs# (seq (iterys# ~next-expr))]
+              (if fs#
+                (concat fs# (~giter (rest ~gxs)))
+                (recur (rest ~gxs))))
+            :else `(cons ~body-expr
+            (~giter (rest ~gxs)))))]
+        `(fn ~giter [~gxs]
+          (lazy-seq
+            (loop [~gxs ~gxs]
+              (when-first [~bind ~gxs]
+                ~(do-mod mod-pairs)))))))]
     `(let [iter# ~(emit-bind (to-groups seq-exprs))]
-        (iter# ~(second seq-exprs)))))
+      (iter# ~(second seq-exprs)))))
 
 (defmacro comment
   "Ignores body, yields nil"
