@@ -15,6 +15,7 @@ using System.Text;
 using Microsoft.Linq.Expressions;
 using System.Reflection.Emit;
 using System.Reflection;
+using System.Collections;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -521,8 +522,110 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        static readonly string STATIC_CTOR_HELPER_NAME = "__static_ctor_helper";
+        private Expression GenerateListAsObjectArray(object value)
+        {
+            List<Expression> items = new List<Expression>();
+            foreach ( Object item in (ICollection)value )
+                items.Add(Compiler.MaybeBox(GenerateValue(item)));
+               
+            return Expression.NewArrayInit(typeof(object), items);
+        }
 
+        private Expression GenerateValue(object value)
+        {
+            bool partial = true;
+            Expression ret;
+
+        if (value is String) 
+            ret = Expression.Constant((String)value);
+        else if (Util.IsPrimitive(value.GetType()) )  // or just IsNumeric?
+            ret =  Expression.Constant(value); 
+        else if ( value is Type )
+            ret =  Expression.Call(
+                null,
+                Compiler.Method_RT_classForName,
+                Expression.Constant(((Type)value).FullName));
+        else if (value is Symbol) {
+            Symbol sym = (Symbol) value;
+            ret =  Expression.Call(
+                null,
+                Compiler.Method_Symbol_create2,
+                Expression.Convert(Expression.Constant(sym.Namespace),typeof(string)),  // can be null
+                Expression.Constant(sym.Name));
+        }
+        else if (value is Keyword) 
+            ret =  Expression.Call(
+                null,
+                Compiler.Method_Keyword_intern,
+                GenerateValue(((Keyword)value).Symbol));
+        else if (value is Var) {
+            Var var = (Var) value;
+            ret =  Expression.Call(
+                null,
+                Compiler.Method_RT_var2,
+                Expression.Constant(var.Namespace.Name.ToString()),
+                Expression.Constant(var.Symbol.Name.ToString()));
+ 
+        } 
+        else if (value is IPersistentMap) {
+            IPersistentMap map = (IPersistentMap)value;
+            List<object> entries = new List<object>(map.count()*2);
+            foreach ( IMapEntry entry in map ) {
+                entries.Add(entry.key());
+                entries.Add(entry.val());
+            }
+            Expression expr = GenerateListAsObjectArray(entries);
+            ret =  Expression.Call(
+                null,
+                Compiler.Method_RT_map,
+                expr);
+        }
+        else if (value is IPersistentVector) {
+            Expression expr = GenerateListAsObjectArray(value);
+            ret =  Expression.Call(
+                null,
+                Compiler.Method_RT_vector,
+                expr);
+        }
+        else if (value is ISeq || value is IPersistentList) {
+            Expression expr = GenerateListAsObjectArray(value);
+            ret =  Expression.Call(
+                null,
+                Compiler.Method_RT_arrayToList,
+                expr);        
+        } 
+        else {
+            string cs = null;
+            try
+            {
+                cs = RT.printString(value);
+            }
+            catch (Exception)
+            {
+                throw new Exception(String.Format("Can't embed object in code, maybe print-dup not defined: {0}", value));
+            }
+            if (cs.Length == 0)
+                throw new Exception(String.Format("Can't embed unreadable object in code: " + value));
+            if (cs.StartsWith("#<"))
+                throw new Exception(String.Format("Can't embed unreadable object in code: " + cs));
+            
+            ret = Expression.Call(Compiler.Method_RT_readString, Expression.Constant(cs));
+            partial = false;
+        }
+
+        if (partial) {
+            if (value is Obj && RT.count(((Obj)value).meta()) > 0) {
+                Expression objExpr = Expression.Convert(ret,typeof(Obj));
+                Expression metaExpr = Expression.Convert(GenerateValue(((Obj)value).meta()),typeof(IPersistentMap));
+                ret = Expression.Call(
+                    objExpr,
+                    Compiler.Method_IObj_withMeta,
+                    metaExpr);
+            }
+        }
+            return ret;
+        }
+        
         private MethodBuilder GenerateConstants(TypeBuilder fnTB, Type baseType)
         {
             try
@@ -532,30 +635,11 @@ namespace clojure.lang.CljCompiler.Ast
                 List<Expression> inits = new List<Expression>();
                 for (int i = 0; i < _constants.count(); i++)
                 {
-                    object o = _constants.nth(i);
-                    string stringValue = null;
-                    if (o is string)
-                        stringValue = (string)o;
-                    else
-                    {
-                        try
-                        {
-                            stringValue = RT.printString(o);
-                        }
-                        catch (Exception)
-                        {
-                            throw new Exception(String.Format("Can't embed object in code, maybe print-dup not defined: {0}", o));
-                        }
-                        if (stringValue.Length == 0)
-                            throw new Exception(String.Format("Can't embed unreadable object in code: " + o));
-                        if (stringValue.StartsWith("#<"))
-                            throw new Exception(String.Format("Can't embed unreadable object in code: " + stringValue));
-                    }
+                    Expression expr = GenerateValue(_constants.nth(i));
                     Expression init =
                         Expression.Assign(
                             Expression.Field(null, baseType, ConstantName(i)),
-                            Expression.Convert(Expression.Call(Compiler.Method_RT_readString, Expression.Constant(stringValue)),
-                                               ConstantType(i)));
+                            Expression.Convert(expr,ConstantType(i)));
                     inits.Add(init);
                 }
                 inits.Add(Expression.Default(typeof(void)));
@@ -563,7 +647,6 @@ namespace clojure.lang.CljCompiler.Ast
                 Expression block = Expression.Block(inits);
                 LambdaExpression lambda = Expression.Lambda(block);
                 MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME, MethodAttributes.Private | MethodAttributes.Static);
-                //lambda.CompileToMethod(methodBuilder,true);
                 lambda.CompileToMethod(methodBuilder);
                 return methodBuilder;
             }
@@ -573,6 +656,59 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
         }
+
+
+        static readonly string STATIC_CTOR_HELPER_NAME = "__static_ctor_helper";
+
+        //private MethodBuilder GenerateConstants(TypeBuilder fnTB, Type baseType)
+        //{
+        //    try
+        //    {
+        //        Var.pushThreadBindings(RT.map(RT.PRINT_DUP, RT.T));
+
+        //        List<Expression> inits = new List<Expression>();
+        //        for (int i = 0; i < _constants.count(); i++)
+        //        {
+        //            object o = _constants.nth(i);
+        //            string stringValue = null;
+        //            if (o is string)
+        //                stringValue = (string)o;
+        //            else
+        //            {
+        //                try
+        //                {
+        //                    stringValue = RT.printString(o);
+        //                }
+        //                catch (Exception)
+        //                {
+        //                    throw new Exception(String.Format("Can't embed object in code, maybe print-dup not defined: {0}", o));
+        //                }
+        //                if (stringValue.Length == 0)
+        //                    throw new Exception(String.Format("Can't embed unreadable object in code: " + o));
+        //                if (stringValue.StartsWith("#<"))
+        //                    throw new Exception(String.Format("Can't embed unreadable object in code: " + stringValue));
+        //            }
+        //            Expression init =
+        //                Expression.Assign(
+        //                    Expression.Field(null, baseType, ConstantName(i)),
+        //                    Expression.Convert(Expression.Call(Compiler.Method_RT_readString, Expression.Constant(stringValue)),
+        //                                       ConstantType(i)));
+        //            inits.Add(init);
+        //        }
+        //        inits.Add(Expression.Default(typeof(void)));
+
+        //        Expression block = Expression.Block(inits);
+        //        LambdaExpression lambda = Expression.Lambda(block);
+        //        MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME, MethodAttributes.Private | MethodAttributes.Static);
+        //        lambda.CompileToMethod(methodBuilder);
+        //        return methodBuilder;
+        //    }
+        //    finally
+        //    {
+        //        Var.popThreadBindings();
+        //    }
+
+        //}
 
         private ConstructorBuilder GenerateConstructor(TypeBuilder fnTB, Type baseType)
         {

@@ -35,7 +35,7 @@ namespace clojure.lang
         private static JavaConcurrentDictionary<Symbol,Keyword> _symKeyMap 
             = new JavaConcurrentDictionary<Symbol,Keyword>();
 
-        protected Symbol Symbol
+        internal Symbol Symbol
         {
           get { return _sym; }
         }

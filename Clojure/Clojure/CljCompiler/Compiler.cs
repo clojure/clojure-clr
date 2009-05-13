@@ -166,6 +166,8 @@ namespace clojure.lang
 
         internal static readonly MethodInfo Method_IObj_withMeta = typeof(IObj).GetMethod("withMeta");
 
+        internal static readonly MethodInfo Method_Keyword_intern = typeof(Keyword).GetMethod("intern", new Type[] { typeof(Symbol) });
+
         internal static readonly MethodInfo Method_Monitor_Enter = typeof(Monitor).GetMethod("Enter");
         internal static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit");
 
@@ -173,6 +175,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Reflector_CallStaticMethod = typeof(Reflector).GetMethod("CallStaticMethod");
         internal static readonly MethodInfo Method_Reflector_InvokeConstructor = typeof(Reflector).GetMethod("InvokeConstructor");
 
+        internal static readonly MethodInfo Method_RT_arrayToList = typeof(RT).GetMethod("arrayToList");
         internal static readonly MethodInfo Method_RT_classForName = typeof(RT).GetMethod("classForName");
         internal static readonly MethodInfo Method_RT_IsTrue = typeof(RT).GetMethod("IsTrue");
         internal static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
@@ -180,6 +183,9 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_RT_set = typeof(RT).GetMethod("set");
         internal static readonly MethodInfo Method_RT_vector = typeof(RT).GetMethod("vector");
         internal static readonly MethodInfo Method_RT_readString = typeof(RT).GetMethod("readString");
+        internal static readonly MethodInfo Method_RT_var2 = typeof(RT).GetMethod("var", new Type[] { typeof(string), typeof(string) });
+
+        internal static readonly MethodInfo Method_Symbol_create2 = typeof(Symbol).GetMethod("create", new Type[] { typeof(string), typeof(string) });
         
         internal static readonly MethodInfo Method_Var_BindRoot = typeof(Var).GetMethod("BindRoot");
         internal static readonly MethodInfo Method_Var_get = typeof(Var).GetMethod("deref");
@@ -223,13 +229,13 @@ namespace clojure.lang
 
         }
 
-        static GenContext _context = new GenContext("eval", CompilerMode.Immediate);
+        static GenContext _context = new GenContext("eval", CompilerMode.File);
 
         static int _saveId = 0;
         public static void SaveContext()
         {
             _context.AssyBldr.Save("done" + _saveId++ + ".dll");
-            _context = new GenContext("eval",CompilerMode.Immediate);
+            _context = new GenContext("eval", CompilerMode.File);
         }
 
 
