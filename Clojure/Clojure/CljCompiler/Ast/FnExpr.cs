@@ -591,7 +591,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression expr = GenerateListAsObjectArray(value);
             ret =  Expression.Call(
                 null,
-                Compiler.Method_RT_arrayToList,
+                Compiler.Method_PersistentList_create,
                 expr);        
         } 
         else {
