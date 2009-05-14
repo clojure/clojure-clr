@@ -231,13 +231,13 @@ namespace clojure.lang
 
         }
 
-        static GenContext _context = new GenContext("eval", CompilerMode.File);
+        static GenContext _context = new GenContext("eval", CompilerMode.Immediate);
 
         static int _saveId = 0;
         public static void SaveContext()
         {
             _context.AssyBldr.Save("done" + _saveId++ + ".dll");
-            _context = new GenContext("eval", CompilerMode.File);
+            _context = new GenContext("eval", CompilerMode.Immediate);
         }
 
 

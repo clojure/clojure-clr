@@ -15,8 +15,8 @@ using System.Text;
 
 namespace Clojure.Tests.LibTests
 {
-    // TODO: add tests for StreamSeq
-    class StreamSeqTests
+    // TODO: add tests for Stream
+    class StreamTests
     {
     }
 }

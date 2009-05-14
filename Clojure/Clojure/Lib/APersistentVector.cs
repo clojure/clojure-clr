@@ -340,33 +340,31 @@ namespace clojure.lang
         #region Streamable Members
 
         /// <summary>
-        /// Internal class to implement <see cref="IStream">IStream</see> capabilities 
+        /// Internal class to implement a <see cref="Stream">Stream</see> source. 
         /// for <see cref="APersistentVector">APersistentVector</see>.
         /// </summary>
-        private class IPVStream : IStream
+        private class Src : AFn
         {
-            private readonly IPersistentVector _ipv;
-            private readonly AtomicInteger _ai;
+            private readonly IPersistentVector _v;
+            private int _i = 0;
 
-            public IPVStream(IPersistentVector ipv)
+            public Src(IPersistentVector v)
             {
-                _ipv = ipv;
-                _ai = new AtomicInteger(0);
+                _v = v;
             }
 
-            public object next()
+            public object invoke()
             {
-                int i = (int)_ai.getAndIncrement();
-                if (i < _ipv.count())
-                    return _ipv.nth(i);
-                return RT.eos();
+                if (_i < _v.count())
+                    return _v.nth(_i++);
+                return RT.EOS;
             }
 
         }
 
-        public IStream stream()
+        public Stream stream()
         {
-            return new IPVStream(this);
+            return new Stream(new Src(this));
         }
 
         #endregion

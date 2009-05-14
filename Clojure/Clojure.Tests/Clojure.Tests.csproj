@@ -99,7 +99,7 @@
     <Compile Include="LibTests\RefTests.cs" />
     <Compile Include="LibTests\RestFnImplTests.cs" />
     <Compile Include="LibTests\RestFnTests.cs" />
-    <Compile Include="LibTests\StreamSeqTests.cs" />
+    <Compile Include="LibTests\StreamTests.cs" />
     <Compile Include="LibTests\StringSeqTests.cs" />
     <Compile Include="LibTests\SymbolTests.cs" />
     <Compile Include="LibTests\TestTest.cs" />

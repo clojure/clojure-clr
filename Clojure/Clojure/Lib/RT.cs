@@ -19,6 +19,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.IO;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 
 namespace clojure.lang
@@ -557,23 +558,21 @@ namespace clojure.lang
 
 
 
-        static public IStream stream(object coll) {
+        static public Stream stream(object coll) {
             if (coll == null)
-                return EMPTY_STREAM;
-            else if (coll is IStream)
-                return (IStream)coll;
+                return new Stream(EMPTY_GEN);
             else if (coll is Streamable)
                 return ((Streamable)coll).stream();
             else if (coll is Fn)  // TODO: Note use of Fn to imply castable to IFn.  Should we do this? Why not just check for IFn?
-                return new FnStream((IFn)coll);
+                return new Stream((IFn)coll);
             else if (coll is IEnumerable)  // java: Iterable
-                return new IteratorStream(((IEnumerable)coll).GetEnumerator());  // java: IteratorStream
+                return new Stream(new IteratorStream(((IEnumerable)coll).GetEnumerator()));  // java: IteratorStream
             else if (coll.GetType().IsArray)
                 return ArrayStream.createFromObject(coll);
             else if (coll is String)
                 return ArrayStream.createFromObject(((String)coll).ToCharArray());
-
-            throw new ArgumentException("Don't know how to create IStream from: " + coll.GetType().Name);
+            else
+                return new Stream(new ASeq.Src(RT.seq(coll)));
         }
 
 
@@ -1608,59 +1607,19 @@ namespace clojure.lang
 
         #region Stream support
 
-        private static readonly object EOS = new object();
+        public static readonly object EOS = new object();
+        public static readonly object SKIP = new object();
 
-        public static object eos()
+
+        public static readonly IFn EMPTY_GEN = new EmptyGen();
+
+        private class EmptyGen: AFn
         {
-            return EOS;
-        }
-
-        public static bool isEOS(object o)
-        {
-            return o == EOS;
-        }
-
-        public static readonly IStream EMPTY_STREAM = new EmptyStream();
-
-        private class EmptyStream : IStream
-        {
-            #region IStream Members
-
-            public object next()
+            [MethodImpl(MethodImplOptions.Synchronized)]  // TODO: Why is this synchronized?
+            public override object invoke()
             {
-                return eos();
+                return EOS;
             }
-
-            #endregion
-        }
-
-
-        private class FnStream : IStream
-        {
-
-            #region Data
-
-            IFn _fn;
-
-            #endregion
-
-            #region C-tors
-
-            public FnStream(IFn fn)
-            {
-                _fn = fn;
-            }
-
-            #endregion
-
-            #region IStream Members
-
-            public object next()
-            {
-                return _fn.invoke();
-            }
-
-            #endregion
         }
 
 

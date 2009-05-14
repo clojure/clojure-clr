@@ -103,6 +103,7 @@
     <Compile Include="Lib\IDeref.cs" />
     <Compile Include="Lib\LazySeq.cs" />
     <Compile Include="Lib\Seqable.cs" />
+    <Compile Include="Lib\Stream.cs" />
     <Compile Include="Readers\LineNumberingReader.cs" />
     <Compile Include="Runtime\ClojureBinder.cs" />
     <Compile Include="Runtime\ClojureCommandLine.cs" />
@@ -157,7 +158,6 @@
     <Compile Include="Lib\IRef.cs" />
     <Compile Include="Lib\IReference.cs" />
     <Compile Include="Lib\ISeq.cs" />
-    <Compile Include="Lib\IStream.cs" />
     <Compile Include="Lib\IteratorStream.cs" />
     <Compile Include="Lib\JavaConcurrentDictionary.cs" />
     <Compile Include="Lib\Keyword.cs" />
@@ -193,7 +193,6 @@
     <Compile Include="Lib\Settable.cs" />
     <Compile Include="Lib\Sorted.cs" />
     <Compile Include="Lib\Streamable.cs" />
-    <Compile Include="Lib\StreamSeq.cs" />
     <Compile Include="Lib\StringSeq.cs" />
     <Compile Include="Lib\Symbol.cs" />
     <Compile Include="Lib\Util.cs" />

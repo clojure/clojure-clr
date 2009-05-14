@@ -290,41 +290,37 @@ namespace clojure.lang
         #region Streamable Members
 
         /// <summary>
-        /// Internal class that implements IStream for ASeq objects.
+        /// Internal class that implements Stream source for ASeq objects.
         /// </summary>
-        class Stream : IStream
+        internal class Src : AFn
         {
             ISeq _s;
 
-            public Stream(ISeq s)
+            public Src(ISeq s)
             {
                 _s = s;
             }
 
-            #region IStream Members
-
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            public object next()
+            public override object invoke()
             {
-                if (_s != null)
+                ISeq sq = RT.seq(_s);
+                if (sq != null)
                 {
-                    object ret = _s.first();
-                    _s = _s.next();
+                    object ret = sq.first();
+                    _s = sq.more();
                     return ret;
                 }
-                return RT.eos();
+                return RT.EOS;
             }
-
-            #endregion
         }
 
         /// <summary>
-        /// Gets an <see cref="IStream">IStream/see> for this object.
+        /// Gets a <see cref="IStream">Stream</see> for this object.
         /// </summary>
-        /// <returns>The <see cref="IStream">IStream/see>.</returns>
-        public virtual IStream stream()
+        /// <returns>The <see cref="Stream">Stream</see>.</returns>
+        public virtual Stream stream()
         {
-            return new Stream(this);
+            return new Stream(new Src(this));
         }
 
         #endregion
