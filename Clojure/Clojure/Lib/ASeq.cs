@@ -198,7 +198,7 @@ namespace clojure.lang
         /// <remarks>An empty sequence must be null.</remarks>
         virtual public IPersistentCollection empty()
         {
-            return null;
+            return PersistentList.EMPTY;
         }
 
 

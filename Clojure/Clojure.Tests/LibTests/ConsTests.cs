@@ -80,7 +80,8 @@ namespace Clojure.Tests.LibTests
         {
             // Test of ASeq
             Cons c = new Cons("abc", null);
-            Expect(c.empty(), Null);
+            IPersistentCollection empty = c.empty();
+            Expect(empty, SameAs(PersistentList.EMPTY));
         }
 
         [Test]
