@@ -225,8 +225,9 @@ namespace clojure.lang
         /// </summary>
         /// <param name="dispatchVal">The dispatch value.</param>
         /// <returns>The preferred method for the value.</returns>
+        /// <remarks>lower initial letter for core.clj compatibility</remarks>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        private IFn GetFn(object dispatchVal)
+        public IFn getMethod(object dispatchVal)
         {
             if (_cachedHierarchy != _hierarchy.deref())
                 ResetCache();
@@ -240,10 +241,15 @@ namespace clojure.lang
                 return targetFn;
 
             targetFn = (IFn)MethodTable.valAt(_defaultDispatchVal);
-            if (targetFn != null)
-                return targetFn;
+            return targetFn;
+        }
 
-            throw new ArgumentException(String.Format("No method for dispatch value: {0}", dispatchVal));
+        private IFn GetFn(object dispatchVal)
+        {
+            IFn targetFn = getMethod(dispatchVal);
+            if (targetFn == null)
+                throw new ArgumentException(String.Format("No method for dispatch value: {0}", dispatchVal));
+            return targetFn;
         }
 
         /// <summary>
