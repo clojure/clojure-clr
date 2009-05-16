@@ -105,7 +105,7 @@ namespace clojure.lang
 
         public IPersistentCollection empty()
         {
-            return null;
+            return PersistentList.EMPTY;
         }
 
         public bool equiv(object o)
