@@ -206,6 +206,7 @@ namespace clojure.lang
             if (x is BigInteger)
                 return (BigInteger)x;
             else
+                // TODO: determine if we should just cast.
                 return BigInteger.valueOf(Convert.ToInt64(x));
         }
 
@@ -216,6 +217,7 @@ namespace clojure.lang
             else if ( x is BigInteger)
                 return new BigDecimal((BigInteger)x);
             else
+                // TODO: determine if we should just cast.
                 return BigDecimal.valueOf(Convert.ToInt64(x));
         }
 
@@ -258,7 +260,6 @@ namespace clojure.lang
 
         public static object reduce(BigInteger val)
         {
-            //return (val.bitLength() < 32) ? (object)val.intValue() : val;
             int bitLength = val.bitLength();
             return (bitLength < 32)
                 ? (object)val.intValue()
@@ -534,7 +535,7 @@ namespace clojure.lang
 
         #endregion
 
-        class IntegerOps : Ops
+        sealed class IntegerOps : Ops
         {
             #region Ops Members
 
@@ -687,7 +688,7 @@ namespace clojure.lang
             #endregion
         }
 
-        class LongOps : Ops
+        sealed class LongOps : Ops
         {
             #region Ops Members
 
@@ -1394,7 +1395,7 @@ namespace clojure.lang
                 return toBigDecimal(x).multiply(toBigDecimal(y));
             }
 
-            // TODO: fiture out what the rounding mode should be
+            // TODO: figure out what the rounding mode should be
             public object divide(object x, object y)
             {
                 return toBigDecimal(x).divide(toBigDecimal(y), BigDecimal.ROUND_HALF_EVEN);

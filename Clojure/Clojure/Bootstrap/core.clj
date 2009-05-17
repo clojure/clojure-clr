@@ -2892,7 +2892,7 @@
 
 (defn rand
   "Returns a random floating point number between 0 (inclusive) and
-  1 (exclusive)."
+  n (default 1) (exclusive)."
   ([] (. clojure.lang.RT (random)))  ;;; Math ==> RT.  No Math.random in CLR.
   ([n] (* n (rand))))
 
