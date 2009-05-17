@@ -1057,6 +1057,10 @@ namespace clojure.lang
         {
             protected override object Read(TextReader r, char eq)
             {
+                if (!RT.booleanCast(RT.READEVAL.deref()))
+                {
+                    throw new Exception("EvalReader not allowed when *read-eval* is false.");
+                }
                 Object o = read(r, true, null, true);
                 if (o is Symbol)
                 {
