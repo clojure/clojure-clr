@@ -24,6 +24,7 @@ using clojure.runtime;
 
 namespace clojure.compiler
 {
+    [Obsolete("This class will go away when I don't need to look at its code anymore")]
     public static class Generator
     {
         #region Data

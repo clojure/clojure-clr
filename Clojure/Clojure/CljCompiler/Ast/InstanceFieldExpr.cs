@@ -42,7 +42,8 @@ namespace clojure.lang.CljCompiler.Ast
             _propertyInfo = _targetType != null ? _targetType.GetProperty(_fieldName, BindingFlags.Instance | BindingFlags.Public) : null;
 
             if ( _fieldInfo == null && _propertyInfo == null  && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-                ((TextWriter)RT.ERR.deref()).WriteLine("Reflection warning -- reference to field/property {0} can't be resolved.", _fieldName);
+                ((TextWriter)RT.ERR.deref()).WriteLine("Reflection warning {0}:{1} - reference to field/property {2} can't be resolved.", 
+                    Compiler.SOURCE_PATH.deref(), /* line */ 0,_fieldName);
         }
 
         #endregion

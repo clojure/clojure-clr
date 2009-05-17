@@ -94,8 +94,8 @@ namespace clojure.lang
         static readonly Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
                                         Symbol.create("*source-path*"), "NO_SOURCE_FILE");
         // String
-        static readonly Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-            Symbol.create("*file*"), null);
+        internal static readonly Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+            Symbol.create("*file*"), "NO_SOURCE_PATH");
 
 
         internal static readonly Var METHODS = Var.create(null);

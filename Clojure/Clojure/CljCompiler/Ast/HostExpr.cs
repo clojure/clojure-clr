@@ -133,8 +133,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if ( method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()) )
                 // TODO: use DLR IO
-                ((TextWriter)RT.ERR.deref()).WriteLine(string.Format("Reflection warning, line: {0} - call to {1} can't be resolved.\n",
-                    /* line ,*/0, methodName));
+                ((TextWriter)RT.ERR.deref()).WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved.\n",
+                    Compiler.SOURCE_PATH.deref(), /* line ,*/0, methodName));
         }
 
         private static MethodInfo GetMatchingMethodAux(Type targetType, IPersistentVector args, string methodName, bool getStatics)

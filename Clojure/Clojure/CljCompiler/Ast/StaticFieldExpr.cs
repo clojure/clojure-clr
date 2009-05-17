@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using Microsoft.Linq.Expressions;
+using System.IO;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -36,6 +37,11 @@ namespace clojure.lang.CljCompiler.Ast
             _type = type;
             _field = type.GetField(_fieldName, BindingFlags.Static | BindingFlags.Public);
             _property = type.GetProperty(_fieldName, BindingFlags.Static | BindingFlags.Public);
+
+            if ( _field == null && _property == null  && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                ((TextWriter)RT.ERR.deref()).WriteLine("Reflection warning {0}:{1} - reference to field/property {2} can't be resolved.", 
+                    Compiler.SOURCE_PATH.deref(), /* line */ 0,_fieldName);
+
         }
 
         #endregion
