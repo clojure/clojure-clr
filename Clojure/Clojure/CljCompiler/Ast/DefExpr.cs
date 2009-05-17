@@ -86,8 +86,10 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 IPersistentMap mm = sym.meta();
-                // TODO: add source line info metadata.
-                //mm = (IPersistentMap) RT.assoc(RT.LINE_KEY, LINE.deref()).assoc(RT.FILE_KEY, SOURCE.deref());
+                // TODO: add source and line info metadata.
+                //Object source_path = SOURCE_PATH.get();
+                //source_path = source_path == null ? "NO_SOURCE_FILE" : source_path;
+                //mm = (IPersistentMap)RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY, source_path);
 
                 Expr meta =  mm == null ? null : Compiler.GenerateAST(mm);
                 Expr init = Compiler.GenerateAST(RT.third(form));
