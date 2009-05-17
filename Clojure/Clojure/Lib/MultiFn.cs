@@ -40,6 +40,11 @@ namespace clojure.lang
         readonly IRef _hierarchy;
 
         /// <summary>
+        /// The name of this multifunction.
+        /// </summary>
+        readonly string _name;
+
+        /// <summary>
         /// The methods defined for this multifunction.
         /// </summary>
         IPersistentMap _methodTable;
@@ -85,13 +90,15 @@ namespace clojure.lang
 
         #region C-tors & factory methods
 
-        /// <summary>
         /// Construct a multifunction.
         /// </summary>
+        /// <param name="name">The name</param>
         /// <param name="dispatchFn">The dispatch function.</param>
         /// <param name="defaultDispatchVal">The default dispatch value.</param>
-        public MultiFn(IFn dispatchFn, object defaultDispatchVal, IRef hierarchy)
+        /// <param name="hierarchy">The hierarchy for this multifunction</param>
+        public MultiFn(string name, IFn dispatchFn, object defaultDispatchVal, IRef hierarchy)
         {
+            _name = name;
             _dispatchFn = dispatchFn;
             _defaultDispatchVal = defaultDispatchVal;
             _methodTable = PersistentHashMap.EMPTY;
@@ -154,7 +161,7 @@ namespace clojure.lang
         public MultiFn preferMethod(object dispatchValX, object dispatchValY)
         {
             if (Prefers(dispatchValY, dispatchValX))
-                throw new InvalidOperationException(String.Format("Preference conflict: {0} is already preferred to {1}", dispatchValY, dispatchValX));
+                throw new InvalidOperationException(String.Format("Preference conflict in multimethod {0}: {1} is already preferred to {2}", _name,dispatchValY, dispatchValX));
             _preferTable = PreferTable.assoc(dispatchValX,
                 RT.conj((IPersistentCollection)RT.get(_preferTable, dispatchValX, PersistentHashSet.EMPTY),
                         dispatchValY));
@@ -267,8 +274,8 @@ namespace clojure.lang
                     if (bestEntry == null || Dominates(me.key(), bestEntry.key()))
                         bestEntry = me;
                     if (!Dominates(bestEntry.key(), me.key()))
-                        throw new ArgumentException(String.Format("Multiple methods match dispatch value: {0} -> {1} and {2}, and neither is preferred",
-                            dispatchVal, me.key(), bestEntry.key()));
+                        throw new ArgumentException(String.Format("Multiple methods in multimethod {0} match dispatch value: {1} -> {2} and {3}, and neither is preferred",
+                            _name,dispatchVal, me.key(), bestEntry.key()));
                 }
             }
             if (bestEntry == null)
