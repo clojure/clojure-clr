@@ -2343,22 +2343,6 @@
   (let [rdr (-> (System.IO.StringReader. s)     ;;; was (java.io.StringReader. s)
                 (clojure.lang.Readers.LineNumberingReader.))]   ;;; was (clojure.lang.LineNumberingPushbackReader.))]
     (load-reader rdr)))
-;;; NOT CLEAR WHAT TO WORK AGAINST HERE.  MAYBE THIS SHOULD NOT BE IN THE CORE?
-;(defn resultset-seq
-;  "Creates and returns a lazy sequence of structmaps corresponding to
-;  the rows in the java.sql.ResultSet rs"
-;  [#^java.sql.ResultSet rs]
-;    (let [rsmeta (. rs (getMetaData))
-;          idxs (range 1 (inc (. rsmeta (getColumnCount))))
-;          keys (map (comp keyword #(.ToLowerCase #^String %))				;;; .toLowerCase
-;                    (map (fn [i] (. rsmeta (getColumnName i))) idxs))
-;          row-struct (apply create-struct keys)
-;          row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
-;          rows (fn thisfn []
-;                   (when (. rs (next))
-;                   (lazy-seq
-;                    (when (. rs (next))
-;      (rows)))
 
 (defn set
   "Returns a set of the distinct elements of coll."
@@ -3436,6 +3420,25 @@
            (recur (conj s x) etc))
          true))
      false)))
+;;; Not clear what to work against here.
+;(defn resultset-seq
+;  "Creates and returns a lazy sequence of structmaps corresponding to
+;  the rows in the java.sql.ResultSet rs"
+;  [#^java.sql.ResultSet rs]
+;    (let [rsmeta (. rs (getMetaData))
+;          idxs (range 1 (inc (. rsmeta (getColumnCount))))
+;          keys (map (comp keyword #(.toLowerCase #^String %))
+;                    (map (fn [i] (. rsmeta (getColumnLabel i))) idxs))
+;          check-keys
+;                (or (apply distinct? keys)
+;                    (throw (Exception. "ResultSet must have unique column labels")))
+;          row-struct (apply create-struct keys)
+;          row-values (fn [] (map (fn [#^Integer i] (. rs (getObject i))) idxs))
+;          rows (fn thisfn []
+;                   (lazy-seq
+;                    (when (. rs (next))
+;                      (cons (apply struct row-struct (row-values)) (thisfn)))))]
+;      (rows)))
 ;;; later (boring)
 ;(defn iterator-seq
 ;  "Returns a seq on a java.util.Iterator. Note that most collections
