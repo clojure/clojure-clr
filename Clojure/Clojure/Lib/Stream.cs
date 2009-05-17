@@ -22,7 +22,7 @@ namespace clojure.lang
 
         static readonly ISeq NO_SEQ = new Cons(null, null);
 
-        ISeq _seq = NO_SEQ;
+        ISeq _sequence = NO_SEQ;
         readonly IFn _src;
 	    readonly IFn _xform;
         Cons _pushed = null;
@@ -46,19 +46,22 @@ namespace clojure.lang
 
         #endregion
 
-
-
         #region Seqable Members
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public ISeq seq()
         {
-            if (_seq == NO_SEQ)
+            return sequence().seq();
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public ISeq sequence()
+        {
+            if (_sequence == NO_SEQ)
             {
                 tap();
-                _seq = makeSeq(_tap);
+                _sequence = makeSequence(_tap);
             }
-            return _seq;
+            return _sequence;
         }
 
         class Seqer : AFn
@@ -72,18 +75,14 @@ namespace clojure.lang
 
             public override object invoke()
             {
-                object v;
-                do
-                {
-                    v = _tap.invoke();
-                } while (v == RT.SKIP);
+                object  v = _tap.invoke();
                 if (v == RT.EOS)
                     return null;
                 return new Cons(v, new LazySeq(this));
             }
         }
 
-        static ISeq makeSeq(IFn tap)
+        static ISeq makeSequence(IFn tap)
         {
             return RT.seq(new LazySeq(new Seqer(tap)));
         }
@@ -124,14 +123,20 @@ namespace clojure.lang
 
             public override object invoke()
             {
+                if (_xform == null)
+                    return _src.invoke();
+
                 object v;
+                object xv;
                 do
                 {
                     v = _src.invoke();
-                } while (v == RT.SKIP);
-                if (_xform == null || v == RT.EOS)
-                    return v;
-                return _xform.invoke(v);
+                    if ( v == RT.EOS)
+                        return v;
+                    xv = _xform.invoke(v);
+                } while (xv == RT.SKIP);
+
+                return xv;
             }
 
         }
