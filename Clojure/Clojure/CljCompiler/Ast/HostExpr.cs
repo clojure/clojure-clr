@@ -176,6 +176,7 @@ namespace clojure.lang.CljCompiler.Ast
             // Assume matching lengths
             int matchIndex = -1;
             bool tied = false;
+            bool foundExact = false;
 
             for (int i = 0; i < parmlists.Count; i++)
             {
@@ -194,8 +195,12 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 if (exact == argexprs.count())
-                    return i;
-                if (match)
+                {
+                    if ( !foundExact || matchIndex == -1 || rets[matchIndex].IsAssignableFrom(rets[i]))
+                        matchIndex = i;
+                    foundExact = true;
+                }
+                else if (match && !foundExact)
                 {
                     if (matchIndex == -1)
                         matchIndex = i;
