@@ -425,6 +425,14 @@ namespace clojure.lang
                 : form;
         }
 
+        static object Macroexpand(object form)
+        {
+            object exf = Macroexpand1(form);
+            if (exf != form)
+                return Macroexpand(exf);
+            return form;
+        }
+
         private static object MacroexpandSeq1(ISeq form)
         {
             object op = RT.first(form);
