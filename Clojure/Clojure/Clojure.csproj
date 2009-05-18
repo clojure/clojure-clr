@@ -67,6 +67,7 @@
     <Compile Include="CljCompiler\Ast\GenContext.cs" />
     <Compile Include="CljCompiler\Ast\HostExpr.cs" />
     <Compile Include="CljCompiler\Ast\IfExpr.cs" />
+    <Compile Include="CljCompiler\Ast\ImportExpr.cs" />
     <Compile Include="CljCompiler\Ast\InstanceFieldExpr.cs" />
     <Compile Include="CljCompiler\Ast\InstanceMethodExpr.cs" />
     <Compile Include="CljCompiler\Ast\InvokeExpr.cs" />

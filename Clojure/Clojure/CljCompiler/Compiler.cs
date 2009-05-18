@@ -59,6 +59,7 @@ namespace clojure.lang
         public static readonly Symbol THROW = Symbol.create("throw");
         public static readonly Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
         public static readonly Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
+        public static readonly Symbol IMPORT = Symbol.create("import*");
         public static readonly Symbol NEW = Symbol.create("new");
         public static readonly Symbol _AMP_ = Symbol.create("&");
 
@@ -132,6 +133,7 @@ namespace clojure.lang
             FN, new FnExpr.Parser(),
             QUOTE, new ConstantExpr.Parser(),
             THE_VAR, new TheVarExpr.Parser(),
+            IMPORT, new ImportExpr.Parser(),
             DOT, new HostExpr.Parser(),
             ASSIGN, new AssignExpr.Parser(),
             TRY, new TryExpr.Parser(),
@@ -164,12 +166,16 @@ namespace clojure.lang
         //static readonly MethodInfo Method_CGen_MakeSet = typeof(Generator).GetMethod("MakeSet");
         //static readonly MethodInfo Method_CGen_MakeVector = typeof(Generator).GetMethod("MakeVector");
 
+        internal static readonly MethodInfo Method_Compiler_CurrentNamespace = typeof(Compiler).GetMethod("CurrentNamespace");
+
         internal static readonly MethodInfo Method_IObj_withMeta = typeof(IObj).GetMethod("withMeta");
 
         internal static readonly MethodInfo Method_Keyword_intern = typeof(Keyword).GetMethod("intern", new Type[] { typeof(Symbol) });
 
         internal static readonly MethodInfo Method_Monitor_Enter = typeof(Monitor).GetMethod("Enter");
         internal static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit");
+
+        internal static readonly MethodInfo Method_Namespace_importClass1 = typeof(Namespace).GetMethod("importClass", new Type[] { typeof(Type) });
 
         internal static readonly MethodInfo Method_PersistentList_create = typeof(PersistentList).GetMethod("create", new Type[] { typeof(System.Collections.IList) });
 
