@@ -10,7 +10,6 @@
 
 (def unquote)
 (def unquote-splicing)
-(def *clojure-version* {:major 1 :minor 0 :incremental 0 :qualifier "RC1"})
 
 (def
  #^{:arglists '([& items])
@@ -3939,11 +3938,6 @@
 (defmacro add-doc {:private true} [name docstring]
   `(alter-meta! (var ~name)  assoc :doc ~docstring))
 
-(add-doc *clojure-version*
-  "The version info for Clojure core, as a map containing :major :minor :incremental and :qualifier keys. 
-  Feature releases may increment :minor and/or :major, bugfix releases will increment :incremental. 
-  Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\"")
-
 (add-doc *file*
   "The path of the file being evaluated, as a String.
 
@@ -4022,7 +4016,6 @@
 ;(load "core_proxy")
 ;(load "core_print")
 ;(load "genclass")
-
 ;;; Need to figure out equivalents for pooledExecutor, java.util.concurrent.Future + we need proxies.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; futures (needs proxy);;;;;;;;;;;;;;;;;;
 ;(defn future-call 
@@ -4092,3 +4085,37 @@
                              (map #(cons `fn %) fnspecs)))
            ~@body))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; clojure version number ;;;;;;;;;;;;;;;;;;;;;;
+;;; THIS EXPOSES WAY TOO MUCH JVM INTERNALS!
+(let [                                        ;;; version-stream (.getResourceAsStream (clojure.lang.RT/baseLoader) 
+                                              ;;;                                      "clojure/version.properties")
+      properties (. clojure.lang.RT GetVersionProperties)  ;;; properties     (doto (new java.util.Properties) (.load version-stream))
+      prop (fn [k] (.getProperty properties (str "clojure.version." k)))
+      clojure-version {:major       (prop "major")
+                       :minor       (prop "minor")
+                       :incremental (prop "incremental")
+                       :qualifier   (prop "qualifier")}]
+  (def *clojure-version* 
+    (if (not (= (prop "interim") "false"))
+      (clojure.lang.RT/assoc clojure-version :interim true)
+      clojure-version)))
+      
+(add-doc *clojure-version*
+  "The version info for Clojure core, as a map containing :major :minor 
+  :incremental and :qualifier keys. Feature releases may increment 
+  :minor and/or :major, bugfix releases will increment :incremental. 
+  Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\"")
+      
+(defn
+  clojure-version 
+  "Returns clojure version as a printable string."
+  []
+  (str (:major *clojure-version*)
+       "."
+       (:minor *clojure-version*)
+       (when-let [i (:incremental *clojure-version*)]
+         (str "." i))
+       (when-let [q (:qualifier *clojure-version*)]
+         (str "-" q))
+       (when (:interim *clojure-version*)
+         "-SNAPSHOT")))

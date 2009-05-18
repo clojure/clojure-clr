@@ -36,9 +36,9 @@ namespace clojure.console
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
 
-                LoadFromStream(new StringReader(clojure.properties.Resources.core),false); 
-                LoadFromStream(new StringReader(clojure.properties.Resources.core_print),false);
-                LoadFromStream(new StringReader(clojure.properties.Resources.test),false);
+                LoadFromStream(new StringReader(clojure.lang.Properties.Resources.core),false);
+                LoadFromStream(new StringReader(clojure.lang.Properties.Resources.core_print), false);
+                LoadFromStream(new StringReader(clojure.lang.Properties.Resources.test), false);
 
                 sw.Stop();
                 Console.WriteLine("Loading took {0} milliseconds.", sw.ElapsedMilliseconds);

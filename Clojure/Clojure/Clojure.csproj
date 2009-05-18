@@ -197,6 +197,7 @@
     <Compile Include="Lib\Symbol.cs" />
     <Compile Include="Lib\Util.cs" />
     <Compile Include="Lib\Var.cs" />
+    <Compile Include="Runtime\Properties.cs" />
     <Compile Include="Runtime\Reflector.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -206,10 +207,12 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Bootstrap\ants.clj" />
     <None Include="Bootstrap\core-print.clj" />
     <None Include="Bootstrap\core.clj" />
     <None Include="Bootstrap\test.clj" />
+    <None Include="Bootstrap\version.properties" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\DLR_Main\Src\Runtime\Microsoft.Scripting.Core\Microsoft.Scripting.Core.csproj">
@@ -220,6 +223,9 @@
       <Project>{EB66B766-6354-4208-A3D4-AACBDCB5C3B3}</Project>
       <Name>Microsoft.Scripting</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\version.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

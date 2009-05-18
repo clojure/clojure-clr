@@ -20,7 +20,7 @@ using System.Threading;
 using System.IO;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-
+using RTProperties = clojure.runtime.Properties;
 
 namespace clojure.lang
 {
@@ -262,6 +262,10 @@ namespace clojure.lang
 
         static public readonly object[] EMPTY_ARRAY = new Object[] { };
 
+        static RTProperties _versionProperties = new RTProperties();
+
+        public static RTProperties GetVersionProperties() { return _versionProperties; }
+
         #endregion
 
         #region  It's true (or not)
@@ -425,6 +429,9 @@ namespace clojure.lang
 
         static RT()
         {
+
+            _versionProperties.LoadFromString(clojure.lang.Properties.Resources.version); 
+
             Keyword dockw = Keyword.intern(null, "doc");
             Keyword arglistskw = Keyword.intern(null, "arglists");
             Symbol namesym = Symbol.create("name");
