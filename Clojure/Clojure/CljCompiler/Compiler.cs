@@ -366,6 +366,7 @@ namespace clojure.lang
                     if (t != null)
                         if (Reflector.GetField(t, symbol.Name, true) != null)
                             return new StaticFieldExpr(t, symbol.Name);
+                    throw new Exception(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
                 }
             }
 
