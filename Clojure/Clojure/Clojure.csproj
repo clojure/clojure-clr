@@ -216,6 +216,9 @@
     <None Include="Bootstrap\version.properties" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\version.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\..\DLR_Main\Src\Runtime\Microsoft.Scripting.Core\Microsoft.Scripting.Core.csproj">
       <Project>{2AE75F5A-CD1F-4925-9647-AF4D1C282FB4}</Project>
       <Name>Microsoft.Scripting.Core</Name>
@@ -224,9 +227,6 @@
       <Project>{EB66B766-6354-4208-A3D4-AACBDCB5C3B3}</Project>
       <Name>Microsoft.Scripting</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\version.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
