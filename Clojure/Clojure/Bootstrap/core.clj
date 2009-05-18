@@ -4087,13 +4087,13 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; clojure version number ;;;;;;;;;;;;;;;;;;;;;;
 ;;; THIS EXPOSES WAY TOO MUCH JVM INTERNALS!
-(let [                                        ;;; version-stream (.getResourceAsStream (clojure.lang.RT/baseLoader) 
-                                              ;;;                                      "clojure/version.properties")
-      properties (. clojure.lang.RT GetVersionProperties)  ;;; properties     (doto (new java.util.Properties) (.load version-stream))
+(let [                                                                      ;;; version-stream (.getResourceAsStream (clojure.lang.RT/baseLoader) 
+                                                                            ;;;                                      "clojure/version.properties")
+      properties (. clojure.lang.RT GetVersionProperties)                   ;;; properties     (doto (new java.util.Properties) (.load version-stream))
       prop (fn [k] (.getProperty properties (str "clojure.version." k)))
-      clojure-version {:major       (prop "major")
-                       :minor       (prop "minor")
-                       :incremental (prop "incremental")
+      clojure-version {:major       (Int32/Parse (prop "major"))            ;;;(Integer/valueOf (prop "major"))
+                       :minor       (Int32/Parse (prop "minor"))            ;;;(Integer/valueOf (prop "minor"))
+                       :incremental (Int32/Parse (prop "incremental"))      ;;;(Integer/valueOf (prop "incremental"))
                        :qualifier   (prop "qualifier")}]
   (def *clojure-version* 
     (if (not (= (prop "interim") "false"))
