@@ -1043,18 +1043,6 @@ namespace clojure.lang
         }
 
 
-        // Java version has this in Reflector, but that is in my SimpleREPL. DOn't want to embed calls there.
-        public static Object prepRet(Object x)
-        {
-            //	if(c == boolean.class)
-            //		return ((Boolean) x).booleanValue() ? RT.T : null;
-            if (x is Boolean)
-                return ((Boolean)x) ? RT.T : RT.F;
-            return x;
-        }
-
-
-
         internal static Type MaybePrimitiveType(Expr e)
         {
             if (e is MaybePrimitiveExpr && e.HasClrType)

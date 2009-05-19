@@ -2177,7 +2177,7 @@
   {:inline (fn [a i] `(. clojure.lang.RT (aget ~a ~i)))
    :inline-arities #{2}}
   ([array idx]
-   (clojure.lang.Compiler/prepRet (. array (GetValue idx))))  ;;; was  (. Array (get array idx)))  also replaced clojure.lang.Reflector/prepRet
+   (clojure.lang.Reflector/prepRet (. array (GetValue idx))))  ;;; was  (. Array (get array idx)))  
   ([array idx & idxs]
    (apply aget (aget array idx) idxs)))
 

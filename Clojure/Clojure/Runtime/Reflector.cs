@@ -15,7 +15,7 @@ using System.Text;
 using System.Reflection;
 using clojure.lang;
 
-namespace clojure.runtime
+namespace clojure.lang
 {
     public sealed class Reflector
     {
@@ -280,6 +280,17 @@ namespace clojure.runtime
             if (argType == null)
                 return !paramType.IsPrimitive;
             return AreAssignable(paramType, argType);
+        }
+
+
+        // Java version has this in Reflector, but that is in my SimpleREPL. DOn't want to embed calls there.
+        public static Object prepRet(Object x)
+        {
+            //	if(c == boolean.class)
+            //		return ((Boolean) x).booleanValue() ? RT.T : null;
+            if (x is Boolean)
+                return ((Boolean)x) ? RT.T : RT.F;
+            return x;
         }
 
         // Stolen from DLR TypeUtils
