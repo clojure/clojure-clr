@@ -18,6 +18,7 @@ using Microsoft.Linq.Expressions;
 using clojure.lang.CljCompiler.Ast;
 using clojure.runtime;
 using System.Reflection;
+using System.Reflection.Emit;
 
 
 namespace clojure.lang
@@ -30,6 +31,7 @@ namespace clojure.lang
     /// Due to the fact that DLR can only generate lambda expressions to static methods in assemblies, some nasty workarounds are required
     /// that force a multi-pass compiler.  With that, I gave up and added an AST intermediate stage.</para>
     /// <para>So now we go SEXPR -> AST -> ExpressionTree.  As a result, once again, my code converges toward the JVM code.</para>
+    /// <para>PS: And then later the damnable :super-class went away.</para>
     /// </remarks>
     public static class Compiler
     {
@@ -88,8 +90,11 @@ namespace clojure.lang
                                                  Symbol.create("*compile-files*"), false);  //JAVA: Boolean.FALSE -- changed from RT.F in rev 1108, not sure why
 
         //String
-        static readonly Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+        public static readonly Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
                                                  Symbol.create("*compile-path*"), null);
+
+        public static readonly Var COMPILE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+                                                Symbol.create("compile"));
 
         // String
         static readonly Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
@@ -167,6 +172,8 @@ namespace clojure.lang
         //static readonly MethodInfo Method_CGen_MakeVector = typeof(Generator).GetMethod("MakeVector");
 
         internal static readonly MethodInfo Method_Compiler_CurrentNamespace = typeof(Compiler).GetMethod("CurrentNamespace");
+        internal static readonly MethodInfo Method_Compiler_PushNS = typeof(Compiler).GetMethod("PushNS");
+
 
         internal static readonly MethodInfo Method_IObj_withMeta = typeof(IObj).GetMethod("withMeta");
 
@@ -182,12 +189,13 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Reflector_CallInstanceMethod = typeof(Reflector).GetMethod("CallInstanceMethod");
         internal static readonly MethodInfo Method_Reflector_CallStaticMethod = typeof(Reflector).GetMethod("CallStaticMethod");
         internal static readonly MethodInfo Method_Reflector_InvokeConstructor = typeof(Reflector).GetMethod("InvokeConstructor");
+        internal static readonly MethodInfo Method_Reflector_SetInstanceFieldOrProperty = typeof(Reflector).GetMethod("SetInstanceFieldOrProperty");
 
         internal static readonly MethodInfo Method_RT_arrayToList = typeof(RT).GetMethod("arrayToList");
         internal static readonly MethodInfo Method_RT_classForName = typeof(RT).GetMethod("classForName");
         internal static readonly MethodInfo Method_RT_IsTrue = typeof(RT).GetMethod("IsTrue");
         internal static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
-        static readonly MethodInfo Method_RT_printToConsole = typeof(RT).GetMethod("printToConsole");
+        internal static readonly MethodInfo Method_RT_printToConsole = typeof(RT).GetMethod("printToConsole");
         internal static readonly MethodInfo Method_RT_set = typeof(RT).GetMethod("set");
         internal static readonly MethodInfo Method_RT_vector = typeof(RT).GetMethod("vector");
         internal static readonly MethodInfo Method_RT_readString = typeof(RT).GetMethod("readString");
@@ -197,8 +205,10 @@ namespace clojure.lang
         
         internal static readonly MethodInfo Method_Var_BindRoot = typeof(Var).GetMethod("BindRoot");
         internal static readonly MethodInfo Method_Var_get = typeof(Var).GetMethod("deref");
-        //static readonly MethodInfo Method_Var_set = typeof(Var).GetMethod("set");
-        internal static readonly MethodInfo Method_Var_SetMeta = typeof(Var).GetMethod("SetMeta");
+        internal static readonly MethodInfo Method_Var_set = typeof(Var).GetMethod("set");
+        internal static readonly MethodInfo Method_Var_setMeta = typeof(Var).GetMethod("setMeta");
+        internal static readonly MethodInfo Method_Var_popThreadBindings = typeof(Var).GetMethod("popThreadBindings");
+
 
         //static readonly ConstructorInfo Ctor_AFnImpl_0 = typeof(AFnImpl).GetConstructor(Type.EmptyTypes);
         internal static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
@@ -240,7 +250,7 @@ namespace clojure.lang
         static GenContext _context = new GenContext("eval", CompilerMode.Immediate);
 
         static int _saveId = 0;
-        public static void SaveContext()
+        public static void SaveEvalContext()
         {
             _context.AssyBldr.Save("done" + _saveId++ + ".dll");
             _context = new GenContext("eval", CompilerMode.Immediate);
@@ -249,20 +259,18 @@ namespace clojure.lang
 
         public static LambdaExpression GenerateLambda(object form, bool addPrint)
         {
+            return GenerateLambda(_context, form, addPrint);
+        }
+
+
+        internal static LambdaExpression GenerateLambda(GenContext context, object form, bool addPrint)
+        {
             // TODO: Clean this up.
             form = RT.list(FN, PersistentVector.EMPTY, form);
 
             Expr ast = GenerateAST(form);
-
-            Expression formExpr = GenerateDlrExpression(_context,ast);
-
-            //Expression finalExpr = Expression.Call(formExpr, "invoke", new Type[0]); ;
+            Expression formExpr = GenerateDlrExpression(context,ast);
             Expression finalExpr = Expression.Call(formExpr, formExpr.Type.GetMethod("invoke", System.Type.EmptyTypes));
-
-            //if (formExpr.Type == typeof(void))
-            //    finalExpr = Expression.Block(formExpr, Expression.Constant(null));
-            //else
-            //    finalExpr = MaybeBox(formExpr);
 
             if (addPrint)
             {
@@ -271,6 +279,9 @@ namespace clojure.lang
 
             return Expression.Lambda(finalExpr, "REPLCall", null);
         }
+
+
+
 
         static Expression[] MaybeBox(Expression[] args)
         {
@@ -826,7 +837,6 @@ namespace clojure.lang
 
         #endregion
 
-
         #region Symbol/namespace resolving
 
         // TODO: we have duplicate code below.
@@ -977,71 +987,253 @@ namespace clojure.lang
 
         #endregion
 
-        #region Hooks from execution engine
-
-        public interface EEHooks
-        {
-            object Eval(object form);
-            object Macroexpand1(object form);
-            object LoadFromStream(TextReader rdr);
-            object LoadFile(string filename);
-            Delegate GenerateTypedDelegate(Type delegateType, Symbol optName, IPersistentVector argList, ISeq body);
-        }
-
-        // Needs to be initialized by the execution engine.
-        private static EEHooks _hooks;
-
-        public static bool SetHooks(EEHooks hooks)
-        {
-            return null == Interlocked.CompareExchange(ref _hooks,hooks,null);
-        }
+        #region Interface to core.clj
 
 
         // The following methods are named (and initial LC) for core.clj compatibility
 
         public static object eval(object form)
         {
-            ValidateHooks();
-
-            return _hooks.Eval(form);
+            LambdaExpression ast = Compiler.GenerateLambda(form, false);
+            return ast.Compile().DynamicInvoke();
         }
 
         public static object macroexpand1(object form)
         {
-            ValidateHooks();
-
-            return _hooks.Macroexpand1(form);
+            return Macroexpand1(form);
         }
+        
+        #endregion
+
+        #region Loading
+
+        public static object loadFile(string filename)
+        {
+            FileInfo finfo = new FileInfo(filename);
+            if ( ! finfo.Exists )
+                throw new FileNotFoundException("Cannot find file to load",filename);
+
+            using (TextReader rdr = finfo.OpenText())
+                return load(rdr, finfo.FullName, finfo.Name);
+        }
+
 
         public static object load(TextReader rdr)
         {
-            ValidateHooks();
-            return _hooks.LoadFromStream(rdr);
+            return load(rdr, null, "NO_SOURCE_FILE");
         }
 
-
-        // This one is mine.
-        public static object GenerateTypedDelegate(Type delegateType, Symbol optName, IPersistentVector argList, ISeq body)
+        public static object load(TextReader rdr, string sourcePath, string sourceName)
         {
-            ValidateHooks();
-            return _hooks.GenerateTypedDelegate(delegateType, optName, argList, body);
-        }
+            object ret = null;
+            object eofVal = new object();
+            object form;
 
-        private static void ValidateHooks()
-        {
-            if ( _hooks == null )
-                throw new InvalidOperationException("Hooks from execution engine not set yet.  Major blowage.");
+            // TODO: ADD LineNumberingReader
+
+            Var.pushThreadBindings(RT.map(
+                //LOADER, RT.makeClassLoader(),
+                SOURCE_PATH, sourcePath,
+                SOURCE, sourceName,
+                RT.CURRENT_NS, RT.CURRENT_NS.deref()
+                //LINE_BEFORE, pushbackReader.getLineNumber(),
+                //LINE_AFTER, pushbackReader.getLineNumber()
+                ));
+
+            try
+            {
+                while ((form = LispReader.read(rdr, false, eofVal, false)) != eofVal)
+                {
+                    //LINE_AFTER.set(pushbackReader.getLineNumber());
+                    LambdaExpression ast = Compiler.GenerateLambda(form, false);
+                    ret = ast.Compile().DynamicInvoke();
+                    //LINE_BEFORE.set(pushbackReader.getLineNumber());
+                }
+            }
+            catch (LispReader.ReaderException e)
+            {
+                throw new CompilerException(sourceName, e.Line, e.InnerException);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+
+            return ret;
         }
+  
+
+        //public Delegate GenerateTypedDelegate(Type delegateType, Symbol optName, IPersistentVector argList, ISeq body)
+        //{
+        //    ScriptSource scriptSource = Engine.CreateScriptSourceFromString("<internal>");
+
+        //    LambdaExpression ast = Generator.GenerateTypedDelegateExpression(GetLanguageContext(), delegateType, optName, argList, body);
+        //    return ast.Compile();
+
+        //    //ast = new GlobalLookupRewriter().RewriteLambda(ast);  -- doesn't work unless no args
+        //    //ScriptCode code = new ScriptCode(ast, GetSourceUnit(scriptSource));
+        //    //return code;
+        //}
+        //// This one is mine.
+        //public static Delegate GenerateTypedDelegate(Type delegateType, Symbol optName, IPersistentVector argList, ISeq body)
+        //{
+            
+        //}
 
         #endregion
 
-        // Added in revision 1108, not sure where it is used.  (Made public in rev 1109)
-        public static void pushNS()
+        #region Compiling
+
+        public static object TestCompile(string filename)
+        {
+            using (TextReader rdr = File.OpenText(filename))
+                return Compile(rdr, null, filename);
+        }
+
+        internal static object Compile(TextReader rdr, string sourceDirectory, string sourceName)
+        {
+            if (COMPILE_PATH.deref() == null)
+                throw new Exception("*compile-path* not set");
+
+            object eofVal = new object();
+            object form;
+
+            string sourcePath = sourceDirectory == null ? sourceName : sourceDirectory + "\\" + sourceName;
+            // TODO: Add LineNumberingReader
+
+            Var.pushThreadBindings(RT.map(
+                SOURCE_PATH, sourcePath,
+                SOURCE, sourceName,
+                RT.CURRENT_NS, RT.CURRENT_NS.deref(),
+                //LINE_BEFORE, pushbackReader.getLineNumber(),
+                //LINE_AFTER, pushbackReader.getLineNumber(),
+                CONSTANTS, PersistentVector.EMPTY,
+                KEYWORDS, PersistentHashMap.EMPTY,
+                VARS, PersistentHashMap.EMPTY
+                ));
+            try
+            {
+                GenContext context = new GenContext(sourceName, sourceDirectory, CompilerMode.File);
+                TypeBuilder exprTB = context.ModuleBldr.DefineType("__REPL__", TypeAttributes.Class | TypeAttributes.Public);
+
+                List<string> names = new List<string>();
+
+                int i = 0;
+                while ((form = LispReader.read(rdr, false, eofVal, false)) != eofVal)
+                {
+                    //LINE_AFTER.set(pushbackReader.getLineNumber());
+                    LambdaExpression ast = Compiler.GenerateLambda(context,form, false);
+
+                    // Compile to assembly
+                    MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++), 
+                        MethodAttributes.Public | MethodAttributes.Static);
+                    ast.CompileToMethod(methodBuilder);
+
+                    names.Add(methodBuilder.Name);
+
+                    // evaluate in this environment
+                    ast.Compile().DynamicInvoke(); 
+                    //LINE_BEFORE.set(pushbackReader.getLineNumber());
+                }
+
+                Type exprType = exprTB.CreateType();
+
+                // Need to put the loader init in its own type because we can't generate calls on the MethodBuilders
+                //  until after their types have been closed.
+
+                TypeBuilder initTB = context.ModuleBldr.DefineType("__Init__", TypeAttributes.Class | TypeAttributes.Public);
+
+
+                Expression pushNSExpr = Expression.Call(null, Method_Compiler_PushNS);
+                Expression popExpr = Expression.Call(null, Method_Var_popThreadBindings);
+
+                List<Expression> inits = new List<Expression>();
+                foreach (string name in names)
+                {
+                    Expression call = Expression.Call(exprType, name, Type.EmptyTypes);
+                    inits.Add(call);
+                }
+
+                Expression tryCatch = Expression.TryCatchFinally(Expression.Block(inits), popExpr);
+
+                Expression body = Expression.Block(pushNSExpr, tryCatch);
+
+                // create initializer call
+                MethodBuilder mbInit = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static);
+                LambdaExpression initFn = Expression.Lambda(body);
+                initFn.CompileToMethod(mbInit);
+
+                initTB.CreateType();
+
+                context.AssyBldr.Save(sourceName  + ".dll");
+            }
+            catch (LispReader.ReaderException e)
+            {
+                throw new CompilerException(sourceName, e.Line, e.InnerException);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+            return null;
+        }
+
+        public static void PushNS()
         {
             Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.create("clojure.core"),
                                                                        Symbol.create("*ns*")), null));
         }
 
+
+        internal static bool LoadAssembly(FileInfo assyInfo)
+        {
+            Assembly assy = Assembly.LoadFile(assyInfo.FullName);
+            Type initType = assy.GetType("__Init__");
+            if (initType == null)
+            {
+                Console.WriteLine("Bad assembly");
+                return false;
+            }
+            try
+            {
+                initType.InvokeMember("Initialize", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, null, new object[0]);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error initializing {0}: {1}", assyInfo.FullName, e.Message);
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region CompilerException
+
+        public sealed class CompilerException : Exception
+        {
+            public CompilerException(string source, int line, Exception cause)
+                : base(ErrorMsg(source, line, cause.ToString()), cause)
+            {
+            }
+
+            public override string ToString()
+            {
+                return Message;
+            }
+
+            static string ErrorMsg(string source, int line, string s)
+            {
+                return string.Format("{0} ({1}:{2})",s, source,line);
+            }
+
+        }   
+
+        #endregion
+
+        #region Things to move elsewhere
+
+ 
 
         internal static Type MaybePrimitiveType(Expr e)
         {
@@ -1088,9 +1280,8 @@ namespace clojure.lang
             return exprs;
         }
 
-        internal static bool LoadAssembly(FileInfo assyInfo)
-        {
-            throw new NotImplementedException();
-        }
+
+
+        #endregion
     }
 }

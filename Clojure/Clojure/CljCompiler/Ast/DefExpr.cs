@@ -117,7 +117,7 @@ namespace clojure.lang.CljCompiler.Ast
                 exprs.Add(Expression.Call(parm, Compiler.Method_Var_BindRoot, Compiler.MaybeBox(_init.GenDlr(context))));
 
             if (_meta != null)
-                exprs.Add(Expression.Call(parm, Compiler.Method_Var_SetMeta, _meta.GenDlr(context)));
+                exprs.Add(Expression.Call(parm, Compiler.Method_Var_setMeta, _meta.GenDlr(context)));
 
             exprs.Add(parm);
 

@@ -12,10 +12,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
     interface AssignableExpr
     {
+        Expression GenAssignDlr(GenContext context, Expr val);
     }
 }

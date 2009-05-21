@@ -181,7 +181,7 @@
               e (char-escape-string c)]
           (if e (.Write w e) (.Write w c))))   
       (.Write w \"))                           
-    (.write w s))
+    (.Write w s))                                 
   nil)
 
 (defmethod print-dup String [s w] (print-method s w))
@@ -280,7 +280,7 @@
   (.Write w "M"))
 
 (defmethod print-method System.Text.RegularExpressions.Regex [p #^System.IO.TextWriter w]         ;;; java.util.regex.Pattern =>
-  (.write w "#\"")
+  (.Write w "#\"")
   (loop [[#^Char c & r :as s] (seq (.ToString #^System.Text.RegularExpressions.Regex p))   ;;; .pattern => .ToString
          qmode false]
     (when s

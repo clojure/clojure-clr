@@ -84,6 +84,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "python", "python", "{D0F225
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sympl35", "..\..\DLR_Main\Src\Languages\sympl\csharp\Sympl35.csproj", "{AD5B6F0A-FD60-4D2E-B58A-EE762C5AC3B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BootstrapCompile", "BootstrapCompile\BootstrapCompile.csproj", "{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -432,6 +434,22 @@ Global
 		{AD5B6F0A-FD60-4D2E-B58A-EE762C5AC3B9}.Silverlight Release|Any CPU.Build.0 = Release|Any CPU
 		{AD5B6F0A-FD60-4D2E-B58A-EE762C5AC3B9}.SpecSharp|Any CPU.ActiveCfg = Release|Any CPU
 		{AD5B6F0A-FD60-4D2E-B58A-EE762C5AC3B9}.SpecSharp|Any CPU.Build.0 = Release|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.DelaySigned Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.DelaySigned Release|Any CPU.Build.0 = Release|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.DelaySigned Silverlight Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.DelaySigned Silverlight Release|Any CPU.Build.0 = Release|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.FxCop|Any CPU.ActiveCfg = Release|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.FxCop|Any CPU.Build.0 = Release|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.Silverlight Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.Silverlight Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.Silverlight Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.Silverlight Release|Any CPU.Build.0 = Release|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.SpecSharp|Any CPU.ActiveCfg = Release|Any CPU
+		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.SpecSharp|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

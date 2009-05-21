@@ -260,11 +260,14 @@ namespace clojure.lang
 
         #region Some misc. goodies
 
-        static public readonly object[] EMPTY_ARRAY = new Object[] { };
+        public static readonly object[] EMPTY_OBJECT_ARRAY = new Object[] { };
 
         static RTProperties _versionProperties = new RTProperties();
 
         public static RTProperties GetVersionProperties() { return _versionProperties; }
+
+        public const string CLOJURE_LOAD_PATH = "clojure.load.path";
+
 
         #endregion
 
@@ -440,7 +443,7 @@ namespace clojure.lang
 
             CURRENT_NS.Tag = Symbol.create("clojure.lang.Namespace");
 
-            AGENT.SetMeta(map(dockw, "The agent currently running an action on this thread, else nil."));
+            AGENT.setMeta(map(dockw, "The agent currently running an action on this thread, else nil."));
             AGENT.Tag = Symbol.create("clojure.lang.Agent");
 
             // We don't have MathContext (yet)
@@ -452,32 +455,29 @@ namespace clojure.lang
 
             Var v;
             v = Var.intern(CLOJURE_NS, IN_NAMESPACE, new InNamespaceFn());
-            v.SetMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
+            v.setMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
                 arglistskw, list(vector(namesym))));
 
             v = Var.intern(CLOJURE_NS, LOAD_FILE, new LoadFileFn());
-            v.SetMeta(map(dockw, "Sequentially read and evaluate the set of forms contained in the file.",
+            v.setMeta(map(dockw, "Sequentially read and evaluate the set of forms contained in the file.",
                 arglistskw, list(vector(namesym))));
 
             v = Var.intern(CLOJURE_NS, IDENTICAL, new IdenticalFn());
-            v.SetMeta(map(dockw, "tests if 2 arguments are the same object",
+            v.setMeta(map(dockw, "tests if 2 arguments are the same object",
                 arglistskw, list(vector(Symbol.create("x"), Symbol.create("y")))));
 
             DoInit();
         }
 
-        //  The original Java is doing this here.
-        // We're pushing this over to the console, for now.
-        // Eventually, we'll push it back here because it is always needed.
         static void DoInit()
         {
-            // Eventually, load core.clj and other support files from here (?)
-            //load("clojure/core");
+            load("clojure/core");
+            //load("clojure/core_print");
             //load("clojure/zip", false);
             //load("clojure/xml", false);
             //load("clojure/set", false);
 
-            //PostBootstrapInit();
+            PostBootstrapInit();
         }
 
         public static void PostBootstrapInit()
@@ -494,7 +494,7 @@ namespace clojure.lang
                 Var refer = var("clojure.core", "refer");
                 in_ns.invoke(USER);
                 refer.invoke(CLOJURE);
-                //maybeLoadResourceScript("user.clj");
+                //TODO: maybeLoadResourceScript("user.clj");
             }
             finally
             {
@@ -1205,7 +1205,7 @@ namespace clojure.lang
         public static object[] toArray(object coll)
         {
             if (coll == null)
-                return EMPTY_ARRAY;
+                return EMPTY_OBJECT_ARRAY;
             else if (coll is object[])
                 return (object[])coll;
             // In CLR, ICollection does not have a toArray.  
@@ -1771,7 +1771,7 @@ namespace clojure.lang
 
         public static void load(String pathname, Boolean failIfNotFound)
         {
-            string assemblyname = pathname + ".dll";
+            string assemblyname = pathname + ".clj.dll";
             string cljname = pathname + ".clj";
 
             FileInfo assyInfo = FindFile(assemblyname);
@@ -1799,7 +1799,7 @@ namespace clojure.lang
                 if (booleanCast(Compiler.COMPILE_FILES.deref()))
                     Compile(cljInfo);
                 else
-                    Compiler.load(cljInfo.OpenText()); ;
+                    LoadScript(cljInfo); ;
             }
             else if (!loaded && failIfNotFound)
                 throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));
@@ -1807,33 +1807,45 @@ namespace clojure.lang
 
         }
 
-        private static void Compile(FileInfo cljInfo)
+        private static void LoadScript(FileInfo cljInfo)
         {
-            throw new NotImplementedException();
+            using (TextReader rdr = cljInfo.OpenText())
+                Compiler.load(rdr, cljInfo.FullName, cljInfo.Name);
         }
 
-        const string CLOJURE_LOAD_PATH_VAR = "clojure.load.path";
+
+        private static void Compile(FileInfo cljInfo)
+        {
+            using ( TextReader rdr = cljInfo.OpenText() )
+                Compiler.Compile(rdr, cljInfo.Directory.FullName, cljInfo.Name);
+        }
+
 
         static FileInfo FindFile(string filename)
         {
             // check the current directory, then any directory in environment variable clojure.load.path
             string currDir = Directory.GetCurrentDirectory();
-            string probePath = currDir + Path.PathSeparator + filename;
+            string probePath = ConvertPath(currDir + "\\" + filename);  // TODO: Something other than hardwired \\?
             if (File.Exists(probePath))
                 return new FileInfo(probePath);
 
-            string rawpaths = (string)System.Environment.GetEnvironmentVariables()[CLOJURE_LOAD_PATH_VAR];
+            string rawpaths = (string)System.Environment.GetEnvironmentVariables()[CLOJURE_LOAD_PATH];
             if (rawpaths == null)
                 return null;
-            string[] paths = rawpaths.Split(';');
+            string[] paths = rawpaths.Split(Path.PathSeparator);
             foreach (string path in paths)
             {
-                probePath = path + Path.PathSeparator + filename;
+                probePath = ConvertPath(path + "\\" + filename);
                 if (File.Exists(probePath))
                     return new FileInfo(probePath);
             }
 
             return null;
+        }
+
+        static string ConvertPath(string path)
+        {
+            return path.Replace('/', '\\');
         }
 
         #endregion

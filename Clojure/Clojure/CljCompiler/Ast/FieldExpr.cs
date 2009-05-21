@@ -12,10 +12,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
     abstract class FieldExpr : HostExpr, AssignableExpr
     {
+        #region AssignableExpr Members
+
+        public abstract Expression GenAssignDlr(GenContext context, Expr val);
+
+        #endregion
     }
 }

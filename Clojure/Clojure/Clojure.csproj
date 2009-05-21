@@ -216,6 +216,7 @@
     <None Include="Bootstrap\version.properties" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Bootstrap\core_print.clj" />
     <None Include="Resources\version.txt" />
   </ItemGroup>
   <ItemGroup>

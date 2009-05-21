@@ -1108,6 +1108,12 @@ namespace clojure.lang
         {
             readonly int _line;
 
+            public int Line
+            {
+                get { return _line; }
+            } 
+
+
             public ReaderException(int line, Exception e)
                 : base(null, e)
             {

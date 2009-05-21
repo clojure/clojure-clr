@@ -3492,7 +3492,7 @@
         gen-class-clause (first (filter #(= :gen-class (first %)) references))
         gen-class-call
           (when gen-class-clause
-            (list* `gen-class :name (.replace (str name) \- \_) :impl-ns name :main true (next gen-class-clause)))
+            (list* `gen-class :name (.Replace (str name) \- \_) :impl-ns name :main true (next gen-class-clause)))   ;;; .replace
         references (remove #(= :gen-class (first %)) references)
         ;ns-effect (clojure.core/in-ns name)
         ]
@@ -3568,14 +3568,14 @@
   [lib]
   (str \/
        (.. (name lib)
-           (replace \- \_)
-           (replace \. \/))))
+           (Replace \- \_)       ;;; replace
+           (Replace \. \/))))    ;;; replace
 
 (defn- root-directory
   "Returns the root resource path for a lib"
   [lib]
   (let [d (root-resource lib)]
-    (subs d 0 (.lastIndexOf d "/"))))
+    (subs d 0 (.LastIndexOf d "/"))))    ;;; lastIndexOf
 
 (def load)
 
@@ -3607,7 +3607,7 @@
 (defn- load-lib
   "Loads a lib with options"
   [prefix lib & options]
-  (throw-if (and prefix (pos? (.indexOf (name lib) (int \.))))
+  (throw-if (and prefix (pos? (.IndexOf (name lib) (int \.))))               ;;; indexOf
             "lib names inside prefix lists must not contain periods")
   (let [lib (if prefix (symbol (str prefix \. lib)) lib)
         opts (apply hash-map options)
@@ -3730,7 +3730,7 @@
   directory for the current namespace otherwise."
   [& paths]
   (doseq [#^String path paths]
-    (let [#^String path (if (.startsWith path "/")
+    (let [#^String path (if (.StartsWith path "/")   ;;; startsWith
                           path
                          (str (root-directory (ns-name *ns*)) \/ path))]
       (when *loading-verbosely*
@@ -3741,7 +3741,7 @@
 ;                path)
       (when-not (*pending-paths* path)
         (binding [*pending-paths* (conj *pending-paths* path)]
-          (clojure.lang.RT/load  (.substring path 1)))))))
+          (clojure.lang.RT/load  (.Substring path 1)))))))       ;;; .substring
 
 (defn compile
   "Compiles the namespace named by the symbol lib into a set of

@@ -72,7 +72,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            throw new NotImplementedException();
+            return _target.GenAssignDlr(context, _val);
         }
 
         #endregion

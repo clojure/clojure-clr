@@ -67,6 +67,24 @@ namespace clojure.lang
             return InvokeMatchingMethod(methodName,methods, t, null, args);
         }
 
+        public static object SetInstanceFieldOrMethod(object target, string fieldname, object val)
+        {
+            Type t = target.GetType();
+            FieldInfo field = t.GetField(fieldname, BindingFlags.Instance | BindingFlags.Public);
+            if (field != null)
+            {
+                field.SetValue(target, val);
+                return val;
+            }
+            PropertyInfo prop = t.GetProperty(fieldname, BindingFlags.Instance | BindingFlags.Public);
+            if (prop != null)
+            {
+                prop.SetValue(target, val, new object[0]);
+                return val;
+            }
+            throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldname, t));
+        }
+
         public static List<MethodInfo> GetMethods(Type t, int arity, string name, bool getStatics)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;

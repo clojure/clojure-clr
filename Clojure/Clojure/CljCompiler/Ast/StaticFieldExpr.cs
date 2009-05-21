@@ -18,7 +18,7 @@ using System.IO;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class StaticFieldExpr : FieldExpr, AssignableExpr
+    class StaticFieldExpr : FieldExpr
     {
         #region Data
 
@@ -72,6 +72,17 @@ namespace clojure.lang.CljCompiler.Ast
             return _property != null
                 ? Expression.Property(null, _property)
                 : Expression.Field(null, _field);
+        }
+
+        #endregion
+
+        #region AssignableExpr Members
+
+        public override Expression GenAssignDlr(GenContext context, Expr val)
+        {
+            Expression access = GenDlrUnboxed(context);
+            Expression valExpr = val.GenDlr(context);
+            return Expression.Assign(access, valExpr);
         }
 
         #endregion

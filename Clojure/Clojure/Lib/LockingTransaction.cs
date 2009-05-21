@@ -734,8 +734,8 @@ namespace clojure.lang
                 }
                 _vals[r] = val;
             }
-            List<CFn> fns = _commutes[r];
-            if (fns == null)
+            List<CFn> fns; ;
+            if (! _commutes.TryGetValue(r, out fns))
                 _commutes[r] = fns = new List<CFn>();
             fns.Add(new CFn(fn, args));
             object ret = fn.applyTo(RT.cons(_vals[r], args));

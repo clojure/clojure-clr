@@ -18,7 +18,7 @@ using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class InstanceFieldExpr : FieldExpr, AssignableExpr
+    class InstanceFieldExpr : FieldExpr
     {
         #region Data
 
@@ -98,6 +98,34 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else
                 throw new InvalidOperationException("Unboxed emit of unknown member.");
+        }
+
+        #endregion
+
+        #region AssignableExpr Members
+
+        public override Expression GenAssignDlr(GenContext context, Expr val)
+        {
+            Expression target = _target.GenDlr(context);
+            Expression valExpr = val.GenDlr(context);
+            if (_targetType != null)
+            {
+                Expression convTarget = Expression.Convert(target, _targetType);
+                Expression access = _fieldInfo != null
+                    ? Expression.Field(convTarget, _fieldInfo)
+                    : Expression.Property(convTarget, _propertyInfo);
+                return Expression.Assign(access, valExpr);
+            }
+            else
+            {
+                // TODO:  Shouldn't this cause a reflection warning?
+                Expression call = Expression.Call(
+                    target, 
+                    Compiler.Method_Reflector_SetInstanceFieldOrProperty,
+                    Expression.Constant(_fieldName),
+                    valExpr);
+                return call;
+            }
         }
 
         #endregion

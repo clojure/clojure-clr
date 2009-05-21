@@ -82,7 +82,24 @@ Clojure.Tests
 	Castle.DynamicProxy2
 	Rhino.Mocks
 
-After that, you should be good to go.
+BootstrapCompile
+	Clojure
+
+
+Compiling
+---------
+
+Adding AOT-compilation allows pre-compilation of the *.clj environment bootstrap files.
+I have not had time to automate the build process fully, so there are some manual steps.
+
+Specifically, the bootstrap files are still contained in Clojure\Bootstrap.  If you make any changes,
+
+  (1) Copy these files into BootstrapCompile\bin\Debug\clojure.  
+  (2) Run the BootstrapCompile program.
+  (3) Copy the .dll and .pdb files from BootstrapCompile\bin\Debug\clojure to Simple.Console\bin\Debug\clojure.
+
+Then you should get them on startup.
+
 
 
 Recommended

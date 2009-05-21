@@ -65,5 +65,16 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+        #region AssignableExpr Members
+
+        public Expression GenAssignDlr(GenContext context, Expr val)
+        {
+            Expression varExpr = context.FnExpr.GenVar(context, _var);
+            Expression valExpr = val.GenDlr(context);
+            return Expression.Call(varExpr, Compiler.Method_Var_set, valExpr);
+        }
+
+        #endregion
     }
 }

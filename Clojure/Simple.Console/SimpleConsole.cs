@@ -28,25 +28,28 @@ namespace clojure.console
 
         private void Initialize()
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
             Var.pushThreadBindings(
                 RT.map(RT.CURRENT_NS, RT.CURRENT_NS.deref()));
             try
             {
 
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
 
-                LoadFromStream(new StringReader(clojure.lang.Properties.Resources.core),false);
-                LoadFromStream(new StringReader(clojure.lang.Properties.Resources.core_print), false);
-                LoadFromStream(new StringReader(clojure.lang.Properties.Resources.test), false);
+                //LoadFromStream(new StringReader(clojure.lang.Properties.Resources.core),false);
+                //RT.load("/core");
+                //LoadFromStream(new StringReader(clojure.lang.Properties.Resources.core_print), false);
+                //LoadFromStream(new StringReader(clojure.lang.Properties.Resources.test), false);
 
-                sw.Stop();
-                Console.WriteLine("Loading took {0} milliseconds.", sw.ElapsedMilliseconds);
             }
             finally
             {
                 Var.popThreadBindings();
             }
+
+            sw.Stop();
+            Console.WriteLine("Loading took {0} milliseconds.", sw.ElapsedMilliseconds);
 
         }
 
@@ -57,9 +60,23 @@ namespace clojure.console
             object form;
             while ((form = LispReader.read(rdr, false, eofVal, false)) != eofVal)
             {
-                LambdaExpression ast = Compiler.GenerateLambda(form, addPrint);
-                ret = ast.Compile().DynamicInvoke();
-                //ret = CompilerHelpers.LightCompile(ast).DynamicInvoke();                
+                try
+                {
+                    LambdaExpression ast = Compiler.GenerateLambda(form, addPrint);
+                    ret = ast.Compile().DynamicInvoke();
+                }
+                catch (Exception ex)
+                {
+                    if (addPrint)
+                    {
+                        Exception root = ex;
+                        while (root.InnerException != null)
+                            root = root.InnerException;
+
+                        Console.WriteLine("Error evaluating {0}: {1}", form, root.Message);
+                        Console.WriteLine(root.StackTrace);
+                    }
+                }
             }
             return ret;
         }
@@ -67,7 +84,9 @@ namespace clojure.console
 
         private void RunInteractiveLoop()
         {
-            LoadFromStream(System.Console.In, true);
+ 
+                    LoadFromStream(System.Console.In, true);
+
         }
 
 

@@ -236,7 +236,7 @@ namespace clojure.lang
         {
             Namespace ns = Namespace.findOrCreate(Symbol.intern(nsName));
             Var ret = intern(ns, Symbol.intern(sym));
-            ret.SetMeta(_privateMeta);
+            ret.setMeta(_privateMeta);
             return ret;
         }
 
@@ -281,7 +281,7 @@ namespace clojure.lang
             _sym = sym;
             _count = new AtomicInteger();
             _root = _rootUnboundValue;
-            SetMeta(PersistentHashMap.EMPTY);
+            setMeta(PersistentHashMap.EMPTY);
         }
 
 
@@ -320,8 +320,9 @@ namespace clojure.lang
         /// Set the metadata attached to this var.
         /// </summary>
         /// <param name="m">The metadata to attach.</param>
-        /// <remarks>The metadata must contain entries for the namespace and name.</remarks>
-        public void SetMeta(IPersistentMap m)
+        /// <remarks>The metadata must contain entries for the namespace and name.
+        /// <para>Lowercase name for core.clj compatability.</para></remarks>
+        public void setMeta(IPersistentMap m)
         { 
             // ensure these basis keys
             resetMeta(m.assoc(_nameKey, _sym).assoc(_nsKey, _ns));

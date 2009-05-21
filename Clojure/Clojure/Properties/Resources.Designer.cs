@@ -134,9 +134,9 @@ namespace clojure.lang.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to clojure.version.major=1
-        ///clojure.version.minor=0
+        ///clojure.version.minor=1
         ///clojure.version.incremental=0
-        ///clojure.version.qualifier=RC1
+        ///clojure.version.qualifier=alpha
         ///clojure.version.interim=true.
         /// </summary>
         public static string version {
