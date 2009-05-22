@@ -19,15 +19,9 @@ namespace clojure.lang
     /// <summary>
     /// 
     /// </summary>
-    public class LineNumberingTextReader : TextReader, IDisposable
+    public class LineNumberingTextReader : PushbackTextReader, IDisposable
     {
         #region Data
-
-        private TextReader _baseReader;
-        protected TextReader BaseReader
-        {
-            get { return _baseReader; }
-        }
 
         private int _lineNumber = 1;
         public int LineNumber
@@ -43,25 +37,14 @@ namespace clojure.lang
         }
 
         private int _lastLinePosition = 0;
-        private int _unreadChar;
-        private bool _hasUnread =false;
 
         #endregion
 
         #region c-tors
 
         public LineNumberingTextReader(TextReader reader)
+            : base(reader)
         {
-            _baseReader = reader;
-        }
-
-        #endregion
-
-        #region Lookahead
-
-        public override int Peek()
-        {
-            return _baseReader.Peek();
         }
 
         #endregion
@@ -70,14 +53,7 @@ namespace clojure.lang
 
         public override int Read()
         {
-            int ret;
-            if (_hasUnread)
-            {
-                ret = _unreadChar;
-                _hasUnread = false;
-            }
-            else
-                ret = _baseReader.Read();
+            int ret = base.Read();
 
             if (ret == -1)
                 return ret;
@@ -141,13 +117,10 @@ namespace clojure.lang
 
         #region Unreading
 
-        public void Unread(int ch)
+        public override void Unread(int ch)
         {
-            if (_hasUnread)
-                throw new IOException("Can't unread a second character.");
+            base.Unread(ch);
 
-            _unreadChar = ch;
-            _hasUnread = true;
             --_position;
 
             if (ch == '\n')
@@ -156,7 +129,6 @@ namespace clojure.lang
                 _position = _lastLinePosition;
             }
         }
-
 
         #endregion
 
@@ -191,7 +163,6 @@ namespace clojure.lang
 
         #endregion
 
-
         #region Lifetime methods
 
         public override void Close()
@@ -199,7 +170,6 @@ namespace clojure.lang
             _baseReader.Close();
             base.Close();
         }
-
 
         void IDisposable.Dispose()
         {

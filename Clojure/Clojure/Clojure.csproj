@@ -106,6 +106,7 @@
     <Compile Include="Lib\Seqable.cs" />
     <Compile Include="Lib\Stream.cs" />
     <Compile Include="Readers\LineNumberingTextReader.cs" />
+    <Compile Include="Readers\PushbackTextReader.cs" />
     <Compile Include="Runtime\ClojureBinder.cs" />
     <Compile Include="Runtime\ClojureCommandLine.cs" />
     <Compile Include="Runtime\ClojureConsoleOptions.cs" />

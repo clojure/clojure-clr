@@ -189,9 +189,9 @@ namespace Clojure.Tests.LibTests
 
         #region Helpers
 
-        static TextReader CreatePushbackReaderFromString(string s)
+        static PushbackTextReader CreatePushbackReaderFromString(string s)
         {
-            return new StringReader(s);
+            return new PushbackTextReader(new StringReader(s));
         }
 
         static object ReadFromString(string s)

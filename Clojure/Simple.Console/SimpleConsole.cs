@@ -53,7 +53,7 @@ namespace clojure.console
 
         }
 
-        public object LoadFromStream(TextReader rdr, bool addPrint)
+        public object LoadFromStream(PushbackTextReader rdr, bool addPrint)
         {
             object ret = null;
             object eofVal = new object();
@@ -84,9 +84,7 @@ namespace clojure.console
 
         private void RunInteractiveLoop()
         {
- 
-                    LoadFromStream(System.Console.In, true);
-
+            LoadFromStream(new LineNumberingTextReader(Console.In), true);
         }
 
 

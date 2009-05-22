@@ -102,7 +102,9 @@ namespace clojure.lang
         // String
         internal static readonly Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
             Symbol.create("*file*"), "NO_SOURCE_PATH");
-
+        //Integer
+        internal static readonly Var LINE_BEFORE = Var.create(0);
+        internal static readonly Var LINE_AFTER = Var.create(0);
 
         internal static readonly Var METHODS = Var.create(null);
         internal static readonly Var LOCAL_ENV = Var.create(PersistentHashMap.EMPTY);
@@ -1029,25 +1031,26 @@ namespace clojure.lang
             object eofVal = new object();
             object form;
 
-            // TODO: ADD LineNumberingReader
+            LineNumberingTextReader lntr =
+                (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);
 
             Var.pushThreadBindings(RT.map(
                 //LOADER, RT.makeClassLoader(),
                 SOURCE_PATH, sourcePath,
                 SOURCE, sourceName,
-                RT.CURRENT_NS, RT.CURRENT_NS.deref()
-                //LINE_BEFORE, pushbackReader.getLineNumber(),
-                //LINE_AFTER, pushbackReader.getLineNumber()
+                RT.CURRENT_NS, RT.CURRENT_NS.deref(),
+                LINE_BEFORE, lntr.LineNumber,
+                LINE_AFTER, lntr.LineNumber
                 ));
 
             try
             {
-                while ((form = LispReader.read(rdr, false, eofVal, false)) != eofVal)
+                while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
-                    //LINE_AFTER.set(pushbackReader.getLineNumber());
+                    LINE_AFTER.set(lntr.LineNumber);
                     LambdaExpression ast = Compiler.GenerateLambda(form, false);
                     ret = ast.Compile().DynamicInvoke();
-                    //LINE_BEFORE.set(pushbackReader.getLineNumber());
+                    LINE_BEFORE.set(lntr.LineNumber);
                 }
             }
             catch (LispReader.ReaderException e)
@@ -1099,14 +1102,16 @@ namespace clojure.lang
             object form;
 
             string sourcePath = sourceDirectory == null ? sourceName : sourceDirectory + "\\" + sourceName;
-            // TODO: Add LineNumberingReader
+
+            LineNumberingTextReader lntr =
+                (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);
 
             Var.pushThreadBindings(RT.map(
                 SOURCE_PATH, sourcePath,
                 SOURCE, sourceName,
                 RT.CURRENT_NS, RT.CURRENT_NS.deref(),
-                //LINE_BEFORE, pushbackReader.getLineNumber(),
-                //LINE_AFTER, pushbackReader.getLineNumber(),
+                LINE_BEFORE, lntr.LineNumber,
+                LINE_AFTER, lntr.LineNumber,
                 CONSTANTS, PersistentVector.EMPTY,
                 KEYWORDS, PersistentHashMap.EMPTY,
                 VARS, PersistentHashMap.EMPTY
@@ -1119,9 +1124,9 @@ namespace clojure.lang
                 List<string> names = new List<string>();
 
                 int i = 0;
-                while ((form = LispReader.read(rdr, false, eofVal, false)) != eofVal)
+                while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
-                    //LINE_AFTER.set(pushbackReader.getLineNumber());
+                    LINE_AFTER.set(lntr.LineNumber);
                     LambdaExpression ast = Compiler.GenerateLambda(context,form, false);
 
                     // Compile to assembly
@@ -1132,8 +1137,8 @@ namespace clojure.lang
                     names.Add(methodBuilder.Name);
 
                     // evaluate in this environment
-                    ast.Compile().DynamicInvoke(); 
-                    //LINE_BEFORE.set(pushbackReader.getLineNumber());
+                    ast.Compile().DynamicInvoke();
+                    LINE_BEFORE.set(lntr.LineNumber);
                 }
 
                 Type exprType = exprTB.CreateType();

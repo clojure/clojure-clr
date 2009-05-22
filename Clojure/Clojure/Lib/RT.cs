@@ -1325,15 +1325,17 @@ namespace clojure.lang
 
         static public string printString(object x)
         {
-            StringWriter sw = new StringWriter();
-            print(x, sw);
-            return sw.ToString();
+            using (StringWriter sw = new StringWriter())
+            {
+                print(x, sw);
+                return sw.ToString();
+            }
         }
 
         static public Object readString(String s)
         {
-            TextReader r = new StringReader(s);
-            return LispReader.read(r, true, null, false);
+            using (PushbackTextReader r = new PushbackTextReader(new StringReader(s)))
+                return LispReader.read(r, true, null, false);
         }
 
         static public void print(Object x, TextWriter w)
