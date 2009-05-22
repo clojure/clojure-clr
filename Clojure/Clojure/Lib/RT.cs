@@ -24,6 +24,12 @@ using RTProperties = clojure.runtime.Properties;
 
 namespace clojure.lang
 {
+    public static class RT_Bootstrap_Flag
+    {
+        public static bool _doRTBootstrap = true;
+
+    }
+
     public static class RT
     {
         #region Default symbol-to-class map
@@ -337,7 +343,7 @@ namespace clojure.lang
         
         public static readonly Var IN =
             Var.intern(CLOJURE_NS, Symbol.create("*in*"),
-            new clojure.lang.Readers.LineNumberingReader(System.Console.In));
+            new clojure.lang.LineNumberingTextReader(System.Console.In));
 
         static readonly Var PRINT_READABLY 
             = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), T);
@@ -466,7 +472,8 @@ namespace clojure.lang
             v.setMeta(map(dockw, "tests if 2 arguments are the same object",
                 arglistskw, list(vector(Symbol.create("x"), Symbol.create("y")))));
 
-            DoInit();
+            if ( RT_Bootstrap_Flag._doRTBootstrap )
+                DoInit();
         }
 
         static void DoInit()

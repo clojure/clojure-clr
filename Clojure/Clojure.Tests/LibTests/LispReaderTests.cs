@@ -23,7 +23,6 @@ using clojure.lang;
 using RMExpect = Rhino.Mocks.Expect;
 using java.math;
 
-using clojure.lang.Readers;
 
 
 namespace Clojure.Tests.LibTests
@@ -200,9 +199,9 @@ namespace Clojure.Tests.LibTests
             return LispReader.read(CreatePushbackReaderFromString(s),true,null,false);
         }
 
-        static LineNumberingReader CreateLNPBRFromString(string s)
+        static LineNumberingTextReader CreateLNPBRFromString(string s)
         {
-            return new LineNumberingReader(new StringReader(s));
+            return new LineNumberingTextReader(new StringReader(s));
         }
 
         static object ReadFromStringNumbering(string s)

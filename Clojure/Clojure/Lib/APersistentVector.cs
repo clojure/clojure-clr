@@ -353,7 +353,7 @@ namespace clojure.lang
                 _v = v;
             }
 
-            public object invoke()
+            public override object invoke()
             {
                 if (_i < _v.count())
                     return _v.nth(_i++);

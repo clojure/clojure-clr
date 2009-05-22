@@ -105,7 +105,7 @@
     <Compile Include="Lib\LazySeq.cs" />
     <Compile Include="Lib\Seqable.cs" />
     <Compile Include="Lib\Stream.cs" />
-    <Compile Include="Readers\LineNumberingReader.cs" />
+    <Compile Include="Readers\LineNumberingTextReader.cs" />
     <Compile Include="Runtime\ClojureBinder.cs" />
     <Compile Include="Runtime\ClojureCommandLine.cs" />
     <Compile Include="Runtime\ClojureConsoleOptions.cs" />

@@ -16,7 +16,6 @@ using System.Text.RegularExpressions;
 using java.math;
 using System.IO;
 using System.Collections;
-using clojure.lang.Readers;
 using clojure.runtime;
 
 namespace clojure.lang
@@ -190,9 +189,9 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                if (isRecursive || !(r is LineNumberingReader))
+                if (isRecursive || !(r is LineNumberingTextReader))
                     throw e;
-                LineNumberingReader rdr = r as LineNumberingReader;
+                LineNumberingTextReader rdr = r as LineNumberingTextReader;
                 throw new ReaderException(rdr.LineNumber, e);
             }
         }
@@ -639,8 +638,8 @@ namespace clojure.lang
             protected override object Read(TextReader r, char leftparen)
             {
                 int line = -1;
-                if (r is LineNumberingReader)
-                    line = ((LineNumberingReader)r).LineNumber;
+                if (r is LineNumberingTextReader)
+                    line = ((LineNumberingTextReader)r).LineNumber;
                 IList<Object> list = readDelimitedList(')', r, true);
                 if (list.Count == 0)
                     return PersistentList.EMPTY;
@@ -893,8 +892,8 @@ namespace clojure.lang
             protected override object Read(TextReader r, char caret)
             {
                 int line = -1;
-                if (r is LineNumberingReader)
-                    line = ((LineNumberingReader)r).LineNumber;
+                if (r is LineNumberingTextReader)
+                    line = ((LineNumberingTextReader)r).LineNumber;
                 //object meta = read(r, true, null, true);
                 object meta = ReadAux(r, true);
                 if (meta is Symbol || meta is Keyword || meta is String)

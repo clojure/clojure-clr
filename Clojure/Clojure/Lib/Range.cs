@@ -164,7 +164,7 @@ namespace clojure.lang
         /// <summary>
         /// Implements a stream over a <see cref="Range">Range</see>.
         /// </summary>
-        private class Src : AFn
+        private new class Src : AFn
         {
             /// <summary>
             /// Current position.

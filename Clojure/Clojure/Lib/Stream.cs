@@ -25,7 +25,7 @@ namespace clojure.lang
         ISeq _sequence = NO_SEQ;
         readonly IFn _src;
 	    readonly IFn _xform;
-        Cons _pushed = null;
+        //Cons _pushed = null;
         IFn _tap = null;
 
         #endregion

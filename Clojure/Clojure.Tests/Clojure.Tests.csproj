@@ -61,6 +61,7 @@
     <Reference Include="vjslib" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FixtureSetupClass.cs" />
     <Compile Include="LibTests\EnumeratorSeqTests.cs" />
     <Compile Include="LibTests\AFnImplTests.cs" />
     <Compile Include="LibTests\AgentTests.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="LibTests\StringSeqTests.cs" />
     <Compile Include="LibTests\SymbolTests.cs" />
     <Compile Include="LibTests\TestTest.cs" />
+    <Compile Include="ReaderTests\LineNumberingTextReaderTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Clojure\Clojure.csproj">
