@@ -50,6 +50,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region Parsing
+
         public sealed class Parser : IParser
         {
             public Expr Parse(object frm)
@@ -101,7 +103,7 @@ namespace clojure.lang.CljCompiler.Ast
                     for (int i = 0; i < bindings.count(); i += 2)
                     {
                         Symbol sym = (Symbol)bindings.nth(i);
-                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1));
+                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1),sym.Name);
                         // Sequential enhancement of env (like Lisp let*)
                         LocalBinding b = (LocalBinding)lbs.nth(i / 2);
                         b.Init = init;
@@ -117,6 +119,10 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
         }
+
+        #endregion
+
+        #region Code generation
 
         public override Expression GenDlr(GenContext context)
         {
@@ -137,5 +143,7 @@ namespace clojure.lang.CljCompiler.Ast
             //    forms.Add(Expression.Assign(parmExpr, initExpr));
             //}
         }
+
+        #endregion
     }
 }

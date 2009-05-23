@@ -189,6 +189,10 @@ namespace clojure.lang
                     return RT.suppressRead() ? null : interpretToken(token);
                 }
             }
+            catch (EndOfStreamException e)
+            {
+                throw e;
+            }
             catch (Exception e)
             {
                 if (isRecursive || !(r is LineNumberingTextReader))

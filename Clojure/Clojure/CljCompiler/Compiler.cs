@@ -137,7 +137,7 @@ namespace clojure.lang
             LET, new LetExpr.Parser(),
             LETFN, new LetFnExpr.Parser(),
             DO, new BodyExpr.Parser(),
-            FN, new FnExpr.Parser(),
+            FN, null,
             QUOTE, new ConstantExpr.Parser(),
             THE_VAR, new TheVarExpr.Parser(),
             IMPORT, new ImportExpr.Parser(),
@@ -319,7 +319,13 @@ namespace clojure.lang
         static LiteralExpr TRUE_EXPR = new BooleanExpr(true);
         static LiteralExpr FALSE_EXPR = new BooleanExpr(false);
 
+        // Equivalent to Java: Compiler.analyze()
         internal static Expr GenerateAST(object form)
+        {
+            return GenerateAST(form,null);
+        }
+
+        internal static Expr GenerateAST(object form, string name)
         {
             if (form is LazySeq)
             {
@@ -343,7 +349,7 @@ namespace clojure.lang
             else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
                 return OptionallyGenerateMetaInit(form, new EmptyExpr(form));
             else if (form is ISeq)
-                return AnalyzeSeq((ISeq)form);
+                return AnalyzeSeq((ISeq)form,name);
             else if (form is IPersistentVector)
                 return VectorExpr.Parse((IPersistentVector)form);
             else if (form is IPersistentMap)
@@ -407,11 +413,11 @@ namespace clojure.lang
         }
 
 
-        private static Expr AnalyzeSeq(ISeq form)
+        private static Expr AnalyzeSeq(ISeq form, string name)
         {
             object exp = MacroexpandSeq1(form);
             if (exp != form)
-                return GenerateAST(exp);
+                return GenerateAST(exp,name);
 
             object op = RT.first(form);
 
@@ -423,8 +429,10 @@ namespace clojure.lang
             if (inline != null)
                 return GenerateAST(inline.applyTo(RT.next(form)));
 
-            IParser p = GetSpecialFormParser(op);
-            if (p != null)
+            IParser p;
+            if (op.Equals(FN))
+                return FnExpr.Parse(form, name);
+            if ((p = GetSpecialFormParser(op)) != null)
                 return p.Parse(form);
             else 
                 return InvokeExpr.Parse(form);

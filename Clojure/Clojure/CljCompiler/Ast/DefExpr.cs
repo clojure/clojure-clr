@@ -92,7 +92,7 @@ namespace clojure.lang.CljCompiler.Ast
                 //mm = (IPersistentMap)RT.assoc(mm, RT.LINE_KEY, LINE.get()).assoc(RT.FILE_KEY, source_path);
 
                 Expr meta =  mm == null ? null : Compiler.GenerateAST(mm);
-                Expr init = Compiler.GenerateAST(RT.third(form));
+                Expr init = Compiler.GenerateAST(RT.third(form),v.Symbol.Name);
                 bool initProvided = RT.count(form) == 3;
 
                 return new DefExpr(v, init, meta, initProvided);

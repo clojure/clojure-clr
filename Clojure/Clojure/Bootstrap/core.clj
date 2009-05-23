@@ -2323,7 +2323,7 @@
   string"
   [s]
   (let [rdr (-> (System.IO.StringReader. s)     ;;; was (java.io.StringReader. s)
-                (clojure.lang.Readers.LineNumberingReader.))]   ;;; was (clojure.lang.LineNumberingPushbackReader.))]
+                (clojure.lang.LineNumberingTextReader.))]   ;;; was (clojure.lang.LineNumberingPushbackReader.))]
     (load-reader rdr)))
 
 (defn set
