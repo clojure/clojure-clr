@@ -4024,7 +4024,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
 ;(load "core_proxy")
-;(load "core_print")
+(load "core_print")
 ;(load "genclass")
 ;;; Need to figure out equivalents for pooledExecutor, java.util.concurrent.Future + we need proxies.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; futures (needs proxy);;;;;;;;;;;;;;;;;;
