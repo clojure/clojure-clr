@@ -84,7 +84,23 @@ namespace clojure.console
 
         private void RunInteractiveLoop()
         {
+            Var.pushThreadBindings(RT.map(
+                RT.CURRENT_NS, RT.CURRENT_NS.deref(),
+                RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref(),
+                RT.PRINT_META, RT.PRINT_META.deref(),
+                RT.PRINT_LENGTH, RT.PRINT_LENGTH.deref(),
+                RT.PRINT_LEVEL, RT.PRINT_LEVEL.deref(),
+                Compiler.COMPILE_PATH, Environment.GetEnvironmentVariable("clojure.compile.path" ?? "classes")
+                ));
+
+            try
+            {
             LoadFromStream(new LineNumberingTextReader(Console.In), true);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
         }
 
 

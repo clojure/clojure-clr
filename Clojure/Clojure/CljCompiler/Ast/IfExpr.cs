@@ -101,14 +101,38 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
+            // Original code made a call to RT.IsTrue.
+            // Now we inline the test.
+            // Not clear if there is much speedup from this.
+
+            //bool testIsBool = _testExpr is MaybePrimitiveExpr && _testExpr.HasClrType && _testExpr.ClrType == typeof(bool);
+
+            //Expression testCode = testIsBool
+            //    ? ((MaybePrimitiveExpr)_testExpr).GenDlrUnboxed(context)
+            //    // TODO: Verify the call to MaybeBox is needed.
+            //    // TODO: See if we can write the code more directly than calling RT.IsTrue.
+            //    : Expression.Call(Compiler.Method_RT_IsTrue, Compiler.MaybeBox(_testExpr.GenDlr(context)));
+
+
             bool testIsBool = _testExpr is MaybePrimitiveExpr && _testExpr.HasClrType && _testExpr.ClrType == typeof(bool);
 
-            Expression testCode = testIsBool
-                ? ((MaybePrimitiveExpr)_testExpr).GenDlrUnboxed(context)
-                // TODO: Verify the call to MaybeBox is needed.
-                // TODO: See if we can write the code more directly than calling RT.IsTrue.
-                : Expression.Call(Compiler.Method_RT_IsTrue, Compiler.MaybeBox(_testExpr.GenDlr(context)));
+            Expression testCode;
 
+
+            if (testIsBool)
+                testCode = ((MaybePrimitiveExpr)_testExpr).GenDlrUnboxed(context);
+            else
+            {
+                ParameterExpression testVar = Expression.Parameter(typeof(object), "__test");
+                Expression assign = Expression.Assign(testVar, Compiler.MaybeBox(_testExpr.GenDlr(context)));
+                Expression boolExpr =
+                    Expression.Not(
+                        Expression.OrElse(
+                            Expression.Equal(testVar, Expression.Constant(null)),
+                            Expression.AndAlso(Expression.TypeIs(testVar, typeof(bool)), Expression.IsFalse(Expression.Unbox(testVar, typeof(bool))))));
+                //Expression.Not(Expression.AndAlso(Expression.TypeIs(testVar, typeof(bool)), Expression.IsFalse(Expression.Convert(testVar,typeof(bool))))));
+                testCode = Expression.Block(typeof(bool), new ParameterExpression[] { testVar }, assign, boolExpr);
+            }
 
             Expression thenCode = _thenExpr.GenDlr(context);
             Expression elseCode = _elseExpr == null

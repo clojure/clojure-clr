@@ -348,7 +348,7 @@ namespace clojure.lang
         static readonly Var PRINT_READABLY 
             = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), T);
         
-        static readonly Var PRINT_META 
+        public static readonly Var PRINT_META 
             = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), F);
         
         public static readonly Var PRINT_DUP 
@@ -362,6 +362,13 @@ namespace clojure.lang
         
         static readonly Var PR_ON 
             = Var.intern(CLOJURE_NS, Symbol.create("pr-on"));
+
+        public static readonly Var PRINT_LENGTH
+            = Var.intern(CLOJURE_NS, Symbol.create("*print-length*"),null);
+
+        public static readonly Var PRINT_LEVEL
+            = Var.intern(CLOJURE_NS, Symbol.create("*print-length*"),null);
+
 
         #endregion
 

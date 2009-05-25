@@ -1056,7 +1056,7 @@ namespace clojure.lang
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     LINE_AFTER.set(lntr.LineNumber);
-                    LambdaExpression ast = Compiler.GenerateLambda(form, false);
+                    LambdaExpression ast = Compiler.GenerateLambda(form, false);  
                     ret = ast.Compile().DynamicInvoke();
                     LINE_BEFORE.set(lntr.LineNumber);
                 }
