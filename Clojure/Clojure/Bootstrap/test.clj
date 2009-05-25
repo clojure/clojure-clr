@@ -22,18 +22,31 @@
 (defn test-if3 [i n] (if i n 'b))
 
 
+; basic check of type tagging from the Clojure docs:
+(defn len [x]  (. x Length))
+(defn len2 [#^String x] (. x Length))
+
+(defn test-len [] (time (reduce + (map len (replicate 10000 "asdf")))))
+(defn test-len2 [] (time (reduce + (map len2 (replicate 10000 "asdf")))))
+
+; my first test ever.  It still runs slow
 (defn f1 [l n] (if (> (count l) n) nil (recur (cons 'a l) n)))
-(defn len [x]
-  (. x Length))
-(defn len2 [#^String x]
-  (. x Length))
+(defn test-f1 [] (time (f1 nil 10000)))
 
-(defn test1 [] (time (f1 nil 10000)))
-(defn test2 [] (time (reduce + (map len (replicate 10000 "asdf")))))
-(defn test3 [] (time (reduce + (map len2 (replicate 10000 "asdf")))))
+(defn f-dotimes [n] (dotimes [i n] (list i)))
+(defn test-dotimes [] (time (f-dotimes 100000)))
 
-(defn f2 [n] (dotimes [i n] (list i)))
+(defmacro
+  #^{:private true}
+  def-aset1 [name method coerce]
+    `(defn ~name
+       {:arglists '([~'array ~'idx ~'val] [~'array ~'idx ~'idx2 & ~'idxv])}
+       ([array# idx# val#]
+        (. clojure.lang.ArrayHelper (~method array# idx# (~coerce val#)))        ;;; Array -> ArrayHelper so we can provide the overloads below.
+        val#)
+       ([array# idx# idx2# & idxv#]
+        (apply ~name (aget array# idx#) idx2# idxv#))))
 
-(defn test4[] (time (f2 100000)))
-
-
+(def-aset1
+  #^{:doc "Sets the value at the index/indices. Works on arrays of int. Returns val."}
+  aset-int setInt int)

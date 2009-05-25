@@ -2191,49 +2191,49 @@
    val)
   ([array idx idx2 & idxv]
    (apply aset (aget array idx) idx2 idxv)))
-;;; Do we really need to do this in CLR?
-;(defmacro
-;  #^{:private true}
-;  def-aset [name method coerce]
-;    `(defn ~name
-;       {:arglists '([~'array ~'idx ~'val] [~'array ~'idx ~'idx2 & ~'idxv])}
-;       ([array# idx# val#]
-;        (. Array (~method array# idx# (~coerce val#)))
-;        val#)
-;       ([array# idx# idx2# & idxv#]
-;        (apply ~name (aget array# idx#) idx2# idxv#))))
-;
-;(def-aset
-;  #^{:doc "Sets the value at the index/indices. Works on arrays of int. Returns val."}
-;  aset-int setInt int)
-;
-;(def-aset
-;  #^{:doc "Sets the value at the index/indices. Works on arrays of long. Returns val."}
-;  aset-long setLong long)
-;
-;(def-aset
-;  #^{:doc "Sets the value at the index/indices. Works on arrays of boolean. Returns val."}
-;  aset-boolean setBoolean boolean)
-;
-;(def-aset
-;  #^{:doc "Sets the value at the index/indices. Works on arrays of float. Returns val."}
-;  aset-float setFloat float)
-;
-;(def-aset
-;  #^{:doc "Sets the value at the index/indices. Works on arrays of double. Returns val."}
-;  aset-double setDouble double)
-;
-;(def-aset
-;  #^{:doc "Sets the value at the index/indices. Works on arrays of short. Returns val."}
-;  aset-short setShort short)
-;
-;(def-aset
-;  #^{:doc "Sets the value at the index/indices. Works on arrays of byte. Returns val."}
-;  aset-byte setByte byte)
-;
-;(def-aset
-;  #^{:doc "Sets the value at the index/indices. Works on arrays of char. Returns val."}
-;  aset-char setChar char)
+;;; This really doesn't help in CLR, because I don't have type-specific setters, so we will still end up boxing the value.  Rethink.
+(defmacro
+  #^{:private true}
+  def-aset [name method coerce]
+    `(defn ~name
+       {:arglists '([~'array ~'idx ~'val] [~'array ~'idx ~'idx2 & ~'idxv])}
+       ([array# idx# val#]
+        (. clojure.lang.ArrayHelper (~method array# idx# (~coerce val#)))        ;;; Array -> ArrayHelper so we can provide the overloads below.
+        val#)
+       ([array# idx# idx2# & idxv#]
+        (apply ~name (aget array# idx#) idx2# idxv#))))
+
+(def-aset
+  #^{:doc "Sets the value at the index/indices. Works on arrays of int. Returns val."}
+  aset-int setInt int)
+
+(def-aset
+  #^{:doc "Sets the value at the index/indices. Works on arrays of long. Returns val."}
+  aset-long setLong long)
+
+(def-aset
+  #^{:doc "Sets the value at the index/indices. Works on arrays of boolean. Returns val."}
+  aset-boolean setBoolean boolean)
+
+(def-aset
+  #^{:doc "Sets the value at the index/indices. Works on arrays of float. Returns val."}
+  aset-float setFloat float)
+
+(def-aset
+  #^{:doc "Sets the value at the index/indices. Works on arrays of double. Returns val."}
+  aset-double setDouble double)
+
+(def-aset
+  #^{:doc "Sets the value at the index/indices. Works on arrays of short. Returns val."}
+  aset-short setShort short)
+
+(def-aset
+  #^{:doc "Sets the value at the index/indices. Works on arrays of byte. Returns val."}
+  aset-byte setByte byte)
+
+(def-aset
+  #^{:doc "Sets the value at the index/indices. Works on arrays of char. Returns val."}
+  aset-char setChar char)
 ;;; Another  ragged versus true multidimensional array problem
 ;(defn make-array
 ;  "Creates and returns an array of instances of the specified class of

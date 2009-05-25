@@ -89,6 +89,22 @@ namespace clojure.lang
             return (int)Convert.ToDouble(o);
         }
 
+        public static long ConvertToLong(object o)
+        {
+            // ToInt64 rounds.  We need truncation.
+            return (long)Convert.ToDouble(o);
+        }
+
+        public static float ConvertToFloat(object o)
+        {
+            return (float)Convert.ToDouble(o);
+        }
+
+        public static double ConvertToDouble(object o)
+        {
+            return ConvertToDouble(o);
+        }
+
         public static bool IsNumeric(object o)
         {
             return o != null && IsNumeric(o.GetType());
