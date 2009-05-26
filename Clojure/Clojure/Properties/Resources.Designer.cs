@@ -116,6 +116,25 @@ namespace clojure.lang.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ;   Copyright (c) Rich Hickey. All rights reserved.
+        ///;   The use and distribution terms for this software are covered by the
+        ///;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+        ///;   which can be found in the file epl-v10.html at the root of this distribution.
+        ///;   By using this software in any fashion, you are agreeing to be bound by
+        ///;   the terms of this license.
+        ///;   You must not remove this notice, or any other, from this software.
+        ///
+        ///(ns clojure.set)
+        ///
+        ///(defn- bubble-max-key [k coll] [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string set {
+            get {
+                return ResourceManager.GetString("set", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ;   Copyright (c) David Miller. All rights reserved.
         ///;   The use and distribution terms for this software are covered by the
         ///;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
@@ -124,7 +143,10 @@ namespace clojure.lang.Properties {
         ///;   the terms of this license.
         ///;   You must not remove this notice, or any other, from this software.
         ///
-        ///(defn f1 [l n] (if (&gt; (count l) n) nil  [rest of string was truncated]&quot;;.
+        ///
+        ///(ns clojure.test)
+        ///
+        ///; check generati [rest of string was truncated]&quot;;.
         /// </summary>
         public static string test {
             get {

@@ -36,17 +36,4 @@
 (defn f-dotimes [n] (dotimes [i n] (list i)))
 (defn test-dotimes [] (time (f-dotimes 100000)))
 
-(defmacro
-  #^{:private true}
-  def-aset1 [name method coerce]
-    `(defn ~name
-       {:arglists '([~'array ~'idx ~'val] [~'array ~'idx ~'idx2 & ~'idxv])}
-       ([array# idx# val#]
-        (. clojure.lang.ArrayHelper (~method array# idx# (~coerce val#)))        ;;; Array -> ArrayHelper so we can provide the overloads below.
-        val#)
-       ([array# idx# idx2# & idxv#]
-        (apply ~name (aget array# idx#) idx2# idxv#))))
 
-(def-aset1
-  #^{:doc "Sets the value at the index/indices. Works on arrays of int. Returns val."}
-  aset-int setInt int)

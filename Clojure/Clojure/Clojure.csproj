@@ -219,6 +219,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Bootstrap\core_print.clj" />
+    <None Include="Bootstrap\main.clj" />
+    <None Include="Bootstrap\set.clj" />
+    <None Include="Bootstrap\zip.clj" />
     <None Include="Resources\version.txt" />
   </ItemGroup>
   <ItemGroup>
