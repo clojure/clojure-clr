@@ -274,7 +274,6 @@ namespace clojure.lang
 
         public const string CLOJURE_LOAD_PATH = "clojure.load.path";
 
-
         #endregion
 
         #region  It's true (or not)
@@ -486,10 +485,9 @@ namespace clojure.lang
         static void DoInit()
         {
             load("clojure/core");
-            //load("clojure/core_print");
-            //load("clojure/zip", false);
+            load("clojure/zip", false);
             //load("clojure/xml", false);
-            //load("clojure/set", false);
+            load("clojure/set", false);
 
             PostBootstrapInit();
         }
@@ -508,7 +506,7 @@ namespace clojure.lang
                 Var refer = var("clojure.core", "refer");
                 in_ns.invoke(USER);
                 refer.invoke(CLOJURE);
-                //TODO: maybeLoadResourceScript("user.clj");
+                MaybeLoadCljScript("user.clj");
             }
             finally
             {
@@ -1780,6 +1778,10 @@ namespace clojure.lang
             }
         }
 
+        #endregion
+
+        #region Loading/compiling
+
         public static void load(String pathname)
         {
             load(pathname, true);
@@ -1823,7 +1825,27 @@ namespace clojure.lang
 
         }
 
-        private static void LoadScript(FileInfo cljInfo)
+        private static void MaybeLoadCljScript(string cljname)
+        {
+            LoadCljScript(cljname, false);
+        }
+
+        static void LoadCljScript(string cljname)
+        {
+            LoadCljScript(cljname, true);
+        }
+
+        static void LoadCljScript(string cljname, bool failIfNotFound)
+        {
+            FileInfo cljInfo = FindFile(cljname);
+            if (cljInfo != null)
+                LoadScript(cljInfo);
+            else if (failIfNotFound)
+                throw new FileNotFoundException(String.Format("Could not locate Clojure resource on {0}", CLOJURE_LOAD_PATH));
+        }
+
+
+        public  static void LoadScript(FileInfo cljInfo)
         {
             using (TextReader rdr = cljInfo.OpenText())
                 Compiler.load(rdr, cljInfo.FullName, cljInfo.Name);

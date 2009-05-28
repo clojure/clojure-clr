@@ -9,11 +9,11 @@
 ;; Originally contributed by Stephen C. Gilardi
 
 (ns clojure.main
-  (:import (clojure.lang Compiler Compiler.CompilerException             ;;;Compiler$CompilerException
+  (:import (clojure.lang Compiler Compiler+CompilerException             ;;;Compiler$CompilerException
                          LineNumberingTextReader RT)))                   ;;; LineNumberingPushbackReader
 
 (declare main)
-
+ 
 (defmacro with-bindings
   "Executes body in the context of thread-local bindings for several vars
   that often need to be set!: *ns* *warn-on-reflection* *print-meta*
@@ -46,11 +46,11 @@
   its behavior of both supporting .unread and collapsing all of CR, LF, and
   CRLF to a single \\newline."
   [s]
-  (let [c (.read s)]
+  (let [c (.Read s)]                             ;;; .read
     (cond
      (= c (int \newline)) :line-start
      (= c -1) :stream-end
-     :else (do (.unread s c) :body))))
+     :else (do (.Unread s c) :body))))           ;;; .unread
 
 (defn skip-whitespace
   "Skips whitespace characters on stream s. Returns :line-start, :stream-end,
@@ -62,13 +62,13 @@
   supporting .unread and collapsing all of CR, LF, and CRLF to a single
   \\newline."
   [s]
-  (loop [c (.read s)]
+  (loop [c (.Read s)]							;;; .read
     (cond
      (= c (int \newline)) :line-start
      (= c -1) :stream-end
-     (= c (int \;)) (do (.readLine s) :line-start)
-     (or (Character/isWhitespace c) (= c (int \,))) (recur (.read s))
-     :else (do (.unread s c) :body))))
+     (= c (int \;)) (do (.ReadLine s) :line-start)                      ;;; .readLine
+     (or (Char/IsWhiteSpace (char c)) (= c (int \,))) (recur (.Read s))        ;;; (Character/isWhitespace c)    .read
+     :else (do (.Unread s c) :body))))                                  ;;; .unread
 
 (defn repl-read
   "Default :read hook for repl. Reads from *in* which must either be an
@@ -93,7 +93,7 @@
   its wrappers"
   [throwable]
   (loop [cause throwable]
-    (if-let [cause (.getCause cause)]
+    (if-let [cause (.InnerException cause)]    ;;; .getCause
       (recur cause)
       cause)))
 
@@ -101,14 +101,14 @@
   "Returns CompilerExceptions in tact, but only the root cause of other
   throwables"
   [throwable]
-  (if (instance? Compiler$CompilerException throwable)
+  (if (instance? clojure.lang.Compiler+CompilerException throwable)   ;;; Compiler$CompilerException
     throwable
     (root-cause throwable)))
 
 (defn repl-caught
   "Default :caught hook for repl"
   [e]
-  (.println *err* (repl-exception e)))
+  (.WriteLine *err* (repl-exception e)))      ;;; .println
 
 (defn repl
   "Generic, reusable, read-eval-print loop. By default, reads from *in*,
@@ -156,8 +156,8 @@
   [& options]
   (let [{:keys [init need-prompt prompt flush read eval print caught]
          :or {init        #()
-              need-prompt (if (instance? LineNumberingPushbackReader *in*)
-                            #(.atLineStart *in*)
+              need-prompt (if (instance? LineNumberingTextReader *in*)     ;;; LineNumberingPushbackReader
+                            #(.AtLineStart *in*)                           ;;; atLineStart
                             #(identity true))
               prompt      repl-prompt
               flush       flush
@@ -178,13 +178,13 @@
                    (set! *3 *2)
                    (set! *2 *1)
                    (set! *1 value))))
-           (catch Throwable e
+           (catch Exception e           ;;; Throwable
              (caught e)
              (set! *e e))))]
     (with-bindings
      (try
       (init)
-      (catch Throwable e
+      (catch Exception e                ;;; Throwable
         (caught e)
         (set! *e e)))
      (prompt)
@@ -200,9 +200,9 @@
   "Loads Clojure source from a file or resource given its path. Paths
   beginning with @ or @/ are considered relative to classpath."
   [path]
-  (if (.startsWith path "@")
-    (RT/loadResourceScript
-     (.substring path (if (.startsWith path "@/") 2 1)))
+  (if (.StartsWith path "@")                                  ;;; startsWith
+    (RT/LoadCljScript                                         ;;; loadResourceScript
+     (.Substring path (if (.StartsWith path "@/") 2 1)))      ;;; substring  startsWith
     (Compiler/loadFile path)))
 
 (defn- init-opt
@@ -246,7 +246,7 @@
     (println "Clojure" (clojure-version)))
   (repl :init #(initialize args inits))
   (prn)
-  (System/exit 0))
+  (Environment/Exit 0))                        ;;;  System.Exit
 
 (defn- script-opt
   "Run a script from a file, resource, or standard in with args and inits"

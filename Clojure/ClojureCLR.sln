@@ -86,6 +86,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sympl35", "..\..\DLR_Main\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BootstrapCompile", "BootstrapCompile\BootstrapCompile.csproj", "{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clojure.Main", "Clojure.Main\Clojure.Main.csproj", "{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -450,6 +452,22 @@ Global
 		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.Silverlight Release|Any CPU.Build.0 = Release|Any CPU
 		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.SpecSharp|Any CPU.ActiveCfg = Release|Any CPU
 		{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}.SpecSharp|Any CPU.Build.0 = Release|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.DelaySigned Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.DelaySigned Release|Any CPU.Build.0 = Release|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.DelaySigned Silverlight Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.DelaySigned Silverlight Release|Any CPU.Build.0 = Release|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.FxCop|Any CPU.ActiveCfg = Release|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.FxCop|Any CPU.Build.0 = Release|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.Silverlight Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.Silverlight Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.Silverlight Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.Silverlight Release|Any CPU.Build.0 = Release|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.SpecSharp|Any CPU.ActiveCfg = Release|Any CPU
+		{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}.SpecSharp|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -30,13 +30,20 @@ namespace clojure.lang
         }
 
 
+        private int _prevPosition = 0;
         private int _position = 0;
         public int Position
         {
             get { return _position; }
         }
 
-        private int _lastLinePosition = 0;
+        private bool _prevLineStart = true;
+        private bool _atLineStart = true;
+        public bool AtLineStart
+        {
+            get { return _atLineStart; }
+        }
+
 
         #endregion
 
@@ -55,29 +62,44 @@ namespace clojure.lang
         {
             int ret = base.Read();
 
-            if (ret == -1)
-                return ret;
+            _prevLineStart = _atLineStart;
 
+            if (ret == -1)
+            {
+                _atLineStart = true;
+                return ret;
+            }
+
+            _atLineStart = false;
             ++_position;
 
-            switch (ret)
+            if (ret == '\r')
             {
-                case '\n':
-                    _lineNumber++;
-                    _lastLinePosition = _position-1;
-                    _position = 0;
-                    break;
-
-                case '\r':
-                    if (Peek() == '\n')
-                    {
-                        ret = _baseReader.Read();
-                        goto case '\n';
-                    }
-                    break;
+                if (Peek() == '\n')
+                    ret = BaseReader.Read();
+                else
+                {
+                    NoteLineAdvance();
+                }
             }
+
+            if ( ret == '\n' )
+                NoteLineAdvance();
+
             return ret;
         }
+
+
+
+        private void NoteLineAdvance()
+        {
+            _atLineStart = true;
+            _lineNumber++;
+            _prevPosition = _position - 1;
+            _position = 0;
+        }
+
+
 
         //public override int Read(char[] buffer, int index, int count)
         //{
@@ -126,7 +148,8 @@ namespace clojure.lang
             if (ch == '\n')
             {
                 --_lineNumber;
-                _position = _lastLinePosition;
+                _position = _prevPosition;
+                _atLineStart = _prevLineStart;
             }
         }
 

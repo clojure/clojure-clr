@@ -61,7 +61,7 @@ namespace clojure.lang
         public static readonly Symbol THROW = Symbol.create("throw");
         public static readonly Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
         public static readonly Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
-        public static readonly Symbol IMPORT = Symbol.create("import*");
+        public static readonly Symbol IMPORT = Symbol.create("clojure.core","import*");
         public static readonly Symbol NEW = Symbol.create("new");
         public static readonly Symbol _AMP_ = Symbol.create("&");
 
@@ -173,7 +173,7 @@ namespace clojure.lang
         //static readonly MethodInfo Method_CGen_MakeSet = typeof(Generator).GetMethod("MakeSet");
         //static readonly MethodInfo Method_CGen_MakeVector = typeof(Generator).GetMethod("MakeVector");
 
-        internal static readonly MethodInfo Method_Compiler_CurrentNamespace = typeof(Compiler).GetMethod("CurrentNamespace");
+        internal static readonly PropertyInfo Method_Compiler_CurrentNamespace = typeof(Compiler).GetProperty("CurrentNamespace");
         internal static readonly MethodInfo Method_Compiler_PushNS = typeof(Compiler).GetMethod("PushNS");
 
 
@@ -240,12 +240,9 @@ namespace clojure.lang
             CreateObjectTypeArray(Compiler.MAX_POSITIONAL_ARITY).CopyTo(types, 0);
             types[Compiler.MAX_POSITIONAL_ARITY] = typeof(object[]);
             Methods_IFn_invoke[Compiler.MAX_POSITIONAL_ARITY + 1]
-                = typeof(IFn).GetMethod("invoke",
-                       BindingFlags.Public | BindingFlags.InvokeMethod,
-                       Type.DefaultBinder,
-                       CallingConventions.VarArgs | CallingConventions.HasThis,
-                       types,
-                       null);
+                = typeof(IFn).GetMethod("invoke", types);
+
+            MethodInfo[] mis = typeof(IFn).GetMethods();
 
         }
 
@@ -1135,7 +1132,7 @@ namespace clojure.lang
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     LINE_AFTER.set(lntr.LineNumber);
-                    LambdaExpression ast = Compiler.GenerateLambda(context,form, false);
+                    LambdaExpression ast = Compiler.GenerateLambda(context,form, false); 
 
                     // Compile to assembly
                     MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++), 

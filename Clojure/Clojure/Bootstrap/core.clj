@@ -2747,7 +2747,7 @@
   "Evaluates body in a context in which *in* is bound to a fresh
   StringReader initialized with the string s."
   [s & body]
-  `(with-open s# (-> (System.IO.StringReader. ~s) clojure.lang.Readers.LineNumberingReader.)  ;;; were java.io.StringReader & clojure.lang.LineNumberingPushbackReader
+  `(with-open [s# (-> (System.IO.StringReader. ~s) clojure.lang.LineNumberingTextReader.)]  ;;; were java.io.StringReader & clojure.lang.LineNumberingPushbackReader
      (binding [*in* s#]
        ~@body)))
 

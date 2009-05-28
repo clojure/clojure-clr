@@ -188,14 +188,16 @@ namespace clojure.lang.CljCompiler.Ast
             Expression basicBody = _tryExpr.GenDlr(context);
             // Wrap the basic body, a Comma, in a return to a label
             LabelTarget target = Expression.Label(basicBody.Type, "ret_label");
-            Expression tryBody = Expression.Return(target, basicBody);
+            //Expression tryBody = Expression.Return(target, basicBody);
+            Expression tryBody = basicBody;
 
             CatchBlock[] catches = new CatchBlock[_catchExprs.count()];
             for ( int i=0; i<_catchExprs.count(); i++ )
             {
                 CatchClause clause = (CatchClause) _catchExprs.nth(i);
-                // TODO: I'm pretty sure this is wrong.
-                catches[i] = Expression.Catch(clause.Type,clause.Lb.ParamExpression,clause.Handler.GenDlr(context));
+                ParameterExpression parmExpr = Expression.Parameter(clause.Type, clause.Lb.Name);
+                clause.Lb.ParamExpression = parmExpr;
+                catches[i] = Expression.Catch(parmExpr,clause.Handler.GenDlr(context));
             }
 
             TryExpression tryStmt = _finallyExpr == null
