@@ -123,21 +123,6 @@ namespace clojure.lang
             object eofValue,
             bool isRecursive)
         {
-            if ( eofIsError )
-                return ReadAux(r,isRecursive);
-
-            try
-            {
-                 return ReadAux(r, isRecursive);
-            }
-            catch (EndOfStreamException)
-            {
-                return eofValue;
-            }
-        }
-
-        public static object ReadAux(PushbackTextReader r, bool isRecursive)
-        {
             try
             {
                 for (; ; )
@@ -149,10 +134,9 @@ namespace clojure.lang
 
                     if (ch == -1)
                     {
-                        //if (eofIsError)
-                        //    throw new Exception("EOF while reading");
-                        //return eofValue;
-                        throw new EndOfStreamException("EOF while reading");
+                        if (eofIsError)
+                            throw new EndOfStreamException("EOF while reading");
+                        return eofValue;
                     }
 
                     if (Char.IsDigit((char)ch))
@@ -189,10 +173,6 @@ namespace clojure.lang
                     return RT.suppressRead() ? null : interpretToken(token);
                 }
             }
-            catch (EndOfStreamException e)
-            {
-                throw e;
-            }
             catch (Exception e)
             {
                 if (isRecursive || !(r is LineNumberingTextReader))
@@ -200,6 +180,11 @@ namespace clojure.lang
                 LineNumberingTextReader rdr = r as LineNumberingTextReader;
                 throw new ReaderException(rdr.LineNumber, e);
             }
+        }
+
+        private static object ReadAux(PushbackTextReader r)
+        {
+            return read(r, true, null, true);
         }
 
         #endregion
@@ -311,8 +296,7 @@ namespace clojure.lang
                 else
                 {
                     Unread(r, ch);
-                    //object o = read(r, true, null, isRecursive);
-                    object o = ReadAux(r, isRecursive);
+                    object o = read(r, true, null, isRecursive);
                     if (o != r)
                         a.Add(o);
                 }
@@ -690,7 +674,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char underscore)
             {
-                ReadAux(r,true);
+                ReadAux(r);
                 return r;
             }
         }
@@ -707,7 +691,7 @@ namespace clojure.lang
             protected override object Read(PushbackTextReader r, char quote)
             {
                 //object o = read(r, true, null, true);
-                object o = ReadAux(r, true);
+                object o = ReadAux(r);
                 return RT.list(_sym, o);
             }
         }
@@ -720,7 +704,7 @@ namespace clojure.lang
                 {
                     Var.pushThreadBindings(RT.map(GENSYM_ENV, PersistentHashMap.EMPTY));
                     //object form = read(r, true, null, true);
-                    object form = ReadAux(r, true);
+                    object form = ReadAux(r);
                     return syntaxQuote(form);
                 }
                 finally
@@ -856,14 +840,14 @@ namespace clojure.lang
                 if (ch == '@')
                 {
                     //object o = read(r, true, null, true);
-                    object o = ReadAux(r, true);
+                    object o = ReadAux(r);
                     return RT.list(UNQUOTE_SPLICING, o);
                 }
                 else
                 {
                     Unread(r, ch);
                     //object o = read(r, true, null, true);
-                    object o = ReadAux(r, true);
+                    object o = ReadAux(r);
                     //return new Unquote(o);
                     // per Rev 1184
                     return RT.list(UNQUOTE, o);
@@ -908,14 +892,14 @@ namespace clojure.lang
                 if (r is LineNumberingTextReader)
                     line = ((LineNumberingTextReader)r).LineNumber;
                 //object meta = read(r, true, null, true);
-                object meta = ReadAux(r, true);
+                object meta = ReadAux(r);
                 if (meta is Symbol || meta is Keyword || meta is String)
                     meta = RT.map(RT.TAG_KEY, meta);
                 else if (!(meta is IPersistentMap))
                     throw new ArgumentException("Metadata must be Symbol,Keyword,String or Map");
 
                 //object o = read(r, true, null, true);
-                object o = ReadAux(r, true);
+                object o = ReadAux(r);
                 if (o is IMeta)
                 {
                     if (line != -1 && o is ISeq)
@@ -937,7 +921,7 @@ namespace clojure.lang
             protected override object Read(PushbackTextReader r, char quote)
             {
                 //object o = read(r, true, null, true);
-                object o = ReadAux(r, true);
+                object o = ReadAux(r);
                 //		if(o instanceof Symbol)
                 //			{
                 //			Object v = Compiler.maybeResolveIn(Compiler.currentNS(), (Symbol) o);
@@ -985,7 +969,7 @@ namespace clojure.lang
                     Var.pushThreadBindings(RT.map(ARG_ENV, PersistentTreeMap.EMPTY));
                     r.Unread('(');
                     ////object form = ReadAux(r, true, null, true);
-                    object form = ReadAux(r, true);
+                    object form = ReadAux(r);
                     //object form = _listReader.invoke(r, '(');
 
                     IPersistentVector args = PersistentVector.EMPTY;
@@ -1032,7 +1016,7 @@ namespace clojure.lang
                     return registerArg(1);
                 }
                 //object n = ReadAux(r, true, null, true);
-                object n = ReadAux(r, true);
+                object n = ReadAux(r);
                 if (n.Equals(Compiler._AMP_))
                     return registerArg(-1);
                 if (!Util.IsNumeric(n))
