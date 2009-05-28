@@ -16,7 +16,9 @@ Goals:
 
 For more information on clojure:  http://clojure.org
 
-For instructions on installing: .\install.txt
+Installing: .\install.txt
+
+Compiling/running:  .\compile-run.txt
 
 Version information:  .\versions.txt
 

@@ -65,14 +65,13 @@ You will need to make sure the projects have the proper references:
 Clojure:  
 	Microsoft.Scripting.Core
 	Microsoft.Scripting
-	Microsoft.Scripting.ExtensionAttribute 
 	vjslib
 
 Simple.Console
 	Clojure
 	Microsoft.Scripting.Core
 	Microsoft.Scripting
-	Microsoft.Scripting.ExtensionAttribute 	
+
 
 Clojure.Tests
 	Clojure
@@ -85,20 +84,10 @@ Clojure.Tests
 BootstrapCompile
 	Clojure
 
-
-Compiling
----------
-
-Adding AOT-compilation allows pre-compilation of the *.clj environment bootstrap files.
-I have not had time to automate the build process fully, so there are some manual steps.
-
-Specifically, the bootstrap files are still contained in Clojure\Bootstrap.  If you make any changes,
-
-  (1) Copy these files into BootstrapCompile\bin\Debug\clojure.  
-  (2) Run the BootstrapCompile program.
-  (3) Copy the .dll and .pdb files from BootstrapCompile\bin\Debug\clojure to Simple.Console\bin\Debug\clojure.
-
-Then you should get them on startup.
+Clojure.Main
+	Clojure
+	Microsoft.Scripting.Core
+	Microsoft.Scripting
 
 
 

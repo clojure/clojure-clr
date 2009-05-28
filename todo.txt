@@ -3,31 +3,26 @@ This list is most definitely incomplete.
 These are in no particular order.
 
 
-- Add other bootstrap *.clj files (beyond core.clj and core-print.clj).
+- Look closely at all code generation to find areas for speedup
+
+- Add other bootstrap *.clj files (remaining are: clojure.xml and inspector.xml)
 
 - Add more unit tests for the basic data structures.
 
 - Test against all the clojure/contrib/test_clojure/*.clj files.
 
-- Fix file loading & compilation, lib loading.
-
 - Add gen-class.
 
 - Add proxies.
 
+
+- Add missing array support, including
+    -- figure out how to handle ragged n-dim arrays versus true multi-dim arrays.
+
+
 - Add callsites for host expression calls.  See MethodBinder.
     -- As part of this, look at the type handling in selecting a target method
        based on argument types in host calls.
-
-- Finish basic REPL
-    -- need *1, *2, *3, *e, better error handling, etc.
-
-
-- Add primitive-type array support.
-
-- Add array support, including
-    -- figure out how to handle ragged n-dim arrays versus true multi-dim arrays.
-
 
 Far away in the distance:
 
