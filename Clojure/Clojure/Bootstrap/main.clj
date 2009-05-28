@@ -36,7 +36,7 @@
 (defn repl-prompt
   "Default :prompt hook for repl"
   []
-  (printf "%s=> " (ns-name *ns*)))
+  (print (str (ns-name *ns*) "=> ")))    ;;;  until we get printf defined for real:  (printf "%s=> " (ns-name *ns*)))
 
 (defn skip-if-eol
   "If the next character on stream s is a newline, skips it, otherwise
