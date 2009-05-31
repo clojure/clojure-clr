@@ -13,7 +13,7 @@ These are in no particular order.
 
 - Add gen-class.
 
-- Add proxies.
+- Add proxies. 
 
 
 - Add missing array support, including

@@ -1647,7 +1647,7 @@ namespace clojure.lang
 
             #endregion
         }
-       
+        
         #region Array c-tors
 
         static public float[] float_array(int size, object init)
