@@ -3421,17 +3421,17 @@
 ;                    (when (. rs (next))
 ;                      (cons (apply struct row-struct (row-values)) (thisfn)))))]
 ;      (rows)))
-;;; later (boring)
-;(defn iterator-seq
-;  "Returns a seq on a java.util.Iterator. Note that most collections
-;  providing iterators implement Iterable and thus support seq directly."
-;  [iter]
-;  (clojure.lang.IteratorSeq/create iter))
-;
-;(defn enumeration-seq
-;  "Returns a seq on a java.util.Enumeration"
-;  [e]
-;  (clojure.lang.EnumerationSeq/create e))
+
+(defn iterator-seq
+  "Returns a seq on a java.util.Iterator. Note that most collections
+  providing iterators implement Iterable and thus support seq directly."
+  [iter]
+  (clojure.lang.EnumeratorSeq/create iter))   ;;; IteratorSeq
+
+(defn enumeration-seq
+  "Returns a seq on a java.util.Enumeration"
+  [e]
+  (clojure.lang.EnumeratorSeq/create e))     ;;; EnumerationSeq
 ;;; Should we make compatible with Java?
 (defn format
   "Formats a string using java.lang.String.format, see java.util.Formatter for format
