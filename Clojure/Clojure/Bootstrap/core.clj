@@ -220,11 +220,11 @@
                 (cons `fn fdecl)))))
 
 (. (var defn) (setMacro))       
-;;; The following didn't work, I've handled the few uses below as special cases.
-;;;(defn cast
-;;;  "Throws a ClassCastException if x is not a c, else returns x."
-;;;  [#^Type c x]   ;;; changed Class to Type
-;;;   (. clojure.lang.RT (Cast c x)))               ;;;  original (. c (cast x)))     
+;;; Not the same as the Java version, but good enough?
+(defn cast
+  "Throws a ClassCastException if x is not a c, else returns x."
+  [#^Type c x]   ;;; changed Class to Type
+   (if (. c (IsInstanceOfType x)) x (throw  (InvalidCastException. "Unable to cast."))))  ;;;  original (. c (cast x)))     
 
 (defn to-array
   "Returns an array of Objects containing the contents of coll, which
@@ -1948,7 +1948,7 @@
   "Returns true if x is a Number"
   [x]
   (. clojure.lang.Util (IsNumeric x)))    ;;; (instance? Number x))
-
+;;; Should we include th other numeric types in the CLR (unsigned, etc.)
 (defn integer?
   "Returns true if n is an integer"
   [n]
@@ -3153,51 +3153,51 @@
        (if (< ~idx  (alength a#))
          (recur (unchecked-inc ~idx) ~expr)
          ~ret))))
-;;; NOT WORTH THE EFFORT AT THE MOMENT
-;(defn float-array
-;  "Creates an array of floats"
-;  {:inline (fn [& args] `(. clojure.lang.Numbers float_array ~@args))
-;   :inline-arities #{1 2}}
-;  ([size-or-seq] (. clojure.lang.Numbers float_array size-or-seq))
-;  ([size init-val-or-seq] (. clojure.lang.Numbers float_array size init-val-or-seq)))
-;
-;(defn double-array
-;  "Creates an array of doubles"
-;  {:inline (fn [& args] `(. clojure.lang.Numbers double_array ~@args))
-;   :inline-arities #{1 2}}
-;  ([size-or-seq] (. clojure.lang.Numbers double_array size-or-seq))
-;  ([size init-val-or-seq] (. clojure.lang.Numbers double_array size init-val-or-seq)))
-;
-;(defn int-array
-;  "Creates an array of ints"
-;  {:inline (fn [& args] `(. clojure.lang.Numbers int_array ~@args))
-;   :inline-arities #{1 2}}
-;  ([size-or-seq] (. clojure.lang.Numbers int_array size-or-seq))
-;  ([size init-val-or-seq] (. clojure.lang.Numbers int_array size init-val-or-seq)))
-;
-;(defn long-array
-;  "Creates an array of ints"
-;  {:inline (fn [& args] `(. clojure.lang.Numbers long_array ~@args))
-;   :inline-arities #{1 2}}
-;  ([size-or-seq] (. clojure.lang.Numbers long_array size-or-seq))
-;  ([size init-val-or-seq] (. clojure.lang.Numbers long_array size init-val-or-seq)))
-;
-;(definline floats
-;  "Casts to float[]"
-;  [xs] `(. clojure.lang.Numbers floats ~xs))
-;
-;(definline ints
-;  "Casts to int[]"
-;  [xs] `(. clojure.lang.Numbers ints ~xs))
-;
-;(definline doubles
-;  "Casts to double[]"
-;  [xs] `(. clojure.lang.Numbers doubles ~xs))
-;
-;(definline longs
-;  "Casts to long[]"
-;  [xs] `(. clojure.lang.Numbers longs ~xs))
-;
+
+(defn float-array
+  "Creates an array of floats"
+  {:inline (fn [& args] `(. clojure.lang.Numbers float_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers float_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers float_array size init-val-or-seq)))
+
+(defn double-array
+  "Creates an array of doubles"
+  {:inline (fn [& args] `(. clojure.lang.Numbers double_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers double_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers double_array size init-val-or-seq)))
+
+(defn int-array
+  "Creates an array of ints"
+  {:inline (fn [& args] `(. clojure.lang.Numbers int_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers int_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers int_array size init-val-or-seq)))
+
+(defn long-array
+  "Creates an array of ints"
+  {:inline (fn [& args] `(. clojure.lang.Numbers long_array ~@args))
+   :inline-arities #{1 2}}
+  ([size-or-seq] (. clojure.lang.Numbers long_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers long_array size init-val-or-seq)))
+
+(definline floats
+  "Casts to float[]"
+  [xs] `(. clojure.lang.Numbers floats ~xs))
+
+(definline ints
+  "Casts to int[]"
+  [xs] `(. clojure.lang.Numbers ints ~xs))
+
+(definline doubles
+  "Casts to double[]"
+  [xs] `(. clojure.lang.Numbers doubles ~xs))
+
+(definline longs
+  "Casts to long[]"
+  [xs] `(. clojure.lang.Numbers longs ~xs))
+
 ;(import '(java.util.concurrent BlockingQueue LinkedBlockingQueue))
 ;;;NOT WORTH THE EFFORT AT THE MOMENT
 ;(defn seque
