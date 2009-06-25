@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FixtureSetupClass.cs" />
+    <Compile Include="LibTests\BigIntegerTests.cs" />
     <Compile Include="LibTests\EnumeratorSeqTests.cs" />
     <Compile Include="LibTests\AFnImplTests.cs" />
     <Compile Include="LibTests\AgentTests.cs" />

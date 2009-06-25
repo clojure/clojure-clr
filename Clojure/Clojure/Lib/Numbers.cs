@@ -12,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using java.math;
+using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
 {
@@ -207,7 +207,8 @@ namespace clojure.lang
                 return (BigInteger)x;
             else
                 // TODO: determine if we should just cast.
-                return BigInteger.valueOf(Convert.ToInt64(x));
+                //return BigInteger.valueOf(Convert.ToInt64(x));
+                return BigInteger.Create(Convert.ToInt64(x));
         }
 
         static BigDecimal toBigDecimal(object x)
@@ -215,7 +216,9 @@ namespace clojure.lang
             if (x is BigDecimal)
                 return (BigDecimal)x;
             else if ( x is BigInteger)
-                return new BigDecimal((BigInteger)x);
+                // TODO: when we get new BigDecimal, fix this.
+                //return new BigDecimal((BigInteger)x);
+                return new BigDecimal(((BigInteger)x).ToString());
             else
                 // TODO: determine if we should just cast.
                 return BigDecimal.valueOf(Convert.ToInt64(x));
@@ -233,11 +236,14 @@ namespace clojure.lang
                 BigDecimal bx = (BigDecimal)x;
                 int scale = bx.scale();
                 if (scale < 0)
-                    return new Ratio(bx.toBigInteger(), BigIntegerOne);
+                    //return new Ratio(bx.toBigInteger(), BigIntegerOne);
+                    return new Ratio(bx.toBigInteger(), BigInteger.ONE);
                 else
-                    return new Ratio(bx.movePointRight(scale).toBigInteger(), BigIntegerTen.pow(scale));
+                    //return new Ratio(bx.movePointRight(scale).toBigInteger(), BigIntegerTen.pow(scale));
+                    return new Ratio(bx.movePointRight(scale).toBigInteger(), BigInteger.TEN.Power(scale));
             }
-            return new Ratio(toBigInteger(x), BigIntegerOne);
+            //return new Ratio(toBigInteger(x), BigIntegerOne);
+            return new Ratio(toBigInteger(x), BigInteger.ONE);
         }
                     
         // TODO: fix rationalize
@@ -253,19 +259,35 @@ namespace clojure.lang
                 if (scale < 0)
                     return bx.toBigInteger();
                 else
-                    return divide(bx.movePointRight(scale).toBigInteger(), BigIntegerTen.pow(scale));
+                    //return divide(bx.movePointRight(scale).toBigInteger(), BigIntegerTen.pow(scale));
+                    return divide(bx.movePointRight(scale).toBigInteger(), BigInteger.TEN.Power(scale));
             }
             return x;
         }
 
+        public static object reduce(java.math.BigInteger jmbi)
+        {
+            // TODO: Get rid of this when we replace BigDecimal
+            return reduce(BigInteger.Parse(jmbi.ToString()));
+        }
+
         public static object reduce(BigInteger val)
         {
-            int bitLength = val.bitLength();
-            return (bitLength < 32)
-                ? (object)val.intValue()
-                : (bitLength < 64)
-                    ? (object)val.longValue()
-                    : val;
+            //int bitLength = val.bitLength();
+            //return (bitLength < 32)
+            //    ? (object)val.intValue()
+            //    : (bitLength < 64)
+            //        ? (object)val.longValue()
+            //        : val;
+            int ival;
+            if (val.AsInt32(out ival))
+                return ival;
+
+            long lval;
+            if (val.AsInt64(out lval))
+                return lval;
+
+            return val;
         }
 
         public static object reduce(long val)
@@ -278,24 +300,30 @@ namespace clojure.lang
 
         public static object BIDivide(BigInteger n, BigInteger d)
         {
-            if (d.Equals(BigIntegerZero))
+            if (d.Equals(BigInteger.ZERO))
                 throw new ArithmeticException("Divide by zero");
-            BigInteger gcd = n.gcd(d);
-            if (gcd.Equals(BigIntegerZero))
+            //BigInteger gcd = n.gcd(d);
+            BigInteger gcd = n.Gcd(d);
+            if (gcd.Equals(BigInteger.ZERO))
                 return 0;
-            n = n.divide(gcd);
-            d = d.divide(gcd);
-            if (d.Equals(BigIntegerOne))
+            //n = n.divide(gcd);
+            //d = d.divide(gcd);
+            n = n / gcd;
+            d = d / gcd;
+
+            if (d.Equals(BigInteger.ONE))
                 return reduce(n);
-            return new Ratio((d.signum() < 0 ? n.negate() : n),
-                (d.signum() < 0 ? d.negate() : d));
+            //return new Ratio((d.signum() < 0 ? n.negate() : n),
+            //    (d.signum() < 0 ? d.negate() : d));
+            return new Ratio((d.Signum < 0 ? -n : n), d.Abs());
         }
 
- 
 
-        public static BigInteger BigIntegerTen  = BigInteger.valueOf(10);
-        public static BigInteger BigIntegerOne  = BigInteger.valueOf(1);
-        public static BigInteger BigIntegerZero = BigInteger.valueOf(0);
+
+        //public static BigInteger BigIntegerTen = BigInteger.valueOf(10);
+        //public static BigInteger BigIntegerOne = BigInteger.valueOf(1);
+        //public static BigInteger BigIntegerZero = BigInteger.valueOf(0);
+
 
         public static BigDecimal BigDecimalOne = BigDecimal.valueOf(1);
 
@@ -552,7 +580,8 @@ namespace clojure.lang
                     n = -n;
                     d = -d;
                 }
-                return new Ratio(BigInteger.valueOf(n), BigInteger.valueOf(d));
+                //return new Ratio(BigInteger.valueOf(n), BigInteger.valueOf(d));
+                return new Ratio(BigInteger.Create(n), BigInteger.Create(d));
             }
 
             public object quotient(object x, object y)
@@ -588,7 +617,8 @@ namespace clojure.lang
                 int val = Convert.ToInt32(x);
                 if (val < Int32.MaxValue)
                     return val + 1;
-                return BigInteger.valueOf(((long)val) + 1);
+                //return BigInteger.valueOf(((long)val) + 1);
+                return BigInteger.Create(((long)val) + 1);
             }
 
             public object dec(object x)
@@ -596,7 +626,8 @@ namespace clojure.lang
                 int val = Convert.ToInt32(x);
                 if (val > Int32.MinValue)
                     return val - 1;
-                return BigInteger.valueOf(((long)val) - 1);
+                //return BigInteger.valueOf(((long)val) - 1);
+                return BigInteger.Create(((long)val) - 1);
             }
 
             #endregion
@@ -709,7 +740,8 @@ namespace clojure.lang
                     n = -n;
                     d = -d;
                 }
-                return new Ratio(BigInteger.valueOf(n), BigInteger.valueOf(d));
+                //return new Ratio(BigInteger.valueOf(n), BigInteger.valueOf(d));
+                return new Ratio(BigInteger.Create(n), BigInteger.Create(d));
             }
 
             public object quotient(object x, object y)
@@ -737,7 +769,8 @@ namespace clojure.lang
                 long val = Convert.ToInt64(x);
                 if (val > Int64.MinValue)
                     return -val;
-                return BigInteger.valueOf(val).negate();
+                //return BigInteger.valueOf(val).negate();
+                return -BigInteger.Create(val);
             }
 
             public object inc(object x)
@@ -1028,52 +1061,65 @@ namespace clojure.lang
             public bool isZero(object x)
             {
                 Ratio r =  toRatio(x);
-                return r.numerator.signum()== 0;
+                //return r.numerator.signum() == 0;
+                return r.numerator.Signum == 0;
             }
 
             public bool isPos(object x)
             {
                 Ratio r = toRatio(x);
-                return r.numerator.signum() > 0;
+                //return r.numerator.signum() > 0;
+                return r.numerator.Signum > 0;
             }
 
             public bool isNeg(object x)
             {
                 Ratio r = toRatio(x);
-                return r.numerator.signum() < 0;
+                //return r.numerator.signum() < 0;
+                return r.numerator.Signum < 0;
             }
 
             public object add(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return divide(ry.numerator.multiply(rx.denominator)
-                    .add(rx.numerator.multiply(ry.denominator)),
-                    ry.denominator.multiply(rx.denominator));
+                //return divide(ry.numerator.multiply(rx.denominator)
+                //    .add(rx.numerator.multiply(ry.denominator)),
+                //    ry.denominator.multiply(rx.denominator));
+                return divide(
+                    ry.numerator * rx.denominator + rx.numerator * ry.denominator,
+                    ry.denominator * rx.denominator);
             }
 
             public object multiply(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return Numbers.divide(ry.numerator.multiply(rx.numerator),
-                    ry.denominator.multiply(rx.denominator));
+                //return Numbers.divide(ry.numerator.multiply(rx.numerator),
+                //    ry.denominator.multiply(rx.denominator));
+                return Numbers.divide(
+                    ry.numerator * rx.numerator,
+                    ry.denominator * rx.denominator);
             }
 
             public object divide(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return Numbers.divide(ry.denominator.multiply(rx.numerator),
-                    ry.numerator.multiply(rx.denominator));
+                //return Numbers.divide(ry.denominator.multiply(rx.numerator),
+                //    ry.numerator.multiply(rx.denominator));
+                return Numbers.divide(
+                    ry.denominator * rx.numerator,
+                    ry.numerator * rx.denominator);
             }
 
             public object quotient(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                BigInteger q = rx.numerator.multiply(ry.denominator)
-                    .divide(rx.denominator.multiply(ry.numerator));
+                //BigInteger q = rx.numerator.multiply(ry.denominator)
+                //    .divide(rx.denominator.multiply(ry.numerator));
+                BigInteger q = (rx.numerator * ry.denominator) / (rx.denominator * ry.numerator);
                 return reduce(q);
             }
 
@@ -1081,8 +1127,9 @@ namespace clojure.lang
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                BigInteger q = rx.numerator.multiply(ry.denominator)
-                    .divide(rx.denominator.multiply(ry.numerator));
+                //BigInteger q = rx.numerator.multiply(ry.denominator)
+                //    .divide(rx.denominator.multiply(ry.numerator));
+                BigInteger q = (rx.numerator * ry.denominator) / (rx.denominator * ry.numerator);
                 return Numbers.minus(x, Numbers.multiply(q, y));
             }
 
@@ -1098,14 +1145,16 @@ namespace clojure.lang
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
-                return Numbers.lt(rx.numerator.multiply(ry.denominator),
-                    ry.numerator.multiply(rx.denominator));
+                //return Numbers.lt(rx.numerator.multiply(ry.denominator),
+                //    ry.numerator.multiply(rx.denominator));
+                return rx.numerator * ry.denominator < ry.numerator * rx.denominator;
             }
 
             public object negate(object x)
             {
                 Ratio rx = toRatio(x);
-                return new Ratio(rx.numerator.negate(), rx.denominator);
+                //return new Ratio(rx.numerator.negate(), rx.denominator);
+                return new Ratio(-rx.numerator, rx.denominator);
             }
 
             public object inc(object x)
@@ -1167,29 +1216,35 @@ namespace clojure.lang
             public bool isZero(object x)
             {
                 BigInteger bx = toBigInteger(x);
-                return bx.signum() == 0;
+                //return bx.signum() == 0;
+                return bx.IsZero;
             }
 
             public bool isPos(object x)
             {
                 BigInteger bx = toBigInteger(x);
-                return bx.signum() > 0;
+                //return bx.signum() > 0;
+                return bx.IsPositive;
             }
 
             public bool isNeg(object x)
             {
                 BigInteger bx = toBigInteger(x);
-                return bx.signum() < 0;
+                //return bx.signum() < 0;
+                return bx.IsNegative;
             }
 
             public object add(object x, object y)
             {
-                return reduce(toBigInteger(x).add(toBigInteger(y)));
+                //return reduce(toBigInteger(x).add(toBigInteger(y)));
+                return reduce(toBigInteger(x) + toBigInteger(y));
             }
 
             public object multiply(object x, object y)
             {
-                return reduce(toBigInteger(x).multiply(toBigInteger(y)));
+                //return reduce(toBigInteger(x).multiply(toBigInteger(y)));
+                return reduce(toBigInteger(x) * toBigInteger(y));
+
             }
 
             public object divide(object x, object y)
@@ -1199,12 +1254,14 @@ namespace clojure.lang
 
             public object quotient(object x, object y)
             {
-                return toBigInteger(x).divide(toBigInteger(y));
+                //return toBigInteger(x).divide(toBigInteger(y));
+                return toBigInteger(x) / toBigInteger(y);
             }
 
             public object remainder(object x, object y)
             {
-                return toBigInteger(x).remainder(toBigInteger(y));
+                //return toBigInteger(x).remainder(toBigInteger(y));
+                return toBigInteger(x) % toBigInteger(y);
             }
 
             public bool equiv(object x, object y)
@@ -1214,24 +1271,28 @@ namespace clojure.lang
 
             public bool lt(object x, object y)
             {
-                return toBigInteger(x).compareTo(toBigInteger(y)) < 0;
+                //return toBigInteger(x).compareTo(toBigInteger(y)) < 0;
+                return toBigInteger(x) < toBigInteger(y);
             }
 
             public object negate(object x)
             {
-                return toBigInteger(x).negate();
+                //return toBigInteger(x).negate();
+                return -toBigInteger(x);
             }
 
             public object inc(object x)
             {
                 BigInteger bx = toBigInteger(x);
-                return reduce(bx.add(BigIntegerOne));
+                //return reduce(bx.add(BigIntegerOne));
+                return reduce(bx + BigInteger.ONE);
             }
 
             public object dec(object x)
             {
                 BigInteger bx = toBigInteger(x);
-                return reduce(bx.subtract(BigIntegerOne));
+                //return reduce(bx.subtract(BigIntegerOne));
+                return reduce(bx - BigInteger.ONE);
             }
 
             #endregion
@@ -1415,7 +1476,8 @@ namespace clojure.lang
                 else if (n < 63)
                     return Convert.ToInt64(x) & ~(1L << n);
                 else
-                    return toBigInteger(x).clearBit(n);
+                    //return toBigInteger(x).clearBit(n);
+                    return toBigInteger(x).ClearBit(n);
             }
 
             public object setBit(object x, int n)
@@ -1425,7 +1487,8 @@ namespace clojure.lang
                 else if (n < 63)
                     return Convert.ToInt64(x) | (1L << n);
                 else
-                    return toBigInteger(x).setBit(n);
+                    //return toBigInteger(x).setBit(n);
+                    return toBigInteger(x).SetBit(n);
             }
 
             public object flipBit(object x, int n)
@@ -1435,7 +1498,8 @@ namespace clojure.lang
                 else if (n < 63)
                     return Convert.ToInt64(x) ^ (1L << n);
                 else
-                    return toBigInteger(x).flipBit(n);
+                    //return toBigInteger(x).flipBit(n);
+                    return toBigInteger(x).FlipBit(n);
             }
 
             public bool testBit(object x, int n)
@@ -1445,7 +1509,8 @@ namespace clojure.lang
                 else if (n < 63)
                     return (Convert.ToInt64(x) & (1L << n)) != 0;
                 else
-                    return toBigInteger(x).testBit(n);
+                    //return toBigInteger(x).testBit(n);
+                    return toBigInteger(x).TestBit(n);
             }
 
             public object shiftLeft(object x, int n)
@@ -1455,7 +1520,8 @@ namespace clojure.lang
                         ? shiftRight(x, -n)
                         : reduce(Convert.ToInt64(x) << n);
                 else
-                    return reduce(toBigInteger(x).shiftLeft(n));
+                    //return reduce(toBigInteger(x).shiftLeft(n));
+                    return reduce(toBigInteger(x) << n);
             }
 
             public object shiftRight(object x, int n)
@@ -1522,7 +1588,8 @@ namespace clojure.lang
                 if (n < 63)
                     return Convert.ToInt64(x) & ~(1L << n);
                 else
-                    return toBigInteger(x).clearBit(n);
+                    //return toBigInteger(x).clearBit(n);
+                    return toBigInteger(x).ClearBit(n);
             }
 
             public object setBit(object x, int n)
@@ -1530,7 +1597,8 @@ namespace clojure.lang
                 if (n < 63)
                     return Convert.ToInt64(x) | (1L << n);
                 else
-                    return toBigInteger(x).setBit(n);
+                    //return toBigInteger(x).setBit(n);
+                    return toBigInteger(x).SetBit(n);
             }
 
             public object flipBit(object x, int n)
@@ -1538,7 +1606,8 @@ namespace clojure.lang
                 if (n < 63)
                     return Convert.ToInt64(x) ^ (1L << n);
                 else
-                    return toBigInteger(x).flipBit(n);
+                    //return toBigInteger(x).flipBit(n);
+                    return toBigInteger(x).FlipBit( n);
             }
 
             public bool testBit(object x, int n)
@@ -1546,14 +1615,16 @@ namespace clojure.lang
                 if (n < 63)
                     return (Convert.ToInt64(x) & (1L << n)) != 0;
                 else
-                    return toBigInteger(x).testBit(n);
+                    //return toBigInteger(x).testBit(n);
+                    return toBigInteger(x).TestBit( n);
             }
 
             public object shiftLeft(object x, int n)
             {
                 return n < 0
-                    ? shiftRight(x,-n)
-                    : reduce(toBigInteger(x).shiftLeft(n));
+                    ? shiftRight(x, -n)
+                    //: reduce(toBigInteger(x).shiftLeft(n));
+                    : reduce(toBigInteger(x) << n);
             }
 
             public object shiftRight(object x, int n)
@@ -1592,57 +1663,69 @@ namespace clojure.lang
 
             public object not(object x)
             {
-                return toBigInteger(x).not();
+                //return toBigInteger(x).not();
+                return ~toBigInteger(x);
             }
 
             public object and(object x, object y)
             {
-                return toBigInteger(x).and(toBigInteger(y));
+                //return toBigInteger(x).and(toBigInteger(y));
+                return toBigInteger(x) & toBigInteger(y);
             }
 
             public object or(object x, object y)
             {
-                return toBigInteger(x).or(toBigInteger(y));
+                //return toBigInteger(x).or(toBigInteger(y));
+                return toBigInteger(x) | toBigInteger(y);
+
             }
 
             public object xor(object x, object y)
             {
-                return toBigInteger(x).xor(toBigInteger(y));
+                //return toBigInteger(x).xor(toBigInteger(y));
+                return toBigInteger(x) ^ toBigInteger(y);
             }
 
             public object andNot(object x, object y)
             {
-                return toBigInteger(x).andNot(toBigInteger(y));
+                //return toBigInteger(x).andNot(toBigInteger(y));
+                return toBigInteger(x).BitwiseAndNot(toBigInteger(y));
             }
 
             public object clearBit(object x, int n)
             {
-                return toBigInteger(x).clearBit(n);
+                //return toBigInteger(x).clearBit(n);
+                return toBigInteger(x).ClearBit(n);
             }
 
             public object setBit(object x, int n)
             {
-                return toBigInteger(x).setBit(n);
+                //return toBigInteger(x).setBit(n);
+                return toBigInteger(x).SetBit(n);
             }
 
             public object flipBit(object x, int n)
             {
-                return toBigInteger(x).flipBit(n);
+                //return toBigInteger(x).flipBit(n);
+                return toBigInteger(x).FlipBit(n);
             }
 
             public bool testBit(object x, int n)
             {
-                return toBigInteger(x).testBit(n);
+                //return toBigInteger(x).testBit(n);
+                return toBigInteger(x).TestBit(n);
             }
 
             public object shiftLeft(object x, int n)
             {
-                return toBigInteger(x).shiftLeft(n);
+                //return toBigInteger(x).shiftLeft(n);
+                return toBigInteger(x) << n;
             }
 
             public object shiftRight(object x, int n)
             {
-                return toBigInteger(x).shiftRight(n);
+                //return toBigInteger(x).shiftRight(n);
+                return toBigInteger(x) >> n;
             }
 
             #endregion

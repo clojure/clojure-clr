@@ -19,9 +19,10 @@ using NUnit.Framework;
 using Rhino.Mocks;
 
 using clojure.lang;
+using BigDecimal = java.math.BigDecimal;
 
 using RMExpect = Rhino.Mocks.Expect;
-using java.math;
+
 
 
 
@@ -55,7 +56,8 @@ namespace Clojure.Tests.LibTests
             Expect(o1, EqualTo(123));
             Expect(o2, EqualTo(123));
             Expect(o3, EqualTo(-123));
-            Expect(o4, EqualTo(new BigInteger("123456789123456789123456789")));
+            //Expect(o4, EqualTo(new BigInteger("123456789123456789123456789")));
+            Expect(o4,EqualTo(BigInteger.Parse("123456789123456789123456789")));
         }
 
         [Test]
@@ -67,7 +69,8 @@ namespace Clojure.Tests.LibTests
 
             Expect(o1, EqualTo(0x12A));
             Expect(o2, EqualTo(0xFFF));
-            Expect(o3, EqualTo(new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFF", 16)));
+            //Expect(o3, EqualTo(new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFF", 16)));
+            Expect(o3,EqualTo(BigInteger.Parse("FFFFFFFFFFFFFFFFFFFFFFFF", 16)));
         }
 
 
@@ -82,7 +85,8 @@ namespace Clojure.Tests.LibTests
             Expect(o1, EqualTo(83));
             Expect(o2, EqualTo(83));
             Expect(o3, EqualTo(-83));
-            Expect(o4, EqualTo(new BigInteger("1234567012345670123456777", 8)));
+            //Expect(o4, EqualTo(new BigInteger("1234567012345670123456777", 8)));
+            Expect(o4,EqualTo(BigInteger.Parse("1234567012345670123456777", 8)));
         }
 
         [Test]
@@ -96,7 +100,8 @@ namespace Clojure.Tests.LibTests
             Expect(o1, EqualTo(12));
             Expect(o2, EqualTo(27));
             Expect(o3, EqualTo(-27));
-            Expect(o4, EqualTo(new BigInteger("1234AQ", 30).longValue()));
+            //Expect(o4, EqualTo(new BigInteger("1234AQ", 30).longValue()));
+            Expect(o4, EqualTo(BigInteger.Parse("1234AQ", 30).ToInt64()));
         }
 
         [Test]
@@ -142,7 +147,7 @@ namespace Clojure.Tests.LibTests
 
             Expect(o1, EqualTo(12));
             Expect(o2, EqualTo(3));
-            Expect(o3, EqualTo(new Ratio(new BigInteger("12"),new BigInteger("5"))));
+            Expect(o3, EqualTo(new Ratio(BigInteger.Create(12), BigInteger.Create(5))));
             Expect(o4, EqualTo(100000));
         }
 
@@ -180,7 +185,7 @@ namespace Clojure.Tests.LibTests
 
 
         [Test]
-        [ExpectedException(typeof(java.lang.NumberFormatException))]
+        [ExpectedException(typeof(FormatException))]
         public void MatchNumberFailsOnRadixSnafu()
         {
             object o3 = LispReader.matchNumber("10RAA");
@@ -243,7 +248,8 @@ namespace Clojure.Tests.LibTests
             Expect(o1, EqualTo(123));
             Expect(o2, EqualTo(-123));
             Expect(o3, EqualTo(123));
-            Expect(o4, EqualTo(new BigInteger("123456789123456789123456789")));
+            //Expect(o4, EqualTo(new BigInteger("123456789123456789123456789")));
+            Expect(o4,EqualTo(BigInteger.Parse("123456789123456789123456789")));
         }
 
         [Test]

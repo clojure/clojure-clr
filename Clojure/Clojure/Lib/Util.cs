@@ -12,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using java.math;
+using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
 {
@@ -111,12 +111,51 @@ namespace clojure.lang
         }
 
 
-        public static int BitCount(int bitMask)
+        public static int BitCount(int x)
         { 
-            bitMask -= ((bitMask >> 1) & 0x55555555);
-            bitMask = (((bitMask >> 2) & 0x33333333) + (bitMask & 0x33333333));
-            bitMask = (((bitMask >> 4) + bitMask) & 0x0f0f0f0f);
-            return ((bitMask * 0x01010101) >> 24);
+            x -= ((x >> 1) & 0x55555555);
+            x = (((x >> 2) & 0x33333333) + (x & 0x33333333));
+            x = (((x >> 4) + x) & 0x0f0f0f0f);
+            return ((x * 0x01010101) >> 24);
+        }
+
+        // A variant of the above that avoids multiplying
+        // This algo is in a lot of places.
+        // See, for example, http://aggregate.org/MAGIC/#Population%20Count%20(Ones%20Count)
+        public static uint BitCount(uint x)
+        {
+            x -= ((x >> 1) & 0x55555555);
+            x = (((x >> 2) & 0x33333333) + (x & 0x33333333));
+            x = (((x >> 4) + x) & 0x0f0f0f0f);
+            x += (x >> 8);
+            x += (x >> 16);
+            return (x & 0x0000003f);
+        }
+
+        // This algo is in a lot of places.
+        // See, for example, http://aggregate.org/MAGIC/#Leading%20Zero%20Count
+        public static uint LeadingZeroCount(uint x)
+        {
+            x |= (x >> 1);
+            x |= (x >> 2);
+            x |= (x >> 4);
+            x |= (x >> 8);
+            x |= (x >> 16);
+
+            return  32u - BitCount(x);
+
+            // THE DLR BigInteger code uses the following.
+            // It's probably faster.
+
+            //int shift = 0;
+
+            //if ((value & 0xFFFF0000) == 0) { value <<= 16; shift += 16; }
+            //if ((value & 0xFF000000) == 0) { value <<= 8; shift += 8; }
+            //if ((value & 0xF0000000) == 0) { value <<= 4; shift += 4; }
+            //if ((value & 0xC0000000) == 0) { value <<= 2; shift += 2; }
+            //if ((value & 0x80000000) == 0) { value <<= 1; shift += 1; }
+
+            //return shift;
         }
 
         public static int Mask(int hash, int shift)

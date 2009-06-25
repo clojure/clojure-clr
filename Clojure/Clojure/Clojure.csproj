@@ -100,6 +100,7 @@
     <Compile Include="CljCompiler\Ast\VectorExpr.cs" />
     <Compile Include="CljCompiler\Ast\StringExpr.cs" />
     <Compile Include="Lib\ArrayHelper.cs" />
+    <Compile Include="Lib\BigInteger.cs" />
     <Compile Include="Lib\Counted.cs" />
     <Compile Include="Lib\EnumeratorSeq.cs" />
     <Compile Include="Lib\IDeref.cs" />

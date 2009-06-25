@@ -12,7 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using java.math;
+using BigDecimal = java.math.BigDecimal;
+
 
 namespace clojure.lang
 {
@@ -64,6 +65,14 @@ namespace clojure.lang
         public Ratio(BigInteger numerator, BigInteger denominator)
         {
             _numerator = numerator;
+            _denominator = denominator;
+        }
+
+        // TODO: Get rid of this when get the new BigDecimal
+
+        public Ratio(java.math.BigInteger numerator, BigInteger denominator)
+        {
+            _numerator = BigInteger.Parse(numerator.ToString());
             _denominator = denominator;
         }
 
@@ -120,7 +129,7 @@ namespace clojure.lang
 
         public bool ToBoolean(IFormatProvider provider)
         {
-            return ! _numerator.Equals(Numbers.BigIntegerZero);
+            return ! _numerator.Equals(BigInteger.ZERO);
         }
 
         public byte ToByte(IFormatProvider provider)
@@ -204,8 +213,11 @@ namespace clojure.lang
         // TODO: Look at all these conversions.
         public BigDecimal ToBigDecimal()
         {
-            BigDecimal numerator = new BigDecimal(this.numerator);
-            BigDecimal denominator = new BigDecimal(this.denominator);
+            // TODO: When we replace BigDecimal, revert to more reasonable constructors.
+            //BigDecimal numerator = new BigDecimal(this.numerator);
+            //BigDecimal denominator = new BigDecimal(this.denominator);
+            BigDecimal numerator = new BigDecimal(this.numerator.ToString());
+            BigDecimal denominator = new BigDecimal(this.denominator.ToString());
             return numerator.divide(denominator, 0);
         }
 

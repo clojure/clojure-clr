@@ -17,7 +17,7 @@ using NUnit.Framework;
 using Rhino.Mocks;
 
 using clojure.lang;
-using java.math;
+
 
 namespace Clojure.Tests.LibTests
 {
@@ -48,10 +48,14 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ReduceOnBigIntReducesSmallerValues()
         {
-            BigInteger b1 = new BigInteger("123");
-            BigInteger b2 = new BigInteger("0");
-            BigInteger b3 = new BigInteger(Int32.MaxValue.ToString());
-            BigInteger b4 = new BigInteger(Int32.MinValue.ToString());
+            //BigInteger b1 = new BigInteger("123");
+            //BigInteger b2 = new BigInteger("0");
+            //BigInteger b3 = new BigInteger(Int32.MaxValue.ToString());
+            //BigInteger b4 = new BigInteger(Int32.MinValue.ToString()); BigInteger b1 = new BigInteger("123");
+            BigInteger b1 = BigInteger.Create(123);
+            BigInteger b2 = BigInteger.Create(0);
+            BigInteger b3 = BigInteger.Create(Int32.MaxValue);
+            BigInteger b4 = BigInteger.Create(Int32.MinValue);
                 
             ExpectInt32(Numbers.reduce(b1));
             ExpectInt32(Numbers.reduce(b2));
@@ -62,10 +66,14 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ReduceOnBigIntReturnsLargerValues()
         {
-            BigInteger b1 = new BigInteger("100000000000000000000", 16);
-            BigInteger b2 = b1.negate();
-            BigInteger b3 = new BigInteger("123456789012345678901234567890");
-            BigInteger b4 = b3.negate();
+            //BigInteger b1 = new BigInteger("100000000000000000000", 16);
+            //BigInteger b2 = b1.negate();
+            //BigInteger b3 = new BigInteger("123456789012345678901234567890");
+            //BigInteger b4 = b3.negate();
+            BigInteger b1 = BigInteger.Parse("100000000000000000000", 16);
+            BigInteger b2 = b1.Negate();
+            BigInteger b3 = BigInteger.Parse("123456789012345678901234567890");
+            BigInteger b4 = b3.Negate();
 
             ExpectSameObject(b1, Numbers.reduce(b1));
             ExpectSameObject(b2, Numbers.reduce(b2));
@@ -110,26 +118,26 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArithmeticException))]
         public void DivideByZeroFails()
         {
-            object o = Numbers.BIDivide(Numbers.BigIntegerOne, Numbers.BigIntegerZero);
+            object o = Numbers.BIDivide(BigInteger.ONE, BigInteger.ZERO);
         }
 
         [Test]
         public void DivideReducesToIntOnDenomOne()
         {
-            object o = Numbers.BIDivide(new BigInteger("75"), new BigInteger("25"));
+            object o = Numbers.BIDivide(BigInteger.Create(75), BigInteger.Create(25));
             Expect(o, EqualTo(3));
         }
 
         [Test]
         public void DivideReturnsReducedRatio()
         {
-            object o = Numbers.BIDivide(new BigInteger("42"), new BigInteger("30"));
+            object o = Numbers.BIDivide(BigInteger.Create(42), BigInteger.Create(30));
             
             Expect(o, TypeOf(typeof(Ratio)));
             
             Ratio r = o as Ratio;
-            Expect(r.numerator, EqualTo(new BigInteger("7")));
-            Expect(r.denominator, EqualTo(new BigInteger("5")));
+            Expect(r.numerator==BigInteger.Create(7));
+            Expect(r.denominator==BigInteger.Create(5));
         }
 
         #endregion

@@ -21,6 +21,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using RTProperties = clojure.runtime.Properties;
+using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
 {
@@ -257,7 +258,7 @@ namespace clojure.lang
             Symbol.create("UriPartial"), typeof(UriPartial),
             // ADDED THESE TO SUPPORT THE BOOTSTRAPPING IN THE JAVA CORE.CLJ
             Symbol.create("StringBuilder"), typeof(StringBuilder),
-            Symbol.create("BigInteger"), typeof(java.math.BigInteger),
+            Symbol.create("BigInteger"), typeof(clojure.lang.BigInteger),
             Symbol.create("BigDecimal"), typeof(java.math.BigDecimal),
             Symbol.create("Environment"), typeof(System.Environment)
      );
@@ -1498,7 +1499,7 @@ namespace clojure.lang
                 w.Write("#=");
                 w.Write(((Type)x).FullName);
             }
-            else if (x is java.math.BigDecimal && readably)
+            else if (x is BigDecimal && readably)
             {
                 w.Write(x.ToString());
                 w.Write("M");

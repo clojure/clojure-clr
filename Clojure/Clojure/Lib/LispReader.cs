@@ -13,10 +13,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using java.math;
 using System.IO;
 using System.Collections;
 using clojure.runtime;
+using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
 {
@@ -469,8 +469,11 @@ namespace clojure.lang
                 if (n == null)
                     return null;
 
-                BigInteger bn = new BigInteger(n, radix);
-                return Numbers.reduce(isNeg ? bn.negate() : bn);
+                //BigInteger bn = new BigInteger(n, radix);
+                BigInteger bn = BigInteger.Parse(n, radix);
+                //return Numbers.reduce(isNeg ? bn.negate() : bn);
+                return Numbers.reduce(isNeg ? bn.Negate() : bn);
+
             }
             m = floatRE.Match(s);
 
@@ -488,7 +491,8 @@ namespace clojure.lang
                 string denomString = m.Groups[2].Value;
                 if (numerString[0] == '+')
                     numerString = numerString.Substring(1);
-                return Numbers.BIDivide(new BigInteger(numerString), new BigInteger(denomString));
+                //return Numbers.BIDivide(new BigInteger(numerString), new BigInteger(denomString));
+                return Numbers.BIDivide(BigInteger.Parse(numerString), BigInteger.Parse(denomString));
             }
             return null;
         }
