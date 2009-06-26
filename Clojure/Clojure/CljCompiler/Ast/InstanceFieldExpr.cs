@@ -27,13 +27,15 @@ namespace clojure.lang.CljCompiler.Ast
         readonly FieldInfo _fieldInfo;
         readonly PropertyInfo _propertyInfo;
         readonly string _fieldName;
+        readonly int _line;
 
         #endregion
 
         #region Ctors
 
-        public InstanceFieldExpr(Expr target, string fieldName)
+        public InstanceFieldExpr(int line, Expr target, string fieldName)
         {
+            _line = line;
             _target = target;
             _fieldName = fieldName;
 
@@ -43,7 +45,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             if ( _fieldInfo == null && _propertyInfo == null  && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                 ((TextWriter)RT.ERR.deref()).WriteLine("Reflection warning {0}:{1} - reference to field/property {2} can't be resolved.", 
-                    Compiler.SOURCE_PATH.deref(), /* line */ 0,_fieldName);
+                    Compiler.SOURCE_PATH.deref(), line,_fieldName);
         }
 
         #endregion

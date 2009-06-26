@@ -26,18 +26,22 @@ namespace clojure.lang.CljCompiler.Ast
         readonly string _methodName;
         readonly IPersistentVector _args;
         readonly MethodInfo _method;
+        readonly string _source;
+        readonly int _line;
 
         #endregion
 
         #region Ctors
 
-        public InstanceMethodExpr(Expr target, string methodName, IPersistentVector args)
+        public InstanceMethodExpr(string source, int line, Expr target, string methodName, IPersistentVector args)
         {
+            _source = source;
+            _line = line;
             _target = target;
             _methodName = methodName;
             _args = args;
 
-            _method = GetMatchingMethod(target, _args, _methodName);
+            _method = GetMatchingMethod(line, target, _args, _methodName);
         }
 
         #endregion

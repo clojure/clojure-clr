@@ -39,6 +39,9 @@ namespace clojure.lang.CljCompiler.Ast
                 if (RT.Length(form) < 3)
                     throw new ArgumentException("Malformed member expression, expecting (. target member ... )");
 
+                int line = (int)Compiler.LINE.deref();
+                string source = (string)Compiler.SOURCE.deref();
+
                 // determine static or instance
                 // static target must be symbol, either fully.qualified.Typename or Typename that has been imported
 
@@ -71,9 +74,9 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     Symbol sym = (Symbol)RT.third(form);
                     if (t != null)
-                        return new StaticFieldExpr(t, sym.Name);
+                        return new StaticFieldExpr(line, t, sym.Name);
                     else
-                        return new InstanceFieldExpr(instance, sym.Name);
+                        return new InstanceFieldExpr(line, instance, sym.Name);
                 }
 
 
@@ -89,8 +92,8 @@ namespace clojure.lang.CljCompiler.Ast
                     args = args.cons(Compiler.GenerateAST(s.first()));
 
                 return t != null
-                    ? (MethodExpr)(new StaticMethodExpr(t, methodName, args))
-                    : (MethodExpr)(new InstanceMethodExpr(instance, methodName, args));
+                    ? (MethodExpr)(new StaticMethodExpr(source, line, t, methodName, args))
+                    : (MethodExpr)(new InstanceMethodExpr(source, line, instance, methodName, args));
             }
         }
 
@@ -111,30 +114,30 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        protected static MethodInfo GetMatchingMethod(Type targetType, IPersistentVector args, string methodName)
+        protected static MethodInfo GetMatchingMethod(int line, Type targetType, IPersistentVector args, string methodName)
         {
             MethodInfo method = GetMatchingMethodAux(targetType, args, methodName, true);
 
-            MaybeReflectionWarn(method, methodName);
+            MaybeReflectionWarn(line, method, methodName);
 
             return method;
         }
 
-        protected static MethodInfo GetMatchingMethod(Expr target, IPersistentVector args, string methodName)
+        protected static MethodInfo GetMatchingMethod(int line, Expr target, IPersistentVector args, string methodName)
         {
             MethodInfo method = target.HasClrType ? GetMatchingMethodAux(target.ClrType, args, methodName, false) : null;
 
-            MaybeReflectionWarn(method, methodName);
+            MaybeReflectionWarn(line, method, methodName);
 
             return method;
         }
 
-        private static void MaybeReflectionWarn(MethodInfo method, string methodName)
+        private static void MaybeReflectionWarn(int line, MethodInfo method, string methodName)
         {
             if ( method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()) )
                 // TODO: use DLR IO
                 ((TextWriter)RT.ERR.deref()).WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved.\n",
-                    Compiler.SOURCE_PATH.deref(), /* line ,*/0, methodName));
+                    Compiler.SOURCE_PATH.deref(), line, methodName));
         }
 
         private static MethodInfo GetMatchingMethodAux(Type targetType, IPersistentVector args, string methodName, bool getStatics)

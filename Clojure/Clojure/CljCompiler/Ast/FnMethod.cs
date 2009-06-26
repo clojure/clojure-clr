@@ -70,7 +70,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         LocalBinding _thisBinding;
 
-        // int line;
+        int _line;
 
         IPersistentSet _localsUsedInCatchFinally = PersistentHashSet.EMPTY;
         public IPersistentSet LocalsUsedInCatchFinally
@@ -121,7 +121,7 @@ namespace clojure.lang.CljCompiler.Ast
             try
             {
                 FnMethod method = new FnMethod(fn, (FnMethod)Compiler.METHODS.deref());
-                // TODO: method.line = (Integer) LINE.deref();
+                method._line = (int) Compiler.LINE.deref();
 
 
                 Var.pushThreadBindings(RT.map(

@@ -78,7 +78,9 @@ namespace clojure.lang.CljCompiler.Ast
         ConstructorInfo _ctorInfo;
 
         List<FieldBuilder> _closedOverFields;
-        
+
+        int _line;
+
         #endregion
 
         #region Ctors
@@ -167,6 +169,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (RT.second(form) is IPersistentVector)
                     form = RT.list(Compiler.FN, RT.next(form));
 
+                fn._line = (int)Compiler.LINE.deref();
 
                 FnMethod variadicMethod = null;
                 SortedDictionary<int, FnMethod> methods = new SortedDictionary<int, FnMethod>();
@@ -217,6 +220,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
+            //TODO: add source,line_before,Line_after debug_info to node.
+            // See FnExpr.compile() in the Java version
+
             switch (context.Mode)
             {
                 case CompilerMode.Immediate:

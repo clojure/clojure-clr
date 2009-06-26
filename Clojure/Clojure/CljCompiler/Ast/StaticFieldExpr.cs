@@ -26,13 +26,15 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Type _type;
         readonly FieldInfo _field;
         readonly PropertyInfo _property;
+        readonly int _line;
 
         #endregion
 
         #region Ctors
 
-        public StaticFieldExpr(Type type, string fieldName)
+        public StaticFieldExpr(int line, Type type, string fieldName)
         {
+            _line = line;
             _fieldName = fieldName;
             _type = type;
             _field = type.GetField(_fieldName, BindingFlags.Static | BindingFlags.Public);

@@ -30,17 +30,23 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public NewExpr(Type type, IPersistentVector args)
+        public NewExpr(Type type, IPersistentVector args, int line)
         {
             _args = args;
             _type = type;
-            _ctor = ComputeCtor();
+            _ctor = ComputeCtor(line);
         }
 
-        private ConstructorInfo ComputeCtor()
+        private ConstructorInfo ComputeCtor(int line)
         {
             int numArgs = _args.count();
 
+            // TODO: solve the DateTime problem
+            // Documentation does not list no-arg DateTime c-tor
+            // However, it exists.
+            // Not picked up here.
+            // Possible solution?
+            
             List<ConstructorInfo> cinfos 
                 = new List<ConstructorInfo>(_type.GetConstructors()
                     .Where(x => x.GetParameters().Length == numArgs && x.IsPublic));
@@ -63,8 +69,8 @@ namespace clojure.lang.CljCompiler.Ast
             }
             ConstructorInfo ctor = index >= 0 ? cinfos[index] : null;
             if (ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-                ((TextWriter)RT.ERR.deref()).WriteLine("Reflection warning, line: {0} - call to {1} ctor can't be resolved.",
-                    /* line */ 0, _type.FullName);
+                ((TextWriter)RT.ERR.deref()).WriteLine("Reflection warning, line: {0}:{1} - call to {2} ctor can't be resolved.",
+                    Compiler.SOURCE_PATH.deref(), line, _type.FullName);
             return ctor;
         }
 
@@ -90,6 +96,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             public Expr Parse(object frm)
             {
+                int line = (int)Compiler.LINE.deref();
+
                 ISeq form = (ISeq)frm;
 
                 // form => (new Typename args ... )
@@ -105,7 +113,7 @@ namespace clojure.lang.CljCompiler.Ast
                 for (ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
                     args = args.cons(Compiler.GenerateAST(s.first()));
 
-                return new NewExpr(t, args);
+                return new NewExpr(t, args,line);
             }
         }
 

@@ -24,13 +24,15 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Expr _testExpr;
         readonly Expr _thenExpr;
         readonly Expr _elseExpr;
+        readonly int _line;
 
         #endregion
 
         #region Ctors
 
-        public IfExpr(Expr testExpr, Expr thenExpr, Expr elseExpr)
+        public IfExpr(int line, Expr testExpr, Expr thenExpr, Expr elseExpr)
         {
+            _line = line;
             _testExpr = testExpr;
             _thenExpr = thenExpr;
             _elseExpr = elseExpr;
@@ -91,7 +93,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr thenExpr = Compiler.GenerateAST(RT.third(form));
                 Expr elseExpr = form.count() == 4 ? Compiler.GenerateAST(RT.fourth(form)) : null;
 
-                return new IfExpr(testExpr, thenExpr, elseExpr);
+                return new IfExpr((int)Compiler.LINE.deref(),testExpr, thenExpr, elseExpr);
             }
         }
 

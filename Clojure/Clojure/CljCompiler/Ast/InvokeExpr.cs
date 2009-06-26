@@ -24,13 +24,17 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Expr _fexpr;
         readonly Object _tag;
         readonly IPersistentVector _args;
+        readonly int _line;
+        readonly string _source;
 
         #endregion
 
         #region Ctors
 
-        public InvokeExpr(Symbol tag, Expr fexpr, IPersistentVector args)
+        public InvokeExpr(string source, int line, Symbol tag, Expr fexpr, IPersistentVector args)
         {
+            _source = source;
+            _line = line;
             _fexpr = fexpr;
             _args = args;
             _tag = tag ?? (fexpr is VarExpr ? ((VarExpr)fexpr).Tag : null);
@@ -60,7 +64,7 @@ namespace clojure.lang.CljCompiler.Ast
             IPersistentVector args = PersistentVector.EMPTY;
             for ( ISeq s = RT.seq(form.next()); s != null; s = s.next())
                 args = args.cons(Compiler.GenerateAST(s.first()));
-            return new InvokeExpr(Compiler.TagOf(form),fexpr,args);
+            return new InvokeExpr((string)Compiler.SOURCE.deref(),(int)Compiler.LINE.deref(),Compiler.TagOf(form),fexpr,args);
         }
 
         #endregion

@@ -97,12 +97,14 @@ namespace clojure.lang
                                                 Symbol.create("compile"));
 
         // String
-        static readonly Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+        internal static readonly Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
                                         Symbol.create("*source-path*"), "NO_SOURCE_FILE");
         // String
         internal static readonly Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
             Symbol.create("*file*"), "NO_SOURCE_PATH");
+
         //Integer
+        internal static readonly Var LINE = Var.create(0);
         internal static readonly Var LINE_BEFORE = Var.create(0);
         internal static readonly Var LINE_AFTER = Var.create(0);
 
@@ -324,37 +326,47 @@ namespace clojure.lang
 
         internal static Expr GenerateAST(object form, string name)
         {
-            if (form is LazySeq)
+            try
             {
-                form = RT.seq(form);
+                if (form is LazySeq)
+                {
+                    form = RT.seq(form);
+                    if (form == null)
+                        form = PersistentList.EMPTY;
+                }
                 if (form == null)
-                    form = PersistentList.EMPTY;
+                    return NIL_EXPR;
+                else if (form is Boolean)
+                    return ((bool)form) ? TRUE_EXPR : FALSE_EXPR;
+
+                Type type = form.GetType();
+
+                if (type == typeof(Symbol))
+                    return AnalyzeSymbol((Symbol)form);
+                else if (type == typeof(Keyword))
+                    return RegisterKeyword((Keyword)form);
+                else if (type == typeof(String))
+                    return new StringExpr((String)form);
+                else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
+                    return OptionallyGenerateMetaInit(form, new EmptyExpr(form));
+                else if (form is ISeq)
+                    return AnalyzeSeq((ISeq)form, name);
+                else if (form is IPersistentVector)
+                    return VectorExpr.Parse((IPersistentVector)form);
+                else if (form is IPersistentMap)
+                    return MapExpr.Parse((IPersistentMap)form);
+                else if (form is IPersistentSet)
+                    return SetExpr.Parse((IPersistentSet)form);
+                else
+                    return new ConstantExpr(form);
             }
-            if (form == null)
-                return NIL_EXPR;
-            else if (form is Boolean)
-                return ((bool)form) ? TRUE_EXPR : FALSE_EXPR;
-
-            Type type = form.GetType();
-
-            if (type == typeof(Symbol))
-                return AnalyzeSymbol((Symbol)form);
-            else if (type == typeof(Keyword))
-                return RegisterKeyword((Keyword)form);
-            else if (type == typeof(String))
-                return new StringExpr((String)form);
-            else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
-                return OptionallyGenerateMetaInit(form, new EmptyExpr(form));
-            else if (form is ISeq)
-                return AnalyzeSeq((ISeq)form,name);
-            else if (form is IPersistentVector)
-                return VectorExpr.Parse((IPersistentVector)form);
-            else if (form is IPersistentMap)
-                return MapExpr.Parse((IPersistentMap)form);
-            else if (form is IPersistentSet)
-                return SetExpr.Parse((IPersistentSet)form);
-            else
-                return new ConstantExpr(form);
+            catch (Exception e)
+            {
+                if (!(e is CompilerException))
+                    throw new CompilerException((string)SOURCE.deref(), (int)LINE.deref(), e);
+                else
+                    throw e;
+            }
         }
 
         internal static Expr OptionallyGenerateMetaInit(object form, Expr expr)
@@ -387,7 +399,7 @@ namespace clojure.lang
                     Type t = MaybeType(nsSym, false);
                     if (t != null)
                         if (Reflector.GetField(t, symbol.Name, true) != null)
-                            return new StaticFieldExpr(t, symbol.Name);
+                            return new StaticFieldExpr((int)LINE.deref(), t, symbol.Name);
                     throw new Exception(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
                 }
             }
@@ -412,27 +424,48 @@ namespace clojure.lang
 
         private static Expr AnalyzeSeq(ISeq form, string name)
         {
-            object exp = MacroexpandSeq1(form);
-            if (exp != form)
-                return GenerateAST(exp,name);
+            int line = (int)LINE.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
+                line = (int)RT.meta(form).valAt(RT.LINE_KEY);
 
-            object op = RT.first(form);
+            Var.pushThreadBindings(RT.map(Compiler.LINE, line));
 
-            if (op == null)
-                throw new ArgumentNullException("Can't call nil");
+            try
+            {
 
-            IFn inline = IsInline(op, RT.count(RT.next(form)));
+                object exp = MacroexpandSeq1(form);
+                if (exp != form)
+                    return GenerateAST(exp, name);
 
-            if (inline != null)
-                return GenerateAST(inline.applyTo(RT.next(form)));
+                object op = RT.first(form);
 
-            IParser p;
-            if (op.Equals(FN))
-                return FnExpr.Parse(form, name);
-            if ((p = GetSpecialFormParser(op)) != null)
-                return p.Parse(form);
-            else 
-                return InvokeExpr.Parse(form);
+                if (op == null)
+                    throw new ArgumentNullException("Can't call nil");
+
+                IFn inline = IsInline(op, RT.count(RT.next(form)));
+
+                if (inline != null)
+                    return GenerateAST(inline.applyTo(RT.next(form)));
+
+                IParser p;
+                if (op.Equals(FN))
+                    return FnExpr.Parse(form, name);
+                if ((p = GetSpecialFormParser(op)) != null)
+                    return p.Parse(form);
+                else
+                    return InvokeExpr.Parse(form);
+            }
+            catch (Exception e)
+            {
+                if (!(e is CompilerException))
+                    throw new CompilerException((string)SOURCE.deref(), (int)LINE.deref(), e);
+                else
+                    throw e;
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
         }
 
 
@@ -1001,8 +1034,19 @@ namespace clojure.lang
 
         public static object eval(object form)
         {
-            LambdaExpression ast = Compiler.GenerateLambda(form, false);
-            return ast.Compile().DynamicInvoke();
+            int line = (int)LINE.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
+                line = (int)RT.meta(form).valAt(RT.LINE_KEY);
+            Var.pushThreadBindings(RT.map(LINE, line));
+            try
+            {
+                LambdaExpression ast = Compiler.GenerateLambda(form, false);
+                return ast.Compile().DynamicInvoke();
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
         }
 
         public static object macroexpand1(object form)
@@ -1132,6 +1176,7 @@ namespace clojure.lang
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     LINE_AFTER.set(lntr.LineNumber);
+
                     LambdaExpression ast = Compiler.GenerateLambda(context,form, false); 
 
                     // Compile to assembly
