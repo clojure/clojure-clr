@@ -41,6 +41,9 @@ namespace clojure.lang.CljCompiler.Ast
             _methodName = methodName;
             _args = args;
 
+            if (target.HasClrType && target.ClrType == null)
+                throw new ArgumentException(String.Format("Attempt to call instance method {0} on nil", methodName));
+
             _method = GetMatchingMethod(line, target, _args, _methodName);
         }
 
