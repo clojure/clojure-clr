@@ -623,10 +623,11 @@ namespace clojure.lang
 
         public static int count(object o)
         {
+            if (o is Counted)
+                return ((Counted)o).count();
+
             if (o == null)
                 return 0;
-            else if (o is Counted)
-                return ((Counted)o).count();
             else if (o is IPersistentCollection)
             {
                 ISeq s = seq(o);
@@ -836,10 +837,10 @@ namespace clojure.lang
 
         static public Object nth(Object coll, int n)
         {
+            if (coll is Indexed)
+                return ((Indexed)coll).nth(n);
             if (coll == null)
                 return null;
-            else if (coll is IPersistentVector)
-                return ((IPersistentVector)coll).nth(n);
             else if (coll is String)
                 return ((string)coll)[n];
             else if (coll.GetType().IsArray)

@@ -137,17 +137,24 @@ namespace clojure.lang
         /// <remarks>Throws an exception if the index <c>i</c> is not in the range of the vector's elements.</remarks>
         public override object nth(int i)
         {
-            if ( i >= 0 && i < _cnt )
+            object[] node = NodeFor(i);
+            return node[i & 0x01f];
+        }
+
+        object[] NodeFor(int i)
+        {
+            if (i >= 0 && i < _cnt)
             {
-                if ( i >= tailoff() )
-                    return _tail[i & 0x01f];
+                if (i >= tailoff())
+                    return _tail;
                 object[] arr = _root;
-                for ( int level = _shift; level > 0; level -= 5)
-                    arr = (object[]) arr[ (i >> level) & 0x01f];
-                return arr[i & 0x01f];
+                for (int level = _shift; level > 0; level -= 5)
+                    arr = (object[])arr[(i >> level) & 0x01f];
+                return arr;
             }
             throw new IndexOutOfRangeException();
         }
+
 
         /// <summary>
         /// Return a new vector with the i-th value set to <c>val</c>.
@@ -331,6 +338,118 @@ namespace clojure.lang
 
         #region IFn members
 
+
+
+        #endregion
+
+        #region ChunkedSeq
+
+        public IChunkedSeq chunkedSeq()
+        {
+            if (count() == 0)
+                return null;
+            return new ChunkedSeq(this, 0, 0);
+        }
+
+        sealed public class ChunkedSeq : ASeq, IChunkedSeq
+        {
+            #region Data
+
+            readonly PersistentVector _vec;
+            readonly object[] _node;
+            readonly int _i;
+            readonly int _offset;
+
+            #endregion
+
+            #region C-tors
+
+            public ChunkedSeq(PersistentVector vec, int i, int offset)
+            {
+                _vec = vec;
+                _i = i;
+                _offset = offset;
+                _node = vec.NodeFor(i);
+            }
+
+            ChunkedSeq(IPersistentMap meta, PersistentVector vec, object[] node,  int i, int offset)
+                : base(meta)
+            {
+                _vec = vec;
+                _node = node;
+                _i = i;
+                _offset = offset;
+            }
+
+            public ChunkedSeq(PersistentVector vec, object[] node,  int i, int offset)
+            {
+                _vec = vec;
+                _node = node;
+                _i = i;
+                _offset = offset;
+            }
+
+            #endregion
+
+            #region IObj members
+
+
+            public override IObj withMeta(IPersistentMap meta)
+            {
+                return (meta == _meta)
+                    ? this
+                    : new ChunkedSeq(meta, _vec, _node, _i, _offset);
+            }
+
+            #endregion
+
+            #region IChunkedSeq Members
+
+            public Indexed chunkedFirst()
+            {
+                return new ArrayChunk(_node, _offset);
+            }
+
+            public ISeq chunkedNext()
+            {
+                if (_i + _node.Length < _vec._cnt)
+                    return new ChunkedSeq(_vec, _i + _node.Length, 0);
+                return null;
+            }
+
+            public ISeq chunkedMore()
+            {
+                ISeq s = chunkedNext();
+                if (s == null)
+                    return PersistentList.EMPTY;
+                return s;
+            }
+
+            #endregion
+
+            #region IPersistentCollection Members
+
+
+            //public new IPersistentCollection cons(object o)
+            //{
+            //    throw new NotImplementedException();
+            //}
+
+            #endregion
+
+            public override object first()
+            {
+                return _node[_offset];
+            }
+
+            public override ISeq next()
+            {
+                if (_offset + 1 < _node.Length)
+                    return new ChunkedSeq(_vec, _node, _i, _offset + 1);
+                return chunkedNext();
+            }
+
+        }
 
 
         #endregion

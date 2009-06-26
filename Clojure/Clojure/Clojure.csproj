@@ -99,11 +99,15 @@
     <Compile Include="CljCompiler\Ast\VarExpr.cs" />
     <Compile Include="CljCompiler\Ast\VectorExpr.cs" />
     <Compile Include="CljCompiler\Ast\StringExpr.cs" />
+    <Compile Include="Lib\ArrayChunk.cs" />
     <Compile Include="Lib\ArrayHelper.cs" />
     <Compile Include="Lib\BigInteger.cs" />
+    <Compile Include="Lib\ChunkedCons.cs" />
     <Compile Include="Lib\Counted.cs" />
     <Compile Include="Lib\EnumeratorSeq.cs" />
+    <Compile Include="Lib\IChunkedSeq.cs" />
     <Compile Include="Lib\IDeref.cs" />
+    <Compile Include="Lib\Indexed.cs" />
     <Compile Include="Lib\LazySeq.cs" />
     <Compile Include="Lib\Seqable.cs" />
     <Compile Include="Lib\Stream.cs" />

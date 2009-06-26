@@ -22,6 +22,7 @@ namespace clojure.lang
         #region Data
 
         private IFn _fn;
+        private object _sv;
         private ISeq _s;
 
         #endregion
@@ -78,11 +79,29 @@ namespace clojure.lang
         [MethodImpl(MethodImplOptions.Synchronized)]
         public ISeq seq()
         {
+            sval();
+            if (_sv != null)
+            {
+                object ls = _sv;
+                _sv = null;
+                while (ls is LazySeq)
+                    ls = ((LazySeq)ls).sval();
+                _s = RT.seq(ls);
+            }
+            return _s;
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        object sval()
+        {
             if (_fn != null)
             {
-                _s = RT.seq(_fn.invoke());
-                _fn = null;
+                    _sv = _fn.invoke();
+                    _fn = null;
             }
+            if ( _sv != null )
+                return _sv;
+
             return _s;
         }
 
