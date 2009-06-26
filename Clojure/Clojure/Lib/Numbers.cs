@@ -124,7 +124,7 @@ namespace clojure.lang
             Ops yops = ops(y);
             if (yops.isZero(y))
                 throw new ArithmeticException("Divide by zero");
-            return ops(x).combine(yops).quotient(x, y);
+            return reduce(ops(x).combine(yops).quotient(x, y));
         }
 
         public static object remainder(object x, object y)
@@ -132,7 +132,7 @@ namespace clojure.lang
             Ops yops = ops(y);
             if (yops.isZero(y))
                 throw new ArithmeticException("Divide by zero");
-            return ops(x).combine(yops).remainder(x, y);
+            return reduce(ops(x).combine(yops).remainder(x, y));
         }
 
 
@@ -269,6 +269,16 @@ namespace clojure.lang
         {
             // TODO: Get rid of this when we replace BigDecimal
             return reduce(BigInteger.Parse(jmbi.ToString()));
+        }
+
+        public static object reduce(object val)
+        {
+            if (val is long)
+                return reduce((long)val);
+            else if (val is BigInteger)
+                return reduce((BigInteger)val);
+            else
+                return val;
         }
 
         public static object reduce(BigInteger val)
