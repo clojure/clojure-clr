@@ -15,7 +15,7 @@ using System.Text;
 
 namespace clojure.lang
 {
-    public class ArrayChunk : Indexed
+    public sealed class ArrayChunk : Indexed
     {
         #region Data
 

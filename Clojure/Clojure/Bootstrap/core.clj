@@ -869,6 +869,8 @@
   bounds, nth throws an exception unless not-found is supplied.  nth
   also works for strings, Java arrays, regex Matchers and Lists, and,
   in O(n) time, for sequences."
+  {:inline (fn  [c i] `(. clojure.lang.RT (nth ~c ~i)))
+   :inline-arities #{2}}  
   ([coll index] (. clojure.lang.RT (nth coll index)))
   ([coll index not-found] (. clojure.lang.RT (nth coll index not-found))))
 
