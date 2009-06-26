@@ -395,6 +395,9 @@ namespace clojure.lang
         public static readonly Var CMD_LINE_ARGS 
             = Var.intern(CLOJURE_NS, Symbol.create("*command-line-args*"), null);
 
+        public static readonly Var USE_CONTEXT_CLASSLOADER
+            = Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), T);
+
         #endregion
 
         #region  Clojure-environment IFns needing support
