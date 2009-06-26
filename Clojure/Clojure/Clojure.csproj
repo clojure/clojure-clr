@@ -102,6 +102,7 @@
     <Compile Include="Lib\ArrayChunk.cs" />
     <Compile Include="Lib\ArrayHelper.cs" />
     <Compile Include="Lib\BigInteger.cs" />
+    <Compile Include="Lib\ChunkBuffer.cs" />
     <Compile Include="Lib\ChunkedCons.cs" />
     <Compile Include="Lib\Counted.cs" />
     <Compile Include="Lib\EnumeratorSeq.cs" />

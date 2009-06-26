@@ -15,37 +15,37 @@ using System.Text;
 
 namespace clojure.lang
 {
-    public sealed class ArrayChunk : Indexed
+    public sealed class ChunkBuffer : Counted
     {
         #region Data
 
-        readonly object[] _array;
-        readonly int _off;
-        readonly int _end;
+        object[] _buffer;
+        int _offset;
 
         #endregion
 
         #region C-tors
 
-        public ArrayChunk(object[] array, int off)
-            : this(array,0,array.Length)
+        public ChunkBuffer(int capacity)
         {
-        }
-
-        public ArrayChunk(object[] array, int off, int end)
-        {
-            _array = array;
-            _off = off;
-            _end = end;
+            _buffer = new object[capacity];
+            _offset = 0;
         }
 
         #endregion
 
-        #region Indexed Members
+        #region Other
 
-        public object nth(int i)
+        public void add(object o)
         {
-            return _array[_off + i];
+            _buffer[_offset++] = o;
+        }
+
+        public Indexed chunk()
+        {
+            ArrayChunk ret = new ArrayChunk(_buffer, 0, _offset);
+            _buffer = null;
+            return ret;
         }
 
         #endregion
@@ -54,7 +54,7 @@ namespace clojure.lang
 
         public int count()
         {
-            return _end - _off;
+            return _offset;
         }
 
         #endregion
