@@ -342,6 +342,15 @@ namespace clojure.lang
 
         #endregion
 
+        #region Seqable members
+
+        public override ISeq seq()
+        {
+            return chunkedSeq();
+        }
+
+        #endregion
+
         #region ChunkedSeq
 
         public IChunkedSeq chunkedSeq()

@@ -22,7 +22,7 @@ namespace clojure.lang
     /// if operations such as <see cref="LazilyPersistentVector.assoc()">assoc()</see> 
     /// are called that require a true persistent collection.
     /// </summary>
-    public class LazilyPersistentVector: APersistentVector
+    public class LazilyPersistentVector : APersistentVector
     {
         #region Data
 
@@ -48,7 +48,7 @@ namespace clojure.lang
         static public IPersistentVector createOwning(params object[] items)
         {
             return items.Length == 0
-                ? (IPersistentVector) PersistentVector.EMPTY
+                ? (IPersistentVector)PersistentVector.EMPTY
                 : new LazilyPersistentVector(null, items, null);
         }
 
@@ -138,7 +138,7 @@ namespace clojure.lang
         /// <remarks>Not sure why you wouldn't use <c>count()</c> intead.</remarks>
         public override int length()
         {
-           return count();
+            return count();
         }
 
         #endregion
@@ -178,6 +178,140 @@ namespace clojure.lang
 
         #endregion
 
+        #region Seqable members
+
+        public override ISeq seq()
+        {
+            if (_array.Length == 0)
+                return null;
+            return new ChunkedSeq(_array);
+        }
+
+
+        sealed class ChunkedSeq : ASeq, IChunkedSeq, IndexedSeq
+        {
+            #region Data
+
+            readonly object[] _array;
+            readonly int _offset;
+            readonly int _end;
+
+            const int BLOCK = 32;
+
+            #endregion
+
+            #region C-tors
+
+            ChunkedSeq(IPersistentMap meta, object[] array, int offset, int end)
+                : base(meta)
+            {
+                _array = array;
+                _offset = offset;
+                _end = end;
+            }
+
+            public ChunkedSeq(object[] array)
+                : this(array, 0)
+            {
+            }
+
+            ChunkedSeq(object[] array, int offset)
+                : this(array, offset, Math.Min(offset + BLOCK, array.Length))
+            {
+            }
+
+            ChunkedSeq(object[] array, int offset, int end)
+            {
+                _array = array;
+                _offset = offset;
+                _end = end;
+            }
+
+            #endregion
+
+            #region IObj members
+
+            public override IObj withMeta(IPersistentMap meta)
+            {
+                return meta == _meta
+                    ? this
+                    : new ChunkedSeq(meta, _array, _offset, _end);
+            }
+
+            #endregion
+
+            #region ISeq members
+
+            public override object first()
+            {
+                return _array[_offset];
+            }
+
+            public override ISeq next()
+            {
+                if (_offset + 1 < _end)
+                    return new ChunkedSeq(_array, _offset + 1, _end);
+                else
+                    return chunkedNext();
+            }
+
+            #endregion
+
+            #region IChunkedSeq Members
+
+            public Indexed chunkedFirst()
+            {
+                return new ArrayChunk(_array,_offset,_end);
+            }
+
+            public ISeq chunkedNext()
+            {
+                if (_end < _array.Length)
+                    return new ChunkedSeq(_array, _end);
+                return null;
+            }
+
+            public ISeq chunkedMore()
+            {
+                ISeq s = chunkedNext();
+                if (s == null)
+                    return PersistentList.EMPTY;
+                return s;
+            }
+
+            #endregion
+            
+            #region IndexedSeq Members
+
+            public int index()
+            {
+                return _offset;
+            }
+
+            #endregion
+
+            #region Counted members
+
+            public override int count()
+            {
+                return _array.Length - _offset;
+            }
+            
+            #endregion
+
+            #region IPersistentCollection Members
+
+
+            //public new IPersistentCollection cons(object o)
+            //{
+            //    throw new NotImplementedException();
+            //}
+
+            #endregion
+        }
+
+        #endregion
+
         #region Internals
 
         /// <summary>
@@ -195,6 +329,5 @@ namespace clojure.lang
         }
 
         #endregion
-
     }
 }
