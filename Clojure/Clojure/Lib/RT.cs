@@ -841,10 +841,15 @@ namespace clojure.lang
                 : ((IPersistentMap)coll).without(key);
         }
 
-        static public Object nth(Object coll, int n)
+        static public Object nth(object coll, int n)
         {
             if (coll is Indexed)
                 return ((Indexed)coll).nth(n);
+            return do_nth(coll, n);
+        }
+
+        static public object do_nth(object coll, int n)
+        {
             if (coll == null)
                 return null;
             else if (coll is String)
