@@ -392,6 +392,9 @@ namespace clojure.lang
         public static readonly Var READEVAL
             = Var.intern(CLOJURE_NS, Symbol.create("*read-eval*"), T);
 
+        public static readonly Var ASSERT
+            = Var.intern(CLOJURE_NS, Symbol.create("*assert*"), T);
+
         public static readonly Var CMD_LINE_ARGS 
             = Var.intern(CLOJURE_NS, Symbol.create("*command-line-args*"), null);
 
