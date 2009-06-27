@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{0A74E77B-8BFF-4A64-8A16-5D0E5C9C47F3}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BootstrapCompile</RootNamespace>
-    <AssemblyName>BootstrapCompile</AssemblyName>
+    <RootNamespace>Clojure.Source</RootNamespace>
+    <AssemblyName>Clojure.Source</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -45,14 +45,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Clojure\Clojure.csproj">
-      <Project>{B8089F66-DFBD-4906-BEE0-B317689C2524}</Project>
-      <Name>Clojure</Name>
-    </ProjectReference>
+    <None Include="clojure\ants.clj" />
+    <None Include="clojure\core.clj" />
+    <None Include="clojure\core_print.clj" />
+    <None Include="clojure\main.clj" />
+    <None Include="clojure\set.clj" />
+    <None Include="clojure\dm-test.clj" />
+    <None Include="clojure\stacktrace.clj" />
+    <None Include="clojure\template.clj" />
+    <None Include="clojure\test.clj" />
+    <None Include="clojure\test\tap.clj" />
+    <None Include="clojure\walk.clj" />
+    <None Include="clojure\zip.clj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
