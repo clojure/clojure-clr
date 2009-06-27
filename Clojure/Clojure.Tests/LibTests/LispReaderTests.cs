@@ -112,12 +112,16 @@ namespace Clojure.Tests.LibTests
             object o3 = LispReader.matchNumber("+1.237e4");
             object o4 = LispReader.matchNumber("+1.237e-4");
             object o5 = LispReader.matchNumber("1.237e+4");
+            object o6 = LispReader.matchNumber("1.");
+            object o7 = LispReader.matchNumber("1.e3");
 
             Expect(o1, EqualTo(123.7));
             Expect(o2, EqualTo(-1237000.0));
             Expect(o3, EqualTo(1.237e4));
             Expect(o4, EqualTo(1.237e-4));
             Expect(o5, EqualTo(1.237e4));
+            Expect(o6, EqualTo(1.0));
+            Expect(o7, EqualTo(1.0e3));
         }
 
         [Test]

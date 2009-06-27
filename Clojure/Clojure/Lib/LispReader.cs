@@ -407,10 +407,9 @@ namespace clojure.lang
 
         #region Reading numbers
 
-        static Regex intRE   = new Regex("^([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)\\.?$");
+        static Regex intRE   = new Regex("^([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)$");
         static Regex ratioRE = new Regex("^([-+]?[0-9]+)/([0-9]+)$");
-        static Regex floatRE = new Regex("^[-+]?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?[M]?$");
-
+        static Regex floatRE = new Regex("^([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?$");
 
         static object readNumber(PushbackTextReader r, char initch)
         {
@@ -479,8 +478,8 @@ namespace clojure.lang
 
             if (m.Success)
             {
-                return ( s[s.Length-1] == 'M' )
-                    ? new BigDecimal( s.Substring(0,s.Length-1))  // TODO: Fix MS inadequacy
+                return ( m.Groups[4].Success )
+                    ? new BigDecimal( m.Groups[1].Value)  // TODO: Fix MS inadequacy
                     : (object)Double.Parse(s);
             }
             m = ratioRE.Match(s);
