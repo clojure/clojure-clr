@@ -187,7 +187,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Expression basicBody = _tryExpr.GenDlr(context);
             // Wrap the basic body, a Comma, in a return to a label
-            LabelTarget target = Expression.Label(basicBody.Type, "ret_label");
+            //LabelTarget target = Expression.Label(basicBody.Type, "ret_label");
             //Expression tryBody = Expression.Return(target, basicBody);
             Expression tryBody = basicBody;
 
@@ -204,9 +204,10 @@ namespace clojure.lang.CljCompiler.Ast
                 ? Expression.TryCatch(tryBody, catches)
                 : Expression.TryCatchFinally(tryBody, _finallyExpr.GenDlr(context), catches);
 
-            Expression defaultValue = Expression.Default(basicBody.Type);
-            Expression whole = Expression.Block(tryStmt, Expression.Label(target, defaultValue));
-            return whole;
+            //Expression defaultValue = Expression.Default(basicBody.Type);
+            //Expression whole = Expression.Block(tryStmt, Expression.Label(target, defaultValue));
+            //return whole;
+            return tryStmt;
         }
 
         #endregion
