@@ -312,6 +312,6 @@
   (print-sequential (format "#<%s@%x: "
                             (.Name (class o))     ;;; .getSimpleName => .Name
                             (.GetHashCode o))    ;;; No easy equivelent in CLR: (System/identityHashCode o)))
-                    pr-on, "", ">", (list @o), w))
+                    pr-on, "", ">", (list (if (and (future? o) (not (future-done? o))) :pending @o)), w))
 
 (def #^{:private true} print-initialized true)  

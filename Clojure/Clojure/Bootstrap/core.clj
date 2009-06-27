@@ -4022,6 +4022,14 @@
   Example: (binding [*read-eval* false] (read-string \"#=(eval (def x 3))\"))
 
   Defaults to true")
+;;; need to implement a Future class, or use the concurrency project
+(defn future?
+  "Returns true if x is a future"
+  [x] false )                       ;;; (instance? java.util.concurrent.Future x))
+
+(defn future-done?
+  "Returns true if future f is done"
+  [f] false)                       ;;;  [#^java.util.concurrent.Future f] (.isDone f))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
@@ -4051,6 +4059,15 @@
 ;  return it on all subsequent calls to deref/@. If the computation has
 ;  not yet finished, calls to deref/@ will block."  
 ;  [& body] `(future-call (fn [] ~@body)))
+;
+;
+;(defn future-cancel
+;  "Cancels the future, if possible."
+;  [#^java.util.concurrent.Future f] (.cancel f true))
+;
+;(defn future-cancelled?
+;  "Returns true if future f is cancelled"
+;  [#^java.util.concurrent.Future f] (.isCancelled f))
 ;
 ;(defn pmap
 ;  "Like map, except f is applied in parallel. Semi-lazy in that the
@@ -4131,3 +4148,28 @@
          (str "-" q))
        (when (:interim *clojure-version*)
          "-SNAPSHOT")))
+;;; Need countdown latch         
+;(defn promise
+;  "Experimental.
+;  Returns a promise object that can be read with deref/@, and set,
+;  once only, with deliver. Calls to deref/@ prior to delivery will
+;  block. All subsequent derefs will return the same delivered value
+;  without blocking."  
+;  []
+;  (let [d (java.util.concurrent.CountDownLatch. 1)
+;        v (atom nil)]
+;    (proxy [clojure.lang.AFn clojure.lang.IDeref] []
+;      (deref [] (.await d) @v)
+;      (invoke [x]
+;        (locking d
+;          (if (pos? (.getCount d))
+;            (do (.countDown d)
+;                (reset! v x)
+;                this)
+;            (throw (IllegalStateException. "Multiple deliver calls to a promise"))))))))
+;
+;(defn deliver
+;  "Experimental.
+;  Delivers the supplied value to the promise, releasing any pending
+;  derefs. A subsequent call to deliver on a promise will throw an exception."  
+;  [promise val] (promise val))
