@@ -1011,6 +1011,9 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char pct)
             {
+                if (ARG_ENV.deref() == null)
+                    return interpretToken(readToken(r, '%'));
+
                 int ch = r.Read();
                 Unread(r, ch);
                 //% alone is first arg

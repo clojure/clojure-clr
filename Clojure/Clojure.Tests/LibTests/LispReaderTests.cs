@@ -1809,10 +1809,14 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void ArgReaderOutsideSharpFnFails()
+        public void ArgReaderOutsideSharpFnReturnsSymbolAsIs()
         {
-            object o1 = ReadFromString("(+ %2 2)");
+            object o1 = ReadFromString("%2");
+
+            Expect(o1, TypeOf(typeof(Symbol)));
+            Expect(((Symbol)o1).Name, EqualTo("%2"));
+            Expect(((Symbol)o1).Namespace, Null);
+
         }
 
         [Test]
