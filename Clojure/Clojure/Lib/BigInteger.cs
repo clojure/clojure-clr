@@ -1791,11 +1791,20 @@ namespace clojure.lang
 
         #endregion
 
-        #region Equals
+        #region Object overrides
 
         public override bool Equals(object obj)
         {
             return Equals(obj as BigInteger);
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 0;
+            for (int i = 0; i < _data.Length; i++)
+                hashCode = (int)(31 * hashCode + (_data[i] & 0xffffffffL));
+
+            return hashCode * _sign;
         }
 
 
