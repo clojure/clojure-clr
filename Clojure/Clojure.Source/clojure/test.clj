@@ -505,8 +505,8 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
   "Returns a vector [filename line-number] for the nth call up the
   stack."
   [n]
-  (let [s (nth (.getStackTrace (new java.lang.Throwable)) n)]
-    [(.getFileName s) (.getLineNumber s)]))
+  (let [s (nth (.GetFrames (System.Diagnostics.StackTrace. (new System.Exception) true)) n)]         ;;; (let [s (nth (.getStackTrace (new java.lang.Throwable)) n)]
+     [(.GetFileName s) (.GetFileLineNumber s)]))                                                     ;;;   [(.getFileName s) (.getLineNumber s)]))
 
 (defn testing-vars-str
   "Returns a string representation of the current test.  Renders names
@@ -571,7 +571,7 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
    (println "expected:" (pr-str (:expected m)))
    (print "  actual: ")
    (let [actual (:actual m)]
-     (if (instance? Throwable actual)
+     (if (instance? Exception actual)                                    ;;; Throwable
        (stack/print-cause-trace actual *stack-trace-depth*)
        (prn actual)))))
 
@@ -598,7 +598,7 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
   "Like var-get but returns nil if the var is unbound."
   [v]
   (try (var-get v)
-       (catch IllegalStateException e
+       (catch InvalidOperationException e                     ;;; IllegalStateException
          nil)))
 
 (defn function?
@@ -717,7 +717,7 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
   You don't call this."
   [msg form]
   `(try ~(assert-expr msg form)
-        (catch Throwable t#
+        (catch Exception t#                                       ;;; Throwable
           (report {:type :error, :message ~msg,
                    :expected '~form, :actual t#}))))
 
@@ -866,7 +866,7 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
       (report {:type :begin-test-var, :var v})
       (inc-report-counter :test)
       (try (t)
-           (catch Throwable e
+           (catch Exception e                                                         ;;; Throwable
              (report {:type :error, :message "Uncaught exception, not in assertion."
                       :expected nil, :actual e})))
       (report {:type :end-test-var, :var v}))))

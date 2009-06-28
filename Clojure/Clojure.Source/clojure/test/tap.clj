@@ -94,7 +94,7 @@
    (print-tap-diagnostic "  actual: ")
    (print-tap-diagnostic
     (with-out-str
-      (if (instance? Throwable (:actual data))
+      (if (instance? Exception (:actual data))                                ;;; Throwable
         (stack/print-cause-trace (:actual data) t/*stack-trace-depth*)
         (prn (:actual data)))))))
 

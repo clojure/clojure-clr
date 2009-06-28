@@ -721,18 +721,18 @@ namespace clojure.lang
 
         #region IDeref Members
 
-        ///// <summary>
-        ///// Gets the (immutable) value the reference is holding.
-        ///// </summary>
-        ///// <returns>The value</returns>
-        ///// <remarks>When IDeref was added and get() was renamed to deref(), this was put in.  
-        ///// Why?  Perhaps to avoid having to change Var.get() references all over.  
-        ///// I don't know.
-        ///// But then they rename all uses anyway.</remarks>
-        //public object get()
-        //{
-        //    return deref();
-        //}
+        /// <summary>
+        /// Gets the (immutable) value the reference is holding.
+        /// </summary>
+        /// <returns>The value</returns>
+        /// <remarks>When IDeref was added and get() was renamed to deref(), this was put in.  
+        /// Why?  Perhaps to avoid having to change Var.get() references all over.  
+        /// For example, core.clj still has var-get calling this.
+        /// But then they rename all uses anyway.</remarks>
+        public object get()
+        {
+            return deref();
+        }
 
         /// <summary>
         /// Gets the (immutable) value the reference is holding.
