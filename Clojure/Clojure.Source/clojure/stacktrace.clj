@@ -19,25 +19,25 @@
 (defn root-cause
   "Returns the last 'cause' Throwable in a chain of Throwables."
   [tr]
-  (if-let [cause (.getCause tr)]
+  (if-let [cause (.InnerException tr)]                              ;;; .getCause
     (recur cause)
     tr))
 
 (defn print-trace-element
   "Prints a Clojure-oriented view of one element in a stack trace."
-  [e]
-  (let [class (.getClassName e)
-	method (.getMethodName e)] 
+  [e]                   ;;; in CLR, e will be a StackFrame
+  (let [class   (.. e  (GetMethod) (ReflectedType) (FullName))          ;;;  (.getClassName e)
+	method      (.. e (GetMethod)  (Name))]                             ;;;  (.getMethodName e)] 
     (let [match (re-matches #"^([A-Za-z0-9_.-]+)\$(\w+)__\d+$" class)]
       (if (and match (= "invoke" method))
-	(apply printf "%s/%s" (rest match))
-	(printf "%s.%s" class method))))
-  (printf " (%s:%d)" (or (.getFileName e) "") (.getLineNumber e)))
+	(print (str (nth match 1) "/" (nth match 2)))                       ;;;  use when we have printf:  (apply printf "%s/%s" (rest match))
+	(print (str class "." method)))))                                   ;;;  use when we have printf:  (printf "%s.%s" class method))))
+  (print (str " (" (.GetFileName e) ":" (.GetFileLineNumber e) ")")))   ;;;  use when we have printf:  (printf " (%s:%d)" (or (.getFileName e) "") (.getLineNumber e)))
 
 (defn print-throwable
   "Prints the class and message of a Throwable."
   [tr]
-  (printf "%s: %s" (.getName (class tr)) (.getMessage tr)))
+  (print (str (.FullName (class tr)) ": " (.Message tr))))              ;;;  use when we have printf:  (printf "%s: %s" (.getName (class tr)) (.getMessage tr)))
 
 (defn print-stack-trace
   "Prints a Clojure-oriented stack trace of tr, a Throwable.
@@ -45,7 +45,7 @@
   Does not print chained exceptions (causes)."
   ([tr] (print-stack-trace tr nil))
   ([tr n]
-     (let [st (.getStackTrace tr)]
+     (let [st (.GetFrames (System.Diagnostics.StackTrace. tr true))]     ;;;  (.getStackTrace tr)]
        (print-throwable tr)
        (newline)
        (print " at ") 
@@ -63,7 +63,7 @@
   ([tr] (print-cause-trace tr nil))
   ([tr n]
      (print-stack-trace tr n)
-     (when-let [cause (.getCause tr)]
+     (when-let [cause (.InnerException tr)]                              ;; (.getTrace tr)]
        (print "Caused by: " )
        (recur cause n))))
 
