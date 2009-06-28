@@ -109,6 +109,7 @@
     <Compile Include="Lib\IChunkedSeq.cs" />
     <Compile Include="Lib\IDeref.cs" />
     <Compile Include="Lib\Indexed.cs" />
+    <Compile Include="Lib\JReMatcher.cs" />
     <Compile Include="Lib\LazySeq.cs" />
     <Compile Include="Lib\Seqable.cs" />
     <Compile Include="Lib\Stream.cs" />

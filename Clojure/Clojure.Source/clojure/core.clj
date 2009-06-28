@@ -2823,67 +2823,67 @@
       (if f
         (do (f) :ok)
         :no-test)))
-;;;Need to take a closer look at CLR Regex vs Java Regex
-;(defn re-pattern
-;  "Returns an instance of java.util.regex.Pattern, for use, e.g. in
-;  re-matcher."
-;  {:tag java.util.regex.Pattern}
-;  [s] (if (instance? java.util.regex.Pattern s)
-;        s
-;        (. java.util.regex.Pattern (compile s))))
-;
-;(defn re-matcher
-;  "Returns an instance of java.util.regex.Matcher, for use, e.g. in
-;  re-find."
-;  {:tag java.util.regex.Matcher}
-;  [#^java.util.regex.Pattern re s]
-;    (. re (matcher s)))
-;
-;(defn re-groups
-;  "Returns the groups from the most recent match/find. If there are no
-;  nested groups, returns a string of the entire match. If there are
-;  nested groups, returns a vector of the groups, the first element
-;  being the entire match."
-;  [#^java.util.regex.Matcher m]
-;    (let [gc  (. m (groupCount))]
-;      (if (zero? gc)
-;        (. m (group))
-;        (loop [ret [] c 0]
-;          (if (<= c gc)
-;            (recur (conj ret (. m (group c))) (inc c))
-;            ret)))))
-;
-;(defn re-seq
-;  "Returns a lazy sequence of successive matches of pattern in string,
-;  using java.util.regex.Matcher.find(), each such match processed with
-;  re-groups."
-;  [#^java.util.regex.Pattern re s]
-;    (let [m (re-matcher re s)]
-;      ((fn step []
-;         (lazy-seq
-;          (when (. m (find))
-;            (cons (re-groups m) (step))))))))
-;
-;(defn re-matches
-;  "Returns the match, if any, of string to pattern, using
-;  java.util.regex.Matcher.matches().  Uses re-groups to return the
-;  groups."
-;  [#^java.util.regex.Pattern re s]
-;    (let [m (re-matcher re s)]
-;      (when (. m (matches))
-;        (re-groups m))))
-;
-;
-;(defn re-find
-;  "Returns the next regex match, if any, of string to pattern, using
-;  java.util.regex.Matcher.find().  Uses re-groups to return the
-;  groups."
-;  ([#^java.util.regex.Matcher m]
-;   (when (. m (find))
-;     (re-groups m)))
-;  ([#^java.util.regex.Pattern re s]
-;   (let [m (re-matcher re s)]
-;     (re-find m))))
+;;; Had to add a bogus class clojure.lang.JReMatcher to make the re-* functions work.
+(defn re-pattern
+  "Returns an instance of java.util.regex.Pattern, for use, e.g. in
+  re-matcher."
+  {:tag System.Text.RegularExpressions.Regex }                           ;;; {:tag java.util.regex.Pattern}
+  [s] (if (instance? System.Text.RegularExpressions.Regex s)             ;;; java.util.regex.Pattern
+        s
+        (System.Text.RegularExpressions.Regex. s)))                      ;;; (. java.util.regex.Pattern (compile s))))
+
+(defn re-matcher
+  "Returns an instance of java.util.regex.Matcher, for use, e.g. in
+  re-find."
+  {:tag clojure.lang.JReMatcher}                                         ;;; {:tag java.util.regex.Matcher}
+  [#^System.Text.RegularExpressions.Regex re s]                          ;;; java.util.regex.Pattern
+    (clojure.lang.JReMatcher. re s))                                     ;;; (. re (matcher s)))
+
+(defn re-groups
+  "Returns the groups from the most recent match/find. If there are no
+  nested groups, returns a string of the entire match. If there are
+  nested groups, returns a vector of the groups, the first element
+  being the entire match."
+  [#^clojure.lang.JReMatcher m]                                          ;;; java.util.regex.Matcher
+    (let [gc (. m (groupCount))]
+      (if (zero? gc)
+        (. m (group))
+        (loop [ret [] c 0]
+          (if (<= c gc)
+            (recur (conj ret (. m (group c))) (inc c))
+            ret)))))
+
+(defn re-seq
+  "Returns a lazy sequence of successive matches of pattern in string,
+  using java.util.regex.Matcher.find(), each such match processed with
+  re-groups."
+  [#^System.Text.RegularExpressions.Regex re s]                          ;;; java.util.regex.Pattern
+    (let [m (re-matcher re s)]
+      ((fn step []
+         (lazy-seq
+          (when (. m (find))
+            (cons (re-groups m) (step))))))))
+
+(defn re-matches
+  "Returns the match, if any, of string to pattern, using
+  java.util.regex.Matcher.matches().  Uses re-groups to return the
+  groups."
+  [#^System.Text.RegularExpressions.Regex re s]                          ;;; java.util.regex.Pattern
+    (let [m (re-matcher re s)]
+      (when (. m (matches))
+        (re-groups m))))
+
+
+(defn re-find
+  "Returns the next regex match, if any, of string to pattern, using
+  java.util.regex.Matcher.find().  Uses re-groups to return the
+  groups."
+  ([#^clojure.lang.JReMatcher m]                                        ;;; java.util.regex.Matcher
+   (when (. m (find))
+     (re-groups m)))
+  ([#^System.Text.RegularExpressions.Regex re s]                        ;;; java.util.regex.Pattern
+   (let [m (re-matcher re s)]
+     (re-find m))))
 
 (defn rand
   "Returns a random floating point number between 0 (inclusive) and
@@ -2907,18 +2907,18 @@
   (when (:macro ^v)
     (println "Macro"))
   (println " " (:doc ^v)))
-;;; Needs re-pattern
-;(defn find-doc
-;  "Prints documentation for any var whose documentation or name
-; contains a match for re-string"
-;  [re-string]
-;    (let [re  (re-pattern re-string)]
-;      (doseq [ns (all-ns)
-;              v (sort-by (comp :name meta) (vals (ns-interns ns)))
-;              :when (and (:doc ^v)
-;                         (or (re-find (re-matcher re (:doc ^v)))
-;                             (re-find (re-matcher re (str (:name ^v))))))]
-;               (print-doc v))))
+
+(defn find-doc
+  "Prints documentation for any var whose documentation or name
+ contains a match for re-string"
+  [re-string]
+    (let [re  (re-pattern re-string)]
+      (doseq [ns (all-ns)
+              v (sort-by (comp :name meta) (vals (ns-interns ns)))
+              :when (and (:doc ^v)
+                         (or (re-find (re-matcher re (:doc ^v)))
+                             (re-find (re-matcher re (str (:name ^v))))))]
+               (print-doc v))))
 
 (defn special-form-anchor
   "Returns the anchor tag on http://clojure.org/special_forms for the
