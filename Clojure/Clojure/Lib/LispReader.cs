@@ -478,9 +478,15 @@ namespace clojure.lang
 
             if (m.Success)
             {
-                return ( m.Groups[4].Success )
-                    ? new BigDecimal( m.Groups[1].Value)  // TODO: Fix MS inadequacy
-                    : (object)Double.Parse(s);
+                if ( m.Groups[4].Success )
+                {
+                    // MS implementation of java.util.BigDecimal has a bug when the string has a leading+
+                    string val = m.Groups[1].Value;
+                    if ( val[0] == '+' )
+                        val = val.Substring(1);
+                    return new BigDecimal(val);
+                }
+                return (object)Double.Parse(s);
             }
             m = ratioRE.Match(s);
             if (m.Success)

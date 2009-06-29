@@ -25,10 +25,10 @@
         (> (count (:arglists m)) 0) true
 
         (string? (:doc m)) true
-        (> (.length (:doc m)) 0) true
+        (> (.Length (:doc m)) 0) true             ;;; .length
         
         (string? (:file m)) true
-        (> (.length (:file m)) 0) true
+        (> (.Length (:file m)) 0) true            ;;; .length
 
         (integer? (:line m)) true
         (> (:line m) 0) true

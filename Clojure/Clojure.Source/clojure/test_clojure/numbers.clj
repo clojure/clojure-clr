@@ -117,7 +117,7 @@
 
 
 (deftest test-subtract
-  (is (thrown? IllegalArgumentException (-)))
+  (is (thrown? ArgumentException (-)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
       (- 1) -1
       (- 1 2) -1
@@ -186,7 +186,7 @@
 
   (is (thrown? ArithmeticException (/ 0)))
   (is (thrown? ArithmeticException (/ 2 0)))
-  (is (thrown? IllegalArgumentException (/))) )
+  (is (thrown? ArgumentException (/))) )              ;;; IllegalArgumentException
 
 
 ;; mod
@@ -201,9 +201,9 @@
 
 (deftest test-mod
   ; wrong number of args
-  (is (thrown? IllegalArgumentException (mod)))
-  (is (thrown? IllegalArgumentException (mod 1)))
-  (is (thrown? IllegalArgumentException (mod 3 2 1)))
+  (is (thrown? ArgumentException (mod)))           ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (mod 1)))         ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (mod 3 2 1)))     ;;; IllegalArgumentException
 
   ; divide by zero
   (is (thrown? ArithmeticException (mod 9 0)))
@@ -251,9 +251,9 @@
 
 (deftest test-rem
   ; wrong number of args
-  (is (thrown? IllegalArgumentException (rem)))
-  (is (thrown? IllegalArgumentException (rem 1)))
-  (is (thrown? IllegalArgumentException (rem 3 2 1)))
+  (is (thrown? ArgumentException (rem)))           ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (rem 1)))         ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (rem 3 2 1)))     ;;; IllegalArgumentException
 
   ; divide by zero
   (is (thrown? ArithmeticException (rem 9 0)))
@@ -298,9 +298,9 @@
 
 (deftest test-quot
   ; wrong number of args
-  (is (thrown? IllegalArgumentException (quot)))
-  (is (thrown? IllegalArgumentException (quot 1)))
-  (is (thrown? IllegalArgumentException (quot 3 2 1)))
+  (is (thrown? ArgumentException (quot)))           ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (quot 1)))         ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (quot 3 2 1)))     ;;; IllegalArgumentException
 
   ; divide by zero
   (is (thrown? ArithmeticException (quot 9 0)))

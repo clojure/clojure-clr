@@ -20,9 +20,9 @@
 
 (def test-names
      [
-     ; :reader
+      :reader
      ; :printer
-     ; :compilation
+      :compilation
      ; :evaluation
      ; :special
      ; :macros
@@ -40,15 +40,15 @@
      ; :vars
      ; :refs
      ; :agents
-     ; :atoms
+      :atoms
      ; :parallel
      ; :java-interop
      ; :test
      ; :test-fixtures
       ;; libraries
-    ;  :clojure-set
+      :clojure-set
     ;  :clojure-xml
-    ;  :clojure-zip
+      :clojure-zip
       ])
 
 (def test-namespaces

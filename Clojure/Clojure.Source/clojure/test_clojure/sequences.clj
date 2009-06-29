@@ -81,7 +81,7 @@
 
 
 (deftest test-cons
-  (is (thrown? IllegalArgumentException (cons 1 2)))
+  (is (thrown? ArgumentException (cons 1 2)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (cons 1 nil) '(1)
     (cons nil nil) '(nil)
@@ -167,14 +167,14 @@
 
 
 (deftest test-first
-  (is (thrown? IllegalArgumentException (first)))
-  (is (thrown? IllegalArgumentException (first true)))
-  (is (thrown? IllegalArgumentException (first false)))
-  (is (thrown? IllegalArgumentException (first 1)))
-  (is (thrown? IllegalArgumentException (first 1 2)))
-  (is (thrown? IllegalArgumentException (first \a)))
-  (is (thrown? IllegalArgumentException (first 's)))
-  (is (thrown? IllegalArgumentException (first :k)))
+  (is (thrown? ArgumentException (first)))            ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first true)))       ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first false)))      ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first 1)))          ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first 1 2)))        ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first \a)))         ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first 's)))         ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first :k)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (first nil) nil
 
@@ -234,14 +234,14 @@
 
 
 (deftest test-next
-  (is (thrown? IllegalArgumentException (next)))
-  (is (thrown? IllegalArgumentException (next true)))
-  (is (thrown? IllegalArgumentException (next false)))
-  (is (thrown? IllegalArgumentException (next 1)))
-  (is (thrown? IllegalArgumentException (next 1 2)))
-  (is (thrown? IllegalArgumentException (next \a)))
-  (is (thrown? IllegalArgumentException (next 's)))
-  (is (thrown? IllegalArgumentException (next :k)))
+  (is (thrown? ArgumentException (next)))            ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next true)))       ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next false)))      ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next 1)))          ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next 1 2)))        ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next \a)))         ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next 's)))         ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next :k)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (next nil) nil
 
@@ -369,7 +369,7 @@
 ;; (ffirst coll) = (first (first coll))
 ;;
 (deftest test-ffirst
-  (is (thrown? IllegalArgumentException (ffirst)))
+  (is (thrown? ArgumentException (ffirst)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (ffirst nil) nil
 
@@ -389,7 +389,7 @@
 ;; (fnext coll) = (first (next coll)) = (second coll)
 ;;
 (deftest test-fnext
-  (is (thrown? IllegalArgumentException (fnext)))
+  (is (thrown? ArgumentException (fnext)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (fnext nil) nil
 
@@ -413,7 +413,7 @@
 ;; (nfirst coll) = (next (first coll))
 ;;
 (deftest test-nfirst
-  (is (thrown? IllegalArgumentException (nfirst)))
+  (is (thrown? ArgumentException (nfirst)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (nfirst nil) nil
 
@@ -433,7 +433,7 @@
 ;; (nnext coll) = (next (next coll))
 ;;
 (deftest test-nnext
-  (is (thrown? IllegalArgumentException (nnext)))
+  (is (thrown? ArgumentException (nnext)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (nnext nil) nil
 
@@ -801,7 +801,7 @@
 
 
 (deftest test-repeat
-  (is (thrown? IllegalArgumentException (repeat)))
+  (is (thrown? ArgumentException (repeat)))         ;;; IllegalArgumentException
 
   ; infinite sequence => use take
   (are [x y] (= x y)

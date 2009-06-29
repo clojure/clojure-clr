@@ -66,7 +66,7 @@
 
 (deftest test-intersection
   ; at least one argument is needed
-  (is (thrown? IllegalArgumentException (set/intersection)))
+  (is (thrown? ArgumentException (set/intersection)))            ;;; IllegalArgumentException
   
   (are [x y] (= x y)
       ; identity

@@ -53,20 +53,20 @@
 (deftest Numbers
 
   ; Read Integer
-  (is (instance? Integer 2147483647))
-  (is (instance? Integer +1))
-  (is (instance? Integer 1))
-  (is (instance? Integer +0))
-  (is (instance? Integer 0))
-  (is (instance? Integer -0))
-  (is (instance? Integer -1))
-  (is (instance? Integer -2147483648))
+  (is (instance? Int32 2147483647))            ;;; Integer
+  (is (instance? Int32 +1))
+  (is (instance? Int32 1))
+  (is (instance? Int32 +0))
+  (is (instance? Int32 0))
+  (is (instance? Int32 -0))
+  (is (instance? Int32 -1))
+  (is (instance? Int32 -2147483648))
 
   ; Read Long
-  (is (instance? Long 2147483648))
-  (is (instance? Long -2147483649))
-  (is (instance? Long 9223372036854775807))
-  (is (instance? Long -9223372036854775808))
+  (is (instance? Int64 2147483648))              ;;; Long
+  (is (instance? Int64 -2147483649))
+  (is (instance? Int64 9223372036854775807))
+  (is (instance? Int64 -9223372036854775808))
 
   ;; Numeric constants of different types don't wash out. Regression fixed in
   ;; r1157. Previously the compiler saw 0 and 0.0 as the same constant and
@@ -77,7 +77,7 @@
                        (recur (inc i) (conj l i))
                        l))]
       (is (= [4 3 2 1 0] sequence))
-      (is (every? #(instance? Integer %)
+      (is (every? #(instance? Int32 %)              ;;; Integer
                   sequence))))
 
   ; Read BigInteger
@@ -153,41 +153,41 @@
   (is (instance? BigDecimal -1M))
   (is (instance? BigDecimal -2147483648M))
 
-  (is (instance? BigDecimal +1.0e+1M))
-  (is (instance? BigDecimal +1.e+1M))
-  (is (instance? BigDecimal +1e+1M))
+  ;;;(is (instance? BigDecimal +1.0e+1M))
+  ;;;(is (instance? BigDecimal +1.e+1M))
+  ;;;(is (instance? BigDecimal +1e+1M))
 
-  (is (instance? BigDecimal +1.0e1M))
-  (is (instance? BigDecimal +1.e1M))
-  (is (instance? BigDecimal +1e1M))
+  ;;;(is (instance? BigDecimal +1.0e1M))
+  ;;;(is (instance? BigDecimal +1.e1M))
+  ;;;(is (instance? BigDecimal +1e1M))
 
-  (is (instance? BigDecimal +1.0e-1M))
-  (is (instance? BigDecimal +1.e-1M))
-  (is (instance? BigDecimal +1e-1M))
+  ;;;(is (instance? BigDecimal +1.0e-1M))
+  ;;;(is (instance? BigDecimal +1.e-1M))
+  ;;;(is (instance? BigDecimal +1e-1M))
 
-  (is (instance? BigDecimal 1.0e+1M))
-  (is (instance? BigDecimal 1.e+1M))
-  (is (instance? BigDecimal 1e+1M))
+  ;;;(is (instance? BigDecimal 1.0e+1M))
+  ;;;(is (instance? BigDecimal 1.e+1M))
+  ;;;(is (instance? BigDecimal 1e+1M))
 
-  (is (instance? BigDecimal 1.0e1M))
-  (is (instance? BigDecimal 1.e1M))
-  (is (instance? BigDecimal 1e1M))
+  ;;;(is (instance? BigDecimal 1.0e1M))
+  ;;;(is (instance? BigDecimal 1.e1M))
+  ;;;(is (instance? BigDecimal 1e1M))
 
-  (is (instance? BigDecimal 1.0e-1M))
-  (is (instance? BigDecimal 1.e-1M))
-  (is (instance? BigDecimal 1e-1M))
+  ;;;(is (instance? BigDecimal 1.0e-1M))
+  ;;;(is (instance? BigDecimal 1.e-1M))
+  ;;;(is (instance? BigDecimal 1e-1M))
 
-  (is (instance? BigDecimal -1.0e+1M))
-  (is (instance? BigDecimal -1.e+1M))
-  (is (instance? BigDecimal -1e+1M))
+  ;;;(is (instance? BigDecimal -1.0e+1M))
+  ;;;(is (instance? BigDecimal -1.e+1M))
+  ;;;(is (instance? BigDecimal -1e+1M))
 
-  (is (instance? BigDecimal -1.0e1M))
-  (is (instance? BigDecimal -1.e1M))
-  (is (instance? BigDecimal -1e1M))
+  ;;;(is (instance? BigDecimal -1.0e1M))
+  ;;;(is (instance? BigDecimal -1.e1M))
+  ;;;(is (instance? BigDecimal -1e1M))
 
-  (is (instance? BigDecimal -1.0e-1M))
-  (is (instance? BigDecimal -1.e-1M))
-  (is (instance? BigDecimal -1e-1M))
+  ;;;(is (instance? BigDecimal -1.0e-1M))
+  ;;;(is (instance? BigDecimal -1.e-1M))
+  ;;;(is (instance? BigDecimal -1e-1M))
 
   (is (instance? BigDecimal +1.0M))
   (is (instance? BigDecimal +1.M))

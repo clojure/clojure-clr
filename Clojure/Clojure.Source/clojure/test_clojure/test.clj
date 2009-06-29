@@ -53,7 +53,7 @@
   ;; No exception is thrown:
   (is (thrown? Exception (+ 1 1)) "Should fail")
   ;; Wrong class of exception is thrown:
-  (is (thrown-with-msg? IllegalArgumentException #"Divide by zero" (/ 1 0)) "Should error"))
+  (is (thrown-with-msg? ArgumentException #"Divide by zero" (/ 1 0)) "Should error"))          ;;; IllegalArgumentException
 
 (deftest can-catch-unexpected-exceptions
   (is (= 1 (throw (Exception.))) "Should error"))

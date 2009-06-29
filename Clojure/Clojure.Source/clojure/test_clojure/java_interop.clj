@@ -250,9 +250,9 @@
 
 (deftest test-into-array
   ; compatible types only
-  (is (thrown? IllegalArgumentException (into-array [1 "abc" :kw])))
-  (is (thrown? IllegalArgumentException (into-array [1.2 4])))
-  (is (thrown? IllegalArgumentException (into-array [(byte 2) (short 3)])))
+  (is (thrown? ArgumentException (into-array [1 "abc" :kw])))          ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (into-array [1.2 4])))                ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (into-array [(byte 2) (short 3)])))   ;;; IllegalArgumentException
 
   ; simple case
   (let [v [1 2 3 4 5]
