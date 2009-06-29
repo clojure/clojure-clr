@@ -57,7 +57,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return _field.FieldType; }
+            get { return _field != null ?_field.FieldType : _property.PropertyType; }
         }
 
         #endregion

@@ -122,7 +122,7 @@ namespace clojure.lang
             //IEnumerable<MethodInfo> einfo = target.GetType().GetMethods(flags).Where(mi => mi.Name == methodName && mi.GetParameters().Length == args.Length);
             //List<MethodInfo> infos = new List<MethodInfo>(einfo);
 
- 
+
 
             //return InvokeMatchingMethod(methodName, infos, null, target, args);
         }

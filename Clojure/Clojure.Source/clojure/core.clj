@@ -1033,7 +1033,7 @@
                       options)
         dispatch-fn (first options)
         options     (next options)
-        m           (assoc m :tag 'clojure.lang.MultiFn)
+        ;m           (assoc m :tag 'clojure.lang.MultiFn)         ;;; ;;; ;;; Major change -- this tag is breaking my type inferencing
         m           (if docstring
                       (assoc m :doc docstring)
                       m)
@@ -2001,7 +2001,7 @@
   [x] (cond
        (instance? BigInteger x) x
        (decimal? x) (.toBigInteger #^BigDecimal x)
-       (number? x) (BigInteger/valueOf (long x))
+       (number? x) (BigInteger/Create (long x))                ;;;(BigInteger/valueOf (long x))
        :else (BigInteger. x)))
 
 (defn bigdec
@@ -3640,7 +3640,7 @@
 (defn- load-lib
   "Loads a lib with options"
   [prefix lib & options]
-  (throw-if (and prefix (pos? (.IndexOf (name lib) (int \.))))               ;;; indexOf
+  (throw-if (and prefix (pos? (.IndexOf (name lib) \.)))               ;;; indexOf  & (int \.)
             "lib names inside prefix lists must not contain periods")
   (let [lib (if prefix (symbol (str prefix \. lib)) lib)
         opts (apply hash-map options)
@@ -4073,7 +4073,7 @@
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
 ;(load "core_proxy")
 (load "core_print")
-;(load "genclass")
+(load "genclass")
 ;;; Need to figure out equivalents for pooledExecutor, java.util.concurrent.Future + we need proxies.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; futures (needs proxy);;;;;;;;;;;;;;;;;;
 ;(defn future-call 

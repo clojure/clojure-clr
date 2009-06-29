@@ -1,7 +1,7 @@
 ;   Copyright (c) Rich Hickey. All rights reserved.
 ;   The use and distribution terms for this software are covered by the
 ;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
-;   which can be found in the file epl-v10.html at the root of this distribution.
+;   which can be found in the file epl-v10.html at the root of this distribution.F
 ;   By using this software in any fashion, you are agreeing to be bound by
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
@@ -505,8 +505,8 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
   "Returns a vector [filename line-number] for the nth call up the
   stack."
   [n]
-  (let [s (nth (.GetFrames (System.Diagnostics.StackTrace. (new System.Exception) true)) n)]         ;;; (let [s (nth (.getStackTrace (new java.lang.Throwable)) n)]
-     [(.GetFileName s) (.GetFileLineNumber s)]))                                                     ;;;   [(.getFileName s) (.getLineNumber s)]))
+  (let [s (nth (.GetFrames (System.Diagnostics.StackTrace.)) n)]            ;;; (let [s (nth (.getStackTrace (new java.lang.Throwable)) n)]
+     (if (nil? s) [nil 0] [(.GetFileName s) (.GetFileLineNumber s)])))      ;;;   [(.getFileName s) (.getLineNumber s)]))
 
 (defn testing-vars-str
   "Returns a string representation of the current test.  Renders names
