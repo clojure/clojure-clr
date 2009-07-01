@@ -153,7 +153,7 @@
   (is (instance? BigDecimal -1M))
   (is (instance? BigDecimal -2147483648M))
 
-  ;;;(is (instance? BigDecimal +1.0e+1M))
+  ;;;(is (instance? BigDecimal +1.0e+1M))  ;;; Major problems with the parsing code in Microsoft's java.util.BigDecimal.
   ;;;(is (instance? BigDecimal +1.e+1M))
   ;;;(is (instance? BigDecimal +1e+1M))
 

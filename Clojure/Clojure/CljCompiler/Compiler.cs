@@ -267,7 +267,7 @@ namespace clojure.lang
         internal static LambdaExpression GenerateLambda(GenContext context, object form, bool addPrint)
         {
             // TODO: Clean this up.
-            form = RT.list(FN, PersistentVector.EMPTY, form);
+            form = RT.list(FN, PersistentVector.EMPTY, RT.list( DO, form));
 
             Expr ast = GenerateAST(form);
             Expression formExpr = GenerateDlrExpression(context,ast);
@@ -398,12 +398,17 @@ namespace clojure.lang
                     Symbol nsSym = Symbol.create(symbol.Namespace);
                     Type t = MaybeType(nsSym, false);
                     if (t != null)
+                    {
+                        // TODO: create ctors for StaticFieldExpr that accept the FieldInfo/PropertyInfo.
                         if (Reflector.GetField(t, symbol.Name, true) != null)
                             return new StaticFieldExpr((int)LINE.deref(), t, symbol.Name);
+                        else if (Reflector.GetProperty(t, symbol.Name, true) != null)
+                            return new StaticFieldExpr((int)LINE.deref(), t, symbol.Name);
+                    }
                     throw new Exception(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
                 }
             }
-
+            // TODO: Resolve of nested class (Compiler+CompilerException) not working
             object o = Compiler.Resolve(symbol);
             if (o is Var)
             {

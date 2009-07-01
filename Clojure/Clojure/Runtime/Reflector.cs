@@ -23,9 +23,17 @@ namespace clojure.lang
         static public FieldInfo GetField(Type t, String name, bool getStatics)
         {
             return getStatics
-                ? t.GetField(name,BindingFlags.Static)
+                ? t.GetField(name,BindingFlags.Static|BindingFlags.Public)
                 : t.GetField(name);
         }
+
+        static public PropertyInfo GetProperty(Type t, String name, bool getStatics)
+        {
+            return getStatics
+                ? t.GetProperty(name, BindingFlags.Static | BindingFlags.Public)
+                : t.GetProperty(name);
+        }
+
 
 
         public static object CallStaticMethod(string methodName, Type t, params object[] args)

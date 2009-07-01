@@ -21,9 +21,9 @@
 (def test-names
      [
       :reader
-     ; :printer
+      :printer
       :compilation
-     ; :evaluation
+      :evaluation
      ; :special
      ; :macros
      ; :metadata

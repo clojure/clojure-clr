@@ -17,8 +17,8 @@
 (ns clojure.test-clojure.evaluation
   (:use clojure.test))
 
-(import '(java.lang Boolean)
-        '(clojure.lang Compiler Compiler$CompilerException))
+(import                                                                       ;;;  not needed: '(java.lang Boolean)
+        '(clojure.lang Compiler Compiler+CompilerException))                  ;;; Compiler$CompilerException
 
 (defmacro test-that
   "Provides a useful way for specifying the purpose of tests. If the first-level
@@ -45,7 +45,7 @@
 ; not using Clojure's RT/classForName since a bug in it could hide a bug in
 ; eval's resolution
 (defn class-for-name [name]
-  (java.lang.Class/forName name))
+  (Type/GetType name false))                                                  ;;; (java.lang.Class/forName name))
 
 (defmacro in-test-ns [& body]
   `(binding [*ns* *ns*]
@@ -75,9 +75,9 @@
   (evaluates-to-itself? \newline)
   (evaluates-to-itself? nil)
   (evaluates-to-itself? :test)
-  ; Boolean literals should evaluate to Boolean.{TRUE|FALSE}
-  (is (identical? (eval true) Boolean/TRUE))
-  (is (identical? (eval false) Boolean/FALSE)))
+  ; Boolean literals should evaluate to Boolean.{TRUE|FALSE}  ;;; Except we don't have.  Use RT.T and RT.F instead.
+  (is (identical? (eval true) clojure.lang.RT/T))             ;;; Boolean/TRUE))
+  (is (identical? (eval false) clojure.lang.RT/F)))             ;;; Boolean/FALSE)))
 
 ;;; Symbol resolution tests ;;;
 
@@ -87,7 +87,7 @@
 (def #^{:private true} baz 456)
 (in-ns 'clojure.test-clojure.evaluation)
 
-(defn a-match? [re s] (not (nil? (re-matches re s))))
+(defn a-match? [re s] (not (nil? (re-find re s))))                   ;;; re-matches  -- I can't expect an exact match.
 
 (defmacro throws-with-msg
   ([re form] `(throws-with-msg ~re ~form Exception))
@@ -101,9 +101,9 @@
                     ~form
                     (catch ~class e# e#)
                     (catch Exception e#
-                      (let [cause# (.getCause e#)]
+                      (let [cause# (.InnerException e#)]                                      ;;; .getCause
                         (if (= ~class (class cause#)) cause# (throw e#)))))]
-          (is (a-match? ~re (.toString ex#))
+          (is (a-match? ~re (.ToString ex#))                                                   ;;; .toString
               (or ~msg
                   (str "Expected exception that matched " (pr-str ~re)
                        ", but got exception with message: \"" ex#))))))
@@ -125,17 +125,17 @@
     (throws-with-msg
       #".*resolution-test/baz is not public.*"
       (eval 'resolution-test/baz)
-      Compiler$CompilerException))
+      clojure.lang.Compiler+CompilerException))                                      ;;; Compiler$CompilerException))
 
   (test-that
     "If a symbol is package-qualified, its value is the Java class named by the
     symbol"
-    (is (= (eval 'java.lang.Math) (class-for-name "java.lang.Math"))))
+    (is (= (eval 'System.Math) (class-for-name "System.Math"))))          ;;; java.lang.Math
 
   (test-that
     "If a symbol is package-qualified, it is an error if there is no Class named
     by the symbol"
-    (is (thrown? Compiler$CompilerException (eval 'java.lang.FooBar))))
+    (is (thrown? clojure.lang.Compiler+CompilerException (eval 'java.lang.FooBar))))              ;;; Compiler$CompilerException
 
   (test-that
     "If a symbol is not qualified, the following applies, in this order:
@@ -160,24 +160,24 @@
     ; First
     (doall (for [form '(def if do let quote var fn loop recur throw try
                          monitor-enter monitor-exit)]
-             (is (thrown? Compiler$CompilerException (eval form)))))
+             (is (thrown? clojure.lang.Compiler+CompilerException (eval form)))))                 ;;;  Compiler$CompilerException
     (let [if "foo"]
-      (is (thrown? Compiler$CompilerException (eval 'if)))
+      (is (thrown? clojure.lang.Compiler+CompilerException (eval 'if)))                           ;;;  Compiler$CompilerException
 
     ; Second
-      (is (= (eval 'Boolean) (class-for-name "java.lang.Boolean"))))
+      (is (= (eval 'Boolean) (class-for-name "System.Boolean"))))                 ;;;  "java.lang.Boolean"
     (let [Boolean "foo"]
-      (is (= (eval 'Boolean) (class-for-name "java.lang.Boolean"))))
+      (is (= (eval 'Boolean) (class-for-name "System.Boolean"))))
 
     ; Third
     (is (= (eval '(let [foo "bar"] foo)) "bar"))
 
     ; Fourth
     (in-test-ns (is (= (eval 'foo) "abc")))
-    (is (thrown? Compiler$CompilerException (eval 'bar))) ; not in this namespace
+    (is (thrown? clojure.lang.Compiler+CompilerException (eval 'bar))) ; not in this namespace            ;;; Compiler$CompilerException
 
     ; Fifth
-    (is (thrown? Compiler$CompilerException (eval 'foobar)))))
+    (is (thrown? clojure.lang.Compiler+CompilerException (eval 'foobar)))))                              ;;; Compiler$CompilerException
 
 ;;; Metadata tests ;;;
 
@@ -222,8 +222,8 @@
 
   (test-that
     "Non-empty lists are considered calls"
-    (is (thrown? Compiler$CompilerException (eval '(1 2 3))))))
-
+    (is (thrown? System.Reflection.TargetInvocationException (eval '(1 2 3))))))                ;;; Compiler$CompilerException -- this is nested
+ 
 (deftest Macros)
 
 (deftest Loading)
