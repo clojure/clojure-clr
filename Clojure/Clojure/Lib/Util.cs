@@ -234,7 +234,7 @@ namespace clojure.lang
                     case TypeCode.UInt64:
                         return true;
                 }
-                if (type == typeof(BigInteger) || type == typeof(BigDecimal))
+                if (type == typeof(BigInteger) || type == typeof(BigDecimal) || type == typeof(Ratio))
                     return true;
             }
             return false;

@@ -24,13 +24,13 @@
       :printer
       :compilation
       :evaluation
-     ; :special
-     ; :macros
-     ; :metadata
-     ; :ns-libs
+      :special
+      :macros
+      :metadata
+      :ns-libs
       :logic
-     ; :predicates
-     ; :control
+      :predicates
+      :control
      ; :data-structures
      ; :numbers
      ; :sequences

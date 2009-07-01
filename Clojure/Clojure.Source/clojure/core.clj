@@ -1966,7 +1966,7 @@
   (or (instance? Int32 n)      ;;; Integer
       (instance? Int64 n)         ;;; Long
       (instance? BigInteger n)   (instance? Char n)  ;;; added Char test
-      (instance? int 16 n)        ;;; Short
+      (instance? Int16 n)        ;;; Short
       (instance? Byte n)))
 
 (defn mod

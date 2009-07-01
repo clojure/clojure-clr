@@ -60,8 +60,8 @@
 
   :fn (fn [x] (* 2 x))
 
-  :class java.util.Date
-  :object (new java.util.Date)
+  :class DateTime                               ;;; java.util.Date
+  :object (. DateTime Now)                        ;;; (new java.util.Date)
 
   :var (var myvar)
   :delay (delay (+ 1 2))
@@ -75,12 +75,12 @@
   false? [:bool-false]
   ; boolean?
 
-  integer?  [:byte :short :int :long :bigint]
+  integer?  [:byte :short :int :long :bigint :character]                                  ;;; Added :character, because Char is integer type in CLR
   float?    [:float :double]
   decimal?  [:bigdec]
   ratio?    [:ratio]
-  rational? [:byte :short :int :long :bigint :ratio :bigdec]
-  number?   [:byte :short :int :long :bigint :ratio :bigdec :float :double]
+  rational? [:byte :short :int :long :bigint :ratio :bigdec :character]                   ;;; Added :character, because Char is integer type in CLR
+  number?   [:byte :short :int :long :bigint :ratio :bigdec :float :double :character]    ;;; Added :character, because Char is integer type in CLR
 
   ; character?
   symbol?  [:symbol]
@@ -119,8 +119,8 @@
 ;;
 (defn- get-fn-name [f]
   (str
-    (apply str (nthnext (first (.split (str f) "_"))
-                        (count "clojure.core$")))
+    (apply str (nthnext (first (.Split (str f) (.ToCharArray "_") 1))                  ;;; (.split (str f) "_")
+                        (count "clojure/core$")))                                      ;;; (count "clojure.core$")
     "?"))
 
 (deftest test-type-preds
@@ -138,5 +138,5 @@
 ;;
 (deftest test-string?-more
   (are (not (string? _))
-    (new java.lang.StringBuilder "abc")
-    (new java.lang.StringBuffer "xyz")))
+    (new java.lang.StringBuilder "abc")                  ;;; java.lang.StringBuilder
+    ))                                                   ;;; (new java.lang.StringBuffer "xyz")))
