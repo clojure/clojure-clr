@@ -488,9 +488,7 @@ namespace clojure.lang
 
         public int CompareTo(object obj)
         {
-            IPersistentVector v = obj as IPersistentVector;
-            if (v == null)
-                return 1;
+            IPersistentVector v = (IPersistentVector) obj;
 
             if (count() < v.count())
                 return -1;

@@ -31,7 +31,7 @@
       :logic
       :predicates
       :control
-     ; :data-structures
+      :data-structures
      ; :numbers
      ; :sequences
      ; :for

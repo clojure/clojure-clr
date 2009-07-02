@@ -33,7 +33,7 @@
 (deftest Coerced-Short
   (let [v (short 3)]
     (are [x]
-     (instance? Short v)
+     (instance? Int16 v)        ;;; Short
      (number? v)
      (integer? v)
      (rational? v))))
@@ -41,15 +41,15 @@
 (deftest Coerced-Integer
   (let [v (int 3)]
     (are [x]
-     (instance? Integer v)
+     (instance? Int32 v)       ;;; Integer
      (number? v)
      (integer? v)
      (rational? v))))
 
-(deftest Coerced-Long
+(deftest Coerced-Long          ;;; Int64
   (let [v (long 3)]
     (are [x]
-     (instance? Long v)
+     (instance? Int64 v)
      (number? v)
      (integer? v)
      (rational? v))))
@@ -65,7 +65,7 @@
 (deftest Coerced-Float
   (let [v (float 3)]
     (are [x]
-     (instance? Float v)
+     (instance? Single v)       ;;; Float
      (number? v)
      (float? v))))
 
@@ -112,8 +112,8 @@
       (+ 1.1 2.4) 3.5
       (+ 1.1 2.2 3.3) 6.6 )
 
-  (is (> (+ Integer/MAX_VALUE 10) Integer/MAX_VALUE))  ; no overflow
-  (is (thrown? ClassCastException (+ "ab" "cd"))) )    ; no string concatenation
+  (is (> (+ Int32/MaxValue 10) Int32/MaxValue))  ; no overflow               ;;; Integer/MAX_VALUE
+  (is (thrown? InvalidCastException (+ "ab" "cd"))) )    ; no string concatenation           ;;; ClassCastException
 
 
 (deftest test-subtract
@@ -139,7 +139,7 @@
       (- 2.2 1.1) 1.1
       (- 6.6 2.2 1.1) 3.3 )
 
-  (is (< (- Integer/MIN_VALUE 10) Integer/MIN_VALUE)) )  ; no underflow
+  (is (< (- Int32/MinValue 10) Int32/MinValue)) )  ; no underflow        ;;; Integer/MIN_VALUE
 
 
 (deftest test-multiply
@@ -162,7 +162,7 @@
       (* 2.0 1.2) 2.4
       (* 3.5 2.0 1.2) 8.4 )
 
-  (is (> (* 3 (int (/ Integer/MAX_VALUE 2.0))) Integer/MAX_VALUE)) )  ; no overflow
+  (is (> (* 3 (int (/ Int32/MaxValue 2.0))) Int32/MaxValue)) )  ; no overflow  ;;; Integer/MAX_VALUE
 
 
 (deftest test-divide

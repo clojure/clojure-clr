@@ -255,13 +255,11 @@ namespace clojure.lang
         /// <summary>
         /// Compare this symbol to another object.
         /// </summary>
-        /// <param name="obj">The object to comapre to.</param>
+        /// <param name="obj">The object to compare to.</param>
         /// <returns>neg,zero,pos semantics.</returns>
         public int CompareTo(object obj)
         {
-            Symbol s = obj as Symbol;
-            if (s == null)
-                throw new InvalidOperationException("Can't compare to null.");
+            Symbol s = (Symbol)obj;
             if (Equals(s))
                 return 0;
             if (_ns == null && s._ns != null)

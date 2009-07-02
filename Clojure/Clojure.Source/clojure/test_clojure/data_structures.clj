@@ -45,7 +45,7 @@
   ; ratios
   (is (= 1/2 0.5))
   (is (= 1/1000 0.001))
-  (is (not= 2/3 0.6666666666666666))
+   ;;;  Actually, this test works in Clojure CLR. (is (not= 2/3 0.6666666666666666))
 
   ; vectors equal other seqs by items equality
   (are [x y] (= x y)
@@ -135,13 +135,13 @@
       (count (into-array [1])) 1
       (count (into-array [1 2 3])) 3
 
-      (count (java.util.ArrayList. [])) 0
-      (count (java.util.ArrayList. [1])) 1
-      (count (java.util.ArrayList. [1 2 3])) 3
+      (count (System.Collections.ArrayList. [])) 0              ;;; java.util.ArrayList.
+      (count (System.Collections.ArrayList. [1])) 1             ;;; java.util.ArrayList.
+      (count (System.Collections.ArrayList. [1 2 3])) 3         ;;; java.util.ArrayList.
 
-      (count (java.util.HashMap. {})) 0
-      (count (java.util.HashMap. {:a 1})) 1
-      (count (java.util.HashMap. {:a 1 :b 2 :c 3})) 3 )
+      (count (System.Collections.Hashtable. {})) 0                         ;;; java.util.HashMap.
+      (count (System.Collections.Hashtable. {:a 1})) 1                     ;;; java.util.HashMap.
+      (count (System.Collections.Hashtable. {:a 1 :b 2 :c 3})) 3 )         ;;; java.util.HashMap.
 
   ; different types
   (are [x]  (= (count [x]) 1)
@@ -152,8 +152,8 @@
 
 (deftest test-conj
   ; doesn't work on strings or arrays
-  (is (thrown? ClassCastException (conj "" \a)))
-  (is (thrown? ClassCastException (conj (into-array []) 1)))
+  (is (thrown? InvalidCastException (conj "" \a)))                   ;;; ClassCastException
+  (is (thrown? InvalidCastException (conj (into-array []) 1)))       ;;; ClassCastException
 
   (are [x y] (= x y)
       (conj nil 1) '(1)
@@ -232,8 +232,8 @@
 
 (deftest test-peek
   ; doesn't work for sets and maps
-  (is (thrown? ClassCastException (peek #{1})))
-  (is (thrown? ClassCastException (peek {:a 1})))
+  (is (thrown? InvalidCastException (peek #{1})))            ;;; ClassCastException
+  (is (thrown? InvalidCastException (peek {:a 1})))          ;;; ClassCastException
 
   (are [x y] (= x y)
       (peek nil) nil
@@ -265,12 +265,12 @@
 
 (deftest test-pop
   ; doesn't work for sets and maps
-  (is (thrown? ClassCastException (pop #{1})))
-  (is (thrown? ClassCastException (pop #{:a 1})))
+  (is (thrown? InvalidCastException (pop #{1})))            ;;; ClassCastException
+  (is (thrown? InvalidCastException (pop #{:a 1})))         ;;; ClassCastException
 
   ; collection cannot be empty
-  (is (thrown? IllegalStateException (pop ())))
-  (is (thrown? IllegalStateException (pop [])))
+  (is (thrown? InvalidOperationException (pop ())))             ;;; IllegalStateException
+  (is (thrown? InvalidOperationException (pop [])))             ;;; IllegalStateException
 
   (are [x y] (= x y)
       (pop nil) nil
@@ -585,8 +585,8 @@
 
 (deftest test-sorted-set
   ; only compatible types can be used
-  (is (thrown? ClassCastException (sorted-set 1 "a")))
-  (is (thrown? ClassCastException (sorted-set '(1 2) [3 4])))
+  (is (thrown? ArgumentException (sorted-set 1 "a")))                 ;;; ClassCastException
+  (is (thrown? InvalidCastException (sorted-set '(1 2) [3 4])))       ;;; ClassCastException
 
   ; creates set?
   (are [x] (set? x)
@@ -612,9 +612,9 @@
       #{} ; #{1 2}
   )
   ; cannot be cast to java.lang.Comparable
-  (is (thrown? ClassCastException (sorted-set '(1 2) '(1 2))))
-  (is (thrown? ClassCastException (sorted-set {:a 1 :b 2} {:a 1 :b 2})))
-  (is (thrown? ClassCastException (sorted-set #{1 2} #{1 2})))
+  (is (thrown? InvalidCastException (sorted-set '(1 2) '(1 2))))                  ;;; ClassCastException
+  (is (thrown? InvalidCastException (sorted-set {:a 1 :b 2} {:a 1 :b 2})))        ;;; ClassCastException
+  (is (thrown? InvalidCastException (sorted-set #{1 2} #{1 2})))                  ;;; ClassCastException
 
   (are [x y] (= x y)
       ; generating
@@ -682,9 +682,9 @@
 
 (deftest test-disj
   ; doesn't work on lists, vectors or maps
-  (is (thrown? ClassCastException (disj '(1 2) 1)))
-  (is (thrown? ClassCastException (disj [1 2] 1)))
-  (is (thrown? ClassCastException (disj {:a 1} :a)))
+  (is (thrown? InvalidCastException (disj '(1 2) 1)))                ;;; ClassCastException
+  (is (thrown? InvalidCastException (disj [1 2] 1)))                 ;;; ClassCastException
+  (is (thrown? InvalidCastException (disj {:a 1} :a)))               ;;; ClassCastException
 
   ; identity
   (are [x] (= (disj x) x)

@@ -540,9 +540,9 @@
         (nth m 0 :not-found) :not-found
         (nth m 2 :not-found) :not-found
         (nth m -1 :not-found) :not-found )
-    (is (thrown? IllegalStateException (nth m 0)))
-    (is (thrown? IllegalStateException (nth m 2)))
-    (is (thrown? IllegalStateException (nth m -1)))))
+    (is (thrown? InvalidOperationException (nth m 0)))          ;;; IllegalStateException
+    (is (thrown? InvalidOperationException (nth m 2)))          ;;; IllegalStateException
+    (is (thrown? InvalidOperationException (nth m -1)))))       ;;; IllegalStateException
 
 
 ; distinct was broken for nil & false:
