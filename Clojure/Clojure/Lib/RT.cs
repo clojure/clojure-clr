@@ -853,15 +853,21 @@ namespace clojure.lang
 
         static public object do_nth(object coll, int n)
         {
+            if (coll is Indexed)
+                return ((Indexed)coll).nth(n);
+
             if (coll == null)
                 return null;
             else if (coll is String)
                 return ((string)coll)[n];
             else if (coll.GetType().IsArray)
-                return ((Array)coll).GetValue(n);  // TODO: Java has Reflector.prepRet -- check all uses.
+                return Reflector.prepRet(((Array)coll).GetValue(n));  // TODO: Java has Reflector.prepRet -- check all uses.
             // Java has RandomAccess here.  CLR has no equiv.
-            else if (coll is IList)                // Caused some infinite loops in places ASeq[].
+            // Trying to replace it with IList caused some real problems,  See the fix in ASeq.
+            else if (coll is IList)
                 return ((IList)coll)[n];
+            else if (coll is JReMatcher)
+                return ((JReMatcher)coll).group(n);
             else if (coll is Match)
                 return ((Match)coll).Groups[n];
             else if (coll is DictionaryEntry)
@@ -893,7 +899,7 @@ namespace clojure.lang
             else if (coll is Sequential)
             {
                 ISeq seq = RT.seq(coll);
-                coll = null;  
+                coll = null;
                 for (int i = 0; i <= n && seq != null; ++i, seq = seq.next())
                 {
                     if (i == n)
@@ -938,6 +944,15 @@ namespace clojure.lang
                 IList list = (IList)coll;
                 if (n < list.Count)
                     return list[n];
+                return notFound;
+            }
+            else if (coll is JReMatcher)
+            {
+                JReMatcher m = (JReMatcher)coll;
+                if (m.IsUnrealizedOrFailed)
+                    return notFound;
+                if (n < m.groupCount())
+                    return m.group(n);
                 return notFound;
             }
             else if (coll is Match)

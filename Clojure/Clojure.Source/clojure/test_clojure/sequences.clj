@@ -410,6 +410,7 @@
     (fnext (sorted-set 1 2 3 4)) 2 ))
 
 
+
 ;; (nfirst coll) = (next (first coll))
 ;;
 (deftest test-nfirst
@@ -457,39 +458,39 @@
     (nnext (sorted-set 1 2)) nil
     (nnext (sorted-set 1 2 3 4)) '(3 4) ))
 
-
 (deftest test-nth
   ; maps, sets are not supported
-  (is (thrown? UnsupportedOperationException (nth {} 0)))
-  (is (thrown? UnsupportedOperationException (nth {:a 1 :b 2} 0)))
-  (is (thrown? UnsupportedOperationException (nth #{} 0)))
-  (is (thrown? UnsupportedOperationException (nth #{1 2 3} 0)))
+  (is (thrown? InvalidOperationException (nth {} 0)))               ;;; UnsupportedOperationException
+  (is (thrown? InvalidOperationException (nth {:a 1 :b 2} 0)))      ;;; UnsupportedOperationException
+  (is (thrown? InvalidOperationException (nth #{} 0)))              ;;; UnsupportedOperationException
+  (is (thrown? InvalidOperationException (nth #{1 2 3} 0)))         ;;; UnsupportedOperationException
 
   ; out of bounds
-  (is (thrown? IndexOutOfBoundsException (nth '() 0)))
-  (is (thrown? IndexOutOfBoundsException (nth '(1 2 3) 5)))
-  (is (thrown? IndexOutOfBoundsException (nth '() -1)))
-  (is (thrown? IndexOutOfBoundsException (nth '(1 2 3) -1)))
+  (is (thrown? IndexOutOfRangeException (nth '() 0)))                   ;;; IndexOutOfBoundsException
+  (is (thrown? IndexOutOfRangeException (nth '(1 2 3) 5)))              ;;; IndexOutOfBoundsException
+  (is (thrown? IndexOutOfRangeException (nth '() -1)))                  ;;; IndexOutOfBoundsException
+  (is (thrown? IndexOutOfRangeException (nth '(1 2 3) -1)))             ;;; IndexOutOfBoundsException
 
-  (is (thrown? IndexOutOfBoundsException (nth [] 0)))
-  (is (thrown? IndexOutOfBoundsException (nth [1 2 3] 5)))
-  (is (thrown? IndexOutOfBoundsException (nth [] -1)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth [1 2 3] -1)))  ; ???
+  (is (thrown? IndexOutOfRangeException (nth [] 0)))                    ;;; IndexOutOfBoundsException
+  (is (thrown? IndexOutOfRangeException (nth [1 2 3] 5)))               ;;; IndexOutOfBoundsException
+  (is (thrown? IndexOutOfRangeException (nth [] -1)))                   ;;; IndexOutOfBoundsException
+  (is (thrown? IndexOutOfRangeException (nth [1 2 3] -1)))  ; ???               ;;; ArrayIndexOutOfBoundsException
 
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array []) 0)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array [1 2 3]) 5)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array []) -1)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (into-array [1 2 3]) -1)))
+  (is (thrown? IndexOutOfRangeException (nth (into-array []) 0)))             ;;; ArrayIndexOutOfBoundsException
+  (is (thrown? IndexOutOfRangeException (nth (into-array [1 2 3]) 5)))             ;;; ArrayIndexOutOfBoundsException
+  (is (thrown? IndexOutOfRangeException (nth (into-array []) -1)))             ;;; ArrayIndexOutOfBoundsException
+  (is (thrown? IndexOutOfRangeException (nth (into-array [1 2 3]) -1)))             ;;; ArrayIndexOutOfBoundsException
 
-  (is (thrown? StringIndexOutOfBoundsException (nth "" 0)))
-  (is (thrown? StringIndexOutOfBoundsException (nth "abc" 5)))
-  (is (thrown? StringIndexOutOfBoundsException (nth "" -1)))
-  (is (thrown? StringIndexOutOfBoundsException (nth "abc" -1)))
+  (is (thrown? IndexOutOfRangeException (nth "" 0)))             ;;; StringIndexOutOfBoundsException
+  (is (thrown? IndexOutOfRangeException (nth "abc" 5)))          ;;; StringIndexOutOfBoundsException
+  (is (thrown? IndexOutOfRangeException (nth "" -1)))            ;;; StringIndexOutOfBoundsException
+  (is (thrown? IndexOutOfRangeException (nth "abc" -1)))         ;;; StringIndexOutOfBoundsException
 
-  (is (thrown? IndexOutOfBoundsException (nth (java.util.ArrayList. []) 0)))
-  (is (thrown? IndexOutOfBoundsException (nth (java.util.ArrayList. [1 2 3]) 5)))
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (java.util.ArrayList. []) -1)))       ; ???
-  (is (thrown? ArrayIndexOutOfBoundsException (nth (java.util.ArrayList. [1 2 3]) -1)))  ; ???
+  (is (thrown? ArgumentOutOfRangeException (nth (System.Collections.ArrayList. []) 0)))                     ;;; IndexOutOfBoundsException, java.util.ArrayList
+  (is (thrown? ArgumentOutOfRangeException (nth (System.Collections.ArrayList. [1 2 3]) 5)))                ;;; IndexOutOfBoundsException, java.util.ArrayList
+  (is (thrown? ArgumentOutOfRangeException (nth (System.Collections.ArrayList. []) -1)))       ; ???   ;;; ArrayIndexOutOfBoundsException, java.util.ArrayList
+  (is (thrown? ArgumentOutOfRangeException (nth (System.Collections.ArrayList. [1 2 3]) -1)))  ; ???   ;;; ArrayIndexOutOfBoundsException, java.util.ArrayList
+
 
   (are [x y] (= x y)
       (nth '(1) 0) 1
@@ -516,11 +517,11 @@
       (nth "abcde" 4) \e
       (nth "abc" 5 :not-found) :not-found
 
-      (nth (java.util.ArrayList. [1]) 0) 1
-      (nth (java.util.ArrayList. [1 2 3]) 0) 1
-      (nth (java.util.ArrayList. [1 2 3 4 5]) 1) 2
-      (nth (java.util.ArrayList. [1 2 3 4 5]) 4) 5
-      (nth (java.util.ArrayList. [1 2 3]) 5 :not-found) :not-found )
+      (nth (System.Collections.ArrayList. [1]) 0) 1                                 ;;; java.util.ArrayList
+      (nth (System.Collections.ArrayList. [1 2 3]) 0) 1                             ;;; java.util.ArrayList
+      (nth (System.Collections.ArrayList. [1 2 3 4 5]) 1) 2                         ;;; java.util.ArrayList
+      (nth (System.Collections.ArrayList. [1 2 3 4 5]) 4) 5                         ;;; java.util.ArrayList
+      (nth (System.Collections.ArrayList. [1 2 3]) 5 :not-found) :not-found )       ;;; java.util.ArrayList
 
   ; regex Matchers
   (let [m (re-matcher #"(a)(b)" "ababaa")]
@@ -531,8 +532,8 @@
         (nth m 2) "b"
         (nth m 3 :not-found) :not-found
         (nth m -1 :not-found) :not-found )
-    (is (thrown? IndexOutOfBoundsException (nth m 3)))
-    (is (thrown? IndexOutOfBoundsException (nth m -1))))
+    (is (thrown? IndexOutOfRangeException (nth m 3)))               ;;; IndexOutOfBoundsException
+    (is (thrown? IndexOutOfRangeException (nth m -1))))             ;;; IndexOutOfBoundsException
 
   (let [m (re-matcher #"c" "ababaa")]
     (re-find m) ; => nil
@@ -543,7 +544,6 @@
     (is (thrown? InvalidOperationException (nth m 0)))          ;;; IllegalStateException
     (is (thrown? InvalidOperationException (nth m 2)))          ;;; IllegalStateException
     (is (thrown? InvalidOperationException (nth m -1)))))       ;;; IllegalStateException
-
 
 ; distinct was broken for nil & false:
 ;   fixed in rev 1278:
@@ -981,4 +981,3 @@
 
 
 ; TODO: some
-

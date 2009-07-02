@@ -43,7 +43,7 @@ namespace clojure.lang
         /// <param name="end">End value</param>
         /// <remarks>Needed to interface with core.clj</remarks>
         public Range(object start, object end)
-            : this((int)start, (int)end)
+            : this(RT.intCast(start), RT.intCast(end))
         {
         }
 

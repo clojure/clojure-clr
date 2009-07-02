@@ -33,7 +33,7 @@
       :control
       :data-structures
       :numbers
-     ; :sequences
+      :sequences
      ; :for
      ; :multimethods
      ; :other-functions

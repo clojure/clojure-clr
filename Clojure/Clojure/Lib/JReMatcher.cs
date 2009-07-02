@@ -40,6 +40,25 @@ namespace clojure.lang
 
         #endregion
 
+        #region State tests
+
+        public bool IsUnrealized
+        {
+            get { return _regex != null; }
+        }
+
+        public bool IsFailed
+        {
+            get { return _regex == null && _match == null; }
+        }
+
+        public bool IsUnrealizedOrFailed
+        {
+            get { return _regex != null || _match == null; }
+        }
+
+        #endregion
+
         #region Matching
 
         // I'll even keep the names lowercase to match java.util.regex.Matcher

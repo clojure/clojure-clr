@@ -509,7 +509,7 @@ namespace clojure.lang
             {
                 get
                 {
-                    return RT.nth(this,index);
+                    throw new IndexOutOfRangeException();
                 }
                 set
                 {
