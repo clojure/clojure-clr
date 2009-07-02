@@ -843,6 +843,64 @@ namespace Clojure.Tests.LibTests
             Expect(SameValue(z, 1, new uint[] { 0x00000001, 0x00000000, 0x00000000, 0x11111110, 0x33333333 }));
         }
 
+        [Test]
+        public void Add_pos_neg_first_larger_mag()
+        {
+            BigInteger x = new BigInteger(1, new uint[] { 0x5 });
+            BigInteger y = new BigInteger(-1, new uint[] { 0x3 });
+            BigInteger z = x.Add(y);
+            Expect(SameValue(z, 1, new uint[] { 0x2 }));
+        }
+
+
+        [Test]
+        public void Add_pos_neg_second_larger_mag()
+        {
+            BigInteger x = new BigInteger(1, new uint[] { 0x3 });
+            BigInteger y = new BigInteger(-1, new uint[] { 0x5 });
+            BigInteger z = x.Add(y);
+            Expect(SameValue(z, -1, new uint[] { 0x2 }));
+        }
+
+
+        [Test]
+        public void Add_pos_neg_same_mag()
+        {
+            BigInteger x = new BigInteger(1, new uint[] { 0x3 });
+            BigInteger y = new BigInteger(-1, new uint[] { 0x3 });
+            BigInteger z = x.Add(y);
+            Expect(z.IsZero);
+        }
+
+
+        [Test]
+        public void Add_neg_pos_first_larger_mag()
+        {
+            BigInteger x = new BigInteger(-1, new uint[] { 0x5 });
+            BigInteger y = new BigInteger(1, new uint[] { 0x3 });
+            BigInteger z = x.Add(y);
+            Expect(SameValue(z, -1, new uint[] { 0x2 }));
+        }
+
+
+        [Test]
+        public void Add_neg_pos_second_larger_mag()
+        {
+            BigInteger x = new BigInteger(-1, new uint[] { 0x3 });
+            BigInteger y = new BigInteger(1, new uint[] { 0x5 });
+            BigInteger z = x.Add(y);
+            Expect(SameValue(z, 1, new uint[] { 0x2 }));
+        }
+
+
+        [Test]
+        public void Add_neg_pos_same_mag()
+        {
+            BigInteger x = new BigInteger(-1, new uint[] { 0x3 });
+            BigInteger y = new BigInteger(1, new uint[] { 0x3 });
+            BigInteger z = x.Add(y);
+            Expect(z.IsZero);
+        }
 
         [Test]
         public void Subtract_zero_yields_this()

@@ -1096,6 +1096,11 @@ namespace clojure.lang
                 //return divide(ry.numerator.multiply(rx.denominator)
                 //    .add(rx.numerator.multiply(ry.denominator)),
                 //    ry.denominator.multiply(rx.denominator));
+                BigInteger n1 = ry.numerator * rx.denominator;
+                BigInteger n2 = rx.numerator * ry.denominator;
+                BigInteger n = n1 + n2;
+                BigInteger d = ry.denominator * rx.denominator;
+                Ratio r = new Ratio(n, d);
                 return divide(
                     ry.numerator * rx.denominator + rx.numerator * ry.denominator,
                     ry.denominator * rx.denominator);

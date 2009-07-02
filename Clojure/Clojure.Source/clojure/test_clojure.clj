@@ -32,7 +32,7 @@
       :predicates
       :control
       :data-structures
-     ; :numbers
+      :numbers
      ; :sequences
      ; :for
      ; :multimethods

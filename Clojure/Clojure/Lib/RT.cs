@@ -1004,9 +1004,9 @@ namespace clojure.lang
             return x != null;
         }
 
-        public static byte byteCast(object x)
+        public static sbyte byteCast(object x)
         {
-            return (byte)Convert.ToDouble(x);
+            return (sbyte)Convert.ToDouble(x);
         }
 
         public static short shortCast(object x)

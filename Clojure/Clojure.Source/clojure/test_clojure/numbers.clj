@@ -25,7 +25,7 @@
 (deftest Coerced-Byte
   (let [v (byte 3)]
     (are [x]
-     (instance? Byte v)
+     (instance? SByte v)                  ;;; Byte
      (number? v)
      (integer? v)
      (rational? v))))
@@ -113,7 +113,7 @@
       (+ 1.1 2.2 3.3) 6.6 )
 
   (is (> (+ Int32/MaxValue 10) Int32/MaxValue))  ; no overflow               ;;; Integer/MAX_VALUE
-  (is (thrown? InvalidCastException (+ "ab" "cd"))) )    ; no string concatenation           ;;; ClassCastException
+  (is (thrown? FormatException (+ "ab" "cd"))) )    ; no string concatenation           ;;; ClassCastException
 
 
 (deftest test-subtract

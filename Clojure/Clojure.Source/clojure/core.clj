@@ -1939,7 +1939,7 @@
 
 (defn byte
   "Coerce to byte"
-  {:tag Byte
+  {:tag SByte                                                                 ;;; Byte
    :inline (fn  [x] `(. clojure.lang.RT (byteCast ~x)))}
   [x] (. clojure.lang.RT (byteCast x)))  ;;;   [#^Number x] (. x (byteValue)))
 
@@ -1963,12 +1963,12 @@
 (defn integer?
   "Returns true if n is an integer"
   [n]
-  (or (instance? Int32 n)      ;;; Integer
-      (instance? Int64 n)         ;;; Long
-      (instance? BigInteger n)   (instance? Char n)  ;;; added Char test
-      (instance? Int16 n)        ;;; Short
-      (instance? Byte n)))
-
+  (or (instance? Int32 n)      (instance? UInt32 n)     ;;; Integer -> Int32, added UInt32
+      (instance? Int64 n)      (instance? UInt64 n)     ;;; Long -> Int64, added UInt64
+      (instance? BigInteger n) (instance? Char n)       ;;; added Char test
+      (instance? Int16 n)      (instance? UInt16 n)     ;;; Short -> Int16, added UInt16
+      (instance? Byte n)  (instance? SByte n)))         ;;; Added SByte test
+      
 (defn mod
   "Modulus of num and div. Truncates toward negative infinity." 
   [num div] 

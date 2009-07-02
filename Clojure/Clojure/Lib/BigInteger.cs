@@ -1867,7 +1867,7 @@ namespace clojure.lang
                 return new BigInteger(_sign, Add(this._data, y._data));
             else
             {
-                int c = Compare(this,y);
+                int c = Compare(this._data,y._data);
 
                 switch ( c ) 
                 {
