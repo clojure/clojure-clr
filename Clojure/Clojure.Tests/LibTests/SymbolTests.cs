@@ -256,7 +256,7 @@ namespace Clojure.Tests.LibTests
         #region IComparable tests
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [ExpectedException(typeof(InvalidCastException))]
         public void CompareToNonSymbolFails()
         {
             Symbol sym1 = Symbol.intern("abc");
