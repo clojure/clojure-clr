@@ -101,7 +101,7 @@
                :when (do (if (< x 5) (odd? x)))] x) '(1 3)))
   (is (= (for [a (range -2 5)
                :when (not= a 0) ; :when may guard :while
-               :while (> (Math/abs (/ 1.0 a)) 1/3)] a) '(-2 -1 1 2))))
+               :while (> (Math/Abs (/ 1.0 a)) 1/3)] a) '(-2 -1 1 2))))                ;;; abs
 
 (deftest-both Nesting
   (is (= (for [x '(a b) y (interpose x '(1 2)) z (list x y)] [x y z])
@@ -113,8 +113,8 @@
 (deftest-both Destructuring
   (is (= (for [{:syms [a b c]} (map #(zipmap '(a b c) (range % 5)) (range 3))
                x [a b c]]
-           (Integer. (str a b c x)))
-         '(120 121 122 1231 1232 1233 2342 2343 2344))))
+           (str a b c x))                                                           ;;;(Integer. (str a b c x)))
+         '("0120" "0121" "0122" "1231" "1232" "1233" "2342" "2343" "2344"))))       ;;; '(120 121 122 1231 1232 1233 2342 2343 2344))))
 
 (deftest-both Let
   (is (= (for [x (range 3) y (range 3) :let [z (+ x y)] :when (odd? z)] [x y z])

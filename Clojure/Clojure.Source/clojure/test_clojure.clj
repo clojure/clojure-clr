@@ -34,12 +34,12 @@
       :data-structures
       :numbers
       :sequences
-     ; :for
-     ; :multimethods
-     ; :other-functions
-     ; :vars
-     ; :refs
-     ; :agents
+      :for
+      :multimethods
+      :other-functions
+      :vars
+      :refs
+      :agents
       :atoms
      ; :parallel
      ; :java-interop

@@ -10,17 +10,17 @@
 
 (ns clojure.test-clojure.agents
   (:use clojure.test))
-
+(comment  ;; await not implemented yet
 (deftest handle-all-throwables-during-agent-actions
   ;; Bug fixed in r1198; previously hung Clojure or didn't report agent errors
   ;; after OutOfMemoryError, yet wouldn't execute new actions.
   (let [agt (agent nil)]
-    (send agt (fn [state] (throw (Throwable. "just testing Throwables"))))
+    (send agt (fn [state] (throw (Exception. "just testing Throwables"))))                ;;; Throwable
     (try
      ;; Let the action finish; eat the "agent has errors" error that bubbles up
      (await agt)
-     (catch RuntimeException _))
-    (is (instance? Throwable (first (agent-errors agt))))
+     (catch Exception _))                                                          ;;; RuntimeException
+    (is (instance? Exception (first (agent-errors agt))))                          ;;;
     (is (= 1 (count (agent-errors agt))))
 
     ;; And now send an action that should work
@@ -29,7 +29,7 @@
     (send agt nil?)
     (await agt)
     (is (true? @agt))))
-
+)
 
 ; http://clojure.org/agents
 
