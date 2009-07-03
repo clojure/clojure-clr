@@ -25,6 +25,7 @@ namespace clojure.lang.CljCompiler.Ast
         readonly IPersistentVector _args;
         readonly ConstructorInfo _ctor;
         readonly Type _type;
+        bool _isNoArgValueTypeCtor = false;
 
         #endregion
 
@@ -52,7 +53,15 @@ namespace clojure.lang.CljCompiler.Ast
                     .Where(x => x.GetParameters().Length == numArgs && x.IsPublic));
 
             if (cinfos.Count == 0)
+            {
+                if (_type.IsValueType && numArgs == 0)
+                {
+                    // Value types have a default no-arg c-tor that is not picked up in the regular c-tors.
+                    _isNoArgValueTypeCtor = true;
+                    return null;
+                }
                 throw new InvalidOperationException(string.Format("No constructor in type: {0} with {1} arguments", _type.Name, numArgs));
+            }
 
             int index = 0;
             if (cinfos.Count > 1)
@@ -132,13 +141,17 @@ namespace clojure.lang.CljCompiler.Ast
 
                 // JAVA: emitClearLocals
             }
+            else if (_isNoArgValueTypeCtor)
+            {
+                return Expression.Default(_type);
+            }
             else
             {
                 Expression typeExpr = Expression.Call(Compiler.Method_RT_classForName, Expression.Constant(_type.FullName));
                 Expression args = Compiler.GenArgArray(context, _args);
                 // Java: emitClearLocals
 
-                return Expression.Call(Compiler.Method_Reflector_InvokeConstructor,typeExpr,args);
+                return Expression.Call(Compiler.Method_Reflector_InvokeConstructor, typeExpr, args);
             }        
         }
 
