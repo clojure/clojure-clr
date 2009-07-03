@@ -83,11 +83,11 @@ namespace clojure.lang
             // Java had the following.
             // This works on other APersistentMap implementations, but not on
             //  arbitrary dictionaries.
-            if (d.Count != this.Count || d.GetHashCode() != this.GetHashCode())
-                return false;
-
-            //if (d.Count != this.Count)
+            //if (d.Count != this.Count || d.GetHashCode() != this.GetHashCode())
             //    return false;
+
+            if (d.Count != this.Count)
+                return false;
 
             for (ISeq s = seq(); s != null; s = s.next())
             {

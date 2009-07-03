@@ -41,10 +41,10 @@
       :refs
       :agents
       :atoms
-     ; :parallel
-     ; :java-interop
-     ; :test
-     ; :test-fixtures
+      :parallel
+      :java-interop
+      :test
+      :test-fixtures
       ;; libraries
       :clojure-set
     ;  :clojure-xml

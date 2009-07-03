@@ -36,15 +36,15 @@
   (is (= 3 (+ 2 2)) "Should fail"))
 
 (deftest can-test-instance
-  (is (instance? Integer (+ 2 2)) "Should pass")
-  (is (instance? Float (+ 1 1)) "Should fail"))
+  (is (instance? Int32 (+ 2 2)) "Should pass")             ;;; Integer
+  (is (instance? Single (+ 1 1)) "Should fail"))           ;;; Float
 
 (deftest can-test-thrown
   (is (thrown? ArithmeticException (/ 1 0)) "Should pass")
   ;; No exception is thrown:
   (is (thrown? Exception (+ 1 1)) "Should fail")
   ;; Wrong class of exception is thrown:
-  (is (thrown? ArithmeticException (throw (RuntimeException.))) "Should error"))
+  (is (thrown? ArithmeticException (throw (Exception.))) "Should error"))          ;;; RuntimeException.
 
 (deftest can-test-thrown-with-msg
   (is (thrown-with-msg? ArithmeticException #"Divide by zero" (/ 1 0)) "Should pass")
@@ -59,12 +59,12 @@
   (is (= 1 (throw (Exception.))) "Should error"))
 
 (deftest can-test-method-call
-  (is (.startsWith "abc" "a") "Should pass")
-  (is (.startsWith "abc" "d") "Should fail"))
+  (is (.StartsWith "abc" "a") "Should pass")           ;;; startsWith
+  (is (.StartsWith "abc" "d") "Should fail"))          ;;; startsWith
 
 (deftest can-test-anonymous-fn
-  (is (#(.startsWith % "a") "abc") "Should pass")
-  (is (#(.startsWith % "d") "abc") "Should fail"))
+  (is (#(.StartsWith % "a") "abc") "Should pass")           ;;; startsWith
+  (is (#(.StartsWith % "d") "abc") "Should fail"))          ;;; startsWith
 
 (deftest can-test-regexps
   (is (re-matches #"^ab.*$" "abbabba") "Should pass")

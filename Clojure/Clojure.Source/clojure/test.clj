@@ -703,7 +703,7 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
     `(try ~@body
           (report {:type :fail, :message ~msg, :expected '~form, :actual nil})
           (catch ~klass e#
-            (let [m# (.getMessage e#)]
+            (let [m# (.Message e#)]                                        ;;;getMessage
               (if (re-matches ~re m#)
                 (report {:type :pass, :message ~msg,
                          :expected '~form, :actual e#})

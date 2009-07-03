@@ -102,7 +102,7 @@ namespace clojure.lang
 
         public static double ConvertToDouble(object o)
         {
-            return ConvertToDouble(o);
+            return Convert.ToDouble(o);
         }
 
         public static bool IsNumeric(object o)
