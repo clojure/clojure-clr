@@ -494,7 +494,7 @@ namespace clojure.lang
 
         public Exception WrongArityException()
         {
-            string name = GetType().Name;
+            string name = Util.NameForType(GetType()); 
             int suffix = name.LastIndexOf("__");  // NOt sure if this is necessary
             return new ArgumentException(String.Format("Wrong number of args passed to: {0}",
                 (suffix == -1 ? name : name.Substring(0, suffix)).Replace('_', '-')));

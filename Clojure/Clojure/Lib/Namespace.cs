@@ -263,7 +263,7 @@ namespace clojure.lang
         /// <remarks>Named importClass instead of ImportType for core.clj compatibility.</remarks>
         public Type importClass(Type t)
         {
-            string n = t.Name;
+            string n = Util.NameForType(t);   
             return importClass(Symbol.intern(n), t);
         }
 

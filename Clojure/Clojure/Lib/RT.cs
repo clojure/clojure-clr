@@ -659,7 +659,7 @@ namespace clojure.lang
             else if (o is Array)
                 return ((Array)o).GetLength(0);
 
-            throw new InvalidOperationException("count not supported on this type: " + o.GetType().Name);
+            throw new InvalidOperationException("count not supported on this type: " + Util.NameForType(o.GetType()));
         }
 
         public static IPersistentCollection conj(IPersistentCollection coll, Object x)
@@ -908,7 +908,7 @@ namespace clojure.lang
                 throw new IndexOutOfRangeException();
             }
             else
-                throw new InvalidOperationException("nth not supported on this type: " + coll.GetType().Name);
+                throw new InvalidOperationException("nth not supported on this type: " + Util.NameForType(coll.GetType()));
         }
 
 
@@ -1000,7 +1000,7 @@ namespace clojure.lang
                 return notFound;
             }
             else
-                throw new InvalidOperationException("nth not supported on this type: " + coll.GetType().Name);
+                throw new InvalidOperationException("nth not supported on this type: " + Util.NameForType(coll.GetType()));
         }
 
         #endregion
@@ -1596,10 +1596,11 @@ namespace clojure.lang
             if (t != null)
                 return t;
 
-            Assembly assy = Assembly.GetExecutingAssembly();
-            t = assy.GetType(p, false);
-            if (t != null)
-                return t;
+            // If the type is in the currently executing assembly, the above is enough.
+            //Assembly assy = Assembly.GetExecutingAssembly();
+            //t = assy.GetType(p, false);
+            //if (t != null)
+            //    return t;
 
             AppDomain domain = AppDomain.CurrentDomain;
             Assembly[] assys = domain.GetAssemblies();

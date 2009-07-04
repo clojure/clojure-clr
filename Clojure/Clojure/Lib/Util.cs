@@ -169,6 +169,21 @@ namespace clojure.lang
             return t != null && t.IsPrimitive && t != typeof(void);
         }
 
+
+        public static string NameForType(Type t)
+        {
+            if (!t.IsNested)
+                return t.Name;
+
+            // for nested types, we have to work harder
+            string fullName = t.FullName;
+            int index = fullName.LastIndexOf('.');
+            string nameToUse = fullName.Substring(index + 1);
+            return nameToUse;
+        }
+
+
+
         #region core.clj compatibility
 
         public static int hash(object o)

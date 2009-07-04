@@ -102,7 +102,7 @@
   "Returns CompilerExceptions in tact, but only the root cause of other
   throwables"
   [throwable]
-  (if (instance? clojure.lang.Compiler+CompilerException throwable)   ;;; Compiler$CompilerException
+  (if (instance? Compiler+CompilerException throwable)   ;;; Compiler$CompilerException
     throwable
     (root-cause throwable)))
 

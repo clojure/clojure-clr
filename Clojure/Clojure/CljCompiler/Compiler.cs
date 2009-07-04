@@ -902,7 +902,7 @@ namespace clojure.lang
             if (o == null)
                 return Symbol.intern(CurrentNamespace.Name.Name, sym.Name);
             else if (o is Type)
-                return Symbol.intern(null, ((Type)o).Name);
+                return Symbol.intern(null, Util.NameForType((Type)o));
             else if (o is Var)
             {
                 Var v = (Var)o;

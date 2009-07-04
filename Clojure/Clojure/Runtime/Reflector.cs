@@ -209,7 +209,7 @@ namespace clojure.lang
 
 
                 if (info == null)
-                    throw new InvalidOperationException(string.Format("Cannot find c-tor for type: {0} with the correct argument type", t.Name));
+                    throw new InvalidOperationException(string.Format("Cannot find c-tor for type: {0} with the correct argument type", Util.NameForType(t)));
 
                 return info.Invoke(BoxArgs(info.GetParameters(), args));
             }
