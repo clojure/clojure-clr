@@ -72,7 +72,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Expression varExpr = context.FnExpr.GenVar(context, _var);
             Expression valExpr = val.GenDlr(context);
-            return Expression.Call(varExpr, Compiler.Method_Var_set, valExpr);
+            return Expression.Call(varExpr, Compiler.Method_Var_set, Compiler.MaybeBox(valExpr));
         }
 
         #endregion
