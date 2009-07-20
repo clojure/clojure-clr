@@ -207,6 +207,7 @@
     <Compile Include="Lib\Symbol.cs" />
     <Compile Include="Lib\Util.cs" />
     <Compile Include="Lib\Var.cs" />
+    <Compile Include="Runtime\Printf.cs" />
     <Compile Include="Runtime\Properties.cs" />
     <Compile Include="Runtime\Reflector.cs" />
   </ItemGroup>

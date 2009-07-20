@@ -96,6 +96,7 @@
     <Compile Include="LibTests\PersistentTreeMapTests.cs" />
     <Compile Include="LibTests\PersistentTreeSetTests.cs" />
     <Compile Include="LibTests\PersistentVectorTests.cs" />
+    <Compile Include="LibTests\PrintfTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LibTests\RangeTests.cs" />
     <Compile Include="LibTests\RefTests.cs" />

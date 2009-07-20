@@ -3471,7 +3471,7 @@
   string syntax"
   {:tag String}
   [fmt & args]
-  (String/Format fmt (to-array args)))    ;; format => Format
+  (clojure.lang.Printf/Format fmt (to-array args)))        ;;;(String/format fmt (to-array args)))
 
 (defn printf
   "Prints formatted output, as per format"
