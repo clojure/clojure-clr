@@ -355,6 +355,7 @@ namespace Clojure.Tests.LibTests
             Test("-12", "%d", (short)-12);
             Test("-12", "%d", (int)-12);
             Test("-12", "%d", (long)-12);
+            Test("999999999999999999999999", "%d", BigInteger.Parse("999999999999999999999999"));
         }
 
         [Test]
@@ -372,6 +373,7 @@ namespace Clojure.Tests.LibTests
             Test("177764", "%o", (short)-12);
             Test("37777777764", "%o", (int)-12);
             Test("1777777777777777777764", "%o", (long)-12);
+            Test("77777777777777777777777777", "%o", BigInteger.Parse("77777777777777777777777777", 8));
         }
 
 
@@ -390,6 +392,8 @@ namespace Clojure.Tests.LibTests
             Test("fff4", "%x", (short)-12);
             Test("fffffff4", "%x", (int)-12);
             Test("fffffffffffffff4", "%x", (long)-12);
+            Test("FFEEDDCCBBAA998877665544332211", "%x", BigInteger.Parse("FFEEDDCCBBAA998877665544332211", 16));
+
         }
 
         [Test]
@@ -563,6 +567,79 @@ namespace Clojure.Tests.LibTests
             Test("0x000000000303b", "%0#15x", 12347);
             Test("0x00000ffffcfc5", "%0#15x", -12347);
         }
+
+
+        [Test]
+        public void DecIntSpecWithBigIntegerArgumentsWorks()
+        {
+            Test("123456789","%d",BigInteger.Parse("123456789"));
+            Test("-123456789","%d",BigInteger.Parse("-123456789"));
+            Test("      123456789","%15d",BigInteger.Parse("123456789"));
+            Test("     -123456789","%15d",BigInteger.Parse("-123456789"));
+            Test("123456789      ","%-15d",BigInteger.Parse("123456789"));
+            Test("-123456789     ","%-15d",BigInteger.Parse("-123456789"));
+
+            Test("     +123456789", "%+15d", BigInteger.Parse("123456789"));
+            Test("     -123456789", "%+15d", BigInteger.Parse("-123456789"));
+
+            Test("000000123456789", "%015d", BigInteger.Parse("123456789"));
+            Test("-00000123456789", "%015d", BigInteger.Parse("-123456789"));
+
+            // not implemented yet
+            //Test("    123,456,789", "%,15d", BigInteger.Parse("123456789"));
+            //Test("   -123,456,789", "%,15d", BigInteger.Parse("-123456789"));
+
+            Test("      123456789", "%(15d", BigInteger.Parse("123456789"));
+            Test("    (123456789)", "%(15d", BigInteger.Parse("-123456789"));
+        }
+
+        [Test]
+        public void OctIntSpecWithBigIntegerArgumentsWorks()
+        {
+            Test("123456777", "%o", BigInteger.Parse("123456777", 8));
+            Test("-123456777", "%o", BigInteger.Parse("-123456777", 8));
+            Test("      123456777", "%15o", BigInteger.Parse("123456777", 8));
+            Test("     -123456777", "%15o", BigInteger.Parse("-123456777", 8));
+            Test("123456777      ", "%-15o", BigInteger.Parse("123456777", 8));
+            Test("-123456777     ", "%-15o", BigInteger.Parse("-123456777", 8));
+
+            Test("     0123456777", "%#15o", BigInteger.Parse("123456777", 8));
+            Test("    -0123456777", "%#15o", BigInteger.Parse("-123456777", 8));
+
+            Test("     +123456777", "%+15o", BigInteger.Parse("123456777", 8));
+            Test("     -123456777", "%+15o", BigInteger.Parse("-123456777", 8));
+
+            Test("000000123456777", "%015o", BigInteger.Parse("123456777", 8));
+            Test("-00000123456777", "%015o", BigInteger.Parse("-123456777", 8));
+
+            Test("      123456777", "%(15o", BigInteger.Parse("123456777", 8));
+            Test("    (123456777)", "%(15o", BigInteger.Parse("-123456777", 8));
+        }
+
+        [Test]
+        public void HexIntSpecWithBigIntegerArgumentsWorks()
+        {
+            Test("123456789ABCDEF", "%x", BigInteger.Parse("123456789ABCDEF", 16));
+            Test("-123456789ABCDEF", "%x", BigInteger.Parse("-123456789ABCDEF", 16));
+            Test("     123456789ABCDEF", "%20x", BigInteger.Parse("123456789ABCDEF", 16));
+            Test("    -123456789ABCDEF", "%20x", BigInteger.Parse("-123456789ABCDEF", 16));
+            Test("123456789ABCDEF     ", "%-20x", BigInteger.Parse("123456789ABCDEF", 16));
+            Test("-123456789ABCDEF    ", "%-20x", BigInteger.Parse("-123456789ABCDEF", 16));
+
+            Test("   0x123456789ABCDEF", "%#20x", BigInteger.Parse("123456789ABCDEF", 16));
+            Test("  -0x123456789ABCDEF", "%#20x", BigInteger.Parse("-123456789ABCDEF", 16));
+
+            Test("    +123456789ABCDEF", "%+20x", BigInteger.Parse("123456789ABCDEF", 16));
+            Test("    -123456789ABCDEF", "%+20x", BigInteger.Parse("-123456789ABCDEF", 16));
+
+            Test("00000123456789ABCDEF", "%020x", BigInteger.Parse("123456789ABCDEF", 16));
+            Test("-0000123456789ABCDEF", "%020x", BigInteger.Parse("-123456789ABCDEF", 16));
+
+            Test("     123456789ABCDEF", "%(20x", BigInteger.Parse("123456789ABCDEF", 16));
+            Test("   (123456789ABCDEF)", "%(20x", BigInteger.Parse("-123456789ABCDEF", 16));
+        }
+
+
         #endregion
 
         #region Float tests

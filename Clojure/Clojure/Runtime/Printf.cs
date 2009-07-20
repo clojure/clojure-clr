@@ -743,7 +743,10 @@ namespace clojure.lang
                         break;
 
                     default:
-                        FailConversion(_conversion, arg);
+                        if (arg is BigInteger)
+                            PrintInteger(sb, (BigInteger)arg);
+                        else
+                            FailConversion(_conversion, arg);
                         break;
                 }
             }
@@ -833,9 +836,38 @@ namespace clojure.lang
                 PrintWithJustification(sb, sb1.ToString());
             }
 
+            void PrintInteger(StringBuilder sb, BigInteger val)
+            {
+                StringBuilder sb1 = new StringBuilder();
+                bool neg = val.IsNegative;
+                BigInteger v = val.Abs();
+
+                PrintLeadingSign(sb1,neg);
+
+                if ( _conversion ==  ConversionAux.DecimalInteger )
+                        PrintMagnitude(sb1,neg,v.ToString());
+                else
+                {
+                    string s = v.ToString( _conversion == ConversionAux.OctalInteger ? 8u : 16u );
+                    PrintIntOctHex(sb1,s,neg,true);
+                }
+
+                PrintTrailingSign(sb1,neg);
+                PrintWithJustification(sb,sb1.ToString());
+            }
+
+ 
+
             void PrintIntOctHex(StringBuilder sb, string val)
             {
-                CheckBadFlags(FormatFlags.Parentheses| FormatFlags.LeadingSpace | FormatFlags.Plus);
+                PrintIntOctHex(sb,val,false, false);
+            }
+
+           void PrintIntOctHex(StringBuilder sb, string val, bool isNeg, bool isBigInt)
+           {
+                if ( ! isBigInt )
+                    CheckBadFlags(FormatFlags.Parentheses| FormatFlags.LeadingSpace | FormatFlags.Plus);
+
                 int len = val.Length; 
                     
                 if ( (_flags & FormatFlags.Alternate ) != 0 )
@@ -852,7 +884,16 @@ namespace clojure.lang
                     }
                 }
 
-                int padSize = _width - len;
+               // Duplicates some code in PrintInteger(StringBuilder,bool,string)
+                int newW = _width;
+                if (newW != -1 && isNeg)
+                {
+                    newW--;
+                    if ((_flags & FormatFlags.Parentheses) != 0)
+                        newW--;
+                }
+
+                int padSize = newW - len;
 
                 if ( (_flags & FormatFlags.ZeroPad) != 0 && padSize > 0 )
                     sb.Append('0',padSize);
@@ -907,7 +948,7 @@ namespace clojure.lang
 
             #endregion
 
-            #region DataTime spec printing            
+            #region DataTime spec printing
 
             private void PrintDateTime(StringBuilder sb, object arg)
             {
