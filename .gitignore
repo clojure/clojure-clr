@@ -5,3 +5,5 @@ obj
 *.suo
 # Emacs artifacts
 *~
+# Java artifacts
+*.class

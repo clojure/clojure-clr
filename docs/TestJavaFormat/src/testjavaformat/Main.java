@@ -6,6 +6,8 @@
 package testjavaformat;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -177,6 +179,29 @@ public class Main {
             String s = String.format("%c",0x1BCD);
             System.out.println("char0 =" + String.format("%x", (int) s.charAt(0)));
             //System.out.println("char1 =" + String.format("%x", (int) s.charAt(1)));
+
+
+            Test("%,20d",new java.math.BigInteger("123456789"));
+
+            System.out.println("-------------");
+
+            Test("%tH", new Date(2009, 7, 1, 1, 10, 20));
+            Test("%tH", new Date(2009, 7, 1, 14, 10, 20));   
+            Test("%tI", new Date(2009, 7, 1, 1, 10, 20));
+            Test("%tI", new Date(2009, 7, 1, 14, 10, 20));
+            Test("%tk", new Date(2009, 7, 1, 1, 10, 20));
+            Test("%tk", new Date(2009, 7, 1, 14, 10, 20));
+            Test("%tl", new Date(2009, 7, 1, 1, 10, 20));
+            Test("%tl", new Date(2009, 7, 1, 14, 10, 20));
+
+            Test("%tM", new Date(2009, 7, 1, 14, 02, 03));
+            Test("%tM", new Date(2009, 7, 1, 14, 44, 50));
+            Test("%tS", new Date(2009, 7, 1, 14, 02, 03));
+            Test("%tS", new Date(2009, 7, 1, 14, 44, 50));
+            
+
+
+
 
 
     }

@@ -1066,6 +1066,76 @@ namespace Clojure.Tests.LibTests
 
         // TODO: Datetime tests
 
+        [Test]
+        public void DateTimeBasics()
+        {
+            Test("01","%tH", new DateTime(2009, 7, 1, 1, 10, 20));
+            Test("14", "%tH", new DateTime(2009, 7, 1, 14, 10, 20));
+            Test("01", "%tI", new DateTime(2009, 7, 1, 1, 10, 20));
+            Test("02", "%tI", new DateTime(2009, 7, 1, 14, 10, 20));
+            Test("1", "%tk", new DateTime(2009, 7, 1, 1, 10, 20));
+            Test("14", "%tk", new DateTime(2009, 7, 1, 14, 10, 20));
+            Test("1", "%tl", new DateTime(2009, 7, 1, 1, 10, 20));
+            Test("2", "%tl", new DateTime(2009, 7, 1, 14, 10, 20));
+            Test("02", "%tM", new DateTime(2009, 7, 1, 14, 02, 03));
+            Test("44", "%tM", new DateTime(2009, 7, 1, 14, 44, 50));
+            Test("03", "%tS", new DateTime(2009, 7, 1, 14, 02, 03));
+            Test("50", "%tS", new DateTime(2009, 7, 1, 14, 44, 50));
+            Test("050", "%tL", new DateTime(2009, 7, 1, 14, 02, 03).AddMilliseconds(50));
+            Test("000027300", "%tN", new DateTime(2009, 7, 1, 14, 20, 03).AddTicks(273));
+            Test("AM", "%tp", new DateTime(2009, 7, 1, 1, 10, 20));  // java has lowercase here.
+            Test("PM", "%tp", new DateTime(2009, 7, 1, 14, 10, 20));  // java has lowercase here.
+            Test("93784010", "%tQ", new DateTime(1970, 1, 1) + new TimeSpan(1, 2, 3, 4, 10));
+            Test("93784", "%ts", new DateTime(1970, 1, 1) + new TimeSpan(1, 2, 3, 4, 10));
+            Test("02:03:04", "%tT", new DateTime(2009, 7, 1, 2, 3, 4));
+            Test("14:52:43", "%tT", new DateTime(2009, 7, 1, 14, 52, 43));
+
+            Test("", "%tz", new DateTime(2009, 7, 1, 1, 10, 20));
+            Test("", "%tZ", new DateTime(2009, 7, 1, 1, 10, 20));
+
+            Test("July", "%tB", new DateTime(2009, 7, 1, 1, 10, 20));
+            Test("Jul", "%tb", new DateTime(2009, 7, 1, 1, 10, 20));
+            Test("Jul", "%th", new DateTime(2009, 7, 1, 1, 10, 20));
+            Test("Wednesday", "%tA", new DateTime(2009, 7, 1, 1, 10, 20));
+            Test("Wed", "%ta", new DateTime(2009, 7, 1, 1, 10, 20));
+
+            Test("19", "%tC", new DateTime(1998, 7, 1, 1, 10, 20));
+            Test("20", "%tC", new DateTime(2009, 7, 1, 1, 10, 20));
+            Test("09", "%tC", new DateTime(998, 7, 1, 1, 10, 20));
+
+            Test("1998", "%tY", new DateTime(1998, 7, 1, 1, 10, 20));
+            Test("2009", "%tY", new DateTime(2009, 7, 1, 1, 10, 20));
+            Test("0998", "%tY", new DateTime(998, 7, 1, 1, 10, 20));
+            Test("98", "%ty", new DateTime(1998, 7, 1, 1, 10, 20));
+            Test("09", "%ty", new DateTime(2009, 7, 1, 1, 10, 20));
+
+            Test("001", "%tj", new DateTime(2009, 1, 1));
+            Test("004", "%tj", new DateTime(2009, 1, 1).AddDays(3));
+            Test("201", "%tj", new DateTime(2009, 1, 1).AddDays(200));
+
+            Test("01", "%tm", new DateTime(2009, 1, 1));
+            Test("11", "%tm", new DateTime(2009, 11, 25));
+            Test("01", "%td", new DateTime(2009, 1, 1));
+            Test("25", "%td", new DateTime(2009, 11, 25));
+            Test("1", "%te", new DateTime(2009, 1, 1));
+            Test("25", "%te", new DateTime(2009, 11, 25));
+
+            Test("01:02:03 AM", "%tr", new DateTime(2009, 7, 1, 1, 2, 3));
+            Test("02:10:20 PM", "%tr", new DateTime(2009, 7, 1, 14, 10, 20));
+
+            Test("01:02", "%tR", new DateTime(2009, 7, 1, 1, 2, 3));
+            Test("14:10", "%tR", new DateTime(2009, 7, 1, 14, 10, 20));
+
+            Test("Wed, 01 Jul 2009 01:02:03 GMT", "%tc", new DateTime(2009, 7, 1, 1, 2, 3));
+            Test("Wed, 01 Jul 2009 14:10:20 GMT", "%tc", new DateTime(2009, 7, 1, 14, 10, 20));
+
+            Test("07/01/09", "%tD", new DateTime(2009, 7, 1, 1, 2, 3));
+            Test("11/25/98", "%tD", new DateTime(1998, 11, 25, 1, 2, 3));
+            Test("2009-07-01", "%tF", new DateTime(2009, 7, 1, 1, 2, 3));
+            Test("1998-11-25", "%tF", new DateTime(1998, 11, 25, 1, 2, 3));
+
+        }
+
         #endregion
 
     }
