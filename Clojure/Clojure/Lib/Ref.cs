@@ -198,6 +198,32 @@ namespace clojure.lang
             get { return _id; }
         }
 
+        volatile int _minHistory = 0;
+        public int MinHistory
+        {
+            get { return _minHistory; }
+            set { _minHistory = value; }
+        }
+        public Ref setMinHistory(int minHistory)
+        {
+            _minHistory = minHistory;
+            return this;
+        }
+
+        volatile int _maxHistory = 10;
+
+        public int MaxHistory
+        {
+            get { return _maxHistory; }
+            set { _maxHistory = value; }
+        }
+        public Ref setMaxHistory(int maxHistory)
+        {
+            _maxHistory = maxHistory;
+            return this;
+        }
+
+
         /// <summary>
         /// Used to generate unique ids.
         /// </summary>
@@ -267,6 +293,36 @@ namespace clojure.lang
         //}
 
         #endregion
+
+        #region History counts
+
+        public int getHistoryCount()
+        {
+            try
+            {
+                EnterWriteLock();
+                return HistCount();
+            }
+            finally
+            {
+                ExitWriteLock();
+            }
+        }
+
+        int HistCount()
+        {
+            if (_tvals == null)
+                return 0;
+            else
+            {
+                int count = 0;
+                for (TVal tv = _tvals.Next; tv != _tvals; tv = tv.Next)
+                    count++;
+                return count;
+            }
+        }
+
+        #endregion       
 
         #region IDeref Members
 
@@ -371,9 +427,11 @@ namespace clojure.lang
         /// <param name="msecs">The clock time.</param>
         internal void SetValue(object val, long commitPoint, int msecs)
         {
+            int hcount = HistCount();
+
             if (_tvals == null)
                 _tvals = new TVal(val, commitPoint, msecs);
-            else if (_faults.get() > 0)
+            else if ( (_faults.get() > 0 && hcount < _maxHistory) || hcount < _minHistory )
             {
                 _tvals = new TVal(val, commitPoint, msecs, _tvals);
                 _faults.set(0);

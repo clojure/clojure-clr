@@ -559,6 +559,7 @@ namespace clojure.lang
                             Ref r = pair.Key;
                             object oldval = r.TryGetVal();
                             object newval = pair.Value;
+                          
                             r.SetValue(newval, commitPoint, msecs);
                             if (r.getWatches().count() > 0)
                                 notify.Add(new Notify(r, oldval, newval));
