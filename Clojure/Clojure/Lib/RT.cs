@@ -848,13 +848,6 @@ namespace clojure.lang
         {
             if (coll is Indexed)
                 return ((Indexed)coll).nth(n);
-            return do_nth(coll, n);
-        }
-
-        static public object do_nth(object coll, int n)
-        {
-            if (coll is Indexed)
-                return ((Indexed)coll).nth(n);
 
             if (coll == null)
                 return null;
