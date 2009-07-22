@@ -110,7 +110,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Expression target = _target.GenDlr(context);
             Expression valExpr = val.GenDlr(context);
-            if (_targetType != null)
+            if (_targetType != null && (_fieldInfo != null || _propertyInfo != null))
             {
                 Expression convTarget = Expression.Convert(target, _targetType);
                 Expression access = _fieldInfo != null
