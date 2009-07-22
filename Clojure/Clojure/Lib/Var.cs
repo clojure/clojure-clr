@@ -547,6 +547,21 @@ namespace clojure.lang
             CurrentFrame = null;
         }
 
+        public static Associative GetThreadBindings()
+        {
+            Frame f = CurrentFrame;
+            IPersistentMap ret = PersistentHashMap.EMPTY;
+            for (ISeq bs = f.Bindings.seq(); bs != null; bs = bs.next())
+            {
+                IMapEntry e = (IMapEntry)bs.first();
+                Var v = (Var)e.key();
+                Box b = (Box)e.val();
+                ret = ret.assoc(v, b.Val);
+            }
+            return ret;
+        }
+
+
         /// <summary>
         /// Get the box of the current binding on the stack for this var, or null if no binding.
         /// </summary>
