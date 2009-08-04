@@ -1192,6 +1192,7 @@ namespace clojure.lang
                     names.Add(methodBuilder.Name);
 
                     // evaluate in this environment
+                    // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
                     ast.Compile().DynamicInvoke();
                     LINE_BEFORE.set(lntr.LineNumber);
                 }
