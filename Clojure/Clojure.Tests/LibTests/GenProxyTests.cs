@@ -12,6 +12,7 @@ using clojure.lang;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.IO;
+using System.Diagnostics;
 
 
 namespace Clojure.Tests.LibTests
@@ -938,6 +939,140 @@ namespace Clojure.Tests.LibTests
             I1 i1 = (I1)o;
             Expect(i1.m2(12), EqualTo(15));
         }
+
+        [Test]
+        public void BoxingHurts()
+        {
+            AssemblyName aname = new AssemblyName("MyAssy3");
+            AssemblyBuilder assyBldr = AppDomain.CurrentDomain.DefineDynamicAssembly(aname, AssemblyBuilderAccess.RunAndSave, ".");
+            ModuleBuilder moduleBldr = assyBldr.DefineDynamicModule(aname.Name, aname.Name + ".dll", true);
+            TypeBuilder tb = moduleBldr.DefineType("TheBoxer", TypeAttributes.Public, typeof(object));
+
+            MethodAttributes baseAttr = MethodAttributes.Public | MethodAttributes.HideBySig;
+
+            MethodBuilder mb1 = tb.DefineMethod("Add1", baseAttr, typeof(int), new Type[] { typeof(int), typeof(int) });
+            ILGenerator gen1 = mb1.GetILGenerator();
+            LocalBuilder loc_i = gen1.DeclareLocal(typeof(Int32));
+            LocalBuilder loc_sum = gen1.DeclareLocal(typeof(Int32));
+            Label loopLabel = gen1.DefineLabel();
+            Label testLabel = gen1.DefineLabel();
+
+            // i=0;
+            gen1.Emit(OpCodes.Ldc_I4_0);
+            gen1.Emit(OpCodes.Stloc,loc_i);
+
+            // sum = 0;
+            gen1.Emit(OpCodes.Ldc_I4_0);
+            gen1.Emit(OpCodes.Stloc,loc_sum);
+
+            gen1.MarkLabel(loopLabel);
+
+
+            // sum = sum + (c+c) + (c+c)
+            gen1.Emit(OpCodes.Ldarg_2);
+            gen1.Emit(OpCodes.Box,typeof(Int32));
+            gen1.Emit(OpCodes.Unbox_Any, typeof(Int32));
+            gen1.Emit(OpCodes.Ldarg_2);
+            gen1.Emit(OpCodes.Box, typeof(Int32));
+            gen1.Emit(OpCodes.Unbox_Any, typeof(Int32));
+            gen1.Emit(OpCodes.Add);
+            gen1.Emit(OpCodes.Ldarg_2);
+            gen1.Emit(OpCodes.Box, typeof(Int32));
+            gen1.Emit(OpCodes.Unbox_Any, typeof(Int32));
+            gen1.Emit(OpCodes.Ldarg_2);
+            gen1.Emit(OpCodes.Box, typeof(Int32));
+            gen1.Emit(OpCodes.Unbox_Any, typeof(Int32));
+            gen1.Emit(OpCodes.Add);
+            gen1.Emit(OpCodes.Add);
+            gen1.Emit(OpCodes.Ldloc, loc_sum);
+            gen1.Emit(OpCodes.Add);
+            gen1.Emit(OpCodes.Stloc, loc_sum);
+
+            // i = i + 1
+            gen1.Emit(OpCodes.Ldloc, loc_i);
+            gen1.Emit(OpCodes.Ldc_I4_1);
+            gen1.Emit(OpCodes.Add);
+            gen1.Emit(OpCodes.Stloc, loc_i);
+
+            // Test: i < n
+            gen1.MarkLabel(testLabel);
+            gen1.Emit(OpCodes.Ldloc, loc_i);
+            gen1.Emit(OpCodes.Ldarg_1);
+            gen1.Emit(OpCodes.Blt, loopLabel);
+
+
+            gen1.Emit(OpCodes.Ret);
+
+            MethodBuilder mb2 = tb.DefineMethod("Add2", baseAttr, typeof(int), new Type[] { typeof(int), typeof(int) });
+            ILGenerator gen2 = mb1.GetILGenerator();
+            loc_i = gen2.DeclareLocal(typeof(Int32));
+            loc_sum = gen2.DeclareLocal(typeof(Int32));
+            loopLabel = gen2.DefineLabel();
+            testLabel = gen2.DefineLabel();
+
+            // i=0;
+            gen2.Emit(OpCodes.Ldc_I4_0);
+            gen2.Emit(OpCodes.Stloc, loc_i);
+
+            // sum = 0;
+            gen2.Emit(OpCodes.Ldc_I4_0);
+            gen2.Emit(OpCodes.Stloc, loc_sum);
+
+            gen2.MarkLabel(loopLabel);
+
+
+            // sum = sum + (c+c) + (c+c)
+            gen2.Emit(OpCodes.Ldarg_2);
+            gen2.Emit(OpCodes.Ldarg_2);
+            gen2.Emit(OpCodes.Add);
+            gen2.Emit(OpCodes.Ldarg_2);
+            gen2.Emit(OpCodes.Ldarg_2);
+            gen2.Emit(OpCodes.Add);
+            gen2.Emit(OpCodes.Add);
+            gen2.Emit(OpCodes.Ldloc, loc_sum);
+            gen2.Emit(OpCodes.Add);
+            gen2.Emit(OpCodes.Stloc, loc_sum);
+
+            // i = i + 1
+            gen2.Emit(OpCodes.Ldloc, loc_i);
+            gen2.Emit(OpCodes.Ldc_I4_1);
+            gen2.Emit(OpCodes.Add);
+            gen2.Emit(OpCodes.Stloc, loc_i);
+
+            // Test: i < n
+            gen2.MarkLabel(testLabel);
+            gen2.Emit(OpCodes.Ldloc, loc_i);
+            gen2.Emit(OpCodes.Ldarg_1);
+            gen2.Emit(OpCodes.Blt, loopLabel);
+
+            gen2.Emit(OpCodes.Ret);
+
+            Type myType = tb.CreateType();
+
+            ConstructorInfo ctor = myType.GetConstructor(Type.EmptyTypes);
+            object o = ctor.Invoke(new object[0]);
+
+            MethodInfo add1 = myType.GetMethod("Add1");
+            MethodInfo add2 = myType.GetMethod("Add2");
+
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+            add1.Invoke(o, new object[] { 1000000, 2 });
+            sw.Stop();
+
+            Console.WriteLine("Add1: {0} ticks", sw.ElapsedTicks);
+
+            sw.Reset();
+
+            sw.Start();
+            add1.Invoke(o, new object[] { 1000000, 2 });
+            sw.Stop();
+
+            Console.WriteLine("Add2: {0} ticks", sw.ElapsedTicks);
+
+        }
+
 
     }
 
