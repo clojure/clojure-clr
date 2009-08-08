@@ -68,6 +68,16 @@ namespace clojure.lang
         }
 
         /// <summary>
+        /// Create (or find existing) keyword with the given name.
+        /// </summary>
+        /// <param name="nsname">The keyword's name</param>
+        /// <returns>A keyword</returns>
+        public static Keyword intern(String nsname)
+        {
+            return intern(Symbol.intern(nsname));
+        }
+
+        /// <summary>
         /// Construct a keyword based on a symbol.
         /// </summary>
         /// <param name="sym">A symbol giving namespace/name.</param>
