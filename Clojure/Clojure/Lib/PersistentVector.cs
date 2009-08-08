@@ -12,25 +12,71 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace clojure.lang
 {
     /// <summary>
     /// Implements a persistent vector using a specialized form of array-mapped hash trie.
     /// </summary>
-    public class PersistentVector: APersistentVector
+    public class PersistentVector: APersistentVector, IEditableCollection
     {
+        #region Node class
+
+        class Node
+        {
+            #region Data
+
+            readonly AtomicReference<Thread> _edit;
+
+            public AtomicReference<Thread> Edit
+            {
+                get { return _edit; }
+            } 
+
+            readonly object[] _array;
+
+            public object[] Array
+            {
+                get { return _array; }
+            } 
+
+            
+            #endregion
+
+            #region C-tors
+
+            public Node(AtomicReference<Thread> edit, object[] array)
+            {
+                _edit = edit;
+                _array = array;
+            }
+
+            public Node(AtomicReference<Thread> edit)
+            {
+                _edit = edit;
+                _array = new object[32];
+            }
+        
+            #endregion
+        }
+
+        #endregion
+
         #region Data
 
-        protected readonly int _cnt;
-        protected readonly int _shift;
-        protected readonly object[] _root;
-        protected readonly object[] _tail;
+        static readonly AtomicReference<Thread> NOEDIT = new AtomicReference<Thread>(null);
+        static readonly Node EMPTY_NODE = new Node(NOEDIT, new object[32]);
+
+        readonly int _cnt;
+        readonly int _shift;
+        readonly Node _root;
+        readonly object[] _tail;
 
         /// <summary>
         /// An empty <see cref="PersistentVector">PersistentVector</see>.
         /// </summary>
-        static public readonly PersistentVector EMPTY = new PersistentVector(0,5,RT.EMPTY_OBJECT_ARRAY,RT.EMPTY_OBJECT_ARRAY);
+        static public readonly PersistentVector EMPTY = new PersistentVector(0,5,EMPTY_NODE, new object[0]);
 
         #endregion
 
@@ -69,7 +115,7 @@ namespace clojure.lang
         /// <param name="shift"></param>
         /// <param name="root"></param>
         /// <param name="tail"></param>
-        PersistentVector(int cnt, int shift, object[] root, object[] tail)
+        PersistentVector(int cnt, int shift, Node root, object[] tail)
             : base(null)
         {
             _cnt = cnt;
@@ -87,7 +133,7 @@ namespace clojure.lang
         /// <param name="shift"></param>
         /// <param name="root"></param>
         /// <param name="tail"></param>
-        PersistentVector(IPersistentMap meta, int cnt, int shift, object[] root, object[] tail)
+        PersistentVector(IPersistentMap meta, int cnt, int shift, Node root, object[] tail)
             : base(meta)
         {
             _cnt = cnt;
@@ -103,9 +149,7 @@ namespace clojure.lang
         public override IObj withMeta(IPersistentMap meta)
         {
             // Java version does not do identity check
-            return (meta == _meta)
-                ? this
-                : new PersistentVector(meta, _cnt, _shift, _root, _tail);
+            return new PersistentVector(meta, _cnt, _shift, _root, _tail);
         }
 
         #endregion
@@ -125,7 +169,9 @@ namespace clojure.lang
 
         int tailoff()
         {
-            return _cnt - _tail.Length;
+            if (_cnt < 32)
+                return 0;
+            return ((_cnt - 1) >> 5) << 5;
         }
 
 
@@ -137,20 +183,20 @@ namespace clojure.lang
         /// <remarks>Throws an exception if the index <c>i</c> is not in the range of the vector's elements.</remarks>
         public override object nth(int i)
         {
-            object[] node = NodeFor(i);
+            object[] node = ArrayFor(i);
             return node[i & 0x01f];
         }
 
-        object[] NodeFor(int i)
+        object[] ArrayFor(int i) 
         {
             if (i >= 0 && i < _cnt)
             {
                 if (i >= tailoff())
                     return _tail;
-                object[] arr = _root;
+                Node node = _root;
                 for (int level = _shift; level > 0; level -= 5)
-                    arr = (object[])arr[(i >> level) & 0x01f];
-                return arr;
+                    node = (Node)node.Array[(i >> level) & 0x01f];
+                return node.Array;
             }
             throw new IndexOutOfRangeException();
         }
@@ -182,15 +228,15 @@ namespace clojure.lang
             throw new IndexOutOfRangeException();
         }
 
-        static private object[] doAssoc(int level, object[] arr, int i, object val)
+        static private Node doAssoc(int level, Node node, int i, object val)
         {
-            object[] ret = (object[]) arr.Clone();
+            Node ret = new Node(node.Edit, (object[])node.Array.Clone());
             if (level == 0)
-                ret[i & 0x01f] = val;
+                ret.Array[i & 0x01f] = val;
             else
             {
                 int subidx = ( i >> level ) & 0x01f;
-                ret[subidx] = doAssoc(level-5,(object[]) arr[subidx], i, val);
+                ret.Array[subidx] = doAssoc(level-5,(Node) node.Array[subidx], i, val);
             }
             return ret;
         }
@@ -203,62 +249,71 @@ namespace clojure.lang
         /// <remarks>Overrides <c>cons</c> in <see cref="IPersistentCollection">IPersistentCollection</see> to specialize the return value.</remarks>
         public override IPersistentVector cons(object val)
         {
-            if (_tail.Length < 32)
+            //if (_tail.Length < 32)
+            if ( _cnt - tailoff() < 32 )
             {
                 object[] newTail = new object[_tail.Length + 1];
                 Array.Copy(_tail, newTail, _tail.Length);
                 newTail[_tail.Length] = val;
                 return new PersistentVector(meta(), _cnt + 1, _shift, _root, newTail);
             }
-            Box expansion = new Box(null);
 
-            object[] newroot = pushTail(_shift - 5, _root, _tail, expansion);
+            // full tail, push into tree
+            Node newroot;
+            Node tailnode = new Node(_root.Edit, _tail);
             int newshift = _shift;
-            if (expansion.Val != null)
+            
+            // overflow root?
+            if ((_cnt >> 5) > (1 << _shift))
             {
-                newroot = new object[] { newroot, expansion.Val };
+                newroot = new Node(_root.Edit);
+                newroot.Array[0] = _root;
+                newroot.Array[1] = newPath(_root.Edit, _shift, tailnode);
                 newshift += 5;
             }
+            else
+                newroot = pushTail(_shift, _root, tailnode);
+
 
             return new PersistentVector(meta(), _cnt + 1, newshift, newroot, new object[] { val });
         }
 
-        private object[] pushTail(int level, object[] arr, object[] tailNode, Box expansion)
+        private Node pushTail(int level, Node parent, Node tailnode)
         {
-            object newchild;
-            if (level == 0)
-                newchild = tailNode;
+            // if parent is leaf, insert node,
+            // else does it map to existing child?  -> nodeToInsert = pushNode one more level
+            // else alloc new path
+            // return nodeToInsert placed in copy of parent
+            int subidx = ((_cnt - 1) >> level) & 0x01f;
+            Node ret = new Node(parent.Edit, (object[])parent.Array.Clone());
+            Node nodeToInsert;
+
+            if (level == 5)
+                nodeToInsert = tailnode;
             else
             {
-                newchild = pushTail(level - 5, (object[])arr[arr.Length - 1], tailNode, expansion);
-                if (expansion.Val == null)
-                {
-                    object[] ret1 = (object[])arr.Clone();
-                    ret1[arr.Length - 1] = newchild;
-                    return ret1;
-                }
-                else
-                    newchild = expansion.Val;
+                Node child = (Node)parent.Array[subidx];
+                nodeToInsert = (child != null
+                                 ? pushTail(level - 5, child, tailnode)
+                                 : newPath(_root.Edit, level - 5, tailnode));
             }
-            //expansion
-            if ( arr.Length == 32 )
-            {
-                expansion.Val = new object[]{newchild};
-                return arr;
-            }
-            object[] ret = new object[arr.Length + 1];
-            Array.Copy(arr, ret, arr.Length);
-            ret[arr.Length] = newchild;
-            expansion.Val = null;
+            ret.Array[subidx] = nodeToInsert;
             return ret;
         }
 
+        static Node newPath(AtomicReference<Thread> edit, int level, Node node)
+        {
+            if (level == 0)
+                return node;
 
+            Node ret = new Node(edit);
+            ret.Array[0] = newPath(edit, level - 5, node);
+            return ret;
+        }
         
         #endregion
 
         #region IPersistentCollection members
-
 
         /// <summary>
         /// Gets the number of items in the collection.
@@ -292,47 +347,52 @@ namespace clojure.lang
                 throw new InvalidOperationException("Can't pop empty vector");
             if ( _cnt == 1)
                 return (IPersistentStack)EMPTY.withMeta(meta());
-            if ( _tail.Length > 1 )
+            //if ( _tail.Length > 1 )
+            if (_cnt - tailoff() > 1)
             {
                 object[] newTail = new object[_tail.Length-1];
                 Array.Copy(_tail,newTail,newTail.Length);
                 return new PersistentVector(meta(),_cnt-1,_shift,_root,newTail);
             }
-            Box ptail = new Box(null);
-            object[] newroot = popTail(_shift-5,_root,ptail);
+            object[] newtail = ArrayFor(_cnt - 2);
+
+            Node newroot = popTail(_shift,_root);
             int newshift = _shift;
             if ( newroot == null )
-                newroot = RT.EMPTY_OBJECT_ARRAY;
-            if ( _shift > 5 && newroot.Length == 1 )
+                newroot = EMPTY_NODE;
+            if ( _shift > 5 && newroot.Array[1] == null )
             {
-                newroot = (Object[])newroot[0];
+                newroot = (Node)newroot.Array[0];
                 newshift -= 5;
             }
-            return new PersistentVector(meta(),_cnt-1,newshift,newroot,(object[])ptail.Val);
+            return new PersistentVector(meta(), _cnt - 1, newshift, newroot, newtail);
         }
 
-        private object[] popTail(int shift, object[] arr, Box ptail)
+        private Node popTail(int level, Node node)
         {
-            if ( shift > 0 )
+            int subidx = ((_cnt - 2) >> level) & 0x01f;
+            if (level > 5)
             {
-                object[] newchild = popTail(shift-5,(object[])arr[arr.Length-1],ptail);
-                if ( newchild != null )
+                Node newchild = popTail(level - 5, (Node)node.Array[subidx]);
+                if (newchild == null && subidx == 0)
+                    return null;
+                else
                 {
-                    object[] ret1 = (object[])arr.Clone();
-                    ret1[arr.Length-1] = newchild;
-                    return ret1;
+                    Node ret = new Node(_root.Edit, (object[])node.Array.Clone());
+                    ret.Array[subidx] = newchild;
+                    return ret;
                 }
             }
-            if ( shift == 0 )
-                ptail.Val = arr[arr.Length-1];
-            //contaction
-            if( arr.Length == 1 )
+            else if (subidx == 0)
                 return null;
-
-            object[] ret = new Object[arr.Length-1];
-            Array.Copy(arr,ret,ret.Length);
-            return ret;
+            else
+            {
+                Node ret = new Node(_root.Edit, (object[])node.Array.Clone());
+                ret.Array[subidx] = null;
+                return ret;
+            }
         }
+
 
         #endregion
 
@@ -378,7 +438,7 @@ namespace clojure.lang
                 _vec = vec;
                 _i = i;
                 _offset = offset;
-                _node = vec.NodeFor(i);
+                _node = vec.ArrayFor(i);
             }
 
             ChunkedSeq(IPersistentMap meta, PersistentVector vec, object[] node,  int i, int offset)
@@ -460,7 +520,318 @@ namespace clojure.lang
 
         }
 
+        #endregion
 
+        #region IEditableCollection Members
+
+        public IMutableCollection mutable()
+        {
+            return new Mutable(this);
+        }
+
+        #endregion
+
+        #region Mutable class
+
+        class Mutable : IMutableVector, Counted
+        {
+            #region Data
+
+            int _cnt;
+	        int _shift;
+	        Node _root;
+            object[] _tail;
+
+            #endregion
+
+            #region Ctors
+
+            Mutable(int cnt, int shift, Node root, Object[] tail)
+            {
+                _cnt = cnt;
+                _shift = shift;
+                _root = root;
+                _tail = tail;
+            }
+
+            public Mutable(PersistentVector v)
+                : this(v._cnt, v._shift, EditableRoot(v._root), EditableTail(v._tail))
+            {
+            }
+
+            #endregion
+
+            #region Counted Members
+
+            public int count()
+            {
+                EnsureEditable();
+                return _cnt;
+            }
+
+            #endregion
+
+            #region Implementation
+
+            void EnsureEditable()
+            {
+                Thread owner = _root.Edit.Get();
+                if (owner == Thread.CurrentThread)
+                    return;
+                if (owner != null)
+                    throw new InvalidOperationException("Mutable used by non-owner thread");
+                throw new InvalidOperationException("Mutable used after immutable call");
+            }
+
+
+            Node EnsureEditable(Node node)
+            {
+                if (node.Edit == _root.Edit)
+                    return node;
+                return new Node(_root.Edit, (object[])node.Array.Clone());
+            }
+
+            static Node EditableRoot(Node node)
+            {
+                return new Node(new AtomicReference<Thread>(Thread.CurrentThread), (object[])node.Array.Clone());
+            }
+
+            static object[] EditableTail(object[] tl)
+            {
+                object[] ret = new object[32];
+                Array.Copy(tl, ret, tl.Length);
+                return ret;
+            }
+
+            Node PushTail(int level, Node parent, Node tailnode)
+            {
+                //if parent is leaf, insert node,
+                // else does it map to an existing child? -> nodeToInsert = pushNode one more level
+                // else alloc new path
+                //return  nodeToInsert placed in copy of parent
+                int subidx = ((_cnt - 1) >> level) & 0x01f;
+                Node ret = new Node(parent.Edit, (object[])parent.Array.Clone());
+                Node nodeToInsert;
+                if (level == 5)
+                {
+                    nodeToInsert = tailnode;
+                }
+                else
+                {
+                    Node child = (Node)parent.Array[subidx];
+                    nodeToInsert = (child != null)
+                        ? PushTail(level - 5, child, tailnode)
+                                                   : newPath(_root.Edit, level - 5, tailnode);
+                }
+                ret.Array[subidx] = nodeToInsert;
+                return ret;
+            }
+
+            int Tailoff()
+            {
+                if (_cnt < 32)
+                    return 0;
+                return ((_cnt - 1) >> 5) << 5;
+            }
+
+            object[] ArrayFor(int i)
+            {
+                if (i >= 0 && i < _cnt)
+                {
+                    if (i >= Tailoff())
+                        return _tail;
+                    Node node = _root;
+                    for (int level = _shift; level > 0; level -= 5)
+                        node = (Node)node.Array[(i >> level) & 0x01f];
+                    return node.Array;
+                }
+                throw new IndexOutOfRangeException();
+            }
+
+            #endregion
+
+            #region IMutableVector Members
+
+            public object nth(int i)
+            {
+                object[] node = ArrayFor(i);
+                return node[i & 0x01f];
+            }
+
+            public IMutableVector assocN(int i, object val)
+            {
+                EnsureEditable();
+                if (i >= 0 && i < _cnt)
+                {
+                    if (i >= Tailoff())
+                    {
+                        _tail[i & 0x01f] = val;
+                        return this;
+                    }
+
+                    _root = doAssoc(_shift, _root, i, val);
+                    return this;
+                }
+                if (i == _cnt)
+                    return (IMutableVector)conj(val);
+                throw new IndexOutOfRangeException();
+            }
+
+            Node doAssoc(int level, Node node, int i, Object val)
+            {
+                node = EnsureEditable(node);
+                Node ret = new Node(node.Edit, (object[])node.Array.Clone());
+                if (level == 0)
+                {
+                    ret.Array[i & 0x01f] = val;
+                }
+                else
+                {
+                    int subidx = (i >> level) & 0x01f;
+                    ret.Array[subidx] = doAssoc(level - 5, (Node)node.Array[subidx], i, val);
+                }
+                return ret;
+            }
+
+            public IMutableVector pop()
+            {
+                EnsureEditable();
+                if (_cnt == 0)
+                    throw new InvalidOperationException("Can't pop empty vector");
+                if (_cnt == 1)
+                {
+                    _cnt = 0;
+                    return this;
+                }
+                int i = _cnt - 1;
+                // pop in tail?
+                if ((i & 0x01f) > 0)
+                {
+                    --_cnt;
+                    return this;
+                }
+                object[] newtail = ArrayFor(_cnt - 2);
+
+                Node newroot = PopTail(_shift, _root);
+                int newshift = _shift;
+                if (newroot == null)
+                {
+                    newroot = EMPTY_NODE;
+                }
+                if (_shift > 5 && newroot.Array[1] == null)
+                {
+                    newroot = (Node)newroot.Array[0];
+                    newshift -= 5;
+                }
+                _root = newroot;
+                _shift = newshift;
+                --_cnt;
+                _tail = newtail;
+                return this;
+            }
+
+
+            private Node PopTail(int level, Node node)
+            {
+                node = EnsureEditable(node);
+                int subidx = ((_cnt - 2) >> level) & 0x01f;
+                if (level > 5)
+                {
+                    Node newchild = PopTail(level - 5, (Node)node.Array[subidx]);
+                    if (newchild == null && subidx == 0)
+                        return null;
+                    else
+                    {
+                        Node ret = node;
+                        ret.Array[subidx] = newchild;
+                        return ret;
+                    }
+                }
+                else if (subidx == 0)
+                    return null;
+                else
+                {
+                    Node ret = node;
+                    ret.Array[subidx] = null;
+                    return ret;
+                }
+            }
+
+            #endregion
+
+            #region IMutableAssociative Members
+
+            public object valAt(object key)
+            {
+                if (Util.IsInteger(key.GetType()))
+                {
+                    int i = Util.ConvertToInt(key);
+                    if (i >= 0 && i < count())
+                        return nth(i);
+                }
+                return null;
+            }
+
+            public IMutableAssociative assoc(object key, object val)
+            {
+                if (Util.IsInteger(key.GetType()))
+                {
+                    int i = Util.ConvertToInt(key);
+                    return assocN(i, val);
+                }
+                throw new ArgumentException("Key must be integer");
+            }
+
+            #endregion
+
+            #region IMutableCollection Members
+
+            public IMutableCollection conj(object val)
+            {
+
+                EnsureEditable();
+                int i = _cnt;
+                //room in tail?
+                if (i - Tailoff() < 32)
+                {
+                    _tail[i & 0x01f] = val;
+                    ++_cnt;
+                    return this;
+                }
+                //full tail, push into tree
+                Node newroot;
+                Node tailnode = new Node(_root.Edit, _tail);
+                _tail = new object[32];
+                _tail[0] = val;
+                int newshift = _shift;
+                //overflow root?
+                if ((_cnt >> 5) > (1 << _shift))
+                {
+                    newroot = new Node(_root.Edit);
+                    newroot.Array[0] = _root;
+                    newroot.Array[1] = newPath(_root.Edit, _shift, tailnode);
+                    newshift += 5;
+                }
+                else
+                    newroot = PushTail(_shift, _root, tailnode);
+                _root = newroot;
+                _shift = newshift;
+                ++_cnt;
+                return this;
+            }
+
+            public IPersistentCollection immutable()
+            {
+                EnsureEditable();
+                _root.Edit.Set(null);
+                object[] trimmedTail = new object[_cnt-Tailoff()];
+                Array.Copy(_tail,trimmedTail,trimmedTail.Length);
+                return new PersistentVector(_cnt, _shift, _root, trimmedTail);
+            }
+
+            #endregion
+        }
+ 
         #endregion
     }
 }

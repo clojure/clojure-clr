@@ -125,10 +125,17 @@
 [#^System.IO.TextWriter tw]
   (proxy [System.IO.TextWriter] []
     (Write ([#^chars cbuf #^Int32 off #^Int32 len] (.Write tw cbuf off len))
-           ([x] (condp (class x)
+           ([x] (condp = (class x)
                   System.String (let [s #^System.String x] (.Write tw (. s ToUpper)))
-                  Int32 (let [c #^Int32 x] (.Write tw (int (Char/ToUpper (char c))))))))))
+                  Int32 (let [c #^Int32 x] (.Write tw  (Char/ToUpper (char c)))))))))
 
+(defn upcase-writer
+[#^System.IO.TextWriter tw]
+  (proxy [System.IO.TextWriter] []
+    (Write ([#^chars cbuf #^Int32 off #^Int32 len] (.Write tw cbuf off len))
+           ([x] (condp = (class x)
+                  System.String (let [s x] (.Write tw (. s ToUpper)))
+                  Int32 (let [c x] (.Write tw (Char/ToUpper (char c)))))))))
 
 
 (defn- capitalize-word-writer

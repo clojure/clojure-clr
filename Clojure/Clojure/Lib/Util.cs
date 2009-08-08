@@ -183,6 +183,29 @@ namespace clojure.lang
         }
 
 
+        internal static bool IsInteger(Type type)
+        {
+            type = GetNonNullableType(type);
+            if (!type.IsEnum)
+            {
+                switch (Type.GetTypeCode(type))
+                {
+                    case TypeCode.SByte:
+                    case TypeCode.Byte:
+                    case TypeCode.Int16:
+                    case TypeCode.Int32:
+                    case TypeCode.Int64:
+                    case TypeCode.UInt16:
+                    case TypeCode.UInt32:
+                    case TypeCode.UInt64:
+                        return true;
+                }
+                if (type == typeof(BigInteger))
+                    return true;
+            }
+            return false;
+        }
+
 
         #region core.clj compatibility
 
