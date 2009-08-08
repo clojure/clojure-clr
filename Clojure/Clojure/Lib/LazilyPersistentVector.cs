@@ -22,19 +22,19 @@ namespace clojure.lang
     /// if operations such as <see cref="LazilyPersistentVector.assoc()">assoc()</see> 
     /// are called that require a true persistent collection.
     /// </summary>
-    public class LazilyPersistentVector : APersistentVector
+    public class LazilyPersistentVector 
     {
         #region Data
 
-        /// <summary>
-        /// The array with the items.
-        /// </summary>
-        protected readonly object[] _array;
+        ///// <summary>
+        ///// The array with the items.
+        ///// </summary>
+        //protected readonly object[] _array;
 
-        /// <summary>
-        /// The lazily-allocated persistent vector for generative operations.
-        /// </summary>
-        PersistentVector _v = null;
+        ///// <summary>
+        ///// The lazily-allocated persistent vector for generative operations.
+        ///// </summary>
+        //PersistentVector _v = null;
 
         #endregion
 
@@ -47,9 +47,13 @@ namespace clojure.lang
         /// <returns>A <see cref="LazilyPersistentVector">LazilyPersistentVector</see>.</returns>
         static public IPersistentVector createOwning(params object[] items)
         {
-            return items.Length == 0
-                ? (IPersistentVector)PersistentVector.EMPTY
-                : new LazilyPersistentVector(null, items, null);
+            if  (items.Length == 0)
+                return (IPersistentVector)PersistentVector.EMPTY;
+            else if ( items.Length <= 32 )
+                return new PersistentVector(items.Length,5,PersistentVector.EMPTY_NODE,items);
+            return PersistentVector.create(items);
+
+                //: new LazilyPersistentVector(null, items, null);
         }
 
         /// <summary>
@@ -59,54 +63,63 @@ namespace clojure.lang
         /// <returns>A <see cref="LazilyPersistentVector">LazilyPersistentVector</see>.</returns>
         static public IPersistentVector create(System.Collections.ICollection coll)
         {
-            object[] array = new object[coll.Count];
-            coll.CopyTo(array, 0);
-            return createOwning(array);
+            if (!(coll is ISeq) && coll.Count <= 32)
+            {
+                object[] array = new object[coll.Count];
+                coll.CopyTo(array, 0);
+                return createOwning(array);
+            }
+            return PersistentVector.create(RT.seq(coll));
         }
 
-        /// <summary>
-        /// Constructs a lazily persistent vector.
-        /// </summary>
-        /// <param name="meta">The metadata to attach.</param>
-        /// <param name="array">The array of values.</param>
-        /// <param name="v">The accompanying persistent vector.</param>
-        LazilyPersistentVector(IPersistentMap meta, object[] array, PersistentVector v)
-            : base(meta)
-        {
-            _array = array;
-            _v = v;
-        }
+        //    object[] array = new object[coll.Count];
+        //    coll.CopyTo(array, 0);
+        //    return createOwning(array);
+        
+
+        ///// <summary>
+        ///// Constructs a lazily persistent vector.
+        ///// </summary>
+        ///// <param name="meta">The metadata to attach.</param>
+        ///// <param name="array">The array of values.</param>
+        ///// <param name="v">The accompanying persistent vector.</param>
+        //LazilyPersistentVector(IPersistentMap meta, object[] array, PersistentVector v)
+        //    : base(meta)
+        //{
+        //    _array = array;
+        //    _v = v;
+        //}
 
         #endregion
 
         #region IObj members
 
-        /// <summary>
-        /// Create a copy with new metadata.
-        /// </summary>
-        /// <param name="meta">The new metadata.</param>
-        /// <returns>A copy of the object with new metadata attached.</returns>
-        public override IObj withMeta(IPersistentMap meta)
-        {
-            return (meta == _meta)
-                ? this
-                : new LazilyPersistentVector(meta, _array, _v);
-        }
+        ///// <summary>
+        ///// Create a copy with new metadata.
+        ///// </summary>
+        ///// <param name="meta">The new metadata.</param>
+        ///// <returns>A copy of the object with new metadata attached.</returns>
+        //public override IObj withMeta(IPersistentMap meta)
+        //{
+        //    return (meta == _meta)
+        //        ? this
+        //        : new LazilyPersistentVector(meta, _array, _v);
+        //}
 
         #endregion
 
         #region IPersistentVector members
 
-        /// <summary>
-        /// Get the i-th item in the vector.
-        /// </summary>
-        /// <param name="i">The index of the item to retrieve/</param>
-        /// <returns>The i-th item</returns>
-        /// <remarks>Throws an exception if the index <c>i</c> is not in the range of the vector's elements.</remarks>
-        public override object nth(int i)
-        {
-            return _array[i];
-        }
+        ///// <summary>
+        ///// Get the i-th item in the vector.
+        ///// </summary>
+        ///// <param name="i">The index of the item to retrieve/</param>
+        ///// <returns>The i-th item</returns>
+        ///// <remarks>Throws an exception if the index <c>i</c> is not in the range of the vector's elements.</remarks>
+        //public override object nth(int i)
+        //{
+        //    return _array[i];
+        //}
 
         /// <summary>
         /// Return a new vector with the i-th value set to <c>val</c>.
@@ -114,10 +127,10 @@ namespace clojure.lang
         /// <param name="i">The index of the item to set.</param>
         /// <param name="val">The new value</param>
         /// <returns>A new (immutable) vector v with v[i] == val.</returns>
-        public override IPersistentVector assocN(int i, object val)
-        {
-            return (IPersistentVector)Vec.assoc(i, val);
-        }
+        //public override IPersistentVector assocN(int i, object val)
+        //{
+        //    return (IPersistentVector)Vec.assoc(i, val);
+        //}
 
 
         /// <summary>
@@ -126,20 +139,20 @@ namespace clojure.lang
         /// <param name="o">The item to add to the vector.</param>
         /// <returns>A new (immutable) vector with the objected added at the end.</returns>
         /// <remarks>Overrides <c>cons</c> in <see cref="IPersistentCollection">IPersistentCollection</see> to specialize the return value.</remarks>
-        public override IPersistentVector cons(object o)
-        {
-            return Vec.cons(o);
-        }
+        //public override IPersistentVector cons(object o)
+        //{
+        //    return Vec.cons(o);
+        //}
 
         /// <summary>
         /// Gets the number of items in the vector.
         /// </summary>
         /// <returns>The number of items.</returns>
         /// <remarks>Not sure why you wouldn't use <c>count()</c> intead.</remarks>
-        public override int length()
-        {
-            return count();
-        }
+        //public override int length()
+        //{
+        //    return count();
+        //}
 
         #endregion
 
@@ -149,19 +162,19 @@ namespace clojure.lang
         /// Gets the number of items in the collection.
         /// </summary>
         /// <returns>The number of items in the collection.</returns>
-        public override int count()
-        {
-            return _array.Length;
-        }
+        //public override int count()
+        //{
+        //    return _array.Length;
+        //}
 
         /// <summary>
         /// Gets an empty collection of the same type.
         /// </summary>
         /// <returns>An emtpy collection.</returns>
-        public override IPersistentCollection empty()
-        {
-            return (IPersistentCollection)PersistentVector.EMPTY.withMeta(meta());
-        }
+        //public override IPersistentCollection empty()
+        //{
+        //    return (IPersistentCollection)PersistentVector.EMPTY.withMeta(meta());
+        //}
 
         #endregion
 
@@ -171,21 +184,21 @@ namespace clojure.lang
         /// Peek at the top (first) element in the stack.
         /// </summary>
         /// <returns>The top (first) element.</returns>
-        public override IPersistentStack pop()
-        {
-            return Vec.pop();
-        }
+        //public override IPersistentStack pop()
+        //{
+        //    return Vec.pop();
+        //}
 
         #endregion
 
         #region Seqable members
 
-        public override ISeq seq()
-        {
-            if (_array.Length == 0)
-                return null;
-            return new ChunkedSeq(_array);
-        }
+        //public override ISeq seq()
+        //{
+        //    if (_array.Length == 0)
+        //        return null;
+        //    return new ChunkedSeq(_array);
+        //}
 
 
         sealed class ChunkedSeq : ASeq, IChunkedSeq, IndexedSeq
@@ -317,16 +330,16 @@ namespace clojure.lang
         /// <summary>
         /// Gets the lazy vector, creating it if necessary.
         /// </summary>
-        private IPersistentVector Vec
-        {
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            get
-            {
-                if (_v == null)
-                    _v = PersistentVector.create(_array);
-                return _v;
-            }
-        }
+        //private IPersistentVector Vec
+        //{
+        //    [MethodImpl(MethodImplOptions.Synchronized)]
+        //    get
+        //    {
+        //        if (_v == null)
+        //            _v = PersistentVector.create(_array);
+        //        return _v;
+        //    }
+        //}
 
         #endregion
     }

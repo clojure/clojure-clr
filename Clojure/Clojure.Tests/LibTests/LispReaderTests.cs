@@ -836,8 +836,8 @@ namespace Clojure.Tests.LibTests
         public void CanReadBasicVector()
         {
             Object o1 = ReadFromString("[abc 12]");
-            Expect(o1, TypeOf(typeof(LazilyPersistentVector)));
-            LazilyPersistentVector pl = o1 as LazilyPersistentVector;
+            Expect(o1, TypeOf(typeof(PersistentVector)));
+            IPersistentVector pl = o1 as IPersistentVector;
             Expect(pl.count(), EqualTo(2));
             Expect(pl.nth(0), TypeOf(typeof(Symbol)));
             Expect(((Symbol)pl.nth(0)).Name, EqualTo("abc"));

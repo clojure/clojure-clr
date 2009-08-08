@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Collections;
 
 namespace clojure.lang
 {
@@ -23,7 +24,7 @@ namespace clojure.lang
     {
         #region Node class
 
-        class Node
+        public class Node
         {
             #region Data
 
@@ -66,7 +67,7 @@ namespace clojure.lang
         #region Data
 
         static readonly AtomicReference<Thread> NOEDIT = new AtomicReference<Thread>(null);
-        static readonly Node EMPTY_NODE = new Node(NOEDIT, new object[32]);
+        internal static readonly Node EMPTY_NODE = new Node(NOEDIT, new object[32]);
 
         readonly int _cnt;
         readonly int _shift;
@@ -89,10 +90,10 @@ namespace clojure.lang
         /// <returns>An initialized vector.</returns>
         static public PersistentVector create(ISeq items)
         {
-            IPersistentVector ret = EMPTY;
+            IMutableCollection ret = EMPTY.mutable();
             for (; items != null; items = items.next())
-                ret = ret.cons(items.first());
-            return (PersistentVector)ret;
+                ret = ret.conj(items.first());
+            return (PersistentVector)ret.immutable();
         }
 
         /// <summary>
@@ -102,11 +103,26 @@ namespace clojure.lang
         /// <returns></returns>
         static public PersistentVector create(params object[] items)
         {
-            IPersistentVector ret = EMPTY;
+            IMutableCollection ret = EMPTY.mutable();
             foreach (object item in items)
-                ret = ret.cons(item);
-            return (PersistentVector)ret;
+                ret = ret.conj(item);
+            return (PersistentVector)ret.immutable();
         }
+
+        /// <summary>
+        /// Create a <see cref="PersistentVector">PersistentVector</see> from an ICollection.
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns></returns>
+        static public PersistentVector create1(ICollection items)
+        {
+            IMutableCollection ret = EMPTY.mutable();
+            foreach (object item in items)
+                ret = ret.conj(item);
+            return (PersistentVector)ret.immutable();
+        }
+
+
 
         /// <summary>
         /// Initialize a <see cref="PersistentVector">PersistentVector</see> from basic components.
@@ -115,7 +131,7 @@ namespace clojure.lang
         /// <param name="shift"></param>
         /// <param name="root"></param>
         /// <param name="tail"></param>
-        PersistentVector(int cnt, int shift, Node root, object[] tail)
+        public PersistentVector(int cnt, int shift, Node root, object[] tail)
             : base(null)
         {
             _cnt = cnt;
