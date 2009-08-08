@@ -748,12 +748,25 @@ namespace clojure.lang
                         csym = Compiler.resolveSymbol(csym);
                         sym = Symbol.intern(null, csym.Name + ".");
                     }
-                    else if ( sym.Namespace == null && sym.Name.StartsWith("."))
+                    else if (sym.Namespace == null && sym.Name.StartsWith("."))
                     {
                         // simply quote method names
                     }
                     else
-                        sym = Compiler.resolveSymbol(sym);
+                    {
+                        object maybeClass = null;
+                        if (sym.Namespace != null)
+                            maybeClass = Compiler.CurrentNamespace.GetMapping(
+                                Symbol.intern(null, sym.Namespace));
+                        if (maybeClass is Type)
+                        {
+                            // Classname/foo -> package.qualified.Classname/foo
+                            sym = Symbol.intern(
+                                ((Type)maybeClass).Name, sym.Name);
+                        }
+                        else
+                            sym = Compiler.resolveSymbol(sym);
+                    }             
                     ret = RT.list(Compiler.QUOTE, sym);
                 }
                 //else if (form is Unquote)  
