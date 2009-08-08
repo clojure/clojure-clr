@@ -526,14 +526,14 @@ namespace clojure.lang
 
         public IMutableCollection mutable()
         {
-            return new Mutable(this);
+            return new MutableVector(this);
         }
 
         #endregion
 
         #region Mutable class
 
-        class Mutable : IMutableVector, Counted
+        class MutableVector : IMutableVector, Counted
         {
             #region Data
 
@@ -546,7 +546,7 @@ namespace clojure.lang
 
             #region Ctors
 
-            Mutable(int cnt, int shift, Node root, Object[] tail)
+            MutableVector(int cnt, int shift, Node root, Object[] tail)
             {
                 _cnt = cnt;
                 _shift = shift;
@@ -554,7 +554,7 @@ namespace clojure.lang
                 _tail = tail;
             }
 
-            public Mutable(PersistentVector v)
+            public MutableVector(PersistentVector v)
                 : this(v._cnt, v._shift, EditableRoot(v._root), EditableTail(v._tail))
             {
             }
