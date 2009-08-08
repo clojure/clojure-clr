@@ -17,7 +17,7 @@ namespace clojure.lang
 {
     public interface IChunkedSeq : ISeq
     {
-        Indexed chunkedFirst();
+        IChunk chunkedFirst();
         ISeq chunkedNext();
         ISeq chunkedMore();
     }

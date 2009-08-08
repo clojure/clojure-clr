@@ -20,7 +20,7 @@ namespace clojure.lang
         #region Data
 
         object[] _buffer;
-        int _offset;
+        int _end;
 
         #endregion
 
@@ -29,7 +29,7 @@ namespace clojure.lang
         public ChunkBuffer(int capacity)
         {
             _buffer = new object[capacity];
-            _offset = 0;
+            _end = 0;
         }
 
         #endregion
@@ -38,12 +38,12 @@ namespace clojure.lang
 
         public void add(object o)
         {
-            _buffer[_offset++] = o;
+            _buffer[_end++] = o;
         }
 
-        public Indexed chunk()
+        public IChunk chunk()
         {
-            ArrayChunk ret = new ArrayChunk(_buffer, 0, _offset);
+            ArrayChunk ret = new ArrayChunk(_buffer, 0, _end);
             _buffer = null;
             return ret;
         }
@@ -54,7 +54,7 @@ namespace clojure.lang
 
         public int count()
         {
-            return _offset;
+            return _end;
         }
 
         #endregion

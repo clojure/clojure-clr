@@ -490,7 +490,7 @@ namespace clojure.lang
 
             #region IChunkedSeq Members
 
-            public Indexed chunkedFirst()
+            public IChunk chunkedFirst()
             {
                 return new ArrayChunk(_node, _offset);
             }

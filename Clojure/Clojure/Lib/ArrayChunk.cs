@@ -15,7 +15,7 @@ using System.Text;
 
 namespace clojure.lang
 {
-    public sealed class ArrayChunk : Indexed
+    public sealed class ArrayChunk : IChunk
     {
         #region Data
 
@@ -55,6 +55,25 @@ namespace clojure.lang
         public int count()
         {
             return _end - _off;
+        }
+
+        #endregion
+
+        #region IChunk Members
+
+        public IChunk dropFirst()
+        {
+            if (_off == _end)
+                throw new InvalidOperationException("dropFirst of empty chunk");
+            return new ArrayChunk(_array, _off + 1, _end);
+        }
+
+        public object reduce(IFn f, object start)
+        {
+            object ret = f.invoke(start, _array[_off]);
+            for (int x = _off + 1; x < _end; x++)
+                ret = f.invoke(ret, _array[x]);
+            return ret;
         }
 
         #endregion

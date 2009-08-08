@@ -19,7 +19,7 @@ namespace clojure.lang
     {
         #region Data
 
-        readonly Indexed _chunk;
+        readonly IChunk _chunk;
         readonly ISeq _more;
         readonly int _offset;
 
@@ -27,24 +27,16 @@ namespace clojure.lang
 
         #region C-tors
 
-        ChunkedCons(IPersistentMap meta, Indexed chunk, int offset, ISeq more)
+        ChunkedCons(IPersistentMap meta, IChunk chunk, ISeq more)
             : base(meta)
         {
             _chunk = chunk;
-            _offset = offset;
             _more = more;
         }
 
-        public ChunkedCons(Indexed chunk, ISeq more)
-            : this(chunk, 0, more)
+        public ChunkedCons(IChunk chunk, ISeq more)
+            : this(null,chunk,more)
         {
-        }
-
-        public ChunkedCons(Indexed chunk, int offset, ISeq more)
-        {
-            _chunk = chunk;
-            _offset = offset;
-            _more = more;
         }
 
         #endregion
@@ -55,7 +47,7 @@ namespace clojure.lang
         {
             return (meta == _meta)
                 ? this
-                :new ChunkedCons(meta, _chunk, _offset, _more);
+                :new ChunkedCons(meta, _chunk, _more);
         }
 
         #endregion
@@ -64,21 +56,30 @@ namespace clojure.lang
 
         public override object first()
         {
-            return _chunk.nth(_offset);
+            return _chunk.nth(0);
         }
 
         public override ISeq next()
         {
-            if (_offset + 1 < _chunk.count())
-                return new ChunkedCons(_chunk, _offset + 1, _more);
+            if (_chunk.count() > 1)
+                return new ChunkedCons(_chunk.dropFirst(), _more);
             return chunkedNext();
+        }
+
+        public override ISeq more()
+        {
+            if (_chunk.count() > 1)
+                return new ChunkedCons(_chunk.dropFirst(), _more);
+            if (_more == null)
+                return PersistentList.EMPTY;
+            return _more;
         }
 
         #endregion
 
         #region IChunkedSeq Members
 
-        public Indexed chunkedFirst()
+        public IChunk chunkedFirst()
         {
             return _chunk;
         }

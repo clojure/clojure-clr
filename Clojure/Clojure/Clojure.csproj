@@ -107,6 +107,7 @@
     <Compile Include="Lib\ChunkedCons.cs" />
     <Compile Include="Lib\Counted.cs" />
     <Compile Include="Lib\EnumeratorSeq.cs" />
+    <Compile Include="Lib\IChunk.cs" />
     <Compile Include="Lib\IChunkedSeq.cs" />
     <Compile Include="Lib\IDeref.cs" />
     <Compile Include="Lib\IEditableCollection.cs" />
