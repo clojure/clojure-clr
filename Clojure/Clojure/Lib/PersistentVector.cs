@@ -547,9 +547,9 @@ namespace clojure.lang
 
         #endregion
 
-        #region Mutable class
+        #region MutableVector class
 
-        class MutableVector : IMutableVector, Counted
+        class MutableVector : AFn, IMutableVector, Counted
         {
             #region Data
 
@@ -777,17 +777,6 @@ namespace clojure.lang
 
             #region IMutableAssociative Members
 
-            public object valAt(object key)
-            {
-                if (Util.IsInteger(key.GetType()))
-                {
-                    int i = Util.ConvertToInt(key);
-                    if (i >= 0 && i < count())
-                        return nth(i);
-                }
-                return null;
-            }
-
             public IMutableAssociative assoc(object key, object val)
             {
                 if (Util.IsInteger(key.GetType()))
@@ -843,6 +832,29 @@ namespace clojure.lang
                 object[] trimmedTail = new object[_cnt-Tailoff()];
                 Array.Copy(_tail,trimmedTail,trimmedTail.Length);
                 return new PersistentVector(_cnt, _shift, _root, trimmedTail);
+            }
+
+            #endregion
+
+            #region ILookup Members
+
+
+            public object valAt(object key)
+            {
+                // note - relies on EnsureEditable in 2-arg valAt
+                return valAt(key, null);
+            }
+
+            public object valAt(object key, object notFound)
+            {
+                EnsureEditable();
+                if (Util.IsInteger(key.GetType()))
+                {
+                    int i = Util.ConvertToInt(key);
+                    if (i >= 0 && i < count())
+                        return nth(i);
+                }
+                return notFound;
             }
 
             #endregion

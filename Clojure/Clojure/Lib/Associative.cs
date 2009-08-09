@@ -8,7 +8,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents an immutable key/value mapping.
     /// </summary>
-    public interface Associative: IPersistentCollection
+    public interface Associative: IPersistentCollection, ILookup
     {
         /// <summary>
         /// Test if the map contains a key.
@@ -32,19 +32,5 @@ namespace clojure.lang
         /// <returns>A new map with the key/value added.</returns>
         Associative assoc(object key, object val);
 
-        /// <summary>
-        /// Gets the value associated with a key.
-        /// </summary>
-        /// <param name="key">The key to look up.</param>
-        /// <returns>The associated value. (Throws an exception if key is not present.)</returns>
-        object valAt(object key);
-
-        /// <summary>
-        /// Gets the value associated with a key.
-        /// </summary>
-        /// <param name="key">The key to look up.</param>
-        /// <param name="notFound">The value to return if the key is not present.</param>
-        /// <returns>The associated value (or <c>notFound</c> if the key is not present.</returns>
-        object valAt(object key, object notFound);
     }
 }

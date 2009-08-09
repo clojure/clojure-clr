@@ -15,9 +15,8 @@ using System.Text;
 
 namespace clojure.lang
 {
-    public interface IMutableVector : IMutableAssociative
+    public interface IMutableVector : IMutableAssociative, Indexed
     {
-        object nth(int i);
         IMutableVector assocN(int i, object val);
         IMutableVector pop();
     }

@@ -4352,17 +4352,6 @@
   [#^clojure.lang.IMutableVector coll] 
   (.pop coll))  
 
-(defn nth!
-  "Returns the value at the index. get! returns nil if index out of
-  bounds, nth! throws an exception"
-  [#^clojure.lang.IMutableVector coll index] 
-  (.nth coll index))  
-
-(defn get!
-  "Returns the value mapped to key, nil if key not present."
-  [#^clojure.lang.IMutableAssociative coll key]
-  (.valAt coll key))
-  
 ;redef into with batch support
 (defn into
   "Returns a new coll consisting of to-coll with all of the items of

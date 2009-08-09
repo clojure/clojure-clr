@@ -111,6 +111,7 @@
     <Compile Include="Lib\IChunkedSeq.cs" />
     <Compile Include="Lib\IDeref.cs" />
     <Compile Include="Lib\IEditableCollection.cs" />
+    <Compile Include="Lib\ILookup.cs" />
     <Compile Include="Lib\IMutableAssociative.cs" />
     <Compile Include="Lib\IMutableCollection.cs" />
     <Compile Include="Lib\IMutableVector.cs" />

@@ -745,8 +745,8 @@ namespace clojure.lang
         {
             if (coll == null)
                 return null;
-            else if (coll is Associative)
-                return ((Associative)coll).valAt(key);
+            else if (coll is ILookup)
+                return ((ILookup)coll).valAt(key);
             else if (coll is IDictionary)
             {
                 IDictionary m = (IDictionary)coll;
@@ -770,8 +770,8 @@ namespace clojure.lang
         {
             if (coll == null)
                 return notFound;
-            else if (coll is Associative)
-                return ((Associative)coll).valAt(key, notFound);
+            else if (coll is ILookup)
+                return ((ILookup)coll).valAt(key, notFound);
             else if (coll is IDictionary)
             {
                 IDictionary m = (IDictionary)coll;

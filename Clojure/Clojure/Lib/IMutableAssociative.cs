@@ -15,9 +15,8 @@ using System.Text;
 
 namespace clojure.lang
 {
-    public interface IMutableAssociative : IMutableCollection
+    public interface IMutableAssociative : IMutableCollection, ILookup
     {
-        object valAt(object key);
         IMutableAssociative assoc(object key, object val);
     }
 }
