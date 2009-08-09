@@ -519,6 +519,8 @@ namespace clojure.lang
                         foreach (KeyValuePair<Ref, List<CFn>> pair in _commutes)
                         {
                             Ref r = pair.Key;
+                            if (!_sets.Contains(r))
+                                continue;
                             r.EnterWriteLock();
                             locked.Add(r);
                             Info refinfo = r.TInfo;
@@ -530,18 +532,13 @@ namespace clojure.lang
                                 }
                             }
                             object val = r.TryGetVal();
-                            if (!_sets.Contains(r))
-                                _vals[r] = val;
                             foreach (CFn f in pair.Value)
                                 _vals[r] = f.Fn.applyTo(RT.cons(_vals[r], f.Args));
                         }
                         foreach (Ref r in _sets)
                         {
-                            if (!_commutes.ContainsKey(r))
-                            {
                                 r.EnterWriteLock();
                                 locked.Add(r);
-                            }
                         }
                         // validate and enqueue notifications
                         foreach (KeyValuePair<Ref, object> pair in _vals)
