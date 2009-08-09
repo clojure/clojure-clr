@@ -114,6 +114,7 @@
     <Compile Include="Lib\ILookup.cs" />
     <Compile Include="Lib\ITransientAssociative.cs" />
     <Compile Include="Lib\ITransientCollection.cs" />
+    <Compile Include="Lib\ITransientMap.cs" />
     <Compile Include="Lib\ITransientVector.cs" />
     <Compile Include="Lib\Indexed.cs" />
     <Compile Include="Lib\IProxy.cs" />
