@@ -17,6 +17,6 @@ namespace clojure.lang
 {
     public interface IEditableCollection
     {
-        IMutableCollection mutable();
+        ITransientCollection asTransient();
     }
 }

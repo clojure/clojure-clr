@@ -15,9 +15,9 @@ using System.Text;
 
 namespace clojure.lang
 {
-    public interface IMutableVector : IMutableAssociative, Indexed
+    public interface ITransientVector : ITransientAssociative, Indexed
     {
-        IMutableVector assocN(int i, object val);
-        IMutableVector pop();
+        ITransientVector assocN(int i, object val);
+        ITransientVector pop();
     }
 }

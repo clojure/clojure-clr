@@ -90,10 +90,10 @@ namespace clojure.lang
         /// <returns>An initialized vector.</returns>
         static public PersistentVector create(ISeq items)
         {
-            IMutableCollection ret = EMPTY.mutable();
+            ITransientCollection ret = EMPTY.asTransient();
             for (; items != null; items = items.next())
                 ret = ret.conj(items.first());
-            return (PersistentVector)ret.immutable();
+            return (PersistentVector)ret.persistent();
         }
 
         /// <summary>
@@ -103,10 +103,10 @@ namespace clojure.lang
         /// <returns></returns>
         static public PersistentVector create(params object[] items)
         {
-            IMutableCollection ret = EMPTY.mutable();
+            ITransientCollection ret = EMPTY.asTransient();
             foreach (object item in items)
                 ret = ret.conj(item);
-            return (PersistentVector)ret.immutable();
+            return (PersistentVector)ret.persistent();
         }
 
         /// <summary>
@@ -116,10 +116,10 @@ namespace clojure.lang
         /// <returns></returns>
         static public PersistentVector create1(ICollection items)
         {
-            IMutableCollection ret = EMPTY.mutable();
+            ITransientCollection ret = EMPTY.asTransient();
             foreach (object item in items)
                 ret = ret.conj(item);
-            return (PersistentVector)ret.immutable();
+            return (PersistentVector)ret.persistent();
         }
 
 
@@ -540,16 +540,16 @@ namespace clojure.lang
 
         #region IEditableCollection Members
 
-        public IMutableCollection mutable()
+        public ITransientCollection asTransient()
         {
-            return new MutableVector(this);
+            return new TransientVector(this);
         }
 
         #endregion
 
         #region MutableVector class
 
-        class MutableVector : AFn, IMutableVector, Counted
+        class TransientVector : AFn, ITransientVector, Counted
         {
             #region Data
 
@@ -562,7 +562,7 @@ namespace clojure.lang
 
             #region Ctors
 
-            MutableVector(int cnt, int shift, Node root, Object[] tail)
+            TransientVector(int cnt, int shift, Node root, Object[] tail)
             {
                 _cnt = cnt;
                 _shift = shift;
@@ -570,7 +570,7 @@ namespace clojure.lang
                 _tail = tail;
             }
 
-            public MutableVector(PersistentVector v)
+            public TransientVector(PersistentVector v)
                 : this(v._cnt, v._shift, EditableRoot(v._root), EditableTail(v._tail))
             {
             }
@@ -674,7 +674,7 @@ namespace clojure.lang
                 return node[i & 0x01f];
             }
 
-            public IMutableVector assocN(int i, object val)
+            public ITransientVector assocN(int i, object val)
             {
                 EnsureEditable();
                 if (i >= 0 && i < _cnt)
@@ -689,7 +689,7 @@ namespace clojure.lang
                     return this;
                 }
                 if (i == _cnt)
-                    return (IMutableVector)conj(val);
+                    return (ITransientVector)conj(val);
                 throw new IndexOutOfRangeException();
             }
 
@@ -709,7 +709,7 @@ namespace clojure.lang
                 return ret;
             }
 
-            public IMutableVector pop()
+            public ITransientVector pop()
             {
                 EnsureEditable();
                 if (_cnt == 0)
@@ -777,7 +777,7 @@ namespace clojure.lang
 
             #region IMutableAssociative Members
 
-            public IMutableAssociative assoc(object key, object val)
+            public ITransientAssociative assoc(object key, object val)
             {
                 if (Util.IsInteger(key.GetType()))
                 {
@@ -791,7 +791,7 @@ namespace clojure.lang
 
             #region IMutableCollection Members
 
-            public IMutableCollection conj(object val)
+            public ITransientCollection conj(object val)
             {
 
                 EnsureEditable();
@@ -825,7 +825,7 @@ namespace clojure.lang
                 return this;
             }
 
-            public IPersistentCollection immutable()
+            public IPersistentCollection persistent()
             {
                 EnsureEditable();
                 _root.Edit.Set(null);

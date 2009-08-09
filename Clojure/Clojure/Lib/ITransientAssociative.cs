@@ -15,8 +15,8 @@ using System.Text;
 
 namespace clojure.lang
 {
-    public interface IMutableAssociative : IMutableCollection, ILookup
+    public interface ITransientAssociative : ITransientCollection, ILookup
     {
-        IMutableAssociative assoc(object key, object val);
+        ITransientAssociative assoc(object key, object val);
     }
 }

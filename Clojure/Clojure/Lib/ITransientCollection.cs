@@ -15,9 +15,9 @@ using System.Text;
 
 namespace clojure.lang
 {
-    public interface IMutableCollection
+    public interface ITransientCollection
     {
-        IMutableCollection conj(object val);
-        IPersistentCollection immutable();
+        ITransientCollection conj(object val);
+        IPersistentCollection persistent();
     }
 }
