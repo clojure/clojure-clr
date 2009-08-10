@@ -1190,7 +1190,7 @@ namespace clojure.lang
 
         #region TransientHashMap class
 
-        sealed class TransientHashMap : AFn, ITransientMap
+        sealed class TransientHashMap : ATransientMap
         {
             #region Data
 
@@ -1218,7 +1218,7 @@ namespace clojure.lang
 
             #region ITransientMap Members
 
-            public ITransientMap assoc(object key, object val)
+            public override ITransientMap assoc(object key, object val)
             {
                 EnsureEditable();
                 Box addedLeaf = new Box(null);
@@ -1228,7 +1228,7 @@ namespace clojure.lang
                 return this;
             }
 
-            public ITransientMap without(object key)
+            public override ITransientMap without(object key)
             {
                 EnsureEditable();
                 Box removedLeaf = new Box(null);
@@ -1239,7 +1239,7 @@ namespace clojure.lang
                 return this;
             }
 
-            public IPersistentMap persistent()
+            public override IPersistentMap persistent()
             {
                 EnsureEditable();
                 _edit.Set(null);
@@ -1248,65 +1248,27 @@ namespace clojure.lang
 
             #endregion
 
-            #region ITransientAssociative Members
+            //#region ITransientAssociative Members
 
-            ITransientAssociative ITransientAssociative.assoc(object key, object val)
-            {
-                return assoc(key, val);
-            }
+            //ITransientAssociative ITransientAssociative.assoc(object key, object val)
+            //{
+            //    return assoc(key, val);
+            //}
 
-            #endregion
+            //#endregion
 
-            #region ITransientCollection Members
+            //#region ITransientCollection Members
 
-            public ITransientCollection conj(object val)
-            {
-                EnsureEditable();
-                if (val is IMapEntry)
-                {
-                    IMapEntry e = (IMapEntry)val;
+            //IPersistentCollection ITransientCollection.persistent()
+            //{
+            //    return persistent();
+            //}
 
-                    return assoc(e.key(), e.val());
-                }
-                else if (val is DictionaryEntry)
-                {
-                    DictionaryEntry de = (DictionaryEntry)val;
-                    return assoc(de.Key, de.Value);
-                }
-
-                else if (val is IPersistentVector)
-                {
-                    IPersistentVector v = (IPersistentVector)val;
-                    if (v.count() != 2)
-                        throw new ArgumentException("Vector arg to map conj must be a pair");
-                    return assoc(v.nth(0), v.nth(1));
-                }
-
-                // TODO: also handle DictionaryEntry?
-                ITransientMap ret = this;
-                for (ISeq es = RT.seq(val); es != null; es = es.next())
-                {
-                    IMapEntry e = (IMapEntry)es.first();
-                    ret = ret.assoc(e.key(), e.val());
-                }
-                return ret;
-            }
-
-            IPersistentCollection ITransientCollection.persistent()
-            {
-                return persistent();
-            }
-
-            #endregion
+            //#endregion
 
             #region ILookup Members
 
-            public object valAt(object key)
-            {
-                return valAt(key,null);
-            }
-
-            public object valAt(object key, object notFound)
+            public override object valAt(object key, object notFound)
             {
                 EnsureEditable();
                 IMapEntry e = entryAt(key);
@@ -1325,7 +1287,7 @@ namespace clojure.lang
 
             #region Counted Members
 
-            public int count()
+            public override int count()
             {
                 EnsureEditable();
                 return _count;
@@ -1333,18 +1295,9 @@ namespace clojure.lang
 
             #endregion
 
-            #region IFn overloads
-
-            public override object invoke(object arg1)
-            {
-                return valAt(arg1);
-            }
-
-            #endregion
-
             #region Implementation details
 
-            void EnsureEditable()
+            protected override void EnsureEditable()
             {
                 Thread owner = _edit.Get();
                 if (owner == Thread.CurrentThread)
