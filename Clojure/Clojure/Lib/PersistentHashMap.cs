@@ -1232,7 +1232,7 @@ namespace clojure.lang
                 Box removedLeaf = new Box(null);
                 INode newroot = _root.without(_edit, Util.hash(key), key, removedLeaf);
                 _root = newroot == null ? EMPTY._root : newroot;
-                if (removedLeaf != null) 
+                if (removedLeaf.Val != null) 
                     _count--;
                 return this;
             }
