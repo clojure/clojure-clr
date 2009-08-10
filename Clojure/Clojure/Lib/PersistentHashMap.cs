@@ -65,10 +65,10 @@ namespace clojure.lang
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
         public static IPersistentMap create(IDictionary other)
         {
-            IPersistentMap ret = EMPTY;
+            ITransientMap ret = (ITransientMap)EMPTY.asTransient();
             foreach (DictionaryEntry e in other)
                 ret = ret.assoc(e.Key, e.Value);
-            return ret;
+            return ret.persistent();
         }
 
         /// <summary>
@@ -78,10 +78,10 @@ namespace clojure.lang
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
         public static PersistentHashMap create(params object[] init)
         {
-            IPersistentMap ret = EMPTY;
+            ITransientMap ret = (ITransientMap)EMPTY.asTransient();
             for (int i = 0; i < init.Length; i += 2)
                 ret = ret.assoc(init[i], init[i + 1]);
-            return (PersistentHashMap)ret;
+            return (PersistentHashMap)ret.persistent();
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace clojure.lang
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
         public static PersistentHashMap create1(IList init)
         {
-            IPersistentMap ret = EMPTY;
+            ITransientMap ret = (ITransientMap)EMPTY.asTransient();
             for (IEnumerator i = init.GetEnumerator(); i.MoveNext(); )
             {
                 object key = i.Current;
@@ -100,7 +100,7 @@ namespace clojure.lang
                 object val = i.Current;
                 ret = ret.assoc(key, val);
             }
-            return (PersistentHashMap)ret;
+            return (PersistentHashMap)ret.persistent();
         }
 
         /// <summary>
@@ -111,14 +111,14 @@ namespace clojure.lang
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
         public static PersistentHashMap create(ISeq items)
         {
-            IPersistentMap ret = EMPTY;
-            for ( ; items != null; items = items.next().next() )
+            ITransientMap ret = (ITransientMap)EMPTY.asTransient();
+            for (; items != null; items = items.next().next())
             {
                 if ( items.next() == null )
                     throw new ArgumentException(String.Format("No value supplied for key: {0}", items.first()));
                 ret = ret.assoc(items.first(), RT.second(items) );
             }
-            return (PersistentHashMap)ret;
+            return (PersistentHashMap)ret.persistent();
         }
 
 
@@ -130,10 +130,7 @@ namespace clojure.lang
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
         public static PersistentHashMap create(IPersistentMap meta, params object[] init)
         {
-            IPersistentMap ret = (IPersistentMap)EMPTY.withMeta(meta);
-            for (int i = 0; i < init.Length; i += 2)
-                ret = ret.assoc(init[i], init[i + 1]);
-            return (PersistentHashMap)ret;
+            return (PersistentHashMap)create(init).withMeta(meta);
         }
 
         /// <summary>
@@ -1242,6 +1239,13 @@ namespace clojure.lang
                 return this;
             }
 
+            public IPersistentMap persistent()
+            {
+                EnsureEditable();
+                _edit.Set(null);
+                return new PersistentHashMap(_count, _root);
+            }
+
             #endregion
 
             #region ITransientAssociative Members
@@ -1288,12 +1292,9 @@ namespace clojure.lang
                 return ret;
             }
 
-
-            public IPersistentCollection persistent()
+            IPersistentCollection ITransientCollection.persistent()
             {
-                EnsureEditable();
-                _edit.Set(null);
-                return new PersistentHashMap(_count, _root);
+                return persistent();
             }
 
             #endregion
@@ -1354,7 +1355,7 @@ namespace clojure.lang
             }
 
             #endregion
-        }
+         }
 
 
         #endregion

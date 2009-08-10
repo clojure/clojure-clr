@@ -24,7 +24,7 @@ namespace clojure.lang
         /// <param name="val">The value</param>
         /// <returns>A new map with key+value added.</returns>
         /// <remarks>Overwrites an exising value for the <paramref name="key"/>, if present.</remarks>
-        ITransientMap assoc(object key, object val);
+        new ITransientMap assoc(object key, object val);
 
         /// <summary>
         /// Remove a key entry.
@@ -32,6 +32,9 @@ namespace clojure.lang
         /// <param name="key">The key to remove</param>
         /// <returns>A new map with the key removed (or the same map if the key is not contained).</returns>
         ITransientMap without(object key);
+
+        new IPersistentMap persistent();
+
 
     }
 }
