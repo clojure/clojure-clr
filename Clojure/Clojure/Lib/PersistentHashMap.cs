@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 
 using System.Collections;
+using System.Threading;
 
 namespace clojure.lang
 {
@@ -32,7 +33,7 @@ namespace clojure.lang
     /// <para>No sub-tree pools or root-resizing</para>
     /// <para>Any errors are Rich Hickey's (so he says), except those that I introduced.</para>
     /// </remarks>
-    public class PersistentHashMap: APersistentMap
+    public class PersistentHashMap: APersistentMap, IEditableCollection
     {
         #region Data
 
@@ -310,6 +311,8 @@ namespace clojure.lang
 
         #endregion
 
+        #region INode
+
         /// <summary>
         /// Interface for all nodes in the trie.
         /// </summary>
@@ -353,7 +356,31 @@ namespace clojure.lang
             /// </summary>
             /// <returns></returns>
             int getHash();
+
+            /// <summary>
+            /// Return a trie with a new key/value pair.
+            /// </summary>
+            /// <param name="edit"></param>
+            /// <param name="shift"></param>
+            /// <param name="hash"></param>
+            /// <param name="key"></param>
+            /// <param name="val"></param>
+            /// <param name="addedLeaf"></param>
+            /// <returns></returns>
+            INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf);
+
+            /// <summary>
+            /// Return a trie with the given key removed.
+            /// </summary>
+            /// <param name="edit"></param>
+            /// <param name="hash"></param>
+            /// <param name="key"></param>
+            /// <param name="removedLeaf"></param>
+            /// <returns></returns>
+            INode without(AtomicReference<Thread> edit, int hash, object key, Box removedLeaf);
         }
+
+        #endregion
 
         /// <summary>
         /// A node with no keys.  Represents the empty map.
@@ -364,7 +391,7 @@ namespace clojure.lang
 
             public INode assoc(int shift, int hash, object key, object val, Box addedLeaf)
             {
-                INode ret = new LeafNode(hash, key, val);
+                INode ret = new LeafNode(null, hash, key, val);
                 addedLeaf.Val = ret;
                 return ret;
             }
@@ -389,6 +416,16 @@ namespace clojure.lang
                 return 0;
             }
 
+            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf)
+            {
+                return assoc(shift, hash, key, val, addedLeaf);
+            }
+
+            public INode without(AtomicReference<Thread> edit, int hash, Object key, Box removedLeaf)
+            {
+                return this;
+            }
+
             #endregion
         }
 
@@ -402,16 +439,18 @@ namespace clojure.lang
             readonly INode[] _nodes;
             readonly int _shift;
             readonly int _hash;
+            readonly AtomicReference<Thread> _edit;
 
             #endregion
 
             #region C-tors
 
-            internal FullNode(INode[] nodes, int shift)
+            internal FullNode(AtomicReference<Thread> edit, INode[] nodes, int shift)
             {
                 _nodes = nodes;
                 _shift = shift;
                 _hash = nodes[0].getHash();
+                _edit = edit;
             }
 
             #endregion
@@ -438,7 +477,7 @@ namespace clojure.lang
                 {
                     INode[] newNodes = (INode[])_nodes.Clone();
                     newNodes[idx] = n;
-                    return new FullNode(newNodes, shift);
+                    return new FullNode(null, newNodes, shift);
                 }
             }
 
@@ -454,11 +493,11 @@ namespace clojure.lang
                         INode[] newnodes1 = new INode[_nodes.Length - 1];
                         Array.Copy(_nodes, 0, newnodes1, 0, idx);
                         Array.Copy(_nodes, idx + 1, newnodes1, idx, _nodes.Length - (idx + 1));
-                        return new BitmapIndexedNode(~bitpos(hash, _shift), newnodes1, _shift);
+                        return new BitmapIndexedNode(null, ~bitpos(hash, _shift), newnodes1, _shift);
                     }
                     INode[] newnodes = (INode[])_nodes.Clone();
                     newnodes[idx] = n;
-                    return new FullNode(newnodes, _shift);
+                    return new FullNode(null, newnodes, _shift);
                 }
                 return this;
             }
@@ -476,6 +515,52 @@ namespace clojure.lang
             public int getHash()
             {
                 return _hash;
+            }
+
+            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
+            {
+                int idx = Util.Mask(hash, shift);
+
+                INode n = _nodes[idx].assoc(edit, shift + 5, hash, key, val, addedLeaf);
+                if (n == _nodes[idx])
+                    return this;
+                else
+                {
+                    FullNode node = EnsureEditable(edit);
+                    node._nodes[idx] = n;
+                    return node;
+                }
+            }
+
+            public INode without(AtomicReference<Thread> edit, int hash, object key, Box removedLeaf)
+            {
+                int idx = Util.Mask(hash, _shift);
+                INode n = _nodes[idx].without(edit, hash, key, removedLeaf);
+                if (n != _nodes[idx])
+                {
+                    if (n == null)
+                    {
+                        INode[] newnodes = new INode[_nodes.Length - 1];
+                        Array.Copy(_nodes, newnodes, idx);
+                        Array.Copy(_nodes, idx + 1, newnodes, idx, _nodes.Length - (idx + 1));
+                        return new BitmapIndexedNode(edit, ~bitpos(hash, _shift), newnodes, _shift);
+                    }
+                    FullNode node = EnsureEditable(edit);
+                    node._nodes[idx] = n;
+                    return node;
+                }
+                return this;
+            }
+            
+            #endregion
+
+            #region Implementation
+
+            FullNode EnsureEditable(AtomicReference<Thread> edit)
+            {
+                if (_edit == edit)
+                    return this;
+                return new FullNode(edit, (INode[])_nodes.Clone(), _shift);
             }
 
             #endregion
@@ -554,14 +639,22 @@ namespace clojure.lang
 
             readonly int _hash;
             readonly object _key;
-            readonly object _val;
+            object _val;
+
+            public object Val
+            {
+                get { return _val; }
+                set { _val = value; }
+            }
+            readonly AtomicReference<Thread> _edit;
             
             #endregion
 
             #region C-tors
 
-            public LeafNode(int hash, object key, object val)
+            public LeafNode(AtomicReference<Thread> edit, int hash, object key, object val)
             {
+                _edit = edit;
                 _hash = hash;
                 _key = key;
                 _val = val;
@@ -595,18 +688,18 @@ namespace clojure.lang
                             return this;
                         // note - do not set AddedLeaf, since we are replacing
                         else
-                            return new LeafNode(hash, key, val);
+                            return new LeafNode(null, hash, key, val);
                     }
                     else
                     {
                         // hash collision, same hash, different keys
-                        LeafNode newLeaf = new LeafNode(hash, key, val);
+                        LeafNode newLeaf = new LeafNode(null, hash, key, val);
                         addedLeaf.Val = newLeaf;
-                        return new HashCollisionNode(hash, this, newLeaf);
+                        return new HashCollisionNode(null, hash, this, newLeaf);
                     }
                 }
                 else
-                    return BitmapIndexedNode.create(shift, this, hash, key, val, addedLeaf);
+                    return BitmapIndexedNode.create(null, shift, this, hash, key, val, addedLeaf);
             }
 
             public INode without(int hash, object key)
@@ -633,6 +726,49 @@ namespace clojure.lang
                 return _hash;
             }
 
+            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
+            {
+                if (hash == _hash)
+                {
+                    if (Util.Equals(key, _key))
+                    {
+                        if (val == _val)
+                            return this;
+                        LeafNode node = EnsureEditable(edit);
+                        node._val = val;
+                        //note  - do not set addedLeaf, since we are replacing
+                        return node;
+                    }
+                    //hash collision - same hash, different keys
+                    LeafNode newLeaf = new LeafNode(edit, hash, key, val);
+                    addedLeaf.Val = newLeaf;
+                    return new HashCollisionNode(edit, hash, this, newLeaf);
+                }
+                return BitmapIndexedNode.create(edit, shift, this, hash, key, val, addedLeaf);
+            }
+
+            public INode without(AtomicReference<Thread> edit, int hash, object key, Box removedLeaf)
+            {
+                if (hash == _hash && Util.Equals(key, _key))
+                {
+                    removedLeaf.Val = this;
+                    return null;
+                }
+                return this;
+            }            
+        
+    
+            #endregion
+
+            #region Implementation
+
+            internal LeafNode EnsureEditable(AtomicReference<Thread> edit)
+            {
+                if (_edit == edit)
+                    return this;
+                return new LeafNode(edit, _hash, _key, _val);
+            }
+
             #endregion
         }
 
@@ -647,6 +783,7 @@ namespace clojure.lang
             readonly INode[] _nodes;
             readonly int _shift;
             readonly int _hash;
+            readonly AtomicReference<Thread> _edit;
 
             #endregion
 
@@ -666,25 +803,28 @@ namespace clojure.lang
 
             #region C-tors & factory methods
 
-            internal BitmapIndexedNode(int bitmap, INode[] nodes, int shift)
+            internal BitmapIndexedNode(AtomicReference<Thread> edit, int bitmap, INode[] nodes, int shift)
             {
                 _bitmap = bitmap;
                 _nodes = nodes;
                 _shift = shift;
                 _hash = nodes[0].getHash();
+                _edit = edit;
             }
 
-            internal static INode create(int bitmap, INode[] nodes, int shift)
+            internal static INode create(AtomicReference<Thread> edit, int bitmap, INode[] nodes, int shift)
             {
                 return bitmap == -1
-                    ? (INode)new FullNode(nodes, shift)
-                    : (INode)new BitmapIndexedNode(bitmap, nodes, shift);
+                    ? (INode)new FullNode(edit, nodes, shift)
+                    : (INode)new BitmapIndexedNode(edit, bitmap, nodes, shift);
             }
 
-            internal static INode create(int shift, INode branch, int hash, object key, object val, Box addedLeaf)
+            internal static INode create(AtomicReference<Thread> edit, int shift, INode branch, int hash, object key, object val, Box addedLeaf)
             {
-                return (new BitmapIndexedNode(bitpos(branch.getHash(), shift), new INode[] { branch }, shift))
-                        .assoc(shift, hash, key, val, addedLeaf);
+                BitmapIndexedNode node =  new BitmapIndexedNode(edit, bitpos(branch.getHash(), shift), new INode[] { branch }, shift);
+                return edit == null
+                    ? node.assoc(shift, hash, key, val, addedLeaf)
+                    : node.assoc(edit, shift, hash, key, val, addedLeaf);
             }
 
             #endregion
@@ -704,16 +844,16 @@ namespace clojure.lang
                     {
                         INode[] newnodes = (INode[])_nodes.Clone();
                         newnodes[idx] = n;
-                        return new BitmapIndexedNode(_bitmap, newnodes, shift);
+                        return new BitmapIndexedNode(null, _bitmap, newnodes, shift);
                     }
                 }
                 else
                 {
                     INode[] newnodes = new INode[_nodes.Length + 1];
                     Array.Copy(_nodes, 0, newnodes, 0, idx);
-                    addedLeaf.Val = newnodes[idx] = new LeafNode(hash, key, val);
+                    addedLeaf.Val = newnodes[idx] = new LeafNode(null, hash, key, val);
                     Array.Copy(_nodes, idx, newnodes, idx + 1, _nodes.Length - idx);
-                    return create(_bitmap | bit, newnodes, shift);
+                    return create(null, _bitmap | bit, newnodes, shift);
                 }           
             }
 
@@ -733,11 +873,11 @@ namespace clojure.lang
                             INode[] newnodes1 = new INode[_nodes.Length - 1];
                             Array.Copy(_nodes, 0, newnodes1, 0, idx);
                             Array.Copy(_nodes, idx + 1, newnodes1, idx, _nodes.Length - (idx + 1));
-                            return new BitmapIndexedNode(_bitmap & ~bit, newnodes1, _shift);
+                            return new BitmapIndexedNode(null, _bitmap & ~bit, newnodes1, _shift);
                         }
                         INode[] newnodes = (INode[])_nodes.Clone();
                         newnodes[idx] = n;
-                        return new BitmapIndexedNode(_bitmap, newnodes, _shift);
+                        return new BitmapIndexedNode(null, _bitmap, newnodes, _shift);
                     }
                 }
                 return this;
@@ -762,6 +902,70 @@ namespace clojure.lang
                 return _hash;
             }
 
+            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
+            {
+                int bit = bitpos(hash, shift);
+                int idx = index(bit);
+                if ((_bitmap & bit) != 0)
+                {
+                    INode n = _nodes[idx].assoc(shift + 5, hash, key, val, addedLeaf);
+                    if (n == _nodes[idx])
+                        return this;
+                    else
+                    {
+                        BitmapIndexedNode node = EnsureEditable(edit);
+                        node._nodes[idx] = n;
+                        return node;
+                    }
+                }
+                else
+                {
+                    // TODO can do better  (TODO in java code)
+                    INode[] newnodes = new INode[_nodes.Length + 1];
+                    Array.Copy(_nodes, newnodes, idx);
+                    addedLeaf.Val = newnodes[idx] = new LeafNode(null, hash, key, val);
+                    Array.Copy(_nodes, idx, newnodes, idx + 1, _nodes.Length - idx);
+                    return create(edit, _bitmap | bit, newnodes, shift);
+                }
+            }
+
+            public INode without(AtomicReference<Thread> edit, int hash, object key, Box removedLeaf)
+            {
+                int bit = bitpos(hash, _shift);
+                if ((_bitmap & bit) != 0)
+                {
+                    int idx = index(bit);
+                    INode n = _nodes[idx].without(edit, hash, key, removedLeaf);
+                    if (n != _nodes[idx])
+                    {
+                        if (n == null)
+                        {
+                            if (_bitmap == bit)
+                                return null;
+                            INode[] newnodes = new INode[_nodes.Length - 1];
+                            Array.Copy(_nodes, newnodes, idx);
+                            Array.Copy(_nodes, idx + 1, newnodes, idx, _nodes.Length - (idx + 1));
+                            return new BitmapIndexedNode(edit, _bitmap & ~bit, newnodes, _shift);
+                        }
+                        BitmapIndexedNode node = EnsureEditable(edit);
+                        node._nodes[idx] = n;
+                        return node;
+                    }
+                }
+                return this;
+            }            
+        
+
+            #endregion
+
+            #region Implementation
+
+            BitmapIndexedNode EnsureEditable(AtomicReference<Thread> edit)
+            {
+                if (_edit == edit)
+                    return this;
+                return new BitmapIndexedNode(edit, _bitmap, (INode[])_nodes.Clone(), _shift);
+            }
             #endregion
 
             sealed class Seq : ASeq
@@ -838,15 +1042,17 @@ namespace clojure.lang
 
             readonly int _hash;
             readonly LeafNode[] _leaves;
+            readonly AtomicReference<Thread> _edit;
 
             #endregion
 
             #region C-tors
 
-            public HashCollisionNode(int hash, params LeafNode[] leaves)
+            public HashCollisionNode(AtomicReference<Thread> edit, int hash, params LeafNode[] leaves)
             {
                 _hash = hash;
                 _leaves = leaves;
+                _edit = edit;
             }
 
             #endregion
@@ -878,15 +1084,15 @@ namespace clojure.lang
                             return this;
                         LeafNode[] newLeaves1 = (LeafNode[])_leaves.Clone();
                         // Note: do not set addedLeaf, since we are replacing
-                        newLeaves1[idx] = new LeafNode(hash, key, val);
-                        return new HashCollisionNode(hash, newLeaves1);
+                        newLeaves1[idx] = new LeafNode(null, hash, key, val);
+                        return new HashCollisionNode(null, hash, newLeaves1);
                     }
                     LeafNode[] newLeaves = new LeafNode[_leaves.Length + 1];
                     Array.Copy(_leaves, 0, newLeaves, 0, _leaves.Length);
-                    addedLeaf.Val = newLeaves[_leaves.Length] = new LeafNode(hash, key, val);
-                    return new HashCollisionNode(hash, newLeaves);
+                    addedLeaf.Val = newLeaves[_leaves.Length] = new LeafNode(null, hash, key, val);
+                    return new HashCollisionNode(null, hash, newLeaves);
                 }
-                return BitmapIndexedNode.create(shift, this, hash, key, val, addedLeaf);
+                return BitmapIndexedNode.create(null, shift, this, hash, key, val, addedLeaf);
             }
 
             public INode without(int hash, object key)
@@ -899,7 +1105,7 @@ namespace clojure.lang
                 LeafNode[] newLeaves = new LeafNode[_leaves.Length - 1];
                 Array.Copy(_leaves, 0, newLeaves, 0, idx);
                 Array.Copy(_leaves, idx + 1, newLeaves, idx, _leaves.Length - (idx + 1));
-                return new HashCollisionNode(hash, newLeaves);
+                return new HashCollisionNode(null, hash, newLeaves);
             }
 
             public INode find(int hash, object key)
@@ -920,8 +1126,237 @@ namespace clojure.lang
                 return _hash;
             }
 
+            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
+            {
+                if (hash == _hash)
+                {
+                    int idx = findIndex(hash, key);
+                    if (idx != -1)
+                    {
+                        if (_leaves[idx].val() == val)
+                            return this;
+                        LeafNode leaf = _leaves[idx].EnsureEditable(edit);
+                        leaf.Val = val;
+                        if (_leaves[idx] == leaf)
+                            return this;
+                        HashCollisionNode node = EnsureEditable(edit);
+                        node._leaves[idx] = leaf;
+                        return node;
+                    }
+                    LeafNode[] newLeaves = new LeafNode[_leaves.Length + 1];
+                    Array.Copy(_leaves, newLeaves, _leaves.Length);
+                    addedLeaf.Val = newLeaves[_leaves.Length] = new LeafNode(null, hash, key, val);
+                    return new HashCollisionNode(edit, hash, newLeaves);
+                }
+                return BitmapIndexedNode.create(edit, shift, this, hash, key, val, addedLeaf);
+            }
+
+            public INode without(AtomicReference<Thread> edit, int hash, object key, Box removedLeaf)
+            {
+                int idx = findIndex(hash, key);
+                if (idx == -1)
+                    return this;
+                removedLeaf.Val = _leaves[idx];
+                if (_leaves.Length == 2)
+                    return idx == 0 ? _leaves[1] : _leaves[0];
+                LeafNode[] newLeaves = new LeafNode[_leaves.Length - 1];
+                Array.Copy(_leaves, newLeaves, idx);
+                Array.Copy(_leaves, idx + 1, newLeaves, idx, _leaves.Length - (idx + 1));
+                return new HashCollisionNode(edit, hash, newLeaves);
+            }       
+        
+
+            #endregion
+
+            #region Implementation
+
+            HashCollisionNode EnsureEditable(AtomicReference<Thread> edit)
+            {
+                if (_edit == edit)
+                    return this;
+                return new HashCollisionNode(edit, _hash, _leaves);
+            }
+
+            #endregion
+
+        }
+
+
+        #region IEditableCollection Members
+
+        public ITransientCollection asTransient()
+        {
+            return new TransientHashMap(this);
+        }
+
+        #endregion
+
+        #region TransientHashMap class
+
+        sealed class TransientHashMap : AFn, ITransientMap
+        {
+            #region Data
+
+            AtomicReference<Thread> _edit;
+            INode _root;
+            int _count;
+
+            #endregion
+
+            #region Ctors
+
+            public TransientHashMap(PersistentHashMap m)
+                :this(new AtomicReference<Thread>(Thread.CurrentThread),m._root,m._count)
+            {
+            }
+
+            TransientHashMap(AtomicReference<Thread> edit, INode root, int count)
+            {
+                _edit = edit;
+                _root = root;
+                _count = count;
+            }
+
+            #endregion
+
+            #region ITransientMap Members
+
+            public ITransientMap assoc(object key, object val)
+            {
+                EnsureEditable();
+                Box addedLeaf = new Box(null);
+                _root = _root.assoc(_edit, 0, Util.hash(key), key, val, addedLeaf);
+                if (addedLeaf.Val != null)
+                    _count++;
+                return this;
+            }
+
+            public ITransientMap without(object key)
+            {
+                EnsureEditable();
+                Box removedLeaf = new Box(null);
+                INode newroot = _root.without(_edit, Util.hash(key), key, removedLeaf);
+                _root = newroot == null ? EMPTY._root : newroot;
+                if (removedLeaf != null) 
+                    _count--;
+                return this;
+            }
+
+            #endregion
+
+            #region ITransientAssociative Members
+
+            ITransientAssociative ITransientAssociative.assoc(object key, object val)
+            {
+                return assoc(key, val);
+            }
+
+            #endregion
+
+            #region ITransientCollection Members
+
+            public ITransientCollection conj(object val)
+            {
+                EnsureEditable();
+                if (val is IMapEntry)
+                {
+                    IMapEntry e = (IMapEntry)val;
+
+                    return assoc(e.key(), e.val());
+                }
+                else if (val is DictionaryEntry)
+                {
+                    DictionaryEntry de = (DictionaryEntry)val;
+                    return assoc(de.Key, de.Value);
+                }
+
+                else if (val is IPersistentVector)
+                {
+                    IPersistentVector v = (IPersistentVector)val;
+                    if (v.count() != 2)
+                        throw new ArgumentException("Vector arg to map conj must be a pair");
+                    return assoc(v.nth(0), v.nth(1));
+                }
+
+                // TODO: also handle DictionaryEntry?
+                ITransientMap ret = this;
+                for (ISeq es = RT.seq(val); es != null; es = es.next())
+                {
+                    IMapEntry e = (IMapEntry)es.first();
+                    ret = ret.assoc(e.key(), e.val());
+                }
+                return ret;
+            }
+
+
+            public IPersistentCollection persistent()
+            {
+                EnsureEditable();
+                _edit.Set(null);
+                return new PersistentHashMap(_count, _root);
+            }
+
+            #endregion
+
+            #region ILookup Members
+
+            public object valAt(object key)
+            {
+                return valAt(key,null);
+            }
+
+            public object valAt(object key, object notFound)
+            {
+                EnsureEditable();
+                IMapEntry e = entryAt(key);
+                if (e != null)
+                    return e.val();
+                return notFound;
+            }
+
+            // not part of this interface, but I don't know a better place for it
+            public IMapEntry entryAt(Object key)
+            {
+                return (IMapEntry)_root.find(Util.hash(key), key);
+            }
+
+            #endregion
+
+            #region Counted Members
+
+            public int count()
+            {
+                EnsureEditable();
+                return _count;
+            }
+
+            #endregion
+
+            #region IFn overloads
+
+            public override object invoke(object arg1)
+            {
+                return valAt(arg1);
+            }
+
+            #endregion
+
+            #region Implementation details
+
+            void EnsureEditable()
+            {
+                Thread owner = _edit.Get();
+                if (owner == Thread.CurrentThread)
+                    return;
+                if (owner != null)
+                    throw new InvalidOperationException("Mutable used by non-owner thread");
+                throw new InvalidOperationException("Mutable used after immutable call");
+            }
+
             #endregion
         }
-        
+
+
+        #endregion
     }
 }
