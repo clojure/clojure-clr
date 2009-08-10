@@ -6,14 +6,18 @@ using System.Collections;
 
 namespace clojure.lang
 {
-    public abstract class ATransientMap : AFn, ITransientMap
+    abstract class ATransientMap : AFn, ITransientMap
     {
+        #region Methods to be supplied by derived classes
+
         abstract protected void EnsureEditable();
-        abstract public ITransientMap assoc(object key, object val);
-        abstract public object valAt(object key, object notFound);
-        abstract public int count();
-        abstract public IPersistentMap persistent();
-        abstract public ITransientMap without(object key);
+        abstract protected ITransientMap doAssoc(object key, object val);
+        abstract protected ITransientMap doWithout(object key);
+        abstract protected object doValAt(object key, object notFound);
+        abstract protected int doCount();
+        abstract protected IPersistentMap doPersistent();
+
+        #endregion
 
         IPersistentCollection ITransientCollection.persistent()
         {
@@ -64,9 +68,54 @@ namespace clojure.lang
         }
 
 
+        #region IFn overloads
+
+        public override object invoke(object arg1)
+        {
+            return valAt(arg1);
+        }
+
+        public override object invoke(object arg1, object arg2)
+        {
+            return valAt(arg1, arg2);
+        }
+
+        #endregion
+
         public object valAt(object key)
         {
             return valAt(key, null);
         }
+
+        public object valAt(object key, object notFound)
+        {
+            EnsureEditable();
+            return doValAt(key, notFound);
+        }
+
+        public ITransientMap assoc(object key, object val)
+        {
+            EnsureEditable();
+            return doAssoc(key, val);
+        }
+
+        public ITransientMap without(object key)
+        {
+            EnsureEditable();
+            return doWithout(key);
+        }
+
+        public IPersistentMap persistent()
+        {
+            EnsureEditable();
+            return doPersistent();
+        }
+
+        public int count()
+        {
+            EnsureEditable();
+            return doCount();
+        }
+
     }
 }

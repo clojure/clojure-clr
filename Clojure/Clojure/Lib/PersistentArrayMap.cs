@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 
 using System.Collections;
+using System.Threading;
 
 namespace clojure.lang
 {
@@ -28,7 +29,7 @@ namespace clojure.lang
     /// but you won't be able to distinguish a <value>null</value> value via <see cref="valAt">valAt</see> --
     /// use <see cref="contains">contains</see> or <see cref="entryAt">entryAt</see>.</para>
     /// </remarks>
-    public class PersistentArrayMap : APersistentMap
+    public class PersistentArrayMap : APersistentMap, IEditableCollection
     {
         // any reason not to seal this class?
 
@@ -66,25 +67,11 @@ namespace clojure.lang
         /// <returns>A new persistent map.</returns>
         public static IPersistentMap create(IDictionary other)
         {
-            // Java version has this.  Seems wasteful.
-            //IPersistentMap ret = EMPTY;
-            //foreach (DictionaryEntry e in other)
-            //{
-            //    ret = ret.assoc(e.Key, e.Value);
-            //}
-            //return ret;
-            if (other.Count > HASHTABLE_THRESHOLD / 2)
-                return PersistentHashMap.create(other);
+            ITransientMap ret = (ITransientMap)EMPTY.asTransient();
+            foreach (DictionaryEntry de in other)
+                ret = ret.assoc(de.Key, de.Value);
+            return ret.persistent();
 
-            object[] array = new object[other.Count * 2];
-            int i=0;
-            foreach (DictionaryEntry e in other)
-            {
-                array[2 * i] = e.Key;
-                array[2 * i + 1] = e.Value;
-                i++;
-            }
-            return new PersistentArrayMap(array);
         }
 
         /// <summary>
@@ -114,8 +101,9 @@ namespace clojure.lang
         /// <remarks>The array is used directly.  Do not modify externally or immutability is sacrificed.</remarks>
         public  PersistentArrayMap(object[] init)
         {
-            if (init.Length % 2 != 0)
-                throw new ArgumentException("Key/value array must have an even number of elements.");
+            // The Java version doesn't seem to care.  Why should I?
+            //if (init.Length % 2 != 0)
+            //    throw new ArgumentException("Key/value array must have an even number of elements.");
             _array = init;
         }
 
@@ -128,8 +116,9 @@ namespace clojure.lang
         protected PersistentArrayMap(IPersistentMap meta, object[] init)
             : base(meta)
         {
-            if (init.Length % 2 != 0)
-                throw new ArgumentException("Key/value array must have an even number of elements.");
+            // The Java version doesn't seem to care.  Why should I?
+            //if (init.Length % 2 != 0)
+            //    throw new ArgumentException("Key/value array must have an even number of elements.");
 
             _array = init;
         }
@@ -179,7 +168,7 @@ namespace clojure.lang
         /// <param name="k2">The second key to compare.</param>
         /// <returns></returns>
         /// <remarks>Handles nulls properly.</remarks>
-        private bool EqualKey(object k1, object k2)
+        static bool EqualKey(object k1, object k2)
         {
             if (k1 == null)
                 return k2 == null;
@@ -458,5 +447,124 @@ namespace clojure.lang
             #endregion
 
         }
+
+        #region IEditableCollection Members
+
+        public ITransientCollection asTransient()
+        {
+            return new TransientArrayMap(_array);
+        }
+
+        #endregion
+
+        #region TransientArrayMap class
+
+        sealed class TransientArrayMap : ATransientMap
+        {
+            #region Data
+
+            int _len;
+            readonly object[] _array;
+            readonly Thread _owner;
+
+            #endregion
+
+            #region Ctors
+
+
+            public TransientArrayMap(object[] array)
+            {
+                _owner = Thread.CurrentThread;
+                _array = new object[Math.Max(HASHTABLE_THRESHOLD, array.Length)];
+                Array.Copy(array, _array, array.Length);
+                _len = array.Length;
+            }
+
+            #endregion
+
+
+            #region
+
+            /// <summary>
+            /// Gets the index of the key in the array.
+            /// </summary>
+            /// <param name="key">The key to search for.</param>
+            /// <returns>The index of the key if found; -1 otherwise.</returns>
+            private int IndexOfKey(object key)
+            {
+                for (int i = 0; i < _len; i += 2)
+                    if (EqualKey(_array[i], key))
+                        return i;
+                return -1;
+            }
+            #endregion
+
+            protected override void EnsureEditable()
+            {
+                if (_owner == Thread.CurrentThread)
+                    return;
+                if (_owner != null)
+                    throw new InvalidOperationException("Mutable used by non-owner thread");
+                throw new InvalidOperationException("Mutable used after immutable call");
+            }
+
+            protected override ITransientMap doAssoc(object key, object val)
+            {
+                int i = IndexOfKey(key);
+                if (i >= 0) //already have key,
+                {
+                    if (_array[i + 1] != val) //no change, no op
+                        _array[i + 1] = val;
+                }
+                else //didn't have key, grow
+                {
+                    if (_len >= _array.Length)
+                        return ((ITransientMap)PersistentHashMap.create(_array).asTransient()).assoc(key, val);
+                    _array[_len++] = key;
+                    _array[_len++] = val;
+                }
+                return this;
+            }
+
+
+            protected override ITransientMap doWithout(object key)
+            {
+                int i = IndexOfKey(key);
+                if (i >= 0) //have key, will remove
+                {
+                    if (_len >= 2)
+                    {
+                        _array[i] = _array[_len - 2];
+                        _array[i + 1] = _array[_len - 1];
+                    }
+                    _len -= 2;
+                }
+                return this;
+            }
+
+            protected override object doValAt(object key, object notFound)
+            {
+                int i = IndexOfKey(key);
+                if (i >= 0)
+                    return _array[i + 1];
+                return notFound;
+            }
+
+            protected override int doCount()
+            {
+                return _len / 2;
+            }
+
+            protected override IPersistentMap doPersistent()
+            {
+                object[] a = new object[_len];
+                Array.Copy(_array, a, _len);
+                return new PersistentArrayMap(a);
+            }
+
+
+        }
+
+        #endregion
     }
 }

@@ -1218,9 +1218,8 @@ namespace clojure.lang
 
             #region ITransientMap Members
 
-            public override ITransientMap assoc(object key, object val)
+            protected override ITransientMap doAssoc(object key, object val)
             {
-                EnsureEditable();
                 Box addedLeaf = new Box(null);
                 _root = _root.assoc(_edit, 0, Util.hash(key), key, val, addedLeaf);
                 if (addedLeaf.Val != null)
@@ -1228,9 +1227,8 @@ namespace clojure.lang
                 return this;
             }
 
-            public override ITransientMap without(object key)
+            protected override ITransientMap doWithout(object key)
             {
-                EnsureEditable();
                 Box removedLeaf = new Box(null);
                 INode newroot = _root.without(_edit, Util.hash(key), key, removedLeaf);
                 _root = newroot == null ? EMPTY._root : newroot;
@@ -1239,9 +1237,8 @@ namespace clojure.lang
                 return this;
             }
 
-            public override IPersistentMap persistent()
+            protected override IPersistentMap doPersistent()
             {
-                EnsureEditable();
                 _edit.Set(null);
                 return new PersistentHashMap(_count, _root);
             }
@@ -1268,9 +1265,8 @@ namespace clojure.lang
 
             #region ILookup Members
 
-            public override object valAt(object key, object notFound)
+            protected override object doValAt(object key, object notFound)
             {
-                EnsureEditable();
                 IMapEntry e = entryAt(key);
                 if (e != null)
                     return e.val();
@@ -1278,7 +1274,7 @@ namespace clojure.lang
             }
 
             // not part of this interface, but I don't know a better place for it
-            public IMapEntry entryAt(Object key)
+            IMapEntry entryAt(Object key)
             {
                 return (IMapEntry)_root.find(Util.hash(key), key);
             }
@@ -1287,9 +1283,8 @@ namespace clojure.lang
 
             #region Counted Members
 
-            public override int count()
+            protected override int doCount()
             {
-                EnsureEditable();
                 return _count;
             }
 
@@ -1309,7 +1304,6 @@ namespace clojure.lang
 
             #endregion
          }
-
 
         #endregion
     }
