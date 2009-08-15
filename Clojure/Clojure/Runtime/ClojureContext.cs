@@ -17,7 +17,6 @@ using Microsoft.Linq.Expressions;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Generation;
 using clojure.lang;
-using clojure.compiler;
 
 namespace clojure.runtime
 {

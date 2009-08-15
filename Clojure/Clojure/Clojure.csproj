@@ -137,7 +137,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="CljCompiler\Generator.cs" />
     <Compile Include="Lib\AFn.cs" />
     <Compile Include="Lib\AFnImpl.cs" />
     <Compile Include="Lib\AFunction.cs" />
