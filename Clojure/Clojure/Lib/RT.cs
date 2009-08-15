@@ -378,7 +378,7 @@ namespace clojure.lang
             = Var.intern(CLOJURE_NS, Symbol.create("*allow-unresolved-vars*"), F);
 
         public static readonly Var WARN_ON_REFLECTION
-            = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), T); // DEBUG_ONLY, should be F in production.
+            = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), F);
 
         public static readonly Var MACRO_META 
             = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);

@@ -21,6 +21,11 @@ namespace clojure.console
 
         private void Run()
         {
+            Console.WriteLine(
+@"This application is for testing purposes only.
+It loads a very minimal test environment.
+Please use Clojure.Main for everyday chores."
+);
             Initialize();
             RunInteractiveLoop();
         }
