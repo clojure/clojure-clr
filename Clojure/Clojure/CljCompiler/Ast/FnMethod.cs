@@ -268,13 +268,11 @@ namespace clojure.lang.CljCompiler.Ast
             return String.Format("__invokeHelper_{0}{1}", RequiredArity, IsVariadic ? "v" : string.Empty);
         }
 
-        #endregion
-
         internal LambdaExpression GenerateImmediateLambda(GenContext context)
         {
             List<ParameterExpression> parmExprs = new List<ParameterExpression>(_argLocals.count());
-            List<ParameterExpression> typedParmExprs = new List<ParameterExpression>();
-            List<Expression> typedParmInitExprs = new List<Expression>();
+            //List<ParameterExpression> typedParmExprs = new List<ParameterExpression>();
+            //List<Expression> typedParmInitExprs = new List<Expression>();
 
             //FnExpr fn = context.FnExpr;
             //ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
@@ -298,18 +296,18 @@ namespace clojure.lang.CljCompiler.Ast
                     b.ParamExpression = pexpr;
                     parmExprs.Add(pexpr);
 
-                    if (b.Tag != null)
-                    {
-                        // we have a type hint
-                        // The ParameterExpression above will be the parameter to the function.
-                        // We need to generate another local parameter that is typed.  
-                        // This will be the parameter tied to the LocalBinding so that the typing information is seen in the body.
-                        Type t = Compiler.TagToType(b.Tag);
-                        ParameterExpression p2 = Expression.Parameter(t, b.Name);
-                        b.ParamExpression = p2;
-                        typedParmExprs.Add(p2);
-                        typedParmInitExprs.Add(Expression.Assign(p2, Expression.Convert(pexpr, t)));
-                    }
+                    //if (b.Tag != null)
+                    //{
+                    //    // we have a type hint
+                    //    // The ParameterExpression above will be the parameter to the function.
+                    //    // We need to generate another local parameter that is typed.  
+                    //    // This will be the parameter tied to the LocalBinding so that the typing information is seen in the body.
+                    //    Type t = Compiler.TagToType(b.Tag);
+                    //    ParameterExpression p2 = Expression.Parameter(t, b.Name);
+                    //    b.ParamExpression = p2;
+                    //    typedParmExprs.Add(p2);
+                    //    typedParmInitExprs.Add(Expression.Assign(p2, Expression.Convert(pexpr, t)));
+                    //}
                 }
 
 
@@ -321,15 +319,15 @@ namespace clojure.lang.CljCompiler.Ast
                 // If we have any typed parameters, we need to add an extra block to do the initialization.
 
                 List<Expression> bodyExprs = new List<Expression>();
-                bodyExprs.AddRange(typedParmInitExprs);
+                //bodyExprs.AddRange(typedParmInitExprs);
                 bodyExprs.Add(Expression.Label(loopLabel));
                 bodyExprs.Add(Compiler.MaybeBox(_body.GenDlr(context)));
 
 
                 Expression block;
-                if (typedParmExprs.Count > 0)
-                    block = Expression.Block(typedParmExprs, bodyExprs);
-                else
+                //if (typedParmExprs.Count > 0)
+                //    block = Expression.Block(typedParmExprs, bodyExprs);
+                //else
                     block = Expression.Block(bodyExprs);
 
                 return Expression.Lambda(
@@ -343,5 +341,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.popThreadBindings();
             }
         }
+
+        #endregion
     }
 }
