@@ -372,7 +372,7 @@ namespace clojure.lang
         internal static Expr OptionallyGenerateMetaInit(object form, Expr expr)
         {
             Expr ret = expr;
-
+           
             IObj o = form as IObj;
             if (o != null && o.meta() != null)
                 ret = new MetaExpr(ret, (MapExpr)MapExpr.Parse(o.meta()));
