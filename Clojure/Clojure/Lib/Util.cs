@@ -86,23 +86,244 @@ namespace clojure.lang
         public static int ConvertToInt(object o)
         {
             // ToInt32 rounds.  We need truncation.
-            return (int)Convert.ToDouble(o);
+            //return (int)Convert.ToDouble(o);
+            //switch (Type.GetTypeCode(o.GetType()))   // convert fix
+            //{
+            //    case TypeCode.Byte:
+            //        return (int)(Byte)o;
+            //    case TypeCode.Char:
+            //        return (int)(Char)o;
+            //    case TypeCode.Decimal:
+            //        return (int)(decimal)o;
+            //    case TypeCode.Double:
+            //        return (int)(double)o;
+            //    case TypeCode.Int16:
+            //        return (int)(short)o;
+            //    case TypeCode.Int32:
+            //        return (int)o;
+            //    case TypeCode.Int64:
+            //        return (int)(long)o;
+            //    case TypeCode.SByte:
+            //        return (int)(sbyte)o;
+            //    case TypeCode.Single:
+            //        return (int)(float)o;
+            //    case TypeCode.UInt16:
+            //        return (int)(ushort)o;
+            //    case TypeCode.UInt32:
+            //        return (int)(uint)o;
+            //    case TypeCode.UInt64:
+            //        return (int)(ulong)o;
+            //    default:
+            //        return Convert.ToInt32(o);
+            //}
+            if (o is Int32)
+                return (int)o;
+            else if (o is Int64)
+                return (int)(long)o;
+            else if (o is Double)
+                return (int)(double)o;
+            else if (o is Single)
+                return (int)(float)o;
+            else if (o is Int16)
+                return (int)(short)o;
+            else if (o is Byte)
+                return (int)(Byte)o;
+            else if (o is Char)
+                return (int)(Char)o;
+            else if (o is Decimal)
+                return (int)(decimal)o;
+            else if (o is SByte)
+                return (int)(sbyte)o;
+            else if (o is UInt16)
+                return (int)(ushort)o;
+            else if (o is UInt32)
+                return (int)(uint)o;
+            else if (o is UInt64)
+                return (int)(ulong)o;
+            else
+                return Convert.ToInt32(o);
         }
 
         public static long ConvertToLong(object o)
         {
             // ToInt64 rounds.  We need truncation.
-            return (long)Convert.ToDouble(o);
+            //return (long)Convert.ToDouble(o);
+            //switch (Type.GetTypeCode(o.GetType()))   // convert fix
+            //{
+            //    case TypeCode.Byte:
+            //        return (long)(Byte)o;
+            //    case TypeCode.Char:
+            //        return (long)(Char)o;
+            //    case TypeCode.Decimal:
+            //        return (long)(decimal)o;
+            //    case TypeCode.Double:
+            //        return (long)(double)o;
+            //    case TypeCode.Int16:
+            //        return (long)(short)o;
+            //    case TypeCode.Int32:
+            //        return (long)(int)o;
+            //    case TypeCode.Int64:
+            //        return (long)o;
+            //    case TypeCode.SByte:
+            //        return (long)(sbyte)o;
+            //    case TypeCode.Single:
+            //        return (long)(float)o;
+            //    case TypeCode.UInt16:
+            //        return (long)(ushort)o;
+            //    case TypeCode.UInt32:
+            //        return (long)(uint)o;
+            //    case TypeCode.UInt64:
+            //        return (long)(ulong)o;
+            //    default:
+            //        return Convert.ToInt64(o);
+            //}
+            if (o is Int64)
+                return (long)o;
+            else if (o is Int32)
+                return (long)(int)o;
+            else if (o is Double)
+                return (long)(double)o;
+            else if (o is Single)
+                return (long)(float)o;
+            else if (o is Int16)
+                return (long)(short)o;
+            else if (o is Byte)
+                return (long)(Byte)o;
+            else if (o is Char)
+                return (long)(Char)o;
+            else if (o is Decimal)
+                return (long)(decimal)o;
+            else if (o is SByte)
+                return (long)(sbyte)o;
+            else if (o is UInt16)
+                return (long)(ushort)o;
+            else if (o is UInt32)
+                return (long)(uint)o;
+            else if (o is UInt64)
+                return (long)(ulong)o;
+            else
+                return Convert.ToInt32(o);
         }
 
         public static float ConvertToFloat(object o)
         {
-            return (float)Convert.ToDouble(o);
+            //return (float)Convert.ToDouble(o);
+            //switch (Type.GetTypeCode(o.GetType()))   // convert fix
+            //{
+            //    case TypeCode.Byte:
+            //        return (float)(Byte)o;
+            //    case TypeCode.Char:
+            //        return (float)(Char)o;
+            //    case TypeCode.Decimal:
+            //        return (float)(decimal)o;
+            //    case TypeCode.Double:
+            //        return (float)(double)o;
+            //    case TypeCode.Int16:
+            //        return (float)(short)o;
+            //    case TypeCode.Int32:
+            //        return (float)(int)o;
+            //    case TypeCode.Int64:
+            //        return (float)(long)o;
+            //    case TypeCode.SByte:
+            //        return (float)(sbyte)o;
+            //    case TypeCode.Single:
+            //        return (float)o;
+            //    case TypeCode.UInt16:
+            //        return (float)(ushort)o;
+            //    case TypeCode.UInt32:
+            //        return (float)(uint)o;
+            //    case TypeCode.UInt64:
+            //        return (float)(ulong)o;
+            //    default:
+            //        return Convert.ToSingle(o);
+            //}
+            if (o is Single)
+                return (float)o;
+            else if (o is Double)
+                return (float)(double)o;
+            else if (o is Int32)
+                return (float)(int)o;
+            else if (o is Int64)
+                return (float)(long)o;
+            else if (o is Int16)
+                return (float)(short)o;
+            else if (o is Byte)
+                return (float)(Byte)o;
+            else if (o is Char)
+                return (float)(Char)o;
+            else if (o is Decimal)
+                return (float)(decimal)o;
+            else if (o is SByte)
+                return (float)(sbyte)o;
+            else if (o is UInt16)
+                return (float)(ushort)o;
+            else if (o is UInt32)
+                return (float)(uint)o;
+            else if (o is UInt64)
+                return (float)(ulong)o;
+            else
+                return Convert.ToSingle(o);
         }
 
         public static double ConvertToDouble(object o)
         {
-            return Convert.ToDouble(o);
+            //return Convert.ToDouble(o);
+            //switch (Type.GetTypeCode(o.GetType()))   // convert fix
+            //{
+            //    case TypeCode.Byte:
+            //        return (double)(Byte)o;
+            //    case TypeCode.Char:
+            //        return (double)(Char)o;
+            //    case TypeCode.Decimal:
+            //        return (double)(decimal)o;
+            //    case TypeCode.Double:
+            //        return (double)o;
+            //    case TypeCode.Int16:
+            //        return (double)(short)o;
+            //    case TypeCode.Int32:
+            //        return (double)(int)o;
+            //    case TypeCode.Int64:
+            //        return (double)(long)o;
+            //    case TypeCode.SByte:
+            //        return (double)(sbyte)o;
+            //    case TypeCode.Single:
+            //        return (double)(float)o;
+            //    case TypeCode.UInt16:
+            //        return (double)(ushort)o;
+            //    case TypeCode.UInt32:
+            //        return (double)(uint)o;
+            //    case TypeCode.UInt64:
+            //        return (double)(ulong)o;
+            //    default:
+            //        return Convert.ToDouble(o);
+            //}
+            if (o is Double)
+                return (double)o;
+            else if (o is Single)
+                return (double)(float)o; 
+            else if (o is Int32)
+                return (double)(int)o;
+            else if (o is Int64)
+                return (double)(long)o;
+            else if (o is Int16)
+                return (double)(short)o;
+            else if (o is Byte)
+                return (double)(Byte)o;
+            else if (o is Char)
+                return (double)(Char)o;
+            else if (o is Decimal)
+                return (double)(decimal)o;
+            else if (o is SByte)
+                return (double)(sbyte)o;
+            else if (o is UInt16)
+                return (double)(ushort)o;
+            else if (o is UInt32)
+                return (double)(uint)o;
+            else if (o is UInt64)
+                return (double)(ulong)o;
+            else
+                return Convert.ToDouble(o);
+
         }
 
         public static bool IsNumeric(object o)

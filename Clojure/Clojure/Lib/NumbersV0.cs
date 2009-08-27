@@ -14,128 +14,38 @@ using System.Linq;
 using System.Text;
 using BigDecimal = java.math.BigDecimal;
 
-namespace clojure.lang
+namespace clojure.lang.deprecated
 {
-
-    // The old version of Numbers is over in NumbersV0. 
-    // I'm keeping it around until I'm sure I want to go with this one.
+    // Keeping this around until I'm sure I want to go with the new one.
     // Make updates in both places.
 
     public class Numbers
     {
 
-        #region Enums for arithmetic opcodes
-
-        public enum UnaryOpCode
+        interface Ops
         {
-            Inc,
-            Dec,
-            Negate
+            Ops combine(Ops y);
+            Ops opsWith(IntegerOps x);
+            Ops opsWith(LongOps x);
+            Ops opsWith(FloatOps x);
+            Ops opsWith(DoubleOps x);
+            Ops opsWith(RatioOps x);
+            Ops opsWith(BigIntegerOps x);
+            Ops opsWith(BigDecimalOps x);
+            bool isZero(object x);
+            bool isPos(object x);
+            bool isNeg(object x);
+            object add(object x, object y);
+            object multiply(object x, object y);
+            object divide(object x, object y);
+            object quotient(object x, object y);
+            object remainder(object x, object y);
+            bool equiv(object x, object y);
+            bool lt(object x, object y);
+            object negate(object x);
+            object inc(object x);
+            object dec(object x);
         }
-
-        public enum BoolUnaryOpCode
-        {
-            IsZero,
-            IsPos,
-            IsNeg
-        }
-
-        public enum BinaryOpCode
-        {
-            Add,
-            Mult,
-            Divide,
-            Quotient,
-            Remainder
-        }
-
-        public enum BoolBinaryOpCode
-        {
-            Equiv,
-            Lt
-        }
-
-        #endregion
-
-        #region Base class for operations
-
-        abstract class Ops<T>
-        {
-            public bool Do(T x, T y, BoolBinaryOpCode code)
-            {
-                switch (code)
-                {
-                    case BoolBinaryOpCode.Equiv:
-                        return equiv(x, y);
-                    case BoolBinaryOpCode.Lt:
-                        return lt(x, y);
-                }
-                throw new InvalidProgramException("Bad BoolBinaryOpCode -- internal error");
-            }
-
-            public bool Do(T x, BoolUnaryOpCode code)
-            {
-                switch (code)
-                {
-                    case BoolUnaryOpCode.IsNeg:
-                        return isNeg(x);
-                    case BoolUnaryOpCode.IsPos:
-                        return isPos(x);
-                    case BoolUnaryOpCode.IsZero:
-                        return isZero(x);
-                }
-                throw new InvalidProgramException("Bad BoolBinaryOpCode -- internal error");
-            }
-
-
-            public object Do(T x, UnaryOpCode code)
-            {
-                switch (code)
-                {
-                    case UnaryOpCode.Dec:
-                        return dec(x);
-                    case UnaryOpCode.Inc:
-                        return inc(x);
-                    case UnaryOpCode.Negate:
-                        return negate(x);
-                }
-                throw new InvalidProgramException("Bad BoolBinaryOpCode -- internal error");
-            }
-
-            public object Do(T x, T y, BinaryOpCode code)
-            {
-                switch (code)
-                {
-                    case BinaryOpCode.Add:
-                        return add(x,y);
-                    case BinaryOpCode.Divide:
-                        return divide(x, y);
-                    case BinaryOpCode.Mult:
-                        return multiply(x, y);
-                    case BinaryOpCode.Quotient:
-                        return quotient(x, y);
-                    case BinaryOpCode.Remainder:
-                        return remainder(x, y);
-                }
-                throw new InvalidProgramException("Bad BoolBinaryOpCode -- internal error");
-            }
-
-            public abstract bool isZero(T x);
-            public abstract bool isPos(T x);
-            public abstract bool isNeg(T x);
-            public abstract object add(T x, T y);
-            public abstract object multiply(T x, T y);
-            public abstract object divide(T x, T y);
-            public abstract object quotient(T x, T y);
-            public abstract object remainder(T x, T y);
-            public abstract bool equiv(T x, T y);
-            public abstract bool lt(T x, T y);
-            public abstract object negate(T x);
-            public abstract object inc(T x);
-            public abstract object dec(T x);
-        }
-
-        #endregion
 
         interface BitOps
         {
@@ -160,72 +70,76 @@ namespace clojure.lang
 
         public static bool isZero(object x)
         {
-            return DoOp(x,BoolUnaryOpCode.IsZero);
+            return ops(x).isZero(x);
         }
 
         public static bool isPos(object x)
         {
-            return DoOp(x, BoolUnaryOpCode.IsPos);
+            return ops(x).isPos(x);
         }
 
         public static bool isNeg(object x)
         {
-            return DoOp(x, BoolUnaryOpCode.IsNeg);
+            return ops(x).isNeg(x);
         }
 
         public static object minus(object x)
         {
-            return DoOp(x, UnaryOpCode.Negate);
+            return ops(x).negate(x);
         }
 
         public static object inc(object x)
         {
-            return DoOp(x, UnaryOpCode.Inc);
+            return ops(x).inc(x);
         }
 
         public static object dec(object x)
         {
-            return DoOp(x, UnaryOpCode.Dec);
+            return ops(x).dec(x);
         }
 
         public static object add(object x, object y)
         {
-            return DoOp(x, y, BinaryOpCode.Add);
+            return ops(x).combine(ops(y)).add(x, y);
         }
 
         public static object minus(object x, object y)
         {
-            return DoOp(x, DoOp(y, UnaryOpCode.Negate), BinaryOpCode.Add);
+            Ops yops = ops(y);
+            return ops(x).combine(yops).add(x, yops.negate(y));
         }
 
         public static object multiply(object x, object y)
         {
-            return DoOp(x, y, BinaryOpCode.Mult);
+            return ops(x).combine(ops(y)).multiply(x, y);
         }
 
         public static object divide(object x, object y)
         {
-            if ( isZero(y) )
+            Ops yops = ops(y);
+            if (yops.isZero(y))
                 throw new ArithmeticException("Divide by zero");
-            return DoOp(x, y, BinaryOpCode.Divide);
+            return ops(x).combine(yops).divide(x, y);
         }
 
         public static object quotient(object x, object y)
         {
-            if (isZero(y))
+            Ops yops = ops(y);
+            if (yops.isZero(y))
                 throw new ArithmeticException("Divide by zero");
-            return reduce(DoOp(x, y, BinaryOpCode.Quotient));
+            return reduce(ops(x).combine(yops).quotient(x, y));
         }
 
         public static object remainder(object x, object y)
         {
-            if (isZero(y))
+            Ops yops = ops(y);
+            if (yops.isZero(y))
                 throw new ArithmeticException("Divide by zero");
-            return reduce(DoOp(x, y, BinaryOpCode.Remainder));
+            return reduce(ops(x).combine(yops).remainder(x, y));
         }
 
 
-        static object DQuotient(double n, double d)
+        public static object DQuotient(double n, double d)
         {
             double q = n / d;
             if (q <= Int32.MaxValue && q >= Int32.MinValue)
@@ -235,7 +149,7 @@ namespace clojure.lang
                 return reduce(new BigDecimal(q).toBigInteger());
         }
 
-        static object DRemainder(double n, double d)
+        public static object DRemainder(double n, double d)
         {
             double q = n / d;
             if (q <= Int32.MaxValue && q >= Int32.MinValue)
@@ -252,244 +166,39 @@ namespace clojure.lang
         {
             return Util.IsNumeric(x)
                 && Util.IsNumeric(y)
-                && DoOp(x, y, BoolBinaryOpCode.Equiv);
+                && ops(x).combine(ops(y)).equiv(x, y);
         }
 
         public static bool lt(object x, object y)
         {
-            return DoOp(x, y, BoolBinaryOpCode.Lt);
+            return ops(x).combine(ops(y)).lt(x, y);
         }
 
         public static bool lte(object x, object y)
         {
-            return !lt(y, x);
+            return !ops(x).combine(ops(y)).lt(y, x);
         }
 
         public static bool gt(object x, object y)
         {
-            return lt(y, x);
+            return ops(x).combine(ops(y)).lt(y, x);
         }
 
         public static bool gte(object x, object y)
         {
-            return !lt(x, y);
+            return !ops(x).combine(ops(y)).lt(x, y);
         }
 
         public static int compare(object x, object y)
         {
-            if (lt(x, y))
+            Ops ops1 = ops(x).combine(ops(y));
+            if (ops1.lt(x, y))
                 return -1;
-            else if (lt(y, x))
+            else if (ops1.lt(y, x))
                 return 1;
             else
                 return 0;
         }
-
-
-        public static object DoOp(object x, UnaryOpCode code)
-        {
-            int ix;
-            if (TryAsInt(x, out ix))
-                return INTEGER_OPS.Do(ix, code);
-
-            long lx;
-            if (TryAsLong(x, out lx))
-                return LONG_OPS.Do(ix, code);
-
-            if ( x is double )
-                return DOUBLE_OPS.Do((double)x, code);
-
-            if ( x is float )
-                return FLOAT_OPS.Do((float)x, code);
-
-            if (x is Ratio)
-                return RATIO_OPS.Do((Ratio)x, code);
-
-            if (x is BigInteger)
-                return BIGINTEGER_OPS.Do((BigInteger)x, code);
-
-            if (x is UInt64)
-                return BIGINTEGER_OPS.Do(BigInteger.Create((ulong)x), code);
-
-            // TODO: decimal
-
-            if (x is BigDecimal)
-                return BIGDECIMAL_OPS.Do((BigDecimal)x, code);
-
-            return INTEGER_OPS.Do(Util.ConvertToInt(x), code);
-        }
-
-        public static bool DoOp(object x, BoolUnaryOpCode code)
-        {
-            int ix;
-            if (TryAsInt(x, out ix))
-                return INTEGER_OPS.Do(ix, code);
-
-            long lx;
-            if (TryAsLong(x, out lx))
-                return LONG_OPS.Do(ix, code);
-
-            if ( x is double )
-                return DOUBLE_OPS.Do((double)x, code);
-
-            if ( x is float )
-                return FLOAT_OPS.Do((float)x, code);
-
-            if (x is Ratio)
-                return RATIO_OPS.Do((Ratio)x, code);
-
-            if (x is BigInteger)
-                return BIGINTEGER_OPS.Do((BigInteger)x, code);
-
-            if (x is UInt64)
-                return BIGINTEGER_OPS.Do(BigInteger.Create((ulong)x), code);
-
-            // TODO: decimal
-
-            if (x is BigDecimal)
-                return BIGDECIMAL_OPS.Do((BigDecimal)x, code);
-
-            return INTEGER_OPS.Do(Util.ConvertToInt(x), code);
-        }
-
-
-        public static bool DoOp(object x, object y, BoolBinaryOpCode code)
-        {
-           if ( x is double )
-                return DOUBLE_OPS.Do((double)x, Util.ConvertToDouble(y), code);
-
-            if ( y is double )
-                return DOUBLE_OPS.Do(Util.ConvertToDouble(x), (double)y, code);
-
-           if ( x is float )
-                return FLOAT_OPS.Do((float)x, Util.ConvertToFloat(y), code);
-
-            if ( y is float )
-                return FLOAT_OPS.Do(Util.ConvertToFloat(x), (float)y, code);
-
-            if ( x is Ratio )
-                return RATIO_OPS.Do((Ratio)x,toRatio(y),code);
-
-            if ( y is Ratio )
-                return RATIO_OPS.Do(toRatio(x), (Ratio)y, code);
-
-            if ( x is BigDecimal )
-                return BIGDECIMAL_OPS.Do((BigDecimal)x,toBigDecimal(y),code);
-
-            if ( y is BigDecimal )
-                return BIGDECIMAL_OPS.Do(toBigDecimal(x), (BigDecimal)y, code);
-
-            if ( x is BigInteger )
-                return BIGINTEGER_OPS.Do((BigInteger)x,toBigInteger(y),code);
-
-            if ( y is BigInteger )
-                return BIGINTEGER_OPS.Do(toBigInteger(x), (BigInteger)y, code); 
-
-            long lval;
-
-            if ( TryAsLong(x,out lval ) )
-                return LONG_OPS.Do(lval,Util.ConvertToLong(y),code);
-
-            if ( TryAsLong(y,out lval ) )
-                return LONG_OPS.Do(Util.ConvertToLong(x),lval,code);
-
-            return INTEGER_OPS.Do(Util.ConvertToInt(x),Util.ConvertToInt(y),code);
-        }
-
-
-        public static object DoOp(object x, object y, BinaryOpCode code)
-        {
-            if (x is double)
-                return DOUBLE_OPS.Do((double)x, Util.ConvertToDouble(y), code);
-
-            if (y is double)
-                return DOUBLE_OPS.Do(Util.ConvertToDouble(x), (double)y, code);
-
-            if (x is float)
-                return FLOAT_OPS.Do((float)x, Util.ConvertToFloat(y), code);
-
-            if (y is float)
-                return FLOAT_OPS.Do(Util.ConvertToFloat(x), (float)y, code);
-
-            if (x is Ratio)
-                return RATIO_OPS.Do((Ratio)x, toRatio(y), code);
-
-            if (y is Ratio)
-                return RATIO_OPS.Do(toRatio(x), (Ratio)y, code);
-
-            if (x is BigDecimal)
-                return BIGDECIMAL_OPS.Do((BigDecimal)x, toBigDecimal(y), code);
-
-            if (y is BigDecimal)
-                return BIGDECIMAL_OPS.Do(toBigDecimal(x), (BigDecimal)y, code);
-
-            if (x is BigInteger)
-                return BIGINTEGER_OPS.Do((BigInteger)x, toBigInteger(y), code);
-
-            if (y is BigInteger)
-                return BIGINTEGER_OPS.Do(toBigInteger(x), (BigInteger)y, code);
-
-            long lval;
-
-            if (TryAsLong(x, out lval))
-                return LONG_OPS.Do(lval, Util.ConvertToLong(y), code);
-
-            if (TryAsLong(y, out lval))
-                return LONG_OPS.Do(Util.ConvertToLong(x), lval, code);
-
-            return INTEGER_OPS.Do(Util.ConvertToInt(x), Util.ConvertToInt(y), code);
-        }
-
-
-        static bool TryAsInt(object x, out int ix)
-        {
-            Type type = Util.GetNonNullableType(x.GetType());
-
-            switch (Type.GetTypeCode(type))
-            {
-                case TypeCode.Char:
-                    ix = (int)(char)x;
-                    return true;
-                case TypeCode.SByte:
-                    ix = (int)(sbyte)x;
-                    return true;
-                case TypeCode.Byte:
-                    ix = (int)(byte)x;
-                    return true;
-                case TypeCode.Int16:
-                    ix = (int)(short)x;
-                    return true;
-                case TypeCode.UInt16:
-                    ix = (int)(ushort)x;
-                    return true;
-                case TypeCode.Int32:
-                    ix = (int)x;
-                    return true;
-            }
-
-            ix = 0;
-            return false;
-        }
-
-        static bool TryAsLong(object x, out long lx)
-        {
-            if (x is long)
-            {
-                lx = (long)x;
-                return true;
-            }
-            else if (x is uint)
-            {
-                lx = (long)(uint)x;
-                return true;
-            }
-            else
-            {
-                lx = 0;
-                return false;
-            }
-        }
-
 
         #endregion
 
@@ -500,20 +209,22 @@ namespace clojure.lang
             if (x is BigInteger)
                 return (BigInteger)x;
             else
-                return BigInteger.Create(Util.ConvertToLong(x)); // convert fix
+                // TODO: determine if we should just cast.
+                //return BigInteger.valueOf(Convert.ToInt64(x));
+                return BigInteger.Create(Convert.ToInt64(x));
         }
 
         static BigDecimal toBigDecimal(object x)
         {
             if (x is BigDecimal)
                 return (BigDecimal)x;
-            else if ( x is BigInteger)
+            else if (x is BigInteger)
                 // TODO: when we get new BigDecimal, fix this.
                 //return new BigDecimal((BigInteger)x);
                 return new BigDecimal(((BigInteger)x).ToString());
             else
-                return BigDecimal.valueOf(Util.ConvertToLong(x)); // convert fix
-
+                // TODO: determine if we should just cast.
+                return BigDecimal.valueOf(Convert.ToInt64(x));
         }
 
         // TODO: doublecheck toRatio
@@ -537,18 +248,13 @@ namespace clojure.lang
             //return new Ratio(toBigInteger(x), BigIntegerOne);
             return new Ratio(toBigInteger(x), BigInteger.ONE);
         }
-                    
+
         // TODO: fix rationalize
         // Java BigDecimal has .valueOf(double)
         public static object rationalize(object x)
         {
-            //if ( x is float || x is double )
-            //    //return rationalize(new BigDecimal(Convert.ToDouble(x))); // wrong, should be (double)x));
-            //    return rationalize(new BigDecimal( Convert.ToDouble(x) )); 
-            if (x is float)                                     // convert fix
-                return rationalize(new BigDecimal((float)x));   // convert fix
-            else if (x is double)                               // convert fix
-                return rationalize(new BigDecimal((double)x));  // convert fix
+            if (x is float || x is double)
+                return rationalize(new BigDecimal(Convert.ToDouble(x))); // wrong, should be (double)x));
             else if (x is BigDecimal)
             {
                 BigDecimal bx = (BigDecimal)x;
@@ -580,6 +286,12 @@ namespace clojure.lang
 
         public static object reduce(BigInteger val)
         {
+            //int bitLength = val.bitLength();
+            //return (bitLength < 32)
+            //    ? (object)val.intValue()
+            //    : (bitLength < 64)
+            //        ? (object)val.longValue()
+            //        : val;
             int ival;
             if (val.AsInt32(out ival))
                 return ival;
@@ -603,18 +315,27 @@ namespace clojure.lang
         {
             if (d.Equals(BigInteger.ZERO))
                 throw new ArithmeticException("Divide by zero");
+            //BigInteger gcd = n.gcd(d);
             BigInteger gcd = n.Gcd(d);
             if (gcd.Equals(BigInteger.ZERO))
                 return 0;
+            //n = n.divide(gcd);
+            //d = d.divide(gcd);
             n = n / gcd;
             d = d / gcd;
 
             if (d.Equals(BigInteger.ONE))
                 return reduce(n);
-
+            //return new Ratio((d.signum() < 0 ? n.negate() : n),
+            //    (d.signum() < 0 ? d.negate() : d));
             return new Ratio((d.Signum < 0 ? -n : n), d.Abs());
         }
 
+
+
+        //public static BigInteger BigIntegerTen = BigInteger.valueOf(10);
+        //public static BigInteger BigIntegerOne = BigInteger.valueOf(1);
+        //public static BigInteger BigIntegerZero = BigInteger.valueOf(0);
 
 
         public static BigDecimal BigDecimalOne = BigDecimal.valueOf(1);
@@ -703,14 +424,52 @@ namespace clojure.lang
         static readonly LongBitOps LONG_BITOPS = new LongBitOps();
         static readonly BigIntegerBitOps BIGINTEGER_BITOPS = new BigIntegerBitOps();
 
- 
+        static Ops ops(object x)
+        {
+            Type type = Util.GetNonNullableType(x.GetType());
+            if (!type.IsEnum)
+            {
+
+                switch (Type.GetTypeCode(type))
+                {
+                    case TypeCode.Char:
+                    case TypeCode.SByte:
+                    case TypeCode.Byte:
+                    case TypeCode.Int16:
+                    case TypeCode.UInt16:
+                    case TypeCode.Int32:
+                        return INTEGER_OPS;
+                    case TypeCode.Double:
+                        return DOUBLE_OPS;
+                    case TypeCode.Single:
+                        return FLOAT_OPS;
+                    case TypeCode.UInt32:
+                    case TypeCode.Int64:
+                        return LONG_OPS;
+                    case TypeCode.UInt64:
+                        return BIGINTEGER_OPS;
+
+                    default:
+                        if (type == typeof(BigInteger))
+                            return BIGINTEGER_OPS;
+                        else if (type == typeof(Ratio))
+                            return RATIO_OPS;
+                        else if (type == typeof(BigDecimal))
+                            return BIGDECIMAL_OPS;
+                        else
+                            return INTEGER_OPS;
+                }
+            }
+            return INTEGER_OPS;
+        }
+
 
         static BitOps bitOps(object x)
         {
             Type type = Util.GetNonNullableType(x.GetType());
 
-            //if (!type.IsEnum)     // convert fix
-            //{
+            if (!type.IsEnum)
+            {
 
                 switch (Type.GetTypeCode(type))
                 {
@@ -725,44 +484,82 @@ namespace clojure.lang
                             throw new ArithmeticException("bit operation on non integer type: " + type);
                         break;
                 }
-            //}
+            }
             return INTEGER_BITOPS;
         }
 
         #endregion
 
-        sealed class IntegerOps : Ops<int>
+        sealed class IntegerOps : Ops
         {
             #region Ops Members
 
-
-            public override bool isZero(int x)
+            public Ops combine(Ops y)
             {
-                return x == 0;  // convert fix
+                return y.opsWith(this);
             }
 
-            public override bool isPos(int x)
+            public Ops opsWith(IntegerOps x)
             {
-                return x > 0;  // convert fix
+                return this;
             }
 
-            public override bool isNeg(int x)
+            public Ops opsWith(LongOps x)
             {
-                return x < 0;  // convert fix
+                return LONG_OPS;
             }
 
-            public override object add(int x, int y)
+            public Ops opsWith(FloatOps x)
             {
-                long ret = (long)x + (long)y;
+                return FLOAT_OPS;
+            }
+
+            public Ops opsWith(DoubleOps x)
+            {
+                return DOUBLE_OPS;
+            }
+
+            public Ops opsWith(RatioOps x)
+            {
+                return RATIO_OPS;
+            }
+
+            public Ops opsWith(BigIntegerOps x)
+            {
+                return BIGINTEGER_OPS;
+            }
+
+            public Ops opsWith(BigDecimalOps x)
+            {
+                return BIGDECIMAL_OPS;
+            }
+
+            public bool isZero(object x)
+            {
+                return Convert.ToInt32(x) == 0;
+            }
+
+            public bool isPos(object x)
+            {
+                return Convert.ToInt32(x) > 0;
+            }
+
+            public bool isNeg(object x)
+            {
+                return Convert.ToInt32(x) < 0;
+            }
+
+            public object add(object x, object y)
+            {
+                long ret = Convert.ToInt64(x) + Convert.ToInt64(y);
                 if (ret <= Int32.MaxValue && ret >= Int32.MinValue)
                     return (int)ret;
                 return ret;
-
             }
 
-            public override object multiply(int x, int y)
+            public object multiply(object x, object y)
             {
-                long ret = (long)x * (long)y;
+                long ret = Convert.ToInt64(x) * Convert.ToInt64(y);
                 if (ret <= Int32.MaxValue && ret >= Int32.MinValue)
                     return (int)ret;
                 return ret;
@@ -779,9 +576,11 @@ namespace clojure.lang
                 return u;
             }
 
-            public override object divide(int n, int val)
+            public object divide(object x, object y)
             {
-                 int gcd1 = gcd(n, val);
+                int n = Convert.ToInt32(x);
+                int val = Convert.ToInt32(y);
+                int gcd1 = gcd(n, val);
                 if (gcd1 == 0)
                     return 0;
 
@@ -794,91 +593,138 @@ namespace clojure.lang
                     n = -n;
                     d = -d;
                 }
+                //return new Ratio(BigInteger.valueOf(n), BigInteger.valueOf(d));
                 return new Ratio(BigInteger.Create(n), BigInteger.Create(d));
             }
 
-            public override object quotient(int x, int y)
+            public object quotient(object x, object y)
             {
-                //return Convert.ToInt32(x) / Convert.ToInt32(y);
-                return x / y;
+                return Convert.ToInt32(x) / Convert.ToInt32(y);
             }
 
-            public override object remainder(int x, int y)
+            public object remainder(object x, object y)
             {
-                return x % y;     // convert fix
+                return Convert.ToInt32(x) % Convert.ToInt32(y);
             }
 
-            public override  bool equiv(int x, int y)
+            public bool equiv(object x, object y)
             {
-                return x == y;     // convert fix
+                return Convert.ToInt32(x) == Convert.ToInt32(y);
             }
 
-            public override bool lt(int x, int y)
+            public bool lt(object x, object y)
             {
-                return x < y;     // convert fix
+                return Convert.ToInt32(x) < Convert.ToInt32(y);
             }
 
-            public override object negate(int x)
+            public object negate(object x)
             {
-                if (x > Int32.MinValue)
-                    return -x;
-                return -((long)x);
+                int val = Convert.ToInt32(x);
+                if (val > Int32.MinValue)
+                    return -val;
+                return -((long)val);
             }
 
-            public override object inc(int x)
+            public object inc(object x)
             {
-                if (x < Int32.MaxValue)
-                    return x + 1;
-                return ((long)x) + 1;
+                int val = Convert.ToInt32(x);
+                if (val < Int32.MaxValue)
+                    return val + 1;
+                //return BigInteger.valueOf(((long)val) + 1);
+                return BigInteger.Create(((long)val) + 1);
             }
 
-            public override object dec(int x)
+            public object dec(object x)
             {
-                if (x > Int32.MinValue)
-                    return x - 1;
-                return ((long)x) - 1;
+                int val = Convert.ToInt32(x);
+                if (val > Int32.MinValue)
+                    return val - 1;
+                //return BigInteger.valueOf(((long)val) - 1);
+                return BigInteger.Create(((long)val) - 1);
             }
 
             #endregion
         }
 
-        sealed class LongOps : Ops<long>
+        sealed class LongOps : Ops
         {
             #region Ops Members
-            
-            public override bool isZero(long x)
+
+            public Ops combine(Ops y)
             {
-                return x == 0;      // convert fix
+                return y.opsWith(this);
             }
 
-            public override bool isPos(long x)
+            public Ops opsWith(IntegerOps x)
             {
-                return x > 0;      // convert fix
+                return this;
             }
 
-            public override bool isNeg(long x)
+            public Ops opsWith(LongOps x)
             {
-                return x < 0;      // convert fix
+                return this;
             }
 
-            public override object add(long x, long y)
+            public Ops opsWith(FloatOps x)
             {
-                long lx = Util.ConvertToLong(x);     // convert fix
-                long ly = Util.ConvertToLong(y);     // convert fix
-                long ret = x + y;
-                if ((ret ^ x) < 0 && (ret ^ y) < 0)
+                return FLOAT_OPS;
+            }
+
+            public Ops opsWith(DoubleOps x)
+            {
+                return DOUBLE_OPS;
+            }
+
+            public Ops opsWith(RatioOps x)
+            {
+                return RATIO_OPS;
+            }
+
+            public Ops opsWith(BigIntegerOps x)
+            {
+                return BIGINTEGER_OPS;
+            }
+
+            public Ops opsWith(BigDecimalOps x)
+            {
+                return BIGDECIMAL_OPS;
+            }
+
+            public bool isZero(object x)
+            {
+                return Convert.ToInt64(x) == 0;
+            }
+
+            public bool isPos(object x)
+            {
+                return Convert.ToInt64(x) > 0;
+            }
+
+            public bool isNeg(object x)
+            {
+                return Convert.ToInt64(x) < 0;
+            }
+
+            public object add(object x, object y)
+            {
+                long lx = Convert.ToInt64(x);
+                long ly = Convert.ToInt64(y);
+                long ret = lx + ly;
+                if ((ret ^ lx) < 0 && (ret ^ ly) < 0)
                     return BIGINTEGER_OPS.add(x, y);
                 return ret;
             }
 
-            public override object multiply(long x, long y)
+            public object multiply(object x, object y)
             {
-                long ret = x * y;
-                if (y != 0 && ret / y != x)
+                long lx = Convert.ToInt64(x);
+                long ly = Convert.ToInt64(y);
+                long ret = lx * ly;
+                if (ly != 0 && ret / ly != lx)
                     return BIGINTEGER_OPS.multiply(x, y);
                 return ret;
             }
-            
+
             static long gcd(long u, long v)
             {
                 while (v != 0)
@@ -890,8 +736,10 @@ namespace clojure.lang
                 return u;
             }
 
-            public override object divide(long n, long val)
+            public object divide(object x, object y)
             {
+                long n = Convert.ToInt64(x);
+                long val = Convert.ToInt64(y);
                 long gcd1 = gcd(n, val);
                 if (gcd1 == 0)
                     return 0;
@@ -905,430 +753,685 @@ namespace clojure.lang
                     n = -n;
                     d = -d;
                 }
+                //return new Ratio(BigInteger.valueOf(n), BigInteger.valueOf(d));
                 return new Ratio(BigInteger.Create(n), BigInteger.Create(d));
             }
 
-            public override object quotient(long x, long y)
+            public object quotient(object x, object y)
             {
-                return x / y;       // convert fix
+                return Convert.ToInt64(x) / Convert.ToInt64(y);
             }
 
-            public override object remainder(long x, long y)
+            public object remainder(object x, object y)
             {
-                return x % y;       // convert fix
+                return Convert.ToInt64(x) % Convert.ToInt64(y);
             }
 
-            public override bool equiv(long x, long y)
+            public bool equiv(object x, object y)
             {
-                return x == y;       // convert fix
+                return Convert.ToInt64(x) == Convert.ToInt64(y);
             }
 
-            public override bool lt(long x, long y)
+            public bool lt(object x, object y)
             {
-                return x < y;       // convert fix
+                return Convert.ToInt64(x) < Convert.ToInt64(y);
             }
 
-            public override object negate(long x)
+            public object negate(object x)
             {
-                if (x > Int64.MinValue)
-                    return -x;
-                return -BigInteger.Create(x);
+                long val = Convert.ToInt64(x);
+                if (val > Int64.MinValue)
+                    return -val;
+                //return BigInteger.valueOf(val).negate();
+                return -BigInteger.Create(val);
             }
 
-            public override object inc(long x)
+            public object inc(object x)
             {
-                if (x < Int64.MaxValue)
-                    return x + 1;
+                long val = Convert.ToInt64(x);
+                if (val < Int64.MaxValue)
+                    return val + 1;
                 return BIGINTEGER_OPS.inc(x);
             }
 
-            public override object dec(long x)
+            public object dec(object x)
             {
-                if (x > Int64.MinValue)
-                    return x - 1;
+                long val = Convert.ToInt64(x);
+                if (val > Int64.MinValue)
+                    return val - 1;
                 return BIGINTEGER_OPS.dec(x);
             }
 
             #endregion
         }
 
-        sealed class FloatOps : Ops<float>
+        class FloatOps : Ops
         {
             #region Ops Members
- 
-            public override bool isZero(float x)
+
+            public Ops combine(Ops y)
             {
-                return x == 0;     // convert fix
+                return y.opsWith(this);
             }
 
-            public override bool isPos(float x)
+            public Ops opsWith(IntegerOps x)
             {
-                return x > 0;     // convert fix
+                return this;
             }
 
-            public override bool isNeg(float x)
+            public Ops opsWith(LongOps x)
             {
-                return x < 0;     // convert fix
+                return this;
+            }
+            public Ops opsWith(FloatOps x)
+            {
+                return this;
             }
 
-            public override object add(float x, float y)
+            public Ops opsWith(DoubleOps x)
             {
-                return x + y;     // convert fix
+                return DOUBLE_OPS;
             }
 
-            public override object multiply(float x, float y)
+            public Ops opsWith(RatioOps x)
             {
-                return x * y;     // convert fix
+                return this;
             }
 
-            public override object divide(float x, float y)
+            public Ops opsWith(BigIntegerOps x)
             {
-                return x / y;     // convert fix
+                return this;
             }
 
-            public override object quotient(float x, float y)
+            public Ops opsWith(BigDecimalOps x)
             {
-                return Numbers.DQuotient((double)x, (double)y);
+                return this;
             }
 
-            public override object remainder(float x, float y)
+            public bool isZero(object x)
             {
-                return Numbers.DRemainder((double)x,(double)y);
+                return Convert.ToSingle(x) == 0;
             }
 
-            public override bool equiv(float x, float y)
+            public bool isPos(object x)
             {
-                return x == y;        // convert fix
+                return Convert.ToSingle(x) > 0;
             }
 
-            public override bool lt(float x, float y)
+            public bool isNeg(object x)
             {
-                return x < y;
+                return Convert.ToSingle(x) < 0;
             }
 
-            public override object negate(float x)
+            public object add(object x, object y)
             {
-                return -x;
+                return Convert.ToSingle(x) + Convert.ToSingle(y);
             }
 
-            public override object inc(float x)
+            public object multiply(object x, object y)
             {
-                return x + 1;    // convert fix
+                return Convert.ToSingle(x) * Convert.ToSingle(y);
             }
 
-            public override object dec(float x)
+            public object divide(object x, object y)
             {
-                return x - 1;    // convert fix
+                return Convert.ToSingle(x) / Convert.ToSingle(y);
+            }
+
+            public object quotient(object x, object y)
+            {
+                return Numbers.DQuotient(Convert.ToDouble(x), Convert.ToDouble(y));
+            }
+
+            public object remainder(object x, object y)
+            {
+                return Numbers.DRemainder(Convert.ToDouble(x), Convert.ToDouble(y));
+            }
+
+            public bool equiv(object x, object y)
+            {
+                return Convert.ToSingle(x) == Convert.ToSingle(y);
+            }
+
+            public bool lt(object x, object y)
+            {
+                return Convert.ToSingle(x) < Convert.ToSingle(y);
+            }
+
+            public object negate(object x)
+            {
+                return -Convert.ToSingle(x);
+            }
+
+            public object inc(object x)
+            {
+                return Convert.ToSingle(x) + 1;
+            }
+
+            public object dec(object x)
+            {
+                return Convert.ToSingle(x) - 1;
             }
 
             #endregion
         }
 
-        sealed class DoubleOps : Ops<double>
+        class DoubleOps : Ops
         {
             #region Ops Members
 
-            public override bool isZero(double x)
+            public Ops combine(Ops y)
             {
-                return x == 0;        // convert fix
+                return y.opsWith(this);
             }
 
-            public override bool isPos(double x)
+            public Ops opsWith(IntegerOps x)
             {
-                return x > 0;        // convert fix
+                return this;
             }
 
-            public override bool isNeg(double x)
+            public Ops opsWith(LongOps x)
             {
-                return x < 0;        // convert fix
+                return this;
             }
 
-            public override object add(double x, double y)
+            public Ops opsWith(FloatOps x)
             {
-                return x + y;       // convert fix
-
+                return this;
             }
 
-            public override object multiply(double x, double y)
+            public Ops opsWith(DoubleOps x)
             {
-                return x * y;
+                return this;
             }
 
-            public override object divide(double x, double y)
+            public Ops opsWith(RatioOps x)
             {
-                return x / y;
+                return this;
             }
 
-            public override object quotient(double x, double y)
+            public Ops opsWith(BigIntegerOps x)
             {
-                return Numbers.DQuotient(x,y);     // convert fix
+                return this;
             }
 
-            public override object remainder(double x, double y)
+            public Ops opsWith(BigDecimalOps x)
             {
-                return Numbers.DRemainder(x,y);     // convert fix
+                return this;
             }
 
-            public override bool equiv(double x, double y)
+            public bool isZero(object x)
             {
-                return x == y;       // convert fix
+                return Convert.ToDouble(x) == 0;
             }
 
-            public override bool lt(double x, double y)
+            public bool isPos(object x)
             {
-                return x < y;
+                return Convert.ToDouble(x) > 0;
             }
 
-            public override object negate(double x)
+            public bool isNeg(object x)
             {
-                return -x;
+                return Convert.ToDouble(x) < 0;
             }
 
-            public override object inc(double x)
+            public object add(object x, object y)
             {
-                return x + 1;     // convert fix
+                return Convert.ToDouble(x) + Convert.ToDouble(y);
             }
 
-            public override object dec(double x)
+            public object multiply(object x, object y)
             {
-                return x - 1;     // convert fix
+                return Convert.ToDouble(x) * Convert.ToDouble(y);
+            }
+
+            public object divide(object x, object y)
+            {
+                return Convert.ToDouble(x) / Convert.ToDouble(y);
+            }
+
+            public object quotient(object x, object y)
+            {
+                return Numbers.DQuotient(Convert.ToDouble(x), Convert.ToDouble(y));
+            }
+
+            public object remainder(object x, object y)
+            {
+                return Numbers.DRemainder(Convert.ToDouble(x), Convert.ToDouble(y));
+            }
+
+            public bool equiv(object x, object y)
+            {
+                return Convert.ToDouble(x) == Convert.ToDouble(y);
+            }
+
+            public bool lt(object x, object y)
+            {
+                return Convert.ToDouble(x) < Convert.ToDouble(y);
+            }
+
+            public object negate(object x)
+            {
+                return -Convert.ToDouble(x);
+            }
+
+            public object inc(object x)
+            {
+                return Convert.ToDouble(x) + 1;
+            }
+
+            public object dec(object x)
+            {
+                return Convert.ToDouble(x) - 1;
             }
 
             #endregion
         }
 
-        class RatioOps : Ops<Ratio>
+        class RatioOps : Ops
         {
             #region Ops Members
 
- 
-
-            public override bool isZero(Ratio r)
+            public Ops combine(Ops y)
             {
+                return y.opsWith(this);
+            }
+
+            public Ops opsWith(IntegerOps x)
+            {
+                return this;
+            }
+
+            public Ops opsWith(LongOps x)
+            {
+                return this;
+            }
+            public Ops opsWith(FloatOps x)
+            {
+                return FLOAT_OPS;
+            }
+
+            public Ops opsWith(DoubleOps x)
+            {
+                return DOUBLE_OPS;
+            }
+
+            public Ops opsWith(RatioOps x)
+            {
+                return this;
+            }
+
+            public Ops opsWith(BigIntegerOps x)
+            {
+                return this;
+            }
+
+            public Ops opsWith(BigDecimalOps x)
+            {
+                return this;
+            }
+
+            public bool isZero(object x)
+            {
+                Ratio r = toRatio(x);
+                //return r.numerator.signum() == 0;
                 return r.numerator.Signum == 0;
             }
 
-            public override bool isPos(Ratio r)
+            public bool isPos(object x)
             {
+                Ratio r = toRatio(x);
+                //return r.numerator.signum() > 0;
                 return r.numerator.Signum > 0;
             }
 
-            public override bool isNeg(Ratio r)
+            public bool isNeg(object x)
             {
+                Ratio r = toRatio(x);
+                //return r.numerator.signum() < 0;
                 return r.numerator.Signum < 0;
             }
 
-            public override object add(Ratio rx, Ratio ry)
+            public object add(object x, object y)
             {
-                return Numbers.divide(
+                Ratio rx = toRatio(x);
+                Ratio ry = toRatio(y);
+                //return divide(ry.numerator.multiply(rx.denominator)
+                //    .add(rx.numerator.multiply(ry.denominator)),
+                //    ry.denominator.multiply(rx.denominator));
+                BigInteger n1 = ry.numerator * rx.denominator;
+                BigInteger n2 = rx.numerator * ry.denominator;
+                BigInteger n = n1 + n2;
+                BigInteger d = ry.denominator * rx.denominator;
+                Ratio r = new Ratio(n, d);
+                return divide(
                     ry.numerator * rx.denominator + rx.numerator * ry.denominator,
                     ry.denominator * rx.denominator);
             }
 
-            public override object multiply(Ratio rx, Ratio ry)
+            public object multiply(object x, object y)
             {
+                Ratio rx = toRatio(x);
+                Ratio ry = toRatio(y);
+                //return Numbers.divide(ry.numerator.multiply(rx.numerator),
+                //    ry.denominator.multiply(rx.denominator));
                 return Numbers.divide(
                     ry.numerator * rx.numerator,
                     ry.denominator * rx.denominator);
             }
 
-            public override object divide(Ratio rx, Ratio ry)
+            public object divide(object x, object y)
             {
+                Ratio rx = toRatio(x);
+                Ratio ry = toRatio(y);
+                //return Numbers.divide(ry.denominator.multiply(rx.numerator),
+                //    ry.numerator.multiply(rx.denominator));
                 return Numbers.divide(
                     ry.denominator * rx.numerator,
                     ry.numerator * rx.denominator);
             }
 
-            public override object quotient(Ratio rx, Ratio ry)
+            public object quotient(object x, object y)
             {
+                Ratio rx = toRatio(x);
+                Ratio ry = toRatio(y);
+                //BigInteger q = rx.numerator.multiply(ry.denominator)
+                //    .divide(rx.denominator.multiply(ry.numerator));
                 BigInteger q = (rx.numerator * ry.denominator) / (rx.denominator * ry.numerator);
                 return reduce(q);
             }
 
-            public override object remainder(Ratio rx, Ratio ry)
+            public object remainder(object x, object y)
             {
+                Ratio rx = toRatio(x);
+                Ratio ry = toRatio(y);
+                //BigInteger q = rx.numerator.multiply(ry.denominator)
+                //    .divide(rx.denominator.multiply(ry.numerator));
                 BigInteger q = (rx.numerator * ry.denominator) / (rx.denominator * ry.numerator);
-                return Numbers.minus(rx, Numbers.multiply(q, ry));
+                return Numbers.minus(x, Numbers.multiply(q, y));
             }
 
-            public override bool equiv(Ratio rx, Ratio ry)
+            public bool equiv(object x, object y)
             {
+                Ratio rx = toRatio(x);
+                Ratio ry = toRatio(y);
                 return rx.numerator.Equals(ry.numerator)
                     && rx.denominator.Equals(ry.denominator);
             }
 
-            public override bool lt(Ratio rx, Ratio ry)
+            public bool lt(object x, object y)
             {
+                Ratio rx = toRatio(x);
+                Ratio ry = toRatio(y);
+                //return Numbers.lt(rx.numerator.multiply(ry.denominator),
+                //    ry.numerator.multiply(rx.denominator));
                 return rx.numerator * ry.denominator < ry.numerator * rx.denominator;
             }
 
-            public override object negate(Ratio rx)
+            public object negate(object x)
             {
+                Ratio rx = toRatio(x);
+                //return new Ratio(rx.numerator.negate(), rx.denominator);
                 return new Ratio(-rx.numerator, rx.denominator);
             }
 
-            static readonly Ratio ONE = new Ratio(BigInteger.ONE,BigInteger.ONE);
-            static readonly Ratio MINUS_ONE = new Ratio(BigInteger.NEGATIVE_ONE, BigInteger.ONE);
-
-            public override object inc(Ratio x)
+            public object inc(object x)
             {
-                return add(x, ONE);
+                return Numbers.add(x, 1);
             }
 
-            public override object dec(Ratio x)
+            public object dec(object x)
             {
-                return add(x, MINUS_ONE);
+                return Numbers.add(x, -1);
             }
 
             #endregion
         }
 
-        class BigIntegerOps : Ops<BigInteger>
+        class BigIntegerOps : Ops
         {
             #region Ops Members
-  
-            public override bool isZero(BigInteger bx)
+
+            public Ops combine(Ops y)
             {
+                return y.opsWith(this);
+            }
+
+            public Ops opsWith(IntegerOps x)
+            {
+                return this;
+            }
+
+            public Ops opsWith(LongOps x)
+            {
+                return this;
+            }
+            public Ops opsWith(FloatOps x)
+            {
+                return FLOAT_OPS;
+            }
+
+            public Ops opsWith(DoubleOps x)
+            {
+                return DOUBLE_OPS;
+            }
+
+            public Ops opsWith(RatioOps x)
+            {
+                return RATIO_OPS;
+            }
+
+            public Ops opsWith(BigIntegerOps x)
+            {
+                return this;
+            }
+
+            public Ops opsWith(BigDecimalOps x)
+            {
+                return BIGDECIMAL_OPS;
+            }
+
+            public bool isZero(object x)
+            {
+                BigInteger bx = toBigInteger(x);
+                //return bx.signum() == 0;
                 return bx.IsZero;
             }
 
-            public override bool isPos(BigInteger bx)
+            public bool isPos(object x)
             {
+                BigInteger bx = toBigInteger(x);
+                //return bx.signum() > 0;
                 return bx.IsPositive;
             }
 
-            public override bool isNeg(BigInteger bx)
+            public bool isNeg(object x)
             {
+                BigInteger bx = toBigInteger(x);
+                //return bx.signum() < 0;
                 return bx.IsNegative;
             }
 
-            public override object add(BigInteger x, BigInteger y)
+            public object add(object x, object y)
             {
                 //return reduce(toBigInteger(x).add(toBigInteger(y)));
-                return reduce(x+y);
+                return reduce(toBigInteger(x) + toBigInteger(y));
             }
 
-            public override object multiply(BigInteger x, BigInteger y)
+            public object multiply(object x, object y)
             {
                 //return reduce(toBigInteger(x).multiply(toBigInteger(y)));
-                return reduce(x*y);
+                return reduce(toBigInteger(x) * toBigInteger(y));
 
             }
 
-            public override object divide(BigInteger x, BigInteger y)
+            public object divide(object x, object y)
             {
-                return BIDivide(x,y);
+                return BIDivide(toBigInteger(x), toBigInteger(y));
             }
 
-            public override object quotient(BigInteger x, BigInteger y)
+            public object quotient(object x, object y)
             {
-                return x/y;
+                //return toBigInteger(x).divide(toBigInteger(y));
+                return toBigInteger(x) / toBigInteger(y);
             }
 
-            public override object remainder(BigInteger x, BigInteger y)
+            public object remainder(object x, object y)
             {
-                return x % y;
+                //return toBigInteger(x).remainder(toBigInteger(y));
+                return toBigInteger(x) % toBigInteger(y);
             }
 
-            public override bool equiv(BigInteger x, BigInteger y)
+            public bool equiv(object x, object y)
             {
-                return x.Equals(y);
+                return toBigInteger(x).Equals(toBigInteger(y));
             }
 
-            public override bool lt(BigInteger x, BigInteger y)
+            public bool lt(object x, object y)
             {
-                return x < y;
+                //return toBigInteger(x).compareTo(toBigInteger(y)) < 0;
+                return toBigInteger(x) < toBigInteger(y);
             }
 
-            public override object negate(BigInteger x)
+            public object negate(object x)
             {
-                return -x;
+                //return toBigInteger(x).negate();
+                return -toBigInteger(x);
             }
 
-            public override object inc(BigInteger bx)
+            public object inc(object x)
             {
+                BigInteger bx = toBigInteger(x);
+                //return reduce(bx.add(BigIntegerOne));
                 return reduce(bx + BigInteger.ONE);
             }
 
-            public override object dec(BigInteger bx)
+            public object dec(object x)
             {
+                BigInteger bx = toBigInteger(x);
+                //return reduce(bx.subtract(BigIntegerOne));
                 return reduce(bx - BigInteger.ONE);
             }
 
             #endregion
         }
 
-        class BigDecimalOps : Ops<BigDecimal>
+        class BigDecimalOps : Ops
         {
             #region Ops Members
 
-            public override bool isZero(BigDecimal bx)
+            public Ops combine(Ops y)
             {
+                return y.opsWith(this);
+            }
+
+            public Ops opsWith(IntegerOps x)
+            {
+                return this;
+            }
+
+            public Ops opsWith(LongOps x)
+            {
+                return this;
+            }
+
+            public Ops opsWith(FloatOps x)
+            {
+                return FLOAT_OPS;
+            }
+
+            public Ops opsWith(DoubleOps x)
+            {
+                return DOUBLE_OPS;
+            }
+
+            public Ops opsWith(RatioOps x)
+            {
+                return RATIO_OPS;
+            }
+
+            public Ops opsWith(BigIntegerOps x)
+            {
+                return this;
+            }
+
+            public Ops opsWith(BigDecimalOps x)
+            {
+                return this;
+            }
+
+            public bool isZero(object x)
+            {
+                BigDecimal bx = toBigDecimal(x);
                 return bx.signum() == 0;
             }
 
-            public override bool isPos(BigDecimal bx)
+            public bool isPos(object x)
             {
+                BigDecimal bx = toBigDecimal(x);
                 return bx.signum() > 0;
             }
 
-            public override bool isNeg(BigDecimal bx)
+            public bool isNeg(object x)
             {
+                BigDecimal bx = toBigDecimal(x);
                 return bx.signum() < 0;
             }
 
-            public override object add(BigDecimal x, BigDecimal y)
+            public object add(object x, object y)
             {
-                return x.add(y);
+                return toBigDecimal(x).add(toBigDecimal(y));
             }
 
-            public override object multiply(BigDecimal x, BigDecimal y)
+            public object multiply(object x, object y)
             {
-                return x.multiply(y);
+                return toBigDecimal(x).multiply(toBigDecimal(y));
             }
 
             // TODO: figure out what the rounding mode should be
-            public override object divide(BigDecimal x, BigDecimal y)
+            public object divide(object x, object y)
             {
-                return x.divide(y, BigDecimal.ROUND_HALF_EVEN);
+                return toBigDecimal(x).divide(toBigDecimal(y), BigDecimal.ROUND_HALF_EVEN);
             }
 
             // TODO: this is  just plain wrong;
             // Java version uses .divideToIntegralValue
-            public override object quotient(BigDecimal x, BigDecimal y)
+            public object quotient(object x, object y)
             {
-                return x.divide(y, 0);
+                return toBigDecimal(x).divide(toBigDecimal(y), 0);
             }
 
             // TODO: this is  just plain wrong;
             // Java version uses .remainder
-            public override object remainder(BigDecimal x, BigDecimal y)
+            public object remainder(object x, object y)
             {
-                return x.divide(y, 0);
+                return toBigDecimal(x).divide(toBigDecimal(y), 0);
             }
 
-            public override bool equiv(BigDecimal x, BigDecimal y)
+            public bool equiv(object x, object y)
             {
-                return x.Equals(y);
+                return toBigDecimal(x).Equals(toBigDecimal(y));
             }
 
-            public override bool lt(BigDecimal x, BigDecimal y)
+            public bool lt(object x, object y)
             {
-                return x.compareTo(y) < 0;
+                return toBigDecimal(x).compareTo(toBigDecimal(y)) < 0;
             }
 
-            public override object negate(BigDecimal x)
+            public object negate(object x)
             {
-                return x.negate();
+                return toBigDecimal(x).negate();
             }
 
-            public override object inc(BigDecimal bx)
+            public object inc(object x)
             {
+                BigDecimal bx = toBigDecimal(x);
                 return bx.add(BigDecimalOne);
             }
 
-            public override object dec(BigDecimal bx)
+            public object dec(object x)
             {
+                BigDecimal bx = toBigDecimal(x);
                 return bx.subtract(BigDecimalOne);
             }
 
@@ -1361,42 +1464,35 @@ namespace clojure.lang
 
             public object not(object x)
             {
-                //return ~Convert.ToInt32(x);
-                return ~Util.ConvertToInt(x);   // convert fix
+                return ~Convert.ToInt32(x);
             }
 
             public object and(object x, object y)
             {
-                //return Convert.ToInt32(x) & Convert.ToInt32(y);
-                return Util.ConvertToInt(x) & Util.ConvertToInt(y);     // convert fix
+                return Convert.ToInt32(x) & Convert.ToInt32(y);
             }
 
             public object or(object x, object y)
             {
-                //return Convert.ToInt32(x) | Convert.ToInt32(y);
-                return Util.ConvertToInt(x) | Util.ConvertToInt(y);     // convert fix
+                return Convert.ToInt32(x) | Convert.ToInt32(y);
             }
 
             public object xor(object x, object y)
             {
-                //return Convert.ToInt32(x) ^ Convert.ToInt32(y);
-                return Util.ConvertToInt(x) ^ Util.ConvertToInt(y);     // convert fix
+                return Convert.ToInt32(x) ^ Convert.ToInt32(y);
             }
 
             public object andNot(object x, object y)
             {
-                //return Convert.ToInt32(x) & ~Convert.ToInt32(y);
-                return Util.ConvertToInt(x) & ~Util.ConvertToInt(y);     // convert fix
+                return Convert.ToInt32(x) & ~Convert.ToInt32(y);
             }
 
             public object clearBit(object x, int n)
             {
                 if (n < 31)
-                    //return Convert.ToInt32(x) & ~(1 << n);
-                    return Util.ConvertToInt(x) & ~(1 << n);    // convert fix
+                    return Convert.ToInt32(x) & ~(1 << n);
                 else if (n < 63)
-                    //return Convert.ToInt64(x) & ~(1L << n);
-                    return Util.ConvertToLong(x) & ~(1L << n);    // convert fix
+                    return Convert.ToInt64(x) & ~(1L << n);
                 else
                     //return toBigInteger(x).clearBit(n);
                     return toBigInteger(x).ClearBit(n);
@@ -1405,11 +1501,9 @@ namespace clojure.lang
             public object setBit(object x, int n)
             {
                 if (n < 31)
-                    //return Convert.ToInt32(x) | (1 << n);
-                    return Util.ConvertToInt(x) | (1 << n);    // convert fix
+                    return Convert.ToInt32(x) | (1 << n);
                 else if (n < 63)
-                    //return Convert.ToInt64(x) | (1L << n);
-                    return Util.ConvertToLong(x) | (1L << n);    // convert fix
+                    return Convert.ToInt64(x) | (1L << n);
                 else
                     //return toBigInteger(x).setBit(n);
                     return toBigInteger(x).SetBit(n);
@@ -1418,12 +1512,9 @@ namespace clojure.lang
             public object flipBit(object x, int n)
             {
                 if (n < 31)
-                    //return Convert.ToInt32(x) ^ (1 << n);
-                    return Util.ConvertToInt(x) ^ (1 << n);    // convert fix
-
+                    return Convert.ToInt32(x) ^ (1 << n);
                 else if (n < 63)
-                    //return Convert.ToInt64(x) ^ (1L << n);
-                    return Util.ConvertToLong(x) ^ (1L << n);    // convert fix
+                    return Convert.ToInt64(x) ^ (1L << n);
                 else
                     //return toBigInteger(x).flipBit(n);
                     return toBigInteger(x).FlipBit(n);
@@ -1432,11 +1523,9 @@ namespace clojure.lang
             public bool testBit(object x, int n)
             {
                 if (n < 31)
-                    //return (Convert.ToInt32(x) & (1 << n)) != 0;
-                    return (Util.ConvertToInt(x) & (1 << n)) != 0;    // convert fix
+                    return (Convert.ToInt32(x) & (1 << n)) != 0;
                 else if (n < 63)
-                    //return (Convert.ToInt64(x) & (1L << n)) != 0;
-                    return (Util.ConvertToLong(x) & (1L << n)) != 0;    // convert fix
+                    return (Convert.ToInt64(x) & (1L << n)) != 0;
                 else
                     //return toBigInteger(x).testBit(n);
                     return toBigInteger(x).TestBit(n);
@@ -1447,8 +1536,7 @@ namespace clojure.lang
                 if (n < 32)
                     return (n < 0)
                         ? shiftRight(x, -n)
-                        //: reduce(Convert.ToInt64(x) << n);
-                        : reduce(Util.ConvertToLong(x) << n);       // convert fix
+                        : reduce(Convert.ToInt64(x) << n);
                 else
                     //return reduce(toBigInteger(x).shiftLeft(n));
                     return reduce(toBigInteger(x) << n);
@@ -1458,8 +1546,7 @@ namespace clojure.lang
             {
                 return (n < 0)
                    ? shiftLeft(x, -n)
-                    //: Convert.ToInt32(x) >> n;
-                   : Util.ConvertToInt(x) >> n;
+                   : Convert.ToInt32(x) >> n;
             }
 
             #endregion
@@ -1491,39 +1578,33 @@ namespace clojure.lang
 
             public object not(object x)
             {
-                //return ~Convert.ToInt64(x);
-                return ~Util.ConvertToLong(x);      // convert fix
+                return ~Convert.ToInt64(x);
             }
 
             public object and(object x, object y)
             {
-                //return Convert.ToInt64(x) & Convert.ToInt64(y);
-                return Util.ConvertToLong(x) & Util.ConvertToLong(y);       // convert fix
+                return Convert.ToInt64(x) & Convert.ToInt64(y);
             }
 
             public object or(object x, object y)
             {
-                //return Convert.ToInt64(x) | Convert.ToInt64(y);
-                return Util.ConvertToLong(x) | Util.ConvertToLong(y);       // convert fix
+                return Convert.ToInt64(x) | Convert.ToInt64(y);
             }
 
             public object xor(object x, object y)
             {
-                //return Convert.ToInt64(x) ^ Convert.ToInt64(y);
-                return Util.ConvertToLong(x) ^ Util.ConvertToLong(y);       // convert fix
+                return Convert.ToInt64(x) ^ Convert.ToInt64(y);
             }
 
             public object andNot(object x, object y)
             {
-                //return Convert.ToInt64(x) & ~Convert.ToInt64(y);
-                return Util.ConvertToLong(x) & ~Util.ConvertToLong(y);       // convert fix
+                return Convert.ToInt64(x) & ~Convert.ToInt64(y);
             }
 
             public object clearBit(object x, int n)
             {
                 if (n < 63)
-                    //return Convert.ToInt64(x) & ~(1L << n);
-                    return Util.ConvertToLong(x) & ~(1L << n);      // convert fix
+                    return Convert.ToInt64(x) & ~(1L << n);
                 else
                     //return toBigInteger(x).clearBit(n);
                     return toBigInteger(x).ClearBit(n);
@@ -1532,8 +1613,7 @@ namespace clojure.lang
             public object setBit(object x, int n)
             {
                 if (n < 63)
-                    //return Convert.ToInt64(x) | (1L << n);
-                    return Util.ConvertToLong(x) | (1L << n);      // convert fix
+                    return Convert.ToInt64(x) | (1L << n);
                 else
                     //return toBigInteger(x).setBit(n);
                     return toBigInteger(x).SetBit(n);
@@ -1542,21 +1622,19 @@ namespace clojure.lang
             public object flipBit(object x, int n)
             {
                 if (n < 63)
-                    //return Convert.ToInt64(x) ^ (1L << n);
-                    return Util.ConvertToLong(x) ^ (1L << n);      // convert fix
+                    return Convert.ToInt64(x) ^ (1L << n);
                 else
                     //return toBigInteger(x).flipBit(n);
-                    return toBigInteger(x).FlipBit( n);
+                    return toBigInteger(x).FlipBit(n);
             }
 
             public bool testBit(object x, int n)
             {
                 if (n < 63)
-                    //return (Convert.ToInt64(x) & (1L << n)) != 0;
-                    return (Util.ConvertToLong(x) & (1L << n)) != 0;      // convert fix
+                    return (Convert.ToInt64(x) & (1L << n)) != 0;
                 else
                     //return toBigInteger(x).testBit(n);
-                    return toBigInteger(x).TestBit( n);
+                    return toBigInteger(x).TestBit(n);
             }
 
             public object shiftLeft(object x, int n)
@@ -1571,8 +1649,7 @@ namespace clojure.lang
             {
                 return n < 0
                      ? shiftLeft(x, -n)
-                    //: Convert.ToInt64(x) >> n;
-                     : Util.ConvertToLong(x) >> n;      // convert fix
+                     : Convert.ToInt64(x) >> n;
             }
 
             #endregion
@@ -1671,7 +1748,7 @@ namespace clojure.lang
 
             #endregion
         }
-        
+
         #region Array c-tors
 
         static public float[] float_array(int size, object init)

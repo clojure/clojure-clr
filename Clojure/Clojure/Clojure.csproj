@@ -121,6 +121,7 @@
     <Compile Include="Lib\IProxy.cs" />
     <Compile Include="Lib\JReMatcher.cs" />
     <Compile Include="Lib\LazySeq.cs" />
+    <Compile Include="Lib\NumbersV0.cs" />
     <Compile Include="Lib\Seqable.cs" />
     <Compile Include="Lib\Stream.cs" />
     <Compile Include="Readers\LineNumberingTextReader.cs" />

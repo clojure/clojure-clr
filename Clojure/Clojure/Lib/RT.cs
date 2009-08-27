@@ -1014,18 +1014,22 @@ namespace clojure.lang
 
         public static sbyte byteCast(object x)
         {
-            return (sbyte)Convert.ToDouble(x);
+            //return (sbyte)Convert.ToDouble(x);
+            return (sbyte)Util.ConvertToInt(x);     // convert fix
         }
 
         public static short shortCast(object x)
         {
-            return (short)Convert.ToDouble(x);
+            //return (short)Convert.ToDouble(x);
+            return (short)Util.ConvertToInt(x);     // convert fix
         }
 
         public static int intCast(object x)
         {
             // ToInt32 rounds.  We need truncation.
-            return (int)Convert.ToDouble(x);
+            //return (int)Convert.ToDouble(x);
+            return Util.ConvertToInt(x);     // convert fix
+
         }
 
         static public int intCast(char x)
@@ -1065,7 +1069,9 @@ namespace clojure.lang
 
         public static long longCast(object x)
         {
-            return (long)Convert.ToDouble(x);
+            //return (long)Convert.ToDouble(x);
+            return Util.ConvertToLong(x);     // convert fix
+
         }
 
         public static long longCast(int x)
@@ -1090,7 +1096,8 @@ namespace clojure.lang
 
         public static float floatCast(object x)
         {
-            return Convert.ToSingle(x);
+            //return Convert.ToSingle(x);
+            return Util.ConvertToFloat(x);      // convert fix
         }
 
         public static float floatCast(int x)
@@ -1115,7 +1122,8 @@ namespace clojure.lang
 
         public static double doubleCast(object x)
         {
-            return Convert.ToDouble(x);
+            //return Convert.ToDouble(x);
+            return Util.ConvertToDouble(x);     // convert fix
         }
 
 
