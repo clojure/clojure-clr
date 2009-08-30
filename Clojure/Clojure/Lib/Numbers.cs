@@ -443,7 +443,8 @@ namespace clojure.lang
 
         static bool TryAsInt(object x, out int ix)
         {
-            Type type = Util.GetNonNullableType(x.GetType());
+            //Type type = Util.GetNonNullableType(x.GetType());
+            Type type = x.GetType();
 
             switch (Type.GetTypeCode(type))
             {
@@ -707,7 +708,8 @@ namespace clojure.lang
 
         static BitOps bitOps(object x)
         {
-            Type type = Util.GetNonNullableType(x.GetType());
+            //Type type = Util.GetNonNullableType(x.GetType());
+            Type type = x.GetType();
 
             //if (!type.IsEnum)     // convert fix
             //{

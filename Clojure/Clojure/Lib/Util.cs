@@ -406,9 +406,9 @@ namespace clojure.lang
 
         internal static bool IsInteger(Type type)
         {
-            type = GetNonNullableType(type);
-            if (!type.IsEnum)
-            {
+            //type = GetNonNullableType(type);
+            //if (!type.IsEnum)
+            //{
                 switch (Type.GetTypeCode(type))
                 {
                     case TypeCode.SByte:
@@ -423,7 +423,7 @@ namespace clojure.lang
                 }
                 if (type == typeof(BigInteger))
                     return true;
-            }
+            //}
             return false;
         }
 
@@ -475,9 +475,9 @@ namespace clojure.lang
 
         internal static bool IsNumeric(Type type)
         {
-            type = GetNonNullableType(type);
-            if (!type.IsEnum)
-            {
+            //type = GetNonNullableType(type);
+            //if (!type.IsEnum)
+            //{
                 switch (Type.GetTypeCode(type))
                 {
                     case TypeCode.Char:
@@ -495,7 +495,7 @@ namespace clojure.lang
                 }
                 if (type == typeof(BigInteger) || type == typeof(BigDecimal) || type == typeof(Ratio))
                     return true;
-            }
+            //}
             return false;
         }
 
