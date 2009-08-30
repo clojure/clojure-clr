@@ -907,17 +907,17 @@ namespace clojure.lang
 
         static public Object nth(Object coll, int n, Object notFound)
         {
+            if (coll is Indexed)
+            {
+                Indexed v = (Indexed)coll;
+                if (n >= 0 && n < v.count())
+                    return v.nth(n);
+                return notFound;
+            }
             if (coll == null)
                 return notFound;
             else if (n < 0)
                 return notFound;
-            else if (coll is IPersistentVector)
-            {
-                IPersistentVector v = (IPersistentVector)coll;
-                if (n < v.count())
-                    return v.nth(n);
-                return notFound;
-            }
             else if (coll is String)
             {
                 String s = (String)coll;
