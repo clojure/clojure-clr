@@ -248,12 +248,30 @@ namespace clojure.lang
             }
         }
 
-        public static Boolean equiv(object x, object y)
+        public static bool equiv(object x, object y)
         {
             return Util.IsNumeric(x)
                 && Util.IsNumeric(y)
                 && DoOp(x, y, BoolBinaryOpCode.Equiv);
         }
+
+        internal static bool EquivArg1Numeric(object x, object y)
+        {
+            return Util.IsNumeric(y)
+                && DoOp(x, y, BoolBinaryOpCode.Equiv);
+        }
+
+        internal static bool EquivArg2Numeric(object x, object y)
+        {
+            return Util.IsNumeric(x)
+                && DoOp(x, y, BoolBinaryOpCode.Equiv);
+        }
+
+        internal static bool EquivBothArgsNumeric(object x, object y)
+        {
+            return DoOp(x, y, BoolBinaryOpCode.Equiv);
+        }
+
 
         public static bool lt(object x, object y)
         {
@@ -2626,42 +2644,50 @@ namespace clojure.lang
 
         static public bool equiv(int x, Object y)
         {
-            return equiv((Object)x, y);
+            //return equiv((Object)x, y);
+            return EquivArg1Numeric(x, y);  // still boxes
         }
 
         static public bool equiv(Object x, int y)
         {
-            return equiv(x, (Object)y);
+            //return equiv(x, (Object)y);
+            return EquivArg2Numeric(x, y);
         }
 
         static public bool equiv(float x, Object y)
         {
-            return equiv((Object)x, y);
+            //return equiv((Object)x, y);
+            return EquivArg1Numeric(x, y);  // still boxes
         }
 
         static public bool equiv(Object x, float y)
         {
-            return equiv(x, (Object)y);
+            //return equiv(x, (Object)y);
+            return EquivArg2Numeric(x, y);
         }
 
         static public bool equiv(long x, Object y)
         {
-            return equiv((Object)x, y);
+            //return equiv((Object)x, y);
+            return EquivArg1Numeric(x, y);  // still boxes
         }
 
         static public bool equiv(Object x, long y)
         {
-            return equiv(x, (Object)y);
+            //return equiv(x, (Object)y);
+            return EquivArg2Numeric(x, y);
         }
 
         static public bool equiv(double x, Object y)
         {
-            return equiv((Object)x, y);
+            //return equiv((Object)x, y);
+            return EquivArg1Numeric(x, y);  // still boxes
         }
 
         static public bool equiv(Object x, double y)
         {
-            return equiv(x, (Object)y);
+            //return equiv(x, (Object)y);
+            return EquivArg2Numeric(x, y);
         }
 
 

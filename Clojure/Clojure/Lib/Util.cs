@@ -39,7 +39,8 @@ namespace clojure.lang
             if (k1 != null)
             {
                 if (IsNumeric(k1))
-                    return Numbers.equiv(k1, k2);
+                    //return Numbers.equiv(k1, k2);
+                    return Numbers.EquivArg1Numeric(k1,k2);
                 else if (k1 is IPersistentCollection && k2 is IPersistentCollection)
                     return ((IPersistentCollection)k1).equiv(k2);
                 return k1.Equals(k2);
