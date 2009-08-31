@@ -420,25 +420,56 @@
   [& body]
   (list 'new 'clojure.lang.LazySeq (list* '#^{:once true} fn* [] body)))    
 
+(defn #^clojure.lang.ChunkBuffer chunk-buffer [capacity]
+  (clojure.lang.ChunkBuffer. capacity))
+
+(defn chunk-append [#^clojure.lang.ChunkBuffer b x]
+  (.add b x))
+
+(defn chunk [#^clojure.lang.ChunkBuffer b]
+  (.chunk b))
+
+(defn #^clojure.lang.IChunk chunk-first [#^clojure.lang.IChunkedSeq s]
+  (.chunkedFirst s))
+
+(defn #^clojure.lang.ISeq chunk-rest [#^clojure.lang.IChunkedSeq s]
+  (.chunkedMore s))
+
+(defn #^clojure.lang.ISeq chunk-next [#^clojure.lang.IChunkedSeq s]
+  (.chunkedNext s))
+
+(defn chunk-cons [chunk rest]
+  (if (clojure.lang.Numbers/isZero (clojure.lang.RT/count chunk))
+    rest
+    (clojure.lang.ChunkedCons. chunk rest)))
+  
+(defn chunked-seq? [s]
+  (instance? clojure.lang.IChunkedSeq s))
+
 (defn concat
   "Returns a lazy seq representing the concatenation of the elements in the supplied colls."
   ([] (lazy-seq nil))
   ([x] (lazy-seq x))
   ([x y]
-     (lazy-seq
+    (lazy-seq
       (let [s (seq x)]
         (if s
-          (cons (first s) (concat (rest s) y))
+          (if (chunked-seq? s)
+            (chunk-cons (chunk-first s) (concat (chunk-rest s) y))
+            (cons (first s) (concat (rest s) y)))
           y))))
   ([x y & zs]
      (let [cat (fn cat [xys zs]
                  (lazy-seq
-                  (let [xys (seq xys)]
-                    (if xys
-                      (cons (first xys) (cat (rest xys) zs))
-                      (when zs
-                        (cat (first zs) (next zs)))))))]
-           (cat (concat x y) zs))))
+                   (let [xys (seq xys)]
+                     (if xys
+                       (if (chunked-seq? xys)
+                         (chunk-cons (chunk-first xys)
+                                     (cat (chunk-rest xys) zs))
+                         (cons (first xys) (cat (rest xys) zs)))
+                       (when zs
+                         (cat (first zs) (next zs)))))))]
+       (cat (concat x y) zs))))
 
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
 
@@ -570,32 +601,6 @@
   "Returns a number one greater than num."
   {:inline (fn [x] `(. clojure.lang.Numbers (inc ~x)))}
   [x] (. clojure.lang.Numbers (inc x)))
-
-(defn #^clojure.lang.ChunkBuffer chunk-buffer [capacity]
-  (clojure.lang.ChunkBuffer. capacity))
-
-(defn chunk-append [#^clojure.lang.ChunkBuffer b x]
-  (.add b x))
-
-(defn chunk [#^clojure.lang.ChunkBuffer b]
-  (.chunk b))
-
-(defn #^clojure.lang.IChunk chunk-first [#^clojure.lang.IChunkedSeq s]
-  (.chunkedFirst s))
-
-(defn #^clojure.lang.ISeq chunk-rest [#^clojure.lang.IChunkedSeq s]
-  (.chunkedMore s))
-
-(defn #^clojure.lang.ISeq chunk-next [#^clojure.lang.IChunkedSeq s]
-  (.chunkedNext s))
-
-(defn chunk-cons [chunk rest]
-  (if (zero? (count chunk))
-    rest
-    (clojure.lang.ChunkedCons. chunk rest)))
-  
-(defn chunked-seq? [s]
-  (instance? clojure.lang.IChunkedSeq s))
 
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
@@ -2853,7 +2858,7 @@
    binding-forms.  Supported modifiers are: :let [binding-form expr ...],
    :while test, :when test.
 
-  (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)]  [x y]))"
+  (take 100 (for [x (range 100000000) y (range 1000000) :while (< y x)] [x y]))"
   [seq-exprs body-expr]
   (assert-args for
     (vector? seq-exprs) "a vector for its binding"
@@ -2884,12 +2889,49 @@
                 (concat fs# (~giter (rest ~gxs)))
                 (recur (rest ~gxs))))
             :else `(cons ~body-expr
-            (~giter (rest ~gxs)))))]
-        `(fn ~giter [~gxs]
-          (lazy-seq
-            (loop [~gxs ~gxs]
-              (when-first [~bind ~gxs]
-                ~(do-mod mod-pairs)))))))]
+                         (~giter (rest ~gxs)))))]
+          (if next-groups
+                        #_"not the inner-most loop"
+                        `(fn ~giter [~gxs]
+                           (lazy-seq
+                             (loop [~gxs ~gxs]
+                               (when-first [~bind ~gxs]
+                                 ~(do-mod mod-pairs)))))
+                        #_"inner-most loop"
+                        (let [gi (gensym "i__")
+                              gb (gensym "b__")
+                              do-cmod (fn do-cmod [[[k v :as pair] & etc]]
+                                        (cond
+                                          (= k :let) `(let ~v ~(do-cmod etc))
+                                          (= k :while) `(when ~v ~(do-cmod etc))
+                                          (= k :when) `(if ~v
+                                                         ~(do-cmod etc)
+                                                         (recur
+                                                           (unchecked-inc ~gi)))
+                                          (keyword? k)
+                                            (err "Invalid 'for' keyword " k)
+                                          :else
+                                            `(do (chunk-append ~gb ~body-expr)
+                                                 (recur (unchecked-inc ~gi)))))]
+                          `(fn ~giter [~gxs]
+                             (lazy-seq
+                               (loop [~gxs ~gxs]
+                                 (when-let [~gxs (seq ~gxs)]
+                                   (if (chunked-seq? ~gxs)
+                                     (let [c# (chunk-first ~gxs)
+                                           size# (int (count c#))
+                                           ~gb (chunk-buffer size#)]
+                                       (if (loop [~gi (int 0)]
+                                             (if (< ~gi size#)
+                                               (let [~bind (.nth c# ~gi)]
+                                                 ~(do-cmod mod-pairs))
+                                               true))
+                                         (chunk-cons
+                                           (chunk ~gb)
+                                           (~giter (chunk-rest ~gxs)))
+                                         (chunk-cons (chunk ~gb) nil)))
+                                     (let [~bind (first ~gxs)]
+                                       ~(do-mod mod-pairs)))))))))))]
     `(let [iter# ~(emit-bind (to-groups seq-exprs))]
       (iter# ~(second seq-exprs)))))
 
