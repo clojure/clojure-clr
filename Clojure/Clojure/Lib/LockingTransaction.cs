@@ -118,6 +118,14 @@ namespace clojure.lang
                 get { return _startPoint; }
             }
 
+            readonly CountDownLatch _latch;
+
+            public CountDownLatch Latch
+            {
+                get { return _latch; }
+            } 
+
+
             #endregion
 
             #region C-tors
@@ -131,6 +139,7 @@ namespace clojure.lang
             {
                 _status = new AtomicInteger(status);
                 _startPoint = startPoint;
+                _latch = new CountDownLatch(1);
             }
 
             #endregion
@@ -317,7 +326,8 @@ namespace clojure.lang
                 lock (_info)
                 {
                     _info.Status.set(status);
-                    Monitor.PulseAll(_info);
+                    //Monitor.PulseAll(_info);
+                    _info.Latch.CountDown();
                 }
                 _info = null;
                 _vals.Clear();
@@ -352,18 +362,26 @@ namespace clojure.lang
                         unlocked = true;
                         // stop prior to blocking
                         stop(RETRY);
-                        lock (refinfo)
+                        //lock (refinfo)
+                        //{
+                        //    if (refinfo.IsRunning)
+                        //    {
+                        //        try
+                        //        {
+                        //            Monitor.Wait(refinfo, LOCK_WAIT_MSECS);
+                        //        }
+                        //        catch (ThreadInterruptedException)
+                        //        {
+                        //        }
+                        //    }
+                        //}
+                        try
                         {
-                            if (refinfo.IsRunning)
-                            {
-                                try
-                                {
-                                    Monitor.Wait(refinfo, LOCK_WAIT_MSECS);
-                                }
-                                catch (ThreadInterruptedException)
-                                {
-                                }
-                            }
+                            refinfo.Latch.Await(LOCK_WAIT_MSECS);
+                        }
+                        catch (ThreadInterruptedException)
+                        {
+                            // ignore
                         }
                         throw _retryex;
                     }
@@ -411,12 +429,15 @@ namespace clojure.lang
             //   try to abort the other
             if (bargeTimeElapsed() && _startPoint < refinfo.StartPoint)
             {
-                lock (refinfo)
-                {
-                    barged = refinfo.Status.compareAndSet(RUNNING, KILLED);
-                    if (barged)
-                        Monitor.PulseAll(refinfo);
-                }
+                //lock (refinfo)
+                //{
+                //    barged = refinfo.Status.compareAndSet(RUNNING, KILLED);
+                //    if (barged)
+                //        Monitor.PulseAll(refinfo);
+                //}
+                barged = refinfo.Status.compareAndSet(RUNNING, KILLED);
+                if (barged)
+                    refinfo.Latch.CountDown();
             }
             return barged;
         }
