@@ -12,13 +12,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace clojure.lang
 {
     /// <summary>
     /// Represents a keyword
     /// </summary>
-    public class Keyword: AFn, Named, IComparable  // ??JAVA only used IFn, not AFn.  NOt sure why.
+    [Serializable]
+    public class Keyword: AFn, Named, IComparable, ISerializable // ??JAVA only used IFn, not AFn.  NOt sure why.
     {
         #region Data
 
@@ -209,6 +212,49 @@ namespace clojure.lang
         public int CompareTo(object obj)
         {
             return _sym.CompareTo(((Keyword)obj)._sym);
+        }
+
+        #endregion
+
+        #region ISerializable Members
+
+        [SecurityPermissionAttribute(SecurityAction.LinkDemand,
+            Flags = SecurityPermissionFlag.SerializationFormatter)]
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            // Instead of serializing the keyword,
+            // serialize a KeywordSerializationHelper instead
+            info.SetType(typeof(KeywordSerializationHelper));
+            info.AddValue("_sym", _sym);
+        }
+
+        #endregion
+    }
+
+    [Serializable]
+    sealed class KeywordSerializationHelper : IObjectReference
+    {
+
+        #region Data
+
+        readonly Symbol _sym;
+
+        #endregion
+
+        #region c-tors
+
+        KeywordSerializationHelper(SerializationInfo info, StreamingContext context)
+        {
+            _sym = (Symbol)info.GetValue("_sym", typeof(Symbol));
+        }
+
+        #endregion
+
+        #region IObjectReference Members
+
+        public object GetRealObject(StreamingContext context)
+        {
+            return Keyword.intern(_sym);
         }
 
         #endregion

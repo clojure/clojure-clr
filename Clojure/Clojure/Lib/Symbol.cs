@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
@@ -20,7 +21,7 @@ namespace clojure.lang
     /// </summary>
     /// <remarks>See the Clojure documentation for more information.</remarks>
     [Serializable]
-    public class Symbol: AFn, Named, IComparable   
+    public class Symbol: AFn, Named, IComparable, ISerializable
     {
         #region Instance variables
 
@@ -117,9 +118,9 @@ namespace clojure.lang
         private Symbol(IPersistentMap meta, string ns_interned, string name_interned)
             : base(meta)
         {
-            this._name = name_interned;
-            this._ns = ns_interned;
-            this._hash = ComputeHashCode();
+            _name = name_interned;
+            _ns = ns_interned;
+            _hash = ComputeHashCode();
         }
 
         /// <summary>
@@ -131,6 +132,18 @@ namespace clojure.lang
             return Util.HashCombine(_name.GetHashCode(), Util.Hash(_ns));
         }
 
+
+        /// <summary>
+        /// Construct a Symbol during deserialization.
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="context"></param>
+        protected Symbol (SerializationInfo info, StreamingContext context)
+        {
+            _name = String.Intern(info.GetString("_name"));
+            _ns = String.Intern(info.GetString("_ns"));
+            _hash = ComputeHashCode();
+        }
 
         #endregion
 
@@ -287,6 +300,16 @@ namespace clojure.lang
         //{
         //    return intern(_ns, _name);
         //}
+
+        #endregion
+
+        #region ISerializable Members
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("_name",_name);
+            info.AddValue("_ns", _ns);
+        }
 
         #endregion
     }

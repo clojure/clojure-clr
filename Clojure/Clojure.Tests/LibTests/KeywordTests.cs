@@ -21,6 +21,8 @@ using clojure.lang;
 
 using RMExpect = Rhino.Mocks.Expect;
 using System.Collections;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 
 namespace Clojure.Tests.LibTests
@@ -232,6 +234,37 @@ namespace Clojure.Tests.LibTests
             Expect(k3.CompareTo(k1), GreaterThan(0));
         }
 
+
+        #endregion
+
+        #region Serializability tests
+
+        [Test]
+        public void Serialization_preserves_keyword_uniqueness()
+        {
+            MemoryStream ms = new MemoryStream();
+
+            Keyword k1 = Keyword.intern("def", "abc");
+            Keyword k2 = Keyword.intern("def", "xyz");
+            List<Keyword> keywords = new List<Keyword>();
+            keywords.Add(k1);
+            keywords.Add(k2);
+            keywords.Add(k1);
+            keywords.Add(k2);
+
+            BinaryFormatter bf = new BinaryFormatter();
+
+            bf.Serialize(ms,keywords);
+
+            ms.Seek(0, SeekOrigin.Begin);
+
+            List<Keyword> inKeys = (List<Keyword>)bf.Deserialize(ms);
+            
+            Expect(Object.ReferenceEquals(inKeys[0],k1));
+            Expect(Object.ReferenceEquals(inKeys[1],k2));
+            Expect(Object.ReferenceEquals(inKeys[2],k1));
+            Expect(Object.ReferenceEquals(inKeys[3],k2));            
+        }
 
         #endregion
     }

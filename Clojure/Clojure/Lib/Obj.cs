@@ -18,6 +18,7 @@ namespace clojure.lang
     /// <summary>
     /// Provides a basic implementation of <see cref="IObj">IObj</see> functionality.
     /// </summary>
+    [Serializable]
     public abstract class Obj: IObj
     {
         #region Data

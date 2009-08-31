@@ -20,6 +20,8 @@ using clojure.lang;
 
 using RMExpect = Rhino.Mocks.Expect;
 using System.Collections;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 
 
@@ -290,6 +292,42 @@ namespace Clojure.Tests.LibTests
 
             Expect(sym1.CompareTo(sym2), LessThan(0));
             Expect(sym2.CompareTo(sym1), GreaterThan(0));
+        }
+
+        #endregion
+
+        #region Serialization test
+
+        [Test]
+        public void Serialization_preserves_keyword_uniqueness()
+        {
+            MemoryStream ms = new MemoryStream();
+
+            Symbol s1 = Symbol.intern("def", "abc");
+            Symbol s2 = Symbol.intern("def", "xyz");
+            List<Symbol> symbols = new List<Symbol>();
+            symbols.Add(s1);
+            symbols.Add(s2);
+            symbols.Add(s1);
+            symbols.Add(s2);
+
+            BinaryFormatter bf = new BinaryFormatter();
+
+            bf.Serialize(ms, symbols);
+
+            ms.Seek(0, SeekOrigin.Begin);
+
+            List<Symbol> inSyms = (List<Symbol>)bf.Deserialize(ms);
+
+            Expect(Object.ReferenceEquals(inSyms[0].Name, s1.Name));
+            Expect(Object.ReferenceEquals(inSyms[0].Namespace, s1.Namespace));
+            Expect(Object.ReferenceEquals(inSyms[1].Name, s2.Name));
+            Expect(Object.ReferenceEquals(inSyms[1].Namespace, s2.Namespace));
+            Expect(Object.ReferenceEquals(inSyms[2].Name, s1.Name));
+            Expect(Object.ReferenceEquals(inSyms[2].Namespace, s1.Namespace));
+            Expect(Object.ReferenceEquals(inSyms[3].Name, s2.Name));
+            Expect(Object.ReferenceEquals(inSyms[3].Namespace, s2.Namespace));
+
         }
 
         #endregion
