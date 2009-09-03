@@ -225,7 +225,7 @@ namespace Clojure.Tests.LibTests
 
             PersistentHashMap m = PersistentHashMap.create(1, "a", 2, "b");
 
-
+            _testNoChange = false;
             _objWithNullMeta = (IObj)m;
             _obj = _objWithNullMeta.withMeta(meta);
             _expectedType = typeof(PersistentHashMap);

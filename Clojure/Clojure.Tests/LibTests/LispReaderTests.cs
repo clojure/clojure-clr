@@ -918,12 +918,12 @@ namespace Clojure.Tests.LibTests
             Object o1 = ReadFromString("{a b 1 2");
         }
 
-        [Test]
-        [ExpectedException(typeof(ArgumentException))]
-        public void MapWithOddNumberOfEntriesFails()
-        {
-            Object o1 = ReadFromString("{a b 1}");
-        }
+        //[Test]
+        //[ExpectedException(typeof(ArgumentException))]
+        //public void MapWithOddNumberOfEntriesFails()
+        //{
+        //    Object o1 = ReadFromString("{a b 1}");
+        //}
 
 
 

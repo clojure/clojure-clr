@@ -40,6 +40,11 @@ namespace Clojure.Tests.LibTests
         /// </summary>
         protected Type _expectedType;
 
+        /// <summary>
+        /// Test if same object with no change in meta.  Set to false to skip test.
+        /// </summary>
+        protected bool _testNoChange = true;
+
 
         MockRepository _mocks = null;
         IPersistentMap _meta = null;
@@ -76,8 +81,11 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void withMeta_returns_self_if_no_change()
         {
-            IObj obj2 = _obj.withMeta(_obj.meta());
-            Expect(obj2, SameAs(_obj));
+            if (_testNoChange)
+            {
+                IObj obj2 = _obj.withMeta(_obj.meta());
+                Expect(obj2, SameAs(_obj));
+            }
         }
 
         [Test]

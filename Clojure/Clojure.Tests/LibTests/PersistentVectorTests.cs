@@ -314,6 +314,7 @@ namespace Clojure.Tests.LibTests
 
             PersistentVector v = PersistentVector.create(2, 3, 4);
 
+            _testNoChange = false;
             _objWithNullMeta = (IObj)v;
             _obj = _objWithNullMeta.withMeta(meta);
             _expectedType = typeof(PersistentVector);

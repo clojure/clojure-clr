@@ -18,13 +18,12 @@ using System.Threading;
 
 namespace clojure.lang
 {
+
+    // TODO: Get rid of Box in favor of 'out' parameer.
+
+
     /// <summary>
     /// A persistent rendition of Phil Bagwell's Hash Array Mapped Trie
-    /// <para>Uses path copying for persistence.</para>
-    /// <para>HashCollision leaves vs extended hashing</para>
-    /// <para>Node polymorphism vs conditionals</para>
-    /// <para>No sub-tree pools or root-resizing</para>
-    /// <para>Any errors are Rich Hickey's, except those that are mine.</para>
     /// </summary>
     /// <remarks>
     /// <para>Uses path copying for persistence.</para>
@@ -40,17 +39,28 @@ namespace clojure.lang
         /// <summary>
         /// The number of entries in the map.
         /// </summary>
-        protected readonly int _count;
+        readonly int _count;
 
         /// <summary>
         /// The root of the trie.
         /// </summary>
-        protected readonly INode _root;
+        readonly INode _root;
+
+        /// <summary>
+        /// Indicates if the map has the null value as a key.
+        /// </summary>
+        readonly bool _hasNull;
+
+        /// <summary>
+        /// The value associated with the null key, if present.
+        /// </summary>
+        readonly object _nullValue;
 
         /// <summary>
         /// An empty <see cref="PersistentHashMap">PersistentHashMap</see>.
         /// </summary>
-        public static readonly PersistentHashMap EMPTY = new PersistentHashMap(0, new EmptyNode());
+        public static readonly PersistentHashMap EMPTY = new PersistentHashMap(0, null, false, null);
+        static readonly object NOT_FOUND = new object();
 
         #endregion
 
@@ -138,10 +148,14 @@ namespace clojure.lang
         /// </summary>
         /// <param name="count">The count.</param>
         /// <param name="root">The root node.</param>
-        PersistentHashMap(int count, INode root)
+        /// <param name="hasNull"></param>
+        /// <param name="nullValue"></param>
+        PersistentHashMap(int count, INode root, bool hasNull, object nullValue)
         {
             _count = count;
             _root = root;
+            _hasNull = hasNull;
+            _nullValue = nullValue;
         }
 
         /// <summary>
@@ -150,11 +164,15 @@ namespace clojure.lang
         /// <param name="meta">The metadata to attach</param>
         /// <param name="count">The count.</param>
         /// <param name="root">The root node.</param>
-        PersistentHashMap(IPersistentMap meta, int count, INode root)
+        /// <param name="hasNull"></param>
+        /// <param name="nullValue"></param>
+        PersistentHashMap(IPersistentMap meta, int count, INode root, bool hasNull, object nullValue)
             : base(meta)
         {
             _count = count;
             _root = root;
+            _hasNull = hasNull;
+            _nullValue = nullValue;
         }
 
         #endregion
@@ -166,12 +184,9 @@ namespace clojure.lang
         /// </summary>
         /// <param name="meta">The new metadata.</param>
         /// <returns>A copy of the object with new metadata attached.</returns>
-         public override IObj withMeta(IPersistentMap meta)
+        public override IObj withMeta(IPersistentMap meta)
         {
-             // Java does not include change test
-            return meta == _meta
-             ? this
-             : new PersistentHashMap(meta, _count, _root);
+            return new PersistentHashMap(meta, _count, _root, _hasNull, _nullValue);
         }
 
         #endregion
@@ -185,7 +200,11 @@ namespace clojure.lang
          /// <returns>True if the key is in this map.</returns>
          public override bool containsKey(object key)
         {
-            return entryAt(key) != null;
+            if (key == null)
+                return _hasNull;
+            return (_root != null) 
+                ? _root.find(0, Util.hash(key), key, NOT_FOUND) != NOT_FOUND 
+                : false;
         }
 
         /// <summary>
@@ -195,7 +214,11 @@ namespace clojure.lang
         /// <returns>The key/value pair for the key, or null if the key is not in the map.</returns>
         public override IMapEntry entryAt(object key)
         {
-            return (IMapEntry)_root.find(Util.Hash(key),key);
+            if (key == null)
+                return _hasNull ? new MapEntry(null, _nullValue) : null;
+            return (_root != null)
+                ? _root.find(0,Util.Hash(key),key)
+                : null;
         }
 
         /// <summary>
@@ -216,9 +239,11 @@ namespace clojure.lang
         /// <returns>The associated value (or <c>notFound</c> if the key is not present.</returns>
         public override object valAt(object key, object notFound)
         {
-            IMapEntry e = entryAt(key);
-            return e != null
-                ? e.val()
+            if (key == null)
+                return _hasNull ? _nullValue : notFound;
+
+            return (_root != null)
+                ? _root.find(0, Util.Hash(key), key, notFound)
                 : notFound;
         }
 
@@ -235,11 +260,18 @@ namespace clojure.lang
         /// <remarks>Overwrites an exising value for the <paramref name="key"/>, if present.</remarks>
         public override IPersistentMap assoc(object key, object val)
         {
+            if (key == null)
+            {
+                if (_hasNull && val == _nullValue)
+                    return this;
+                return new PersistentHashMap(meta(), _hasNull ? _count : _count + 1, _root, true, val);
+            }
             Box addedLeaf = new Box(null);
-            INode newroot = _root.assoc(0, Util.Hash(key), key, val, addedLeaf);
+            INode newroot = (_root == null ? BitmapIndexedNode.EMPTY : _root)
+                .assoc(0, Util.Hash(key), key, val, addedLeaf);
             return newroot == _root
                 ? this
-                : new PersistentHashMap(meta(), addedLeaf.Val == null ? _count : _count + 1, newroot);
+                : new PersistentHashMap(meta(), addedLeaf.Val == null ? _count : _count + 1, newroot, _hasNull, _nullValue);
         }
 
 
@@ -265,14 +297,14 @@ namespace clojure.lang
         /// <returns>A new map with the key removed (or the same map if the key is not contained).</returns>
         public override IPersistentMap without(object key)
         {
-            INode newroot = _root.without(Util.Hash(key), key);
-
-            return newroot == _root
-                ? this
-                : (newroot == null
-                    ? (IPersistentMap) EMPTY.withMeta(meta())
-                    : new PersistentHashMap(meta(), _count - 1, newroot));
-
+            if (key == null)
+                return _hasNull ? new PersistentHashMap(meta(), _count - 1, _root, false, null) : this;
+            if (_root == null)
+                return this;
+            INode newroot = _root.without(0, Util.hash(key), key);
+            if (newroot == _root)
+                return this;
+            return new PersistentHashMap(meta(), _count - 1, newroot, _hasNull, _nullValue); 
         }
 
         #endregion
@@ -294,7 +326,8 @@ namespace clojure.lang
         /// <returns>An ISeq for iteration.</returns>
         public override ISeq seq()
         {
-            return _root.nodeSeq();
+            ISeq s = _root != null ? _root.nodeSeq() : null;
+            return _hasNull ? new Cons(new MapEntry(null, _nullValue), s) : s;
         }
 
         /// <summary>
@@ -307,877 +340,6 @@ namespace clojure.lang
         }
 
         #endregion
-
-        #region INode
-
-        /// <summary>
-        /// Interface for all nodes in the trie.
-        /// </summary>
-        public interface INode
-        {
-            /// <summary>
-            /// Return a trie with a new key/value pair.
-            /// </summary>
-            /// <param name="shift"></param>
-            /// <param name="hash"></param>
-            /// <param name="key"></param>
-            /// <param name="val"></param>
-            /// <param name="addedLeaf"></param>
-            /// <returns></returns>
-            INode assoc(int shift, int hash, object key, object val, Box addedLeaf);
-
-            /// <summary>
-            /// Return a trie with the given key removed.
-            /// </summary>
-            /// <param name="hash"></param>
-            /// <param name="key"></param>
-            /// <returns></returns>
-            INode without(int hash, object key);
-
-            /// <summary>
-            /// Gets the node containing a given key.
-            /// </summary>
-            /// <param name="hash"></param>
-            /// <param name="key"></param>
-            /// <returns></returns>
-            INode find(int hash, object key);
-
-            /// <summary>
-            /// Return an <see cref="ISeq">ISeq</see> with iterating the tree defined by the current node.
-            /// </summary>
-            /// <returns>An <see cref="ISeq">ISeq</see> </returns>
-            ISeq nodeSeq();
-
-            /// <summary>
-            /// Get the hash for the current ndoe.
-            /// </summary>
-            /// <returns></returns>
-            int getHash();
-
-            /// <summary>
-            /// Return a trie with a new key/value pair.
-            /// </summary>
-            /// <param name="edit"></param>
-            /// <param name="shift"></param>
-            /// <param name="hash"></param>
-            /// <param name="key"></param>
-            /// <param name="val"></param>
-            /// <param name="addedLeaf"></param>
-            /// <returns></returns>
-            INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf);
-
-            /// <summary>
-            /// Return a trie with the given key removed.
-            /// </summary>
-            /// <param name="edit"></param>
-            /// <param name="hash"></param>
-            /// <param name="key"></param>
-            /// <param name="removedLeaf"></param>
-            /// <returns></returns>
-            INode without(AtomicReference<Thread> edit, int hash, object key, Box removedLeaf);
-        }
-
-        #endregion
-
-        /// <summary>
-        /// A node with no keys.  Represents the empty map.
-        /// </summary>
-        sealed class EmptyNode : INode
-        {
-            #region INode Members
-
-            public INode assoc(int shift, int hash, object key, object val, Box addedLeaf)
-            {
-                INode ret = new LeafNode(null, hash, key, val);
-                addedLeaf.Val = ret;
-                return ret;
-            }
-
-            public INode without(int hash, object key)
-            {
-                return this;
-            }
-
-            public INode find(int hash, object key)
-            {
-                return null;
-            }
-
-            public ISeq nodeSeq()
-            {
-                return null;
-            }
-
-            public int getHash()
-            {
-                return 0;
-            }
-
-            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf)
-            {
-                return assoc(shift, hash, key, val, addedLeaf);
-            }
-
-            public INode without(AtomicReference<Thread> edit, int hash, Object key, Box removedLeaf)
-            {
-                return this;
-            }
-
-            #endregion
-        }
-
-        /// <summary>
-        ///  An internal node in the trie with all branches filled.
-        /// </summary>
-        sealed class FullNode : INode
-        {
-            #region Data
-
-            readonly INode[] _nodes;
-            readonly int _shift;
-            readonly int _hash;
-            readonly AtomicReference<Thread> _edit;
-
-            #endregion
-
-            #region C-tors
-
-            internal FullNode(AtomicReference<Thread> edit, INode[] nodes, int shift)
-            {
-                _nodes = nodes;
-                _shift = shift;
-                _hash = nodes[0].getHash();
-                _edit = edit;
-            }
-
-            #endregion
-
-            #region Calculations
-
-            static int bitpos(int hash, int shift)
-            {
-                return 1 << Util.Mask(hash, shift);
-            }
-
-            #endregion
-
-            #region INode Members
-
-            public INode assoc(int shift, int hash, object key, object val, Box addedLeaf)
-            {
-                int idx = Util.Mask(hash, shift);
-
-                INode n = _nodes[idx].assoc(shift + 5, hash, key, val, addedLeaf);
-                if (n == _nodes[idx])
-                    return this;
-                else
-                {
-                    INode[] newNodes = (INode[])_nodes.Clone();
-                    newNodes[idx] = n;
-                    return new FullNode(null, newNodes, shift);
-                }
-            }
-
-
-            public INode without(int hash, object key)
-            {
-                int idx = Util.Mask(hash, _shift);
-                INode n = _nodes[idx].without(hash, key);
-                if (n != _nodes[idx])
-                {
-                    if (n == null)
-                    {
-                        INode[] newnodes1 = new INode[_nodes.Length - 1];
-                        Array.Copy(_nodes, 0, newnodes1, 0, idx);
-                        Array.Copy(_nodes, idx + 1, newnodes1, idx, _nodes.Length - (idx + 1));
-                        return new BitmapIndexedNode(null, ~bitpos(hash, _shift), newnodes1, _shift);
-                    }
-                    INode[] newnodes = (INode[])_nodes.Clone();
-                    newnodes[idx] = n;
-                    return new FullNode(null, newnodes, _shift);
-                }
-                return this;
-            }
-
-            public INode find(int hash, object key)
-            {
-                return _nodes[Util.Mask(hash, _shift)].find(hash, key);
-            }
-
-            public ISeq nodeSeq()
-            {
-                return Seq.create(this, 0);
-            }
-
-            public int getHash()
-            {
-                return _hash;
-            }
-
-            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
-            {
-                int idx = Util.Mask(hash, shift);
-
-                INode n = _nodes[idx].assoc(edit, shift + 5, hash, key, val, addedLeaf);
-                if (n == _nodes[idx])
-                    return this;
-                else
-                {
-                    FullNode node = EnsureEditable(edit);
-                    node._nodes[idx] = n;
-                    return node;
-                }
-            }
-
-            public INode without(AtomicReference<Thread> edit, int hash, object key, Box removedLeaf)
-            {
-                int idx = Util.Mask(hash, _shift);
-                INode n = _nodes[idx].without(edit, hash, key, removedLeaf);
-                if (n != _nodes[idx])
-                {
-                    if (n == null)
-                    {
-                        INode[] newnodes = new INode[_nodes.Length - 1];
-                        Array.Copy(_nodes, newnodes, idx);
-                        Array.Copy(_nodes, idx + 1, newnodes, idx, _nodes.Length - (idx + 1));
-                        return new BitmapIndexedNode(edit, ~bitpos(hash, _shift), newnodes, _shift);
-                    }
-                    FullNode node = EnsureEditable(edit);
-                    node._nodes[idx] = n;
-                    return node;
-                }
-                return this;
-            }
-            
-            #endregion
-
-            #region Implementation
-
-            FullNode EnsureEditable(AtomicReference<Thread> edit)
-            {
-                if (_edit == edit)
-                    return this;
-                return new FullNode(edit, (INode[])_nodes.Clone(), _shift);
-            }
-
-            #endregion
-
-            private sealed class Seq : ASeq
-            {
-                #region Data
-
-                readonly ISeq _s;
-                readonly int _i;
-                readonly FullNode _node;
-
-                #endregion
-
-                #region C-tors & factory methods
-
-                Seq(ISeq s, int i, FullNode node)
-                {
-                    _s = s;
-                    _i = i;
-                    _node = node;
-                }
-
-                Seq(IPersistentMap meta, ISeq s, int i, FullNode node)
-                    :base(meta)
-                {
-                    _s = s;
-                    _i = i;
-                    _node = node;
-                }
-
-                public static ISeq create(FullNode node, int i)
-                {
-                    return i >= node._nodes.Length
-                        ? null
-                        : new Seq(node._nodes[i].nodeSeq(), i, node);
-                }
-
-                #endregion
-
-                #region ISeq members
-
-                public override object first()
-                {
-                    return _s.first();
-                }
-
-                public override ISeq next()
-                {
-                    ISeq nexts = _s.next();
-                    return nexts != null
-                        ? new Seq(nexts, _i, _node)
-                        : create(_node, _i + 1);
-                }
-             
-
-                #endregion
-
-                #region IObj members
-
-                public override IObj withMeta(IPersistentMap meta)
-                {
-                    return new Seq(meta, _s, _i, _node);
-                }
-
-                #endregion
-            }
-        }
-
-        /// <summary>
-        /// Represents a leaf node in the tree, corresponding to single map entry (key/value).
-        /// </summary>
-        sealed class LeafNode : AMapEntry, INode
-        {
-            #region Data
-
-            readonly int _hash;
-            readonly object _key;
-            object _val;
-
-            public object Val
-            {
-                get { return _val; }
-                set { _val = value; }
-            }
-            readonly AtomicReference<Thread> _edit;
-            
-            #endregion
-
-            #region C-tors
-
-            public LeafNode(AtomicReference<Thread> edit, int hash, object key, object val)
-            {
-                _edit = edit;
-                _hash = hash;
-                _key = key;
-                _val = val;
-            }
-
-            #endregion
-
-            #region IMapEntry members
-
-            public override object key()
-            {
-                return _key;
-            }
-
-            public override object val()
-            {
-                return _val;
-            }
-
-            #endregion
-
-            #region INode Members
-
-            public INode assoc(int shift, int hash, object key, object val, Box addedLeaf)
-            {
-                if (hash == _hash)
-                {
-                    if (Util.equals(key, _key))
-                    {
-                        if (val == _val)
-                            return this;
-                        // note - do not set AddedLeaf, since we are replacing
-                        else
-                            return new LeafNode(null, hash, key, val);
-                    }
-                    else
-                    {
-                        // hash collision, same hash, different keys
-                        LeafNode newLeaf = new LeafNode(null, hash, key, val);
-                        addedLeaf.Val = newLeaf;
-                        return new HashCollisionNode(null, hash, this, newLeaf);
-                    }
-                }
-                else
-                    return BitmapIndexedNode.create(null, shift, this, hash, key, val, addedLeaf);
-            }
-
-            public INode without(int hash, object key)
-            {
-                return (hash == _hash && Util.equals(key, _key))
-                   ? null
-                   : this;
-            }
-
-            public INode find(int hash, object key)
-            {
-                return (hash == _hash && Util.equals(key, _key))
-                    ? this
-                    : null;
-            }
-
-            public ISeq nodeSeq()
-            {
-                return (ISeq)RT.cons(this,null);
-            }
-
-            public int getHash()
-            {
-                return _hash;
-            }
-
-            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
-            {
-                if (hash == _hash)
-                {
-                    if (Util.Equals(key, _key))
-                    {
-                        if (val == _val)
-                            return this;
-                        LeafNode node = EnsureEditable(edit);
-                        node._val = val;
-                        //note  - do not set addedLeaf, since we are replacing
-                        return node;
-                    }
-                    //hash collision - same hash, different keys
-                    LeafNode newLeaf = new LeafNode(edit, hash, key, val);
-                    addedLeaf.Val = newLeaf;
-                    return new HashCollisionNode(edit, hash, this, newLeaf);
-                }
-                return BitmapIndexedNode.create(edit, shift, this, hash, key, val, addedLeaf);
-            }
-
-            public INode without(AtomicReference<Thread> edit, int hash, object key, Box removedLeaf)
-            {
-                if (hash == _hash && Util.Equals(key, _key))
-                {
-                    removedLeaf.Val = this;
-                    return null;
-                }
-                return this;
-            }            
-        
-    
-            #endregion
-
-            #region Implementation
-
-            internal LeafNode EnsureEditable(AtomicReference<Thread> edit)
-            {
-                if (_edit == edit)
-                    return this;
-                return new LeafNode(edit, _hash, _key, _val);
-            }
-
-            #endregion
-        }
-
-        /// <summary>
-        ///  Represents an internal node in the trie, not full.
-        /// </summary>
-        sealed class BitmapIndexedNode : INode
-        {
-            #region Data
-
-            readonly int _bitmap;
-            readonly INode[] _nodes;
-            readonly int _shift;
-            readonly int _hash;
-            readonly AtomicReference<Thread> _edit;
-
-            #endregion
-
-            #region Calculations
-
-            static int bitpos(int hash, int shift)
-            {
-                return 1 << Util.Mask(hash, shift);
-            }
-
-            int index(int bit)
-            {
-                return Util.BitCount(_bitmap & (bit - 1));
-            }
-
-            #endregion
-
-            #region C-tors & factory methods
-
-            internal BitmapIndexedNode(AtomicReference<Thread> edit, int bitmap, INode[] nodes, int shift)
-            {
-                _bitmap = bitmap;
-                _nodes = nodes;
-                _shift = shift;
-                _hash = nodes[0].getHash();
-                _edit = edit;
-            }
-
-            internal static INode create(AtomicReference<Thread> edit, int bitmap, INode[] nodes, int shift)
-            {
-                return bitmap == -1
-                    ? (INode)new FullNode(edit, nodes, shift)
-                    : (INode)new BitmapIndexedNode(edit, bitmap, nodes, shift);
-            }
-
-            internal static INode create(AtomicReference<Thread> edit, int shift, INode branch, int hash, object key, object val, Box addedLeaf)
-            {
-                BitmapIndexedNode node =  new BitmapIndexedNode(edit, bitpos(branch.getHash(), shift), new INode[] { branch }, shift);
-                return edit == null
-                    ? node.assoc(shift, hash, key, val, addedLeaf)
-                    : node.assoc(edit, shift, hash, key, val, addedLeaf);
-            }
-
-            #endregion
-
-            #region INode Members
-
-            public INode assoc(int shift, int hash, object key, object val, Box addedLeaf)
-            {
-                int bit = bitpos(hash, shift);
-                int idx = index(bit);
-                if ((_bitmap & bit) != 0)
-                {
-                    INode n = _nodes[idx].assoc(shift + 5, hash, key, val, addedLeaf);
-                    if (n == _nodes[idx])
-                        return this;
-                    else
-                    {
-                        INode[] newnodes = (INode[])_nodes.Clone();
-                        newnodes[idx] = n;
-                        return new BitmapIndexedNode(null, _bitmap, newnodes, shift);
-                    }
-                }
-                else
-                {
-                    INode[] newnodes = new INode[_nodes.Length + 1];
-                    Array.Copy(_nodes, 0, newnodes, 0, idx);
-                    addedLeaf.Val = newnodes[idx] = new LeafNode(null, hash, key, val);
-                    Array.Copy(_nodes, idx, newnodes, idx + 1, _nodes.Length - idx);
-                    return create(null, _bitmap | bit, newnodes, shift);
-                }           
-            }
-
-            public INode without(int hash, object key)
-            {
-                int bit = bitpos(hash, _shift);
-                if ((_bitmap & bit) != 0)
-                {
-                    int idx = index(bit);
-                    INode n = _nodes[idx].without(hash, key);
-                    if (n != _nodes[idx])
-                    {
-                        if (n == null)
-                        {
-                            if (_bitmap == bit)
-                                return null;
-                            INode[] newnodes1 = new INode[_nodes.Length - 1];
-                            Array.Copy(_nodes, 0, newnodes1, 0, idx);
-                            Array.Copy(_nodes, idx + 1, newnodes1, idx, _nodes.Length - (idx + 1));
-                            return new BitmapIndexedNode(null, _bitmap & ~bit, newnodes1, _shift);
-                        }
-                        INode[] newnodes = (INode[])_nodes.Clone();
-                        newnodes[idx] = n;
-                        return new BitmapIndexedNode(null, _bitmap, newnodes, _shift);
-                    }
-                }
-                return this;
-            }
-
-
-            public INode find(int hash, object key)
-            {
-                int bit = bitpos(hash, _shift);
-                return ((_bitmap & bit) != 0)
-                    ? _nodes[index(bit)].find(hash, key)
-                    : null;
-            }
-
-            public ISeq nodeSeq()
-            {
-                return Seq.create(this,0);
-            }
-
-            public int getHash()
-            {
-                return _hash;
-            }
-
-            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
-            {
-                int bit = bitpos(hash, shift);
-                int idx = index(bit);
-                if ((_bitmap & bit) != 0)
-                {
-                    INode n = _nodes[idx].assoc(shift + 5, hash, key, val, addedLeaf);
-                    if (n == _nodes[idx])
-                        return this;
-                    else
-                    {
-                        BitmapIndexedNode node = EnsureEditable(edit);
-                        node._nodes[idx] = n;
-                        return node;
-                    }
-                }
-                else
-                {
-                    // TODO can do better  (TODO in java code)
-                    INode[] newnodes = new INode[_nodes.Length + 1];
-                    Array.Copy(_nodes, newnodes, idx);
-                    addedLeaf.Val = newnodes[idx] = new LeafNode(null, hash, key, val);
-                    Array.Copy(_nodes, idx, newnodes, idx + 1, _nodes.Length - idx);
-                    return create(edit, _bitmap | bit, newnodes, shift);
-                }
-            }
-
-            public INode without(AtomicReference<Thread> edit, int hash, object key, Box removedLeaf)
-            {
-                int bit = bitpos(hash, _shift);
-                if ((_bitmap & bit) != 0)
-                {
-                    int idx = index(bit);
-                    INode n = _nodes[idx].without(edit, hash, key, removedLeaf);
-                    if (n != _nodes[idx])
-                    {
-                        if (n == null)
-                        {
-                            if (_bitmap == bit)
-                                return null;
-                            INode[] newnodes = new INode[_nodes.Length - 1];
-                            Array.Copy(_nodes, newnodes, idx);
-                            Array.Copy(_nodes, idx + 1, newnodes, idx, _nodes.Length - (idx + 1));
-                            return new BitmapIndexedNode(edit, _bitmap & ~bit, newnodes, _shift);
-                        }
-                        BitmapIndexedNode node = EnsureEditable(edit);
-                        node._nodes[idx] = n;
-                        return node;
-                    }
-                }
-                return this;
-            }            
-        
-
-            #endregion
-
-            #region Implementation
-
-            BitmapIndexedNode EnsureEditable(AtomicReference<Thread> edit)
-            {
-                if (_edit == edit)
-                    return this;
-                return new BitmapIndexedNode(edit, _bitmap, (INode[])_nodes.Clone(), _shift);
-            }
-            #endregion
-
-            sealed class Seq : ASeq
-            {
-                #region Data
-
-                readonly ISeq _s;
-                readonly int _i;
-                readonly BitmapIndexedNode _node;
-
-                #endregion
-
-                #region C-tors & factory methods
-
-                Seq(ISeq s, int i, BitmapIndexedNode node)
-                {
-                    _s = s;
-                    _i = i;
-                    _node = node;
-                }
-
-                Seq(IPersistentMap meta, ISeq s, int i, BitmapIndexedNode node)
-                    :base(meta)
-                {
-                    _s = s;
-                    _i = i;
-                    _node = node;
-                }
-
-                public static ISeq create(BitmapIndexedNode node, int i)
-                {
-                    return i >= node._nodes.Length
-                        ? null
-                        : new Seq(node._nodes[i].nodeSeq(), i, node);
-                }
-
-
-                #endregion
-
-                #region ISeq members
-
-                public override object first()
-                {
-                    return _s.first();
-                }
-
-                public override ISeq next()
-                {
-                    ISeq nexts = _s.next();
-                    return ( nexts != null )
-                        ? new Seq(nexts,_i,_node)
-                        : create(_node, _i+1);
-                }
-
-                #endregion
-
-                #region IObj members
-
-                public override IObj withMeta(IPersistentMap meta)
-                {
-                    return new Seq(meta, _s, _i, _node);
-                }
-
-                #endregion
-            }
-        }
-
-        /// <summary>
-        /// Represents a leaf node corresponding to multiple map entries, all with keys that have the same hash value.
-        /// </summary>
-        sealed class HashCollisionNode : INode
-        {
-            #region Data
-
-            readonly int _hash;
-            readonly LeafNode[] _leaves;
-            readonly AtomicReference<Thread> _edit;
-
-            #endregion
-
-            #region C-tors
-
-            public HashCollisionNode(AtomicReference<Thread> edit, int hash, params LeafNode[] leaves)
-            {
-                _hash = hash;
-                _leaves = leaves;
-                _edit = edit;
-            }
-
-            #endregion
-
-            #region details
-
-            int findIndex(int hash, object key)
-            {
-                for (int i = 0; i < _leaves.Length; i++)
-                {
-                    if (_leaves[i].find(hash, key) != null)
-                        return i;
-                }
-                return -1;
-            }
-
-            #endregion
-
-            #region INode Members
-
-            public INode assoc(int shift, int hash, object key, object val, Box addedLeaf)
-            {
-                if (_hash == hash)
-                {
-                    int idx = findIndex(hash, key);
-                    if (idx != -1)
-                    {
-                        if (_leaves[idx].val() == val)
-                            return this;
-                        LeafNode[] newLeaves1 = (LeafNode[])_leaves.Clone();
-                        // Note: do not set addedLeaf, since we are replacing
-                        newLeaves1[idx] = new LeafNode(null, hash, key, val);
-                        return new HashCollisionNode(null, hash, newLeaves1);
-                    }
-                    LeafNode[] newLeaves = new LeafNode[_leaves.Length + 1];
-                    Array.Copy(_leaves, 0, newLeaves, 0, _leaves.Length);
-                    addedLeaf.Val = newLeaves[_leaves.Length] = new LeafNode(null, hash, key, val);
-                    return new HashCollisionNode(null, hash, newLeaves);
-                }
-                return BitmapIndexedNode.create(null, shift, this, hash, key, val, addedLeaf);
-            }
-
-            public INode without(int hash, object key)
-            {
-                int idx = findIndex(hash, key);
-                if (idx == -1)
-                    return this;
-                if (_leaves.Length == 2)
-                    return idx == 0 ? _leaves[1] : _leaves[0];
-                LeafNode[] newLeaves = new LeafNode[_leaves.Length - 1];
-                Array.Copy(_leaves, 0, newLeaves, 0, idx);
-                Array.Copy(_leaves, idx + 1, newLeaves, idx, _leaves.Length - (idx + 1));
-                return new HashCollisionNode(null, hash, newLeaves);
-            }
-
-            public INode find(int hash, object key)
-            {
-                int idx = findIndex(hash, key);
-                return idx != -1
-                    ? _leaves[idx]
-                    : null;
-            }
-
-            public ISeq nodeSeq()
-            {
-                return ArraySeq.create((object[])_leaves);
-            }
-
-            public int getHash()
-            {
-                return _hash;
-            }
-
-            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
-            {
-                if (hash == _hash)
-                {
-                    int idx = findIndex(hash, key);
-                    if (idx != -1)
-                    {
-                        if (_leaves[idx].val() == val)
-                            return this;
-                        LeafNode leaf = _leaves[idx].EnsureEditable(edit);
-                        leaf.Val = val;
-                        if (_leaves[idx] == leaf)
-                            return this;
-                        HashCollisionNode node = EnsureEditable(edit);
-                        node._leaves[idx] = leaf;
-                        return node;
-                    }
-                    LeafNode[] newLeaves = new LeafNode[_leaves.Length + 1];
-                    Array.Copy(_leaves, newLeaves, _leaves.Length);
-                    addedLeaf.Val = newLeaves[_leaves.Length] = new LeafNode(null, hash, key, val);
-                    return new HashCollisionNode(edit, hash, newLeaves);
-                }
-                return BitmapIndexedNode.create(edit, shift, this, hash, key, val, addedLeaf);
-            }
-
-            public INode without(AtomicReference<Thread> edit, int hash, object key, Box removedLeaf)
-            {
-                int idx = findIndex(hash, key);
-                if (idx == -1)
-                    return this;
-                removedLeaf.Val = _leaves[idx];
-                if (_leaves.Length == 2)
-                    return idx == 0 ? _leaves[1] : _leaves[0];
-                LeafNode[] newLeaves = new LeafNode[_leaves.Length - 1];
-                Array.Copy(_leaves, newLeaves, idx);
-                Array.Copy(_leaves, idx + 1, newLeaves, idx, _leaves.Length - (idx + 1));
-                return new HashCollisionNode(edit, hash, newLeaves);
-            }       
-        
-
-            #endregion
-
-            #region Implementation
-
-            HashCollisionNode EnsureEditable(AtomicReference<Thread> edit)
-            {
-                if (_edit == edit)
-                    return this;
-                return new HashCollisionNode(edit, _hash, _leaves);
-            }
-
-            #endregion
-
-        }
-
 
         #region IEditableCollection Members
 
@@ -1197,21 +359,26 @@ namespace clojure.lang
             AtomicReference<Thread> _edit;
             INode _root;
             int _count;
+            bool _hasNull;
+            object _nullValue;
+            readonly Box _leafFlag = new Box(null);
 
             #endregion
 
             #region Ctors
 
             public TransientHashMap(PersistentHashMap m)
-                :this(new AtomicReference<Thread>(Thread.CurrentThread),m._root,m._count)
+                : this(new AtomicReference<Thread>(Thread.CurrentThread),m._root,m._count, m._hasNull, m._nullValue)
             {
             }
 
-            TransientHashMap(AtomicReference<Thread> edit, INode root, int count)
+            TransientHashMap(AtomicReference<Thread> edit, INode root, int count, bool hasNull, object nullValue)
             {
                 _edit = edit;
                 _root = root;
                 _count = count;
+                _hasNull = hasNull;
+                _nullValue = nullValue;
             }
 
             #endregion
@@ -1220,19 +387,47 @@ namespace clojure.lang
 
             protected override ITransientMap doAssoc(object key, object val)
             {
-                Box addedLeaf = new Box(null);
-                _root = _root.assoc(_edit, 0, Util.hash(key), key, val, addedLeaf);
-                if (addedLeaf.Val != null)
+                if (key == null)
+                {
+                    if (_nullValue != val)
+                        _nullValue = val;
+                    if (_hasNull)
+                    {
+                        _count++;
+                        _hasNull = true;
+                    }
+                    return this;
+                }
+                _leafFlag.Val = null;
+                INode n = (_root == null ? BitmapIndexedNode.EMPTY : _root)
+                    .assoc(_edit, 0, Util.hash(key), key, val, _leafFlag);
+                if (n != _root)
+                    _root = n;
+                if (_leafFlag.Val != null)
                     _count++;
                 return this;
             }
 
             protected override ITransientMap doWithout(object key)
             {
-                Box removedLeaf = new Box(null);
-                INode newroot = _root.without(_edit, Util.hash(key), key, removedLeaf);
-                _root = newroot == null ? EMPTY._root : newroot;
-                if (removedLeaf.Val != null) 
+                if (key == null)
+                {
+                    if (!_hasNull)
+                        return this;
+                    _hasNull = false;
+                    _nullValue = null;
+                    _count--;
+                    return this;
+                }
+
+                if (_root == null)
+                    return this;
+
+                _leafFlag.Val = null;
+                INode n = _root.without(_edit, 0, Util.hash(key), key, _leafFlag);
+                if (n != _root)
+                    _root = n;
+               if (_leafFlag.Val != null) 
                     _count--;
                 return this;
             }
@@ -1240,44 +435,30 @@ namespace clojure.lang
             protected override IPersistentMap doPersistent()
             {
                 _edit.Set(null);
-                return new PersistentHashMap(_count, _root);
+                return new PersistentHashMap(_count, _root, _hasNull, _nullValue);
             }
 
             #endregion
-
-            //#region ITransientAssociative Members
-
-            //ITransientAssociative ITransientAssociative.assoc(object key, object val)
-            //{
-            //    return assoc(key, val);
-            //}
-
-            //#endregion
-
-            //#region ITransientCollection Members
-
-            //IPersistentCollection ITransientCollection.persistent()
-            //{
-            //    return persistent();
-            //}
-
-            //#endregion
 
             #region ILookup Members
 
             protected override object doValAt(object key, object notFound)
             {
-                IMapEntry e = entryAt(key);
-                if (e != null)
-                    return e.val();
-                return notFound;
+                if (key == null)
+                    if (_hasNull)
+                        return _nullValue;
+                    else
+                        return notFound;
+                if (_root == null)
+                    return null;
+                return _root.find(0, Util.hash(key), key, notFound);                
             }
 
-            // not part of this interface, but I don't know a better place for it
-            IMapEntry entryAt(Object key)
-            {
-                return (IMapEntry)_root.find(Util.hash(key), key);
-            }
+            //// not part of this interface, but I don't know a better place for it
+            //IMapEntry entryAt(Object key)
+            //{
+            //    return (IMapEntry)_root.find(Util.hash(key), key);
+            //}
 
             #endregion
 
@@ -1306,5 +487,956 @@ namespace clojure.lang
          }
 
         #endregion
+        
+        #region INode
+
+        /// <summary>
+        /// Interface for all nodes in the trie.
+        /// </summary>
+        public interface INode
+        {
+            /// <summary>
+            /// Return a trie with a new key/value pair.
+            /// </summary>
+            /// <param name="shift"></param>
+            /// <param name="hash"></param>
+            /// <param name="key"></param>
+            /// <param name="val"></param>
+            /// <param name="addedLeaf"></param>
+            /// <returns></returns>
+            INode assoc(int shift, int hash, object key, object val, Box addedLeaf);
+
+            /// <summary>
+            /// Return a trie with the given key removed.
+            /// </summary>
+            /// <param name="shift"></param>
+            /// <param name="hash"></param>
+            /// <param name="key"></param>
+            /// <returns></returns>
+            INode without(int shift, int hash, object key);
+
+            /// <summary>
+            /// Gets the entry containing a given key and its value.
+            /// </summary>
+            /// <param name="shift"></param>
+            /// <param name="hash"></param>
+            /// <param name="key"></param>
+            /// <returns></returns>
+            IMapEntry find(int shift, int hash, object key);
+
+            /// <summary>
+            /// Gets the value associated with a given key, or return a default value if not found.
+            /// </summary>
+            /// <param name="shift"></param>
+            /// <param name="hash"></param>
+            /// <param name="key"></param>
+            /// <param name="notFound"></param>
+            /// <returns></returns>
+            object find(int shift, int hash, object key, object notFound);
+
+            /// <summary>
+            /// Return an <see cref="ISeq">ISeq</see> with iterating the tree defined by the current node.
+            /// </summary>
+            /// <returns>An <see cref="ISeq">ISeq</see> </returns>
+            ISeq nodeSeq();
+
+            ///// <summary>
+            ///// Get the hash for the current ndoe.
+            ///// </summary>
+            ///// <returns></returns>
+            //int getHash();
+
+            /// <summary>
+            /// Return a trie with a new key/value pair.
+            /// </summary>
+            /// <param name="edit"></param>
+            /// <param name="shift"></param>
+            /// <param name="hash"></param>
+            /// <param name="key"></param>
+            /// <param name="val"></param>
+            /// <param name="addedLeaf"></param>
+            /// <returns></returns>
+            INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf);
+
+            /// <summary>
+            /// Return a trie with the given key removed.
+            /// </summary>
+            /// <param name="edit"></param>
+            /// <param name="shift"></param>
+            /// <param name="hash"></param>
+            /// <param name="key"></param>
+            /// <param name="removedLeaf"></param>
+            /// <returns></returns>
+            INode without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf);
+        }
+
+        #endregion
+
+        #region Array manipulation
+
+        static INode[] CloneAndSet(INode[] array, int i, INode a)
+        {
+            INode[] clone = (INode[])array.Clone();
+            clone[i] = a;
+            return clone;
+        }
+
+        static object[] CloneAndSet(object[] array, int i, object a)
+        {
+            Object[] clone = (object[])array.Clone();
+            clone[i] = a;
+            return clone;
+        }
+
+        static object[] CloneAndSet(object[] array, int i, object a, int j, object b)
+        {
+            object[] clone = (object[])array.Clone();
+            clone[i] = a;
+            clone[j] = b;
+            return clone;
+        }
+
+        private static object[] RemovePair(object[] array, int i)
+        {
+            object[] newArray = new Object[array.Length - 2];
+            Array.Copy(array, 0, newArray, 0, 2 * i);
+            Array.Copy(array, 2 * (i + 1), newArray, 2 * i, newArray.Length - 2 * i);
+            return newArray;
+        }
+
+ 
+
+        #endregion
+
+        #region Node factories
+
+        private static INode CreateNode(int shift, object key1, object val1, int key2hash, object key2, object val2)
+        {
+            int key1hash = Util.hash(key1);
+            if (key1hash == key2hash)
+                return new HashCollisionNode(null, key1hash, 2, new object[] { key1, val1, key2, val2 });
+            Box _ = new Box(null);
+            AtomicReference<Thread> edit = new AtomicReference<Thread>();
+            return BitmapIndexedNode.EMPTY
+                .assoc(edit, shift, key1hash, key1, val1, _)
+                .assoc(edit, shift, key2hash, key2, val2, _);
+        }
+
+        private static INode CreateNode(AtomicReference<Thread> edit, int shift, Object key1, Object val1, int key2hash, Object key2, Object val2)
+        {
+            int key1hash = Util.hash(key1);
+            if (key1hash == key2hash)
+                return new HashCollisionNode(null, key1hash, 2, new Object[] { key1, val1, key2, val2 });
+            Box _ = new Box(null);
+            return BitmapIndexedNode.EMPTY
+                .assoc(edit, shift, key1hash, key1, val1, _)
+                .assoc(edit, shift, key2hash, key2, val2, _);
+        }
+
+        #endregion
+
+        #region Other details
+
+        static int Bitpos(int hash, int shift)
+        {
+            return 1 << Util.Mask(hash, shift);
+        }
+
+        #endregion
+
+        sealed class ArrayNode : INode
+        {
+            #region Data
+
+            int _count;
+            readonly INode[] _array;
+            readonly AtomicReference<Thread> _edit;
+
+            #endregion
+
+            #region C-tors
+
+            public ArrayNode(AtomicReference<Thread> edit, int count, INode[] array)
+            {
+                _array = array;
+                _edit = edit;
+                _count = count;
+            }
+
+            #endregion
+
+            #region INode Members
+
+            public INode assoc(int shift, int hash, object key, object val, Box addedLeaf)
+            {
+                int idx = Util.Mask(hash, shift);
+                INode node = _array[idx];
+                if (node == null)
+                    return new ArrayNode(null, _count + 1, CloneAndSet(_array, idx, BitmapIndexedNode.EMPTY.assoc(shift + 5, hash, key, val, addedLeaf)));
+                INode n = node.assoc(shift + 5, hash, key, val, addedLeaf);
+                if (n == node)
+                    return this;
+                return new ArrayNode(null, _count, CloneAndSet(_array, idx, n));
+            }
+
+            public INode without(int shift, int hash, object key)
+            {
+                int idx = Util.Mask(hash, shift);
+                INode node = _array[idx];
+                if (node == null)
+                    return this;
+                INode n = node.without(shift + 5, hash, key);
+                if (n == node)
+                    return this;
+                if (n == null)
+                {
+                    if (_count <= 8) // shrink
+                        return pack(null, idx);
+                    return new ArrayNode(null, _count - 1, CloneAndSet(_array, idx, n));
+                }
+                else
+                    return new ArrayNode(null, _count, CloneAndSet(_array, idx, n));
+            }
+
+            public IMapEntry find(int shift, int hash, object key)
+            {
+                int idx = Util.Mask(hash, shift);
+                INode node = _array[idx];
+                if (node == null)
+                    return null;
+                return node.find(shift + 5, hash, key);
+            }
+
+            public object find(int shift, int hash, object key, object notFound)
+            {
+                int idx = Util.Mask(hash, shift);
+                INode node = _array[idx];
+                if (node == null)
+                    return notFound;
+                return node.find(shift + 5, hash, key, notFound);
+            }
+
+            public ISeq nodeSeq()
+            {
+                return Seq.create(_array);
+            }
+
+            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
+            {
+                int idx = Util.Mask(hash, shift);
+                INode node = _array[idx];
+                if (node == null)
+                {
+                    ArrayNode editable = EditAndSet(edit, idx, BitmapIndexedNode.EMPTY.assoc(edit, shift + 5, hash, key, val, addedLeaf));
+                    editable._count++;
+                    return editable;
+                }
+                INode n = node.assoc(edit, shift + 5, hash, key, val, addedLeaf);
+                if (n == node)
+                    return this;
+                return EditAndSet(edit, idx, n);
+            }
+
+            public INode without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf)
+            {
+                int idx = Util.Mask(hash, shift);
+                INode node = _array[idx];
+                if (node == null)
+                    return this;
+                INode n = node.without(edit, shift + 5, hash, key, removedLeaf);
+                if (n == node)
+                    return this;
+                if (n == null)
+                {
+                    if (_count <= 8) // shrink
+                        return pack(edit, idx);
+                    ArrayNode editable = EditAndSet(edit, idx, n);
+                    editable._count--;
+                    return editable;
+                }
+                return EditAndSet(edit, idx, n);
+            }
+
+            #endregion
+
+            #region Implementation details
+
+            ArrayNode EnsureEditable(AtomicReference<Thread> edit)
+            {
+                if (_edit == edit)
+                    return this;
+                return new ArrayNode(edit, _count, (INode[])_array.Clone());
+            }
+
+            ArrayNode EditAndSet(AtomicReference<Thread> edit, int i, INode n)
+            {
+                ArrayNode editable = EnsureEditable(edit);
+                editable._array[i] = n;
+                return editable;
+            }
+
+            INode pack(AtomicReference<Thread> edit, int idx)
+            {
+                Object[] newArray = new Object[2 * (_count - 1)];
+                int j = 1;
+                int bitmap = 0;
+                for (int i = 0; i < idx; i++)
+                    if (_array[i] != null)
+                    {
+                        newArray[j] = _array[i];
+                        bitmap |= 1 << i;
+                        j += 2;
+                    }
+                for (int i = idx + 1; i < _array.Length; i++)
+                    if (_array[i] != null)
+                    {
+                        newArray[j] = _array[i];
+                        bitmap |= 1 << i;
+                        j += 2;
+                    }
+                return new BitmapIndexedNode(edit, bitmap, newArray);
+            }
+
+            #endregion
+
+            #region Seq implementation
+
+            class Seq : ASeq
+            {
+                #region Data
+
+                readonly INode[] _nodes;
+                readonly int _i;
+                readonly ISeq _s;
+
+                #endregion
+
+                #region C-tors
+
+                static public ISeq create(INode[] nodes)
+                {
+                    return create(null, nodes, 0, null);
+                }
+
+                static ISeq create(IPersistentMap meta, INode[] nodes, int i, ISeq s)
+                {
+                    if (s != null)
+                        return new Seq(meta, nodes, i, s);
+                    for (int j = i; j < nodes.Length; j++)
+                        if (nodes[j] != null)
+                        {
+                            ISeq ns = nodes[j].nodeSeq();
+                            if (ns != null)
+                                return new Seq(meta, nodes, j + 1, ns);
+                        }
+                    return null;
+                }
+
+                Seq(IPersistentMap meta, INode[] nodes, int i, ISeq s)
+                    : base(meta)
+                {
+                    _nodes = nodes;
+                    _i = i;
+                    _s = s;
+                }
+
+                #endregion
+
+                #region IObj methods
+
+                public override IObj withMeta(IPersistentMap meta)
+                {
+                    return new Seq(meta, _nodes, _i, _s);
+                }
+
+                #endregion
+
+                #region ISeq methods
+
+                public override object first()
+                {
+                    return _s.first();
+                }
+
+                public override ISeq next()
+                {
+                    return create(null, _nodes, _i, _s.next());
+                }
+
+                #endregion
+            }
+
+            #endregion
+        }
+
+        /// <summary>
+        ///  Represents an internal node in the trie, not full.
+        /// </summary>
+        sealed class BitmapIndexedNode : INode
+        {
+            #region Data
+
+            internal static readonly BitmapIndexedNode EMPTY = new BitmapIndexedNode(null, 0, new object[0]);
+
+            int _bitmap;
+            object[] _array;
+            readonly AtomicReference<Thread> _edit;
+
+            #endregion
+
+            #region Calculations
+
+            int Index(int bit)
+            {
+                return Util.BitCount(_bitmap & (bit - 1));
+            }
+
+            #endregion
+
+            #region C-tors & factory methods
+
+            internal BitmapIndexedNode(AtomicReference<Thread> edit, int bitmap, object[] array)
+            {
+                _bitmap = bitmap;
+                _array = array;
+                _edit = edit;
+            }
+
+            #endregion
+
+            #region INode Members
+
+            public INode assoc(int shift, int hash, object key, object val, Box addedLeaf)
+            {
+                int bit = Bitpos(hash, shift);
+                int idx = Index(bit);
+                if ((_bitmap & bit) != 0)
+                {
+                    object keyOrNull = _array[2 * idx];
+                    object valOrNode = _array[2 * idx + 1];
+                    if (keyOrNull == null)
+                    {
+                        INode n = ((INode)valOrNode).assoc(shift + 5, hash, key, val, addedLeaf);
+                        if (n == valOrNode)
+                            return this;
+                        return new BitmapIndexedNode(null, _bitmap, CloneAndSet(_array, 2 * idx + 1, n));
+                    }
+                    if ( Util.equals(key,keyOrNull))
+                    {
+                        if ( val == valOrNode)
+                            return this;
+                        return new BitmapIndexedNode(null,_bitmap,CloneAndSet(_array,2*idx+1,val));
+                    }
+                    addedLeaf.Val = val;
+                    return new BitmapIndexedNode(null,_bitmap,
+                        CloneAndSet(_array,
+                                    2*idx,
+                                    null,
+                                    2*idx+1,
+                                    CreateNode(shift+5,keyOrNull,valOrNode,hash,key,val)));
+                }
+                else
+                {
+                    int n = Util.BitCount(_bitmap);
+                    if ( n >= 16 )
+                    {
+                        INode [] nodes = new INode[32];
+                        int jdx = Util.Mask(hash,shift);
+                        nodes[jdx] = EMPTY.assoc(shift+5,hash,key,val,addedLeaf);
+                        int j=0;
+                        for ( int i=0; i < 32; i++ )
+                            if ( ( (_bitmap >>i) & 1) != 0 )
+                            {
+                                if ( _array[j] ==  null )
+                                   nodes[i] = (INode) _array[j+1];
+                                else
+                                    nodes[i] = EMPTY.assoc(shift+5,Util.hash(_array[j]),_array[j],_array[j+1], addedLeaf);
+                                j += 2;
+                            }
+                        return new ArrayNode(null,n+1,nodes);
+                    }
+                    else
+                    {
+                        object[] newArray = new object[2*(n+1)];
+                        Array.Copy(_array, 0, newArray, 0, 2*idx);
+                        newArray[2*idx] = key;
+                        addedLeaf.Val = newArray[2*idx+1] = val;
+                        Array.Copy(_array, 2*idx, newArray, 2*(idx + 1), 2*(n - idx));
+                        return new BitmapIndexedNode(null, _bitmap | bit, newArray);
+                    }           
+                }
+            }
+
+
+            public INode without(int shift, int hash, object key)
+            {
+                int bit = Bitpos(hash, shift);
+                if ((_bitmap & bit) == 0)
+                    return this;
+
+                int idx = Index(bit);
+                object keyOrNull = _array[2 * idx];
+                object valOrNode = _array[2 * idx + 1];
+                if ( keyOrNull == null )
+                {
+                    INode n = ((INode)valOrNode).without(shift+5,hash,key);
+                    if ( n == valOrNode)
+                        return this;
+                    if ( n != null )
+                        return new BitmapIndexedNode(null,_bitmap,CloneAndSet(_array,2*idx+1,n));
+                    if ( _bitmap == bit )
+                        return null;
+                    return new BitmapIndexedNode(null,_bitmap^bit,RemovePair(_array,idx));
+                }
+                if ( Util.equals(key,keyOrNull))
+                    // TODO: Collapse  (TODO in Java code)
+                    return new BitmapIndexedNode(null,_bitmap^bit,RemovePair(_array,idx));
+                return this;
+            }
+
+            public IMapEntry find(int shift, int hash, object key)
+            {
+                int bit = Bitpos(hash, shift);
+                if ((_bitmap & bit) == 0)
+                    return null;
+                int idx = Index(bit);
+                 object keyOrNull = _array[2 * idx];
+                object valOrNode = _array[2 * idx + 1];
+                if ( keyOrNull == null )
+                    return ((INode)valOrNode).find(shift+5,hash,key);
+                if ( Util.equals(key,keyOrNull))
+                    return new MapEntry(keyOrNull,valOrNode);
+                return null;
+            }
+
+
+            public Object find(int shift, int hash, Object key, Object notFound)
+            {
+                int bit = Bitpos(hash, shift);
+                if ((_bitmap & bit) == 0)
+                    return notFound;
+                int idx = Index(bit);
+                Object keyOrNull = _array[2 * idx];
+                Object valOrNode = _array[2 * idx + 1];
+                if (keyOrNull == null)
+                    return ((INode)valOrNode).find(shift + 5, hash, key, notFound);
+                if (Util.equals(key, keyOrNull))
+                    return valOrNode;
+                return notFound;
+            }
+
+            public ISeq nodeSeq()
+            {
+                return NodeSeq.Create(_array);
+            }
+
+            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
+            {
+                int bit = Bitpos(hash, shift);
+                int idx = Index(bit);
+                if ((_bitmap & bit) != 0)
+                {
+                    object keyOrNull = _array[2 * idx];
+                    object valOrNode = _array[2 * idx + 1];
+                    if (keyOrNull == null)
+                    {
+                        INode n = ((INode)valOrNode).assoc(edit, shift + 5, hash, key, val, addedLeaf);
+                        if (n == valOrNode)
+                            return this;
+                        return EditAndSet(edit, 2 * idx + 1, n);
+                    }
+                    if (Util.equals(key, keyOrNull))
+                    {
+                        if (val == valOrNode)
+                            return this;
+                        return EditAndSet(edit, 2 * idx + 1, val);
+                    }
+                    addedLeaf.Val = val;
+                    return EditAndSet(edit,
+                        2*idx,null,
+                        2*idx+1,CreateNode(edit,shift+5,keyOrNull,valOrNode,hash,key,val));
+                }
+                else
+                {int n = Util.BitCount(_bitmap);
+                    if ( n*2 < _array.Length )
+                    {
+                        addedLeaf.Val = val;
+                        BitmapIndexedNode editable = EnsureEditable(edit);
+                        Array.Copy(editable._array,2*idx,editable._array,2*(idx+1),2*(n-idx));
+                        editable._array[2*idx] = key;
+                        editable._array[2*idx+1] = val;
+                        editable._bitmap |= bit;
+                        return editable;
+                    }
+                    if ( n >= 16 )
+                    {
+                        INode[] nodes = new INode[32];
+                        int jdx = Util.Mask(hash,shift);
+                        nodes[jdx] = EMPTY.assoc(edit,shift+5,hash,key,val,addedLeaf);
+                        int j=0;
+                        for ( int i=0; i<32; i++ )
+                            if (((_bitmap>>i) & 1) != 0 )
+                            {
+                                if ( _array[j] == null )
+                                    nodes[i] = (INode)_array[j+1];
+                                else
+                                    nodes[i] = EMPTY.assoc(edit,shift+5,Util.hash(_array[j]), _array[j], _array[j+1], addedLeaf);
+                                j += 2;
+                            }
+                        return new ArrayNode(edit,n+1,nodes);
+                    }
+                    else
+                    {
+                        object[] newArray = new object[2*(n+4)];
+                        Array.Copy(_array,0,newArray,0,2*idx);
+                        newArray[2*idx] = key;
+                        addedLeaf.Val = newArray[2*idx+1] = val;
+                        Array.Copy(_array,2*idx,newArray,2*(idx+1),2*(n-idx));
+                        BitmapIndexedNode editable = EnsureEditable(edit);
+                        editable._array = newArray;
+                        editable._bitmap |= bit;
+                        return editable;
+                    }
+                }
+            }
+
+
+
+            public INode without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf)
+            {
+                int bit = Bitpos(hash, shift);
+                if ((_bitmap & bit) == 0)
+                    return this;
+                int idx = Index(bit);
+                Object keyOrNull = _array[2 * idx];
+                Object valOrNode = _array[2 * idx + 1];
+                if (keyOrNull == null)
+                {
+                    INode n = ((INode)valOrNode).without(edit, shift + 5, hash, key, removedLeaf);
+                    if (n == valOrNode)
+                        return this;
+                    if (n != null)
+                        return EditAndSet(edit, 2 * idx + 1, n);
+                    if (_bitmap == bit)
+                        return null;
+                    removedLeaf.Val = valOrNode;
+                    return EditAndRemovePair(edit, bit, idx);
+                }
+                if (Util.equals(key, keyOrNull))
+                {
+                    removedLeaf.Val = key; // key can't be null
+                    // TODO: collapse
+                    return EditAndRemovePair(edit, bit, idx);
+                }
+                return this;
+            }            
+        
+
+            #endregion
+
+            #region Implementation
+
+            private BitmapIndexedNode EditAndSet(AtomicReference<Thread> edit, int i, Object a)
+            {
+                BitmapIndexedNode editable = EnsureEditable(edit);
+                editable._array[i] = a;
+                return editable;
+            }
+
+            private BitmapIndexedNode EditAndSet(AtomicReference<Thread> edit, int i, Object a, int j, Object b)
+            {
+                BitmapIndexedNode editable = EnsureEditable(edit);
+                editable._array[i] = a;
+                editable._array[j] = b;
+                return editable;
+            }
+
+            private BitmapIndexedNode EditAndRemovePair(AtomicReference<Thread> edit, int bit, int i)
+            {
+                if (_bitmap == bit)
+                    return null;
+                BitmapIndexedNode editable = EnsureEditable(edit);
+                editable._bitmap ^= bit;
+                Array.Copy(editable._array, 2 * (i + 1), editable._array, 2 * i, editable._array.Length - 2 * (i + 1));
+                editable._array[editable._array.Length - 2] = null;
+                editable._array[editable._array.Length - 1] = null;
+                return editable;
+            }
+
+            BitmapIndexedNode EnsureEditable(AtomicReference<Thread> edit)
+            {
+                if (_edit == edit)
+                    return this;
+                int n = Util.BitCount(_bitmap);
+                object[] newArray = new Object[n >= 0 ? 2 * (n + 1) : 4];  // make room for next assoc
+                Array.Copy(_array, newArray, 2 * n);
+                return new BitmapIndexedNode(edit, _bitmap, newArray);
+            }
+
+            #endregion
+        }
+
+        /// <summary>
+        /// Represents a leaf node corresponding to multiple map entries, all with keys that have the same hash value.
+        /// </summary>
+        sealed class HashCollisionNode : INode
+        {
+            #region Data
+
+            readonly int _hash;
+            int _count;
+            object[] _array;
+            readonly AtomicReference<Thread> _edit;
+
+            #endregion
+
+            #region C-tors
+
+            public HashCollisionNode(AtomicReference<Thread> edit, int hash, int count, params object[] array)
+            {
+                _edit = edit;
+                _hash = hash;
+                _count = count;
+                _array = array;
+            }
+
+            #endregion
+
+            #region details
+
+            int FindIndex(object key)
+            {
+                for (int i = 0; i < 2 * _count; i += 2)
+                {
+                    if (Util.equals(key, _array[i]))
+                        return i;
+                }
+                return -1;
+            }
+
+            #endregion
+
+            #region INode Members
+
+            public INode assoc(int shift, int hash, object key, object val, Box addedLeaf)
+            {
+                if (_hash == hash)
+                {
+                    int idx = FindIndex(key);
+                    if (idx != -1)
+                    {
+                        if (_array[idx + 1] == val)
+                            return this;
+                        return new HashCollisionNode(null, hash, _count, CloneAndSet(_array, idx + 1, val));
+                    }
+                    object[] newArray = new object[_array.Length + 2];
+                    Array.Copy(_array, 0, newArray, 0, _array.Length);
+                    newArray[_array.Length] = key;
+                    newArray[_array.Length + 1] = val;
+                    return new HashCollisionNode(_edit, hash, _count + 1, newArray);
+                }
+                // nest it in a bitmap node
+                return new BitmapIndexedNode(null, Bitpos(_hash, shift), new object[] { null, this })
+                    .assoc(shift, hash, key, val, addedLeaf);
+            }
+
+            public INode without(int shift, int hash, object key)
+            {
+                int idx = FindIndex(key);
+                if (idx == -1)
+                    return this;
+                if (_count == 1)
+                    return null;
+                return new HashCollisionNode(null, hash, _count - 1, RemovePair(_array, idx / 2));
+            }
+
+            public IMapEntry find(int shift, int hash, object key)
+            {
+                int idx = FindIndex(key);
+                if (idx < 0)
+                    return null;
+                if (Util.equals(key, _array[idx]))
+                    return new MapEntry(_array[idx], _array[idx + 1]);
+                return null;
+            }
+
+            public Object find(int shift, int hash, Object key, Object notFound)
+            {
+                int idx = FindIndex(key);
+                if (idx < 0)
+                    return notFound;
+                if (Util.equals(key, _array[idx]))
+                    return _array[idx + 1];
+                return notFound;
+            }
+
+            public ISeq nodeSeq()
+            {
+                return NodeSeq.Create(_array);
+            }
+
+            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf)
+            {
+                if (hash == _hash)
+                {
+                    int idx = FindIndex(key);
+                    if (idx != -1)
+                    {
+                        if (_array[idx + 1] == val)
+                            return this;
+                        return EditAndSet(edit, idx + 1, val);
+                    }
+                    if (_array.Length > 2 * _count)
+                    {
+                        HashCollisionNode editable = EditAndSet(edit, 2 * _count, key, 2 * _count + 1, val);
+                        editable._count++;
+                        return editable;
+                    }
+                    object[] newArray = new object[_array.Length + 2];
+                    Array.Copy(_array, 0, newArray, 0, _array.Length);
+                    newArray[_array.Length] = key;
+                    newArray[_array.Length + 1] = val;
+                    return EnsureEditable(edit, _count + 1, newArray);
+                }
+                // nest it in a bitmap node
+                return new BitmapIndexedNode(edit, Bitpos(_hash, shift), new object[] { null, this, null, null })
+                    .assoc(edit, shift, hash, key, val, addedLeaf);
+            }
+
+            public INode without(AtomicReference<Thread> edit, int shift, int hash, Object key, Box removedLeaf)
+            {
+                int idx = FindIndex(key);
+                if (idx == -1)
+                    return this;
+                if (_count == 1)
+                    return null;
+                HashCollisionNode editable = EnsureEditable(edit);
+                editable._array[idx] = editable._array[2 * _count - 2];
+                editable._array[idx + 1] = editable._array[2 * _count - 1];
+                editable._array[2 * _count - 2] = editable._array[2 * _count - 1] = null;
+                editable._count--;
+                return editable;
+            }
+
+            #endregion
+
+            #region Implementation
+
+            HashCollisionNode EnsureEditable(AtomicReference<Thread> edit)
+            {
+                if (_edit == edit)
+                    return this;
+                return new HashCollisionNode(edit, _hash, _count, _array);
+            }
+
+            HashCollisionNode EnsureEditable(AtomicReference<Thread> edit, int count, Object[] array)
+            {
+                if (_edit == edit)
+                {
+                    _array = array;
+                    return this;
+                }
+                return new HashCollisionNode(edit, _hash, count, array);
+            }
+
+            HashCollisionNode EditAndSet(AtomicReference<Thread> edit, int i, Object a)
+            {
+                HashCollisionNode editable = EnsureEditable(edit);
+                editable._array[i] = a;
+                return editable;
+            }
+
+            HashCollisionNode EditAndSet(AtomicReference<Thread> edit, int i, Object a, int j, Object b)
+            {
+                HashCollisionNode editable = EnsureEditable(edit);
+                editable._array[i] = a;
+                editable._array[j] = b;
+                return editable;
+            }
+
+            #endregion
+
+        }
+
+
+        sealed class NodeSeq : ASeq
+        {
+
+            #region Data
+
+            readonly object[] _array;
+            readonly int _i;
+            readonly ISeq _s;
+
+            #endregion
+
+            #region Ctors
+
+            NodeSeq(object[] array, int i)
+                : this(null, array, i, null)
+            {
+            }
+
+            public static ISeq Create(object[] array)
+            {
+                return Create(array, 0, null);
+            }
+
+            private static ISeq Create(object[] array, int i, ISeq s)
+            {
+                if (s != null)
+                    return new NodeSeq(null, array, i, s);
+                for (int j = i; j < array.Length; j += 2)
+                {
+                    if (array[j] != null)
+                        return new NodeSeq(null, array, j, null);
+                    INode node = (INode)array[j + 1];
+                    if (node != null)
+                    {
+                        ISeq nodeSeq = node.nodeSeq();
+                        if (nodeSeq != null)
+                            return new NodeSeq(null, array, j + 2, nodeSeq);
+                    }
+                }
+                return null;
+            }
+
+            NodeSeq(IPersistentMap meta, Object[] array, int i, ISeq s)
+                : base(meta)
+            {
+                _array = array;
+                _i = i;
+                _s = s;
+            }
+
+            #endregion
+
+            #region IObj methods
+
+            public override IObj withMeta(IPersistentMap meta)
+            {
+                return new NodeSeq(meta, _array, _i, _s);
+            }
+
+            #endregion
+
+            #region ISeq methods
+
+            public override object first()
+            {
+                if (_s != null)
+                    return _s.first();
+                return new MapEntry(_array[_i], _array[_i + 1]);
+            }
+
+            public override ISeq next()
+            {
+                if (_s != null)
+                    return Create(_array, _i, _s.next());
+                return Create(_array, _i + 2, null);
+            }
+            #endregion
+        }
+
     }
 }

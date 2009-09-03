@@ -213,8 +213,9 @@ namespace Clojure.Tests.LibTests
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
 
+            _testNoChange = false;
             _obj = _objWithNullMeta = (IObj)v;
-            _expectedType = typeof(LazilyPersistentVector);
+            _expectedType = typeof(PersistentVector);
         }
     }
 }
