@@ -254,7 +254,7 @@ namespace clojure.lang
             _id = _ids.getAndIncrement();
             _faults = new AtomicInteger();
             // TODO: Figure out if we really need SupportsRecursion or not.
-            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
+            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
             _tvals = new TVal(initval, 0, System.Environment.TickCount);
         }
 
@@ -333,14 +333,14 @@ namespace clojure.lang
         /// <returns>The value</returns>
         public override object deref()
         {
-            LockingTransaction t = LockingTransaction.getRunning();
+            LockingTransaction t = LockingTransaction.GetRunning();
             if (t == null)
             {
                 object ret = currentVal();
                 //Console.WriteLine("Thr {0}, {1}: No-trans get => {2}", Thread.CurrentThread.ManagedThreadId,DebugStr(), ret);
                 return ret;
             }
-            return t.doGet(this, _tvals);
+            return t.DoGet(this, _tvals);
         }
 
         object currentVal()
@@ -365,7 +365,7 @@ namespace clojure.lang
         /// <summary>
         /// Get the read lock.
         /// </summary>
-        public void EnterReadLock()
+        internal void EnterReadLock()
         {
             _lock.EnterReadLock();
         }
@@ -373,7 +373,7 @@ namespace clojure.lang
         /// <summary>
         /// Release the read lock.
         /// </summary>
-        public void ExitReadLock()
+        internal void ExitReadLock()
         {
             _lock.ExitReadLock();
         }
@@ -381,15 +381,24 @@ namespace clojure.lang
         /// <summary>
         /// Get the write lock.
         /// </summary>
-        public void EnterWriteLock()
+        internal void EnterWriteLock()
         {
             _lock.EnterWriteLock();
+        }
+
+
+        /// <summary>
+        /// Get the write lock.
+        /// </summary>
+        internal bool TryEnterWriteLock(int msecTimeout)
+        {
+            return _lock.TryEnterWriteLock(msecTimeout);
         }
 
         /// <summary>
         /// Release the write lock.
         /// </summary>
-        public void ExitWriteLock()
+        internal void ExitWriteLock()
         {
             _lock.ExitWriteLock();
         }
@@ -455,7 +464,7 @@ namespace clojure.lang
         /// <returns>The new value.</returns>
         public object set(object val)
         {
-            return LockingTransaction.getEx().doSet(this, val);
+            return LockingTransaction.GetEx().DoSet(this, val);
         }
 
         /// <summary>
@@ -466,7 +475,7 @@ namespace clojure.lang
         /// <returns>The computed value.</returns>
         public object commute(IFn fn, ISeq args)
         {
-            return LockingTransaction.getEx().doCommute(this, fn, args);
+            return LockingTransaction.GetEx().DoCommute(this, fn, args);
         }
 
         /// <summary>
@@ -477,8 +486,8 @@ namespace clojure.lang
         /// <returns>The computed value.</returns>
         public object alter(IFn fn, ISeq args)
         {
-            LockingTransaction t = LockingTransaction.getEx();
-            return t.doSet(this, fn.applyTo(RT.cons(t.doGet(this, _tvals), args)));
+            LockingTransaction t = LockingTransaction.GetEx();
+            return t.DoSet(this, fn.applyTo(RT.cons(t.DoGet(this, _tvals), args)));
         }
 
         /// <summary>
@@ -486,7 +495,7 @@ namespace clojure.lang
         /// </summary>
         public void touch()
         {
-            LockingTransaction.getEx().doTouch(this);
+            LockingTransaction.GetEx().DoEnsure(this);
         }
 
         #endregion

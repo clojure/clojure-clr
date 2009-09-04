@@ -192,9 +192,9 @@ namespace clojure.lang
         /// </remarks>
         internal static void DispatchAction(Action action)
         {
-            LockingTransaction trans = LockingTransaction.getRunning();
+            LockingTransaction trans = LockingTransaction.GetRunning();
             if (trans != null)
-                trans.enqueue(action);
+                trans.Enqueue(action);
             else if (_nested != null)
                 _nested = _nested.cons(action);
             else

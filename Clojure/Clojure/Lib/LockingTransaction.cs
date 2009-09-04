@@ -36,6 +36,11 @@ namespace clojure.lang
         /// <summary>
         /// How old another transaction must be before we 'barge' it.
         /// </summary>
+        /// <remarks>
+        /// Java version has BARGE_WAIT_NANOS, set at 10*1000000.
+        /// If I'm thinking correctly tonight, that's 10 milliseconds.
+        /// Ticks here are 100 nanos, so we should have  10 * 1000000/100 = 100000.
+        /// </remarks>
         public const long BARGE_WAIT_TICKS = 100000;
 
 
@@ -79,7 +84,7 @@ namespace clojure.lang
         }
 
         /// <summary>
-        /// The transaction has been aborted.
+        /// Exception thrown when a transaction has been aborted.
         /// </summary>
         public class AbortException : Exception
         {
@@ -280,6 +285,11 @@ namespace clojure.lang
         /// </summary>
         readonly SortedDictionary<Ref, List<CFn>> _commutes = new SortedDictionary<Ref, List<CFn>>();
 
+        /// <summary>
+        /// The set of Refs holding read locks.
+        /// </summary>
+        readonly HashSet<Ref> _ensures = new HashSet<Ref>(); 
+
         #endregion
 
         #region Debugging
@@ -296,7 +306,7 @@ namespace clojure.lang
         /// <summary>
         /// Get a new read point value.
         /// </summary>
-        void getReadPoint()
+        void GetReadPoint()
         {
             _readPoint = _lastPoint.incrementAndGet();
         }
@@ -305,7 +315,7 @@ namespace clojure.lang
         /// Get a commit point value.
         /// </summary>
         /// <returns></returns>
-        long getCommitpoint()
+        long GetCommitPoint()
         {
             return _lastPoint.incrementAndGet();
         }
@@ -318,15 +328,13 @@ namespace clojure.lang
         /// Stop this transaction.
         /// </summary>
         /// <param name="status">The new status.</param>
-        void stop(int status)
+        void Stop(int status)
         {
-
             if (_info != null)
             {
                 lock (_info)
                 {
                     _info.Status.set(status);
-                    //Monitor.PulseAll(_info);
                     _info.Latch.CountDown();
                 }
                 _info = null;
@@ -337,17 +345,61 @@ namespace clojure.lang
             }
         }
 
+        void TryWriteLock(Ref r)
+        {
+            try
+            {
+                if (!r.TryEnterWriteLock(LOCK_WAIT_MSECS))
+                    throw _retryex;
+            }
+            catch (ThreadInterruptedException e) // TODO: Check if this is the correct exception class
+            {
+                throw _retryex;
+            }
+        }
+
+        void ReleaseIfEnsured(Ref r)
+        {
+            if (_ensures.Contains(r))
+            {
+                _ensures.Remove(r);
+                r.ExitReadLock();
+            }
+        }
+
+
+        object BlockAndBail(Info refinfo)
+        {
+            //stop prior to blocking
+            Stop(RETRY);
+            try
+            {
+                refinfo.Latch.Await(LOCK_WAIT_MSECS);
+            }
+            catch (ThreadInterruptedException e)
+            {
+                //ignore
+            }
+            throw _retryex;
+        }
+
+
         /// <summary>
         /// Lock a ref.
         /// </summary>
         /// <param name="r">The ref to lock.</param>
-        /// <returns>The current value of the ref.</returns>
+        /// <returns>The most recent value of the ref.</returns>
         object Lock(Ref r)
         {
-            bool unlocked = false;
+            // can't upgrade read lock, so release it.
+            ReleaseIfEnsured(r);
+
+            bool unlocked = true;
             try
             {
-                r.EnterWriteLock();
+                TryWriteLock(r);
+                unlocked = false;
+
                 if (r.CurrentValPoint() > _readPoint)
                     throw _retryex;
 
@@ -356,34 +408,11 @@ namespace clojure.lang
                 // write lock conflict
                 if (refinfo != null && refinfo != _info && refinfo.IsRunning)
                 {
-                    if (!barge(refinfo))
+                    if (!Barge(refinfo))
                     {
                         r.ExitWriteLock();
                         unlocked = true;
-                        // stop prior to blocking
-                        stop(RETRY);
-                        //lock (refinfo)
-                        //{
-                        //    if (refinfo.IsRunning)
-                        //    {
-                        //        try
-                        //        {
-                        //            Monitor.Wait(refinfo, LOCK_WAIT_MSECS);
-                        //        }
-                        //        catch (ThreadInterruptedException)
-                        //        {
-                        //        }
-                        //    }
-                        //}
-                        try
-                        {
-                            refinfo.Latch.Await(LOCK_WAIT_MSECS);
-                        }
-                        catch (ThreadInterruptedException)
-                        {
-                            // ignore
-                        }
-                        throw _retryex;
+                        return BlockAndBail(refinfo);
                     }
                 }
 
@@ -402,9 +431,9 @@ namespace clojure.lang
         /// <summary>
         /// Kill this transaction.
         /// </summary>
-        void abort()
+        void Abort()
         {
-            stop(KILLED);
+            Stop(KILLED);
             throw new AbortException();
         }
 
@@ -412,7 +441,7 @@ namespace clojure.lang
         /// Determine if sufficient clock time has elapsed to barge another transaction.
         /// </summary>
         /// <returns><value>true</value> if enough time has elapsed; <value>false</value> otherwise.</returns>
-        private bool bargeTimeElapsed()
+        private bool BargeTimeElapsed()
         {
             return DateTime.Now.Ticks - _startTime > BARGE_WAIT_TICKS;
         }
@@ -422,19 +451,13 @@ namespace clojure.lang
         /// </summary>
         /// <param name="refinfo">The info on the other transaction.</param>
         /// <returns><value>true</value> if we killed the other transaction; <value>false</value> otherwise.</returns>
-        private bool barge(Info refinfo)
+        private bool Barge(Info refinfo)
         {
             bool barged = false;
             // if this transaction is older
             //   try to abort the other
-            if (bargeTimeElapsed() && _startPoint < refinfo.StartPoint)
+            if (BargeTimeElapsed() && _startPoint < refinfo.StartPoint)
             {
-                //lock (refinfo)
-                //{
-                //    barged = refinfo.Status.compareAndSet(RUNNING, KILLED);
-                //    if (barged)
-                //        Monitor.PulseAll(refinfo);
-                //}
                 barged = refinfo.Status.compareAndSet(RUNNING, KILLED);
                 if (barged)
                     refinfo.Latch.CountDown();
@@ -446,7 +469,7 @@ namespace clojure.lang
         /// Get the transaction running on this thread (throw exception if no transaction). 
         /// </summary>
         /// <returns>The running transaction.</returns>
-        public static LockingTransaction getEx()
+        public static LockingTransaction GetEx()
         {
             LockingTransaction t = _transaction;
             if (t == null || t._info == null)
@@ -458,7 +481,7 @@ namespace clojure.lang
         /// Get the transaction running on this thread (or null if no transaction).
         /// </summary>
         /// <returns>The running transaction if there is one, else <value>null</value>.</returns>
-        public static LockingTransaction getRunning()
+        static internal LockingTransaction GetRunning()
         {
             LockingTransaction t = _transaction;
             if (t == null || t._info == null)
@@ -470,9 +493,10 @@ namespace clojure.lang
         /// Is there a transaction running on this thread?
         /// </summary>
         /// <returns><value>true</value> if there is a transaction running on this thread; <value>false</value> otherwise.</returns>
+        /// <remarks>Initial lowercase in name for core.clj compatibility.</remarks>
         public static bool isRunning()
         {
-            return getRunning() != null;
+            return GetRunning() != null;
         }
 
         /// <summary>
@@ -480,8 +504,12 @@ namespace clojure.lang
         /// </summary>
         /// <param name="fn">The function to invoke.</param>
         /// <returns>The value computed by the function.</returns>
+        /// <remarks>Initial lowercase in name for core.clj compatibility.</remarks>
         public static object runInTransaction(IFn fn)
         {
+            // TODO: This can be called on something more general than  an IFn.
+            // We can could define a delegate for this, probably use ThreadStartDelegate.
+            // Should still have a version that takes IFn.
             LockingTransaction t = _transaction;
             if (t == null)
                 _transaction = t = new LockingTransaction();
@@ -489,7 +517,7 @@ namespace clojure.lang
             if (t._info != null)
                 return fn.invoke();
 
-            return t.run(fn);
+            return t.Run(fn);
         }
 
         class Notify
@@ -512,8 +540,10 @@ namespace clojure.lang
         /// </summary>
         /// <param name="fn">The function to invoke.</param>
         /// <returns>The value computed by the function.</returns>
-        object run(IFn fn)
+        object Run(IFn fn)
         {
+            // TODO: Define an overload called on ThreadStartDelegate or something equivalent.
+
             bool done = false;
             object ret = null;
             List<Ref> locked = new List<Ref>();
@@ -523,7 +553,7 @@ namespace clojure.lang
             {
                 try
                 {
-                    getReadPoint();
+                    GetReadPoint();
                     if (i == 0)
                     {
                         _startPoint = _readPoint;
@@ -540,26 +570,35 @@ namespace clojure.lang
                         foreach (KeyValuePair<Ref, List<CFn>> pair in _commutes)
                         {
                             Ref r = pair.Key;
-                            if (!_sets.Contains(r))
+                            if (_sets.Contains(r))
                                 continue;
-                            r.EnterWriteLock();
+
+                            bool wasEnsured = _ensures.Contains(r);
+                            // can't upgrade read lock, so release
+                            ReleaseIfEnsured(r);
+                            TryWriteLock(r);
                             locked.Add(r);
+
+                            if (wasEnsured && r.CurrentValPoint() > _readPoint )
+                                throw _retryex;
+
                             Info refinfo = r.TInfo;
-                            if (refinfo != null && refinfo != _info && refinfo.IsRunning)
+                            if ( refinfo != null && refinfo != _info && refinfo.IsRunning)
                             {
-                                if (!barge(refinfo))
+                                if (!Barge(refinfo))
                                 {
                                     throw _retryex;
                                 }
                             }
                             object val = r.TryGetVal();
+                            _vals[r] = val;
                             foreach (CFn f in pair.Value)
                                 _vals[r] = f.Fn.applyTo(RT.cons(_vals[r], f.Args));
                         }
                         foreach (Ref r in _sets)
                         {
-                                r.EnterWriteLock();
-                                locked.Add(r);
+                            TryWriteLock(r);
+                            locked.Add(r);
                         }
                         // validate and enqueue notifications
                         foreach (KeyValuePair<Ref, object> pair in _vals)
@@ -571,7 +610,7 @@ namespace clojure.lang
                         // at this point, all values calced, all refs to be written locked
                         // no more client code to be called
                         int msecs = System.Environment.TickCount;
-                        long commitPoint = getCommitpoint();
+                        long commitPoint = GetCommitPoint();
                         foreach (KeyValuePair<Ref, object> pair in _vals)
                         {
                             Ref r = pair.Key;
@@ -609,7 +648,10 @@ namespace clojure.lang
                         locked[k].ExitWriteLock();
                     }
                     locked.Clear();
-                    stop(done ? COMMITTED : RETRY);
+                    foreach (Ref r in _ensures)
+                        r.ExitReadLock();
+                    _ensures.Clear();
+                    Stop(done ? COMMITTED : RETRY);
                     try
                     {
                         if (done) // re-dispatch out of transaction
@@ -654,7 +696,7 @@ namespace clojure.lang
         /// Add an agent action sent during the transaction to a queue.
         /// </summary>
         /// <param name="action">The action that was sent.</param>
-        internal void enqueue(Agent.Action action)
+        internal void Enqueue(Agent.Action action)
         {
             _actions.Add(action);
         }
@@ -665,7 +707,7 @@ namespace clojure.lang
         /// <param name="r"></param>
         /// <param name="tvals"></param>
         /// <returns>The value.</returns>
-        internal object doGet(Ref r, Ref.TVal tvals)
+        internal object DoGet(Ref r, Ref.TVal tvals)
         {
             if (!_info.IsRunning)
                 throw _retryex;
@@ -702,7 +744,7 @@ namespace clojure.lang
         /// <param name="r">The ref to set.</param>
         /// <param name="val">The value.</param>
         /// <returns>The value.</returns>
-        internal object doSet(Ref r, object val)
+        internal object DoSet(Ref r, object val)
         {
             if (!_info.IsRunning)
                 throw _retryex;
@@ -721,12 +763,35 @@ namespace clojure.lang
         /// Touch a ref.  (Lock it.)
         /// </summary>
         /// <param name="r">The ref to touch.</param>
-        internal void doTouch(Ref r)
+        internal void DoEnsure(Ref r)
         {
             if (!_info.IsRunning)
                 throw _retryex;
+            if (_ensures.Contains(r))
+                return;
+
             Lock(r);
+
+            // someone completed a write after our shapshot
+            if (r.CurrentValPoint() > _readPoint)
+            {
+                r.ExitReadLock();
+                throw _retryex;
+            }
+
+            Info refinfo = r.TInfo;
+
+            // writer exists
+            if (refinfo != null && refinfo.IsRunning)
+            {
+                r.ExitReadLock();
+                if (refinfo != _info)  // not us, ensure is doomed
+                    BlockAndBail(refinfo);
+            }
+            else
+                _ensures.Add(r);
         }
+
 
         /// <summary>
         /// Post a commute on a ref in this transaction.
@@ -735,7 +800,7 @@ namespace clojure.lang
         /// <param name="fn">The commuting function.</param>
         /// <param name="args">Additional arguments to the function.</param>
         /// <returns>The computed value.</returns>
-        internal object doCommute(Ref r, IFn fn, ISeq args)
+        internal object DoCommute(Ref r, IFn fn, ISeq args)
         {
             if (!_info.IsRunning)
                 throw _retryex;
@@ -753,7 +818,7 @@ namespace clojure.lang
                 }
                 _vals[r] = val;
             }
-            List<CFn> fns; ;
+            List<CFn> fns;
             if (! _commutes.TryGetValue(r, out fns))
                 _commutes[r] = fns = new List<CFn>();
             fns.Add(new CFn(fn, args));
