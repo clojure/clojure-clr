@@ -125,12 +125,39 @@ namespace clojure.lang.CljCompiler.Ast
         protected static List<MethodInfo> GetMethods(Type targetType, int arity,  string methodName, bool getStatics)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
-
             flags |= getStatics ? BindingFlags.Static : BindingFlags.Instance;
 
-            IEnumerable<MethodInfo> einfo 
-                = targetType.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
-            List<MethodInfo> infos = new List<MethodInfo>(einfo);
+            List<MethodInfo> infos;
+
+            if (targetType.IsInterface && ! getStatics)
+                infos = GetInterfaceMethods(targetType,arity,methodName);
+            else
+            {
+                IEnumerable<MethodInfo> einfo
+                    = targetType.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
+                infos = new List<MethodInfo>(einfo);
+            }
+
+            return infos;
+        }
+
+        static List<MethodInfo> GetInterfaceMethods(Type targetType, int arity, string methodName)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod;
+
+            List<Type> interfaces = new List<Type>();
+            interfaces.Add(targetType);
+            interfaces.AddRange(targetType.GetInterfaces());
+
+            List<MethodInfo> infos = new List<MethodInfo>();
+
+            foreach ( Type type in interfaces )
+            {
+                MethodInfo[] methods = type.GetMethods();
+                IEnumerable<MethodInfo> einfo
+                     = type.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
+                infos.AddRange(einfo);
+            }
 
             return infos;
         }
@@ -157,7 +184,6 @@ namespace clojure.lang.CljCompiler.Ast
         private static void MaybeReflectionWarn(int line, MethodInfo method, string methodName)
         {
             if ( method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()) )
-                // TODO: use DLR IO
                 ((TextWriter)RT.ERR.deref()).WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved.\n",
                     Compiler.SOURCE_PATH.deref(), line, methodName));
         }

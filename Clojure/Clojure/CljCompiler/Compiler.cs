@@ -839,19 +839,6 @@ namespace clojure.lang
             return sb.ToString();
         }
 
-
-        //private static Expr OptionallyGenerateMetaInit(object form, Expr expr)
-        //{
-        //    Expr ret = expr;
-
-        //    if (RT.meta(form) != null )
-        //    {
-        //        Expression metaExpr = new MetaExpr(expr, GenerateMapExpr(o.meta());
-        //        ret = Expression.Call(Expression.Convert(expr, typeof(IObj)), Method_IObj_withMeta, metaExpr);
-        //    }
-        //    return ret;
-        //}
-
         #endregion
 
         #region Code generation
@@ -1322,8 +1309,6 @@ namespace clojure.lang
             }
             return exprs;
         }
-
-
 
         #endregion
     }

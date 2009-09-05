@@ -86,8 +86,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression target = _target.GenDlr(context);
             Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
 
-            return AstUtils.SimpleCallHelper(target,_method, args); ;
-
+            return AstUtils.SimpleCallHelper(target,_method, args);
         }
 
         private Expression GenDlrViaReflection(GenContext context)

@@ -82,7 +82,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-
         #region Type mangling
 
         public override Type ClrType
@@ -112,7 +111,6 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
-
 
         #region Type mangling
 

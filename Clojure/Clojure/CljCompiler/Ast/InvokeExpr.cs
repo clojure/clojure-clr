@@ -123,10 +123,6 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             Expression call = Expression.Call(fn, mi, actualArgs);
-            // Java version doesn't seem to do this.  Instead, its InvokeExpression carries the type information so someone else can use it.
-            // Not sure if this is useful here.
-            if (returnType != null)
-                call = Expression.Convert(call, returnType);
 
             return call;
         }
