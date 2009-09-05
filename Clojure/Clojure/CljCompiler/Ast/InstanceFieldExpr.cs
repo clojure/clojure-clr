@@ -18,14 +18,13 @@ using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class InstanceFieldExpr : FieldExpr
+    abstract class InstanceFieldOrProprtyExpr<TInfo> : FieldOrPropertyExpr
     {
         #region Data
 
         readonly Expr _target;
         readonly Type _targetType;
-        readonly FieldInfo _fieldInfo;
-        readonly PropertyInfo _propertyInfo;
+        protected readonly TInfo _tinfo;
         readonly string _fieldName;
         readonly int _line;
 
@@ -33,17 +32,18 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public InstanceFieldExpr(int line, Expr target, string fieldName)
+        public InstanceFieldOrProprtyExpr(int line, Expr target, string fieldName, TInfo tinfo)
         {
             _line = line;
             _target = target;
             _fieldName = fieldName;
+            _tinfo = tinfo;
 
             _targetType = target.HasClrType ? target.ClrType : null;
-            _fieldInfo = _targetType != null ? _targetType.GetField(_fieldName, BindingFlags.Instance | BindingFlags.Public) : null;
-            _propertyInfo = _targetType != null ? _targetType.GetProperty(_fieldName, BindingFlags.Instance | BindingFlags.Public) : null;
 
-            if ( _fieldInfo == null && _propertyInfo == null  && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+            // Java version does not include check on _targetType
+            // However, this seems consistent with the checks in the generation code.
+            if ( (_targetType == null || _tinfo == null) && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                 ((TextWriter)RT.ERR.deref()).WriteLine("Reflection warning {0}:{1} - reference to field/property {2} can't be resolved.", 
                     Compiler.SOURCE_PATH.deref(), line,_fieldName);
         }
@@ -54,17 +54,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override bool HasClrType
         {
-            get { return _fieldInfo != null || _propertyInfo != null; }
-        }
-
-        public override Type ClrType
-        {
-            get {
-
-                return _fieldInfo != null
-                    ? _fieldInfo.FieldType
-                    : _propertyInfo.PropertyType;
-            }
+            get { return _tinfo != null; }
         }
 
         #endregion
@@ -74,28 +64,25 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenDlr(GenContext context)
         {
             Expression target = _target.GenDlr(context);
-            if (_targetType != null && (_fieldInfo != null || _propertyInfo != null))
+            if (_targetType != null && _tinfo != null)
             {
                 Expression convTarget = Expression.Convert(target, _targetType);
-                Expression access = _fieldInfo != null
-                    ? Expression.Field(convTarget, _fieldInfo)
-                    : Expression.Property(convTarget, _propertyInfo);
+                Expression access = GenAccess(convTarget);
                 return Compiler.MaybeBox(access);
             }
             else
                 return Compiler.MaybeBox(Expression.PropertyOrField(target,_fieldName));
-            //Or maybe this should call Reflector.invokeNoArgInstanceMember
         }
+
+        protected abstract Expression GenAccess(Expression target);
 
         public override Expression GenDlrUnboxed(GenContext context)
         {
             Expression target = _target.GenDlr(context);
-            if (_targetType != null && (_fieldInfo != null || _propertyInfo != null))
+            if (_targetType != null && _tinfo != null)
             {
                 Expression convTarget = Expression.Convert(target, _targetType);
-                Expression access = _fieldInfo != null
-                    ? Expression.Field(convTarget, _fieldInfo)
-                    : Expression.Property(convTarget, _propertyInfo);
+                Expression access = GenAccess(convTarget);
                 return access;
             }
             else
@@ -110,17 +97,14 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Expression target = _target.GenDlr(context);
             Expression valExpr = val.GenDlr(context);
-            if (_targetType != null && (_fieldInfo != null || _propertyInfo != null))
+            if (_targetType != null && _tinfo != null)
             {
                 Expression convTarget = Expression.Convert(target, _targetType);
-                Expression access = _fieldInfo != null
-                    ? Expression.Field(convTarget, _fieldInfo)
-                    : Expression.Property(convTarget, _propertyInfo);
+                Expression access = GenAccess(convTarget);
                 return Expression.Assign(access, valExpr);
             }
             else
             {
-                // TODO:  Shouldn't this cause a reflection warning?
                 Expression call = Expression.Call(
                     target, 
                     Compiler.Method_Reflector_SetInstanceFieldOrProperty,
@@ -128,6 +112,67 @@ namespace clojure.lang.CljCompiler.Ast
                     valExpr);
                 return call;
             }
+        }
+
+        #endregion
+    }
+
+    sealed class InstanceFieldExpr : InstanceFieldOrProprtyExpr<FieldInfo>
+    {
+        #region C-tors
+
+        public InstanceFieldExpr(int line, Expr target, string fieldName, FieldInfo finfo)
+            :base(line,target,fieldName,finfo)  
+        {
+        }
+
+        #endregion
+
+        #region Type mangling
+
+        public override Type ClrType
+        {
+            get { return _tinfo.FieldType; }
+        }
+
+        #endregion
+
+        #region Code generation
+
+        protected override Expression GenAccess(Expression target)
+        {
+            return Expression.Field(target, _tinfo);
+        }
+
+        #endregion
+    }
+
+
+    sealed class InstancePropertyExpr : InstanceFieldOrProprtyExpr<PropertyInfo>
+    {
+        #region C-tors
+
+        public InstancePropertyExpr(int line, Expr target, string fieldName, PropertyInfo pinfo)
+            :base(line,target,fieldName,pinfo)  
+        {
+        }
+
+        #endregion
+
+        #region Type mangling
+
+        public override Type ClrType
+        {
+            get { return  _tinfo.PropertyType; }
+        }
+
+        #endregion
+
+        #region Code generation
+
+        protected override Expression GenAccess(Expression target)
+        {
+            return Expression.Property(target, _tinfo);
         }
 
         #endregion

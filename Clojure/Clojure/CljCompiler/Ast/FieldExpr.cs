@@ -16,7 +16,7 @@ using Microsoft.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    abstract class FieldExpr : HostExpr, AssignableExpr
+    abstract class FieldOrPropertyExpr : HostExpr, AssignableExpr
     {
         #region AssignableExpr Members
 

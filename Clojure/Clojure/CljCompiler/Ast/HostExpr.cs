@@ -52,33 +52,55 @@ namespace clojure.lang.CljCompiler.Ast
                 if (t == null)
                     instance = Compiler.GenerateAST(RT.second(form));
 
-                bool isFieldOrProperty = false;
+                //bool isFieldOrProperty = false;
+
+                //if (RT.Length(form) == 3 && RT.third(form) is Symbol)
+                //{
+                //    Symbol sym = (Symbol)RT.third(form);
+                //    if (t != null)
+                //        isFieldOrProperty =
+                //            t.GetField(sym.Name, BindingFlags.Static | BindingFlags.Public) != null
+                //            || t.GetProperty(sym.Name, BindingFlags.Static | BindingFlags.Public) != null;
+                //    else if (instance != null && instance.HasClrType && instance.ClrType != null)
+                //    {
+                //        Type instanceType = instance.ClrType;
+                //        isFieldOrProperty =
+                //            instanceType.GetField(sym.Name, BindingFlags.Instance | BindingFlags.Public) != null
+                //            || instanceType.GetProperty(sym.Name, BindingFlags.Instance | BindingFlags.Public) != null;
+                //    }
+                //}
+
+                //if (isFieldOrProperty)
+                //{
+                //    Symbol sym = (Symbol)RT.third(form);
+                //    if (t != null)
+                //        return new StaticFieldExpr(line, t, sym.Name);
+                //    else
+                //        return new InstanceFieldExpr(line, instance, sym.Name);
+                //}
 
                 if (RT.Length(form) == 3 && RT.third(form) is Symbol)
                 {
+                    PropertyInfo pinfo = null;
+                    FieldInfo finfo = null;
                     Symbol sym = (Symbol)RT.third(form);
+                    string fieldName = sym.Name;
                     if (t != null)
-                        isFieldOrProperty =
-                            t.GetField(sym.Name, BindingFlags.Static | BindingFlags.Public) != null
-                            || t.GetProperty(sym.Name, BindingFlags.Static | BindingFlags.Public) != null;
+                    {
+                        if ((finfo = t.GetField(sym.Name, BindingFlags.Static | BindingFlags.Public)) != null)
+                            return new StaticFieldExpr(line, t, fieldName, finfo);
+                        if ((pinfo = t.GetProperty(sym.Name, BindingFlags.Static | BindingFlags.Public)) != null)
+                            return new StaticPropertyExpr(line, t, fieldName, pinfo);
+                    }
                     else if (instance != null && instance.HasClrType && instance.ClrType != null)
                     {
                         Type instanceType = instance.ClrType;
-                        isFieldOrProperty =
-                            instanceType.GetField(sym.Name, BindingFlags.Instance | BindingFlags.Public) != null
-                            || instanceType.GetProperty(sym.Name, BindingFlags.Instance | BindingFlags.Public) != null;
+                        if ((finfo = instanceType.GetField(sym.Name, BindingFlags.Instance | BindingFlags.Public)) != null)
+                            return new InstanceFieldExpr(line, instance, fieldName, finfo);
+                        if ((pinfo = instanceType.GetProperty(sym.Name, BindingFlags.Instance | BindingFlags.Public)) != null)
+                            return new InstancePropertyExpr(line, instance, fieldName, pinfo);
                     }
                 }
-
-                if (isFieldOrProperty)
-                {
-                    Symbol sym = (Symbol)RT.third(form);
-                    if (t != null)
-                        return new StaticFieldExpr(line, t, sym.Name);
-                    else
-                        return new InstanceFieldExpr(line, instance, sym.Name);
-                }
-
 
                 ISeq call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));
 

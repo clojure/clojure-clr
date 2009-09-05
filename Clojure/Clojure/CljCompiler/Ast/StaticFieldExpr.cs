@@ -18,32 +18,25 @@ using System.IO;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class StaticFieldExpr : FieldExpr
+    abstract class StaticFieldOrPropertyExpr<TInfo> : FieldOrPropertyExpr
     {
         #region Data
 
         readonly string _fieldName;
         readonly Type _type;
-        readonly FieldInfo _field;
-        readonly PropertyInfo _property;
+        protected readonly TInfo _tinfo;
         readonly int _line;
 
         #endregion
 
         #region Ctors
 
-        public StaticFieldExpr(int line, Type type, string fieldName)
+        protected StaticFieldOrPropertyExpr(int line, Type type, string fieldName, TInfo tinfo)
         {
             _line = line;
             _fieldName = fieldName;
             _type = type;
-            _field = type.GetField(_fieldName, BindingFlags.Static | BindingFlags.Public);
-            _property = type.GetProperty(_fieldName, BindingFlags.Static | BindingFlags.Public);
-
-            if ( _field == null && _property == null  && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-                ((TextWriter)RT.ERR.deref()).WriteLine("Reflection warning {0}:{1} - reference to field/property {2} can't be resolved.", 
-                    Compiler.SOURCE_PATH.deref(), /* line */ 0,_fieldName);
-
+            _tinfo = tinfo;
         }
 
         #endregion
@@ -55,11 +48,6 @@ namespace clojure.lang.CljCompiler.Ast
             get { return true; }
         }
 
-        public override Type ClrType
-        {
-            get { return _field != null ?_field.FieldType : _property.PropertyType; }
-        }
-
         #endregion
 
         #region Code generation
@@ -67,13 +55,6 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenDlr(GenContext context)
         {
             return Compiler.MaybeBox(GenDlrUnboxed(context));
-        }
-
-        public override Expression GenDlrUnboxed(GenContext context)
-        {
-            return _property != null
-                ? Expression.Property(null, _property)
-                : Expression.Field(null, _field);
         }
 
         #endregion
@@ -89,4 +70,67 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
     }
+
+    sealed class StaticFieldExpr : StaticFieldOrPropertyExpr<FieldInfo>
+    {
+        #region C-tors
+
+        public StaticFieldExpr(int line, Type type, string fieldName, FieldInfo finfo)
+            : base(line, type, fieldName, finfo)
+        {
+        }
+
+        #endregion
+
+
+        #region Type mangling
+
+        public override Type ClrType
+        {
+            get { return _tinfo.FieldType; }
+        }
+
+        #endregion
+
+        #region Code generation
+
+        public override Expression GenDlrUnboxed(GenContext context)
+        {
+            return Expression.Field(null, _tinfo);
+        }
+
+        #endregion
+    }
+
+    sealed class StaticPropertyExpr : StaticFieldOrPropertyExpr<PropertyInfo>
+    {
+        #region C-tors
+
+        public StaticPropertyExpr(int line, Type type, string fieldName, PropertyInfo pinfo)
+            : base(line, type, fieldName, pinfo)
+        {
+        }
+
+        #endregion
+
+
+        #region Type mangling
+
+        public override Type ClrType
+        {
+            get { return _tinfo.PropertyType; }
+        }
+
+        #endregion
+
+        #region Code generation
+
+        public override Expression GenDlrUnboxed(GenContext context)
+        {
+            return Expression.Property(null, _tinfo);
+        }
+
+        #endregion
+    }
+
 }

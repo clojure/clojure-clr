@@ -725,7 +725,7 @@ namespace clojure.lang
             static object syntaxQuote(object form)
             {
                 object ret;
-                if (Compiler.isSpecial(form))
+                if (Compiler.IsSpecial(form))
                     ret = RT.list(Compiler.QUOTE, form);
                 else if (form is Symbol)
                 {

@@ -1,5 +1,4 @@
-﻿
-/**
+﻿/**
  *   Copyright (c) David Miller. All rights reserved.
  *   The use and distribution terms for this software are covered by the
  *   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
@@ -8,6 +7,7 @@
  * 	 the terms of this license.
  *   You must not remove this notice, or any other, from this software.
  **/
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -129,8 +129,6 @@ namespace clojure.lang
 
         #region Special forms
 
-        // TODO: Figure out why clojure's special-form?  shows if as special, instead of if*.
-
         public static readonly IPersistentMap _specials = PersistentHashMap.create(
             DEF, new DefExpr.Parser(),
             LOOP, new LetExpr.Parser(),
@@ -155,7 +153,7 @@ namespace clojure.lang
             _AMP_, null
         );
 
-        public static bool isSpecial(Object sym)
+        public static bool IsSpecial(Object sym)
         {
             return _specials.containsKey(sym);
         }
@@ -168,12 +166,6 @@ namespace clojure.lang
         #endregion
 
         #region MethodInfos, etc.
-
-        //static readonly MethodInfo Method_ArraySeq_create_array_int = typeof(ArraySeq).GetMethod("create", new Type[] { typeof(object[]), typeof(int) });
-
-        //static readonly MethodInfo Method_CGen_MakeMap = typeof(Generator).GetMethod("MakeMap");
-        //static readonly MethodInfo Method_CGen_MakeSet = typeof(Generator).GetMethod("MakeSet");
-        //static readonly MethodInfo Method_CGen_MakeVector = typeof(Generator).GetMethod("MakeVector");
 
         internal static readonly PropertyInfo Method_Compiler_CurrentNamespace = typeof(Compiler).GetProperty("CurrentNamespace");
         internal static readonly MethodInfo Method_Compiler_PushNS = typeof(Compiler).GetMethod("PushNS");
@@ -213,8 +205,6 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Var_setMeta = typeof(Var).GetMethod("setMeta");
         internal static readonly MethodInfo Method_Var_popThreadBindings = typeof(Var).GetMethod("popThreadBindings");
 
-
-        //static readonly ConstructorInfo Ctor_AFnImpl_0 = typeof(AFnImpl).GetConstructor(Type.EmptyTypes);
         internal static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
 
         internal static readonly MethodInfo[] Methods_IFn_invoke = new MethodInfo[MAX_POSITIONAL_ARITY + 2];
@@ -226,8 +216,6 @@ namespace clojure.lang
                 typeArray[i] = typeof(Object);
             return typeArray;
         }
-
-
 
         #endregion
 
@@ -243,24 +231,21 @@ namespace clojure.lang
             types[Compiler.MAX_POSITIONAL_ARITY] = typeof(object[]);
             Methods_IFn_invoke[Compiler.MAX_POSITIONAL_ARITY + 1]
                 = typeof(IFn).GetMethod("invoke", types);
-
-            MethodInfo[] mis = typeof(IFn).GetMethods();
-
         }
 
-        static GenContext _context = new GenContext("eval", CompilerMode.Immediate);
+        static GenContext _evalContext = new GenContext("eval", CompilerMode.Immediate);
 
         static int _saveId = 0;
         public static void SaveEvalContext()
         {
-            _context.AssyBldr.Save("done" + _saveId++ + ".dll");
-            _context = new GenContext("eval", CompilerMode.Immediate);
+            _evalContext.AssyBldr.Save("eval" + _saveId++ + ".dll");
+            _evalContext = new GenContext("eval", CompilerMode.Immediate);
         }
 
 
         public static LambdaExpression GenerateLambda(object form, bool addPrint)
         {
-            return GenerateLambda(_context, form, addPrint);
+            return GenerateLambda(_evalContext, form, addPrint);
         }
 
 
@@ -282,7 +267,9 @@ namespace clojure.lang
         }
 
 
+        #endregion
 
+        #region Boxing arguments
 
         static Expression[] MaybeBox(Expression[] args)
         {
@@ -303,12 +290,6 @@ namespace clojure.lang
                 ? Expression.Convert(expr, typeof(object))
                 : expr;
         }
-
-        #endregion
-
-        #region Entry points
-
-
 
         #endregion
 
@@ -380,7 +361,6 @@ namespace clojure.lang
             return ret;
         }
 
-
         private static Expr AnalyzeSymbol(Symbol symbol)
         {
             Symbol tag = TagOf(symbol);
@@ -399,16 +379,18 @@ namespace clojure.lang
                     Type t = MaybeType(nsSym, false);
                     if (t != null)
                     {
-                        // TODO: create ctors for StaticFieldExpr that accept the FieldInfo/PropertyInfo.
-                        if (Reflector.GetField(t, symbol.Name, true) != null)
-                            return new StaticFieldExpr((int)LINE.deref(), t, symbol.Name);
-                        else if (Reflector.GetProperty(t, symbol.Name, true) != null)
-                            return new StaticFieldExpr((int)LINE.deref(), t, symbol.Name);
+                        FieldInfo finfo;
+                        PropertyInfo pinfo;
+
+                        if ((finfo = Reflector.GetField(t, symbol.Name, true)) != null)
+                            return new StaticFieldExpr((int)LINE.deref(), t, symbol.Name,finfo);
+                        else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) != null)
+                            return new StaticPropertyExpr((int)LINE.deref(), t, symbol.Name,pinfo);
                     }
                     throw new Exception(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
                 }
             }
-            // TODO: Resolve of nested class (Compiler+CompilerException) not working
+
             object o = Compiler.Resolve(symbol);
             if (o is Var)
             {
@@ -493,7 +475,7 @@ namespace clojure.lang
         {
             object op = RT.first(form);
 
-            if (isSpecial(op))
+            if (IsSpecial(op))
                 return form;
 
             // macro expansion
