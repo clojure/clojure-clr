@@ -79,7 +79,9 @@ namespace clojure.lang.CljCompiler.Ast
                 //        return new InstanceFieldExpr(line, instance, sym.Name);
                 //}
 
-                if (RT.Length(form) == 3 && RT.third(form) is Symbol)
+                bool maybeFieldOrProperty = RT.Length(form) == 3 && RT.third(form) is Symbol;
+
+                if (maybeFieldOrProperty)
                 {
                     PropertyInfo pinfo = null;
                     FieldInfo finfo = null;
@@ -91,6 +93,7 @@ namespace clojure.lang.CljCompiler.Ast
                             return new StaticFieldExpr(line, t, fieldName, finfo);
                         if ((pinfo = t.GetProperty(sym.Name, BindingFlags.Static | BindingFlags.Public)) != null)
                             return new StaticPropertyExpr(line, t, fieldName, pinfo);
+                        maybeFieldOrProperty = false;
                     }
                     else if (instance != null && instance.HasClrType && instance.ClrType != null)
                     {
@@ -99,8 +102,20 @@ namespace clojure.lang.CljCompiler.Ast
                             return new InstanceFieldExpr(line, instance, fieldName, finfo);
                         if ((pinfo = instanceType.GetProperty(sym.Name, BindingFlags.Instance | BindingFlags.Public)) != null)
                             return new InstancePropertyExpr(line, instance, fieldName, pinfo);
+                        maybeFieldOrProperty = false;
                     }
                 }
+
+                if (maybeFieldOrProperty)
+                {
+                    Symbol sym = (Symbol)RT.third(form);
+                    string fieldName = sym.Name;
+                    if (t != null)
+                        return new StaticFieldExpr(line, t, fieldName, null);  // same as StaticPropertyExpr when last arg is null
+                    else
+                        return new InstanceFieldExpr(line, instance, fieldName, null); // same as InstancePropertyExpr when last arg is null
+                }
+ 
 
                 ISeq call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));
 

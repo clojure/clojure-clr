@@ -75,7 +75,7 @@ namespace clojure.lang
             return InvokeMatchingMethod(methodName,methods, t, null, args);
         }
 
-        public static object SetInstanceFieldOrMethod(object target, string fieldname, object val)
+        public static object SetInstanceFieldOrProperty(object target, string fieldname, object val)
         {
             Type t = target.GetType();
             FieldInfo field = t.GetField(fieldname, BindingFlags.Instance | BindingFlags.Public);
@@ -90,6 +90,21 @@ namespace clojure.lang
                 prop.SetValue(target, val, new object[0]);
                 return val;
             }
+            throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldname, t));
+        }
+
+        public static object GetInstanceFieldOrProperty(object target, string fieldname)
+        {
+            Type t = target.GetType();
+            
+            FieldInfo field = t.GetField(fieldname, BindingFlags.Instance | BindingFlags.Public);
+            if (field != null)
+                return field.GetValue(target);
+
+            PropertyInfo prop = t.GetProperty(fieldname, BindingFlags.Instance | BindingFlags.Public);
+            if (prop != null)
+                return prop.GetValue(target, new object[0]);
+
             throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldname, t));
         }
 

@@ -71,7 +71,10 @@ namespace clojure.lang.CljCompiler.Ast
                 return Compiler.MaybeBox(access);
             }
             else
-                return Compiler.MaybeBox(Expression.PropertyOrField(target,_fieldName));
+            {
+                Expression call = Expression.Call(Compiler.Method_Reflector_GetInstanceFieldOrProperty, target, Expression.Constant(_fieldName));
+                return Compiler.MaybeBox(call);
+            }
         }
 
         protected abstract Expression GenAccess(Expression target);
@@ -106,10 +109,10 @@ namespace clojure.lang.CljCompiler.Ast
             else
             {
                 Expression call = Expression.Call(
-                    target, 
                     Compiler.Method_Reflector_SetInstanceFieldOrProperty,
+                    target,
                     Expression.Constant(_fieldName),
-                    valExpr);
+                    Compiler.MaybeBox(valExpr));
                 return call;
             }
         }
