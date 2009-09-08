@@ -83,22 +83,12 @@ namespace clojure.lang.CljCompiler.Ast
             for (int i = 0; i < argCount; i++ )
                 args[i] = Compiler.MaybeBox(((Expr)_args.nth(i)).GenDlr(context));
 
-            Expression call = GenerateInvocation(InvocationReturnType, fn, args);
+            Expression call = GenerateInvocation(fn, args);
 
             return call;
         }
 
-        private Type InvocationReturnType
-        {
-            get
-            {
-                return (_tag == null)
-                    ? null
-                    : Compiler.TagToType(_tag);
-            }
-        }
-
-        private static Expression GenerateInvocation(Type returnType, Expression fn, Expression[] args)
+        private static Expression GenerateInvocation(Expression fn, Expression[] args)
         {
             MethodInfo mi;
             Expression[] actualArgs;

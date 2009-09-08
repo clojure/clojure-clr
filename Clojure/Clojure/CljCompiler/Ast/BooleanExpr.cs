@@ -50,6 +50,10 @@ namespace clojure.lang.CljCompiler.Ast
             get { return typeof(Boolean); }
         }
 
+        #endregion
+
+        #region Code generation
+
         public override Expression GenDlr(GenContext context)
         {
             return Expression.Constant(_val);
