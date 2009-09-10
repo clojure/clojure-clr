@@ -105,8 +105,10 @@ namespace clojure.lang
             if (prop != null)
                 return prop.GetValue(target, new object[0]);
 
-            FieldInfo[] fields = t.GetFields();
-            PropertyInfo[] props = t.GetProperties();
+            MethodInfo method = GetArityZeroMethod(t,fieldname,false);
+
+            if (method != null)
+                return method.Invoke(target, new object[0]);
 
             throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldname, t));
         }
@@ -121,6 +123,24 @@ namespace clojure.lang
             List<MethodInfo> infos = new List<MethodInfo>(einfo);
 
             return infos;
+        }
+
+        public static MethodInfo GetArityZeroMethod(Type t, string name, bool getStatics)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
+            if (getStatics)
+                flags |= BindingFlags.Static;
+            else
+                flags |= BindingFlags.Instance;
+
+            MethodInfo[] all = t.GetMethods();
+
+            IEnumerable<MethodInfo> einfo = t.GetMethods(flags).Where(mi => mi.Name == name && mi.GetParameters().Length == 0);
+            List<MethodInfo> infos = new List<MethodInfo>(einfo);
+            if (infos.Count() == 1)
+                return infos[0];
+            else
+                return null;
         }
 
         public static object CallInstanceMethod(string methodName, object target, params object[] args)
