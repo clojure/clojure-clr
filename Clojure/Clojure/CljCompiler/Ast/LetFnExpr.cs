@@ -54,7 +54,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm)
+            public Expr Parse(object frm, bool isRecurContext)
             {
                 ISeq form = (ISeq)frm;
 
@@ -103,7 +103,7 @@ namespace clojure.lang.CljCompiler.Ast
                     for (int i = 0; i < bindings.count(); i += 2)
                     {
                         Symbol sym = (Symbol)bindings.nth(i);
-                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1),sym.Name);
+                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1),sym.Name,false);
                         // Sequential enhancement of env (like Lisp let*)
                         LocalBinding b = (LocalBinding)lbs.nth(i / 2);
                         b.Init = init;
@@ -111,7 +111,7 @@ namespace clojure.lang.CljCompiler.Ast
                         bindingInits = bindingInits.cons(bi);
                     }
 
-                    return new LetFnExpr(bindingInits,new BodyExpr.Parser().Parse(body));
+                    return new LetFnExpr(bindingInits,new BodyExpr.Parser().Parse(body,isRecurContext));
                 }
                 finally
                 {

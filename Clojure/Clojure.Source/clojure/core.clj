@@ -2626,8 +2626,8 @@
   select a subset, via inclusion or exclusion, or to provide a mapping
   to a symbol different from the var's name, in order to prevent
   clashes. Use :use in the ns macro in preference to calling this directly."
-  [ns-sym & filters]
-    (let [ns (or (find-ns ns-sym) (throw (new Exception (str "No namespace: " ns-sym))))
+  [ns-sym & filters]   
+    (let [ns (or (find-ns ns-sym) (throw (new Exception (str "No namespace: " ns-sym))))   
           fs (apply hash-map filters)
           nspublics (ns-publics ns)
           rename (or (:rename fs) {})
@@ -3776,7 +3776,9 @@
         ]
     `(do
        (clojure.core/in-ns '~name)
+      
        (with-loading-context
+
         ~@(when gen-class-call (list gen-class-call))
         ~@(when (and (not= name 'clojure.core) (not-any? #(= :refer-clojure (first %)) references))
             `((clojure.core/refer '~'clojure.core)))

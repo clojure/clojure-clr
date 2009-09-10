@@ -37,15 +37,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form)
+            public Expr Parse(object form, bool isRecurContext)
             {
-                // Java:
-                // TODO: figure out if it matters
-                //if (context == C.EVAL)
-                //    return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
-
-                return new ThrowExpr(Compiler.GenerateAST(RT.second(form)));
-               
+                return new ThrowExpr(Compiler.GenerateAST(RT.second(form),false));
             }
         }
 

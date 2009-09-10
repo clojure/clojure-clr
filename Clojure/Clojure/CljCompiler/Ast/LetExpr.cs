@@ -55,7 +55,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm)
+            public Expr Parse(object frm, bool isRecurContext)
             {
                 ISeq form = (ISeq) frm;
 
@@ -73,16 +73,6 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new ArgumentException("Bad binding form, expected matched symbol/value pairs.");
 
                 ISeq body = RT.next(RT.next(form));
-
-                // TODO: This is one place where context makes a difference.  Need to figure this out.
-                //  Second test clause added in Rev 1216.
-                // if (ctxt == C.EVAL || (context == c.EXPRESSION && isLoop))
-                //    return Generate(RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)));
-
-                // As of Rev 1216, I tried tjos out. 
-                // However, it goes into an infinite loop.  Still need to figure this out.
-                //if (isLoop)
-                //    Generate(RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)));
 
                 IPersistentMap dynamicBindings = RT.map(
                     Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
@@ -107,7 +97,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if (sym.Namespace != null)
                             throw new Exception("Can't let qualified name: " + sym);
 
-                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1));
+                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1),false);
                         // Sequential enhancement of env (like Lisp let*)
                         LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), init);
                         BindingInit bi = new BindingInit(b, init);
@@ -120,7 +110,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.LOOP_LOCALS.set(loopLocals);
 
                     return new LetExpr(bindingInits,
-                        new BodyExpr.Parser().Parse(body),
+                        new BodyExpr.Parser().Parse(body,isLoop || isRecurContext),
                         isLoop);
                 }
                 finally

@@ -51,7 +51,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm)
+            public Expr Parse(object frm, bool isRecurContext)
             {
                 return new ImportExpr((string)RT.second(frm));
             }

@@ -55,7 +55,7 @@ namespace clojure.lang.CljCompiler.Ast
             for (ISeq s = RT.seq(form); s != null; s = s.next())
             {
                 object e = s.first();
-                keys = (IPersistentVector)keys.cons(Compiler.GenerateAST(e));
+                keys = (IPersistentVector)keys.cons(Compiler.GenerateAST(e,false));
             }
             Expr ret = new SetExpr(keys);
             return Compiler.OptionallyGenerateMetaInit(form, ret);

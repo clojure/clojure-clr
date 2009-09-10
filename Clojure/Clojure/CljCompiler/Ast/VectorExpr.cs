@@ -53,7 +53,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             IPersistentVector args = PersistentVector.EMPTY;
             for (int i = 0; i < form.count(); i++ )
-                args = (IPersistentVector)args.cons(Compiler.GenerateAST(form.nth(i)));
+                args = (IPersistentVector)args.cons(Compiler.GenerateAST(form.nth(i),false));
 
             Expr ret = new VectorExpr(args);
             return Compiler.OptionallyGenerateMetaInit(form, ret);

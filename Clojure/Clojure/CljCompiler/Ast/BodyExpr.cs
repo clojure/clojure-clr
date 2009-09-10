@@ -59,7 +59,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frms)
+            public Expr Parse(object frms, bool isRecurContext)
             {
                 ISeq forms = (ISeq)frms;
 
@@ -69,23 +69,8 @@ namespace clojure.lang.CljCompiler.Ast
                 IPersistentVector exprs = PersistentVector.EMPTY;
 
                 for (ISeq s = forms; s != null; s = s.next())
-                {
-                    if (s.next() == null)
-                    {
-                        // in tail recurive position
-                        try
-                        {
-                            Var.pushThreadBindings(PersistentHashMap.create(Compiler.IN_TAIL_POSITION, RT.T));
-                            exprs = exprs.cons(Compiler.GenerateAST(s.first()));
-                        }
-                        finally
-                        {
-                            Var.popThreadBindings();
-                        }
-                    }
-                    else
-                        exprs = exprs.cons(Compiler.GenerateAST(s.first()));
-                }
+                    exprs = exprs.cons(Compiler.GenerateAST(s.first(),isRecurContext&&s.next() == null));
+  
                 if (exprs.count() == 0)
                     exprs = exprs.cons(Compiler.NIL_EXPR);
 

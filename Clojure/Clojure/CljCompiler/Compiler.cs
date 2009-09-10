@@ -118,8 +118,6 @@ namespace clojure.lang
 
 
         internal static readonly Var IN_CATCH_FINALLY = Var.create(null);          //null or not
-        internal static readonly Var IN_TAIL_POSITION = Var.create(null);        //null or not
-
 
         internal static readonly Var VARS = Var.create();           //var->constid
         internal static readonly Var CONSTANTS = Var.create();      //vector<object>
@@ -255,7 +253,7 @@ namespace clojure.lang
             // TODO: Clean this up.
             form = RT.list(FN, PersistentVector.EMPTY, RT.list( DO, form));
 
-            Expr ast = GenerateAST(form);
+            Expr ast = GenerateAST(form,false);
             Expression formExpr = GenerateDlrExpression(context,ast);
             Expression finalExpr = Expression.Call(formExpr, formExpr.Type.GetMethod("invoke", System.Type.EmptyTypes));
 
@@ -301,12 +299,12 @@ namespace clojure.lang
         static LiteralExpr FALSE_EXPR = new BooleanExpr(false);
 
         // Equivalent to Java: Compiler.analyze()
-        internal static Expr GenerateAST(object form)
+        internal static Expr GenerateAST(object form, bool isRecurContext)
         {
-            return GenerateAST(form,null);
+            return GenerateAST(form, null, isRecurContext);
         }
 
-        internal static Expr GenerateAST(object form, string name)
+        internal static Expr GenerateAST(object form, string name, bool isRecurContext)
         {
             try
             {
@@ -332,7 +330,7 @@ namespace clojure.lang
                 else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
                     return OptionallyGenerateMetaInit(form, new EmptyExpr(form));
                 else if (form is ISeq)
-                    return AnalyzeSeq((ISeq)form, name);
+                    return AnalyzeSeq((ISeq)form, name,isRecurContext);
                 else if (form is IPersistentVector)
                     return VectorExpr.Parse((IPersistentVector)form);
                 else if (form is IPersistentMap)
@@ -410,7 +408,7 @@ namespace clojure.lang
         }
 
 
-        private static Expr AnalyzeSeq(ISeq form, string name)
+        private static Expr AnalyzeSeq(ISeq form, string name, bool isRecurContext)
         {
             int line = (int)LINE.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
@@ -423,7 +421,7 @@ namespace clojure.lang
 
                 object exp = MacroexpandSeq1(form);
                 if (exp != form)
-                    return GenerateAST(exp, name);
+                    return GenerateAST(exp, name,isRecurContext);
 
                 object op = RT.first(form);
 
@@ -433,13 +431,13 @@ namespace clojure.lang
                 IFn inline = IsInline(op, RT.count(RT.next(form)));
 
                 if (inline != null)
-                    return GenerateAST(inline.applyTo(RT.next(form)));
+                    return GenerateAST(inline.applyTo(RT.next(form)),isRecurContext);
 
                 IParser p;
                 if (op.Equals(FN))
-                    return FnExpr.Parse(form, name);
+                    return FnExpr.Parse(form, name,isRecurContext);
                 if ((p = GetSpecialFormParser(op)) != null)
-                    return p.Parse(form);
+                    return p.Parse(form,isRecurContext);
                 else
                     return InvokeExpr.Parse(form);
             }
@@ -553,7 +551,7 @@ namespace clojure.lang
                 Var v = (op is Var) ? (Var)op : LookupVar((Symbol)op, false);
                 if (v != null)
                 {
-                    if (v.Namespace != CurrentNamespace && !v.isPublic())
+                    if (v.Namespace != CurrentNamespace && !v.isPublic)
                         throw new InvalidOperationException("var: " + v + " is not public");
                     IFn ret = (IFn)RT.get(v.meta(), INLINE_KEY);
                     if (ret != null)

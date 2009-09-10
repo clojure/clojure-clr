@@ -103,7 +103,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm)
+            public Expr Parse(object frm, bool isRecurContext)
             {
                 int line = (int)Compiler.LINE.deref();
 
@@ -120,7 +120,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 IPersistentVector args = PersistentVector.EMPTY;
                 for (ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
-                    args = args.cons(Compiler.GenerateAST(s.first()));
+                    args = args.cons(Compiler.GenerateAST(s.first(),false));
 
                 return new NewExpr(t, args,line);
             }

@@ -60,10 +60,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expr Parse(ISeq form)
         {
-            Expr fexpr = Compiler.GenerateAST(form.first());
+            Expr fexpr = Compiler.GenerateAST(form.first(),false);
             IPersistentVector args = PersistentVector.EMPTY;
             for ( ISeq s = RT.seq(form.next()); s != null; s = s.next())
-                args = args.cons(Compiler.GenerateAST(s.first()));
+                args = args.cons(Compiler.GenerateAST(s.first(),false));
             return new InvokeExpr((string)Compiler.SOURCE.deref(),(int)Compiler.LINE.deref(),Compiler.TagOf(form),fexpr,args);
         }
 

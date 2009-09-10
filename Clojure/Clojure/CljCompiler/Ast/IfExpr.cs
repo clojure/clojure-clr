@@ -76,7 +76,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm)
+            public Expr Parse(object frm, bool isRecurContext)
             {
                 ISeq form = (ISeq)frm;
 
@@ -89,9 +89,9 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new Exception("Too few arguments to if");
 
 
-                Expr testExpr = Compiler.GenerateAST(RT.second(form));
-                Expr thenExpr = Compiler.GenerateAST(RT.third(form));
-                Expr elseExpr = form.count() == 4 ? Compiler.GenerateAST(RT.fourth(form)) : null;
+                Expr testExpr = Compiler.GenerateAST(RT.second(form),false);
+                Expr thenExpr = Compiler.GenerateAST(RT.third(form),isRecurContext);
+                Expr elseExpr = form.count() == 4 ? Compiler.GenerateAST(RT.fourth(form),isRecurContext) : null;
 
                 return new IfExpr((int)Compiler.LINE.deref(),testExpr, thenExpr, elseExpr);
             }

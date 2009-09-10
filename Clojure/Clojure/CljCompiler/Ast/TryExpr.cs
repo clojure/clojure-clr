@@ -93,14 +93,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm)
+            public Expr Parse(object frm, bool isRecurContext)
             {
                 ISeq form = (ISeq)frm;
-
-                // Java version has this:
-                //if (context != C.RETURN)
-                //    return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
-                // TODO: figure out why it matters.
 
                 // (try try-expr* catch-expr* finally-expr?)
                 // catch-expr: (catch class sym expr*)
@@ -148,7 +143,7 @@ namespace clojure.lang.CljCompiler.Ast
                                 LocalBinding lb = Compiler.RegisterLocal(sym,
                                     (Symbol)(RT.second(f) is Symbol ? RT.second(f) : null),
                                     null);
-                                Expr handler = (new BodyExpr.Parser()).Parse(RT.next(RT.next(RT.next(f))));
+                                Expr handler = (new BodyExpr.Parser()).Parse(RT.next(RT.next(RT.next(f))), isRecurContext);
                                 catches = catches.cons(new CatchClause(t, lb, handler)); ;
                             }
                             finally
@@ -164,7 +159,7 @@ namespace clojure.lang.CljCompiler.Ast
                             try
                             {
                                 Var.pushThreadBindings(RT.map(Compiler.IN_CATCH_FINALLY, RT.T));
-                                finallyExpr = (new BodyExpr.Parser()).Parse(RT.next(f));
+                                finallyExpr = (new BodyExpr.Parser()).Parse(RT.next(f),false);
                             }
                             finally
                             {
@@ -174,7 +169,7 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
-                Expr bodyExpr = (new BodyExpr.Parser()).Parse(RT.seq(body));
+                Expr bodyExpr = (new BodyExpr.Parser()).Parse(RT.seq(body),isRecurContext);
                 return new TryExpr(bodyExpr, catches, finallyExpr, retLocal, finallyLocal);
               }
         }

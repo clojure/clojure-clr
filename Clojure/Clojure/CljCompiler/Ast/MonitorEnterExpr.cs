@@ -37,9 +37,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form)
+            public Expr Parse(object form, bool isRecurContext)
             {
-                return new MonitorEnterExpr(Compiler.GenerateAST(RT.second(form)));
+                return new MonitorEnterExpr(Compiler.GenerateAST(RT.second(form),false));
             }
         }
 

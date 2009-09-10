@@ -25,7 +25,7 @@ namespace clojure.lang.CljCompiler.Ast
         
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm)
+            public Expr Parse(object frm, bool isRecurContext)
             {
                 ISeq form = (ISeq)frm;
 
@@ -50,7 +50,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Expr instance = null;
                 if (t == null)
-                    instance = Compiler.GenerateAST(RT.second(form));
+                    instance = Compiler.GenerateAST(RT.second(form),false);
 
                 //bool isFieldOrProperty = false;
 
@@ -126,7 +126,7 @@ namespace clojure.lang.CljCompiler.Ast
                 IPersistentVector args = PersistentVector.EMPTY;
 
                 for (ISeq s = RT.next(call); s != null; s = s.next())
-                    args = args.cons(Compiler.GenerateAST(s.first()));
+                    args = args.cons(Compiler.GenerateAST(s.first(),false));
 
                 return t != null
                     ? (MethodExpr)(new StaticMethodExpr(source, line, t, methodName, args))

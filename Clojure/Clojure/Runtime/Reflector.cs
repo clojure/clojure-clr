@@ -105,6 +105,9 @@ namespace clojure.lang
             if (prop != null)
                 return prop.GetValue(target, new object[0]);
 
+            FieldInfo[] fields = t.GetFields();
+            PropertyInfo[] props = t.GetProperties();
+
             throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldname, t));
         }
 
