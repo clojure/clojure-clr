@@ -275,16 +275,18 @@ namespace clojure.lang
             gen.Emit(OpCodes.Beq_S, elseLabel);
 
             // map entry found
-            int parmCount = m.GetParameters().Length;
+            ParameterInfo[] pinfos = m.GetParameters();
             gen.Emit(OpCodes.Castclass, typeof(IFn));
             gen.Emit(OpCodes.Ldarg_0);  // push implicit 'this' arg.
-            for (int i = 0; i < parmCount; i++)
+            for (int i = 0; i < pinfos.Length; i++)
             {
                 gen.Emit(OpCodes.Ldarg, i + 1);
                 if (m.GetParameters()[i].ParameterType.IsValueType)
-                    gen.Emit(OpCodes.Box,m.GetParameters()[i].ParameterType);
+                    gen.Emit(OpCodes.Box,pinfos[i].ParameterType);
             }
-            gen.Emit(OpCodes.Call, GetIFnInvokeMethodInfo(parmCount+1));
+
+            int parmCount = pinfos.Length;
+            gen.Emit(OpCodes.Call, GetIFnInvokeMethodInfo(parmCount + 1));
             if (m.ReturnType == typeof(void))
                 gen.Emit(OpCodes.Pop);
             else

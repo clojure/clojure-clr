@@ -103,12 +103,12 @@ namespace clojure.lang.CljCompiler.Ast
                 // pick up the extended version.
                 mi = Compiler.Methods_IFn_invoke[Compiler.MAX_POSITIONAL_ARITY + 1];
                 Expression[] leftoverArgs = new Expression[args.Length - Compiler.MAX_POSITIONAL_ARITY];
-                Array.ConstrainedCopy(args, Compiler.MAX_POSITIONAL_ARITY, leftoverArgs, 0, args.Length - Compiler.MAX_POSITIONAL_ARITY);
+                Array.Copy(args, Compiler.MAX_POSITIONAL_ARITY, leftoverArgs, 0, args.Length - Compiler.MAX_POSITIONAL_ARITY);
 
                 Expression restArg = Expression.NewArrayInit(typeof(object), leftoverArgs);
 
                 actualArgs = new Expression[Compiler.MAX_POSITIONAL_ARITY + 1];
-                Array.ConstrainedCopy(args, 0, actualArgs, 0, Compiler.MAX_POSITIONAL_ARITY);
+                Array.Copy(args, 0, actualArgs, 0, Compiler.MAX_POSITIONAL_ARITY);
                 actualArgs[Compiler.MAX_POSITIONAL_ARITY] = restArg;
             }
 
