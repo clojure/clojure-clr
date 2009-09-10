@@ -798,18 +798,18 @@ namespace clojure.lang
         /// The namespace this var is interned in.
         /// </summary>
         /// <returns></returns>
-        public Namespace ns()
+        public Namespace ns
         {
-            return Namespace;
+            get { return Namespace; }
         }
 
         /// <summary>
         /// Is this var public?
         /// </summary>
         /// <returns></returns>
-        public bool isPublic()
+        public bool isPublic
         {
-            return IsPublic;
+            get { return IsPublic; }
         }
 
         #endregion
