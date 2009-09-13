@@ -29,9 +29,26 @@ namespace clojure.lang
 
         static public PropertyInfo GetProperty(Type t, String name, bool getStatics)
         {
-            return getStatics
-                ? t.GetProperty(name, BindingFlags.Static | BindingFlags.Public)
-                : t.GetProperty(name);
+            BindingFlags flags = BindingFlags.Public;
+            if (getStatics)
+                flags |= BindingFlags.Static | BindingFlags.FlattenHierarchy;
+            else
+                flags |= BindingFlags.Instance;
+
+            List<PropertyInfo> pinfos = new List<PropertyInfo>(t.GetProperties(flags).Where(pi => pi.Name == name && pi.GetIndexParameters().Length == 0));
+
+            if (pinfos.Count == 0)
+                return null;
+
+            if (pinfos.Count == 1)
+                return pinfos[0];
+
+            // Look for the one declared on this type, if it exists
+            foreach (PropertyInfo pinfo in pinfos)
+                if (pinfo.DeclaringType == t)
+                    return pinfo;
+
+            return null;
         }
 
 
@@ -84,7 +101,7 @@ namespace clojure.lang
                 field.SetValue(target, val);
                 return val;
             }
-            PropertyInfo prop = t.GetProperty(fieldname, BindingFlags.Instance | BindingFlags.Public);
+            PropertyInfo prop = Reflector.GetProperty(t,fieldname,false);
             if (prop != null)
             {
                 prop.SetValue(target, val, new object[0]);
@@ -101,7 +118,7 @@ namespace clojure.lang
             if (field != null)
                 return field.GetValue(target);
 
-            PropertyInfo prop = t.GetProperty(fieldname, BindingFlags.Instance | BindingFlags.Public);
+            PropertyInfo prop = Reflector.GetProperty(t,fieldname,false);
             if (prop != null)
                 return prop.GetValue(target, new object[0]);
 
@@ -151,7 +168,7 @@ namespace clojure.lang
                 if (f != null)
                     return f.GetValue(target);
 
-                PropertyInfo p = target.GetType().GetProperty(methodName, BindingFlags.Instance | BindingFlags.Public);
+                PropertyInfo p = Reflector.GetProperty(target.GetType(),methodName, false);
                 if (p != null)
                     return p.GetValue(target, null);
             }

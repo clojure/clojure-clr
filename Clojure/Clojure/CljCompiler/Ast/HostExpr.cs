@@ -97,7 +97,7 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         if ((finfo = t.GetField(sym.Name, BindingFlags.Static | BindingFlags.Public)) != null)
                             return new StaticFieldExpr(line, t, fieldName, finfo);
-                        if ((pinfo = t.GetProperty(sym.Name, BindingFlags.Static | BindingFlags.Public)) != null)
+                        if ((pinfo = Reflector.GetProperty(t, sym.Name, true)) != null)
                             return new StaticPropertyExpr(line, t, fieldName, pinfo);
                         if ((minfo = Reflector.GetArityZeroMethod(t, fieldName, true)) != null)
                             return (MethodExpr)(new StaticMethodExpr(source, line, t, fieldName, PersistentVector.EMPTY));
@@ -107,7 +107,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Type instanceType = instance.ClrType;
                         if ((finfo = instanceType.GetField(sym.Name, BindingFlags.Instance | BindingFlags.Public)) != null)
                             return new InstanceFieldExpr(line, instance, fieldName, finfo);
-                        if ((pinfo = instanceType.GetProperty(sym.Name, BindingFlags.Instance | BindingFlags.Public)) != null)
+                        if ((pinfo = Reflector.GetProperty(instanceType,sym.Name,false)) != null)
                             return new InstancePropertyExpr(line, instance, fieldName, pinfo);
                         if ((minfo = Reflector.GetArityZeroMethod(instanceType, fieldName, false)) != null)
                             return new InstanceMethodExpr(source, line, instance, fieldName, PersistentVector.EMPTY);
