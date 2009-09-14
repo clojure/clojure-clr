@@ -53,12 +53,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="clojure\ants.clj" />
+    <None Include="clojure\samples\ants.clj" />
     <None Include="clojure\core.clj" />
     <None Include="clojure\core_print.clj" />
     <None Include="clojure\core_proxy.clj" />
     <None Include="clojure\genclass.clj" />
     <None Include="clojure\main.clj" />
+    <None Include="clojure\samples\celsius.clj" />
     <None Include="clojure\set.clj" />
     <None Include="clojure\dm-test.clj" />
     <None Include="clojure\stacktrace.clj" />

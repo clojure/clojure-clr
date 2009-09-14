@@ -99,6 +99,7 @@
     <Compile Include="CljCompiler\Ast\VarExpr.cs" />
     <Compile Include="CljCompiler\Ast\VectorExpr.cs" />
     <Compile Include="CljCompiler\Ast\StringExpr.cs" />
+    <Compile Include="CljCompiler\GenDelegate.cs" />
     <Compile Include="CljCompiler\GenProxy.cs" />
     <Compile Include="Lib\ArrayChunk.cs" />
     <Compile Include="Lib\ArrayHelper.cs" />
