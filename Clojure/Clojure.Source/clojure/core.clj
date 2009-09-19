@@ -2005,40 +2005,40 @@
   ([n coll]
    (dorun n coll)
    coll))
-; Need to figure out how to do this in CLR. Should be some kind of event handle
-;(defn await
-;  "Blocks the current thread (indefinitely!) until all actions
-;  dispatched thus far, from this thread or agent, to the agent(s) have
-;  occurred."
-;  [& agents]
-;  (io! "await in transaction"
-;    (when *agent*
-;      (throw (new Exception "Can't await in agent action")))
-;    (let [latch (new java.util.concurrent.CountDownLatch (count agents))
-;          count-down (fn [agent] (. latch (countDown)) agent)]
-;      (doseq [agent agents]
-;        (send agent count-down))
-;      (. latch (await)))))
-;
-;(defn await1 [#^clojure.lang.Agent a]
-;  (when (pos? (.getQueueCount a))
-;    (await a))
-;    a)
-;
-;(defn await-for
-;  "Blocks the current thread until all actions dispatched thus
-;  far (from this thread or agent) to the agents have occurred, or the
-;  timeout (in milliseconds) has elapsed. Returns nil if returning due
-;  to timeout, non-nil otherwise."
-;  [timeout-ms & agents]
-;    (io! "await-for in transaction"
-;     (when *agent*
-;       (throw (new Exception "Can't await in agent action")))
-;     (let [latch (new java.util.concurrent.CountDownLatch (count agents))
-;           count-down (fn [agent] (. latch (countDown)) agent)]
-;       (doseq [agent agents]
-;           (send agent count-down))
-;       (. latch (await  timeout-ms (. java.util.concurrent.TimeUnit MILLISECONDS))))))
+
+(defn await
+  "Blocks the current thread (indefinitely!) until all actions
+  dispatched thus far, from this thread or agent, to the agent(s) have
+  occurred."
+  [& agents]
+  (io! "await in transaction"
+    (when *agent*
+      (throw (new Exception "Can't await in agent action")))
+    (let [latch (new clojure.lang.CountDownLatch (count agents))  ;;; java.util.concurrent.CountDownLatch
+          count-down (fn [agent] (. latch (CountDown)) agent)]    ;;; countDown
+      (doseq [agent agents]
+        (send agent count-down))
+      (. latch (Await)))))                                        ;;; await
+
+(defn await1 [#^clojure.lang.Agent a]
+  (when (pos? (.getQueueCount a))
+    (await a))
+    a)
+
+(defn await-for
+  "Blocks the current thread until all actions dispatched thus
+  far (from this thread or agent) to the agents have occurred, or the
+  timeout (in milliseconds) has elapsed. Returns nil if returning due
+  to timeout, non-nil otherwise."
+  [timeout-ms & agents]
+    (io! "await-for in transaction"
+     (when *agent*
+       (throw (new Exception "Can't await in agent action")))
+     (let [latch (new clojure.lang.CountDownLatch (count agents))   ;;; java.util.concurrent.CountDownLatch
+           count-down (fn [agent] (. latch (CountDown)) agent)]     ;;; countDown
+       (doseq [agent agents]
+           (send agent count-down))
+       (. latch (Await timeout-ms)))))   ;;;(await  timeout-ms (. java.util.concurrent.TimeUnit MILLISECONDS))))))
 
 (defmacro dotimes
   "bindings => name n

@@ -59,6 +59,7 @@
     <None Include="clojure\core_proxy.clj" />
     <None Include="clojure\genclass.clj" />
     <None Include="clojure\main.clj" />
+    <None Include="clojure\samples\await-test.clj" />
     <None Include="clojure\samples\celsius.clj" />
     <None Include="clojure\set.clj" />
     <None Include="clojure\dm-test.clj" />

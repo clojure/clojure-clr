@@ -57,6 +57,15 @@ namespace clojure.lang
             }
         }
 
+        /// <summary>
+        /// Number of items in the queue.  For core.clj compatibility.
+        /// </summary>
+        /// <returns></returns>
+        public int getQueueCount()
+        {
+            return QueueCount;
+        }
+
 
         /// <summary>
         /// Agent errors, a sequence of Exceptions.
