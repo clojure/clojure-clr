@@ -3205,7 +3205,7 @@
       (if nspace
         `(print-namespace-doc ~nspace)
         `(print-doc (var ~name))))))
-;;; Not tested yet.  
+ 
  (defn tree-seq
   "Returns a lazy sequence of the nodes in a tree, via a depth-first walk.
    branch? must be a fn of one arg that returns true if passed a node
@@ -3220,15 +3220,15 @@
                   (when (branch? node)
                     (mapcat walk (children node))))))]
      (walk root)))
-;;; This will be harder in the CLR
-;(defn file-seq
-;  "A tree seq on java.io.Files"
-;  [dir]
-;    (tree-seq
-;     (fn [#^java.io.File f] (. f (isDirectory)))
-;     (fn [#^java.io.File d] (seq (. d (listFiles))))
-;     dir))
-;;; not tested
+
+(defn file-seq
+  "A tree seq on java.io.Files"
+  [dir]
+    (tree-seq
+       (fn [x] (instance? System.IO.DirectoryInfo x))                       ;;; (fn [#^java.io.File f] (. f (isDirectory)))
+       (fn [#^System.IO.DirectoryInfo d] (seq (.GetFileSystemInfos d)))     ;;; (fn [#^java.io.File d] (seq (. d (listFiles))))
+     dir))
+
 (defn xml-seq
   "A tree seq on the xml elements as per xml/parse"
   [root]
