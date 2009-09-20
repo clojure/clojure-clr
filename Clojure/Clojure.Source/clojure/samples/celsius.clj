@@ -10,6 +10,9 @@
 ;;;  A Celsius/Fahrenheit converter
 ;;;  A WinForms equivalent to the Swing app shown here:  http://clojure.org/jvm_hosted
 
+; If you are running on .Net 4, you will have to change this.
+(System.Reflection.Assembly/Load "System.Windows.Forms,Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089") 
+
 (import 
   '(System.Drawing Size)
   '(System.Windows.Forms 
