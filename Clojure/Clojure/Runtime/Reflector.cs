@@ -17,14 +17,19 @@ using clojure.lang;
 
 namespace clojure.lang
 {
-    public sealed class Reflector
+    public static class Reflector
     {
+        #region Field/property lookup
 
         static public FieldInfo GetField(Type t, String name, bool getStatics)
         {
-            return getStatics
-                ? t.GetField(name,BindingFlags.Static|BindingFlags.Public)
-                : t.GetField(name);
+            BindingFlags flags = BindingFlags.Public;
+            if (getStatics)
+                flags |= BindingFlags.Static | BindingFlags.FlattenHierarchy;
+            else
+                flags |= BindingFlags.Instance;
+
+            return t.GetField(name,flags);
         }
 
         static public PropertyInfo GetProperty(Type t, String name, bool getStatics)
@@ -44,6 +49,7 @@ namespace clojure.lang
                 return pinfos[0];
 
             // Look for the one declared on this type, if it exists
+            // This handles the situation where we have overloads.
             foreach (PropertyInfo pinfo in pinfos)
                 if (pinfo.DeclaringType == t)
                     return pinfo;
@@ -51,57 +57,20 @@ namespace clojure.lang
             return null;
         }
 
+        #endregion
 
-
-        public static object CallStaticMethod(string methodName, Type t, params object[] args)
-        {
-
-            if (args.Length == 0)
-            {
-                FieldInfo f = t.GetField(methodName, BindingFlags.Static | BindingFlags.Public);
-                if (f != null)
-                    return f.GetValue(t);
-
-                PropertyInfo p = t.GetProperty(methodName, BindingFlags.Static | BindingFlags.Public);
-                if (p != null)
-                    return p.GetValue(t, null);
-            }
-
-            BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod | BindingFlags.GetField | BindingFlags.GetProperty;
-
-            return t.InvokeMember(methodName, flags, Type.DefaultBinder, null, args);
-
-
-            //IEnumerable<MethodInfo> einfo = t.GetMethods(flags).Where(mi => mi.Name == methodName && mi.GetParameters().Length == args.Length);
-            //List<MethodInfo> infos = new List<MethodInfo>(einfo);
-
-            //return InvokeMatchingMethod(methodName, infos, t, null, args);
-        }
-
-        public static Object InvokeStaticMethod(String typeName, String methodName, Object[] args)
-        {
-            Type t = RT.classForName(typeName);
-            return InvokeStaticMethod(t, methodName, args);
-        }
-
-        public static Object InvokeStaticMethod(Type t, String methodName, Object[] args)
-        {
-            if (methodName.Equals("new"))
-                return InvokeConstructor(t, args);
-            List<MethodInfo> methods = GetMethods(t, args.Length, methodName, true);
-            return InvokeMatchingMethod(methodName,methods, t, null, args);
-        }
+        #region Field/property access
 
         public static object SetInstanceFieldOrProperty(object target, string fieldname, object val)
         {
             Type t = target.GetType();
-            FieldInfo field = t.GetField(fieldname, BindingFlags.Instance | BindingFlags.Public);
+            FieldInfo field = GetField(t, fieldname, false);
             if (field != null)
             {
                 field.SetValue(target, val);
                 return val;
             }
-            PropertyInfo prop = Reflector.GetProperty(t,fieldname,false);
+            PropertyInfo prop = GetProperty(t, fieldname, false);
             if (prop != null)
             {
                 prop.SetValue(target, val, new object[0]);
@@ -113,16 +82,16 @@ namespace clojure.lang
         public static object GetInstanceFieldOrProperty(object target, string fieldname)
         {
             Type t = target.GetType();
-            
-            FieldInfo field = t.GetField(fieldname, BindingFlags.Instance | BindingFlags.Public);
+
+            FieldInfo field = GetField(t, fieldname, false);
             if (field != null)
                 return field.GetValue(target);
 
-            PropertyInfo prop = Reflector.GetProperty(t,fieldname,false);
+            PropertyInfo prop = GetProperty(t, fieldname, false);
             if (prop != null)
                 return prop.GetValue(target, new object[0]);
 
-            MethodInfo method = GetArityZeroMethod(t,fieldname,false);
+            MethodInfo method = GetArityZeroMethod(t, fieldname, false);
 
             if (method != null)
                 return method.Invoke(target, new object[0]);
@@ -130,11 +99,15 @@ namespace clojure.lang
             throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldname, t));
         }
 
-        public static List<MethodInfo> GetMethods(Type t, int arity, string name, bool getStatics)
+        #endregion
+
+        #region Method lookup
+
+        static List<MethodInfo> GetMethods(Type t, string name, int arity, bool getStatics)
         {
-            BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
+            BindingFlags flags = BindingFlags.Public | BindingFlags.InvokeMethod;
             if (getStatics)
-                flags |= BindingFlags.Static;
+                flags |= BindingFlags.Static | BindingFlags.FlattenHierarchy;
 
             IEnumerable<MethodInfo> einfo = t.GetMethods(flags).Where(mi => mi.Name == name && mi.GetParameters().Length == arity);
             List<MethodInfo> infos = new List<MethodInfo>(einfo);
@@ -160,37 +133,103 @@ namespace clojure.lang
                 return null;
         }
 
+        #endregion
+
+        #region Method calling
+
         public static object CallInstanceMethod(string methodName, object target, params object[] args)
         {
             if (args.Length == 0)
             {
-                FieldInfo f = target.GetType().GetField(methodName, BindingFlags.Instance | BindingFlags.Public);
+                Type t = target.GetType();
+
+                FieldInfo f = GetField(t,methodName, false);
                 if (f != null)
                     return f.GetValue(target);
 
-                PropertyInfo p = Reflector.GetProperty(target.GetType(),methodName, false);
+                PropertyInfo p = GetProperty(t,methodName, false);
                 if (p != null)
                     return p.GetValue(target, null);
             }
-
             
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
 
             return target.GetType().InvokeMember(methodName, flags, Type.DefaultBinder, target, args);
-
-            //IEnumerable<MethodInfo> einfo1 = target.GetType().GetMethods(flags);
-            //List<MethodInfo> infos1 = new List<MethodInfo>(einfo1);
-
-
-            //IEnumerable<MethodInfo> einfo = target.GetType().GetMethods(flags).Where(mi => mi.Name == methodName && mi.GetParameters().Length == args.Length);
-            //List<MethodInfo> infos = new List<MethodInfo>(einfo);
-
-
-
-            //return InvokeMatchingMethod(methodName, infos, null, target, args);
         }
 
+        public static object CallStaticMethod(string methodName, Type t, params object[] args)
+        {
+            if (args.Length == 0)
+            {
+                FieldInfo f = GetField(t,methodName, true);
+                if (f != null)
+                    return f.GetValue(t);
 
+                PropertyInfo p = GetProperty(t, methodName, true);
+                if (p != null)
+                    return p.GetValue(t, null);
+            }
+
+            BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod | BindingFlags.GetField | BindingFlags.GetProperty;
+
+            return t.InvokeMember(methodName, flags, Type.DefaultBinder, null, args);
+        }
+
+        public static object InvokeConstructor(Type t, object[] args)
+        {
+            IEnumerable<ConstructorInfo> einfos = t.GetConstructors().Where(ci => ci.GetParameters().Length == args.Length);
+            List<ConstructorInfo> infos = new List<ConstructorInfo>(einfos);
+
+            if (infos.Count == 0)
+                throw new ArgumentException("NO matching constructor found for " + t.Name);
+            else if (infos.Count == 1)
+            {
+                ConstructorInfo info = infos[0];
+                return info.Invoke(BoxArgs(info.GetParameters(), args));
+            }
+            else
+            {
+                ConstructorInfo info = null;
+
+                // More than one with correct arity.  Find best match.
+                ConstructorInfo found = null;
+                foreach (ConstructorInfo ci in infos)
+                {
+                    ParameterInfo[] pinfos = ci.GetParameters();
+                    if (IsCongruent(pinfos, args))
+                    {
+                        if (found == null || Subsumes(pinfos, found.GetParameters()))
+                            found = ci;
+                    }
+                }
+                info = found;
+
+
+                if (info == null)
+                    throw new InvalidOperationException(string.Format("Cannot find c-tor for type: {0} with the correct argument type", Util.NameForType(t)));
+
+                return info.Invoke(BoxArgs(info.GetParameters(), args));
+            }
+        }
+
+        #endregion
+
+        #region LispReader read-eval support
+
+        // At the moment, only used by the LispReader
+        public static Object InvokeStaticMethod(String typeName, String methodName, Object[] args)
+        {
+            Type t = RT.classForName(typeName);
+            return InvokeStaticMethod(t, methodName, args);
+        }
+
+        static Object InvokeStaticMethod(Type t, String methodName, Object[] args)
+        {
+            if (methodName.Equals("new"))
+                return InvokeConstructor(t, args);
+            List<MethodInfo> methods = GetMethods(t, methodName, args.Length, true);
+            return InvokeMatchingMethod(methodName, methods, t, null, args);
+        }
         private static object InvokeMatchingMethod(string methodName, List<MethodInfo> infos, Type t, object target, object[] args)
         {
 
@@ -233,43 +272,9 @@ namespace clojure.lang
                 return info.Invoke(target, boxedArgs);
         }
 
-        public static object InvokeConstructor(Type t, object[] args)
-        {
-            IEnumerable<ConstructorInfo> einfos = t.GetConstructors().Where(ci => ci.GetParameters().Length == args.Length);
-            List<ConstructorInfo> infos = new List<ConstructorInfo>(einfos);
+        #endregion
 
-            if (infos.Count == 0)
-                throw new ArgumentException("NO matching constructor found for " + t.Name);
-            else if (infos.Count == 1)
-            {
-                ConstructorInfo info = infos[0];
-                return info.Invoke(BoxArgs(info.GetParameters(), args));
-            }
-            else
-            {
-                ConstructorInfo info = null;
-
-                // More than one with correct arity.  Find best match.
-                ConstructorInfo found = null;
-                foreach (ConstructorInfo ci in infos)
-                {
-                    ParameterInfo[] pinfos = ci.GetParameters();
-                    if (IsCongruent(pinfos, args))
-                    {
-                        if (found == null || Subsumes(pinfos, found.GetParameters()))
-                            found = ci;
-                    }
-                }
-                info = found;
-
-
-                if (info == null)
-                    throw new InvalidOperationException(string.Format("Cannot find c-tor for type: {0} with the correct argument type", Util.NameForType(t)));
-
-                return info.Invoke(BoxArgs(info.GetParameters(), args));
-            }
-        }
-
+        #region  Method matching
 
         internal static bool Subsumes(ParameterInfo[] c1, ParameterInfo[] c2)
         {
@@ -305,21 +310,6 @@ namespace clojure.lang
             return ret;
         }
 
-        // I can't remember what problem we are trying to solve.
-        // Here is the code that solved the first problem.
-        // However, it was messing up an Keyword -> IFn conversion, which should be possible.
-
-        //private static object BoxArg(ParameterInfo pinfo, object arg)
-        //{
-        //    Type paramType = pinfo.ParameterType;
-
-        //    if (!paramType.IsPrimitive)
-        //        return Convert.ChangeType(arg, pinfo.ParameterType);
-
-        //    return Convert.ChangeType(arg, pinfo.ParameterType);  // don't know yet what we need here
-        //}
-
-        // Here is an improved version, until we figure out the problem.
 
         private static object BoxArg(ParameterInfo pinfo, object arg)
         {
@@ -331,10 +321,6 @@ namespace clojure.lang
 
             return Convert.ChangeType(arg, pinfo.ParameterType);  // don't know yet what we need here
         }
-
-
-
-
 
         private static bool IsCongruent(ParameterInfo[] pinfos, object[] args)
         {
@@ -364,7 +350,6 @@ namespace clojure.lang
         }
 
 
-        // Java version has this in Reflector, but that is in my SimpleREPL. DOn't want to embed calls there.
         public static Object prepRet(Object x)
         {
             //	if(c == boolean.class)
@@ -373,6 +358,8 @@ namespace clojure.lang
                 return ((Boolean)x) ? RT.T : RT.F;
             return x;
         }
+
+        #endregion
 
         // Stolen from DLR TypeUtils
         internal static bool AreAssignable(Type dest, Type src)
