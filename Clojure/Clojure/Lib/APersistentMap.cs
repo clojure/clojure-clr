@@ -400,7 +400,12 @@ namespace clojure.lang
 
             public override object first()
             {
-                return ((IMapEntry)_seq.first()).key();
+                object entry = _seq.first();
+                if (entry is IMapEntry)
+                    return ((IMapEntry)entry).key();
+                else if (entry is DictionaryEntry)
+                    return ((DictionaryEntry)entry).Key;
+                throw new InvalidCastException("Cannot convert hashtable entry to IMapEntry or DictionaryEntry");
             }
 
             public override ISeq next()
@@ -457,7 +462,12 @@ namespace clojure.lang
 
             public override object first()
             {
-                return ((IMapEntry)_seq.first()).val();
+                object entry = _seq.first();
+                if (entry is IMapEntry)
+                    return ((IMapEntry)entry).val();
+                else if (entry is DictionaryEntry)
+                    return ((DictionaryEntry)entry).Value;
+                throw new InvalidCastException("Cannot convert hashtable entry to IMapEntry or DictionaryEntry");
             }
 
             public override ISeq next()
