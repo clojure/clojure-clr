@@ -8,4 +8,8 @@
 
 (in-ns 'clojure.core)
 
-;;; Not ready for this yet.
+ ; Totally bogus genclass definition to make sure lib loading with a genclass designation doesn't crash and burn.
+ 
+ (in-ns 'clojure.core)
+ 
+ (defmacro gen-class [& options] true)
