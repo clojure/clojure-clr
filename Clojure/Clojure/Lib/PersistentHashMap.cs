@@ -391,7 +391,7 @@ namespace clojure.lang
                 {
                     if (_nullValue != val)
                         _nullValue = val;
-                    if (_hasNull)
+                    if (!_hasNull)
                     {
                         _count++;
                         _hasNull = true;
