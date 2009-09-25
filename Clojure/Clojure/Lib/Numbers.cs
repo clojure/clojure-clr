@@ -312,7 +312,7 @@ namespace clojure.lang
 
             long lx;
             if (TryAsLong(x, out lx))
-                return LONG_OPS.Do(ix, code);
+                return LONG_OPS.Do(lx, code);
 
             if ( x is double )
                 return DOUBLE_OPS.Do((double)x, code);
@@ -345,7 +345,7 @@ namespace clojure.lang
 
             long lx;
             if (TryAsLong(x, out lx))
-                return LONG_OPS.Do(ix, code);
+                return LONG_OPS.Do(lx, code);
 
             if ( x is double )
                 return DOUBLE_OPS.Do((double)x, code);
@@ -883,8 +883,6 @@ namespace clojure.lang
 
             public override object add(long x, long y)
             {
-                long lx = Util.ConvertToLong(x);     // convert fix
-                long ly = Util.ConvertToLong(y);     // convert fix
                 long ret = x + y;
                 if ((ret ^ x) < 0 && (ret ^ y) < 0)
                     return BIGINTEGER_OPS.add(x, y);
