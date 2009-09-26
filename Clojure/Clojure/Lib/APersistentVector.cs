@@ -449,10 +449,15 @@ namespace clojure.lang
             if ( array.Rank > 1 )
                 throw new ArgumentException("array must be 1-dimensional");
 
-            if (index >= array.Length || array.Length - index < count())
+            int cnt = count();
+
+            if (cnt == 0)
+                return;
+
+            if (index >= array.Length || array.Length - index < cnt)
                 throw new ArgumentException();
 
-            for (int i = 0; i < count(); i++)
+            for (int i = 0; i < cnt; i++)
                 array.SetValue(nth(i), i+index);
         }
 
