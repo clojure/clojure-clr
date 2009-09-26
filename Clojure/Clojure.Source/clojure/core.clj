@@ -2106,12 +2106,12 @@
   "Returns the :type metadata of x, or its Class if none"
   [x]
   (or (:type (meta x)) (class x)))  
-;;; Don't know what to do with this.  No equivalent to Number in CLR.
-;(defn num
-;  "Coerce to Number"
-;  {:tag Number
-;   :inline (fn  [x] `(. clojure.lang.Numbers (num ~x)))}
-;  [x] (. clojure.lang.Numbers (num x)))
+
+(defn num
+  "Coerce to Number"
+  {:tag Object                                           ;;; Number
+  }                               ;;;  :inline (fn  [x] `(. clojure.lang.Numbers (num ~x)))}
+  [x] x)                          ;;;  (. clojure.lang.Numbers (num x)))
 
   (defn long
   "Coerce to long"

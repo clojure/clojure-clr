@@ -49,7 +49,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return _v.GetType(); }
+            get { Type t = _v.GetType(); return t.IsPrimitive ? typeof(object) : t; }
         }
 
         #endregion
