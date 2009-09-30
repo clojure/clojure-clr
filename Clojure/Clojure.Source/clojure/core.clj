@@ -2445,34 +2445,34 @@
 (def-aset
   #^{:doc "Sets the value at the index/indices. Works on arrays of char. Returns val."}
   aset-char setChar char)
-;;; Another  ragged versus true multidimensional array problem
-;(defn make-array
-;  "Creates and returns an array of instances of the specified class of
-;  the specified dimension(s).  Note that a class object is required.
-;  Class objects can be obtained by using their imported or
-;  fully-qualified name.  Class objects for the primitive types can be
-;  obtained using, e.g., Integer/TYPE."
-;  ([#^Class type len]
-;   (. Array (newInstance type (int len))))
-;  ([#^Class type dim & more-dims]
-;   (let [dims (cons dim more-dims)
-;         #^"[I" dimarray (make-array (. Integer TYPE)  (count dims))]
-;     (dotimes [i (alength dimarray)]
-;       (aset-int dimarray i (nth dims i)))
-;     (. Array (newInstance type dimarray)))))
-;
-;(defn to-array-2d
-;  "Returns a (potentially-ragged) 2-dimensional array of Objects
-;  containing the contents of coll, which can be any Collection of any
-;  Collection."
-;  {:tag "Object[][]" }   ;;; "[[Ljava.lang.Object;"
-;  [#^java.util.Collection coll]
-;    (let [ret (make-array (. Class (forName "[Ljava.lang.Object;")) (. coll (size)))]
-;      (loop [i 0 xs (seq coll)]
-;        (when xs
-;          (aset ret i (to-array (first xs)))
-;          (recur (inc i) (next xs))))
-;      ret))
+;;; Another  ragged versus true multidimensional array problem -- we will go with ragged here so as not to break aget/aset
+(defn make-array
+  "Creates and returns an array of instances of the specified class of
+  the specified dimension(s).  Note that a class object is required.
+  Class objects can be obtained by using their imported or
+  fully-qualified name.  Class objects for the primitive types can be
+  obtained using, e.g., Integer/TYPE."
+  ([#^Type type len]                                                     ;;; #^Class
+   (. Array (CreateInstance type (int len))))                            ;;; newInstance
+  ([#^Type type dim & more-dims]                                        ;;; #^Class
+   (let [ a  (. Array (CreateInstance Array (int dim)))]       ;;;    [dims (cons dim more-dims)
+                                                               ;;;     #^"[I" dimarray (make-array (. Integer TYPE)  (count dims))]
+      (dotimes [i dim]                                         ;;;       (dotimes [i (alength dimarray)]
+          (aset a i (apply make-array type more-dims)))        ;;;   (aset-int dimarray i (nth dims i)))
+      a)))                                                     ;;; (. Array (newInstance type dimarray)))))
+
+(defn to-array-2d
+  "Returns a (potentially-ragged) 2-dimensional array of Objects
+  containing the contents of coll, which can be any Collection of any
+  Collection."
+  {:tag "Object[][]" }                                                                 ;;; "[[Ljava.lang.Object;"
+  [#^System.Collections.ICollection coll]                                              ;;; #^java.util.Collection
+    (let [ret  (make-array Object (. coll (Count)))]      ;;; NEED BETTER TYPING HERE (make-array (. Class (forName "[Ljava.lang.Object;")) (. coll (size)))]
+      (loop [i 0 xs (seq coll)]
+        (when xs
+          (aset ret i (to-array (first xs)))
+          (recur (inc i) (next xs))))
+      ret))
 
 (defn macroexpand-1
   "If form represents a macro form, returns its expansion,
