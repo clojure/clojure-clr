@@ -541,93 +541,105 @@ namespace clojure.lang.CljCompiler.Ast
             bool partial = true;
             Expression ret;
 
-        if (value is String) 
-            ret = Expression.Constant((String)value);
-        else if (Util.IsPrimitive(value.GetType()) )  // or just IsNumeric?
-            ret =  Expression.Constant(value); 
-        else if ( value is Type )
-            ret =  Expression.Call(
-                null,
-                Compiler.Method_RT_classForName,
-                Expression.Constant(((Type)value).FullName));
-        else if (value is Symbol) {
-            Symbol sym = (Symbol) value;
-            ret =  Expression.Call(
-                null,
-                Compiler.Method_Symbol_create2,
-                Expression.Convert(Expression.Constant(sym.Namespace),typeof(string)),  // can be null
-                Expression.Constant(sym.Name));
-        }
-        else if (value is Keyword) 
-            ret =  Expression.Call(
-                null,
-                Compiler.Method_Keyword_intern,
-                GenerateValue(((Keyword)value).Symbol));
-        else if (value is Var) {
-            Var var = (Var) value;
-            ret =  Expression.Call(
-                null,
-                Compiler.Method_RT_var2,
-                Expression.Constant(var.Namespace.Name.ToString()),
-                Expression.Constant(var.Symbol.Name.ToString()));
- 
-        } 
-        else if (value is IPersistentMap) {
-            IPersistentMap map = (IPersistentMap)value;
-            List<object> entries = new List<object>(map.count()*2);
-            foreach ( IMapEntry entry in map ) {
-                entries.Add(entry.key());
-                entries.Add(entry.val());
-            }
-            Expression expr = GenerateListAsObjectArray(entries);
-            ret =  Expression.Call(
-                null,
-                Compiler.Method_RT_map,
-                expr);
-        }
-        else if (value is IPersistentVector) {
-            Expression expr = GenerateListAsObjectArray(value);
-            ret =  Expression.Call(
-                null,
-                Compiler.Method_RT_vector,
-                expr);
-        }
-        else if (value is ISeq || value is IPersistentList) {
-            Expression expr = GenerateListAsObjectArray(value);
-            ret =  Expression.Call(
-                null,
-                Compiler.Method_PersistentList_create,
-                expr);        
-        } 
-        else {
-            string cs = null;
-            try
-            {
-                cs = RT.printString(value);
-            }
-            catch (Exception)
-            {
-                throw new Exception(String.Format("Can't embed object in code, maybe print-dup not defined: {0}", value));
-            }
-            if (cs.Length == 0)
-                throw new Exception(String.Format("Can't embed unreadable object in code: " + value));
-            if (cs.StartsWith("#<"))
-                throw new Exception(String.Format("Can't embed unreadable object in code: " + cs));
-            
-            ret = Expression.Call(Compiler.Method_RT_readString, Expression.Constant(cs));
-            partial = false;
-        }
+            if (value == null)
+                ret = Expression.Constant(null);
 
-        if (partial) {
-            if (value is Obj && RT.count(((Obj)value).meta()) > 0) {
-                Expression objExpr = Expression.Convert(ret,typeof(Obj));
-                Expression metaExpr = Expression.Convert(GenerateValue(((Obj)value).meta()),typeof(IPersistentMap));
+            else if (value is String)
+                ret = Expression.Constant((String)value);
+            else if (Util.IsPrimitive(value.GetType()))  // or just IsNumeric?
+                ret = Expression.Constant(value);
+            else if (value is Type)
                 ret = Expression.Call(
-                    objExpr,
-                    Compiler.Method_IObj_withMeta,
-                    metaExpr);
+                    null,
+                    Compiler.Method_RT_classForName,
+                    Expression.Constant(((Type)value).FullName));
+            else if (value is Symbol)
+            {
+                Symbol sym = (Symbol)value;
+                ret = Expression.Call(
+                    null,
+                    Compiler.Method_Symbol_create2,
+                    Expression.Convert(Expression.Constant(sym.Namespace), typeof(string)),  // can be null
+                    Expression.Constant(sym.Name));
             }
-        }
+            else if (value is Keyword)
+                ret = Expression.Call(
+                    null,
+                    Compiler.Method_Keyword_intern,
+                    GenerateValue(((Keyword)value).Symbol));
+            else if (value is Var)
+            {
+                Var var = (Var)value;
+                ret = Expression.Call(
+                    null,
+                    Compiler.Method_RT_var2,
+                    Expression.Constant(var.Namespace.Name.ToString()),
+                    Expression.Constant(var.Symbol.Name.ToString()));
+
+            }
+            else if (value is IPersistentMap)
+            {
+                IPersistentMap map = (IPersistentMap)value;
+                List<object> entries = new List<object>(map.count() * 2);
+                foreach (IMapEntry entry in map)
+                {
+                    entries.Add(entry.key());
+                    entries.Add(entry.val());
+                }
+                Expression expr = GenerateListAsObjectArray(entries);
+                ret = Expression.Call(
+                    null,
+                    Compiler.Method_RT_map,
+                    expr);
+            }
+            else if (value is IPersistentVector)
+            {
+                Expression expr = GenerateListAsObjectArray(value);
+                ret = Expression.Call(
+                    null,
+                    Compiler.Method_RT_vector,
+                    expr);
+            }
+            else if (value is ISeq || value is IPersistentList)
+            {
+                Expression expr = GenerateListAsObjectArray(value);
+                ret = Expression.Call(
+                    null,
+                    Compiler.Method_PersistentList_create,
+                    expr);
+            }
+            else
+            {
+                string cs = null;
+                try
+                {
+                    cs = RT.printString(value);
+                }
+                catch (Exception)
+                {
+                    throw new Exception(String.Format("Can't embed object in code, maybe print-dup not defined: {0}", value));
+                }
+                if (cs.Length == 0)
+                    throw new Exception(String.Format("Can't embed unreadable object in code: " + value));
+                if (cs.StartsWith("#<"))
+                    throw new Exception(String.Format("Can't embed unreadable object in code: " + cs));
+
+                ret = Expression.Call(Compiler.Method_RT_readString, Expression.Constant(cs));
+                partial = false;
+            }
+
+            if (partial)
+            {
+                if (value is Obj && RT.count(((Obj)value).meta()) > 0)
+                {
+                    Expression objExpr = Expression.Convert(ret, typeof(Obj));
+                    Expression metaExpr = Expression.Convert(GenerateValue(((Obj)value).meta()), typeof(IPersistentMap));
+                    ret = Expression.Call(
+                        objExpr,
+                        Compiler.Method_IObj_withMeta,
+                        metaExpr);
+                }
+            }
             return ret;
         }
         

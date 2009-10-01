@@ -388,7 +388,9 @@ namespace clojure.lang
 
         public static bool IsPrimitive(Type t)
         {
-            return t != null && t.IsPrimitive && t != typeof(void);
+            //return t != null && t.IsPrimitive && t != typeof(void);
+            // STRUCT TEST
+            return t != null && t.IsValueType && t != typeof(void);
         }
 
 
