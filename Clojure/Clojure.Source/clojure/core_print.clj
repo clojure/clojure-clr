@@ -242,11 +242,16 @@
 (defmethod print-dup Int32  [o w] (print-method o w))               ;;; java.lang.Integer
 (defmethod print-dup Double [o w] (print-method o w))                ;;; java.lang.Double
 (defmethod print-dup clojure.lang.Ratio [o w] (print-method o w))
-(defmethod print-dup java.math.BigDecimal [o w] (print-method o w))
+(defmethod print-dup java.math.BigDecimal [o w] (print-method o w))  (defmethod print-dup clojure.lang.BigInteger [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentHashMap [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentHashSet [o w] (print-method o w)) 
 (defmethod print-dup clojure.lang.PersistentVector [o w] (print-method o w))
 (defmethod print-dup clojure.lang.LazilyPersistentVector [o w] (print-method o w))
+
+;;; ADDED LINES
+(defmethod print-method clojure.lang.Ratio [o  #^System.IO.TextWriter w]   (.Write w (str o)))
+
+
 
 (def primitives-classnames    ;; not clear what the equiv should be
   {Single  "Single"   ;;{Float/TYPE "Float/TYPE"
@@ -278,6 +283,9 @@
 (defmethod print-method java.math.BigDecimal [b, #^System.IO.TextWriter w]
   (.Write w (str b))
   (.Write w "M"))
+  ;;; ADDED LINES
+  (defmethod print-method clojure.lang.BigInteger [b, #^System.IO.TextWriter w]
+  (.Write w (str b)))
 
 (defmethod print-method System.Text.RegularExpressions.Regex [p #^System.IO.TextWriter w]         ;;; java.util.regex.Pattern =>
   (.Write w "#\"")
