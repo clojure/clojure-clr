@@ -765,6 +765,7 @@ namespace clojure.lang
                 {
                     switch (sym.Name)
                     {
+                        case "objects": t = typeof(object[]); break;
                         case "ints": t = typeof(int[]); break;
                         case "longs": t = typeof(long[]); break;
                         case "floats": t = typeof(float[]); break;
@@ -781,17 +782,18 @@ namespace clojure.lang
             {
                 // TODO: Find a general solution to this problem.
                 string strTag = (string)tag;
-                switch (strTag)
-                {
-                    case "Object[]":
-                    case "object[]":
-                        t = typeof(object[]);
-                        break;
-                    case "Object[][]":
-                    case "object[][]":
-                        t = typeof(object[][]);
-                        break;
-                }
+                //switch (strTag)
+                //{
+                //    case "Object[]":
+                //    case "object[]":
+                //        t = typeof(object[]);
+                //        break;
+                //    case "Object[][]":
+                //    case "object[][]":
+                //        t = typeof(object[][]);
+                //        break;
+                //}
+                t = Type.GetType(strTag);
             }
                     
             if (t != null)

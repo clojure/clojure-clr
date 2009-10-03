@@ -239,7 +239,7 @@
 (defn to-array
   "Returns an array of Objects containing the contents of coll, which
   can be any Collection.  Maps to java.util.Collection.toArray()."
-  {:tag "Object[]" }                                                  ;;;{:tag "[Ljava.lang.Object;"}  
+  {:tag "System.Object[]" }                                                  ;;;{:tag "[Ljava.lang.Object;"}  
   [coll] (. clojure.lang.RT (toArray coll)))
  
 (defn vector
@@ -2465,7 +2465,7 @@
   "Returns a (potentially-ragged) 2-dimensional array of Objects
   containing the contents of coll, which can be any Collection of any
   Collection."
-  {:tag "Object[][]" }                                                                 ;;; "[[Ljava.lang.Object;"
+  {:tag "System.Object[][]" }                                                                 ;;; "[[Ljava.lang.Object;"
   [#^System.Collections.ICollection coll]                                              ;;; #^java.util.Collection
     (let [ret  (make-array Object (. coll (Count)))]      ;;; NEED BETTER TYPING HERE (make-array (. Class (forName "[Ljava.lang.Object;")) (. coll (size)))]
       (loop [i 0 xs (seq coll)]
