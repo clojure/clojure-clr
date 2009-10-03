@@ -89,16 +89,10 @@ namespace clojure.lang
 
         #region IPersistentCollection members
 
-        //  The Java version does not define this.
-        //  Defaults to ASeq's iteration method.
-        //  Seems wasteful.
         /// <summary>
         /// Gets the number of items in the collection.
         /// </summary>
         /// <returns>The number of items in the collection.</returns>
-        /// <remarks>The Java version does not define this.
-        /// Defaults to <see cref="ASeq">ASeq</see>'s iteration method.
-        /// Seems wasteful</remarks>
          public override int count()
         {
             return _i < _s.Length ? _s.Length - _i : 0;
