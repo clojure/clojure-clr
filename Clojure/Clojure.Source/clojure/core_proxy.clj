@@ -43,10 +43,13 @@
 (defn proxy-name
  {:tag String} 
  [#^Type super interfaces]                         ;;; Class
-  (apply str "clojure.proxy."
-         (.FullName super)                          ;;; .getName
-         (interleave (repeat "$")
-                     (sort (map #(.Name #^Type %) interfaces)))))    ;;; .getSimpleName  #^Class
+  (let [inames (into (sorted-set) (map #(.getName #^Type %) interfaces))]   ;;; #^Class
+    (apply str (.replace (str *ns*) \- \_) ".proxy"
+      (interleave (repeat "$")
+        (concat
+          [(.FullName super)]                          ;;; .getName
+          (map #(subs % (inc (.lastIndexOf #^String % "."))) inames)
+          [(.ToString (hash inames) "X")])))))                        ;;;[(Integer/toHexString (hash inames))])))))                   
 
 (defn- generate-proxy [#^Type super interfaces]     ;;; Class
   (clojure.lang.GenProxy/GenerateProxyClass super interfaces (proxy-name super interfaces)))  ;;;DM;;
