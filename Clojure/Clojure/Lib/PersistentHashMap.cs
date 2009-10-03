@@ -927,7 +927,7 @@ namespace clojure.lang
                             return this;
                         return new BitmapIndexedNode(null,_bitmap,CloneAndSet(_array,2*idx+1,val));
                     }
-                    addedLeaf.Val = val;
+                    addedLeaf.Val = addedLeaf;
                     return new BitmapIndexedNode(null,_bitmap,
                         CloneAndSet(_array,
                                     2*idx,
@@ -960,7 +960,8 @@ namespace clojure.lang
                         object[] newArray = new object[2*(n+1)];
                         Array.Copy(_array, 0, newArray, 0, 2*idx);
                         newArray[2*idx] = key;
-                        addedLeaf.Val = newArray[2*idx+1] = val;
+                        addedLeaf.Val = addedLeaf;
+                        newArray[2*idx+1] = val;
                         Array.Copy(_array, 2*idx, newArray, 2*(idx + 1), 2*(n - idx));
                         return new BitmapIndexedNode(null, _bitmap | bit, newArray);
                     }           
@@ -1051,7 +1052,7 @@ namespace clojure.lang
                             return this;
                         return EditAndSet(edit, 2 * idx + 1, val);
                     }
-                    addedLeaf.Val = val;
+                    addedLeaf.Val = addedLeaf;
                     return EditAndSet(edit,
                         2*idx,null,
                         2*idx+1,CreateNode(edit,shift+5,keyOrNull,valOrNode,hash,key,val));
@@ -1060,7 +1061,7 @@ namespace clojure.lang
                 {int n = Util.BitCount(_bitmap);
                     if ( n*2 < _array.Length )
                     {
-                        addedLeaf.Val = val;
+                        addedLeaf.Val = addedLeaf;
                         BitmapIndexedNode editable = EnsureEditable(edit);
                         Array.Copy(editable._array,2*idx,editable._array,2*(idx+1),2*(n-idx));
                         editable._array[2*idx] = key;
@@ -1090,7 +1091,8 @@ namespace clojure.lang
                         object[] newArray = new object[2*(n+4)];
                         Array.Copy(_array,0,newArray,0,2*idx);
                         newArray[2*idx] = key;
-                        addedLeaf.Val = newArray[2*idx+1] = val;
+                        addedLeaf.Val = addedLeaf;
+                        newArray[2 * idx + 1] = val;
                         Array.Copy(_array,2*idx,newArray,2*(idx+1),2*(n-idx));
                         BitmapIndexedNode editable = EnsureEditable(edit);
                         editable._array = newArray;
@@ -1119,12 +1121,12 @@ namespace clojure.lang
                         return EditAndSet(edit, 2 * idx + 1, n);
                     if (_bitmap == bit)
                         return null;
-                    removedLeaf.Val = valOrNode;
+                    removedLeaf.Val = removedLeaf;
                     return EditAndRemovePair(edit, bit, idx);
                 }
                 if (Util.equals(key, keyOrNull))
                 {
-                    removedLeaf.Val = key; // key can't be null
+                    removedLeaf.Val = removedLeaf;
                     // TODO: collapse
                     return EditAndRemovePair(edit, bit, idx);
                 }
