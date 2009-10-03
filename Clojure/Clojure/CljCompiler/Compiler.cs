@@ -73,6 +73,8 @@ namespace clojure.lang
 
         internal static readonly Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
 
+        internal static readonly Symbol CLASS = Symbol.create("System.Type");
+
 
         #endregion
 
@@ -508,7 +510,8 @@ namespace clojure.lang
                         //  However, when I do this, it makes ants.clj choke on: (def white-brush (new SolidBrush (.White Color)))
                         object target = RT.second(form);
                         if (MaybeType(target, false) != null)
-                            target = RT.list(IDENTITY, target);
+                            //target = RT.list(IDENTITY, target);
+                            target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY, CLASS));
                         return RT.listStar(DOT, target, method, form.next().next());
                         // safe substitute: return RT.listStar(Compiler.DOT, RT.second(form), method, form.next().next());
                     }
