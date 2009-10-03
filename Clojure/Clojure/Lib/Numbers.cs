@@ -1717,7 +1717,7 @@ namespace clojure.lang
             else
             {
                 ISeq s = RT.seq(sizeOrSeq);
-                int size = s.count();
+                int size = RT.count(s);
                 float[] ret = new float[size];
                 for (int i = 0; i < size && s != null; i++, s = s.next())
                     ret[i] = Util.ConvertToFloat(s.first());
@@ -1750,7 +1750,7 @@ namespace clojure.lang
             else
             {
                 ISeq s = RT.seq(sizeOrSeq);
-                int size = s.count();
+                int size = RT.count(s);
                 double[] ret = new double[size];
                 for (int i = 0; i < size && s != null; i++, s = s.next())
                     ret[i] = Util.ConvertToDouble(s.first());
@@ -1783,7 +1783,7 @@ namespace clojure.lang
             else
             {
                 ISeq s = RT.seq(sizeOrSeq);
-                int size = s.count();
+                int size = RT.count(s);
                 int[] ret = new int[size];
                 for (int i = 0; i < size && s != null; i++, s = s.next())
                     ret[i] = Util.ConvertToInt(s.first());
@@ -1816,7 +1816,7 @@ namespace clojure.lang
             else
             {
                 ISeq s = RT.seq(sizeOrSeq);
-                int size = s.count();
+                int size = RT.count(s);
                 long[] ret = new long[size];
                 for (int i = 0; i < size && s != null; i++, s = s.next())
                     ret[i] = Util.ConvertToLong(s.first());

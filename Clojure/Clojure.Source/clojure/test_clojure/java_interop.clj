@@ -152,7 +152,7 @@
       ; copy of a sequence
       (are [x] (and (= (alength (~type-array x)) (count x))
                     (= (vec (~type-array x)) x))
-;;        []    ;; ERROR
+          []    
           [1]
           [1 -2 3 0 5] )
 
