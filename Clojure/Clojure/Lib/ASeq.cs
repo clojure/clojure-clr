@@ -346,7 +346,7 @@ namespace clojure.lang
             return false;
         }
 
-        public int IndexOf(object value)
+        public virtual int IndexOf(object value)
         {
             int i = 0;
             for (ISeq s = seq(); s != null; s = s.next(),i++)

@@ -31,7 +31,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void Create_on_nothing_returns_null()
         {
-            ArraySeq a = ArraySeq.create();
+            IArraySeq a = ArraySeq.create();
             
             Expect(a, Null);
         }
@@ -40,7 +40,7 @@ namespace Clojure.Tests.LibTests
         public void Create_on_array_creates()
         {
             object[] array = new object[] { 1, 2, 3 };
-            ArraySeq a = ArraySeq.create(array);
+            IArraySeq a = ArraySeq.create(array);
 
             Expect(a, Not.Null);
         }
@@ -48,7 +48,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void Create_on_null_returns_null()
         {
-            ArraySeq a = ArraySeq.create(null);
+            IArraySeq a = ArraySeq.create(null);
             
             Expect(a, Null);
         }
@@ -57,7 +57,7 @@ namespace Clojure.Tests.LibTests
         public void Create_on_array_has_no_meta()
         {
             object[] array = new object[] { 1, 2, 3 };
-            ArraySeq a = ArraySeq.create(array);
+            IArraySeq a = ArraySeq.create(array);
 
             Expect(a.meta(), Null);
         }
@@ -66,7 +66,7 @@ namespace Clojure.Tests.LibTests
         public void Create_on_array_and_index_creates()
         {
             object[] array = new object[] { 1, 2, 3 };
-            ArraySeq a = ArraySeq.create(array,0);
+            IArraySeq a = ArraySeq.create(array,0);
 
             Expect(a, Not.Null);
         }
@@ -75,7 +75,7 @@ namespace Clojure.Tests.LibTests
         public void Create_on_array_and_index_with_high_index_returns_null()
         {
             object[] array = new object[] { 1, 2, 3 };
-            ArraySeq a = ArraySeq.create(array, 10);
+            IArraySeq a = ArraySeq.create(array, 10);
 
             Expect(a, Null);
         }
@@ -84,7 +84,7 @@ namespace Clojure.Tests.LibTests
         public void Create_on_array_and_index_has_no_meta()
         {
             object[] array = new object[] { 1, 2, 3 };
-            ArraySeq a = ArraySeq.create(array,0);
+            IArraySeq a = ArraySeq.create(array,0);
 
             Expect(a.meta(), Null);
         }  
@@ -97,18 +97,18 @@ namespace Clojure.Tests.LibTests
         public void ArraySeq_has_correct_count_1()
         {
             object[] array = new object[] { 1, 2, 3 };
-            ArraySeq a = ArraySeq.create(array);
+            IArraySeq a = ArraySeq.create(array);
 
-            Expect(a.count(), EqualTo(3));
+            Expect(((Counted)a).count(), EqualTo(3));
         }
 
         [Test]
         public void ArraySeq_has_correct_count_2()
         {
             object[] array = new object[] { 1, 2, 3 };
-            ArraySeq a = ArraySeq.create(array,1);
+            IArraySeq a = ArraySeq.create(array,1);
 
-            Expect(a.count(), EqualTo(2));
+            Expect(((Counted)a).count(), EqualTo(2));
         }
 
         #endregion
@@ -126,7 +126,7 @@ namespace Clojure.Tests.LibTests
             mocks.ReplayAll();
 
             object[] array = new object[] { 2, 3, 4 };
-            ArraySeq a = ArraySeq.create(array);
+            IArraySeq a = ArraySeq.create(array);
             object ret = a.reduce(fn);
 
             Expect(ret, EqualTo(7));
@@ -145,7 +145,7 @@ namespace Clojure.Tests.LibTests
             mocks.ReplayAll();
 
             object[] array = new object[] { 2, 3, 4 };
-            ArraySeq a = ArraySeq.create(array);
+            IArraySeq a = ArraySeq.create(array);
             object ret = a.reduce(fn, 20);
 
             Expect(ret, EqualTo(7));
@@ -161,8 +161,8 @@ namespace Clojure.Tests.LibTests
     {
         object[] _array0;
         object[] _array1;
-        ArraySeq _a0;
-        ArraySeq _a1;
+        IArraySeq _a0;
+        IArraySeq _a1;
 
         [SetUp]
         public void Setup()
@@ -208,7 +208,8 @@ namespace Clojure.Tests.LibTests
         {
             object[] array = new object[] { 1, 2, 3 };
             _objWithNullMeta = _obj = ArraySeq.create(array, 0);
-            _expectedType = typeof(ArraySeq);
+            _expectedType = typeof(TypedArraySeq<Object>);
+            _testNoChange = false;
         }
     }
 }

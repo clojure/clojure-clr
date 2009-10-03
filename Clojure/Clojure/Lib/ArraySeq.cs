@@ -16,96 +16,105 @@ using System.Collections;
 
 namespace clojure.lang
 {
-    public class ArraySeq : ASeq, IndexedSeq, IReduce
+    public interface IArraySeq : IObj, ISeq, IList, Streamable,IndexedSeq, IReduce
     {
-        // TODO: rethink the whole thing.
-        // Java version has separate types for numeric arrays.
-        // We could specialize for arrays using direct access versus arrays using Array.get access.
+        object[] ToArray();
+    }
 
-        #region Data
-
-        private readonly object _a;
-        private readonly int _i;
-        private readonly object[] _oa;
-        // TODO: Check against current version.  IList equivalent not in current Java version.
-        private readonly IList _ilist;
-
-        public object[] ToArray()
-        {
-            if ( _oa != null )
-                return _oa;
-
-            if (_ilist != null)
-            {
-                object[] items = new object[_ilist.Count];
-                for (int i = 0; i < _ilist.Count; i++)
-                    items[i] = _ilist[i];
-                return items;
-            }
-
-            return (object[])_a;
-        }
-
-        #endregion
-
+    public static class ArraySeq
+    {
         #region C-tors and factory methods
 
-        static public ArraySeq create()
+        static public IArraySeq create()
         {
             return null;
         }
 
-        static public ArraySeq create(params object[] array)
+        static public IArraySeq create(params object[] array)
         {
             return (array == null || array.Length == 0)
                 ? null
-                : new ArraySeq(array, 0);
+                : new TypedArraySeq<Object>(null,array, 0);
         }
 
         // Not in the Java version, but I can really use this
-        static public ArraySeq create(object[] array, int firstIndex)
+        static public IArraySeq create(object[] array, int firstIndex)
         {
             return (array == null || array.Length <= firstIndex )
                 ? null
-                : new ArraySeq(array, firstIndex);
+                : new TypedArraySeq<Object>(null,array, firstIndex);
         }
 
-        internal static ISeq createFromObject(Object array)
+        internal static IArraySeq createFromObject(Object array)
         {
-            if (array == null || ((Array)array).Length == 0)
+            Array aa = (Array)array;
+
+            if (array == null || aa.Length == 0)
                 return null;
-            //Type aclass = array.GetType();
-            //if(aclass == int[].class)
-            //    return new ArraySeq_int(null, (int[]) array, 0);
-            //if(aclass == float[].class)
-            //    return new ArraySeq_float(null, (float[]) array, 0);
-            //if(aclass == double[].class)
-            //    return new ArraySeq_double(null, (double[]) array, 0);
-            //if(aclass == long[].class)
-            //    return new ArraySeq_long(null, (long[]) array, 0);
-            return new ArraySeq(array, 0);
+
+            Type elementType = array.GetType().GetElementType();
+            switch (Type.GetTypeCode(elementType))
+            {
+                case TypeCode.Boolean:
+                    return new TypedArraySeq<bool>(null, (bool[])aa, 0);
+                case TypeCode.Byte:
+                    return new TypedArraySeq<byte>(null, (byte[])aa, 0);
+                case TypeCode.Char:
+                    return new TypedArraySeq<char>(null, (char[])aa, 0);
+                case TypeCode.Decimal:
+                    return new TypedArraySeq<decimal>(null, (decimal[])aa, 0);
+                case TypeCode.Double:
+                    return new TypedArraySeq<double>(null, (double[])aa, 0);
+                case TypeCode.Int16:
+                    return new TypedArraySeq<short>(null, (short[])aa, 0);
+                case TypeCode.Int32:
+                    return new TypedArraySeq<int>(null, (int[])aa, 0);
+                case TypeCode.Int64:
+                    return new TypedArraySeq<long>(null, (long[])aa, 0);
+                case TypeCode.SByte:
+                    return new TypedArraySeq<sbyte>(null, (sbyte[])aa, 0);
+                case TypeCode.Single:
+                    return new TypedArraySeq<float>(null, (float[])aa, 0);
+                case TypeCode.UInt16:
+                    return new TypedArraySeq<ushort>(null, (ushort[])aa, 0);
+                case TypeCode.UInt32:
+                    return new TypedArraySeq<uint>(null, (uint[])aa, 0);
+                case TypeCode.UInt64:
+                    return new TypedArraySeq<ulong>(null, (ulong[])aa, 0);
+                default:
+                    if (elementType == typeof(object))
+                        return new TypedArraySeq<Object>(null, (object[])aa, 0);
+                    else
+                        return new UntypedArraySeq(array, 0);
+            }
         }
 
+        #endregion
+    }
 
-//  TODO:  Really need to think about this.  A lot left on the table here.
+    public class UntypedArraySeq : ASeq, IArraySeq
+    {
+        #region Data
 
-        ArraySeq(object array, int i)
+        private readonly Array _a;
+        private readonly int _i;
+
+        #endregion
+
+        #region Ctors
+
+        public UntypedArraySeq(object array, int i)
         {
-            _a = array;
+            _a = (Array)array;
             _i = i;
-            _oa = (object[])(array is object[] ? array : null);
-            _ilist = (IList)_a;
         }
 
-        ArraySeq(IPersistentMap meta, object array, int i)
+        public UntypedArraySeq(IPersistentMap meta, object array, int i)
             : base(meta)
         {
-            _a = array;
+            _a = (Array)array;
             _i = i;
-            _oa = (object[])(array is object[] ? array : null);
-            _ilist = (IList)_a;
         }
-
 
         #endregion
 
@@ -113,24 +122,13 @@ namespace clojure.lang
 
         public override object first()
         {
-            if (_oa != null)
-                return _oa[_i];
-            else
-                return _ilist[_i];  //rev 1112 wraps this in RT.prepRet, don't know why
+            return Reflector.prepRet(_a.GetValue(_i));
         }
 
         public override ISeq next()
         {
-            if (_oa != null)
-            {
-                if (_i + 1 < _oa.Length)
-                    return new ArraySeq(_a, _i + 1);
-            }
-            else
-            {
-                if (_i + 1 < _ilist.Count)
-                    return new ArraySeq(_a, _i + 1);
-            }
+            if (_i + 1 < _a.Length)
+                return new UntypedArraySeq(_a, _i + 1);
             return null;
         }
 
@@ -140,9 +138,7 @@ namespace clojure.lang
 
         public override int count()
         {
-            return _oa != null
-                ? _oa.Length - _i
-                : _ilist.Count - _i;
+            return _a.Length - _i;
         }
 
         #endregion
@@ -151,10 +147,7 @@ namespace clojure.lang
 
         public override IObj withMeta(IPersistentMap meta)
         {
-            // Java version does not do identity test
-            return meta == _meta
-                ? this
-                : new ArraySeq(meta, _a, _i);
+            return new UntypedArraySeq(meta, _a, _i);
         }
 
         #endregion
@@ -172,34 +165,163 @@ namespace clojure.lang
 
         public object reduce(IFn f)
         {
-            if (_oa != null)
-            {
-                object ret = _oa[_i];
-                for (int x = _i + 1; x < _oa.Length; x++)
-                    ret = f.invoke(ret, _oa[x]);
-                return ret;
-            }
-            object ret1 = _ilist[_i];    // JAVA 1112 wraps in RT.prepRet
-            for (int x = _i + 1; x < _ilist.Count; x++)
-                ret1 = f.invoke(ret1, _ilist[x]);       // JAVA 1112 wraps in RT.prepRet
-            return ret1;
+            object ret = RT.prepRet(_a.GetValue(_i));
+            for (int x = _i + 1; x < _a.Length; x++)
+                ret = f.invoke(ret, RT.prepRet(_a.GetValue(x)));
+            return ret;
         }
 
         public object reduce(IFn f, object start)
         {
-            if (_oa != null)
-            {
-                object ret = f.invoke(start, _oa[_i]);
-                for (int x = _i + 1; x < _oa.Length; x++)
-                    ret = f.invoke(ret, _oa[x]);
-                return ret;
-            }
-            object ret1 = f.invoke(start, _ilist[_i]);    // JAVA 1112 wraps in RT.prepRet
-            for (int x = _i + 1; x < _ilist.Count; x++)
-                ret1 = f.invoke(ret1, _ilist[x]);         // JAVA 1112 wraps in RT.prepRet
-            return ret1;
+            object ret = f.invoke(start, RT.prepRet(_a.GetValue(_i)));
+            for (int x = _i + 1; x < _a.Length; x++)
+                ret = f.invoke(ret, RT.prepRet(_a.GetValue(x)));
+            return ret;
+        }
+
+        #endregion
+
+        #region IList members
+
+        public override int IndexOf(object value)
+        {
+            int n = _a.Length;
+            for (int j = _i; j < n; j++)
+                if (Util.equals(value, Reflector.prepRet(_a.GetValue(j))))
+                    return j - _i;
+            return -1;
+        }
+
+        #endregion
+
+        #region IArraySeq members
+
+        public object[] ToArray()
+        {
+              object[] items = new object[_a.Length];
+              for (int i = 0; i < _a.Length; i++)
+                  items[i] = _a.GetValue(i);
+                return items;
         }
 
         #endregion
     }
+    
+    public class TypedArraySeq<T> : ASeq, IArraySeq
+    {
+        #region Data
+
+        readonly T[] _array;
+        readonly int _i;
+
+        #endregion
+
+        #region C-tors
+
+        public TypedArraySeq(IPersistentMap meta, T[] array, int i)
+            : base(meta)
+        {
+            _array = array;
+            _i = i;
+        }
+
+        #endregion
+
+        #region IPersistentCollection members
+
+        public override int count()
+        {
+            return _array.Length - _i;
+        }
+
+        IPersistentCollection IPersistentCollection.cons(object o)
+        {
+            return cons(o);
+        }
+
+        #endregion
+
+        #region ISeq members
+
+        public override object first()
+        {
+            return _array[_i];
+        }
+
+        public override ISeq next()
+        {
+            if (_i + 1 < _array.Length)
+                return new TypedArraySeq<T>(meta(), _array, _i + 1);
+            return null;
+        }
+
+        #endregion
+
+        #region IObj members
+
+        public override IObj withMeta(IPersistentMap meta)
+        {
+            return new TypedArraySeq<T>(meta, _array, _i);
+        }
+
+        #endregion
+
+        #region IndexedSeq Members
+
+        public int index()
+        {
+            return _i;
+        }
+
+        #endregion
+
+        #region IReduce Members
+
+        public object reduce(IFn f)
+        {
+            object ret = _array[_i];
+            for (int x = _i + 1; x < _array.Length; x++)
+                ret = f.invoke(ret, _array[x]);
+            return ret;
+        }
+
+        public object reduce(IFn f, object start)
+        {
+            object ret = f.invoke(start,_array[_i]);
+            for (int x = _i + 1; x < _array.Length; x++)
+                ret = f.invoke(ret, _array[x]);
+            return ret;
+        }
+
+        #endregion
+
+        #region IList members
+
+        public override int IndexOf(object value)
+        {
+            for (int j = _i; j < _array.Length; j++)
+                if (value.Equals(_array[j]))
+                    return j - _i;
+
+            return -1;
+        }
+      
+        #endregion
+
+        #region IArraySeq members
+
+        public object[] ToArray()
+        {
+            if (typeof(T) == typeof(object))
+                return (object[])(object)_array;
+
+            object[] items = new object[_array.Length];
+            for (int i = 0; i < _array.Length; i++)
+                items[i] = _array[i];
+            return items;
+        }
+
+        #endregion
+    }
+
 }
