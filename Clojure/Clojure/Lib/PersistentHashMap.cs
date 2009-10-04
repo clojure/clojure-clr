@@ -1235,6 +1235,7 @@ namespace clojure.lang
                     Array.Copy(_array, 0, newArray, 0, _array.Length);
                     newArray[_array.Length] = key;
                     newArray[_array.Length + 1] = val;
+                    addedLeaf.Val = addedLeaf;
                     return new HashCollisionNode(_edit, hash, _count + 1, newArray);
                 }
                 // nest it in a bitmap node
@@ -1290,6 +1291,7 @@ namespace clojure.lang
                     }
                     if (_array.Length > 2 * _count)
                     {
+                        addedLeaf.Val = addedLeaf;
                         HashCollisionNode editable = EditAndSet(edit, 2 * _count, key, 2 * _count + 1, val);
                         editable._count++;
                         return editable;
@@ -1298,6 +1300,7 @@ namespace clojure.lang
                     Array.Copy(_array, 0, newArray, 0, _array.Length);
                     newArray[_array.Length] = key;
                     newArray[_array.Length + 1] = val;
+                    addedLeaf.Val = addedLeaf;
                     return EnsureEditable(edit, _count + 1, newArray);
                 }
                 // nest it in a bitmap node
@@ -1336,6 +1339,7 @@ namespace clojure.lang
                 if (_edit == edit)
                 {
                     _array = array;
+                    _count = count;
                     return this;
                 }
                 return new HashCollisionNode(edit, _hash, count, array);
