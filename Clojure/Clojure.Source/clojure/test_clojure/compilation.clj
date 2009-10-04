@@ -36,4 +36,7 @@
         (:macro m) true
         (:name m) 'when )))
 
-
+;(deftest test-embedded-constants
+;  (testing "Embedded constants"
+;    (are [t] (eval `(= t ~t/TYPE)))
+;         Boolean Byte Character Double Float Integer Long Short))
