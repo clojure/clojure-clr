@@ -104,6 +104,7 @@
     <Compile Include="Lib\ArrayChunk.cs" />
     <Compile Include="Lib\ArrayHelper.cs" />
     <Compile Include="Lib\ATransientMap.cs" />
+    <Compile Include="Lib\ATransientSet.cs" />
     <Compile Include="Lib\BigInteger.cs" />
     <Compile Include="Lib\ChunkBuffer.cs" />
     <Compile Include="Lib\ChunkedCons.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="Lib\ITransientAssociative.cs" />
     <Compile Include="Lib\ITransientCollection.cs" />
     <Compile Include="Lib\ITransientMap.cs" />
+    <Compile Include="Lib\ITransientSet.cs" />
     <Compile Include="Lib\ITransientVector.cs" />
     <Compile Include="Lib\Indexed.cs" />
     <Compile Include="Lib\IProxy.cs" />

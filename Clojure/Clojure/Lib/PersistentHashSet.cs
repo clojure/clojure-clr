@@ -21,7 +21,7 @@ namespace clojure.lang
     /// <summary>
     /// A persistent set built on a <see cref="IPersistentMap">IPersistentMap</see>.
     /// </summary>
-    public class PersistentHashSet: APersistentSet
+    public class PersistentHashSet: APersistentSet, IEditableCollection
     {
         #region Data
 
@@ -148,5 +148,36 @@ namespace clojure.lang
         }
 
         #endregion
+
+        #region IEditableCollection Members
+
+        public ITransientCollection asTransient()
+        {
+            return new TransientHashSet((ITransientMap)((PersistentHashMap)_impl).asTransient());
+        }
+
+        #endregion
+
+        #region Transient support
+
+        class TransientHashSet : ATransientSet
+        {
+
+            public TransientHashSet(ITransientMap impl)
+                : base(impl)
+            {
+            }
+
+
+
+            public override IPersistentCollection persistent()
+            {
+                return new PersistentHashSet(null, _impl.persistent());
+            }
+        }
+
+
+        #endregion
+
     }
 }
