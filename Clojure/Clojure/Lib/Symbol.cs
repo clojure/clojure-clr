@@ -69,7 +69,7 @@ namespace clojure.lang
         static public Symbol intern(string nsname)
         {
             int i = nsname.LastIndexOf('/');
-            return i == -1
+            return i == -1 || nsname.Equals("/")
                 ? new Symbol(null, String.Intern(nsname))
                 : new Symbol(String.Intern(nsname.Substring(0, i)),
                              String.Intern(nsname.Substring(i + 1)));
