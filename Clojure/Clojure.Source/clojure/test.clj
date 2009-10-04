@@ -505,7 +505,7 @@ Chas Emerick, Allen Rohner, and Stuart Halloway",
   "Returns a vector [filename line-number] for the nth call up the
   stack."
   [n]
-  (let [s (nth (.GetFrames (System.Diagnostics.StackTrace.)) n)]            ;;; (let [s (nth (.getStackTrace (new java.lang.Throwable)) n)]
+  (let [#^System.Diagnostics.StackFrame s (nth (.GetFrames (System.Diagnostics.StackTrace.)) n)]            ;;; (let [#^StackTraceElement s (nth (.getStackTrace (new java.lang.Throwable)) n)]
      (if (nil? s) [nil 0] [(.GetFileName s) (.GetFileLineNumber s)])))      ;;;   [(.getFileName s) (.getLineNumber s)]))
 
 (defn testing-vars-str

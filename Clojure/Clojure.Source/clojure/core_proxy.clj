@@ -269,7 +269,7 @@
           pname (proxy-name super interfaces)]
       (or  (RT/classForName pname)                            ;;; (RT/loadClassForName pname)
            (generate-proxy super interfaces))))               ;;; (let [[cname bytecode] (generate-proxy super interfaces)]
-                                                              ;;;   (. (deref clojure.lang.Compiler/LOADER) (defineClass pname bytecode))))))
+                                                              ;;;   (. #^DynamicClassLoader (deref clojure.lang.Compiler/LOADER) (defineClass pname bytecode))))))
 
 (defn construct-proxy
   "Takes a proxy class and any arguments for its superclass ctor and
