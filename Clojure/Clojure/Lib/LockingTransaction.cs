@@ -352,7 +352,7 @@ namespace clojure.lang
                 if (!r.TryEnterWriteLock(LOCK_WAIT_MSECS))
                     throw _retryex;
             }
-            catch (ThreadInterruptedException e) // TODO: Check if this is the correct exception class
+            catch (ThreadInterruptedException )
             {
                 throw _retryex;
             }
@@ -376,7 +376,7 @@ namespace clojure.lang
             {
                 refinfo.Latch.Await(LOCK_WAIT_MSECS);
             }
-            catch (ThreadInterruptedException e)
+            catch (ThreadInterruptedException)
             {
                 //ignore
             }

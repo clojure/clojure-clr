@@ -94,21 +94,20 @@ namespace clojure.lang.CljCompiler.Ast
             List<Expression> finalAssigns = new List<Expression>(argCount);
 
             // Evaluate all the init forms into local variables.
-            // TODO: Check the typing here.
             for (int i = 0; i < _loopLocals.count(); i++)
             {
                 LocalBinding b = (LocalBinding)_loopLocals.nth(i);
                 Expr arg = (Expr)_args.nth(i);
-                ParameterExpression tempVar = Expression.Parameter(b.ParamExpression.Type, "__local__" + i);  //asdf-tag
+                ParameterExpression tempVar = Expression.Parameter(b.ParamExpression.Type, "__local__" + i);
                 Expression valExpr = ((Expr)_args.nth(i)).GenDlr(context);
                 tempVars.Add(tempVar);
 
                 if (tempVar.Type == typeof(Object))
                     tempAssigns.Add(Expression.Assign(tempVar, Compiler.MaybeBox(valExpr)));
                 else
-                    tempAssigns.Add(Expression.Assign(tempVar, Expression.Convert(valExpr, tempVar.Type)));                     //asdf-tag
+                    tempAssigns.Add(Expression.Assign(tempVar, Expression.Convert(valExpr, tempVar.Type)));
 
-                finalAssigns.Add(Expression.Assign(b.ParamExpression, tempVar));  //asdf-tag
+                finalAssigns.Add(Expression.Assign(b.ParamExpression, tempVar));
             }
 
             List<Expression> exprs = tempAssigns;

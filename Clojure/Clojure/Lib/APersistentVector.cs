@@ -511,8 +511,6 @@ namespace clojure.lang
         #endregion
         
 
-        // TODO: Factor out common code from Seq/RSeq
-
         /// <summary>
         /// Internal class providing <see cref="ISeq">ISeq</see> functionality for <see cref="APersistentVector">APersistentVector</see>.
         /// </summary>

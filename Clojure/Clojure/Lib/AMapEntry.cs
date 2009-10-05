@@ -15,14 +15,9 @@ using System.Text;
 
 namespace clojure.lang
 {
-
-    // TODO: Find out why this is an APersistentVector.  
-
     /// <summary>
     /// Provides a basic implementation of <see cref="IMapEntry">IMapEntry</see>.
     /// </summary>
-    /// <remarks>This also provides <see cref="IPersistentVector">IPersistentVector</see> functionality.  
-    /// I'm not sure why.</remarks>
     public abstract class AMapEntry: APersistentVector, IMapEntry
     {
 

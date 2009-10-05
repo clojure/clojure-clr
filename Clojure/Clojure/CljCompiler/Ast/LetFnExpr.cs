@@ -70,11 +70,6 @@ namespace clojure.lang.CljCompiler.Ast
 
                 ISeq body = RT.next(RT.next(form));
 
-                // TODO: This is one place where context makes a difference.  Need to figure this out.
-                // if (ctxt == C.EVAL)
-                //    return Generate(RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)));
-
-
                 IPersistentMap dynamicBindings = RT.map(
                     Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
                     Compiler.NEXT_LOCAL_NUM, Compiler.NEXT_LOCAL_NUM.deref());

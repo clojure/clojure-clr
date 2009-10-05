@@ -333,8 +333,6 @@ namespace clojure.lang
 
         #region Vars (I/O-related)
 
-        // TODO:  These need to be tied into the DLR IO subsystem
-
         public static readonly Var OUT 
             = Var.intern(CLOJURE_NS, Symbol.create("*out*"), System.Console.Out);
         

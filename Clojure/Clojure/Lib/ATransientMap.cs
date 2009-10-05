@@ -57,7 +57,7 @@ namespace clojure.lang
                 return assoc(v.nth(0), v.nth(1));
             }
 
-            // TODO: also handle DictionaryEntry?
+            // TODO: also handle KeyValuePair?
             ITransientMap ret = this;
             for (ISeq es = RT.seq(val); es != null; es = es.next())
             {

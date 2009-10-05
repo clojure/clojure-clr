@@ -42,12 +42,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             int numArgs = _args.count();
 
-            // TODO: solve the DateTime problem
-            // Documentation does not list no-arg DateTime c-tor
-            // However, it exists.
-            // Not picked up here.
-            // Possible solution?
-            
             List<ConstructorInfo> cinfos 
                 = new List<ConstructorInfo>(_type.GetConstructors()
                     .Where(x => x.GetParameters().Length == numArgs && x.IsPublic));

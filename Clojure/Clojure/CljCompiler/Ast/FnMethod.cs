@@ -155,7 +155,7 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         LocalBinding b = Compiler.RegisterLocal(p,
                             paramState == ParamParseState.Rest ? Compiler.ISEQ : Compiler.TagOf(p),
-                            null); // asdf-tag
+                            null);
 
                         argLocals = argLocals.cons(b);
                         switch (paramState)
@@ -246,7 +246,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Expression.Label(loopLabel),
                         Compiler.MaybeBox(_body.GenDlr(context)));
                 LambdaExpression lambda = Expression.Lambda(body, parms);
-                // TODO: Figure out why the Java code nulls all the local variables here.
+                // JVM: Clears locals here.
 
 
                 // TODO: Cache all the CreateObjectTypeArray values
@@ -292,22 +292,9 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     LocalBinding b = (LocalBinding)_argLocals.nth(i);
 
-                    ParameterExpression pexpr = Expression.Parameter(typeof(object), b.Name);  //asdf-tag
+                    ParameterExpression pexpr = Expression.Parameter(typeof(object), b.Name);
                     b.ParamExpression = pexpr;
                     parmExprs.Add(pexpr);
-
-                    //if (b.Tag != null)
-                    //{
-                    //    // we have a type hint
-                    //    // The ParameterExpression above will be the parameter to the function.
-                    //    // We need to generate another local parameter that is typed.  
-                    //    // This will be the parameter tied to the LocalBinding so that the typing information is seen in the body.
-                    //    Type t = Compiler.TagToType(b.Tag);
-                    //    ParameterExpression p2 = Expression.Parameter(t, b.Name);
-                    //    b.ParamExpression = p2;
-                    //    typedParmExprs.Add(p2);
-                    //    typedParmInitExprs.Add(Expression.Assign(p2, Expression.Convert(pexpr, t)));
-                    //}
                 }
 
 

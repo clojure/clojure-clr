@@ -253,7 +253,6 @@ namespace clojure.lang
         {
             _id = _ids.getAndIncrement();
             _faults = new AtomicInteger();
-            // TODO: Figure out if we really need SupportsRecursion or not.
             _lock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
             _tvals = new TVal(initval, 0, System.Environment.TickCount);
         }

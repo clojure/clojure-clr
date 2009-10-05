@@ -81,22 +81,26 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region Code generateion
+        #region Code generation
 
         public override Expression GenDlr(GenContext context)
         {
             List<Expression> exprs = new List<Expression>(_exprs.count());
 
-            for (int i = 0; i < _exprs.count() - 1; i++)
+            // In Java version, this is split off because the Context in the calls above is forced to be C.STATEMENT.
+            //for (int i = 0; i < _exprs.count() - 1; i++)
+            //{
+            //    Expr e = (Expr)_exprs.nth(i);
+            //    exprs.Add(e.GenDlr(context));
+            //}
+            //Expr last = (Expr)_exprs.nth(_exprs.count() - 1);
+            //exprs.Add(last.GenDlr(context));
+
+            for (int i = 0; i < _exprs.count(); i++)
             {
                 Expr e = (Expr)_exprs.nth(i);
                 exprs.Add(e.GenDlr(context));
             }
-
-            // In Java version, this is split off because the Context in the calls above is forced to be C.STATEMENT.
-            // TODO: Wrap this into the loop above.  No real need to do this way.
-            Expr last = (Expr)_exprs.nth(_exprs.count() - 1);
-            exprs.Add(last.GenDlr(context));
 
             return Expression.Block(exprs);
         }

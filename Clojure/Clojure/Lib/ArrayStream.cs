@@ -45,10 +45,10 @@ namespace clojure.lang
         #endregion
     }
 
-
-    // TODO: ArrayStream needs some thought.
     public class ArrayStream : ArrayStreamBase<Object>
     {
+
+        #region C-tors & factory methods
 
         public ArrayStream(Object[] array)
             : base(array)
@@ -98,6 +98,12 @@ namespace clojure.lang
 
             throw new ArgumentException(String.Format("Unsupported array type %s", array.GetType()));
         }
+
+        #endregion
+
+        #region  Instantiations of base for primitive types
+
+        // TODO: Get rid of instantiations of ArrayStreamBase.
 
         class ArrayStream_char : ArrayStreamBase<char>
         {
@@ -193,5 +199,7 @@ namespace clojure.lang
             {
             }
         }
+
+        #endregion
     }
 }

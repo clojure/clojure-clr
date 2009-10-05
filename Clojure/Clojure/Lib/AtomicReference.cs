@@ -63,11 +63,11 @@ namespace clojure.lang
         /// <param name="update">The new value.</param>
         /// <returns><value>true</value> if the value is changed; <value>false</value> otherwise.</returns>
         /// <remarks>The Java version returns a boolean.  The BCL version returns the old value.  
-        /// Is ReferenceEquals the correct comparison?  (That is what CompareExchange uses, so I'm guessing so.)</remarks>
+        /// We use ReferenceEquals for the change comparison because that is what CompareExchange&lt;T&gt; uses.</remarks>
         public bool CompareAndSet(T expect, T update)
         {
             T oldVal = Interlocked.CompareExchange<T>(ref _ref, update, expect);
-            return Object.ReferenceEquals(oldVal,expect);  // TODO: (Or does it use Equals?)
+            return Object.ReferenceEquals(oldVal,expect);
         }
 
         /// <summary>

@@ -66,8 +66,6 @@ namespace clojure.lang
 
         #region C-tors & factory methods
 
-        // TODO: Is it worth speeding up the initializers that create so many unnecessary nodes?
-
         /// <summary>
         /// Create a <see cref="PersistentHashMap">PersistentHashMap</see> initialized from a CLR dictionary.
         /// </summary>

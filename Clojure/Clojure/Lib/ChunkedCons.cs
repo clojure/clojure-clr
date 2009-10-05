@@ -21,7 +21,6 @@ namespace clojure.lang
 
         readonly IChunk _chunk;
         readonly ISeq _more;
-        readonly int _offset;
 
         #endregion
 

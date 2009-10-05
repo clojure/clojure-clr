@@ -252,7 +252,7 @@ namespace clojure.lang
 
         internal static LambdaExpression GenerateLambda(GenContext context, object form, bool addPrint)
         {
-            // TODO: Clean this up.
+            // TODO: Get rid of this extra wrap.  See how the JVM version handles setting up the context for compiling the form.
             form = RT.list(FN, PersistentVector.EMPTY, RT.list( DO, form));
 
             Expr ast = GenerateAST(form,false);
@@ -272,14 +272,14 @@ namespace clojure.lang
 
         #region Boxing arguments
 
-        static Expression[] MaybeBox(Expression[] args)
-        {
-            // TODO: avoid copying array if not necessary
-            Expression[] boxedArgs = new Expression[args.Length];
-            for (int i1 = 0; i1 < args.Length; ++i1)
-                boxedArgs[i1] = MaybeBox(args[i1]);
-            return boxedArgs;
-        }
+        //static Expression[] MaybeBox(Expression[] args)
+        //{
+        //    // TODO: avoid copying array if not necessary
+        //    Expression[] boxedArgs = new Expression[args.Length];
+        //    for (int i1 = 0; i1 < args.Length; ++i1)
+        //        boxedArgs[i1] = MaybeBox(args[i1]);
+        //    return boxedArgs;
+        //}
 
         internal static Expression MaybeBox(Expression expr)
         {
@@ -1018,6 +1018,7 @@ namespace clojure.lang
             Var.pushThreadBindings(RT.map(LINE, line));
             try
             {
+                // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
                 LambdaExpression ast = Compiler.GenerateLambda(form, false);
                 return ast.Compile().DynamicInvoke();
             }
@@ -1075,7 +1076,8 @@ namespace clojure.lang
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     LINE_AFTER.set(lntr.LineNumber);
-                    LambdaExpression ast = Compiler.GenerateLambda(form, false);  
+                    LambdaExpression ast = Compiler.GenerateLambda(form, false);
+                    // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
                     ret = ast.Compile().DynamicInvoke();
                     LINE_BEFORE.set(lntr.LineNumber);
                 }
@@ -1091,24 +1093,6 @@ namespace clojure.lang
 
             return ret;
         }
-  
-
-        //public Delegate GenerateTypedDelegate(Type delegateType, Symbol optName, IPersistentVector argList, ISeq body)
-        //{
-        //    ScriptSource scriptSource = Engine.CreateScriptSourceFromString("<internal>");
-
-        //    LambdaExpression ast = Generator.GenerateTypedDelegateExpression(GetLanguageContext(), delegateType, optName, argList, body);
-        //    return ast.Compile();
-
-        //    //ast = new GlobalLookupRewriter().RewriteLambda(ast);  -- doesn't work unless no args
-        //    //ScriptCode code = new ScriptCode(ast, GetSourceUnit(scriptSource));
-        //    //return code;
-        //}
-        //// This one is mine.
-        //public static Delegate GenerateTypedDelegate(Type delegateType, Symbol optName, IPersistentVector argList, ISeq body)
-        //{
-            
-        //}
 
         #endregion
 

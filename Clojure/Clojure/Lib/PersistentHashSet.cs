@@ -56,7 +56,6 @@ namespace clojure.lang
         /// both an IList and an ISeq, such as any ASeq.</remarks>
         public static PersistentHashSet create1(IList init)
         {
-            // TODO: Look for other collection classes with an overload problem on create(IList) and create(ISeq).
             PersistentHashSet ret = EMPTY;
             foreach (object obj in init)
                 ret = (PersistentHashSet)ret.cons(obj);
