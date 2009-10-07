@@ -19,12 +19,6 @@
        Form TableLayoutPanel Label Button TextBox
        PaintEventHandler PaintEventArgs)      
  ) 
- 
- 
- ; Eventually, this macro should be moved to a global place.
- 
- (defmacro gen-delegate 
-    [type argVec & body] `(clojure.lang.GenDelegate/Create ~type (fn ~argVec ~@body)))
     
   
  (defn celsius []

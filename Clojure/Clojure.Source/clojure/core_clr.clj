@@ -11,3 +11,7 @@
 ;;;;;; Extensions to core for the CLR platform  ;;;;;;;
 
 
+ 
+ (defmacro gen-delegate 
+    [type argVec & body] `(clojure.lang.GenDelegate/Create ~type (fn ~argVec ~@body)))
+    
