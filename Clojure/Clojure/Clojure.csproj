@@ -129,13 +129,6 @@
     <Compile Include="Lib\Stream.cs" />
     <Compile Include="Readers\LineNumberingTextReader.cs" />
     <Compile Include="Readers\PushbackTextReader.cs" />
-    <Compile Include="Runtime\ClojureBinder.cs" />
-    <Compile Include="Runtime\ClojureCommandLine.cs" />
-    <Compile Include="Runtime\ClojureConsoleOptions.cs" />
-    <Compile Include="Runtime\ClojureContext.cs" />
-    <Compile Include="Runtime\ClojureHostUtils.cs" />
-    <Compile Include="Runtime\ClojureOptionsParser.cs" />
-    <Compile Include="Runtime\ClojureParser.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
