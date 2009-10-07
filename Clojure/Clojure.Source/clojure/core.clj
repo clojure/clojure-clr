@@ -4360,7 +4360,7 @@
   [f] false)                       ;;;  [#^java.util.concurrent.Future f] (.isDone f))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language")
+(alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language") (load "core_clr")
 (load "core_proxy")
 (load "core_print")
 (load "genclass")

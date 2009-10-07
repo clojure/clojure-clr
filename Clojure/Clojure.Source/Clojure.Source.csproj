@@ -53,6 +53,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="clojure\core_clr.clj" />
     <None Include="clojure\samples\ants.clj" />
     <None Include="clojure\core.clj" />
     <None Include="clojure\core_print.clj" />
