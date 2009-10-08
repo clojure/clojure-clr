@@ -63,6 +63,31 @@ namespace clojure.lang
         {
             a[index] = value;
         }
+
+        public static void setSByte(sbyte[] a, int index, sbyte value)
+        {
+            a[index] = value;
+        }
+
+        public static void setUInt(uint[] a, int index, uint value)
+        {
+            a[index] = value;
+        }
+
+        public static void setUShort(ushort[] a, int index, ushort value)
+        {
+            a[index] = value;
+        }
+
+        public static void setULong(ulong[] a, int index, ulong value)
+        {
+            a[index] = value;
+        }
+
+        public static void setDecimal(decimal[] a, int index, decimal value)
+        {
+            a[index] = value;
+        }
        
     }
 }
