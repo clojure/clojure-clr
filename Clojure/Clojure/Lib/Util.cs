@@ -203,7 +203,7 @@ namespace clojure.lang
             else if (o is UInt64)
                 return (long)(ulong)o;
             else
-                return Convert.ToInt32(o);
+                return Convert.ToInt64(o);
         }
 
         public static float ConvertToFloat(object o)

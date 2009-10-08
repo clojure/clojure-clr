@@ -2445,7 +2445,7 @@
    val)
   ([array idx idx2 & idxv]
    (apply aset (aget array idx) idx2 idxv)))
-;;; This really doesn't help in CLR, because I don't have type-specific setters, so we will still end up boxing the value.  Rethink.
+
 (defmacro
   #^{:private true}
   def-aset [name method coerce]

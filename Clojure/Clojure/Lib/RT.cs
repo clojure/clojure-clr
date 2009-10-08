@@ -998,6 +998,10 @@ namespace clojure.lang
 
         #region boxing/casts
 
+        // Needs rethinking.  Need to benchmark the approaches in Util vs Convert.
+        // Which overloads do we need?
+
+
         public static char charCast(object x)
         {
             return Convert.ToChar(x);
@@ -1010,24 +1014,45 @@ namespace clojure.lang
             return x != null;
         }
 
-        public static sbyte byteCast(object x)
+        public static byte byteCast(object x)
         {
-            //return (sbyte)Convert.ToDouble(x);
-            return (sbyte)Util.ConvertToInt(x);     // convert fix
+            return (byte)Util.ConvertToInt(x); 
         }
 
         public static short shortCast(object x)
         {
-            //return (short)Convert.ToDouble(x);
-            return (short)Util.ConvertToInt(x);     // convert fix
+            return (short)Util.ConvertToInt(x); 
+        }
+
+        public static ushort ushortCast(object x)
+        {
+            return Convert.ToUInt16(x);
+        }
+
+        public static uint uintCast(object x)
+        {
+            return Convert.ToUInt32(x);
+        }
+
+        public static ulong ulongCast(object x)
+        {
+            return Convert.ToUInt64(x);
+        }
+
+
+        public static decimal decimalCast(object x)
+        {
+            return Convert.ToDecimal(x);
+        }
+
+        public static sbyte sbyteCast(object x)
+        {
+            return Convert.ToSByte(x);
         }
 
         public static int intCast(object x)
         {
-            // ToInt32 rounds.  We need truncation.
-            //return (int)Convert.ToDouble(x);
-            return Util.ConvertToInt(x);     // convert fix
-
+            return Util.ConvertToInt(x);
         }
 
         static public int intCast(char x)
@@ -1067,9 +1092,7 @@ namespace clojure.lang
 
         public static long longCast(object x)
         {
-            //return (long)Convert.ToDouble(x);
-            return Util.ConvertToLong(x);     // convert fix
-
+            return Util.ConvertToLong(x);
         }
 
         public static long longCast(int x)
@@ -1094,8 +1117,7 @@ namespace clojure.lang
 
         public static float floatCast(object x)
         {
-            //return Convert.ToSingle(x);
-            return Util.ConvertToFloat(x);      // convert fix
+            return Util.ConvertToFloat(x);
         }
 
         public static float floatCast(int x)
@@ -1120,10 +1142,8 @@ namespace clojure.lang
 
         public static double doubleCast(object x)
         {
-            //return Convert.ToDouble(x);
-            return Util.ConvertToDouble(x);     // convert fix
+            return Util.ConvertToDouble(x);
         }
-
 
         public static double doubleCast(int x)
         {

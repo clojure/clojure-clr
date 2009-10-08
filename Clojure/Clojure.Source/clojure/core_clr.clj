@@ -15,3 +15,36 @@
  (defmacro gen-delegate 
     [type argVec & body] `(clojure.lang.GenDelegate/Create ~type (fn ~argVec ~@body)))
     
+;;; Additional numeric casts
+;;; Somewhat useless until our arithmetic package is extended to support all these types.
+
+(defn uint
+  "Coerce to uint"
+  {:tag UInt32   
+   :inline (fn  [x] `(. clojure.lang.RT (uintCast ~x)))}
+  [x] (. clojure.lang.RT (uintCast x)))
+  
+(defn ushort
+  "Coerce to ushort"
+  {:tag UInt16   
+   :inline (fn  [x] `(. clojure.lang.RT (ushortCast ~x)))}
+  [x] (. clojure.lang.RT (ushortCast x)))
+  
+(defn ulong
+  "Coerce to ulong"
+  {:tag UInt64   
+   :inline (fn  [x] `(. clojure.lang.RT (ulongCast ~x)))}
+  [x] (. clojure.lang.RT (ulongCast x)))
+  
+(defn decimal
+  "Coerce to decimal"
+  {:tag UInt16   
+   :inline (fn  [x] `(. clojure.lang.RT (ushortCast ~x)))}
+  [x] (. clojure.lang.RT (ushortCast x)))
+  
+(defn sbyte
+  "Coerce to sbyte"
+  {:tag SByte   
+   :inline (fn  [x] `(. clojure.lang.RT (sbyteCast ~x)))}
+  [x] (. clojure.lang.RT (sbyteCast x)))
+
