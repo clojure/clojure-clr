@@ -1,9 +1,10 @@
 ClojureCLR
 
 This project is a native implementation of Clojure on Microsoft's .Net Framework,
-programmed in C# and using the Dynamic Language Runtime.
+programmed in C# and using the Dynamic Language Runtime (DLR).
 
-Status: Alpha, developer release
+Status: Beta
+        Still best for developers until we develop an installer
 
 Goals:
 
@@ -14,15 +15,18 @@ Goals:
 
 --------------------------------------------------------------------------------------
 
-For more information on clojure:  http://clojure.org
+For more information on Clojure:  http://clojure.org
 
-Installing: .\install.txt
+For more information on ClojureCLR: The wiki on the github site 
+   (http://wiki.github.com/richhickey/clojure-clr) has the most up-to-date information.
 
-Compiling/running:  .\compile-run.txt
+Specifically:
 
-Version information:  .\versions.txt
+Installing: http://wiki.github.com/richhickey/clojure-clr/installing-clojureclr
+Building:   http://wiki.github.com/richhickey/clojure-clr/compiling-clojureclr
+Running:    http://wiki.github.com/richhickey/clojure-clr/running-clojureclr
 
-Todo list:  .\todo.txt
+
  
 --------------------------------------------------------------------------------------
 
