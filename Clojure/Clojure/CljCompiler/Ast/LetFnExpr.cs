@@ -121,22 +121,30 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            throw new NotImplementedException();
+            int n = _bindingInits.count();
+            List<ParameterExpression> parms = new List<ParameterExpression>(n);
+            List<Expression> forms = new List<Expression>(n);
 
-            //List<ParameterExpression> parms = new List<ParameterExpression>();
-            //List<Expression> forms = new List<Expression>();
+            /// First, set up the environment.
+            for (int i = 0; i < n; i++)
+            {
+                BindingInit bi = (BindingInit)_bindingInits.nth(i);
+                ParameterExpression parmExpr = Expression.Parameter(typeof(IFn), bi.Binding.Name);
+                bi.Binding.ParamExpression = parmExpr;
+                parms.Add(parmExpr);
+            }
 
-            //for (int i = 0; i < _bindingInits.count(); i++)
-            //{
-            //    BindingInit bi = (BindingInit)_bindingInits.nth(i);
-            //    Type primType = Compiler.MaybePrimitiveType(bi.Init);
-            //    ParameterExpression parmExpr = Expression.Parameter(primType ?? typeof(object), bi.Binding.Name);
-            //    bi.Binding.ParamExpression = parmExpr;
-            //    parms.Add(parmExpr);
-            //    //forms.Add(Expression.Assign(parmExpr, Compiler.MaybeBox(bi.Init.GenDlr(context))));
-            //    Expression initExpr = primType != null ? ((MaybePrimitiveExpr)bi.Init).GenDlrUnboxed(context) : Compiler.MaybeBox(bi.Init.GenDlr(context));
-            //    forms.Add(Expression.Assign(parmExpr, initExpr));
-            //}
+            // Then initialize
+            for (int i = 0; i < n; i++)
+            {
+                BindingInit bi = (BindingInit)_bindingInits.nth(i);
+                ParameterExpression parmExpr = (ParameterExpression)bi.Binding.ParamExpression;
+                forms.Add(Expression.Assign(parmExpr, bi.Init.GenDlr(context)));
+            }
+
+            // The work
+            forms.Add(_body.GenDlr(context));
+            return Expression.Block(parms,forms);
         }
 
         #endregion
