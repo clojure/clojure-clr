@@ -144,7 +144,8 @@ namespace clojure.lang
         volatile object _root;
 
         static Keyword _privateKey = Keyword.intern(null, "private");
-        static IPersistentMap _privateMeta = new PersistentArrayMap(new object[] { _privateKey, RT.T });
+        //static IPersistentMap _privateMeta = new PersistentArrayMap(new object[] { _privateKey, RT.T });
+        static IPersistentMap _privateMeta = new PersistentArrayMap(new object[] { _privateKey, true });
         static Keyword _macroKey = Keyword.intern(null, "macro");
         static Keyword _nameKey = Keyword.intern(null, "name");
         static Keyword _nsKey = Keyword.intern(null, "ns");
@@ -334,7 +335,8 @@ namespace clojure.lang
         /// <remarks>Lowercase name for core.clj compatability.</remarks>
         public void setMacro()
         {
-            alterMeta(_assoc,RT.list(_macroKey, RT.T));
+            //alterMeta(_assoc, RT.list(_macroKey, RT.T));
+            alterMeta(_assoc, RT.list(_macroKey, true));
         }
 
         /// <summary>
@@ -430,8 +432,9 @@ namespace clojure.lang
             Validate(getValidator(), root);
             object oldroot = hasRoot() ? _root : null;
             _root = root;
-            alterMeta(_assoc,RT.list(_macroKey, RT.F));
-            notifyWatches(oldroot,_root);
+            //alterMeta(_assoc, RT.list(_macroKey, RT.F));
+            alterMeta(_assoc, RT.list(_macroKey, false));
+            notifyWatches(oldroot, _root);
         }
 
 

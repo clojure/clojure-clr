@@ -352,7 +352,8 @@ namespace clojure.lang
         public static Object prepRet(Object x)
         {
             if (x is Boolean)
-                return ((Boolean)x) ? RT.T : RT.F;
+                //return ((Boolean)x) ? RT.T : RT.F;
+                return ((Boolean)x) ? true : false;
             return x;
         }
 

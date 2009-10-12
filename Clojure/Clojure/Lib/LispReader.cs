@@ -341,11 +341,13 @@ namespace clojure.lang
             }
             else if (s.Equals("true"))
             {
-                return RT.T;
+                //return RT.T;
+                return true;
             }
             else if (s.Equals("false"))
             {
-                return RT.F;
+                //return RT.F;
+                return false;
             }
             else if (s.Equals("/"))
             {

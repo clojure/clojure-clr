@@ -279,10 +279,14 @@ namespace clojure.lang
 
         #region  It's true (or not)
 
-        // TODO:  Should these really be object?  In ClojureJVM, we would be trying to avoid boxing.
+        // The JVM version has these to provide standard boxed values for true/false.
+        // I've tried it in the CLR version, two ways: with the types of the as bool and the types as Object.
+        // Very little difference between those.
+        // However, getting rid of them entirely speeds up compilation by about 25%.
+        // Thus, I'm thinking boxing bools is less expensive than a static field lookup.
 
-        public static readonly Object T = true;//Keyword.intern(Symbol.create(null, "t"));
-        public static readonly Object F = false;//Keyword.intern(Symbol.create(null, "t"));
+        //public static readonly Object T = true;//Keyword.intern(Symbol.create(null, "t"));
+        //public static readonly Object F = false;//Keyword.intern(Symbol.create(null, "t"));
 
         public static bool IsTrue(object o)
         {
@@ -323,11 +327,13 @@ namespace clojure.lang
             = Var.intern(CLOJURE_NS, Symbol.create("*ns*"),CLOJURE_NS);
 
 
-        public static readonly Var IN_NS_VAR 
-            = Var.intern(CLOJURE_NS, Symbol.create("in-ns"), F);
+        public static readonly Var IN_NS_VAR
+            //= Var.intern(CLOJURE_NS, Symbol.create("in-ns"), RT.F);
+            = Var.intern(CLOJURE_NS, Symbol.create("in-ns"), false);
 
         public static readonly Var NS_VAR 
-            = Var.intern(CLOJURE_NS, Symbol.create("ns"), F);
+            //= Var.intern(CLOJURE_NS, Symbol.create("ns"), RT.F);
+            = Var.intern(CLOJURE_NS, Symbol.create("ns"), false);
 
         #endregion
 
@@ -343,17 +349,21 @@ namespace clojure.lang
             Var.intern(CLOJURE_NS, Symbol.create("*in*"),
             new clojure.lang.LineNumberingTextReader(System.Console.In));
 
-        static readonly Var PRINT_READABLY 
-            = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), T);
+        static readonly Var PRINT_READABLY
+            //= Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), RT.T);
+            = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), true);
         
         public static readonly Var PRINT_META 
-            = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), F);
+            //= Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), RT.F);
+            = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), false);
         
         public static readonly Var PRINT_DUP 
-            = Var.intern(CLOJURE_NS, Symbol.create("*print-dup*"), F);
+            //= Var.intern(CLOJURE_NS, Symbol.create("*print-dup*"), RT.F);
+            = Var.intern(CLOJURE_NS, Symbol.create("*print-dup*"), false);
         
         static readonly Var FLUSH_ON_NEWLINE 
-            = Var.intern(CLOJURE_NS, Symbol.create("*flush-on-newline*"), T);
+            //= Var.intern(CLOJURE_NS, Symbol.create("*flush-on-newline*"), RT.T);
+            = Var.intern(CLOJURE_NS, Symbol.create("*flush-on-newline*"), true);
         
         static readonly Var PRINT_INITIALIZED 
             = Var.intern(CLOJURE_NS, Symbol.create("print-initialized"));
@@ -372,11 +382,13 @@ namespace clojure.lang
 
         #region Vars (miscellaneous)
 
-        public static readonly Var ALLOW_UNRESOLVED_VARS 
-            = Var.intern(CLOJURE_NS, Symbol.create("*allow-unresolved-vars*"), F);
+        public static readonly Var ALLOW_UNRESOLVED_VARS
+            //= Var.intern(CLOJURE_NS, Symbol.create("*allow-unresolved-vars*"), RT.F);
+            = Var.intern(CLOJURE_NS, Symbol.create("*allow-unresolved-vars*"), false);
 
         public static readonly Var WARN_ON_REFLECTION
-            = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), F);
+            //= Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), RT.F);
+            = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), false);
 
         public static readonly Var MACRO_META 
             = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);
@@ -388,16 +400,19 @@ namespace clojure.lang
             = Var.intern(CLOJURE_NS, Symbol.create("*agent*"), null);
 
         public static readonly Var READEVAL
-            = Var.intern(CLOJURE_NS, Symbol.create("*read-eval*"), T);
+            //= Var.intern(CLOJURE_NS, Symbol.create("*read-eval*"), RT.T);
+            = Var.intern(CLOJURE_NS, Symbol.create("*read-eval*"), true);
 
         public static readonly Var ASSERT
-            = Var.intern(CLOJURE_NS, Symbol.create("*assert*"), T);
+            //= Var.intern(CLOJURE_NS, Symbol.create("*assert*"), RT.T);
+            = Var.intern(CLOJURE_NS, Symbol.create("*assert*"), true);
 
         public static readonly Var CMD_LINE_ARGS 
             = Var.intern(CLOJURE_NS, Symbol.create("*command-line-args*"), null);
 
         public static readonly Var USE_CONTEXT_CLASSLOADER
-            = Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), T);
+            //= Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), RT.T);
+            = Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), true);
 
         #endregion
 
@@ -426,9 +441,11 @@ namespace clojure.lang
             {
                 //return Object.ReferenceEquals(arg1, arg2) ? RT.T : RT.F;
                 if ( arg1 is ValueType )
-                    return arg1.Equals(arg2) ? RT.T : RT.F;
+                    //return arg1.Equals(arg2) ? RT.T : RT.F;
+                    return arg1.Equals(arg2);
                 else
-                    return arg1 == arg2 ? RT.T : RT.F;
+                    //return arg1 == arg2 ? RT.T : RT.F;
+                    return arg1 == arg2;
             }
         }
 
@@ -802,22 +819,27 @@ namespace clojure.lang
         public static object contains(object coll, object key)
         {
             if (coll == null)
-                return F;
+                //return RT.F;
+                return false;
             else if (coll is Associative)
-                return ((Associative)coll).containsKey(key) ? T : F;
+                //return ((Associative)coll).containsKey(key) ? RT.T : RT.F;
+                return ((Associative)coll).containsKey(key);
             else if (coll is IPersistentSet)
-                return ((IPersistentSet)coll).contains(key) ? T : F;
+                //return ((IPersistentSet)coll).contains(key) ? RT.T : RT.F;
+                return ((IPersistentSet)coll).contains(key);
             else if (coll is IDictionary)
             {
                 IDictionary m = (IDictionary)coll;
-                return m.Contains(key) ? T : F;
+                //return m.Contains(key) ? RT.T : RT.F;
+                return m.Contains(key);
             }
             else if (Util.IsNumeric(key) && (coll is String || coll.GetType().IsArray))
             {
                 int n = Util.ConvertToInt(key);
                 return n >= 0 && n < count(coll);
             }
-            return F;
+            //return RT.F;
+            return false;
         }
 
         public static object find(object coll, object key)
@@ -1738,7 +1760,8 @@ namespace clojure.lang
             //	if(c == boolean.class)
             //		return ((Boolean) x).booleanValue() ? RT.T : null;
             if (x is Boolean)
-                return ((Boolean)x) ? RT.T : RT.F; // Java version has Boolean.TRUE and Boolean.FALSE
+                //return ((Boolean)x) ? RT.T : RT.F; // Java version has Boolean.TRUE and Boolean.FALSE
+                return ((Boolean)x); // Java version has Boolean.TRUE and Boolean.FALSE
             return x;
         }
 

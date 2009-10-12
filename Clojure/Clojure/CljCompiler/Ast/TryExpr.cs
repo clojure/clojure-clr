@@ -135,7 +135,8 @@ namespace clojure.lang.CljCompiler.Ast
                             IPersistentMap dynamicBindings = RT.map(
                                 Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
                                 Compiler.NEXT_LOCAL_NUM, Compiler.NEXT_LOCAL_NUM.deref(),
-                                Compiler.IN_CATCH_FINALLY, RT.T);
+                                //Compiler.IN_CATCH_FINALLY, RT.T);
+                                Compiler.IN_CATCH_FINALLY, true);
 
                             try
                             {
@@ -158,8 +159,9 @@ namespace clojure.lang.CljCompiler.Ast
                                 throw new Exception("finally clause must be last in try expression");
                             try
                             {
-                                Var.pushThreadBindings(RT.map(Compiler.IN_CATCH_FINALLY, RT.T));
-                                finallyExpr = (new BodyExpr.Parser()).Parse(RT.next(f),false);
+                                //Var.pushThreadBindings(RT.map(Compiler.IN_CATCH_FINALLY, RT.T));
+                                Var.pushThreadBindings(RT.map(Compiler.IN_CATCH_FINALLY, true));
+                                finallyExpr = (new BodyExpr.Parser()).Parse(RT.next(f), false);
                             }
                             finally
                             {

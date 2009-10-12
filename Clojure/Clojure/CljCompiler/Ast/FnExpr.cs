@@ -647,7 +647,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             try
             {
-                Var.pushThreadBindings(RT.map(RT.PRINT_DUP, RT.T));
+                //Var.pushThreadBindings(RT.map(RT.PRINT_DUP, RT.T));
+                Var.pushThreadBindings(RT.map(RT.PRINT_DUP, true));
 
                 List<Expression> inits = new List<Expression>();
                 for (int i = 0; i < _constants.count(); i++)

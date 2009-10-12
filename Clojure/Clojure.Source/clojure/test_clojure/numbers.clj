@@ -25,7 +25,7 @@
 (deftest Coerced-Byte
   (let [v (byte 3)]
     (are [x] (true? x)
-     (instance? SByte v)                  ;;; Byte
+     (instance? Byte v)                 
      (number? v)
      (integer? v)
      (rational? v))))
@@ -349,7 +349,7 @@
 ;; pos? zero? neg?
 
 (deftest test-pos?-zero?-neg?
-  (let [nums [[(byte 2) (byte 0) (byte -2)]
+  (let [nums [[(sbyte 2) (sbyte 0) (sbyte -1)]   ;;;[(byte 2) (byte 0) (byte -1)]      ;;; right now we map byte to byte, which is unsigned versus signed in java.  (byte -2)
               [(short 3) (short 0) (short -3)]
               [(int 4) (int 0) (int -4)]
               [(long 5) (long 0) (long -5)]

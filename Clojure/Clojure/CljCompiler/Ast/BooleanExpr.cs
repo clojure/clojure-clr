@@ -24,7 +24,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override object Val
         {
-            get { return _val ? RT.T : RT.F; }
+            //get { return _val ? RT.T : RT.F; }
+            get { return _val; }
         }
 
         #endregion
