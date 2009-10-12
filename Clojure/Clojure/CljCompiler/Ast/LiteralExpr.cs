@@ -18,7 +18,7 @@ namespace clojure.lang.CljCompiler.Ast
 {
     abstract class LiteralExpr : Expr
     {
-        public abstract object val();
+        public abstract object Val { get; }
     }
 
 

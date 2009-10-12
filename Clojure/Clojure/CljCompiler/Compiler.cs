@@ -89,7 +89,8 @@ namespace clojure.lang
 
         //boolean
         internal static readonly Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                                 Symbol.create("*compile-files*"), false);  //JAVA: Boolean.FALSE -- changed from RT.F in rev 1108, not sure why
+                                                 Symbol.create("*compile-files*"), RT.F);  
+        //JAVA: Boolean.FALSE -- changed from RT.F in rev 1108, not sure why
 
         //String
         public static readonly Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),

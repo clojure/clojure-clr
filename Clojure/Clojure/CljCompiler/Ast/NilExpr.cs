@@ -20,9 +20,9 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        public override object val()
+        public override object Val
         {
-            return null;
+            get { return null; }
         }
 
         #endregion

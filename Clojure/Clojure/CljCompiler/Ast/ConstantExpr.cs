@@ -23,9 +23,9 @@ namespace clojure.lang.CljCompiler.Ast
         readonly object _v;
         readonly int _id;
 
-        public override object val()
+        public override object Val
         {
-            return _v;
+            get { return _v; }
         }
 
         #endregion

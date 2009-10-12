@@ -349,11 +349,8 @@ namespace clojure.lang
             return AreAssignable(paramType, argType);
         }
 
-
         public static Object prepRet(Object x)
         {
-            //	if(c == boolean.class)
-            //		return ((Boolean) x).booleanValue() ? RT.T : null;
             if (x is Boolean)
                 return ((Boolean)x) ? RT.T : RT.F;
             return x;

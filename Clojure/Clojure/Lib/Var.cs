@@ -144,7 +144,7 @@ namespace clojure.lang
         volatile object _root;
 
         static Keyword _privateKey = Keyword.intern(null, "private");
-        static IPersistentMap _privateMeta = new PersistentArrayMap(new object[] { _privateKey, true });
+        static IPersistentMap _privateMeta = new PersistentArrayMap(new object[] { _privateKey, RT.T });
         static Keyword _macroKey = Keyword.intern(null, "macro");
         static Keyword _nameKey = Keyword.intern(null, "name");
         static Keyword _nsKey = Keyword.intern(null, "ns");

@@ -281,8 +281,8 @@ namespace clojure.lang
 
         // TODO:  Should these really be object?  In ClojureJVM, we would be trying to avoid boxing.
 
-        public static readonly Boolean T = true;//Keyword.intern(Symbol.create(null, "t"));
-        public static readonly Boolean F = false;//Keyword.intern(Symbol.create(null, "t"));
+        public static readonly Object T = true;//Keyword.intern(Symbol.create(null, "t"));
+        public static readonly Object F = false;//Keyword.intern(Symbol.create(null, "t"));
 
         public static bool IsTrue(object o)
         {

@@ -22,9 +22,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         readonly bool _val;
 
-        public override object val()
+        public override object Val
         {
-            return _val;
+            get { return _val ? RT.T : RT.F; }
         }
 
         #endregion
