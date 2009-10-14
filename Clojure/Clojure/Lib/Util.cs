@@ -86,7 +86,8 @@ namespace clojure.lang
 
         public static int ConvertToInt(object o)
         {
-            // ToInt32 rounds.  We need truncation.
+            //  The Typecode dispatch version is much slower for most cases.
+            //  I leave it here as a reminder.
             //return (int)Convert.ToDouble(o);
             //switch (Type.GetTypeCode(o.GetType()))   // convert fix
             //{
@@ -145,39 +146,38 @@ namespace clojure.lang
                 return Convert.ToInt32(o);
         }
 
+        public static uint ConvertToUInt(object o)
+        {
+            if (o is UInt32)
+                return (uint)o;
+            else if (o is Int32)
+                return (uint)(int)o;
+            else if (o is Int64)
+                return (uint)(long)o;
+            else if (o is Double)
+                return (uint)(double)o;
+            else if (o is Single)
+                return (uint)(float)o;
+            else if (o is Int16)
+                return (uint)(short)o;
+            else if (o is Byte)
+                return (uint)(Byte)o;
+            else if (o is Char)
+                return (uint)(Char)o;
+            else if (o is Decimal)
+                return (uint)(decimal)o;
+            else if (o is SByte)
+                return (uint)(sbyte)o;
+            else if (o is UInt16)
+                return (uint)(ushort)o;
+            else if (o is UInt64)
+                return (uint)(ulong)o;
+            else
+                return Convert.ToUInt32(o);
+        }
+
         public static long ConvertToLong(object o)
         {
-            // ToInt64 rounds.  We need truncation.
-            //return (long)Convert.ToDouble(o);
-            //switch (Type.GetTypeCode(o.GetType()))   // convert fix
-            //{
-            //    case TypeCode.Byte:
-            //        return (long)(Byte)o;
-            //    case TypeCode.Char:
-            //        return (long)(Char)o;
-            //    case TypeCode.Decimal:
-            //        return (long)(decimal)o;
-            //    case TypeCode.Double:
-            //        return (long)(double)o;
-            //    case TypeCode.Int16:
-            //        return (long)(short)o;
-            //    case TypeCode.Int32:
-            //        return (long)(int)o;
-            //    case TypeCode.Int64:
-            //        return (long)o;
-            //    case TypeCode.SByte:
-            //        return (long)(sbyte)o;
-            //    case TypeCode.Single:
-            //        return (long)(float)o;
-            //    case TypeCode.UInt16:
-            //        return (long)(ushort)o;
-            //    case TypeCode.UInt32:
-            //        return (long)(uint)o;
-            //    case TypeCode.UInt64:
-            //        return (long)(ulong)o;
-            //    default:
-            //        return Convert.ToInt64(o);
-            //}
             if (o is Int64)
                 return (long)o;
             else if (o is Int32)
@@ -206,38 +206,164 @@ namespace clojure.lang
                 return Convert.ToInt64(o);
         }
 
+        public static ulong ConvertToULong(object o)
+        {
+            if (o is UInt64)
+                return (ulong)o;
+            else if (o is Int64)
+                return (ulong)(long)o;
+            else if (o is Int32)
+                return (ulong)(int)o;
+            else if (o is Double)
+                return (ulong)(double)o;
+            else if (o is Single)
+                return (ulong)(float)o;
+            else if (o is Int16)
+                return (ulong)(short)o;
+            else if (o is Byte)
+                return (ulong)(Byte)o;
+            else if (o is Char)
+                return (ulong)(Char)o;
+            else if (o is Decimal)
+                return (ulong)(decimal)o;
+            else if (o is SByte)
+                return (ulong)(sbyte)o;
+            else if (o is UInt16)
+                return (ulong)(ushort)o;
+            else if (o is UInt32)
+                return (ulong)(uint)o;
+            else
+                return Convert.ToUInt64(o);
+        }
+
+        //
+
+        public static short ConvertToShort(object o)
+        {
+            if (o is Int16)
+                return (short)o;
+            else if (o is Int32)
+                return (short)(int)o;
+            else if (o is Double)
+                return (short)(double)o;
+            else if (o is Single)
+                return (short)(float)o;
+            else if (o is Byte)
+                return (short)(Byte)o;
+            else if (o is Char)
+                return (short)(Char)o;
+            else if (o is Decimal)
+                return (short)(decimal)o;
+            else if (o is SByte)
+                return (short)(sbyte)o;
+            else if (o is UInt16)
+                return (short)(ushort)o;
+            else if (o is UInt32)
+                return (short)(uint)o;
+            else if (o is UInt64)
+                return (short)(ulong)o;
+            else if (o is Int64)
+                return (short)(long)o;
+            else
+                return Convert.ToInt16(o);
+        }
+
+        public static ushort ConvertToUShort(object o)
+        {
+            if (o is UInt16)
+                return (ushort)o;
+            else if (o is Int64)
+                return (ushort)(long)o;
+            else if (o is Int32)
+                return (ushort)(int)o;
+            else if (o is Double)
+                return (ushort)(double)o;
+            else if (o is Single)
+                return (ushort)(float)o;
+            else if (o is Int16)
+                return (ushort)(short)o;
+            else if (o is Byte)
+                return (ushort)(Byte)o;
+            else if (o is Char)
+                return (ushort)(Char)o;
+            else if (o is Decimal)
+                return (ushort)(decimal)o;
+            else if (o is SByte)
+                return (ushort)(sbyte)o;
+            else if (o is UInt32)
+                return (ushort)(uint)o;
+            else if (o is UInt64)
+                return (ushort)(ushort)o;
+            else
+                return Convert.ToUInt16(o);
+        }
+
+        //
+
+        public static sbyte ConvertToSByte(object o)
+        {
+            if (o is SByte)
+                return (sbyte)o;
+            else if (o is Int32)
+                return (sbyte)(int)o;
+            else if (o is Double)
+                return (sbyte)(double)o;
+            else if (o is Single)
+                return (sbyte)(float)o;
+            else if (o is Int16)
+                return (sbyte)(short)o;
+            else if (o is Byte)
+                return (sbyte)(Byte)o;
+            else if (o is Char)
+                return (sbyte)(Char)o;
+            else if (o is Decimal)
+                return (sbyte)(decimal)o;
+            else if (o is UInt16)
+                return (sbyte)(ushort)o;
+            else if (o is UInt32)
+                return (sbyte)(uint)o;
+            else if (o is UInt64)
+                return (sbyte)(ulong)o;
+            else if (o is Int64)
+                return (sbyte)(long)o;
+            else
+                return Convert.ToSByte(o);
+        }
+
+        public static byte ConvertToByte(object o)
+        {
+            if (o is Byte)
+                return (byte)o;
+            else if (o is Int32)
+                return (byte)(int)o;
+            else if (o is Int64)
+                return (byte)(long)o;
+            else if (o is Double)
+                return (byte)(double)o;
+            else if (o is Single)
+                return (byte)(float)o;
+            else if (o is Int16)
+                return (byte)(short)o;
+            else if (o is Char)
+                return (byte)(Char)o;
+            else if (o is Decimal)
+                return (byte)(decimal)o;
+            else if (o is SByte)
+                return (byte)(sbyte)o;
+            else if (o is UInt16)
+                return (byte)(ushort)o;
+            else if (o is UInt32)
+                return (byte)(uint)o;
+            else if (o is UInt64)
+                return (byte)(ushort)o;
+            else
+                return Convert.ToByte(o);
+        }
+
+        //
+        
         public static float ConvertToFloat(object o)
         {
-            //return (float)Convert.ToDouble(o);
-            //switch (Type.GetTypeCode(o.GetType()))   // convert fix
-            //{
-            //    case TypeCode.Byte:
-            //        return (float)(Byte)o;
-            //    case TypeCode.Char:
-            //        return (float)(Char)o;
-            //    case TypeCode.Decimal:
-            //        return (float)(decimal)o;
-            //    case TypeCode.Double:
-            //        return (float)(double)o;
-            //    case TypeCode.Int16:
-            //        return (float)(short)o;
-            //    case TypeCode.Int32:
-            //        return (float)(int)o;
-            //    case TypeCode.Int64:
-            //        return (float)(long)o;
-            //    case TypeCode.SByte:
-            //        return (float)(sbyte)o;
-            //    case TypeCode.Single:
-            //        return (float)o;
-            //    case TypeCode.UInt16:
-            //        return (float)(ushort)o;
-            //    case TypeCode.UInt32:
-            //        return (float)(uint)o;
-            //    case TypeCode.UInt64:
-            //        return (float)(ulong)o;
-            //    default:
-            //        return Convert.ToSingle(o);
-            //}
             if (o is Single)
                 return (float)o;
             else if (o is Double)
@@ -268,36 +394,6 @@ namespace clojure.lang
 
         public static double ConvertToDouble(object o)
         {
-            //return Convert.ToDouble(o);
-            //switch (Type.GetTypeCode(o.GetType()))   // convert fix
-            //{
-            //    case TypeCode.Byte:
-            //        return (double)(Byte)o;
-            //    case TypeCode.Char:
-            //        return (double)(Char)o;
-            //    case TypeCode.Decimal:
-            //        return (double)(decimal)o;
-            //    case TypeCode.Double:
-            //        return (double)o;
-            //    case TypeCode.Int16:
-            //        return (double)(short)o;
-            //    case TypeCode.Int32:
-            //        return (double)(int)o;
-            //    case TypeCode.Int64:
-            //        return (double)(long)o;
-            //    case TypeCode.SByte:
-            //        return (double)(sbyte)o;
-            //    case TypeCode.Single:
-            //        return (double)(float)o;
-            //    case TypeCode.UInt16:
-            //        return (double)(ushort)o;
-            //    case TypeCode.UInt32:
-            //        return (double)(uint)o;
-            //    case TypeCode.UInt64:
-            //        return (double)(ulong)o;
-            //    default:
-            //        return Convert.ToDouble(o);
-            //}
             if (o is Double)
                 return (double)o;
             else if (o is Single)
@@ -324,8 +420,72 @@ namespace clojure.lang
                 return (double)(ulong)o;
             else
                 return Convert.ToDouble(o);
-
         }
+
+
+        public static decimal ConvertToDecimal(object o)
+        {
+            if (o is Decimal)
+                return (decimal)o;
+            else if (o is Double)
+                return (decimal)(double)o;
+            else if (o is Single)
+                return (decimal)(float)o;
+            else if (o is Int32)
+                return (decimal)(int)o;
+            else if (o is Int64)
+                return (decimal)(long)o;
+            else if (o is Int16)
+                return (decimal)(short)o;
+            else if (o is Byte)
+                return (decimal)(Byte)o;
+            else if (o is Char)
+                return (decimal)(Char)o;
+            else if (o is SByte)
+                return (decimal)(sbyte)o;
+            else if (o is UInt16)
+                return (decimal)(ushort)o;
+            else if (o is UInt32)
+                return (decimal)(uint)o;
+            else if (o is UInt64)
+                return (decimal)(ulong)o;
+            else
+                return Convert.ToDecimal(o);
+        }
+
+
+        public static char ConvertToChar(object o)
+        {
+            if (o is Char)
+                return (Char)o;
+            else if (o is Int32)
+                return (char)(int)o;
+            else if (o is Int64)
+                return (char)(long)o;
+            else if (o is Double)
+                return (char)(double)o;
+            else if (o is Single)
+                return (char)(float)o;
+            else if (o is Int16)
+                return (char)(short)o;
+            else if (o is Byte)
+                return (char)(Byte)o;
+            else if (o is Char)
+                return (char)(Char)o;
+            else if (o is Decimal)
+                return (char)(decimal)o;
+            else if (o is SByte)
+                return (char)(sbyte)o;
+            else if (o is UInt16)
+                return (char)(ushort)o;
+            else if (o is UInt32)
+                return (char)(uint)o;
+            else if (o is UInt64)
+                return (char)(ulong)o;
+            else
+                return Convert.ToChar(o);
+        }
+
 
         public static bool IsNumeric(object o)
         {
@@ -499,6 +659,26 @@ namespace clojure.lang
                 if (type == typeof(BigInteger) || type == typeof(BigDecimal) || type == typeof(Ratio))
                     return true;
             //}
+            return false;
+        }
+
+        internal static bool IsPrimitiveNumeric(Type type)
+        {
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Char:
+                case TypeCode.SByte:
+                case TypeCode.Byte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.Double:
+                case TypeCode.Single:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return true;
+            }
             return false;
         }
 

@@ -313,8 +313,64 @@ namespace clojure.lang.CljCompiler.Ast
             if (Compiler.MaybePrimitiveType(arg) == type)
                 return ((MaybePrimitiveExpr)arg).GenDlrUnboxed(context);
             else
-                // Java has emitUnboxArg -- should we do something similar?
-                return arg.GenDlr(context);
+            {
+                Expression argExpr = arg.GenDlr(context);
+                return GenMaybeUnboxedArg(type, argExpr);
+            }
+        }
+
+        internal static readonly MethodInfo Method_Util_ConvertToSByte = typeof(Util).GetMethod("ConvertToByte");
+        internal static readonly MethodInfo Method_Util_ConvertToByte = typeof(Util).GetMethod("ConvertToByte");
+        internal static readonly MethodInfo Method_Util_ConvertToShort = typeof(Util).GetMethod("ConvertToShort");
+        internal static readonly MethodInfo Method_Util_ConvertToUShort = typeof(Util).GetMethod("ConvertToUShort");
+        internal static readonly MethodInfo Method_Util_ConvertToInt = typeof(Util).GetMethod("ConvertToInt");
+        internal static readonly MethodInfo Method_Util_ConvertToUInt = typeof(Util).GetMethod("ConvertToUInt");
+        internal static readonly MethodInfo Method_Util_ConvertToLong = typeof(Util).GetMethod("ConvertToLong");
+        internal static readonly MethodInfo Method_Util_ConvertToULong = typeof(Util).GetMethod("ConvertToULong");
+        internal static readonly MethodInfo Method_Util_ConvertToFloat = typeof(Util).GetMethod("ConvertToFloat");
+        internal static readonly MethodInfo Method_Util_ConvertToDouble = typeof(Util).GetMethod("ConvertToDouble");
+        internal static readonly MethodInfo Method_Util_ConvertToChar = typeof(Util).GetMethod("ConvertToChar");
+        internal static readonly MethodInfo Method_Util_ConvertToDecimal = typeof(Util).GetMethod("ConvertToDecimal");
+
+        static Expression GenMaybeUnboxedArg(Type type, Expression argExpr)
+        {
+            Type argType = argExpr.Type;
+
+            if (argType == type)
+                return argExpr;
+
+            if (type.IsAssignableFrom(argType))
+                return argExpr;
+
+            if (Util.IsPrimitiveNumeric(argType) && Util.IsPrimitiveNumeric(type))
+                return argExpr;
+
+            if (type == typeof(sbyte))
+                return Expression.Call(null, Method_Util_ConvertToSByte, argExpr);
+            else if ( type == typeof(byte))
+                return Expression.Call(null, Method_Util_ConvertToByte, argExpr);
+            else if (type == typeof(short))
+                return Expression.Call(null, Method_Util_ConvertToShort, argExpr);
+            else if (type == typeof(ushort))
+                return Expression.Call(null, Method_Util_ConvertToUShort, argExpr);
+            else if (type == typeof(int))
+                return Expression.Call(null, Method_Util_ConvertToInt, argExpr);
+            else if (type == typeof(uint))
+                return Expression.Call(null, Method_Util_ConvertToUInt, argExpr);
+            else if (type == typeof(long))
+                return Expression.Call(null, Method_Util_ConvertToLong, argExpr);
+            else if (type == typeof(ulong))
+                return Expression.Call(null, Method_Util_ConvertToULong, argExpr);
+            else if (type == typeof(float))
+                return Expression.Call(null, Method_Util_ConvertToFloat, argExpr);
+            else if (type == typeof(double))
+                return Expression.Call(null, Method_Util_ConvertToDouble, argExpr);
+            else if (type == typeof(char))
+                return Expression.Call(null, Method_Util_ConvertToChar, argExpr);
+            else if (type == typeof(decimal))
+                return Expression.Call(null, Method_Util_ConvertToDecimal, argExpr);
+            
+            return argExpr;
         }
 
         #endregion
