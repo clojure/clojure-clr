@@ -1,0 +1,643 @@
+From ed8d20f734aa831f7e61c981efe93c922cefb0ba Mon Sep 17 00:00:00 2001
+From: Shawn Hoover <shawn.hoover@gmail.com>
+Date: Fri, 2 Oct 2009 20:15:05 -0400
+Subject: [PATCH 1/4] ThreadPool-based Future implementation. Stock pmap works with this.
+
+---
+ Clojure/Clojure.Source/clojure/core.clj       |  108 +++++++++++++------------
+ Clojure/Clojure.Tests/Clojure.Tests.csproj    |    1 +
+ Clojure/Clojure.Tests/LibTests/FutureTests.cs |   79 ++++++++++++++++++
+ Clojure/Clojure/Clojure.csproj                |    1 +
+ Clojure/Clojure/Lib/Future.cs                 |   65 +++++++++++++++
+ 5 files changed, 203 insertions(+), 51 deletions(-)
+ create mode 100644 Clojure/Clojure.Tests/LibTests/FutureTests.cs
+ create mode 100644 Clojure/Clojure/Lib/Future.cs
+
+diff --git a/Clojure/Clojure.Source/clojure/core.clj b/Clojure/Clojure.Source/clojure/core.clj
+index a0e6dc2..dafd604 100644
+--- a/Clojure/Clojure.Source/clojure/core.clj
++++ b/Clojure/Clojure.Source/clojure/core.clj
+@@ -4353,11 +4353,11 @@
+ ;;; need to implement a Future class, or use the concurrency project
+ (defn future?
+   "Returns true if x is a future"
+-  [x] false )                       ;;; (instance? java.util.concurrent.Future x))
++  [x] (instance? clojure.lang.Future x))                 ;;; (instance? java.util.concurrent.Future x))
+ 
+ (defn future-done?
+   "Returns true if future f is done"
+-  [f] false)                       ;;;  [#^java.util.concurrent.Future f] (.isDone f))
++  [#^clojure.lang.Future f] (.isDone f))                 ;;;  [#^java.util.concurrent.Future f] (.isDone f))
+ 
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language") (load "core_clr")
+@@ -4381,55 +4381,61 @@
+ ;      (isDone [] (.isDone fut))
+ ;      (cancel [interrupt?] (.cancel fut interrupt?)))))
+ ;  
+-;(defmacro future
+-;  "Takes a body of expressions and yields a future object that will
+-;  invoke the body in another thread, and will cache the result and
+-;  return it on all subsequent calls to deref/@. If the computation has
+-;  not yet finished, calls to deref/@ will block."  
+-;  [& body] `(future-call (fn [] ~@body)))
+-;
+-;
+-;(defn future-cancel
+-;  "Cancels the future, if possible."
+-;  [#^java.util.concurrent.Future f] (.cancel f true))
+-;
+-;(defn future-cancelled?
+-;  "Returns true if future f is cancelled"
+-;  [#^java.util.concurrent.Future f] (.isCancelled f))
+-;
+-;(defn pmap
+-;  "Like map, except f is applied in parallel. Semi-lazy in that the
+-;  parallel computation stays ahead of the consumption, but doesn't
+-;  realize the entire result unless required. Only useful for
+-;  computationally intensive functions where the time of f dominates
+-;  the coordination overhead."
+-;  ([f coll]
+-;   (let [n (+ 2 (.. Runtime getRuntime availableProcessors))
+-;         rets (map #(future (f %)) coll)
+-;         step (fn step [[x & xs :as vs] fs]
+-;                (lazy-seq
+-;                 (if-let [s (seq fs)]
+-;                   (cons (deref x) (step xs (rest s)))
+-;                   (map deref vs))))]
+-;     (step rets (drop n rets))))
+-;  ([f coll & colls]
+-;   (let [step (fn step [cs]
+-;                (lazy-seq
+-;                 (let [ss (map seq cs)]
+-;                   (when (every? identity ss)
+-;                     (cons (map first ss) (step (map rest ss)))))))]
+-;
+-;(defn pcalls
+-;  "Executes the no-arg fns in parallel, returning a lazy sequence of
+-;  their values" 
+-;  [& fns] (pmap #(%) fns))
+-;
+-;(defmacro pvalues
+-;  "Returns a lazy sequence of the values of the exprs, which are
+-;  evaluated in parallel" 
+-;  [& exprs]
+-;  `(pcalls ~@(map #(list `fn [] %) exprs)))
+-;
++(defn future-call
++  [f]
++  (clojure.lang.Future. f))
++
++(defmacro future
++  "Takes a body of expressions and yields a future object that will
++  invoke the body in another thread, and will cache the result and
++  return it on all subsequent calls to deref/@. If the computation has
++  not yet finished, calls to deref/@ will block."  
++  [& body] `(future-call (fn [] ~@body)))
++
++
++(defn future-cancel
++  "Cancels the future, if possible."
++  [] nil)                                       ;;; [#^java.util.concurrent.Future f] (.cancel f true))
++
++(defn future-cancelled?
++  "Returns true if future f is cancelled"
++  [] false)                                     ;;; [#^java.util.concurrent.Future f] (.isCancelled f))
++
++
++(defn pmap
++  "Like map, except f is applied in parallel. Semi-lazy in that the
++  parallel computation stays ahead of the consumption, but doesn't
++  realize the entire result unless required. Only useful for
++  computationally intensive functions where the time of f dominates
++  the coordination overhead."
++  ([f coll]
++   (let [n (+ 2 Environment/ProcessorCount)     ;;; (.. Runtime getRuntime availableProcessors))
++         rets (map #(future (f %)) coll)
++         step (fn step [[x & xs :as vs] fs]
++                (lazy-seq
++                 (if-let [s (seq fs)]
++                   (cons (deref x) (step xs (rest s)))
++                   (map deref vs))))]
++     (step rets (drop n rets))))
++  ([f coll & colls]
++   (let [step (fn step [cs]
++                (lazy-seq
++                 (let [ss (map seq cs)]
++                   (when (every? identity ss)
++                     (cons (map first ss) (step (map rest ss)))))))]
++     (pmap #(apply f %) (step (cons coll colls))))))
++
++(defn pcalls
++  "Executes the no-arg fns in parallel, returning a lazy sequence of
++  their values" 
++  [& fns] (pmap #(%) fns))
++
++(defmacro pvalues
++  "Returns a lazy sequence of the values of the exprs, which are
++  evaluated in parallel" 
++  [& exprs]
++  `(pcalls ~@(map #(list `fn [] %) exprs)))
++
+ 
+ (defmacro letfn 
+   "Takes a vector of function specs and a body, and generates a set of
+diff --git a/Clojure/Clojure.Tests/Clojure.Tests.csproj b/Clojure/Clojure.Tests/Clojure.Tests.csproj
+index 6e198d1..707d49c 100644
+--- a/Clojure/Clojure.Tests/Clojure.Tests.csproj
++++ b/Clojure/Clojure.Tests/Clojure.Tests.csproj
+@@ -76,6 +76,7 @@
+     <Compile Include="LibTests\CachedSeqTests.cs" />
+     <Compile Include="LibTests\ConsTests.cs" />
+     <Compile Include="LibTests\DelayTests.cs" />
++    <Compile Include="LibTests\FutureTests.cs" />
+     <Compile Include="LibTests\GenProxyTests.cs" />
+     <Compile Include="LibTests\IObjTests.cs" />
+     <Compile Include="LibTests\ISeqTestHelper.cs" />
+diff --git a/Clojure/Clojure.Tests/LibTests/FutureTests.cs b/Clojure/Clojure.Tests/LibTests/FutureTests.cs
+new file mode 100644
+index 0000000..65f1227
+--- /dev/null
++++ b/Clojure/Clojure.Tests/LibTests/FutureTests.cs
+@@ -0,0 +1,79 @@
++﻿using System;
++using System.Collections.Generic;
++using System.Linq;
++using System.Text;
++using System.Threading;
++
++using NUnit.Framework;
++using Rhino.Mocks;
++
++using clojure.lang;
++
++namespace Clojure.Tests.LibTests
++{
++    [TestFixture]
++    public class FutureTests : AssertionHelper
++    {
++        [Test]
++        public void ComputesTheValueOnAnotherThread()
++        {
++            int workerID = Thread.CurrentThread.ManagedThreadId;
++            AFnImpl fn = new AFnImpl();
++            fn._fn0 = () =>
++                {
++                    workerID = Thread.CurrentThread.ManagedThreadId;
++                    return 42;
++                };
++            
++            Future f = new Future(fn);
++            Expect(f.deref(), EqualTo(42));
++            Expect(workerID, Not.EqualTo(Thread.CurrentThread.ManagedThreadId));
++        }
++
++        [Test]
++        public void CachesResultForSubsequentCalls()
++        {
++            int i = 0;
++            AFnImpl fn = new AFnImpl();
++            fn._fn0 = () => Interlocked.Increment(ref i);
++            
++            Future f = new Future(fn);
++            Expect(f.deref(), EqualTo(1));
++            Expect(f.deref(), EqualTo(1));
++            Expect(i, EqualTo(1));
++        }
++
++        [Test]
++        public void PropagatesExceptions()
++        {
++            AFnImpl fn = new AFnImpl();
++            fn._fn0 = () => { throw new Exception("future exception"); };
++            
++            Future f = new Future(fn);
++            try
++            {
++                f.deref();
++                Assert.Fail("expected future exception");
++            }
++            catch(Exception ex)
++            {
++                Expect(ex.Message, EqualTo("Future has an error"));
++                Expect(ex.InnerException, Is.Not.Null);
++                Expect(ex.InnerException.Message, EqualTo("future exception"));
++            }
++
++            // Same result for subsequent derefs.
++            try
++            {
++                f.deref();
++                Assert.Fail("expected future exception");
++            }
++            catch (Exception ex)
++            {
++                Expect(ex.Message, EqualTo("Future has an error"));
++                Expect(ex.InnerException, Is.Not.Null);
++                Expect(ex.InnerException.Message, EqualTo("future exception"));
++            }
++        }
++    }
++}
+diff --git a/Clojure/Clojure/Clojure.csproj b/Clojure/Clojure/Clojure.csproj
+index 2a4d93e..70902f1 100644
+--- a/Clojure/Clojure/Clojure.csproj
++++ b/Clojure/Clojure/Clojure.csproj
+@@ -111,6 +111,7 @@
+     <Compile Include="Lib\CountDownLatch.cs" />
+     <Compile Include="Lib\Counted.cs" />
+     <Compile Include="Lib\EnumeratorSeq.cs" />
++    <Compile Include="Lib\Future.cs" />
+     <Compile Include="Lib\IChunk.cs" />
+     <Compile Include="Lib\IChunkedSeq.cs" />
+     <Compile Include="Lib\IDeref.cs" />
+diff --git a/Clojure/Clojure/Lib/Future.cs b/Clojure/Clojure/Lib/Future.cs
+new file mode 100644
+index 0000000..4d4e8fd
+--- /dev/null
++++ b/Clojure/Clojure/Lib/Future.cs
+@@ -0,0 +1,65 @@
++﻿using System;
++using System.Collections.Generic;
++using System.Linq;
++using System.Text;
++using System.Threading;
++
++namespace clojure.lang
++{
++    public class Future : IDeref
++    {
++        ManualResetEvent done = new ManualResetEvent(false);
++        object value;
++        Exception error;
++
++        public Future(IFn fn)
++        {
++            ThreadPool.QueueUserWorkItem(new WaitCallback(ComputeFuture), fn);
++        }
++
++        private void ComputeFuture(object state)
++        {
++            try
++            {
++                value = ((IFn)state).invoke();
++            }
++            catch (Exception ex)
++            {
++                error = ex;
++            }
++            finally
++            {
++                done.Set();
++            }
++        }
++
++        #region IDeref Members
++
++        public object deref()
++        {
++            done.WaitOne();
++            if (error != null)
++            {
++                throw new Exception("Future has an error", error);
++            }
++            return value;
++        }
++
++        #endregion
++
++        public bool isDone()
++        {
++            return done.WaitOne(0);
++        }
++
++        public bool cancel()
++        {
++            return false;
++        }
++
++        public bool isCancelled()
++        {
++            return false;
++        }
++    }
++}
+-- 
+1.6.4.msysgit.0
+
+
+From 96dd9617c51b61ef9554b66d65092743dcc742b5 Mon Sep 17 00:00:00 2001
+From: Shawn Hoover <shawn.hoover@gmail.com>
+Date: Sun, 4 Oct 2009 16:34:11 -0400
+Subject: [PATCH 2/4] Use a dedicated thread since we shouldn't block on the ThreadPool.
+
+---
+ Clojure/Clojure/Lib/Future.cs |   13 +++++--------
+ 1 files changed, 5 insertions(+), 8 deletions(-)
+
+diff --git a/Clojure/Clojure/Lib/Future.cs b/Clojure/Clojure/Lib/Future.cs
+index 4d4e8fd..0ab234b 100644
+--- a/Clojure/Clojure/Lib/Future.cs
++++ b/Clojure/Clojure/Lib/Future.cs
+@@ -8,13 +8,14 @@ namespace clojure.lang
+ {
+     public class Future : IDeref
+     {
+-        ManualResetEvent done = new ManualResetEvent(false);
++        Thread t;
+         object value;
+         Exception error;
+ 
+         public Future(IFn fn)
+         {
+-            ThreadPool.QueueUserWorkItem(new WaitCallback(ComputeFuture), fn);
++            t = new Thread(new ParameterizedThreadStart(ComputeFuture));
++            t.Start(fn);
+         }
+ 
+         private void ComputeFuture(object state)
+@@ -27,17 +28,13 @@ namespace clojure.lang
+             {
+                 error = ex;
+             }
+-            finally
+-            {
+-                done.Set();
+-            }
+         }
+ 
+         #region IDeref Members
+ 
+         public object deref()
+         {
+-            done.WaitOne();
++            t.Join();
+             if (error != null)
+             {
+                 throw new Exception("Future has an error", error);
+@@ -49,7 +46,7 @@ namespace clojure.lang
+ 
+         public bool isDone()
+         {
+-            return done.WaitOne(0);
++            return t.Join(0);
+         }
+ 
+         public bool cancel()
+-- 
+1.6.4.msysgit.0
+
+
+From 5cd0b0747645b240f79714fc0e65de82346a60d4 Mon Sep 17 00:00:00 2001
+From: Shawn Hoover <shawn.hoover@gmail.com>
+Date: Sun, 4 Oct 2009 18:02:35 -0400
+Subject: [PATCH 3/4] Implemented future cancel, isCancelled.
+ Renamed instance members to _ standard.
+
+---
+ Clojure/Clojure.Source/clojure/core.clj       |    4 +-
+ Clojure/Clojure.Tests/LibTests/FutureTests.cs |   46 +++++++++++++
+ Clojure/Clojure/Lib/Future.cs                 |   87 ++++++++++++++++++++----
+ 3 files changed, 120 insertions(+), 17 deletions(-)
+
+diff --git a/Clojure/Clojure.Source/clojure/core.clj b/Clojure/Clojure.Source/clojure/core.clj
+index dafd604..690bb96 100644
+--- a/Clojure/Clojure.Source/clojure/core.clj
++++ b/Clojure/Clojure.Source/clojure/core.clj
+@@ -4395,11 +4395,11 @@
+ 
+ (defn future-cancel
+   "Cancels the future, if possible."
+-  [] nil)                                       ;;; [#^java.util.concurrent.Future f] (.cancel f true))
++  [#^clojure.lang.Future f] (.cancel f))    ;;; [#^java.util.concurrent.Future f] (.cancel f true))
+ 
+ (defn future-cancelled?
+   "Returns true if future f is cancelled"
+-  [] false)                                     ;;; [#^java.util.concurrent.Future f] (.isCancelled f))
++  [#^clojure.lang.Future f] (.isCancelled f))    ;;; [#^java.util.concurrent.Future f] (.isCancelled f))
+ 
+ 
+ (defn pmap
+diff --git a/Clojure/Clojure.Tests/LibTests/FutureTests.cs b/Clojure/Clojure.Tests/LibTests/FutureTests.cs
+index 65f1227..94512f9 100644
+--- a/Clojure/Clojure.Tests/LibTests/FutureTests.cs
++++ b/Clojure/Clojure.Tests/LibTests/FutureTests.cs
+@@ -75,5 +75,51 @@ namespace Clojure.Tests.LibTests
+                 Expect(ex.InnerException.Message, EqualTo("future exception"));
+             }
+         }
++
++        [Test]
++        public void CancelAbortsTheTask()
++        {
++            AFnImpl fn = new AFnImpl();
++            fn._fn0 = () => { while (true); };
++
++            Future f = new Future(fn);
++            Expect(f.cancel(), EqualTo(true));
++            Expect(f.isCancelled(), EqualTo(true));
++        }
++
++        [Test]
++        public void SecondCancelReturnsFalse()
++        {
++            AFnImpl fn = new AFnImpl();
++            fn._fn0 = () => { while (true); };
++
++            Future f = new Future(fn);
++            Expect(f.cancel(), EqualTo(true));
++            Expect(f.cancel(), EqualTo(false));
++        }
++        
++        [Test]
++        public void CancelFailsAfterSuccessfulCompletion()
++        {
++            AFnImpl fn = new AFnImpl();
++            fn._fn0 = () => { return 42; };
++
++            Future f = new Future(fn);
++            Expect(f.deref(), EqualTo(42));
++            Expect(f.cancel(), EqualTo(false));
++            Expect(f.isCancelled(), EqualTo(false));
++        }
++
++        [Test]
++        [ExpectedException(typeof(FutureAbortedException))]
++        public void DerefThrowsAfterCancellation()
++        {
++            AFnImpl fn = new AFnImpl();
++            fn._fn0 = () => { while (true); };
++
++            Future f = new Future(fn);
++            f.cancel();
++            f.deref();
++        }
+     }
+ }
+diff --git a/Clojure/Clojure/Lib/Future.cs b/Clojure/Clojure/Lib/Future.cs
+index 0ab234b..39a67b4 100644
+--- a/Clojure/Clojure/Lib/Future.cs
++++ b/Clojure/Clojure/Lib/Future.cs
+@@ -1,4 +1,14 @@
+-﻿using System;
++﻿/**
++ *   Copyright (c) Shawn Hoover. All rights reserved.
++ *   The use and distribution terms for this software are covered by the
++ *   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
++ *   which can be found in the file epl-v10.html at the root of this distribution.
++ *   By using this software in any fashion, you are agreeing to be bound by
++ * 	 the terms of this license.
++ *   You must not remove this notice, or any other, from this software.
++ **/
++
++using System;
+ using System.Collections.Generic;
+ using System.Linq;
+ using System.Text;
+@@ -6,27 +16,42 @@ using System.Threading;
+ 
+ namespace clojure.lang
+ {
++    /// <summary>
++    /// Implements IDeref and java.util.concurrent.Future, like the proxy in JVM clojure core.
++    /// </summary>
+     public class Future : IDeref
+     {
+-        Thread t;
+-        object value;
+-        Exception error;
++        readonly Thread _t;
++        readonly ManualResetEvent _started = new ManualResetEvent(false);
++        object _value;
++        Exception _error;
++        bool _cancelled;
+ 
+         public Future(IFn fn)
+         {
+-            t = new Thread(new ParameterizedThreadStart(ComputeFuture));
+-            t.Start(fn);
++            // TODO: Use a cached thread pool when agents have one.
++            _t = new Thread(new ParameterizedThreadStart(ComputeFuture));
++            _t.Name = "Future";
++            _t.Start(fn);
+         }
+ 
++        // Worker method to execute the task.
+         private void ComputeFuture(object state)
+         {
+             try
+             {
+-                value = ((IFn)state).invoke();
++                _started.Set();
++
++                _value = ((IFn)state).invoke();
++            }
++            catch (ThreadAbortException)
++            {
++                _cancelled = true;
++                Thread.ResetAbort();
+             }
+             catch (Exception ex)
+             {
+-                error = ex;
++                _error = ex;
+             }
+         }
+ 
+@@ -34,29 +59,61 @@ namespace clojure.lang
+ 
+         public object deref()
+         {
+-            t.Join();
+-            if (error != null)
++            _t.Join();
++            if (_cancelled)
+             {
+-                throw new Exception("Future has an error", error);
++                throw new FutureAbortedException();
+             }
+-            return value;
++            if (_error != null)
++            {
++                throw new Exception("Future has an error", _error);
++            }
++            return _value;
+         }
+ 
+         #endregion
+ 
++        /// <summary>
++        ///
++        /// </summary>
++        /// <returns>True if the task completed due to normal completion, cancellation,
++        /// or an exception.</returns>
+         public bool isDone()
+         {
+-            return t.Join(0);
++            return _t.Join(0);
+         }
+ 
++        /// <summary>
++        /// Attempts to abort the future.
++        /// </summary>
++        /// <returns>True if the attempt succeeds. False if the task already completed
++        /// or was cancelled previously.</returns>
+         public bool cancel()
+         {
+-            return false;
++            // Already completed or cancelled.
++            if (_t.Join(0))
++                return false;
++
++            // Don't abort until the task thread has established its ThreadAbortException catch block.
++            _started.WaitOne();
++
++            _t.Abort();
++            _t.Join();
++            return _cancelled;
+         }
+ 
+         public bool isCancelled()
+         {
+-            return false;
++            return _cancelled;
+         }
+     }
++
++    public class FutureAbortedException : Exception
++    {
++        public FutureAbortedException() { }
++
++        public FutureAbortedException(string msg) : base(msg) { }
++
++        public FutureAbortedException(string msg, Exception inner) : base(msg, inner) { }
++    }
+ }
+-- 
+1.6.4.msysgit.0
+
+
+From 0bd54882b58064fef250efb25d729cfddc23a8bb Mon Sep 17 00:00:00 2001
+From: Shawn Hoover <shawn.hoover@gmail.com>
+Date: Sun, 4 Oct 2009 18:08:33 -0400
+Subject: [PATCH 4/4] Tweaked test for additional isCancelled check.
+
+---
+ Clojure/Clojure.Tests/LibTests/FutureTests.cs |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/Clojure/Clojure.Tests/LibTests/FutureTests.cs b/Clojure/Clojure.Tests/LibTests/FutureTests.cs
+index 94512f9..b20892a 100644
+--- a/Clojure/Clojure.Tests/LibTests/FutureTests.cs
++++ b/Clojure/Clojure.Tests/LibTests/FutureTests.cs
+@@ -83,6 +83,7 @@ namespace Clojure.Tests.LibTests
+             fn._fn0 = () => { while (true); };
+ 
+             Future f = new Future(fn);
++            Expect(f.isCancelled(), EqualTo(false));
+             Expect(f.cancel(), EqualTo(true));
+             Expect(f.isCancelled(), EqualTo(true));
+         }
+-- 
+1.6.4.msysgit.0
+

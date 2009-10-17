@@ -53,21 +53,45 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="clojure\core_clr.clj" />
+    <None Include="clojure\core_clr.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="clojure\samples\ants.clj" />
-    <None Include="clojure\core.clj" />
-    <None Include="clojure\core_print.clj" />
-    <None Include="clojure\core_proxy.clj" />
-    <None Include="clojure\genclass.clj" />
-    <None Include="clojure\main.clj" />
+    <None Include="clojure\core.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\core_print.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\core_proxy.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\genclass.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\main.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="clojure\samples\await-test.clj" />
     <None Include="clojure\samples\celsius.clj" />
-    <None Include="clojure\set.clj" />
-    <None Include="clojure\dm-test.clj" />
-    <None Include="clojure\stacktrace.clj" />
-    <None Include="clojure\template.clj" />
-    <None Include="clojure\test.clj" />
-    <None Include="clojure\test\tap.clj" />
+    <None Include="clojure\set.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\dm-test.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\stacktrace.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\template.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\test.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\test\tap.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="clojure\test_clojure.clj" />
     <None Include="clojure\test_clojure\agents.clj" />
     <None Include="clojure\test_clojure\atoms.clj" />
@@ -98,8 +122,12 @@
     <None Include="clojure\test_clojure\test_fixtures.clj" />
     <None Include="clojure\test_clojure\test_utils.clj" />
     <None Include="clojure\test_clojure\vars.clj" />
-    <None Include="clojure\walk.clj" />
-    <None Include="clojure\zip.clj" />
+    <None Include="clojure\walk.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\zip.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

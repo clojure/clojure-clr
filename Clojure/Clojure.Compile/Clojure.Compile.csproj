@@ -49,6 +49,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Clojure.Source\Clojure.Source.csproj">
+      <Project>{0A74E77B-8BFF-4A64-8A16-5D0E5C9C47F3}</Project>
+      <Name>Clojure.Source</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Clojure\Clojure.csproj">
       <Project>{B8089F66-DFBD-4906-BEE0-B317689C2524}</Project>
       <Name>Clojure</Name>
@@ -62,4 +66,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PostBuildEvent>$(TargetPath) clojure.core clojure.set clojure.zip clojure.main clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap</PostBuildEvent>
+  </PropertyGroup>
 </Project>

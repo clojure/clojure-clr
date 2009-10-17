@@ -49,6 +49,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Clojure.Compile\Clojure.Compile.csproj">
+      <Project>{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}</Project>
+      <Name>Clojure.Compile</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Clojure\Clojure.csproj">
       <Project>{B8089F66-DFBD-4906-BEE0-B317689C2524}</Project>
       <Name>Clojure</Name>
@@ -62,4 +66,11 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PostBuildEvent>xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)\clojure\*.dll $(TargetDir)\clojure\ /Y /s
+xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)\clojure\*.pdb $(TargetDir)\clojure\ /Y /s
+xcopy $(SolutionDir)\Clojure.Source\clojure\test_clojure.clj $(TargetDir)\clojure\ 
+xcopy $(SolutionDir)\Clojure.Source\clojure\test_clojure\*.clj $(TargetDir)\clojure\test_clojure\ /Y /s
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>
