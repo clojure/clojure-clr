@@ -1863,6 +1863,12 @@ namespace clojure.lang
         /// <returns>The sum</returns>
         public BigInteger Add(BigInteger y)
         {
+            if (this._sign == 0)
+                return y;
+
+            if (y._sign == 0)
+                return this;
+
             if ( this._sign == y._sign )
                 return new BigInteger(_sign, Add(this._data, y._data));
             else
@@ -3367,6 +3373,58 @@ namespace clojure.lang
         private static ushort GetDoubleBiasedExponent(byte[] v)
         {
             return (ushort)((((ushort)(v[7] & 0x7F)) << (ushort)4) | (((ushort)(v[6] & 0xF0)) >> 4));
+        }
+
+        #endregion
+
+        #region Precision
+
+        // Support for BigDecimal, to compute precision.
+
+        public uint Precision
+        {
+            get
+            {
+                if (IsZero)
+                    return 1;  // 0 is one digit
+
+                uint digits = 0;
+                uint[] work = GetMagnitude();  // need a working copy.
+                int index=0;
+                while (index < work.Length-1 )
+                {
+                    InPlaceDivRem(work,ref index,1000000000U);
+                    digits += 9;
+                }
+
+                if (index == work.Length - 1)
+                    digits += UIntPrecision(work[index]);
+
+                return digits;                    
+            }
+        }
+
+        static uint[] UIntLogTable = 
+        {
+            0,
+            9,
+            99,
+            999,
+            9999,
+            99999,
+            999999,
+            9999999,
+            99999999,
+            999999999,
+            UInt32.MaxValue
+        };
+
+        // Algorithm from Hacker's Delight, section 11-4
+        static uint UIntPrecision(uint v)
+        {
+            for ( uint i=1; ; i++ )
+                if ( v <= UIntLogTable[i] )
+                    return i;
         }
 
         #endregion

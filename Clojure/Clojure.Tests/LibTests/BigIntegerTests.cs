@@ -903,6 +903,16 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
+        public void Add_zero_to_pos()
+        {
+            BigInteger x = new BigInteger(0, new uint[0]);
+            BigInteger y = new BigInteger(1, new uint[] { 0x3 });
+            BigInteger z = x.Add(y);
+            Expect(z,EqualTo(y));
+        }
+
+
+        [Test]
         public void Subtract_zero_yields_this()
         {
             BigInteger x = new BigInteger(1, new uint[] { 0x12345678, 0x12345678, 0xFFFFFFFF, 0xFFFFFFFF, 0x22222222 });
@@ -2625,7 +2635,67 @@ namespace Clojure.Tests.LibTests
 
         #endregion
 
+        #region Precision tests
 
+        [Test]
+        public void PrecisionSingleDigitsIsOne()
+        {
+            for (int i = -9; i <= 9; i++)
+            {
+                BigInteger bi = BigInteger.Create(i);
+                Expect(bi.Precision, EqualTo(1));
+            }
+        }
+
+        [Test]
+        public void PrecisionTwoDigitsIsTwo()
+        {
+            int[] values = {-99, -50, -11, -10, 10, 11, 50, 99 };
+            foreach (int v in values )
+            {
+                BigInteger bi = BigInteger.Create(v);
+                Expect(bi.Precision,EqualTo(2));
+            }
+        }
+
+        [Test]
+        public void PrecisionThreeDigitsIsThree()
+        {
+            int[] values = { -999, -509, -101, -100, 100, 101, 500, 999 };
+            foreach (int v in values)
+            {
+                BigInteger bi = BigInteger.Create(v);
+                Expect(bi.Precision, EqualTo(3));
+            }
+        }
+
+        [Test]
+        public void PrecisionBoundaryCases()
+        {
+            string nines = "";
+            string tenpow = "1";
+
+            for ( int i=1; i<30; i++ )
+            {
+                nines += "9";
+                tenpow += "0";
+                BigInteger bi9 = BigInteger.Parse(nines);
+                BigInteger bi0 = BigInteger.Parse(tenpow);
+                Expect(bi9.Precision,EqualTo(i));
+                Expect(bi0.Precision,EqualTo(i+1));
+            }
+        }
+
+        [Test]
+        public void PrecisionBoundaryCase2()
+        {
+            BigInteger x = new BigInteger(1, new uint[] { 0xFFFFFFFF });
+            BigInteger y = new BigInteger(1, new uint[] { 0x1, 0x0  });
+            Expect(x.Precision, EqualTo(10));
+            Expect(y.Precision, EqualTo(10));
+        }
+
+        #endregion
 
         #region Some utilities
 
