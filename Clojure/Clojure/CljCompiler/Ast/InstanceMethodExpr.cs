@@ -13,7 +13,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
-using Microsoft.Linq.Expressions;
+#if CLR2
+using Microsoft.Scripting.Ast;
+#else
+using System.Linq.Expressions;
+#endif
 using AstUtils = Microsoft.Scripting.Ast.Utils;
 
 namespace clojure.lang.CljCompiler.Ast

@@ -5,8 +5,12 @@ using System.Text;
 using clojure.lang;
 using System.Diagnostics;
 using System.IO;
-using Microsoft.Linq.Expressions;
-using Microsoft.Scripting.Generation;
+#if CLR2
+using Microsoft.Scripting.Ast;
+#else
+using System.Linq.Expressions;
+#endif
+//using Microsoft.Scripting.Generation;
 
 namespace clojure.console
 {

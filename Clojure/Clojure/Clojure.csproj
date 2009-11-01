@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{B8089F66-DFBD-4906-BEE0-B317689C2524}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CLR2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -231,6 +231,10 @@
     <None Include="Resources\version.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\DLR_Main\Src\Runtime\Microsoft.Dynamic\Microsoft.Dynamic.csproj">
+      <Project>{EB66B766-6354-4208-A3D4-AACBDCB5C3B3}</Project>
+      <Name>Microsoft.Dynamic</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\DLR_Main\Src\Runtime\Microsoft.Scripting.Core\Microsoft.Scripting.Core.csproj">
       <Project>{2AE75F5A-CD1F-4925-9647-AF4D1C282FB4}</Project>
       <Name>Microsoft.Scripting.Core</Name>

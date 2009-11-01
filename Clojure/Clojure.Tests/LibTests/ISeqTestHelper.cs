@@ -40,7 +40,7 @@ namespace Clojure.Tests.LibTests
         public void VerifyISeqRestTypes(ISeq s, Type type)
         {
             for ( ; s.next() != null; s = s.next())
-                Expect(s.next(), InstanceOfType(type));
+                Expect(s.next(), InstanceOf(type));
         }
 
         public void VerifyISeqRestMaintainsMeta(ISeq s)

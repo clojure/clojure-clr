@@ -794,7 +794,7 @@ namespace Clojure.Tests.LibTests
         public void CanReadEmptyList()
         {
             Object o1 = ReadFromString("(   )");
-            Expect(o1, InstanceOfType(typeof(IPersistentList)));
+            Expect(o1, InstanceOf(typeof(IPersistentList)));
             IPersistentList pl = o1 as IPersistentList;
             Expect(pl.count(), EqualTo(0));
         }
@@ -803,11 +803,11 @@ namespace Clojure.Tests.LibTests
         public void CanReadNestedList()
         {
             Object o1 = ReadFromString("(a (b c) d)");
-            Expect(o1, InstanceOfType(typeof(IPersistentList)));
+            Expect(o1, InstanceOf(typeof(IPersistentList)));
             IPersistentList pl = o1 as IPersistentList;
             ISeq seq = pl.seq();
             Expect(pl.count(), EqualTo(3));
-            Expect(seq.next().first(), InstanceOfType(typeof(IPersistentList)));
+            Expect(seq.next().first(), InstanceOf(typeof(IPersistentList)));
             IPersistentList sub = seq.next().first() as IPersistentList;
             Expect(sub.count(), EqualTo(2));
         }
@@ -823,7 +823,7 @@ namespace Clojure.Tests.LibTests
         public void ListGetsLineNumber()
         {
             Object o1 = ReadFromStringNumbering("\n\n(a b \n1 2)");
-            Expect(o1, InstanceOfType(typeof(IObj)));
+            Expect(o1, InstanceOf(typeof(IObj)));
             IObj io = o1 as IObj;
             Expect(io.meta().valAt(Keyword.intern(null,"line")), EqualTo(3));
         }
@@ -850,7 +850,7 @@ namespace Clojure.Tests.LibTests
         public void CanReadEmptyVector()
         {
             Object o1 = ReadFromString("[   ]");
-            Expect(o1, InstanceOfType(typeof(IPersistentVector)));
+            Expect(o1, InstanceOf(typeof(IPersistentVector)));
             IPersistentVector v = o1 as IPersistentVector;
             Expect(v.count(), EqualTo(0));
         }
@@ -859,10 +859,10 @@ namespace Clojure.Tests.LibTests
         public void VectorCanContainNestedList()
         {
             Object o1 = ReadFromString("[a (b c) d]");
-            Expect(o1, InstanceOfType(typeof(IPersistentVector)));
+            Expect(o1, InstanceOf(typeof(IPersistentVector)));
             IPersistentVector v = o1 as IPersistentVector;
             Expect(v.count(), EqualTo(3));
-            Expect(v.nth(1), InstanceOfType(typeof(IPersistentList)));
+            Expect(v.nth(1), InstanceOf(typeof(IPersistentList)));
             IPersistentList sub = v.nth(1) as IPersistentList;
             Expect(sub.count(), EqualTo(2));
         }
@@ -871,10 +871,10 @@ namespace Clojure.Tests.LibTests
         public void VectorCanContainNestedVector()
         {
             Object o1 = ReadFromString("[a [b c] d]");
-            Expect(o1, InstanceOfType(typeof(IPersistentVector)));
+            Expect(o1, InstanceOf(typeof(IPersistentVector)));
             IPersistentVector v = o1 as IPersistentVector;
             Expect(v.count(), EqualTo(3));
-            Expect(v.nth(1), InstanceOfType(typeof(IPersistentVector)));
+            Expect(v.nth(1), InstanceOf(typeof(IPersistentVector)));
             IPersistentVector sub = v.nth(1) as IPersistentVector;
             Expect(sub.count(), EqualTo(2));
         }
@@ -894,7 +894,7 @@ namespace Clojure.Tests.LibTests
         public void CanReadBasicMap()
         {
             Object o1 = ReadFromString("{:abc 12 14 a}");
-            Expect(o1, InstanceOfType(typeof(IPersistentMap)));
+            Expect(o1, InstanceOf(typeof(IPersistentMap)));
             IPersistentMap m = o1 as IPersistentMap;
             Expect(m.count(), EqualTo(2));
             Expect(m.valAt(Keyword.intern(null, "abc")), EqualTo(12));
@@ -905,7 +905,7 @@ namespace Clojure.Tests.LibTests
         public void CanReadEmptyMap()
         {
             Object o1 = ReadFromString("{   }");
-            Expect(o1, InstanceOfType(typeof(IPersistentMap)));
+            Expect(o1, InstanceOf(typeof(IPersistentMap)));
             IPersistentMap m = o1 as IPersistentMap;
             Expect(m.count(), EqualTo(0));
         }
@@ -935,7 +935,7 @@ namespace Clojure.Tests.LibTests
         public void CanReadBasicSet()
         {
             Object o1 = ReadFromString("#{abc 12}");
-            Expect(o1, InstanceOfType(typeof(IPersistentSet)));
+            Expect(o1, InstanceOf(typeof(IPersistentSet)));
             IPersistentSet s = o1 as IPersistentSet;
             Expect(s.count(), EqualTo(2));
             Expect(s.contains(Symbol.intern("abc")));
@@ -946,7 +946,7 @@ namespace Clojure.Tests.LibTests
         public void CanReadEmptySet()
         {
             Object o1 = ReadFromString("#{   }");
-            Expect(o1, InstanceOfType(typeof(IPersistentSet)));
+            Expect(o1, InstanceOf(typeof(IPersistentSet)));
             IPersistentSet s = o1 as IPersistentSet;
             Expect(s.count(), EqualTo(0));
         }
@@ -999,7 +999,7 @@ namespace Clojure.Tests.LibTests
         public void QuoteWraps()
         {
             object o1 = ReadFromString("'a");
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(2));
             Expect(s.first(),EqualTo(Symbol.intern("quote")));
@@ -1010,11 +1010,11 @@ namespace Clojure.Tests.LibTests
         public void QuoteWraps2()
         {
             object o1 = ReadFromString("'(a b c)");
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("quote")));
-            Expect(s.next().first(), InstanceOfType(typeof(IPersistentList)));
+            Expect(s.next().first(), InstanceOf(typeof(IPersistentList)));
             Expect(((IPersistentList)s.next().first()).count(), EqualTo(3));
         }
 
@@ -1023,7 +1023,7 @@ namespace Clojure.Tests.LibTests
         public void MetaWraps()
         {
             object o1 = ReadFromString("^a");
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("clojure.core","meta")));
@@ -1034,11 +1034,11 @@ namespace Clojure.Tests.LibTests
         public void MetaWraps2()
         {
             object o1 = ReadFromString("^(a b c)");
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("clojure.core", "meta")));
-            Expect(s.next().first(), InstanceOfType(typeof(IPersistentList)));
+            Expect(s.next().first(), InstanceOf(typeof(IPersistentList)));
             Expect(((IPersistentList)s.next().first()).count(), EqualTo(3));
         }
 
@@ -1046,7 +1046,7 @@ namespace Clojure.Tests.LibTests
         public void DerefWraps()
         {
             object o1 = ReadFromString("@a");
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("clojure.core", "deref")));
@@ -1057,11 +1057,11 @@ namespace Clojure.Tests.LibTests
         public void DerefWraps2()
         {
             object o1 = ReadFromString("@(a b c)");
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("clojure.core", "deref")));
-            Expect(s.next().first(), InstanceOfType(typeof(IPersistentList)));
+            Expect(s.next().first(), InstanceOf(typeof(IPersistentList)));
             Expect(((IPersistentList)s.next().first()).count(), EqualTo(3));
         }
 
@@ -1091,11 +1091,11 @@ namespace Clojure.Tests.LibTests
         public void SQOnSpecialFormQuotes()
         {
             object o1 = ReadFromString("`def");
-            Expect(o1,InstanceOfType(typeof(ISeq)));
+            Expect(o1,InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(),EqualTo(2) );
             Expect(s.first(),EqualTo(Symbol.intern("quote")));
-            Expect(s.next().first(),InstanceOfType(typeof(Symbol)));
+            Expect(s.next().first(),InstanceOf(typeof(Symbol)));
             Symbol sym = s.next().first() as Symbol;
             Expect(sym.Namespace, Null);
             Expect(sym.Name, EqualTo("def"));
@@ -1105,11 +1105,11 @@ namespace Clojure.Tests.LibTests
         public void SQOnRegularSymbolResolves()
         {
             object o1 = ReadFromString("`abc");
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("quote")));
-            Expect(s.next().first(), InstanceOfType(typeof(Symbol)));
+            Expect(s.next().first(), InstanceOf(typeof(Symbol)));
             Symbol sym = s.next().first() as Symbol;
             Expect(sym.Namespace, EqualTo(((Namespace)RT.CURRENT_NS.deref()).Name.Name));
             Expect(sym.Name, EqualTo("abc"));
@@ -1119,11 +1119,11 @@ namespace Clojure.Tests.LibTests
         public void SQOnGensymGenerates()
         {
             object o1 = ReadFromString("`abc#");
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("quote")));
-            Expect(s.next().first(), InstanceOfType(typeof(Symbol)));
+            Expect(s.next().first(), InstanceOf(typeof(Symbol)));
             Symbol sym = s.next().first() as Symbol;
             Expect(sym.Namespace, Null);
             Expect(sym.Name.StartsWith("abc_")); ;
@@ -1139,32 +1139,32 @@ namespace Clojure.Tests.LibTests
             //                                 (clojure/list (quote abc__N)))))
             string str = o1.ToString();
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(),EqualTo(2));
             Expect(s.first(),EqualTo(Symbol.intern("clojure.core","seq")));
-            Expect(s.next().first(),InstanceOfType(typeof(ISeq)));
+            Expect(s.next().first(),InstanceOf(typeof(ISeq)));
             ISeq s1 = s.next().first() as ISeq;
 
             Expect(s1.count(), EqualTo(3));
             Expect(s1.first(), EqualTo(Symbol.intern("clojure.core","concat")));
 
-            Expect(s1.next().first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.next().first(), InstanceOf(typeof(ISeq)));
             ISeq s2 = s1.next().first() as ISeq;
             Expect(s2.count(), EqualTo(2));
 
-            Expect(s2.next().first(), InstanceOfType(typeof(ISeq)));
+            Expect(s2.next().first(), InstanceOf(typeof(ISeq)));
             ISeq s2a = s2.next().first() as ISeq;
-            Expect(s2a.next().first(), InstanceOfType(typeof(Symbol)));
+            Expect(s2a.next().first(), InstanceOf(typeof(Symbol)));
             Symbol sym1 = s2a.next().first() as Symbol;
 
-            Expect(s1.next().next().first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.next().next().first(), InstanceOf(typeof(ISeq)));
             ISeq s3 = s1.next().next().first() as ISeq;
             Expect(s3.count(), EqualTo(2));
 
-            Expect(s3.next().first(), InstanceOfType(typeof(ISeq)));
+            Expect(s3.next().first(), InstanceOf(typeof(ISeq)));
             ISeq s3a = s3.next().first() as ISeq;
-            Expect(s3a.next().first(), InstanceOfType(typeof(Symbol)));
+            Expect(s3a.next().first(), InstanceOf(typeof(Symbol)));
             Symbol sym2 = s3a.next().first() as Symbol;
 
             Expect(sym1.Namespace, Null);
@@ -1184,26 +1184,26 @@ namespace Clojure.Tests.LibTests
             //                             (clojure/list :b) 
             //                             (clojure/list 2))))
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(3));
             Expect(s.first(), EqualTo(Symbol.intern("clojure.core/apply")));
             Expect(s.next().first(), EqualTo(Symbol.intern("clojure.core/hash-map")));
-            Expect(s.next().next().first(), InstanceOfType(typeof(ISeq)));
+            Expect(s.next().next().first(), InstanceOf(typeof(ISeq)));
 
             ISeq s0 = s.next().next().first() as ISeq;
             ISeq s2;
 
             Expect(s0.count(), EqualTo(2));
             Expect(s0.first(), EqualTo(Symbol.intern("clojure.core/seq")));
-            Expect(s0.next().first(),InstanceOfType(typeof(ISeq)));
+            Expect(s0.next().first(),InstanceOf(typeof(ISeq)));
             ISeq s1 = s0.next().first() as ISeq;
 
             Expect(s1.count(), EqualTo(5));
             Expect(s1.first(), EqualTo(Symbol.intern("clojure.core/concat")));
 
             s1 = s1.next();
-            Expect(s1.first(),InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(),InstanceOf(typeof(ISeq)));
 
             s2 = s1.first() as ISeq;
             Expect(s2.first(),EqualTo(Symbol.intern("clojure.core/list")));
@@ -1211,14 +1211,14 @@ namespace Clojure.Tests.LibTests
 
 
             s1 = s1.next();
-            Expect(s1.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(), InstanceOf(typeof(ISeq)));
 
             s2 = s1.first() as ISeq;
             Expect(s2.first(), EqualTo(Symbol.intern("clojure.core/list")));
             Expect(s2.next().first(), EqualTo(1));
 
             s1 = s1.next();
-            Expect(s1.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(), InstanceOf(typeof(ISeq)));
 
             s2 = s1.first() as ISeq;
             Expect(s2.first(), EqualTo(Symbol.intern("clojure.core/list")));
@@ -1226,7 +1226,7 @@ namespace Clojure.Tests.LibTests
 
 
             s1 = s1.next();
-            Expect(s1.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(), InstanceOf(typeof(ISeq)));
 
             s2 = s1.first() as ISeq;
             Expect(s2.first(), EqualTo(Symbol.intern("clojure.core/list")));
@@ -1241,12 +1241,12 @@ namespace Clojure.Tests.LibTests
             //         (clojure/concat (clojure/list :b) 
             //                         (clojure/list 2)))
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(3));
             Expect(s.first(), EqualTo(Symbol.intern("clojure.core/apply")));
             Expect(s.next().first(), EqualTo(Symbol.intern("clojure.core/vector")));
-            Expect(s.next().next().first(), InstanceOfType(typeof(ISeq)));
+            Expect(s.next().next().first(), InstanceOf(typeof(ISeq)));
 
             ISeq s1 = s.next().next().first() as ISeq;
             ISeq s2;
@@ -1255,7 +1255,7 @@ namespace Clojure.Tests.LibTests
             Expect(s1.first(), EqualTo(Symbol.intern("clojure.core/concat")));
 
             s1 = s1.next();
-            Expect(s1.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(), InstanceOf(typeof(ISeq)));
 
             s2 = s1.first() as ISeq;
             Expect(s2.first(), EqualTo(Symbol.intern("clojure.core/list")));
@@ -1263,7 +1263,7 @@ namespace Clojure.Tests.LibTests
 
 
             s1 = s1.next();
-            Expect(s1.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(), InstanceOf(typeof(ISeq)));
 
             s2 = s1.first() as ISeq;
             Expect(s2.first(), EqualTo(Symbol.intern("clojure.core/list")));
@@ -1280,17 +1280,17 @@ namespace Clojure.Tests.LibTests
             //             (clojure/concat (clojure/list :b) 
             //                             (clojure/list 2))))
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(3));
             Expect(s.first(), EqualTo(Symbol.intern("clojure.core/apply")));
             Expect(s.next().first(), EqualTo(Symbol.intern("clojure.core/hash-set")));
-            Expect(s.next().next().first(), InstanceOfType(typeof(ISeq)));
+            Expect(s.next().next().first(), InstanceOf(typeof(ISeq)));
 
             ISeq s0 = s.next().next().first() as ISeq;
             Expect(s0.count(), EqualTo(2));
             Expect(s0.first(),EqualTo(Symbol.intern("clojure.core/seq")));
-            Expect(s0.next().first(),InstanceOfType(typeof(ISeq)));
+            Expect(s0.next().first(),InstanceOf(typeof(ISeq)));
 
             ISeq s1 = s0.next().first() as ISeq;
             
@@ -1298,10 +1298,10 @@ namespace Clojure.Tests.LibTests
             Expect(s1.first(), EqualTo(Symbol.intern("clojure.core/concat")));
 
             s1 = s1.next();
-            Expect(s1.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(), InstanceOf(typeof(ISeq)));
             ISeq s2 = s1.first() as ISeq;
             s1 = s1.next();
-            Expect(s1.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(), InstanceOf(typeof(ISeq)));
             ISeq s3 = s1.first() as ISeq;
 
             Expect(s2.first(), EqualTo(Symbol.intern("clojure.core/list")));
@@ -1325,12 +1325,12 @@ namespace Clojure.Tests.LibTests
             //   (clojure/seq (clojure/concat (clojure/list :b) 
             //                                (clojure/list 2))))
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
 
             ISeq s0 = o1 as ISeq;
             Expect(s0.count(), EqualTo(2));
             Expect(s0.first(), EqualTo(Symbol.intern("clojure.core/seq")));
-            Expect(s0.next().first(),InstanceOfType(typeof(ISeq)));
+            Expect(s0.next().first(),InstanceOf(typeof(ISeq)));
             ISeq s1 = s0.next().first() as ISeq;
             ISeq s2;
 
@@ -1338,7 +1338,7 @@ namespace Clojure.Tests.LibTests
             Expect(s1.first(), EqualTo(Symbol.intern("clojure.core/concat")));
 
             s1 = s1.next();
-            Expect(s1.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(), InstanceOf(typeof(ISeq)));
 
             s2 = s1.first() as ISeq;
             Expect(s2.first(), EqualTo(Symbol.intern("clojure.core/list")));
@@ -1346,7 +1346,7 @@ namespace Clojure.Tests.LibTests
 
 
             s1 = s1.next();
-            Expect(s1.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(), InstanceOf(typeof(ISeq)));
 
             s2 = s1.first() as ISeq;
             Expect(s2.first(), EqualTo(Symbol.intern("clojure.core/list")));
@@ -1359,10 +1359,10 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromString("~x");
 
-            //Expect(o1, InstanceOfType(typeof(LispReader.Unquote)));
+            //Expect(o1, InstanceOf(typeof(LispReader.Unquote)));
             //LispReader.Unquote u = o1 as LispReader.Unquote;
             //Expect(u.Obj, EqualTo(Symbol.intern("x")));
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.first(), EqualTo(Symbol.intern("clojure.core/unquote")));
             Expect(s.next().first(), EqualTo(Symbol.intern("x")));
@@ -1375,7 +1375,7 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromString("~@x");
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.first(), EqualTo(Symbol.intern("clojure.core/unquote-splicing")));
             Expect(s.next().first(), EqualTo(Symbol.intern("x")));
@@ -1390,12 +1390,12 @@ namespace Clojure.Tests.LibTests
             //                              (clojure/list b)))
 
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
 
             ISeq s0 = o1 as ISeq;
             Expect(s0.count(),EqualTo(2));
             Expect(s0.first(),EqualTo(Symbol.intern("clojure.core/seq")));
-            Expect(s0.next().first(),InstanceOfType(typeof(ISeq)));
+            Expect(s0.next().first(),InstanceOf(typeof(ISeq)));
 
             ISeq s1 = s0.next().first() as ISeq;
             ISeq s2;
@@ -1404,11 +1404,11 @@ namespace Clojure.Tests.LibTests
             Expect(s1.first(), EqualTo(Symbol.intern("clojure.core/concat")));
 
             s1 = s1.next();
-            Expect(s1.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(), InstanceOf(typeof(ISeq)));
 
             s2 = s1.first() as ISeq;
             Expect(s2.first(), EqualTo(Symbol.intern("clojure.core/list")));
-            Expect(s2.next().first(), InstanceOfType(typeof(ISeq)));
+            Expect(s2.next().first(), InstanceOf(typeof(ISeq)));
             ISeq s3 = s2.next().first() as ISeq;
 
             Expect(s3.count(), EqualTo(2));
@@ -1417,7 +1417,7 @@ namespace Clojure.Tests.LibTests
 
 
             s1 = s1.next();
-            Expect(s1.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(), InstanceOf(typeof(ISeq)));
 
             s2 = s1.first() as ISeq;
             Expect(s2.first(), EqualTo(Symbol.intern("clojure.core/list")));
@@ -1437,12 +1437,12 @@ namespace Clojure.Tests.LibTests
             object o1 = ReadFromString("`(a ~@b)");
             // (clojure/seq (clojure/concat (clojure/list (quote user/a)) b))
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
 
             ISeq s0 = o1 as ISeq;
             Expect(s0.count(), EqualTo(2));
             Expect(s0.first(), EqualTo(Symbol.intern("clojure.core/seq")));
-            Expect(s0.next().first(), InstanceOfType(typeof(ISeq)));
+            Expect(s0.next().first(), InstanceOf(typeof(ISeq)));
 
             ISeq s1 = s0.next().first() as ISeq;
             ISeq s2;
@@ -1451,11 +1451,11 @@ namespace Clojure.Tests.LibTests
             Expect(s1.first(), EqualTo(Symbol.intern("clojure.core/concat")));
 
             s1 = s1.next();
-            Expect(s1.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s1.first(), InstanceOf(typeof(ISeq)));
 
             s2 = s1.first() as ISeq;
             Expect(s2.first(), EqualTo(Symbol.intern("clojure.core/list")));
-            Expect(s2.next().first(), InstanceOfType(typeof(ISeq)));
+            Expect(s2.next().first(), InstanceOf(typeof(ISeq)));
             ISeq s3 = s2.next().first() as ISeq;
 
             Expect(s3.count(), EqualTo(2));
@@ -1474,7 +1474,7 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromString("`()");
             //  (clojure/list)
-            Expect(o1,InstanceOfType(typeof(ISeq)));
+            Expect(o1,InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(),EqualTo(1));
             Expect(s.first(),EqualTo(Symbol.intern("clojure.core/list")));
@@ -1514,16 +1514,16 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromString("#^{a 1} (a b)");
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
 
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("a")));
             Expect(s.next().first(), EqualTo(Symbol.intern("b")));
 
-            Expect(o1, InstanceOfType(typeof(IObj)));
+            Expect(o1, InstanceOf(typeof(IObj)));
             IObj o = o1 as IObj;
-            Expect(o.meta(), InstanceOfType(typeof(IPersistentMap)));
+            Expect(o.meta(), InstanceOf(typeof(IPersistentMap)));
             IPersistentMap m = o.meta() as IPersistentMap;
 
             Expect(m.count(), EqualTo(1));
@@ -1536,16 +1536,16 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromString("#^c (a b)");
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
 
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("a")));
             Expect(s.next().first(), EqualTo(Symbol.intern("b")));
 
-            Expect(o1, InstanceOfType(typeof(IObj)));
+            Expect(o1, InstanceOf(typeof(IObj)));
             IObj o = o1 as IObj;
-            Expect(o.meta(), InstanceOfType(typeof(IPersistentMap)));
+            Expect(o.meta(), InstanceOf(typeof(IPersistentMap)));
             IPersistentMap m = o.meta() as IPersistentMap;
 
             Expect(m.count(), EqualTo(1));
@@ -1557,16 +1557,16 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromString("#^:c (a b)");
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
 
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("a")));
             Expect(s.next().first(), EqualTo(Symbol.intern("b")));
 
-            Expect(o1, InstanceOfType(typeof(IObj)));
+            Expect(o1, InstanceOf(typeof(IObj)));
             IObj o = o1 as IObj;
-            Expect(o.meta(), InstanceOfType(typeof(IPersistentMap)));
+            Expect(o.meta(), InstanceOf(typeof(IPersistentMap)));
             IPersistentMap m = o.meta() as IPersistentMap;
 
             Expect(m.count(), EqualTo(1));
@@ -1578,16 +1578,16 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromString("#^\"help\" (a b)");
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
 
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("a")));
             Expect(s.next().first(), EqualTo(Symbol.intern("b")));
 
-            Expect(o1, InstanceOfType(typeof(IObj)));
+            Expect(o1, InstanceOf(typeof(IObj)));
             IObj o = o1 as IObj;
-            Expect(o.meta(), InstanceOfType(typeof(IPersistentMap)));
+            Expect(o.meta(), InstanceOf(typeof(IPersistentMap)));
             IPersistentMap m = o.meta() as IPersistentMap;
 
             Expect(m.count(), EqualTo(1));
@@ -1599,16 +1599,16 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromStringNumbering("\n\n#^:c (a b)");
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
 
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("a")));
             Expect(s.next().first(), EqualTo(Symbol.intern("b")));
 
-            Expect(o1, InstanceOfType(typeof(IObj)));
+            Expect(o1, InstanceOf(typeof(IObj)));
             IObj o = o1 as IObj;
-            Expect(o.meta(), InstanceOfType(typeof(IPersistentMap)));
+            Expect(o.meta(), InstanceOf(typeof(IPersistentMap)));
             IPersistentMap m = o.meta() as IPersistentMap;
 
             Expect(m.count(), EqualTo(2));
@@ -1625,7 +1625,7 @@ namespace Clojure.Tests.LibTests
         {
             Object o1 = ReadFromString("#'abc");
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("var")));
@@ -1641,7 +1641,7 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromString("#\"abc\"");
 
-            Expect(o1, InstanceOfType(typeof(System.Text.RegularExpressions.Regex)));
+            Expect(o1, InstanceOf(typeof(System.Text.RegularExpressions.Regex)));
             System.Text.RegularExpressions.Regex r = o1 as System.Text.RegularExpressions.Regex;
             Expect(r.ToString(), EqualTo("abc"));
         }
@@ -1666,7 +1666,7 @@ namespace Clojure.Tests.LibTests
 
             object o1 = ReadFromString(str);
 
-            Expect(o1, InstanceOfType(typeof(System.Text.RegularExpressions.Regex)));
+            Expect(o1, InstanceOf(typeof(System.Text.RegularExpressions.Regex)));
             System.Text.RegularExpressions.Regex r = o1 as System.Text.RegularExpressions.Regex;
             Expect(r.ToString(), EqualTo("a\\\"bc"));
         }
@@ -1681,18 +1681,18 @@ namespace Clojure.Tests.LibTests
             object o1 = ReadFromString("#(+ 1 2)");
             // (fn* [] (+ 1 2))
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
 
             Expect(s.first(), EqualTo(Symbol.intern("fn*")));
             s = s.next();
-            Expect(s.first(), InstanceOfType(typeof(IPersistentVector)));
+            Expect(s.first(), InstanceOf(typeof(IPersistentVector)));
             IPersistentVector arglist = s.first() as IPersistentVector;
 
             Expect(arglist.count(), EqualTo(0));
 
             s = s.next();
-            Expect(s.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s.first(), InstanceOf(typeof(ISeq)));
             Expect(s.next(), Null);
 
             ISeq form = s.first() as ISeq;
@@ -1709,24 +1709,24 @@ namespace Clojure.Tests.LibTests
             object o1 = ReadFromString("#(+ %2 2)");
             // (fn* [p1__N p2__M] (+ p2__M 2))
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
 
             Expect(s.first(), EqualTo(Symbol.intern("fn*")));
             s = s.next();
-            Expect(s.first(), InstanceOfType(typeof(IPersistentVector)));
+            Expect(s.first(), InstanceOf(typeof(IPersistentVector)));
             IPersistentVector arglist = s.first() as IPersistentVector;
 
             Expect(arglist.count(), EqualTo(2));
-            Expect(arglist.nth(0), InstanceOfType(typeof(Symbol)));
-            Expect(arglist.nth(1), InstanceOfType(typeof(Symbol)));
+            Expect(arglist.nth(0), InstanceOf(typeof(Symbol)));
+            Expect(arglist.nth(1), InstanceOf(typeof(Symbol)));
             Symbol arg1 = arglist.nth(0) as Symbol;
             Symbol arg2 = arglist.nth(1) as Symbol;
             Expect(arg1.Name, StartsWith("p1__"));
             Expect(arg2.Name, StartsWith("p2__"));
 
             s = s.next();
-            Expect(s.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s.first(), InstanceOf(typeof(ISeq)));
             Expect(s.next(), Null);
 
             ISeq form = s.first() as ISeq;
@@ -1743,19 +1743,19 @@ namespace Clojure.Tests.LibTests
             object o1 = ReadFromString("#(+ %2 %&)");
             // (fn* [p1__N p2__M & rest__X] (+ p2__M rest__X))
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
 
             Expect(s.first(), EqualTo(Symbol.intern("fn*")));
             s = s.next();
-            Expect(s.first(), InstanceOfType(typeof(IPersistentVector)));
+            Expect(s.first(), InstanceOf(typeof(IPersistentVector)));
             IPersistentVector arglist = s.first() as IPersistentVector;
 
             Expect(arglist.count(), EqualTo(4));
-            Expect(arglist.nth(0), InstanceOfType(typeof(Symbol)));
-            Expect(arglist.nth(1), InstanceOfType(typeof(Symbol)));
-            Expect(arglist.nth(2), InstanceOfType(typeof(Symbol)));
-            Expect(arglist.nth(3), InstanceOfType(typeof(Symbol)));
+            Expect(arglist.nth(0), InstanceOf(typeof(Symbol)));
+            Expect(arglist.nth(1), InstanceOf(typeof(Symbol)));
+            Expect(arglist.nth(2), InstanceOf(typeof(Symbol)));
+            Expect(arglist.nth(3), InstanceOf(typeof(Symbol)));
             Symbol arg1 = arglist.nth(0) as Symbol;
             Symbol arg2 = arglist.nth(1) as Symbol;
             Symbol arg3 = arglist.nth(2) as Symbol;
@@ -1766,7 +1766,7 @@ namespace Clojure.Tests.LibTests
             Expect(arg4.Name, StartsWith("rest__"));
 
             s = s.next();
-            Expect(s.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s.first(), InstanceOf(typeof(ISeq)));
             Expect(s.next(), Null);
 
             ISeq form = s.first() as ISeq;
@@ -1783,21 +1783,21 @@ namespace Clojure.Tests.LibTests
             object o1 = ReadFromString("#(+ % 2)");
             // (fn* [p1__N] (+ p1__N 2))
 
-            Expect(o1, InstanceOfType(typeof(ISeq)));
+            Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
 
             Expect(s.first(), EqualTo(Symbol.intern("fn*")));
             s = s.next();
-            Expect(s.first(), InstanceOfType(typeof(IPersistentVector)));
+            Expect(s.first(), InstanceOf(typeof(IPersistentVector)));
             IPersistentVector arglist = s.first() as IPersistentVector;
 
             Expect(arglist.count(), EqualTo(1));
-            Expect(arglist.nth(0), InstanceOfType(typeof(Symbol)));
+            Expect(arglist.nth(0), InstanceOf(typeof(Symbol)));
             Symbol arg1 = arglist.nth(0) as Symbol;
             Expect(arg1.Name, StartsWith("p1__"));
 
             s = s.next();
-            Expect(s.first(), InstanceOfType(typeof(ISeq)));
+            Expect(s.first(), InstanceOf(typeof(ISeq)));
             Expect(s.next(), Null);
 
             ISeq form = s.first() as ISeq;

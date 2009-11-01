@@ -14,7 +14,11 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Threading;
-using Microsoft.Linq.Expressions;
+#if CLR2
+using Microsoft.Scripting.Ast;
+#else
+using System.Linq.Expressions;
+#endif
 using clojure.lang.CljCompiler.Ast;
 using clojure.runtime;
 using System.Reflection;
