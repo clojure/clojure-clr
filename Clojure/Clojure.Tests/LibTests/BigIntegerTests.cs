@@ -219,6 +219,9 @@ namespace Clojure.Tests.LibTests
             i = BigInteger.Create(-1.0);
             Expect(SameValue(i, -1, new uint[] { 1 }));
 
+            i = BigInteger.Create(10.0);
+            Expect(SameValue(i, 1, new uint[] { 10 }));
+
             i = BigInteger.Create(12345678.123);
             Expect(SameValue(i, 1, new uint[] { 12345678 }));
 
@@ -543,6 +546,24 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i;
             bool result = BigInteger.TryParse("123456789012345678901234567890", 10, out i);
+            Expect(result);
+            Expect(SameValue(i, 1, new uint[] { 0x1, 0x8ee90ff6, 0xc373e0ee, 0x4e3f0ad2 }));
+        }
+
+        [Test]
+        public void Parse_works_with_leading_minus_sign()
+        {
+            BigInteger i;
+            bool result = BigInteger.TryParse("-123456789012345678901234567890", 10, out i);
+            Expect(result);
+            Expect(SameValue(i, -1, new uint[] { 0x1, 0x8ee90ff6, 0xc373e0ee, 0x4e3f0ad2 }));
+        }
+
+        [Test]
+        public void Parse_works_with_leading_plus_sign()
+        {
+            BigInteger i;
+            bool result = BigInteger.TryParse("+123456789012345678901234567890", 10, out i);
             Expect(result);
             Expect(SameValue(i, 1, new uint[] { 0x1, 0x8ee90ff6, 0xc373e0ee, 0x4e3f0ad2 }));
         }
@@ -1522,6 +1543,42 @@ namespace Clojure.Tests.LibTests
             Expect(p == a);
         }
 
+
+        #endregion
+
+        #region misc tests
+
+        [Test]
+        public void IsOddWorks()
+        {
+            BigInteger x1 = new BigInteger(0, new uint[] { 0x0 });
+            BigInteger x2 = new BigInteger(1, new uint[] { 0x1 });
+            BigInteger x3 = new BigInteger(-1, new uint[] { 0x1 });
+            BigInteger x4 = new BigInteger(1, new uint[] { 0x2 });
+            BigInteger x5 = new BigInteger(-1, new uint[] { 0x2 });
+            BigInteger x6 = new BigInteger(1, new uint[] { 0xFFFFFFF0 });
+            BigInteger x7 = new BigInteger(-1, new uint[] { 0xFFFFFFF0 });
+            BigInteger x8 = new BigInteger(1, new uint[] { 0xFFFFFFF1 });
+            BigInteger x9 = new BigInteger(-1, new uint[] { 0xFFFFFFF1 });
+            BigInteger x10 = new BigInteger(1, new uint[] { 0x1, 0x2 });
+            BigInteger x11 = new BigInteger(1, new uint[] { 0x2, 0x1 });
+            BigInteger x12 = new BigInteger(1, new uint[] { 0x2, 0x2 });
+            BigInteger x13 = new BigInteger(1, new uint[] { 0x1, 0x1 });
+
+            Expect(x1.IsOdd, False);
+            Expect(x2.IsOdd);
+            Expect(x3.IsOdd);
+            Expect(x4.IsOdd, False);
+            Expect(x5.IsOdd, False);
+            Expect(x6.IsOdd, False);
+            Expect(x7.IsOdd, False);
+            Expect(x8.IsOdd);
+            Expect(x9.IsOdd);
+            Expect(x10.IsOdd, False);
+            Expect(x11.IsOdd);
+            Expect(x12.IsOdd, False);
+            Expect(x13.IsOdd);
+        }
 
         #endregion
 

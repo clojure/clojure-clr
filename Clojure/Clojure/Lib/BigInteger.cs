@@ -73,6 +73,11 @@ namespace clojure.lang
         public static BigInteger TWO = new BigInteger(1, new uint[] { 2 });
 
         /// <summary>
+        /// Five
+        /// </summary>
+        public static BigInteger FIVE = new BigInteger(1, new uint[] { 5 });
+
+        /// <summary>
         /// Ten
         /// </summary>
         public static BigInteger TEN = new BigInteger(1, new uint[] { 10 });
@@ -229,7 +234,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="sign">The sign (-1, 0, +1)</param>
         /// <param name="data">The magnitude (big-endian)</param>
-        /// <exception cref="System.ArgumentException>Thrown when the sign is not one of -1, 0, +1, 
+        /// <exception cref="System.ArgumentException">Thrown when the sign is not one of -1, 0, +1, 
         /// or if a zero sign is given on a non-empty magnitude.</exception>
         /// <remarks>
         /// <para>Leading zero (uint) digits will be removed.</para>
@@ -334,18 +339,30 @@ namespace clojure.lang
             short sign = 1;
             int len = s.Length;
 
-            // zero length bad, hyphen only bad, hyphen not leading bad
-            int index = s.LastIndexOf('-');
-            if (len == 0 || (index == 0 && len == 1) || (index > 0))
+            // zero length bad, 
+            // hyphen only bad, plus only bad,
+            // hyphen not leading bad, plus not leading bad
+            // (overkill) both hyphen and minus present (one would be caught by the tests above)
+            int minusIndex = s.LastIndexOf('-');
+            int plusIndex = s.LastIndexOf('+');
+            if (len == 0
+                || (minusIndex == 0 && len == 1)
+                || (plusIndex == 0 && len == 1)
+                || (minusIndex > 0)
+                || (plusIndex > 0))
             {
                 v = null;
                 return false;
             }
 
-            if (index != -1)
+            int index = 0;
+            if (plusIndex != -1)
+                index = 1;
+            else if (minusIndex != -1)
+            {
                 sign = -1;
-
-            index++;
+                index = 1;
+            }
 
             // skip leading zeros
             while (index < len && s[index] == '0')
@@ -2822,7 +2839,7 @@ namespace clojure.lang
             {
                 return (_data != null
                     && _data.Length > 0
-                    && ((_data[0] & 1) != 0));
+                    && ((_data[_data.Length-1] & 1) != 0));
             }
         }
 
@@ -3329,7 +3346,7 @@ namespace clojure.lang
         /// <summary>
         /// Exponent bias in the 64-bit floating point representation.
         /// </summary>
-        const int DoubleExponentBias = 1023;
+        public const int DoubleExponentBias = 1023;
 
         /// <summary>
         /// The size in bits of the significand in the 64-bit floating point representation.
@@ -3337,9 +3354,9 @@ namespace clojure.lang
         const int DoubleSignificandBitLength = 52;
 
         /// <summary>
-        /// How much to shift to accommdate the exponent and the binary digits of the significand.
+        /// How much to shift to accommodate the exponent and the binary digits of the significand.
         /// </summary>
-        const int DoubleShiftBias = DoubleExponentBias + DoubleSignificandBitLength;
+        public const int DoubleShiftBias = DoubleExponentBias + DoubleSignificandBitLength;
 
 
         /// <summary>
@@ -3347,17 +3364,17 @@ namespace clojure.lang
         /// </summary>
         /// <param name="v">A byte-array representation of a double</param>
         /// <returns>The sign bit, either 0 (positive) or 1 (negative)</returns>
-        private static int GetDoubleSign(byte[] v)
+        public  static int GetDoubleSign(byte[] v)
         {
             return v[7] & 0x80;
         }
 
         /// <summary>
-        /// Extract the significand (AKA mantissa, coefficient) from a byte-array representaition of a double.
+        /// Extract the significand (AKA mantissa, coefficient) from a byte-array representation of a double.
         /// </summary>
         /// <param name="v">A byte-array representation of a double</param>
         /// <returns>The significand</returns>
-        private static ulong GetDoubleSignificand(byte[] v)
+        public static ulong GetDoubleSignificand(byte[] v)
         {
             uint i1 = ((uint)v[0] | ((uint)v[1] << 8) | ((uint)v[2] << 16) | ((uint)v[3] << 24));
             uint i2 = ((uint)v[4] | ((uint)v[5] << 8) | ((uint)(v[6] & 0xF) << 16));
@@ -3370,7 +3387,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="v">A byte-array representation of a double</param>
         /// <returns>The exponent</returns>
-        private static ushort GetDoubleBiasedExponent(byte[] v)
+        public static ushort GetDoubleBiasedExponent(byte[] v)
         {
             return (ushort)((((ushort)(v[7] & 0x7F)) << (ushort)4) | (((ushort)(v[6] & 0xF0)) >> 4));
         }
@@ -3420,7 +3437,7 @@ namespace clojure.lang
         };
 
         // Algorithm from Hacker's Delight, section 11-4
-        static uint UIntPrecision(uint v)
+        public static uint UIntPrecision(uint v)
         {
             for ( uint i=1; ; i++ )
                 if ( v <= UIntLogTable[i] )

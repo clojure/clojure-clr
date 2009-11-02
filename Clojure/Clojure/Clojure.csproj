@@ -51,6 +51,7 @@
     <Reference Include="vjslib" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Lib\BigDecimal.cs" />
     <Compile Include="CljCompiler\Ast\AFnImplGenerator.cs" />
     <Compile Include="CljCompiler\Ast\AssignableExpr.cs" />
     <Compile Include="CljCompiler\Ast\AssignExpr.cs" />
