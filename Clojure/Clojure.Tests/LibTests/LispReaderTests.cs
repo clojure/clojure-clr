@@ -19,7 +19,7 @@ using NUnit.Framework;
 using Rhino.Mocks;
 
 using clojure.lang;
-using BigDecimal = java.math.BigDecimal;
+//using BigDecimal = java.math.BigDecimal;
 
 using RMExpect = Rhino.Mocks.Expect;
 
@@ -127,18 +127,17 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void MatchNumberMatchesDecimals()
         {
-            object o1 = LispReader.matchNumber("123.7M");
-            // MS implementation of BigDecimal parser does not allow these.
-            //object o2 = LispReader.matchNumber("-123.7E4M");
-            //object o3 = LispReader.matchNumber("+1.237e4M");
-            //object o4 = LispReader.matchNumber("+1.237e-4M");
-            //object o5 = LispReader.matchNumber("1.237e+4M");
+            TestDecimalMatch("123.7M","123.7");
+            TestDecimalMatch("-123.7E4M","-123.7E+4");
+            TestDecimalMatch("+123.7E4M","123.7E4");
+            TestDecimalMatch("0.0001234500M", "0.0001234500");
+            TestDecimalMatch("123456789.987654321E-6M", "123.456789987654321");  
+        }
 
-            Expect(o1, EqualTo(new BigDecimal("123.7")));
-            //Expect(o2, EqualTo(-1237000.0M));
-            //Expect(o3, EqualTo(1.237e4M));
-            //Expect(o4, EqualTo(1.237e-4M));
-            //Expect(o5, EqualTo(1.237e4M));       
+        void TestDecimalMatch(string inStr,string bdStr)
+        {
+            object o = LispReader.matchNumber(inStr);
+            Expect(o, EqualTo(BigDecimal.Parse(bdStr)));
         }
 
         [Test]

@@ -141,5 +141,41 @@ namespace Clojure.Tests.LibTests
         }
 
         #endregion
+
+        #region rationalize tests
+
+        [Test]
+        public void RationalizeTakesIntegerToBigInteger()
+        {
+            BigDecimal bd = BigDecimal.Parse("12345");
+            object r = Numbers.rationalize(bd);
+            Expect(r,InstanceOf(typeof(BigInteger)));
+            BigInteger bi = (BigInteger) r;
+            Expect(bi,EqualTo(BigInteger.Parse("12345")));
+        }
+
+        [Test]
+        public void RationalizeTakesFractionToBigInteger()
+        {
+            BigDecimal bd = BigDecimal.Parse("123.45");
+            object r = Numbers.rationalize(bd);
+            Expect(r, InstanceOf(typeof(Ratio)));
+            Ratio rr = (Ratio)r;
+            Ratio ratio = new Ratio(BigInteger.Create(12345/5), BigInteger.Create(100/5));
+            Expect(rr, EqualTo(ratio));
+        }
+
+        [Test]
+        public void RaionalizeWorksOnDoubles()
+        {
+            object r = Numbers.rationalize(0.0625);
+            Expect(r, InstanceOf(typeof(Ratio)));
+            Ratio rr = (Ratio)r;
+            Ratio ratio = new Ratio(BigInteger.Create(1), BigInteger.Create(16));
+            Expect(rr, EqualTo(ratio));
+
+        }
+
+        #endregion
     }
 }

@@ -12,15 +12,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using BigDecimal = java.math.BigDecimal;
+//using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
 {
-
-    // The old version of Numbers is over in NumbersV0. 
-    // I'm keeping it around until I'm sure I want to go with this one.
-    // Make updates in both places.
-
     public class Numbers
     {
 
@@ -137,6 +132,8 @@ namespace clojure.lang
 
         #endregion
 
+        #region BitOps interface
+
         interface BitOps
         {
             BitOps combine(BitOps y);
@@ -155,6 +152,8 @@ namespace clojure.lang
             object shiftLeft(object x, int n);
             object shiftRight(object x, int n);
         }
+
+        #endregion
 
         #region Basic Ops operations
 
@@ -232,7 +231,7 @@ namespace clojure.lang
                 return (int)q;
             else
                 // bigint quotient
-                return reduce(new BigDecimal(q).toBigInteger());
+                return reduce(BigDecimal.Create(q).ToBigInteger());
         }
 
         static object DRemainder(double n, double d)
@@ -243,7 +242,7 @@ namespace clojure.lang
             else
             {
                 // bigint quotient
-                object bq = reduce(new BigDecimal(q).toBigInteger());
+                object bq = reduce(BigDecimal.Create(q).ToBigInteger());
                 return n - ((double)bq) * d;
             }
         }
@@ -527,17 +526,12 @@ namespace clojure.lang
             if (x is BigDecimal)
                 return (BigDecimal)x;
             else if ( x is BigInteger)
-                // TODO: when we get new BigDecimal, fix this.
-                //return new BigDecimal((BigInteger)x);
-                return new BigDecimal(((BigInteger)x).ToString());
+                return BigDecimal.Create((BigInteger)x);
             else
-                return BigDecimal.valueOf(Util.ConvertToLong(x)); // convert fix
+                return BigDecimal.Create(Util.ConvertToLong(x)); // convert fix
 
         }
 
-        // TODO: doublecheck toRatio
-        // Java BigDecimal has unscaledValue and pow.  
-        // MS implementation does not.
         static Ratio toRatio(object x)
         {
             if (x is Ratio)
@@ -545,46 +539,32 @@ namespace clojure.lang
             else if (x is BigDecimal)
             {
                 BigDecimal bx = (BigDecimal)x;
-                int scale = bx.scale();
-                if (scale < 0)
-                    //return new Ratio(bx.toBigInteger(), BigIntegerOne);
-                    return new Ratio(bx.toBigInteger(), BigInteger.ONE);
+                int exp = bx.Exponent;
+                if (exp >= 0)
+                    return new Ratio(bx.ToBigInteger(), BigInteger.ONE);
                 else
-                    //return new Ratio(bx.movePointRight(scale).toBigInteger(), BigIntegerTen.pow(scale));
-                    return new Ratio(bx.movePointRight(scale).toBigInteger(), BigInteger.TEN.Power(scale));
+                    return new Ratio(bx.MovePointRight(-exp).ToBigInteger(), BigInteger.TEN.Power(-exp));
             }
-            //return new Ratio(toBigInteger(x), BigIntegerOne);
             return new Ratio(toBigInteger(x), BigInteger.ONE);
         }
-                    
-        // TODO: fix rationalize
-        // Java BigDecimal has .valueOf(double)
+
         public static object rationalize(object x)
         {
-            //if ( x is float || x is double )
-            //    //return rationalize(new BigDecimal(Convert.ToDouble(x))); // wrong, should be (double)x));
-            //    return rationalize(new BigDecimal( Convert.ToDouble(x) )); 
             if (x is float)                                     // convert fix
-                return rationalize(new BigDecimal((float)x));   // convert fix
+                return rationalize(BigDecimal.Create((float)x));   // convert fix
             else if (x is double)                               // convert fix
-                return rationalize(new BigDecimal((double)x));  // convert fix
+                return rationalize(BigDecimal.Create((double)x));  // convert fix
             else if (x is BigDecimal)
             {
                 BigDecimal bx = (BigDecimal)x;
-                int scale = bx.scale();
-                if (scale < 0)
-                    return bx.toBigInteger();
+                int exp = bx.Exponent;
+                if (exp >= 0)
+                    return bx.ToBigInteger();
                 else
                     //return divide(bx.movePointRight(scale).toBigInteger(), BigIntegerTen.pow(scale));
-                    return divide(bx.movePointRight(scale).toBigInteger(), BigInteger.TEN.Power(scale));
+                    return divide(bx.MovePointRight(-exp).ToBigInteger(), BigInteger.TEN.Power(-exp));
             }
             return x;
-        }
-
-        public static object reduce(java.math.BigInteger jmbi)
-        {
-            // TODO: Get rid of this when we replace BigDecimal
-            return reduce(BigInteger.Parse(jmbi.ToString()));
         }
 
         public static object reduce(object val)
@@ -633,10 +613,6 @@ namespace clojure.lang
 
             return new Ratio((d.Signum < 0 ? -n : n), d.Abs());
         }
-
-
-
-        public static BigDecimal BigDecimalOne = BigDecimal.valueOf(1);
 
         #endregion
 
@@ -1282,47 +1258,57 @@ namespace clojure.lang
 
             public override bool isZero(BigDecimal bx)
             {
-                return bx.signum() == 0;
+                return bx.IsZero;
             }
 
             public override bool isPos(BigDecimal bx)
             {
-                return bx.signum() > 0;
+                return bx.IsPositive;
             }
 
             public override bool isNeg(BigDecimal bx)
             {
-                return bx.signum() < 0;
+                return bx.IsNegative;
             }
 
             public override object add(BigDecimal x, BigDecimal y)
             {
-                return x.add(y);
+                BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                return c == null
+                    ? x.Add(y)
+                    : x.Add(y, c.Value);
             }
 
             public override object multiply(BigDecimal x, BigDecimal y)
             {
-                return x.multiply(y);
+                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                 return c == null
+                    ? x.Multiply(y)
+                    : x.Multiply(y, c.Value);
             }
 
-            // TODO: figure out what the rounding mode should be
             public override object divide(BigDecimal x, BigDecimal y)
             {
-                return x.divide(y, BigDecimal.ROUND_HALF_EVEN);
+                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                 return c == null
+                     ? x.Divide(y)
+                     : x.Divide(y, c.Value);
             }
 
-            // TODO: this is  just plain wrong;
-            // Java version uses .divideToIntegralValue
             public override object quotient(BigDecimal x, BigDecimal y)
             {
-                return x.divide(y, 0);
+                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                 return c == null
+                     ? x.DivideInteger(y)
+                     : x.DivideInteger(y, c.Value);
             }
 
-            // TODO: this is  just plain wrong;
-            // Java version uses .remainder
             public override object remainder(BigDecimal x, BigDecimal y)
             {
-                return x.divide(y, 0);
+                BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                return c == null
+                    ? x.Mod(y)
+                    : x.Mod(y, c.Value);
             }
 
             public override bool equiv(BigDecimal x, BigDecimal y)
@@ -1332,22 +1318,31 @@ namespace clojure.lang
 
             public override bool lt(BigDecimal x, BigDecimal y)
             {
-                return x.compareTo(y) < 0;
+                return x.CompareTo(y) < 0;
             }
 
             public override object negate(BigDecimal x)
             {
-                return x.negate();
+                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                 return c == null
+                     ? x.Negate()
+                     : x.Negate(c.Value);
             }
 
             public override object inc(BigDecimal bx)
             {
-                return bx.add(BigDecimalOne);
+                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                 return c == null
+                     ? bx.Add(BigDecimal.ONE)
+                     : bx.Add(BigDecimal.ONE, c.Value);
             }
 
             public override object dec(BigDecimal bx)
             {
-                return bx.subtract(BigDecimalOne);
+                BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                return c == null
+                    ? bx.Subtract(BigDecimal.ONE)
+                    : bx.Subtract(BigDecimal.ONE, c.Value);
             }
 
             #endregion

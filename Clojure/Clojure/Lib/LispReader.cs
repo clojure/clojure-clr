@@ -16,7 +16,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Collections;
 using clojure.runtime;
-using BigDecimal = java.math.BigDecimal;
+//using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
 {
@@ -482,11 +482,11 @@ namespace clojure.lang
             {
                 if ( m.Groups[4].Success )
                 {
-                    // MS implementation of java.util.BigDecimal has a bug when the string has a leading+
                     string val = m.Groups[1].Value;
-                    if ( val[0] == '+' )
-                        val = val.Substring(1);
-                    return new BigDecimal(val);
+                    // MS implementation of java.util.BigDecimal has a bug when the string has a leading+
+                    //if ( val[0] == '+' )
+                    //    val = val.Substring(1);
+                    return BigDecimal.Parse(val);
                 }
                 return (object)Double.Parse(s);
             }

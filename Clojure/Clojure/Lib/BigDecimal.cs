@@ -16,7 +16,7 @@ using System.Text;
 using clojure.lang;
 using System.Diagnostics;
 
-namespace clojure.lang.BD
+namespace clojure.lang
 {
     
     /// <summary>
@@ -82,18 +82,17 @@ namespace clojure.lang.BD
             Floor,
 
             /// <summary>
-            /// Round up if discarded digits are greater than or equal .5 of the next left position.
+            /// Round to nearest neighbor, round up if equidistant.
             /// </summary>
             HalfUp,
 
             /// <summary>
-            /// Round up if discarded digits are greater than .5 of the next left position.
+            /// Round to nearest neighbor, round down if equidistant.
             /// </summary>
             HalfDown,
 
             /// <summary>
-            /// Round up if discarded digits are greater than .5 of the next left position, or if equal to .5,
-            /// round up only if result would be odd.
+            /// Round to nearest neighbor, round to even neighbor if equidistant.
             /// </summary>
             HalfEven,
 
@@ -145,6 +144,10 @@ namespace clojure.lang.BD
             #region C-tors and factory methods
 
             static readonly Context BASIC_DEFAULT = new Context(9,RoundingMode.HalfUp);
+            public static readonly Context Decimal32 = new Context(7, RoundingMode.HalfEven);
+            public static readonly Context Decimal64 = new Context(16, RoundingMode.HalfEven);
+            public static readonly Context Decimal128 = new Context(34, RoundingMode.HalfEven);
+            public static readonly Context Unlimited = new Context(0,RoundingMode.HalfUp);
 
             public Context BasicDefault() { return BASIC_DEFAULT; }
 
@@ -265,6 +268,10 @@ namespace clojure.lang.BD
         #endregion
 
         #region Factory methods
+
+        // I went with factory methods rather than constructors so that I could, if I wanted,
+        // return cached values for things such as zero, one, etc.
+
 
         /// <summary>
         /// Create a BigDecimal from a double.

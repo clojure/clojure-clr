@@ -94,7 +94,7 @@
   (.Write w (str o)))
 
 (defmethod print-dup clojure.lang.Keyword [o w] (print-method o w))
-;;; MAJOR PROBLEM: no Number type in CLR.  We will just ask every ValueType to print itself.  Need to deal with BigDecimal and BigInteger later.
+;;; MAJOR PROBLEM: no Number type in CLR.  We will just ask every ValueType to print itself.  TODO: Need to deal with BigDecimal and BigInteger later.
 (defmethod print-method ValueType [o, #^System.IO.TextWriter w]   ;; Number => ValueType
   (.Write w (str o)))
 
@@ -108,8 +108,8 @@
   (print-ctor o (fn [o w]) w))
 
 (prefer-method print-dup clojure.lang.IPersistentCollection clojure.lang.Fn)
-(prefer-method print-dup java.util.Map clojure.lang.Fn)
-(prefer-method print-dup java.util.Collection clojure.lang.Fn)
+(prefer-method print-dup System.Collections.IDictionary clojure.lang.Fn)                        ;;; java.util.Map
+(prefer-method print-dup System.Collections.ICollection clojure.lang.Fn)                        ;;; java.util.Collection
 
 (defmethod print-method Boolean [o, #^System.IO.TextWriter w]
   (.Write w (str o)))
@@ -203,7 +203,7 @@
   (print-meta m w)
   (print-map m pr-on w))
 
-(defmethod print-dup java.util.Map [m, #^System.IO.TextWriter w]
+(defmethod print-dup System.Collections.IDictionary [m, #^System.IO.TextWriter w]    ;;; java.util.Map
   (print-ctor m #(print-map (seq %1) print-method %2) w))
 
 (defmethod print-dup clojure.lang.IPersistentMap [m, #^System.IO.TextWriter w]
@@ -242,7 +242,7 @@
 (defmethod print-dup Int32  [o w] (print-method o w))               ;;; java.lang.Integer
 (defmethod print-dup Double [o w] (print-method o w))                ;;; java.lang.Double
 (defmethod print-dup clojure.lang.Ratio [o w] (print-method o w))
-(defmethod print-dup java.math.BigDecimal [o w] (print-method o w))  (defmethod print-dup clojure.lang.BigInteger [o w] (print-method o w))
+(defmethod print-dup clojure.lang.BigDecimal [o w] (print-method o w))  (defmethod print-dup clojure.lang.BigInteger [o w] (print-method o w))   ;java.math.BigDecimal 
 (defmethod print-dup clojure.lang.PersistentHashMap [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentHashSet [o w] (print-method o w)) 
 (defmethod print-dup clojure.lang.PersistentVector [o w] (print-method o w))
@@ -280,7 +280,7 @@
             (.Write w "#=")
             (.Write w (.FullName c)))))    ;;; .getName => .FullName
 
-(defmethod print-method java.math.BigDecimal [b, #^System.IO.TextWriter w]
+(defmethod print-method clojure.lang.BigDecimal [b, #^System.IO.TextWriter w]    ;;; java.math.BigDecimal
   (.Write w (str b))
   (.Write w "M"))
   ;;; ADDED LINES

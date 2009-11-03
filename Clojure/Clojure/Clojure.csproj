@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{B8089F66-DFBD-4906-BEE0-B317689C2524}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -48,7 +48,6 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="vjslib" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Lib\BigDecimal.cs" />

@@ -12,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using BigDecimal = java.math.BigDecimal;
+//using BigDecimal = java.math.BigDecimal;
 
 
 namespace clojure.lang
@@ -65,14 +65,6 @@ namespace clojure.lang
         public Ratio(BigInteger numerator, BigInteger denominator)
         {
             _numerator = numerator;
-            _denominator = denominator;
-        }
-
-        // TODO: Get rid of this when get the new BigDecimal
-
-        public Ratio(java.math.BigInteger numerator, BigInteger denominator)
-        {
-            _numerator = BigInteger.Parse(numerator.ToString());
             _denominator = denominator;
         }
 
@@ -149,12 +141,14 @@ namespace clojure.lang
 
         public decimal ToDecimal(IFormatProvider provider)
         {
-            return Convert.ToDecimal(ToDouble(provider));
+            //return Convert.ToDecimal(ToDouble(provider));
+            return ToBigDecimal(BigDecimal.Context.Decimal128).ToDecimal(provider);
         }
 
         public double ToDouble(IFormatProvider provider)
         {
-            return _numerator.ToDouble(provider) / _denominator.ToDouble(provider);
+            //return _numerator.ToDouble(provider) / _denominator.ToDouble(provider);
+            return ToBigDecimal(BigDecimal.Context.Decimal64).ToDouble(provider);
         }
 
         public short ToInt16(IFormatProvider provider)
@@ -207,37 +201,20 @@ namespace clojure.lang
             return Convert.ToUInt64(ToDouble(provider));
         }
 
-        // Java Rev 1256.
-        // TODO: figure out the roundingModes in  this implementation.
-        // TODO:  Make this an explicit cast opearator?
-        // TODO: Look at all these conversions.
+
         public BigDecimal ToBigDecimal()
         {
-            // TODO: When we replace BigDecimal, revert to more reasonable constructors.
-            //BigDecimal numerator = new BigDecimal(this.numerator);
-            //BigDecimal denominator = new BigDecimal(this.denominator);
-            BigDecimal numerator = new BigDecimal(this.numerator.ToString());
-            BigDecimal denominator = new BigDecimal(this.denominator.ToString());
-            return numerator.divide(denominator, 0);
+            BigDecimal numerator = BigDecimal.Create(this.numerator);
+            BigDecimal denominator = BigDecimal.Create(this.denominator);
+            return numerator.Divide(denominator);
         }
 
-        //public double doubleValue()
-        //{
-        //    return decimalValue(MathContext.DECIMAL64).doubleValue();
-        //}
-
-        //public BigDecimal decimalValue()
-        //{
-        //    return decimalValue(MathContext.UNLIMITED);
-        //}
-
-        //public BigDecimal decimalValue(MathContext mc)
-        //{
-        //    BigDecimal numerator = new BigDecimal(this.numerator);
-        //    BigDecimal denominator = new BigDecimal(this.denominator);
-
-        //    return numerator.divide(denominator, mc);
-        //}
+        public BigDecimal ToBigDecimal(BigDecimal.Context c)
+        {
+            BigDecimal numerator = BigDecimal.Create(this.numerator);
+            BigDecimal denominator = BigDecimal.Create(this.denominator);
+            return numerator.Divide(denominator,c);
+        }
 
         #endregion
     }

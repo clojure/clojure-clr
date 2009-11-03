@@ -21,7 +21,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using RTProperties = clojure.runtime.Properties;
-using BigDecimal = java.math.BigDecimal;
+//using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
 {
@@ -259,7 +259,7 @@ namespace clojure.lang
             // ADDED THESE TO SUPPORT THE BOOTSTRAPPING IN THE JAVA CORE.CLJ
             Symbol.create("StringBuilder"), typeof(StringBuilder),
             Symbol.create("BigInteger"), typeof(clojure.lang.BigInteger),
-            Symbol.create("BigDecimal"), typeof(java.math.BigDecimal),
+            Symbol.create("BigDecimal"), typeof(clojure.lang.BigDecimal),
             Symbol.create("Environment"), typeof(System.Environment)
      );
 

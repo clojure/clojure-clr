@@ -2243,7 +2243,7 @@
   {:tag BigInteger}
   [x] (cond
        (instance? BigInteger x) x
-       (decimal? x) (.toBigInteger #^BigDecimal x)
+       (decimal? x) (.ToBigInteger #^BigDecimal x)             ;;; toBigInteger
        (number? x) (BigInteger/Create (long x))                ;;;(BigInteger/valueOf (long x))
        :else (BigInteger. x)))
 
@@ -2252,11 +2252,11 @@
   {:tag BigDecimal}
   [x] (cond
        (decimal? x) x
-       (float? x) (. BigDecimal valueOf (double x))
-       (ratio? x) (/ (BigDecimal. (.numerator x)) (.denominator x))  ;;; THIS FAILS TO COMPUTE PROPERLY
-       (instance? BigInteger x) (BigDecimal. #^BigInteger x)
-       (number? x) (BigDecimal/valueOf (long x))
-       :else (BigDecimal. x)))
+       (float? x) (BigDecimal/Create (double x))                     ;;; (. BigDecimal valueOf (double x))
+       (ratio? x) (.ToBigDecimal #^clojure.lang.Ratio x)             ;;; (/ (BigDecimal. (.numerator x)) (.denominator x))
+       (instance? BigInteger x) (BigDecimal/Create #^BigInteger x)   ;;; (BigDecimal. #^BigInteger x)
+       (number? x) (BigDecimal/Create (long x))                      ;;; (BigDecimal/valueOf (long x))
+       :else  (BigDecimal/Create x)))                                ;;; (BigDecimal. x)))
 
 (def #^{:private true} print-initialized false)
 
@@ -3361,22 +3361,22 @@
   once, but any effects on Refs will be atomic."
   [& exprs]
   `(sync nil ~@exprs))
-;;; Figure out equivalent for CLR
-;(defmacro with-precision
-;  "Sets the precision and rounding mode to be used for BigDecimal operations.
-;
-;  Usage: (with-precision 10 (/ 1M 3))
-;  or:    (with-precision 10 :rounding HALF_DOWN (/ 1M 3))
-;
-;  The rounding mode is one of CEILING, FLOOR, HALF_UP, HALF_DOWN,
-;  HALF_EVEN, UP, DOWN and UNNECESSARY; it defaults to HALF_UP."
-;  [precision & exprs]
-;    (let [[body rm] (if (= (first exprs) :rounding)
-;                      [(next (next exprs))
-;                       `((. java.math.RoundingMode ~(second exprs)))]
-;                      [exprs nil])]
-;      `(binding [*math-context* (java.math.MathContext. ~precision ~@rm)]
-;         ~@body))) 
+
+(defmacro with-precision
+  "Sets the precision and rounding mode to be used for BigDecimal operations.
+
+  Usage: (with-precision 10 (/ 1M 3))
+  or:    (with-precision 10 :rounding HALF_DOWN (/ 1M 3))
+
+  The rounding mode is one of CEILING, FLOOR, HALF_UP, HALF_DOWN,
+  HALF_EVEN, UP, DOWN and UNNECESSARY; it defaults to HALF_UP."
+  [precision & exprs]
+    (let [[body rm] (if (= (first exprs) :rounding)
+                      [(next (next exprs))
+                       `((Enum/Parse clojure.lang.BigDecimal+RoundingMode (name '~(second exprs))))]       ;;; `((. java.math.RoundingMode ~(second exprs)))]
+                      [exprs nil])]
+      `(binding [*math-context* (clojure.lang.BigDecimal+Context.  ~precision ~@rm)]              ;;; (java.math.MathContext. ~precision ~@rm)]
+         ~@body))) 
 
 (defn bound-fn
   {:private true}

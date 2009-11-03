@@ -69,3 +69,8 @@
 (def-aset
   #^{:doc "Sets the value at the index/indices. Works on arrays of sbyte. Returns val."}
   aset-sbyte setSByte sbyte)
+  
+(defn enum-val [t n]
+   "Gets a value from an enum from the name"
+(let [s (if (string? n) n (name n))]
+  (Enum/Parse t s)))

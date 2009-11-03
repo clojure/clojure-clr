@@ -17,7 +17,6 @@ using System.Text;
 using NUnit.Framework;
 using clojure.lang;
 
-using clojure.lang.BD;
 using System.Text.RegularExpressions;
 
 namespace Clojure.Tests.LibTests
