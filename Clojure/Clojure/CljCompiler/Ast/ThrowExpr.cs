@@ -57,7 +57,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression exc = _excExpr.GenDlr(context);
             Expression exc2 = Expression.Convert(exc, typeof(Exception));
 
-            return Expression.Throw(exc2);
+            return Expression.Throw(exc2,typeof(object));
         }
 
         #endregion
