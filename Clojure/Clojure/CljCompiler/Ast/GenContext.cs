@@ -86,15 +86,15 @@ namespace clojure.lang.CljCompiler.Ast
         #region C-tors & factory methods
 
         public GenContext(string assyName, CompilerMode mode)
-            : this(assyName,null,mode)
+            : this(assyName, ".dll", null, mode)
         {
         }
 
-        public GenContext(string assyName, string directory, CompilerMode mode)
+        public GenContext(string assyName, string extension, string directory, CompilerMode mode)
         {
             AssemblyName aname = new AssemblyName(assyName);
             _assyBldr = AppDomain.CurrentDomain.DefineDynamicAssembly(aname, AssemblyBuilderAccess.RunAndSave,directory);
-            _moduleBldr = _assyBldr.DefineDynamicModule(aname.Name, aname.Name + ".dll", true);
+            _moduleBldr = _assyBldr.DefineDynamicModule(aname.Name, aname.Name + extension, true);
             _mode = mode;
         }
 

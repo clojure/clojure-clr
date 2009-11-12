@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="clojure\samples\genclass\C.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -74,6 +75,7 @@
     </None>
     <None Include="clojure\samples\await-test.clj" />
     <None Include="clojure\samples\celsius.clj" />
+    <None Include="clojure\samples\genclass\testgenclass.clj" />
     <None Include="clojure\set.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

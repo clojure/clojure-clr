@@ -131,6 +131,8 @@ namespace clojure.lang
         internal static readonly Var CONSTANTS = Var.create();      //vector<object>
         internal static readonly Var KEYWORDS = Var.create();       //keyword->constid
 
+        internal static readonly Var COMPILER_CONTEXT = Var.create(null);
+
         #endregion
 
         #region Special forms
@@ -1123,19 +1125,24 @@ namespace clojure.lang
             LineNumberingTextReader lntr =
                 (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);
 
+            GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, CompilerMode.File);
+
             Var.pushThreadBindings(RT.map(
-                SOURCE_PATH, sourcePath,
-                SOURCE, sourceName,
-                RT.CURRENT_NS, RT.CURRENT_NS.deref(),
-                LINE_BEFORE, lntr.LineNumber,
-                LINE_AFTER, lntr.LineNumber,
-                CONSTANTS, PersistentVector.EMPTY,
-                KEYWORDS, PersistentHashMap.EMPTY,
-                VARS, PersistentHashMap.EMPTY
-                ));
+            SOURCE_PATH, sourcePath,
+            SOURCE, sourceName,
+            RT.CURRENT_NS, RT.CURRENT_NS.deref(),
+            LINE_BEFORE, lntr.LineNumber,
+            LINE_AFTER, lntr.LineNumber,
+            CONSTANTS, PersistentVector.EMPTY,
+            KEYWORDS, PersistentHashMap.EMPTY,
+            VARS, PersistentHashMap.EMPTY,
+            COMPILER_CONTEXT, context
+            ));
+
+
             try
             {
-                GenContext context = new GenContext(sourceName, sourceDirectory, CompilerMode.File);
+
                 TypeBuilder exprTB = context.ModuleBldr.DefineType("__REPL__", TypeAttributes.Class | TypeAttributes.Public);
 
                 List<string> names = new List<string>();
@@ -1145,10 +1152,10 @@ namespace clojure.lang
                 {
                     LINE_AFTER.set(lntr.LineNumber);
 
-                    LambdaExpression ast = Compiler.GenerateLambda(context,form, false); 
+                    LambdaExpression ast = Compiler.GenerateLambda(context, form, false);
 
                     // Compile to assembly
-                    MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++), 
+                    MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
                         MethodAttributes.Public | MethodAttributes.Static);
                     ast.CompileToMethod(methodBuilder);
 
@@ -1189,7 +1196,7 @@ namespace clojure.lang
 
                 initTB.CreateType();
 
-                context.AssyBldr.Save(sourceName  + ".dll");
+                context.AssyBldr.Save(sourceName + ".dll");
             }
             catch (LispReader.ReaderException e)
             {

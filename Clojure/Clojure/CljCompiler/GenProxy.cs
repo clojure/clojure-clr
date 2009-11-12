@@ -5,6 +5,7 @@ using System.Text;
 using clojure.lang.CljCompiler.Ast;
 using System.Reflection;
 using System.Reflection.Emit;
+using clojure.lang.CljCompiler;
 
 namespace clojure.lang
 {
@@ -157,7 +158,7 @@ namespace clojure.lang
             HashSet<Type> allInterfaces,
             HashSet<MethodBuilder> specialMethods)
         {
-            HashSet<Sig> considered = new HashSet<Sig>();
+            HashSet<MethodSignature> considered = new HashSet<MethodSignature>();
             List<MethodInfo> implementedMethods = new List<MethodInfo>();
             List<MethodInfo> unimplementedMethods = new List<MethodInfo>();           
 
@@ -165,7 +166,7 @@ namespace clojure.lang
             
             foreach (MethodInfo  m in minfos )
             {
-                Sig sig = new Sig(m);
+                MethodSignature sig = new MethodSignature(m);
                 if (!considered.Contains(sig)
                     && !m.IsPrivate
                     && !m.IsStatic
@@ -182,7 +183,7 @@ namespace clojure.lang
             foreach ( Type ifType in allInterfaces )
                 foreach (MethodInfo m in ifType.GetMethods() )
                 {
-                    Sig sig = new Sig(m);
+                    MethodSignature sig = new MethodSignature(m);
                     if (!considered.Contains(sig))
                         unimplementedMethods.Add(m);
                     considered.Add(sig);
@@ -325,14 +326,14 @@ namespace clojure.lang
             HashSet<Type> allInterfaces,
             HashSet<MethodBuilder> specialMethods)
         {
-            HashSet<Sig> considered = new HashSet<Sig>();
+            HashSet<MethodSignature> considered = new HashSet<MethodSignature>();
             List<PropertyInfo> properties = new List<PropertyInfo>();
 
             PropertyInfo[] pinfos = superclass.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
             foreach (PropertyInfo p in pinfos)
             {
-                Sig sig = new Sig(p);
+                MethodSignature sig = new MethodSignature(p);
                 if (!considered.Contains(sig))
                     properties.Add(p);
                 considered.Add(sig);
@@ -341,7 +342,7 @@ namespace clojure.lang
             foreach (Type ifType in allInterfaces)
                 foreach (PropertyInfo p in ifType.GetProperties())
                 {
-                    Sig sig = new Sig(p);
+                    MethodSignature sig = new MethodSignature(p);
                     if (!considered.Contains(sig))
                         properties.Add(p);
                     considered.Add(sig);
@@ -371,96 +372,6 @@ namespace clojure.lang
             }
         }
 
-
-        class Sig : IComparable<Sig>, IComparable
-        {
-            #region Data
-
-            string _name;
-            Type[] _paramTypes;
-
-            #endregion
-
-            #region Ctors
-
-            public Sig(MethodInfo m)
-            {
-                _name = m.Name;
-                _paramTypes = m.GetParameters().Select<ParameterInfo, Type>(p => p.ParameterType).ToArray<Type>();
-            }
-
-            public Sig(PropertyInfo pi)
-            {
-                _name = pi.Name;
-                _paramTypes = pi.GetIndexParameters().Select<ParameterInfo, Type>(p => p.ParameterType).ToArray<Type>();
-            }
-
-            #endregion
-
-            #region IComparable<Sig> Members
-
-            public int CompareTo(Sig other)
-            {
-                int c = _name.CompareTo(other._name);
-                if (c != 0)
-                    return c;
-
-                // names are same, do lexicographic ordering on the types.
-                int n1 = _paramTypes.Length;
-                int n2 = other._paramTypes.Length;
-                int n = Math.Min(n1,n2);
-                for ( int i=0; i<n; i++ )
-                {
-                   c = _paramTypes[i].FullName.CompareTo(other._paramTypes[i].FullName);
-                   if ( c != 0 )
-                       return c;
-                }
-
-                // equal through length of smallest. smallest wins
-                if ( n1 < n2 )
-                    return -1;
-                else if ( n1 > n2 )
-                    return 1;
-                else
-                    return 0;
-            }
-
-            #endregion
-
-            #region IComparable Members
-
-            public int CompareTo(object obj)
-            {
-                if (!(obj is Sig))
-                    throw new ArgumentException("Must compare to a Sig");
-
-                return CompareTo((Sig)obj);
-            }
-
-            #endregion
-
-            #region Object overrides
-
-            public override bool Equals(object obj)
-            {
-                if (!(obj is Sig))
-                    return false;
-                return CompareTo((Sig)obj) == 0;
-            }
-
-            public override int GetHashCode()
-            {
-                int h = _name.GetHashCode();
-                foreach (Type t in _paramTypes)
-                    h = Util.HashCombine(h, t.GetHashCode());
-                return h;
-            }
-
-            #endregion
-        }
-
-
-
         static MethodInfo GetIFnInvokeMethodInfo(int numArgs)
         {
             if (numArgs <= 20)
@@ -483,6 +394,5 @@ namespace clojure.lang
         }
 
         #endregion
-
     }
 }

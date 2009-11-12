@@ -25,7 +25,7 @@
  
  
 
-(defn method-sig [System.Reflection.MethodInfo meth]                            ;;; [#^java.lang.reflect.Method meth]
+(defn method-sig [#^System.Reflection.MethodInfo meth]                            ;;; [#^java.lang.reflect.Method meth]
    [(. meth Name) (seq (. meth GetParameters)) (. meth ReturnType)])               ;;;[(. meth (getName)) (seq (. meth (getParameterTypes))) (. meth getReturnType)])
 
 (defn- most-specific [rtypes]
