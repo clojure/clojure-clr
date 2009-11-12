@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CljCompiler\GenClass.cs" />
+    <Compile Include="CljCompiler\GenInterface.cs" />
     <Compile Include="CljCompiler\MethodSignature.cs" />
     <Compile Include="Lib\BigDecimal.cs" />
     <Compile Include="CljCompiler\Ast\AFnImplGenerator.cs" />

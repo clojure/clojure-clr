@@ -127,10 +127,8 @@ namespace clojure.lang
 
             context.AssyBldr.Save(className+extension);
 
-
             return t;
         }
-
 
         #endregion
 
@@ -607,11 +605,11 @@ namespace clojure.lang
             return var + "__var";
         }
 
-        static Type[] CreateTypeArray(ISeq seq)
+        internal static Type[] CreateTypeArray(ISeq seq)
         {
             List<Type> types = new List<Type>();
 
-            for (ISeq s = seq.seq(); s != null; s = s.next())
+            for (ISeq s = seq == null ? null :seq.seq(); s != null; s = s.next())
                 types.Add((Type)s.first());
 
             if ( types.Count ==  0 )

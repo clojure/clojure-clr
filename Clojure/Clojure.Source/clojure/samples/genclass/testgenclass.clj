@@ -28,13 +28,14 @@
 ;  Also, you should be able to go to your root directory and execute test.my.gen.exe.
 ;  It will load everything and call the main routine listed below.
 
-
+(gen-interface :name test.my.I2
+   :methods [ [m10 [Int32 String] Int32] ])
 
 (ns clojure.testgenclass
   (:gen-class
       :name test.my.gen
       :main true
-      :implements [ dm.I1 ]
+      :implements [ dm.I1 test.my.I2 ]
       :extends dm.C1
       :factory fy
       :init init
@@ -58,4 +59,6 @@
 (defn -main [& args] 
    (let [ v (test.my.gen/fy 12 "test" "thingy")]
      (println (str (.State v)))))
+     
+ 
       
