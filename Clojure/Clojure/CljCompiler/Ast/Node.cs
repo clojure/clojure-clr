@@ -20,7 +20,7 @@ namespace clojure.lang.CljCompiler.Ast
     /// Base class for AST expressions in the compiler.
     /// </summary>
     /// <remarks>Stolen from IronPython.</remarks>
-    abstract class Node
+    public abstract class Node
     {
         #region Data
 

@@ -309,12 +309,12 @@ namespace clojure.lang
         static LiteralExpr FALSE_EXPR = new BooleanExpr(false);
 
         // Equivalent to Java: Compiler.analyze()
-        internal static Expr GenerateAST(object form, bool isRecurContext)
+        public static Expr GenerateAST(object form, bool isRecurContext)
         {
             return GenerateAST(form, null, isRecurContext);
         }
 
-        internal static Expr GenerateAST(object form, string name, bool isRecurContext)
+        public static Expr GenerateAST(object form, string name, bool isRecurContext)
         {
             try
             {

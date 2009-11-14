@@ -24,9 +24,9 @@ using System.Linq.Expressions;
 namespace clojure.lang.CljCompiler.Ast
 {
 
-    enum CompilerMode { Immediate, File };
+    public enum CompilerMode { Immediate, File };
 
-    class GenContext
+    public class GenContext
     {
         #region Data
 
@@ -103,7 +103,7 @@ namespace clojure.lang.CljCompiler.Ast
             _mode = mode;
         }
 
-        public GenContext CreateWithNewType(FnExpr fnExpr)
+        internal GenContext CreateWithNewType(FnExpr fnExpr)
         {
             GenContext newContext = Clone();
             newContext._fnExpr = fnExpr;

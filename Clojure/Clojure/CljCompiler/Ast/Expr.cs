@@ -23,7 +23,7 @@ namespace clojure.lang.CljCompiler.Ast
     /// <summary>
     /// Base class for all AST expressions.
     /// </summary>
-    abstract class Expr : Node
+    public abstract class Expr : Node
     {
      	public abstract bool HasClrType { get; }
         public abstract Type ClrType { get; }
