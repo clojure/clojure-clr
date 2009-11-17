@@ -17,6 +17,7 @@ using System.IO;
 using System.Collections;
 using clojure.runtime;
 //using BigDecimal = java.math.BigDecimal;
+using Microsoft.Scripting;
 
 namespace clojure.lang
 {
@@ -641,16 +642,25 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char leftparen)
             {
-                int line = -1;
-                if (r is LineNumberingTextReader)
-                    line = ((LineNumberingTextReader)r).LineNumber;
+                int startLine = -1;
+                int startCol = -1;
+                LineNumberingTextReader lntr = r as LineNumberingTextReader;
+
+                if (lntr != null)
+                {
+                    startLine = lntr.LineNumber;
+                    startCol = lntr.ColumnNumber;
+                }
                 IList<Object> list = readDelimitedList(')', r, true);
                 if (list.Count == 0)
                     return PersistentList.EMPTY;
                 IObj s = (IObj)PersistentList.create((IList)list);
-                //		IObj s = (IObj) RT.seq(list);
-                if (line != -1)
-                    return s.withMeta(RT.map(RT.LINE_KEY, line));
+                if (startLine != -1)
+                {
+                    return s.withMeta(RT.map(
+                        RT.LINE_KEY, startLine)); // This is what is supported by the JVM version
+                        //RT.SOURCE_KEY, new SourceSpan(new SourceLocation(0,startLine,startCol), new SourceLocation(0,lntr.LineNumber,lntr.ColumnNumber))));                
+                }
                 else
                     return s;
             }

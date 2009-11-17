@@ -34,7 +34,8 @@ namespace Clojure.Tests.ReaderTests
         [Test]
         public void Initializes_properly()
         {
-            Expect(_rdr.Position, EqualTo(0));
+            Expect(_rdr.Index, EqualTo(0));
+            Expect(_rdr.ColumnNumber, EqualTo(0));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.Peek(), EqualTo((int)_sample[0]));
             Expect(_rdr.AtLineStart);
@@ -68,6 +69,14 @@ namespace Clojure.Tests.ReaderTests
                 6,
                 6, 6, 6, 6, 6 };
 
+            int[] indexes = new int[] {
+                1, 2, 3, 4,
+                5, 6, 7,
+                8, 9, 10, 11, 12, 13, 15, // \r\n
+                16, 17, 18, 19, 20, 21, 22,
+                23,
+                24, 25, 26, 27, 28 };
+
             bool[] starts = new bool[] {
                 false, false, false, true,
                 false, false, true,
@@ -81,8 +90,9 @@ namespace Clojure.Tests.ReaderTests
             int ch;
             while ((ch = _rdr.Read()) != -1)
             {
+                Expect(_rdr.Index,EqualTo(indexes[i]));
                 Expect(ch, EqualTo(chars[i]));
-                Expect(_rdr.Position, EqualTo(positions[i]));
+                Expect(_rdr.ColumnNumber, EqualTo(positions[i]));
                 Expect(_rdr.LineNumber, EqualTo(lines[i]));
                 Expect(_rdr.AtLineStart, EqualTo(starts[i]));
                 ++i;
@@ -110,14 +120,19 @@ namespace Clojure.Tests.ReaderTests
                 true, true, true, true, true, true
             };
 
+            int[] indexes = new int[] {
+                4,7,15,22,23,28
+            };
+
             int index = 0;
             string line;
             while ((line = _rdr.ReadLine()) != null)
             {
                 Expect(line, EqualTo(lines[index]));
-                Expect(_rdr.Position, EqualTo(positions[index]));
+                Expect(_rdr.ColumnNumber, EqualTo(positions[index]));
                 Expect(_rdr.LineNumber, EqualTo(lineNums[index]));
                 Expect(_rdr.AtLineStart, EqualTo(starts[index]));
+                Expect(_rdr.Index, EqualTo(indexes[index]));
                 ++index;
             }
         }
@@ -135,6 +150,7 @@ namespace Clojure.Tests.ReaderTests
             int[] positions = new int[] { 1, 3, 1, 6, 3, 5 };
             int[] lineNums = new int[] { 2, 3, 4, 4, 6, 6 };
             bool[] starts = new bool[] { false, false, false, false, false, true, };
+            int[] indexes = new int[] { 5, 10, 16, 21, 26, 28 };
 
             char[] buffer = new char[20];
 
@@ -142,11 +158,11 @@ namespace Clojure.Tests.ReaderTests
             int count;
             while ((count = _rdr.Read(buffer, 0, 5)) != 0)
             {
-                //Console.WriteLine("{0} {1}/{2} {3}/{4} {5}", index, _rdr.Position, positions[index], _rdr.LineNumber, lineNums[index], _rdr.AtLineStart);
                 Expect(SameContents(buffer, buffers[index], count));
-                Expect(_rdr.Position, EqualTo(positions[index]));
+                Expect(_rdr.ColumnNumber, EqualTo(positions[index]));
                 Expect(_rdr.LineNumber, EqualTo(lineNums[index]));
                 Expect(_rdr.AtLineStart, EqualTo(starts[index]));
+                Expect(_rdr.Index, EqualTo(indexes[index]));
                 ++index;
             }
 
@@ -175,32 +191,37 @@ namespace Clojure.Tests.ReaderTests
         {
             int c1 = _rdr.Read();
             Expect(c1, EqualTo((int)'a'));
-            Expect(_rdr.Position, EqualTo(1));
+            Expect(_rdr.ColumnNumber, EqualTo(1));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
+            Expect(_rdr.Index, EqualTo(1));
 
             int c2 = _rdr.Read();
             Expect(c2, EqualTo((int)'b'));
-            Expect(_rdr.Position, EqualTo(2));
+            Expect(_rdr.ColumnNumber, EqualTo(2));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
+            Expect(_rdr.Index, EqualTo(2));
 
             _rdr.Unread('x');
-            Expect(_rdr.Position, EqualTo(1));
+            Expect(_rdr.ColumnNumber, EqualTo(1));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
+            Expect(_rdr.Index, EqualTo(1));
 
             int c3 = _rdr.Read();
             Expect(c3, EqualTo((int)'x'));
-            Expect(_rdr.Position, EqualTo(2));
+            Expect(_rdr.ColumnNumber, EqualTo(2));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
+            Expect(_rdr.Index, EqualTo(2));
 
             int c4 = _rdr.Read();
             Expect(c4, EqualTo((int)'c'));
-            Expect(_rdr.Position, EqualTo(3));
+            Expect(_rdr.ColumnNumber, EqualTo(3));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
+            Expect(_rdr.Index, EqualTo(3));
         }
 
         [Test]
@@ -208,44 +229,51 @@ namespace Clojure.Tests.ReaderTests
         {
             int c1 = _rdr.Read();
             Expect(c1, EqualTo((int)'a'));
-            Expect(_rdr.Position, EqualTo(1));
+            Expect(_rdr.ColumnNumber, EqualTo(1));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
+            Expect(_rdr.Index, EqualTo(1));
 
             int c2 = _rdr.Read();
             Expect(c2, EqualTo((int)'b'));
-            Expect(_rdr.Position, EqualTo(2));
+            Expect(_rdr.ColumnNumber, EqualTo(2));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
+            Expect(_rdr.Index, EqualTo(2));
 
             int c3 = _rdr.Read();
             Expect(c3, EqualTo((int)'c'));
-            Expect(_rdr.Position, EqualTo(3));
+            Expect(_rdr.ColumnNumber, EqualTo(3));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
+            Expect(_rdr.Index, EqualTo(3));
 
             int c4 = _rdr.Read();
             Expect(c4, EqualTo((int)'\n'));
-            Expect(_rdr.Position, EqualTo(0));
+            Expect(_rdr.ColumnNumber, EqualTo(0));
             Expect(_rdr.LineNumber, EqualTo(2));
             Expect(_rdr.AtLineStart);
+            Expect(_rdr.Index, EqualTo(4));
 
             _rdr.Unread(c4);
-            Expect(_rdr.Position, EqualTo(3));
+            Expect(_rdr.ColumnNumber, EqualTo(3));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
+            Expect(_rdr.Index, EqualTo(3));
 
             int c5 = _rdr.Read();
             Expect(c5, EqualTo((int)'\n'));
-            Expect(_rdr.Position, EqualTo(0));
+            Expect(_rdr.ColumnNumber, EqualTo(0));
             Expect(_rdr.LineNumber, EqualTo(2));
             Expect(_rdr.AtLineStart);
+            Expect(_rdr.Index, EqualTo(4));
 
             int c6 = _rdr.Read();
             Expect(c6, EqualTo((int)'d'));
-            Expect(_rdr.Position, EqualTo(1));
+            Expect(_rdr.ColumnNumber, EqualTo(1));
             Expect(_rdr.LineNumber, EqualTo(2));
             Expect(_rdr.AtLineStart, False);
+            Expect(_rdr.Index, EqualTo(5));
         }
     }
 }

@@ -24,27 +24,38 @@ namespace clojure.lang
         #region Data
 
         private int _lineNumber = 1;
+
         public int LineNumber
         {
             get { return _lineNumber; }
         }
 
+        private int _prevColumnNumber = 0;
 
-        private int _prevPosition = 0;
-        private int _position = 0;
-        public int Position
+        private int _columnNumber = 0;
+        
+        public int ColumnNumber
         {
-            get { return _position; }
+            get { return _columnNumber; }
         }
 
         private bool _prevLineStart = true;
+
         private bool _atLineStart = true;
+        
         public bool AtLineStart
         {
             get { return _atLineStart; }
         }
 
+        private int _index = 0;
 
+        public int Index
+        {
+            get { return _index; }
+        }
+
+        
         #endregion
 
         #region c-tors
@@ -62,6 +73,7 @@ namespace clojure.lang
         {
             int ret = base.Read();
 
+
             _prevLineStart = _atLineStart;
 
             if (ret == -1)
@@ -70,13 +82,17 @@ namespace clojure.lang
                 return ret;
             }
 
+            ++_index;
             _atLineStart = false;
-            ++_position;
+            ++_columnNumber;
 
             if (ret == '\r')
             {
                 if (Peek() == '\n')
+                {
                     ret = BaseReader.Read();
+                    ++_index;
+                }
                 else
                 {
                     NoteLineAdvance();
@@ -95,45 +111,9 @@ namespace clojure.lang
         {
             _atLineStart = true;
             _lineNumber++;
-            _prevPosition = _position - 1;
-            _position = 0;
+            _prevColumnNumber = _columnNumber - 1;
+            _columnNumber = 0;
         }
-
-
-
-        //public override int Read(char[] buffer, int index, int count)
-        //{
-        //    int numRead = _baseReader.Read(buffer, index, count);
-        //    HandleLines(buffer, index, numRead);
-        //    return numRead;
-        //}
-
-        //public override int ReadBlock(char[] buffer, int index, int count)
-        //{
-        //    int numRead =  _baseReader.ReadBlock(buffer, index, count);
-        //    HandleLines(buffer, index, numRead);
-        //    return numRead;
-        //}
-
-        //public override string ReadLine()
-        //{
-        //    string line = _baseReader.ReadLine();
-        //    if (line != null)
-        //    {
-        //        _lineNumber++;
-        //        _lastLinePosition = _position;
-        //        _position = 0;
-        //    }
-        //    return line;
-        //}
-
-        //public override string ReadToEnd()
-        //{
-        //    string result =  _baseReader.ReadToEnd();
-        //    HandleLines(result);
-        //    return result;
-        //}
-
 
         #endregion
 
@@ -142,47 +122,17 @@ namespace clojure.lang
         public override void Unread(int ch)
         {
             base.Unread(ch);
+            --_index;
 
-            --_position;
+            --_columnNumber;
 
             if (ch == '\n')
             {
                 --_lineNumber;
-                _position = _prevPosition;
+                _columnNumber = _prevColumnNumber;
                 _atLineStart = _prevLineStart;
             }
         }
-
-        #endregion
-
-        #region Counting lines
-
-        //private void HandleLines(char[] buffer, int index, int numRead)
-        //{
-        //    for (int i = index; i < index + numRead; ++i)
-        //        if (buffer[i] == '\n')
-        //        {
-        //            ++_lineNumber;
-        //            _lastLinePosition = _position;
-        //            _position = 0;
-        //        }
-        //        else
-        //            ++_position;
-        //}
-
-
-        //private void HandleLines(string result)
-        //{
-        //    foreach (char c in result)
-        //        if (c == '\n')
-        //        {
-        //            ++_lineNumber;
-        //            _lastLinePosition = _position;
-        //            _position = 0;
-        //        }
-        //        else
-        //            ++_position;
-        //}
 
         #endregion
 

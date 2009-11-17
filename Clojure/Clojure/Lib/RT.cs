@@ -319,6 +319,9 @@ namespace clojure.lang
         public static readonly Keyword FILE_KEY
             = Keyword.intern(null, "file");
 
+        public static readonly Keyword SOURCE_KEY
+            = Keyword.intern(null, "source");
+
         #endregion
 
         #region Vars (namespace-related)

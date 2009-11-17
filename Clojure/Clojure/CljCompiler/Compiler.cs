@@ -30,12 +30,8 @@ namespace clojure.lang
     /// <summary>
     /// 
     /// </summary>
-    /// <remarks>Originally, I tried to do this as one-pass compiler, direct from SEXPRs to DLR Expression Trees.  And it was working just fine.
-    /// <para>Then Rich added a change in the new lazy version of Clojure that required a variable base class for implementations of <see cref="AFn"/>.  
-    /// Due to the fact that DLR can only generate lambda expressions to static methods in assemblies, some nasty workarounds are required
-    /// that force a multi-pass compiler.  With that, I gave up and added an AST intermediate stage.</para>
-    /// <para>So now we go SEXPR -> AST -> ExpressionTree.  As a result, once again, my code converges toward the JVM code.</para>
-    /// <para>PS: And then later the damnable :super-class went away.</para>
+    /// <remarks>
+    /// <para>The translation isSEXPR -> AST -> ExpressionTree.  </para>
     /// </remarks>
     public static class Compiler
     {
@@ -279,15 +275,6 @@ namespace clojure.lang
         #endregion
 
         #region Boxing arguments
-
-        //static Expression[] MaybeBox(Expression[] args)
-        //{
-        //    // TODO: avoid copying array if not necessary
-        //    Expression[] boxedArgs = new Expression[args.Length];
-        //    for (int i1 = 0; i1 < args.Length; ++i1)
-        //        boxedArgs[i1] = MaybeBox(args[i1]);
-        //    return boxedArgs;
-        //}
 
         internal static Expression MaybeBox(Expression expr)
         {
