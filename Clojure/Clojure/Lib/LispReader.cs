@@ -658,8 +658,10 @@ namespace clojure.lang
                 if (startLine != -1)
                 {
                     return s.withMeta(RT.map(
-                        RT.LINE_KEY, startLine)); // This is what is supported by the JVM version
-                        //RT.SOURCE_KEY, new SourceSpan(new SourceLocation(0,startLine,startCol), new SourceLocation(0,lntr.LineNumber,lntr.ColumnNumber))));                
+                        RT.LINE_KEY, startLine, // This is what is supported by the JVM version
+                        RT.COLUMN_KEY, startCol,
+                        RT.END_LINE_KEY, lntr.LineNumber,
+                        RT.END_COLUMN_KEY, lntr.ColumnNumber));
                 }
                 else
                     return s;

@@ -821,10 +821,13 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ListGetsLineNumber()
         {
-            Object o1 = ReadFromStringNumbering("\n\n(a b \n1 2)");
+            Object o1 = ReadFromStringNumbering("\n\n (a b \n1 2)");
             Expect(o1, InstanceOf(typeof(IObj)));
             IObj io = o1 as IObj;
-            Expect(io.meta().valAt(Keyword.intern(null,"line")), EqualTo(3));
+            Expect(io.meta().valAt(RT.LINE_KEY), EqualTo(3));
+            Expect(io.meta().valAt(RT.COLUMN_KEY),EqualTo(2));
+            Expect(io.meta().valAt(RT.END_LINE_KEY), EqualTo(4));
+            Expect(io.meta().valAt(RT.END_COLUMN_KEY),EqualTo(4));            
         }
 
         #endregion
