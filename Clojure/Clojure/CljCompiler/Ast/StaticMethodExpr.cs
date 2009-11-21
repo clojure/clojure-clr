@@ -19,6 +19,7 @@ using Microsoft.Scripting.Ast;
 using System.Linq.Expressions;
 #endif
 using AstUtils = Microsoft.Scripting.Ast.Utils;
+using Microsoft.Scripting;
 
 using System.IO;
 
@@ -34,15 +35,17 @@ namespace clojure.lang.CljCompiler.Ast
         readonly MethodInfo _method;
         readonly string _source;
         readonly int _line;
+        readonly SourceSpan? _span;
 
         #endregion
 
         #region Ctors
 
-        public StaticMethodExpr(string source, int line, Type type, string methodName, IPersistentVector args)
+        public StaticMethodExpr(string source, int line, SourceSpan? span, Type type, string methodName, IPersistentVector args)
         {
             _source = source;
             _line = line;
+            _span = span;
             _type = type;
             _methodName = methodName;
             _args = args;
@@ -72,10 +75,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
+            Expression call;
             if (_method != null)
-                return Compiler.MaybeBox(GenDlrForMethod(context));
+                call = Compiler.MaybeBox(GenDlrForMethod(context));
             else
-                return GenDlrViaReflection(context);
+                call = GenDlrViaReflection(context);
+
+            call = Compiler.MaybeAddDebugInfo(call, _span);
+            return call;
         }
 
         public override Expression GenDlrUnboxed(GenContext context)
@@ -91,8 +98,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
 
-            return AstUtils.SimpleCallHelper(_method, args); ;
-
+            return AstUtils.SimpleCallHelper(_method, args);
         }
 
 

@@ -23,7 +23,10 @@ using clojure.lang.CljCompiler.Ast;
 using clojure.runtime;
 using System.Reflection;
 using System.Reflection.Emit;
-
+using System.Runtime.CompilerServices;
+using Microsoft.Scripting.Generation;
+using Microsoft.Scripting;
+using AstUtils = Microsoft.Scripting.Ast.Utils;
 
 namespace clojure.lang
 {
@@ -108,9 +111,11 @@ namespace clojure.lang
             Symbol.create("*file*"), "NO_SOURCE_PATH");
 
         //Integer
-        internal static readonly Var LINE = Var.create(0);
-        internal static readonly Var LINE_BEFORE = Var.create(0);
-        internal static readonly Var LINE_AFTER = Var.create(0);
+        internal static readonly Var LINE = Var.create(0);          // From the JVM version
+        internal static readonly Var LINE_BEFORE = Var.create(0);   // From the JVM version
+        internal static readonly Var LINE_AFTER = Var.create(0);    // From the JVM version
+        //internal static readonly Var SOURCE_SPAN = Var.create(null);    // Mine
+        internal static readonly Var DOCUMENT_INFO = Var.create(null);  // Mine
 
         internal static readonly Var METHODS = Var.create(null);
         internal static readonly Var LOCAL_ENV = Var.create(PersistentHashMap.EMPTY);
@@ -379,9 +384,9 @@ namespace clojure.lang
                         PropertyInfo pinfo;
 
                         if ((finfo = Reflector.GetField(t, symbol.Name, true)) != null)
-                            return new StaticFieldExpr((int)LINE.deref(), t, symbol.Name,finfo);
+                            return new StaticFieldExpr((string)SOURCE.deref(),(int)LINE.deref(), null, t, symbol.Name,finfo);
                         else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) != null)
-                            return new StaticPropertyExpr((int)LINE.deref(), t, symbol.Name,pinfo);
+                            return new StaticPropertyExpr((string)SOURCE.deref(), (int)LINE.deref(), null, t, symbol.Name, pinfo);
                     }
                     throw new Exception(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
                 }
@@ -428,7 +433,7 @@ namespace clojure.lang
                 IFn inline = IsInline(op, RT.count(RT.next(form)));
 
                 if (inline != null)
-                    return GenerateAST(inline.applyTo(RT.next(form)),isRecurContext);
+                    return GenerateAST(MaybeTransferSourceInfo(inline.applyTo(RT.next(form)),form),isRecurContext);
 
                 IParser p;
                 if (op.Equals(FN))
@@ -500,15 +505,12 @@ namespace clojure.lang
                         if (form.count() < 2)
                             throw new ArgumentException("Malformed member expression, expecting (.member target ...)");
                         Symbol method = Symbol.intern(sname.Substring(1));
-                        // TODO:  Figure out why the following change made in Java Rev 1158 breaks ants.clj
-                        // Note on that revision: force instance member interpretation of (.method ClassName), e.g. (.getMethods String) works
-                        //  However, when I do this, it makes ants.clj choke on: (def white-brush (new SolidBrush (.White Color)))
                         object target = RT.second(form);
                         if (MaybeType(target, false) != null)
-                            //target = RT.list(IDENTITY, target);
                             target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY, CLASS));
-                        return RT.listStar(DOT, target, method, form.next().next());
-                        // safe substitute: return RT.listStar(Compiler.DOT, RT.second(form), method, form.next().next());
+                        // JVM: return RT.listStar(DOT, target, method, form.next().next());
+                        // We need to make sure source information gets transferred
+                        return MaybeTransferSourceInfo(RT.listStar(DOT, target, method, form.next().next()), form);
                     }
                     else if (NamesStaticMember(sym))
                     {
@@ -517,20 +519,59 @@ namespace clojure.lang
                         if (t != null)
                         {
                             Symbol method = Symbol.intern(sym.Name);
-                            return RT.listStar(Compiler.DOT, target, method, form.next());
+                            // JVM: return RT.listStar(Compiler.DOT, target, method, form.next());
+                            // We need to make sure source information gets transferred
+                            return MaybeTransferSourceInfo(RT.listStar(Compiler.DOT, target, method, form.next()), form);
                         }
                     }
                     else
                     {
-                        // (x.substring 2 5) =>  (. s substring 2 5)
+                        // (x.substring 2 5) =>  (. x substring 2 5)
                         int index = sname.LastIndexOf('.');
                         if (index == sname.Length - 1)
-                            return RT.listStar(Compiler.NEW, Symbol.intern(sname.Substring(0, index)), form.next());
+                            // JVM: return RT.listStar(Compiler.NEW, Symbol.intern(sname.Substring(0, index)), form.next());
+                            // We need to make sure source information gets transferred
+                            return MaybeTransferSourceInfo(RT.listStar(Compiler.NEW, Symbol.intern(sname.Substring(0, index)), form.next()), form);
                     }
                 }
 
             }
             return form;
+        }
+
+        static object MaybeTransferSourceInfo(object newForm, object oldForm)
+        {
+            IObj newObj = newForm as IObj;
+            if (newObj == null)
+                return newForm;
+
+            IObj oldObj = oldForm as IObj;
+            if (oldObj == null)
+                return newForm;
+
+            IPersistentMap oldMeta = oldObj.meta();
+            if (oldMeta == null)
+                return newForm;
+
+            // TODO: Make the source info an IPersistentMap.
+            int? startLine = (int?)oldMeta.valAt(RT.LINE_KEY);
+            int? startColumn = (int?)oldMeta.valAt(RT.COLUMN_KEY);
+            int? endLine = (int?)oldMeta.valAt(RT.END_LINE_KEY);
+            int? endColumn = (int?)oldMeta.valAt(RT.END_COLUMN_KEY);
+
+            if (startLine.HasValue || startColumn.HasValue || endLine.HasValue || endColumn.HasValue)
+            {
+                IPersistentMap newMeta = newObj.meta();
+                if (newMeta == null) newMeta = RT.map();
+                if (startLine.HasValue) newMeta = newMeta.assoc(RT.LINE_KEY, startLine.Value);
+                if (startColumn.HasValue) newMeta = newMeta.assoc(RT.COLUMN_KEY, startColumn.Value);
+                if (endLine.HasValue) newMeta = newMeta.assoc(RT.END_LINE_KEY, endLine.Value);
+                if (endColumn.HasValue) newMeta = newMeta.assoc(RT.END_COLUMN_KEY, endColumn.Value);
+
+                return newObj.withMeta(newMeta);
+            }
+
+            return newForm;
         }
 
         internal static bool NamesStaticMember(Symbol sym)
@@ -1099,6 +1140,41 @@ namespace clojure.lang
                 return Compile(rdr, null, filename);
         }
 
+
+        internal static SymbolDocumentInfo DocInfo()
+        {
+            return (SymbolDocumentInfo)DOCUMENT_INFO.deref();
+        }
+
+        internal static SourceSpan? GetSourceSpan(object form)
+        {
+            IObj iobj = form as IObj;
+            if (iobj == null)
+                return null;
+            IPersistentMap meta = iobj.meta();
+            if (meta == null)
+                return null;
+
+            int? startLine = (int?)meta.valAt(RT.LINE_KEY);
+            int? endLine = (int?)meta.valAt(RT.END_LINE_KEY);
+            int? startCol = (int?)meta.valAt(RT.COLUMN_KEY);
+            int? endCol = (int?)meta.valAt(RT.END_COLUMN_KEY);
+
+            if (startLine.HasValue && endLine.HasValue && startCol.HasValue && endCol.HasValue)
+                return new SourceSpan(new SourceLocation(0, startLine.Value, startCol.Value), new SourceLocation(0, endLine.Value, endCol.Value));
+
+            return null;
+        }
+
+        internal static Expression MaybeAddDebugInfo(Expression expr, SourceSpan? span)
+        {
+            if (span.HasValue & Compiler.DocInfo() != null)
+                return AstUtils.AddDebugInfo(expr, Compiler.DocInfo(), span.Value.Start, span.Value.End);
+
+            return expr;
+        }
+
+
         internal static object Compile(TextReader rdr, string sourceDirectory, string sourceName)
         {
             if (COMPILE_PATH.deref() == null)
@@ -1120,6 +1196,7 @@ namespace clojure.lang
             RT.CURRENT_NS, RT.CURRENT_NS.deref(),
             LINE_BEFORE, lntr.LineNumber,
             LINE_AFTER, lntr.LineNumber,
+            DOCUMENT_INFO, Expression.SymbolDocument(sourcePath),
             CONSTANTS, PersistentVector.EMPTY,
             KEYWORDS, PersistentHashMap.EMPTY,
             VARS, PersistentHashMap.EMPTY,
@@ -1144,7 +1221,8 @@ namespace clojure.lang
                     // Compile to assembly
                     MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
                         MethodAttributes.Public | MethodAttributes.Static);
-                    ast.CompileToMethod(methodBuilder);
+                    //ast.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());
+                    ast.CompileToMethod(methodBuilder, true);
 
                     names.Add(methodBuilder.Name);
 
@@ -1179,7 +1257,7 @@ namespace clojure.lang
                 // create initializer call
                 MethodBuilder mbInit = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static);
                 LambdaExpression initFn = Expression.Lambda(body);
-                initFn.CompileToMethod(mbInit);
+                initFn.CompileToMethod(mbInit, DebugInfoGenerator.CreatePdbGenerator());
 
                 initTB.CreateType();
 

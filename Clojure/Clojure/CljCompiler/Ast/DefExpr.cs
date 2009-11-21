@@ -17,6 +17,7 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using Microsoft.Scripting;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -94,6 +95,11 @@ namespace clojure.lang.CljCompiler.Ast
                 Object source_path = Compiler.SOURCE_PATH.deref();
                 source_path = source_path ?? "NO_SOURCE_FILE";
                 mm = (IPersistentMap)RT.assoc(mm, RT.LINE_KEY, Compiler.LINE.deref()).assoc(RT.FILE_KEY, source_path);
+
+                //SourceSpan? span = (SourceSpan?)Compiler.SOURCE_SPAN.deref();
+                SourceSpan? span = Compiler.GetSourceSpan(form);
+                if (span.HasValue)
+                    mm = mm.assoc(RT.COLUMN_KEY, span.Value.Start.Column).assoc(RT.END_LINE_KEY, span.Value.End.Line).assoc(RT.END_COLUMN_KEY, span.Value.End.Column);
 
                 Expr meta =  mm == null ? null : Compiler.GenerateAST(mm,false);
                 Expr init = Compiler.GenerateAST(RT.third(form),v.Symbol.Name,false);

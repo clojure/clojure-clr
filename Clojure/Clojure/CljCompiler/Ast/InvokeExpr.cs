@@ -17,7 +17,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-
+using AstUtils = Microsoft.Scripting.Ast.Utils;
+using Microsoft.Scripting;
 using System.Reflection;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -31,14 +32,16 @@ namespace clojure.lang.CljCompiler.Ast
         readonly IPersistentVector _args;
         readonly int _line;
         readonly string _source;
+        readonly SourceSpan? _span;
 
         #endregion
 
         #region Ctors
 
-        public InvokeExpr(string source, int line, Symbol tag, Expr fexpr, IPersistentVector args)
+        public InvokeExpr(string source, int line, SourceSpan? span, Symbol tag, Expr fexpr, IPersistentVector args)
         {
             _source = source;
+            _span = span;
             _line = line;
             _fexpr = fexpr;
             _args = args;
@@ -69,7 +72,12 @@ namespace clojure.lang.CljCompiler.Ast
             IPersistentVector args = PersistentVector.EMPTY;
             for ( ISeq s = RT.seq(form.next()); s != null; s = s.next())
                 args = args.cons(Compiler.GenerateAST(s.first(),false));
-            return new InvokeExpr((string)Compiler.SOURCE.deref(),(int)Compiler.LINE.deref(),Compiler.TagOf(form),fexpr,args);
+            return new InvokeExpr((string)Compiler.SOURCE.deref(),
+                (int)Compiler.LINE.deref(),
+                Compiler.GetSourceSpan(form),
+                Compiler.TagOf(form),
+                fexpr,
+                args);
         }
 
         #endregion
@@ -89,7 +97,7 @@ namespace clojure.lang.CljCompiler.Ast
                 args[i] = Compiler.MaybeBox(((Expr)_args.nth(i)).GenDlr(context));
 
             Expression call = GenerateInvocation(fn, args);
-
+            call = Compiler.MaybeAddDebugInfo(call, _span);
             return call;
         }
 

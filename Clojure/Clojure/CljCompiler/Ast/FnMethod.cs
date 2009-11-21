@@ -16,6 +16,8 @@ using System.Reflection.Emit;
 using System.Reflection;
 #if CLR2
 using Microsoft.Scripting.Ast;
+using System.Runtime.CompilerServices;
+using Microsoft.Scripting.Generation;
 #else
 using System.Linq.Expressions;
 #endif
@@ -257,8 +259,8 @@ namespace clojure.lang.CljCompiler.Ast
                 // TODO: Cache all the CreateObjectTypeArray values
                 MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
 
-                lambda.CompileToMethod(mb);
-                //lambda.CompileToMethod(mb, true);
+                //lambda.CompileToMethod(mb,DebugInfoGenerator.CreatePdbGenerator());
+                lambda.CompileToMethod(mb, true);
                 return mb;
             }
             finally

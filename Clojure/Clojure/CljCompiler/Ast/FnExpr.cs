@@ -20,6 +20,8 @@ using System.Linq.Expressions;
 using System.Reflection.Emit;
 using System.Reflection;
 using System.Collections;
+using System.Runtime.CompilerServices;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -669,7 +671,8 @@ namespace clojure.lang.CljCompiler.Ast
                 Expression block = Expression.Block(inits);
                 LambdaExpression lambda = Expression.Lambda(block);
                 MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME, MethodAttributes.Private | MethodAttributes.Static);
-                lambda.CompileToMethod(methodBuilder);
+                //lambda.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());   
+                lambda.CompileToMethod(methodBuilder, true);
                 return methodBuilder;
             }
             finally

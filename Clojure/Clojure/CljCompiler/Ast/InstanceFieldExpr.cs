@@ -19,7 +19,7 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-
+using Microsoft.Scripting;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -32,14 +32,18 @@ namespace clojure.lang.CljCompiler.Ast
         protected readonly TInfo _tinfo;
         readonly string _fieldName;
         readonly int _line;
+        readonly string _source;
+        readonly SourceSpan? _span;
 
         #endregion
 
         #region Ctors
 
-        public InstanceFieldOrProprtyExpr(int line, Expr target, string fieldName, TInfo tinfo)
+        public InstanceFieldOrProprtyExpr(string source, int line, SourceSpan? span,Expr target, string fieldName, TInfo tinfo)
         {
+            _source = source;
             _line = line;
+            _span = span;
             _target = target;
             _fieldName = fieldName;
             _tinfo = tinfo;
@@ -69,17 +73,20 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenDlr(GenContext context)
         {
             Expression target = _target.GenDlr(context);
+            Expression call;
             if (_targetType != null && _tinfo != null)
             {
                 Expression convTarget = Expression.Convert(target, _targetType);
                 Expression access = GenAccess(convTarget);
-                return Compiler.MaybeBox(access);
+                call = Compiler.MaybeBox(access);
             }
             else
             {
-                Expression call = Expression.Call(Compiler.Method_Reflector_GetInstanceFieldOrProperty, target, Expression.Constant(_fieldName));
-                return Compiler.MaybeBox(call);
+                call = Expression.Call(Compiler.Method_Reflector_GetInstanceFieldOrProperty, target, Expression.Constant(_fieldName));
+                call = Compiler.MaybeBox(call);
             }
+            call = Compiler.MaybeAddDebugInfo(call, _span);
+            return call;
         }
 
         protected abstract Expression GenAccess(Expression target);
@@ -105,21 +112,24 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Expression target = _target.GenDlr(context);
             Expression valExpr = val.GenDlr(context);
+            Expression call;
             if (_targetType != null && _tinfo != null)
             {
                 Expression convTarget = Expression.Convert(target, _targetType);
                 Expression access = GenAccess(convTarget);
-                return Expression.Assign(access, valExpr);
+                call = Expression.Assign(access, valExpr);
             }
             else
             {
-                Expression call = Expression.Call(
+                call = Expression.Call(
                     Compiler.Method_Reflector_SetInstanceFieldOrProperty,
                     target,
                     Expression.Constant(_fieldName),
                     Compiler.MaybeBox(valExpr));
-                return call;
             }
+
+            call = Compiler.MaybeAddDebugInfo(call, _span);
+            return call;
         }
 
         #endregion
@@ -129,8 +139,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region C-tors
 
-        public InstanceFieldExpr(int line, Expr target, string fieldName, FieldInfo finfo)
-            :base(line,target,fieldName,finfo)  
+        public InstanceFieldExpr(string source, int line, SourceSpan? span, Expr target, string fieldName, FieldInfo finfo)
+            :base(source,line,span,target,fieldName,finfo)  
         {
         }
 
@@ -160,8 +170,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region C-tors
 
-        public InstancePropertyExpr(int line, Expr target, string fieldName, PropertyInfo pinfo)
-            :base(line,target,fieldName,pinfo)  
+        public InstancePropertyExpr(string source, int line, SourceSpan? span, Expr target, string fieldName, PropertyInfo pinfo)
+            :base(source,line,span,target,fieldName,pinfo)  
         {
         }
 

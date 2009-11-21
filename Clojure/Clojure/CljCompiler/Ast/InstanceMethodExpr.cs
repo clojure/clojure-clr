@@ -19,6 +19,7 @@ using Microsoft.Scripting.Ast;
 using System.Linq.Expressions;
 #endif
 using AstUtils = Microsoft.Scripting.Ast.Utils;
+using Microsoft.Scripting;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -32,15 +33,17 @@ namespace clojure.lang.CljCompiler.Ast
         readonly MethodInfo _method;
         readonly string _source;
         readonly int _line;
+        readonly SourceSpan? _span;
 
         #endregion
 
         #region Ctors
 
-        public InstanceMethodExpr(string source, int line, Expr target, string methodName, IPersistentVector args)
+        public InstanceMethodExpr(string source, int line, SourceSpan? span, Expr target, string methodName, IPersistentVector args)
         {
             _source = source;
             _line = line;
+            _span = span;
             _target = target;
             _methodName = methodName;
             _args = args;
@@ -90,7 +93,9 @@ namespace clojure.lang.CljCompiler.Ast
             Expression target = _target.GenDlr(context);
             Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
 
-            return AstUtils.SimpleCallHelper(target,_method, args);
+            Expression call = AstUtils.SimpleCallHelper(target,_method, args);
+            call = Compiler.MaybeAddDebugInfo(call, _span);
+            return call;
         }
 
         private Expression GenDlrViaReflection(GenContext context)
@@ -104,7 +109,9 @@ namespace clojure.lang.CljCompiler.Ast
             moreArgs[1] = _target.GenDlr(context);
             moreArgs[2] = Expression.NewArrayInit(typeof(object), parms);
 
-            return Expression.Call(Compiler.Method_Reflector_CallInstanceMethod, moreArgs);
+            Expression call = Expression.Call(Compiler.Method_Reflector_CallInstanceMethod, moreArgs);
+            call = Compiler.MaybeAddDebugInfo(call, _span);
+            return call;
         }
 
         #endregion
