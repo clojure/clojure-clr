@@ -28,7 +28,7 @@ namespace clojure.lang
         #region C-tors
 
         public ArrayChunk(object[] array, int off)
-            : this(array,0,array.Length)
+            : this(array,off,array.Length)
         {
         }
 
