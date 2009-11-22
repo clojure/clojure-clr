@@ -30,19 +30,17 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Expr _fexpr;
         readonly Object _tag;
         readonly IPersistentVector _args;
-        readonly int _line;
         readonly string _source;
-        readonly SourceSpan? _span;
+        readonly IPersistentMap _spanMap;
 
         #endregion
 
         #region Ctors
 
-        public InvokeExpr(string source, int line, SourceSpan? span, Symbol tag, Expr fexpr, IPersistentVector args)
+        public InvokeExpr(string source, IPersistentMap spanMap, Symbol tag, Expr fexpr, IPersistentVector args)
         {
             _source = source;
-            _span = span;
-            _line = line;
+            _spanMap = spanMap;
             _fexpr = fexpr;
             _args = args;
             _tag = tag ?? (fexpr is VarExpr ? ((VarExpr)fexpr).Tag : null);
@@ -73,8 +71,7 @@ namespace clojure.lang.CljCompiler.Ast
             for ( ISeq s = RT.seq(form.next()); s != null; s = s.next())
                 args = args.cons(Compiler.GenerateAST(s.first(),false));
             return new InvokeExpr((string)Compiler.SOURCE.deref(),
-                (int)Compiler.LINE.deref(),
-                Compiler.GetSourceSpan(form),
+                Compiler.GetSourceSpanMap(form),
                 Compiler.TagOf(form),
                 fexpr,
                 args);
@@ -97,7 +94,7 @@ namespace clojure.lang.CljCompiler.Ast
                 args[i] = Compiler.MaybeBox(((Expr)_args.nth(i)).GenDlr(context));
 
             Expression call = GenerateInvocation(fn, args);
-            call = Compiler.MaybeAddDebugInfo(call, _span);
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
         }
 

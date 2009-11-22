@@ -825,9 +825,11 @@ namespace Clojure.Tests.LibTests
             Expect(o1, InstanceOf(typeof(IObj)));
             IObj io = o1 as IObj;
             Expect(io.meta().valAt(RT.LINE_KEY), EqualTo(3));
-            Expect(io.meta().valAt(RT.COLUMN_KEY),EqualTo(2));
-            Expect(io.meta().valAt(RT.END_LINE_KEY), EqualTo(4));
-            Expect(io.meta().valAt(RT.END_COLUMN_KEY),EqualTo(4));            
+            IPersistentMap sourceSpanMap = (IPersistentMap)io.meta().valAt(RT.SOURCE_SPAN_KEY);
+            Expect(sourceSpanMap.valAt(RT.START_LINE_KEY), EqualTo(3));
+            Expect(sourceSpanMap.valAt(RT.START_COLUMN_KEY), EqualTo(2));
+            Expect(sourceSpanMap.valAt(RT.END_LINE_KEY), EqualTo(4));
+            Expect(sourceSpanMap.valAt(RT.END_COLUMN_KEY),EqualTo(4));            
         }
 
         #endregion

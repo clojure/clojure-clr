@@ -34,26 +34,22 @@ namespace clojure.lang.CljCompiler.Ast
         readonly IPersistentVector _args;
         readonly MethodInfo _method;
         readonly string _source;
-        readonly int _line;
-        readonly SourceSpan? _span;
+        readonly IPersistentMap _spanMap;
 
         #endregion
 
         #region Ctors
 
-        public StaticMethodExpr(string source, int line, SourceSpan? span, Type type, string methodName, IPersistentVector args)
+        public StaticMethodExpr(string source, IPersistentMap spanMap, Type type, string methodName, IPersistentVector args)
         {
             _source = source;
-            _line = line;
-            _span = span;
+            _spanMap = spanMap;
             _type = type;
             _methodName = methodName;
             _args = args;
 
-            _method  = GetMatchingMethod(line, _type, _args, _methodName);
+            _method  = GetMatchingMethod(spanMap, _type, _args, _methodName);
         }
-
-
 
         #endregion
 
@@ -81,7 +77,7 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 call = GenDlrViaReflection(context);
 
-            call = Compiler.MaybeAddDebugInfo(call, _span);
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
         }
 

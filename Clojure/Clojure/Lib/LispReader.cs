@@ -659,9 +659,13 @@ namespace clojure.lang
                 {
                     return s.withMeta(RT.map(
                         RT.LINE_KEY, startLine, // This is what is supported by the JVM version
-                        RT.COLUMN_KEY, startCol,
-                        RT.END_LINE_KEY, lntr.LineNumber,
-                        RT.END_COLUMN_KEY, lntr.ColumnNumber));
+                        // We add a :source-span key, value is map with the other values.
+                        // A map is used here so that we are print-dup--serializable.
+                        RT.SOURCE_SPAN_KEY, RT.map(
+                            RT.START_LINE_KEY, startLine,
+                            RT.START_COLUMN_KEY, startCol,
+                            RT.END_LINE_KEY, lntr.LineNumber,
+                            RT.END_COLUMN_KEY, lntr.ColumnNumber)));
                 }
                 else
                     return s;

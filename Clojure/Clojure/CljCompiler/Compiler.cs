@@ -25,7 +25,6 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using Microsoft.Scripting.Generation;
-using Microsoft.Scripting;
 using AstUtils = Microsoft.Scripting.Ast.Utils;
 
 namespace clojure.lang
@@ -384,9 +383,9 @@ namespace clojure.lang
                         PropertyInfo pinfo;
 
                         if ((finfo = Reflector.GetField(t, symbol.Name, true)) != null)
-                            return new StaticFieldExpr((string)SOURCE.deref(),(int)LINE.deref(), null, t, symbol.Name,finfo);
+                            return new StaticFieldExpr((string)SOURCE.deref(), null, t, symbol.Name,finfo);
                         else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) != null)
-                            return new StaticPropertyExpr((string)SOURCE.deref(), (int)LINE.deref(), null, t, symbol.Name, pinfo);
+                            return new StaticPropertyExpr((string)SOURCE.deref(), null, t, symbol.Name, pinfo);
                     }
                     throw new Exception(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
                 }
@@ -553,20 +552,14 @@ namespace clojure.lang
             if (oldMeta == null)
                 return newForm;
 
-            // TODO: Make the source info an IPersistentMap.
-            int? startLine = (int?)oldMeta.valAt(RT.LINE_KEY);
-            int? startColumn = (int?)oldMeta.valAt(RT.COLUMN_KEY);
-            int? endLine = (int?)oldMeta.valAt(RT.END_LINE_KEY);
-            int? endColumn = (int?)oldMeta.valAt(RT.END_COLUMN_KEY);
-
-            if (startLine.HasValue || startColumn.HasValue || endLine.HasValue || endColumn.HasValue)
+            IPersistentMap spanMap = (IPersistentMap)oldMeta.valAt(RT.SOURCE_SPAN_KEY);
+            if (spanMap != null)
             {
                 IPersistentMap newMeta = newObj.meta();
-                if (newMeta == null) newMeta = RT.map();
-                if (startLine.HasValue) newMeta = newMeta.assoc(RT.LINE_KEY, startLine.Value);
-                if (startColumn.HasValue) newMeta = newMeta.assoc(RT.COLUMN_KEY, startColumn.Value);
-                if (endLine.HasValue) newMeta = newMeta.assoc(RT.END_LINE_KEY, endLine.Value);
-                if (endColumn.HasValue) newMeta = newMeta.assoc(RT.END_COLUMN_KEY, endColumn.Value);
+                if (newMeta == null) 
+                    newMeta = RT.map();
+
+                newMeta = newMeta.assoc(RT.SOURCE_SPAN_KEY, spanMap);
 
                 return newObj.withMeta(newMeta);
             }
@@ -1146,7 +1139,7 @@ namespace clojure.lang
             return (SymbolDocumentInfo)DOCUMENT_INFO.deref();
         }
 
-        internal static SourceSpan? GetSourceSpan(object form)
+        internal static IPersistentMap GetSourceSpanMap(object form)
         {
             IObj iobj = form as IObj;
             if (iobj == null)
@@ -1155,22 +1148,17 @@ namespace clojure.lang
             if (meta == null)
                 return null;
 
-            int? startLine = (int?)meta.valAt(RT.LINE_KEY);
-            int? endLine = (int?)meta.valAt(RT.END_LINE_KEY);
-            int? startCol = (int?)meta.valAt(RT.COLUMN_KEY);
-            int? endCol = (int?)meta.valAt(RT.END_COLUMN_KEY);
-
-            if (startLine.HasValue && endLine.HasValue && startCol.HasValue && endCol.HasValue)
-                return new SourceSpan(new SourceLocation(0, startLine.Value, startCol.Value), new SourceLocation(0, endLine.Value, endCol.Value));
-
-            return null;
+            IPersistentMap spanMap = (IPersistentMap)meta.valAt(RT.SOURCE_SPAN_KEY);
+            return spanMap;
         }
 
-        internal static Expression MaybeAddDebugInfo(Expression expr, SourceSpan? span)
+        internal static Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap)
         {
-            if (span.HasValue & Compiler.DocInfo() != null)
-                return AstUtils.AddDebugInfo(expr, Compiler.DocInfo(), span.Value.Start, span.Value.End);
-
+            if (spanMap != null & Compiler.DocInfo() != null)
+                return AstUtils.AddDebugInfo(expr,
+                    Compiler.DocInfo(),
+                    new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.START_LINE_KEY), (int)spanMap.valAt(RT.START_COLUMN_KEY)),
+                    new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.END_LINE_KEY), (int)spanMap.valAt(RT.END_COLUMN_KEY)));
             return expr;
         }
 

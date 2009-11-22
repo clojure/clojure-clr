@@ -97,9 +97,9 @@ namespace clojure.lang.CljCompiler.Ast
                 mm = (IPersistentMap)RT.assoc(mm, RT.LINE_KEY, Compiler.LINE.deref()).assoc(RT.FILE_KEY, source_path);
 
                 //SourceSpan? span = (SourceSpan?)Compiler.SOURCE_SPAN.deref();
-                SourceSpan? span = Compiler.GetSourceSpan(form);
-                if (span.HasValue)
-                    mm = mm.assoc(RT.COLUMN_KEY, span.Value.Start.Column).assoc(RT.END_LINE_KEY, span.Value.End.Line).assoc(RT.END_COLUMN_KEY, span.Value.End.Column);
+                IPersistentMap spanMap = Compiler.GetSourceSpanMap(form);
+                if (spanMap != null)
+                    mm = mm.assoc(RT.SOURCE_SPAN_KEY, spanMap);
 
                 Expr meta =  mm == null ? null : Compiler.GenerateAST(mm,false);
                 Expr init = Compiler.GenerateAST(RT.third(form),v.Symbol.Name,false);

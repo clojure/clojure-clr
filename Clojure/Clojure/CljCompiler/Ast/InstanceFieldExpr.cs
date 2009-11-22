@@ -31,19 +31,17 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Type _targetType;
         protected readonly TInfo _tinfo;
         readonly string _fieldName;
-        readonly int _line;
         readonly string _source;
-        readonly SourceSpan? _span;
+        readonly IPersistentMap _spanMap;
 
         #endregion
 
         #region Ctors
 
-        public InstanceFieldOrProprtyExpr(string source, int line, SourceSpan? span,Expr target, string fieldName, TInfo tinfo)
+        public InstanceFieldOrProprtyExpr(string source, IPersistentMap spanMap, Expr target, string fieldName, TInfo tinfo)
         {
             _source = source;
-            _line = line;
-            _span = span;
+            _spanMap = spanMap;
             _target = target;
             _fieldName = fieldName;
             _tinfo = tinfo;
@@ -54,7 +52,7 @@ namespace clojure.lang.CljCompiler.Ast
             // However, this seems consistent with the checks in the generation code.
             if ( (_targetType == null || _tinfo == null) && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                 ((TextWriter)RT.ERR.deref()).WriteLine("Reflection warning {0}:{1} - reference to field/property {2} can't be resolved.", 
-                    Compiler.SOURCE_PATH.deref(), line,_fieldName);
+                    Compiler.SOURCE_PATH.deref(), spanMap == null ? (int)spanMap.valAt(RT.START_LINE_KEY, 0) : 0,_fieldName);
         }
 
         #endregion
@@ -85,7 +83,7 @@ namespace clojure.lang.CljCompiler.Ast
                 call = Expression.Call(Compiler.Method_Reflector_GetInstanceFieldOrProperty, target, Expression.Constant(_fieldName));
                 call = Compiler.MaybeBox(call);
             }
-            call = Compiler.MaybeAddDebugInfo(call, _span);
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
         }
 
@@ -128,7 +126,7 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.MaybeBox(valExpr));
             }
 
-            call = Compiler.MaybeAddDebugInfo(call, _span);
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
         }
 
@@ -139,8 +137,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region C-tors
 
-        public InstanceFieldExpr(string source, int line, SourceSpan? span, Expr target, string fieldName, FieldInfo finfo)
-            :base(source,line,span,target,fieldName,finfo)  
+        public InstanceFieldExpr(string source, IPersistentMap spanMap, Expr target, string fieldName, FieldInfo finfo)
+            :base(source,spanMap,target,fieldName,finfo)  
         {
         }
 
@@ -170,8 +168,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region C-tors
 
-        public InstancePropertyExpr(string source, int line, SourceSpan? span, Expr target, string fieldName, PropertyInfo pinfo)
-            :base(source,line,span,target,fieldName,pinfo)  
+        public InstancePropertyExpr(string source, IPersistentMap spanMap, Expr target, string fieldName, PropertyInfo pinfo)
+            :base(source,spanMap,target,fieldName,pinfo)  
         {
         }
 

@@ -319,12 +319,18 @@ namespace clojure.lang
         public static readonly Keyword FILE_KEY
             = Keyword.intern(null, "file");
 
+        public static readonly Keyword SOURCE_SPAN_KEY
+            = Keyword.intern(null, "source-span");
+
+        public static readonly Keyword START_LINE_KEY
+            = Keyword.intern(null, "start-line");
+
+        public static readonly Keyword START_COLUMN_KEY
+            = Keyword.intern(null, "start-column");
+
         public static readonly Keyword END_LINE_KEY
             = Keyword.intern(null, "end-line");
-
-        public static readonly Keyword COLUMN_KEY
-            = Keyword.intern(null, "column");
-
+        
         public static readonly Keyword END_COLUMN_KEY
             = Keyword.intern(null, "end-column");
  

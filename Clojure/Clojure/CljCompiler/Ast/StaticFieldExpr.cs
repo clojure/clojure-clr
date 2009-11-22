@@ -32,19 +32,17 @@ namespace clojure.lang.CljCompiler.Ast
         readonly string _fieldName;
         readonly Type _type;
         protected readonly TInfo _tinfo;
-        readonly int _line;
-        protected string _source;
-        protected SourceSpan? _span;
+        readonly protected string _source;
+        readonly protected IPersistentMap _spanMap;
 
         #endregion
 
         #region Ctors
 
-        protected StaticFieldOrPropertyExpr(string source, int line, SourceSpan? span, Type type, string fieldName, TInfo tinfo)
+        protected StaticFieldOrPropertyExpr(string source, IPersistentMap spanMap, Type type, string fieldName, TInfo tinfo)
         {
             _source = source;
-            _line = line;
-            _span = span;
+            _spanMap = spanMap;
             _fieldName = fieldName;
             _type = type;
             _tinfo = tinfo;
@@ -77,7 +75,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression access = GenDlrUnboxed(context);
             Expression valExpr = val.GenDlr(context);
             Expression assign = Expression.Assign(access, valExpr);
-            assign = Compiler.MaybeAddDebugInfo(assign, _span);
+            assign = Compiler.MaybeAddDebugInfo(assign, _spanMap);
             return assign;
         }
 
@@ -88,8 +86,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region C-tors
 
-        public StaticFieldExpr(string source,int line, SourceSpan? span, Type type, string fieldName, FieldInfo finfo)
-            : base(source, line, span, type, fieldName, finfo)
+        public StaticFieldExpr(string source, IPersistentMap spanMap, Type type, string fieldName, FieldInfo finfo)
+            : base(source, spanMap, type, fieldName, finfo)
         {
         }
 
@@ -109,7 +107,7 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenDlrUnboxed(GenContext context)
         {
             Expression field = Expression.Field(null, _tinfo);
-            field = Compiler.MaybeAddDebugInfo(field, _span);
+            field = Compiler.MaybeAddDebugInfo(field, _spanMap);
             return field;
         }
 
@@ -120,8 +118,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region C-tors
 
-        public StaticPropertyExpr(string source, int line, SourceSpan? span, Type type, string fieldName, PropertyInfo pinfo)
-            : base(source, line, span, type, fieldName, pinfo)
+        public StaticPropertyExpr(string source, IPersistentMap spanMap, Type type, string fieldName, PropertyInfo pinfo)
+            : base(source, spanMap, type, fieldName, pinfo)
         {
         }
 
@@ -141,7 +139,7 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenDlrUnboxed(GenContext context)
         {
             Expression prop = Expression.Property(null, _tinfo);
-            prop = Compiler.MaybeAddDebugInfo(prop, _span);
+            prop = Compiler.MaybeAddDebugInfo(prop, _spanMap);
             return prop;
         }
 

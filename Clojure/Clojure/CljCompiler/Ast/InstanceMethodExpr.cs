@@ -32,18 +32,16 @@ namespace clojure.lang.CljCompiler.Ast
         readonly IPersistentVector _args;
         readonly MethodInfo _method;
         readonly string _source;
-        readonly int _line;
-        readonly SourceSpan? _span;
+        readonly IPersistentMap _spanMap;
 
         #endregion
 
         #region Ctors
 
-        public InstanceMethodExpr(string source, int line, SourceSpan? span, Expr target, string methodName, IPersistentVector args)
+        public InstanceMethodExpr(string source, IPersistentMap spanMap, Expr target, string methodName, IPersistentVector args)
         {
             _source = source;
-            _line = line;
-            _span = span;
+            _spanMap = spanMap;
             _target = target;
             _methodName = methodName;
             _args = args;
@@ -51,7 +49,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (target.HasClrType && target.ClrType == null)
                 throw new ArgumentException(String.Format("Attempt to call instance method {0} on nil", methodName));
 
-            _method = GetMatchingMethod(line, target, _args, _methodName);
+            _method = GetMatchingMethod(spanMap, target, _args, _methodName);
         }
 
         #endregion
@@ -94,7 +92,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
 
             Expression call = AstUtils.SimpleCallHelper(target,_method, args);
-            call = Compiler.MaybeAddDebugInfo(call, _span);
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
         }
 
@@ -110,7 +108,7 @@ namespace clojure.lang.CljCompiler.Ast
             moreArgs[2] = Expression.NewArrayInit(typeof(object), parms);
 
             Expression call = Expression.Call(Compiler.Method_Reflector_CallInstanceMethod, moreArgs);
-            call = Compiler.MaybeAddDebugInfo(call, _span);
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
         }
 
