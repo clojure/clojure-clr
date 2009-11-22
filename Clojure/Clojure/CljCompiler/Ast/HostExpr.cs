@@ -45,7 +45,6 @@ namespace clojure.lang.CljCompiler.Ast
                 if (RT.Length(form) < 3)
                     throw new ArgumentException("Malformed member expression, expecting (. target member ... )");
 
-                int line = (int)Compiler.LINE.deref();
                 string source = (string)Compiler.SOURCE.deref();
                 IPersistentMap spanMap = Compiler.GetSourceSpanMap(form);
 

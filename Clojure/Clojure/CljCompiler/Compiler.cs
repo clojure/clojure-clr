@@ -110,10 +110,9 @@ namespace clojure.lang
             Symbol.create("*file*"), "NO_SOURCE_PATH");
 
         //Integer
-        internal static readonly Var LINE = Var.create(0);          // From the JVM version
-        internal static readonly Var LINE_BEFORE = Var.create(0);   // From the JVM version
-        internal static readonly Var LINE_AFTER = Var.create(0);    // From the JVM version
-        //internal static readonly Var SOURCE_SPAN = Var.create(null);    // Mine
+        //internal static readonly Var LINE = Var.create(0);          // From the JVM version
+        //internal static readonly Var LINE_BEFORE = Var.create(0);   // From the JVM version
+        //internal static readonly Var LINE_AFTER = Var.create(0);    // From the JVM version
         internal static readonly Var DOCUMENT_INFO = Var.create(null);  // Mine
 
         internal static readonly Var METHODS = Var.create(null);
@@ -307,8 +306,8 @@ namespace clojure.lang
 
         public static Expr GenerateAST(object form, string name, bool isRecurContext)
         {
-            try
-            {
+            //try
+            //{
                 if (form is LazySeq)
                 {
                     form = RT.seq(form);
@@ -340,14 +339,14 @@ namespace clojure.lang
                     return SetExpr.Parse((IPersistentSet)form);
                 else
                     return new ConstantExpr(form);
-            }
-            catch (Exception e)
-            {
-                if (!(e is CompilerException))
-                    throw new CompilerException((string)SOURCE.deref(), (int)LINE.deref(), e);
-                else
-                    throw e;
-            }
+            //}
+            //catch (Exception e)
+            //{
+            //    if (!(e is CompilerException))
+            //        throw new CompilerException((string)SOURCE.deref(), (int)LINE.deref(), e);
+            //    else
+            //        throw e;
+            //}
         }
 
         internal static Expr OptionallyGenerateMetaInit(object form, Expr expr)
@@ -411,14 +410,14 @@ namespace clojure.lang
 
         private static Expr AnalyzeSeq(ISeq form, string name, bool isRecurContext)
         {
-            int line = (int)LINE.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
-                line = (int)RT.meta(form).valAt(RT.LINE_KEY);
+            //int line = (int)LINE.deref();
+            //if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
+            //    line = (int)RT.meta(form).valAt(RT.LINE_KEY);
 
-            Var.pushThreadBindings(RT.map(Compiler.LINE, line));
+            //Var.pushThreadBindings(RT.map(Compiler.LINE, line));
 
-            try
-            {
+            //try
+            //{
 
                 object exp = MacroexpandSeq1(form);
                 if (exp != form)
@@ -441,18 +440,18 @@ namespace clojure.lang
                     return p.Parse(form,isRecurContext);
                 else
                     return InvokeExpr.Parse(form);
-            }
-            catch (Exception e)
-            {
-                if (!(e is CompilerException))
-                    throw new CompilerException((string)SOURCE.deref(), (int)LINE.deref(), e);
-                else
-                    throw e;
-            }
-            finally
-            {
-                Var.popThreadBindings();
-            }
+            //}
+            //catch (Exception e)
+            //{
+            //    if (!(e is CompilerException))
+            //        throw new CompilerException((string)SOURCE.deref(), (int)LINE.deref(), e);
+            //    else
+            //        throw e;
+            //}
+            //finally
+            //{
+            //    Var.popThreadBindings();
+            //}
         }
 
 
@@ -1041,20 +1040,20 @@ namespace clojure.lang
 
         public static object eval(object form)
         {
-            int line = (int)LINE.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
-                line = (int)RT.meta(form).valAt(RT.LINE_KEY);
-            Var.pushThreadBindings(RT.map(LINE, line));
-            try
-            {
+            //int line = (int)LINE.deref();
+            //if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
+            //    line = (int)RT.meta(form).valAt(RT.LINE_KEY);
+            //Var.pushThreadBindings(RT.map(LINE, line));
+            //try
+            //{
                 // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
                 LambdaExpression ast = Compiler.GenerateLambda(form, false);
                 return ast.Compile().DynamicInvoke();
-            }
-            finally
-            {
-                Var.popThreadBindings();
-            }
+            //}
+            //finally
+            //{
+            //    Var.popThreadBindings();
+            //}
         }
 
         public static object macroexpand1(object form)
@@ -1095,20 +1094,20 @@ namespace clojure.lang
                 //LOADER, RT.makeClassLoader(),
                 SOURCE_PATH, sourcePath,
                 SOURCE, sourceName,
-                RT.CURRENT_NS, RT.CURRENT_NS.deref(),
-                LINE_BEFORE, lntr.LineNumber,
-                LINE_AFTER, lntr.LineNumber
+                RT.CURRENT_NS, RT.CURRENT_NS.deref()
+                //LINE_BEFORE, lntr.LineNumber,
+                //LINE_AFTER, lntr.LineNumber
                 ));
 
             try
             {
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
-                    LINE_AFTER.set(lntr.LineNumber);
+                    //LINE_AFTER.set(lntr.LineNumber);
                     LambdaExpression ast = Compiler.GenerateLambda(form, false);
                     // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
                     ret = ast.Compile().DynamicInvoke();
-                    LINE_BEFORE.set(lntr.LineNumber);
+                    //LINE_BEFORE.set(lntr.LineNumber);
                 }
             }
             catch (LispReader.ReaderException e)
@@ -1182,8 +1181,8 @@ namespace clojure.lang
             SOURCE_PATH, sourcePath,
             SOURCE, sourceName,
             RT.CURRENT_NS, RT.CURRENT_NS.deref(),
-            LINE_BEFORE, lntr.LineNumber,
-            LINE_AFTER, lntr.LineNumber,
+            //LINE_BEFORE, lntr.LineNumber,
+            //LINE_AFTER, lntr.LineNumber,
             DOCUMENT_INFO, Expression.SymbolDocument(sourcePath),
             CONSTANTS, PersistentVector.EMPTY,
             KEYWORDS, PersistentHashMap.EMPTY,
@@ -1202,7 +1201,7 @@ namespace clojure.lang
                 int i = 0;
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
-                    LINE_AFTER.set(lntr.LineNumber);
+                    //LINE_AFTER.set(lntr.LineNumber);
 
                     LambdaExpression ast = Compiler.GenerateLambda(context, form, false);
 
@@ -1217,7 +1216,7 @@ namespace clojure.lang
                     // evaluate in this environment
                     // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
                     ast.Compile().DynamicInvoke();
-                    LINE_BEFORE.set(lntr.LineNumber);
+                    //LINE_BEFORE.set(lntr.LineNumber);
                 }
 
                 Type exprType = exprTB.CreateType();

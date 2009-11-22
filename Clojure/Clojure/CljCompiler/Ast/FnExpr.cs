@@ -85,7 +85,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         List<FieldBuilder> _closedOverFields;
 
-        int _line;
+        //int _line;
 
         #endregion
 
@@ -175,7 +175,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (RT.second(form) is IPersistentVector)
                     form = RT.list(Compiler.FN, RT.next(form));
 
-                fn._line = (int)Compiler.LINE.deref();
+                //fn._line = (int)Compiler.LINE.deref();
 
                 FnMethod variadicMethod = null;
                 SortedDictionary<int, FnMethod> methods = new SortedDictionary<int, FnMethod>();

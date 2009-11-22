@@ -31,19 +31,21 @@ namespace clojure.lang.CljCompiler.Ast
         readonly ConstructorInfo _ctor;
         readonly Type _type;
         bool _isNoArgValueTypeCtor = false;
+        readonly IPersistentMap _spanMap;
 
         #endregion
 
         #region Ctors
 
-        public NewExpr(Type type, IPersistentVector args, int line)
+        public NewExpr(Type type, IPersistentVector args, IPersistentMap spanMap)
         {
             _args = args;
             _type = type;
-            _ctor = ComputeCtor(line);
+            _spanMap = spanMap;
+            _ctor = ComputeCtor();
         }
 
-        private ConstructorInfo ComputeCtor(int line)
+        private ConstructorInfo ComputeCtor()
         {
             int numArgs = _args.count();
 
@@ -78,7 +80,7 @@ namespace clojure.lang.CljCompiler.Ast
             ConstructorInfo ctor = index >= 0 ? cinfos[index] : null;
             if (ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                 ((TextWriter)RT.ERR.deref()).WriteLine("Reflection warning, line: {0}:{1} - call to {2} ctor can't be resolved.",
-                    Compiler.SOURCE_PATH.deref(), line, _type.FullName);
+                    Compiler.SOURCE_PATH.deref(), _spanMap == null ? (int)_spanMap.valAt(RT.START_LINE_KEY, 0) : 0, _type.FullName);
             return ctor;
         }
 
@@ -104,7 +106,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             public Expr Parse(object frm, bool isRecurContext)
             {
-                int line = (int)Compiler.LINE.deref();
+                //int line = (int)Compiler.LINE.deref();
 
                 ISeq form = (ISeq)frm;
 
@@ -121,7 +123,7 @@ namespace clojure.lang.CljCompiler.Ast
                 for (ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
                     args = args.cons(Compiler.GenerateAST(s.first(),false));
 
-                return new NewExpr(t, args,line);
+                return new NewExpr(t, args, Compiler.GetSourceSpanMap(form));
             }
         }
 
@@ -131,18 +133,20 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
+            Expression result;
+
             if ( _ctor != null )
             {
                 // The ctor is uniquely determined.
 
                 Expression[] args = Compiler.GenTypedArgArray(context, _ctor.GetParameters(), _args);
-                return Expression.New(_ctor, args);
+                result = Expression.New(_ctor, args);
 
                 // JAVA: emitClearLocals
             }
             else if (_isNoArgValueTypeCtor)
             {
-                return Expression.Default(_type);
+                result = Expression.Default(_type);
             }
             else
             {
@@ -150,8 +154,11 @@ namespace clojure.lang.CljCompiler.Ast
                 Expression args = Compiler.GenArgArray(context, _args);
                 // Java: emitClearLocals
 
-                return Expression.Call(Compiler.Method_Reflector_InvokeConstructor, typeExpr, args);
-            }        
+                result = Expression.Call(Compiler.Method_Reflector_InvokeConstructor, typeExpr, args);
+            }
+
+            result = Compiler.MaybeAddDebugInfo(result, _spanMap);
+            return result;
         }
 
         #endregion
