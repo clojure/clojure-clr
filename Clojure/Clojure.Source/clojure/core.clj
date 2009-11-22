@@ -2371,7 +2371,7 @@
                               (try
                                 (with-open ~(subvec bindings 2) ~@body)
                                 (finally
-                                  (. ~(bindings 0) Close))))      ;;; close => Close
+                                  (. ~(bindings 0) Dispose))))      ;;; close => Dispose
     :else (throw (ArgumentException.                              ;;;IllegalArgumentException.
                    "with-open only allows Symbols in bindings"))))
 
