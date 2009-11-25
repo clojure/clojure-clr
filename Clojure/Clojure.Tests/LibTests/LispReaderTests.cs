@@ -402,6 +402,67 @@ namespace Clojure.Tests.LibTests
             object o1 = ReadFromString("ab::cd/ef");
         }
 
+        [Test]
+        public void PipeEscapingTurnsOffSpecialCharacters()
+        {
+            object o1 = ReadFromString("|ab(1 2)[1 2]{1 2}#{1 2}cd|");
+            Expect(o1, TypeOf(typeof(Symbol)));
+            Expect(((Symbol)o1).Name, EqualTo("ab(1 2)[1 2]{1 2}#{1 2}cd"));
+            Expect(((Symbol)o1).Namespace, Null);
+        }
+
+        [Test]
+        public void PipeEscapingWorksInside()
+        {
+            object o1 = ReadFromString("ab|(1 2)[1 2]{1 2}#{1 2}|cd");
+            Expect(o1, TypeOf(typeof(Symbol)));
+            Expect(((Symbol)o1).Name, EqualTo("ab(1 2)[1 2]{1 2}#{1 2}cd"));
+            Expect(((Symbol)o1).Namespace, Null);
+        }
+
+        [Test]
+        public void PipeEscapingMultipleTimesWorks()
+        {
+            object o1 = ReadFromString("ab|(1 2)[1 2]|cd|{1 2}#{1 2}|ef");
+            Expect(o1, TypeOf(typeof(Symbol)));
+            Expect(((Symbol)o1).Name, EqualTo("ab(1 2)[1 2]cd{1 2}#{1 2}ef"));
+            Expect(((Symbol)o1).Namespace, Null);
+        }
+
+        [Test]
+        public void PipeEscapingEscapesItself()
+        {
+            object o1 = ReadFromString("ab|cd||ef|gh||||");
+            Expect(o1, TypeOf(typeof(Symbol)));
+            Expect(((Symbol)o1).Name, EqualTo("abcd|efgh|"));
+            Expect(((Symbol)o1).Namespace, Null);
+        }
+
+        [Test]
+        public void PipeEscapingEatsSlash()
+        {
+            object o1 = ReadFromString("ab|cd/ef|gh");
+            Expect(o1, TypeOf(typeof(Symbol)));
+            Expect(((Symbol)o1).Name, EqualTo("abcd/efgh"));
+            Expect(((Symbol)o1).Namespace, Null);
+        }
+
+        [Test]
+        public void PipeEscapingEatsSlash2()
+        {
+            object o1 = ReadFromString("ab/cd|ef/gh|ij");
+            Expect(o1, TypeOf(typeof(Symbol)));
+            Expect(((Symbol)o1).Name, EqualTo("cdef/ghij"));
+            Expect(((Symbol)o1).Namespace, EqualTo("ab"));
+        }
+
+        [Test]
+        [ExpectedException(typeof(System.IO.EndOfStreamException))]
+        public void PipeEscapingWithOddPipesIsBad()
+        {
+            object o1 = ReadFromString("ab|cd|ef|gh");
+        }
+
         #endregion
 
         #region Keyword tests

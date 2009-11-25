@@ -170,8 +170,18 @@ namespace clojure.lang
                         Unread(r, ch2);
                     }
 
-                    string token = readToken(r, (char)ch);
-                    return RT.suppressRead() ? null : interpretToken(token);
+                    //string token = readToken(r, (char)ch);
+                    //return RT.suppressRead() ? null : interpretToken(token);
+                    string token;
+                    int lastSlashIndex;
+                    bool eofSeen = readToken(r, (char)ch, out token, out lastSlashIndex);
+                    if (eofSeen)
+                    {
+                        if (eofIsError)
+                            throw new EndOfStreamException("EOF while reading");
+                        return eofValue;
+                    }
+                    return RT.suppressRead() ? null : interpretToken(token,lastSlashIndex);
                 }
             }
             catch (Exception e)
@@ -316,93 +326,265 @@ namespace clojure.lang
 
         #region Reading tokens
 
-        static string readToken(PushbackTextReader r, char initch) 
+        static string readSimpleToken(PushbackTextReader r, char initch)
         {
-	        StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.Append(initch);
-            
-            for(; ;)
+
+            for (; ; )
             {
                 int ch = r.Read();
-                if(ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
+                if (ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
                 {
                     Unread(r, ch);
                     return sb.ToString();
                 }
-                sb.Append((char) ch);
+                sb.Append((char)ch);
             }
         }
 
-        public static object interpretToken(string s)
+        static bool readToken(PushbackTextReader r, char initch, out string nameString, out int lastSlashIndex)
         {
+            bool oddVertBarMode = false;
+            lastSlashIndex = -1;
 
-            if (s.Equals("nil"))
+            StringBuilder sb = new StringBuilder();
+
+            if (initch == '|')
+                oddVertBarMode = true;
+            else
+                sb.Append(initch);
+
+            for (; ; )
             {
-                return null;
+                int ch = r.Read();
+                if (oddVertBarMode)
+                {
+                    if (ch == -1)
+                    {
+                        nameString = sb.ToString();
+                        return true;
+                    }
+                    if (ch == '|')
+                    {
+                        int ch2 = r.Read();
+                        if (ch2 == '|')
+                            sb.Append('|');
+                        else
+                        {
+                            r.Unread(ch2);
+                            oddVertBarMode = false;
+                        }
+                    }
+                    else 
+                        sb.Append((char)ch);
+                }
+                else
+                {
+                    if (ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
+                    {
+                        Unread(r, ch);
+                        nameString = sb.ToString();
+                        return false;
+                    }
+                    else if (ch == '|')
+                    {
+                        oddVertBarMode = true;
+                    }
+                    else
+                    {
+                        sb.Append((char)ch);
+                        if (ch == '/')
+                            lastSlashIndex = sb.Length - 1;
+                    }
+                }
             }
-            else if (s.Equals("true"))
-            {
-                //return RT.T;
-                return true;
-            }
-            else if (s.Equals("false"))
-            {
-                //return RT.F;
-                return false;
-            }
-            else if (s.Equals("/"))
-            {
-                return SLASH;
-            }
-            else if (s.Equals("clojure.core//"))
+        }
+
+        //public static object interpretToken(string s)
+        //{
+        //    if (s.Equals("nil"))
+        //    {
+        //        return null;
+        //    }
+        //    else if (s.Equals("true"))
+        //    {
+        //        //return RT.T;
+        //        return true;
+        //    }
+        //    else if (s.Equals("false"))
+        //    {
+        //        //return RT.F;
+        //        return false;
+        //    }
+        //    else if (s.Equals("/"))
+        //    {
+        //        return SLASH;
+        //    }
+        //    else if (s.Equals("clojure.core//"))
+        //    {
+        //        return CLOJURE_SLASH;
+        //    }
+
+        //    object ret = null;
+
+        //    ret = matchSymbol(s);
+        //    if (ret != null)
+        //        return ret;
+
+        //    throw new Exception("Invalid token: " + s);
+        //}
+
+        public static object interpretToken(string token, int lastSlashIndex)
+        {
+            if (token.Equals("nil"))
+                {
+                    return null;
+                }
+                else if (token.Equals("true"))
+                {
+                    //return RT.T;
+                    return true;
+                }
+                else if (token.Equals("false"))
+                {
+                    //return RT.F;
+                    return false;
+                }
+                else if (token.Equals("/"))
+                {
+                    return SLASH;
+                }
+            else if (token.Equals("clojure.core//"))
             {
                 return CLOJURE_SLASH;
             }
 
             object ret = null;
 
-            ret = matchSymbol(s);
+            ret = matchSymbol(token,lastSlashIndex);
             if (ret != null)
                 return ret;
 
-            throw new Exception("Invalid token: " + s);
+            throw new Exception("Invalid token: " + token);
         }
 
 
-        static Regex symbolPat = new Regex("^[:]?([\\D-[/]].*/)?([\\D-[/]][^/]*)$");
+        static Regex nsSymbolPat = new Regex("^[:]?\\D");
+        static Regex nameSymbolPat = new Regex("^\\D");
 
-        static object matchSymbol(string s)
+        static object matchSymbol(string token, int lastSlashIndex)
         {
-            Match m = symbolPat.Match(s);
-            if (m.Success)
+            // no :: except at beginning
+            if (token.IndexOf("::", 1) != -1)
+                return null;
+
+            string nsStr;
+            string nameStr;
+            bool hasNS;
+
+            if (lastSlashIndex == -1)
             {
-                int gc = m.Groups.Count;
-                string ns = m.Groups[1].Value;
-                string name = m.Groups[2].Value;
-                if (ns != null && ns.EndsWith(":/")
-                   || name.EndsWith(":")
-                   || s.IndexOf("::", 1) != -1)
-                    return null;
-                // Maybe resolveSymbol should move here or into Namespace:  resolveSymbol is not used in the compiler.
-                if (s.StartsWith("::"))
-                {
-                    Symbol ks = Symbol.intern(s.Substring(2));
-                    Namespace kns;
-                    if (ks.Namespace != null)
-                        kns = Compiler.NamespaceFor(ks);
-                    else
-                        kns = Compiler.CurrentNamespace;
-                    //auto-resolving keyword
-                    return Keyword.intern(kns.Name.Name, ks.Name);
-                }
-                bool isKeyword = s[0] == ':';
-                Symbol sym = Symbol.intern(s.Substring(isKeyword ? 1 : 0));
-                if (isKeyword)
-                    return Keyword.intern(sym);
-                return sym;
+                hasNS = false;
+                nsStr = String.Empty;
+                nameStr = token;
             }
-            return null;
+            else
+            {
+                hasNS = true;
+                nsStr = token.Substring(0, lastSlashIndex);
+                nameStr = token.Substring(lastSlashIndex + 1);
+            }
+
+            // Must begin with non-digit, or ':' + non-digit if there is a namespace
+            Match nameMatch = hasNS ? nameSymbolPat.Match(nameStr) : nsSymbolPat.Match(nameStr);
+            if (!nameMatch.Success)
+                return null;
+
+            // no trailing :
+            if (nameStr.EndsWith(":"))
+                return null;
+
+            if (hasNS)
+            {
+                // Must begin with non-digit or ':' + non-digit
+                Match nsMatch = nsSymbolPat.Match(nsStr);
+                if (!nsMatch.Success)
+                    return null;
+
+                // no trailing :
+                if (nsStr.EndsWith(":"))
+                    return null;
+
+            }
+
+            // Do keyword detection
+
+            if (hasNS)
+            {
+                if (nsStr.StartsWith("::"))
+                {
+                    Symbol nsSym = Symbol.create(nsStr.Substring(2));
+                    Namespace ns = Compiler.CurrentNamespace.LookupAlias(nsSym);
+                    if (ns == null)
+                        ns = Namespace.find(nsSym);
+                    if (ns == null)
+                        //ClojureJVM: is ns is Null, get a NPE.  Not sure that is a good thing.  I like my solution better.
+                        return Keyword.intern(nsSym.Name, nameStr);
+                    else
+                        return Keyword.intern(Compiler.CurrentNamespace.Name.getName(), nameStr);
+                }
+                else if (nsStr.StartsWith(":"))
+                    return Keyword.intern(nsStr.Substring(1), nameStr);
+                else
+                    return Symbol.intern(nsStr, nameStr);
+            }
+            else
+            {
+                if ( nameStr.StartsWith("::"))
+                    return Keyword.intern(Compiler.CurrentNamespace.Name.getName(),nameStr.Substring(2));
+                else if ( nameStr.StartsWith(":") )
+                    return Keyword.intern(nameStr.Substring(1));
+                else
+                    return Symbol.intern(null,nameStr);  // Avoid / interpretation in intern(string)
+            }
         }
+
+
+        //static Regex symbolPat = new Regex("^[:]?([\\D-[/]].*/)?([\\D-[/]][^/]*)$");
+
+        //static object matchSymbol(string s)
+        //{
+        //    Match m = symbolPat.Match(s);
+        //    if (m.Success)
+        //    {
+        //        int gc = m.Groups.Count;
+        //        string ns = m.Groups[1].Value;
+        //        string name = m.Groups[2].Value;
+        //        if (ns != null && ns.EndsWith(":/")
+        //           || name.EndsWith(":")
+        //           || s.IndexOf("::", 1) != -1)
+        //            return null;
+        //        // Maybe resolveSymbol should move here or into Namespace:  resolveSymbol is not used in the compiler.
+        //        if (s.StartsWith("::"))
+        //        {
+        //            Symbol ks = Symbol.intern(s.Substring(2));
+        //            Namespace kns;
+        //            if (ks.Namespace != null)
+        //                kns = Compiler.NamespaceFor(ks);
+        //            else
+        //                kns = Compiler.CurrentNamespace;
+        //            //auto-resolving keyword
+        //            return Keyword.intern(kns.Name.Name, ks.Name);
+        //        }
+        //        bool isKeyword = s[0] == ':';
+        //        Symbol sym = Symbol.intern(s.Substring(isKeyword ? 1 : 0));
+        //        if (isKeyword)
+        //            return Keyword.intern(sym);
+        //        return sym;
+        //    }
+        //    return null;
+        //}
 
 
 
@@ -527,7 +709,7 @@ namespace clojure.lang
                 int ch = r.Read();
                 if (ch == -1)
                     throw new EndOfStreamException("EOF while reading character");
-                String token = readToken(r, (char)ch);
+                String token = readSimpleToken(r, (char)ch);
                 if (token.Length == 1)
                     return token[0];
                 else if (token.Equals("newline"))
@@ -1048,8 +1230,18 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char pct)
             {
+                //if (ARG_ENV.deref() == null)
+                //    return interpretToken(readToken(r, '%'));
                 if (ARG_ENV.deref() == null)
-                    return interpretToken(readToken(r, '%'));
+                {
+                    string token;
+                    int lastSlashIndex;
+                    if (readToken(r, '%', out token, out lastSlashIndex))
+                        throw new EndOfStreamException("EOF while reading %-token");
+                    else
+                        return interpretToken(token, lastSlashIndex);
+                }
+
 
                 int ch = r.Read();
                 Unread(r, ch);
