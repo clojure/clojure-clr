@@ -613,7 +613,7 @@ namespace clojure.lang
             //else if (coll is IEnumerator)  // java: Iterator
             //    return EnumeratorSeq.create((IEnumerator)coll);
             else
-                throw new ArgumentException("Don't know how to create ISeq from: " + coll.GetType().Name);
+                throw new ArgumentException("Don't know how to create ISeq from: " + coll.GetType().FullName);
         }
 
 
