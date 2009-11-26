@@ -302,7 +302,7 @@
 (defn sorted-set-by
   "Returns a new sorted set with supplied keys, using the supplied comparator."
   ([comparator & keys]
-   (clojure.lang.PersistentTreeSet/create1 comparator keys)))  ;;; JVM: create -- another ambiguity
+   (clojure.lang.PersistentTreeSet/create comparator keys))) 
  
  
  ;;;;;;;;;;;;;;;;;;;;
