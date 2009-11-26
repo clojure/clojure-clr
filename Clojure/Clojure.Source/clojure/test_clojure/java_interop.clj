@@ -190,30 +190,30 @@
        (double-array -1) ))
 
 
-;;;(deftest test-make-array
-;;;  ; negative size
-;;;  (is (thrown? NegativeArraySizeException (make-array Integer -1)))
-;;;
-;;;  ; one-dimensional
-;;;  (are [x] (= (alength (make-array Integer x)) x)
-;;;      0 1 5 )
-;;;
-;;;  (let [a (make-array Integer 5)]
-;;;    (aset a 3 42)
-;;;    (are [x y] (= x y)
-;;;        (aget a 3) 42
-;;;        (class (aget a 3)) Integer ))
-;;;      
-;;;  ; multi-dimensional
-;;;  (let [a (make-array Integer 3 2 4)]
-;;;    (aset a 0 1 2 987)
-;;;    (are [x y] (= x y)
-;;;        (alength a) 3
-;;;        (alength (first a)) 2
-;;;        (alength (first (first a))) 4
-;;;
-;;;        (aget a 0 1 2) 987
-;;;        (class (aget a 0 1 2)) Integer )))
+(deftest test-make-array
+  ; negative size
+  (is (thrown? ArgumentOutOfRangeException (make-array Int32 -1)))   ;;; NegativeArraySizeException Integer
+
+  ; one-dimensional
+  (are [x] (= (alength (make-array Int32 x)) x)      ;;; Integer
+      0 1 5 )
+
+  (let [a (make-array Int32 5)]      ;;; Integer
+    (aset a 3 42)
+    (are [x y] (= x y)
+        (aget a 3) 42
+        (class (aget a 3)) Int32 ))      ;;; Integer
+      
+  ; multi-dimensional
+  (let [a (make-array Int32 3 2 4)]      ;;; Integer
+    (aset a 0 1 2 987)
+    (are [x y] (= x y)
+        (alength a) 3
+        (alength (first a)) 2
+        (alength (first (first a))) 4
+
+        (aget a 0 1 2) 987
+        (class (aget a 0 1 2)) Int32 )))      ;;; Integer
 
 
 (deftest test-to-array
@@ -288,28 +288,28 @@
       (to-array [1 2 3]) ))
 
 
-;;;(deftest test-to-array-2d
-;;;  ; needs to be a collection of collection(s)
-;;;  (is (thrown? Exception (to-array-2d [1 2 3])))
-;;;
-;;;  ; ragged array
-;;;  (let [v [[1] [2 3] [4 5 6]]
-;;;        a (to-array-2d v)]
-;;;    (are [x y] (= x y)
-;;;        (alength a) (count v)
-;;;        (alength (aget a 0)) (count (nth v 0))
-;;;        (alength (aget a 1)) (count (nth v 1))
-;;;        (alength (aget a 2)) (count (nth v 2))
-;;;
-;;;        (vec (aget a 0)) (nth v 0)
-;;;        (vec (aget a 1)) (nth v 1)
-;;;        (vec (aget a 2)) (nth v 2) ))
-;;;
-;;;  ; empty array
-;;;  (let [a (to-array-2d [])]
-;;;    (are [x y] (= x y)
-;;;        (alength a) 0
-;;;        (vec a) [] )))
+(deftest test-to-array-2d
+  ; needs to be a collection of collection(s)
+  (is (thrown? Exception (to-array-2d [1 2 3])))
+
+  ; ragged array
+  (let [v [[1] [2 3] [4 5 6]]
+        a (to-array-2d v)]
+    (are [x y] (= x y)
+        (alength a) (count v)
+        (alength (aget a 0)) (count (nth v 0))
+        (alength (aget a 1)) (count (nth v 1))
+        (alength (aget a 2)) (count (nth v 2))
+
+        (vec (aget a 0)) (nth v 0)
+        (vec (aget a 1)) (nth v 1)
+        (vec (aget a 2)) (nth v 2) ))
+
+  ; empty array
+  (let [a (to-array-2d [])]
+    (are [x y] (= x y)
+        (alength a) 0
+        (vec a) [] )))
 
 
 (deftest test-alength
@@ -318,30 +318,42 @@
       (long-array 0)
       (float-array 0)
       (double-array 0)
-      ;;;(make-array Integer/TYPE 0)
+      (boolean-array 0)
+      (byte-array 0)
+      (char-array 0)
+      (short-array 0)
+      (make-array Int32 0)  ;;;(make-array Integer/TYPE 0)
       (to-array [])
       (into-array [])
-      );;;(to-array-2d []) )
+      (to-array-2d []) )
 
   (are [x] (= (alength x) 1)
       (int-array 1)
       (long-array 1)
       (float-array 1)
       (double-array 1)
-      ;;;(make-array Integer/TYPE 1)
+      (boolean-array 1)
+      (byte-array 1)
+      (char-array 1)
+      (short-array 1)
+      (make-array Int32 1)  ;;;(make-array Integer/TYPE 1)
       (to-array [1])
       (into-array [1])
-      );;;(to-array-2d [[1]]) )
+      (to-array-2d [[1]]) )
 
   (are [x] (= (alength x) 3)
       (int-array 3)
       (long-array 3)
       (float-array 3)
       (double-array 3)
-      ;;;(make-array Integer/TYPE 3)
+      (boolean-array 3)
+      (byte-array 3)
+      (char-array 3)
+      (short-array 3)
+      (make-array Int32 3)  ;;;(make-array Integer/TYPE 3)
       (to-array [1 "a" :k])
       (into-array [1 2 3])
-      ));;;(to-array-2d [[1] [2 3] [4 5 6]]) ))
+      (to-array-2d [[1] [2 3] [4 5 6]]) ))
 
 
 (deftest test-aclone
@@ -352,7 +364,11 @@
       (long-array 0)
       (float-array 0)
       (double-array 0)
-      ;;;(make-array Integer/TYPE 0)
+      (boolean-array 0)
+      (byte-array 0)
+      (char-array 0)
+      (short-array 0)
+      (make-array Int32 0)  ;;;(make-array Integer/TYPE 0)
       (to-array [])
       (into-array [])
 
@@ -360,17 +376,21 @@
       (long-array [1 2 3])
       (float-array [1 2 3])
       (double-array [1 2 3])
-      ;;;(make-array Integer/TYPE 3)
+      (boolean-array [true false])
+      (byte-array [(byte 1) (byte 2)])
+      (char-array [\a \b \c])
+      (short-array [(short 1) (short 2)])
+      (make-array Int32 3)  ;;;(make-array Integer/TYPE 3)
       (to-array [1 "a" :k])
       (into-array [1 2 3]) )
 
   ; clone 2D
-;;;  (are [x] (and (= (alength (aclone x)) (alength x))
-;;;                (= (map alength (aclone x)) (map alength x))
-;;;                (= (map vec (aclone x)) (map vec x)))
-;;;      (to-array-2d [])
-;;;      (to-array-2d [[1] [2 3] [4 5 6]]) ))
-)
+  (are [x] (and (= (alength (aclone x)) (alength x))
+                (= (map alength (aclone x)) (map alength x))
+                (= (map vec (aclone x)) (map vec x)))
+      (to-array-2d [])
+      (to-array-2d [[1] [2 3] [4 5 6]]) ))
+
 
 ; Type Hints, *warn-on-reflection*
 ;   #^ints, #^floats, #^longs, #^doubles
