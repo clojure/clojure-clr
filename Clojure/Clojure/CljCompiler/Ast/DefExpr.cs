@@ -75,7 +75,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Symbol sym = RT.second(form) as Symbol;
 
                 if (sym == null)
-                    throw new Exception("Second argument to def must be a Symbol.");
+                    throw new Exception("First argument to def must be a Symbol.");
 
                 Var v = Compiler.LookupVar(sym, true);
 
