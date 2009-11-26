@@ -418,3 +418,18 @@ Math/pow overflows to Infinity."
        1 (bit-shift-right (expt 2 32) 32)
        1 (bit-shift-right (expt 2 10000) 10000)
        ))
+       
+
+;; arrays
+(deftest test-array-types
+  (are [x y z] (= (clojure.lang.RT/classForName x) (class y) (class z))       ;;; Class/forName
+       "System.Boolean[]" (boolean-array 1) (booleans (boolean-array 1 true))        ;;; "[Z"
+       "System.Byte[]"    (byte-array 1) (bytes (byte-array 1 (byte 1)))             ;;; "[B" 
+       "System.Char[]"    (char-array 1) (chars (char-array 1 \a))                   ;;; "[C"
+       "System.Int16[]"   (short-array 1) (shorts (short-array 1 (short 1)))         ;;; "[S"
+       "System.Single[]"  (float-array 1) (floats (float-array 1 1))                 ;;; "[F"
+       "System.Double[]"  (double-array 1) (doubles (double-array 1 1))              ;;; "[D"
+       "System.Int32[]"   (int-array 1) (ints (int-array 1 1))                       ;;; "[I"
+       "System.Int64[]"   (long-array 1) (longs (long-array 1 1))))                  ;;; "[J"
+
+    

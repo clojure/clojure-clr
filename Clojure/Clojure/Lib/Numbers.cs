@@ -1819,6 +1819,163 @@ namespace clojure.lang
             }
         }
 
+
+        static public short[] short_array(int size, Object init)
+        {
+            short[] ret = new short[size];
+            if (Util.IsNumeric(init))
+            {
+                short f = Util.ConvertToShort(init);
+                for (int i = 0; i < ret.Length; i++)
+                    ret[i] = f;
+            }
+            else
+            {
+                ISeq s = RT.seq(init);
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToShort(s.first());
+            }
+            return ret;
+        }
+
+        static public short[] short_array(Object sizeOrSeq)
+        {
+            if (Util.IsNumeric(sizeOrSeq))
+                return new short[Util.ConvertToInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = RT.count(s);
+                short[] ret = new short[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToShort(s.first());
+                return ret;
+            }
+        }
+
+
+        static public char[] char_array(int size, Object init)
+        {
+            char[] ret = new char[size];
+            if (Util.IsNumeric(init))
+            {
+                char f = Util.ConvertToChar(init);
+                for (int i = 0; i < ret.Length; i++)
+                    ret[i] = f;
+            }
+            else
+            {
+                ISeq s = RT.seq(init);
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToChar(s.first());
+            }
+            return ret;
+        }
+
+        static public char[] char_array(Object sizeOrSeq)
+        {
+            if (Util.IsNumeric(sizeOrSeq))
+                return new char[Util.ConvertToInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = RT.count(s);
+                char[] ret = new char[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToChar(s.first());
+                return ret;
+            }
+        }
+
+
+        static public byte[] byte_array(int size, Object init)
+        {
+            byte[] ret = new byte[size];
+            if (Util.IsNumeric(init))
+            {
+                byte f = Util.ConvertToByte(init);
+                for (int i = 0; i < ret.Length; i++)
+                    ret[i] = f;
+            }
+            else
+            {
+                ISeq s = RT.seq(init);
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToByte(s.first());
+            }
+            return ret;
+        }
+
+        static public byte[] byte_array(Object sizeOrSeq)
+        {
+            if (Util.IsNumeric(sizeOrSeq))
+                return new byte[Util.ConvertToInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = RT.count(s);
+                byte[] ret = new byte[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToByte(s.first());
+                return ret;
+            }
+        }
+
+
+        static public bool[] boolean_array(int size, Object init)
+        {
+            bool[] ret = new bool[size];
+            if (init is bool)
+            {
+                bool f = (bool)init;
+                for (int i = 0; i < ret.Length; i++)
+                    ret[i] = f;
+            }
+            else
+            {
+                ISeq s = RT.seq(init);
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = (bool)s.first();
+            }
+            return ret;
+        }
+
+        static public bool[] boolean_array(Object sizeOrSeq)
+        {
+            if (Util.IsNumeric(sizeOrSeq))
+                return new bool[Util.ConvertToInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = RT.count(s);
+                bool[] ret = new bool[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = (bool)s.first();
+                return ret;
+            }
+        }
+
+
+        static public bool[] booleans(Object array)
+        {
+            return (bool[])array;
+        }
+        
+        static public byte[] bytes(Object array)
+        {
+            return (byte[])array;
+        }
+        
+        static public char[] chars(Object array)
+        {
+            return (char[])array;
+        }
+        
+        static public short[] shorts(Object array)
+        {
+            return (short[])array;
+        }
+
         static public float[] floats(Object array)
         {
             return (float[])array;
