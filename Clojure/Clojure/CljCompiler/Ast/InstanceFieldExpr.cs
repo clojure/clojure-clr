@@ -33,18 +33,20 @@ namespace clojure.lang.CljCompiler.Ast
         readonly string _fieldName;
         readonly string _source;
         readonly IPersistentMap _spanMap;
+        protected readonly Symbol _tag;
 
         #endregion
 
         #region Ctors
 
-        public InstanceFieldOrProprtyExpr(string source, IPersistentMap spanMap, Expr target, string fieldName, TInfo tinfo)
+        public InstanceFieldOrProprtyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string fieldName, TInfo tinfo)
         {
             _source = source;
             _spanMap = spanMap;
             _target = target;
             _fieldName = fieldName;
             _tinfo = tinfo;
+            _tag = tag;
 
             _targetType = target.HasClrType ? target.ClrType : null;
 
@@ -61,7 +63,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override bool HasClrType
         {
-            get { return _tinfo != null; }
+            get { return _tinfo != null || _tag != null; }
         }
 
         #endregion
@@ -137,8 +139,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region C-tors
 
-        public InstanceFieldExpr(string source, IPersistentMap spanMap, Expr target, string fieldName, FieldInfo finfo)
-            :base(source,spanMap,target,fieldName,finfo)  
+        public InstanceFieldExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string fieldName, FieldInfo finfo)
+            :base(source,spanMap,tag,target,fieldName,finfo)  
         {
         }
 
@@ -148,7 +150,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return _tinfo.FieldType; }
+            get { return _tag != null ? Compiler.TagToType(_tag) : _tinfo.FieldType; }
         }
 
         #endregion
@@ -168,8 +170,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region C-tors
 
-        public InstancePropertyExpr(string source, IPersistentMap spanMap, Expr target, string fieldName, PropertyInfo pinfo)
-            :base(source,spanMap,target,fieldName,pinfo)  
+        public InstancePropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string fieldName, PropertyInfo pinfo)
+            :base(source,spanMap,tag, target,fieldName,pinfo)  
         {
         }
 
@@ -179,7 +181,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return  _tinfo.PropertyType; }
+            get { return _tag != null ? Compiler.TagToType(_tag) : _tinfo.PropertyType; }
         }
 
         #endregion

@@ -35,18 +35,19 @@ namespace clojure.lang.CljCompiler.Ast
         readonly MethodInfo _method;
         readonly string _source;
         readonly IPersistentMap _spanMap;
-
+        readonly Symbol _tag;
         #endregion
 
         #region Ctors
 
-        public StaticMethodExpr(string source, IPersistentMap spanMap, Type type, string methodName, IPersistentVector args)
+        public StaticMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string methodName, IPersistentVector args)
         {
             _source = source;
             _spanMap = spanMap;
             _type = type;
             _methodName = methodName;
             _args = args;
+            _tag = tag;
 
             _method  = GetMatchingMethod(spanMap, _type, _args, _methodName);
         }
@@ -57,12 +58,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override bool HasClrType
         {
-            get { return _method != null; }
+            get { return _method != null || _tag != null; }
         }
 
         public override Type ClrType
         {
-            get { return _method.ReturnType; }
+            get { return _tag != null ? Compiler.TagToType(_tag) : _method.ReturnType; }
         }
 
         #endregion

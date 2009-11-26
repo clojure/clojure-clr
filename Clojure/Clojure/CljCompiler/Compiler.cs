@@ -382,9 +382,9 @@ namespace clojure.lang
                         PropertyInfo pinfo;
 
                         if ((finfo = Reflector.GetField(t, symbol.Name, true)) != null)
-                            return new StaticFieldExpr((string)SOURCE.deref(), null, t, symbol.Name,finfo);
+                            return new StaticFieldExpr((string)SOURCE.deref(), null, tag, t, symbol.Name,finfo);
                         else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) != null)
-                            return new StaticPropertyExpr((string)SOURCE.deref(), null, t, symbol.Name, pinfo);
+                            return new StaticPropertyExpr((string)SOURCE.deref(), null, tag, t, symbol.Name, pinfo);
                     }
                     throw new Exception(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
                 }
@@ -431,7 +431,7 @@ namespace clojure.lang
                 IFn inline = IsInline(op, RT.count(RT.next(form)));
 
                 if (inline != null)
-                    return GenerateAST(MaybeTransferSourceInfo(inline.applyTo(RT.next(form)),form),isRecurContext);
+                    return GenerateAST(MaybeTransferSourceInfo(PreserveTag(form,inline.applyTo(RT.next(form))),form),isRecurContext);
 
                 IParser p;
                 if (op.Equals(FN))
@@ -468,6 +468,17 @@ namespace clojure.lang
             if (exf != form)
                 return Macroexpand(exf);
             return form;
+        }
+
+        static object PreserveTag(ISeq src, object dst)
+        {
+            Symbol tag = TagOf(src);
+            if (tag != null && dst is IObj)
+            {
+                IPersistentMap meta = RT.meta(dst);
+                return ((IObj)dst).withMeta((IPersistentMap)RT.assoc(meta, RT.TAG_KEY, tag));
+            }
+            return dst;
         }
 
         private static object MacroexpandSeq1(ISeq form)
@@ -508,7 +519,7 @@ namespace clojure.lang
                             target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY, CLASS));
                         // JVM: return RT.listStar(DOT, target, method, form.next().next());
                         // We need to make sure source information gets transferred
-                        return MaybeTransferSourceInfo(RT.listStar(DOT, target, method, form.next().next()), form);
+                        return MaybeTransferSourceInfo(PreserveTag(form,RT.listStar(DOT, target, method, form.next().next())), form);
                     }
                     else if (NamesStaticMember(sym))
                     {
@@ -519,7 +530,7 @@ namespace clojure.lang
                             Symbol method = Symbol.intern(sym.Name);
                             // JVM: return RT.listStar(Compiler.DOT, target, method, form.next());
                             // We need to make sure source information gets transferred
-                            return MaybeTransferSourceInfo(RT.listStar(Compiler.DOT, target, method, form.next()), form);
+                            return MaybeTransferSourceInfo(PreserveTag(form,RT.listStar(Compiler.DOT, target, method, form.next())), form);
                         }
                     }
                     else
