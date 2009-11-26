@@ -979,7 +979,7 @@ namespace clojure.lang
                 {
                     if (RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.deref()))
                         return symbol;
-                    else
+                    else 
                         throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));
                 }
                 return o;

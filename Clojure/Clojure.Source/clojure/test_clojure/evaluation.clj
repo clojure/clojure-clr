@@ -125,7 +125,7 @@
     (throws-with-msg
       #".*resolution-test/baz is not public.*"
       (eval 'resolution-test/baz)
-      Compiler+CompilerException))                                      ;;; Compiler$CompilerException))
+      Exception))                                      ;;; Compiler$CompilerException))
 
   (test-that
     "If a symbol is package-qualified, its value is the Java class named by the
@@ -135,7 +135,7 @@
   (test-that
     "If a symbol is package-qualified, it is an error if there is no Class named
     by the symbol"
-    (is (thrown? Compiler+CompilerException (eval 'java.lang.FooBar))))              ;;; Compiler$CompilerException
+    (is (thrown? Exception (eval 'java.lang.FooBar))))              ;;; Compiler$CompilerException
 
   (test-that
     "If a symbol is not qualified, the following applies, in this order:
@@ -160,9 +160,9 @@
     ; First
     (doall (for [form '(def if do let quote var fn loop recur throw try
                          monitor-enter monitor-exit)]
-             (is (thrown? Compiler+CompilerException (eval form)))))                 ;;;  Compiler$CompilerException
+             (is (thrown? Exception (eval form)))))                 ;;;  Compiler$CompilerException
     (let [if "foo"]
-      (is (thrown? Compiler+CompilerException (eval 'if)))                           ;;;  Compiler$CompilerException
+      (is (thrown? Exception (eval 'if)))                           ;;;  Compiler$CompilerException
 
     ; Second
       (is (= (eval 'Boolean) (class-for-name "System.Boolean"))))                 ;;;  "java.lang.Boolean"
@@ -174,10 +174,10 @@
 
     ; Fourth
     (in-test-ns (is (= (eval 'foo) "abc")))
-    (is (thrown? Compiler+CompilerException (eval 'bar))) ; not in this namespace            ;;; Compiler$CompilerException
+    (is (thrown? Exception (eval 'bar))) ; not in this namespace            ;;; Compiler$CompilerException
 
     ; Fifth
-    (is (thrown? Compiler+CompilerException (eval 'foobar)))))                              ;;; Compiler$CompilerException
+    (is (thrown? Exception (eval 'foobar)))))                              ;;; Compiler$CompilerException
 
 ;;; Metadata tests ;;;
 
