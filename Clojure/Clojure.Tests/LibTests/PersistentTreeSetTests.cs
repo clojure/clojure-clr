@@ -39,7 +39,7 @@ namespace Clojure.Tests.LibTests
             IPersistentMap meta = _mocks.StrictMock<IPersistentMap>();
             _mocks.ReplayAll();
 
-            PersistentTreeSet m = PersistentTreeSet.create("a", "b");
+            PersistentTreeSet m = PersistentTreeSet.create(PersistentVector.create("a", "b"));
 
 
             _objWithNullMeta = (IObj)m;

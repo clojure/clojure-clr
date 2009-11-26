@@ -32,33 +32,6 @@ namespace clojure.lang
 
         #region Ctors and factory methods
 
-        /// <summary>
-        /// Create a <see cref="PersistentTreeSet"/> from arbitrary arguments.
-        /// </summary>
-        /// <param name="init">Array of elements.</param>
-        /// <returns>A <see cref="PersistentTreeSet">PersistentTreeSet</see>.</returns>
-        public static PersistentTreeSet create(params object[] init)
-        {
-            PersistentTreeSet ret = EMPTY;
-            for (int i = 0; i < init.Length; i++)
-                ret = (PersistentTreeSet)ret.cons(init[i]);
-            return ret;
-        }
-
-        /// <summary>
-        /// Create a <see cref="PersistentTreeSet"/> sorted by a comparator from arbitrary arguments.
-        /// </summary>
-        /// <param name="comp"></param>
-        /// <param name="init"></param>
-        /// <returns></returns>
-        public static PersistentTreeSet create1(IComparer comp, params object[] init)
-        {
-            PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
-            for (int i = 0; i < init.Length; i++)
-                ret = (PersistentTreeSet)ret.cons(init[i]);
-            return ret;
-        }
-
 
         /// <summary>
         /// Create a <see cref="PersistentTreeSet"/> initialized from an IList.
@@ -79,7 +52,7 @@ namespace clojure.lang
         /// <param name="comp"></param>
         /// <param name="init"></param>
         /// <returns></returns>
-        public static PersistentTreeSet create2(IComparer comp, IList init)
+        public static PersistentTreeSet create(IComparer comp, IList init)
         {
             PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
             foreach (object o in init)
@@ -108,7 +81,7 @@ namespace clojure.lang
         /// <param name="comp"></param>
         /// <param name="init"></param>
         /// <returns></returns>
-        public static PersistentTreeSet create3(IComparer comp, ISeq init)
+        public static PersistentTreeSet create1(IComparer comp, ISeq init)
         {
             PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
             for (ISeq s = init; s != null; s = s.next())
