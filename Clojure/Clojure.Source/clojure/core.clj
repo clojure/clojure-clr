@@ -114,6 +114,11 @@
  seq? (fn seq? [x] (instance? clojure.lang.ISeq x)))
 
 (def
+  #^{:arglists '([x])
+    :doc "Return true if x is a Character"}
+ char? (fn char? [x] (instance? Char x)))             ;;; Character
+
+(def
  #^{:arglists '([x])
     :doc "Return true if x is a String"}
  string? (fn string? [x] (instance? String x)))
