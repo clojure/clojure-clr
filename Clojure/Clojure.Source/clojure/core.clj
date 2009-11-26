@@ -266,24 +266,30 @@
   "Returns a new hash set with supplied keys."
   ([] #{})
   ([& keys]
-   (. clojure.lang.PersistentHashSet (create keys))))
+   (clojure.lang.PersistentHashSet/create keys)))
 
 (defn sorted-map
   "keyval => key val
   Returns a new sorted map with supplied mappings."
-  ([] (. clojure.lang.PersistentTreeMap EMPTY))  ;;; I HAD TO ADD THIS EXTRA CASE TO AVOID AMBIGUOUS CALL TO CREATE WITH NULL
+  ([] clojure.lang.PersistentTreeMap/EMPTY)                    ;;; I HAD TO ADD THIS EXTRA CASE TO AVOID AMBIGUOUS CALL TO CREATE WITH NULL
   ([& keyvals]    (. clojure.lang.PersistentTreeMap (create keyvals))))
-
-(defn sorted-set  
-  "Returns a new sorted set with supplied keys."
-  ([] (. clojure.lang.PersistentTreeSet EMPTY))  ;;; I HAD TO ADD THIS EXTRA CASE TO AVOID AMBIGUOUS CALL TO CREATE WITH NULL
-  ([& keys]   (. clojure.lang.PersistentTreeSet (create keys))))
 
 (defn sorted-map-by
   "keyval => key val
   Returns a new sorted map with supplied mappings, using the supplied comparator."
   ([comparator & keyvals]
-   (. clojure.lang.PersistentTreeMap (create comparator keyvals))))
+   (clojure.lang.PersistentTreeMap/create comparator keyvals)))
+ 
+(defn sorted-set  
+  "Returns a new sorted set with supplied keys."
+  ([] clojure.lang.PersistentTreeSet/EMPTY)                    ;;; I HAD TO ADD THIS EXTRA CASE TO AVOID AMBIGUOUS CALL TO CREATE WITH NULL
+  ([& keys]   (clojure.lang.PersistentTreeSet/create keys))) 
+ 
+(defn sorted-set-by
+  "Returns a new sorted set with supplied keys, using the supplied comparator."
+  ([comparator & keys]
+   (clojure.lang.PersistentTreeSet/create3 comparator keys)))  ;;; = create in JVM:  reflection problem.
+ 
  
  ;;;;;;;;;;;;;;;;;;;;
 (def

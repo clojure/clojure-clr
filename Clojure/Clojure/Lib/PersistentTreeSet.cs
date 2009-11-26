@@ -33,7 +33,7 @@ namespace clojure.lang
         #region Ctors and factory methods
 
         /// <summary>
-        /// Create a <see cref="PersistentTreeSet">PersistentTreeSet</see> from arbitrary arguments.
+        /// Create a <see cref="PersistentTreeSet"/> from arbitrary arguments.
         /// </summary>
         /// <param name="init">Array of elements.</param>
         /// <returns>A <see cref="PersistentTreeSet">PersistentTreeSet</see>.</returns>
@@ -46,7 +46,22 @@ namespace clojure.lang
         }
 
         /// <summary>
-        /// Create a <see cref="PersistentTreeSet">PersistentTreeSet</see> initialized from an IList.
+        /// Create a <see cref="PersistentTreeSet"/> sorted by a comparator from arbitrary arguments.
+        /// </summary>
+        /// <param name="comp"></param>
+        /// <param name="init"></param>
+        /// <returns></returns>
+        public static PersistentTreeSet create1(IComparer comp, params object[] init)
+        {
+            PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
+            for (int i = 0; i < init.Length; i++)
+                ret = (PersistentTreeSet)ret.cons(init[i]);
+            return ret;
+        }
+
+
+        /// <summary>
+        /// Create a <see cref="PersistentTreeSet"/> initialized from an IList.
         /// </summary>
         /// <param name="init">A list of elements</param>
         /// <returns>A <see cref="PersistentTreeSet">PersistentTreeSet</see>.</returns>
@@ -59,7 +74,22 @@ namespace clojure.lang
         }
 
         /// <summary>
-        /// Create a <see cref="PersistentTreeSet">PersistentTreeSet</see> initialized from an <see cref="ISeq">ISeq</see>.
+        /// Create a <see cref="PersistentTreeSet"/> sorted by a comparator initialized from an IList.
+        /// </summary>
+        /// <param name="comp"></param>
+        /// <param name="init"></param>
+        /// <returns></returns>
+        public static PersistentTreeSet create2(IComparer comp, IList init)
+        {
+            PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
+            foreach (object o in init)
+                ret = (PersistentTreeSet)ret.cons(o);
+            return ret;
+        }
+
+
+        /// <summary>
+        /// Create a <see cref="PersistentTreeSet"/> initialized from an <see cref="ISeq"/>.
         /// </summary>
         /// <param name="init">A sequence of elements.</param>
         /// <returns>A <see cref="PersistentTreeSet">PersistentTreeSet</see>.</returns>
@@ -67,6 +97,21 @@ namespace clojure.lang
         {
             PersistentTreeSet ret = EMPTY;
            for (ISeq s = init; s != null; s = s.next() )
+                ret = (PersistentTreeSet)ret.cons(s.first());
+            return ret;
+        }
+
+
+        /// <summary>
+        /// Create a <see cref="PersistentTreeSet"/> using a given comparator function initialized from an <see cref="ISeq"/>.
+        /// </summary>
+        /// <param name="comp"></param>
+        /// <param name="init"></param>
+        /// <returns></returns>
+        public static PersistentTreeSet create3(IComparer comp, ISeq init)
+        {
+            PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
+            for (ISeq s = init; s != null; s = s.next())
                 ret = (PersistentTreeSet)ret.cons(s.first());
             return ret;
         }
