@@ -347,6 +347,7 @@ namespace clojure.lang
         {
             bool oddVertBarMode = false;
             lastSlashIndex = -1;
+            bool allowSymEscape = RT.booleanCast(RT.ALLOW_SYMBOL_ESCAPE.deref());
 
             StringBuilder sb = new StringBuilder();
 
@@ -387,7 +388,7 @@ namespace clojure.lang
                         nameString = sb.ToString();
                         return false;
                     }
-                    else if (ch == '|')
+                    else if (ch == '|' && allowSymEscape)
                     {
                         oddVertBarMode = true;
                     }
