@@ -111,7 +111,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             Expression[] moreArgs = new Expression[3];
             moreArgs[0] = Expression.Constant(_methodName);
-            moreArgs[1] = Expression.Constant(_type);
+            moreArgs[1] = Expression.Constant(_type,typeof(Type));
             moreArgs[2] = Expression.NewArrayInit(typeof(object), parms);
 
             return Expression.Call(Compiler.Method_Reflector_CallStaticMethod, moreArgs);

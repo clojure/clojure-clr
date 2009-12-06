@@ -42,7 +42,8 @@ namespace clojure.lang
         static int _saveId = 0;
         public static void SaveProxyContext()
         {
-            _context.AssyBldr.Save("delegates" + _saveId++ + ".dll");
+            //_context.AssyBldr.Save("delegates" + _saveId++ + ".dll");
+            _context.AssemblyGen.SaveAssembly();
             _context = new GenContext("delegates", CompilerMode.Immediate);
         }
 

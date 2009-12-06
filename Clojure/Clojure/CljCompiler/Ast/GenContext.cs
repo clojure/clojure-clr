@@ -20,6 +20,7 @@ using System.Reflection.Emit;
 using System.Reflection;
 #if CLR2
 using Microsoft.Scripting.Ast;
+using Microsoft.Scripting.Generation;
 #else
 using System.Linq.Expressions;
 #endif
@@ -39,29 +40,35 @@ namespace clojure.lang.CljCompiler.Ast
         internal CompilerMode Mode
         {
             get { return _mode; }
-        } 
-
-
-
-        readonly AssemblyBuilder _assyBldr;
-        public AssemblyBuilder AssyBldr
-        {
-            get { return _assyBldr; }
-            //set { _ab = value; }
         }
 
-        readonly ModuleBuilder _moduleBldr;
-        public ModuleBuilder ModuleBldr
+        readonly AssemblyGen _assyGen;
+
+        public AssemblyGen AssemblyGen
         {
-            get { return _moduleBldr; }
-            //set { _moduleBldr = value; }
+            get { return _assyGen; }
         }
 
-        //TypeBuilder _typeBldr;
-        //public TypeBuilder TypeBldr
+        public AssemblyBuilder AssemblyBuilder
+        {
+            get { return _assyGen.AssemblyBuilder; }
+        }
+
+        public ModuleBuilder ModuleBuilder
+        {
+            get { return _assyGen.AssemblyBuilder.GetDynamicModule(_assyGen.AssemblyBuilder.GetName().Name); }
+        }
+
+        //readonly AssemblyBuilder _assyBldr;
+        //public AssemblyBuilder AssyBldr
         //{
-        //    get { return _typeBldr; }
-        //    //set { _tb = value; }
+        //    get { return _assyBldr; }
+        //}
+
+        //readonly ModuleBuilder _moduleBldr;
+        //public ModuleBuilder ModuleBldr
+        //{
+        //    get { return _moduleBldr; }
         //}
 
         FnExpr _fnExpr = null;
@@ -70,20 +77,6 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _fnExpr; }
             //set { _fnExpr = value; }
         }
-
-        //Type _baseType;
-        //public Type BaseType
-        //{
-        //    get { return _baseType; }
-        //    //set { _baseType = value; }
-        //}
-
-        //ParameterExpression _thisFn;
-        //public ParameterExpression ThisFn
-        //{
-        //    get { return _thisFn; }
-        //    //set { _thisFn = value; }
-        //}
 
         #endregion
 
@@ -97,8 +90,9 @@ namespace clojure.lang.CljCompiler.Ast
         public GenContext(string assyName, string extension, string directory, CompilerMode mode)
         {
             AssemblyName aname = new AssemblyName(assyName);
-            _assyBldr = AppDomain.CurrentDomain.DefineDynamicAssembly(aname, AssemblyBuilderAccess.RunAndSave,directory);
-            _moduleBldr = _assyBldr.DefineDynamicModule(aname.Name, aname.Name + extension, true);
+            //_assyBldr = AppDomain.CurrentDomain.DefineDynamicAssembly(aname, AssemblyBuilderAccess.RunAndSave,directory);
+            //_moduleBldr = _assyBldr.DefineDynamicModule(aname.Name, aname.Name + extension, true);
+            _assyGen = new AssemblyGen(aname, directory, extension, true);
             _mode = mode;
         }
 

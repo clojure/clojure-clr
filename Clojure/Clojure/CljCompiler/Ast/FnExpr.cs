@@ -411,7 +411,8 @@ namespace clojure.lang.CljCompiler.Ast
             Type super = GetSuperType();
             string baseClassName = _internalName + "_base";
 
-            TypeBuilder baseTB = context.ModuleBldr.DefineType(baseClassName, TypeAttributes.Class | TypeAttributes.Public, super);
+            //TypeBuilder baseTB = context.ModuleBldr.DefineType(baseClassName, TypeAttributes.Class | TypeAttributes.Public, super);
+            TypeBuilder baseTB = context.AssemblyGen.DefinePublicType(baseClassName, super, true);
 
             GenerateConstantFields(baseTB);
             GenerateClosedOverFields(baseTB);
@@ -511,7 +512,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         private TypeBuilder GenerateFnClass(GenContext context, Type baseType)
         {
-            TypeBuilder fnTB = context.ModuleBldr.DefineType(_internalName, TypeAttributes.Class | TypeAttributes.Public, baseType);
+            //TypeBuilder fnTB = context.ModuleBldr.DefineType(_internalName, TypeAttributes.Class | TypeAttributes.Public, baseType);
+            TypeBuilder fnTB = context.AssemblyGen.DefinePublicType(_internalName, baseType, true);
             _typeBuilder = fnTB;
             //_thisParam = Expression.Parameter(_baseType, _thisName);
 

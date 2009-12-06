@@ -48,7 +48,8 @@ namespace clojure.lang
         static int _saveId = 0;
         public static void SaveContext()
         {
-            _context.AssyBldr.Save("genclass" + _saveId++ + ".dll");
+            //_context.AssyBldr.Save("genclass" + _saveId++ + ".dll");
+            _context.AssemblyGen.SaveAssembly();
             _context = new GenContext("genclass", CompilerMode.Immediate);
         }
          
@@ -84,9 +85,10 @@ namespace clojure.lang
 
             for (ISeq s = interfaces; s != null; s = s.next())
                 interfaceTypes.Add((Type)s.first());
-             
 
-            TypeBuilder proxyTB = context.ModuleBldr.DefineType(
+
+            //TypeBuilder proxyTB = context.ModuleBldr.DefineType(
+            TypeBuilder proxyTB = context.ModuleBuilder.DefineType(
                 className,
                 TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed,
                 superClass,
@@ -129,7 +131,8 @@ namespace clojure.lang
 
             Type t = proxyTB.CreateType();
 
-            context.AssyBldr.Save(className+extension);
+            //context.AssyBldr.Save(className + extension);
+            context.AssemblyGen.SaveAssembly();
 
             return t;
         }
@@ -398,8 +401,8 @@ namespace clojure.lang
             gen.MarkLabel(endLabel);
             gen.Emit(OpCodes.Ret);
 
-
-            context.AssyBldr.SetEntryPoint(cb);
+            //context.AssyBldr.SetEntryPoint(cb);
+            context.AssemblyBuilder.SetEntryPoint(cb);
         }
 
         private static void EmitMethods(TypeBuilder proxyTB, 

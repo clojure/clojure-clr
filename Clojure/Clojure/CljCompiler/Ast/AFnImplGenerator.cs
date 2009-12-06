@@ -26,9 +26,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal static Type Create(GenContext context, Type baseClass)
         {
-            ModuleBuilder mb = context.ModuleBldr;
+            //ModuleBuilder mb = context.ModuleBldr;
             string name = baseClass.Name + "_impl";
-            TypeBuilder baseTB = context.ModuleBldr.DefineType(name, TypeAttributes.Class | TypeAttributes.Public, baseClass);
+            //TypeBuilder baseTB = context.ModuleBldr.DefineType(name, TypeAttributes.Class | TypeAttributes.Public, baseClass);
+            TypeBuilder baseTB = context.AssemblyGen.DefinePublicType(name, baseClass, true);
 
             baseTB.DefineDefaultConstructor(MethodAttributes.Public);
 

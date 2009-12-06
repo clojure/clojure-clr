@@ -250,7 +250,8 @@ namespace clojure.lang
         static int _saveId = 0;
         public static void SaveEvalContext()
         {
-            _evalContext.AssyBldr.Save("eval" + _saveId++ + ".dll");
+            //_evalContext.AssyBldr.Save("eval" + _saveId++ + ".dll");
+            _evalContext.AssemblyGen.SaveAssembly();
             _evalContext = new GenContext("eval", CompilerMode.Immediate);
         }
 
@@ -1209,7 +1210,8 @@ namespace clojure.lang
             try
             {
 
-                TypeBuilder exprTB = context.ModuleBldr.DefineType("__REPL__", TypeAttributes.Class | TypeAttributes.Public);
+                //TypeBuilder exprTB = context.ModuleBldr.DefineType("__REPL__", TypeAttributes.Class | TypeAttributes.Public);
+                TypeBuilder exprTB = context.AssemblyGen.DefinePublicType("__REPL__", typeof(object), true);
 
                 List<string> names = new List<string>();
 
@@ -1239,7 +1241,8 @@ namespace clojure.lang
                 // Need to put the loader init in its own type because we can't generate calls on the MethodBuilders
                 //  until after their types have been closed.
 
-                TypeBuilder initTB = context.ModuleBldr.DefineType("__Init__", TypeAttributes.Class | TypeAttributes.Public);
+                //TypeBuilder initTB = context.ModuleBldr.DefineType("__Init__", TypeAttributes.Class | TypeAttributes.Public);
+                TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
 
 
                 Expression pushNSExpr = Expression.Call(null, Method_Compiler_PushNS);
@@ -1263,7 +1266,8 @@ namespace clojure.lang
 
                 initTB.CreateType();
 
-                context.AssyBldr.Save(sourceName + ".dll");
+                //context.AssyBldr.Save(sourceName + ".dll");
+                context.AssemblyGen.SaveAssembly();
             }
             catch (LispReader.ReaderException e)
             {

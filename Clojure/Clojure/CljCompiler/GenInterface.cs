@@ -43,7 +43,8 @@ namespace clojure.lang
 
             Type[] interfaceTypes = GenClass.CreateTypeArray(extends == null ? null : extends.seq());
 
-            TypeBuilder proxyTB = context.ModuleBldr.DefineType(
+            //TypeBuilder proxyTB = context.ModuleBldr.DefineType(
+            TypeBuilder proxyTB = context.ModuleBuilder.DefineType(
                 iName,
                 TypeAttributes.Interface | TypeAttributes.Public | TypeAttributes.Abstract,
                 null,
@@ -53,7 +54,8 @@ namespace clojure.lang
             DefineMethods(proxyTB, methods);
 
             Type t = proxyTB.CreateType();
-            context.AssyBldr.Save(iName  + ".dll");
+            //context.AssyBldr.Save(iName + ".dll");
+            context.AssemblyGen.SaveAssembly();
             return t;
         }
 
