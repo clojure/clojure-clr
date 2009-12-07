@@ -20,6 +20,7 @@ using clojure.lang.CljCompiler.Ast;
 using System.Reflection;
 using System.Reflection.Emit;
 using clojure.lang.CljCompiler;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang
 {
@@ -103,10 +104,10 @@ namespace clojure.lang
 
             ConstructorBuilder cb = proxyTB.DefineConstructor(ctor.Attributes, CallingConventions.HasThis, paramTypes);
             // Call base class ctor on all the args
-            ILGenerator gen = cb.GetILGenerator();
-            gen.Emit(OpCodes.Ldarg_0);
+            ILGen gen = new ILGen(cb.GetILGenerator());
+            gen.EmitLoadArg(0);                         // gen.Emit(OpCodes.Ldarg_0);
             for (int i = 0; i < pinfos.Length; i++)
-                gen.Emit(OpCodes.Ldarg, i + 1);
+                gen.EmitLoadArg(i + 1);                 // gen.Emit(OpCodes.Ldarg, i + 1);
             gen.Emit(OpCodes.Call, ctor);
             gen.Emit(OpCodes.Ret);
         }
@@ -124,10 +125,10 @@ namespace clojure.lang
                  MethodAttributes.Public|MethodAttributes.Virtual|MethodAttributes.HideBySig,
                  typeof(void),
                  new Type[] { typeof(IPersistentMap) });
-            ILGenerator gen = initMb.GetILGenerator();
-            gen.Emit(OpCodes.Ldarg_0);
-            gen.Emit(OpCodes.Ldarg_1);
-            gen.Emit(OpCodes.Stfld, fb);
+            ILGen gen = new ILGen(initMb.GetILGenerator());
+            gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
+            gen.EmitLoadArg(1);                     // gen.Emit(OpCodes.Ldarg_1);
+            gen.EmitFieldSet(fb);                   // gen.Emit(OpCodes.Stfld, fb);
             gen.Emit(OpCodes.Ret);
 
             MethodBuilder updateTB = proxyTB.DefineMethod(
@@ -135,17 +136,17 @@ namespace clojure.lang
                  MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
                  typeof(void),
                  new Type[] { typeof(IPersistentMap) });
-            gen = updateTB.GetILGenerator();
-            gen.Emit(OpCodes.Ldarg_0);
+            gen = new ILGen(updateTB.GetILGenerator());
+            gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
 
             gen.Emit(OpCodes.Dup);
-            gen.Emit(OpCodes.Ldfld, fb);
+            gen.EmitFieldGet(fb);                   // gen.Emit(OpCodes.Ldfld, fb);
             gen.Emit(OpCodes.Castclass, typeof(IPersistentCollection));
 
-            gen.Emit(OpCodes.Ldarg_1);
-            gen.Emit(OpCodes.Call, Method_IPersistentCollection_Cons);
+            gen.EmitLoadArg(1);                                     // gen.Emit(OpCodes.Ldarg_1);
+            gen.EmitCall(Method_IPersistentCollection_Cons);        //gen.Emit(OpCodes.Call, Method_IPersistentCollection_Cons);
 
-            gen.Emit(OpCodes.Stfld, fb);
+            gen.EmitFieldSet(fb);                                   // gen.Emit(OpCodes.Stfld, fb);
             gen.Emit(OpCodes.Ret);
 
             MethodBuilder getMb = proxyTB.DefineMethod(
@@ -154,13 +155,12 @@ namespace clojure.lang
                 typeof(IPersistentMap),
                 Type.EmptyTypes);
 
-            gen = getMb.GetILGenerator();
-            gen.Emit(OpCodes.Ldarg_0);
-            gen.Emit(OpCodes.Ldfld, fb);
+            gen = new ILGen(getMb.GetILGenerator());
+            gen.EmitLoadArg(0);                                     // gen.Emit(OpCodes.Ldarg_0);
+            gen.EmitFieldGet(fb);                                   // gen.Emit(OpCodes.Ldfld, fb);
             gen.Emit(OpCodes.Ret);
 
             return fb;
-
         }
 
 
@@ -270,7 +270,7 @@ namespace clojure.lang
             if (m.IsSpecialName)
                 specialMethods.Add(proxym);
 
-            ILGenerator gen = proxym.GetILGenerator();
+            ILGen gen = new ILGen(proxym.GetILGenerator());
             
             Label elseLabel = gen.DefineLabel();
             Label endLabel = gen.DefineLabel();
@@ -283,27 +283,27 @@ namespace clojure.lang
             //gen.Emit(OpCodes.Call, typeof(System.IO.TextWriter).GetMethod("Flush"));
 
             // Lookup method name in map
-            gen.Emit(OpCodes.Ldarg_0);
-            gen.Emit(OpCodes.Ldfld, mapField);
-            gen.Emit(OpCodes.Ldstr, m.Name);
-            gen.Emit(OpCodes.Call, Method_RT_get);
+            gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
+            gen.EmitFieldGet(mapField);                     // gen.Emit(OpCodes.Ldfld, mapField);
+            gen.EmitString(m.Name);                         // gen.Emit(OpCodes.Ldstr, m.Name);
+            gen.EmitCall(Method_RT_get);                    // gen.Emit(OpCodes.Call, Method_RT_get);
             gen.Emit(OpCodes.Dup);
-            gen.Emit(OpCodes.Ldnull);
+            gen.EmitNull();                                 // gen.Emit(OpCodes.Ldnull);
             gen.Emit(OpCodes.Beq_S, elseLabel);
 
             // map entry found
             ParameterInfo[] pinfos = m.GetParameters();
             gen.Emit(OpCodes.Castclass, typeof(IFn));
-            gen.Emit(OpCodes.Ldarg_0);  // push implicit 'this' arg.
+            gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);  // push implicit 'this' arg.
             for (int i = 0; i < pinfos.Length; i++)
             {
-                gen.Emit(OpCodes.Ldarg, i + 1);
+                gen.EmitLoadArg(i + 1);                     // gen.Emit(OpCodes.Ldarg, i + 1);
                 if (m.GetParameters()[i].ParameterType.IsValueType)
                     gen.Emit(OpCodes.Box,pinfos[i].ParameterType);
             }
 
             int parmCount = pinfos.Length;
-            gen.Emit(OpCodes.Call, GetIFnInvokeMethodInfo(parmCount + 1));
+            gen.EmitCall(GetIFnInvokeMethodInfo(parmCount + 1));        // gen.Emit(OpCodes.Call, GetIFnInvokeMethodInfo(parmCount + 1));
             if (m.ReturnType == typeof(void))
                 gen.Emit(OpCodes.Pop);
             else
@@ -317,15 +317,15 @@ namespace clojure.lang
 
             if ( callBaseMethod )
             {
-                gen.Emit(OpCodes.Ldarg_0);
+                gen.EmitLoadArg(0);                                     // gen.Emit(OpCodes.Ldarg_0);
                 for (int i = 0; i < parmCount; i++)
-                    gen.Emit(OpCodes.Ldarg, i + 1);
-                gen.Emit(OpCodes.Call,m);
+                    gen.EmitLoadArg(i + 1);                             // gen.Emit(OpCodes.Ldarg, i + 1);
+                gen.EmitCall(m);                                        // gen.Emit(OpCodes.Call, m);
             }
             else
             {
-                gen.Emit(OpCodes.Ldstr,m.Name);
-                gen.Emit(OpCodes.Newobj,CtorInfo_NotImplementedException_1);
+                gen.EmitString(m.Name);                                 // gen.Emit(OpCodes.Ldstr, m.Name);
+                gen.EmitNew(CtorInfo_NotImplementedException_1);        // gen.Emit(OpCodes.Newobj, CtorInfo_NotImplementedException_1);
                 gen.Emit(OpCodes.Throw);
             }
 

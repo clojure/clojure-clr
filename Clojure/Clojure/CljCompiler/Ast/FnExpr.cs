@@ -482,24 +482,24 @@ namespace clojure.lang.CljCompiler.Ast
         private void GenerateBaseClassConstructor(TypeBuilder baseTB)
         {
             ConstructorBuilder cb = baseTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, EMPTY_TYPE_ARRAY);
-            ILGenerator gen = cb.GetILGenerator();
+            ILGen gen = new ILGen(cb.GetILGenerator());
             // Call base constructor
             if (_superName != null)
             {
                 Type parentType = Type.GetType(_superName);
                 ConstructorInfo cInfo = parentType.GetConstructor(EMPTY_TYPE_ARRAY);
-                gen.Emit(OpCodes.Ldarg_0);
-                gen.Emit(OpCodes.Call, cInfo);
+                gen.EmitLoadArg(0);         //gen.Emit(OpCodes.Ldarg_0);
+                gen.Emit(OpCodes.Call, cInfo);  
             }
             else if (IsVariadic)
             {
-                gen.Emit(OpCodes.Ldarg_0);
-                gen.Emit(OpCodes.Ldc_I4, _variadicMethod.RequiredArity);
+                gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
+                gen.EmitInt(_variadicMethod.RequiredArity);     // gen.Emit(OpCodes.Ldc_I4, _variadicMethod.RequiredArity);
                 gen.Emit(OpCodes.Call, RestFn_Int_Ctor);
             }
             else
             {
-                gen.Emit(OpCodes.Ldarg_0);
+                gen.EmitLoadArg(0);                             // en.Emit(OpCodes.Ldarg_0);
                 gen.Emit(OpCodes.Call, AFunction_Default_Ctor);
             }
             gen.Emit(OpCodes.Ret);
@@ -530,10 +530,10 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if (_constants.count() > 0)
             {
-                MethodBuilder method = GenerateConstants(fnTB,baseType);
                 ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, EMPTY_TYPE_ARRAY);
-                ILGenerator gen = cb.GetILGenerator();
-                gen.Emit(OpCodes.Call, method);
+                MethodBuilder method = GenerateConstants(fnTB, baseType);
+                ILGen gen = new ILGen(cb.GetILGenerator());
+                gen.EmitCall(method);       // gen.Emit(OpCodes.Call, method);
                 gen.Emit(OpCodes.Ret);
 
             }
@@ -744,10 +744,10 @@ namespace clojure.lang.CljCompiler.Ast
         private ConstructorBuilder GenerateConstructor(TypeBuilder fnTB, Type baseType)
         {
             ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, CtorTypes());
-            ILGenerator gen = cb.GetILGenerator();
+            ILGen gen = new ILGen(cb.GetILGenerator());
             //Call base constructor
             ConstructorInfo baseCtorInfo = baseType.GetConstructor(EMPTY_TYPE_ARRAY);
-            gen.Emit(OpCodes.Ldarg_0);
+            gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
             gen.Emit(OpCodes.Call, baseCtorInfo);
 
             int a = 0;
@@ -756,8 +756,8 @@ namespace clojure.lang.CljCompiler.Ast
                 LocalBinding lb = (LocalBinding)s.first();
                 FieldBuilder fb = _closedOverFields[a];
 
-                gen.Emit(OpCodes.Ldarg_0);
-                gen.Emit(OpCodes.Ldarg, a + 1);
+                gen.EmitLoadArg(0);             // gen.Emit(OpCodes.Ldarg_0);
+                gen.EmitLoadArg(a + 1);         // gen.Emit(OpCodes.Ldarg, a + 1);
                 gen.Emit(OpCodes.Stfld, fb);
             }
             gen.Emit(OpCodes.Ret);

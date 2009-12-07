@@ -215,11 +215,11 @@ namespace clojure.lang.CljCompiler.Ast
 
             // TODO: Cache all the CreateObjectTypeArray values
             MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
-            ILGenerator gen = mb.GetILGenerator();
-            gen.Emit(OpCodes.Ldarg_0);
+            ILGen gen = new ILGen(mb.GetILGenerator());
+            gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
             for (int i = 1; i <= _argLocals.count(); i++)
-                gen.Emit(OpCodes.Ldarg, i);
-            gen.Emit(OpCodes.Call, staticMethodInfo);
+                gen.EmitLoadArg(i);                         // gen.Emit(OpCodes.Ldarg, i);
+            gen.EmitCall(staticMethodInfo);                 // gen.Emit(OpCodes.Call, staticMethodInfo);
             gen.Emit(OpCodes.Ret);
         }
 

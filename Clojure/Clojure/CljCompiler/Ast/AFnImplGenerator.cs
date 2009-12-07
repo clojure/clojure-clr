@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection.Emit;
 using System.Reflection;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -57,28 +58,28 @@ namespace clojure.lang.CljCompiler.Ast
             FieldBuilder fb = tb.DefineField(fieldName, fieldType, FieldAttributes.Public);
 
             MethodBuilder mb = tb.DefineMethod("invoke", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual, typeof(object), CreateObjectTypeArray(numArgs));
-            ILGenerator gen = mb.GetILGenerator();
+
+            ILGen gen = new ILGen(mb.GetILGenerator());
 
             Label eqLabel = gen.DefineLabel();
 
             //  this._fni == null ?
-            gen.Emit(OpCodes.Ldarg_0);
+            gen.EmitLoadArg(0);                                 // gen.Emit(OpCodes.Ldarg_0);
             gen.Emit(OpCodes.Ldfld, fb);
-            gen.Emit(OpCodes.Ldnull);
+            gen.EmitNull();                                     // gen.Emit(OpCodes.Ldnull);
             gen.Emit(OpCodes.Beq, eqLabel);
             //Not equal to Null, invoke it.
-            gen.Emit(OpCodes.Ldarg_0);
+            gen.EmitLoadArg(0);                                 //  gen.Emit(OpCodes.Ldarg_0);
             gen.Emit(OpCodes.Ldfld, fb);
             for (int i = 0; i < numArgs; i++)
-                gen.Emit(OpCodes.Ldarg, i+1);
-            gen.Emit(OpCodes.Call,fb.FieldType.GetMethod("Invoke"));            
-            
+                gen.EmitLoadArg(i + 1);                         // gen.Emit(OpCodes.Ldarg, i + 1);
+            gen.EmitCall(fb.FieldType.GetMethod("Invoke"));     // gen.Emit(OpCodes.Call, fb.FieldType.GetMethod("Invoke"));
             gen.Emit(OpCodes.Ret);
 
             gen.MarkLabel(eqLabel);
             // Equal to Null: throw WrongArityException
-            gen.Emit(OpCodes.Ldarg_0);
-            gen.Emit(OpCodes.Call, Method_AFn_WrongArityException);
+            gen.EmitLoadArg(0);                                 // gen.Emit(OpCodes.Ldarg_0);
+            gen.EmitCall(Method_AFn_WrongArityException);       // gen.Emit(OpCodes.Call, Method_AFn_WrongArityException);
             gen.Emit(OpCodes.Throw);          
           }
 
