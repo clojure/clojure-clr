@@ -653,7 +653,7 @@ namespace clojure.lang
                 else if (m.Groups[7].Success)
                 {
                     n = m.Groups[7].Value;
-                    radix = Int32.Parse(m.Groups[6].Value);
+                    radix = Int32.Parse(m.Groups[6].Value, System.Globalization.CultureInfo.InvariantCulture);
                 }
                 if (n == null)
                     return null;
@@ -676,7 +676,7 @@ namespace clojure.lang
                     //    val = val.Substring(1);
                     return BigDecimal.Parse(val);
                 }
-                return (object)Double.Parse(s);
+                return (object)Double.Parse(s, System.Globalization.CultureInfo.InvariantCulture);
             }
             m = ratioRE.Match(s);
             if (m.Success)
