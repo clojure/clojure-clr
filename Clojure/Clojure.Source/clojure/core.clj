@@ -358,7 +358,7 @@
   {:tag String}
   ([] "")
   ([#^Object x]
-   (if (nil? x) "" (. x (ToString))))   ;; java: toString
+   (if (nil? x) "" (String/Format System.Globalization.CultureInfo/InvariantCulture "{0}" x)))    ;;;(if (nil? x) "" (. x (toString))))   ;; java: toString
   ([x & ys]
      ((fn [#^StringBuilder sb more]
           (if more
