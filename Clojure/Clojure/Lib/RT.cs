@@ -1958,31 +1958,45 @@ namespace clojure.lang
         }
 
 
-        static FileInfo FindFile(string filename)
+        static FileInfo FindFile(string path, string filename)
         {
-            // check the current directory, then any directory in environment variable clojure.load.path
-            string currDir = Directory.GetCurrentDirectory();
-            string probePath = ConvertPath(currDir + "\\" + filename);  // TODO: Something other than hardwired \\?
+            string probePath = ConvertPath(Path.Combine(path, filename));
             if (File.Exists(probePath))
                 return new FileInfo(probePath);
 
+            return null;
+        }
+
+        static IEnumerable<string> GetFindFilePaths()
+        {
+            yield return Directory.GetCurrentDirectory();
+
+            yield return Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+
             string rawpaths = (string)System.Environment.GetEnvironmentVariables()[CLOJURE_LOAD_PATH];
             if (rawpaths == null)
-                return null;
+                yield break;
+
             string[] paths = rawpaths.Split(Path.PathSeparator);
             foreach (string path in paths)
-            {
-                probePath = ConvertPath(path + "\\" + filename);
-                if (File.Exists(probePath))
-                    return new FileInfo(probePath);
-            }
+                yield return path;
+        }
+
+
+        static FileInfo FindFile(string filename)
+        {
+            FileInfo fi;
+
+            foreach (string path in GetFindFilePaths())
+                if ((fi = FindFile(path, filename)) != null)
+                    return fi;
 
             return null;
         }
 
         static string ConvertPath(string path)
         {
-            return path.Replace('/', '\\');
+            return path.Replace('/', Path.DirectorySeparatorChar);
         }
 
         #endregion
