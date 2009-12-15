@@ -50,7 +50,7 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new ArgumentException("Malformed member expression, expecting (. target member ... )");
 
                 string source = (string)Compiler.SOURCE.deref();
-                IPersistentMap spanMap = Compiler.GetSourceSpanMap(form);
+                IPersistentMap spanMap = (IPersistentMap)Compiler.SOURCE_SPAN.deref();  // Compiler.GetSourceSpanMap(form);
 
                 Symbol tag = Compiler.TagOf(form);
 

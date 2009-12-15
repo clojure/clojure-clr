@@ -98,12 +98,15 @@ namespace clojure.lang.CljCompiler.Ast
                 IPersistentMap mm = sym.meta();
                 Object source_path = Compiler.SOURCE_PATH.deref();
                 source_path = source_path ?? "NO_SOURCE_FILE";
-                //JVM: mm = (IPersistentMap)RT.assoc(mm, RT.LINE_KEY, Compiler.LINE.deref()).assoc(RT.FILE_KEY, source_path);
-                mm = (IPersistentMap)RT.assoc(mm, RT.FILE_KEY, source_path);
+                mm = (IPersistentMap)RT.assoc(mm,RT.LINE_KEY, Compiler.LINE.deref())
+                    .assoc(RT.FILE_KEY, source_path)
+                    .assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
 
-                IPersistentMap spanMap = Compiler.GetSourceSpanMap(form);
-                if (spanMap != null)
-                    mm = mm.assoc(RT.SOURCE_SPAN_KEY, spanMap);
+                
+                //mm = (IPersistentMap)RT.assoc(mm, RT.FILE_KEY, source_path);
+                //IPersistentMap spanMap = Compiler.GetSourceSpanMap(form);
+                //if (spanMap != null)
+                //    mm = mm.assoc(RT.SOURCE_SPAN_KEY, spanMap);
 
                 Expr meta =  mm == null ? null : Compiler.GenerateAST(mm,false);
                 Expr init = Compiler.GenerateAST(RT.third(form),v.Symbol.Name,false);

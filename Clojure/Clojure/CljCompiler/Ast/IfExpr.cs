@@ -30,6 +30,7 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
+        readonly IPersistentMap _sourceSpan;
         readonly Expr _testExpr;
         readonly Expr _thenExpr;
         readonly Expr _elseExpr;
@@ -38,8 +39,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public IfExpr( Expr testExpr, Expr thenExpr, Expr elseExpr)
+        public IfExpr( IPersistentMap sourceSpan, Expr testExpr, Expr thenExpr, Expr elseExpr)
         {
+            _sourceSpan = sourceSpan;
             _testExpr = testExpr;
             _thenExpr = thenExpr;
             _elseExpr = elseExpr;
@@ -100,8 +102,8 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr thenExpr = Compiler.GenerateAST(RT.third(form),isRecurContext);
                 Expr elseExpr = form.count() == 4 ? Compiler.GenerateAST(RT.fourth(form),isRecurContext) : null;
 
-                //return new IfExpr((int)Compiler.LINE.deref(), testExpr, thenExpr, elseExpr);
-                return new IfExpr( testExpr, thenExpr, elseExpr);
+                return new IfExpr((IPersistentMap)Compiler.SOURCE_SPAN.deref(), testExpr, thenExpr, elseExpr);
+                //return new IfExpr( testExpr, thenExpr, elseExpr);
             }
         }
 
@@ -181,7 +183,9 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            return Expression.Condition(testCode, thenCode, elseCode, targetType);
+            Expression cond = Expression.Condition(testCode, thenCode, elseCode, targetType);
+            cond = Compiler.MaybeAddDebugInfo(cond, _sourceSpan);
+            return cond;
         }
 
         #endregion

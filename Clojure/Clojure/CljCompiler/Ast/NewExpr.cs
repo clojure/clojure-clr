@@ -127,7 +127,8 @@ namespace clojure.lang.CljCompiler.Ast
                 for (ISeq s = RT.next(RT.next(form)); s != null; s = s.next())
                     args = args.cons(Compiler.GenerateAST(s.first(),false));
 
-                return new NewExpr(t, args, Compiler.GetSourceSpanMap(form));
+                //return new NewExpr(t, args, Compiler.GetSourceSpanMap(form));
+                return new NewExpr(t, args, (IPersistentMap)Compiler.SOURCE_SPAN.deref());
             }
         }
 

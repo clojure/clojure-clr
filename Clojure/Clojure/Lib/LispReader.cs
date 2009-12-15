@@ -1017,8 +1017,8 @@ namespace clojure.lang
 
                 if (form is IObj &&  RT.meta(form) != null)
                 {
-                    //filter line numbers
-                    IPersistentMap newMeta = ((IObj)form).meta().without(RT.LINE_KEY);
+                    //filter line numbers & source span info
+                    IPersistentMap newMeta = ((IObj)form).meta().without(RT.LINE_KEY).without(RT.SOURCE_SPAN_KEY);
                     if (newMeta.count() > 0)
                         return RT.list(WITH_META, ret, syntaxQuote(((IObj)form).meta()));
                 }
@@ -1115,9 +1115,18 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char caret)
             {
-                int line = -1;
-                if (r is LineNumberingTextReader)
-                    line = ((LineNumberingTextReader)r).LineNumber;
+                int startLine = -1;
+                int startCol = -1;
+                LineNumberingTextReader lntr = r as LineNumberingTextReader;
+
+                if (lntr != null)
+                {
+                    startLine = lntr.LineNumber;
+                    startCol = lntr.ColumnNumber;
+                }
+                //int line = -1;
+                //if (r is LineNumberingTextReader)
+                //    line = ((LineNumberingTextReader)r).LineNumber;
                 //object meta = read(r, true, null, true);
                 object meta = ReadAux(r);
                 if (meta is Symbol || meta is Keyword || meta is String)
@@ -1129,8 +1138,13 @@ namespace clojure.lang
                 object o = ReadAux(r);
                 if (o is IMeta)
                 {
-                    if (line != -1 && o is ISeq)
-                        meta = ((IPersistentMap)meta).assoc(RT.LINE_KEY, line);
+                    if (startLine != -1 && o is ISeq)
+                        meta = ((IPersistentMap)meta).assoc(RT.LINE_KEY, startLine)
+                            .assoc(RT.SOURCE_SPAN_KEY, RT.map(
+                                RT.START_LINE_KEY, startLine,
+                                RT.START_COLUMN_KEY, startCol,
+                                RT.END_LINE_KEY, lntr.LineNumber,
+                                RT.END_COLUMN_KEY, lntr.ColumnNumber));
                     if (o is IReference)
                     {
                         ((IReference)o).resetMeta((IPersistentMap)meta);

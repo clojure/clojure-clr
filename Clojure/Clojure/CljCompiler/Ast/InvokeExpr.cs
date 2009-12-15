@@ -75,7 +75,7 @@ namespace clojure.lang.CljCompiler.Ast
             for ( ISeq s = RT.seq(form.next()); s != null; s = s.next())
                 args = args.cons(Compiler.GenerateAST(s.first(),false));
             return new InvokeExpr((string)Compiler.SOURCE.deref(),
-                Compiler.GetSourceSpanMap(form),
+                (IPersistentMap)Compiler.SOURCE_SPAN.deref(), //Compiler.GetSourceSpanMap(form),
                 Compiler.TagOf(form),
                 fexpr,
                 args);

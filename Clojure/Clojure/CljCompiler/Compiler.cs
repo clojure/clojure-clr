@@ -114,10 +114,11 @@ namespace clojure.lang
             Symbol.create("*file*"), "NO_SOURCE_PATH");
 
         //Integer
-        //internal static readonly Var LINE = Var.create(0);          // From the JVM version
+        internal static readonly Var LINE = Var.create(0);          // From the JVM version
         //internal static readonly Var LINE_BEFORE = Var.create(0);   // From the JVM version
         //internal static readonly Var LINE_AFTER = Var.create(0);    // From the JVM version
         internal static readonly Var DOCUMENT_INFO = Var.create(null);  // Mine
+        internal static readonly Var SOURCE_SPAN = Var.create(null);    // Mine
 
         internal static readonly Var METHODS = Var.create(null);
         public static readonly Var LOCAL_ENV = Var.create(PersistentHashMap.EMPTY);
@@ -415,14 +416,17 @@ namespace clojure.lang
 
         private static Expr AnalyzeSeq(ISeq form, string name, bool isRecurContext)
         {
-            //int line = (int)LINE.deref();
-            //if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
-            //    line = (int)RT.meta(form).valAt(RT.LINE_KEY);
+            int line = (int)LINE.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
+                line = (int)RT.meta(form).valAt(RT.LINE_KEY);
+            IPersistentMap sourceSpan = (IPersistentMap)SOURCE_SPAN.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SOURCE_SPAN_KEY))
+                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SOURCE_SPAN_KEY);
 
-            //Var.pushThreadBindings(RT.map(Compiler.LINE, line));
+            Var.pushThreadBindings(RT.map(LINE, line, SOURCE_SPAN, sourceSpan));
 
-            //try
-            //{
+            try
+            {
 
                 object exp = MacroexpandSeq1(form);
                 if (exp != form)
@@ -445,7 +449,7 @@ namespace clojure.lang
                     return p.Parse(form,isRecurContext);
                 else
                     return InvokeExpr.Parse(form);
-            //}
+            }
             //catch (Exception e)
             //{
             //    if (!(e is CompilerException))
@@ -453,10 +457,10 @@ namespace clojure.lang
             //    else
             //        throw e;
             //}
-            //finally
-            //{
-            //    Var.popThreadBindings();
-            //}
+            finally
+            {
+                Var.popThreadBindings();
+            }
         }
 
 
@@ -1056,20 +1060,24 @@ namespace clojure.lang
 
         public static object eval(object form)
         {
-            //int line = (int)LINE.deref();
-            //if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
-            //    line = (int)RT.meta(form).valAt(RT.LINE_KEY);
-            //Var.pushThreadBindings(RT.map(LINE, line));
-            //try
-            //{
+            int line = (int)LINE.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
+                line = (int)RT.meta(form).valAt(RT.LINE_KEY);
+            IPersistentMap sourceSpan = (IPersistentMap)SOURCE_SPAN.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SOURCE_SPAN_KEY))
+                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SOURCE_SPAN_KEY);
+
+            Var.pushThreadBindings(RT.map(LINE, line, SOURCE_SPAN, sourceSpan));
+            try
+            {
                 // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
                 LambdaExpression ast = Compiler.GenerateLambda(form, false);
                 return ast.Compile().DynamicInvoke();
-            //}
-            //finally
-            //{
-            //    Var.popThreadBindings();
-            //}
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
         }
 
         public static object macroexpand1(object form)
@@ -1110,6 +1118,8 @@ namespace clojure.lang
                 //LOADER, RT.makeClassLoader(),
                 SOURCE_PATH, sourcePath,
                 SOURCE, sourceName,
+                DOCUMENT_INFO, Expression.SymbolDocument(sourceName),  // I hope this is enough
+
                 RT.CURRENT_NS, RT.CURRENT_NS.deref()
                 //LINE_BEFORE, lntr.LineNumber,
                 //LINE_AFTER, lntr.LineNumber
@@ -1154,18 +1164,18 @@ namespace clojure.lang
             return (SymbolDocumentInfo)DOCUMENT_INFO.deref();
         }
 
-        internal static IPersistentMap GetSourceSpanMap(object form)
-        {
-            IObj iobj = form as IObj;
-            if (iobj == null)
-                return null;
-            IPersistentMap meta = iobj.meta();
-            if (meta == null)
-                return null;
+        //internal static IPersistentMap GetSourceSpanMap(object form)
+        //{
+        //    IObj iobj = form as IObj;
+        //    if (iobj == null)
+        //        return null;
+        //    IPersistentMap meta = iobj.meta();
+        //    if (meta == null)
+        //        return null;
 
-            IPersistentMap spanMap = (IPersistentMap)meta.valAt(RT.SOURCE_SPAN_KEY);
-            return spanMap;
-        }
+        //    IPersistentMap spanMap = (IPersistentMap)meta.valAt(RT.SOURCE_SPAN_KEY);
+        //    return spanMap;
+        //}
 
         internal static Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap)
         {
@@ -1186,7 +1196,8 @@ namespace clojure.lang
             object eofVal = new object();
             object form;
 
-            string sourcePath = sourceDirectory == null ? sourceName : sourceDirectory + "\\" + sourceName;
+            //string sourcePath = sourceDirectory == null ? sourceName : sourceDirectory + "\\" + sourceName;
+            string sourcePath = sourceDirectory;  // I hope this is enough
 
             LineNumberingTextReader lntr =
                 (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);
@@ -1199,7 +1210,7 @@ namespace clojure.lang
             RT.CURRENT_NS, RT.CURRENT_NS.deref(),
             //LINE_BEFORE, lntr.LineNumber,
             //LINE_AFTER, lntr.LineNumber,
-            DOCUMENT_INFO, Expression.SymbolDocument(sourcePath),
+            DOCUMENT_INFO, Expression.SymbolDocument(sourceName),  // I hope this is enough
             CONSTANTS, PersistentVector.EMPTY,
             KEYWORDS, PersistentHashMap.EMPTY,
             VARS, PersistentHashMap.EMPTY,
