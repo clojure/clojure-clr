@@ -120,7 +120,7 @@ namespace clojure.lang
         internal static readonly Var DOCUMENT_INFO = Var.create(null);  // Mine
 
         internal static readonly Var METHODS = Var.create(null);
-        internal static readonly Var LOCAL_ENV = Var.create(PersistentHashMap.EMPTY);
+        public static readonly Var LOCAL_ENV = Var.create(PersistentHashMap.EMPTY);
         //Integer
         internal static readonly Var NEXT_LOCAL_NUM = Var.create(0);
         internal static readonly Var LOOP_LOCALS = Var.create(null);
