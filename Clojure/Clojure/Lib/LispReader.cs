@@ -355,7 +355,7 @@ namespace clojure.lang
 
             StringBuilder sb = new StringBuilder();
 
-            if (initch == '|')
+            if (allowSymEscape && initch == '|')
                 oddVertBarMode = true;
             else
                 sb.Append(initch);
