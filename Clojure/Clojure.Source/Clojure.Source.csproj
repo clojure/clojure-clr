@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="clojure\samples\genclass\C.cs" />
+    <Compile Include="clojure\samples\interop\C.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -78,6 +79,7 @@
     <None Include="clojure\samples\genclass\testgenclass.clj" />
     <None Include="clojure\samples\genclass\testgenclass2.clj" />
     <None Include="clojure\samples\genclass\testgenclass3.clj" />
+    <None Include="clojure\samples\interop\testinterop.clj" />
     <None Include="clojure\set.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

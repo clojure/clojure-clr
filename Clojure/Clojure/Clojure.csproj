@@ -50,6 +50,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CljCompiler\Ast\InstanceZeroArityCallExpr.cs" />
+    <Compile Include="CljCompiler\Ast\StaticZeroArityCallExpr.cs" />
     <Compile Include="CljCompiler\GenClass.cs" />
     <Compile Include="CljCompiler\GenInterface.cs" />
     <Compile Include="CljCompiler\MethodSignature.cs" />

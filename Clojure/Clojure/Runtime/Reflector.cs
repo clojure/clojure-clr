@@ -23,6 +23,10 @@ namespace clojure.lang
 {
     public static class Reflector
     {
+
+
+        #region Old version (still in use during transition)
+
         #region Field/property lookup
 
         static public FieldInfo GetField(Type t, String name, bool getStatics)
@@ -403,5 +407,7 @@ namespace clojure.lang
             }
             return false;
         }
+
+        #endregion
     }
 }

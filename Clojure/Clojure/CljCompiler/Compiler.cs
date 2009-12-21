@@ -1277,6 +1277,8 @@ namespace clojure.lang
 
                 initTB.CreateType();
 
+                context.DynInitHelper.Finalize();
+
                 //context.AssyBldr.Save(sourceName + ".dll");
                 context.AssemblyGen.SaveAssembly();
             }

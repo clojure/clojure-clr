@@ -59,6 +59,16 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _assyGen.AssemblyBuilder.GetDynamicModule(_assyGen.AssemblyBuilder.GetName().Name); }
         }
 
+
+        readonly DynInitHelper _dynInitHelper;
+
+        internal DynInitHelper DynInitHelper
+        {
+            get { return _dynInitHelper; }
+        } 
+
+
+
         //readonly AssemblyBuilder _assyBldr;
         //public AssemblyBuilder AssyBldr
         //{
@@ -94,6 +104,7 @@ namespace clojure.lang.CljCompiler.Ast
             //_moduleBldr = _assyBldr.DefineDynamicModule(aname.Name, aname.Name + extension, true);
             _assyGen = new AssemblyGen(aname, directory, extension, true);
             _mode = mode;
+            _dynInitHelper = new DynInitHelper(_assyGen, "__InternalDynamicExpressionInits");
         }
 
         private GenContext(CompilerMode mode)

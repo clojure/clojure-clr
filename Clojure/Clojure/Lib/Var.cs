@@ -554,7 +554,12 @@ namespace clojure.lang
             CurrentFrame = null;
         }
 
-        public static Associative GetThreadBindings()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>Lowercase name for core.clj compatability.</remarks>
+        public static Associative getThreadBindings()
         {
             Frame f = CurrentFrame;
             IPersistentMap ret = PersistentHashMap.EMPTY;
