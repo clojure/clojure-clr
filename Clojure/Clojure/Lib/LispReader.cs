@@ -76,7 +76,7 @@ namespace clojure.lang
             _macros[';'] = new CommentReader();
             _macros['\''] = new WrappingReader(QUOTE);
             _macros['@'] = new WrappingReader(DEREF);//new DerefReader();
-            _macros['^'] = new WrappingReader(META);
+            _macros['^'] = new DeprecatedWrappingReader(META, "^");
             _macros['`'] = new SyntaxQuoteReader();
             _macros['~'] = new UnquoteReader();
             _macros['('] = new ListReader();
@@ -904,6 +904,27 @@ namespace clojure.lang
 
             protected override object Read(PushbackTextReader r, char quote)
             {
+                //object o = read(r, true, null, true);
+                object o = ReadAux(r);
+                return RT.list(_sym, o);
+            }
+        }
+
+
+        public sealed class DeprecatedWrappingReader : ReaderBase
+        {
+            readonly Symbol _sym;
+            readonly string _macro;
+
+            public DeprecatedWrappingReader(Symbol sym, string macro)
+            {
+                _sym = sym;
+                _macro = macro;                
+            }
+
+            protected override object Read(PushbackTextReader r, char quote)
+            {
+                Console.WriteLine("WARNING: read macro {0} is deprecated; use {1} instead",_macro,_sym.getName());
                 //object o = read(r, true, null, true);
                 object o = ReadAux(r);
                 return RT.list(_sym, o);
