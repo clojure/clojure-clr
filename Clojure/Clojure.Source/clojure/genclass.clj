@@ -202,7 +202,8 @@
 
   :impl-ns name
 
-  Default: the name of the current ns. Implementations of methods will be looked up in this namespace.
+  Default: the name of the current ns. Implementations of methods will be 
+  looked up in this namespace.
 
   :load-impl-ns boolean
 

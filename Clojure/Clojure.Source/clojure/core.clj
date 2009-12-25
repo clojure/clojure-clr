@@ -530,7 +530,8 @@
   [x] (. clojure.lang.Delay (force x)))
     
 (defmacro if-not
-  "Evaluates test. If logical false, evaluates and returns then expr, otherwise else expr, if supplied, else nil."
+  "Evaluates test. If logical false, evaluates and returns then expr, 
+  otherwise else expr, if supplied, else nil."  
   ([test then] `(if-not ~test ~then nil))
   ([test then else]
    `(if (not ~test) ~then ~else)))
@@ -1159,7 +1160,8 @@
  (. multifn removeMethod dispatch-val))
 
 (defn prefer-method
-  "Causes the multimethod to prefer matches of dispatch-val-x over dispatch-val-y when there is a conflict"
+  "Causes the multimethod to prefer matches of dispatch-val-x over dispatch-val-y 
+   when there is a conflict"  
   [multifn dispatch-val-x dispatch-val-y]
   (. multifn preferMethod dispatch-val-x dispatch-val-y))
 
@@ -1189,7 +1191,8 @@
 (defmacro if-let
   "bindings => binding-form test
 
-  If test is true, evaluates then with binding-form bound to the value of test, if not, yields else"
+  If test is true, evaluates then with binding-form bound to the value of 
+  test, if not, yields else"
   ([bindings then]
    `(if-let ~bindings ~then nil))
   ([bindings then else & oldform]
@@ -3504,8 +3507,9 @@
 
 (defmacro amap
   "Maps an expression across an array a, using an index named idx, and
-  return value named ret, initialized to a clone of a, then setting each element of
-  ret to the evaluation of expr, returning the new array ret."
+  return value named ret, initialized to a clone of a, then setting 
+  each element of ret to the evaluation of expr, returning the new 
+  array ret."
   [a idx ret expr]
   `(let [a# ~a
          ~ret (aclone a#)]
@@ -3518,8 +3522,8 @@
 
 (defmacro areduce
   "Reduces an expression across an array a, using an index named idx,
-  and return value named ret, initialized to init, setting ret to the evaluation of expr at
-  each step, returning ret."
+  and return value named ret, initialized to init, setting ret to the 
+  evaluation of expr at each step, returning ret."
   [a idx ret init expr]
   `(let [a# ~a]
      (loop  [~idx (int 0) ~ret ~init]
