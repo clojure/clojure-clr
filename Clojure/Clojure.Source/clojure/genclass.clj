@@ -72,7 +72,7 @@
         methods (map (fn [x] [(nth x 0) 
                               (map the-class (nth x 1)) 
                               (the-class (nth x 2)) 
-                              (:static ^x)]) 
+                              (:static (meta x))]) 
                          methods)
       ]  
 	(clojure.lang.GenClass/GenerateClass
