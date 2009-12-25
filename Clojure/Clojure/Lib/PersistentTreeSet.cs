@@ -113,7 +113,7 @@ namespace clojure.lang
         /// <returns>An emtpy collection.</returns>
         public override IPersistentCollection empty()
         {
-            return (IPersistentCollection)EMPTY.withMeta(meta());
+            return new PersistentTreeSet(meta(), (PersistentTreeMap)_impl.empty());
         }
 
         #endregion

@@ -256,7 +256,7 @@ namespace clojure.lang
         /// <returns>An emtpy collection.</returns>
         public override IPersistentCollection empty()
         {
-            return (IPersistentCollection)EMPTY.withMeta(meta());
+            return new PersistentTreeMap(meta(), _comp);  
         }
 
         #endregion
