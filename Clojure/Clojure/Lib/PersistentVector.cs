@@ -599,8 +599,8 @@ namespace clojure.lang
                 if (owner == Thread.CurrentThread)
                     return;
                 if (owner != null)
-                    throw new InvalidOperationException("Mutable used by non-owner thread");
-                throw new InvalidOperationException("Mutable used after immutable call");
+                    throw new InvalidOperationException("Transient used by non-owner thread");
+                throw new InvalidOperationException("Transient used after persistent! call");
             }
 
 
@@ -670,7 +670,7 @@ namespace clojure.lang
 
             #endregion
 
-            #region IMutableVector Members
+            #region ITransientVector Members
 
             public object nth(int i)
             {
@@ -779,7 +779,7 @@ namespace clojure.lang
 
             #endregion
 
-            #region IMutableAssociative Members
+            #region ITransientAssociative Members
 
             public ITransientAssociative assoc(object key, object val)
             {
@@ -793,7 +793,7 @@ namespace clojure.lang
 
             #endregion
 
-            #region IMutableCollection Members
+            #region ITransientCollection Members
 
             public ITransientCollection conj(object val)
             {

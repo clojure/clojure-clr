@@ -469,7 +469,7 @@ namespace clojure.lang
 
             int _len;
             readonly object[] _array;
-            readonly Thread _owner;
+            Thread _owner;
 
             #endregion
 
@@ -486,7 +486,6 @@ namespace clojure.lang
 
             #endregion
 
-
             #region
 
             /// <summary>
@@ -501,15 +500,14 @@ namespace clojure.lang
                         return i;
                 return -1;
             }
-            #endregion
 
             protected override void EnsureEditable()
             {
                 if (_owner == Thread.CurrentThread)
                     return;
                 if (_owner != null)
-                    throw new InvalidOperationException("Mutable used by non-owner thread");
-                throw new InvalidOperationException("Mutable used after immutable call");
+                    throw new InvalidOperationException("Transient used by non-owner thread");
+                throw new InvalidOperationException("Transient used after persistent! call");
             }
 
             protected override ITransientMap doAssoc(object key, object val)
@@ -561,12 +559,14 @@ namespace clojure.lang
 
             protected override IPersistentMap doPersistent()
             {
+                EnsureEditable();
+                _owner = null;
                 object[] a = new object[_len];
                 Array.Copy(_array, a, _len);
                 return new PersistentArrayMap(a);
             }
 
-
+            #endregion
         }
 
         #endregion

@@ -481,8 +481,8 @@ namespace clojure.lang
                 if (owner == Thread.CurrentThread)
                     return;
                 if (owner != null)
-                    throw new InvalidOperationException("Mutable used by non-owner thread");
-                throw new InvalidOperationException("Mutable used after immutable call");
+                    throw new InvalidOperationException("Transient used by non-owner thread");
+                throw new InvalidOperationException("Transient used after persistent! call");
             }
 
             #endregion
