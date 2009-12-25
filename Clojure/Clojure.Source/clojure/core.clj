@@ -3484,8 +3484,13 @@
   [f] (lazy-seq (cons (f) (repeatedly f))))
 ;;; What is CLR equivalent -- should this just be a no-op?
 ;(defn add-classpath
-;  "Adds the url (String or URL object) to the classpath per URLClassLoader.addURL"
-;  [url] (. clojure.lang.RT addURL url))
+;  "DEPRECATED 
+;
+;  Adds the url (String or URL object) to the classpath per
+;  URLClassLoader.addURL"
+;  [url]
+;  (println "WARNING: add-classpath is deprecated")
+;  (clojure.lang.RT/addURL url))
 
 
 
@@ -4313,7 +4318,7 @@
        v))
   ([ns name val] 
      (let [v (clojure.lang.Var/intern (the-ns ns) name val)]
-       (when ^name (.setMeta v (meta name)))
+       (when (meta name) (.setMeta v (meta name)))
        v)))
 
 (defmacro while
