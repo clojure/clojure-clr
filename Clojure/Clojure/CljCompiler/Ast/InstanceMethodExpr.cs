@@ -24,6 +24,7 @@ using System.Linq.Expressions;
 #endif
 using AstUtils = Microsoft.Scripting.Ast.Utils;
 using Microsoft.Scripting;
+using System.Dynamic;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -78,11 +79,33 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            if (_method != null)
-                return Compiler.MaybeBox(GenDlrForMethod(context));
-            else
-                return GenDlrViaReflection(context);
+            Expression[] exprs = new Expression[_args.count() + 1];
+            exprs[0] = _target.GenDlr(context);
+
+            for (int i = 0; i < _args.count(); i++)
+                exprs[i+1] = ((Expr)_args.nth(i)).GenDlr(context);
+
+            Type returnType = HasClrType ? ClrType : typeof(object);
+
+            InvokeMemberBinder binder = new DefaultInvokeMemberBinder(_methodName, exprs.Length);
+            DynamicExpression dyn = Expression.Dynamic(binder, returnType, exprs);
+
+            Expression call = dyn;
+
+            if (context.Mode == CompilerMode.File)
+                call = context.DynInitHelper.ReduceDyn(dyn);
+
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
+            return call;
         }
+
+        //public override Expression GenDlr(GenContext context)
+        //{
+        //    if (_method != null)
+        //        return Compiler.MaybeBox(GenDlrForMethod(context));
+        //    else
+        //        return GenDlrViaReflection(context);
+        //}
 
         public override Expression GenDlrUnboxed(GenContext context)
         {

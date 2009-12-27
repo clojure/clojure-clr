@@ -43,7 +43,7 @@ namespace clojure.lang.CljCompiler.Ast
                 //  (. x fieldname-sym)
                 //  (. x 0-ary-method)
                 //  (. x propertyname-sym)
-                //  (. x methodname-sym args+)
+                //  (. x methodname-sym args)+
                 //  (. x (methodname-sym args?))
 
                 if (RT.Length(form) < 3)
@@ -130,10 +130,17 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+        #endregion
+
+        #region Code generation
+
         public abstract Expression GenDlrUnboxed(GenContext context);
 
+        #endregion
 
-        protected static List<MethodInfo> GetMethods(Type targetType, int arity,  string methodName, bool getStatics)
+        #region Reflection helpers
+
+        private static List<MethodInfo> GetMethods(Type targetType, int arity,  string methodName, bool getStatics)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
             flags |= getStatics ? BindingFlags.Static : BindingFlags.Instance;
@@ -152,7 +159,7 @@ namespace clojure.lang.CljCompiler.Ast
             return infos;
         }
 
-        static List<MethodInfo> GetInterfaceMethods(Type targetType, int arity, string methodName)
+        private static List<MethodInfo> GetInterfaceMethods(Type targetType, int arity, string methodName)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod;
 
@@ -176,7 +183,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, IPersistentVector args, string methodName)
         {
-            MethodInfo method = GetMatchingMethodAux(targetType, args, methodName, true);
+            // MethodInfo method = GetMatchingMethodAux(targetType, args, methodName, true);
+            MethodInfo method = null;
 
             MaybeReflectionWarn(spanMap, method, methodName);
 
@@ -185,7 +193,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, IPersistentVector args, string methodName)
         {
-            MethodInfo method = target.HasClrType ? GetMatchingMethodAux(target.ClrType, args, methodName, false) : null;
+            //MethodInfo method = target.HasClrType ? GetMatchingMethodAux(target.ClrType, args, methodName, false) : null;
+            MethodInfo method = null;
 
             MaybeReflectionWarn(spanMap, method, methodName);
 

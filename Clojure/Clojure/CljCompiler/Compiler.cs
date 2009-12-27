@@ -1203,6 +1203,7 @@ namespace clojure.lang
                 (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);
 
             GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, CompilerMode.File);
+            GenContext evalContext = new GenContext("EvalForCompile", CompilerMode.Immediate);
 
             Var.pushThreadBindings(RT.map(
             SOURCE_PATH, sourcePath,
@@ -1243,7 +1244,16 @@ namespace clojure.lang
 
                     // evaluate in this environment
                     // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
+                    
+                    // We have to evaluate in an evaluation context also.  We used to be able to just do ast.Compile().DynamicInvoke() directly,
+                    // but with DynamicExpressions needing to be pulled from static fields, we are stuck.  I think.  Unless we do it per fn.
+                    // Something to try.
+
+                    // old:  ast.Compile().DynamicInvoke();
+
+                    ast = Compiler.GenerateLambda(evalContext, form, false);
                     ast.Compile().DynamicInvoke();
+
                     //LINE_BEFORE.set(lntr.LineNumber);
                 }
 

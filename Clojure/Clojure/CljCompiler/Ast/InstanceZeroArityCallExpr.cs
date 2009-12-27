@@ -29,6 +29,7 @@ using AstUtils = Microsoft.Scripting.Ast.Utils;
 using System.Reflection.Emit;
 using Microsoft.Scripting.Generation;
 using System.Runtime.CompilerServices;
+using Microsoft.Scripting.Actions.Calls;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -104,6 +105,105 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
     }
 
+    public class DefaultInvokeMemberBinder : InvokeMemberBinder, IExpressionSerializable
+    {
+        #region Data
+
+        DefaultBinder _binder = new DefaultBinder();
+
+        #endregion
+
+        #region C-tors
+
+        public DefaultInvokeMemberBinder(string name, int argCount)
+            : base(name, false, new CallInfo(argCount, GetArgNames(argCount)))
+        {
+        }
+
+        #endregion
+
+        #region Argument names
+
+        static Dictionary<int, string[]> _argNamesCache = new Dictionary<int, string[]>();
+
+        static string[] GetArgNames(int argCount)
+        {
+            string[] names;
+            if (!_argNamesCache.TryGetValue(argCount, out names))
+            {
+                names = CreateArgNames(argCount);
+                _argNamesCache[argCount] = names;
+            }
+            return names;
+        }
+
+        private static string[] CreateArgNames(int argCount)
+        {
+            string[] names = new string[argCount];
+            for (int i = 0; i < argCount; i++)
+                names[i] = "arg" + i.ToString();
+            return names;
+        }
+
+        #endregion
+
+        #region InvokeMemberBinder methods
+
+        public override DynamicMetaObject FallbackInvokeMember(DynamicMetaObject target, DynamicMetaObject[] args, DynamicMetaObject errorSuggestion)
+        {
+            OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+
+            IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(args.Length);
+            argsPlus.Add(target);
+            foreach (DynamicMetaObject arg in args)
+                argsPlus.Add(arg);
+
+            DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(args.Length), CallTypes.ImplicitInstance);
+
+            IList<MethodBase> methods = new List<MethodBase>(target.LimitType.GetMethods(BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public).Where<MethodBase>(x => x.Name == Name && x.GetParameters().Length == args.Length));
+
+            if (methods.Count > 0)
+            {
+
+                DynamicMetaObject dmo = _binder.CallMethod(res, methods);
+                dmo = DynUtils.MaybeBoxReturnValue(dmo);
+
+                //; Console.WriteLine(dmo.Expression.DebugView);
+                return dmo;
+            }
+
+            return errorSuggestion ??
+                new DynamicMetaObject(
+                    Expression.Throw(
+                        Expression.New(typeof(MissingMethodException).GetConstructor(new Type[] { typeof(string) }),
+                            Expression.Constant(String.Format("Cannot find member {0} matching args", this.Name))),
+                        typeof(object)),
+                    target.Restrictions.Merge(BindingRestrictions.Combine(args)));
+        }
+
+        public override DynamicMetaObject FallbackInvoke(DynamicMetaObject target, DynamicMetaObject[] args, DynamicMetaObject errorSuggestion)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region IExpressionSerializable Members
+
+        public Expression CreateExpression()
+        {
+            return Expression.Call(typeof(DefaultInvokeMemberBinder).GetMethod("CreateMe"),
+                Expression.Constant(this.Name),
+                Expression.Constant(this.CallInfo.ArgumentCount));
+        }
+
+        public static DefaultInvokeMemberBinder CreateMe(string name, int argCount)
+        {
+            return new DefaultInvokeMemberBinder(name, argCount);
+        }
+
+        #endregion
+    }
 
     public class DefaultGetZeroArityMemberBinder : GetMemberBinder, IExpressionSerializable
     {
@@ -124,7 +224,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region GetMemberBinderMember
+        #region GetMemberBinder Members
 
         public override DynamicMetaObject FallbackGetMember(DynamicMetaObject target, DynamicMetaObject errorSuggestion)
         {
@@ -263,23 +363,23 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region
 
-        public static Expression CreateGetZeroArityMemberExpression(DynInitHelper dih, ParameterExpression thisParm, Type returnType, string name, bool isStatic)
-        {
-            GetMemberBinder imb = new DefaultGetZeroArityMemberBinder(name, isStatic);
-            DynamicExpression dyn = Expression.Dynamic(imb, returnType, new Expression[] { thisParm });
-            Expression dynReplace = dih.ReduceDyn(dyn);
-            return dynReplace;
-        }
+        //public static Expression CreateGetZeroArityMemberExpression(DynInitHelper dih, ParameterExpression thisParm, Type returnType, string name, bool isStatic)
+        //{
+        //    GetMemberBinder imb = new DefaultGetZeroArityMemberBinder(name, isStatic);
+        //    DynamicExpression dyn = Expression.Dynamic(imb, returnType, new Expression[] { thisParm });
+        //    Expression dynReplace = dih.ReduceDyn(dyn);
+        //    return dynReplace;
+        //}
 
-        public static LambdaExpression CreateGetZeroArityMemberLambda(DynInitHelper dih, ParameterExpression[] parms,
-            string name, bool isStatic, Type returnType)
-        {
-            ParameterExpression thisParm = Expression.Parameter(typeof(object), "this");
-            Expression dynReplace = CreateGetZeroArityMemberExpression(dih, thisParm, returnType, name, isStatic);
-            ParameterExpression[] allParms = ArrayInsert<ParameterExpression>(thisParm, parms);
-            LambdaExpression lambda = Expression.Lambda(dynReplace, allParms);
-            return lambda;
-        }
+        //public static LambdaExpression CreateGetZeroArityMemberLambda(DynInitHelper dih, ParameterExpression[] parms,
+        //    string name, bool isStatic, Type returnType)
+        //{
+        //    ParameterExpression thisParm = Expression.Parameter(typeof(object), "this");
+        //    Expression dynReplace = CreateGetZeroArityMemberExpression(dih, thisParm, returnType, name, isStatic);
+        //    ParameterExpression[] allParms = ArrayInsert<ParameterExpression>(thisParm, parms);
+        //    LambdaExpression lambda = Expression.Lambda(dynReplace, allParms);
+        //    return lambda;
+        //}
 
         #endregion
 
@@ -375,7 +475,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ConstructorBuilder ctorB = _typeBuilder.DefineConstructor(MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
             ILGen gen = new ILGen(ctorB.GetILGenerator());
-            gen.EmitString("Entering cctor");
+            gen.EmitString(String.Format("Entering cctor for {0}",_assemblyGen.AssemblyBuilder.FullName));
             gen.EmitCall(typeof(System.Console), "WriteLine", new Type[] { typeof(string) });
 
             for (int i = 0; i < _fieldBuilders.Count; i++)
