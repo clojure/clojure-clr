@@ -320,7 +320,7 @@ namespace clojure.lang
                 gen.EmitLoadArg(0);                                     // gen.Emit(OpCodes.Ldarg_0);
                 for (int i = 0; i < parmCount; i++)
                     gen.EmitLoadArg(i + 1);                             // gen.Emit(OpCodes.Ldarg, i + 1);
-                gen.EmitCall(m);                                        // gen.Emit(OpCodes.Call, m);
+                gen.Emit(OpCodes.Call, m);                              // gen.EmitCall(m) improperly emits a callvirt in some cases
             }
             else
             {
