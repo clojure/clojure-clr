@@ -77,9 +77,13 @@ namespace clojure.lang
             string implNamespace,
             bool loadImplNameSpace)
         {
+            string path = (string)Compiler.COMPILE_PATH.deref();
+            if ( path == null)
+                throw new Exception("*compile-path* not set");
+
             string extension = hasMain ? ".exe" : ".dll";
 
-            GenContext context = new GenContext(className,extension,null, CompilerMode.File);
+            GenContext context = new GenContext(className,extension,path, CompilerMode.File);
 
             // define the class
             List<Type> interfaceTypes = new List<Type>();
@@ -545,7 +549,7 @@ namespace clojure.lang
 
         private static void EmitExposers(TypeBuilder proxyTB, Type superClass, IPersistentMap exposesFields)
         {
-            for ( ISeq s = exposesFields.seq(); s != null; s = s.next() )
+            for ( ISeq s = RT.seq(exposesFields); s != null; s = s.next() )
             {
                 IMapEntry me = (IMapEntry)s.first();
                 Symbol protectedFieldSym = (Symbol)me.key();

@@ -76,6 +76,7 @@
     <None Include="clojure\samples\await-test.clj" />
     <None Include="clojure\samples\celsius.clj" />
     <None Include="clojure\samples\genclass\testgenclass.clj" />
+    <None Include="clojure\samples\genclass\testgenclass2.clj" />
     <None Include="clojure\set.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
