@@ -95,7 +95,7 @@ namespace clojure.lang
             //TypeBuilder proxyTB = context.ModuleBldr.DefineType(
             TypeBuilder proxyTB = context.ModuleBuilder.DefineType(
                 className,
-                TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed,
+                TypeAttributes.Class | TypeAttributes.Public,
                 superClass,
                 interfaceTypes.ToArray());
 
