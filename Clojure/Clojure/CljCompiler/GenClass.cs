@@ -431,7 +431,7 @@ namespace clojure.lang
                                 gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
                                 for (int i = 0; i < sig.ParamTypes.Length; i++)
                                     gen.EmitLoadArg(i + 1);                     // gen.Emit(OpCodes.Ldarg, (i + 1));
-                                gen.EmitCall(sig.Method);                       // gen.Emit(OpCodes.Call, sig.Method);
+                                gen.Emit(OpCodes.Call, sig.Method);             // not gen.EmitCall(sig.Method) -- we need call versus callvirt
                             });
                         break;
                     case "interface":
@@ -512,7 +512,9 @@ namespace clojure.lang
                 for (int i = 0; i < sig.ParamTypes.Length; i++)
                 {
                     gen.EmitLoadArg(i + 1);                 // gen.Emit(OpCodes.Ldarg, i + 1);
-                    //gen.Emit(OpCodes.Castclass, sig.ParamTypes[i]);
+                    if (sig.ParamTypes[i].IsValueType)
+                        gen.Emit(OpCodes.Box, sig.ParamTypes[i]);
+
                 }
                 gen.EmitCall(Compiler.Methods_IFn_invoke[sig.ParamTypes.Length + (isStatic ? 0 : 1)]);
                 //gen.Emit(OpCodes.Call, Compiler.Methods_IFn_invoke[sig.ParamTypes.Length + (isStatic ? 0 : 1)]);
@@ -540,7 +542,7 @@ namespace clojure.lang
             gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
             for (int i = 0; i < paramTypes.Length; i++)
                 gen.EmitLoadArg(i + 1);                     // gen.Emit(OpCodes.Ldarg, i + 1);
-            gen.EmitCall(mi);                               // gen.Emit(OpCodes.Call, mi);
+            gen.Emit(OpCodes.Call, mi);                     // not gen.EmitCall(mi); -- we need call versus callvirt
             gen.Emit(OpCodes.Ret);
         }
 
