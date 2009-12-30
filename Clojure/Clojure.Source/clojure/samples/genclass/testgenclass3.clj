@@ -9,6 +9,8 @@
 ;
 ;	Author: David Miller
 ;
+;   Simple example testing arguments and returns of value type.
+;
 ; Place this file in the clojure subdirectory of your main directory.
 ;   (compile 'clojure.testgenclass3)
 ;
