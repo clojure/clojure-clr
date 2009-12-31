@@ -28,18 +28,11 @@ namespace clojure.lang
 
         public static Type GenerateInterface(string iName, ISeq extends, ISeq methods)
         {
-            
-            GenContext context = new GenContext(iName, CompilerMode.File);
+            string path = (string)Compiler.COMPILE_PATH.deref();
+            if (path == null)
+                throw new Exception("*compile-path* not set");
 
-//            GenContext context = (GenContext)Compiler.COMPILER_CONTEXT.deref();
-//            if (context == null)
-//            {
-//#if DEBUG
-//                context = new GenContext(iName, CompilerMode.File);
-//#else
-//                throw new InvalidOperationException("No compiler context on the stack.");
-//#endif
-//            }  
+            GenContext context = new GenContext(iName, ".dll", path, CompilerMode.File);
 
             Type[] interfaceTypes = GenClass.CreateTypeArray(extends == null ? null : extends.seq());
 
