@@ -225,7 +225,11 @@ namespace clojure.lang
                 Type[] thisParamTypes = CreateTypeArray(thisParamTypesV);
                 Type[] baseParamTypes = CreateTypeArray(baseParamTypesV);
 
-                ConstructorInfo superCtor = superClass.GetConstructor(baseParamTypes);
+                BindingFlags flags = BindingFlags.CreateInstance| BindingFlags.NonPublic| BindingFlags.Public| BindingFlags.Instance;
+                ConstructorInfo superCtor = superClass.GetConstructor(flags,null,baseParamTypes,null);
+
+                if (superCtor == null || superCtor.IsPrivate)
+                    throw new Exception("Base class constructor missing or private");
 
                 ConstructorBuilder cb = proxyTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, thisParamTypes);
                 ILGen gen = new ILGen(cb.GetILGenerator());

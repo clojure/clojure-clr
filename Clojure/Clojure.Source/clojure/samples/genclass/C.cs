@@ -23,7 +23,7 @@ namespace dm
         private int m5(int x) { Message("m5", x.ToString()); return x + 1; }
 
         public C1(int x, string y) { Message("ctor1", x.ToString(), y); this.x = x; this.y = y; }
-        public C1(string y, int x) { Message("ctor2", y, x.ToString()); this.y = y; this.x = x; }
+        protected C1(string y, int x) { Message("ctor2", y, x.ToString()); this.y = y; this.x = x; }
         public C1() { Message("defaultctor"); }
 
         private static void Message(string name, params string[] strs)
