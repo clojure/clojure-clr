@@ -171,6 +171,10 @@ namespace clojure.lang.CljCompiler.Ast
                     fn._thisName = ((Symbol)RT.second(form)).Name;
                     form = RT.cons(Compiler.FN, RT.next(RT.next(form)));
                 }
+                else if (name != null)
+                {
+                    fn._thisName = name;
+                }
 
                 // Normalize body
                 // If it is (fn [arg...] body ...), turn it into
