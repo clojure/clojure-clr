@@ -171,10 +171,13 @@ namespace clojure.lang.CljCompiler.Ast
                     fn._thisName = ((Symbol)RT.second(form)).Name;
                     form = RT.cons(Compiler.FN, RT.next(RT.next(form)));
                 }
-                else if (name != null)
-                {
-                    fn._thisName = name;
-                }
+                //  Added to improve stack trace messages.
+                //  This seriously hoses compilation of core.clj.  Needs investigation.
+                //  Backing this out.
+                //else if (name != null)
+                //{
+                //    fn._thisName = name;
+                //}
 
                 // Normalize body
                 // If it is (fn [arg...] body ...), turn it into
