@@ -87,7 +87,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             Type returnType = HasClrType ? ClrType : typeof(object);
 
-            InvokeMemberBinder binder = new DefaultInvokeMemberBinder(_methodName, exprs.Length);
+            InvokeMemberBinder binder = new DefaultInvokeMemberBinder(_methodName, exprs.Length,false);
             DynamicExpression dyn = Expression.Dynamic(binder, returnType, exprs);
 
             Expression call = dyn;

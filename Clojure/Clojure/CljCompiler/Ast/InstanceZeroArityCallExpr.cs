@@ -109,15 +109,17 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        DefaultBinder _binder = new DefaultBinder();
+        readonly DefaultBinder _binder = new DefaultBinder();
+        readonly bool _isStatic;
 
         #endregion
 
         #region C-tors
 
-        public DefaultInvokeMemberBinder(string name, int argCount)
+        public DefaultInvokeMemberBinder(string name, int argCount, bool isStatic)
             : base(name, false, new CallInfo(argCount, GetArgNames(argCount)))
         {
+            _isStatic = isStatic;
         }
 
         #endregion
@@ -152,15 +154,19 @@ namespace clojure.lang.CljCompiler.Ast
         public override DynamicMetaObject FallbackInvokeMember(DynamicMetaObject target, DynamicMetaObject[] args, DynamicMetaObject errorSuggestion)
         {
             OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            Type typeToUse = _isStatic && target.Value is Type ? (Type)target.Value : target.LimitType;
 
-            IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(args.Length);
-            argsPlus.Add(target);
+
+            IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(args.Length + (_isStatic ? 0 : 1));
+            if ( ! _isStatic )
+                argsPlus.Add(target);
             foreach (DynamicMetaObject arg in args)
                 argsPlus.Add(arg);
 
-            DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(args.Length), CallTypes.ImplicitInstance);
+            DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(args.Length), _isStatic ? CallTypes.None : CallTypes.ImplicitInstance);
 
-            IList<MethodBase> methods = new List<MethodBase>(target.LimitType.GetMethods(BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public).Where<MethodBase>(x => x.Name == Name && x.GetParameters().Length == args.Length));
+            BindingFlags flags = BindingFlags.InvokeMethod | BindingFlags.Public | (_isStatic ? BindingFlags.Static : BindingFlags.Instance);
+            IList<MethodBase> methods = new List<MethodBase>(typeToUse.GetMethods(flags).Where<MethodBase>(x => x.Name == Name && x.GetParameters().Length == args.Length));
 
             if (methods.Count > 0)
             {
@@ -194,12 +200,13 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return Expression.Call(typeof(DefaultInvokeMemberBinder).GetMethod("CreateMe"),
                 Expression.Constant(this.Name),
-                Expression.Constant(this.CallInfo.ArgumentCount));
+                Expression.Constant(this.CallInfo.ArgumentCount),
+                Expression.Constant(this._isStatic));
         }
 
-        public static DefaultInvokeMemberBinder CreateMe(string name, int argCount)
+        public static DefaultInvokeMemberBinder CreateMe(string name, int argCount, bool isStatic)
         {
-            return new DefaultInvokeMemberBinder(name, argCount);
+            return new DefaultInvokeMemberBinder(name, argCount,isStatic);
         }
 
         #endregion
@@ -209,8 +216,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        DefaultBinder _binder = new DefaultBinder();
-        bool _isStatic;
+        readonly DefaultBinder _binder = new DefaultBinder();
+        readonly bool _isStatic;
 
         #endregion
 
