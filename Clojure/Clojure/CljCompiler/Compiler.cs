@@ -251,8 +251,7 @@ namespace clojure.lang
         static int _saveId = 0;
         public static void SaveEvalContext()
         {
-            //_evalContext.AssyBldr.Save("eval" + _saveId++ + ".dll");
-            _evalContext.AssemblyGen.SaveAssembly();
+            _evalContext.SaveAssembly();
             _evalContext = new GenContext("eval", CompilerMode.Immediate);
         }
 
@@ -265,21 +264,30 @@ namespace clojure.lang
 
         internal static LambdaExpression GenerateLambda(GenContext context, object form, bool addPrint)
         {
-            // TODO: Get rid of this extra wrap.  See how the JVM version handles setting up the context for compiling the form.
-            form = RT.list(FN, PersistentVector.EMPTY, RT.list( DO, form));
-
-            Expr ast = GenerateAST(form,false);
-            Expression formExpr = GenerateDlrExpression(context,ast);
-            Expression finalExpr = Expression.Call(formExpr, formExpr.Type.GetMethod("invoke", System.Type.EmptyTypes));
-
+            Expr ast = GenerateWrappedAst(form);
+            Expression expr = GenerateInvokedDlrFromWrappedAst(context,ast);
             if (addPrint)
             {
-                finalExpr = Expression.Call(Method_RT_printToConsole, finalExpr);
+                expr = Expression.Call(Method_RT_printToConsole, expr);
             }
 
-            return Expression.Lambda(finalExpr, "REPLCall", null);
+            return Expression.Lambda(expr, "REPLCall", null);
         }
 
+        internal static Expression GenerateInvokedDlrFromWrappedAst(GenContext context, Expr ast)
+        {
+            Expression formExpr = GenerateDlrExpression(context, ast);
+            Expression finalExpr = Expression.Call(formExpr, formExpr.Type.GetMethod("invoke", System.Type.EmptyTypes));
+            return finalExpr;
+        }
+
+        internal static Expr GenerateWrappedAst(object form)
+        {
+            // TODO: Get rid of this extra wrap.  See how the JVM version handles setting up the context for compiling the form.
+            object wrappedForm = RT.list(FN, PersistentVector.EMPTY, RT.list(DO, form));
+            Expr ast = GenerateAST(wrappedForm, false);
+            return ast;
+        }
 
         #endregion
 
@@ -1152,30 +1160,10 @@ namespace clojure.lang
 
         #region Compiling
 
-        public static object TestCompile(string filename)
-        {
-            using (TextReader rdr = File.OpenText(filename))
-                return Compile(rdr, null, filename);
-        }
-
-
         internal static SymbolDocumentInfo DocInfo()
         {
             return (SymbolDocumentInfo)DOCUMENT_INFO.deref();
         }
-
-        //internal static IPersistentMap GetSourceSpanMap(object form)
-        //{
-        //    IObj iobj = form as IObj;
-        //    if (iobj == null)
-        //        return null;
-        //    IPersistentMap meta = iobj.meta();
-        //    if (meta == null)
-        //        return null;
-
-        //    IPersistentMap spanMap = (IPersistentMap)meta.valAt(RT.SOURCE_SPAN_KEY);
-        //    return spanMap;
-        //}
 
         internal static Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap)
         {
@@ -1186,7 +1174,6 @@ namespace clojure.lang
                     new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.END_LINE_KEY), (int)spanMap.valAt(RT.END_COLUMN_KEY)));
             return expr;
         }
-
 
         internal static object Compile(TextReader rdr, string sourceDirectory, string sourceName)
         {
@@ -1222,7 +1209,6 @@ namespace clojure.lang
             try
             {
 
-                //TypeBuilder exprTB = context.ModuleBldr.DefineType("__REPL__", TypeAttributes.Class | TypeAttributes.Public);
                 TypeBuilder exprTB = context.AssemblyGen.DefinePublicType("__REPL__", typeof(object), true);
 
                 List<string> names = new List<string>();
@@ -1230,31 +1216,35 @@ namespace clojure.lang
                 int i = 0;
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
-                    //LINE_AFTER.set(lntr.LineNumber);
+                    //Java version: LINE_AFTER.set(lntr.LineNumber);
 
-                    LambdaExpression ast = Compiler.GenerateLambda(context, form, false);
+                    // To avoid expanding macros more than once, we generate the AST only once,
+                    // and then compile using the compile context
+                    // and then eval using the eval context
+
+                    Expr ast = GenerateWrappedAst(form);
 
                     // Compile to assembly
+                    Expression exprForCompile = GenerateInvokedDlrFromWrappedAst(context, ast);
+                    LambdaExpression lambdaForCompile = Expression.Lambda(exprForCompile, "ReplCall", null);
+
+                    // TODO: gather all the exprForCompiles into one BIG lambda.  Then we only need one BIG method.
                     MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
                         MethodAttributes.Public | MethodAttributes.Static);
                     //ast.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());
-                    ast.CompileToMethod(methodBuilder, true);
+                    lambdaForCompile.CompileToMethod(methodBuilder, true);
 
                     names.Add(methodBuilder.Name);
 
                     // evaluate in this environment
+                    Expression exprForEval = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
+                    LambdaExpression lambdaForEval = Expression.Lambda(exprForEval, "ReplCall", null);
+
                     // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
-                    
-                    // We have to evaluate in an evaluation context also.  We used to be able to just do ast.Compile().DynamicInvoke() directly,
-                    // but with DynamicExpressions needing to be pulled from static fields, we are stuck.  I think.  Unless we do it per fn.
-                    // Something to try.
+                    lambdaForEval.Compile().DynamicInvoke();
 
-                    // old:  ast.Compile().DynamicInvoke();
 
-                    ast = Compiler.GenerateLambda(evalContext, form, false);
-                    ast.Compile().DynamicInvoke();
-
-                    //LINE_BEFORE.set(lntr.LineNumber);
+                    //Java version: LINE_BEFORE.set(lntr.LineNumber);
                 }
 
                 Type exprType = exprTB.CreateType();
@@ -1262,9 +1252,7 @@ namespace clojure.lang
                 // Need to put the loader init in its own type because we can't generate calls on the MethodBuilders
                 //  until after their types have been closed.
 
-                //TypeBuilder initTB = context.ModuleBldr.DefineType("__Init__", TypeAttributes.Class | TypeAttributes.Public);
                 TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
-
 
                 Expression pushNSExpr = Expression.Call(null, Method_Compiler_PushNS);
                 Expression popExpr = Expression.Call(null, Method_Var_popThreadBindings);
@@ -1287,10 +1275,7 @@ namespace clojure.lang
 
                 initTB.CreateType();
 
-                context.DynInitHelper.Finalize();
-
-                //context.AssyBldr.Save(sourceName + ".dll");
-                context.AssemblyGen.SaveAssembly();
+                context.SaveAssembly();
             }
             catch (LispReader.ReaderException e)
             {

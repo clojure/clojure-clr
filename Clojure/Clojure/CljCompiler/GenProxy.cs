@@ -42,8 +42,7 @@ namespace clojure.lang
         static int _saveId = 0;
         public static void SaveProxyContext()
         {
-            //_context.AssyBldr.Save("done" + _saveId++ + ".dll");
-            _context.AssemblyGen.SaveAssembly();
+            _context.SaveAssembly();
             _context = new GenContext("proxy", CompilerMode.Immediate);
         }
 
@@ -54,8 +53,6 @@ namespace clojure.lang
 
         public static Type GenerateProxyClass(Type superclass, ISeq interfaces, string className)
         {
-            //Console.WriteLine("Defining proxy class {0} with base {1}", className, superclass);
-
             // define the class
             List<Type> interfaceTypes = new List<Type>();
             interfaceTypes.Add(typeof(IProxy));
@@ -63,7 +60,6 @@ namespace clojure.lang
             for (ISeq s = interfaces; s != null; s = s.next())
                 interfaceTypes.Add((Type)s.first());
 
-            //TypeBuilder proxyTB = _context.ModuleBldr.DefineType(
             TypeBuilder proxyTB = _context.ModuleBuilder.DefineType(
                 className,
                 TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed,

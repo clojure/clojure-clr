@@ -47,8 +47,8 @@ namespace clojure.lang
             DefineMethods(proxyTB, methods);
 
             Type t = proxyTB.CreateType();
-            //context.AssyBldr.Save(iName + ".dll");
-            context.AssemblyGen.SaveAssembly();
+            context.SaveAssembly();
+
             return t;
         }
 

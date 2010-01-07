@@ -410,7 +410,7 @@ namespace clojure.lang
 
         public static readonly Var WARN_ON_REFLECTION
             //= Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), false);
+            = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), true);  // Just while we're working on the new HostExpr code
 
         public static readonly Var MACRO_META 
             = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);

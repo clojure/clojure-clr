@@ -67,25 +67,10 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _dynInitHelper; }
         } 
 
-
-
-        //readonly AssemblyBuilder _assyBldr;
-        //public AssemblyBuilder AssyBldr
-        //{
-        //    get { return _assyBldr; }
-        //}
-
-        //readonly ModuleBuilder _moduleBldr;
-        //public ModuleBuilder ModuleBldr
-        //{
-        //    get { return _moduleBldr; }
-        //}
-
         FnExpr _fnExpr = null;
         internal FnExpr FnExpr
         {
             get { return _fnExpr; }
-            //set { _fnExpr = value; }
         }
 
         #endregion
@@ -100,11 +85,10 @@ namespace clojure.lang.CljCompiler.Ast
         public GenContext(string assyName, string extension, string directory, CompilerMode mode)
         {
             AssemblyName aname = new AssemblyName(assyName);
-            //_assyBldr = AppDomain.CurrentDomain.DefineDynamicAssembly(aname, AssemblyBuilderAccess.RunAndSave,directory);
-            //_moduleBldr = _assyBldr.DefineDynamicModule(aname.Name, aname.Name + extension, true);
             _assyGen = new AssemblyGen(aname, directory, extension, true);
             _mode = mode;
-            _dynInitHelper = new DynInitHelper(_assyGen, "__InternalDynamicExpressionInits");
+            if ( mode == CompilerMode.File )
+                _dynInitHelper = new DynInitHelper(_assyGen, "__InternalDynamicExpressionInits");
         }
 
         private GenContext(CompilerMode mode)
@@ -122,6 +106,18 @@ namespace clojure.lang.CljCompiler.Ast
         private GenContext Clone()
         {
             return (GenContext) this.MemberwiseClone();
+        }
+
+        #endregion
+
+        #region Other
+
+        // DO not call context.AssmeblyGen.SaveAssembly() directly.
+        internal void SaveAssembly()
+        {
+            if ( _dynInitHelper != null )
+                _dynInitHelper.FinalizeType();
+            _assyGen.SaveAssembly();
         }
 
         #endregion

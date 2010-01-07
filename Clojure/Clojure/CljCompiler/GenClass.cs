@@ -49,8 +49,7 @@ namespace clojure.lang
         static int _saveId = 0;
         public static void SaveContext()
         {
-            //_context.AssyBldr.Save("genclass" + _saveId++ + ".dll");
-            _context.AssemblyGen.SaveAssembly();
+            _context.SaveAssembly();
             _context = new GenContext("genclass", CompilerMode.Immediate);
         }
          
@@ -136,8 +135,7 @@ namespace clojure.lang
 
             Type t = proxyTB.CreateType();
 
-            //context.AssyBldr.Save(className + extension);
-            context.AssemblyGen.SaveAssembly();
+            context.SaveAssembly();
 
             return t;
         }
