@@ -71,6 +71,21 @@
   aset-sbyte setSByte sbyte)
   
 (defn enum-val [t n]
-   "Gets a value from an enum from the name"
-(let [s (if (string? n) n (name n))]
-  (Enum/Parse t s)))
+  "Gets a value from an enum from the name"
+  (let [s (if (string? n) n (name n))]
+   (Enum/Parse t s)))
+  
+; Support for interop
+
+(defn refparam [v]
+  "Signals that a by-ref parameter is desired at this position in an interop call.
+  
+  Should only be used in CLR interop code.  Throws an exception otherwise."
+  (throw (ArgumentException. "refparam not used at top-level in an interop call")))
+  
+(defn outparam [v]
+  "Signals that an out parameter is desired at this position in an interop call.
+  
+  Should only be used in CLR interop code.  Throws an exception otherwise."
+  (throw (ArgumentException. "outparam not used at top-level in an interop call")))  
+  

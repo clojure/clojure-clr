@@ -12,6 +12,8 @@
  *   Author: David Miller
  **/
 
+extern alias MSC;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,13 +32,72 @@ using System.Dynamic;
 using Microsoft.Scripting.Actions.Calls;
 using Microsoft.Scripting.Actions;
 using Microsoft.Scripting.Runtime;
+using System.Runtime.CompilerServices;
 
 namespace clojure.lang.CljCompiler.Ast
 {
+    enum ParameterType
+    {
+        Standard,
+        Ref,
+        Out
+    }
+
     abstract class HostExpr : Expr, MaybePrimitiveExpr
     {
+        #region Symbols
+
+        public static readonly Symbol REFPARAM = Symbol.create("refparam");
+        public static readonly Symbol OUTPARAM = Symbol.create("outparam");
+
+        #endregion
+
+        #region  Argument type
+
+        internal class HostArg
+        {
+            #region Data
+
+            readonly ParameterType _paramType;
+
+            public ParameterType ParamType
+            {
+                get { return _paramType; }
+            }
+
+            readonly Expr _argExpr;
+
+            public Expr ArgExpr
+            {
+                get { return _argExpr; }
+            }
+
+            readonly LocalBinding _localBinding;
+
+            public LocalBinding LocalBinding
+            {
+                get { return _localBinding; }
+            }
+
+            #endregion
+
+            #region C-tors
+
+            public HostArg(ParameterType paramType, Expr argExpr, LocalBinding lb)
+            {
+                _paramType = paramType;
+                _argExpr = argExpr;
+                _localBinding = lb;
+            }
+
+            #endregion
+
+        }
+
+        #endregion
+
         #region Parsing
-        
+
         public sealed class Parser : IParser
         {
             public Expr Parse(object frm, bool isRecurContext)
@@ -89,7 +150,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if ((pinfo = Reflector.GetProperty(t, sym.Name, true)) != null)
                             return new StaticPropertyExpr(source, spanMap, tag, t, fieldName, pinfo);
                         if ((minfo = Reflector.GetArityZeroMethod(t, fieldName, true)) != null)
-                            return new StaticMethodExpr(source, spanMap, tag, t, fieldName, PersistentVector.EMPTY);
+                            return new StaticMethodExpr(source, spanMap, tag, t, fieldName, new List<HostArg>());
                         throw new MissingMemberException(t.Name, fieldName);
                     }
                     else if (instance != null && instance.HasClrType && instance.ClrType != null)
@@ -100,7 +161,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if ((pinfo = Reflector.GetProperty(instanceType,sym.Name,false)) != null)
                             return new InstancePropertyExpr(source, spanMap, tag, instance, fieldName, pinfo);
                         if ((minfo = Reflector.GetArityZeroMethod(instanceType, fieldName, false)) != null)
-                            return new InstanceMethodExpr(source, spanMap, tag, instance, fieldName, PersistentVector.EMPTY);
+                            return new InstanceMethodExpr(source, spanMap, tag, instance, fieldName, new List<HostArg>());
                         return new InstanceZeroArityCallExpr(source, spanMap, tag, instance, fieldName);
                     }
                     else
@@ -123,10 +184,42 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new ArgumentException("Malformed member exception");
 
                 string methodName = ((Symbol)RT.first(call)).Name;
-                IPersistentVector args = PersistentVector.EMPTY;
+
+
+                List<HostArg> args = new List<HostArg>();
 
                 for (ISeq s = RT.next(call); s != null; s = s.next())
-                    args = args.cons(Compiler.GenerateAST(s.first(),false));
+                {
+                    object arg = s.first();
+
+                    ParameterType paramType = ParameterType.Standard;
+                    LocalBinding lb = null;
+
+                    if (arg is ISeq)
+                    {
+                        Symbol op = RT.first(arg) as Symbol;
+                        if (op != null && (op.Equals(OUTPARAM) || op.Equals(REFPARAM)))
+                        {
+                            if (RT.Length((ISeq)arg) != 2)
+                                throw new ArgumentException("Wrong number of arguments to {0}", ((Symbol)op).Name);
+
+                            object localArg = RT.second(arg);
+                            if (!(localArg is Symbol) || (lb = Compiler.ReferenceLocal((Symbol)localArg)) == null)
+                                throw new ArgumentException("Argument to {0} must be a local variable.", ((Symbol)op).Name);
+
+                            if ( op.Equals(OUTPARAM) )
+                                paramType = ParameterType.Out;
+                            else
+                                paramType = ParameterType.Ref;
+
+                            arg = localArg;
+                        }
+                    }
+
+                    Expr expr = Compiler.GenerateAST(arg, false);
+
+                    args.Add(new HostArg(paramType,expr,lb));
+                }
 
                 return t != null
                     ? (MethodExpr)(new StaticMethodExpr(source, spanMap, tag, t, methodName, args))
@@ -144,23 +237,23 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Reflection helpers
 
-        protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, IPersistentVector args, string methodName)
+        protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, List<HostArg> args, string methodName)
         {
             MethodInfo method = GetMatchingMethodAux(targetType, args, methodName, true);
             MaybeReflectionWarn(spanMap, method, methodName);
             return method;
         }
 
-        protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, IPersistentVector args, string methodName)
+        protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, List<HostArg> args, string methodName)
         {
             MethodInfo method = target.HasClrType ? GetMatchingMethodAux(target.ClrType, args, methodName, false) : null;
             MaybeReflectionWarn(spanMap, method, methodName);
             return method;
         }
 
-        private static MethodInfo GetMatchingMethodAux(Type targetType, IPersistentVector args, string methodName, bool isStatic)
+        private static MethodInfo GetMatchingMethodAux(Type targetType, List<HostArg> args, string methodName, bool isStatic)
         {
-            int argCount = args.count();
+            int argCount = args.Count;
 
             List<MethodBase> methods = new List<MethodBase>();
             foreach (MethodInfo mi in HostExpr.GetMethods(targetType, argCount, methodName, isStatic))
@@ -173,10 +266,25 @@ namespace clojure.lang.CljCompiler.Ast
             if (!isStatic)
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(targetType), BindingRestrictions.Empty));
 
-            for (int i = 0; i < argCount; i++)
+            foreach (HostArg ha in args)
             {
-                Expr e = (Expr)args.nth(i);
-                Type t = e.HasClrType ? (e.ClrType ?? typeof(object)) : typeof(Object);
+                Expr e = ha.ArgExpr;
+                Type argType = e.HasClrType ? (e.ClrType ?? typeof(object)) : typeof(Object);
+
+                Type t;
+
+                switch (ha.ParamType)
+                {
+                    case ParameterType.Ref:
+                    case ParameterType.Out:
+                        t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+                        break;
+                    case ParameterType.Standard:
+                        t = argType;
+                        break;
+                    default:
+                        throw Util.UnreachableCode();
+                }
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(t), BindingRestrictions.Empty));
             }
 
@@ -294,11 +402,11 @@ namespace clojure.lang.CljCompiler.Ast
             return matchIndex;
         }
 
-        internal static Expression[] GenTypedArgs(GenContext context, ParameterInfo[] parms, IPersistentVector args)
+        internal static Expression[] GenTypedArgs(GenContext context, ParameterInfo[] parms, List<HostArg> args)
         {
             Expression[] exprs = new Expression[parms.Length];
             for (int i = 0; i < parms.Length; i++)
-                exprs[i] = GenTypedArg(context,parms[i].ParameterType, (Expr)args.nth(i));
+                exprs[i] = GenTypedArg(context,parms[i].ParameterType, args[i].ArgExpr);
             return exprs;
         }
 

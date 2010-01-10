@@ -35,24 +35,21 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Type _type;
-        readonly string _methodName;
-        readonly IPersistentVector _args;
-        readonly MethodInfo _method;
-        readonly string _source;
-        readonly IPersistentMap _spanMap;
-        readonly Symbol _tag;
+        //readonly string _methodName;
+        //readonly List<HostArg> _args;
+        //readonly MethodInfo _method;
+        //readonly string _source;
+        //readonly IPersistentMap _spanMap;
+        //readonly Symbol _tag;
+
         #endregion
 
         #region Ctors
 
-        public StaticMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string methodName, IPersistentVector args)
+        public StaticMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string methodName, List<HostArg> args)
+            : base(source,spanMap,tag,methodName,args)
         {
-            _source = source;
-            _spanMap = spanMap;
             _type = type;
-            _methodName = methodName;
-            _args = args;
-            _tag = tag;
 
             _method  = GetMatchingMethod(spanMap, _type, _args, _methodName);
         }
@@ -75,37 +72,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        protected override bool IsStaticCall
         {
-            Expression call;
+            get { return true; }
+        }
 
-            if (_method != null)
-            {
-                call = GenDlrForMethod(context);
-            }
-            else
-            {
-                int argCount = _args.count();
-                Expression[] exprs = new Expression[argCount + 1];
-
-                Expression target = Expression.Constant(_type, typeof(Type));
-                exprs[0] = target;
-                for (int i = 0; i < _args.count(); i++)
-                    exprs[i + 1] = ((Expr)_args.nth(i)).GenDlr(context); 
-                
-                Type returnType = HasClrType ? ClrType : typeof(object);
-
-                InvokeMemberBinder binder = new DefaultInvokeMemberBinder(_methodName, exprs.Length, true);
-                DynamicExpression dyn = Expression.Dynamic(binder, returnType, exprs);
-
-                if (context.Mode == CompilerMode.File)
-                    call = context.DynInitHelper.ReduceDyn(dyn);
-                else
-                    call = dyn;
-            }
-
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
-            return call;
+        protected override Expression GenTargetExpression(GenContext context)
+        {
+            return Expression.Constant(_type, typeof(Type));
         }
 
         public override Expression GenDlrUnboxed(GenContext context)
@@ -120,7 +94,7 @@ namespace clojure.lang.CljCompiler.Ast
                 throw new InvalidOperationException("Unboxed emit of unknown member.");
         }
 
-        private Expression GenDlrForMethod(GenContext context)
+        protected override Expression GenDlrForMethod(GenContext context)
         {
             Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
             return AstUtils.ComplexCallHelper(_method, args);

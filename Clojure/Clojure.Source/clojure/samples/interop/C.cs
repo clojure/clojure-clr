@@ -14,17 +14,17 @@ namespace dm.interop
         static public int m1s = 110;
 
         // Testing overloads
-        public void m2() { Console.WriteLine(); }
-        public void m2(int v) { Console.WriteLine(v); }
-        public void m2(double v) { Console.WriteLine(v); }
-        public void m2(object v) { Console.WriteLine(v); }
+        public void m2() { Console.WriteLine("m2()"); }
+        public void m2(int v) { Console.WriteLine("m2(int) => {0}",v); }
+        public void m2(double v) { Console.WriteLine("m2(double) => {0}", v); }
+        public void m2(object v) { Console.WriteLine("m2(object) => {0}", v); }
         public void m2(string format, object arg0) { Console.WriteLine(format, arg0); }
         public void m2(string format, object arg0, object arg1) { Console.WriteLine(format, arg0, arg1); }
         public void m2(string format, params object[] args) { Console.WriteLine(format, args); }
 
         // Testing ref/out resolving
         public int m3(int x) { return x; }
-        public int m3(ref int x) { x = x + 1; return x; }
+        public int m3(ref int x) { x = x + 1; return x+20; }
 
 
         // Testing non-resolving of simple arg
