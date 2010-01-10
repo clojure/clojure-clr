@@ -26,6 +26,10 @@ using Microsoft.Scripting;
 
 using clojure.runtime;
 using System.IO;
+using System.Dynamic;
+using Microsoft.Scripting.Actions.Calls;
+using Microsoft.Scripting.Actions;
+using Microsoft.Scripting.Runtime;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -140,7 +144,54 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Reflection helpers
 
-        private static List<MethodInfo> GetMethods(Type targetType, int arity,  string methodName, bool getStatics)
+        protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, IPersistentVector args, string methodName)
+        {
+            MethodInfo method = GetMatchingMethodAux(targetType, args, methodName, true);
+            MaybeReflectionWarn(spanMap, method, methodName);
+            return method;
+        }
+
+        protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, IPersistentVector args, string methodName)
+        {
+            MethodInfo method = target.HasClrType ? GetMatchingMethodAux(target.ClrType, args, methodName, false) : null;
+            MaybeReflectionWarn(spanMap, method, methodName);
+            return method;
+        }
+
+        private static MethodInfo GetMatchingMethodAux(Type targetType, IPersistentVector args, string methodName, bool isStatic)
+        {
+            int argCount = args.count();
+
+            List<MethodBase> methods = new List<MethodBase>();
+            foreach (MethodInfo mi in HostExpr.GetMethods(targetType, argCount, methodName, isStatic))
+                methods.Add(mi);
+
+            if (methods.Count == 0)
+                return null;
+
+            IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(argCount + (isStatic ? 0 : 1));
+            if (!isStatic)
+                argsPlus.Add(new DynamicMetaObject(Expression.Default(targetType), BindingRestrictions.Empty));
+
+            for (int i = 0; i < argCount; i++)
+            {
+                Expr e = (Expr)args.nth(i);
+                Type t = e.HasClrType ? (e.ClrType ?? typeof(object)) : typeof(Object);
+                argsPlus.Add(new DynamicMetaObject(Expression.Default(t), BindingRestrictions.Empty));
+            }
+
+            OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), isStatic ? CallTypes.None : CallTypes.ImplicitInstance);
+
+            BindingTarget bt = res.ResolveOverload(methodName, methods, NarrowingLevel.None, NarrowingLevel.All);
+            if (bt.Success)
+                return bt.Method as MethodInfo;
+
+            return null;
+        }
+        
+
+        private static List<MethodInfo> GetMethods(Type targetType, int arity, string methodName, bool getStatics)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
             flags |= getStatics ? BindingFlags.Static : BindingFlags.Instance;
@@ -181,26 +232,6 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, IPersistentVector args, string methodName)
-        {
-            // MethodInfo method = GetMatchingMethodAux(targetType, args, methodName, true);
-            MethodInfo method = null;
-
-            MaybeReflectionWarn(spanMap, method, methodName);
-
-            return method;
-        }
-
-        protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, IPersistentVector args, string methodName)
-        {
-            //MethodInfo method = target.HasClrType ? GetMatchingMethodAux(target.ClrType, args, methodName, false) : null;
-            MethodInfo method = null;
-
-            MaybeReflectionWarn(spanMap, method, methodName);
-
-            return method;
-        }
-
         private static void MaybeReflectionWarn(IPersistentMap spanMap, MethodInfo method, string methodName)
         {
             if ( method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()) )
@@ -208,40 +239,6 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.SOURCE_PATH.deref(), spanMap == null ? (int)spanMap.valAt(RT.START_LINE_KEY, 0) : 0, methodName));
         }
 
-        private static MethodInfo GetMatchingMethodAux(Type targetType, IPersistentVector args, string methodName, bool getStatics)
-        {
-            MethodInfo method = null;
-
-            List<MethodInfo> methods = HostExpr.GetMethods(targetType, args.count(), methodName, getStatics);
-
-            if (methods.Count == 0)
-                method = null;
-            else
-            {
-
-                int index = 0;
-                if (methods.Count > 1)
-                {
-                    List<ParameterInfo[]> parms = new List<ParameterInfo[]>(methods.Count);
-                    List<Type> rets = new List<Type>(methods.Count);
-
-                    foreach (MethodInfo mi in methods)
-                    {
-                        parms.Add(mi.GetParameters());
-                        rets.Add(mi.ReturnType);
-                    }
-                    index = GetMatchingParams(methodName, parms, args, rets);
-                }
-                method = (index >= 0 ? methods[index] : null);
-            }
-
-            return method;
-        }
-
-
-
- 
- 
         internal static int GetMatchingParams(string methodName, List<ParameterInfo[]> parmlists, IPersistentVector argexprs, List<Type> rets)
         {
             // Assume matching lengths

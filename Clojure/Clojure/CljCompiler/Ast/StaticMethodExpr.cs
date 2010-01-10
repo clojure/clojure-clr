@@ -77,70 +77,54 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            Expression[] exprs = new Expression[_args.count() + 1];
-            exprs[0] = Expression.Constant(_type, typeof(Type));
+            Expression call;
 
-            for (int i = 0; i < _args.count(); i++)
-                exprs[i + 1] = ((Expr)_args.nth(i)).GenDlr(context);
+            if (_method != null)
+            {
+                call = GenDlrForMethod(context);
+            }
+            else
+            {
+                int argCount = _args.count();
+                Expression[] exprs = new Expression[argCount + 1];
 
-            Type returnType = HasClrType ? ClrType : typeof(object);
+                Expression target = Expression.Constant(_type, typeof(Type));
+                exprs[0] = target;
+                for (int i = 0; i < _args.count(); i++)
+                    exprs[i + 1] = ((Expr)_args.nth(i)).GenDlr(context); 
+                
+                Type returnType = HasClrType ? ClrType : typeof(object);
 
-            InvokeMemberBinder binder = new DefaultInvokeMemberBinder(_methodName, exprs.Length,true);
-            DynamicExpression dyn = Expression.Dynamic(binder, returnType, exprs);
+                InvokeMemberBinder binder = new DefaultInvokeMemberBinder(_methodName, exprs.Length, true);
+                DynamicExpression dyn = Expression.Dynamic(binder, returnType, exprs);
 
-            Expression call = dyn;
-
-            if (context.Mode == CompilerMode.File)
-                call = context.DynInitHelper.ReduceDyn(dyn);
+                if (context.Mode == CompilerMode.File)
+                    call = context.DynInitHelper.ReduceDyn(dyn);
+                else
+                    call = dyn;
+            }
 
             call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
         }
 
-
-        //public override Expression GenDlr(GenContext context)
-        //{
-        //    Expression call;
-        //    if (_method != null)
-        //        call = Compiler.MaybeBox(GenDlrForMethod(context));
-        //    else
-        //        call = GenDlrViaReflection(context);
-
-        //    call = Compiler.MaybeAddDebugInfo(call, _spanMap);
-        //    return call;
-        //}
-
         public override Expression GenDlrUnboxed(GenContext context)
         {
             if (_method != null)
-                return GenDlrForMethod(context);
+            {
+                Expression call = GenDlrForMethod(context);
+                call = Compiler.MaybeAddDebugInfo(call, _spanMap);
+                return call;
+            }
             else
                 throw new InvalidOperationException("Unboxed emit of unknown member.");
         }
 
-
         private Expression GenDlrForMethod(GenContext context)
         {
             Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
-
-            return AstUtils.SimpleCallHelper(_method, args);
+            return AstUtils.ComplexCallHelper(_method, args);
         }
-
-
-        private Expression GenDlrViaReflection(GenContext context)
-        {
-            Expression[] parms = new Expression[_args.count()];
-            for ( int i=0; i<_args.count(); i++ )
-                parms[i] = Compiler.MaybeBox(((Expr)_args.nth(i)).GenDlr(context));
-
-            Expression[] moreArgs = new Expression[3];
-            moreArgs[0] = Expression.Constant(_methodName);
-            moreArgs[1] = Expression.Constant(_type,typeof(Type));
-            moreArgs[2] = Expression.NewArrayInit(typeof(object), parms);
-
-            return Expression.Call(Compiler.Method_Reflector_CallStaticMethod, moreArgs);
-        }
-
 
         #endregion
     }

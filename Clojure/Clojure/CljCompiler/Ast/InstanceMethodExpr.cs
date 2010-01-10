@@ -25,6 +25,9 @@ using System.Linq.Expressions;
 using AstUtils = Microsoft.Scripting.Ast.Utils;
 using Microsoft.Scripting;
 using System.Dynamic;
+using Microsoft.Scripting.Actions.Calls;
+using Microsoft.Scripting.Actions;
+using Microsoft.Scripting.Runtime;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -79,38 +82,44 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            Expression[] exprs = new Expression[_args.count() + 1];
-            exprs[0] = _target.GenDlr(context);
+            Expression call;
 
-            for (int i = 0; i < _args.count(); i++)
-                exprs[i+1] = ((Expr)_args.nth(i)).GenDlr(context);
+            if (_method != null)
+                call = GenDlrForMethod(context);
+            else
+            {
+                int argCount = _args.count();
 
-            Type returnType = HasClrType ? ClrType : typeof(object);
+                Expression target = _target.GenDlr(context);
 
-            InvokeMemberBinder binder = new DefaultInvokeMemberBinder(_methodName, exprs.Length,false);
-            DynamicExpression dyn = Expression.Dynamic(binder, returnType, exprs);
+                Expression[] exprs = new Expression[argCount+1];
+                exprs[0] = target;
+                for (int i = 0; i < argCount; i++)
+                    exprs[i+1] = ((Expr)_args.nth(i)).GenDlr(context);
 
-            Expression call = dyn;
+                Type returnType = HasClrType ? ClrType : typeof(object);
 
-            if (context.Mode == CompilerMode.File)
-                call = context.DynInitHelper.ReduceDyn(dyn);
+                InvokeMemberBinder binder = new DefaultInvokeMemberBinder(_methodName, exprs.Length, false);
+                DynamicExpression dyn = Expression.Dynamic(binder, returnType, exprs);
+
+                if (context.Mode == CompilerMode.File)
+                    call = context.DynInitHelper.ReduceDyn(dyn);
+                else
+                    call = dyn;
+            }
 
             call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
         }
 
-        //public override Expression GenDlr(GenContext context)
-        //{
-        //    if (_method != null)
-        //        return Compiler.MaybeBox(GenDlrForMethod(context));
-        //    else
-        //        return GenDlrViaReflection(context);
-        //}
-
         public override Expression GenDlrUnboxed(GenContext context)
         {
             if (_method != null)
-                return GenDlrForMethod(context);
+            {
+                Expression call = GenDlrForMethod(context);
+                call = Compiler.MaybeAddDebugInfo(call, _spanMap);
+                return call;
+            }
             else
                 throw new InvalidOperationException("Unboxed emit of unknown member.");
         }
@@ -120,25 +129,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression target = _target.GenDlr(context);
             Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
 
-            Expression call = AstUtils.SimpleCallHelper(target,_method, args);
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
-            return call;
-        }
-
-        private Expression GenDlrViaReflection(GenContext context)
-        {
-            Expression[] parms = new Expression[_args.count()];
-            for (int i = 0; i < _args.count(); i++)
-                parms[i] = Compiler.MaybeBox(((Expr)_args.nth(i)).GenDlr(context));
-
-            Expression[] moreArgs = new Expression[3];
-            moreArgs[0] = Expression.Constant(_methodName);
-            moreArgs[1] = _target.GenDlr(context);
-            moreArgs[2] = Expression.NewArrayInit(typeof(object), parms);
-
-            Expression call = Expression.Call(Compiler.Method_Reflector_CallInstanceMethod, moreArgs);
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
-            return call;
+            return AstUtils.ComplexCallHelper(target,_method, args);
         }
 
         #endregion

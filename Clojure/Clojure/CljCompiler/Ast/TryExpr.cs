@@ -195,6 +195,8 @@ namespace clojure.lang.CljCompiler.Ast
             // Wrap the basic body, a Comma, in a return to a label
             //LabelTarget target = Expression.Label(basicBody.Type, "ret_label");
             //Expression tryBody = Expression.Return(target, basicBody);
+            if (basicBody.Type == typeof(void))
+                basicBody = Expression.Block(basicBody, Expression.Default(typeof(object)));
             Expression tryBody = Expression.Convert(basicBody,typeof(object));
 
             CatchBlock[] catches = new CatchBlock[_catchExprs.count()];
