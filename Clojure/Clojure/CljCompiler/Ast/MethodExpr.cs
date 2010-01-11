@@ -146,7 +146,7 @@ namespace clojure.lang.CljCompiler.Ast
                                     sbParam,
                                     Expression.New(
                                         sbType.GetConstructor(cflags, null, new Type[] { argType }, null),
-                                        ha.LocalBinding.ParamExpression));
+                                        Expression.Convert(ha.LocalBinding.ParamExpression,argType)));
                             Expression sbXfer = Expression.Assign(ha.LocalBinding.ParamExpression, Expression.Field(sbParam, "Value"));
                             sbParams.Add(sbParam);
                             sbInits.Add(sbInit1);

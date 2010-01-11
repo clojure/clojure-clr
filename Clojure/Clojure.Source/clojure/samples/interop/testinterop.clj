@@ -120,3 +120,7 @@
      
 ; (make5a "help" 12)  => [#<C5 Constructed with String+int-by-ref c-tor> 32]
 ; (make5a 20 30) =>  [#<C5 Constructed with int+int-by-ref c-tor> 60]
+
+(defn f6 [c a]
+  [(.m6 c (refparam a)) a])
+  

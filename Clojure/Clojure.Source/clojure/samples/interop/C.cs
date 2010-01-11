@@ -34,7 +34,9 @@ namespace dm.interop
         public string m5(string x, ref int y) { y = y + 10;  return x + y.ToString(); }
         public int m5(int x, ref int y) { y = y + 100; return x+y; }
 
-
+        // Testing ambiguity in the ref
+        public string m6(ref int x) { x += 111; return x.ToString(); }
+        public string m6(ref string x) { x += "abc"; return x; } 
     }
 
     public class C2
