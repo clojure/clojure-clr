@@ -92,4 +92,31 @@
 ; (f3r c1 12) => 13
 ; (f3n c1 12) => 12
 
-  
+; Testing some ambiguity with refs
+(defn f5 [c x y]
+  (let [m (int y)
+        v (.m5 c x (refparam m))]
+    [v m]))
+    
+; (f5 c1 "help" 12) => ["help22" 22]
+; (f5 c1 15 20) => [135 120]
+
+; Try the following to test c-tor overloads
+; (dm.interop.C5.)
+; (dm.interop.C5. 7)
+; (dm.interop.C5. "thing")
+; (let [x (int 12)] (dm.interop.C5. (refparam x)) x)
+; 
+
+; Test dynamic overload resolution
+(defn make5 [x] (dm.interop.C5. x))
+
+
+; Test overload resolution with ref param
+(defn make5a [x y] 
+   (let [n (int y)
+         v (dm.interop.C5. x (refparam n))]
+     [v n]))
+     
+; (make5a "help" 12)  => [#<C5 Constructed with String+int-by-ref c-tor> 32]
+; (make5a 20 30) =>  [#<C5 Constructed with int+int-by-ref c-tor> 60]

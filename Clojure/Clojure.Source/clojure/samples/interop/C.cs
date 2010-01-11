@@ -30,6 +30,9 @@ namespace dm.interop
         // Testing non-resolving of simple arg
         public int m4(ref int v) { return v + 1; }
 
+        // Testing some ambiguity
+        public string m5(string x, ref int y) { y = y + 10;  return x + y.ToString(); }
+        public int m5(int x, ref int y) { y = y + 100; return x+y; }
 
 
     }
@@ -51,6 +54,60 @@ namespace dm.interop
     // All attempts at resolving members should fail here.
     public class C4
     {
+    }
+
+    // For playing with c-tors
+    public class C5
+    {
+        string _msg;
+        object _data;
+
+        public override string ToString()
+        {
+            return String.Format("Constructed with {0}", _msg);
+        }
+
+        public C5()
+        {
+            _msg = "Default c-tor";
+            _data = null;
+        }
+
+        public C5(int x)
+        {
+            _msg = "Int32 c-ctor";
+            _data = x;
+        }
+
+        public C5(string x)
+        {
+            _msg = "String c-ctor";
+            _data = x;
+        }
+
+        public C5(ref int x)
+        {
+            _msg = "Int32-by-ref c-ctor";
+            _data = x;
+            x = x + 1;
+        }
+
+        // Trying for some ambiguity in calls with ref parameters
+        public C5(string x, ref int y)
+        {
+            _msg = "String+int-by-ref c-tor";
+            _data = x;
+            y = y + 20;
+        }
+
+        // Trying for some ambiguity in calls with ref parameters
+        public C5(int x, ref int y)
+        {
+            _msg = "int+int-by-ref c-tor";
+            _data = x;
+            y = y + 30;
+        }
+
     }
 
 }

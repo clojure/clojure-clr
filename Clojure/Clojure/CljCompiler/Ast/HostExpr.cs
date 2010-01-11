@@ -36,12 +36,58 @@ using System.Runtime.CompilerServices;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    enum ParameterType
+
+
+    internal class HostArg
     {
-        Standard,
-        Ref,
-        Out
+        #region Enum
+
+        public enum ParameterType
+        {
+            Standard,
+            Ref,
+            Out
+        }
+
+        #endregion
+
+        #region Data
+
+        readonly ParameterType _paramType;
+
+        public ParameterType ParamType
+        {
+            get { return _paramType; }
+        }
+
+        readonly Expr _argExpr;
+
+        public Expr ArgExpr
+        {
+            get { return _argExpr; }
+        }
+
+        readonly LocalBinding _localBinding;
+
+        public LocalBinding LocalBinding
+        {
+            get { return _localBinding; }
+        }
+
+        #endregion
+
+        #region C-tors
+
+        public HostArg(ParameterType paramType, Expr argExpr, LocalBinding lb)
+        {
+            _paramType = paramType;
+            _argExpr = argExpr;
+            _localBinding = lb;
+        }
+
+        #endregion
     }
+
 
     abstract class HostExpr : Expr, MaybePrimitiveExpr
     {
@@ -49,50 +95,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static readonly Symbol REFPARAM = Symbol.create("refparam");
         public static readonly Symbol OUTPARAM = Symbol.create("outparam");
-
-        #endregion
-
-        #region  Argument type
-
-        internal class HostArg
-        {
-            #region Data
-
-            readonly ParameterType _paramType;
-
-            public ParameterType ParamType
-            {
-                get { return _paramType; }
-            }
-
-            readonly Expr _argExpr;
-
-            public Expr ArgExpr
-            {
-                get { return _argExpr; }
-            }
-
-            readonly LocalBinding _localBinding;
-
-            public LocalBinding LocalBinding
-            {
-                get { return _localBinding; }
-            }
-
-            #endregion
-
-            #region C-tors
-
-            public HostArg(ParameterType paramType, Expr argExpr, LocalBinding lb)
-            {
-                _paramType = paramType;
-                _argExpr = argExpr;
-                _localBinding = lb;
-            }
-
-            #endregion
-
-        }
 
         #endregion
 
@@ -185,46 +187,54 @@ namespace clojure.lang.CljCompiler.Ast
 
                 string methodName = ((Symbol)RT.first(call)).Name;
 
-
-                List<HostArg> args = new List<HostArg>();
-
-                for (ISeq s = RT.next(call); s != null; s = s.next())
-                {
-                    object arg = s.first();
-
-                    ParameterType paramType = ParameterType.Standard;
-                    LocalBinding lb = null;
-
-                    if (arg is ISeq)
-                    {
-                        Symbol op = RT.first(arg) as Symbol;
-                        if (op != null && (op.Equals(OUTPARAM) || op.Equals(REFPARAM)))
-                        {
-                            if (RT.Length((ISeq)arg) != 2)
-                                throw new ArgumentException("Wrong number of arguments to {0}", ((Symbol)op).Name);
-
-                            object localArg = RT.second(arg);
-                            if (!(localArg is Symbol) || (lb = Compiler.ReferenceLocal((Symbol)localArg)) == null)
-                                throw new ArgumentException("Argument to {0} must be a local variable.", ((Symbol)op).Name);
-
-                            if ( op.Equals(OUTPARAM) )
-                                paramType = ParameterType.Out;
-                            else
-                                paramType = ParameterType.Ref;
-
-                            arg = localArg;
-                        }
-                    }
-
-                    Expr expr = Compiler.GenerateAST(arg, false);
-
-                    args.Add(new HostArg(paramType,expr,lb));
-                }
+                List<HostArg> args = ParseArgs(RT.next(call));
 
                 return t != null
                     ? (MethodExpr)(new StaticMethodExpr(source, spanMap, tag, t, methodName, args))
                     : (MethodExpr)(new InstanceMethodExpr(source, spanMap, tag, instance, methodName, args));
             }
+        }
+
+
+        internal static List<HostArg> ParseArgs(ISeq argSeq)
+        {
+            List<HostArg> args = new List<HostArg>();
+
+            for (ISeq s = argSeq; s != null; s = s.next())
+            {
+                object arg = s.first();
+
+                HostArg.ParameterType paramType = HostArg.ParameterType.Standard;
+                LocalBinding lb = null;
+
+                if (arg is ISeq)
+                {
+                    Symbol op = RT.first(arg) as Symbol;
+                    if (op != null && (op.Equals(OUTPARAM) || op.Equals(REFPARAM)))
+                    {
+                        if (RT.Length((ISeq)arg) != 2)
+                            throw new ArgumentException("Wrong number of arguments to {0}", ((Symbol)op).Name);
+
+                        object localArg = RT.second(arg);
+                        if (!(localArg is Symbol) || (lb = Compiler.ReferenceLocal((Symbol)localArg)) == null)
+                            throw new ArgumentException("Argument to {0} must be a local variable.", ((Symbol)op).Name);
+
+                        if (op.Equals(OUTPARAM))
+                            paramType = HostArg.ParameterType.Out;
+                        else
+                            paramType = HostArg.ParameterType.Ref;
+
+                        arg = localArg;
+                    }
+                }
+
+                Expr expr = Compiler.GenerateAST(arg, false);
+
+                args.Add(new HostArg(paramType, expr, lb));
+            }
+
+            return args;
+
         }
 
         #endregion
@@ -239,25 +249,40 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, List<HostArg> args, string methodName)
         {
-            MethodInfo method = GetMatchingMethodAux(targetType, args, methodName, true);
+            List<MethodBase> methods = HostExpr.GetMethods(targetType, args.Count, methodName, true);
+
+            MethodBase method = GetMatchingMethodAux(targetType, args, methods, methodName, true);
             MaybeReflectionWarn(spanMap, method, methodName);
-            return method;
+            return (MethodInfo) method;
         }
 
         protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, List<HostArg> args, string methodName)
         {
-            MethodInfo method = target.HasClrType ? GetMatchingMethodAux(target.ClrType, args, methodName, false) : null;
+            MethodBase method = null;
+            if (target.HasClrType)
+            {
+                Type targetType = target.ClrType;
+                List<MethodBase> methods = HostExpr.GetMethods(targetType, args.Count, methodName, false);
+                method = GetMatchingMethodAux(targetType, args, methods, methodName, false);
+            }
+
             MaybeReflectionWarn(spanMap, method, methodName);
-            return method;
+            return (MethodInfo)method;
         }
 
-        private static MethodInfo GetMatchingMethodAux(Type targetType, List<HostArg> args, string methodName, bool isStatic)
+        internal static ConstructorInfo GetMatchingConstructor(IPersistentMap spanMap, Type targetType, List<HostArg> args, out int ctorCount)
+        {
+            List<MethodBase> methods = HostExpr.GetConstructors(targetType, args.Count);
+            ctorCount = methods.Count;
+
+            MethodBase method = GetMatchingMethodAux(targetType, args, methods, "_ctor", true);
+            // Because no-arg c-tors for value types are handled elsewhere, we defer the warning to there.
+            return (ConstructorInfo)method;
+        }
+
+        private static MethodBase GetMatchingMethodAux(Type targetType, List<HostArg> args, List<MethodBase> methods, string methodName, bool isStatic)
         {
             int argCount = args.Count;
-
-            List<MethodBase> methods = new List<MethodBase>();
-            foreach (MethodInfo mi in HostExpr.GetMethods(targetType, argCount, methodName, isStatic))
-                methods.Add(mi);
 
             if (methods.Count == 0)
                 return null;
@@ -275,11 +300,11 @@ namespace clojure.lang.CljCompiler.Ast
 
                 switch (ha.ParamType)
                 {
-                    case ParameterType.Ref:
-                    case ParameterType.Out:
+                    case HostArg.ParameterType.Ref:
+                    case HostArg.ParameterType.Out:
                         t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
                         break;
-                    case ParameterType.Standard:
+                    case HostArg.ParameterType.Standard:
                         t = argType;
                         break;
                     default:
@@ -293,32 +318,47 @@ namespace clojure.lang.CljCompiler.Ast
 
             BindingTarget bt = res.ResolveOverload(methodName, methods, NarrowingLevel.None, NarrowingLevel.All);
             if (bt.Success)
-                return bt.Method as MethodInfo;
+                return bt.Method;
 
             return null;
         }
-        
 
-        private static List<MethodInfo> GetMethods(Type targetType, int arity, string methodName, bool getStatics)
+
+        private static List<MethodBase> GetConstructors(Type targetType, int arity)
+        {
+            IEnumerable<ConstructorInfo> cinfos
+                = targetType.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Where(info =>  info.GetParameters().Length == arity);
+
+            List<MethodBase> infos = new List<MethodBase>();
+
+            foreach (ConstructorInfo info in cinfos)
+                infos.Add(info);
+
+            return infos;
+        }
+
+        private static List<MethodBase> GetMethods(Type targetType, int arity, string methodName, bool getStatics)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
             flags |= getStatics ? BindingFlags.Static : BindingFlags.Instance;
 
-            List<MethodInfo> infos;
+            List<MethodBase> infos;
 
             if (targetType.IsInterface && ! getStatics)
                 infos = GetInterfaceMethods(targetType,arity,methodName);
             else
             {
-                IEnumerable<MethodInfo> einfo
+                IEnumerable<MethodInfo> einfos
                     = targetType.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
-                infos = new List<MethodInfo>(einfo);
+                infos = new List<MethodBase>();
+                foreach (MethodInfo minfo in einfos)
+                    infos.Add(minfo);
             }
 
             return infos;
         }
 
-        private static List<MethodInfo> GetInterfaceMethods(Type targetType, int arity, string methodName)
+        private static List<MethodBase> GetInterfaceMethods(Type targetType, int arity, string methodName)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod;
 
@@ -326,21 +366,22 @@ namespace clojure.lang.CljCompiler.Ast
             interfaces.Add(targetType);
             interfaces.AddRange(targetType.GetInterfaces());
 
-            List<MethodInfo> infos = new List<MethodInfo>();
+            List<MethodBase> infos = new List<MethodBase>();
 
             foreach ( Type type in interfaces )
             {
                 MethodInfo[] methods = type.GetMethods();
                 IEnumerable<MethodInfo> einfo
                      = type.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
-                infos.AddRange(einfo);
+                foreach (MethodInfo minfo in einfo)
+                    infos.Add(minfo);
             }
 
             return infos;
         }
 
 
-        private static void MaybeReflectionWarn(IPersistentMap spanMap, MethodInfo method, string methodName)
+        private static void MaybeReflectionWarn(IPersistentMap spanMap, MethodBase method, string methodName)
         {
             if ( method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()) )
                 ((TextWriter)RT.ERR.deref()).WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved.\n",

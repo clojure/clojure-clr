@@ -107,6 +107,80 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
     }
 
+    public class DefaultCreateInstanceBinder : CreateInstanceBinder, IExpressionSerializable
+    {
+        #region Data
+
+        readonly DefaultBinder _binder = new DefaultBinder();
+
+        #endregion
+
+        #region C-tors
+
+        public DefaultCreateInstanceBinder(int argCount)
+            : base(new CallInfo(argCount, DynUtils.GetArgNames(argCount)))
+        {
+        }
+
+        #endregion
+
+        #region CreateInstanceBinder methods
+
+     
+
+        public override DynamicMetaObject FallbackCreateInstance(DynamicMetaObject target, DynamicMetaObject[] args, DynamicMetaObject errorSuggestion)
+        {
+            OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            Type typeToUse = target.Value is Type ? (Type)target.Value : target.LimitType;
+
+
+            IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(args.Length);
+
+            foreach (DynamicMetaObject arg in args)
+                argsPlus.Add(arg);
+
+            DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(args.Length),  CallTypes.None);
+
+            BindingFlags flags =  BindingFlags.Public | BindingFlags.Instance;
+            IList<MethodBase> methods = new List<MethodBase>(typeToUse.GetConstructors(flags).Where<MethodBase>(x =>  x.GetParameters().Length == args.Length));
+
+            if (methods.Count > 0)
+            {
+                DynamicMetaObject dmo = _binder.CallMethod(res, methods);
+                dmo = DynUtils.MaybeBoxReturnValue(dmo);
+
+                //; Console.WriteLine(dmo.Expression.DebugView);
+                return dmo;
+            }
+
+            return errorSuggestion ??
+                new DynamicMetaObject(
+                    Expression.Throw(
+                        Expression.New(typeof(MissingMethodException).GetConstructor(new Type[] { typeof(string) }),
+                            Expression.Constant("Cannot find constructor matching args")),
+                        typeof(object)),
+                    target.Restrictions.Merge(BindingRestrictions.Combine(args)));
+        }
+
+        #endregion
+
+        #region IExpressionSerializable Members
+
+        public Expression CreateExpression()
+        {
+            return Expression.Call(typeof(DefaultCreateInstanceBinder).GetMethod("CreateMe"),
+                Expression.Constant(this.CallInfo.ArgumentCount));
+        }
+
+        public static DefaultCreateInstanceBinder CreateMe(int argCount)
+        {
+            return new DefaultCreateInstanceBinder(argCount);
+        }
+
+        #endregion
+    }
+
+
     public class DefaultInvokeMemberBinder : InvokeMemberBinder, IExpressionSerializable
     {
         #region Data
@@ -119,39 +193,14 @@ namespace clojure.lang.CljCompiler.Ast
         #region C-tors
 
         public DefaultInvokeMemberBinder(string name, int argCount, bool isStatic)
-            : base(name, false, new CallInfo(argCount, GetArgNames(argCount)))
+            : base(name, false, new CallInfo(argCount, DynUtils.GetArgNames(argCount)))
         {
             _isStatic = isStatic;
         }
 
         #endregion
 
-        #region Argument names
-
-        static Dictionary<int, string[]> _argNamesCache = new Dictionary<int, string[]>();
-
-        static string[] GetArgNames(int argCount)
-        {
-            string[] names;
-            if (!_argNamesCache.TryGetValue(argCount, out names))
-            {
-                names = CreateArgNames(argCount);
-                _argNamesCache[argCount] = names;
-            }
-            return names;
-        }
-
-        private static string[] CreateArgNames(int argCount)
-        {
-            string[] names = new string[argCount];
-            for (int i = 0; i < argCount; i++)
-                names[i] = "arg" + i.ToString();
-            return names;
-        }
-
-        #endregion
-
-        #region InvokeMemberBinder methods
+         #region InvokeMemberBinder methods
 
         public override DynamicMetaObject FallbackInvokeMember(DynamicMetaObject target, DynamicMetaObject[] args, DynamicMetaObject errorSuggestion)
         {
@@ -303,6 +352,31 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region Argument names
+
+        static Dictionary<int, string[]> _argNamesCache = new Dictionary<int, string[]>();
+
+        public static string[] GetArgNames(int argCount)
+        {
+            string[] names;
+            if (!_argNamesCache.TryGetValue(argCount, out names))
+            {
+                names = CreateArgNames(argCount);
+                _argNamesCache[argCount] = names;
+            }
+            return names;
+        }
+
+        private static string[] CreateArgNames(int argCount)
+        {
+            string[] names = new string[argCount];
+            for (int i = 0; i < argCount; i++)
+                names[i] = "arg" + i.ToString();
+            return names;
+        }
+
+        #endregion
+
         #region  Boxing support
 
         public static DynamicMetaObject MaybeBoxReturnValue(DynamicMetaObject res)
@@ -391,7 +465,6 @@ namespace clojure.lang.CljCompiler.Ast
         //}
 
         #endregion
-
     }
 
     static class StolenFromDlrCollectionExtensions

@@ -1343,8 +1343,6 @@ namespace clojure.lang
 
         #region Things to move elsewhere
 
- 
-
         internal static Type MaybePrimitiveType(Expr e)
         {
             if (e is MaybePrimitiveExpr && e.HasClrType)
@@ -1355,8 +1353,6 @@ namespace clojure.lang
             }
             return null;
         }
-
-
 
         internal static Expression GenArgArray(GenContext context, IPersistentVector args)
         {
@@ -1372,23 +1368,23 @@ namespace clojure.lang
             return argArray;
         }
 
-        internal static Expression[] GenTypedArgArray(GenContext context, ParameterInfo[] infos, IPersistentVector args)
-        {
-            Expression[] exprs = new Expression[args.count()];
+        //internal static Expression[] GenTypedArgArray(GenContext context, ParameterInfo[] infos, IPersistentVector args)
+        //{
+        //    Expression[] exprs = new Expression[args.count()];
 
-            for (int i = 0; i < infos.Length; i++)
-            {
-                Expr e = (Expr)args.nth(i);
-                // Java: this is in a try/catch, where the catch prints a stack trace
-                if (MaybePrimitiveType(e) == infos[i].ParameterType)
-                    exprs[i] = ((MaybePrimitiveExpr)e).GenDlrUnboxed(context);
-                else
-                    // Java follows this with: HostExpr.emitUnboxArg(fn, gen, parameterTypes[i]);
-                    //exprs[i] = e.GenDlr(context);
-                    exprs[i] = Expression.Convert(e.GenDlr(context), infos[i].ParameterType); ;
-            }
-            return exprs;
-        }
+        //    for (int i = 0; i < infos.Length; i++)
+        //    {
+        //        Expr e = (Expr)args.nth(i);
+        //        // Java: this is in a try/catch, where the catch prints a stack trace
+        //        if (MaybePrimitiveType(e) == infos[i].ParameterType)
+        //            exprs[i] = ((MaybePrimitiveExpr)e).GenDlrUnboxed(context);
+        //        else
+        //            // Java follows this with: HostExpr.emitUnboxArg(fn, gen, parameterTypes[i]);
+        //            //exprs[i] = e.GenDlr(context);
+        //            exprs[i] = Expression.Convert(e.GenDlr(context), infos[i].ParameterType); ;
+        //    }
+        //    return exprs;
+        //}
 
         #endregion
     }
