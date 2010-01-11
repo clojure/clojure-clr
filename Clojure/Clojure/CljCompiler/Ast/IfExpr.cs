@@ -103,7 +103,6 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr elseExpr = form.count() == 4 ? Compiler.GenerateAST(RT.fourth(form),isRecurContext) : null;
 
                 return new IfExpr((IPersistentMap)Compiler.SOURCE_SPAN.deref(), testExpr, thenExpr, elseExpr);
-                //return new IfExpr( testExpr, thenExpr, elseExpr);
             }
         }
 
@@ -128,7 +127,6 @@ namespace clojure.lang.CljCompiler.Ast
                         Expression.OrElse(
                             Expression.Equal(testVar, Expression.Constant(null)),
                             Expression.AndAlso(Expression.TypeIs(testVar, typeof(bool)), Expression.IsFalse(Expression.Unbox(testVar, typeof(bool))))));
-                //Expression.Not(Expression.AndAlso(Expression.TypeIs(testVar, typeof(bool)), Expression.IsFalse(Expression.Convert(testVar,typeof(bool))))));
                 testCode = Expression.Block(typeof(bool), new ParameterExpression[] { testVar }, assign, boolExpr);
             }
 

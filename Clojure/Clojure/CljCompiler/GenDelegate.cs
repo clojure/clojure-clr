@@ -22,7 +22,6 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-
 using clojure.lang.CljCompiler.Ast;
 
 
@@ -30,7 +29,6 @@ namespace clojure.lang
 {
     public static class GenDelegate
     {
-
         #region Data
 
         static GenContext _context = new GenContext("delegates", CompilerMode.Immediate);
@@ -75,6 +73,5 @@ namespace clojure.lang
 
 
         #endregion
-
     }
 }

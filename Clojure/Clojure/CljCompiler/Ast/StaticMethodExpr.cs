@@ -24,7 +24,6 @@ using System.Linq.Expressions;
 #endif
 using AstUtils = Microsoft.Scripting.Ast.Utils;
 using Microsoft.Scripting;
-
 using System.IO;
 using System.Dynamic;
 
@@ -35,12 +34,6 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Type _type;
-        //readonly string _methodName;
-        //readonly List<HostArg> _args;
-        //readonly MethodInfo _method;
-        //readonly string _source;
-        //readonly IPersistentMap _spanMap;
-        //readonly Symbol _tag;
 
         #endregion
 
@@ -50,7 +43,6 @@ namespace clojure.lang.CljCompiler.Ast
             : base(source,spanMap,tag,methodName,args)
         {
             _type = type;
-
             _method  = GetMatchingMethod(spanMap, _type, _args, _methodName);
         }
 

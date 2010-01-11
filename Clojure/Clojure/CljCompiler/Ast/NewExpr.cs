@@ -22,7 +22,6 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-
 using System.IO;
 using System.Dynamic;
 
@@ -127,18 +126,9 @@ namespace clojure.lang.CljCompiler.Ast
             if (_ctor != null)
                 call = GenDlrForMethod(context);
             else if (_isNoArgValueTypeCtor)
-            {
                 call = Expression.Default(_type);
-            }
             else
-            {
                 call = GenerateComplexCall(context);
-                //Expression typeExpr = Expression.Call(Compiler.Method_RT_classForName, Expression.Constant(_type.FullName));
-                //Expression args = Compiler.GenArgArray(context, _args);
-                //// Java: emitClearLocals
-
-                //call = Expression.Call(Compiler.Method_Reflector_InvokeConstructor, typeExpr, args);
-            }
 
             call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
@@ -207,13 +197,10 @@ namespace clojure.lang.CljCompiler.Ast
             // The ctor is uniquely determined.
 
             Expression[] args = HostExpr.GenTypedArgs(context, _ctor.GetParameters(), _args);
-            //return Expression.New(_ctor, args);
-
             return Utils.SimpleNewHelper(_ctor, args);
 
             // JAVA: emitClearLocals
         }
-
 
         #endregion
     }

@@ -73,7 +73,6 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenDlr(GenContext context)
         {
             Expression getTypeExpr = Expression.Call(null, Compiler.Method_RT_classForName, Expression.Constant(_c));
-            //Expression getNsExpr = Expression.Call(null, Compiler.Method_Compiler_CurrentNamespace);
             Expression getNsExpr = Expression.Property(null, Compiler.Method_Compiler_CurrentNamespace);
             return Expression.Call(getNsExpr, Compiler.Method_Namespace_importClass1, getTypeExpr);   
         }

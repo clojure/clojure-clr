@@ -20,12 +20,11 @@ using System.Linq;
 using System.Text;
 #if CLR2
 using Microsoft.Scripting.Ast;
-using System.Dynamic;
-using System.Reflection;
 #else
 using System.Linq.Expressions;
 #endif
-
+using System.Dynamic;
+using System.Reflection;
 
 namespace clojure.lang.CljCompiler.Ast
 {

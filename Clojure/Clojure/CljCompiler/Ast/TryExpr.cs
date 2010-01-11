@@ -79,7 +79,6 @@ namespace clojure.lang.CljCompiler.Ast
             _finallyExpr = finallyExpr;
             _retLocal = retLocal;
             _finallyLocal = finallyLocal;
-
         }
 
         #endregion
@@ -192,9 +191,6 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenDlr(GenContext context)
         {
             Expression basicBody = _tryExpr.GenDlr(context);
-            // Wrap the basic body, a Comma, in a return to a label
-            //LabelTarget target = Expression.Label(basicBody.Type, "ret_label");
-            //Expression tryBody = Expression.Return(target, basicBody);
             if (basicBody.Type == typeof(void))
                 basicBody = Expression.Block(basicBody, Expression.Default(typeof(object)));
             Expression tryBody = Expression.Convert(basicBody,typeof(object));
@@ -212,9 +208,6 @@ namespace clojure.lang.CljCompiler.Ast
                 ? Expression.TryCatch(tryBody, catches)
                 : Expression.TryCatchFinally(tryBody, _finallyExpr.GenDlr(context), catches);
 
-            //Expression defaultValue = Expression.Default(basicBody.Type);
-            //Expression whole = Expression.Block(tryStmt, Expression.Label(target, defaultValue));
-            //return whole;
             return tryStmt;
         }
 

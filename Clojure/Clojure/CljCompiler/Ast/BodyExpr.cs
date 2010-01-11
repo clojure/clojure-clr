@@ -95,15 +95,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             List<Expression> exprs = new List<Expression>(_exprs.count());
 
-            // In Java version, this is split off because the Context in the calls above is forced to be C.STATEMENT.
-            //for (int i = 0; i < _exprs.count() - 1; i++)
-            //{
-            //    Expr e = (Expr)_exprs.nth(i);
-            //    exprs.Add(e.GenDlr(context));
-            //}
-            //Expr last = (Expr)_exprs.nth(_exprs.count() - 1);
-            //exprs.Add(last.GenDlr(context));
-
             for (int i = 0; i < _exprs.count(); i++)
             {
                 Expr e = (Expr)_exprs.nth(i);

@@ -36,59 +36,6 @@ using System.Runtime.CompilerServices;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-
-
-    internal class HostArg
-    {
-        #region Enum
-
-        public enum ParameterType
-        {
-            Standard,
-            Ref,
-            Out
-        }
-
-        #endregion
-
-        #region Data
-
-        readonly ParameterType _paramType;
-
-        public ParameterType ParamType
-        {
-            get { return _paramType; }
-        }
-
-        readonly Expr _argExpr;
-
-        public Expr ArgExpr
-        {
-            get { return _argExpr; }
-        }
-
-        readonly LocalBinding _localBinding;
-
-        public LocalBinding LocalBinding
-        {
-            get { return _localBinding; }
-        }
-
-        #endregion
-
-        #region C-tors
-
-        public HostArg(ParameterType paramType, Expr argExpr, LocalBinding lb)
-        {
-            _paramType = paramType;
-            _argExpr = argExpr;
-            _localBinding = lb;
-        }
-
-        #endregion
-    }
-
-
     abstract class HostExpr : Expr, MaybePrimitiveExpr
     {
         #region Symbols
@@ -388,60 +335,6 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.SOURCE_PATH.deref(), spanMap != null ? (int)spanMap.valAt(RT.START_LINE_KEY, 0) : 0, methodName));
         }
 
-        internal static int GetMatchingParams(string methodName, List<ParameterInfo[]> parmlists, IPersistentVector argexprs, List<Type> rets)
-        {
-            // Assume matching lengths
-            int matchIndex = -1;
-            bool tied = false;
-            bool foundExact = false;
-
-            for (int i = 0; i < parmlists.Count; i++)
-            {
-                bool match = true;
-                ISeq aseq = argexprs.seq();
-                int exact = 0;
-                for (int p = 0; match && p < argexprs.count() && aseq != null; ++p, aseq = aseq.next())
-                {
-                    Expr arg = (Expr)aseq.first();
-                    Type atype = arg.HasClrType ? arg.ClrType : typeof(object);
-                    Type ptype = parmlists[i][p].ParameterType;
-                    if (arg.HasClrType && atype == ptype)
-                        exact++;
-                    else
-                        match = Reflector.ParamArgTypeMatch(ptype, atype);
-                }
-
-                if (exact == argexprs.count())
-                {
-                    if ( !foundExact || matchIndex == -1 || rets[matchIndex].IsAssignableFrom(rets[i]))
-                        matchIndex = i;
-                    foundExact = true;
-                }
-                else if (match && !foundExact)
-                {
-                    if (matchIndex == -1)
-                        matchIndex = i;
-                    else
-                    {
-                        if (Reflector.Subsumes(parmlists[i], parmlists[matchIndex]))
-                        {
-                            matchIndex = i;
-                            tied = false;
-                        }
-                        else if (Array.Equals(parmlists[i], parmlists[matchIndex]))
-                            if (rets[matchIndex].IsAssignableFrom(rets[i]))
-                                matchIndex = i;
-                            else if (!Reflector.Subsumes(parmlists[matchIndex], parmlists[i]))
-                                tied = true;
-                    }
-                }
-            }
-
-            if (tied)
-                throw new ArgumentException("More than one matching method found: " + methodName);
-
-            return matchIndex;
-        }
 
         internal static Expression[] GenTypedArgs(GenContext context, ParameterInfo[] parms, List<HostArg> args)
         {

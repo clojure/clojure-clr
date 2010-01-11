@@ -20,12 +20,11 @@ using System.Reflection.Emit;
 using System.Reflection;
 #if CLR2
 using Microsoft.Scripting.Ast;
-using System.Runtime.CompilerServices;
-using Microsoft.Scripting.Generation;
 #else
 using System.Linq.Expressions;
 #endif
-
+using System.Runtime.CompilerServices;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {

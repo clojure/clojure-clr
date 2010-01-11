@@ -50,8 +50,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CljCompiler\Ast\DefaultCreateInstanceBinder.cs" />
+    <Compile Include="CljCompiler\Ast\DefaultGetZeroArityMemberBinder.cs" />
+    <Compile Include="CljCompiler\Ast\DefaultInvokeMemberBinder.cs" />
+    <Compile Include="CljCompiler\Ast\DynInitHelper.cs" />
+    <Compile Include="CljCompiler\Ast\DynUtils.cs" />
+    <Compile Include="CljCompiler\Ast\HostArg.cs" />
     <Compile Include="CljCompiler\Ast\InstanceZeroArityCallExpr.cs" />
-    <Compile Include="CljCompiler\Ast\StaticZeroArityCallExpr.cs" />
     <Compile Include="CljCompiler\GenClass.cs" />
     <Compile Include="CljCompiler\GenInterface.cs" />
     <Compile Include="CljCompiler\MethodSignature.cs" />

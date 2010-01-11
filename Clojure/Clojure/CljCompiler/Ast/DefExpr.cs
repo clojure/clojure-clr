@@ -102,12 +102,6 @@ namespace clojure.lang.CljCompiler.Ast
                     .assoc(RT.FILE_KEY, source_path)
                     .assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
 
-                
-                //mm = (IPersistentMap)RT.assoc(mm, RT.FILE_KEY, source_path);
-                //IPersistentMap spanMap = Compiler.GetSourceSpanMap(form);
-                //if (spanMap != null)
-                //    mm = mm.assoc(RT.SOURCE_SPAN_KEY, spanMap);
-
                 Expr meta =  mm == null ? null : Compiler.GenerateAST(mm,false);
                 Expr init = Compiler.GenerateAST(RT.third(form),v.Symbol.Name,false);
                 bool initProvided = RT.count(form) == 3;
