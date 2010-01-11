@@ -252,8 +252,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ConstructorBuilder ctorB = _typeBuilder.DefineConstructor(MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
             ILGen gen = new ILGen(ctorB.GetILGenerator());
-            gen.EmitString(String.Format("Entering cctor for {0}", _assemblyGen.AssemblyBuilder.FullName));
-            gen.EmitCall(typeof(System.Console), "WriteLine", new Type[] { typeof(string) });
 
             for (int i = 0; i < _fieldBuilders.Count; i++)
             {
@@ -270,15 +268,9 @@ namespace clojure.lang.CljCompiler.Ast
                 LambdaExpression initL = Expression.Lambda(Expression.Assign(Expression.Field(null, fb), fbInit));
                 initL.CompileToMethod(mbSetter);
 
-                gen.EmitString("Ready to call " + setterName);
-                gen.EmitCall(typeof(System.Console), "WriteLine", new Type[] { typeof(string) });
-
                 gen.EmitCall(mbSetter);
                 gen.Emit(OpCodes.Pop);
             }
-
-            gen.EmitString("After calls, before return");
-            gen.EmitCall(typeof(System.Console), "WriteLine", new Type[] { typeof(string) });
 
             gen.Emit(OpCodes.Ret);
         }
