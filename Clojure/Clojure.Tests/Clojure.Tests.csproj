@@ -76,6 +76,7 @@
     <Compile Include="LibTests\CachedSeqTests.cs" />
     <Compile Include="LibTests\ConsTests.cs" />
     <Compile Include="LibTests\DelayTests.cs" />
+    <Compile Include="LibTests\FutureTests.cs" />
     <Compile Include="LibTests\GenProxyTests.cs" />
     <Compile Include="LibTests\IObjTests.cs" />
     <Compile Include="LibTests\ISeqTestHelper.cs" />

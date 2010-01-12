@@ -4449,29 +4449,29 @@
   Example: (binding [*read-eval* false] (read-string \"#=(eval (def x 3))\"))
 
   Defaults to true")
-;;; need to implement a Future class, or use the concurrency project
+
 (defn future?
   "Returns true if x is a future"
-  [x] false )                       ;;; (instance? java.util.concurrent.Future x))
+  [x] (instance? clojure.lang.Future x))          ;;; java.util.concurrent.Future
 
 (defn future-done?
   "Returns true if future f is done"
-  [f] false)                       ;;;  [#^java.util.concurrent.Future f] (.isDone f))
+  [#^clojure.lang.Future f] (.isDone f))          ;;; #^java.util.concurrent.Future
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language") (load "core_clr")
 (load "core_proxy")
 (load "core_print")
 (load "genclass")
-;;; Need to figure out equivalents for pooledExecutor, java.util.concurrent.Future + we need proxies.
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; futures (needs proxy);;;;;;;;;;;;;;;;;;
-;(defn future-call 
-;  "Takes a function of no args and yields a future object that will
-;  invoke the function in another thread, and will cache the result and
-;  return it on all subsequent calls to deref/@. If the computation has
-;  not yet finished, calls to deref/@ will block."
-;  [#^Callable f]
-;  (let [fut (.submit clojure.lang.Agent/soloExecutor f)]
+(defn future-call 
+  "Takes a function of no args and yields a future object that will
+  invoke the function in another thread, and will cache the result and
+  return it on all subsequent calls to deref/@. If the computation has
+  not yet finished, calls to deref/@ will block."
+  [f]                                                 ;;;  [#^Callable f]
+    (clojure.lang.Future. f))                         ;;;  (let [fut (.submit clojure.lang.Agent/soloExecutor f)]
 ;    (proxy [clojure.lang.IDeref java.util.concurrent.Future] []
 ;      (deref [] (.get fut))
 ;      (get ([] (.get fut))
@@ -4479,56 +4479,57 @@
 ;      (isCancelled [] (.isCancelled fut))
 ;      (isDone [] (.isDone fut))
 ;      (cancel [interrupt?] (.cancel fut interrupt?)))))
-;  
-;(defmacro future
-;  "Takes a body of expressions and yields a future object that will
-;  invoke the body in another thread, and will cache the result and
-;  return it on all subsequent calls to deref/@. If the computation has
-;  not yet finished, calls to deref/@ will block."  
-;  [& body] `(future-call (fn [] ~@body)))
-;
-;
-;(defn future-cancel
-;  "Cancels the future, if possible."
-;  [#^java.util.concurrent.Future f] (.cancel f true))
-;
-;(defn future-cancelled?
-;  "Returns true if future f is cancelled"
-;  [#^java.util.concurrent.Future f] (.isCancelled f))
-;
-;(defn pmap
-;  "Like map, except f is applied in parallel. Semi-lazy in that the
-;  parallel computation stays ahead of the consumption, but doesn't
-;  realize the entire result unless required. Only useful for
-;  computationally intensive functions where the time of f dominates
-;  the coordination overhead."
-;  ([f coll]
-;   (let [n (+ 2 (.. Runtime getRuntime availableProcessors))
-;         rets (map #(future (f %)) coll)
-;         step (fn step [[x & xs :as vs] fs]
-;                (lazy-seq
-;                 (if-let [s (seq fs)]
-;                   (cons (deref x) (step xs (rest s)))
-;                   (map deref vs))))]
-;     (step rets (drop n rets))))
-;  ([f coll & colls]
-;   (let [step (fn step [cs]
-;                (lazy-seq
-;                 (let [ss (map seq cs)]
-;                   (when (every? identity ss)
-;                     (cons (map first ss) (step (map rest ss)))))))]
-;
-;(defn pcalls
-;  "Executes the no-arg fns in parallel, returning a lazy sequence of
-;  their values" 
-;  [& fns] (pmap #(%) fns))
-;
-;(defmacro pvalues
-;  "Returns a lazy sequence of the values of the exprs, which are
-;  evaluated in parallel" 
-;  [& exprs]
-;  `(pcalls ~@(map #(list `fn [] %) exprs)))
-;
+  
+(defmacro future
+  "Takes a body of expressions and yields a future object that will
+  invoke the body in another thread, and will cache the result and
+  return it on all subsequent calls to deref/@. If the computation has
+  not yet finished, calls to deref/@ will block."  
+  [& body] `(future-call (fn [] ~@body)))
+
+
+(defn future-cancel
+  "Cancels the future, if possible."
+  [#^clojure.lang.Future f] (.cancel f true))    ;;; java.util.concurrent.Future
+
+(defn future-cancelled?
+  "Returns true if future f is cancelled"
+  [#^clojure.lang.Future f] (.isCancelled f))    ;;; java.util.concurrent.Future
+
+(defn pmap
+  "Like map, except f is applied in parallel. Semi-lazy in that the
+  parallel computation stays ahead of the consumption, but doesn't
+  realize the entire result unless required. Only useful for
+  computationally intensive functions where the time of f dominates
+  the coordination overhead."
+  ([f coll]
+   (let [n (+ 2 Environment/ProcessorCount)            ;;; (.. Runtime getRuntime availableProcessors)
+         rets (map #(future (f %)) coll)
+         step (fn step [[x & xs :as vs] fs]
+                (lazy-seq
+                 (if-let [s (seq fs)]
+                   (cons (deref x) (step xs (rest s)))
+                   (map deref vs))))]
+     (step rets (drop n rets))))
+  ([f coll & colls]
+   (let [step (fn step [cs]
+                (lazy-seq
+                 (let [ss (map seq cs)]
+                   (when (every? identity ss)
+                     (cons (map first ss) (step (map rest ss)))))))]
+     (pmap #(apply f %) (step (cons coll colls))))))
+
+(defn pcalls
+  "Executes the no-arg fns in parallel, returning a lazy sequence of
+  their values" 
+  [& fns] (pmap #(%) fns))
+
+(defmacro pvalues
+  "Returns a lazy sequence of the values of the exprs, which are
+  evaluated in parallel" 
+  [& exprs]
+  `(pcalls ~@(map #(list `fn [] %) exprs)))
+
 
 (defmacro letfn 
   "Takes a vector of function specs and a body, and generates a set of
