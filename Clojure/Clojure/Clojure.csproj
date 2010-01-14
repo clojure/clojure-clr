@@ -125,8 +125,13 @@
     <Compile Include="Lib\IChunk.cs" />
     <Compile Include="Lib\IChunkedSeq.cs" />
     <Compile Include="Lib\IDeref.cs" />
+    <Compile Include="Lib\IDynamicType.cs" />
     <Compile Include="Lib\IEditableCollection.cs" />
+    <Compile Include="Lib\IKeywordLookup.cs" />
     <Compile Include="Lib\ILookup.cs" />
+    <Compile Include="Lib\ILookupHost.cs" />
+    <Compile Include="Lib\ILookupSite.cs" />
+    <Compile Include="Lib\ILookupThunk.cs" />
     <Compile Include="Lib\ITransientAssociative.cs" />
     <Compile Include="Lib\ITransientCollection.cs" />
     <Compile Include="Lib\ITransientMap.cs" />
@@ -135,7 +140,9 @@
     <Compile Include="Lib\Indexed.cs" />
     <Compile Include="Lib\IProxy.cs" />
     <Compile Include="Lib\JReMatcher.cs" />
+    <Compile Include="Lib\KeywordLookupSite.cs" />
     <Compile Include="Lib\LazySeq.cs" />
+    <Compile Include="Lib\MethodImplCache.cs" />
     <Compile Include="Lib\Seqable.cs" />
     <Compile Include="Lib\Stream.cs" />
     <Compile Include="Readers\LineNumberingTextReader.cs" />

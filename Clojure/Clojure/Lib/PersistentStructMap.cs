@@ -112,11 +112,15 @@ namespace clojure.lang
         {
             if (keys == null)
                 throw new ArgumentException("Must supply keys");
-            IPersistentMap map = PersistentHashMap.EMPTY;
+            int c = RT.count(keys);
+            object[] v = new object[2 * c];
             int i = 0;
             for (ISeq s = keys; s != null; s = s.next(), i++)
-                map = map.assoc(s.first(), i);
-            return new Def(keys, map);
+            {
+                v[2 * i] = s.first();
+                v[2 * i + 1] = i;
+            }
+            return new Def(keys, RT.map(v));
         }
 
         /// <summary>
@@ -348,10 +352,10 @@ namespace clojure.lang
         /// <returns>The associated value. (Throws an exception if key is not present.)</returns>
         public override object valAt(object key)
         {
-            IMapEntry me = _def.Keyslots.entryAt(key);
-            return me == null
-                ? _ext.valAt(key)
-                : _vals[Util.ConvertToInt(me.val())];
+            int? i = (int?)_def.Keyslots.valAt(key);
+            if (i.HasValue)
+                return _vals[i.Value];
+            return _ext.valAt(key);
         }
 
         /// <summary>
@@ -362,10 +366,10 @@ namespace clojure.lang
         /// <returns>The associated value (or <c>notFound</c> if the key is not present.</returns>
         public override object valAt(object key, object notFound)
         {
-            IMapEntry me = _def.Keyslots.entryAt(key);
-            return me == null
-                ? _ext.valAt(key,notFound)
-                : _vals[Util.ConvertToInt(me.val())];
+            int? i = (int?)_def.Keyslots.valAt(key);
+            if (i.HasValue)
+                return _vals[i.Value];
+            return _ext.valAt(key);
         }
 
         #endregion

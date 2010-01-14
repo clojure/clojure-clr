@@ -25,7 +25,7 @@ namespace clojure.lang
     /// Represents a keyword
     /// </summary>
     [Serializable]
-    public class Keyword: AFn, Named, IComparable, ISerializable // ??JAVA only used IFn, not AFn.  NOt sure why.
+    public sealed class Keyword: AFn, Named, IComparable, ISerializable // ??JAVA only used IFn, not AFn.  NOt sure why.
     {
         #region Data
 
@@ -33,6 +33,11 @@ namespace clojure.lang
         /// The symbol giving the namespace/name (without :) of the keyword.
         /// </summary>
         private readonly Symbol _sym;
+
+        /// <summary>
+        /// Caches the hash value for the keyword.
+        /// </summary>
+        readonly int _hash;
 
         /// <summary>
         /// Map from symbol to keyword to uniquify keywords.
@@ -90,7 +95,8 @@ namespace clojure.lang
         /// <param name="sym">A symbol giving namespace/name.</param>
         private Keyword(Symbol sym)
         {
-            this._sym = sym;
+            _sym = sym;
+            _hash = (int)(_sym.GetHashCode() + 0x9e3779b9);
         }
 
 
@@ -131,7 +137,7 @@ namespace clojure.lang
         /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
-            return (int)(_sym.GetHashCode() + 0x9e3779b9);
+            return _hash;
         }
 
         #endregion
@@ -186,9 +192,11 @@ namespace clojure.lang
         /// </summary>
         /// <param name="arg1">The object to access.</param>
         /// <returns>The value mapped to the keyword.</returns>
-        public override object invoke(object arg1)
+        public sealed override object invoke(object obj)
         {
-            return RT.get(arg1, this);
+            if (obj is ILookup)
+                return ((ILookup)obj).valAt(this);
+            return RT.get(obj, this);
         }
 
 
@@ -198,9 +206,11 @@ namespace clojure.lang
         /// <param name="arg1">The object to access.</param>
         /// <param name="arg2">Default value if not found.</param>
         /// <returns></returns>
-        public override object invoke(object arg1, object arg2)
+        public sealed override object invoke(object obj, object notFound)
         {
-            return RT.get(arg1, this, arg2);
+            if (obj is ILookup)
+                return ((ILookup)obj).valAt(this,notFound);
+            return RT.get(obj, this, notFound);
         }
 
 
