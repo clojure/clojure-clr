@@ -120,7 +120,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             ParameterExpression parm = Expression.Parameter(typeof(Var), "v");
 
-            Expression varExpr = context.FnExpr.GenVar(context,_var);
+            Expression varExpr = context.ObjExpr.GenVar(context,_var);
 
             exprs.Add(Expression.Assign(parm, varExpr));
 

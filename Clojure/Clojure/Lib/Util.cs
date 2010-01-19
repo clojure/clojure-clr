@@ -72,6 +72,18 @@ namespace clojure.lang
             return k1 != null && k1.Equals(k2);
         }
 
+        public static bool identical(object k1, object k2)
+        {
+            return k1 == k2;
+        }
+
+        public static Type classOf(object x)
+        {
+            if (x != null)
+                return x.GetType();
+            return null;
+        }
+
         public static int compare(object k1, object k2)
         {
             if (k1 == k2)
@@ -85,6 +97,16 @@ namespace clojure.lang
                 return ((IComparable)k1).CompareTo(k2);
             }
             return -1;
+        }
+
+        public static object Ret1(object ret, object nil)
+        {
+            return ret;
+        }
+
+        public static ISeq Ret1(ISeq ret, object nil)
+        {
+            return ret;
         }
 
 

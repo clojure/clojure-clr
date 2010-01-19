@@ -16,51 +16,53 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class KeywordExpr : Expr
+    class NewInstanceExpr : ObjExpr
     {
+
         #region Data
 
-        readonly Keyword _kw;
 
         #endregion
 
-        #region Ctors
+        #region C-tors
 
-        public KeywordExpr(Keyword kw)
+        public NewInstanceExpr(object tag)
+            : base(tag)
         {
-            _kw = kw;
         }
 
         #endregion
 
         #region Type mangling
 
-        public override bool HasClrType
+
+        #endregion
+
+        #region Parsing
+
+        public sealed class ReifyParser : IParser
         {
-            get { return true; }
+            public Expr Parse(object frm, bool isRecurContext)
+            {
+                return null;
+            }
         }
 
-        public override Type ClrType
+        public sealed class DefTypeParser : IParser
         {
-            get { return typeof(Keyword); }
+            public Expr Parse(object frm, bool isRecurContext)
+            {
+                return null;
+            }
         }
 
         #endregion
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
-        {
-            return context.ObjExpr.GenKeyword(context,_kw);
-        }
 
         #endregion
     }

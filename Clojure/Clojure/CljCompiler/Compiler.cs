@@ -68,7 +68,11 @@ namespace clojure.lang
         public static readonly Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
         public static readonly Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
         public static readonly Symbol IMPORT = Symbol.create("clojure.core","import*");
+        public static readonly Symbol DEFTYPE = Symbol.create("deftype*");
+        public static readonly Symbol CASE = Symbol.create("case*");
         public static readonly Symbol NEW = Symbol.create("new");
+        public static readonly Symbol THIS = Symbol.create("this");
+        public static readonly Symbol REIFY = Symbol.create("reify*");
         public static readonly Symbol _AMP_ = Symbol.create("&");
 
 
@@ -89,6 +93,11 @@ namespace clojure.lang
         static readonly Keyword INLINE_KEY = Keyword.intern(null, "inline");
         static readonly Keyword INLINE_ARITIES_KEY = Keyword.intern(null, "inline-arities");
 
+        static readonly Keyword VOLATILE_KEY = Keyword.intern(null,"volatile");
+        static readonly Keyword IMPLEMENTS_KEY = Keyword.intern(null,"implements");
+        static readonly Keyword PROTOCOL_KEY = Keyword.intern(null,"protocol");
+        static readonly Keyword ON_KEY = Keyword.intern(null, "on");
+
         #endregion
 
         #region Vars
@@ -97,7 +106,12 @@ namespace clojure.lang
         internal static readonly Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
                                                  //Symbol.create("*compile-files*"), RT.F);
                                                          Symbol.create("*compile-files*"), false);  
-//JAVA: Boolean.FALSE -- changed from RT.F in rev 1108, not sure why
+        //JAVA: Boolean.FALSE -- changed from RT.F in rev 1108, not sure why
+
+
+        internal static readonly Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
+                                                         Symbol.create("instance?"), false);  
+
 
         //String
         public static readonly Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
@@ -135,6 +149,11 @@ namespace clojure.lang
         internal static readonly Var CONSTANTS = Var.create();      //vector<object>
         internal static readonly Var KEYWORDS = Var.create();       //keyword->constid
 
+        //internal static readonly Var KEYWORD_CALLSITES = Var.create();
+        //internal static readonly Var PROTOCOL_CALLSITES = Var.create();
+        //internal static readonly Var VAR_CALLSITES = Var.create();       
+
+
         internal static readonly Var COMPILER_CONTEXT = Var.create(null);
 
         #endregion
@@ -146,6 +165,7 @@ namespace clojure.lang
             LOOP, new LetExpr.Parser(),
             RECUR, new RecurExpr.Parser(),
             IF, new IfExpr.Parser(),
+            CASE, new CaseExpr.Parser(),
             LET, new LetExpr.Parser(),
             LETFN, new LetFnExpr.Parser(),
             DO, new BodyExpr.Parser(),
@@ -155,6 +175,8 @@ namespace clojure.lang
             IMPORT, new ImportExpr.Parser(),
             DOT, new HostExpr.Parser(),
             ASSIGN, new AssignExpr.Parser(),
+            DEFTYPE, new NewInstanceExpr.DefTypeParser(),
+            REIFY, new NewInstanceExpr.ReifyParser(),
             TRY, new TryExpr.Parser(),
             THROW, new ThrowExpr.Parser(),
             MONITOR_ENTER, new MonitorEnterExpr.Parser(),

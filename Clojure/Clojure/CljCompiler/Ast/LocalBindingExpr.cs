@@ -29,6 +29,12 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly LocalBinding _b;
+
+        internal LocalBinding Binding
+        {
+            get { return _b; }
+        } 
+
         readonly Symbol _tag;
 
         #endregion
@@ -68,13 +74,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            return context.FnExpr.GenLocal(context,_b);
+            return context.ObjExpr.GenLocal(context,_b);
         }
 
 
         public Expression GenDlrUnboxed(GenContext context)
         {
-            return context.FnExpr.GenUnboxedLocal(context,_b);
+            return context.ObjExpr.GenUnboxedLocal(context,_b);
         }
 
         #endregion

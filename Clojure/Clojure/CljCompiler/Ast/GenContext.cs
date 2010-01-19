@@ -67,10 +67,10 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _dynInitHelper; }
         } 
 
-        FnExpr _fnExpr = null;
-        internal FnExpr FnExpr
+        ObjExpr _objExpr = null;
+        internal ObjExpr ObjExpr
         {
-            get { return _fnExpr; }
+            get { return _objExpr; }
         }
 
         #endregion
@@ -96,10 +96,10 @@ namespace clojure.lang.CljCompiler.Ast
             _mode = mode;
         }
 
-        internal GenContext CreateWithNewType(FnExpr fnExpr)
+        internal GenContext CreateWithNewType(ObjExpr objExpr)
         {
             GenContext newContext = Clone();
-            newContext._fnExpr = fnExpr;
+            newContext._objExpr = objExpr;
              return newContext;
         }
 
