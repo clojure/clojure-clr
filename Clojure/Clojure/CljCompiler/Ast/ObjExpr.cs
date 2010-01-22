@@ -32,7 +32,13 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        protected string _name;
+        private string _name;
+
+        public string Name
+        {
+            get { return _name; }
+            set { _name = value; }
+        }
         protected string _internalName;
         protected string _superName = null;
 

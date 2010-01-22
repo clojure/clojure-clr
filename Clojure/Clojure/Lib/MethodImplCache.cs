@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace clojure.lang.Lib
+namespace clojure.lang
 {
     // TODO: This is a cache for a type=>IFn map.  Should be replaced by the DLR CallSite mechanism
    public sealed class MethodImplCache

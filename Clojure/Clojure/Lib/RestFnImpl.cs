@@ -268,12 +268,9 @@ namespace clojure.lang
             object, object> _fnDo20;
 
         public RestFnImpl(int reqArity)
-            : base(reqArity)
+            :base(reqArity)
         {
         }
-
-
-
 
         protected override object doInvoke(object args)
         {

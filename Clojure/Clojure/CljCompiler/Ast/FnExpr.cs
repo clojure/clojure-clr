@@ -67,15 +67,16 @@ namespace clojure.lang.CljCompiler.Ast
             FnMethod enclosingMethod = (FnMethod)Compiler.METHODS.deref();
 
             string baseName = enclosingMethod != null
-                ? (enclosingMethod.Fn._name + "$")
+                ? (enclosingMethod.Objx.Name + "$")
                 : (Compiler.Munge(Compiler.CurrentNamespace.Name.Name) + "$");
 
             if (RT.second(form) is Symbol)
                 name = ((Symbol)RT.second(form)).Name;
 
             _simpleName = (name == null ? "fn" : Compiler.Munge(name).Replace(".", "_DOT_")) + "__" + RT.nextID();
-            _name = baseName + _simpleName;
-            _internalName = _name.Replace('.', '/');
+
+            Name = baseName + _simpleName;
+            _internalName = Name.Replace('.', '/');
 
             _objType = RT.classForName(_internalName);
             // fn.fntype = Type.getObjectType(fn.internalName) -- JAVA            
@@ -185,6 +186,19 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 FnMethod method = (FnMethod)s.first();
                 method.GenerateCode(context);
+            }
+
+            if (IsVariadic)
+            {
+                TypeBuilder tb = context.ObjExpr.TypeBuilder;
+                MethodBuilder mb = tb.DefineMethod(
+                    "getRequiredArity",
+                    MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual,
+                    typeof(int),
+                    Type.EmptyTypes);
+                ILGen gen = new ILGen(mb.GetILGenerator());
+                gen.EmitInt(_variadicMethod.RequiredArity);
+                gen.Emit(OpCodes.Ret);
             }
         }
 

@@ -210,7 +210,7 @@ namespace clojure.lang
 
         public virtual object applyTo(ISeq arglist)
         {
-            return ApplyToHelper(this, arglist);
+            return ApplyToHelper(this, Util.Ret1(arglist,arglist=null));
         }
 
 
@@ -220,30 +220,33 @@ namespace clojure.lang
             switch (RT.BoundedLength(arglist, 20))
             {
                 case 0:
+                    arglist = null;
                     return ifn.invoke();
                 case 1:
-                    return ifn.invoke(arglist.first());
+                    object a1 = arglist.first();
+                    arglist = null; 
+                    return ifn.invoke(a1);
                 case 2:
                     return ifn.invoke(arglist.first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(),arglist = null)
                     );
                 case 3:
                     return ifn.invoke(arglist.first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 4:
                     return ifn.invoke(arglist.first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 5:
                     return ifn.invoke(arglist.first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 6:
                     return ifn.invoke(arglist.first()
@@ -251,7 +254,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 7:
                     return ifn.invoke(arglist.first()
@@ -260,7 +263,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 8:
                     return ifn.invoke(arglist.first()
@@ -270,7 +273,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 9:
                     return ifn.invoke(arglist.first()
@@ -281,7 +284,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 10:
                     return ifn.invoke(arglist.first()
@@ -293,7 +296,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 11:
                     return ifn.invoke(arglist.first()
@@ -306,7 +309,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 12:
                     return ifn.invoke(arglist.first()
@@ -320,7 +323,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 13:
                     return ifn.invoke(arglist.first()
@@ -335,7 +338,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 14:
                     return ifn.invoke(arglist.first()
@@ -351,7 +354,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 15:
                     return ifn.invoke(arglist.first()
@@ -368,7 +371,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 16:
                     return ifn.invoke(arglist.first()
@@ -386,7 +389,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 17:
                     return ifn.invoke(arglist.first()
@@ -405,7 +408,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 18:
                     return ifn.invoke(arglist.first()
@@ -425,7 +428,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 19:
                     return ifn.invoke(arglist.first()
@@ -446,7 +449,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 case 20:
                     return ifn.invoke(arglist.first()
@@ -468,7 +471,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , (arglist = arglist.next()).first()
+                            , Util.Ret1((arglist = arglist.next()).first(), arglist = null)
                     );
                 default:
                     return ifn.invoke(arglist.first()
@@ -491,7 +494,7 @@ namespace clojure.lang
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
                             , (arglist = arglist.next()).first()
-                            , RT.SeqToArray<object>(arglist.next()));
+                            , RT.SeqToArray<object>(Util.Ret1(arglist.next(),arglist=null)));
             }
         }
 
@@ -503,13 +506,6 @@ namespace clojure.lang
             return new ArgumentException(String.Format("Wrong number of args passed to: {0}",
                 (suffix == -1 ? name : name.Substring(0, suffix)).Replace('_', '-')));
         }
-
-        public Exception WrongArityException2()
-        {
-            Console.WriteLine("Do-dah!");
-            return WrongArityException();
-        }
-
 
         #endregion
     }

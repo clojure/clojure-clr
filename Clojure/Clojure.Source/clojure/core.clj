@@ -647,7 +647,7 @@
   {:tag Int32   ;;; Integer
    :inline (fn  [x] `(. clojure.lang.RT (intCast ~x)))}
   [x] (. clojure.lang.RT (intCast x)))
-  
+
 (defn nth
   "Returns the value at the index. get returns nil if index out of
   bounds, nth throws an exception unless not-found is supplied.  nth

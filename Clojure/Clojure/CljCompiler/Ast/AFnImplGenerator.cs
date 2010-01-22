@@ -48,7 +48,7 @@ namespace clojure.lang.CljCompiler.Ast
             return typeArray;
         }
 
-        static MethodInfo Method_AFn_WrongArityException = typeof(AFn).GetMethod("WrongArityException2");
+        static MethodInfo Method_AFn_WrongArityException = typeof(AFn).GetMethod("WrongArityException");
         static MethodInfo Method_Delegate_Invoke = typeof(Delegate).GetMethod("Invoke");
 
         static void DefineDelegateFieldAndOverride(TypeBuilder tb, int numArgs)

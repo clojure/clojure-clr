@@ -97,9 +97,7 @@ namespace clojure.lang
         /// <remarks>Internal use only.  Used to interface with core.clj.</remarks>
         sealed class PLCreator : RestFn
         {
-            /// <summary>
-            ///  Create the function with requiredArity=0.
-            /// </summary>
+
             public PLCreator()
                 : base(0)
             {

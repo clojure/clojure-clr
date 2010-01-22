@@ -25,6 +25,18 @@ namespace clojure.lang
     /// </summary>
     public abstract class AFunction : AFn, Fn, IComparer
     {
+        #region Data
+
+        MethodImplCache _methodImplCache;
+
+        public MethodImplCache MethodImplCache
+        {
+            get { return _methodImplCache; }
+            set { _methodImplCache = value; }
+        }
+
+        #endregion
+
         #region Ctors and factory methods
 
         /// <summary>

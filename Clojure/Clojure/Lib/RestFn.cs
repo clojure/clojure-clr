@@ -23,11 +23,16 @@ namespace clojure.lang
     {
         #region Data
 
-        protected readonly int _reqArity;
+        readonly int _reqArity;
+
+        public virtual int getRequiredArity()
+        {
+            return _reqArity;
+        }
 
         #endregion
 
-        #region C-tors
+        #region C-tor
 
         public RestFn(int reqArity)
         {
@@ -172,38 +177,40 @@ namespace clojure.lang
 
         public override object applyTo(ISeq args)
         {
-            if (RT.BoundedLength(args, _reqArity) <= _reqArity)
-                return base.applyTo(args);
+            int reqArity = getRequiredArity();
 
-            switch (_reqArity)
+            if (RT.BoundedLength(args, reqArity) <= reqArity)
+                return AFn.ApplyToHelper(this, Util.Ret1(args, args = null));
+
+            switch (reqArity)
             {
                 case 0:
-                    return doInvoke(args);
+                    return doInvoke(Util.Ret1(args, args = null));
                 case 1:
                     return doInvoke(args.first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 2:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 3:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 4:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 5:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 6:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -211,7 +218,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 7:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -220,7 +227,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 8:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -230,7 +237,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 9:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -241,7 +248,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 10:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -253,7 +260,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 11:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -266,7 +273,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 12:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -280,7 +287,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 13:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -295,7 +302,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 14:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -311,7 +318,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 15:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -328,7 +335,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 16:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -346,7 +353,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 17:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -365,7 +372,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 18:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -385,7 +392,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 19:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -406,7 +413,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
                 case 20:
                     return doInvoke(args.first()
                             , (args = args.next()).first()
@@ -428,7 +435,7 @@ namespace clojure.lang
                             , (args = args.next()).first()
                             , (args = args.next()).first()
                             , (args = args.next()).first()
-                            , args.next());
+                            , Util.Ret1(args.next(), args = null));
 
             }
             throw WrongArityException();
@@ -437,7 +444,7 @@ namespace clojure.lang
 
         public override Object invoke()
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
                     return doInvoke(null);
@@ -449,12 +456,12 @@ namespace clojure.lang
 
         public override Object invoke(Object arg1)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1));
+                    return doInvoke(ArraySeq.create(Util.Ret1(arg1,arg1=null)));
                 case 1:
-                    return doInvoke(arg1, null);
+                    return doInvoke(Util.Ret1(arg1, arg1 = null), null);
                 default:
                     throw WrongArityException();
             }
@@ -463,14 +470,23 @@ namespace clojure.lang
 
         public override Object invoke(Object arg1, Object arg2)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -479,16 +495,32 @@ namespace clojure.lang
 
         public override Object invoke(Object arg1, Object arg2, Object arg3)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(   
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -497,18 +529,43 @@ namespace clojure.lang
 
         public override Object invoke(Object arg1, Object arg2, Object arg3, Object arg4)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null),
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -517,20 +574,56 @@ namespace clojure.lang
 
         public override Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null),
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -539,22 +632,71 @@ namespace clojure.lang
 
         public override Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6));
+                    return doInvoke(
+                        ArraySeq.create(    
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null),
+                            Util.Ret1(arg6, arg6 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -563,24 +705,88 @@ namespace clojure.lang
 
         public override Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        ArraySeq.create(    
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -590,26 +796,107 @@ namespace clojure.lang
         public override Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                              Object arg8)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -619,28 +906,128 @@ namespace clojure.lang
         public override Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                              Object arg8, Object arg9)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                            Util.Ret1(arg3, arg3 = null),
+                            Util.Ret1(arg4, arg4 = null),
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8, arg9));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ArraySeq.create(arg9));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg9, arg9 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -650,30 +1037,150 @@ namespace clojure.lang
         public override Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                              Object arg8, Object arg9, Object arg10)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9, arg10));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8, arg9, arg10));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ArraySeq.create(arg9, arg10));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ArraySeq.create(arg10));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null));
                 case 10:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -683,32 +1190,176 @@ namespace clojure.lang
         public override Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                              Object arg8, Object arg9, Object arg10, Object arg11)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null),
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null),
+                            Util.Ret1(arg4, arg4 = null),
+                            Util.Ret1(arg5, arg5 = null),
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9, arg10, arg11));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8, arg9, arg10, arg11));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ArraySeq.create(arg9, arg10, arg11));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null),
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ArraySeq.create(arg10, arg11));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null)));
                 case 10:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, ArraySeq.create(arg11));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg11, arg11 = null)));
                 case 11:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -718,34 +1369,203 @@ namespace clojure.lang
         public override Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                              Object arg8, Object arg9, Object arg10, Object arg11, Object arg12)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null),
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8, arg9, arg10, arg11, arg12));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ArraySeq.create(arg9, arg10, arg11, arg12));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ArraySeq.create(arg10, arg11, arg12));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null)));
                 case 10:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, ArraySeq.create(arg11, arg12));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null)));
                 case 11:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, ArraySeq.create(arg12));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg12, arg12 = null)));
                 case 12:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -755,49 +1575,232 @@ namespace clojure.lang
         public override Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                              Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
                     return doInvoke(
-                            ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+                            ArraySeq.create(
+                                Util.Ret1(arg1, arg1 = null), 
+                                Util.Ret1(arg2, arg2 = null), 
+                                Util.Ret1(arg3, arg3 = null), 
+                                Util.Ret1(arg4, arg4 = null), 
+                                Util.Ret1(arg5, arg5 = null), 
+                                Util.Ret1(arg6, arg6 = null), 
+                                Util.Ret1(arg7, arg7 = null), 
+                                Util.Ret1(arg8, arg8 = null), 
+                                Util.Ret1(arg9, arg9 = null), 
+                                Util.Ret1(arg10, arg10 = null), 
+                                Util.Ret1(arg11, arg11 = null), 
+                                Util.Ret1(arg12, arg12 = null), 
+                                Util.Ret1(arg13, arg13 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                          arg13));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2,
-                                    ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3,
-                                    ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null),
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4,
-                                    ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+                    return doInvoke(
+                            Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null),
+                            ArraySeq.create(
+                                Util.Ret1(arg5, arg5 = null),
+                                Util.Ret1(arg6, arg6 = null),
+                                Util.Ret1(arg7, arg7 = null), 
+                                Util.Ret1(arg8, arg8 = null), 
+                                Util.Ret1(arg9, arg9 = null),
+                                Util.Ret1(arg10, arg10 = null),
+                                Util.Ret1(arg11, arg11 = null),
+                                Util.Ret1(arg12, arg12 = null), 
+                                Util.Ret1(arg13, arg13 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5,
-                                    ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6,
-                                    ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null),
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-                                    ArraySeq.create(arg8, arg9, arg10, arg11, arg12, arg13));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
-                                    ArraySeq.create(arg9, arg10, arg11, arg12, arg13));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-                                    ArraySeq.create(arg10, arg11, arg12, arg13));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null)));
                 case 10:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-                                    ArraySeq.create(arg11, arg12, arg13));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null),
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null)));
                 case 11:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                    ArraySeq.create(arg12, arg13));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null)));
                 case 12:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                    ArraySeq.create(arg13));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg13, arg13 = null)));
                 case 13:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -807,53 +1810,263 @@ namespace clojure.lang
         public override Object invoke(Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6, Object arg7,
                              Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                    arg13, arg14));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                          arg13, arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                arg13, arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null),
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3,
-                                    ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4,
-                                    ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5,
-                                    ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6,
-                                    ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-                                    ArraySeq.create(arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
-                                    ArraySeq.create(arg9, arg10, arg11, arg12, arg13, arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-                                    ArraySeq.create(arg10, arg11, arg12, arg13, arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null)));
                 case 10:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-                                    ArraySeq.create(arg11, arg12, arg13, arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null)));
                 case 11:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                    ArraySeq.create(arg12, arg13, arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null)));
                 case 12:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                    ArraySeq.create(arg13, arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null)));
                 case 13:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-                                    ArraySeq.create(arg14));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null),
+                        Util.Ret1(arg13, arg13 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg14, arg14 = null)));
                 case 14:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -864,56 +2077,296 @@ namespace clojure.lang
                              Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                              Object arg15)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                    arg13, arg14, arg15));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null),
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                          arg13, arg14, arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                arg13, arg14, arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null),
+                            Util.Ret1(arg5, arg5 = null),
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                      arg13, arg14, arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null),
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4,
-                                    ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null),
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5,
-                                    ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+                    return doInvoke(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null),
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null),
+                            Util.Ret1(arg5, arg5 = null),
+                            ArraySeq.create(
+                                Util.Ret1(arg6, arg6 = null), 
+                                Util.Ret1(arg7, arg7 = null), 
+                                Util.Ret1(arg8, arg8 = null), 
+                                Util.Ret1(arg9, arg9 = null), 
+                                Util.Ret1(arg10, arg10 = null),
+                                Util.Ret1(arg11, arg11 = null),
+                                Util.Ret1(arg12, arg12 = null), 
+                                Util.Ret1(arg13, arg13 = null), 
+                                Util.Ret1(arg14, arg14 = null),
+                                Util.Ret1(arg15, arg15 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6,
-                                    ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-                                    ArraySeq.create(arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
-                                    ArraySeq.create(arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-                                    ArraySeq.create(arg10, arg11, arg12, arg13, arg14, arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null)));
                 case 10:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-                                    ArraySeq.create(arg11, arg12, arg13, arg14, arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null)));
                 case 11:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                    ArraySeq.create(arg12, arg13, arg14, arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null)));
                 case 12:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                    ArraySeq.create(arg13, arg14, arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null)));
                 case 13:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-                                    ArraySeq.create(arg14, arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null)));
                 case 14:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    ArraySeq.create(arg15));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg15, arg15 = null)));
                 case 15:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -924,59 +2377,331 @@ namespace clojure.lang
                              Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                              Object arg15, Object arg16)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                    arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                          arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                      arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                            arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5,
-                                    ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6,
-                                    ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-                                    ArraySeq.create(arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
-                                    ArraySeq.create(arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null),
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-                                    ArraySeq.create(arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null)));
                 case 10:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-                                    ArraySeq.create(arg11, arg12, arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null)));
                 case 11:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                    ArraySeq.create(arg12, arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null)));
                 case 12:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                    ArraySeq.create(arg13, arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null),
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null)));
                 case 13:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-                                    ArraySeq.create(arg14, arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null)));
                 case 14:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    ArraySeq.create(arg15, arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null)));
                 case 15:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, ArraySeq.create(arg16));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg16, arg16 = null)));
                 case 16:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null),
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -987,62 +2712,368 @@ namespace clojure.lang
                              Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                              Object arg15, Object arg16, Object arg17)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                    arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null),
+                            Util.Ret1(arg3, arg3 = null),
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                          arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null),
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),                                                          
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                      arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                            arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                                  arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6,
-                                    ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-                                    ArraySeq.create(arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
-                                    ArraySeq.create(arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-                                    ArraySeq.create(arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null)));
                 case 10:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-                                    ArraySeq.create(arg11, arg12, arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null),
+                            Util.Ret1(arg17, arg17 = null)));
                 case 11:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                    ArraySeq.create(arg12, arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null)));
                 case 12:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                    ArraySeq.create(arg13, arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null),
+                            Util.Ret1(arg17, arg17 = null)));
                 case 13:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-                                    ArraySeq.create(arg14, arg15, arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null),
+                        Util.Ret1(arg13, arg13 = null),                                
+                        ArraySeq.create(
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null),
+                            Util.Ret1(arg17, arg17 = null)));
                 case 14:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    ArraySeq.create(arg15, arg16, arg17));
+                    return doInvoke(
+                    Util.Ret1(arg1, arg1 = null),
+                    Util.Ret1(arg2, arg2 = null),
+                    Util.Ret1(arg3, arg3 = null),
+                    Util.Ret1(arg4, arg4 = null),
+                    Util.Ret1(arg5, arg5 = null),
+                    Util.Ret1(arg6, arg6 = null),
+                    Util.Ret1(arg7, arg7 = null),
+                    Util.Ret1(arg8, arg8 = null),
+                    Util.Ret1(arg9, arg9 = null),
+                    Util.Ret1(arg10, arg10 = null),
+                    Util.Ret1(arg11, arg11 = null), 
+                    Util.Ret1(arg12, arg12 = null), 
+                    Util.Ret1(arg13, arg13 = null),
+                    Util.Ret1(arg14, arg14 = null),
+                    ArraySeq.create(
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null), 
+                        Util.Ret1(arg17, arg17 = null)));
                 case 15:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, ArraySeq.create(arg16, arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null),
+                        Util.Ret1(arg13, arg13 = null),
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null)));
                 case 16:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, ArraySeq.create(arg17));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null),
+                        Util.Ret1(arg13, arg13 = null),
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null),
+                        Util.Ret1(arg16, arg16 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg17, arg17 = null)));
                 case 17:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null),
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null),
+                        Util.Ret1(arg16, arg16 = null),
+                        Util.Ret1(arg17, arg17 = null),
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -1053,66 +3084,391 @@ namespace clojure.lang
                              Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                              Object arg15, Object arg16, Object arg17, Object arg18)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                    arg13, arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), Util.Ret1(arg2, arg2 = null), Util.Ret1(arg3, arg3 = null), Util.Ret1(arg4, arg4 = null), Util.Ret1(arg5, arg5 = null), Util.Ret1(arg6, arg6 = null), Util.Ret1(arg7, arg7 = null), Util.Ret1(arg8, arg8 = null), Util.Ret1(arg9, arg9 = null), Util.Ret1(arg10, arg10 = null), Util.Ret1(arg11, arg11 = null), Util.Ret1(arg12, arg12 = null),
+                                                    Util.Ret1(arg13, arg13 = null), Util.Ret1(arg14, arg14 = null), Util.Ret1(arg15, arg15 = null), Util.Ret1(arg16, arg16 = null), Util.Ret1(arg17, arg17 = null), Util.Ret1(arg18, arg18 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                          arg13, arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                arg13, arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null),
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                      arg13, arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                            arg13, arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                                  arg13, arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null),
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                                        arg13, arg14, arg15, arg16, arg17,
-                                                                                        arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7,
-                                    ArraySeq.create(arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null),
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8,
-                                    ArraySeq.create(arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-                                    ArraySeq.create(arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 10:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-                                    ArraySeq.create(arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 11:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                    ArraySeq.create(arg12, arg13, arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 12:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                    ArraySeq.create(arg13, arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 13:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-                                    ArraySeq.create(arg14, arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null),
+                        Util.Ret1(arg13, arg13 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null),
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 14:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    ArraySeq.create(arg15, arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null)));
                 case 15:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, ArraySeq.create(arg16, arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 16:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, ArraySeq.create(arg17, arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null),
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null),
+                        Util.Ret1(arg16, arg16 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null)));
                 case 17:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, ArraySeq.create(arg18));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null),
+                        Util.Ret1(arg13, arg13 = null),
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null),
+                        Util.Ret1(arg16, arg16 = null), 
+                        Util.Ret1(arg17, arg17 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg18, arg18 = null)));
                 case 18:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, arg18, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null),
+                        Util.Ret1(arg16, arg16 = null), 
+                        Util.Ret1(arg17, arg17 = null),
+                        Util.Ret1(arg18, arg18 = null),
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -1123,72 +3479,448 @@ namespace clojure.lang
                              Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                              Object arg15, Object arg16, Object arg17, Object arg18, Object arg19)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                    arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null),
+                            Util.Ret1(arg19, arg19 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                          arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null),
+                            Util.Ret1(arg19, arg19 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                      arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                            arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                                  arg13, arg14, arg15, arg16, arg17, arg18,
-                                                                                  arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null),
+                            Util.Ret1(arg19, arg19 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                                        arg13, arg14, arg15, arg16, arg17,
-                                                                                        arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8, arg9, arg10, arg11, arg12,
-                                                                                              arg13, arg14, arg15, arg16, arg17,
-                                                                                              arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ArraySeq.create(arg9, arg10, arg11, arg12,
-                                                                                                    arg13, arg14, arg15, arg16,
-                                                                                                    arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null),
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
-                                    ArraySeq.create(arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 10:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-                                    ArraySeq.create(arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 11:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                    ArraySeq.create(arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 12:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                    ArraySeq.create(arg13, arg14, arg15, arg16, arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 13:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-                                    ArraySeq.create(arg14, arg15, arg16, arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 14:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    ArraySeq.create(arg15, arg16, arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null),
+                        Util.Ret1(arg14, arg14 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 15:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, ArraySeq.create(arg16, arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 16:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, ArraySeq.create(arg17, arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null),
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 17:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, ArraySeq.create(arg18, arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null),
+                        Util.Ret1(arg13, arg13 = null),
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null), 
+                        Util.Ret1(arg17, arg17 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null)));
                 case 18:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, arg18, ArraySeq.create(arg19));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null),
+                        Util.Ret1(arg17, arg17 = null), 
+                        Util.Ret1(arg18, arg18 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg19, arg19 = null)));
                 case 19:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, arg18, arg19, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null), 
+                        Util.Ret1(arg17, arg17 = null), 
+                        Util.Ret1(arg18, arg18 = null), 
+                        Util.Ret1(arg19, arg19 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -1199,79 +3931,488 @@ namespace clojure.lang
                              Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                              Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(ArraySeq.create(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                    arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        ArraySeq.create(
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 1:
-                    return doInvoke(arg1, ArraySeq.create(arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                          arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null),
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, ArraySeq.create(arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, ArraySeq.create(arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                      arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, ArraySeq.create(arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                            arg13, arg14, arg15, arg16, arg17, arg18, arg19,
-                                                                            arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null),
+                            Util.Ret1(arg20, arg20 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, ArraySeq.create(arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                                  arg13, arg14, arg15, arg16, arg17, arg18,
-                                                                                  arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null),
+                            Util.Ret1(arg19, arg19 = null),
+                            Util.Ret1(arg20, arg20 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, ArraySeq.create(arg7, arg8, arg9, arg10, arg11, arg12,
-                                                                                        arg13, arg14, arg15, arg16, arg17,
-                                                                                        arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null),
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ArraySeq.create(arg8, arg9, arg10, arg11, arg12,
-                                                                                              arg13, arg14, arg15, arg16, arg17,
-                                                                                              arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null),
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, ArraySeq.create(arg9, arg10, arg11, arg12,
-                                                                                                    arg13, arg14, arg15, arg16,
-                                                                                                    arg17, arg18, arg19,
-                                                                                                    arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null),
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null),   
+                            Util.Ret1(arg20, arg20 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ArraySeq.create(arg10, arg11, arg12,
-                                                                                                          arg13, arg14, arg15,
-                                                                                                          arg16, arg17, arg18,
-                                                                                                          arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null),
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 10:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
-                                    ArraySeq.create(arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg11, arg11 = null), 
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 11:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                    ArraySeq.create(arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 12:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                    ArraySeq.create(arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null),
+                        ArraySeq.create(
+                        Util.Ret1(arg13, arg13 = null),
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null),
+                        Util.Ret1(arg16, arg16 = null),
+                        Util.Ret1(arg17, arg17 = null),
+                        Util.Ret1(arg18, arg18 = null),
+                        Util.Ret1(arg19, arg19 = null),
+                        Util.Ret1(arg20, arg20 = null)));
                 case 13:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-                                    ArraySeq.create(arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null),
+                            Util.Ret1(arg20, arg20 = null)));
                 case 14:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    ArraySeq.create(arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        ArraySeq.create(
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null),
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 15:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, ArraySeq.create(arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 16:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, ArraySeq.create(arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null),
+                        Util.Ret1(arg13, arg13 = null),
+                        Util.Ret1(arg14, arg14 = null),  
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 17:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, ArraySeq.create(arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null), 
+                        Util.Ret1(arg17, arg17 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 18:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, arg18, ArraySeq.create(arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null), 
+                        Util.Ret1(arg17, arg17 = null), 
+                        Util.Ret1(arg18, arg18 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 19:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, arg18, arg19, ArraySeq.create(arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null),
+                        Util.Ret1(arg13, arg13 = null),
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null), 
+                        Util.Ret1(arg17, arg17 = null),
+                        Util.Ret1(arg18, arg18 = null), 
+                        Util.Ret1(arg19, arg19 = null), 
+                        ArraySeq.create(
+                            Util.Ret1(arg20, arg20 = null)));
                 case 20:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, arg18, arg19, arg20, null);
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null), 
+                        Util.Ret1(arg17, arg17 = null), 
+                        Util.Ret1(arg18, arg18 = null), 
+                        Util.Ret1(arg19, arg19 = null), 
+                        Util.Ret1(arg20, arg20 = null), 
+                        null);
                 default:
                     throw WrongArityException();
             }
@@ -1282,87 +4423,511 @@ namespace clojure.lang
                              Object arg8, Object arg9, Object arg10, Object arg11, Object arg12, Object arg13, Object arg14,
                              Object arg15, Object arg16, Object arg17, Object arg18, Object arg19, Object arg20, params object[] args)
         {
-            switch (_reqArity)
+            switch (getRequiredArity())
             {
                 case 0:
-                    return doInvoke(OntoArrayPrepend(args, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                                     arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg1, arg1 = null), 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null),
+                            Util.Ret1(arg5, arg5 = null),
+                            Util.Ret1(arg6, arg6 = null),
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null),
+                            Util.Ret1(arg19, arg19 = null),
+                            Util.Ret1(arg20, arg20 = null)));
                 case 1:
-                    return doInvoke(arg1, OntoArrayPrepend(args, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                                           arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        OntoArrayPrepend(  
+                            args, 
+                            Util.Ret1(arg2, arg2 = null), 
+                            Util.Ret1(arg3, arg3 = null),
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null),
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null),
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null),
+                            Util.Ret1(arg20, arg20 = null)));
                 case 2:
-                    return doInvoke(arg1, arg2, OntoArrayPrepend(args, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                                                 arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19,
-                                                                 arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        OntoArrayPrepend(
+                            args,
+                            Util.Ret1(arg3, arg3 = null), 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null),
+                            Util.Ret1(arg20, arg20 = null)));
                 case 3:
-                    return doInvoke(arg1, arg2, arg3, OntoArrayPrepend(args, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                                                       arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19,
-                                                                       arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null),
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg4, arg4 = null), 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null),
+                            Util.Ret1(arg20, arg20 = null)));
                 case 4:
-                    return doInvoke(arg1, arg2, arg3, arg4, OntoArrayPrepend(args, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                                                             arg12, arg13, arg14, arg15, arg16, arg17, arg18,
-                                                                             arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg5, arg5 = null), 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null),
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 5:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, OntoArrayPrepend(args, arg6, arg7, arg8, arg9, arg10, arg11,
-                                                                                   arg12, arg13, arg14, arg15, arg16, arg17,
-                                                                                   arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null),
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg6, arg6 = null), 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 6:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, OntoArrayPrepend(args, arg7, arg8, arg9, arg10, arg11,
-                                                                                         arg12, arg13, arg14, arg15, arg16,
-                                                                                         arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null),
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg7, arg7 = null), 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null),
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null),
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 7:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, OntoArrayPrepend(args, arg8, arg9, arg10, arg11,
-                                                                                               arg12, arg13, arg14, arg15,
-                                                                                               arg16, arg17, arg18, arg19,
-                                                                                               arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null),
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg8, arg8 = null), 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null),
+                            Util.Ret1(arg20, arg20 = null)));
                 case 8:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, OntoArrayPrepend(args, arg9, arg10, arg11,
-                                                                                                     arg12, arg13, arg14, arg15,
-                                                                                                     arg16, arg17, arg18, arg19,
-                                                                                                     arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg9, arg9 = null), 
+                            Util.Ret1(arg10, arg10 = null),
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null),
+                            Util.Ret1(arg20, arg20 = null)));
                 case 9:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, OntoArrayPrepend(args, arg10, arg11,
-                                                                                                           arg12, arg13, arg14,
-                                                                                                           arg15, arg16, arg17,
-                                                                                                           arg18, arg19,
-                                                                                                           arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg10, arg10 = null), 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null),
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null),
+                            Util.Ret1(arg20, arg20 = null)));
                 case 10:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, OntoArrayPrepend(args, arg11,
-                                                                                                                  arg12, arg13,
-                                                                                                                  arg14, arg15,
-                                                                                                                  arg16, arg17,
-                                                                                                                  arg18, arg19,
-                                                                                                                  arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg11, arg11 = null),
+                            Util.Ret1(arg12, arg12 = null), 
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null),
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null),
+                            Util.Ret1(arg19, arg19 = null),
+                            Util.Ret1(arg20, arg20 = null)));
                 case 11:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11,
-                                    OntoArrayPrepend(args, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg12, arg12 = null),
+                            Util.Ret1(arg13, arg13 = null),
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null),
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 12:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12,
-                                    OntoArrayPrepend(args, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null),
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg13, arg13 = null), 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 13:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13,
-                                    OntoArrayPrepend(args, arg14, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null),
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg14, arg14 = null), 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 14:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    OntoArrayPrepend(args, arg15, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg15, arg15 = null), 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 15:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, OntoArrayPrepend(args, arg16, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null),
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg16, arg16 = null), 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 16:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, OntoArrayPrepend(args, arg17, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null),
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null),
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null),
+                        Util.Ret1(arg9, arg9 = null),
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null),
+                        Util.Ret1(arg16, arg16 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg17, arg17 = null), 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 17:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, OntoArrayPrepend(args, arg18, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null),
+                        Util.Ret1(arg7, arg7 = null),
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null), 
+                        Util.Ret1(arg17, arg17 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg18, arg18 = null), 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 18:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, arg18, OntoArrayPrepend(args, arg19, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null),
+                        Util.Ret1(arg11, arg11 = null),
+                        Util.Ret1(arg12, arg12 = null),
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null), 
+                        Util.Ret1(arg17, arg17 = null), 
+                        Util.Ret1(arg18, arg18 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg19, arg19 = null), 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 19:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, arg18, arg19, OntoArrayPrepend(args, arg20));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null), 
+                        Util.Ret1(arg17, arg17 = null), 
+                        Util.Ret1(arg18, arg18 = null), 
+                        Util.Ret1(arg19, arg19 = null), 
+                        OntoArrayPrepend(
+                            args, 
+                            Util.Ret1(arg20, arg20 = null)));
                 case 20:
-                    return doInvoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                    arg15, arg16, arg17, arg18, arg19, arg20, ArraySeq.create(args));
+                    return doInvoke(
+                        Util.Ret1(arg1, arg1 = null), 
+                        Util.Ret1(arg2, arg2 = null), 
+                        Util.Ret1(arg3, arg3 = null), 
+                        Util.Ret1(arg4, arg4 = null), 
+                        Util.Ret1(arg5, arg5 = null), 
+                        Util.Ret1(arg6, arg6 = null), 
+                        Util.Ret1(arg7, arg7 = null), 
+                        Util.Ret1(arg8, arg8 = null), 
+                        Util.Ret1(arg9, arg9 = null), 
+                        Util.Ret1(arg10, arg10 = null), 
+                        Util.Ret1(arg11, arg11 = null), 
+                        Util.Ret1(arg12, arg12 = null), 
+                        Util.Ret1(arg13, arg13 = null), 
+                        Util.Ret1(arg14, arg14 = null),
+                        Util.Ret1(arg15, arg15 = null), 
+                        Util.Ret1(arg16, arg16 = null),
+                        Util.Ret1(arg17, arg17 = null),
+                        Util.Ret1(arg18, arg18 = null), 
+                        Util.Ret1(arg19, arg19 = null), 
+                        Util.Ret1(arg20, arg20 = null), 
+                        ArraySeq.create(args));
                 default:
                     throw WrongArityException();
             }

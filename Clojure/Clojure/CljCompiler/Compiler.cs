@@ -769,13 +769,13 @@ namespace clojure.lang
             return b;
         }
 
-        static void CloseOver(LocalBinding b, FnMethod method)
+        static void CloseOver(LocalBinding b, ObjMethod method)
         {
             if (b != null && method != null)
             {
                 if (RT.get(method.Locals, b) == null)
                 {
-                    method.Fn.Closes = (IPersistentMap)RT.assoc(method.Fn.Closes, b, b);
+                    method.Objx.Closes = (IPersistentMap)RT.assoc(method.Objx.Closes, b, b);
                     CloseOver(b, method.Parent);
                 }
                 else if (IN_CATCH_FINALLY.deref() != null)
