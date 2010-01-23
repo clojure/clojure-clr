@@ -98,9 +98,9 @@ namespace clojure.lang
         sealed class PLCreator : RestFn
         {
 
-            public PLCreator()
-                : base(0)
+            public override int getRequiredArity()
             {
+                return 0;
             }
 
             /// <summary>

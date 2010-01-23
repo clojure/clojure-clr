@@ -21,23 +21,9 @@ namespace clojure.lang
 {
     public abstract class RestFn : AFunction
     {
-        #region Data
+        #region Interface
 
-        readonly int _reqArity;
-
-        public virtual int getRequiredArity()
-        {
-            return _reqArity;
-        }
-
-        #endregion
-
-        #region C-tor
-
-        public RestFn(int reqArity)
-        {
-            _reqArity = reqArity;
-        }
+        public abstract int getRequiredArity();
 
         #endregion
 

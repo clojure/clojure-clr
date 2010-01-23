@@ -81,6 +81,9 @@ namespace clojure.lang.CljCompiler.Ast
             set { _thisParam = value; }
         }
 
+        protected Type _superType;
+
+
         protected ConstructorInfo _ctorInfo;
 
         protected List<FieldBuilder> _closedOverFields;
@@ -96,9 +99,7 @@ namespace clojure.lang.CljCompiler.Ast
         IPersistentVector _protocolCallSites;
         IPersistentVector _varCallSites;
 
-        // TODO: This should be moved back into FnExp
-        bool IsVariadic { get { return _variadicMethod != null; } }
-        protected FnMethod _variadicMethod = null;
+
 
 
         #endregion
@@ -130,6 +131,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
+            _superType = GetSuperType();
+
             switch (context.Mode)
             {
                 case CompilerMode.Immediate:
@@ -141,13 +144,18 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+        protected virtual Type GetSuperType()
+        {
+            return Type.GetType(_superName);
+        }
+
         #endregion
 
-       #region Immediate-mode compilation
+        #region Immediate-mode compilation
 
         Expression GenDlrImmediate(GenContext context)
         {
-            _baseType = GetBaseClass(context,GetSuperType());
+            _baseType = GetBaseClass(context,_superType);
             return GenerateImmediateLambda(context, _baseType);
         }
 
@@ -160,30 +168,17 @@ namespace clojure.lang.CljCompiler.Ast
 
             // TODO: deal with embedding variadic
 
-            if (baseClass == typeof(RestFnImpl))
-                exprs.Add(Expression.Assign(p1,
-                          Expression.New(Compiler.Ctor_RestFnImpl_1, Expression.Constant(_variadicMethod.RequiredArity))));
-            else
-                exprs.Add(Expression.Assign(p1, Expression.New(p1.Type)));
+            //if (baseClass == typeof(RestFnImpl))
+            //    exprs.Add(Expression.Assign(p1,
+            //              Expression.New(Compiler.Ctor_RestFnImpl_1, Expression.Constant(_variadicMethod.RequiredArity))));
+            //else
+            //    exprs.Add(Expression.Assign(p1, Expression.New(p1.Type)));
 
-            //exprs.Add(Expression.Assign(p1, Expression.New(p1.Type)));
+            exprs.Add(Expression.Assign(p1, Expression.New(p1.Type)));
 
             GenContext newContext = CreateContext(context, null, baseClass);
 
-            // TODO: extract this is a method, virtualize it, move this code to FnExpr
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
-            {
-                FnMethod method = (FnMethod)s.first();
-                LambdaExpression lambda = method.GenerateImmediateLambda(newContext);
-
-                // TODO: Move fieldName to FnMethod or ObjMethod
-                string fieldName = IsVariadic && method.IsVariadic
-                    ? "_fnDo" + method.RequiredArity
-                    : "_fn" + method.NumParams;
-                exprs.Add(Expression.Assign(Expression.Field(p1,fieldName), lambda));
-
-                //exprs.Add(Expression.Assign(Expression.Field(p1, method.FieldName), lambda));
-            }
+            GenerateMethodsForImmediate(newContext,p1,exprs);
 
             exprs.Add(p1);
 
@@ -191,7 +186,11 @@ namespace clojure.lang.CljCompiler.Ast
             return expr;
         }
 
-        private static Type GetBaseClass(GenContext context,Type superType)
+        protected virtual void GenerateMethodsForImmediate(GenContext context, ParameterExpression thisParam, List<Expression> exprs)
+        {
+        }
+
+        protected virtual Type GetBaseClass(GenContext context,Type superType)
         {
             Type baseClass = LookupBaseClass(superType);
             if (baseClass != null)
@@ -204,11 +203,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         static AtomicReference<IPersistentMap> _baseClassMapRef = new AtomicReference<IPersistentMap>(PersistentHashMap.EMPTY);
 
-        static ObjExpr()
-        {
-            _baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(RestFn),typeof(RestFnImpl)));
-            //_baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(AFn),typeof(AFnImpl)));
-        }
+        //static ObjExpr()
+        //{
+        //    _baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(RestFn),typeof(RestFnImpl)));
+        //    //_baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(AFn),typeof(AFnImpl)));
+        //}
 
 
         private static Type LookupBaseClass(Type superType)
@@ -307,11 +306,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         private TypeBuilder GenerateFnBaseClass(GenContext context)
         {
-            Type super = GetSuperType();
             string baseClassName = _internalName + "_base";
 
-            //TypeBuilder baseTB = context.ModuleBldr.DefineType(baseClassName, TypeAttributes.Class | TypeAttributes.Public, super);
-            TypeBuilder baseTB = context.AssemblyGen.DefinePublicType(baseClassName, super, true);
+            TypeBuilder baseTB = context.ModuleBuilder.DefineType(baseClassName, TypeAttributes.Public | TypeAttributes.Abstract, _superType);
+            //TypeBuilder baseTB = context.AssemblyGen.DefinePublicType(baseClassName, _superType, true);
 
             GenerateConstantFields(baseTB);
             GenerateClosedOverFields(baseTB);
@@ -390,12 +388,12 @@ namespace clojure.lang.CljCompiler.Ast
                 gen.EmitLoadArg(0);         //gen.Emit(OpCodes.Ldarg_0);
                 gen.Emit(OpCodes.Call, cInfo);  
             }
-            else if (IsVariadic)
-            {
-                gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
-                gen.EmitInt(_variadicMethod.RequiredArity);     // gen.Emit(OpCodes.Ldc_I4, _variadicMethod.RequiredArity);
-                gen.Emit(OpCodes.Call, RestFn_Int_Ctor);
-            }
+            //else if (IsVariadic)
+            //{
+            //    gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
+            //    gen.EmitInt(_variadicMethod.RequiredArity);     // gen.Emit(OpCodes.Ldc_I4, _variadicMethod.RequiredArity);
+            //    gen.Emit(OpCodes.Call, RestFn_Int_Ctor);
+            //}
             else
             {
                 gen.EmitLoadArg(0);                             // en.Emit(OpCodes.Ldarg_0);
@@ -689,14 +687,7 @@ namespace clojure.lang.CljCompiler.Ast
             return incomingContext.CreateWithNewType(this);
         }
 
-        private Type GetSuperType()
-        {
-            return _superName != null
-                ? Type.GetType(_superName)
-                : IsVariadic
-                ? typeof(RestFn)
-                : typeof(AFunction);
-        }
+
 
         #endregion
 

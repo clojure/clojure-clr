@@ -40,6 +40,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         bool _onceOnly = false;
 
+        bool IsVariadic { get { return _variadicMethod != null; } }
+        FnMethod _variadicMethod = null;
+
         //int _line;
 
         #endregion
@@ -82,7 +85,6 @@ namespace clojure.lang.CljCompiler.Ast
             // fn.fntype = Type.getObjectType(fn.internalName) -- JAVA            
         }
 
-        bool IsVariadic { get { return _variadicMethod != null; } }
 
         #endregion
 
@@ -172,13 +174,117 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Var.popThreadBindings();
             }
+            
             // JAVA: fn.compile();
             return fn;
         }
 
+
+
         #endregion
 
         #region Code generation
+
+        protected override Type GetSuperType()
+        {
+            return _superName != null
+                ? Type.GetType(_superName)
+                : IsVariadic
+                ? typeof(RestFn)
+                : typeof(AFunction);
+        }
+
+        protected override void GenerateMethodsForImmediate(GenContext context, ParameterExpression thisParam, List<Expression> exprs)
+        {
+
+            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+            {
+                FnMethod method = (FnMethod)s.first();
+                LambdaExpression lambda = method.GenerateImmediateLambda(context);
+
+                // TODO: Move fieldName to FnMethod or ObjMethod
+                string fieldName = IsVariadic && method.IsVariadic
+                    ? "_fnDo" + method.RequiredArity
+                    : "_fn" + method.NumParams;
+                exprs.Add(Expression.Assign(Expression.Field(thisParam, fieldName), lambda));
+
+                //exprs.Add(Expression.Assign(Expression.Field(p1, method.FieldName), lambda));
+            }
+        }
+
+        protected override Type GetBaseClass(GenContext context, Type superType)
+        {
+            if (superType == typeof(RestFn))
+            {
+                int reqArity = _variadicMethod.RequiredArity;
+                Type baseClass = LookupRestFnBaseClass(reqArity);
+                if (baseClass != null)
+                    return baseClass;
+
+                baseClass = GenerateRestFnBaseClass(context, reqArity);
+                baseClass = RegisterRestFnBaseClass(reqArity, baseClass);
+                return baseClass;
+
+            }
+
+            return base.GetBaseClass(context, superType);
+        }
+
+
+        static AtomicReference<IPersistentMap> _restFnClassMapRef = new AtomicReference<IPersistentMap>(PersistentHashMap.EMPTY);
+
+        //static ObjExpr()
+        //{
+        //    _baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(RestFn),typeof(RestFnImpl)));
+        //    //_baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(AFn),typeof(AFnImpl)));
+        //}
+
+
+        private static Type LookupRestFnBaseClass(int reqArity)
+        {
+            return (Type)_restFnClassMapRef.Get().valAt(reqArity);
+        }
+
+        private static Type RegisterRestFnBaseClass( int reqArity, Type baseType)
+        {
+            IPersistentMap map = _restFnClassMapRef.Get();
+
+            while (!map.containsKey(reqArity))
+            {
+                IPersistentMap newMap = map.assoc(reqArity, baseType);
+                _restFnClassMapRef.CompareAndSet(map, newMap);
+                map = _restFnClassMapRef.Get();
+            }
+
+            return LookupRestFnBaseClass(reqArity);  // may not be the one we defined -- race condition
+        }
+
+
+        private static Type GenerateRestFnBaseClass(GenContext context, int reqArity)
+        {
+            string name = "RestFnImpl__" + reqArity.ToString();
+            TypeBuilder baseTB = context.AssemblyGen.DefinePublicType(name, typeof(RestFnImpl), true);
+
+            GenerateGetRequiredArityMethod(baseTB, reqArity);
+
+            return baseTB.CreateType();
+        }
+
+
+        static MethodBuilder GenerateGetRequiredArityMethod(TypeBuilder tb, int requiredArity)
+        {
+            MethodBuilder mb = tb.DefineMethod(
+                "getRequiredArity",
+                MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual,
+                typeof(int),
+                Type.EmptyTypes);
+
+            ILGen gen = new ILGen(mb.GetILGenerator());
+            gen.EmitInt(requiredArity);
+            gen.Emit(OpCodes.Ret);
+
+            return mb;
+        }
 
         protected override void GenerateMethods(GenContext context)
         {
@@ -191,14 +297,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (IsVariadic)
             {
                 TypeBuilder tb = context.ObjExpr.TypeBuilder;
-                MethodBuilder mb = tb.DefineMethod(
-                    "getRequiredArity",
-                    MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual,
-                    typeof(int),
-                    Type.EmptyTypes);
-                ILGen gen = new ILGen(mb.GetILGenerator());
-                gen.EmitInt(_variadicMethod.RequiredArity);
-                gen.Emit(OpCodes.Ret);
+                GenerateGetRequiredArityMethod(tb, _variadicMethod.RequiredArity);
             }
         }
 
