@@ -166,6 +166,11 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Field(target, _tinfo);
         }
 
+        public override bool CanEmitPrimitive
+        {
+            get { return Util.IsPrimitive(_tinfo.FieldType); }
+        }
+
         #endregion
     }
 
@@ -195,6 +200,11 @@ namespace clojure.lang.CljCompiler.Ast
         protected override Expression GenAccess(Expression target)
         {
             return Expression.Property(target, _tinfo);
+        }
+
+        public override bool CanEmitPrimitive
+        {
+            get { return Util.IsPrimitive(_tinfo.PropertyType); }
         }
 
         #endregion

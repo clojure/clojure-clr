@@ -1369,7 +1369,7 @@ namespace clojure.lang
 
         internal static Type MaybePrimitiveType(Expr e)
         {
-            if (e is MaybePrimitiveExpr && e.HasClrType)
+            if (e is MaybePrimitiveExpr && e.HasClrType && ((MaybePrimitiveExpr)e).CanEmitPrimitive)
             {
                 Type t = e.ClrType;
                 if (Util.IsPrimitive(t))

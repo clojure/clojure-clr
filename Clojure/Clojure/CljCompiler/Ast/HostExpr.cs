@@ -188,6 +188,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
+        public abstract bool CanEmitPrimitive { get; }
         public abstract Expression GenDlrUnboxed(GenContext context);
 
         #endregion

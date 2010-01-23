@@ -84,5 +84,14 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+        #region MaybePrimitiveExpr Members
+
+        public bool CanEmitPrimitive
+        {
+            get { return _b.PrimitiveType != null; }
+        }
+
+        #endregion
     }
 }

@@ -117,6 +117,12 @@ namespace clojure.lang.CljCompiler.Ast
             return field;
         }
 
+        public override bool CanEmitPrimitive
+        {
+            get { return Util.IsPrimitive(_tinfo.FieldType); }
+        }
+
+
         #endregion
     }
 
@@ -148,6 +154,12 @@ namespace clojure.lang.CljCompiler.Ast
             prop = Compiler.MaybeAddDebugInfo(prop, _spanMap);
             return prop;
         }
+
+        public override bool CanEmitPrimitive
+        {
+            get { return Util.IsPrimitive(_tinfo.PropertyType); }
+        }
+
 
         #endregion
     }

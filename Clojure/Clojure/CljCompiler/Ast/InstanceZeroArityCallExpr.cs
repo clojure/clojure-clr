@@ -92,6 +92,11 @@ namespace clojure.lang.CljCompiler.Ast
             return call;
         }
 
+        public override bool CanEmitPrimitive
+        {
+            get { return HasClrType && Util.IsPrimitive(ClrType); }
+        }
+
         #endregion
     }
 }

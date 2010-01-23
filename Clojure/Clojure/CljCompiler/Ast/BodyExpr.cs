@@ -24,7 +24,7 @@ using System.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class BodyExpr : Expr
+    class BodyExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
@@ -100,6 +100,31 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr e = (Expr)_exprs.nth(i);
                 exprs.Add(e.GenDlr(context));
             }
+
+            return Expression.Block(exprs);
+        }
+
+        #endregion
+
+        #region MaybePrimitiveExpr Members
+
+        public bool CanEmitPrimitive
+        {
+            get { return LastExpr is MaybePrimitiveExpr && ((MaybePrimitiveExpr)LastExpr).CanEmitPrimitive; }
+        }
+
+        public Expression GenDlrUnboxed(GenContext context)
+        {
+            List<Expression> exprs = new List<Expression>(_exprs.count());
+
+            for (int i = 0; i < _exprs.count()-1; i++)
+            {
+                Expr e = (Expr)_exprs.nth(i);
+                exprs.Add(e.GenDlr(context));
+            }
+
+            MaybePrimitiveExpr last = (MaybePrimitiveExpr)LastExpr;
+            exprs.Add(last.GenDlrUnboxed(context));
 
             return Expression.Block(exprs);
         }

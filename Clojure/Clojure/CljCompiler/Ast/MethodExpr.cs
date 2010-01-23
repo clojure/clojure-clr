@@ -168,6 +168,11 @@ namespace clojure.lang.CljCompiler.Ast
         protected abstract Expression GenTargetExpression(GenContext context);
         protected abstract Expression GenDlrForMethod(GenContext context);
 
+        public override bool CanEmitPrimitive
+        {
+            get { return _method != null && Util.IsPrimitive(_method.ReturnType); }
+        }
+
         #endregion
     }
 }

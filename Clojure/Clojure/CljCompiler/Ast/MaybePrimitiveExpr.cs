@@ -26,6 +26,7 @@ namespace clojure.lang.CljCompiler.Ast
 {
     interface MaybePrimitiveExpr
     {
+        bool CanEmitPrimitive { get; }
         Expression GenDlrUnboxed(GenContext context);
     }
 }
