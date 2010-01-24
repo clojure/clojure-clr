@@ -69,12 +69,7 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.NEXT_LOCAL_NUM, 0));
 
                 // register 'this' as local 0  
-                //method._thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null);
-                if (fn.ThisName != null)
-                    method._thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName), null, null);
-                else
-                    Compiler.GetAndIncLocalNum();
-
+                method._thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null,false);
 
                 ParamParseState paramState = ParamParseState.Required;
                 IPersistentVector argLocals = PersistentVector.EMPTY;
@@ -98,7 +93,7 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         LocalBinding b = Compiler.RegisterLocal(p,
                             paramState == ParamParseState.Rest ? Compiler.ISEQ : Compiler.TagOf(p),
-                            null);
+                            null,true);
 
                         argLocals = argLocals.cons(b);
                         switch (paramState)

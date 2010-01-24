@@ -107,7 +107,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                         Expr init = Compiler.GenerateAST(bindings.nth(i + 1),false);
                         // Sequential enhancement of env (like Lisp let*)
-                        LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), init);
+                        LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), init,false);
                         BindingInit bi = new BindingInit(b, init);
                         bindingInits = bindingInits.cons(bi);
 

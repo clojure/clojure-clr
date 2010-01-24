@@ -111,6 +111,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 IPersistentVector body = PersistentVector.EMPTY;
                 IPersistentVector catches = PersistentVector.EMPTY;
+                Expr bodyExpr = null;
                 Expr finallyExpr = null;
                 bool caught = false;
 
@@ -129,6 +130,8 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                     else
                     {
+                        if (bodyExpr == null)
+                            bodyExpr = new BodyExpr.Parser().Parse(RT.seq(body), isRecurContext);
                         if (Util.equals(op, Compiler.CATCH))
                         {
                             Type t = Compiler.MaybeType(RT.second(f), false);
@@ -151,7 +154,7 @@ namespace clojure.lang.CljCompiler.Ast
                                 Var.pushThreadBindings(dynamicBindings);
                                 LocalBinding lb = Compiler.RegisterLocal(sym,
                                     (Symbol)(RT.second(f) is Symbol ? RT.second(f) : null),
-                                    null);
+                                    null,false);
                                 Expr handler = (new BodyExpr.Parser()).Parse(RT.next(RT.next(RT.next(f))), isRecurContext);
                                 catches = catches.cons(new CatchClause(t, lb, handler)); ;
                             }
@@ -179,7 +182,8 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
-                Expr bodyExpr = (new BodyExpr.Parser()).Parse(RT.seq(body),isRecurContext);
+                if ( bodyExpr == null )
+                    bodyExpr = (new BodyExpr.Parser()).Parse(RT.seq(body),isRecurContext);
                 return new TryExpr(bodyExpr, catches, finallyExpr, retLocal, finallyLocal);
               }
         }

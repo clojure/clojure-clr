@@ -67,11 +67,19 @@ namespace clojure.lang.CljCompiler.Ast
             set { _paramExpression = value; }
         }
 
+        readonly bool _isArg;
+        public bool IsArg
+        {
+            get { return _isArg; }
+        } 
+
+
+
         #endregion
 
         #region C-tors
 
-        public LocalBinding(int index, Symbol sym, Symbol tag, Expr init)
+        public LocalBinding(int index, Symbol sym, Symbol tag, Expr init, bool isArg)
         {
             if (Compiler.MaybePrimitiveType(init) != null && tag != null)
                 throw new InvalidOperationException("Can't type hint a local with a primitive initializer");
@@ -81,6 +89,7 @@ namespace clojure.lang.CljCompiler.Ast
             _tag = tag;
             _init = init;
             _name = Compiler.Munge(sym.Name);
+            _isArg = isArg;
         }
 
         #endregion
