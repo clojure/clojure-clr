@@ -146,8 +146,22 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            Expression fn = _fexpr.GenDlr(context);
-            fn = Expression.Convert(fn, typeof(IFn));
+            Expression basicFn = _fexpr.GenDlr(context);
+            basicFn = Expression.Convert(basicFn, typeof(IFn));
+
+            Expression fn;
+
+            // TODO: Determine if this optimization is valid for Immediate mode
+            if (_isDirect && context.Mode == CompilerMode.File)
+            {
+                ParameterExpression v = Expression.Parameter(typeof(IFn));
+                Expression initV = Expression.Assign(v, Expression.Field(null, context.ObjExpr.BaseType, context.ObjExpr.VarCallsiteName(_siteIndex)));
+                Expression test = Expression.Condition(Expression.Equal(v, Expression.Constant(null,typeof(IFn))), basicFn, v);
+                Expression block = Expression.Block(typeof(IFn), new ParameterExpression[] { v }, initV, test);
+                fn = block;
+            }
+            else
+                fn = basicFn;
 
             int argCount = _args.count();
 

@@ -245,6 +245,9 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Var_set = typeof(Var).GetMethod("set");
         internal static readonly MethodInfo Method_Var_setMeta = typeof(Var).GetMethod("setMeta");
         internal static readonly MethodInfo Method_Var_popThreadBindings = typeof(Var).GetMethod("popThreadBindings");
+        internal static readonly MethodInfo Method_Var_hasRoot = typeof(Var).GetMethod("hasRoot");
+        internal static readonly MethodInfo Method_Var_getRoot = typeof(Var).GetMethod("getRoot");
+
 
         internal static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
 

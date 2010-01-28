@@ -319,10 +319,13 @@ namespace clojure.lang.CljCompiler.Ast
 
             GenerateConstantFields(baseTB);
             GenerateClosedOverFields(baseTB);
+            GenerateVarCallsites(baseTB);
+
             GenerateBaseClassConstructor(baseTB);
 
             return baseTB;
         }
+
 
         private void GenerateConstantFields(TypeBuilder baseTB)
         {
@@ -379,6 +382,17 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+
+        private void GenerateVarCallsites(TypeBuilder baseTB)
+        {
+            for (int i = 0; i < _varCallsites.count(); i++)
+            {
+                string fieldName = VarCallsiteName(i);
+                FieldBuilder fb = baseTB.DefineField(fieldName, typeof(IFn), FieldAttributes.FamORAssem | FieldAttributes.Static);
+            }
+        }
+
+
         static readonly ConstructorInfo AFunction_Default_Ctor = typeof(AFunction).GetConstructor(Type.EmptyTypes);
         static readonly ConstructorInfo RestFn_Int_Ctor = typeof(RestFn).GetConstructor(new Type[] { typeof(int) });
 
@@ -434,12 +448,58 @@ namespace clojure.lang.CljCompiler.Ast
             if (_constants.count() > 0)
             {
                 ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
-                MethodBuilder method = GenerateConstants(fnTB, baseType);
+                MethodBuilder method1 = GenerateConstants(fnTB, baseType);
+                MethodBuilder method2 = GenerateVarCallsiteInits(fnTB, baseType);
                 ILGen gen = new ILGen(cb.GetILGenerator());
-                gen.EmitCall(method);       // gen.Emit(OpCodes.Call, method);
+                gen.EmitCall(method1);       // gen.Emit(OpCodes.Call, method1);
+                if ( method2 != null )
+                    gen.EmitCall(method2);
                 gen.Emit(OpCodes.Ret);
 
             }
+        }
+
+        public String VarCallsiteName(int n)
+        {
+            return "__var__callsite__" + n;
+        }
+
+        private MethodBuilder GenerateVarCallsiteInits(TypeBuilder fnTB, Type baseType)
+        {
+            if (_varCallsites.count() == 0)
+                return null;
+
+            List<Expression> inits = new List<Expression>();
+            for (int i = 0; i < _varCallsites.count(); i++)
+            {
+                Var v = (Var)_varCallsites.nth(i);
+                ParameterExpression varTemp = Expression.Parameter(typeof(Var), "varTemp");
+                ParameterExpression valTemp = Expression.Parameter(typeof(Object), "valTemp");
+
+                Expression block = Expression.Block(
+                    new ParameterExpression[] { varTemp },
+                     Expression.Assign(
+                        varTemp,
+                        Expression.Call(null, Compiler.Method_RT_var2, Expression.Constant(v.Namespace.Name.Name), Expression.Constant(v.Symbol.Name))),
+                    Expression.IfThen(
+                        Expression.Call(varTemp, Compiler.Method_Var_hasRoot),
+                        Expression.Block(
+                            new ParameterExpression[] { valTemp },
+                            Expression.Assign(valTemp, Expression.Call(varTemp, Compiler.Method_Var_getRoot)),
+                            Expression.IfThen(
+                                Expression.TypeIs(valTemp, typeof(AFunction)),
+                                Expression.Assign(
+                                    Expression.Field(null, _baseType, VarCallsiteName(i)),
+                                    Expression.Convert(valTemp, typeof(IFn)))))));
+                inits.Add(block);
+            }
+
+            Expression allInits = Expression.Block(inits);
+            LambdaExpression lambda = Expression.Lambda(allInits);
+            MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_callsites", MethodAttributes.Private | MethodAttributes.Static);
+            //lambda.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());   
+            lambda.CompileToMethod(methodBuilder, true);
+            return methodBuilder;
         }
 
         private Expression GenerateListAsObjectArray(object value)
@@ -579,7 +639,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Expression block = Expression.Block(inits);
                 LambdaExpression lambda = Expression.Lambda(block);
-                MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME, MethodAttributes.Private | MethodAttributes.Static);
+                MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME+"_constants", MethodAttributes.Private | MethodAttributes.Static);
                 //lambda.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());   
                 lambda.CompileToMethod(methodBuilder, true);
                 return methodBuilder;

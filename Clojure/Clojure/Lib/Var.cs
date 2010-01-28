@@ -396,7 +396,7 @@ namespace clojure.lang
         /// 
         /// </summary>
         /// <returns>The root value.</returns>
-        object getRoot()
+        public object getRoot()
         {
             if ( hasRoot() )
                 return _root;
