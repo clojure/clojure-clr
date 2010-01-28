@@ -62,7 +62,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return Compiler.TagToType(_tag); }
+            get { return HostExpr.TagToType(_tag); }
         }
 
         #endregion

@@ -24,25 +24,25 @@ using System.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class KeywordExpr : Expr
+    sealed class InstanceOfExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
-        readonly Keyword _kw;
-
-        public Keyword Kw
-        {
-            get { return _kw; }
-        } 
-
+        readonly Expr _expr;
+        readonly Type _t;
+        readonly string _source;
+        readonly IPersistentMap _spanMap;
 
         #endregion
 
-        #region Ctors
+        #region C-tors
 
-        public KeywordExpr(Keyword kw)
+        public InstanceOfExpr(string source, IPersistentMap spanMap, Type t, Expr expr)
         {
-            _kw = kw;
+            _source = source;
+            _spanMap = spanMap;
+            _t = t;
+            _expr = expr;
         }
 
         #endregion
@@ -56,7 +56,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return typeof(Keyword); }
+            get { return typeof(bool); }
         }
 
         #endregion
@@ -65,7 +65,21 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            return context.ObjExpr.GenKeyword(context,_kw);
+            return Expression.Convert(GenDlrUnboxed(context), typeof(Object));
+        }
+
+        #endregion
+
+        #region MaybePrimitiveExpr Members
+
+        public bool CanEmitPrimitive
+        {
+            get { return true; }
+        }
+
+        public Expression GenDlrUnboxed(GenContext context)
+        {
+            return Expression.TypeIs(_expr.GenDlr(context), _t); ;
         }
 
         #endregion

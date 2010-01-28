@@ -134,7 +134,7 @@ namespace clojure.lang.CljCompiler.Ast
                             bodyExpr = new BodyExpr.Parser().Parse(RT.seq(body), isRecurContext);
                         if (Util.equals(op, Compiler.CATCH))
                         {
-                            Type t = Compiler.MaybeType(RT.second(f), false);
+                            Type t = HostExpr.MaybeType(RT.second(f), false);
                             if (t == null)
                                 throw new ArgumentException("Unable to resolve classname: " + RT.second(f));
                             if (!(RT.third(f) is Symbol))

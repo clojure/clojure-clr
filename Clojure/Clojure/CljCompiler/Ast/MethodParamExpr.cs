@@ -22,27 +22,22 @@ using Microsoft.Scripting.Ast;
 using System.Linq.Expressions;
 #endif
 
+
 namespace clojure.lang.CljCompiler.Ast
 {
-    class KeywordExpr : Expr
+    sealed class MethodParamExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
-        readonly Keyword _kw;
-
-        public Keyword Kw
-        {
-            get { return _kw; }
-        } 
-
+        readonly Type _t;
 
         #endregion
 
-        #region Ctors
+        #region C-tors
 
-        public KeywordExpr(Keyword kw)
+        public MethodParamExpr(Type t)
         {
-            _kw = kw;
+            _t = t;
         }
 
         #endregion
@@ -51,12 +46,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override bool HasClrType
         {
-            get { return true; }
+            get { return _t != null; }
         }
 
         public override Type ClrType
         {
-            get { return typeof(Keyword); }
+            get { return _t; }
         }
 
         #endregion
@@ -65,7 +60,21 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            return context.ObjExpr.GenKeyword(context,_kw);
+            throw new InvalidOperationException("Can't emit");
+        }
+
+        #endregion
+
+        #region MaybePrimitiveExpr Members
+
+        public bool CanEmitPrimitive
+        {
+            get { return Util.IsPrimitive(_t); }
+        }
+
+        public Expression GenDlrUnboxed(GenContext context)
+        {
+            throw new InvalidOperationException("Can't emit");
         }
 
         #endregion

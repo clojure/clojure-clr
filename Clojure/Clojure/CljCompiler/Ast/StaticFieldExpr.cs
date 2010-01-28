@@ -103,7 +103,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return _tag != null ? Compiler.TagToType(_tag) : _tinfo.FieldType; }
+            get { return _tag != null ? HostExpr.TagToType(_tag) : _tinfo.FieldType; }
         }
 
         #endregion
@@ -141,7 +141,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return _tag != null ? Compiler.TagToType(_tag) : _tinfo.PropertyType; }
+            get { return _tag != null ? HostExpr.TagToType(_tag) : _tinfo.PropertyType; }
         }
 
         #endregion

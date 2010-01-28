@@ -95,8 +95,10 @@ namespace clojure.lang
 
         static readonly Keyword VOLATILE_KEY = Keyword.intern(null,"volatile");
         static readonly Keyword IMPLEMENTS_KEY = Keyword.intern(null,"implements");
-        static readonly Keyword PROTOCOL_KEY = Keyword.intern(null,"protocol");
+        internal static readonly Keyword PROTOCOL_KEY = Keyword.intern(null,"protocol");
         static readonly Keyword ON_KEY = Keyword.intern(null, "on");
+
+        internal const string COMPILE_STUB_PREFIX = "compile__stub";
 
         #endregion
 
@@ -134,7 +136,7 @@ namespace clojure.lang
         internal static readonly Var DOCUMENT_INFO = Var.create(null);  // Mine
         internal static readonly Var SOURCE_SPAN = Var.create(null);    // Mine
 
-        internal static readonly Var METHODS = Var.create(null);
+        internal static readonly Var METHOD = Var.create(null);
         public static readonly Var LOCAL_ENV = Var.create(PersistentHashMap.EMPTY);
         //Integer
         internal static readonly Var NEXT_LOCAL_NUM = Var.create(0);
@@ -149,9 +151,13 @@ namespace clojure.lang
         internal static readonly Var CONSTANTS = Var.create();      //vector<object>
         internal static readonly Var KEYWORDS = Var.create();       //keyword->constid
 
-        //internal static readonly Var KEYWORD_CALLSITES = Var.create();
-        //internal static readonly Var PROTOCOL_CALLSITES = Var.create();
-        //internal static readonly Var VAR_CALLSITES = Var.create();       
+        internal static readonly Var KEYWORD_CALLSITES = Var.create();
+        internal static readonly Var PROTOCOL_CALLSITES = Var.create();
+        internal static readonly Var VAR_CALLSITES = Var.create();
+
+        internal static readonly Var COMPILE_STUB_SYM = Var.create(null);
+        internal static readonly Var COMPILE_STUB_CLASS = Var.create(null);
+
 
 
         internal static readonly Var COMPILER_CONTEXT = Var.create(null);
@@ -411,7 +417,7 @@ namespace clojure.lang
                 if (namespaceFor(symbol) == null)
                 {
                     Symbol nsSym = Symbol.create(symbol.Namespace);
-                    Type t = MaybeType(nsSym, false);
+                    Type t = HostExpr.MaybeType(nsSym, false);
                     if (t != null)
                     {
                         FieldInfo finfo;
@@ -546,7 +552,7 @@ namespace clojure.lang
                             throw new ArgumentException("Malformed member expression, expecting (.member target ...)");
                         Symbol method = Symbol.intern(sname.Substring(1));
                         object target = RT.second(form);
-                        if (MaybeType(target, false) != null)
+                        if (HostExpr.MaybeType(target, false) != null)
                             target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY, CLASS));
                         // JVM: return RT.listStar(DOT, target, method, form.next().next());
                         // We need to make sure source information gets transferred
@@ -555,7 +561,7 @@ namespace clojure.lang
                     else if (NamesStaticMember(sym))
                     {
                         Symbol target = Symbol.intern(sym.Namespace);
-                        Type t = MaybeType(target, false);
+                        Type t = HostExpr.MaybeType(target, false);
                         if (t != null)
                         {
                             Symbol method = Symbol.intern(sym.Name);
@@ -729,6 +735,38 @@ namespace clojure.lang
             return new KeywordExpr(keyword);
         }
 
+        internal static int RegisterKeywordCallsite(Keyword keyword)
+        {
+            if (!KEYWORD_CALLSITES.IsBound)
+                throw new InvalidOperationException("KEYWORD_CALLSITES is not bound");
+
+            IPersistentVector keywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
+            keywordCallsites = keywordCallsites.cons(keyword);
+            KEYWORD_CALLSITES.set(keywordCallsites);
+            return keywordCallsites.count() - 1;
+        }
+
+        internal static int RegisterProtocolCallsite(Var v)
+        {
+            if (!PROTOCOL_CALLSITES.IsBound)
+                throw new InvalidOperationException("PROTOCOL_CALLSITES is not bound");
+
+            IPersistentVector protocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
+            protocolCallsites = protocolCallsites.cons(v);
+            PROTOCOL_CALLSITES.set(protocolCallsites);
+            return protocolCallsites.count() - 1;
+        }
+
+        internal static int RegisterVarCallsite(Var v)
+        {
+            if (!VAR_CALLSITES.IsBound)
+                throw new InvalidOperationException("VAR_CALLSITES is not bound");
+
+            IPersistentVector varCallsites = (IPersistentVector)VAR_CALLSITES.deref();
+            varCallsites = varCallsites.cons(v);
+            VAR_CALLSITES.set(varCallsites);
+            return varCallsites.count() - 1;
+        }
 
         internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init, bool isArg)
         {
@@ -738,7 +776,7 @@ namespace clojure.lang
 
             IPersistentMap localsMap = (IPersistentMap)LOCAL_ENV.deref();
             LOCAL_ENV.set(RT.assoc(localsMap,b.Symbol, b));
-            FnMethod method = (FnMethod)METHODS.deref();
+            ObjMethod method = (ObjMethod)METHOD.deref();
             method.Locals = (IPersistentMap)RT.assoc(method.Locals,b, b);
             method.IndexLocals = (IPersistentMap)RT.assoc(method.IndexLocals, num, b);
             return b;
@@ -747,7 +785,7 @@ namespace clojure.lang
         internal static int GetAndIncLocalNum()
         {
             int num = (int)NEXT_LOCAL_NUM.deref();
-            FnMethod m = (FnMethod)METHODS.deref();
+            ObjMethod m = (ObjMethod)METHOD.deref();
             if (num > m.MaxLocal)
                 m.MaxLocal = num;
             NEXT_LOCAL_NUM.set(num + 1);
@@ -762,7 +800,7 @@ namespace clojure.lang
             LocalBinding b = (LocalBinding)RT.get(LOCAL_ENV.deref(), symbol);
             if (b != null)
             {
-                FnMethod method = (FnMethod)METHODS.deref();
+                ObjMethod method = (ObjMethod)METHOD.deref();
                 CloseOver(b, method);
             }
 
@@ -785,6 +823,14 @@ namespace clojure.lang
             }
         }
 
+        internal static Type[] GetTypes(ParameterInfo[] ps)
+        {
+            Type[] ts = new Type[ps.Length];
+            for (int i = 0; i < ps.Length; i++)
+                ts[i] = ps[i].ParameterType;
+            return ts;
+        }
+
         internal static Symbol TagOf(object o)
         {
             object tag = RT.get(RT.meta(o), RT.TAG_KEY);
@@ -796,81 +842,41 @@ namespace clojure.lang
         }
 
 
-        internal static Type MaybeType(object form, bool stringOk)
-        {
-            if (form is Type)
-                return (Type)form;
-
-            Type t = null;
-            if (form is Symbol)
+	    static Type PrimType(Symbol sym){
+		    if(sym == null)
+			    return null;
+		    Type t = null;
+            switch( sym.Name )
             {
-                Symbol sym = (Symbol)form;
-                if (sym.Namespace == null) // if ns-qualified, can't be classname
-                {
-                    // TODO:  This uses Java  [whatever  notation.  Figure out what to do here.
-                    if (sym.Name.IndexOf('.') > 0 || sym.Name[0] == '[')
-                        t = RT.classForName(sym.Name);
-                    else
-                    {
-                        object o = CurrentNamespace.GetMapping(sym);
-                        if (o is Type)
-                            t = (Type)o;
-                    }
+                case "int": t = typeof(int); break;
+                case "long": t = typeof(long); break;
+                case "float": t= typeof(float); break;
+                case "double": t= typeof(double); break;
+                case "char": t = typeof(char); break;
+                case "short": t = typeof(short); break;
+                case "byte": t = typeof(byte); break;
+                case "bool":
+                case "boolean": t= typeof(bool); break;
+                case "void": t = typeof(void); break;
+                case "uint": t = typeof(uint); break;
+                case "ulong": t = typeof(ulong); break;
+                case "ushort": t = typeof(ushort); break;
+                case "sbyte": t  = typeof(sbyte); break;
+            }	
+            return t;
+	    }
 
-                }
-            }
-            else if (stringOk && form is string)
-                t = RT.classForName((string)form);
-
+        internal static Type TagType(Object tag)
+        {
+            if (tag == null)
+                return typeof(object);
+            Type t = null;
+            if (tag is Symbol)
+                t = PrimType((Symbol)tag);
+            if (t == null)
+                t = HostExpr.TagToType(tag);
             return t;
         }
-
-        internal static Type TagToType(object tag)
-        {
-            Type t = MaybeType(tag, true);
-            if (tag is Symbol)
-            {
-                Symbol sym = (Symbol)tag;
-                if (sym.Namespace == null) // if ns-qualified, can't be classname
-                {
-                    switch (sym.Name)
-                    {
-                        case "objects": t = typeof(object[]); break;
-                        case "ints": t = typeof(int[]); break;
-                        case "longs": t = typeof(long[]); break;
-                        case "floats": t = typeof(float[]); break;
-                        case "doubles": t = typeof(double[]); break;
-                        case "chars": t = typeof(char[]); break;
-                        case "shorts": t = typeof(short[]); break;
-                        case "bytes": t = typeof(byte[]); break;
-                        case "booleans":
-                        case "bools": t = typeof(bool[]); break;
-                    }
-                }
-            }
-            else if (tag is String)
-            {
-                // TODO: Find a general solution to this problem.
-                string strTag = (string)tag;
-                //switch (strTag)
-                //{
-                //    case "Object[]":
-                //    case "object[]":
-                //        t = typeof(object[]);
-                //        break;
-                //    case "Object[][]":
-                //    case "object[][]":
-                //        t = typeof(object[][]);
-                //        break;
-                //}
-                t = Type.GetType(strTag);
-            }
-                    
-            if (t != null)
-                return t;
-
-            throw new ArgumentException("Unable to resolve typename: " + tag);
-        }    
 
         private static IPersistentMap CHAR_MAP = PersistentHashMap.create('-', "_",
             //		                         '.', "_DOT_",
@@ -1152,7 +1158,7 @@ namespace clojure.lang
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     //LINE_AFTER.set(lntr.LineNumber);
-                    LambdaExpression ast = Compiler.GenerateLambda(form, false);
+                    LambdaExpression ast = Compiler.GenerateLambda(form, true);  // DEBUG ONLY, should be false
                     // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
                     ret = ast.Compile().DynamicInvoke();
                     //LINE_BEFORE.set(lntr.LineNumber);

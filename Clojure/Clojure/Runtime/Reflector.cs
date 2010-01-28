@@ -111,7 +111,7 @@ namespace clojure.lang
 
         #region Method lookup
 
-        static List<MethodInfo> GetMethods(Type t, string name, int arity, bool getStatics)
+        public static List<MethodInfo> GetMethods(Type t, string name, int arity, bool getStatics)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.InvokeMethod;
             if (getStatics)

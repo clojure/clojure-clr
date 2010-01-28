@@ -115,7 +115,7 @@ namespace clojure.lang.CljCompiler.Ast
             get
             {
                 return _tag != null
-                    ? Compiler.TagToType(_tag)
+                    ? HostExpr.TagToType(_tag)
                     : _init != null
                     ? _init.ClrType
                     : null;

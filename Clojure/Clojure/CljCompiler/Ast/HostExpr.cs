@@ -71,7 +71,7 @@ namespace clojure.lang.CljCompiler.Ast
                 // determine static or instance
                 // static target must be symbol, either fully.qualified.Typename or Typename that has been imported
                  
-                Type t = Compiler.MaybeType(RT.second(form), false);
+                Type t = HostExpr.MaybeType(RT.second(form), false);
                 // at this point, t will be non-null if static
 
                 Expr instance = null;
@@ -408,6 +408,81 @@ namespace clojure.lang.CljCompiler.Ast
                 return Expression.Call(null, Method_Util_ConvertToDecimal, argExpr);
             
             return argExpr;
+        }
+
+        #endregion
+
+        #region Tags and types
+
+        internal static Type MaybeType(object form, bool stringOk)
+        {
+            if (form is Type)
+                return (Type)form;
+
+            Type t = null;
+            if (form is Symbol)
+            {
+                Symbol sym = (Symbol)form;
+                if (sym.Namespace == null) // if ns-qualified, can't be classname
+                {
+                    if (Util.equals(sym, Compiler.COMPILE_STUB_SYM.get()))
+                        return (Type)Compiler.COMPILE_STUB_CLASS.get();
+                    // TODO:  This uses Java  [whatever  notation.  Figure out what to do here.
+                    if (sym.Name.IndexOf('.') > 0 || sym.Name[0] == '[')
+                        t = RT.classForName(sym.Name);
+                    else
+                    {
+                        object o = Compiler.CurrentNamespace.GetMapping(sym);
+                        if (o is Type)
+                            t = (Type)o;
+                    }
+
+                }
+            }
+            else if (stringOk && form is string)
+                t = RT.classForName((string)form);
+
+            return t;
+        }
+
+        internal static Type TagToType(object tag)
+        {
+            Type t = MaybeType(tag, true);
+            if (tag is Symbol)
+            {
+                Symbol sym = (Symbol)tag;
+                if (sym.Namespace == null) // if ns-qualified, can't be classname
+                {
+                    switch (sym.Name)
+                    {
+                        case "objects": t = typeof(object[]); break;
+                        case "ints": t = typeof(int[]); break;
+                        case "longs": t = typeof(long[]); break;
+                        case "floats": t = typeof(float[]); break;
+                        case "doubles": t = typeof(double[]); break;
+                        case "chars": t = typeof(char[]); break;
+                        case "shorts": t = typeof(short[]); break;
+                        case "bytes": t = typeof(byte[]); break;
+                        case "booleans":
+                        case "bools": t = typeof(bool[]); break;
+                        case "uints": t = typeof(uint[]); break;
+                        case "ushorts": t = typeof(ushort[]); break;
+                        case "ulongs": t = typeof(ulong[]); break;
+                        case "sbytes": t = typeof(sbyte[]); break;
+                    }
+                }
+            }
+            else if (tag is String)
+            {
+                // TODO: This is no longer in the Java version.  SHould we get rid of?
+                string strTag = (string)tag;
+                t = Type.GetType(strTag);
+            }
+
+            if (t != null)
+                return t;
+
+            throw new ArgumentException("Unable to resolve typename: " + tag);
         }
 
         #endregion

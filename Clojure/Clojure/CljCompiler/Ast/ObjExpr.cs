@@ -18,13 +18,14 @@ using System.Linq;
 using System.Text;
 #if CLR2
 using Microsoft.Scripting.Ast;
+#else
+using System.Linq.Expressions;
+#endif
 using System.Reflection.Emit;
 using System.Reflection;
 using Microsoft.Scripting.Generation;
 using System.Collections;
-#else
-using System.Linq.Expressions;
-#endif
+
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -32,8 +33,7 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        private string _name;
-
+        protected string _name;
         public string Name
         {
             get { return _name; }
@@ -90,14 +90,20 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected IPersistentCollection _methods;
 
+        protected IPersistentMap _fields = null;
+
+        protected bool IsDefType { get { return _fields != null; } }
+
         protected IPersistentMap _keywords = PersistentHashMap.EMPTY;         // Keyword -> KeywordExpr
         protected IPersistentMap _vars = PersistentHashMap.EMPTY;
         protected PersistentVector _constants;
         protected int _constantsID;
 
-        IPersistentVector _keywordCallSites;
-        IPersistentVector _protocolCallSites;
-        IPersistentVector _varCallSites;
+        protected int altCtorDrops = 0;
+
+        protected IPersistentVector _keywordCallsites;
+        protected IPersistentVector _protocolCallsites;
+        protected IPersistentVector _varCallsites;
 
 
 
@@ -122,7 +128,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return _tag != null ? Compiler.TagToType(_tag) : typeof(IFn); }
+            get { return _tag != null ? HostExpr.TagToType(_tag) : typeof(IFn); }
         }
 
         #endregion
@@ -725,7 +731,13 @@ namespace clojure.lang.CljCompiler.Ast
             // fn is the enclosing IFn, not this.
             throw new NotImplementedException();
         }
-        
+
+
+        public static string TrimGenID(string name)
+        {
+            int i = name.LastIndexOf("__");
+            return i == -1 ? name : name.Substring(0, i);
+        }
         #endregion
     }
 }

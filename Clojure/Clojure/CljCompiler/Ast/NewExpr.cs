@@ -105,7 +105,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (form.count() < 2)
                     throw new Exception("wrong number of arguments, expecting: (new Typename args ...)");
 
-                Type t = Compiler.MaybeType(RT.second(form), false);
+                Type t = HostExpr.MaybeType(RT.second(form), false);
                 if (t == null)
                     throw new ArgumentException("Unable to resolve classname: " + RT.second(form));
 

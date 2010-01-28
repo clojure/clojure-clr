@@ -63,7 +63,7 @@ namespace clojure.lang.CljCompiler.Ast
             get 
             {
                 if (_tag != null)
-                    return Compiler.TagToType(_tag);
+                    return HostExpr.TagToType(_tag);
                 return _b.ClrType;
             }
         }

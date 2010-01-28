@@ -67,7 +67,7 @@ namespace clojure.lang.CljCompiler.Ast
         // This naming convention drawn from the Java code.
         internal void ComputeNames(ISeq form, string name)
         {
-            FnMethod enclosingMethod = (FnMethod)Compiler.METHODS.deref();
+            ObjMethod enclosingMethod = (ObjMethod)Compiler.METHOD.deref();
 
             string baseName = enclosingMethod != null
                 ? (enclosingMethod.Objx.Name + "$")
@@ -110,7 +110,10 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.pushThreadBindings(RT.map(
                     Compiler.CONSTANTS, PersistentVector.EMPTY,
                     Compiler.KEYWORDS, PersistentHashMap.EMPTY,
-                    Compiler.VARS, PersistentHashMap.EMPTY));
+                    Compiler.VARS, PersistentHashMap.EMPTY,
+                    Compiler.KEYWORD_CALLSITES,PersistentVector.EMPTY,
+                    Compiler.PROTOCOL_CALLSITES,PersistentVector.EMPTY,
+                    Compiler.VAR_CALLSITES,PersistentVector.EMPTY));
 
                 //arglist might be preceded by symbol naming this fn
                 if (RT.second(form) is Symbol)
@@ -168,6 +171,10 @@ namespace clojure.lang.CljCompiler.Ast
                 fn._keywords = (IPersistentMap)Compiler.KEYWORDS.deref();
                 fn._vars = (IPersistentMap)Compiler.VARS.deref();
                 fn._constants = (PersistentVector)Compiler.CONSTANTS.deref();
+                fn._keywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
+                fn._protocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
+                fn._varCallsites = (IPersistentVector)Compiler.VAR_CALLSITES.deref();
+
                 fn._constantsID = RT.nextID();
             }
             finally

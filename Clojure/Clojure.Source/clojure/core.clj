@@ -4574,6 +4574,7 @@
 (load "core_proxy")
 (load "core_print")
 (load "genclass")
+(load "core_deftype")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; futures (needs proxy);;;;;;;;;;;;;;;;;;
 (defn future-call 

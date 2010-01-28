@@ -157,7 +157,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 LabelTarget loopLabel = Expression.Label("top");
 
-                Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHODS, this));
+                Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHOD, this));
 
 
 
@@ -214,7 +214,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 LabelTarget loopLabel = Expression.Label("top");
 
-                Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHODS, this));
+                Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHOD, this));
 
                 for (int i = 0; i < _argLocals.count(); i++)
                 {

@@ -29,6 +29,11 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Var _var;
+        public Var Var
+        {
+            get { return _var; }
+        } 
+
         readonly object _tag;
 
         public object Tag
@@ -59,7 +64,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return Compiler.TagToType(_tag);  }
+            get { return HostExpr.TagToType(_tag); }
         }
 
         #endregion

@@ -36,6 +36,15 @@ namespace clojure.lang.CljCompiler.Ast
         readonly IPersistentVector _args;
         readonly string _source;
         readonly IPersistentMap _spanMap;
+        bool _isProtocol = false;
+        bool _isDirect = false;
+        int _siteIndex = -1;
+        Type _protocolOn;
+        MethodInfo _onMethod;
+
+        static readonly Keyword _onKey = Keyword.intern("on");
+        static readonly Keyword _methodMapKey = Keyword.intern("method-map");
+        static readonly Keyword _dynamicKey = Keyword.intern("dynamic");
 
         #endregion
 
@@ -47,6 +56,38 @@ namespace clojure.lang.CljCompiler.Ast
             _spanMap = spanMap;
             _fexpr = fexpr;
             _args = args;
+
+            if (fexpr is VarExpr)
+            {
+                Var fvar = ((VarExpr)fexpr).Var;
+                Var pvar = (Var)RT.get(fvar.meta(), Compiler.PROTOCOL_KEY);
+                if (pvar != null && Compiler.PROTOCOL_CALLSITES.IsBound)
+                {
+                    _isProtocol = true;
+                    _siteIndex = Compiler.RegisterProtocolCallsite(fvar);
+                    Object pon = RT.get(pvar.get(), _onKey);
+                    _protocolOn = HostExpr.MaybeType(pon, false);
+                    if (_protocolOn != null)
+                    {
+                        IPersistentMap mmap = (IPersistentMap)RT.get(pvar.get(), _methodMapKey);
+                        string mname = Compiler.Munge(((Keyword)mmap.valAt(Keyword.intern(fvar.Symbol))).Symbol.ToString());
+                        List<MethodInfo> methods = Reflector.GetMethods(_protocolOn, mname, args.count() - 1,  false);
+                        if (methods.Count != 1)
+                            throw new ArgumentException(String.Format("No single method: {0} of interface: {1} found for function: {2} of protocol: {3}",
+                                mname, _protocolOn.FullName, fvar.Symbol, pvar.Symbol));
+                        _onMethod = methods[0];
+                    }
+                }
+                else if (pvar == null && Compiler.VAR_CALLSITES.IsBound
+                    && fvar.Namespace.Name.Name.StartsWith("clojure")
+                    && !RT.booleanCast(RT.get(RT.meta(fvar), _dynamicKey)))
+                {
+                    // Java TODO: more specific criteria for binding these
+                    _isDirect = true;
+                    _siteIndex = Compiler.RegisterVarCallsite(fvar);
+                }
+            }
+
             _tag = tag ?? (fexpr is VarExpr ? ((VarExpr)fexpr).Tag : null);
         }
 
@@ -61,7 +102,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return Compiler.TagToType(_tag); }
+            get { return HostExpr.TagToType(_tag); }
         }
 
         #endregion
@@ -70,7 +111,25 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expr Parse(ISeq form)
         {
+            // TODO: DO we need the recur context here and below?
             Expr fexpr = Compiler.GenerateAST(form.first(),false);
+
+            if ( fexpr is VarExpr && ((VarExpr)fexpr).Var.Equals(Compiler.INSTANCE))
+            {
+                if ( RT.second(form) is Symbol )
+                {
+                    Type t = HostExpr.MaybeType(RT.second(form),false);
+                    if ( t != null )
+                        return new InstanceOfExpr((string)Compiler.SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), t, Compiler.GenerateAST(RT.third(form), false));
+                }
+            }
+
+            if ( fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KEYWORD_CALLSITES.IsBound )
+            {
+                Expr target = Compiler.GenerateAST(RT.second(form), false);
+                return new KeywordInvokeExpr((string)Compiler.SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), Compiler.TagOf(form), (KeywordExpr)fexpr, target);
+            }
+
             IPersistentVector args = PersistentVector.EMPTY;
             for ( ISeq s = RT.seq(form.next()); s != null; s = s.next())
                 args = args.cons(Compiler.GenerateAST(s.first(),false));

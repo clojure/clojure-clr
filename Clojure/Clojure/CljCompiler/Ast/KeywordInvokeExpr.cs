@@ -24,25 +24,29 @@ using System.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class KeywordExpr : Expr
+    sealed class KeywordInvokeExpr : Expr
     {
         #region Data
 
-        readonly Keyword _kw;
-
-        public Keyword Kw
-        {
-            get { return _kw; }
-        } 
-
+        readonly KeywordExpr _kw;
+        readonly Object _tag;
+        readonly Expr _target;
+        readonly string _source;
+        readonly IPersistentMap _spanMap;
+        readonly int _siteIndex;
 
         #endregion
 
-        #region Ctors
+        #region C-tors
 
-        public KeywordExpr(Keyword kw)
+        public KeywordInvokeExpr(string source, IPersistentMap spanMap, Symbol tag, KeywordExpr kw, Expr target)
         {
+            _source = source;
+            _spanMap = spanMap;
             _kw = kw;
+            _target = target;
+            _tag = tag;
+            _siteIndex = Compiler.RegisterKeywordCallsite(kw.Kw);
         }
 
         #endregion
@@ -51,12 +55,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override bool HasClrType
         {
-            get { return true; }
+            get { return _tag != null; }
         }
 
         public override Type ClrType
         {
-            get { return typeof(Keyword); }
+            get { return HostExpr.TagToType(_tag); }
         }
 
         #endregion
@@ -65,9 +69,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            return context.ObjExpr.GenKeyword(context,_kw);
+            InvokeExpr ie = new InvokeExpr(_source,_spanMap,(Symbol)_tag,_kw,RT.vector(_target));
+
+            // TODO: Implement the real thing
+            return ie.GenDlr(context);
         }
 
         #endregion
+
     }
 }

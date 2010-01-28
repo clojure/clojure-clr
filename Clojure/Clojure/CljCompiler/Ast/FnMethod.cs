@@ -38,7 +38,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region C-tors
 
-        public FnMethod(FnExpr fn, FnMethod parent)
+        public FnMethod(FnExpr fn, ObjMethod parent)
             :base(fn,parent)
         {
         }
@@ -58,12 +58,12 @@ namespace clojure.lang.CljCompiler.Ast
 
             try
             {
-                FnMethod method = new FnMethod(fn, (FnMethod)Compiler.METHODS.deref());
+                FnMethod method = new FnMethod(fn, (ObjMethod)Compiler.METHOD.deref());
                 //method._line = (int) Compiler.LINE.deref();
 
 
                 Var.pushThreadBindings(RT.map(
-                    Compiler.METHODS, method,
+                    Compiler.METHOD, method,
                     Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
                     Compiler.LOOP_LOCALS, null,
                     Compiler.NEXT_LOCAL_NUM, 0));
@@ -125,120 +125,5 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
-
-
-//<<<<<<< HEAD:Clojure/Clojure/CljCompiler/Ast/FnMethod.cs
-//            ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
-//            if (_thisBinding != null) _thisBinding.ParamExpression = thisParm;
-//            fn.ThisParam = thisParm;
-//            parms.Add(thisParm);
-
-//            try
-//            {
-//                LabelTarget loopLabel = Expression.Label("top");
-
-//                Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHODS, this));
-
-
-
-//                for (int i = 0; i < _argLocals.count(); i++)
-//                {
-//                    LocalBinding lb = (LocalBinding)_argLocals.nth(i);
-//                    ParameterExpression parm = Expression.Parameter(typeof(object), lb.Name);
-//                    lb.ParamExpression = parm;
-//                    parms.Add(parm);
-//                }
-
-//                Expression body =
-//                    Expression.Block(
-//                        Expression.Label(loopLabel),
-//                        Compiler.MaybeBox(_body.GenDlr(context)));
-//                LambdaExpression lambda = Expression.Lambda(body, parms);
-//                // JVM: Clears locals here.
-
-
-//                // TODO: Cache all the CreateObjectTypeArray values
-//                MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
-
-//                //lambda.CompileToMethod(mb,DebugInfoGenerator.CreatePdbGenerator());
-//                lambda.CompileToMethod(mb, true);
-//                return mb;
-//            }
-//            finally
-//            {
-//                Var.popThreadBindings();
-//            }
-
-//        }
-
-//        private string GetStaticMethodName()
-//        {
-//            return String.Format("__invokeHelper_{0}{1}", RequiredArity, IsVariadic ? "v" : string.Empty);
-//        }
-
-//        internal LambdaExpression GenerateImmediateLambda(GenContext context)
-//        {
-//            List<ParameterExpression> parmExprs = new List<ParameterExpression>(_argLocals.count());
-//            //List<ParameterExpression> typedParmExprs = new List<ParameterExpression>();
-//            //List<Expression> typedParmInitExprs = new List<Expression>();
-
-//            //FnExpr fn = context.FnExpr;
-//            //ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
-//            //_thisBinding.ParamExpression = thisParm;
-//            //fn.ThisParam = thisParm;
-//            ObjExpr fn = context.ObjExpr;
-//            _thisBinding.ParamExpression = fn.ThisParam;
-
-//            try
-//            {
-
-//                LabelTarget loopLabel = Expression.Label("top");
-
-//                Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHODS, this));
-
-//                for (int i = 0; i < _argLocals.count(); i++)
-//                {
-//                    LocalBinding b = (LocalBinding)_argLocals.nth(i);
-
-//                    ParameterExpression pexpr = Expression.Parameter(typeof(object), b.Name);
-//                    b.ParamExpression = pexpr;
-//                    parmExprs.Add(pexpr);
-//                }
-
-
-//                // TODO:  Eventually, type this param to ISeq.  
-//                // This will require some reworking with signatures in various places around here.
-//                //if (fn.IsVariadic)
-//                //    parmExprs.Add(Expression.Parameter(typeof(object), "____REST"));
-
-//                // If we have any typed parameters, we need to add an extra block to do the initialization.
-
-//                List<Expression> bodyExprs = new List<Expression>();
-//                //bodyExprs.AddRange(typedParmInitExprs);
-//                bodyExprs.Add(Expression.Label(loopLabel));
-//                bodyExprs.Add(Compiler.MaybeBox(_body.GenDlr(context)));
-
-
-//                Expression block;
-//                //if (typedParmExprs.Count > 0)
-//                //    block = Expression.Block(typedParmExprs, bodyExprs);
-//                //else
-//                    block = Expression.Block(bodyExprs);
-
-//                return Expression.Lambda(
-//                    FuncTypeHelpers.GetFFuncType(parmExprs.Count),
-//                    block,
-//                    _fn.ThisName,
-//                    parmExprs);
-//            }
-//            finally
-//            {
-//                Var.popThreadBindings();
-//            }
-//        }
-
-//        #endregion
-//=======
-//>>>>>>> Converted AFn, RestFn to not hold head:Clojure/Clojure/CljCompiler/Ast/FnMethod.cs
     }
 }
