@@ -43,7 +43,7 @@
    (contains? prim->class x) (prim->class x)
    :else (let [strx (str x)]
            (clojure.lang.RT/classForName 
-            (if (some #{\.} strx)
+            (if (some #{\. \[} strx)           ;;; Added in commit 493b8f to add type hints for arrays of primitives.  Prolly not needed for us.
               strx
               (str "System." strx))))))         ;;;(str "java.lang." strx))))))
  
