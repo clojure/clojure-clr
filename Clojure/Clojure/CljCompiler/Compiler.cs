@@ -210,10 +210,12 @@ namespace clojure.lang
         internal static readonly PropertyInfo Method_Compiler_CurrentNamespace = typeof(Compiler).GetProperty("CurrentNamespace");
         internal static readonly MethodInfo Method_Compiler_PushNS = typeof(Compiler).GetMethod("PushNS");
 
-
+        internal static readonly MethodInfo Method_Delegate_CreateDelegate = typeof(Delegate).GetMethod("CreateDelegate", BindingFlags.Static | BindingFlags.Public,null,new Type[] {typeof(Type), typeof(Object), typeof(string)},null);
         internal static readonly MethodInfo Method_IObj_withMeta = typeof(IObj).GetMethod("withMeta");
 
         internal static readonly MethodInfo Method_Keyword_intern = typeof(Keyword).GetMethod("intern", new Type[] { typeof(Symbol) });
+        
+        internal static readonly MethodInfo Method_KeywordLookupSite_Get = typeof(KeywordLookupSite).GetMethod("Get");
 
         internal static readonly MethodInfo Method_Monitor_Enter = typeof(Monitor).GetMethod("Enter");
         internal static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit");
@@ -248,7 +250,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Var_hasRoot = typeof(Var).GetMethod("hasRoot");
         internal static readonly MethodInfo Method_Var_getRoot = typeof(Var).GetMethod("getRoot");
 
-
+        internal static readonly ConstructorInfo Ctor_KeywordLookupSite_2 = typeof(KeywordLookupSite).GetConstructor(new Type[] { typeof(int), typeof(Keyword) });
         internal static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
 
         internal static readonly MethodInfo[] Methods_IFn_invoke = new MethodInfo[MAX_POSITIONAL_ARITY + 2];
