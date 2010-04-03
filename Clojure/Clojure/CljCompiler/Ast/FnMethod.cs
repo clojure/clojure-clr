@@ -141,7 +141,12 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.NEXT_LOCAL_NUM, 0));
 
                 // register 'this' as local 0  
-                method._thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null);
+                //method._thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null);
+                if (fn.ThisName != null)
+                    method._thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName), null, null);
+                else
+                    Compiler.GetAndIncLocalNum();
+
 
                 ParamParseState paramState = ParamParseState.Required;
                 IPersistentVector argLocals = PersistentVector.EMPTY;
@@ -231,7 +236,7 @@ namespace clojure.lang.CljCompiler.Ast
             List<ParameterExpression> parms = new List<ParameterExpression>(_argLocals.count() + 1);
 
             ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
-            _thisBinding.ParamExpression = thisParm;
+            if (_thisBinding != null) _thisBinding.ParamExpression = thisParm;
             fn.ThisParam = thisParm;
             parms.Add(thisParm);
 
@@ -289,7 +294,7 @@ namespace clojure.lang.CljCompiler.Ast
             //_thisBinding.ParamExpression = thisParm;
             //fn.ThisParam = thisParm;
             FnExpr fn = context.FnExpr;
-            _thisBinding.ParamExpression = fn.ThisParam;
+            if ( _thisBinding != null ) _thisBinding.ParamExpression = fn.ThisParam;
 
             try
             {

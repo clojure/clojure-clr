@@ -509,15 +509,7 @@ namespace clojure.lang
             Var v = IsMacro(op);
             if (v != null)
             {
-                try
-                {
-                    Var.pushThreadBindings(RT.map(RT.MACRO_META, RT.meta(form)));
-                    return v.applyTo(form.next());
-                }
-                finally
-                {
-                    Var.popThreadBindings();
-                }
+                return v.applyTo(RT.cons(form, RT.cons(LOCAL_ENV.get(), form.next())));
             }
             else
             {

@@ -412,8 +412,8 @@ namespace clojure.lang
             //= Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), RT.F);
             = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), false);
  
-        public static readonly Var MACRO_META 
-            = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);
+        //public static readonly Var MACRO_META 
+        //    = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);
 
         public static readonly Var MATH_CONTEXT 
             = Var.intern(CLOJURE_NS, Symbol.create("*math-context*"), null);
@@ -453,6 +453,17 @@ namespace clojure.lang
             }
         }
         static readonly Symbol NAMESPACE = Symbol.create("ns");
+
+        sealed class BootNamespaceFN : AFn
+        {
+            public override object invoke(object __form, object __env, object arg1)
+            {
+                Symbol nsname = (Symbol)arg1;
+                Namespace ns = Namespace.findOrCreate(nsname);
+                CURRENT_NS.set(ns);
+                return ns;
+            }
+        }
 
 
         static readonly Symbol IDENTICAL = Symbol.create("identical?");
@@ -505,8 +516,9 @@ namespace clojure.lang
             // We don't have MathContext (yet)
             //MATH_CONTEXT.Tag = Symbol.create("java.math.MathContext");
 
-            // during bootstrap, ns same as in-ns
-            Var nv = Var.intern(CLOJURE_NS, NAMESPACE, new InNamespaceFn());
+            //// during bootstrap, ns same as in-ns
+            //Var nv = Var.intern(CLOJURE_NS, NAMESPACE, new InNamespaceFn());
+            Var nv = Var.intern(CLOJURE_NS, NAMESPACE, new BootNamespaceFN());
             nv.setMacro();
 
             Var v;
