@@ -132,7 +132,7 @@ namespace clojure.lang.CljCompiler.Ast
             _name = baseName + _simpleName;
             _internalName = _name.Replace('.', '/');
             _fnType = RT.classForName(_internalName);
-            // fn.fntype = Type.getObjectType(fn.internalName) -- JAVA            
+            // fn.fntype = Type.getObjectType(fn.internalName) -- JAVA    
         }
 
         bool IsVariadic { get { return _variadicMethod != null; } }

@@ -156,8 +156,8 @@
 
 (deftest test-conj
   ; doesn't work on strings or arrays
-  (is (thrown? InvalidCastException (conj "" \a)))                   ;;; ClassCastException
-  (is (thrown? InvalidCastException (conj (into-array []) 1)))       ;;; ClassCastException
+  (is (thrown? Microsoft.Scripting.ArgumentTypeException (conj "" \a)))                   ;;; ClassCastException
+  (is (thrown? Microsoft.Scripting.ArgumentTypeException (conj (into-array []) 1)))       ;;; ClassCastException
 
   (are [x y] (= x y)
       (conj nil 1) '(1)

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{A9B3BA9E-6955-43E6-9846-54DEFEDCFBFC}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -69,6 +69,8 @@
   <PropertyGroup>
     <PostBuildEvent>xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)\clojure\*.dll $(TargetDir)\clojure\ /Y /s
 xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)\clojure\*.pdb $(TargetDir)\clojure\ /Y /s
+xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)*_COMP.dll $(TargetDir) /Y /s
+xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)*_COMP.pdb $(TargetDir) /Y /s
 xcopy $(SolutionDir)\Clojure.Source\clojure\test_clojure.clj $(TargetDir)\clojure\ 
 xcopy $(SolutionDir)\Clojure.Source\clojure\test_clojure\*.clj $(TargetDir)\clojure\test_clojure\ /Y /s
 </PostBuildEvent>

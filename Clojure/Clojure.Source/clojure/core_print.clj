@@ -317,9 +317,13 @@
   (.Write w ")"))
 
 (defmethod print-method clojure.lang.IDeref [o #^System.IO.TextWriter w]
-  (print-sequential (format "#<%s@%x: "
+  (print-sequential (format "#<%s@%x%s: "
                             (.Name (class o))     ;;; .getSimpleName => .Name
-                            (.GetHashCode o))    ;;; No easy equivelent in CLR: (System/identityHashCode o)))
+                            (.GetHashCode o)     ;;; No easy equivelent in CLR: (System/identityHashCode o)))
+                            (if (and (instance? clojure.lang.Agent o)
+                                     (agent-error o))
+                              " FAILED"
+                              ""))
                     pr-on, "", ">", (list (if (and (future? o) (not (future-done? o))) :pending @o)), w))
 
 (def #^{:private true} print-initialized true)  

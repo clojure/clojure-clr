@@ -47,9 +47,9 @@
     (apply str (.Replace (str *ns*) \- \_) ".proxy"                         ;;; .replace
       (interleave (repeat "$")
         (concat
-          [(.FullName super)]                                              ;;; .getName
+          [(.Name super)]                                              ;;; .getName
           (map #(subs % (inc (.LastIndexOf #^String % "."))) inames)       ;;; .lastIndexOf
-          [(.ToString (hash inames) "X")])))))                             ;;;[(Integer/toHexString (hash inames))])))))                   
+          [(.ToString (hash inames) "X")] [(clojure.lang.Compiler/IsCompilingSuffix)])))))                             ;;;[(Integer/toHexString (hash inames))])))))                   
 
 (defn- generate-proxy [#^Type super interfaces]     ;;; Class
   (clojure.lang.GenProxy/GenerateProxyClass super interfaces (proxy-name super interfaces)))  ;;;DM;;
@@ -254,7 +254,7 @@
 ;;;    [cname (. cv toByteArray)]))
 
 (defn- get-super-and-interfaces [bases]
-  (if (. #^Type (first bases) (IsInterface))     ;;; #^Class  isInterface
+  (if (. #^Type (first bases) IsInterface)     ;;; #^Class  (IsInterface)
     [Object bases]
     [(first bases) (next bases)]))
 

@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Runtime.CompilerServices;
 
 namespace clojure.lang
 {
@@ -30,6 +31,26 @@ namespace clojure.lang
     /// </remarks>
     public sealed class Agent : ARef
     {
+        #region ActionQueue class
+
+        class ActionQueue
+        {
+            public readonly IPersistentStack _q;
+            public readonly Exception _error; // non-null indicates fail state
+            static internal readonly ActionQueue EMPTY = new ActionQueue(PersistentQueue.EMPTY, null);
+
+            public ActionQueue(IPersistentStack q, Exception error)
+            {
+                _q = q;
+                _error = error;
+            }
+        }
+        
+        static readonly Keyword CONTINUE = Keyword.intern(null, "continue");
+        static readonly Keyword FAIL = Keyword.intern(null, "fail");
+
+        #endregion
+
         #region Data
 
         /// <summary>
@@ -48,7 +69,7 @@ namespace clojure.lang
         /// <summary>
         /// A queue of pending actions.
         /// </summary>
-        private AtomicReference<IPersistentStack> _q = new AtomicReference<IPersistentStack>(PersistentQueue.EMPTY);
+        private AtomicReference<ActionQueue> _aq = new AtomicReference<ActionQueue>(ActionQueue.EMPTY);
 
         /// <summary>
         /// Number of items in the queue.
@@ -57,7 +78,7 @@ namespace clojure.lang
         {
             get
             {
-                return _q.Get().count();
+                return _aq.Get()._q.count();
             }
         }
 
@@ -70,29 +91,31 @@ namespace clojure.lang
             return QueueCount;
         }
 
+        volatile Keyword _errorMode = CONTINUE;
+        volatile IFn _errorHandler = null;
 
-        /// <summary>
-        /// Agent errors, a sequence of Exceptions.
-        /// </summary>
-        private volatile ISeq _errors = null;
+        ///// <summary>
+        ///// Agent errors, a sequence of Exceptions.
+        ///// </summary>
+        //private volatile ISeq _errors = null;
 
-        /// <summary>
-        /// Agent errors, a sequence of Exceptions.
-        /// </summary>
-        public ISeq Errors
-        {
-            get { return _errors; }
-        }
+        ///// <summary>
+        ///// Agent errors, a sequence of Exceptions.
+        ///// </summary>
+        //public ISeq Errors
+        //{
+        //    get { return _errors; }
+        //}
 
 
-        /// <summary>
-        /// Add an error.
-        /// </summary>
-        /// <param name="e">The exception to add.</param>
-        public void AddError(Exception e)
-        {
-            _errors = RT.cons(e, _errors);
-        }
+        ///// <summary>
+        ///// Add an error.
+        ///// </summary>
+        ///// <param name="e">The exception to add.</param>
+        //public void AddError(Exception e)
+        //{
+        //    _errors = RT.cons(e, _errors);
+        //}
 
 
         /// <summary>
@@ -155,24 +178,69 @@ namespace clojure.lang
 
         #region Agent methods
 
-        /// <summary>
-        /// Get the agent's errors.
-        /// </summary>
-        /// <returns>A sequence of the errors.</returns>
-        /// <remarks>Lowercase-name (and is a method instead of a property) for core.clj compatibility.</remarks>
-        public ISeq getErrors()
+        public Exception getError()
         {
-            return _errors;
+            return _aq.Get()._error;
         }
 
-        /// <summary>
-        /// Clear the agent's errors.
-        /// </summary>
-        /// <remarks>Lowercase-name and  for core.clj compatibility.</remarks>
-        public void clearErrors()
+        ///// <summary>
+        ///// Clear the agent's errors.
+        ///// </summary>
+        ///// <remarks>Lowercase-name and  for core.clj compatibility.</remarks>
+        //public void clearErrors()
+        //{
+        //    _errors = null;
+        //}
+
+        public void setErrorMode(Keyword k)
         {
-            _errors = null;
+            _errorMode = k;
         }
+
+        public Keyword getErrorMode()
+        {
+            return _errorMode;
+        }
+
+        public void setErrorHandler(IFn f)
+        {
+            _errorHandler = f;
+        }
+
+        public IFn getErrorHandler()
+        {
+            return _errorHandler;
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public object restart(object newState, bool clearActions)
+        {
+            if (getError() == null)
+                throw new Exception("Agent does not need a restart");
+
+            Validate(newState);
+            _state = newState;
+
+            if (clearActions)
+                _aq.Set(ActionQueue.EMPTY);
+            else
+            {
+                bool restarted = false;
+                ActionQueue prior = null;
+                while (!restarted)
+                {
+                    prior = _aq.Get();
+                    restarted = _aq.CompareAndSet(prior, new ActionQueue(prior._q, null));
+                }
+
+                if (prior._q.count() > 0)
+                    ((Action)prior._q.peek()).execute();
+            }
+
+            return newState;
+        }
+
+
 
         /// <summary>
         /// Send a message to the agent.
@@ -184,8 +252,9 @@ namespace clojure.lang
         /// <returns>This agent.</returns>
         public object dispatch(IFn fn, ISeq args, Boolean solo)
         {
-            if ( _errors != null )
-                throw new Exception("Agent has errors", (Exception)RT.first(_errors));
+            Exception error = getError();
+            if (error != null)
+                throw new Exception("Agent is failed, needs restart", error);
             Action action = new Action(this,fn,args,solo);
             DispatchAction(action);
 
@@ -222,14 +291,14 @@ namespace clojure.lang
         void Enqueue(Action action)
         {
             bool queued = false;
-            IPersistentStack prior = null;
+            ActionQueue prior = null;
             while (!queued)
             {
-                prior = _q.Get();
-                queued = _q.CompareAndSet(prior, (IPersistentStack)prior.cons(action));
+                prior = _aq.Get();
+                queued = _aq.CompareAndSet(prior, new ActionQueue((IPersistentStack)prior._q.cons(action), prior._error));
             }
 
-            if (prior.count() == 0)
+            if (prior._q.count() == 0 && prior._error == null )
                 action.execute();
         }
 
@@ -244,8 +313,6 @@ namespace clojure.lang
         /// <returns>The value</returns>
         public override object deref()
         {
-            if (_errors != null)
-                throw new Exception("Agent has errors", (Exception)RT.first(_errors));
             return _state;
         }
 
@@ -329,15 +396,32 @@ namespace clojure.lang
             /// </summary>
             public void execute()
             {
-                if (_solo)
+                try
                 {
-                    // TODO:  Reuse/cleanup these threads
-                    Thread thread = new Thread(ExecuteAction);
-                    //thread.Priority = ThreadPriority.Lowest;
-                    thread.Start(null);
+                    if (_solo)
+                    {
+                        // TODO:  Reuse/cleanup these threads
+                        Thread thread = new Thread(ExecuteAction);
+                        //thread.Priority = ThreadPriority.Lowest;
+                        thread.Start(null);
+                    }
+                    else
+                        ThreadPool.QueueUserWorkItem(ExecuteAction);
                 }
-                else
-                    ThreadPool.QueueUserWorkItem(ExecuteAction);
+                catch (Exception error)
+                {
+                    if (_agent._errorHandler != null)
+                    {
+                        try
+                        {
+                            _agent._errorHandler.invoke(_agent, error);
+                        }
+                        catch (Exception)
+                        {
+                            // ignore _errorHandler errors
+                        }
+                    }
+                }
             }
 
             /// <summary>
@@ -352,7 +436,7 @@ namespace clojure.lang
                     Var.pushThreadBindings(RT.map(RT.AGENT, _agent));
                     Agent.Nested = PersistentVector.EMPTY;
 
-                    bool hadError = false;
+                    Exception error = null;
 
                     try
                     {
@@ -363,25 +447,40 @@ namespace clojure.lang
                     }
                     catch (Exception e)
                     {
-                        // TODO: report/callback  (Java TODO)
-                        _agent.AddError(e);
-                        hadError = true;
+                        error = e;
                     }
 
-                    if (!hadError)
+                    if (error == null)
                         releasePendingSends();
+                    else
+                    {
+                        Nested = PersistentVector.EMPTY;
+                        if (_agent._errorHandler != null)
+                        {
+                            try
+                            {
+                                _agent._errorHandler.invoke(_agent, error);
+                            }
+                            catch (Exception)
+                            {
+                                // ignore error handler errors
+                            }
+                        }
+                        if (_agent._errorMode == CONTINUE)
+                            error = null;
+                    }
 
                     bool popped = false;
-                    IPersistentStack next = null;
+                    ActionQueue next = null;
                     while (!popped)
                     {
-                        IPersistentStack prior = _agent._q.Get();
-                        next = prior.pop();
-                        popped = _agent._q.CompareAndSet(prior, next);
+                        ActionQueue prior = _agent._aq.Get();
+                        next = new ActionQueue(prior._q.pop(), error);
+                        popped = _agent._aq.CompareAndSet(prior, next);
                     }
 
-                    if (next.count() > 0)
-                        ((Action)next.peek()).execute();
+                    if (error==null && next._q.count() > 0)
+                        ((Action)next._q.peek()).execute();
                 }
                 finally
                 {

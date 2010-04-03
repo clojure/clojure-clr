@@ -160,7 +160,7 @@ namespace clojure.lang
         /// <returns>A string representing the namespace.</returns>
         public override string ToString()
         {
-            return "#<Namespace: " + _name + ">";
+            return _name.ToString();
         }
 
         #endregion

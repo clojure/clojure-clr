@@ -24,26 +24,50 @@ using Microsoft.Scripting.Generation;
 
 namespace clojure.lang
 {
-    public static class GenProxy
+    public class GenProxy
     {
 
         #region Data
 
-        static GenContext _context = new GenContext("proxy", CompilerMode.Immediate);
+        static GenContext _staticContext = new GenContext("proxy", CompilerMode.Immediate);
         const string _methodMapFieldName = "__clojureFnMap";
         static readonly MethodInfo Method_IPersistentCollection_Cons = typeof(IPersistentCollection).GetMethod("cons");
         static readonly MethodInfo Method_RT_get = typeof(RT).GetMethod("get",new Type[]{ typeof(object), typeof(object) });
         static readonly ConstructorInfo CtorInfo_NotImplementedException_1 = typeof(NotImplementedException).GetConstructor(new Type[] { typeof(string) });
 
+        GenContext _context;
+
         #endregion
 
         #region A little debugging aid
 
-        static int _saveId = 0;
-        public static void SaveProxyContext()
+        static int _saveId = 12;
+        public  void SaveProxyContext()
         {
             _context.SaveAssembly();
-            _context = new GenContext("proxy", CompilerMode.Immediate);
+            //if ( _context == _staticContext) 
+            //    _staticContext = new GenContext("proxy"+(++_saveId).ToString(), CompilerMode.Immediate);
+        }
+
+
+        #endregion
+
+        #region C-tors
+
+        GenProxy(string className)
+        {
+            if (Compiler.IsCompiling)
+            {
+                string path = (string)Compiler.COMPILE_PATH.deref();
+                if (path == null)
+                    throw new Exception("*compile-path* not set");
+
+                //string dir = (string)Compiler.SOURCE_PATH.deref();
+
+                _context = new GenContext(className, ".dll", path, CompilerMode.File);
+            }
+            else
+                _context = new GenContext("proxy" + (++_saveId).ToString(), CompilerMode.Immediate);
         }
 
 
@@ -51,7 +75,18 @@ namespace clojure.lang
 
         #region Factory methods
 
+
+
         public static Type GenerateProxyClass(Type superclass, ISeq interfaces, string className)
+        {
+            return new GenProxy(className).Generate(superclass, interfaces,className);
+        }
+
+        #endregion
+
+        #region Implementation
+
+        Type Generate(Type superclass, ISeq interfaces, string className)
         {
             // define the class
             List<Type> interfaceTypes = new List<Type>();
@@ -75,12 +110,11 @@ namespace clojure.lang
             AddInterfaceMethods(proxyTB, mapField, superclass, allInterfaces, specialMethods);
             AddInterfaceProperties(proxyTB, superclass, allInterfaces, specialMethods ); // Must follow AddInterfaceMethods
 
-            return proxyTB.CreateType();
+            Type t = proxyTB.CreateType();
+            if (Compiler.IsCompiling)
+                SaveProxyContext();
+            return t;
         }
-
-        #endregion
-
-        #region Implementation
 
         static void DefineCtors(TypeBuilder proxyTB, Type superclass)
         {
@@ -182,7 +216,8 @@ namespace clojure.lang
                 if (!considered.Contains(sig)
                     && !m.IsPrivate
                     && !m.IsStatic
-                    && !m.IsFinal)
+                    && !m.IsFinal
+                    && !m.Name.Equals("Finalize"))
                 {
                     if (m.IsAbstract)
                         unimplementedMethods.Add(m);
@@ -299,7 +334,7 @@ namespace clojure.lang
             }
 
             int parmCount = pinfos.Length;
-            gen.EmitCall(GetIFnInvokeMethodInfo(parmCount + 1));        // gen.Emit(OpCodes.Call, GetIFnInvokeMethodInfo(parmCount + 1));
+            gen.EmitCall(GetIFnInvokeMethodInfo(parmCount+1));        // gen.Emit(OpCodes.Call, GetIFnInvokeMethodInfo(parmCount + 1));
             if (m.ReturnType == typeof(void))
                 gen.Emit(OpCodes.Pop);
             else
@@ -392,9 +427,7 @@ namespace clojure.lang
                 return typeof(IFn).GetMethod("invoke", parmTypes);
             }
             else
-                // TODO: return param array method
-                throw new NotImplementedException();
-
+                return typeof(IFn).GetMethod("invoke", GetObjectTypeArrayWithParam(20));
         }
 
         private static Type[] GetObjectTypeArray(int numArgs)
@@ -404,6 +437,16 @@ namespace clojure.lang
                 array[i] = typeof(object);
             return array;
         }
+
+        private static Type[] GetObjectTypeArrayWithParam(int numArgs)
+        {
+            Type[] array = new Type[numArgs+1];
+            for (int i = 0; i < numArgs; i++)
+                array[i] = typeof(object);
+            array[numArgs] = typeof(object[]);
+            return array;
+        }
+
 
         #endregion
     }

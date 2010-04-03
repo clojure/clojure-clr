@@ -80,6 +80,7 @@
     <None Include="clojure\samples\genclass\testgenclass2.clj" />
     <None Include="clojure\samples\genclass\testgenclass3.clj" />
     <None Include="clojure\samples\interop\testinterop.clj" />
+    <None Include="clojure\samples\proxy\testproxy.clj" />
     <None Include="clojure\set.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -1175,6 +1175,16 @@ namespace clojure.lang
             return expr;
         }
 
+        public static bool IsCompiling
+        {
+            get { return COMPILER_CONTEXT.deref() != null; }
+        }
+
+        public static string IsCompilingSuffix()
+        {
+            return COMPILER_CONTEXT.deref() == null ? "_INTERP" : "_COMP";
+        }
+
         internal static object Compile(TextReader rdr, string sourceDirectory, string sourceName)
         {
             if (COMPILE_PATH.deref() == null)

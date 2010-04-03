@@ -32,8 +32,8 @@
   (are [x] (= x "System.String")               ;;; java.lang.String
       (.FullName String)                           ;;; getName
       (. (identity String) FullName)               ;;; getName
-      (. (identity String) (FullName)) )           ;;; getName
-
+      ;(. (identity String) (FullName)) )           ;;; getName
+  )
   ; (Classname/staticMethod args*)
   (are [x] (= x 7)
       (Math/Abs -7)                                ;;; abs

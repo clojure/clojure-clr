@@ -25,8 +25,8 @@
 (defn print-trace-element
   "Prints a Clojure-oriented view of one element in a stack trace."
   [e]                   ;;; in CLR, e will be a StackFrame
-  (let [class   (if-let [t (.. e  (GetMethod) (ReflectedType))] (.FullName t) "")         ;;;  (.getClassName e)
-	method      (.. e (GetMethod)  (Name))]                             ;;;  (.getMethodName e)] 
+  (let [class   (if-let [t (.. e  (GetMethod) ReflectedType)] (.FullName t) "")         ;;;  (.getClassName e)
+	method      (.. e (GetMethod)  Name)]                             ;;;  (.getMethodName e)] 
     (let [match (re-matches #"^([A-Za-z0-9_.-]+)\$(\w+)__\d+$" class)]
       (if (and match (= "invoke" method))
 	(print (str (nth match 1) "/" (nth match 2)))                       ;;;  use when we have printf:  (apply printf "%s/%s" (rest match))
