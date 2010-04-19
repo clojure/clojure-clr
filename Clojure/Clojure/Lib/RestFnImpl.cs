@@ -26,12 +26,26 @@ namespace clojure.lang
     // Eventually, we need to do overloading to solve this problem.
     // Overloading is not possible at the moment do to a bug in LambdaExpression.CompileToMethod
 
-    public abstract class RestFnImpl : RestFn, Fn
+    public class RestFnImpl : RestFn, Fn
     // Per Java Rev 1122, need to make all true functions implement this marker interface, 
     // In java version this is done by making the per-funcion generated class implement the interface.  
     // We can do that, too, once we start generating per-function classes.
     // And then it goes away again in Rev 1161.  Sigh.  (RestFn implements AFunction, which apparently suffices.)
     {
+
+        protected readonly int _reqArity;
+
+        public RestFnImpl(int reqArity)
+        {
+            _reqArity = reqArity;
+        }
+
+
+        public override int getRequiredArity()
+        {
+            return _reqArity;
+        }
+
 
         public FFunc<
             object> _fn0;

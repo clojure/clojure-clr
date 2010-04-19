@@ -32,7 +32,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Expr _target;
-        readonly Type _targetType;
+        protected readonly Type _targetType;
         protected readonly TInfo _tinfo;
         readonly string _fieldName;
         readonly string _source;
@@ -168,7 +168,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override bool CanEmitPrimitive
         {
-            get { return Util.IsPrimitive(_tinfo.FieldType); }
+            get { return _targetType != null && _tinfo != null && Util.IsPrimitive(_tinfo.FieldType); }
         }
 
         #endregion
@@ -204,7 +204,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override bool CanEmitPrimitive
         {
-            get { return Util.IsPrimitive(_tinfo.PropertyType); }
+            get { return _targetType != null && _tinfo != null && Util.IsPrimitive(_tinfo.PropertyType); }
         }
 
         #endregion

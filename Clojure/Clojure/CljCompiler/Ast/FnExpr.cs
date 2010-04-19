@@ -31,37 +31,44 @@ namespace clojure.lang.CljCompiler.Ast
 {
     class FnExpr : ObjExpr
     {
+
         #region Data
 
         static readonly Keyword KW_ONCE = Keyword.intern(null, "once");
+
+        FnMethod _variadicMethod = null;
+
+        bool IsVariadic { get { return _variadicMethod != null; } }
+
+        bool _onceOnly = false;
+
+        #endregion
+
+        #region not yet
+        /*
+         * 
+         * 
         static readonly Keyword KW_SUPER_NAME = Keyword.intern(null, "super-name");
 
         string _simpleName;
 
-        bool _onceOnly = false;
 
-        bool IsVariadic { get { return _variadicMethod != null; } }
-        FnMethod _variadicMethod = null;
 
         //int _line;
+         
+         */
 
         #endregion
 
         #region Ctors
 
         public FnExpr(object tag)
-            :base(tag)
+            : base(tag)
         {
         }
 
         #endregion
-        
-        #region Type mangling
-
-
-
-        #endregion
-
+       
         #region Misc
 
         // This naming convention drawn from the Java code.
@@ -71,20 +78,19 @@ namespace clojure.lang.CljCompiler.Ast
 
             string baseName = enclosingMethod != null
                 ? (enclosingMethod.Objx.Name + "$")
-                : (Compiler.Munge(Compiler.CurrentNamespace.Name.Name) + "$");
+                : Compiler.Munge(Compiler.CurrentNamespace.Name.Name) + "$";
 
             if (RT.second(form) is Symbol)
                 name = ((Symbol)RT.second(form)).Name;
 
-            _simpleName = (name == null ? "fn" : Compiler.Munge(name).Replace(".", "_DOT_")) + "__" + RT.nextID();
-
-            Name = baseName + _simpleName;
+            string simpleName = (name == null ? "fn" : Compiler.Munge(name).Replace(".", "_DOT_")) + "__" + RT.nextID();
+            
+            Name = baseName + simpleName;
             _internalName = Name.Replace('.', '/');
 
             _objType = RT.classForName(_internalName);
             // fn.fntype = Type.getObjectType(fn.internalName) -- JAVA            
         }
-
 
         #endregion
 
@@ -99,7 +105,6 @@ namespace clojure.lang.CljCompiler.Ast
             if (((IMeta)form.first()).meta() != null)
             {
                 fn._onceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), KW_ONCE));
-                fn._superName = (string)RT.get(RT.meta(form.first()), KW_SUPER_NAME);
             }
 
 
@@ -121,6 +126,7 @@ namespace clojure.lang.CljCompiler.Ast
                     fn._thisName = ((Symbol)RT.second(form)).Name;
                     form = RT.cons(Compiler.FN, RT.next(RT.next(form)));
                 }
+
                 //  Added to improve stack trace messages.
                 //  This seriously hoses compilation of core.clj.  Needs investigation.
                 //  Backing this out.
@@ -136,10 +142,8 @@ namespace clojure.lang.CljCompiler.Ast
                 if (RT.second(form) is IPersistentVector)
                     form = RT.list(Compiler.FN, RT.next(form));
 
-                //fn._line = (int)Compiler.LINE.deref();
-
-                FnMethod variadicMethod = null;
                 SortedDictionary<int, FnMethod> methods = new SortedDictionary<int, FnMethod>();
+                FnMethod variadicMethod = null;
 
                 for (ISeq s = RT.next(form); s != null; s = RT.next(s))
                 {
@@ -192,32 +196,151 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        protected override Type GetSuperType()
+        public override Expression GenDlr(GenContext context)
         {
-            return _superName != null
-                ? Type.GetType(_superName)
-                : IsVariadic
+            _superType = GetSuperType();
+            return base.GenDlr(context);
+        }
+
+
+        protected override void GenerateMethods(GenContext context)
+        {
+            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+            {
+                FnMethod method = (FnMethod)s.first();
+                method.GenerateCode(context);
+            }
+
+            if (IsVariadic)
+            {
+                TypeBuilder tb = context.ObjExpr.TypeBuilder;
+                GenerateGetRequiredArityMethod(tb, _variadicMethod.RequiredArity);
+            }
+        }
+
+        static MethodBuilder GenerateGetRequiredArityMethod(TypeBuilder tb, int requiredArity)
+        {
+            MethodBuilder mb = tb.DefineMethod(
+                "getRequiredArity",
+                MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual,
+                typeof(int),
+                Type.EmptyTypes);
+
+            ILGen gen = new ILGen(mb.GetILGenerator());
+            gen.EmitInt(requiredArity);
+            gen.Emit(OpCodes.Ret);
+
+            return mb;
+        }
+        
+        #endregion
+
+        #region Immediate mode compilation
+
+
+        protected override Expression GenDlrImmediate(GenContext context)
+        {
+            _baseType = GetBaseClass(context, _superType);
+            return GenerateImmediateLambda(context, _baseType);
+        }
+
+        protected Type GetSuperType()
+        {
+            //return _superName != null
+            //    ? Type.GetType(_superName)
+            //    : IsVariadic
+            //    ? typeof(RestFn)
+            //    : typeof(AFunction);
+            return IsVariadic
                 ? typeof(RestFn)
                 : typeof(AFunction);
         }
 
-        protected override void GenerateMethodsForImmediate(GenContext context, ParameterExpression thisParam, List<Expression> exprs)
+        private Expression GenerateImmediateLambda(GenContext context, Type baseClass)
         {
+            ParameterExpression p1 = Expression.Parameter(baseClass, "__x__");
+            _thisParam = p1;
+
+            List<Expression> exprs = new List<Expression>();
+
+            if (baseClass == typeof(RestFnImpl))
+                exprs.Add(Expression.Assign(p1,
+                          Expression.New(Compiler.Ctor_RestFnImpl_1, Expression.Constant(_variadicMethod.RequiredArity))));
+            else
+                exprs.Add(Expression.Assign(p1, Expression.New(p1.Type)));
+
+            GenContext newContext = CreateContext(context, null, baseClass);
 
             for (ISeq s = RT.seq(_methods); s != null; s = s.next())
             {
                 FnMethod method = (FnMethod)s.first();
-                LambdaExpression lambda = method.GenerateImmediateLambda(context);
-
-                // TODO: Move fieldName to FnMethod or ObjMethod
+                LambdaExpression lambda = method.GenerateImmediateLambda(newContext);
                 string fieldName = IsVariadic && method.IsVariadic
                     ? "_fnDo" + method.RequiredArity
                     : "_fn" + method.NumParams;
-                exprs.Add(Expression.Assign(Expression.Field(thisParam, fieldName), lambda));
-
-                //exprs.Add(Expression.Assign(Expression.Field(p1, method.FieldName), lambda));
+                exprs.Add(Expression.Assign(Expression.Field(p1, fieldName), lambda));
             }
+
+            exprs.Add(p1);
+
+            Expression expr = Expression.Block(new ParameterExpression[] { p1 }, exprs);
+            return expr;
         }
+
+        private static Type GetBaseClass(GenContext context, Type superType)
+        {
+            Type baseClass = LookupBaseClass(superType);
+            if (baseClass != null)
+                return baseClass;
+
+            baseClass = GenerateBaseClass(context, superType);
+            baseClass = RegisterBaseClass(superType, baseClass);
+            return baseClass;
+        }
+
+        static AtomicReference<IPersistentMap> _baseClassMapRef = new AtomicReference<IPersistentMap>(PersistentHashMap.EMPTY);
+
+        static FnExpr()
+        {
+            _baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(RestFn), typeof(RestFnImpl)));
+            //_baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(AFn),typeof(AFnImpl)));
+        }
+
+
+        private static Type LookupBaseClass(Type superType)
+        {
+            return (Type)_baseClassMapRef.Get().valAt(superType);
+        }
+
+        private static Type RegisterBaseClass(Type superType, Type baseType)
+        {
+            IPersistentMap map = _baseClassMapRef.Get();
+
+            while (!map.containsKey(superType))
+            {
+                IPersistentMap newMap = map.assoc(superType, baseType);
+                _baseClassMapRef.CompareAndSet(map, newMap);
+                map = _baseClassMapRef.Get();
+            }
+
+            return LookupBaseClass(superType);  // may not be the one we defined -- race condition
+        }
+
+
+        private static Type GenerateBaseClass(GenContext context, Type superType)
+        {
+            return AFnImplGenerator.Create(context, superType);
+        }
+
+
+
+        #endregion
+
+        #region not yet
+        /* 
+
+
+
 
         protected override Type GetBaseClass(GenContext context, Type superType)
         {
@@ -278,38 +401,12 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        static MethodBuilder GenerateGetRequiredArityMethod(TypeBuilder tb, int requiredArity)
-        {
-            MethodBuilder mb = tb.DefineMethod(
-                "getRequiredArity",
-                MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual,
-                typeof(int),
-                Type.EmptyTypes);
 
-            ILGen gen = new ILGen(mb.GetILGenerator());
-            gen.EmitInt(requiredArity);
-            gen.Emit(OpCodes.Ret);
 
-            return mb;
-        }
 
-        protected override void GenerateMethods(GenContext context)
-        {
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
-            {
-                FnMethod method = (FnMethod)s.first();
-                method.GenerateCode(context);
-            }
-
-            if (IsVariadic)
-            {
-                TypeBuilder tb = context.ObjExpr.TypeBuilder;
-                GenerateGetRequiredArityMethod(tb, _variadicMethod.RequiredArity);
-            }
-        }
-
-        #endregion
         
- 
+        */
+        #endregion
+
     }
 }

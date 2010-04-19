@@ -34,58 +34,92 @@ namespace clojure.lang.CljCompiler.Ast
         // Java: when closures are defined inside other closures,
         // the closed over locals need to be propagated to the enclosing fn
         readonly ObjMethod _parent;
+        
         internal ObjMethod Parent
         {
             get { return _parent; }
         }
-
-
+        
         IPersistentMap _locals = null;       // localbinding => localbinding
+        IPersistentMap _indexLocals = null;  // num -> localbinding
+
+
         public IPersistentMap Locals
         {
             get { return _locals; }
             set { _locals = value; }
         }
 
-        IPersistentMap _indexLocals = null;  // num -> localbinding
         public IPersistentMap IndexLocals
         {
             get { return _indexLocals; }
             set { _indexLocals = value; }
         }
 
-        protected IPersistentVector _reqParms = PersistentVector.EMPTY;  // localbinding => localbinding
-
-        protected LocalBinding _restParm = null;
+        protected LocalBinding _thisBinding;
 
         protected Expr _body = null;
-
+        
         ObjExpr _objx;
         internal ObjExpr Objx
         {
             get { return _objx; }
-            set { _objx = value; }
+            //set { _objx = value; }
         }
 
         protected IPersistentVector _argLocals;
-
         int _maxLocal = 0;
+
         public int MaxLocal
         {
             get { return _maxLocal; }
             set { _maxLocal = value; }
         }
 
-        protected LocalBinding _thisBinding;
-
-        //int _line;
-
         IPersistentSet _localsUsedInCatchFinally = PersistentHashSet.EMPTY;
+
         public IPersistentSet LocalsUsedInCatchFinally
         {
             get { return _localsUsedInCatchFinally; }
             set { _localsUsedInCatchFinally = value; }
         }
+
+        #endregion
+
+        #region abstract methods
+
+        internal abstract bool IsVariadic { get; }
+        internal abstract int NumParams { get; }
+        internal abstract int RequiredArity { get; }
+        internal abstract string MethodName { get; }
+
+        #endregion
+
+        #region not yet
+
+        /*        
+         * 
+         * 
+                 internal bool IsVariadic
+        {
+            get { return _restParm != null; }
+        }
+
+
+        internal int NumParams
+        {
+            get { return _reqParms.count() + (IsVariadic ? 1 : 0); }
+        }
+
+        internal int RequiredArity
+        {
+            get { return _reqParms.count(); }
+        } 
+
+
+        //int _line;
+
+
 
         internal bool IsVariadic
         {
@@ -102,11 +136,13 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get { return _reqParms.count(); }
         }
+        */
+
 
         #endregion
 
-        #region
-        
+        #region Ctors
+
         public ObjMethod(ObjExpr fn, ObjMethod parent)
         {
             _parent = parent;
@@ -114,7 +150,6 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
-
 
         #region Code generation
 
@@ -124,21 +159,6 @@ namespace clojure.lang.CljCompiler.Ast
             GenerateMethod(mb, context);
         }
 
-        void GenerateMethod(MethodInfo staticMethodInfo, GenContext context)
-        {
-            string methodName = IsVariadic ? "doInvoke" : "invoke";
-
-            TypeBuilder tb = context.ObjExpr.TypeBuilder;
-
-            // TODO: Cache all the CreateObjectTypeArray values
-            MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
-            ILGen gen = new ILGen(mb.GetILGenerator());
-            gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
-            for (int i = 1; i <= _argLocals.count(); i++)
-                gen.EmitLoadArg(i);                         // gen.Emit(OpCodes.Ldarg, i);
-            gen.EmitCall(staticMethodInfo);                 // gen.Emit(OpCodes.Call, staticMethodInfo);
-            gen.Emit(OpCodes.Ret);
-        }
 
         MethodBuilder GenerateStaticMethod(GenContext context)
         {
@@ -159,8 +179,6 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHOD, this));
 
-
-
                 for (int i = 0; i < _argLocals.count(); i++)
                 {
                     LocalBinding lb = (LocalBinding)_argLocals.nth(i);
@@ -180,7 +198,6 @@ namespace clojure.lang.CljCompiler.Ast
                 // TODO: Cache all the CreateObjectTypeArray values
                 MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
 
-                //lambda.CompileToMethod(mb,DebugInfoGenerator.CreatePdbGenerator());
                 lambda.CompileToMethod(mb, true);
                 return mb;
             }
@@ -196,65 +213,21 @@ namespace clojure.lang.CljCompiler.Ast
             return String.Format("__invokeHelper_{0}{1}", RequiredArity, IsVariadic ? "v" : string.Empty);
         }
 
-        internal LambdaExpression GenerateImmediateLambda(GenContext context)
+
+        void GenerateMethod(MethodInfo staticMethodInfo, GenContext context)
         {
-            List<ParameterExpression> parmExprs = new List<ParameterExpression>(_argLocals.count());
-            //List<ParameterExpression> typedParmExprs = new List<ParameterExpression>();
-            //List<Expression> typedParmInitExprs = new List<Expression>();
+            //string methodName = IsVariadic ? "doInvoke" : "invoke";
 
-            //FnExpr fn = context.FnExpr;
-            //ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
-            //_thisBinding.ParamExpression = thisParm;
-            //fn.ThisParam = thisParm;
-            ObjExpr fn = context.ObjExpr;
-            _thisBinding.ParamExpression = fn.ThisParam;
+            TypeBuilder tb = context.ObjExpr.TypeBuilder;
 
-            try
-            {
-
-                LabelTarget loopLabel = Expression.Label("top");
-
-                Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHOD, this));
-
-                for (int i = 0; i < _argLocals.count(); i++)
-                {
-                    LocalBinding b = (LocalBinding)_argLocals.nth(i);
-
-                    ParameterExpression pexpr = Expression.Parameter(typeof(object), b.Name);
-                    b.ParamExpression = pexpr;
-                    parmExprs.Add(pexpr);
-                }
-
-
-                // TODO:  Eventually, type this param to ISeq.  
-                // This will require some reworking with signatures in various places around here.
-                //if (fn.IsVariadic)
-                //    parmExprs.Add(Expression.Parameter(typeof(object), "____REST"));
-
-                // If we have any typed parameters, we need to add an extra block to do the initialization.
-
-                List<Expression> bodyExprs = new List<Expression>();
-                //bodyExprs.AddRange(typedParmInitExprs);
-                bodyExprs.Add(Expression.Label(loopLabel));
-                bodyExprs.Add(Compiler.MaybeBox(_body.GenDlr(context)));
-
-
-                Expression block;
-                //if (typedParmExprs.Count > 0)
-                //    block = Expression.Block(typedParmExprs, bodyExprs);
-                //else
-                block = Expression.Block(bodyExprs);
-
-                return Expression.Lambda(
-                    FuncTypeHelpers.GetFFuncType(parmExprs.Count),
-                    block,
-                    _objx.ThisName,
-                    parmExprs);
-            }
-            finally
-            {
-                Var.popThreadBindings();
-            }
+            // TODO: Cache all the CreateObjectTypeArray values
+            MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
+            ILGen gen = new ILGen(mb.GetILGenerator());
+            gen.EmitLoadArg(0);                             
+            for (int i = 1; i <= _argLocals.count(); i++)
+                gen.EmitLoadArg(i);                         
+            gen.EmitCall(staticMethodInfo);                 
+            gen.Emit(OpCodes.Ret);
         }
 
         #endregion

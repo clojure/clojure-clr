@@ -403,6 +403,11 @@ namespace clojure.lang
             throw new InvalidOperationException(String.Format("Var {0}/{1} is unbound.", _ns, _sym));
         }
 
+        public object getRawRoot()
+        {
+            return _root;
+        }
+
         // In the Java version, haven't missed it yet.
         //public object alter(IFn fn, ISeq args)
         //{
@@ -758,6 +763,8 @@ namespace clojure.lang
         /// But then they rename all uses anyway.</remarks>
         public object get()
         {
+            if (_count.get() == 0 && _root != CurrentFrame)
+                return _root;
             return deref();
         }
 

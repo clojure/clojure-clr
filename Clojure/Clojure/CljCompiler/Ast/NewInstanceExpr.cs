@@ -27,12 +27,17 @@ namespace clojure.lang.CljCompiler.Ast
 {
     sealed class NewInstanceExpr : ObjExpr
     {
+        /*
+
         #region Data
 
         Dictionary<IPersistentVector,MethodInfo> _methodMap;
         Dictionary<IPersistentVector,HashSet<Type>> _covariants;
 
         #endregion
+
+         */
+
 
         #region C-tors
 
@@ -43,6 +48,27 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        public sealed class ReifyParser : IParser
+        {
+            public Expr Parse(object frm, bool isRecurContext) { throw new NotImplementedException(); }
+        }
+
+        public sealed class DefTypeParser : IParser
+        {
+            public Expr Parse(object frm, bool isRecurContext) { throw new NotImplementedException(); }
+        }
+
+
+        protected override Expression GenDlrImmediate(GenContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void GenerateMethods(GenContext context)
+        {
+            throw new NotImplementedException();
+        }
+        /*
         #region Type mangling
 
 
@@ -311,5 +337,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+        */
     }
 }

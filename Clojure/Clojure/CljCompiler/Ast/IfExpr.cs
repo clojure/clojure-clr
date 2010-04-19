@@ -112,7 +112,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            bool testIsBool = _testExpr is MaybePrimitiveExpr && _testExpr.HasClrType && _testExpr.ClrType == typeof(bool);
+            //bool testIsBool = _testExpr is MaybePrimitiveExpr && _testExpr.HasClrType && _testExpr.ClrType == typeof(bool);
+            bool testIsBool = Compiler.MaybePrimitiveType(_testExpr) == typeof(bool);
 
             Expression testCode;
 

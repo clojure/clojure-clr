@@ -22,6 +22,28 @@ namespace clojure.lang.CljCompiler.Ast
 {
     sealed class NewInstanceMethod : ObjMethod
     {
+        internal override bool IsVariadic
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        internal override string MethodName
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+
+        internal override int NumParams
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        internal override int RequiredArity
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        /*
         #region Data
 
         string _name;
@@ -36,6 +58,8 @@ namespace clojure.lang.CljCompiler.Ast
         static readonly Symbol dummyThis = Symbol.intern(null, "dummy_this_dlskjsdfower");
 
         #endregion
+         * 
+         */
 
         #region C-tors
 
@@ -46,6 +70,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        /* 
         #region Accessors
 
         int NumParams { get { return _argLocals.count(); } }
@@ -203,6 +228,8 @@ namespace clojure.lang.CljCompiler.Ast
 
 
         #endregion
+
+        */
 
  
     }

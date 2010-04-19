@@ -30,9 +30,10 @@ namespace clojure.lang.CljCompiler.Ast
 {
     class FnMethod : ObjMethod
     {
-
         #region Data
-
+        
+        protected IPersistentVector _reqParms = PersistentVector.EMPTY;  // localbinding => localbinding
+        protected LocalBinding _restParm = null;
 
         #endregion
 
@@ -42,6 +43,31 @@ namespace clojure.lang.CljCompiler.Ast
             :base(fn,parent)
         {
         }
+
+        #endregion
+
+        #region ObjMethod methods
+
+        internal override bool IsVariadic
+        {
+            get { return _restParm != null; }
+        }
+
+        internal override int NumParams
+        {
+            get { return _reqParms.count() + (IsVariadic ? 1 : 0); }
+        }
+
+        internal override int RequiredArity
+        {
+            get { return _reqParms.count(); }
+        } 
+
+        internal override string MethodName
+        {
+            get { return IsVariadic ? "doInvoke" : "invoke"; }
+        }
+
 
         #endregion
 
@@ -59,8 +85,6 @@ namespace clojure.lang.CljCompiler.Ast
             try
             {
                 FnMethod method = new FnMethod(fn, (ObjMethod)Compiler.METHOD.deref());
-                //method._line = (int) Compiler.LINE.deref();
-
 
                 Var.pushThreadBindings(RT.map(
                     Compiler.METHOD, method,
@@ -125,5 +149,71 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+        #region Immediate mode compilation
+
+        internal LambdaExpression GenerateImmediateLambda(GenContext context)
+        {
+            List<ParameterExpression> parmExprs = new List<ParameterExpression>(_argLocals.count());
+            //List<ParameterExpression> typedParmExprs = new List<ParameterExpression>();
+            //List<Expression> typedParmInitExprs = new List<Expression>();
+
+            //FnExpr fn = context.FnExpr;
+            //ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
+            //_thisBinding.ParamExpression = thisParm;
+            //fn.ThisParam = thisParm;
+            ObjExpr fn = context.ObjExpr;
+            _thisBinding.ParamExpression = fn.ThisParam;
+
+            try
+            {
+
+                LabelTarget loopLabel = Expression.Label("top");
+
+                Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHOD, this));
+
+                for (int i = 0; i < _argLocals.count(); i++)
+                {
+                    LocalBinding b = (LocalBinding)_argLocals.nth(i);
+
+                    ParameterExpression pexpr = Expression.Parameter(typeof(object), b.Name);
+                    b.ParamExpression = pexpr;
+                    parmExprs.Add(pexpr);
+                }
+
+
+                // TODO:  Eventually, type this param to ISeq.  
+                // This will require some reworking with signatures in various places around here.
+                //if (fn.IsVariadic)
+                //    parmExprs.Add(Expression.Parameter(typeof(object), "____REST"));
+
+                // If we have any typed parameters, we need to add an extra block to do the initialization.
+
+                List<Expression> bodyExprs = new List<Expression>();
+                //bodyExprs.AddRange(typedParmInitExprs);
+                bodyExprs.Add(Expression.Label(loopLabel));
+                bodyExprs.Add(Compiler.MaybeBox(_body.GenDlr(context)));
+
+
+                Expression block;
+                //if (typedParmExprs.Count > 0)
+                //    block = Expression.Block(typedParmExprs, bodyExprs);
+                //else
+                block = Expression.Block(bodyExprs);
+
+                return Expression.Lambda(
+                    FuncTypeHelpers.GetFFuncType(parmExprs.Count),
+                    block,
+                    Objx.ThisName,
+                    parmExprs);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+        }
+
+        #endregion
+
     }
 }
