@@ -27,17 +27,12 @@ namespace clojure.lang.CljCompiler.Ast
 {
     sealed class NewInstanceExpr : ObjExpr
     {
-        /*
-
         #region Data
 
         Dictionary<IPersistentVector,MethodInfo> _methodMap;
-        Dictionary<IPersistentVector,HashSet<Type>> _covariants;
+        Dictionary<IPersistentVector, HashSet<Type>> _covariants;
 
         #endregion
-
-         */
-
 
         #region C-tors
 
@@ -48,33 +43,20 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        public sealed class ReifyParser : IParser
-        {
-            public Expr Parse(object frm, bool isRecurContext) { throw new NotImplementedException(); }
-        }
 
-        public sealed class DefTypeParser : IParser
-        {
-            public Expr Parse(object frm, bool isRecurContext) { throw new NotImplementedException(); }
-        }
-
-
-        protected override Expression GenDlrImmediate(GenContext context)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override void GenerateMethods(GenContext context)
-        {
-            throw new NotImplementedException();
-        }
-        /*
         #region Type mangling
 
 
         #endregion
 
         #region Parsing
+        
+        
+        public sealed class DefTypeParser : IParser
+        {
+            public Expr Parse(object frm, bool isRecurContext) { throw new NotImplementedException(); }
+        }
+
 
         public sealed class ReifyParser : IParser
         {
@@ -100,36 +82,42 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        internal static ObjExpr Build(IPersistentVector interfaceSyms, IPersistentVector fieldSyms, Symbol thisSym,
-            string tagName, string className, Symbol typeTag, ISeq methodForms)
+        internal static ObjExpr Build(
+            IPersistentVector interfaceSyms, 
+            IPersistentVector fieldSyms, 
+            Symbol thisSym,
+            string tagName, 
+            string className, 
+            Symbol typeTag, 
+            ISeq methodForms)
         {
             NewInstanceExpr ret = new NewInstanceExpr(null);
             ret._name = className;
-            ret._internalName = ret.Name.Replace('.','/');
+            ret._internalName = ret.Name.Replace('.', '/');
             ret._objType = null; // ???
 
-            if ( thisSym != null )
+            if (thisSym != null)
                 ret._thisName = thisSym.Name;
 
-            if ( fieldSyms != null )
+            if (fieldSyms != null)
             {
                 IPersistentMap fmap = PersistentHashMap.EMPTY;
-                object[] closesvec = new object[2*fieldSyms.count()];
-                for ( int i=0; i<fieldSyms.count(); i++ )
+                object[] closesvec = new object[2 * fieldSyms.count()];
+                for (int i = 0; i < fieldSyms.count(); i++)
                 {
-                    Symbol sym = (Symbol) fieldSyms.nth(i);
+                    Symbol sym = (Symbol)fieldSyms.nth(i);
                     LocalBinding lb = new LocalBinding(-1, sym, null, new MethodParamExpr(Compiler.TagType(Compiler.TagOf(sym))), false);
-                    fmap = fmap.assoc(sym,lb);
-                    closesvec[i*2] = lb;
-                    closesvec[i*2+1] = lb;
+                    fmap = fmap.assoc(sym, lb);
+                    closesvec[i * 2] = lb;
+                    closesvec[i * 2 + 1] = lb;
                     if (!sym.Name.StartsWith("__"))
-                        CompileLookupThunk(ret,sym);
+                        CompileLookupThunk(ret, sym);
                 }
                 // Java TODO: inject __meta et al into closes - when?
                 // use array map to preserve ctor order
                 ret._closes = new PersistentArrayMap(closesvec);
                 ret._fields = fmap;
-                for ( int i=fieldSyms.count()-1; i>= 0 && ((Symbol)fieldSyms.nth(i)).Name.StartsWith("__");--i)
+                for (int i = fieldSyms.count() - 1; i >= 0 && ((Symbol)fieldSyms.nth(i)).Name.StartsWith("__"); --i)
                     ret.altCtorDrops++;
             }
 
@@ -137,46 +125,47 @@ namespace clojure.lang.CljCompiler.Ast
             //ret._volatiles = PersistentHashSet.create(RT.seq(RT.get(ret._optionsMap, volatileKey)));
 
             IPersistentVector interfaces = PersistentVector.EMPTY;
-            for ( ISeq s = RT.seq(interfaceSyms); s != null; s = s.next() )
+            for (ISeq s = RT.seq(interfaceSyms); s != null; s = s.next())
             {
-                Type t = (Type) Compiler.Resolve((Symbol) s.first());
-                if ( ! t.IsInterface )
+                Type t = (Type)Compiler.Resolve((Symbol)s.first());
+                if (!t.IsInterface)
                     throw new ArgumentException("only interfaces are supported, had: " + t.Name);
                 interfaces = interfaces.cons(t);
             }
             Type superClass = typeof(Object);
-             
-            Dictionary<IPersistentVector,MethodInfo> overrideables;
-            Dictionary<IPersistentVector,HashSet<Type>> covariants;
-            GatherMethods(superClass,RT.seq(interfaces), out overrideables, out covariants);
+
+            Dictionary<IPersistentVector, MethodInfo> overrideables;
+            Dictionary<IPersistentVector, HashSet<Type>> covariants;
+            GatherMethods(superClass, RT.seq(interfaces), out overrideables, out covariants);
 
             ret._methodMap = overrideables;
             ret._covariants = covariants;
+            ret._interfaces = interfaces;
 
-            string[] inames = InterfaceNames(interfaces);
+            //string[] inames = InterfaceNames(interfaces);
 
             //Type stub = CompileStub(SlashName(superClass),ret,inames);
             //Symbol thisTag = Symbol.intern(null,stub.Name);
             Type stub = null;
             Symbol thisTag = Symbol.intern(null, Compiler.COMPILE_STUB_PREFIX + "/" + ret._internalName);
-            try 
+            try
             {
                 Var.pushThreadBindings(
                     RT.map(
-                        Compiler.CONSTANTS,PersistentVector.EMPTY,
-                        Compiler.KEYWORDS,PersistentHashMap.EMPTY,
+                        Compiler.CONSTANTS, PersistentVector.EMPTY,
+                        Compiler.KEYWORDS, PersistentHashMap.EMPTY,
                         Compiler.VARS, PersistentHashMap.EMPTY,
                         Compiler.KEYWORD_CALLSITES, PersistentVector.EMPTY,
                         Compiler.PROTOCOL_CALLSITES, PersistentVector.EMPTY,
                         Compiler.VAR_CALLSITES, PersistentVector.EMPTY
                         ));
-                if ( ret.IsDefType)
+                if (ret.IsDefType)
                 {
                     Var.pushThreadBindings(
                         RT.map(
                             Compiler.METHOD, null,
                             Compiler.LOCAL_ENV, ret._fields,
-                            Compiler.COMPILE_STUB_SYM, Symbol.intern(null,tagName),
+                            Compiler.COMPILE_STUB_SYM, Symbol.intern(null, tagName),
                             Compiler.COMPILE_STUB_CLASS, stub
                             ));
                 }
@@ -193,46 +182,46 @@ namespace clojure.lang.CljCompiler.Ast
                 ret._methods = methods;
                 ret._keywords = (IPersistentMap)Compiler.KEYWORDS.deref();
                 ret._vars = (IPersistentMap)Compiler.VARS.deref();
-                ret._constants = (PersistentVector) Compiler.CONSTANTS.deref();
+                ret._constants = (PersistentVector)Compiler.CONSTANTS.deref();
                 ret._constantsID = RT.nextID();
-                ret._keywordCallsites = (IPersistentVector) Compiler.KEYWORD_CALLSITES.deref();
-                ret._protocolCallsites = (IPersistentVector) Compiler.PROTOCOL_CALLSITES.deref();
-                ret._varCallsites = (IPersistentVector) Compiler.VAR_CALLSITES.deref();
+                ret._keywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
+                ret._protocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
+                ret._varCallsites = (IPersistentVector)Compiler.VAR_CALLSITES.deref();
             }
             finally
             {
-                if ( ret.IsDefType )
+                if (ret.IsDefType)
                     Var.popThreadBindings();
                 Var.popThreadBindings();
             }
 
             // TODO: This is silly.  We have the superClass in hand.  Might as well stash it.
-            ret._superName = SlashName(superClass);
-            //ret.Copmile(SlashName(superClass),inames,false);
+            //ret._superName = SlashName(superClass);
+            ret._superType = superClass;
+
+            //ret.Compile(SlashName(superClass),inames,false);
             //ret.getCompiledClass();
             return ret;
         }
 
-        private static Expression<LookupThunkDelegate> CompileLookupThunk(NewInstanceExpr ret, Symbol fld)
+
+        private static Expression CompileLookupThunk(NewInstanceExpr ret, Symbol fld)
         {
-            // TODO: WHere do we put this delegate?  compiled vs eval?
-            ParameterExpression p = Expression.Parameter(typeof(Object), "x");
-            Expression e =
-                Expression.IfThenElse(
-                    Expression.TypeIs(p, ret._objType),
-                    Compiler.MaybeBox(Expression.Field(p, ret._objType, Compiler.Munge(fld.Name))),
-                    p);
-            Expression<LookupThunkDelegate> lambda = Expression.Lambda<LookupThunkDelegate>(e, p);
-            return lambda;
+            return null;
+
+            //// TODO: WHere do we put this delegate?  compiled vs eval?
+            //ParameterExpression p = Expression.Parameter(typeof(Object), "x");
+            //Expression e =
+            //    Expression.IfThenElse(
+            //        Expression.TypeIs(p, ret._objType),
+            //        Compiler.MaybeBox(Expression.Field(p, ret._objType, Compiler.Munge(fld.Name))),
+            //        p);
+            //Expression lambda = Expression.Lambda(e, p);
+            //return lambda;
         }
 
-        public sealed class DefTypeParser : IParser
-        {
-            public Expr Parse(object frm, bool isRecurContext)
-            {
-                return null;
-            }
-        }
+
+
 
         static string[] InterfaceNames(IPersistentVector interfaces)
         {
@@ -247,25 +236,6 @@ namespace clojure.lang.CljCompiler.Ast
         static string SlashName(Type t)
         {
             return t.FullName.Replace(',', '/');
-        }
-
-
-        #endregion
-
-        #region Code generation
-
-        protected override void GenerateMethods(GenContext context)
-        {
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
-            {
-                FnMethod method = (FnMethod)s.first();
-                method.GenerateCode(context);
-            }
-        }
-
-        protected override void GenerateMethodsForImmediate(GenContext context, ParameterExpression thisParam, List<Expression> exprs)
-        {
-            base.GenerateMethodsForImmediate(context, thisParam, exprs);
         }
 
 
@@ -333,11 +303,33 @@ namespace clojure.lang.CljCompiler.Ast
 
         static IPersistentVector MSig(MethodInfo m)
         {
-		    return RT.vector(m.Name, RT.seq(Compiler.GetTypes(m.GetParameters())),m.ReturnType);
+            return RT.vector(m.Name, RT.seq(Compiler.GetTypes(m.GetParameters())), m.ReturnType);
         }
 
         #endregion
 
-        */
+
+        #region Code generation
+
+
+        protected override Expression GenDlrImmediate(GenContext context)
+        {
+            GenContext newC = context.SwitchMode();
+
+            Expression expr =  GenDlrForFile(newC,false);
+            return expr;
+        }
+
+        protected override void GenerateMethods(GenContext context)
+        {
+            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+            {
+                ObjMethod method = (ObjMethod)s.first();
+                method.GenerateCode(context);
+            }
+        }
+
+        #endregion
+
     }
 }

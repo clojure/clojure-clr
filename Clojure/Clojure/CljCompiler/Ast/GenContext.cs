@@ -35,7 +35,7 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        readonly CompilerMode _mode;
+        CompilerMode _mode;
 
         internal CompilerMode Mode
         {
@@ -101,6 +101,13 @@ namespace clojure.lang.CljCompiler.Ast
             GenContext newContext = Clone();
             newContext._objExpr = objExpr;
              return newContext;
+        }
+
+        internal GenContext SwitchMode()
+        {
+            GenContext newContext = Clone();
+            newContext._mode = _mode == CompilerMode.Immediate ? CompilerMode.File : CompilerMode.Immediate;
+            return newContext;
         }
 
         private GenContext Clone()

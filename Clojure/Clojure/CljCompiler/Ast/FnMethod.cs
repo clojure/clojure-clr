@@ -68,6 +68,20 @@ namespace clojure.lang.CljCompiler.Ast
             get { return IsVariadic ? "doInvoke" : "invoke"; }
         }
 
+        protected override string StaticMethodName
+        {
+            get { return String.Format("__invokeHelper_{0}{1}", RequiredArity, IsVariadic ? "v" : string.Empty); }
+        }
+
+        protected override Type[] ArgTypes
+        {
+            get { return Compiler.CreateObjectTypeArray(NumParams); }
+        }
+
+        protected override Type ReturnType
+        {
+            get { return typeof(object); }
+        }
 
         #endregion
 

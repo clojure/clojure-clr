@@ -110,6 +110,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected IPersistentMap _fields = null;
 
+        protected bool IsDefType { get { return _fields != null; } }
+
         protected IPersistentMap _keywords = PersistentHashMap.EMPTY;         // Keyword -> KeywordExpr
         protected IPersistentMap _vars = PersistentHashMap.EMPTY;
         protected PersistentVector _constants;
@@ -123,6 +125,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected ConstructorInfo _ctorInfo;
 
+        protected IPersistentVector _interfaces = PersistentVector.EMPTY;
+
         #endregion
 
         #region Not yet
@@ -131,7 +135,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected string _superName = null;
         protected TypeBuilder _baseTypeBuilder = null;
-        protected bool IsDefType { get { return _fields != null; } }
 
         */
 
@@ -171,7 +174,7 @@ namespace clojure.lang.CljCompiler.Ast
                 case CompilerMode.Immediate:
                     return GenDlrImmediate(context);
                 case CompilerMode.File:
-                    return GenDlrForFile(context);
+                    return GenDlrForFile(context,true);
                 default:
                     throw Util.UnreachableCode();
             }
@@ -194,7 +197,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region File-mode compilation
 
-        Expression GenDlrForFile(GenContext context)
+        protected Expression GenDlrForFile(GenContext context, bool convertToIFn)
         {
             EnsureTypeBuilt(context);
 
@@ -208,7 +211,12 @@ namespace clojure.lang.CljCompiler.Ast
                     args.Add(context.ObjExpr.GenLocal(context, lb));
             }
 
-            return Expression.Convert(Expression.New(_ctorInfo, args),typeof(IFn));
+            Expression newExpr = Expression.New(_ctorInfo, args);
+
+            if ( convertToIFn )
+                newExpr = Expression.Convert(newExpr,typeof(IFn));
+
+            return newExpr;
         }
 
         private void EnsureTypeBuilt(GenContext context)
@@ -221,6 +229,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             GenerateFnClass(context);
             _objType = _typeBuilder.CreateType();
+            _ctorInfo = _objType.GetConstructors()[0];  // TODO: When we have more than one c-tor, we'll have to fix this.
         }
 
         #endregion
@@ -450,6 +459,8 @@ namespace clojure.lang.CljCompiler.Ast
         private void GenerateFnClass(GenContext context)
         {
             _typeBuilder = context.AssemblyGen.DefinePublicType(_internalName, _baseType, true);
+            for (int i =0; i<_interfaces.count(); i++ )
+                _typeBuilder.AddInterfaceImplementation((Type)_interfaces.nth(i));
 
             GenerateStaticConstructor(_typeBuilder, _baseType);
             _ctorInfo = GenerateConstructor(_typeBuilder, _baseType);

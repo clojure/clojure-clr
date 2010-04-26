@@ -22,62 +22,62 @@ namespace clojure.lang.CljCompiler.Ast
 {
     sealed class NewInstanceMethod : ObjMethod
     {
-        internal override bool IsVariadic
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        internal override string MethodName
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-
-        internal override int NumParams
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        internal override int RequiredArity
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        /*
         #region Data
 
         string _name;
-        public string MethodName { get { return _name; } }
 
         Type[] _argTypes;
-        public Type[] ArgTypes { get { return _argTypes; } }
 
         Type _retType;
-        public Type ReturnType { get { return _retType; } }
 
         static readonly Symbol dummyThis = Symbol.intern(null, "dummy_this_dlskjsdfower");
 
         #endregion
-         * 
-         */
+
+        #region ObjMethod methods
+
+        internal override int NumParams
+        {
+            get { return _argLocals.count(); }
+        }
+
+        internal override bool IsVariadic
+        {
+            get { return false; }
+        }
+      
+        internal override int RequiredArity
+        {
+            get { return NumParams; }
+        }
+
+        internal override string MethodName
+        {
+            get { return _name; }
+        }
+
+        protected override string StaticMethodName
+        {
+            get { return _name + "__static"; }
+        }
+
+        protected override Type[] ArgTypes
+        {
+            get { return _argTypes; }
+        }
+
+        protected override Type ReturnType
+        {
+            get { return _retType; }
+        }
+
+        #endregion
 
         #region C-tors
 
         public NewInstanceMethod(ObjExpr objx, ObjMethod parent)
             : base(objx, parent)
         {
-        }
-
-        #endregion
-
-        /* 
-        #region Accessors
-
-        int NumParams { get { return _argLocals.count(); } }
-
-        public static IPersistentVector MSig(string name, Type[] paramTypes)
-        {
-            return RT.vector(name, RT.seq(paramTypes));
         }
 
         #endregion
@@ -212,7 +212,10 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        private static Dictionary<IPersistentVector, MethodInfo> FindMethodsWithNameAndArity(String name, int arity, Dictionary<IPersistentVector, MethodInfo> mm)
+        private static Dictionary<IPersistentVector, MethodInfo> FindMethodsWithNameAndArity(
+            String name, 
+            int arity, 
+            Dictionary<IPersistentVector, MethodInfo> mm)
         {
             Dictionary<IPersistentVector, MethodInfo> ret = new Dictionary<IPersistentVector, MethodInfo>();
 
@@ -226,11 +229,11 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
+        public static IPersistentVector MSig(string name, Type[] paramTypes)
+        {
+            return RT.vector(name, RT.seq(paramTypes));
+        }
 
         #endregion
-
-        */
-
- 
     }
 }

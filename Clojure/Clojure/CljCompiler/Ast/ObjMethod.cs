@@ -92,6 +92,9 @@ namespace clojure.lang.CljCompiler.Ast
         internal abstract int NumParams { get; }
         internal abstract int RequiredArity { get; }
         internal abstract string MethodName { get; }
+        protected abstract string StaticMethodName { get; }
+        protected abstract Type ReturnType { get; }
+        protected abstract Type[] ArgTypes { get; }
 
         #endregion
 
@@ -162,14 +165,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         MethodBuilder GenerateStaticMethod(GenContext context)
         {
-            string methodName = GetStaticMethodName();
+            string methodName = StaticMethodName;
             ObjExpr fn = context.ObjExpr;
             TypeBuilder tb = fn.TypeBuilder;
 
             List<ParameterExpression> parms = new List<ParameterExpression>(_argLocals.count() + 1);
 
             ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
-            _thisBinding.ParamExpression = thisParm;
+            if ( _thisBinding != null )
+                _thisBinding.ParamExpression = thisParm;
             fn.ThisParam = thisParm;
             parms.Add(thisParm);
 
@@ -179,10 +183,12 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHOD, this));
 
+                Type[] argTypes = ArgTypes;
+
                 for (int i = 0; i < _argLocals.count(); i++)
                 {
                     LocalBinding lb = (LocalBinding)_argLocals.nth(i);
-                    ParameterExpression parm = Expression.Parameter(typeof(object), lb.Name);
+                    ParameterExpression parm = Expression.Parameter(argTypes[i], lb.Name);
                     lb.ParamExpression = parm;
                     parms.Add(parm);
                 }
@@ -196,7 +202,7 @@ namespace clojure.lang.CljCompiler.Ast
 
 
                 // TODO: Cache all the CreateObjectTypeArray values
-                MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
+                MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static, ReturnType, argTypes);
 
                 lambda.CompileToMethod(mb, true);
                 return mb;
@@ -208,20 +214,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         }
 
-        private string GetStaticMethodName()
-        {
-            return String.Format("__invokeHelper_{0}{1}", RequiredArity, IsVariadic ? "v" : string.Empty);
-        }
-
 
         void GenerateMethod(MethodInfo staticMethodInfo, GenContext context)
         {
-            //string methodName = IsVariadic ? "doInvoke" : "invoke";
 
             TypeBuilder tb = context.ObjExpr.TypeBuilder;
 
-            // TODO: Cache all the CreateObjectTypeArray values
-            MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(object), Compiler.CreateObjectTypeArray(NumParams));
+            MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, ReturnType, ArgTypes);
             ILGen gen = new ILGen(mb.GetILGenerator());
             gen.EmitLoadArg(0);                             
             for (int i = 1; i <= _argLocals.count(); i++)
