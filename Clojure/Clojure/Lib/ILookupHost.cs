@@ -17,7 +17,6 @@ namespace clojure.lang
 {
     public interface ILookupHost
     {
-        //void swapThunk(int n, ILookupThunk thunk);
-        void swapThunk(int n, LookupThunkDelegate thunk);
+        void swapThunk(int n, ILookupThunk thunk);
     }
 }

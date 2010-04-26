@@ -124,11 +124,11 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            //if ( fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KEYWORD_CALLSITES.IsBound )
-            //{
-            //    Expr target = Compiler.GenerateAST(RT.second(form), false);
-            //    return new KeywordInvokeExpr((string)Compiler.SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), Compiler.TagOf(form), (KeywordExpr)fexpr, target);
-            //}
+            if (fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KEYWORD_CALLSITES.IsBound)
+            {
+                Expr target = Compiler.GenerateAST(RT.second(form), false);
+                return new KeywordInvokeExpr((string)Compiler.SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), Compiler.TagOf(form), (KeywordExpr)fexpr, target);
+            }
 
             IPersistentVector args = PersistentVector.EMPTY;
             for ( ISeq s = RT.seq(form.next()); s != null; s = s.next())

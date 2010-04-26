@@ -69,13 +69,45 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            // This will emit a plain Keyword reference, rather than a callsite.
-            InvokeExpr ie = new InvokeExpr(_source, _spanMap, (Symbol)_tag, _kw, RT.vector(_target));
-            return ie.GenDlr(context);
+            if (context.Mode == CompilerMode.Immediate)
+            {
+                // This will emit a plain Keyword reference, rather than a callsite.
+                InvokeExpr ie = new InvokeExpr(_source, _spanMap, (Symbol)_tag, _kw, RT.vector(_target));
+                return ie.GenDlr(context);
+            }
+            else
+            {
 
-           
+                ParameterExpression thunkParam = Expression.Parameter(typeof(ILookupThunk), "thunk");
+                Expression assignThunk = Expression.Assign(thunkParam, Expression.Field(null, context.ObjExpr.ThunkField(_siteIndex)));
 
-        }
+                ParameterExpression targetParam = Expression.Parameter(typeof(object), "target");
+                Expression assignTarget = Expression.Assign(targetParam,_target.GenDlr(context));
+
+                ParameterExpression valParam = Expression.Parameter(typeof(Object), "val");
+                Expression assignVal = Expression.Assign(valParam, Expression.Call(thunkParam, Compiler.Method_ILookupThunk_get,targetParam));
+
+                ParameterExpression siteParam = Expression.Parameter(typeof(KeywordLookupSite), "site");
+                Expression assignSite = Expression.Assign(siteParam, Expression.Field(null, context.ObjExpr.KeywordLookupSiteField(_siteIndex)));
+
+                Expression block =
+                    Expression.Block(typeof(Object), new ParameterExpression[] { thunkParam, valParam, targetParam },
+                        assignThunk,
+                        assignTarget,
+                        assignVal,
+                        Expression.Condition(
+                            Expression.NotEqual(valParam, thunkParam),
+                            valParam,
+                            Expression.Block(typeof(Object), new ParameterExpression[] { siteParam },
+                                assignSite,
+                                Expression.Call(siteParam, Compiler.Method_ILookupSite_fault, targetParam, context.ObjExpr.ThisParam)),
+                            typeof(object)));
+
+
+                block = Compiler.MaybeAddDebugInfo(block, _spanMap);
+                return block;
+            }
+        } 
 
         #endregion
 

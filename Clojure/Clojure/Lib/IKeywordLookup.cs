@@ -21,7 +21,6 @@ namespace clojure.lang
 {
     public interface IKeywordLookup
     {
-        //ILookupThunk getLookupThunk(Keyword k);
-        LookupThunkDelegate getLookupThunk(Keyword k);
+        ILookupThunk getLookupThunk(Keyword k);
     }
 }

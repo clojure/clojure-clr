@@ -19,13 +19,10 @@ using System.Text;
 
 namespace clojure.lang
 {
-    // The use of this interface in the JVM code is equivalent to a delegate.
-    // Thus we create a delegate with the signature of ILookupThunk.get.
-    //public interface ILookupThunk
-    //{
-    //    object get(object target);
-    //}
 
-    public delegate object LookupThunkDelegate(object target);
+    public interface ILookupThunk
+    {
+        object get(object target);
+    }
 
 }

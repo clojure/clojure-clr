@@ -19,10 +19,8 @@ using System.Text;
 
 namespace clojure.lang
 {
-    public sealed class KeywordLookupSite: ILookupSite   /* , ILookupThunk -- this interface has been replaced by a delegate */
+    public sealed class KeywordLookupSite: ILookupSite, ILookupThunk
     {
-        // Where 'this' is used as an ILookupThunk, create a delegate on the 'get' method.
-
         #region Data
 
         readonly int _n;
@@ -51,15 +49,15 @@ namespace clojure.lang
                 host.swapThunk(_n, CreateThunk(target.GetType()));
                 return ((ILookup)target).valAt(_k);
             }
-            host.swapThunk(_n, this.Get);
+            host.swapThunk(_n, this);
             return RT.get(target, _k);
         }
 
         #endregion
 
-        #region ILookupThunk Members -- not really
+        #region ILookupThunk Members
 
-        public object Get(object target)
+        public object get(object target)
         {
             if (target is IKeywordLookup || target is ILookup)
                 return this;
@@ -72,35 +70,47 @@ namespace clojure.lang
 
         private object Install(object target, ILookupHost host)
         {
-            // JVM: ILookupThunk t = ((IKeywordLookup)target).getLookupThunk(_k);
-            LookupThunkDelegate t = ((IKeywordLookup)target).getLookupThunk(_k);
+            ILookupThunk t = ((IKeywordLookup)target).getLookupThunk(_k);
             if (t != null)
             {
                 host.swapThunk(_n, t);
-                // JVM: return t.get(target);
-                return t(target);
+                return t.get(target);
             }
             host.swapThunk(_n, CreateThunk(target.GetType()));
             return ((ILookup)target).valAt(_k);
         }
 
-        private LookupThunkDelegate CreateThunk(Type type)
+        private ILookupThunk CreateThunk(Type type)
         {
-            //return new ILookupThunk(){
-            //        public Object get(Object target){
-            //            if(target != null && target.getClass() == c)
-            //                return ((ILookup) target).valAt(k);
-            //            return this;
-            //        }
-            //    };       
-            return (object target) => { 
-                if (target != null && target.GetType() == type )
-                    return ((ILookup)target).valAt(_k);
-                return this;
-            };
+            return new SimpleThunk(type,_k);
+
         }
 
-        
+        class SimpleThunk : ILookupThunk
+        {
+            Type _type;
+            Keyword _kw;
+
+            public SimpleThunk(Type type, Keyword kw)
+            {
+                _type = type;
+                _kw = kw;
+            }
+
+
+
+            #region ILookupThunk Members
+
+            public object get(object target)
+            {
+                if (target != null && target.GetType() == _type)
+                    return ((ILookup)target).valAt(_kw);
+                return this;  
+
+            }
+
+            #endregion
+        }
 
         #endregion
     }

@@ -96,6 +96,16 @@ namespace clojure.lang.CljCompiler.Ast
         protected List<FieldBuilder> _keywordLookupSiteFields;
         protected List<FieldBuilder> _thunkFields;
 
+        internal FieldBuilder ThunkField(int i)
+        {
+            return _thunkFields[i];
+        }
+
+        internal FieldBuilder KeywordLookupSiteField(int i)
+        {
+            return _keywordLookupSiteFields[i];
+        }
+
         protected IPersistentCollection _methods;
 
         protected IPersistentMap _fields = null;
@@ -221,12 +231,19 @@ namespace clojure.lang.CljCompiler.Ast
         {
             string baseClassName = _internalName + "_base";
 
-            TypeBuilder baseTB = context.ModuleBuilder.DefineType(baseClassName, TypeAttributes.Public | TypeAttributes.Abstract, _superType);
+            Type[] interfaces = new Type[0];
+
+            if ( _keywordCallsites.count() > 0 )
+                interfaces = new Type[] { typeof(ILookupHost) };
+
+            TypeBuilder baseTB = context.ModuleBuilder.DefineType(baseClassName, TypeAttributes.Public | TypeAttributes.Abstract, _superType,interfaces);
+
 
             GenerateConstantFields(baseTB);
             GenerateClosedOverFields(baseTB);
             GenerateVarCallsites(baseTB);
             GenerateKeywordCallsites(baseTB);
+            GenerateSwapThunk(baseTB);
 
             GenerateBaseClassConstructor(baseTB);
 
@@ -314,23 +331,21 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void GenerateKeywordCallsites(TypeBuilder baseTB)
         {
-            return;
+            int count = _keywordCallsites.count();
 
-            //int count = _keywordCallsites.count();
+            _keywordLookupSiteFields = new List<FieldBuilder>(count);
+            _thunkFields = new List<FieldBuilder>(count);
 
-            //_keywordLookupSiteFields = new List<FieldBuilder>(count);
-            //_thunkFields = new List<FieldBuilder>(count);
-
-            //for (int i = 0; i < _keywordCallsites.count(); i++)
-            //{
-            //    Keyword k = (Keyword)_keywordCallsites.nth(i);
-            //    string siteName = SiteNameStatic(i);
-            //    string thunkName = ThunkNameStatic(i);
-            //    FieldBuilder fb1 = baseTB.DefineField(siteName, typeof(KeywordLookupSite), FieldAttributes.FamORAssem | FieldAttributes.Static);
-            //    FieldBuilder fb2 = baseTB.DefineField(thunkName, typeof(LookupThunkDelegate), FieldAttributes.FamORAssem | FieldAttributes.Static);
-            //    _keywordLookupSiteFields.Add(fb1);
-            //    _thunkFields.Add(fb2);
-            //}
+            for (int i = 0; i < _keywordCallsites.count(); i++)
+            {
+                Keyword k = (Keyword)_keywordCallsites.nth(i);
+                string siteName = SiteNameStatic(i);
+                string thunkName = ThunkNameStatic(i);
+                FieldBuilder fb1 = baseTB.DefineField(siteName, typeof(KeywordLookupSite), FieldAttributes.FamORAssem | FieldAttributes.Static);
+                FieldBuilder fb2 = baseTB.DefineField(thunkName, typeof(ILookupThunk), FieldAttributes.FamORAssem | FieldAttributes.Static);
+                _keywordLookupSiteFields.Add(fb1);
+                _thunkFields.Add(fb2);
+            }
         }
 
         String SiteName(int n)
@@ -351,6 +366,39 @@ namespace clojure.lang.CljCompiler.Ast
         public String ThunkNameStatic(int n)
         {
             return ThunkName(n) + "__";
+        }
+
+
+        // TODO: Avoid going through the static, i.e., define the interface method directly.
+        void GenerateSwapThunk(TypeBuilder tb)
+        {
+            if (_keywordCallsites.count() == 0)
+                return;
+
+            MethodBuilder mbs = tb.DefineMethod("swapThunk_static", MethodAttributes.Public | MethodAttributes.Static, typeof(void), new Type[] { typeof(int), typeof(ILookupThunk) });
+
+            ParameterExpression pi = Expression.Parameter(typeof(int),"i");
+            ParameterExpression pt = Expression.Parameter(typeof(ILookupThunk),"t");
+
+            List<SwitchCase> cases = new List<SwitchCase>(_keywordCallsites.count());
+            for ( int i=0; i<_keywordCallsites.count(); i++ )
+                cases.Add( 
+                    Expression.SwitchCase(
+                        Expression.Block(
+                            Expression.Assign(Expression.Field(null,_thunkFields[i]),pt),
+                            Expression.Default(typeof(void))),
+                        Expression.Constant(i)));
+
+            Expression body = Expression.Switch(pi, cases.ToArray<SwitchCase>());
+            LambdaExpression lambda = Expression.Lambda(body, pi, pt);
+            lambda.CompileToMethod(mbs);
+
+            MethodBuilder mb = tb.DefineMethod("swapThunk", MethodAttributes.Public|MethodAttributes.HideBySig|MethodAttributes.Virtual, typeof(void), new Type[] { typeof(int), typeof(ILookupThunk) });
+            ILGen gen = new ILGen(mb.GetILGenerator());
+            gen.EmitLoadArg(0);
+            gen.EmitLoadArg(1);
+            gen.EmitCall(mbs);
+            gen.Emit(OpCodes.Ret);
         }
 
         #endregion
@@ -627,39 +675,33 @@ namespace clojure.lang.CljCompiler.Ast
 
         private MethodBuilder GenerateKeywordCallsiteInit(TypeBuilder fnTB, Type baseType)
         {
-            return null;
-            //if (_keywordCallsites.count() == 0)
-            //    return null;
+            if (_keywordCallsites.count() == 0)
+                return null;
 
-            //List<Expression> inits = new List<Expression>();
-            //ParameterExpression parm = Expression.Parameter(typeof(KeywordLookupSite), "temp");
+            List<Expression> inits = new List<Expression>();
+            ParameterExpression parm = Expression.Parameter(typeof(KeywordLookupSite), "temp");
 
-            //for (int i = 0; i < _keywordCallsites.count(); i++)
-            //{
-            //    Expression nArg = Expression.Constant(i);
-            //    Expression kArg = GenerateValue(_keywordCallsites.nth(i));
-            //    Expression parmAssign =
-            //        Expression.Assign(
-            //            parm,
-            //            Expression.New(Compiler.Ctor_KeywordLookupSite_2, new Expression[] { nArg, kArg }));
-            //    Expression siteAssign = Expression.Assign(Expression.Field(null, _keywordLookupSiteFields[i]), parm);
-            //    Expression thunkAssign =
-            //        Expression.Call(
-            //            null,
-            //            Compiler.Method_Delegate_CreateDelegate,
-            //            Expression.Constant(typeof(LookupThunkDelegate)),
-            //            parm,
-            //            Expression.Constant("Get"));
-            //    inits.Add(parmAssign);
-            //    inits.Add(siteAssign);
-            //    inits.Add(thunkAssign);
-            //}
+            for (int i = 0; i < _keywordCallsites.count(); i++)
+            {
+                Expression nArg = Expression.Constant(i);
+                Expression kArg = GenerateValue(_keywordCallsites.nth(i));
+                Expression parmAssign =
+                    Expression.Assign(
+                        parm,
+                        Expression.New(Compiler.Ctor_KeywordLookupSite_2, new Expression[] { nArg, kArg }));
+                Expression siteAssign = Expression.Assign(Expression.Field(null, _keywordLookupSiteFields[i]), parm);
+                Expression thunkAssign = Expression.Assign(Expression.Field(null, _thunkFields[i]), Expression.Convert(parm,typeof(ILookupThunk)));
+                inits.Add(parmAssign);
+                inits.Add(siteAssign);
+                inits.Add(thunkAssign);
+                inits.Add(Expression.Default(typeof(void)));
+            }
 
-            //Expression allInits = Expression.Block(new ParameterExpression[] { parm }, inits);
-            //LambdaExpression lambda = Expression.Lambda(allInits);
-            //MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_kwcallsites", MethodAttributes.Private | MethodAttributes.Static);
-            //lambda.CompileToMethod(methodBuilder, true);
-            //return methodBuilder;
+            Expression allInits = Expression.Block(new ParameterExpression[] { parm }, inits);
+            LambdaExpression lambda = Expression.Lambda(allInits);
+            MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_kwcallsites", MethodAttributes.Private | MethodAttributes.Static,typeof(void),Type.EmptyTypes);
+            lambda.CompileToMethod(methodBuilder, true);
+            return methodBuilder;
 
         }
         
