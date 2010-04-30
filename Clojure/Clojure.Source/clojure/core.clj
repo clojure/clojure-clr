@@ -243,7 +243,8 @@
                     (assoc m :inline (cons ifn (cons name (next inline))))
                     m))]
           (list 'def (with-meta name (conj (if (meta name) (meta name) {}) m))
-                (cons `fn fdecl)))))
+                (cons 'fn (cons name fdecl))))))
+                ;(cons `fn fdecl)))))
 
 (. (var defn) (setMacro))       
 ;;; Not the same as the Java version, but good enough?
@@ -306,9 +307,8 @@
   ([comparator & keys]
    (clojure.lang.PersistentTreeSet/create comparator keys))) 
  
-
  
- ;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;
 (defn nil?
   "Returns true if x is nil, false otherwise."
   {:tag Boolean}
@@ -2057,6 +2057,10 @@
                (next vs))
         map)))
 
+(defmacro declare
+  "defs the supplied var names with no bindings, useful for making forward declarations."
+  [& names] `(do ~@(map #(list 'def (vary-meta % assoc :declared true)) names)))
+  
 (defn line-seq
   "Returns the lines of text from rdr as a lazy sequence of strings.
   rdr must implement java.io.BufferedReader."
@@ -2306,7 +2310,11 @@
 (defn type 
   "Returns the :type metadata of x, or its Class if none"
   [x]
-  (or (:type (meta x)) (class x)))  
+  (or (:type (meta x)) 
+      (if (instance? clojure.lang.IDynamicType x)
+        (let [x #^clojure.lang.IDynamicType x]
+          (.getDynamicType x))
+        (class x))))
 
 (defn num
   "Coerce to Number"
@@ -2434,6 +2442,7 @@
   of *out*.  Prints the object(s), separated by spaces if there is
   more than one.  By default, pr and prn print in a way that objects
   can be read by the reader"
+  {:dynamic true}
   ([] nil)
   ([x]
      (pr-on x *out*))
@@ -3031,7 +3040,7 @@
     (let [name (if (symbol? (first sigs)) (first sigs) nil)
           sigs (if name (next sigs) sigs)
           sigs (if (vector? (first sigs)) (list sigs) sigs)
-          psig (fn [sig]
+          psig (fn* [sig]
                  (let [[params & body] sig
                        conds (when (and (next body) (map? (first body))) 
                                            (first body))
@@ -3043,11 +3052,11 @@
                               `((let [~'% ~(if (< 1 (count body)) 
                                             `(do ~@body) 
                                             (first body))]
-                                 ~@(map (fn [c] `(assert ~c)) post)
+                                 ~@(map (fn* [c] `(assert ~c)) post)
                                  ~'%))
                               body)
                        body (if pre
-                              (concat (map (fn [c] `(assert ~c)) pre) 
+                              (concat (map (fn* [c] `(assert ~c)) pre) 
                                       body)
                               body)]
                    (if (every? symbol? params)
@@ -3787,10 +3796,11 @@
 (defn bases
   "Returns the immediate superclass and direct interfaces of c, if any"
   [#^Type c]                             ;;;  Class ==> Type
-  (let [i (.GetInterfaces c)             ;;;  .getInterfaces ==> .GetInterfaces
-        s (.BaseType c)]                 ;;;  .getSuperclass ==> BaseType
-    (not-empty
-     (if s (cons s i) i))))
+  (when c
+    (let [i (.GetInterfaces c)             ;;;  .getInterfaces ==> .GetInterfaces
+          s (.BaseType c)]                 ;;;  .getSuperclass ==> BaseType
+      (not-empty
+        (if s (cons s i) i)))))
 
 (defn supers
   "Returns the immediate and indirect superclasses and interfaces of c, if any"
@@ -3972,7 +3982,7 @@
   [fmt & args]
   (print (apply format fmt args)))
 
-(def gen-class)
+(declare gen-class)
 ;;; no clear equivalent for us
 (defmacro with-loading-context [& body]
   `((fn loading# [] 
@@ -4110,7 +4120,7 @@
   (let [d (root-resource lib)]
     (subs d 0 (.LastIndexOf d "/"))))    ;;; lastIndexOf
 
-(def load)
+(declare load)
 
 (defn- load-one
   "Loads a lib given its name. If need-ns, ensures that the associated
@@ -4385,10 +4395,6 @@
  #^{:doc "bound in a repl thread to the most recent exception caught by the repl"}
  *e)
 
-(defmacro declare
-  "defs the supplied var names with no bindings, useful for making forward declarations."
-  [& names] `(do ~@(map #(list 'def %) names)))
-
 (defn trampoline
   "trampoline can be used to convert algorithms requiring mutual
   recursion without stack consumption. Calls f with supplied args, if
@@ -4569,6 +4575,85 @@
   "Returns true if future f is done"
   [#^clojure.lang.Future f] (.isDone f))          ;;; #^java.util.concurrent.Future
 
+
+(defmacro letfn 
+  "Takes a vector of function specs and a body, and generates a set of
+  bindings of functions to their names. All of the names are available
+  in all of the definitions of the functions, as well as the body.
+
+  fnspec ==> (fname [params*] exprs) or (fname ([params*] exprs)+)" 
+  [fnspecs & body] 
+  `(letfn* ~(vec (interleave (map first fnspecs) 
+                             (map #(cons `fn %) fnspecs)))
+           ~@body))
+
+;;;;;;; case ;;;;;;;;;;;;;
+(defn- shift-mask [shift mask x]
+  (-> x (bit-shift-right shift) (bit-and mask)))
+
+(defn- min-hash 
+  "takes a collection of keys and returns [shift mask]"
+  [keys]
+  (let [hashes (map hash keys)
+        cnt (count keys)]
+    (when-not (apply distinct? hashes)
+      (throw (ArgumentException. "Hashes must be distinct")))              ;;; IllegalArgumentException
+    (or (first 
+         (filter (fn [[s m]]
+                   (apply distinct? (map #(shift-mask s m %) hashes)))
+                 (for [mask (map #(dec (bit-shift-left 1 %)) (range 1 14))
+                       shift (range 0 31)]
+                   [shift mask])))
+        (throw (ArgumentException. "No distinct mapping found")))))        ;;; IllegalArgumentException
+
+(defmacro case 
+  "Takes an expression, and a set of clauses.
+
+  Each clause can take the form of either:
+
+  test-constant result-expr
+
+  (test-constant1 ... test-constantN)  result-expr
+
+  The test-constants are not evaluated. They must be compile-time
+  literals, and need not be quoted.  If the expression is equal to a
+  test-constant, the corresponding result-expr is returned. A single
+  default expression can follow the clauses, and its value will be
+  returned if no clause matches. If no default expression is provided
+  and no clause matches, an IllegalArgumentException is thrown.
+
+  Unlike cond and condp, case does a constant-time dispatch, the
+  clauses are not considered sequentially.  All manner of constant
+  expressions are acceptable in case, including numbers, strings,
+  symbols, keywords, and (Clojure) composites thereof. Note that since
+  lists are used to group multiple constants that map to the same
+  expression, a vector can be used to match a list if needed. The
+  test-constants need not be all of the same type."
+
+  [e & clauses]
+  (let [ge (with-meta (gensym) {:tag Object})
+        default (if (odd? (count clauses)) 
+                  (last clauses)
+                  `(throw (ArgumentException. (str "No matching clause: " ~ge))))     ;;; IllegalArgumentException
+        cases (partition 2 clauses)
+        case-map (reduce (fn [m [test expr]]
+                           (if (seq? test)
+                             (into m (zipmap test (repeat expr)))
+                             (assoc m test expr))) 
+                           {} cases)
+        [shift mask] (if (seq case-map) (min-hash (keys case-map)) [0 0])
+        
+        hmap (reduce (fn [m [test expr :as te]]
+                       (assoc m (shift-mask shift mask (hash test)) te))
+                     (sorted-map) case-map)]
+    `(let [~ge ~e]
+       ~(condp = (count clauses)
+          0 default
+          1 default
+          `(case* ~ge ~shift ~mask ~(key (first hmap)) ~(key (last hmap)) ~default ~hmap 
+                        ~(every? keyword? (keys case-map)))))))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language") (load "core_clr")
 (load "core_proxy")
@@ -4643,16 +4728,6 @@
   `(pcalls ~@(map #(list `fn [] %) exprs)))
 
 
-(defmacro letfn 
-  "Takes a vector of function specs and a body, and generates a set of
-  bindings of functions to their names. All of the names are available
-  in all of the definitions of the functions, as well as the body.
-
-  fnspec ==> (fname [params*] exprs) or (fname ([params*] exprs)+)" 
-  [fnspecs & body] 
-  `(letfn* ~(vec (interleave (map first fnspecs) 
-                             (map #(cons `fn %) fnspecs)))
-           ~@body))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; clojure version number ;;;;;;;;;;;;;;;;;;;;;;
 ;;; THIS EXPOSES WAY TOO MUCH JVM INTERNALS!

@@ -54,7 +54,33 @@ namespace clojure.lang.CljCompiler.Ast
         
         public sealed class DefTypeParser : IParser
         {
-            public Expr Parse(object frm, bool isRecurContext) { throw new NotImplementedException(); }
+            public Expr Parse(object frm, bool isRecurContext) 
+            {
+
+                // frm is: (deftype* tagname classname [fields] :implements [interfaces] :tag tagname methods*)
+
+                ISeq rform = (ISeq)frm;
+                rform = RT.next(rform);
+
+                string tagname = ((Symbol) rform.first()).ToString();
+			rform = rform.next();
+			string classname = ((Symbol) rform.first()).ToString();
+			rform = rform.next();
+			IPersistentVector fields = (IPersistentVector) rform.first();
+			rform = rform.next();
+			IPersistentMap opts = PersistentHashMap.EMPTY;
+			while(rform != null && rform.first() is Keyword)
+				{
+				opts = opts.assoc(rform.first(), RT.second(rform));
+				rform = rform.next().next();
+				}
+
+			return Build((IPersistentVector)RT.get(opts,Compiler.IMPLEMENTS_KEY, PersistentVector.EMPTY),fields,null,tagname, classname,
+			             (Symbol) RT.get(opts,RT.TAG_KEY),rform);
+
+            
+            
+            }
         }
 
 

@@ -91,13 +91,13 @@
   [& opts+specs]
   (let [[interfaces methods] (parse-opts+specs opts+specs)]
     `(reify* ~interfaces ~@methods)))
-(comment
+
 (defn hash-combine [x y] 
   (clojure.lang.Util/hashCombine x (clojure.lang.Util/hash y)))
 
 (defn munge [s]
   ((if (symbol? s) symbol str) (clojure.lang.Compiler/munge (str s))))
-
+(comment
 (defn- emit-deftype* 
   "Do not use this directly - use deftype"
   [tagname name fields interfaces methods]

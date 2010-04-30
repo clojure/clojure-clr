@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 #if CLR2
 using Microsoft.Scripting.Ast;
+using System.Reflection;
 #else
 using System.Linq.Expressions;
 #endif
@@ -26,160 +27,42 @@ namespace clojure.lang.CljCompiler.Ast
 {
     class CaseExpr : UntypedExpr
     {
-
-    //public final LocalBindingExpr expr;
-    //public final int shift, mask, low, high;
-    //public final Expr defaultExpr;
-    //public final HashMap<Integer,Expr> tests;
-    //public final HashMap<Integer,Expr> thens;
-    //public final boolean allKeywords;
-
-    //public final int line;
-
-    //final static Method hashMethod = Method.getMethod("int hash(Object)");
-    //final static Method hashCodeMethod = Method.getMethod("int hashCode()");
-    //final static Method equalsMethod = Method.getMethod("boolean equals(Object, Object)");
-
-
-    //public CaseExpr(int line, LocalBindingExpr expr, int shift, int mask, int low, int high, Expr defaultExpr,
-    //                HashMap<Integer,Expr> tests,HashMap<Integer,Expr> thens, boolean allKeywords){
-    //    this.expr = expr;
-    //    this.shift = shift;
-    //    this.mask = mask;
-    //    this.low = low;
-    //    this.high = high;
-    //    this.defaultExpr = defaultExpr;
-    //    this.tests = tests;
-    //    this.thens = thens;
-    //    this.line = line;
-    //    this.allKeywords = allKeywords;
-    //}
-
-    //public Object eval() throws Exception{
-    //    throw new UnsupportedOperationException("Can't eval case");
-    //}
-
-    //public void emit(C context, ObjExpr objx, GeneratorAdapter gen){
-    //    Label defaultLabel = gen.newLabel();
-    //    Label endLabel = gen.newLabel();
-    //    HashMap<Integer,Label> labels = new HashMap();
-
-    //    for(Integer i : tests.keySet())
-    //        {
-    //        labels.put(i, gen.newLabel());
-    //        }
-
-    //    Label[] la = new Label[(high-low)+1];
-
-    //    for(int i=low;i<=high;i++)
-    //        {
-    //        la[i-low] = labels.containsKey(i) ? labels.get(i) : defaultLabel;
-    //        }
-
-    //    gen.visitLineNumber(line, gen.mark());
-    //    expr.emit(C.EXPRESSION, objx, gen);
-    //        gen.invokeStatic(UTIL_TYPE,hashMethod);
-    //    gen.push(shift);
-    //    gen.visitInsn(ISHR);
-    //    gen.push(mask);
-    //    gen.visitInsn(IAND);
-    //    gen.visitTableSwitchInsn(low, high, defaultLabel, la);
-
-    //    for(Integer i : labels.keySet())
-    //        {
-    //        gen.mark(labels.get(i));
-    //        expr.emit(C.EXPRESSION, objx, gen);
-    //        tests.get(i).emit(C.EXPRESSION, objx, gen);
-    //        if(allKeywords)
-    //            {
-    //            gen.visitJumpInsn(IF_ACMPNE, defaultLabel);
-    //            }
-    //        else
-    //            {
-    //            gen.invokeStatic(UTIL_TYPE, equalsMethod);
-    //            gen.ifZCmp(GeneratorAdapter.EQ, defaultLabel);
-    //            }
-    //        thens.get(i).emit(C.EXPRESSION,objx,gen);
-    //        gen.goTo(endLabel);
-    //        }
-
-    //    gen.mark(defaultLabel);
-    //    defaultExpr.emit(C.EXPRESSION, objx, gen);
-    //    gen.mark(endLabel);
-    //    if(context == C.STATEMENT)
-    //        gen.pop();
-    //}
-
-    //static class Parser implements IParser{
-    //    //(case* expr shift mask low high default map<minhash, [test then]> identity?)
-    //    //prepared by case macro and presumed correct
-    //    //case macro binds actual expr in let so expr is always a local,
-    //    //no need to worry about multiple evaluation
-    //    public Expr parse(C context, Object frm) throws Exception{
-    //        ISeq form = (ISeq) frm;
-    //        if(context == C.EVAL)
-    //            return analyze(context, RT.list(RT.list(FN, PersistentVector.EMPTY, form)));
-    //        PersistentVector args = PersistentVector.create(form.next());
-    //        HashMap<Integer,Expr> tests = new HashMap();
-    //        HashMap<Integer,Expr> thens = new HashMap();
-
-    //        LocalBindingExpr testexpr = (LocalBindingExpr) analyze(C.EXPRESSION, args.nth(0));
-    //        testexpr.shouldClear = false;
-            
-    //        PathNode branch = new PathNode(PATHTYPE.BRANCH, (PathNode) CLEAR_PATH.get());
-    //        for(Object o : ((Map)args.nth(6)).entrySet())
-    //            {
-    //            Map.Entry e = (Map.Entry) o;
-    //            Integer minhash = (Integer) e.getKey();
-    //            MapEntry me = (MapEntry) e.getValue();
-    //            Expr testExpr = new ConstantExpr(me.getKey());
-    //            tests.put(minhash, testExpr);
-    //            Expr thenExpr;
-    //            try {
-    //                Var.pushThreadBindings(
-    //                        RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
-    //                thenExpr = analyze(C.EXPRESSION, me.getValue());
-    //                }
-    //            finally{
-    //                Var.popThreadBindings();
-    //                }
-    //            thens.put(minhash, thenExpr);
-    //            }
-            
-    //        Expr defaultExpr;
-    //        try {
-    //            Var.pushThreadBindings(
-    //                    RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
-    //            defaultExpr = analyze(C.EXPRESSION, args.nth(5));
-    //            }
-    //        finally{
-    //            Var.popThreadBindings();
-    //            }
-
-    //        return new CaseExpr((Integer) LINE.deref(),
-    //                          testexpr,
-    //                          (Integer)args.nth(1),
-    //                          (Integer)args.nth(2),
-    //                          (Integer)args.nth(3),
-    //                          (Integer)args.nth(4),
-    //                          defaultExpr,
-    //                          tests,thens,args.nth(7) != RT.F);
-
-    //    }
-        //}
-
         #region Data
 
+        readonly LocalBindingExpr _expr;
+        readonly int _shift, _mask, _low, _high;
+        readonly Expr _defaultExpr;
+        readonly Dictionary<int, Expr> _tests;
+        readonly Dictionary<int, Expr> _thens;
+        readonly bool _allKeywords;
+
+        //readonly int _line;
+
+        readonly IPersistentMap _sourceSpan;
+
+
+        //final static Method hashMethod = Method.getMethod("int hash(Object)");
+        //final static Method hashCodeMethod = Method.getMethod("int hashCode()");
+        //final static Method equalsMethod = Method.getMethod("boolean equals(Object, Object)");
 
         #endregion
 
         #region C-tors
 
-
-        #endregion
-
-        #region Type mangling
-
+        public CaseExpr( IPersistentMap sourceSpan, LocalBindingExpr expr, int shift, int mask, int low, int high, Expr defaultExpr,
+                        Dictionary<int, Expr> tests, Dictionary<int, Expr> thens, bool allKeywords)
+        {
+            _sourceSpan = sourceSpan;
+            _expr = expr;
+            _shift = shift;
+            _mask = mask;
+            _low = low;
+            _high = high;
+            _defaultExpr = defaultExpr;
+            _tests = tests;
+            _thens = thens;
+            _allKeywords = allKeywords;
+        }
 
         #endregion
 
@@ -187,9 +70,66 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
+            //(case* expr shift mask low high default map<minhash, [test then]> identity?)
+            //prepared by case macro and presumed correct
+            //case macro binds actual expr in let so expr is always a local,
+            //no need to worry about multiple evaluation
             public Expr Parse(object frm, bool isRecurContext)
             {
-                return null;
+                ISeq form = (ISeq) frm;
+
+                PersistentVector args = PersistentVector.create(form.next());
+                Dictionary<int,Expr> tests = new Dictionary<int,Expr>();
+                Dictionary<int,Expr> thens = new Dictionary<int,Expr>();
+                
+                LocalBindingExpr testexpr = (LocalBindingExpr) Compiler.GenerateAST(args.nth(0),false);
+                //testexpr.shouldClear = false;
+            
+                //PathNode branch = new PathNode(PATHTYPE.BRANCH, (PathNode) CLEAR_PATH.get());
+            
+                foreach ( IMapEntry e in ((IPersistentMap)args.nth(6)) )
+                {
+                    int minhash = (int)e.key();
+                    IMapEntry me = (IMapEntry)e.val();
+                    Expr testExpr = new ConstantExpr(me.key());
+                    tests[minhash] = testExpr;
+                    Expr thenExpr;
+                    //try 
+                    //{
+                    //    Var.pushThreadBindings(
+                    //        RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
+                    thenExpr = Compiler.GenerateAST(me.val(),false);
+                    //}
+                    //finally
+                    //{
+                    //    Var.popThreadBindings();
+                    //}
+                    thens[minhash] = thenExpr;
+                }
+            
+                Expr defaultExpr;
+                //try 
+                //{
+                //    Var.pushThreadBindings(
+                //        RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
+                    defaultExpr = Compiler.GenerateAST(args.nth(5),false);
+                //}
+                //finally
+                //{
+                //    Var.popThreadBindings();
+                //}
+
+            return new CaseExpr(
+                (IPersistentMap) Compiler.SOURCE_SPAN.deref(),
+                testexpr,
+                (int)args.nth(1),
+                (int)args.nth(2),
+                (int)args.nth(3),
+                (int)args.nth(4),
+                defaultExpr,
+                tests,
+                thens,
+                RT.booleanCast(args.nth(7)));
             }
         }
         
@@ -197,9 +137,74 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Equivalent to :
+        ///    switch (hashed _expr)
+        ///    
+        ///      case i:  if _expr == _test_i
+        ///                 goto end with _then_i
+        ///               else goto default
+        ///               
+        ///      ...
+        ///      default:
+        ///            (default_label)
+        ///             goto end with _default
+        ///      end
+        ///    end_label:
+        ///      
+        /// </remarks>
         public override Expression GenDlr(GenContext context)
         {
-            throw new NotImplementedException();
+            LabelTarget defaultLabel = Expression.Label("default");
+            LabelTarget endLabel = Expression.Label(typeof(Object),"end");
+
+            MethodInfo cmp = _allKeywords ? Compiler.Method_Object_ReferenceEquals : Compiler.Method_Util_equals;
+
+            List<SwitchCase> cases = new List<SwitchCase>();
+
+            foreach (KeyValuePair<int, Expr> pair in _tests)
+            {
+                int i = pair.Key;
+                Expr test = pair.Value;
+
+                Expression body = 
+                    Expression.Condition(
+                        Expression.Call(null,cmp,_expr.GenDlr(context),test.GenDlr(context)),
+                        Expression.Return(endLabel,Compiler.MaybeBox(_thens[i].GenDlr(context))),
+                        Expression.Goto(defaultLabel));
+
+                cases.Add(Expression.SwitchCase(body, Expression.Constant(i)));
+            }
+
+
+
+            Expression testExpr = 
+                Expression.And(
+                    Expression.RightShift(
+                        Expression.Call(null,Compiler.Method_Util_Hash,_expr.GenDlr(context)),
+                        Expression.Constant(_shift)),
+                    Expression.Constant(_mask));
+
+
+            Expression defaultExpr =
+                Expression.Block(
+                    Expression.Label(defaultLabel),
+                    Expression.Return(endLabel,Compiler.MaybeBox(_defaultExpr.GenDlr(context))));
+
+            Expression switchExpr = Expression.Switch(testExpr, defaultExpr, cases.ToArray<SwitchCase>());
+
+            Expression block =
+                Expression.Block(typeof(object),
+                    switchExpr,
+                    Expression.Label(endLabel, Expression.Default(typeof(Object))));
+
+            block = Compiler.MaybeAddDebugInfo(block, _sourceSpan);
+            return block;
         }
 
         #endregion

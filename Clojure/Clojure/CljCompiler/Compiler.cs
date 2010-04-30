@@ -94,7 +94,7 @@ namespace clojure.lang
         static readonly Keyword INLINE_ARITIES_KEY = Keyword.intern(null, "inline-arities");
 
         static readonly Keyword VOLATILE_KEY = Keyword.intern(null,"volatile");
-        static readonly Keyword IMPLEMENTS_KEY = Keyword.intern(null,"implements");
+        internal static readonly Keyword IMPLEMENTS_KEY = Keyword.intern(null,"implements");
         internal static readonly Keyword PROTOCOL_KEY = Keyword.intern(null,"protocol");
         static readonly Keyword ON_KEY = Keyword.intern(null, "on");
 
@@ -224,6 +224,8 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Monitor_Enter = typeof(Monitor).GetMethod("Enter");
         internal static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit");
 
+        internal static readonly MethodInfo Method_Object_ReferenceEquals = typeof(Object).GetMethod("ReferenceEquals");
+
         internal static readonly MethodInfo Method_Namespace_importClass1 = typeof(Namespace).GetMethod("importClass", new Type[] { typeof(Type) });
 
         internal static readonly MethodInfo Method_PersistentList_create = typeof(PersistentList).GetMethod("create", new Type[] { typeof(System.Collections.IList) });
@@ -245,6 +247,9 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_RT_var2 = typeof(RT).GetMethod("var", new Type[] { typeof(string), typeof(string) });
 
         internal static readonly MethodInfo Method_Symbol_create2 = typeof(Symbol).GetMethod("create", new Type[] { typeof(string), typeof(string) });
+
+        internal static readonly MethodInfo Method_Util_equals = typeof(Util).GetMethod("equals");
+        internal static readonly MethodInfo Method_Util_Hash = typeof(Util).GetMethod("Hash");
         
         internal static readonly MethodInfo Method_Var_BindRoot = typeof(Var).GetMethod("BindRoot");
         internal static readonly MethodInfo Method_Var_get = typeof(Var).GetMethod("deref");
