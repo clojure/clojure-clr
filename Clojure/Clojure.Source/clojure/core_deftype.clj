@@ -97,7 +97,7 @@
 
 (defn munge [s]
   ((if (symbol? s) symbol str) (clojure.lang.Compiler/munge (str s))))
-(comment
+
 (defn- emit-deftype* 
   "Do not use this directly - use deftype"
   [tagname name fields interfaces methods]
@@ -114,11 +114,11 @@
         fields (conj fields '__meta '__extmap)]
     (letfn 
      [(eqhash [[i m]] 
-        (if (not (or (contains? methodname-set 'equals) (contains? methodname-set 'hashCode)))
+        (if (not (or (contains? methodname-set 'Equals) (contains? methodname-set 'GetHashCode)))    ;;; equals, hashCode
           [i
            (conj m 
-                 `(hashCode [~'this] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))
-                 `(equals [~'this ~'o] 
+                 `(GetHashCode [~'this] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))   ;;; hashCode
+                 `(Equals [~'this ~'o]                                                                               ;;; equals
                     (boolean 
                      (or (identical? ~'this ~'o)
                          (when (instance? clojure.lang.IDynamicType ~'o)
@@ -147,7 +147,7 @@
                              (fn [fld]
                                (let [cstr (str (clojure.core/name classname) "$__lookup__" (clojure.core/name fld))]
                                  [(keyword fld) 
-                                  `(-> ~cstr (Class/forName) (.newInstance))]))
+                                  `(-> ~cstr (clojure.lang.RT/classForName) (System.Activator/CreateInstance))]))       ;;;`(-> ~cstr (Class/forName) (.newInstance))]))           
                              base-fields)
                           nil)))]
           [i m]))
@@ -282,17 +282,17 @@
          ([~@fields] (new ~classname ~@fields nil nil))
          ([~@fields meta# extmap#] (new ~classname ~@fields meta# extmap#))))))
 
-(defn- print-deftype [fields, #^clojure.lang.IDynamicType o, #^Writer w]
+(defn- print-deftype [fields, #^clojure.lang.IDynamicType o, #^System.IO.TextWriter w]           ;;; Writer
   (print-meta o w)
   (.write w "#:")
   (.write w (str (name (.getDynamicType o))))
   (print-map
     (concat
-      (map #(clojure.lang.MapEntry. % (.getDynamicField o % nil)) fields)
+      (map #(clojure.lang.MapEntry. % (.getDynamicField o % nil)) fields)          ;;; MapEntry
       (.getExtensionMap o))
     pr-on w))
 
-
+(comment
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn dtype 

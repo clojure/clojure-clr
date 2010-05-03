@@ -86,9 +86,9 @@ namespace clojure.lang.CljCompiler.Ast
             string simpleName = (name == null ? "fn" : Compiler.Munge(name).Replace(".", "_DOT_")) + "__" + RT.nextID();
             
             Name = baseName + simpleName;
-            _internalName = Name.Replace('.', '/');
+            InternalName = Name.Replace('.', '/');
 
-            _objType = RT.classForName(_internalName);
+            _objType = RT.classForName(InternalName);
             // fn.fntype = Type.getObjectType(fn.internalName) -- JAVA            
         }
 

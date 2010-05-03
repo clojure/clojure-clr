@@ -289,6 +289,7 @@ namespace clojure.lang
         }
 
         static GenContext _evalContext = new GenContext("eval", CompilerMode.Immediate);
+        static public GenContext EvalContext { get { return _evalContext; } }
 
         static int _saveId = 0;
         public static void SaveEvalContext()
@@ -1000,7 +1001,13 @@ namespace clojure.lang
             get { return (Namespace)RT.CURRENT_NS.deref(); }
         }
 
-
+        public static string DestubClassName(String className)
+        {
+            //skip over prefix + '.' or '/'
+            if (className.StartsWith(COMPILE_STUB_PREFIX))
+                return className.Substring(COMPILE_STUB_PREFIX.Length + 1);
+            return className;
+        }
 
         public static object Resolve(Symbol symbol, bool allowPrivate)
         {
@@ -1036,6 +1043,9 @@ namespace clojure.lang
                 return RT.IN_NS_VAR;
             else
             {
+                if (Util.equals(symbol, COMPILE_STUB_SYM.get()))
+                    return COMPILE_STUB_CLASS.get();
+
                 object o = n.GetMapping(symbol);
                 if (o == null)
                 {
@@ -1172,7 +1182,7 @@ namespace clojure.lang
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     //LINE_AFTER.set(lntr.LineNumber);
-                    LambdaExpression ast = Compiler.GenerateLambda(form, true);  // DEBUG ONLY, should be false
+                    LambdaExpression ast = Compiler.GenerateLambda(form, false);  
                     // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
                     ret = ast.Compile().DynamicInvoke();
                     //LINE_BEFORE.set(lntr.LineNumber);

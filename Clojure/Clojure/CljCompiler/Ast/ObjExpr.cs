@@ -44,7 +44,13 @@ namespace clojure.lang.CljCompiler.Ast
             set { _name = value; }
         }
 
-        protected string _internalName;
+        private string _internalName;
+
+        internal string InternalName
+        {
+            get { return _internalName; }
+            set { _internalName = value; }
+        }
 
         protected string _thisName;
         public string ThisName
@@ -66,6 +72,10 @@ namespace clojure.lang.CljCompiler.Ast
         protected IPersistentVector _closesExprs = PersistentVector.EMPTY;
         protected IPersistentSet _volatiles = PersistentHashSet.EMPTY;
 
+        internal bool IsVolatile(LocalBinding lb)
+        {
+            return _closes.containsKey(lb) && _volatiles.contains(lb.Symbol);
+        }
 
         protected Type _superType;
 
@@ -539,7 +549,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ret = Expression.Call(
                     null,
                     Compiler.Method_RT_classForName,
-                    Expression.Constant(((Type)value).FullName));
+                    Expression.Constant(Compiler.DestubClassName(((Type)value).FullName)));
             else if (value is Symbol)
             {
                 Symbol sym = (Symbol)value;
@@ -746,7 +756,7 @@ namespace clojure.lang.CljCompiler.Ast
             return cb;
         }
 
-        private Type[] CtorTypes()
+        internal Type[] CtorTypes()
         {
             if (_closes.count() == 0)
                 return Type.EmptyTypes;

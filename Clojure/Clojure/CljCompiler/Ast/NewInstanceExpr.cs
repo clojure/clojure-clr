@@ -22,6 +22,8 @@ using Microsoft.Scripting.Ast;
 using System.Linq.Expressions;
 #endif
 using System.Reflection;
+using System.Reflection.Emit;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -119,7 +121,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             NewInstanceExpr ret = new NewInstanceExpr(null);
             ret._name = className;
-            ret._internalName = ret.Name.Replace('.', '/');
+            ret.InternalName = ret.Name;  // ret.Name.Replace('.', '/');
             ret._objType = null; // ???
 
             if (thisSym != null)
@@ -170,10 +172,9 @@ namespace clojure.lang.CljCompiler.Ast
 
             //string[] inames = InterfaceNames(interfaces);
 
-            //Type stub = CompileStub(SlashName(superClass),ret,inames);
-            //Symbol thisTag = Symbol.intern(null,stub.Name);
-            Type stub = null;
-            Symbol thisTag = Symbol.intern(null, Compiler.COMPILE_STUB_PREFIX + "/" + ret._internalName);
+            Type stub = CompileStub(superClass,ret,SeqToTypeArray(interfaces));
+            Symbol thisTag = Symbol.intern(null,stub.FullName);
+
             try
             {
                 Var.pushThreadBindings(
@@ -230,6 +231,70 @@ namespace clojure.lang.CljCompiler.Ast
             return ret;
         }
 
+        private static Type[] SeqToTypeArray(IPersistentVector interfaces)
+        {
+            Type[] types = new Type[interfaces.count()];
+            for (int i = 0; i < interfaces.count(); i++)
+                types[i] = (Type)interfaces.nth(i);
+
+            return types;
+        }
+
+        /***
+ * Current host interop uses reflection, which requires pre-existing classes
+ * Work around this by:
+ * Generate a stub class that has the same interfaces and fields as the class we are generating.
+ * Use it as a type hint for this, and bind the simple name of the class to this stub (in resolve etc)
+ * Unmunge the name (using a magic prefix) on any code gen for classes
+ */
+        static Type CompileStub(Type super, NewInstanceExpr ret, Type[] interfaces)
+        {
+            TypeBuilder tb = Compiler.EvalContext.ModuleBuilder.DefineType(Compiler.COMPILE_STUB_PREFIX + "." + ret.InternalName, TypeAttributes.Public|TypeAttributes.Abstract, super, interfaces);
+
+            // instance fields for closed-overs
+            for (ISeq s = RT.keys(ret.Closes); s != null; s = s.next())
+            {
+                LocalBinding lb = (LocalBinding)s.first();
+                FieldAttributes access = FieldAttributes.Public;
+
+                // TODO: FIgure out Volatile
+                if (!ret.IsVolatile(lb))
+                    access |= FieldAttributes.InitOnly;
+
+                if (lb.PrimitiveType != null)
+                    tb.DefineField(lb.Name, lb.PrimitiveType, access);
+                else
+                    tb.DefineField(lb.Name, typeof(Object), access);
+            }
+
+            // ctor that takes closed-overs and does nothing
+            ConstructorBuilder cb = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, ret.CtorTypes());
+            ILGen ilg = new ILGen(cb.GetILGenerator());
+            ilg.EmitLoadArg(0);
+            ilg.Emit(OpCodes.Call,super.GetConstructor(Type.EmptyTypes));
+            ilg.Emit(OpCodes.Ret);
+
+            if (ret.altCtorDrops > 0)
+            {
+                Type[] ctorTypes = ret.CtorTypes();
+                int newLen = ctorTypes.Length - ret.altCtorDrops;
+                Type[] altCtorTypes = new Type[newLen];
+                for (int i = 0; i < altCtorTypes.Length; i++)
+                    altCtorTypes[i] = ctorTypes[i];
+                ConstructorBuilder cb2 = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
+                ILGen ilg2 = new ILGen(cb2.GetILGenerator());
+                ilg2.EmitLoadArg(0);
+                for (int i = 0; i < newLen; i++)
+                    ilg2.EmitLoadArg(i + 1);
+                for (int i = 0; i < ret.altCtorDrops; i++)
+                    ilg2.EmitNull();
+                ilg2.Emit(OpCodes.Call, cb);
+                ilg2.Emit(OpCodes.Ret);
+            }
+
+            return tb.CreateType();
+        }
+
 
         private static Expression CompileLookupThunk(NewInstanceExpr ret, Symbol fld)
         {
@@ -271,9 +336,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         static void GatherMethods(Type t, Dictionary<IPersistentVector, MethodInfo> mm)
         {
-            for (; t != null; t = t.BaseType)
-                foreach (MethodInfo m in t.GetMethods())
+            for (Type mt = t; mt != null; mt = mt.BaseType)
+                foreach (MethodInfo m in mt.GetMethods(BindingFlags.FlattenHierarchy| BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic))
                     ConsiderMethod(m, mm);
+
+            if (t.IsInterface)
+                foreach (Type it in t.GetInterfaces())
+                    GatherMethods(it, mm);
+
         }
 
 

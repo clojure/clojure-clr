@@ -189,7 +189,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         private Expression GenTargetExpression(GenContext context)
         {
-            return Expression.Constant(_type, typeof(Type));
+            string name = Compiler.DestubClassName(_type.FullName);
+            return Expression.Call(null, Compiler.Method_RT_classForName, Expression.Constant(name));
+            //return Expression.Constant(_type, typeof(Type));
         }
 
         Expression GenDlrForMethod(GenContext context)
