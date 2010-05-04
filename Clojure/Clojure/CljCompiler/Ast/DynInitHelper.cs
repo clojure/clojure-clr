@@ -38,12 +38,14 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         int _id = 0;
-        AssemblyGen _assemblyGen;
-        TypeBuilder _typeBuilder;
-        TypeGen _typeGen;
+        AssemblyGen _assemblyGen = null;
+        TypeBuilder _typeBuilder =  null;
+        TypeGen _typeGen = null;
 
-        List<FieldBuilder> _fieldBuilders = new List<FieldBuilder>();
-        List<Expression> _fieldInits = new List<Expression>();
+        string _typeName;
+
+        List<FieldBuilder> _fieldBuilders = null;
+        List<Expression> _fieldInits = null;
 
         Dictionary<Type, Type> _delegateTypes;
 
@@ -54,8 +56,9 @@ namespace clojure.lang.CljCompiler.Ast
         public DynInitHelper(AssemblyGen ag, string typeName)
         {
             _assemblyGen = ag;
-            _typeBuilder = ag.DefinePublicType(typeName, typeof(object), true);
-            _typeGen = new TypeGen(ag, _typeBuilder);
+            _typeName = typeName;
+            //_typeBuilder = ag.DefinePublicType(typeName, typeof(object), true);
+            //_typeGen = new TypeGen(ag, _typeBuilder);
         }
 
         #endregion
@@ -67,6 +70,8 @@ namespace clojure.lang.CljCompiler.Ast
         /// </summary>
         public Expression ReduceDyn(DynamicExpression node)
         {
+            MaybeInit();
+
             Type delegateType;
             if (RewriteDelegate(node.DelegateType, out delegateType))
             {
@@ -91,6 +96,17 @@ namespace clojure.lang.CljCompiler.Ast
                     DynUtils.ArrayInsert(site, node.Arguments)
                 )
             );
+        }
+
+        private void MaybeInit()
+        {
+            if (_typeBuilder == null)
+            {
+                _typeBuilder = _assemblyGen.DefinePublicType(_typeName, typeof(object), true);
+                _typeGen = new TypeGen(_assemblyGen, _typeBuilder);
+                _fieldBuilders = new List<FieldBuilder>();
+                _fieldInits = new List<Expression>();
+            }
         }
 
 
@@ -244,8 +260,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void FinalizeType()
         {
-            CreateStaticCtor();
-            _typeGen.FinishType();
+            if (_typeBuilder != null)
+            {
+                CreateStaticCtor();
+                _typeGen.FinishType();
+            }
         }
 
         void CreateStaticCtor()
