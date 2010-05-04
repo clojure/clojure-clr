@@ -152,23 +152,26 @@ namespace clojure.lang.CljCompiler.Ast
             Expression fn;
 
             // TODO: Determine if this optimization is valid for Immediate mode
-            if (_isDirect && context.Mode == CompilerMode.File)
-            {
-                ParameterExpression v = Expression.Parameter(typeof(IFn));
-                Expression initV = Expression.Assign(v, Expression.Field(null, context.ObjExpr.BaseType, context.ObjExpr.VarCallsiteName(_siteIndex)));
-                Expression test = Expression.Condition(Expression.Equal(v, Expression.Constant(null,typeof(IFn))), basicFn, v);
-                Expression block = Expression.Block(typeof(IFn), new ParameterExpression[] { v }, initV, test);
-                fn = block;
-            }
-            else
+            //if (_isDirect && context.Mode == CompilerMode.File)
+            //{
+            //    ParameterExpression v = Expression.Parameter(typeof(IFn));
+            //    Expression initV = Expression.Assign(v, Expression.Field(null, context.ObjExpr.BaseType, context.ObjExpr.VarCallsiteName(_siteIndex)));
+            //    Expression test = Expression.Condition(Expression.Equal(v, Expression.Constant(null,typeof(IFn))), basicFn, v);
+            //    Expression block = Expression.Block(typeof(IFn), new ParameterExpression[] { v }, initV, test);
+            //    fn = block;
+            //}
+            //else
                 fn = basicFn;
 
             int argCount = _args.count();
 
             Expression[] args = new Expression[argCount];
 
-            for (int i = 0; i < argCount; i++ )
-                args[i] = Compiler.MaybeBox(((Expr)_args.nth(i)).GenDlr(context));
+            for (int i = 0; i < argCount; i++)
+            {
+                Expression bare = ((Expr)_args.nth(i)).GenDlr(context);
+                args[i] = Compiler.MaybeBox(bare);
+            }
 
             Expression call = GenerateInvocation(fn, args);
             call = Compiler.MaybeAddDebugInfo(call, _spanMap);

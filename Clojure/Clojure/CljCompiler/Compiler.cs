@@ -288,7 +288,8 @@ namespace clojure.lang
                 = typeof(IFn).GetMethod("invoke", types);
         }
 
-        static GenContext _evalContext = new GenContext("eval", CompilerMode.Immediate);
+        //static GenContext _evalContext = new GenContext("eval", CompilerMode.Immediate);
+        static GenContext _evalContext = new GenContext("eval", ".dll", ".", CompilerMode.Immediate);
         static public GenContext EvalContext { get { return _evalContext; } }
 
         static int _saveId = 0;
@@ -299,13 +300,13 @@ namespace clojure.lang
         }
 
 
-        public static LambdaExpression GenerateLambda(object form, bool addPrint)
+        public static Expression<ReplDelegate> GenerateLambda(object form, bool addPrint)
         {
             return GenerateLambda(_evalContext, form, addPrint);
         }
 
 
-        internal static LambdaExpression GenerateLambda(GenContext context, object form, bool addPrint)
+        internal static Expression<ReplDelegate> GenerateLambda(GenContext context, object form, bool addPrint)
         {
             Expr ast = GenerateWrappedAst(form);
             Expression expr = GenerateInvokedDlrFromWrappedAst(context,ast);
@@ -314,7 +315,7 @@ namespace clojure.lang
                 expr = Expression.Call(Method_RT_printToConsole, expr);
             }
 
-            return Expression.Lambda(expr, "REPLCall", null);
+            return Expression.Lambda<ReplDelegate>(expr, "REPLCall", null);
         }
 
         internal static Expression GenerateInvokedDlrFromWrappedAst(GenContext context, Expr ast)
@@ -345,6 +346,30 @@ namespace clojure.lang
             return expr.Type.IsValueType
                 ? Expression.Convert(expr, typeof(object))
                 : expr;
+        }
+
+        internal static Expression MaybeDeVoid(Expression expr)
+        {
+            if (expr.Type == typeof(void))
+                // I guess we'll pass a void.  This happens when we have a throw, for example.
+                return Expression.Block(expr, Expression.Default(typeof(object)));
+
+            return expr;
+        }
+
+        internal static Expression MaybeConvert(Expression expr, Type type)
+        {
+            if (type == typeof(void))
+                type = typeof(object);
+
+            if (expr.Type == typeof(void))
+                // I guess we'll pass a void.  This happens when we have a throw, for example.
+                return Expression.Block(expr, Expression.Default(type));
+
+            if (expr.Type == type)
+                return expr;
+
+            return Expression.Convert(expr, type);
         }
 
         #endregion
@@ -1119,12 +1144,11 @@ namespace clojure.lang
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SOURCE_SPAN_KEY))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SOURCE_SPAN_KEY);
 
-            Var.pushThreadBindings(RT.map(LINE, line, SOURCE_SPAN, sourceSpan));
+            Var.pushThreadBindings(RT.map(LINE, line, SOURCE_SPAN, sourceSpan, COMPILER_CONTEXT, null));
             try
             {
-                // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
-                LambdaExpression ast = Compiler.GenerateLambda(form, false);
-                return ast.Compile().DynamicInvoke();
+                Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
+                return ast.Compile().Invoke();
             }
             finally
             {
@@ -1157,6 +1181,9 @@ namespace clojure.lang
             return load(rdr, null, "NO_SOURCE_FILE");
         }
 
+        public delegate object ReplDelegate();
+
+
         public static object load(TextReader rdr, string sourcePath, string sourceName)
         {
             object ret = null;
@@ -1182,9 +1209,8 @@ namespace clojure.lang
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     //LINE_AFTER.set(lntr.LineNumber);
-                    LambdaExpression ast = Compiler.GenerateLambda(form, false);  
-                    // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
-                    ret = ast.Compile().DynamicInvoke();
+                    Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
+                    ret = ast.Compile().Invoke();
                     //LINE_BEFORE.set(lntr.LineNumber);
                 }
             }
@@ -1280,7 +1306,7 @@ namespace clojure.lang
 
                     // Compile to assembly
                     Expression exprForCompile = GenerateInvokedDlrFromWrappedAst(context, ast);
-                    LambdaExpression lambdaForCompile = Expression.Lambda(exprForCompile, "ReplCall", null);
+                    Expression<ReplDelegate> lambdaForCompile = Expression.Lambda<ReplDelegate>(Expression.Convert(exprForCompile,typeof(Object)), "ReplCall", null);
 
                     // TODO: gather all the exprForCompiles into one BIG lambda.  Then we only need one BIG method.
                     MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
@@ -1290,12 +1316,12 @@ namespace clojure.lang
 
                     names.Add(methodBuilder.Name);
 
-                    // evaluate in this environment
-                    Expression exprForEval = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
-                    LambdaExpression lambdaForEval = Expression.Lambda(exprForEval, "ReplCall", null);
+                    //// evaluate in this environment
+                    //Expression exprForEval = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
+                    //LambdaExpression lambdaForEval = Expression.Lambda(exprForEval, "ReplCall", null);
+                    Expression<ReplDelegate> lambdaForEval = lambdaForCompile;
 
-                    // TODO: Compile to specfic delegate type, so can use Invoke instead of DynamicInvoke.
-                    lambdaForEval.Compile().DynamicInvoke();
+                    lambdaForEval.Compile().Invoke();
 
 
                     //Java version: LINE_BEFORE.set(lntr.LineNumber);

@@ -196,8 +196,11 @@ namespace clojure.lang.CljCompiler.Ast
                 Expression body =
                     Expression.Block(
                         Expression.Label(loopLabel),
-                        Compiler.MaybeBox(_body.GenDlr(context)));
-                LambdaExpression lambda = Expression.Lambda(body, parms);
+                        _body.GenDlr(context));
+
+                Expression convBody = Compiler.MaybeConvert(body, ReturnType);
+
+                LambdaExpression lambda = Expression.Lambda(convBody, parms);
                 // JVM: Clears locals here.
 
 

@@ -122,7 +122,7 @@ namespace clojure.lang.CljCompiler.Ast
             NewInstanceExpr ret = new NewInstanceExpr(null);
             ret._name = className;
             ret.InternalName = ret.Name;  // ret.Name.Replace('.', '/');
-            ret._objType = null; // ???
+            ret._objType = null; 
 
             if (thisSym != null)
                 ret._thisName = thisSym.Name;
@@ -138,8 +138,6 @@ namespace clojure.lang.CljCompiler.Ast
                     fmap = fmap.assoc(sym, lb);
                     closesvec[i * 2] = lb;
                     closesvec[i * 2 + 1] = lb;
-                    if (!sym.Name.StartsWith("__"))
-                        CompileLookupThunk(ret, sym);
                 }
                 // Java TODO: inject __meta et al into closes - when?
                 // use array map to preserve ctor order
@@ -228,6 +226,18 @@ namespace clojure.lang.CljCompiler.Ast
 
             //ret.Compile(SlashName(superClass),inames,false);
             //ret.getCompiledClass();
+            ret._objType = ret.GenerateClass();
+
+            // THis is done in an earlier loop in the JVM code.
+            // We have to do it here so that we have ret._objType defined.
+
+            for (int i = 0; i < fieldSyms.count(); i++)
+            {
+                Symbol sym = (Symbol)fieldSyms.nth(i);
+                if (!sym.Name.StartsWith("__"))
+                    CompileLookupThunk(ret, sym);
+            }
+
             return ret;
         }
 
@@ -296,19 +306,39 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        private static Expression CompileLookupThunk(NewInstanceExpr ret, Symbol fld)
+        private static Type CompileLookupThunk(NewInstanceExpr ret, Symbol fld)
         {
-            return null;
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
 
-            //// TODO: WHere do we put this delegate?  compiled vs eval?
-            //ParameterExpression p = Expression.Parameter(typeof(Object), "x");
-            //Expression e =
-            //    Expression.IfThenElse(
-            //        Expression.TypeIs(p, ret._objType),
-            //        Compiler.MaybeBox(Expression.Field(p, ret._objType, Compiler.Munge(fld.Name))),
-            //        p);
-            //Expression lambda = Expression.Lambda(e, p);
-            //return lambda;
+            string className = ret.InternalName + "$__lookup__" + fld.Name;
+            Type ftype = Compiler.TagType(Compiler.TagOf(fld));
+
+            // Java: workaround until full support for type-hinted non-primitive fields
+            if (!ftype.IsValueType)
+                ftype = typeof(Object);
+
+            TypeBuilder tb = context.ModuleBuilder.DefineType(className, TypeAttributes.Public | TypeAttributes.Sealed, typeof(object), new Type[] { typeof(ILookupThunk) });
+
+            ConstructorBuilder cb = tb.DefineDefaultConstructor(MethodAttributes.Public);
+
+            MethodBuilder mb = tb.DefineMethod("get", MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(Object), new Type[] { typeof(Object) });
+            ILGen ilg = new ILGen(mb.GetILGenerator());
+            Label faultLabel = ilg.DefineLabel();
+            Label endLabel = ilg.DefineLabel();
+            ilg.EmitLoadArg(0);
+            ilg.Emit(OpCodes.Dup);
+            ilg.Emit(OpCodes.Isinst, ret._objType);
+            ilg.Emit(OpCodes.Brfalse_S, faultLabel);
+            ilg.Emit(OpCodes.Castclass, ret._objType);
+            ilg.EmitFieldGet(ret._objType, Compiler.Munge(fld.Name));
+            ilg.Emit(OpCodes.Br_S, endLabel);
+            ilg.MarkLabel(faultLabel);
+            ilg.Emit(OpCodes.Pop);
+            ilg.EmitLoadArg(0);
+            ilg.MarkLabel(endLabel);
+            ilg.Emit(OpCodes.Ret);
+
+            return tb.CreateType();
         }
 
 
@@ -405,12 +435,28 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
 
 
+        #region Class creation
+
+        protected override Type GenerateClassForImmediate(GenContext context)
+        {
+            return GenerateClassForFile(context);
+        }
+
+        protected override Type GenerateClassForFile(GenContext context)
+        {
+            GenContext newC = context.ChangeMode(CompilerMode.File).WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString());
+            return EnsureTypeBuilt(newC);
+        }
+
+        #endregion
+
         #region Code generation
 
 
         protected override Expression GenDlrImmediate(GenContext context)
         {
-            GenContext newC = context.SwitchMode();
+            GenContext newC = context.ChangeMode(CompilerMode.File);
+            //newC = CreateContext(newC, null, null);
 
             Expression expr =  GenDlrForFile(newC,false);
             return expr;

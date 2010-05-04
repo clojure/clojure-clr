@@ -187,18 +187,36 @@ namespace clojure.lang.CljCompiler.Ast
             }
             
             // JAVA: fn.compile();
+            fn._superType = fn.GetSuperType();
+            fn.GenerateClass();
             return fn;
         }
 
-
-
         #endregion
+
+        #region Class generation
+
+        protected override Type GenerateClassForImmediate(GenContext context)
+        {
+            _baseType = GetBaseClass(context, _superType);
+            return _baseType;
+        }
+
+
+        protected override Type GenerateClassForFile(GenContext context)
+        {
+            // Needs its own GenContext so it has its own DynInitHelper
+            GenContext genC = context.WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString() );
+            return EnsureTypeBuilt(genC);
+
+        }
+
+        #endregion 
 
         #region Code generation
 
         public override Expression GenDlr(GenContext context)
         {
-            _superType = GetSuperType();
             return base.GenDlr(context);
         }
 
@@ -240,7 +258,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override Expression GenDlrImmediate(GenContext context)
         {
-            _baseType = GetBaseClass(context, _superType);
+            //_baseType = GetBaseClass(context, _superType);
             return GenerateImmediateLambda(context, _baseType);
         }
 

@@ -120,7 +120,7 @@ namespace clojure.lang.CljCompiler.Ast
                         ));
 
                 // register 'this' as local 0
-                Compiler.RegisterLocal(((thisName == null) ? dummyThis : thisName), thisTag, null, false);
+                method._thisBinding = Compiler.RegisterLocal(((thisName == null) ? dummyThis : thisName), thisTag, null, false);
 
                 IPersistentVector argLocals = PersistentVector.EMPTY;
                 method._retType = Compiler.TagType(Compiler.TagOf(name));

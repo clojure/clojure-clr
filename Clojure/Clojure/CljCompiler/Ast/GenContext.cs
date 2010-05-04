@@ -60,7 +60,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        readonly DynInitHelper _dynInitHelper;
+        DynInitHelper _dynInitHelper;
 
         internal DynInitHelper DynInitHelper
         {
@@ -103,10 +103,13 @@ namespace clojure.lang.CljCompiler.Ast
              return newContext;
         }
 
-        internal GenContext SwitchMode()
+        internal GenContext ChangeMode(CompilerMode newMode)
         {
+            if (_mode == newMode)
+                return this;
+
             GenContext newContext = Clone();
-            newContext._mode = _mode == CompilerMode.Immediate ? CompilerMode.File : CompilerMode.Immediate;
+            newContext._mode = newMode;
             return newContext;
         }
 
@@ -128,5 +131,17 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+        internal GenContext WithNewDynInitHelper(string dihClassName)
+        {
+            GenContext newContext = Clone();
+
+            if (_mode == CompilerMode.File)
+                newContext._dynInitHelper = new DynInitHelper(_assyGen, dihClassName);
+            else
+                newContext._dynInitHelper = null;
+
+            return newContext;
+        }
     }
 }

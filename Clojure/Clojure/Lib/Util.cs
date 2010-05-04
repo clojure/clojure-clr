@@ -624,6 +624,12 @@ namespace clojure.lang
             return Hash(o);
         }
 
+        static public int hashCombine(int seed, int hash)
+        {
+            return HashCombine(seed, hash);
+        }
+
+
         #endregion
 
         #region Stolen code

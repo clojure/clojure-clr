@@ -205,11 +205,37 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region Class generation
+
+        protected Type GenerateClass()
+        {
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
+
+            return GenerateClass(context);
+        }
+
+        protected Type GenerateClass(GenContext context)
+        {
+            if (context.Mode == CompilerMode.Immediate)
+                return GenerateClassForImmediate(context);
+            else
+                return GenerateClassForFile(context);
+        }
+
+        protected abstract Type GenerateClassForImmediate(GenContext context);
+        protected abstract Type GenerateClassForFile(GenContext context);
+
+
+
+        #endregion
+
         #region File-mode compilation
 
         protected Expression GenDlrForFile(GenContext context, bool convertToIFn)
         {
-            EnsureTypeBuilt(context);
+            //EnsureTypeBuilt(context);
+            if (IsDefType)
+                return Expression.Constant(null);
 
             List<Expression> args = new List<Expression>(_closes.count());
             for (ISeq s = RT.keys(_closes); s != null; s = s.next())
@@ -229,17 +255,19 @@ namespace clojure.lang.CljCompiler.Ast
             return newExpr;
         }
 
-        private void EnsureTypeBuilt(GenContext context)
+        protected Type EnsureTypeBuilt(GenContext context)
         {
-            if (_typeBuilder != null)
-                return;
+            if (_objType != null)
+                return _objType;
 
             TypeBuilder baseTB = GenerateFnBaseClass(context);
             _baseType = baseTB.CreateType();
 
             GenerateFnClass(context);
             _objType = _typeBuilder.CreateType();
+            context.DynInitHelper.FinalizeType();
             _ctorInfo = _objType.GetConstructors()[0];  // TODO: When we have more than one c-tor, we'll have to fix this.
+            return _objType;
         }
 
         #endregion
@@ -322,7 +350,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 LocalBinding lb = (LocalBinding)s.first();
                 Type type = lb.PrimitiveType ?? typeof(object);
-                _closedOverFields.Add(baseTB.DefineField(lb.Name, type, FieldAttributes.FamORAssem));
+                _closedOverFields.Add(baseTB.DefineField(lb.Name, type, FieldAttributes.Public));
             }
         }
 

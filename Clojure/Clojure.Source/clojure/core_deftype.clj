@@ -118,7 +118,7 @@
           [i
            (conj m 
                  `(GetHashCode [~'this] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))   ;;; hashCode
-                 `(Equals [~'this ~'o]                                                                               ;;; equals
+                 `(Equals [~'this ~'o]                                                                              ;;; equals
                     (boolean 
                      (or (identical? ~'this ~'o)
                          (when (instance? clojure.lang.IDynamicType ~'o)
@@ -284,8 +284,8 @@
 
 (defn- print-deftype [fields, #^clojure.lang.IDynamicType o, #^System.IO.TextWriter w]           ;;; Writer
   (print-meta o w)
-  (.write w "#:")
-  (.write w (str (name (.getDynamicType o))))
+  (.Write w "#:")                                                                                ;;; write
+  (.Write w (str (name (.getDynamicType o))))                                                    ;;; write
   (print-map
     (concat
       (map #(clojure.lang.MapEntry. % (.getDynamicField o % nil)) fields)          ;;; MapEntry
