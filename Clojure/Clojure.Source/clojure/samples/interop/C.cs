@@ -36,7 +36,9 @@ namespace dm.interop
 
         // Testing ambiguity in the ref
         public string m6(ref int x) { x += 111; return x.ToString(); }
-        public string m6(ref string x) { x += "abc"; return x; } 
+        public string m6(ref string x) { x += "abc"; return x; }
+
+        public void m7(string format, params object[] args) { Console.WriteLine("Count is {0}", args.Length); }
     }
 
     public class C2

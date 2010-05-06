@@ -49,7 +49,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, bool isRecurContext)
+            public Expr Parse(object frm, ParserContext pcon)
             {
                 ISeq form = (ISeq)frm;
 
@@ -76,7 +76,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Expr instance = null;
                 if (t == null)
-                    instance = Compiler.GenerateAST(RT.second(form),false);
+                    instance = Compiler.GenerateAST(RT.second(form),new ParserContext(false,false));
 
                 bool isZeroArityCall = RT.Length(form) == 3 && RT.third(form) is Symbol;
 
@@ -175,7 +175,7 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
-                Expr expr = Compiler.GenerateAST(arg, false);
+                Expr expr = Compiler.GenerateAST(arg, new ParserContext(false,false));
 
                 args.Add(new HostArg(paramType, expr, lb));
             }

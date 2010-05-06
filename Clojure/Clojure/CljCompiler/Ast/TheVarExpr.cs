@@ -60,7 +60,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form, bool isRecurContext)
+            public Expr Parse(object form, ParserContext pcon)
             {
                 Symbol sym = (Symbol)RT.second(form);
                 Var v = Compiler.LookupVar(sym, false);

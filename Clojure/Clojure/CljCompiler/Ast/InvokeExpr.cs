@@ -111,8 +111,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expr Parse(ISeq form)
         {
+            ParserContext pcon = new ParserContext(false, false);
+
             // TODO: DO we need the recur context here and below?
-            Expr fexpr = Compiler.GenerateAST(form.first(),false);
+            Expr fexpr = Compiler.GenerateAST(form.first(),pcon);
 
             if ( fexpr is VarExpr && ((VarExpr)fexpr).Var.Equals(Compiler.INSTANCE))
             {
@@ -120,19 +122,19 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     Type t = HostExpr.MaybeType(RT.second(form),false);
                     if ( t != null )
-                        return new InstanceOfExpr((string)Compiler.SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), t, Compiler.GenerateAST(RT.third(form), false));
+                        return new InstanceOfExpr((string)Compiler.SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), t, Compiler.GenerateAST(RT.third(form), pcon));
                 }
             }
 
             if (fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KEYWORD_CALLSITES.IsBound)
             {
-                Expr target = Compiler.GenerateAST(RT.second(form), false);
+                Expr target = Compiler.GenerateAST(RT.second(form), pcon);
                 return new KeywordInvokeExpr((string)Compiler.SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), Compiler.TagOf(form), (KeywordExpr)fexpr, target);
             }
 
             IPersistentVector args = PersistentVector.EMPTY;
             for ( ISeq s = RT.seq(form.next()); s != null; s = s.next())
-                args = args.cons(Compiler.GenerateAST(s.first(),false));
+                args = args.cons(Compiler.GenerateAST(s.first(),pcon));
             return new InvokeExpr((string)Compiler.SOURCE.deref(),
                 (IPersistentMap)Compiler.SOURCE_SPAN.deref(), //Compiler.GetSourceSpanMap(form),
                 Compiler.TagOf(form),

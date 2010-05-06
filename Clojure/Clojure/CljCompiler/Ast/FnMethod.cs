@@ -153,7 +153,7 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new Exception(string.Format("Can't specify more than {0} parameters", Compiler.MAX_POSITIONAL_ARITY));
                 Compiler.LOOP_LOCALS.set(argLocals);
                 method._argLocals = argLocals;
-                method._body = (new BodyExpr.Parser()).Parse(body,true);
+                method._body = (new BodyExpr.Parser()).Parse(body,new ParserContext(true,false));
                 return method;
             }
             finally

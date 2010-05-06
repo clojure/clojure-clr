@@ -59,11 +59,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expr Parse(IPersistentSet form)
         {
+            ParserContext pcon = new ParserContext(false, false);
+
             IPersistentVector keys = PersistentVector.EMPTY;
             for (ISeq s = RT.seq(form); s != null; s = s.next())
             {
                 object e = s.first();
-                keys = (IPersistentVector)keys.cons(Compiler.GenerateAST(e,false));
+                keys = (IPersistentVector)keys.cons(Compiler.GenerateAST(e,pcon));
             }
             Expr ret = new SetExpr(keys);
             return Compiler.OptionallyGenerateMetaInit(form, ret);

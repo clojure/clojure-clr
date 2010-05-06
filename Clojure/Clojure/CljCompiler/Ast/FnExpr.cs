@@ -96,7 +96,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Parsing
 
-        public static Expr Parse(object frm, string name, bool isRecurContext)
+        public static Expr Parse(object frm, string name, ParserContext pcon)
         {
             ISeq form = (ISeq)frm;
 

@@ -74,15 +74,17 @@ namespace clojure.lang.CljCompiler.Ast
             //prepared by case macro and presumed correct
             //case macro binds actual expr in let so expr is always a local,
             //no need to worry about multiple evaluation
-            public Expr Parse(object frm, bool isRecurContext)
+            public Expr Parse(object frm, ParserContext pcon)
             {
+                ParserContext pass = new ParserContext(false,false);
+
                 ISeq form = (ISeq) frm;
 
                 PersistentVector args = PersistentVector.create(form.next());
                 Dictionary<int,Expr> tests = new Dictionary<int,Expr>();
                 Dictionary<int,Expr> thens = new Dictionary<int,Expr>();
-                
-                LocalBindingExpr testexpr = (LocalBindingExpr) Compiler.GenerateAST(args.nth(0),false);
+
+                LocalBindingExpr testexpr = (LocalBindingExpr)Compiler.GenerateAST(args.nth(0), pass);
                 //testexpr.shouldClear = false;
             
                 //PathNode branch = new PathNode(PATHTYPE.BRANCH, (PathNode) CLEAR_PATH.get());
@@ -98,7 +100,7 @@ namespace clojure.lang.CljCompiler.Ast
                     //{
                     //    Var.pushThreadBindings(
                     //        RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
-                    thenExpr = Compiler.GenerateAST(me.val(),false);
+                    thenExpr = Compiler.GenerateAST(me.val(), pass);
                     //}
                     //finally
                     //{
@@ -112,7 +114,7 @@ namespace clojure.lang.CljCompiler.Ast
                 //{
                 //    Var.pushThreadBindings(
                 //        RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
-                    defaultExpr = Compiler.GenerateAST(args.nth(5),false);
+                defaultExpr = Compiler.GenerateAST(args.nth(5), pass);
                 //}
                 //finally
                 //{

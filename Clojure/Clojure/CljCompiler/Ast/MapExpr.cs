@@ -60,12 +60,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expr Parse(IPersistentMap form)
         {
+            ParserContext pcon = new ParserContext(false, false);
+
             IPersistentVector keyvals = PersistentVector.EMPTY;
             for (ISeq s = RT.seq(form); s != null; s = s.next())
             {
                 IMapEntry e = (IMapEntry)s.first();
-                keyvals = (IPersistentVector)keyvals.cons(Compiler.GenerateAST(e.key(),false));
-                keyvals = (IPersistentVector)keyvals.cons(Compiler.GenerateAST(e.val(),false));
+                keyvals = (IPersistentVector)keyvals.cons(Compiler.GenerateAST(e.key(),pcon));
+                keyvals = (IPersistentVector)keyvals.cons(Compiler.GenerateAST(e.val(),pcon));
             }
             Expr ret = new MapExpr(keyvals);
             return Compiler.OptionallyGenerateMetaInit(form, ret);

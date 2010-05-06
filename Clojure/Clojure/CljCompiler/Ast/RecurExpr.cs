@@ -62,13 +62,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, bool isRecurContext)
+            public Expr Parse(object frm, ParserContext pcon)
             {
                 ISeq form = (ISeq)frm;
 
                 IPersistentVector loopLocals = (IPersistentVector)Compiler.LOOP_LOCALS.deref();
 
-                if (! isRecurContext || loopLocals == null)
+                if (! pcon.IsRecurContext || loopLocals == null)
                     throw new InvalidOperationException("Can only recur from tail position");
 
                 if (Compiler.IN_CATCH_FINALLY.deref() != null)
@@ -77,7 +77,7 @@ namespace clojure.lang.CljCompiler.Ast
                 IPersistentVector args = PersistentVector.EMPTY;
 
                 for (ISeq s = form.next(); s != null; s = s.next())
-                    args = args.cons(Compiler.GenerateAST(s.first(),false));
+                    args = args.cons(Compiler.GenerateAST(s.first(),pcon.SetRecur(false)));
                 if (args.count() != loopLocals.count())
                     throw new ArgumentException(string.Format("Mismatched argument count to recur, expected: {0} args, got {1}", 
                         loopLocals.count(), args.count()));

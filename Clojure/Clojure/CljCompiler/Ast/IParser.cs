@@ -21,6 +21,6 @@ namespace clojure.lang.CljCompiler.Ast
 {
     interface IParser
     {
-        Expr Parse(object form, bool isRecurContext);
+        Expr Parse(object form, ParserContext pcon);
     }
 }

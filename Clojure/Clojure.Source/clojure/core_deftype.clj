@@ -293,6 +293,7 @@
     pr-on w))
 
 (comment
+
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn dtype 
@@ -316,9 +317,9 @@
                       table cs)]
     (clojure.lang.MethodImplCache. (.protocol cache) (.methodk cache) shift mask table)))
 
-(defn- super-chain [#^Class c]
+(defn- super-chain [#^Type c]           ;;; Class
   (when c
-    (cons c (super-chain (.getSuperclass c)))))
+    (cons c (super-chain (.BaseType c)))))                 ;;; getSuperclass
 
 (defn find-protocol-impl [protocol x]
   (if (and (:on-interface protocol) (instance? (:on-interface protocol) x))
@@ -357,9 +358,9 @@
   (let [cache  (.__methodImplCache pf)
         f (find-protocol-method (.protocol cache) (.methodk cache) x)]
     (when-not f
-      (throw (IllegalArgumentException. (str "No implementation of method: " (.methodk cache) 
+      (throw (ArgumentException. (str "No implementation of method: " (.methodk cache)                         ;;; IllegalArgumentException
                                              " of protocol: " (:var (.protocol cache)) 
-                                             " found for class: " (if (nil? x) "nil" (.getName (class x)))))))
+                                             " found for class: " (if (nil? x) "nil" (.Name (class x)))))))   ;;; getName
     (set! (.__methodImplCache pf) (expand-method-impl-cache cache (class x) f))
     f))
 
@@ -421,7 +422,7 @@
                                    (recur (conj as (first rs)) (next rs))
                                    [(seq as) (first rs)]))]
                          (when (some #{0} (map count arglists))
-                           (throw (IllegalArgumentException. (str "Protocol fn: " mname " must take at least one arg"))))
+                           (throw (ArgumentException. (str "Protocol fn: " mname " must take at least one arg"))))   ;;;IllegalArgumentException
                          (assoc m (keyword mname)  
                                 {:name (vary-meta mname assoc :doc doc :arglists arglists)
                                  :arglists arglists
@@ -658,5 +659,5 @@
 
   [p & specs]
   (emit-extend-protocol p specs))
-  )
-
+  
+)

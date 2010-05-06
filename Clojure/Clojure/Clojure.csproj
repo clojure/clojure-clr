@@ -66,6 +66,7 @@
     <Compile Include="CljCompiler\Ast\NewInstanceMethod.cs" />
     <Compile Include="CljCompiler\Ast\ObjExpr.cs" />
     <Compile Include="CljCompiler\Ast\ObjMethod.cs" />
+    <Compile Include="CljCompiler\Ast\ParserContext.cs" />
     <Compile Include="CljCompiler\GenClass.cs" />
     <Compile Include="CljCompiler\GenInterface.cs" />
     <Compile Include="CljCompiler\MethodSignature.cs" />

@@ -63,7 +63,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, bool isRecurContext)
+            public Expr Parse(object frm, ParserContext pcon)
             {
                 ISeq form = (ISeq) frm;
 
@@ -105,7 +105,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if (sym.Namespace != null)
                             throw new Exception("Can't let qualified name: " + sym);
 
-                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1),false);
+                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1),pcon.SetRecur(false));
                         // Sequential enhancement of env (like Lisp let*)
                         LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), init,false);
                         BindingInit bi = new BindingInit(b, init);
@@ -118,7 +118,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.LOOP_LOCALS.set(loopLocals);
 
                     return new LetExpr(bindingInits,
-                        new BodyExpr.Parser().Parse(body,isLoop || isRecurContext),
+                        new BodyExpr.Parser().Parse(body,pcon.SetRecur(isLoop || pcon.IsRecurContext)),
                         isLoop);
                 }
                 finally

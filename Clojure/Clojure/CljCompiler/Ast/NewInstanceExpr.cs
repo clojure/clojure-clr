@@ -56,7 +56,7 @@ namespace clojure.lang.CljCompiler.Ast
         
         public sealed class DefTypeParser : IParser
         {
-            public Expr Parse(object frm, bool isRecurContext) 
+            public Expr Parse(object frm, ParserContext pcon) 
             {
 
                 // frm is: (deftype* tagname classname [fields] :implements [interfaces] :tag tagname methods*)
@@ -88,7 +88,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class ReifyParser : IParser
         {
-            public Expr Parse(object frm, bool isRecurContext)
+            public Expr Parse(object frm, ParserContext pcon)
             {
                 // frm is:  (reify this-name? [interfaces] (method-name [args] body)* )
                 ISeq form = (ISeq)frm;

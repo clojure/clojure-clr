@@ -101,7 +101,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, bool isRecurContext)
+            public Expr Parse(object frm, ParserContext pcon)
             {
                 ISeq form = (ISeq)frm;
 
@@ -131,7 +131,7 @@ namespace clojure.lang.CljCompiler.Ast
                     else
                     {
                         if (bodyExpr == null)
-                            bodyExpr = new BodyExpr.Parser().Parse(RT.seq(body), isRecurContext);
+                            bodyExpr = new BodyExpr.Parser().Parse(RT.seq(body), pcon);
                         if (Util.equals(op, Compiler.CATCH))
                         {
                             Type t = HostExpr.MaybeType(RT.second(f), false);
@@ -155,7 +155,7 @@ namespace clojure.lang.CljCompiler.Ast
                                 LocalBinding lb = Compiler.RegisterLocal(sym,
                                     (Symbol)(RT.second(f) is Symbol ? RT.second(f) : null),
                                     null,false);
-                                Expr handler = (new BodyExpr.Parser()).Parse(RT.next(RT.next(RT.next(f))), isRecurContext);
+                                Expr handler = (new BodyExpr.Parser()).Parse(RT.next(RT.next(RT.next(f))), pcon);
                                 catches = catches.cons(new CatchClause(t, lb, handler)); ;
                             }
                             finally
@@ -172,7 +172,7 @@ namespace clojure.lang.CljCompiler.Ast
                             {
                                 //Var.pushThreadBindings(RT.map(Compiler.IN_CATCH_FINALLY, RT.T));
                                 Var.pushThreadBindings(RT.map(Compiler.IN_CATCH_FINALLY, true));
-                                finallyExpr = (new BodyExpr.Parser()).Parse(RT.next(f), false);
+                                finallyExpr = (new BodyExpr.Parser()).Parse(RT.next(f), pcon.SetRecur(false));
                             }
                             finally
                             {
@@ -183,7 +183,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 if ( bodyExpr == null )
-                    bodyExpr = (new BodyExpr.Parser()).Parse(RT.seq(body),isRecurContext);
+                    bodyExpr = (new BodyExpr.Parser()).Parse(RT.seq(body),pcon);
                 return new TryExpr(bodyExpr, catches, finallyExpr, retLocal, finallyLocal);
               }
         }

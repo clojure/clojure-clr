@@ -67,7 +67,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form, bool isRecurContext)
+            public Expr Parse(object form, ParserContext pcon)
             {
                 // (def x) or (def x initexpr)
                 if (RT.count(form) > 3)
@@ -102,8 +102,8 @@ namespace clojure.lang.CljCompiler.Ast
                     .assoc(RT.FILE_KEY, source_path)
                     .assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
 
-                Expr meta =  mm == null ? null : Compiler.GenerateAST(mm,false);
-                Expr init = Compiler.GenerateAST(RT.third(form),v.Symbol.Name,false);
+                Expr meta =  mm == null ? null : Compiler.GenerateAST(mm,pcon.SetRecur(false));
+                Expr init = Compiler.GenerateAST(RT.third(form), v.Symbol.Name, pcon.SetRecur(false));
                 bool initProvided = RT.count(form) == 3;
 
                 return new DefExpr(v, init, meta, initProvided);

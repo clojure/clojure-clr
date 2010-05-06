@@ -196,13 +196,11 @@ namespace clojure.lang.CljCompiler.Ast
                     argLocals = argLocals.assocN(i, lb);
                     method._argTypes[i] = pTypes[i];
                 }
-                //for (int i = 0; i < parms.count(); i++)
-                //    if (pTypes[i] == typeof(long) || pTypes[i] == typeof(double))
-                //        Compiler.GetAndIncLocalNum();
+
                 Compiler.LOOP_LOCALS.set(argLocals);
                 method._name = name.Name;
                 method._argLocals = argLocals;
-                method._body = (new BodyExpr.Parser()).Parse(body, true);
+                method._body = (new BodyExpr.Parser()).Parse(body, new ParserContext(true,false));
                 return method;
             }
             finally

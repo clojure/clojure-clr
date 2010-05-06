@@ -329,7 +329,7 @@ namespace clojure.lang
         {
             // TODO: Get rid of this extra wrap.  See how the JVM version handles setting up the context for compiling the form.
             object wrappedForm = RT.list(FN, PersistentVector.EMPTY, RT.list(DO, form));
-            Expr ast = GenerateAST(wrappedForm, false);
+            Expr ast = GenerateAST(wrappedForm, new ParserContext(false,false));
             return ast;
         }
 
@@ -381,12 +381,12 @@ namespace clojure.lang
         static LiteralExpr FALSE_EXPR = new BooleanExpr(false);
 
         // Equivalent to Java: Compiler.analyze()
-        public static Expr GenerateAST(object form, bool isRecurContext)
+        public static Expr GenerateAST(object form, ParserContext pcon)
         {
-            return GenerateAST(form, null, isRecurContext);
+            return GenerateAST(form, null, pcon);
         }
 
-        public static Expr GenerateAST(object form, string name, bool isRecurContext)
+        public static Expr GenerateAST(object form, string name, ParserContext pcon)
         {
             //try
             //{
@@ -412,7 +412,7 @@ namespace clojure.lang
                 else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
                     return OptionallyGenerateMetaInit(form, new EmptyExpr(form));
                 else if (form is ISeq)
-                    return AnalyzeSeq((ISeq)form, name,isRecurContext);
+                    return AnalyzeSeq((ISeq)form, name,pcon);
                 else if (form is IPersistentVector)
                     return VectorExpr.Parse((IPersistentVector)form);
                 else if (form is IPersistentMap)
@@ -490,7 +490,7 @@ namespace clojure.lang
         }
 
 
-        private static Expr AnalyzeSeq(ISeq form, string name, bool isRecurContext)
+        private static Expr AnalyzeSeq(ISeq form, string name, ParserContext pcon)
         {
             int line = (int)LINE.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
@@ -506,7 +506,7 @@ namespace clojure.lang
 
                 object exp = MacroexpandSeq1(form);
                 if (exp != form)
-                    return GenerateAST(exp, name,isRecurContext);
+                    return GenerateAST(exp, name, pcon);
 
                 object op = RT.first(form);
 
@@ -516,13 +516,13 @@ namespace clojure.lang
                 IFn inline = IsInline(op, RT.count(RT.next(form)));
 
                 if (inline != null)
-                    return GenerateAST(MaybeTransferSourceInfo(PreserveTag(form,inline.applyTo(RT.next(form))),form),isRecurContext);
+                    return GenerateAST(MaybeTransferSourceInfo(PreserveTag(form,inline.applyTo(RT.next(form))),form),pcon);
 
                 IParser p;
                 if (op.Equals(FN))
-                    return FnExpr.Parse(form, name,isRecurContext);
+                    return FnExpr.Parse(form, name,pcon);
                 if ((p = GetSpecialFormParser(op)) != null)
-                    return p.Parse(form,isRecurContext);
+                    return p.Parse(form,pcon);
                 else
                     return InvokeExpr.Parse(form);
             }
