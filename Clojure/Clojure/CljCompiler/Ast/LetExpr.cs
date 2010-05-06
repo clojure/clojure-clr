@@ -105,7 +105,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if (sym.Namespace != null)
                             throw new Exception("Can't let qualified name: " + sym);
 
-                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1),pcon.SetRecur(false));
+                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1), pcon.SetRecur(false).SetAssign(false));
                         // Sequential enhancement of env (like Lisp let*)
                         LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), init,false);
                         BindingInit bi = new BindingInit(b, init);
@@ -118,7 +118,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.LOOP_LOCALS.set(loopLocals);
 
                     return new LetExpr(bindingInits,
-                        new BodyExpr.Parser().Parse(body,pcon.SetRecur(isLoop || pcon.IsRecurContext)),
+                        new BodyExpr.Parser().Parse(body, pcon.SetRecur(isLoop || pcon.IsRecurContext).SetAssign(false)),
                         isLoop);
                 }
                 finally

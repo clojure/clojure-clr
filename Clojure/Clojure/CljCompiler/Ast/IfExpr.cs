@@ -98,9 +98,9 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new Exception("Too few arguments to if");
 
 
-                Expr testExpr = Compiler.GenerateAST(RT.second(form),pcon.SetRecur(false));
-                Expr thenExpr = Compiler.GenerateAST(RT.third(form),pcon);
-                Expr elseExpr = form.count() == 4 ? Compiler.GenerateAST(RT.fourth(form),pcon) : null;
+                Expr testExpr = Compiler.GenerateAST(RT.second(form), pcon.SetRecur(false).SetAssign(false));
+                Expr thenExpr = Compiler.GenerateAST(RT.third(form), pcon.SetAssign(false));
+                Expr elseExpr = form.count() == 4 ? Compiler.GenerateAST(RT.fourth(form), pcon.SetAssign(false)) : null;
 
                 return new IfExpr((IPersistentMap)Compiler.SOURCE_SPAN.deref(), testExpr, thenExpr, elseExpr);
             }

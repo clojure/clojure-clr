@@ -102,8 +102,9 @@ namespace clojure.lang.CljCompiler.Ast
                     .assoc(RT.FILE_KEY, source_path)
                     .assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
 
-                Expr meta =  mm == null ? null : Compiler.GenerateAST(mm,pcon.SetRecur(false));
-                Expr init = Compiler.GenerateAST(RT.third(form), v.Symbol.Name, pcon.SetRecur(false));
+                ParserContext pass = pcon.SetRecur(false).SetAssign(false);
+                Expr meta =  mm == null ? null : Compiler.GenerateAST(mm,pass);
+                Expr init = Compiler.GenerateAST(RT.third(form), v.Symbol.Name, pass);
                 bool initProvided = RT.count(form) == 3;
 
                 return new DefExpr(v, init, meta, initProvided);

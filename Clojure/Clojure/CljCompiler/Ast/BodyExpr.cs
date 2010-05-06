@@ -77,7 +77,7 @@ namespace clojure.lang.CljCompiler.Ast
                 IPersistentVector exprs = PersistentVector.EMPTY;
 
                 for (ISeq s = forms; s != null; s = s.next())
-                    exprs = exprs.cons(Compiler.GenerateAST(s.first(),pcon.SetRecur(pcon.IsRecurContext&&s.next() == null)));
+                    exprs = exprs.cons(Compiler.GenerateAST(s.first(),pcon.SetAssign(false).SetRecur(pcon.IsRecurContext&&s.next() == null)));
   
                 if (exprs.count() == 0)
                     exprs = exprs.cons(Compiler.NIL_EXPR);

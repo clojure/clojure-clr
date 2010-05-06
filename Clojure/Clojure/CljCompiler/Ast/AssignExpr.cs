@@ -67,11 +67,11 @@ namespace clojure.lang.CljCompiler.Ast
                 ISeq form = (ISeq)frm;
                 if (RT.Length(form) != 3)
                     throw new ArgumentException("Malformed assignment, expecting (set! target val)");
-                Expr target = Compiler.GenerateAST(RT.second(form), pcon.SetRecur(false));
+                Expr target = Compiler.GenerateAST(RT.second(form), pcon.SetRecur(false).SetAssign(true));
                 if (!(target is AssignableExpr))
                     throw new ArgumentException("Invalid assignment target");
                 return new AssignExpr((AssignableExpr)target,
-                    Compiler.GenerateAST(RT.third(form), pcon.SetRecur(false)));
+                    Compiler.GenerateAST(RT.third(form), pcon.SetRecur(false).SetAssign(false)));
             }
         }
 

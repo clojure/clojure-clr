@@ -77,7 +77,7 @@ namespace clojure.lang.CljCompiler.Ast
                 IPersistentVector args = PersistentVector.EMPTY;
 
                 for (ISeq s = form.next(); s != null; s = s.next())
-                    args = args.cons(Compiler.GenerateAST(s.first(),pcon.SetRecur(false)));
+                    args = args.cons(Compiler.GenerateAST(s.first(), pcon.SetRecur(false).SetAssign(false)));
                 if (args.count() != loopLocals.count())
                     throw new ArgumentException(string.Format("Mismatched argument count to recur, expected: {0} args, got {1}", 
                         loopLocals.count(), args.count()));

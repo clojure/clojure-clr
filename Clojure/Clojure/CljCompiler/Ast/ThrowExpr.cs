@@ -48,7 +48,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             public Expr Parse(object form, ParserContext pcon)
             {
-                return new ThrowExpr(Compiler.GenerateAST(RT.second(form),pcon.SetRecur(false)));
+                return new ThrowExpr(Compiler.GenerateAST(RT.second(form), pcon.SetRecur(false).SetAssign(false)));
             }
         }
 
