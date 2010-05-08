@@ -77,28 +77,20 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override Expression GenTargetExpression(GenContext context)
         {
-            return _target.GenDlr(context);
+            Expression expr = _target.GenDlr(context);
+            if ( _target.HasClrType )
+                expr =  Expression.Convert(expr,_target.ClrType);
+
+            return expr;
         }
 
-        public override Expression GenDlrUnboxed(GenContext context)
-        {
-            if (_method != null)
-            {
-                Expression call = GenDlrForMethod(context);
-                call = Compiler.MaybeAddDebugInfo(call, _spanMap);
-                return call;
-            }
-            else
-                throw new InvalidOperationException("Unboxed emit of unknown member.");
-        }
+        //protected override Expression GenDlrForMethod(GenContext context)
+        //{
+        //    Expression target = _target.GenDlr(context);
+        //    Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
 
-        protected override Expression GenDlrForMethod(GenContext context)
-        {
-            Expression target = _target.GenDlr(context);
-            Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
-
-            return AstUtils.ComplexCallHelper(target,_method, args);
-        }
+        //    return AstUtils.ComplexCallHelper(target,_method, args);
+        //}
 
         #endregion
     }

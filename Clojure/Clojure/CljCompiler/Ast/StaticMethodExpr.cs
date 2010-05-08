@@ -27,6 +27,7 @@ using Microsoft.Scripting;
 using System.IO;
 using System.Dynamic;
 
+
 namespace clojure.lang.CljCompiler.Ast
 {
     class StaticMethodExpr : MethodExpr
@@ -74,23 +75,13 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Constant(_type, typeof(Type));
         }
 
-        public override Expression GenDlrUnboxed(GenContext context)
-        {
-            if (_method != null)
-            {
-                Expression call = GenDlrForMethod(context);
-                call = Compiler.MaybeAddDebugInfo(call, _spanMap);
-                return call;
-            }
-            else
-                throw new InvalidOperationException("Unboxed emit of unknown member.");
-        }
+        //protected override Expression GenDlrForMethod(GenContext context)
+        //{
+        //    Expression target = _target.GenDlr(context);
+        //    Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
 
-        protected override Expression GenDlrForMethod(GenContext context)
-        {
-            Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
-            return AstUtils.ComplexCallHelper(_method, args);
-        }
+        //    return AstUtils.ComplexCallHelper(target,_method, args);
+        //}
 
         #endregion
     }

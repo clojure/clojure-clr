@@ -271,10 +271,11 @@ namespace clojure.lang.CljCompiler.Ast
 
             BindingTarget bt = res.ResolveOverload(methodName, methods, NarrowingLevel.None, NarrowingLevel.All);
             if (bt.Success)
-                return bt.Method;
+                return bt.Overload.ReflectionInfo;
 
             return null;
         }
+
 
 
         private static List<MethodBase> GetConstructors(Type targetType, int arity)
@@ -433,7 +434,7 @@ namespace clojure.lang.CljCompiler.Ast
                     if (Util.equals(sym, Compiler.COMPILE_STUB_SYM.get()))
                         return (Type)Compiler.COMPILE_STUB_CLASS.get();
                     // TODO:  This uses Java  [whatever  notation.  Figure out what to do here.
-                    if (sym.Name.IndexOf('.') > 0 || sym.Name[0] == '[')
+                    if (sym.Name.IndexOf('.') > 0 || sym.Name[sym.Name.Length-1] == ']')
                         t = RT.classForName(sym.Name);
                     else
                     {

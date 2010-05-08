@@ -25,6 +25,9 @@ using System.Linq.Expressions;
 #endif
 using System.Dynamic;
 using System.Reflection;
+using Microsoft.Scripting.Actions.Calls;
+using Microsoft.Scripting.Actions;
+using Microsoft.Scripting.Runtime;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -67,6 +70,92 @@ namespace clojure.lang.CljCompiler.Ast
             call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
 
+        }
+
+        public override Expression GenDlrUnboxed(GenContext context)
+        {
+            if (_method != null)
+            {
+                Expression call = GenDlrForMethod(context);
+                call = Compiler.MaybeAddDebugInfo(call, _spanMap);
+                return call;
+            }
+            else
+                throw new InvalidOperationException("Unboxed emit of unknown member.");
+        }
+
+
+        protected Expression GenDlrForMethod(GenContext context)
+        {
+            int argCount = _args.Count;
+
+
+            IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(argCount + (IsStaticCall ? 0 : 1));
+            if (!IsStaticCall)
+                argsPlus.Add(new DynamicMetaObject(GenTargetExpression(context), BindingRestrictions.Empty));
+
+            List<int> refPositions = new List<int>();
+
+            for (int i=0; i< argCount; i++ )
+            {
+                HostArg ha = _args[i];
+
+                Expr e = ha.ArgExpr;
+                Type argType = e.HasClrType ? (e.ClrType ?? typeof(object)) : typeof(Object);
+
+                Type t;
+
+                switch (ha.ParamType)
+                {
+                    case HostArg.ParameterType.Ref:
+                    case HostArg.ParameterType.Out:
+                        t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+                        refPositions.Add(i);
+                        break;
+                    case HostArg.ParameterType.Standard:
+                        t = argType;
+                        break;
+                    default:
+                        throw Util.UnreachableCode();
+                }
+                // TODO: Rethink how we are getting typing done.
+                argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(context, argType, e), argType), BindingRestrictions.Empty));
+            }
+
+            OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), IsStaticCall ? CallTypes.None : CallTypes.ImplicitInstance);
+
+            List<MethodBase> methods = new List<MethodBase>();
+            methods.Add(_method);
+
+            BindingTarget bt = res.ResolveOverload(_methodName, methods, NarrowingLevel.None, NarrowingLevel.All);
+            if (!bt.Success)
+                throw new ArgumentException("Conflict in argument matching. -- Internal error.");
+
+            Expression call = bt.MakeExpression();
+
+            if (refPositions.Count > 0)
+            {
+                ParameterExpression resultParm = Expression.Parameter(typeof(Object[]));
+
+                List<Expression> stmts = new List<Expression>(refPositions.Count + 2);
+                stmts.Add(Expression.Assign(resultParm, call));
+
+                // TODO: Fold this into the loop above
+                foreach (int i in refPositions)
+                {
+                    HostArg ha = _args[i];
+                    Expr e = ha.ArgExpr;
+                    Type argType = e.HasClrType ? (e.ClrType ?? typeof(object)) : typeof(Object);
+                    stmts.Add(Expression.Assign(_args[i].LocalBinding.ParamExpression, Expression.Convert(Expression.ArrayIndex(resultParm, Expression.Constant(i + 1)), argType)));
+                }
+
+                Type returnType = HasClrType ? ClrType : typeof(object);
+                stmts.Add(Expression.Convert(Expression.ArrayIndex(resultParm, Expression.Constant(0)), returnType));
+                call = Expression.Block(new ParameterExpression[] { resultParm }, stmts);
+            }
+
+            return call;
         }
 
         private Expression GenerateComplexCall(GenContext context)
@@ -166,7 +255,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected abstract bool IsStaticCall { get; }
         protected abstract Expression GenTargetExpression(GenContext context);
-        protected abstract Expression GenDlrForMethod(GenContext context);
+        //protected abstract Expression GenDlrForMethod(GenContext context);
 
         public override bool CanEmitPrimitive
         {

@@ -114,4 +114,44 @@ namespace dm.interop
 
     }
 
+    // For testing params, with and without ref/out, with and without ambiguity
+
+    public class C6
+    {
+        public static int sm1(int x, params object[] ys)
+        {
+            return x + ys.Length;
+        }
+
+        public static int sm1(int x, params string[] ys)
+        {
+            int count = x;
+            foreach (String y in ys)
+                count += y.Length;
+
+            return count;
+        }
+
+        public int m1(int x, params object[] ys)
+        {
+            return x + ys.Length;
+        }
+
+        public int m1(int x, params string[] ys)
+        {
+            int count = x;
+            foreach (String y in ys)
+                count += y.Length;
+
+            return count;
+        }
+
+        public static int m2(ref int x, params object[] ys)
+        {
+            x += ys.Length;
+            return ys.Length;
+        }
+   
+
+    }
 }

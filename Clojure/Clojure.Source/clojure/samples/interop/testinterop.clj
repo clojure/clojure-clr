@@ -124,3 +124,35 @@
 (defn f6 [c a]
   [(.m6 c (refparam a)) a])
   
+; (f6 c1 12)  => [ "123" 123 ]
+; (f6 c1 "def") => [ "defabc" "defab" ]
+
+(defn c6sm1a [x ys]
+  (dm.interop.C6/sm1 x #^objects (into-array Object ys)))
+  
+; (c6sm1a 12 [ 1 2 3] ) => 15
+
+(defn c6sm1b [x ys]
+  (dm.interop.C6/sm1 x #^"System.String[]" (into-array String ys)))
+
+; (c6sm1b 12 ["abc" "de" "f"]) => 18
+
+(def c6 (dm.interop.C6.))
+
+(defn c6m1a [c x ys]
+  (.m1 c x #^objects (into-array Object ys)))
+  
+; (c6m1a c6 12 [ 1 2 3] ) => 15
+
+(defn c6m1b [c x ys]
+  (.m1 c x #^"System.String[]" (into-array String ys)))
+
+; (c6m1b c6 12 ["abc" "de" "f"]) => 18
+
+(defn c6m2 [x] 
+  (let [n (int x)
+        v (dm.interop.C6/m2 (refparam n) #^objects (into-array Object [1 2 3 4]))]
+    [n v]))
+    
+;  (c6m2 12) => [16 4]
+  
