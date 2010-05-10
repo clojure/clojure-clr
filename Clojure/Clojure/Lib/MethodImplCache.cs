@@ -58,7 +58,8 @@ namespace clojure.lang
 
        #region Implementation
         
-       public IFn FnFor(Type t)
+       // initial lowercase for core.clj compatibility
+       public IFn fnFor(Type t)
         {
             if (t == _lastType)
                 return _lastImpl;

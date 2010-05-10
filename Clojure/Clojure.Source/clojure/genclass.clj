@@ -259,6 +259,5 @@
   here."
 
   [& options]
-  (when *compile-files*
-    (let [options-map (apply hash-map options) ]
-          `'~(generate-interface options-map))))
+  (let [options-map (apply hash-map options) ]
+          `'~(generate-interface options-map)))

@@ -88,7 +88,7 @@ namespace clojure.lang.CljCompiler.Ast
             _sym = sym;
             _tag = tag;
             _init = init;
-            _name = Compiler.Munge(sym.Name);
+            _name = Compiler.munge(sym.Name);
             _isArg = isArg;
         }
 

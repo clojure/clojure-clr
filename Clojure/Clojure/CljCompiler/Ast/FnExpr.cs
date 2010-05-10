@@ -78,17 +78,17 @@ namespace clojure.lang.CljCompiler.Ast
 
             string baseName = enclosingMethod != null
                 ? (enclosingMethod.Objx.Name + "$")
-                : Compiler.Munge(Compiler.CurrentNamespace.Name.Name) + "$";
+                : Compiler.munge(Compiler.CurrentNamespace.Name.Name) + "$";
 
             if (RT.second(form) is Symbol)
                 name = ((Symbol)RT.second(form)).Name;
 
-            string simpleName = (name == null ? "fn" : Compiler.Munge(name).Replace(".", "_DOT_")) + "__" + RT.nextID();
+            string simpleName = (name == null ? "fn" : Compiler.munge(name).Replace(".", "_DOT_")) + "__" + RT.nextID();
             
             Name = baseName + simpleName;
             InternalName = Name.Replace('.', '/');
 
-            _objType = RT.classForName(InternalName);
+            ObjType = RT.classForName(InternalName);
             // fn.fntype = Type.getObjectType(fn.internalName) -- JAVA            
         }
 

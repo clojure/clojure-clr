@@ -87,7 +87,7 @@ namespace clojure.lang.CljCompiler.Ast
                     MethodInfo minfo = null;
 
                     Symbol sym = (Symbol)RT.third(form);
-                    string fieldName = Compiler.Munge(sym.Name);
+                    string fieldName = Compiler.munge(sym.Name);
                     // The JVM version does not have to worry about Properties.  It captures 0-arity methods under fields.
                     // We have to put in special checks here for this.
                     // Also, when reflection is required, we have to capture 0-arity methods under the calls that
@@ -111,7 +111,10 @@ namespace clojure.lang.CljCompiler.Ast
                             return new InstancePropertyExpr(source, spanMap, tag, instance, fieldName, pinfo);
                         if ((minfo = Reflector.GetArityZeroMethod(instanceType, fieldName, false)) != null)
                             return new InstanceMethodExpr(source, spanMap, tag, instance, fieldName, new List<HostArg>());
-                        return new InstanceZeroArityCallExpr(source, spanMap, tag, instance, fieldName);
+                        if (pcon.IsAssignContext)
+                            return new InstanceFieldExpr(source, spanMap, tag, instance, fieldName, null); // same as InstancePropertyExpr when last arg is null
+                        else
+                            return new InstanceZeroArityCallExpr(source, spanMap, tag, instance, fieldName);
                     }
                     else
                     {
@@ -137,7 +140,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (!(RT.first(call) is Symbol))
                     throw new ArgumentException("Malformed member exception");
 
-                string methodName = Compiler.Munge(((Symbol)RT.first(call)).Name);
+                string methodName = Compiler.munge(((Symbol)RT.first(call)).Name);
 
                 List<HostArg> args = ParseArgs(RT.next(call));
 

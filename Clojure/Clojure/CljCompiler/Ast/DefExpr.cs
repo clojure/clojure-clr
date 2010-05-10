@@ -127,7 +127,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (_initProvided)
                 // Java doesn't Box here, but we have to deal with unboxed bool values
-                exprs.Add(Expression.Call(parm, Compiler.Method_Var_BindRoot, Compiler.MaybeBox(_init.GenDlr(context))));
+                exprs.Add(Expression.Call(parm, Compiler.Method_Var_bindRoot, Compiler.MaybeBox(_init.GenDlr(context))));
 
             if (_meta != null)
                 // Java casts to IPersistentMap on the _meta, but Expression.Call can handle that for us.

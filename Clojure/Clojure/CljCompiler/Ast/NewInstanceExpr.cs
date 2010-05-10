@@ -95,7 +95,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ObjMethod enclosingMethod = (ObjMethod)Compiler.METHOD.deref();
                 string baseName = enclosingMethod != null
                     ? (ObjExpr.TrimGenID(enclosingMethod.Objx.Name) + "$")
-                    : (Compiler.Munge(Compiler.CurrentNamespace.Name.Name) + "$");
+                    : (Compiler.munge(Compiler.CurrentNamespace.Name.Name) + "$");
                 string simpleName = "reify__" + RT.nextID();
                 string className = baseName + simpleName;
 
@@ -122,7 +122,7 @@ namespace clojure.lang.CljCompiler.Ast
             NewInstanceExpr ret = new NewInstanceExpr(null);
             ret._name = className;
             ret.InternalName = ret.Name;  // ret.Name.Replace('.', '/');
-            ret._objType = null; 
+            ret.ObjType = null; 
 
             if (thisSym != null)
                 ret._thisName = thisSym.Name;
@@ -226,7 +226,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             //ret.Compile(SlashName(superClass),inames,false);
             //ret.getCompiledClass();
-            ret._objType = ret.GenerateClass();
+            ret.ObjType = ret.GenerateClass();
 
             // THis is done in an earlier loop in the JVM code.
             // We have to do it here so that we have ret._objType defined.
@@ -327,10 +327,10 @@ namespace clojure.lang.CljCompiler.Ast
             Label endLabel = ilg.DefineLabel();
             ilg.EmitLoadArg(0);
             ilg.Emit(OpCodes.Dup);
-            ilg.Emit(OpCodes.Isinst, ret._objType);
+            ilg.Emit(OpCodes.Isinst, ret.ObjType);
             ilg.Emit(OpCodes.Brfalse_S, faultLabel);
-            ilg.Emit(OpCodes.Castclass, ret._objType);
-            ilg.EmitFieldGet(ret._objType, Compiler.Munge(fld.Name));
+            ilg.Emit(OpCodes.Castclass, ret.ObjType);
+            ilg.EmitFieldGet(ret.ObjType, Compiler.munge(fld.Name));
             ilg.Emit(OpCodes.Br_S, endLabel);
             ilg.MarkLabel(faultLabel);
             ilg.Emit(OpCodes.Pop);

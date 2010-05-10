@@ -27,12 +27,12 @@ namespace clojure.lang
     {
         #region Data
 
-        MethodImplCache _methodImplCache;
+        public MethodImplCache __methodImplCache;
 
         public MethodImplCache MethodImplCache
         {
-            get { return _methodImplCache; }
-            set { _methodImplCache = value; }
+            get { return __methodImplCache; }
+            set { __methodImplCache = value; }
         }
 
         #endregion

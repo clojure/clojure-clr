@@ -151,9 +151,9 @@ namespace clojure.lang
         internal static readonly Var CONSTANTS = Var.create();      //vector<object>
         internal static readonly Var KEYWORDS = Var.create();       //keyword->constid
 
-        internal static readonly Var KEYWORD_CALLSITES = Var.create();
-        internal static readonly Var PROTOCOL_CALLSITES = Var.create();
-        internal static readonly Var VAR_CALLSITES = Var.create();
+        internal static readonly Var KEYWORD_CALLSITES = Var.create();  // vector<keyword>
+        internal static readonly Var PROTOCOL_CALLSITES = Var.create(); // vector<var>
+        internal static readonly Var VAR_CALLSITES = Var.create();      // vector<var>
 
         internal static readonly Var COMPILE_STUB_SYM = Var.create(null);
         internal static readonly Var COMPILE_STUB_CLASS = Var.create(null);
@@ -207,6 +207,8 @@ namespace clojure.lang
 
         #region MethodInfos, etc.
 
+        internal static readonly PropertyInfo Method_AFunction_MethodImplCache = typeof(AFunction).GetProperty("MethodImplCache");
+
         internal static readonly PropertyInfo Method_Compiler_CurrentNamespace = typeof(Compiler).GetProperty("CurrentNamespace");
         internal static readonly MethodInfo Method_Compiler_PushNS = typeof(Compiler).GetMethod("PushNS");
 
@@ -220,6 +222,8 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Keyword_intern = typeof(Keyword).GetMethod("intern", new Type[] { typeof(Symbol) });
         
         internal static readonly MethodInfo Method_KeywordLookupSite_Get = typeof(KeywordLookupSite).GetMethod("Get");
+
+        internal static readonly MethodInfo Method_MethodImplCache_fnFor = typeof(MethodImplCache).GetMethod("fnFor");
 
         internal static readonly MethodInfo Method_Monitor_Enter = typeof(Monitor).GetMethod("Enter");
         internal static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit");
@@ -248,15 +252,17 @@ namespace clojure.lang
 
         internal static readonly MethodInfo Method_Symbol_create2 = typeof(Symbol).GetMethod("create", new Type[] { typeof(string), typeof(string) });
 
+        internal static readonly MethodInfo Method_Util_classOf = typeof(Util).GetMethod("classOf");
         internal static readonly MethodInfo Method_Util_equals = typeof(Util).GetMethod("equals");
         internal static readonly MethodInfo Method_Util_Hash = typeof(Util).GetMethod("Hash");
         
-        internal static readonly MethodInfo Method_Var_BindRoot = typeof(Var).GetMethod("BindRoot");
+        internal static readonly MethodInfo Method_Var_bindRoot = typeof(Var).GetMethod("bindRoot");
         internal static readonly MethodInfo Method_Var_get = typeof(Var).GetMethod("deref");
         internal static readonly MethodInfo Method_Var_set = typeof(Var).GetMethod("set");
         internal static readonly MethodInfo Method_Var_setMeta = typeof(Var).GetMethod("setMeta");
         internal static readonly MethodInfo Method_Var_popThreadBindings = typeof(Var).GetMethod("popThreadBindings");
         internal static readonly MethodInfo Method_Var_hasRoot = typeof(Var).GetMethod("hasRoot");
+        internal static readonly MethodInfo Method_Var_getRawRoot = typeof(Var).GetMethod("getRawRoot");
         internal static readonly MethodInfo Method_Var_getRoot = typeof(Var).GetMethod("getRoot");
 
         internal static readonly ConstructorInfo Ctor_KeywordLookupSite_2 = typeof(KeywordLookupSite).GetConstructor(new Type[] { typeof(int), typeof(Keyword) });
@@ -945,7 +951,8 @@ namespace clojure.lang
              );
 
 
-        public static string Munge(string name)
+        // Used in core_deftype, so initial lowercase required for compatibility
+        public static string munge(string name)
         {
             StringBuilder sb = new StringBuilder();
             foreach (char c in name)
@@ -1147,8 +1154,25 @@ namespace clojure.lang
             Var.pushThreadBindings(RT.map(LINE, line, SOURCE_SPAN, sourceSpan, COMPILER_CONTEXT, null));
             try
             {
-                Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
-                return ast.Compile().Invoke();
+                form = Macroexpand(form);
+                if (form is IPersistentCollection && Util.equals(RT.first(form), DO))
+                {
+                    ISeq s = RT.next(form);
+                    for (; RT.next(s) != null; s = RT.next(s))
+                        eval(RT.first(s));
+                    return eval(RT.first(s));
+                }
+                else if (form is IPersistentCollection && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def")))
+                {
+                    Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
+                    return ast.Compile().Invoke();
+                }
+                else
+                {
+                    // In the Java version, one would actually eval.
+                    Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
+                    return ast.Compile().Invoke();
+                }
             }
             finally
             {
@@ -1298,30 +1322,7 @@ namespace clojure.lang
                 {
                     //Java version: LINE_AFTER.set(lntr.LineNumber);
 
-                    // To avoid expanding macros more than once, we generate the AST only once,
-                    // and then compile using the compile context
-                    // and then eval using the eval context
-
-                    Expr ast = GenerateWrappedAst(form);
-
-                    // Compile to assembly
-                    Expression exprForCompile = GenerateInvokedDlrFromWrappedAst(context, ast);
-                    Expression<ReplDelegate> lambdaForCompile = Expression.Lambda<ReplDelegate>(Expression.Convert(exprForCompile,typeof(Object)), "ReplCall", null);
-
-                    // TODO: gather all the exprForCompiles into one BIG lambda.  Then we only need one BIG method.
-                    MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
-                        MethodAttributes.Public | MethodAttributes.Static);
-                    //ast.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());
-                    lambdaForCompile.CompileToMethod(methodBuilder, true);
-
-                    names.Add(methodBuilder.Name);
-
-                    //// evaluate in this environment
-                    //Expression exprForEval = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
-                    //LambdaExpression lambdaForEval = Expression.Lambda(exprForEval, "ReplCall", null);
-                    Expression<ReplDelegate> lambdaForEval = lambdaForCompile;
-
-                    lambdaForEval.Compile().Invoke();
+                    Compile1(context, exprTB, form, names, ref i);
 
 
                     //Java version: LINE_BEFORE.set(lntr.LineNumber);
@@ -1366,6 +1367,44 @@ namespace clojure.lang
                 Var.popThreadBindings();
             }
             return null;
+        }
+
+        private static void Compile1(GenContext context, TypeBuilder exprTB, object form, List<string> names, ref int i)
+        {
+            form = Macroexpand(form);
+            if (form is IPersistentCollection && Util.Equals(RT.first(form), DO))
+            {
+                for (ISeq s = RT.next(form); s != null; s = RT.next(s))
+                    Compile1(context, exprTB, RT.first(s), names, ref i);
+            }
+            else
+            {
+
+                // To avoid expanding macros more than once, we generate the AST only once,
+                // and then compile using the compile context
+                // and then eval using the eval context
+
+                Expr ast = GenerateWrappedAst(form);
+
+                // Compile to assembly
+                Expression exprForCompile = GenerateInvokedDlrFromWrappedAst(context, ast);
+                Expression<ReplDelegate> lambdaForCompile = Expression.Lambda<ReplDelegate>(Expression.Convert(exprForCompile, typeof(Object)), "ReplCall", null);
+
+                // TODO: gather all the exprForCompiles into one BIG lambda.  Then we only need one BIG method.
+                MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
+                    MethodAttributes.Public | MethodAttributes.Static);
+                //ast.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());
+                lambdaForCompile.CompileToMethod(methodBuilder, true);
+
+                names.Add(methodBuilder.Name);
+
+                //// evaluate in this environment
+                //Expression exprForEval = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
+                //LambdaExpression lambdaForEval = Expression.Lambda(exprForEval, "ReplCall", null);
+                Expression<ReplDelegate> lambdaForEval = lambdaForCompile;
+
+                lambdaForEval.Compile().Invoke();
+            }
         }
 
         public static void PushNS()

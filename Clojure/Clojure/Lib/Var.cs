@@ -173,6 +173,12 @@ namespace clojure.lang
             get { return _sym; }
         }
 
+        // core.clj compatibility
+        public Symbol sym
+        {
+            get { return _sym; }
+        }
+
         /// <summary>
         /// The namespace holding this var.
         /// </summary>
@@ -214,7 +220,7 @@ namespace clojure.lang
         {
             Var dvout = ns.intern(sym);
             if (!dvout.hasRoot() || replaceRoot)
-                dvout.BindRoot(root);
+                dvout.bindRoot(root);
             return dvout;
         }
 
@@ -434,9 +440,10 @@ namespace clojure.lang
         /// Change the root value.  (And clear the macro flag.)
         /// </summary>
         /// <param name="root">The new value.</param>
-        /// <remarks>binding root clears macro flag</remarks>
+        /// <remarks>binding root clears macro flag
+        /// <para>Initial lowercase for core.clj compatibility</para></remarks>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void BindRoot(object root)
+        public void bindRoot(object root)
         {
             Validate(getValidator(), root);
             object oldroot = hasRoot() ? _root : null;
@@ -853,7 +860,7 @@ namespace clojure.lang
         /// <returns>The new value.</returns>
         public object doReset(object val)
         {
-            BindRoot(val);
+            bindRoot(val);
             return val;
         }
 

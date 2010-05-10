@@ -121,7 +121,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Expression convTarget = Expression.Convert(target, _targetType);
                 Expression access = GenAccess(convTarget);
-                call = Expression.Assign(access, valExpr);
+                call = Expression.Assign(access, Expression.Convert(valExpr,access.Type));
             }
             else
             {

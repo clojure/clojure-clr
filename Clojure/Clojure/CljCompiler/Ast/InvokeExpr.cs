@@ -70,7 +70,7 @@ namespace clojure.lang.CljCompiler.Ast
                     if (_protocolOn != null)
                     {
                         IPersistentMap mmap = (IPersistentMap)RT.get(pvar.get(), _methodMapKey);
-                        string mname = Compiler.Munge(((Keyword)mmap.valAt(Keyword.intern(fvar.Symbol))).Symbol.ToString());
+                        string mname = Compiler.munge(((Keyword)mmap.valAt(Keyword.intern(fvar.Symbol))).Symbol.ToString());
                         List<MethodInfo> methods = Reflector.GetMethods(_protocolOn, mname, args.count() - 1,  false);
                         if (methods.Count != 1)
                             throw new ArgumentException(String.Format("No single method: {0} of interface: {1} found for function: {2} of protocol: {3}",
@@ -151,23 +151,50 @@ namespace clojure.lang.CljCompiler.Ast
             Expression basicFn = _fexpr.GenDlr(context);
             basicFn = Expression.Convert(basicFn, typeof(IFn));
 
+            if (_isProtocol)
+                return GenProto(context,basicFn);
+
+            return GenNonProto(context,basicFn);
+        }
+
+        private Expression GenNonProto(GenContext context, Expression basicFn)
+        {
             Expression fn;
 
-            // TODO: Determine if this optimization is valid for Immediate mode
-            //if (_isDirect && context.Mode == CompilerMode.File)
-            //{
-            //    ParameterExpression v = Expression.Parameter(typeof(IFn));
-            //    Expression initV = Expression.Assign(v, Expression.Field(null, context.ObjExpr.BaseType, context.ObjExpr.VarCallsiteName(_siteIndex)));
-            //    Expression test = Expression.Condition(Expression.Equal(v, Expression.Constant(null,typeof(IFn))), basicFn, v);
-            //    Expression block = Expression.Block(typeof(IFn), new ParameterExpression[] { v }, initV, test);
-            //    fn = block;
-            //}
-            //else
+            if (_isDirect && context.Mode == CompilerMode.File)
+            {
+                // TODO: Determine if this optimization is valid for Immediate mode
+                ParameterExpression v = Expression.Parameter(typeof(IFn));
+                Expression initV = Expression.Assign(v, Expression.Field(null, context.ObjExpr.BaseType, context.ObjExpr.VarCallsiteName(_siteIndex)));
+                Expression test = Expression.Condition(Expression.Equal(v, Expression.Constant(null, typeof(IFn))), basicFn, v);
+                Expression block = Expression.Block(typeof(IFn), new ParameterExpression[] { v }, initV, test);
+                fn = block;
+            }
+            else
                 fn = basicFn;
 
-            int argCount = _args.count();
+            return GenerateArgsAndCall(context, fn);
+        }
 
-            Expression[] args = new Expression[argCount];
+
+        private Expression GenerateArgsAndCall(GenContext context, Expression fn, Expression arg0)
+        {
+            Expression[] args = new Expression[_args.count()];
+            args[0] = arg0;
+            GenerateArgs(context,args,1);
+            return GenerateCall(fn,args);
+        }
+
+        private Expression GenerateArgsAndCall(GenContext context, Expression fn)
+        {
+            Expression[] args = new Expression[_args.count()];
+            GenerateArgs(context,args,0);
+            return GenerateCall(fn, args);
+        }
+
+        private void GenerateArgs(GenContext context, Expression[] args, int firstIndex)
+        {
+            int argCount = _args.count();
 
             for (int i = 0; i < argCount; i++)
             {
@@ -175,6 +202,10 @@ namespace clojure.lang.CljCompiler.Ast
                 args[i] = Compiler.MaybeBox(bare);
             }
 
+        }
+
+        private Expression GenerateCall(Expression fn, Expression[] args)
+        {
             Expression call = GenerateInvocation(fn, args);
             call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
@@ -208,6 +239,88 @@ namespace clojure.lang.CljCompiler.Ast
 
             return call;
         }
+
+        // TODO: PRIORITY: IMPLEMENT protocolOn
+
+        private Expression GenProto(GenContext context, Expression fn)
+        {
+            Var v = ((VarExpr)_fexpr).Var;
+
+            Expr e = (Expr)_args.nth(0);
+
+            ParameterExpression fnParam = Expression.Parameter(context.ObjExpr.ObjType, "fn");
+            ParameterExpression targetParam = Expression.Parameter(typeof(Object), "target");
+            ParameterExpression targetTypeParam = Expression.Parameter(typeof(Type), "targetType");
+            ParameterExpression vpfnParam = Expression.Parameter(typeof(AFunction), "vpfn");
+            ParameterExpression implParam = Expression.Parameter(typeof(IFn), "implFn");
+
+            Expression fnParamAssign = Expression.Assign(fnParam,Expression.Convert(fn,context.ObjExpr.ObjType));
+            Expression targetParamAssign = Expression.Assign(targetParam, e.GenDlr(context));
+            Expression targetTypeParamAssign =
+                Expression.Assign(
+                    targetTypeParam,
+                    Expression.Call(null, Compiler.Method_Util_classOf, targetParam));
+            Expression vpfnParamAssign =
+                Expression.Assign(
+                    vpfnParam,
+                    Expression.Call(context.ObjExpr.GenVar(context, v), Compiler.Method_Var_getRawRoot));
+
+            Expression cachedTypeField = Expression.Field(fnParam, context.ObjExpr.CachedTypeField(_siteIndex));
+            Expression cachedProtoFnField = Expression.Field(fnParam, context.ObjExpr.CachedProtoFnField(_siteIndex));
+            Expression cachedProtoImplField = Expression.Field(fnParam,context.ObjExpr.CachedProtoImplField(_siteIndex));
+
+            Expression setCachedClass =
+                Expression.Assign(
+                    cachedTypeField,
+                    targetTypeParam);
+
+            Expression setCachedProtoFn =
+                Expression.Block(
+                    Expression.Assign(cachedProtoFnField,vpfnParam),
+                    Expression.Assign(
+                        implParam,
+                        Expression.Call(
+                            Expression.Property(vpfnParam,Compiler.Method_AFunction_MethodImplCache),
+                            Compiler.Method_MethodImplCache_fnFor,
+                            targetTypeParam)),
+                    Expression.IfThenElse(
+                        Expression.Equal(implParam,Expression.Constant(null)),
+                        Expression.Block(
+                            Expression.Assign(cachedProtoFnField,Expression.Constant(null)),
+                            Expression.Assign(implParam,vpfnParam)),
+                        Expression.Assign(
+                            cachedProtoImplField,
+                            implParam)));
+
+            Expression standardImplParamAssign = Expression.Assign(implParam,cachedProtoImplField);
+
+            LabelTarget clear1Label = Expression.Label("clear1");
+            LabelTarget clear2Label = Expression.Label("clear2");
+            LabelTarget callLabel = Expression.Label("call");
+
+            Expression block =
+                Expression.Block(
+                    new ParameterExpression[] { fnParam, targetParam, targetTypeParam, vpfnParam, implParam },
+                    fnParamAssign,
+                    targetParamAssign,
+                    targetTypeParamAssign,
+                    vpfnParamAssign,
+                    Expression.IfThen(
+                        Expression.NotEqual(targetTypeParam, cachedTypeField),
+                        Expression.Goto(clear1Label)),
+                    Expression.IfThen(
+                        Expression.NotEqual(vpfnParam, cachedProtoFnField),
+                        Expression.Goto(clear2Label)),
+                    standardImplParamAssign,
+                    Expression.Goto(callLabel),
+                    Expression.Label(clear1Label),
+                    setCachedClass,
+                    Expression.Label(clear2Label),
+                    setCachedProtoFn,
+                    Expression.Label(callLabel),
+                    GenerateArgsAndCall(context, fnParam, targetParam));
+
+            return block;        }
 
         #endregion
     }

@@ -292,8 +292,6 @@
       (.getExtensionMap o))
     pr-on w))
 
-(comment
-
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn dtype 
@@ -659,5 +657,3 @@
 
   [p & specs]
   (emit-extend-protocol p specs))
-  
-)

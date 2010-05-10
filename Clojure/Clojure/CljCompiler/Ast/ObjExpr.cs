@@ -90,8 +90,14 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get { return _typeBuilder; }
         }
-        
-        protected Type _objType;
+
+        private Type _objType;
+
+        internal Type ObjType
+        {
+            get { return _objType; }
+            set { _objType = value; }
+        }
 
         protected ParameterExpression _thisParam = null;
         public ParameterExpression ThisParam
@@ -114,6 +120,26 @@ namespace clojure.lang.CljCompiler.Ast
         internal FieldBuilder KeywordLookupSiteField(int i)
         {
             return _keywordLookupSiteFields[i];
+        }
+
+
+        protected List<FieldBuilder> _cachedTypeFields;
+        protected List<FieldBuilder> _cachedProtoFnFields;
+        protected List<FieldBuilder> _cachedProtoImplFields;
+
+        internal FieldBuilder CachedTypeField(int i)
+        {
+            return _cachedTypeFields[i];
+        }
+
+        internal FieldBuilder CachedProtoFnField(int i)
+        {
+            return _cachedProtoFnFields[i];
+        }
+
+        internal FieldBuilder CachedProtoImplField(int i)
+        {
+            return _cachedProtoImplFields[i];
         }
 
         protected IPersistentCollection _methods;
@@ -291,6 +317,7 @@ namespace clojure.lang.CljCompiler.Ast
             GenerateVarCallsites(baseTB);
             GenerateKeywordCallsites(baseTB);
             GenerateSwapThunk(baseTB);
+            GenerateProtocolCallsites(baseTB);
 
             GenerateBaseClassConstructor(baseTB);
 
@@ -447,6 +474,44 @@ namespace clojure.lang.CljCompiler.Ast
             gen.EmitCall(mbs);
             gen.Emit(OpCodes.Ret);
         }
+
+        #endregion
+
+        #region Generating protocol callsites
+
+        private void GenerateProtocolCallsites(TypeBuilder baseTB)
+        {
+            int count = _protocolCallsites.count();
+
+            _cachedTypeFields = new List<FieldBuilder>(count);
+            _cachedProtoFnFields = new List<FieldBuilder>(count);
+            _cachedProtoImplFields = new List<FieldBuilder>(count);
+
+
+            for (int i = 0; i < count; i++)
+            {
+                _cachedTypeFields.Add(baseTB.DefineField(CachedClassName(i), typeof(Type), FieldAttributes.Public));
+                _cachedProtoFnFields.Add(baseTB.DefineField(CachedProtoFnName(i), typeof(AFunction), FieldAttributes.Public));
+                _cachedProtoImplFields.Add(baseTB.DefineField(CachedProtoImplName(i), typeof(IFn), FieldAttributes.Public));
+            }
+        }
+
+
+        String CachedClassName(int n)
+        {
+            return "__cached_class__" + n;
+        }
+
+        String CachedProtoFnName(int n)
+        {
+            return "__cached_proto_fn__" + n;
+        }
+
+        String CachedProtoImplName(int n)
+        {
+            return "__cached_proto_impl__" + n;
+        }
+
 
         #endregion
 

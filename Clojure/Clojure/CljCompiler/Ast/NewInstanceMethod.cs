@@ -92,7 +92,7 @@ namespace clojure.lang.CljCompiler.Ast
             NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod)Compiler.METHOD.deref());
 
             Symbol dotName = (Symbol)RT.first(form);
-            Symbol name = (Symbol)Symbol.intern(null, Compiler.Munge(dotName.Name)).withMeta(RT.meta(dotName));
+            Symbol name = (Symbol)Symbol.intern(null, Compiler.munge(dotName.Name)).withMeta(RT.meta(dotName));
 
             IPersistentVector parms = (IPersistentVector)RT.second(form);
             if (parms.count() == 0)
