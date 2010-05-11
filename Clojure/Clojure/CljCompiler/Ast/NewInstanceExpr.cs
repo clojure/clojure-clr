@@ -170,8 +170,10 @@ namespace clojure.lang.CljCompiler.Ast
 
             //string[] inames = InterfaceNames(interfaces);
 
-            Type stub = CompileStub(superClass,ret,SeqToTypeArray(interfaces));
-            Symbol thisTag = Symbol.intern(null,stub.FullName);
+            Type stub = CompileStub(superClass, ret, SeqToTypeArray(interfaces));
+            Symbol thisTag = Symbol.intern(null, stub.FullName);
+            //Symbol stubTag = Symbol.intern(null,stub.FullName);
+            //Symbol thisTag = Symbol.intern(null, tagName);
 
             try
             {
@@ -222,7 +224,9 @@ namespace clojure.lang.CljCompiler.Ast
 
             // TODO: This is silly.  We have the superClass in hand.  Might as well stash it.
             //ret._superName = SlashName(superClass);
-            ret._superType = superClass;
+            //ret._superType = superClass;
+            ret._superType = stub;
+            // asdf: IF this works, I'll be totally amazed.
 
             //ret.Compile(SlashName(superClass),inames,false);
             //ret.getCompiledClass();
@@ -259,7 +263,12 @@ namespace clojure.lang.CljCompiler.Ast
  */
         static Type CompileStub(Type super, NewInstanceExpr ret, Type[] interfaces)
         {
-            TypeBuilder tb = Compiler.EvalContext.ModuleBuilder.DefineType(Compiler.COMPILE_STUB_PREFIX + "." + ret.InternalName, TypeAttributes.Public|TypeAttributes.Abstract, super, interfaces);
+
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
+
+            TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.COMPILE_STUB_PREFIX + "." + ret.InternalName, TypeAttributes.Public|TypeAttributes.Abstract, super, interfaces);
+
+            tb.DefineDefaultConstructor(MethodAttributes.Public);
 
             // instance fields for closed-overs
             for (ISeq s = RT.keys(ret.Closes); s != null; s = s.next())

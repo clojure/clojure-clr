@@ -116,6 +116,8 @@ namespace clojure.lang
             BindingFlags flags = BindingFlags.Public | BindingFlags.InvokeMethod;
             if (getStatics)
                 flags |= BindingFlags.Static | BindingFlags.FlattenHierarchy;
+            else
+                flags |= BindingFlags.Instance;
 
             IEnumerable<MethodInfo> einfo = t.GetMethods(flags).Where(mi => mi.Name == name && mi.GetParameters().Length == arity);
             List<MethodInfo> infos = new List<MethodInfo>(einfo);

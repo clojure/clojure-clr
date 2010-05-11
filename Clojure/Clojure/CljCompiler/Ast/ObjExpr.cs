@@ -208,6 +208,11 @@ namespace clojure.lang.CljCompiler.Ast
             switch (context.Mode)
             {
                 case CompilerMode.Immediate:
+                    if (_protocolCallsites.count() > 0)
+                    {
+                        context = context.ChangeMode(CompilerMode.File);
+                        return GenDlrForFile(context,true);
+                    }
                     return GenDlrImmediate(context);
                 case CompilerMode.File:
                     return GenDlrForFile(context,true);
@@ -236,6 +241,9 @@ namespace clojure.lang.CljCompiler.Ast
         protected Type GenerateClass()
         {
             GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
+
+            if (_protocolCallsites.count() > 0)
+                context = context.ChangeMode(CompilerMode.File);
 
             return GenerateClass(context);
         }
@@ -497,17 +505,17 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        String CachedClassName(int n)
+        internal static String CachedClassName(int n)
         {
             return "__cached_class__" + n;
         }
 
-        String CachedProtoFnName(int n)
+        internal static String CachedProtoFnName(int n)
         {
             return "__cached_proto_fn__" + n;
         }
 
-        String CachedProtoImplName(int n)
+        internal static String CachedProtoImplName(int n)
         {
             return "__cached_proto_impl__" + n;
         }
