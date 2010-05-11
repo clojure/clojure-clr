@@ -119,8 +119,8 @@ namespace clojure.lang.CljCompiler.Ast
                         throw Util.UnreachableCode();
                 }
                 // TODO: Rethink how we are getting typing done.
-                //argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(context, argType, e), argType), BindingRestrictions.Empty));
-                argsPlus.Add(new DynamicMetaObject(GenTypedArg(context, argType, e), BindingRestrictions.Empty));
+                argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(context, argType, e), argType), BindingRestrictions.Empty));
+                //argsPlus.Add(new DynamicMetaObject(GenTypedArg(context, argType, e), BindingRestrictions.Empty));
             }
 
             OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
