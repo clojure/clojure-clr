@@ -25,9 +25,11 @@ namespace clojure.lang
     /// <summary>
     /// A persistent set built on a <see cref="IPersistentMap">IPersistentMap</see>.
     /// </summary>
-    public class PersistentHashSet: APersistentSet, IEditableCollection
+    public class PersistentHashSet: APersistentSet, IObj, IEditableCollection
     {
         #region Data
+
+        readonly IPersistentMap _meta;
 
         /// <summary>
         /// An empty <see cref="PersistentHashSet">PersistentHashSet</see>.
@@ -85,8 +87,9 @@ namespace clojure.lang
         /// <param name="meta">The metadata to attach.</param>
         /// <param name="impl">The implementating map.</param>
         PersistentHashSet(IPersistentMap meta, IPersistentMap impl)
-            : base(meta, impl)
+            : base(impl)
         {
+            _meta = meta;
         }
 
         #endregion
@@ -98,7 +101,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="meta">The new metadata.</param>
         /// <returns>A copy of the object with new metadata attached.</returns>
-        public override IObj withMeta(IPersistentMap meta)
+        public IObj withMeta(IPersistentMap meta)
         {
             return (_meta == meta)
                 ? this
@@ -106,6 +109,15 @@ namespace clojure.lang
 
             // JAVA: did not follow the usual pattern.
             // return new PersistentHashSet(meta, _impl);
+        }
+
+        #endregion
+        
+        #region IMeta Members
+
+        public IPersistentMap meta()
+        {
+            return _meta;
         }
 
         #endregion
@@ -181,6 +193,5 @@ namespace clojure.lang
 
 
         #endregion
-
     }
 }

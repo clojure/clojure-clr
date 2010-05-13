@@ -135,8 +135,8 @@ namespace clojure.lang.CljCompiler.Ast
                 for (int k = 1; k < args.Length; k++)
                 {
                     Type p = args[k];
-                    if (!p.Assembly.GetName().Name.Equals("mscorlib") && !p.Assembly.GetName().Name.Equals("Clojure"))
-                        Console.WriteLine("Found {0}", p.ToString());
+                    //if (!p.Assembly.GetName().Name.Equals("mscorlib") && !p.Assembly.GetName().Name.Equals("Clojure"))
+                    //    Console.WriteLine("Found {0}", p.ToString());
                 }
             }
 

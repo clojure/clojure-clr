@@ -36,7 +36,9 @@
  
  (def
  #^{:macro true}
- fn (fn* fn [&form &env & decl] (cons 'fn* decl)))
+ fn (fn* fn [&form &env & decl] 
+         (.withMeta #^clojure.lang.IObj (cons 'fn* decl) 
+                    (.meta #^clojure.lang.IMeta &form))))
   
 (def 
  #^{:arglists '([coll])
@@ -241,10 +243,10 @@
                         (if (instance? clojure.lang.Symbol iname) false true))
                     ;; inserts the same fn name to the inline fn if it does not have one
                     (assoc m :inline (cons ifn (cons name (next inline))))
-                    m))]
-          (list 'def (with-meta name (conj (if (meta name) (meta name) {}) m))
-                (cons 'fn (cons name fdecl))))))
-                ;(cons `fn fdecl)))))
+                    m))
+              m (conj (if (meta name) (meta name) {}) m)]
+          (list 'def (with-meta name m)
+               (list '.withMeta (cons `fn (cons name fdecl)) (list '.meta (list 'var name)))))))
 
 (. (var defn) (setMacro))       
 ;;; Not the same as the Java version, but good enough?
@@ -2675,9 +2677,9 @@
   "Returns a (potentially-ragged) 2-dimensional array of Objects
   containing the contents of coll, which can be any Collection of any
   Collection."
-  {:tag "System.Object[][]" }                                                                 ;;; "[[Ljava.lang.Object;"
+  {:tag "System.Object[]" }                                                                 ;;; "[[Ljava.lang.Object;"
   [#^System.Collections.ICollection coll]                                              ;;; #^java.util.Collection
-    (let [ret  (make-array Object (. coll (Count)))]      ;;; NEED BETTER TYPING HERE (make-array (. Class (forName "[Ljava.lang.Object;")) (. coll (size)))]
+    (let [ret  (make-array Object (.Count coll))]      ;;; NEED BETTER TYPING HERE (make-array (. Class (forName "[Ljava.lang.Object;")) (. coll (size)))]
       (loop [i 0 xs (seq coll)]
         (when xs
           (aset ret i (to-array (first xs)))

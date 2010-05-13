@@ -149,6 +149,7 @@ namespace clojure.lang
 
         internal static readonly Var VARS = Var.create();           //var->constid
         internal static readonly Var CONSTANTS = Var.create();      //vector<object>
+        internal static readonly Var CONSTANT_IDS = Var.create();   // IdentityHashMap
         internal static readonly Var KEYWORDS = Var.create();       //keyword->constid
 
         internal static readonly Var KEYWORD_CALLSITES = Var.create();  // vector<keyword>
@@ -229,6 +230,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit");
 
         internal static readonly MethodInfo Method_Object_ReferenceEquals = typeof(Object).GetMethod("ReferenceEquals");
+        internal static readonly MethodInfo Method_Object_MemberwiseClone = typeof(Object).GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod);
 
         internal static readonly MethodInfo Method_Namespace_importClass1 = typeof(Namespace).GetMethod("importClass", new Type[] { typeof(Type) });
 
@@ -765,7 +767,12 @@ namespace clojure.lang
             if (!CONSTANTS.IsBound)
                 return -1;
             PersistentVector v = (PersistentVector)CONSTANTS.deref();
+            IdentityHashMap ids = (IdentityHashMap)CONSTANT_IDS.deref();
+            int i;
+            if ( ids.TryGetValue(o, out i) )
+                return i;
             CONSTANTS.set(RT.conj(v, o));
+            ids[o] = v.count();
             return v.count();
         }
 
@@ -1304,6 +1311,7 @@ namespace clojure.lang
             //LINE_AFTER, lntr.LineNumber,
             DOCUMENT_INFO, Expression.SymbolDocument(sourceName),  // I hope this is enough
             CONSTANTS, PersistentVector.EMPTY,
+            CONSTANT_IDS, new IdentityHashMap(),
             KEYWORDS, PersistentHashMap.EMPTY,
             VARS, PersistentHashMap.EMPTY,
             COMPILER_CONTEXT, context

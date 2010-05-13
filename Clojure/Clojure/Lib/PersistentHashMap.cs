@@ -36,7 +36,7 @@ namespace clojure.lang
     /// <para>No sub-tree pools or root-resizing</para>
     /// <para>Any errors are Rich Hickey's (so he says), except those that I introduced.</para>
     /// </remarks>
-    public class PersistentHashMap: APersistentMap, IEditableCollection
+    public class PersistentHashMap: APersistentMap, IEditableCollection, IObj
     {
         #region Data
 
@@ -59,6 +59,8 @@ namespace clojure.lang
         /// The value associated with the null key, if present.
         /// </summary>
         readonly object _nullValue;
+
+        readonly IPersistentMap _meta;
 
         /// <summary>
         /// An empty <see cref="PersistentHashMap">PersistentHashMap</see>.
@@ -154,6 +156,7 @@ namespace clojure.lang
         /// <param name="nullValue"></param>
         PersistentHashMap(int count, INode root, bool hasNull, object nullValue)
         {
+            _meta = null;
             _count = count;
             _root = root;
             _hasNull = hasNull;
@@ -169,8 +172,8 @@ namespace clojure.lang
         /// <param name="hasNull"></param>
         /// <param name="nullValue"></param>
         PersistentHashMap(IPersistentMap meta, int count, INode root, bool hasNull, object nullValue)
-            : base(meta)
         {
+            _meta = meta;
             _count = count;
             _root = root;
             _hasNull = hasNull;
@@ -193,6 +196,15 @@ namespace clojure.lang
 
         #endregion
 
+        #region IMeta Members
+
+        public IPersistentMap meta()
+        {
+            return _meta;
+        }
+
+        #endregion
+        
         #region Associative
 
          /// <summary>
@@ -1445,6 +1457,5 @@ namespace clojure.lang
             }
             #endregion
         }
-
     }
 }

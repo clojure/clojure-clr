@@ -31,7 +31,7 @@ namespace clojure.lang
         /// Initialize an <see cref="AMapEntry">AMapEntry</see> with null metadata.
         /// </summary>
         public AMapEntry()
-            : base(null)
+            : base()
         {
         }
 

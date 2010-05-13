@@ -180,6 +180,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.pushThreadBindings(
                     RT.map(
                         Compiler.CONSTANTS, PersistentVector.EMPTY,
+                        Compiler.CONSTANT_IDS, new IdentityHashMap(),
                         Compiler.KEYWORDS, PersistentHashMap.EMPTY,
                         Compiler.VARS, PersistentHashMap.EMPTY,
                         Compiler.KEYWORD_CALLSITES, PersistentVector.EMPTY,

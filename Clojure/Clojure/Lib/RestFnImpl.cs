@@ -33,10 +33,13 @@ namespace clojure.lang
     // And then it goes away again in Rev 1161.  Sigh.  (RestFn implements AFunction, which apparently suffices.)
     {
 
+        IPersistentMap _meta;
+
         protected readonly int _reqArity;
 
         public RestFnImpl(int reqArity)
         {
+            _meta = null;
             _reqArity = reqArity;
         }
 
@@ -558,5 +561,17 @@ namespace clojure.lang
         //    return (_fnRest == null) ? base.invoke() 
         //    : _fnRest(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, args);
         //}
+
+        public override IObj withMeta(IPersistentMap meta)
+        {
+            RestFnImpl copy = (RestFnImpl) MemberwiseClone();
+            copy._meta = meta;
+            return copy;
+        }
+
+        public override IPersistentMap meta()
+        {
+            return _meta;
+        }
     }
 }

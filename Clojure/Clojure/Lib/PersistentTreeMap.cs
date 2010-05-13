@@ -29,7 +29,7 @@ namespace clojure.lang
     /// i.e., add/remove etc return new values.</para
     /// <para>See Okasaki, Kahrs, Larsen et al</para>
     /// </remarks>
-    public class PersistentTreeMap : APersistentMap, Reversible, Sorted
+    public class PersistentTreeMap : APersistentMap, IObj, Reversible, Sorted
     {
         #region Data
 
@@ -47,6 +47,8 @@ namespace clojure.lang
         /// Number of items in the tree.
         /// </summary>
         protected readonly int _count;
+
+        readonly IPersistentMap _meta;
 
         /// <summary>
         /// An empty <see cref="PersistentTreeMap">PersistentTreeMap</see>.
@@ -130,8 +132,8 @@ namespace clojure.lang
         /// <param name="meta"></param>
         /// <param name="comp"></param>
         public PersistentTreeMap(IPersistentMap meta, IComparer comp)
-            : base(meta)
         {
+            _meta = meta;
             _comp = comp;
             _tree = null;
             _count = 0;
@@ -145,8 +147,8 @@ namespace clojure.lang
         /// <param name="count">The number of elements in the tree.</param>
         /// <param name="meta">The metadata to attach.</param>
         PersistentTreeMap(IComparer comp, Node tree, int count, IPersistentMap meta)
-            : base(meta)
         {
+            _meta = meta;
             _comp = comp;
             _tree = tree;
             _count = count;
@@ -154,8 +156,8 @@ namespace clojure.lang
 
         // Why we have this and the previous, I don't know.
         PersistentTreeMap(IPersistentMap meta, IComparer comp, Node tree, int count)
-            : base(meta)
         {
+            _meta = meta;
             _comp = comp;
             _tree = tree;
             _count = count;
@@ -177,6 +179,15 @@ namespace clojure.lang
                 ? this
                 : new PersistentTreeMap(meta, _comp, _tree, _count);
             // Java: return new PersistentTreeMap(meta, _comp, _tree, _count);
+        }
+
+        #endregion
+
+        #region IMeta Members
+
+        public IPersistentMap meta()
+        {
+            return _meta;
         }
 
         #endregion
@@ -1131,7 +1142,6 @@ namespace clojure.lang
 
             #endregion
         }
-
     }
 }
 

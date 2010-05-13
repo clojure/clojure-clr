@@ -49,23 +49,14 @@ namespace Clojure.Tests.LibTests
             object[] _values;
 
             public CPV(object[] values)
-                : base(null)
             {
                 _values = values;
             }
 
 
             public CPV(IPersistentMap meta, object[] values)
-                : base(meta)
             {
                 _values = values;
-            }
-
-            public override IObj withMeta(IPersistentMap meta)
-            {
-                return meta == _meta
-                    ? this
-                    : new CPV(meta, _values);
             }
 
             //public override object applyTo(ISeq arglist)
@@ -81,7 +72,7 @@ namespace Clojure.Tests.LibTests
                 object[] newArr = new object[_values.Length - 1];
                 Array.Copy(_values, newArr, _values.Length - 1);
 
-                return new CPV(_meta, newArr);
+                return new CPV( newArr);
             }
 
             public override IPersistentVector cons(object o)
@@ -89,7 +80,7 @@ namespace Clojure.Tests.LibTests
                 object[] newArr = new object[_values.Length + 1];
                 _values.CopyTo(newArr, 0);
                 newArr[_values.Length] = o;
-                return new CPV(_meta, newArr);
+                return new CPV(newArr);
             }
 
             public override IPersistentVector assocN(int i, object val)
@@ -99,7 +90,7 @@ namespace Clojure.Tests.LibTests
                     object[] newArr = new object[_values.Length];
                     _values.CopyTo(newArr, 0);
                     newArr[i] = val;
-                    return new CPV(_meta, newArr);
+                    return new CPV(newArr);
                 }
                 if ( i == _values.Length )
                     return cons(val);
@@ -130,26 +121,26 @@ namespace Clojure.Tests.LibTests
 
         #region C-tor tests
 
-        [Test]
-        public void NoMetaCtorHasNoMeta()
-        {
-            CPV v = new CPV(new object[] { 1, 2, 3 });
+        //[Test]
+        //public void NoMetaCtorHasNoMeta()
+        //{
+        //    CPV v = new CPV(new object[] { 1, 2, 3 });
 
-            Expect(v.meta(),Null);
-        }
+        //    Expect(v.meta(),Null);
+        //}
 
-        [Test]
-        public void MetaCtorHasMeta()
-        {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
+        //[Test]
+        //public void MetaCtorHasMeta()
+        //{
+        //    MockRepository mocks = new MockRepository();
+        //    IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
+        //    mocks.ReplayAll();
 
-            CPV v = new CPV(meta,new object[] { 1, 2, 3 });
+        //    CPV v = new CPV(meta,new object[] { 1, 2, 3 });
 
-            Expect(v.meta(), SameAs(meta));
-            mocks.VerifyAll();
-        }
+        //    Expect(v.meta(), SameAs(meta));
+        //    mocks.VerifyAll();
+        //}
 
         #endregion
 

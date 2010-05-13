@@ -25,7 +25,7 @@ namespace clojure.lang
     /// </summary>
     /// <remarks>See the Clojure documentation for more information.</remarks>
     [Serializable]
-    public class Symbol: AFn, Named, IComparable, ISerializable
+    public class Symbol: AFn, IObj, Named, IComparable, ISerializable
     {
         #region Instance variables
 
@@ -45,6 +45,8 @@ namespace clojure.lang
         /// The cached hashcode.
         /// </summary>
         protected readonly int _hash;
+
+        readonly IPersistentMap _meta;
 
         #endregion
 
@@ -108,9 +110,10 @@ namespace clojure.lang
         private Symbol(string ns_interned, string name_interned) 
             : base()
         {
-            this._name = name_interned;
-            this._ns = ns_interned;
-            this._hash = ComputeHashCode();
+            _meta = null;
+            _name = name_interned;
+            _ns = ns_interned;
+            _hash = ComputeHashCode();
         }
 
         /// <summary>
@@ -120,8 +123,8 @@ namespace clojure.lang
         /// <param name="ns_interned">The (interned) namespace name.</param>
         /// <param name="name_interned">The (interned) symbol name.</param>
         private Symbol(IPersistentMap meta, string ns_interned, string name_interned)
-            : base(meta)
         {
+            _meta = meta;
             _name = name_interned;
             _ns = ns_interned;
             _hash = ComputeHashCode();
@@ -200,7 +203,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="meta">The new metadata.</param>
         /// <returns>A copy of the object with new metadata attached.</returns>
-        public override IObj withMeta(IPersistentMap meta)
+        public IObj withMeta(IPersistentMap meta)
         {
             // Java did not do identity test.
             return meta == _meta
@@ -210,6 +213,15 @@ namespace clojure.lang
 
         #endregion
 
+        #region IMeta Members
+
+        public IPersistentMap meta()
+        {
+            return _meta;
+        }
+
+        #endregion
+        
         #region Named members
 
         // I prefer to use these internally.

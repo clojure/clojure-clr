@@ -340,7 +340,33 @@ namespace Clojure.Tests.LibTests
             int m1(int s);      // Collides with method on I1
         }
 
-        public class Fn1 : AFunction
+        public class AFunctionMeta : AFunction
+        {
+            protected IPersistentMap _meta;
+
+            public AFunctionMeta()
+            {
+                _meta = null;
+            }
+
+            protected AFunctionMeta(IPersistentMap meta)
+            {
+                _meta = meta;
+            }
+
+
+            public override IObj withMeta(IPersistentMap meta)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override IPersistentMap meta()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public class Fn1 : AFunctionMeta
         {
             public override object invoke(object arg1, object arg2)
             {
@@ -349,7 +375,7 @@ namespace Clojure.Tests.LibTests
             }
         }
 
-        public class Fn2 : AFunction
+        public class Fn2 : AFunctionMeta
         {
             public override object invoke(object arg1, object arg2)
             {
@@ -358,7 +384,7 @@ namespace Clojure.Tests.LibTests
             }
         }
 
-        public class Fn2V : AFunction
+        public class Fn2V : AFunctionMeta
         {
             public static bool _called = false;
 
@@ -370,7 +396,7 @@ namespace Clojure.Tests.LibTests
             }
         }
 
-        public class Fn2S : AFunction
+        public class Fn2S : AFunctionMeta
         {
             public override object invoke(object arg1, object arg2)
             {
@@ -381,7 +407,7 @@ namespace Clojure.Tests.LibTests
 
 
 
-        public class Fn3 : AFunction
+        public class Fn3 : AFunctionMeta
         {
             int _x;
 
@@ -397,7 +423,7 @@ namespace Clojure.Tests.LibTests
             }
         }
 
-        public class Fn4 : AFunction
+        public class Fn4 : AFunctionMeta
         {
             int _x;
 

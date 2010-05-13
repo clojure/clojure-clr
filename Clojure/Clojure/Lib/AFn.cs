@@ -24,46 +24,8 @@ namespace clojure.lang
     /// Provides a basic implementation of <see cref="IFn">IFn</see> interface methods.
     /// </summary>
     [Serializable]
-    public abstract class AFn : Obj, IFn
+    public abstract class AFn : IFn
     {
-        #region C-tors
-
-        /// <summary>
-        /// Initialize an <see cref="AFn">AFn</see> with the given metadata.
-        /// </summary>
-        /// <param name="meta">The metadata to attach.</param>
-        public AFn(IPersistentMap meta)
-            : base(meta)
-        {
-        }
-
-        /// <summary>
-        /// Initialize an <see cref="AFn">AFn</see> with the null metadata.
-        /// </summary>
-        public AFn()
-        {
-        }
-
-        #endregion
-
-        #region IObj members
-
-        /// <summary>
-        /// Create a copy with new metadata.
-        /// </summary>
-        /// <param name="meta">The new metadata.</param>
-        /// <returns>A copy of the object with new metadata attached.</returns>
-        /// <remarks>Not implemented at this level.  
-        /// This just introduces the virtual method definition 
-        /// for concrete classes to override, or not.  
-        /// (Some may want to leave it unimplemented.)</remarks>
-        public override IObj withMeta(IPersistentMap meta)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
         #region IFn Members
 
         public virtual object invoke()

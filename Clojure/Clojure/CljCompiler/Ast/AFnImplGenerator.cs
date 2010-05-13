@@ -27,12 +27,32 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal static Type Create(GenContext context, Type baseClass)
         {
+           
             //ModuleBuilder mb = context.ModuleBldr;
             string name = baseClass.Name + "_impl";
             //TypeBuilder baseTB = context.ModuleBldr.DefineType(name, TypeAttributes.Class | TypeAttributes.Public, baseClass);
             TypeBuilder baseTB = context.AssemblyGen.DefinePublicType(name, baseClass, true);
 
             baseTB.DefineDefaultConstructor(MethodAttributes.Public);
+
+            FieldBuilder metaField = baseTB.DefineField("_meta", typeof(IPersistentMap), FieldAttributes.Public);
+
+            MethodBuilder metaMB = baseTB.DefineMethod("meta", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.ReuseSlot, typeof(IPersistentMap), Type.EmptyTypes);
+            ILGen gen = new ILGen(metaMB.GetILGenerator());
+            gen.EmitLoadArg(0);
+            gen.EmitFieldGet(metaField);
+            gen.Emit(OpCodes.Ret);
+
+            MethodBuilder withMB = baseTB.DefineMethod("withMeta", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.ReuseSlot, typeof(IObj), new Type[] { typeof(IPersistentMap)});
+            gen = new ILGen(withMB.GetILGenerator());
+            gen.EmitLoadArg(0);
+            gen.EmitCall(Compiler.Method_Object_MemberwiseClone);
+            gen.Emit(OpCodes.Castclass, baseTB);
+            gen.Emit(OpCodes.Dup);
+            gen.EmitLoadArg(1);
+            gen.EmitFieldSet(metaField);
+            gen.Emit(OpCodes.Ret);
+
 
             for (int i = 0; i < 20; i++ )
                 DefineDelegateFieldAndOverride(baseTB, i);

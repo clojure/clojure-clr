@@ -34,19 +34,6 @@ namespace clojure.lang
 
         #endregion
 
-        #region C-tors and factory methods
-
-        /// <summary>
-        /// Initializes an <see cref="APersistentVector">APersistentVector</see> with the given metadata.
-        /// </summary>
-        /// <param name="meta">The metadata to attach</param>
-        public APersistentVector(IPersistentMap meta)
-            : base(meta)
-        {           
-        }
-
-        #endregion
-
         #region Object overrides
 
         /// <summary>
@@ -815,7 +802,7 @@ namespace clojure.lang
         /// <summary>
         /// Internal class providing subvector functionality for <see cref="APersistentVector">APersistentVector</see>.
         /// </summary>
-        public sealed class SubVector : APersistentVector, IPersistentCollection
+        public sealed class SubVector : APersistentVector, IPersistentCollection, IObj
         {
             #region Data
 
@@ -834,6 +821,8 @@ namespace clojure.lang
             /// </summary>
             readonly int _end;
 
+            readonly IPersistentMap _meta;
+
             #endregion
 
             #region C-tors and factory methods
@@ -846,8 +835,9 @@ namespace clojure.lang
             /// <param name="start">The start index of the subvector.</param>
             /// <param name="end">The end index of the subvector.</param>
             public SubVector(IPersistentMap meta, IPersistentVector v, int start, int end)
-                : base(meta)
             {
+                _meta = meta;
+
                 if (v is SubVector)
                 {
                     SubVector sv = (SubVector)v;
@@ -869,11 +859,20 @@ namespace clojure.lang
             /// </summary>
             /// <param name="meta">The new metadata.</param>
             /// <returns>A copy of the object with new metadata attached.</returns>
-            public override IObj withMeta(IPersistentMap meta)
+            public IObj withMeta(IPersistentMap meta)
             {
                 return meta == _meta
                     ? this
                     : new SubVector(meta, _v, _start, _end);
+            }
+
+            #endregion
+
+            #region IMeta Members
+
+            public IPersistentMap meta()
+            {
+                return _meta;
             }
 
             #endregion
@@ -973,7 +972,7 @@ namespace clojure.lang
             {
                 return (_end - 1 == _start)
                     ? (IPersistentStack)PersistentVector.EMPTY
-                    : new SubVector(_meta, _v, _start, _end - 1);                   
+                    : new SubVector(_meta, _v, _start, _end - 1);
             }
 
             #endregion

@@ -58,6 +58,7 @@
     <Compile Include="CljCompiler\Ast\DynInitHelper.cs" />
     <Compile Include="CljCompiler\Ast\DynUtils.cs" />
     <Compile Include="CljCompiler\Ast\HostArg.cs" />
+    <Compile Include="CljCompiler\Ast\IdentityHashMap.cs" />
     <Compile Include="CljCompiler\Ast\InstanceOfExpr.cs" />
     <Compile Include="CljCompiler\Ast\InstanceZeroArityCallExpr.cs" />
     <Compile Include="CljCompiler\Ast\KeywordInvokeExpr.cs" />

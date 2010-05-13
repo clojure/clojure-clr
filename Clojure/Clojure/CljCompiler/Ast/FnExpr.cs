@@ -94,11 +94,32 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region Type munging
+
+        public override bool HasClrType
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        public override Type ClrType
+        {
+            get
+            {
+                return typeof(AFunction);
+            }
+        }
+
+        #endregion
+
         #region Parsing
 
         public static Expr Parse(object frm, string name, ParserContext pcon)
         {
             ISeq form = (ISeq)frm;
+            ISeq origForm = form;
 
             FnExpr fn = new FnExpr(Compiler.TagOf(form));
 
@@ -114,6 +135,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Var.pushThreadBindings(RT.map(
                     Compiler.CONSTANTS, PersistentVector.EMPTY,
+                    Compiler.CONSTANT_IDS, new IdentityHashMap(),
                     Compiler.KEYWORDS, PersistentHashMap.EMPTY,
                     Compiler.VARS, PersistentHashMap.EMPTY,
                     Compiler.KEYWORD_CALLSITES,PersistentVector.EMPTY,
@@ -189,7 +211,11 @@ namespace clojure.lang.CljCompiler.Ast
             // JAVA: fn.compile();
             fn._superType = fn.GetSuperType();
             fn.GenerateClass();
-            return fn;
+
+            if (origForm is IObj && ((IObj)origForm).meta() != null)
+                return new MetaExpr(fn, (MapExpr)MapExpr.Parse(((IObj)origForm).meta()));
+            else
+                return fn;
         }
 
         #endregion

@@ -23,7 +23,7 @@ namespace clojure.lang
     /// <summary>
     /// Base class providing IComparer implementation on top of <see cref="AFn">AFn</see>.  Internal use by compiler.
     /// </summary>
-    public abstract class AFunction : AFn, Fn, IComparer
+    public abstract class AFunction : AFn, IObj, Fn, IComparer
     {
         #region Data
 
@@ -33,27 +33,6 @@ namespace clojure.lang
         {
             get { return __methodImplCache; }
             set { __methodImplCache = value; }
-        }
-
-        #endregion
-
-        #region Ctors and factory methods
-
-        /// <summary>
-        /// Initialize an <see cref="AFunction">AFunction</see> to have the given metadata.
-        /// </summary>
-        /// <param name="meta">The metadata to attach.</param>
-        public AFunction(IPersistentMap meta)
-            : base(meta)
-        {
-        }
-
-        /// <summary>
-        /// Initialize an <see cref="AFunction">AFunction</see> to have the null metadata.
-        /// </summary>
-        public AFunction()
-            : base()
-        {
         }
 
         #endregion
@@ -82,6 +61,17 @@ namespace clojure.lang
         }
 
         #endregion
-    
+
+        #region IObj Members
+
+        public abstract IObj withMeta(IPersistentMap meta);
+
+        #endregion
+
+        #region IMeta Members
+
+        public abstract IPersistentMap meta();
+
+        #endregion
     }
 }

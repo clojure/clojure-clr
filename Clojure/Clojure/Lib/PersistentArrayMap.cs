@@ -33,7 +33,7 @@ namespace clojure.lang
     /// but you won't be able to distinguish a <value>null</value> value via <see cref="valAt">valAt</see> --
     /// use <see cref="contains">contains</see> or <see cref="entryAt">entryAt</see>.</para>
     /// </remarks>
-    public class PersistentArrayMap : APersistentMap, IEditableCollection
+    public class PersistentArrayMap : APersistentMap, IObj, IEditableCollection
     {
         // any reason not to seal this class?
 
@@ -59,6 +59,9 @@ namespace clojure.lang
         /// An empty <see cref="PersistentArrayMap">PersistentArrayMap</see>. Constant.
         /// </summary>
         public static readonly PersistentArrayMap EMPTY = new PersistentArrayMap();
+
+
+        readonly IPersistentMap _meta;
 
         #endregion
 
@@ -95,6 +98,7 @@ namespace clojure.lang
         /// </summary>
         protected PersistentArrayMap()
         {
+            _meta = null;
             _array = new object[] { };
         }
 
@@ -105,10 +109,13 @@ namespace clojure.lang
         /// <remarks>The array is used directly.  Do not modify externally or immutability is sacrificed.</remarks>
         public  PersistentArrayMap(object[] init)
         {
+            _meta = null;
+            
             // The Java version doesn't seem to care.  Why should I?
             //if (init.Length % 2 != 0)
             //    throw new ArgumentException("Key/value array must have an even number of elements.");
             _array = init;
+
         }
 
         /// <summary>
@@ -118,8 +125,9 @@ namespace clojure.lang
         /// <param name="init">An array with alternating keys and values.</param>
         /// <remarks>The array is used directly.  Do not modify externally or immutability is sacrificed.</remarks>
         protected PersistentArrayMap(IPersistentMap meta, object[] init)
-            : base(meta)
         {
+            _meta = meta;
+
             // The Java version doesn't seem to care.  Why should I?
             //if (init.Length % 2 != 0)
             //    throw new ArgumentException("Key/value array must have an even number of elements.");
@@ -147,6 +155,15 @@ namespace clojure.lang
                 : new PersistentArrayMap(meta, _array);
         }
 
+
+        #endregion
+
+        #region IMeta Members
+
+        public IPersistentMap meta()
+        {
+            return _meta;
+        }
 
         #endregion
 

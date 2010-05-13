@@ -42,10 +42,8 @@ namespace clojure.lang
         /// <summary>
         /// Initialize an <cref see="APersistentSet">APersistentSet</cref> from the metadata map and the data map.
         /// </summary>
-        /// <param name="meta">The metadata</param>
         /// <param name="impl">The underlying implementation map</param>
-        protected APersistentSet(IPersistentMap meta, IPersistentMap impl)
-            : base(meta)
+        protected APersistentSet(IPersistentMap impl)
         {
             _impl = impl;
         }

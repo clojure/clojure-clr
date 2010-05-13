@@ -24,7 +24,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements a persistent vector using a specialized form of array-mapped hash trie.
     /// </summary>
-    public class PersistentVector: APersistentVector, IEditableCollection
+    public class PersistentVector: APersistentVector, IObj, IEditableCollection
     {
         #region Node class
 
@@ -77,6 +77,8 @@ namespace clojure.lang
         readonly int _shift;
         readonly Node _root;
         readonly object[] _tail;
+
+        readonly IPersistentMap _meta;
 
         /// <summary>
         /// An empty <see cref="PersistentVector">PersistentVector</see>.
@@ -136,8 +138,8 @@ namespace clojure.lang
         /// <param name="root"></param>
         /// <param name="tail"></param>
         public PersistentVector(int cnt, int shift, Node root, object[] tail)
-            : base(null)
         {
+            _meta = null;
             _cnt = cnt;
             _shift = shift;
             _root = root;
@@ -154,8 +156,8 @@ namespace clojure.lang
         /// <param name="root"></param>
         /// <param name="tail"></param>
         PersistentVector(IPersistentMap meta, int cnt, int shift, Node root, object[] tail)
-            : base(meta)
         {
+            _meta = meta;
             _cnt = cnt;
             _shift = shift;
             _root = root;
@@ -166,10 +168,19 @@ namespace clojure.lang
 
         #region IObj members
 
-        public override IObj withMeta(IPersistentMap meta)
+        public IObj withMeta(IPersistentMap meta)
         {
             // Java version does not do identity check
             return new PersistentVector(meta, _cnt, _shift, _root, _tail);
+        }
+
+        #endregion
+
+        #region IMeta Members
+
+        public IPersistentMap meta()
+        {
+            return _meta;
         }
 
         #endregion

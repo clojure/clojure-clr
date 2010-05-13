@@ -337,8 +337,6 @@ namespace clojure.lang.CljCompiler.Ast
                     args[i - 1] = Compiler.MaybeBox(bare);
                 }
 
-                Console.WriteLine("Protocol is {0}", _protocolOn.FullName);
-
                 block = Expression.Block(
                     new ParameterExpression[] { fnParam, targetParam, targetTypeParam, vpfnParam, implParam },
                     block1,

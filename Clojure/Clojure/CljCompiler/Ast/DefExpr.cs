@@ -125,10 +125,14 @@ namespace clojure.lang.CljCompiler.Ast
 
             exprs.Add(Expression.Assign(parm, varExpr));
 
+
+            // The Java code does the following in the opposite order (as modified in commit #430dd4f, Jan 19, 2010)
+            // However, the call to bindRoot sets :macro to False.  I'm not sure how it works now in the JVM version.
+
             if (_initProvided)
                 // Java doesn't Box here, but we have to deal with unboxed bool values
                 exprs.Add(Expression.Call(parm, Compiler.Method_Var_bindRoot, Compiler.MaybeBox(_init.GenDlr(context))));
-
+            
             if (_meta != null)
                 // Java casts to IPersistentMap on the _meta, but Expression.Call can handle that for us.
                 exprs.Add(Expression.Call(parm, Compiler.Method_Var_setMeta, _meta.GenDlr(context)));

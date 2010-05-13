@@ -23,9 +23,11 @@ namespace clojure.lang
     /// <summary>
     /// Implements an persistent, ordered set.
     /// </summary>
-    public class PersistentTreeSet : APersistentSet, Reversible, Sorted
+    public class PersistentTreeSet : APersistentSet, IObj, Reversible, Sorted
     {
         #region Data
+
+        readonly IPersistentMap _meta;
 
         /// <summary>
         /// An empty <see cref="PersistentTreeSet">PersistentTreeSet</see>.
@@ -70,8 +72,9 @@ namespace clojure.lang
         /// <param name="meta">The metadata to attach</param>
         /// <param name="impl">A map to implement the set.</param>
         PersistentTreeSet(IPersistentMap meta, IPersistentMap impl)
-            : base(meta, impl)
+            : base(impl)
         {
+            _meta = meta;
         }
 
         #endregion
@@ -83,12 +86,21 @@ namespace clojure.lang
         /// </summary>
         /// <param name="meta">The new metadata.</param>
         /// <returns>A copy of the object with new metadata attached.</returns>
-        public override IObj withMeta(IPersistentMap meta)
+        public IObj withMeta(IPersistentMap meta)
         {
             // Java doesn't do identity check
             return meta == _meta
                 ? this
                 : new PersistentTreeSet(meta, _impl);
+        }
+
+        #endregion
+
+        #region IMeta Members
+
+        public IPersistentMap meta()
+        {
+            return _meta;
         }
 
         #endregion

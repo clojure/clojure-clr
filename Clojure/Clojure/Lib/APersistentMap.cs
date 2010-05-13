@@ -37,26 +37,6 @@ namespace clojure.lang
 
         #endregion
 
-        #region C-tors and factory methods
-
-        /// <summary>
-        /// Initializes a <see cref="APersistnetMap">APersistantMap</see> to have the given metadata.
-        /// </summary>
-        /// <param name="meta">The metatdata to attach.</param>
-        protected APersistentMap(IPersistentMap meta)
-            : base(meta)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a <see cref="APersistnetMap">APersistantMap</see> to have null metadata.
-        /// </summary>
-        protected APersistentMap()
-        {
-        }
-
-        #endregion
-
         #region object overrides
 
         /// <summary>
@@ -206,7 +186,7 @@ namespace clojure.lang
 
         #region IObj members
 
-        abstract public override IObj withMeta(IPersistentMap meta);
+        abstract public IObj withMeta(IPersistentMap meta);
 
         #endregion
 

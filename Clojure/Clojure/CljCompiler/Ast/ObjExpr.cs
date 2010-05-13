@@ -106,6 +106,8 @@ namespace clojure.lang.CljCompiler.Ast
             set { _thisParam = value; }
         }
 
+        protected FieldBuilder _metaField;
+
         protected List<FieldBuilder> _closedOverFields;
 
         
@@ -160,6 +162,7 @@ namespace clojure.lang.CljCompiler.Ast
         protected IPersistentVector _varCallsites;
 
         protected ConstructorInfo _ctorInfo;
+        protected ConstructorInfo _nonmetaCtorInfo;
 
         protected IPersistentVector _interfaces = PersistentVector.EMPTY;
 
@@ -271,7 +274,8 @@ namespace clojure.lang.CljCompiler.Ast
             if (IsDefType)
                 return Expression.Constant(null);
 
-            List<Expression> args = new List<Expression>(_closes.count());
+            List<Expression> args = new List<Expression>(_closes.count()+1);
+            args.Add(Expression.Constant(null,typeof(IPersistentMap))); // meta
             for (ISeq s = RT.keys(_closes); s != null; s = s.next())
             {
                 LocalBinding lb = (LocalBinding)s.first();
@@ -321,6 +325,10 @@ namespace clojure.lang.CljCompiler.Ast
 
 
             GenerateConstantFields(baseTB);
+
+            if (!IsDefType)
+                _metaField = baseTB.DefineField("__meta", typeof(IPersistentMap), FieldAttributes.Public | FieldAttributes.InitOnly);
+
             GenerateClosedOverFields(baseTB);
             GenerateVarCallsites(baseTB);
             GenerateKeywordCallsites(baseTB);
@@ -576,6 +584,12 @@ namespace clojure.lang.CljCompiler.Ast
             GenerateStaticConstructor(_typeBuilder, _baseType);
             _ctorInfo = GenerateConstructor(_typeBuilder, _baseType);
 
+            if (!IsDefType)
+            {
+                _nonmetaCtorInfo = GenerateNonMetaConstructor(_typeBuilder, _baseType);
+                GenerateMetaFunctions(_typeBuilder);
+            }
+
             // The incoming context holds info on the containing function.
             // That is the one that holds the closed-over variable values.
 
@@ -826,7 +840,32 @@ namespace clojure.lang.CljCompiler.Ast
             return methodBuilder;
 
         }
-        
+
+
+        private void GenerateMetaFunctions(TypeBuilder fnTB)
+        {
+            // IPersistentMap meta()
+            MethodBuilder metaMB = fnTB.DefineMethod("meta", MethodAttributes.Public|MethodAttributes.Virtual|MethodAttributes.ReuseSlot,typeof(IPersistentMap),Type.EmptyTypes);
+            ILGen gen = new ILGen(metaMB.GetILGenerator());
+            gen.EmitLoadArg(0);
+            gen.EmitFieldGet(_metaField);
+            gen.Emit(OpCodes.Ret);
+
+
+            // IObj withMeta(IPersistentMap)
+            MethodBuilder withMB = fnTB.DefineMethod("withMeta", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.ReuseSlot, typeof(IObj), new Type[] { typeof(IPersistentMap) });
+            gen = new ILGen(withMB.GetILGenerator());
+
+            gen.EmitLoadArg(1);   // meta arg
+            foreach (FieldBuilder fb in _closedOverFields)
+            {
+                gen.EmitLoadArg(0);
+                gen.EmitFieldGet(fb);
+            }
+
+            gen.EmitNew(_ctorInfo);
+            gen.Emit(OpCodes.Ret);
+        }
 
         #endregion
 
@@ -842,28 +881,63 @@ namespace clojure.lang.CljCompiler.Ast
             gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
             gen.Emit(OpCodes.Call, baseCtorInfo);
 
+            // Store Meta
+            if (!IsDefType)
+            {
+                gen.EmitLoadArg(0);
+                gen.EmitLoadArg(1);
+                gen.Emit(OpCodes.Castclass, typeof(IPersistentMap));
+                gen.EmitFieldSet(_metaField);
+            }
+
             // store closed-overs in their fields
             int a = 0;
+            int offset = IsDefType ? 1 : 2;
+
             for (ISeq s = RT.keys(_closes); s != null; s = s.next(), a++)
             {
                 LocalBinding lb = (LocalBinding)s.first();
                 FieldBuilder fb = _closedOverFields[a];
 
                 gen.EmitLoadArg(0);             // gen.Emit(OpCodes.Ldarg_0);
-                gen.EmitLoadArg(a + 1);         // gen.Emit(OpCodes.Ldarg, a + 1);
+                gen.EmitLoadArg(a + offset);         // gen.Emit(OpCodes.Ldarg, a + 1);
                 gen.Emit(OpCodes.Stfld, fb);
             }
             gen.Emit(OpCodes.Ret);
             return cb;
         }
 
+        private ConstructorBuilder GenerateNonMetaConstructor(TypeBuilder fnTB, Type baseType)
+        {
+            Type[] ctorTypes = CtorTypes();
+            Type[] noMetaCtorTypes = new Type[ctorTypes.Length - 1];
+            for (int i = 1; i < ctorTypes.Length; i++)
+                noMetaCtorTypes[i - 1] = ctorTypes[i];
+
+            ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, noMetaCtorTypes);
+            ILGen gen = new ILGen(cb.GetILGenerator());
+
+            gen.EmitLoadArg(0);
+            gen.EmitNull();     // null meta
+            for (int i = 0; i < noMetaCtorTypes.Length; i++)
+                gen.EmitLoadArg(i + 1);
+            gen.Emit(OpCodes.Call, _ctorInfo);
+            gen.Emit(OpCodes.Ret);
+
+            return cb;
+        }
+
+
         internal Type[] CtorTypes()
         {
-            if (_closes.count() == 0)
-                return Type.EmptyTypes;
 
-            Type[] ret = new Type[_closes.count()];
-            int i = 0;
+            int i = IsDefType ? 0 : 1;
+
+            Type[] ret = new Type[_closes.count()+i];
+
+            if (!IsDefType)
+                ret[0] = typeof(IPersistentMap);
+
             for (ISeq s = RT.keys(_closes); s != null; s = s.next(), i++)
             {
                 LocalBinding lb = (LocalBinding)s.first();

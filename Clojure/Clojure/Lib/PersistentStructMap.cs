@@ -23,7 +23,7 @@ namespace clojure.lang
     /// Represents a structure map (map with fixed set of quickly accessible keys).
     /// </summary>
     /// <remarks>See the Clojure API for more information.</remarks>
-    public class PersistentStructMap : APersistentMap
+    public class PersistentStructMap : APersistentMap, IObj
     {
 
         #region Internal classes
@@ -98,6 +98,9 @@ namespace clojure.lang
         /// The map for non-fixed keys.
         /// </summary>
         readonly IPersistentMap _ext;
+
+
+        readonly IPersistentMap _meta;
 
         #endregion
 
@@ -175,8 +178,8 @@ namespace clojure.lang
         /// <param name="vals">Values for the fixed keys.</param>
         /// <param name="ext">Additional keys/values.</param>
         protected PersistentStructMap(IPersistentMap meta, Def def, Object[] vals, IPersistentMap ext)
-            : base(meta)
         {
+            _meta = meta;
             _ext = ext;
             _def = def;
             _vals = vals;
@@ -284,6 +287,15 @@ namespace clojure.lang
             return (meta == _meta)
                 ? this
                 : makeNew(meta, _def, _vals, _ext);
+        }
+
+        #endregion
+
+        #region IMeta Members
+
+        public IPersistentMap meta()
+        {
+            return _meta;
         }
 
         #endregion
@@ -521,6 +533,6 @@ namespace clojure.lang
             }
 
             #endregion
-        }      
+        }
     }
 }
