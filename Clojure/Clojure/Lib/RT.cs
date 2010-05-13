@@ -1323,9 +1323,19 @@ namespace clojure.lang
             return ret;
         }
 
-        public static Object[] objectArray(int n)
+        public static Object[] object_array(Object sizeOrSeq)
         {
-            return new Object[n];
+            if (Util.IsNumeric(sizeOrSeq))
+                return new Object[Util.ConvertToInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = RT.count(s);
+                Object[] ret = new Object[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = s.first();
+                return ret;
+            }
         }
 
         public static object[] toArray(object coll)
