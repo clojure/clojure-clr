@@ -2600,7 +2600,7 @@
 (defn aget
   "Returns the value at the index/indices. Works on Java arrays of all
   types."
-  {:inline (fn [a i] `(. clojure.lang.RT (aget ~a ~i)))
+  {:inline (fn [a i] `(. clojure.lang.RT (aget ~a (int ~i))))
    :inline-arities #{2}}
   ([array idx]
    (clojure.lang.Reflector/prepRet (. array (GetValue idx))))  ;;; was  (. Array (get array idx)))  
@@ -2610,7 +2610,7 @@
 (defn aset
   "Sets the value at the index/indices. Works on Java arrays of
   reference types. Returns val."
-  {:inline (fn [a i v] `(. clojure.lang.RT (aset ~a ~i ~v)))
+  {:inline (fn [a i v] `(. clojure.lang.RT (aset ~a (int ~i) ~v)))
    :inline-arities #{3}}
   ([array idx val]
    (. array (SetValue val idx))  ;;; was     (. Array (set array idx val))
