@@ -1323,6 +1323,11 @@ namespace clojure.lang
             return ret;
         }
 
+        public static Object[] objectArray(int n)
+        {
+            return new Object[n];
+        }
+
         public static object[] toArray(object coll)
         {
             if (coll == null)
