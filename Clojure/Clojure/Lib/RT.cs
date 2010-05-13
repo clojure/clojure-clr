@@ -672,13 +672,6 @@ namespace clojure.lang
                 : null;
         }
 
-        public static int count(Counted o)
-        {
-            if (o != null)
-                return o.count();
-            return 0;
-        }
-
         public static int count(object o)
         {
             if (o is Counted)

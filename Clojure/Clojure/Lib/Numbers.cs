@@ -681,9 +681,19 @@ namespace clojure.lang
             return bitOps(x).shiftLeft(x, n);
         }
 
+        public static int shiftLeft(int x, int n)
+        {
+            return x << n;
+        }
+
         public static object shiftRight(object x, int n)
         {
             return bitOps(x).shiftRight(x, n);
+        }
+
+        public static int shiftRight(int x, int n)
+        {
+            return x >> n;
         }
 
         #endregion
