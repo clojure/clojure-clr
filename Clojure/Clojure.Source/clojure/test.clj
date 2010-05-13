@@ -467,7 +467,7 @@
   ;; (is (thrown-with-msg? c re expr))
   ;; Asserts that evaluating expr throws an exception of class c.
   ;; Also asserts that the message string of the exception matches
-  ;; (with re-matches) the regular expression re.
+  ;; (with re-find) the regular expression re.
   (let [klass (nth form 1)
         re (nth form 2)
         body (nthnext form 3)]
@@ -475,7 +475,7 @@
           (report {:type :fail, :message ~msg, :expected '~form, :actual nil})
           (catch ~klass e#
             (let [m# (.Message e#)]                                        ;;;getMessage
-              (if (re-matches ~re m#)
+              (if (re-find ~re m#)
                 (report {:type :pass, :message ~msg,
                          :expected '~form, :actual e#})
                 (report {:type :fail, :message ~msg,
@@ -511,7 +511,7 @@
 
   (is (thrown-with-msg? c re body)) checks that an instance of c is
   thrown AND that the message on the exception matches (with
-  re-matches) the regular expression re."
+  re-find) the regular expression re."
   ([form] `(is ~form nil))
   ([form msg] `(try-expr ~msg ~form)))
 
