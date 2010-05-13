@@ -744,10 +744,10 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (partial)
             {
-                if (value is Obj && RT.count(((Obj)value).meta()) > 0)
+                if (value is IObj && RT.count(((IObj)value).meta()) > 0)
                 {
-                    Expression objExpr = Expression.Convert(ret, typeof(Obj));
-                    Expression metaExpr = Expression.Convert(GenerateValue(((Obj)value).meta()), typeof(IPersistentMap));
+                    Expression objExpr = Expression.Convert(ret, typeof(IObj));
+                    Expression metaExpr = Expression.Convert(GenerateValue(((IObj)value).meta()), typeof(IPersistentMap));
                     ret = Expression.Call(
                         objExpr,
                         Compiler.Method_IObj_withMeta,
