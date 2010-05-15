@@ -28,8 +28,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        private SourceLocation _start = SourceLocation.Invalid;
-        private SourceLocation _end = SourceLocation.Invalid;
+        private Microsoft.Scripting.SourceLocation _start = SourceLocation.Invalid;
+        private Microsoft.Scripting.SourceLocation _end = SourceLocation.Invalid;
 
         #endregion
 
