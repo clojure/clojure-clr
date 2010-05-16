@@ -408,10 +408,11 @@ namespace clojure.lang.CljCompiler.Ast
                 IPersistentVector mk = kv.Key;
                 mk = (IPersistentVector)mk.pop();
                 MethodInfo m = kv.Value;
-                if (overrides.ContainsKey(mk)) // covariant return -- not a problem for CLR! but we are doing to have so many others.
+                // TODO: explicit implementation of interfaces
+                if (overrides.ContainsKey(mk)) // covariant return -- not a problem for CLR! but we are going to have so many others.
                 {
-                    HashSet<Type> cvs = covariants[mk];
-                    if (cvs == null)
+                    HashSet<Type> cvs;
+                    if ( ! covariants.TryGetValue(mk,out cvs) )
                     {
                         cvs = new HashSet<Type>();
                         covariants[mk] = cvs;
