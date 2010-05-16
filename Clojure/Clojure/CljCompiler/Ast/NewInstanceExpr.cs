@@ -232,6 +232,7 @@ namespace clojure.lang.CljCompiler.Ast
             //ret.Compile(SlashName(superClass),inames,false);
             //ret.getCompiledClass();
             ret.ObjType = ret.GenerateClass();
+            Compiler.RegisterDuplicateType(ret.ObjType);
 
             // THis is done in an earlier loop in the JVM code.
             // We have to do it here so that we have ret._objType defined.
@@ -312,7 +313,9 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg2.Emit(OpCodes.Ret);
             }
 
-            return tb.CreateType();
+            Type t = tb.CreateType();
+            Compiler.RegisterDuplicateType(t);
+            return t;
         }
 
 

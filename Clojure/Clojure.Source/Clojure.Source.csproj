@@ -58,6 +58,7 @@
     <None Include="clojure\core_clr.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="clojure\gvec.clj" />
     <None Include="clojure\samples\ants.clj" />
     <None Include="clojure\core.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -76,6 +77,7 @@
     </None>
     <None Include="clojure\samples\await-test.clj" />
     <None Include="clojure\samples\celsius.clj" />
+    <None Include="clojure\samples\deftype\testdeftype.clj" />
     <None Include="clojure\samples\genclass\testgenclass.clj" />
     <None Include="clojure\samples\genclass\testgenclass2.clj" />
     <None Include="clojure\samples\genclass\testgenclass3.clj" />

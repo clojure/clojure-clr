@@ -1679,11 +1679,9 @@ namespace clojure.lang
             if (t != null)
                 return t;
 
-            // If the type is in the currently executing assembly, the above is enough.
-            //Assembly assy = Assembly.GetExecutingAssembly();
-            //t = assy.GetType(p, false);
-            //if (t != null)
-            //    return t;
+            t = Compiler.FindDuplicateType(p);
+            if (t != null)
+                return t;
 
             AppDomain domain = AppDomain.CurrentDomain;
             Assembly[] assys = domain.GetAssemblies();

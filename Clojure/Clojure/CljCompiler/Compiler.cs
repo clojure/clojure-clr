@@ -382,6 +382,24 @@ namespace clojure.lang
 
         #endregion
 
+        #region Duplicate types
+
+        static Dictionary<String, Type> _duplicateTypeMap = new Dictionary<string, Type>();
+
+        internal static void RegisterDuplicateType(Type type)
+        {
+            _duplicateTypeMap[type.FullName] = type;
+        }
+
+        internal static Type FindDuplicateType(string typename)
+        {
+            Type type;
+            _duplicateTypeMap.TryGetValue(typename, out type);
+            return type;
+        }
+
+        #endregion
+
         #region  AST generation
 
         internal static LiteralExpr NIL_EXPR = new NilExpr();

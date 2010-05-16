@@ -58,6 +58,8 @@ namespace clojure.lang
             if ( Compiler.IsCompiling )
                 context.SaveAssembly();
 
+            Compiler.RegisterDuplicateType(t);
+
             return t;
         }
 
