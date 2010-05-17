@@ -432,4 +432,7 @@ Math/pow overflows to Infinity."
        "System.Int32[]"   (int-array 1) (ints (int-array 1 1))                       ;;; "[I"
        "System.Int64[]"   (long-array 1) (longs (long-array 1 1))))                  ;;; "[J"
 
-    
+
+(deftest test-ratios
+  (is (= (denominator 1/2) 2))
+  (is (= (numerator 1/2) 1)))    
