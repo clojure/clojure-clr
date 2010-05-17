@@ -322,7 +322,7 @@ namespace clojure.lang
 
         static Symbol garg(int n)
         {
-            return Symbol.intern(null, (n == -1 ? "rest" : ("p" + n)) + "__" + RT.nextID());
+            return Symbol.intern(null, (n == -1 ? "rest" : ("p" + n)) + "__" + RT.nextID() + "#");
         }
 
 
