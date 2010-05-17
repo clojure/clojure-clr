@@ -98,6 +98,19 @@ namespace clojure.lang
             return (PersistentHashMap)ret.persistent();
         }
 
+
+        public static PersistentHashMap createWithCheck(params object[] init)
+        {
+            ITransientMap ret = (ITransientMap)EMPTY.asTransient();
+            for (int i = 0; i < init.Length; i += 2)
+            {
+                ret = ret.assoc(init[i], init[i + 1]);
+                if (ret.count() != i / 2 + 1)
+                    throw new ArgumentException("Duplicate key: " + init[i]);
+            }
+            return (PersistentHashMap)ret.persistent();
+        }
+
         /// <summary>
         /// Create a <see cref="PersistentHashMap">PersistentHashMap</see> initialized from an IList of alternating keys and values.
         /// </summary>
@@ -113,6 +126,20 @@ namespace clojure.lang
                     throw new ArgumentException(String.Format("No value supplied for key: {0}", key));
                 object val = i.Current;
                 ret = ret.assoc(key, val);
+            }
+            return (PersistentHashMap)ret.persistent();
+        }
+
+        static public PersistentHashMap createWithCheck(ISeq items)
+        {
+            ITransientMap ret = (ITransientMap)EMPTY.asTransient();
+            for (int i = 0; items != null; items = items.next().next(), ++i)
+            {
+                if (items.next() == null)
+                    throw new ArgumentException(String.Format("No value supplied for key: {0}", items.first()));
+                ret = ret.assoc(items.first(), RT.second(items));
+                if (ret.count() != i + 1)
+                    throw new ArgumentException("Duplicate key: " + items.first());
             }
             return (PersistentHashMap)ret.persistent();
         }

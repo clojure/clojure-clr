@@ -93,6 +93,19 @@ namespace clojure.lang
         }
 
 
+        public static PersistentArrayMap createWithCheck(Object[] init)
+        {
+            for (int i = 0; i < init.Length; i += 2)
+            {
+                for (int j = i + 2; j < init.Length; j += 2)
+                {
+                    if (EqualKey(init[i], init[j]))
+                        throw new ArgumentException("Duplicate key: " + init[i]);
+                }
+            }
+            return new PersistentArrayMap(init);
+        }
+
         /// <summary>
         /// Create an empty <see cref="PersistentArrayMap">PersistentArrayMap</see>.
         /// </summary>

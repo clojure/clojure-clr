@@ -197,7 +197,7 @@ namespace clojure.lang
             Symbol.create("UIntPtr"), typeof(UIntPtr),
             // Symbol.create(""),typeof(Void),
             // interfaces/
-            Symbol.create("AppDomain"), typeof(AppDomain),
+            //Symbol.create("AppDomain"), typeof(AppDomain),
             Symbol.create("IAppDomainSetup"), typeof(IAppDomainSetup),
             Symbol.create("IAsyncResult"), typeof(IAsyncResult),
             Symbol.create("ICloneable"), typeof(ICloneable),
@@ -263,8 +263,8 @@ namespace clojure.lang
             // ADDED THESE TO SUPPORT THE BOOTSTRAPPING IN THE JAVA CORE.CLJ
             Symbol.create("StringBuilder"), typeof(StringBuilder),
             Symbol.create("BigInteger"), typeof(clojure.lang.BigInteger),
-            Symbol.create("BigDecimal"), typeof(clojure.lang.BigDecimal),
-            Symbol.create("Environment"), typeof(System.Environment)
+            Symbol.create("BigDecimal"), typeof(clojure.lang.BigDecimal)
+            //Symbol.create("Environment"), typeof(System.Environment)
      );
 
         #endregion
@@ -1220,11 +1220,12 @@ namespace clojure.lang
 
         public static IPersistentMap map(params object[] init)
         {
-            return (init == null)
-                ? PersistentArrayMap.EMPTY
-                : (init.Length <= PersistentArrayMap.HASHTABLE_THRESHOLD)
-                    ? (IPersistentMap)new PersistentArrayMap(init)
-                    : (IPersistentMap)PersistentHashMap.create(init);
+            if (init == null)
+                return PersistentArrayMap.EMPTY;
+            else if (init.Length <= PersistentArrayMap.HASHTABLE_THRESHOLD)
+                return PersistentArrayMap.createWithCheck(init);
+            else 
+                return PersistentHashMap.createWithCheck(init);
         }
 
         public static IPersistentSet set(params object[] init)
