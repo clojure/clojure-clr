@@ -701,8 +701,8 @@ namespace clojure.lang
                     IFn ret = (IFn)RT.get(v.meta(), INLINE_KEY);
                     if (ret != null)
                     {
-                        IPersistentSet arities = (IPersistentSet)RT.get(v.meta(), INLINE_ARITIES_KEY);
-                        if (arities == null || arities.contains(arity))
+                        IFn arityPred = (IFn)RT.get(v.meta(), INLINE_ARITIES_KEY);
+                        if (arityPred == null || RT.booleanCast(arityPred.invoke(arity)))
                             return ret;
                     }
                 }
