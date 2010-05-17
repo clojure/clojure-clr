@@ -466,21 +466,21 @@ namespace clojure.lang
         }
 
 
-        static readonly Symbol IDENTICAL = Symbol.create("identical?");
+        //static readonly Symbol IDENTICAL = Symbol.create("identical?");
 
-        sealed class IdenticalFn : AFn
-        {
-            public override object invoke(object arg1, object arg2)
-            {
-                //return Object.ReferenceEquals(arg1, arg2) ? RT.T : RT.F;
-                if ( arg1 is ValueType )
-                    //return arg1.Equals(arg2) ? RT.T : RT.F;
-                    return arg1.Equals(arg2);
-                else
-                    //return arg1 == arg2 ? RT.T : RT.F;
-                    return arg1 == arg2;
-            }
-        }
+        //sealed class IdenticalFn : AFn
+        //{
+        //    public override object invoke(object arg1, object arg2)
+        //    {
+        //        //return Object.ReferenceEquals(arg1, arg2) ? RT.T : RT.F;
+        //        if ( arg1 is ValueType )
+        //            //return arg1.Equals(arg2) ? RT.T : RT.F;
+        //            return arg1.Equals(arg2);
+        //        else
+        //            //return arg1 == arg2 ? RT.T : RT.F;
+        //            return arg1 == arg2;
+        //    }
+        //}
 
         static readonly Symbol LOAD_FILE = Symbol.create("load-file");
 
@@ -530,9 +530,9 @@ namespace clojure.lang
             v.setMeta(map(dockw, "Sequentially read and evaluate the set of forms contained in the file.",
                 arglistskw, list(vector(namesym))));
 
-            v = Var.intern(CLOJURE_NS, IDENTICAL, new IdenticalFn());
-            v.setMeta(map(dockw, "tests if 2 arguments are the same object",
-                arglistskw, list(vector(Symbol.create("x"), Symbol.create("y")))));
+            //v = Var.intern(CLOJURE_NS, IDENTICAL, new IdenticalFn());
+            //v.setMeta(map(dockw, "tests if 2 arguments are the same object",
+            //    arglistskw, list(vector(Symbol.create("x"), Symbol.create("y")))));
 
             if ( RT_Bootstrap_Flag._doRTBootstrap )
                 DoInit();
