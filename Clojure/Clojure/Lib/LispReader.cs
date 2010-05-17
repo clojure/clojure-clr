@@ -1320,7 +1320,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char leftbracket)
             {
-                return PersistentHashSet.create1(readDelimitedList('}', r, true));
+                return PersistentHashSet.createWithCheck(readDelimitedList('}', r, true));
             }
         }
 

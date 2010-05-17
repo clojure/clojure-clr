@@ -60,7 +60,7 @@ namespace clojure.lang
         /// <returns>A <see cref="PersistentHashSet">PersistentHashSet</see>.</returns>
         /// <remarks>This is called just 'create' in the Java version.  CLR can't handle this overload when called on something that is 
         /// both an IList and an ISeq, such as any ASeq.</remarks>
-        public static PersistentHashSet create1(IList init)
+        public static PersistentHashSet create(IList init)
         {
             PersistentHashSet ret = EMPTY;
             foreach (object obj in init)
@@ -80,6 +80,46 @@ namespace clojure.lang
                 ret = (PersistentHashSet)ret.cons(items.first());
             return ret;
         }
+
+        public static PersistentHashSet createWithCheck(params object[] init)
+        {
+            PersistentHashSet ret = EMPTY;
+            for (int i = 0; i < init.Length; i++)
+            {
+                ret = (PersistentHashSet)ret.cons(init[i]);
+                if (ret.count() != i + 1)
+                    throw new ArgumentException("Duplicate key: " + init[i]);
+            }
+            return ret;
+        }
+
+        public static PersistentHashSet createWithCheck(IList init)
+        {
+            PersistentHashSet ret = EMPTY;
+            int i = 0;
+            foreach (Object key in init)
+            {
+                ret = (PersistentHashSet)ret.cons(key);
+                if (ret.count() != i + 1)
+                    throw new ArgumentException("Duplicate key: " + key);
+                ++i;
+            }
+            return ret;
+        }
+
+        public static PersistentHashSet createWithCheck(ISeq items)
+        {
+            PersistentHashSet ret = EMPTY;
+            for (int i = 0; items != null; items = items.next(), ++i)
+            {
+                ret = (PersistentHashSet)ret.cons(items.first());
+                if (ret.count() != i + 1)
+                    throw new ArgumentException("Duplicate key: " + items.first());
+            }
+            return ret;
+        }
+
+
 
         /// <summary>
         /// Initialize a <see cref="PersistentHashSet">PersistentHashSet</see> to use given metadata and underlying map.

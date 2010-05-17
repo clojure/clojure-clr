@@ -1230,7 +1230,7 @@ namespace clojure.lang
 
         public static IPersistentSet set(params object[] init)
         {
-            return PersistentHashSet.create1(init);
+            return PersistentHashSet.createWithCheck(init);
         }
 
         public static IPersistentVector vector(params object[] init)
