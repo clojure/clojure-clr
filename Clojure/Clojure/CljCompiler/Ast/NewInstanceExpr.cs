@@ -101,12 +101,16 @@ namespace clojure.lang.CljCompiler.Ast
 
                 ISeq rform = RT.next(form);
 
-                IPersistentVector interfaces = (IPersistentVector)RT.first(rform);
+                IPersistentVector interfaces = ((IPersistentVector)RT.first(rform)).cons(Symbol.intern("clojure.lang.IObj"));
 
                 rform = RT.next(rform);
 
-                return Build(interfaces, null, null, className, className, null, rform);
-
+                //return Build(interfaces, null, null, className, className, null, rform);
+                Expr ret = Build(interfaces, null, null, className, className, null, rform);
+                if (frm is IObj && ((IObj)frm).meta() != null)
+                    return new MetaExpr(ret, (MapExpr)MapExpr.Parse(((IObj)frm).meta()));
+                else
+                    return ret;
             }
         }
 
@@ -237,11 +241,14 @@ namespace clojure.lang.CljCompiler.Ast
             // THis is done in an earlier loop in the JVM code.
             // We have to do it here so that we have ret._objType defined.
 
-            for (int i = 0; i < fieldSyms.count(); i++)
+            if (fieldSyms != null)
             {
-                Symbol sym = (Symbol)fieldSyms.nth(i);
-                if (!sym.Name.StartsWith("__"))
-                    CompileLookupThunk(ret, sym);
+                for (int i = 0; i < fieldSyms.count(); i++)
+                {
+                    Symbol sym = (Symbol)fieldSyms.nth(i);
+                    if (!sym.Name.StartsWith("__"))
+                        CompileLookupThunk(ret, sym);
+                }
             }
 
             return ret;
