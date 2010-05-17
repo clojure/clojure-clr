@@ -3597,9 +3597,11 @@
                  (if ((mk-bound-fn sc end-test end-key) e) s (next s))))))
 
 (defn repeatedly
-  "Takes a function of no args, presumably with side effects, and returns an infinite
-  lazy sequence of calls to it"
-  [f] (lazy-seq (cons (f) (repeatedly f))))
+  "Takes a function of no args, presumably with side effects, and
+  returns an infinite (or length n if supplied) lazy sequence of calls
+  to it" 
+  ([f] (lazy-seq (cons (f) (repeatedly f))))
+  ([n f] (take n (repeatedly f))))
 ;;; What is CLR equivalent -- should this just be a no-op?
 ;(defn add-classpath
 ;  "DEPRECATED 
