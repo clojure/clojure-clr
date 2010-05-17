@@ -4714,13 +4714,15 @@
   not yet finished, calls to deref/@ will block."
   [f]                                                 ;;;  [#^Callable f]
     (clojure.lang.Future. f))                         ;;;  (let [fut (.submit clojure.lang.Agent/soloExecutor f)]
-;    (proxy [clojure.lang.IDeref java.util.concurrent.Future] []
-;      (deref [] (.get fut))
-;      (get ([] (.get fut))
-;           ([timeout unit] (.get fut timeout unit)))
-;      (isCancelled [] (.isCancelled fut))
-;      (isDone [] (.isDone fut))
-;      (cancel [interrupt?] (.cancel fut interrupt?)))))
+;;;    (reify 
+;;;     clojure.lang.IDeref 
+;;;      (deref [_] (.get fut))
+;;;     java.util.concurrent.Future
+;;;      (get [_] (.get fut))
+;;;      (get [_ timeout unit] (.get fut timeout unit))
+;;;      (isCancelled [_] (.isCancelled fut))
+;;;      (isDone [_] (.isDone fut))
+;;;      (cancel [_ interrupt?] (.cancel fut interrupt?)))))
   
 (defmacro future
   "Takes a body of expressions and yields a future object that will
@@ -4818,16 +4820,18 @@
   [] 
   (let [d (clojure.lang.CountDownLatch. 1)                       ;;; java.util.concurrent.CountDownLatch.
         v (atom nil)]
-    (proxy [clojure.lang.AFn clojure.lang.IDeref] []
-      (deref [] (.Await d) @v)                                   ;;; await
+    (proxy [clojure.lang.AFn clojure.lang.IDeref] []             ;;; TODO: Update this to reify after we have fixed the missing method problem.
+      (deref [] (.Await d) @v) ;;; await
       (invoke [x]
         (locking d
-          (if (pos? (.Count d))                               ;;; getCount
+          (if (pos? (.Count d)) ;;; getCount
             (do (reset! v x)
-                (.CountDown d)                                ;;; countDown
+                (.CountDown d) ;;; countDown
                 this)
-            (throw (InvalidOperationException. "Multiple deliver calls to a promise"))))))))          ;;; IllegalStateException;
+            (throw (InvalidOperationException. "Multiple deliver calls to a promise")))))))) ;;; IllegalStateException;
 
+
+        
 (defn deliver
   "Alpha - subject to change.
   Delivers the supplied value to the promise, releasing any pending
