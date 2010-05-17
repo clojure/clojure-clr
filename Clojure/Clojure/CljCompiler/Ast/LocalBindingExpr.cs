@@ -24,7 +24,7 @@ using System.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class LocalBindingExpr : Expr, MaybePrimitiveExpr
+    class LocalBindingExpr : Expr, MaybePrimitiveExpr, AssignableExpr
     {
         #region Data
 
@@ -90,6 +90,17 @@ namespace clojure.lang.CljCompiler.Ast
         public bool CanEmitPrimitive
         {
             get { return _b.PrimitiveType != null; }
+        }
+
+        #endregion
+
+        #region AssignableExpr Members
+
+        public Expression GenAssignDlr(GenContext context, Expr val)
+        {
+            return Expression.Block(
+                context.ObjExpr.GenAssignLocal(context,_b,val),
+                context.ObjExpr.GenLocal(context,_b));
         }
 
         #endregion

@@ -25,6 +25,7 @@ using System.Reflection.Emit;
 using System.Reflection;
 using Microsoft.Scripting.Generation;
 using System.Collections;
+using System.Runtime.CompilerServices;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -74,8 +75,17 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal bool IsVolatile(LocalBinding lb)
         {
-            return _closes.containsKey(lb) && _volatiles.contains(lb.Symbol);
+            return RT.booleanCast(RT.contains(_fields, lb.Symbol)) &&
+                RT.booleanCast(RT.get(lb.Symbol.meta(), Keyword.intern("volatile-mutable")));
         }
+
+        bool IsMutable(LocalBinding lb)
+        {
+            return IsVolatile(lb) ||
+                   RT.booleanCast(RT.contains(_fields, lb.Symbol)) &&
+                   RT.booleanCast(RT.get(lb.Symbol.meta(), Keyword.intern("unsynchronized-mutable")));
+        }
+
 
         protected Type _superType;
 
@@ -109,6 +119,7 @@ namespace clojure.lang.CljCompiler.Ast
         protected FieldBuilder _metaField;
 
         protected List<FieldBuilder> _closedOverFields;
+        protected Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;
 
         
         protected List<FieldBuilder> _keywordLookupSiteFields;
@@ -387,13 +398,30 @@ namespace clojure.lang.CljCompiler.Ast
         private void GenerateClosedOverFields(TypeBuilder baseTB)
         {
             _closedOverFields = new List<FieldBuilder>(_closes.count());
+            _closedOverFieldsMap = new Dictionary<LocalBinding, FieldBuilder>(_closes.count());
 
             // closed-overs map to instance fields.
             for (ISeq s = RT.keys(_closes); s != null; s = s.next())
             {
                 LocalBinding lb = (LocalBinding)s.first();
+
+                FieldAttributes attributes = FieldAttributes.Public;
+                bool markVolatile = IsVolatile(lb);
+
+                if (IsDefType)
+                {
+                    if (!IsMutable(lb))
+                        attributes |= FieldAttributes.InitOnly;
+                }
+
                 Type type = lb.PrimitiveType ?? typeof(object);
-                _closedOverFields.Add(baseTB.DefineField(lb.Name, type, FieldAttributes.Public));
+
+                FieldBuilder fb = markVolatile 
+                    ? baseTB.DefineField(lb.Name,type, new Type[] { typeof(IsVolatile) }, Type.EmptyTypes, attributes)
+                    : baseTB.DefineField(lb.Name, type, attributes);
+
+                _closedOverFields.Add(fb);
+                _closedOverFieldsMap[lb] = fb;
             }
         }
 
@@ -962,6 +990,14 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
 
         #region Code generation support
+
+        internal Expression GenAssignLocal(GenContext context, LocalBinding lb, Expr val)
+        {
+            if (!IsMutable(lb))
+                throw new ArgumentException("Cannot assign to non-mutable: " + lb.Name);
+
+            return Expression.Assign(Expression.Field(_thisParam,_closedOverFieldsMap[lb]), val.GenDlr(context));
+        }
 
         internal Expression GenLocal(GenContext context, LocalBinding lb)
         {
