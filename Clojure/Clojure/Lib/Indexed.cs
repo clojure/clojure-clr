@@ -27,5 +27,7 @@ namespace clojure.lang
         /// <param name="i">Index of the item to access</param>
         /// <returns>The item at the given index</returns>
         object nth(int i);
+
+        object nth(int i, object notFound);
     }
 }

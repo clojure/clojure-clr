@@ -231,6 +231,12 @@ namespace clojure.lang
         abstract public IPersistentVector assocN(int i, object val);
         abstract public IPersistentVector cons(object o);
 
+        public object nth(int i, object notFound)
+        {
+            if (i >= 0 && i < count())
+                return nth(i);
+            return notFound;
+        }
 
         #endregion
 

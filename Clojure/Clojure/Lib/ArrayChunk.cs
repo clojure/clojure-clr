@@ -52,6 +52,13 @@ namespace clojure.lang
             return _array[_off + i];
         }
 
+        public object nth(int i, object notFound)
+        {
+            if (i >= 0 && i < count())
+                return nth(i);
+            return notFound;
+        }
+
         #endregion
 
         #region Counted Members

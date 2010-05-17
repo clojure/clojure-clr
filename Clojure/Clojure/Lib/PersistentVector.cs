@@ -218,6 +218,13 @@ namespace clojure.lang
             return node[i & 0x01f];
         }
 
+        public Object nth(int i, Object notFound)
+        {
+            if (i >= 0 && i < _cnt)
+                return nth(i);
+            return notFound;
+        }
+
         object[] ArrayFor(int i) 
         {
             if (i >= 0 && i < _cnt)
@@ -562,7 +569,7 @@ namespace clojure.lang
 
         #endregion
 
-        #region MutableVector class
+        #region TransientVector class
 
         class TransientVector : AFn, ITransientVector, Counted
         {
@@ -687,6 +694,14 @@ namespace clojure.lang
             {
                 object[] node = ArrayFor(i);
                 return node[i & 0x01f];
+            }
+
+
+            public object nth(int i, object notFound)
+            {
+                if (i >= 0 && i < count())
+                    return nth(i);
+                return notFound;
             }
 
             public ITransientVector assocN(int i, object val)

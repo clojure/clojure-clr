@@ -676,7 +676,11 @@ namespace clojure.lang
         {
             if (o is Counted)
                 return ((Counted)o).count();
+            return CountFrom(o);
+        }
 
+        static int CountFrom(object o)
+        {
             if (o == null)
                 return 0;
             else if (o is IPersistentCollection)
@@ -785,10 +789,15 @@ namespace clojure.lang
 
         static public Object get(Object coll, Object key)
         {
+            if (coll is ILookup)
+                return ((ILookup)coll).valAt(key);
+            return GetFrom(coll, key);
+        }
+
+        static object GetFrom(object coll, object key)
+        {
             if (coll == null)
                 return null;
-            else if (coll is ILookup)
-                return ((ILookup)coll).valAt(key);
             else if (coll is IDictionary)
             {
                 IDictionary m = (IDictionary)coll;
@@ -810,10 +819,15 @@ namespace clojure.lang
 
         static public Object get(Object coll, Object key, Object notFound)
         {
-            if (coll == null)
+             if (coll is ILookup)
+                return ((ILookup)coll).valAt(key,notFound);
+            return GetFrom(coll, key, notFound);
+        }
+
+        static object GetFrom(object coll, object key, object notFound)
+        {
+           if (coll == null)
                 return notFound;
-            else if (coll is ILookup)
-                return ((ILookup)coll).valAt(key, notFound);
             else if (coll is IDictionary)
             {
                 IDictionary m = (IDictionary)coll;
@@ -895,7 +909,11 @@ namespace clojure.lang
         {
             if (coll is Indexed)
                 return ((Indexed)coll).nth(n);
+            return NthFrom(coll, n);
+        }
 
+        static object NthFrom(object coll, int n)
+        {
             if (coll == null)
                 return null;
             else if (coll is String)
@@ -957,10 +975,13 @@ namespace clojure.lang
             if (coll is Indexed)
             {
                 Indexed v = (Indexed)coll;
-                if (n >= 0 && n < v.count())
-                    return v.nth(n);
-                return notFound;
+                return v.nth(n,notFound);
             }
+            return NthFrom(coll, n, notFound);
+        }
+
+        static object NthFrom(object coll, int n, object notFound)
+        {
             if (coll == null)
                 return notFound;
             else if (n < 0)
