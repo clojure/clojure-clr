@@ -74,7 +74,14 @@ namespace clojure.lang
 
         public static bool identical(object k1, object k2)
         {
-            return k1 == k2;
+            // I would prefer simpler version below, but it can't handle simple true/false (boxed booleans)
+
+            if (k1 is ValueType)
+                return k1.Equals(k2);
+            else
+                return k1 == k2;
+
+            //return k1 == k2;
         }
 
         public static Type classOf(object x)
