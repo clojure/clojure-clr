@@ -154,8 +154,7 @@ namespace clojure.lang.CljCompiler.Ast
                         // must be hinted and match one method
                         if (!hinted)
                             throw new ArgumentException("Must hint overloaded method: " + name.Name);
-                        m = matches[mk];
-                        if (m == null)
+                        if (! matches.TryGetValue(mk,out m) )
                             throw new ArgumentException("Can't find matching overloaded method: " + name.Name);
                         if (m.ReturnType != method._retType)
                             throw new ArgumentException(String.Format("Mismatched return type: {0}, expected {1}, had: {2}",
@@ -166,8 +165,7 @@ namespace clojure.lang.CljCompiler.Ast
                         // if hinted, validate match,
                         if (hinted)
                         {
-                            m = matches[mk];
-                            if (m == null)
+                            if (!matches.TryGetValue(mk, out m))
                                 throw new ArgumentException("Can't find matching method: " + name.Name + ", leave off hints for auto match.");
                             if (m.ReturnType != method._retType)
                                 throw new ArgumentException(String.Format("Mismatched return type: {0}, expected {1}, had: {2}",
