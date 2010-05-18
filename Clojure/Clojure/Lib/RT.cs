@@ -676,7 +676,7 @@ namespace clojure.lang
         {
             if (o is Counted)
                 return ((Counted)o).count();
-            return CountFrom(o);
+            return CountFrom(Util.Ret1(o,o=null));
         }
 
         static int CountFrom(object o)
@@ -909,7 +909,7 @@ namespace clojure.lang
         {
             if (coll is Indexed)
                 return ((Indexed)coll).nth(n);
-            return NthFrom(coll, n);
+            return NthFrom(Util.Ret1(coll,coll=null), n);
         }
 
         static object NthFrom(object coll, int n)
