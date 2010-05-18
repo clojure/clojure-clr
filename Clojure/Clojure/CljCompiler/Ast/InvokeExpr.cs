@@ -61,7 +61,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Var fvar = ((VarExpr)fexpr).Var;
                 Var pvar = (Var)RT.get(fvar.meta(), Compiler.PROTOCOL_KEY);
-                if (pvar != null && Compiler.PROTOCOL_CALLSITES.IsBound)
+                if (pvar != null && Compiler.PROTOCOL_CALLSITES.isBound)
                 {
                     _isProtocol = true;
                     _siteIndex = Compiler.RegisterProtocolCallsite(fvar);
@@ -78,7 +78,7 @@ namespace clojure.lang.CljCompiler.Ast
                         _onMethod = methods[0];
                     }
                 }
-                else if (pvar == null && Compiler.VAR_CALLSITES.IsBound
+                else if (pvar == null && Compiler.VAR_CALLSITES.isBound
                     && fvar.Namespace.Name.Name.StartsWith("clojure")
                     && !RT.booleanCast(RT.get(RT.meta(fvar), _dynamicKey)))
                 {
@@ -126,7 +126,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            if (fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KEYWORD_CALLSITES.IsBound)
+            if (fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KEYWORD_CALLSITES.isBound)
             {
                 Expr target = Compiler.GenerateAST(RT.second(form), pcon);
                 return new KeywordInvokeExpr((string)Compiler.SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), Compiler.TagOf(form), (KeywordExpr)fexpr, target);

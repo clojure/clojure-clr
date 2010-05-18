@@ -1485,7 +1485,7 @@ namespace clojure.lang
         static public void print(Object x, TextWriter w)
         {
             //call multimethod
-            if (PRINT_INITIALIZED.IsBound && RT.booleanCast(PRINT_INITIALIZED.deref()))
+            if (PRINT_INITIALIZED.isBound && RT.booleanCast(PRINT_INITIALIZED.deref()))
             {
                 PR_ON.invoke(x, w);
                 return;

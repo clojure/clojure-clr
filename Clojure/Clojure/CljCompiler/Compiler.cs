@@ -769,7 +769,7 @@ namespace clojure.lang
 
         private static void RegisterVar(Var v)
         {
-            if (!VARS.IsBound)
+            if (!VARS.isBound)
                 return;
             IPersistentMap varsMap = (IPersistentMap)VARS.deref();
             Object id = RT.get(varsMap, v);
@@ -782,7 +782,7 @@ namespace clojure.lang
 
         internal static int RegisterConstant(Object o)
         {
-            if (!CONSTANTS.IsBound)
+            if (!CONSTANTS.isBound)
                 return -1;
             PersistentVector v = (PersistentVector)CONSTANTS.deref();
             IdentityHashMap ids = (IdentityHashMap)CONSTANT_IDS.deref();
@@ -796,7 +796,7 @@ namespace clojure.lang
 
         internal static KeywordExpr RegisterKeyword(Keyword keyword)
         {
-            if (!KEYWORDS.IsBound)
+            if (!KEYWORDS.isBound)
                 return new KeywordExpr(keyword);
 
             IPersistentMap keywordsMap = (IPersistentMap)KEYWORDS.deref();
@@ -808,7 +808,7 @@ namespace clojure.lang
 
         internal static int RegisterKeywordCallsite(Keyword keyword)
         {
-            if (!KEYWORD_CALLSITES.IsBound)
+            if (!KEYWORD_CALLSITES.isBound)
                 throw new InvalidOperationException("KEYWORD_CALLSITES is not bound");
 
             IPersistentVector keywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
@@ -819,7 +819,7 @@ namespace clojure.lang
 
         internal static int RegisterProtocolCallsite(Var v)
         {
-            if (!PROTOCOL_CALLSITES.IsBound)
+            if (!PROTOCOL_CALLSITES.isBound)
                 throw new InvalidOperationException("PROTOCOL_CALLSITES is not bound");
 
             IPersistentVector protocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
@@ -830,7 +830,7 @@ namespace clojure.lang
 
         internal static int RegisterVarCallsite(Var v)
         {
-            if (!VAR_CALLSITES.IsBound)
+            if (!VAR_CALLSITES.isBound)
                 throw new InvalidOperationException("VAR_CALLSITES is not bound");
 
             IPersistentVector varCallsites = (IPersistentVector)VAR_CALLSITES.deref();
@@ -865,7 +865,7 @@ namespace clojure.lang
 
         internal static LocalBinding ReferenceLocal(Symbol symbol)
         {
-            if (!LOCAL_ENV.IsBound)
+            if (!LOCAL_ENV.isBound)
                 return null;
 
             LocalBinding b = (LocalBinding)RT.get(LOCAL_ENV.deref(), symbol);

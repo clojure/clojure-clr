@@ -382,7 +382,7 @@ namespace clojure.lang
         /// <summary>
         /// Does the var have value?
         /// </summary>
-        public bool IsBound
+        public bool isBound
         {
             get { return hasRoot() || (_count.get() > 0 && CurrentFrame.Bindings.containsKey(this)); }
         }
@@ -430,7 +430,7 @@ namespace clojure.lang
         public object set(object val)
         {
             Validate(getValidator(), val);
-            Box b = GetThreadBinding();
+            Box b = getThreadBinding();
             if (b != null)
                 return (b.Val = val);
             throw new InvalidOperationException(String.Format("Can't change/establish root binding of: {0} with set", _sym));
@@ -590,7 +590,7 @@ namespace clojure.lang
         /// Get the box of the current binding on the stack for this var, or null if no binding.
         /// </summary>
         /// <returns>The box of the current binding on the stack (or null if no binding).</returns>
-        Box GetThreadBinding()
+        public Box getThreadBinding()
         {
             if (_count.get() > 0)
             {
@@ -781,7 +781,7 @@ namespace clojure.lang
         /// <returns>The value</returns>
         public override object deref()
         {
-            Box b = GetThreadBinding();
+            Box b = getThreadBinding();
             if (b != null)
                 return b.Val;
             if (hasRoot())
