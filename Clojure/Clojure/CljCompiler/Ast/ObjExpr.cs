@@ -208,7 +208,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return _tag != null ? HostExpr.TagToType(_tag) : typeof(IFn); }
+            get { return _objType ?? (_tag != null ? HostExpr.TagToType(_tag) : typeof(IFn)); }
         }
 
         #endregion

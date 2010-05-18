@@ -224,7 +224,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override Type GenerateClassForImmediate(GenContext context)
         {
-            _baseType = GetBaseClass(context, _superType);
+            ObjType = _baseType = GetBaseClass(context, _superType);
             return _baseType;
         }
 
