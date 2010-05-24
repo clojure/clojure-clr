@@ -557,7 +557,7 @@
 
 (defmacro delay
   "Takes a body of expressions and yields a Delay object than will
-  invoke the body only the first time it is forced (with force), and
+  invoke the body only the first time it is forced (with force or deref/@), and
   will cache the result and return it on all subsequent force
   calls."
   [& body]
