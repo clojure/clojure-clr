@@ -164,6 +164,10 @@
 
   (is (> (* 3 (int (/ Int32/MaxValue 2.0))) Int32/MaxValue)) )  ; no overflow  ;;; Integer/MAX_VALUE
 
+(deftest test-ratios-simplify-to-ints-where-appropriate
+  (testing "negative denominator (assembla #275)"
+    (is (integer? (/ 1 -1/2)))
+    (is (integer? (/ 0 -1/2)))))
 
 (deftest test-divide
   (are [x y] (= x y)
@@ -436,3 +440,4 @@ Math/pow overflows to Infinity."
 (deftest test-ratios
   (is (= (denominator 1/2) 2))
   (is (= (numerator 1/2) 1)))    
+  
