@@ -401,10 +401,13 @@
 (defn find-protocol-method [protocol methodk x]
   (get (find-protocol-impl protocol x) methodk))
 
+(defn- implements? [protocol atype]
+  (.IsAssignableFrom #^Type (:on-interface protocol) atype))         ;;; isAssignableFrom, Class
+
 (defn extends? 
   "Returns true if atype  extends protocol"
   [protocol atype]
-  (boolean (or (.IsAssignableFrom #^Type (:on-interface protocol) atype)                ;;; isAssignableFrom, Class
+  (boolean (or (implements? protocol atype)
                (get (:impls protocol) atype))))
 
 (defn extenders 
@@ -613,6 +616,10 @@
 
   [atype & proto+mmaps]
   (doseq [[proto mmap] (partition 2 proto+mmaps)]
+    (when (implements? proto atype)
+      (throw (ArgumentException.                                                            ;;; IllegalArgumentException
+              (str atype " already directly implements " (:on-interface proto) " for protocol:"  
+                   (:var proto)))))
     (-reset-methods (alter-var-root (:var proto) assoc-in [:impls atype] mmap))))
 
 (defn- emit-impl [[p fs]]
