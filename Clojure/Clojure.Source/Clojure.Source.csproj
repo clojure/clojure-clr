@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0A74E77B-8BFF-4A64-8A16-5D0E5C9C47F3}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -127,6 +127,8 @@
     <None Include="clojure\test_clojure\parallel.clj" />
     <None Include="clojure\test_clojure\predicates.clj" />
     <None Include="clojure\test_clojure\printer.clj" />
+    <None Include="clojure\test_clojure\protocols.clj" />
+    <None Include="clojure\test_clojure\protocols\examples.clj" />
     <None Include="clojure\test_clojure\reader.clj" />
     <None Include="clojure\test_clojure\refs.clj" />
     <None Include="clojure\test_clojure\sequences.clj" />
