@@ -2330,11 +2330,7 @@
 (defn type 
   "Returns the :type metadata of x, or its Class if none"
   [x]
-  (or (:type (meta x)) 
-      (if (instance? clojure.lang.IDynamicType x)
-        (let [x #^clojure.lang.IDynamicType x]
-          (.getDynamicType x))
-        (class x))))
+  (or (:type (meta x)) (class x)))
 
 (defn num
   "Coerce to Number"

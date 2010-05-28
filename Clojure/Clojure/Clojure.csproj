@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{B8089F66-DFBD-4906-BEE0-B317689C2524}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -136,7 +136,6 @@
     <Compile Include="Lib\IChunk.cs" />
     <Compile Include="Lib\IChunkedSeq.cs" />
     <Compile Include="Lib\IDeref.cs" />
-    <Compile Include="Lib\IDynamicType.cs" />
     <Compile Include="Lib\IEditableCollection.cs" />
     <Compile Include="Lib\IKeywordLookup.cs" />
     <Compile Include="Lib\ILookup.cs" />
