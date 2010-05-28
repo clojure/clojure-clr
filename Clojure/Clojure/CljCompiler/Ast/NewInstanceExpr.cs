@@ -77,10 +77,10 @@ namespace clojure.lang.CljCompiler.Ast
 				rform = rform.next().next();
 				}
 
-			return Build((IPersistentVector)RT.get(opts,Compiler.IMPLEMENTS_KEY, PersistentVector.EMPTY),fields,null,tagname, classname,
-			             (Symbol) RT.get(opts,RT.TAG_KEY),rform);
+			ObjExpr ret = Build((IPersistentVector)RT.get(opts,Compiler.IMPLEMENTS_KEY, PersistentVector.EMPTY),fields,null,tagname, classname,
+			             (Symbol) RT.get(opts,RT.TAG_KEY),rform,frm);
 
-            
+            return ret;
             
             }
         }
@@ -106,7 +106,7 @@ namespace clojure.lang.CljCompiler.Ast
                 rform = RT.next(rform);
 
                 //return Build(interfaces, null, null, className, className, null, rform);
-                Expr ret = Build(interfaces, null, null, className, className, null, rform);
+                ObjExpr ret = Build(interfaces, null, null, className, className, null, rform,frm);
                 if (frm is IObj && ((IObj)frm).meta() != null)
                     return new MetaExpr(ret, (MapExpr)MapExpr.Parse(((IObj)frm).meta()));
                 else
@@ -121,9 +121,11 @@ namespace clojure.lang.CljCompiler.Ast
             string tagName, 
             string className, 
             Symbol typeTag, 
-            ISeq methodForms)
+            ISeq methodForms,
+            Object frm)
         {
             NewInstanceExpr ret = new NewInstanceExpr(null);
+            ret._src = frm;
             ret._name = className;
             ret.InternalName = ret.Name;  // ret.Name.Replace('.', '/');
             ret.ObjType = null; 
@@ -174,7 +176,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             //string[] inames = InterfaceNames(interfaces);
 
-            Type stub = CompileStub(superClass, ret, SeqToTypeArray(interfaces));
+            Type stub = CompileStub(superClass, ret, SeqToTypeArray(interfaces),frm);
             Symbol thisTag = Symbol.intern(null, stub.FullName);
             //Symbol stubTag = Symbol.intern(null,stub.FullName);
             //Symbol thisTag = Symbol.intern(null, tagName);
@@ -270,11 +272,11 @@ namespace clojure.lang.CljCompiler.Ast
  * Use it as a type hint for this, and bind the simple name of the class to this stub (in resolve etc)
  * Unmunge the name (using a magic prefix) on any code gen for classes
  */
-        static Type CompileStub(Type super, NewInstanceExpr ret, Type[] interfaces)
+        static Type CompileStub(Type super, NewInstanceExpr ret, Type[] interfaces, Object frm)
         {
 
-            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
-
+            //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", CompilerMode.Immediate);
             TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.COMPILE_STUB_PREFIX + "." + ret.InternalName, TypeAttributes.Public|TypeAttributes.Abstract, super, interfaces);
 
             tb.DefineDefaultConstructor(MethodAttributes.Public);

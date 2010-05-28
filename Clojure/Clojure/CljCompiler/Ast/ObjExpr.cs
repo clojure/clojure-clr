@@ -177,6 +177,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected IPersistentVector _interfaces = PersistentVector.EMPTY;
 
+        protected Object _src;
+
         #endregion
 
         #region Not yet

@@ -122,6 +122,7 @@ namespace clojure.lang.CljCompiler.Ast
             ISeq origForm = form;
 
             FnExpr fn = new FnExpr(Compiler.TagOf(form));
+            fn._src = form;
 
             if (((IMeta)form.first()).meta() != null)
             {
