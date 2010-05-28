@@ -1130,7 +1130,8 @@ namespace clojure.lang
                     return null;
                  return v;
             }
-            else if (symbol.Name.IndexOf('.') > 0 || symbol.Name[0] == '[')
+            else if (symbol.Name.IndexOf('.') > 0  && !symbol.Name.EndsWith(".")
+                || symbol.Name[symbol.Name.Length-1] == ']')              /// JAVA: symbol.Name[0] == '[')
                 return RT.classForName(symbol.Name);
             else if (symbol.Equals(NS))
                 return RT.NS_VAR;
