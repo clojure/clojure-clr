@@ -23,7 +23,7 @@ namespace clojure.lang
     /// <summary>
     /// Provides a basic implementation of <see cref="IPersistentVector">IPersistentVector</see> functionality.
     /// </summary>
-    public abstract class APersistentVector: AFn, IPersistentVector, Streamable, IList, IComparable
+    public abstract class APersistentVector: AFn, IPersistentVector, IList, IComparable
     {
         #region Data
 
@@ -333,38 +333,6 @@ namespace clojure.lang
 
 
         #endregion 
-
-        #region Streamable Members
-
-        /// <summary>
-        /// Internal class to implement a <see cref="Stream">Stream</see> source. 
-        /// for <see cref="APersistentVector">APersistentVector</see>.
-        /// </summary>
-        private class Src : AFn
-        {
-            private readonly IPersistentVector _v;
-            private int _i = 0;
-
-            public Src(IPersistentVector v)
-            {
-                _v = v;
-            }
-
-            public override object invoke()
-            {
-                if (_i < _v.count())
-                    return _v.nth(_i++);
-                return RT.EOS;
-            }
-
-        }
-
-        public Stream stream()
-        {
-            return new Stream(new Src(this));
-        }
-
-        #endregion
 
         #region IList Members
 

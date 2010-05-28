@@ -25,7 +25,7 @@ namespace clojure.lang
     /// <summary>
     /// Provides basic implementation of <see cref="ISeq"/> functionality.
     /// </summary>
-    public abstract class ASeq: Obj, ISeq, IList, Streamable
+    public abstract class ASeq: Obj, ISeq, IList
     {
         #region Data
 
@@ -287,44 +287,6 @@ namespace clojure.lang
         public IEnumerator GetEnumerator()
         {
             return new SeqEnumerator(seq());
-        }
-
-        #endregion
-
-        #region Streamable Members
-
-        /// <summary>
-        /// Internal class that implements Stream source for ASeq objects.
-        /// </summary>
-        internal class Src : AFn
-        {
-            ISeq _s;
-
-            public Src(ISeq s)
-            {
-                _s = s;
-            }
-
-            public override object invoke()
-            {
-                ISeq sq = RT.seq(_s);
-                if (sq != null)
-                {
-                    object ret = sq.first();
-                    _s = sq.more();
-                    return ret;
-                }
-                return RT.EOS;
-            }
-        }
-
-        /// <summary>
-        /// Gets a <see cref="IStream">Stream</see> for this object.
-        /// </summary>
-        /// <returns>The <see cref="Stream">Stream</see>.</returns>
-        public virtual Stream stream()
-        {
-            return new Stream(new Src(this));
         }
 
         #endregion

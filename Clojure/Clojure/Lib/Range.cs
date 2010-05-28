@@ -22,7 +22,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents a (contiguous) range of integers.
     /// </summary>
-    public class Range: ASeq, IReduce, Streamable, Counted
+    public class Range: ASeq, IReduce, Counted
     {
         #region Data
 
@@ -159,49 +159,6 @@ namespace clojure.lang
             for (int x = _n + 1; x < _end; x++)
                 ret = f.invoke(ret, x);
             return ret;
-        }
-
-        #endregion
-
-        #region Streamable Members
-
-        /// <summary>
-        /// Implements a stream over a <see cref="Range">Range</see>.
-        /// </summary>
-        private new class Src : AFn
-        {
-            /// <summary>
-            /// Current position.
-            /// </summary>
-            private int _n;
-
-            /// <summary>
-            /// Final position.
-            /// </summary>
-            private readonly long _end;
-
-
-            public Src(int n, int end)
-            {
-                _n = n;
-                _end = end;
-            }
-
-            public override object invoke()
-            {
-                return (_n < _end)
-                    ? _n++
-                    : RT.EOS;
-            }
-        }
-
-        /// <summary>
-        /// Gets a <see cref="Stream"/> for this object.
-        /// </summary>
-        /// <returns>The <see cref="Stream"/>.</returns>
-        public override Stream stream()
-        {
-            return new Stream(new Src(_n, _end));
         }
 
         #endregion

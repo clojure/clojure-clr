@@ -20,7 +20,7 @@ using System.Collections;
 
 namespace clojure.lang
 {
-    public interface IArraySeq : IObj, ISeq, IList, Streamable,IndexedSeq, IReduce
+    public interface IArraySeq : IObj, ISeq, IList, IndexedSeq, IReduce
     {
         object[] ToArray();
     }

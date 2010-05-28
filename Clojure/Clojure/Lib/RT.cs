@@ -634,27 +634,6 @@ namespace clojure.lang
                 throw new ArgumentException("Don't know how to create ISeq from: " + coll.GetType().FullName);
         }
 
-
-
-        static public Stream stream(object coll) {
-            if (coll == null)
-                return new Stream(EMPTY_GEN);
-            else if (coll is Streamable)
-                return ((Streamable)coll).stream();
-            else if (coll is Fn)  // TODO: Note use of Fn to imply castable to IFn.  Should we do this? Why not just check for IFn?
-                return new Stream((IFn)coll);
-            else if (coll is IEnumerable)  // java: Iterable
-                return new Stream(new IteratorStream(((IEnumerable)coll).GetEnumerator()));  // java: IteratorStream
-            else if (coll.GetType().IsArray)
-                return ArrayStream.createFromObject(coll);
-            else if (coll is String)
-                return ArrayStream.createFromObject(((String)coll).ToCharArray());
-            else
-                return new Stream(new ASeq.Src(RT.seq(coll)));
-        }
-
-
-
         public static ISeq keys(object coll)
         {
             return APersistentMap.KeySeq.create(seq(coll));
@@ -1764,26 +1743,6 @@ namespace clojure.lang
             a.SetValue(val, idx);
             return val;
         }
-
-        #endregion
-
-        #region Stream support
-
-        public static readonly object EOS = new object();
-        public static readonly object SKIP = new object();
-
-
-        public static readonly IFn EMPTY_GEN = new EmptyGen();
-
-        private class EmptyGen: AFn
-        {
-            [MethodImpl(MethodImplOptions.Synchronized)]  // TODO: Why is this synchronized?
-            public override object invoke()
-            {
-                return EOS;
-            }
-        }
-
 
         #endregion
 
