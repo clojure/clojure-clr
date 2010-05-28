@@ -614,6 +614,8 @@ namespace clojure.lang
 
             if (d.Equals(BigInteger.ONE))
                 return reduce(n);
+            else if (d.Equals(BigInteger.NEGATIVE_ONE))
+                return reduce(n.Negate());
 
             return new Ratio((d.Signum < 0 ? -n : n), d.Abs());
         }
