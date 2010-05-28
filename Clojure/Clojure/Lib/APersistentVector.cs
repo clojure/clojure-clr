@@ -67,6 +67,8 @@ namespace clojure.lang
         /// </returns>
         static public bool doEquals(IPersistentVector v, object obj)
         {
+            if (v == obj)
+                return true;
 
             if (obj is IList || obj is IPersistentVector)
             {

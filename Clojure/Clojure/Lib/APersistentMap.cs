@@ -56,6 +56,9 @@ namespace clojure.lang
         /// otherwise, false.</returns>
         public override bool Equals(object obj)
         {
+            if (this == obj)
+                return true;
+
             //if(!(obj instanceof Map))
             //    return false;
             //Map m = (Map) obj;

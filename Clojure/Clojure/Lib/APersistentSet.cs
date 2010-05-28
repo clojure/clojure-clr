@@ -94,6 +94,9 @@ namespace clojure.lang
             // I really can't do what the Java version does.
             // It casts to a Set.  No such thing here.  We'll use IPersistentSet instead.
 
+            if (this == obj)
+                return true;
+
             IPersistentSet s = obj as IPersistentSet;
             if (s == null)
                 return false;

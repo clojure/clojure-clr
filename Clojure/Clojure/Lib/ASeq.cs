@@ -76,6 +76,9 @@ namespace clojure.lang
         /// <remarks>Equality is value-based, ie.e. depends on the sequence of items.</remarks>
         public override bool Equals(object obj)
         {
+            if (this == obj)
+                return true;
+
             if (!(obj is Sequential || obj is IList))
                 return false;
 
