@@ -77,15 +77,11 @@
   
 ; Support for interop
 
-(defn refparam [v]
-  "Signals that a by-ref parameter is desired at this position in an interop call.
+(defn by-ref [v]
+  "Signals that a by-ref parameter is desired at this position in an interop call or method signature.
   
   Should only be used in CLR interop code.  Throws an exception otherwise."
-  (throw (ArgumentException. "refparam not used at top-level in an interop call")))
+  (throw (ArgumentException. "by-ref not used at top-level in an interop call or method signature")))
   
-(defn outparam [v]
-  "Signals that an out parameter is desired at this position in an interop call.
-  
-  Should only be used in CLR interop code.  Throws an exception otherwise."
-  (throw (ArgumentException. "outparam not used at top-level in an interop call")))  
+
   

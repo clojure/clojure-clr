@@ -40,8 +40,7 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Symbols
 
-        public static readonly Symbol REFPARAM = Symbol.create("refparam");
-        public static readonly Symbol OUTPARAM = Symbol.create("outparam");
+        public static readonly Symbol BY_REF = Symbol.create("by-ref");
 
         #endregion
 
@@ -165,7 +164,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (arg is ISeq)
                 {
                     Symbol op = RT.first(arg) as Symbol;
-                    if (op != null && (op.Equals(OUTPARAM) || op.Equals(REFPARAM)))
+                    if (op != null && op.Equals(BY_REF))
                     {
                         if (RT.Length((ISeq)arg) != 2)
                             throw new ArgumentException("Wrong number of arguments to {0}", ((Symbol)op).Name);
@@ -174,10 +173,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if (!(localArg is Symbol) || (lb = Compiler.ReferenceLocal((Symbol)localArg)) == null)
                             throw new ArgumentException("Argument to {0} must be a local variable.", ((Symbol)op).Name);
 
-                        if (op.Equals(OUTPARAM))
-                            paramType = HostArg.ParameterType.Out;
-                        else
-                            paramType = HostArg.ParameterType.Ref;
+                        paramType = HostArg.ParameterType.ByRef;
 
                         arg = localArg;
                     }
@@ -256,8 +252,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 switch (ha.ParamType)
                 {
-                    case HostArg.ParameterType.Ref:
-                    case HostArg.ParameterType.Out:
+                    case HostArg.ParameterType.ByRef:
                         t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
                         break;
                     case HostArg.ParameterType.Standard:

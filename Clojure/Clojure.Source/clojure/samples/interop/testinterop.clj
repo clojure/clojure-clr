@@ -67,23 +67,21 @@
 ; (f2two c23 "Here it is: {0}" 12)
 
 
-; Test refparam, resolved at compile-time
+; Test by-ref, resolved at compile-time
 
 (defn f3c [c n]
   (let [m (int n)]
-     (.m3 #^dm.interop.C1 c (refparam m))
+     (.m3 #^dm.interop.C1 c (by-ref m))
      m))
      
-; Test refparam, resolved at runtime
-
-; Test refparam, resolved at compile-time
+; Test by-ref, resolved at runtime
 
 (defn f3r [c n]
   (let [m (int n)]
-     (.m3 c (refparam m))
+     (.m3 c (by-ref m))
      m))     
   
-; Make sure we find the non-refparam overload
+; Make sure we find the non-by-ref overload
 (defn f3n [c n]
   (let [m (int n)]
      (.m3 c m)))  
@@ -95,7 +93,7 @@
 ; Testing some ambiguity with refs
 (defn f5 [c x y]
   (let [m (int y)
-        v (.m5 c x (refparam m))]
+        v (.m5 c x (by-ref m))]
     [v m]))
     
 ; (f5 c1 "help" 12) => ["help22" 22]
@@ -105,7 +103,7 @@
 ; (dm.interop.C5.)
 ; (dm.interop.C5. 7)
 ; (dm.interop.C5. "thing")
-; (let [x (int 12)] (dm.interop.C5. (refparam x)) x)
+; (let [x (int 12)] (dm.interop.C5. (by-ref x)) x)
 ; 
 
 ; Test dynamic overload resolution
@@ -115,17 +113,17 @@
 ; Test overload resolution with ref param
 (defn make5a [x y] 
    (let [n (int y)
-         v (dm.interop.C5. x (refparam n))]
+         v (dm.interop.C5. x (by-ref n))]
      [v n]))
      
 ; (make5a "help" 12)  => [#<C5 Constructed with String+int-by-ref c-tor> 32]
 ; (make5a 20 30) =>  [#<C5 Constructed with int+int-by-ref c-tor> 60]
 
 (defn f6 [c a]
-  [(.m6 c (refparam a)) a])
+  [(.m6 c (by-ref a)) a])
   
-; (f6 c1 12)  => [ "123" 123 ]
-; (f6 c1 "def") => [ "defabc" "defab" ]
+; (f6 c1 12)  => [ "123" 123 ]                  NOPE
+; (f6 c1 "def") => [ "defabc" "defab" ]         NOPE
 
 (defn c6sm1a [x ys]
   (dm.interop.C6/sm1 x #^objects (into-array Object ys)))
@@ -151,7 +149,7 @@
 
 (defn c6m2 [x] 
   (let [n (int x)
-        v (dm.interop.C6/m2 (refparam n) #^objects (into-array Object [1 2 3 4]))]
+        v (dm.interop.C6/m2 (by-ref n) #^objects (into-array Object [1 2 3 4]))]
     [n v]))
     
 ;  (c6m2 12) => [16 4]

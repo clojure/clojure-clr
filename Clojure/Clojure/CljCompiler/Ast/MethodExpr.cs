@@ -107,8 +107,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 switch (ha.ParamType)
                 {
-                    case HostArg.ParameterType.Ref:
-                    case HostArg.ParameterType.Out:
+                    case HostArg.ParameterType.ByRef:
                         t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
                         refPositions.Add(i);
                         break;
@@ -225,8 +224,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 switch (ha.ParamType)
                 {
-                    case HostArg.ParameterType.Ref:
-                    case HostArg.ParameterType.Out:
+                    case HostArg.ParameterType.ByRef:
                         {
                             Type sbType = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
                             ParameterExpression sbParam = Expression.Parameter(sbType, String.Format("__sb_{0}", sbParams.Count));

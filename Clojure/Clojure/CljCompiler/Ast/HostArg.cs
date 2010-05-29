@@ -12,8 +12,7 @@ namespace clojure.lang.CljCompiler.Ast
         public enum ParameterType
         {
             Standard,
-            Ref,
-            Out
+            ByRef
         }
 
         #endregion
