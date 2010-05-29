@@ -47,6 +47,10 @@
               strx
               (str "System." strx))))))         ;;;(str "java.lang." strx))))))
  
+ (defn- the-class-maybe-by-ref [x]
+   (cond
+      (seq? x) (list (first x) (the-class (second x)))    ; (by-ref v)
+      :else (the-class x)))
   
  (defn- generate-class [options-map]
    (let [default-options {:prefix "-" :load-impl-ns true :impl-ns (ns-name *ns*)}
@@ -226,7 +230,7 @@
 (defn- generate-interface
   [{:keys [name extends methods]}]
   (let [extendTypes (map the-class extends)
-        methodSigs (map (fn [[mname pclasses rclass]] [(str mname) (map the-class pclasses) (the-class rclass)]) methods)]
+        methodSigs (map (fn [[mname pclasses rclass]] [(str mname) (map the-class-maybe-by-ref pclasses) (the-class rclass)]) methods)]
 	(clojure.lang.GenInterface/GenerateInterface (str name) extendTypes methodSigs)))
 
 

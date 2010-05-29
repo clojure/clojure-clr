@@ -630,8 +630,25 @@ namespace clojure.lang
         {
             List<Type> types = new List<Type>();
 
-            for (ISeq s = seq == null ? null :seq.seq(); s != null; s = s.next())
-                types.Add((Type)s.first());
+            for (ISeq s = seq == null ? null : seq.seq(); s != null; s = s.next())
+            {
+                Object o = s.first();
+                if (o is Type)
+                    types.Add((Type)o);
+                else if (o is ISeq)
+                {
+                    object first = RT.first(o);
+                    object second = RT.second(o);
+                    if (!(first is Symbol) || !((Symbol)first).Equals(HostExpr.BY_REF))
+                        throw new ArgumentException("First element of parameter definition is not by-ref");
+                    if (!(second is Type))
+                        throw new ArgumentException("by-ref must be paired with a type");
+                    Type t = (Type)second;                    
+                    types.Add(t.MakeByRefType());
+                }
+                else
+                    throw new ArgumentException("Bad parameter definition");
+            }
 
             if ( types.Count ==  0 )
                 return Type.EmptyTypes;

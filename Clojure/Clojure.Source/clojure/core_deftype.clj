@@ -13,7 +13,7 @@
 ;for now, built on gen-interface
 (defmacro definterface 
   [name & sigs]
-  (let [tag (fn [x] (or (:tag (meta x)) Object))
+  (let [tag (fn tag [x] (if (seq? x) (list (first x) (tag (second x))) (or (:tag (meta x)) Object)))
         psig (fn [[name [& args]]]
                (vector name (vec (map tag args)) (tag name)))
         cname (symbol (str *ns* "." name))]
