@@ -128,21 +128,47 @@ namespace clojure.lang.CljCompiler.Ast
                 bool hinted = Compiler.TagOf(name) != null;
                 Type[] pTypes = new Type[parms.count()];
                 Symbol[] pSyms = new Symbol[parms.count()];
+                bool[] pRefs = new bool[parms.count()];
 
                 for (int i = 0; i < parms.count(); i++)
                 {
-                    if (!(parms.nth(i) is Symbol))
-                        throw new ArgumentException("Params must be Symbols");
-                    Symbol p = (Symbol)parms.nth(i);
+                    // Param should be symbol or (by-ref symbol)
+                    Symbol p;
+                    bool isByRef = false;
+
+                    object pobj = parms.nth(i);
+                    if (pobj is Symbol)
+                        p = (Symbol)pobj;
+                    else if (pobj is ISeq)
+                    {
+                        ISeq pseq = (ISeq)pobj;
+                        object first = RT.first(pseq);
+                        object second = RT.second(pseq);
+                        if (!(first is Symbol && ((Symbol)first).Equals(HostExpr.BY_REF)))
+                            throw new ArgumentException("First element in parameter pair must be by-ref");
+                        if (!(second is Symbol))
+                            throw new ArgumentException("Params must be Symbols");
+                        isByRef = true;
+                        p = (Symbol)second;
+                        hinted = true;
+                    }
+                    else 
+                        throw new ArgumentException("Params must be Symbols or of the form (by-ref Symbol)");
+
                     object tag = Compiler.TagOf(p);
                     if (tag != null)
                         hinted = true;
                     if (p.Namespace != null)
                         p = Symbol.create(p.Name);
                     Type pType = Compiler.TagType(tag);
+                    if (isByRef)
+                        pType = pType.MakeByRefType();
+
                     pTypes[i] = pType;
                     pSyms[i] = p;
+                    pRefs[i] = isByRef;
                 }
+
                 Dictionary<IPersistentVector, MethodInfo> matches = FindMethodsWithNameAndArity(name.Name, parms.count(), overrideables);
                 IPersistentVector mk = MSig(name.Name, pTypes);
                 MethodInfo m = null;
@@ -190,7 +216,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 for (int i = 0; i < parms.count(); i++)
                 {
-                    LocalBinding lb = Compiler.RegisterLocal(pSyms[i], null, new MethodParamExpr(pTypes[i]), true);
+                    LocalBinding lb = Compiler.RegisterLocal(pSyms[i], null, new MethodParamExpr(pTypes[i]), true, pRefs[i]);
                     argLocals = argLocals.assocN(i, lb);
                     method._argTypes[i] = pTypes[i];
                 }

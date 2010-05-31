@@ -81,9 +81,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         bool IsMutable(LocalBinding lb)
         {
-            return IsVolatile(lb) ||
-                   RT.booleanCast(RT.contains(_fields, lb.Symbol)) &&
-                   RT.booleanCast(RT.get(lb.Symbol.meta(), Keyword.intern("unsynchronized-mutable")));
+            return IsVolatile(lb)
+                ||
+                RT.booleanCast(RT.contains(_fields, lb.Symbol)) &&
+                   RT.booleanCast(RT.get(lb.Symbol.meta(), Keyword.intern("unsynchronized-mutable")))
+                ||
+                lb.IsByRef;
         }
 
 
@@ -998,7 +1001,10 @@ namespace clojure.lang.CljCompiler.Ast
             if (!IsMutable(lb))
                 throw new ArgumentException("Cannot assign to non-mutable: " + lb.Name);
 
-            return Expression.Assign(Expression.Field(_thisParam,_closedOverFieldsMap[lb]), val.GenDlr(context));
+            FieldBuilder fb;
+            if ( _closedOverFieldsMap.TryGetValue(lb,out fb) )
+                return Expression.Assign(Expression.Field(_thisParam,_closedOverFieldsMap[lb]), val.GenDlr(context));
+            return Expression.Assign(lb.ParamExpression, val.GenDlr(context));
         }
 
         internal Expression GenLocal(GenContext context, LocalBinding lb)

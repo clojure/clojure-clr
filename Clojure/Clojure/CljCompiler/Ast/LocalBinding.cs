@@ -71,7 +71,15 @@ namespace clojure.lang.CljCompiler.Ast
         public bool IsArg
         {
             get { return _isArg; }
+        }
+
+        readonly bool _isByRef;
+
+        public bool IsByRef
+        {
+            get { return _isByRef; }
         } 
+
 
 
 
@@ -79,7 +87,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region C-tors
 
-        public LocalBinding(int index, Symbol sym, Symbol tag, Expr init, bool isArg)
+        public LocalBinding(int index, Symbol sym, Symbol tag, Expr init, bool isArg, bool isByRef)
         {
             if (Compiler.MaybePrimitiveType(init) != null && tag != null)
                 throw new InvalidOperationException("Can't type hint a local with a primitive initializer");
@@ -90,6 +98,7 @@ namespace clojure.lang.CljCompiler.Ast
             _init = init;
             _name = Compiler.munge(sym.Name);
             _isArg = isArg;
+            _isByRef = isByRef;
         }
 
         #endregion

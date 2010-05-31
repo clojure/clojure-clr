@@ -841,9 +841,14 @@ namespace clojure.lang
 
         internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init, bool isArg)
         {
+            return RegisterLocal(sym, tag, init, isArg, false);
+        }
+
+        internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init, bool isArg, bool isByRef)
+        {
             int num = GetAndIncLocalNum();
 
-            LocalBinding b = new LocalBinding(num,sym, tag, init, isArg);
+            LocalBinding b = new LocalBinding(num,sym, tag, init, isArg, isByRef);
 
             IPersistentMap localsMap = (IPersistentMap)LOCAL_ENV.deref();
             LOCAL_ENV.set(RT.assoc(localsMap,b.Symbol, b));
