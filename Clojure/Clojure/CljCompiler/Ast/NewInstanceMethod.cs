@@ -95,7 +95,7 @@ namespace clojure.lang.CljCompiler.Ast
             Symbol name = (Symbol)Symbol.intern(null, Compiler.munge(dotName.Name)).withMeta(RT.meta(dotName));
 
             IPersistentVector parms = (IPersistentVector)RT.second(form);
-            if (parms.count() == 0)
+            if (parms.count() == 0 || !(parms.nth(0) is Symbol))
                 throw new ArgumentException("Must supply at least one argument for 'this' in: " + dotName);
 
             Symbol thisName = (Symbol)parms.nth(0);
