@@ -31,8 +31,7 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        Dictionary<IPersistentVector,MethodInfo> _methodMap;
-        Dictionary<IPersistentVector, HashSet<Type>> _covariants;
+        Dictionary<IPersistentVector,List<MethodInfo>> _methodMap;
 
         #endregion
 
@@ -166,12 +165,11 @@ namespace clojure.lang.CljCompiler.Ast
             }
             Type superClass = typeof(Object);
 
-            Dictionary<IPersistentVector, MethodInfo> overrideables;
+            Dictionary<IPersistentVector, List<MethodInfo>> overrideables;
             Dictionary<IPersistentVector, HashSet<Type>> covariants;
-            GatherMethods(superClass, RT.seq(interfaces), out overrideables, out covariants);
+            GatherMethods(superClass, RT.seq(interfaces), out overrideables);
 
             ret._methodMap = overrideables;
-            ret._covariants = covariants;
             ret._interfaces = interfaces;
 
             //string[] inames = InterfaceNames(interfaces);
@@ -386,10 +384,51 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Method reflection
 
-        static void GatherMethods(Type t, Dictionary<IPersistentVector, MethodInfo> mm)
+        static void GatherMethods(
+            Type st,
+            ISeq interfaces,
+            out Dictionary<IPersistentVector, List<MethodInfo>> overrides)
+        {
+            Dictionary<IPersistentVector, List<MethodInfo>> allm = new Dictionary<IPersistentVector, List<MethodInfo>>();
+            GatherMethods(st, allm);
+            for (; interfaces != null; interfaces = interfaces.next())
+                GatherMethods((Type)interfaces.first(), allm);
+
+            overrides = allm;
+
+            //overrides = new Dictionary<IPersistentVector, List<MethodInfo>>();
+            //foreach (KeyValuePair<IPersistentVector, List<MethodInfo>> kv in allm)
+            //{
+            //    IPersistentVector mk = kv.Key;
+            //    mk = (IPersistentVector)mk.pop();
+            //    List<MethodInfo> ms = kv.Value;
+            //    // TODO: explicit implementation of interfaces
+            //    if (overrides.ContainsKey(mk)) 
+            //    {
+            //        HashSet<Type> cvs;
+            //        if ( ! covariants.TryGetValue(mk,out cvs) )
+            //        {
+            //            cvs = new HashSet<Type>();
+            //            covariants[mk] = cvs;
+            //        }
+            //        MethodInfo om = overrides[mk];
+            //        if (om.ReturnType.IsAssignableFrom(m.ReturnType))
+            //        {
+            //            cvs.Add(om.ReturnType);
+            //            overrides[mk] = m;
+            //        }
+            //        else
+            //            cvs.Add(m.ReturnType);
+            //    }
+            //    else
+            //        overrides[mk] = m;
+            //}
+        }
+
+        static void GatherMethods(Type t, Dictionary<IPersistentVector, List<MethodInfo>> mm)
         {
             for (Type mt = t; mt != null; mt = mt.BaseType)
-                foreach (MethodInfo m in mt.GetMethods(BindingFlags.FlattenHierarchy| BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic))
+                foreach (MethodInfo m in mt.GetMethods(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                     ConsiderMethod(m, mm);
 
             if (t.IsInterface)
@@ -398,61 +437,30 @@ namespace clojure.lang.CljCompiler.Ast
 
         }
 
-
-        static void GatherMethods(
-            Type st,
-            ISeq interfaces,
-            out Dictionary<IPersistentVector, MethodInfo> overrides,
-            out Dictionary<IPersistentVector, HashSet<Type>> covariants)
-        {
-            Dictionary<IPersistentVector, MethodInfo> allm = new Dictionary<IPersistentVector, MethodInfo>();
-            GatherMethods(st, allm);
-            for (; interfaces != null; interfaces = interfaces.next())
-                GatherMethods((Type)interfaces.first(), allm);
-
-            overrides = new Dictionary<IPersistentVector, MethodInfo>();
-            covariants = new Dictionary<IPersistentVector, HashSet<Type>>();
-            foreach (KeyValuePair<IPersistentVector, MethodInfo> kv in allm)
-            {
-                IPersistentVector mk = kv.Key;
-                mk = (IPersistentVector)mk.pop();
-                MethodInfo m = kv.Value;
-                // TODO: explicit implementation of interfaces
-                if (overrides.ContainsKey(mk)) // covariant return -- not a problem for CLR! but we are going to have so many others.
-                {
-                    HashSet<Type> cvs;
-                    if ( ! covariants.TryGetValue(mk,out cvs) )
-                    {
-                        cvs = new HashSet<Type>();
-                        covariants[mk] = cvs;
-                    }
-                    MethodInfo om = overrides[mk];
-                    if (om.ReturnType.IsAssignableFrom(m.ReturnType))
-                    {
-                        cvs.Add(om.ReturnType);
-                        overrides[mk] = m;
-                    }
-                    else
-                        cvs.Add(m.ReturnType);
-                }
-                else
-                    overrides[mk] = m;
-            }
-        }
-
-        static void ConsiderMethod(MethodInfo m, Dictionary<IPersistentVector, MethodInfo> mm)
+        static void ConsiderMethod(MethodInfo m, Dictionary<IPersistentVector, List<MethodInfo>> mm)
         {
             IPersistentVector mk = MSig(m);
             if (!(mm.ContainsKey(mk)
                 || !(m.IsPublic || m.IsFamily)
                 || m.IsStatic
                 || m.IsFinal))
-                mm[mk] = m;
+                AddMethod(mm, mk, m);
         }
 
-        static IPersistentVector MSig(MethodInfo m)
+        public static IPersistentVector MSig(MethodInfo m)
         {
             return RT.vector(m.Name, RT.seq(Compiler.GetTypes(m.GetParameters())), m.ReturnType);
+        }
+
+        static void AddMethod(Dictionary<IPersistentVector, List<MethodInfo>> mm, IPersistentVector sig, MethodInfo m)
+        {
+            List<MethodInfo> value;
+            if (!mm.TryGetValue(sig, out value))
+            {
+                value = new List<MethodInfo>();
+                mm[sig] = value;
+            }
+            value.Add(m);
         }
 
         #endregion
@@ -487,11 +495,40 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override void GenerateMethods(GenContext context)
         {
+            HashSet<MethodInfo> implemented = new HashSet<MethodInfo>();
+
             for (ISeq s = RT.seq(_methods); s != null; s = s.next())
             {
-                ObjMethod method = (ObjMethod)s.first();
+                NewInstanceMethod method = (NewInstanceMethod)s.first();
                 method.GenerateCode(context);
+                implemented.UnionWith(method.MethodInfos);
             }
+
+            foreach (List<MethodInfo> ms in _methodMap.Values)
+                foreach (MethodInfo mi in ms)
+                    if (NeedsDummy(mi,implemented))
+                        GenerateDummyMethod(context,mi);
+        }
+
+        private bool NeedsDummy(MethodInfo mi, HashSet<MethodInfo> implemented)
+        {
+            return !implemented.Contains(mi) && mi.DeclaringType.IsInterface && !(!IsDefType && mi.DeclaringType == typeof(IObj) || mi.DeclaringType == typeof(IMeta));
+        }
+
+        private void GenerateDummyMethod(GenContext context, MethodInfo mi)
+        {
+            TypeBuilder tb = TypeBuilder;
+
+            MethodBuilder mb = tb.DefineMethod(ExplicitMethodName(mi), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, mi.ReturnType, Compiler.GetTypes(mi.GetParameters()));
+            ILGen gen = new ILGen(mb.GetILGenerator());
+            gen.EmitNew(typeof(NotImplementedException),Type.EmptyTypes);
+            gen.Emit(OpCodes.Throw);
+            tb.DefineMethodOverride(mb, mi);            
+        }
+
+        private string ExplicitMethodName(MethodInfo mi)
+        {
+            return mi.DeclaringType.Name + "." + mi.Name;
         }
 
         #endregion

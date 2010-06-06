@@ -32,6 +32,16 @@ namespace clojure.lang.CljCompiler.Ast
 
         static readonly Symbol dummyThis = Symbol.intern(null, "dummy_this_dlskjsdfower");
 
+        List<MethodInfo> _minfos;
+
+        public List<MethodInfo> MethodInfos
+        {
+            get { return _minfos; }
+        }
+
+
+        bool _isExplicit = false;
+
         #endregion
 
         #region ObjMethod methods
@@ -84,7 +94,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Parsing
 
-        public static NewInstanceMethod Parse(ObjExpr objx, ISeq form, Symbol thisTag, Dictionary<IPersistentVector, MethodInfo> overrideables)
+        public static NewInstanceMethod Parse(ObjExpr objx, ISeq form, Symbol thisTag, Dictionary<IPersistentVector, List<MethodInfo>> overrideables)
         {
             // (methodname [this-name args*] body...)
             // this-name might be nil
@@ -169,43 +179,54 @@ namespace clojure.lang.CljCompiler.Ast
                     pRefs[i] = isByRef;
                 }
 
-                Dictionary<IPersistentVector, MethodInfo> matches = FindMethodsWithNameAndArity(name.Name, parms.count(), overrideables);
-                IPersistentVector mk = MSig(name.Name, pTypes);
-                MethodInfo m = null;
-                if (matches.Count > 0)
+                // TODO: detect explicit implementation
+
+                Dictionary<IPersistentVector, List<MethodInfo>> matches = FindMethodsWithNameAndArity(name.Name, parms.count(), overrideables);
+                IPersistentVector mk = MSig(name.Name, pTypes, method._retType);
+                List<MethodInfo> ms = null;
+                if (matches.Count > 0 )
                 {
-                    // multiple methods
+                    // multiple matches
                     if (matches.Count > 1)
                     {
                         // must be hinted and match one method
                         if (!hinted)
                             throw new ArgumentException("Must hint overloaded method: " + name.Name);
-                        if (! matches.TryGetValue(mk,out m) )
+                        if (! matches.TryGetValue(mk,out ms) )
                             throw new ArgumentException("Can't find matching overloaded method: " + name.Name);
-                        if (m.ReturnType != method._retType)
-                            throw new ArgumentException(String.Format("Mismatched return type: {0}, expected {1}, had: {2}",
-                                name.Name, m.ReturnType.Name, method._retType.Name));
+
+                        method._minfos = ms;
+
+                        //if (m.ReturnType != method._retType)
+                        //    throw new ArgumentException(String.Format("Mismatched return type: {0}, expected {1}, had: {2}",
+                        //        name.Name, m.ReturnType.Name, method._retType.Name));
                     }
                     else // one match
                     {
                         // if hinted, validate match,
                         if (hinted)
                         {
-                            if (!matches.TryGetValue(mk, out m))
+                            if (!matches.TryGetValue(mk, out ms))
                                 throw new ArgumentException("Can't find matching method: " + name.Name + ", leave off hints for auto match.");
-                            if (m.ReturnType != method._retType)
-                                throw new ArgumentException(String.Format("Mismatched return type: {0}, expected {1}, had: {2}",
-                                    name.Name, m.ReturnType.Name, method._retType.Name));
+
+                            method._minfos = ms;
+
+                            //if (m.ReturnType != method._retType)
+                            //    throw new ArgumentException(String.Format("Mismatched return type: {0}, expected {1}, had: {2}",
+                            //        name.Name, m.ReturnType.Name, method._retType.Name));
                         }
                         else // adopt found method sig
                         {
-                            using (var e = matches.Values.GetEnumerator())
+                            using (var e = matches.GetEnumerator() )
                             {
                                 e.MoveNext();
-                                m = e.Current;
+                                mk = e.Current.Key;
+                                ms = e.Current.Value;
                             }
-                            method._retType = m.ReturnType;
-                            pTypes = Compiler.GetTypes(m.GetParameters());
+                            MethodInfo m = ms[0];
+                            method._retType = (Type) RT.third(mk);
+                            pTypes = (Type[])RT.second(mk);
+                            method._minfos = ms;
                         }
                     }
                 }
@@ -234,26 +255,26 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        private static Dictionary<IPersistentVector, MethodInfo> FindMethodsWithNameAndArity(
+        private static Dictionary<IPersistentVector, List<MethodInfo>> FindMethodsWithNameAndArity(
             String name, 
             int arity, 
-            Dictionary<IPersistentVector, MethodInfo> mm)
+            Dictionary<IPersistentVector, List<MethodInfo>> mm)
         {
-            Dictionary<IPersistentVector, MethodInfo> ret = new Dictionary<IPersistentVector, MethodInfo>();
+            Dictionary<IPersistentVector, List<MethodInfo>> ret = new Dictionary<IPersistentVector, List<MethodInfo>>();
 
-            foreach (KeyValuePair<IPersistentVector, MethodInfo> kv in mm)
+            foreach (KeyValuePair<IPersistentVector, List<MethodInfo>> kv in mm)
             {
-                MethodInfo m = kv.Value;
+                MethodInfo m = kv.Value[0];
                 if (name.Equals(m.Name) && m.GetParameters().Length == arity)
-                    ret[kv.Key] = m;
+                    ret[kv.Key] = kv.Value;
             }
             return ret;
         }
 
 
-        public static IPersistentVector MSig(string name, Type[] paramTypes)
+        public static IPersistentVector MSig(string name, Type[] paramTypes, Type retType)
         {
-            return RT.vector(name, RT.seq(paramTypes));
+            return RT.vector(name, RT.seq(paramTypes), retType);
         }
 
         #endregion
