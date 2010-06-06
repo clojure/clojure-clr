@@ -39,9 +39,6 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _minfos; }
         }
 
-
-        bool _isExplicit = false;
-
         #endregion
 
         #region ObjMethod methods
@@ -102,7 +99,28 @@ namespace clojure.lang.CljCompiler.Ast
             NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod)Compiler.METHOD.deref());
 
             Symbol dotName = (Symbol)RT.first(form);
-            Symbol name = (Symbol)Symbol.intern(null, Compiler.munge(dotName.Name)).withMeta(RT.meta(dotName));
+            Symbol name;
+            string methodName;
+
+            int idx = dotName.Name.LastIndexOf(".");
+            if (idx >= 0)
+            {
+                // we have an explicit interface implementation
+                string dotNameStr = dotName.Name;
+                string interfaceName = dotNameStr.Substring(0, idx);
+
+                method._explicitInterface = RT.classForName(interfaceName);
+                if (method._explicitInterface == null)
+                    throw new ArgumentException(String.Format("Unable to find interface {0} for explicit method implemntation: {1}", interfaceName, dotNameStr));
+
+                methodName = dotNameStr.Substring(idx + 1);
+                name = (Symbol)Symbol.intern(null, Compiler.munge(dotName.Name)).withMeta(RT.meta(dotName));
+            }
+            else
+            {
+                name = (Symbol)Symbol.intern(null, Compiler.munge(dotName.Name)).withMeta(RT.meta(dotName));
+                methodName = name.Name;
+            }
 
             IPersistentVector parms = (IPersistentVector)RT.second(form);
             if (parms.count() == 0 || !(parms.nth(0) is Symbol))
@@ -179,10 +197,12 @@ namespace clojure.lang.CljCompiler.Ast
                     pRefs[i] = isByRef;
                 }
 
-                // TODO: detect explicit implementation
+                Dictionary<IPersistentVector, List<MethodInfo>> matches =
+                    method.IsExplicit 
+                    ? FindMethodsWithNameAndArity(method._explicitInterface, methodName, parms.count(), overrideables)
+                    : FindMethodsWithNameAndArity(methodName, parms.count(), overrideables);
 
-                Dictionary<IPersistentVector, List<MethodInfo>> matches = FindMethodsWithNameAndArity(name.Name, parms.count(), overrideables);
-                IPersistentVector mk = MSig(name.Name, pTypes, method._retType);
+                IPersistentVector mk = MSig(methodName, pTypes, method._retType);
                 List<MethodInfo> ms = null;
                 if (matches.Count > 0 )
                 {
@@ -224,15 +244,18 @@ namespace clojure.lang.CljCompiler.Ast
                                 ms = e.Current.Value;
                             }
                             MethodInfo m = ms[0];
-                            method._retType = (Type) RT.third(mk);
-                            pTypes = (Type[])RT.second(mk);
+                            method._retType = m.ReturnType;
+                            pTypes = Compiler.GetTypes(m.GetParameters());
                             method._minfos = ms;
                         }
                     }
                 }
                 else
                     throw new ArgumentException("Can't define method not in interfaces: " + name.Name);
-                
+
+                if (method.IsExplicit)
+                    method._explicitMethodInfo = ms[0];
+
                 // validate unique name + arity among additional methods
 
                 for (int i = 0; i < parms.count(); i++)
@@ -261,7 +284,7 @@ namespace clojure.lang.CljCompiler.Ast
             Dictionary<IPersistentVector, List<MethodInfo>> mm)
         {
             Dictionary<IPersistentVector, List<MethodInfo>> ret = new Dictionary<IPersistentVector, List<MethodInfo>>();
-
+            
             foreach (KeyValuePair<IPersistentVector, List<MethodInfo>> kv in mm)
             {
                 MethodInfo m = kv.Value[0];
@@ -271,6 +294,31 @@ namespace clojure.lang.CljCompiler.Ast
             return ret;
         }
 
+        private static Dictionary<IPersistentVector, List<MethodInfo>> FindMethodsWithNameAndArity(
+            Type explicitInterface,
+            String name,
+            int arity,
+            Dictionary<IPersistentVector, List<MethodInfo>> mm)
+        {
+            Dictionary<IPersistentVector, List<MethodInfo>> ret = new Dictionary<IPersistentVector, List<MethodInfo>>();
+
+            foreach (KeyValuePair<IPersistentVector, List<MethodInfo>> kv in mm)
+            {
+                foreach (MethodInfo mi in kv.Value)
+                    if (name.Equals(mi.Name) && mi.GetParameters().Length == arity && mi.DeclaringType == explicitInterface)
+                    {
+                        // Should be only one, but I'm being cautious.
+                        List<MethodInfo> list;
+                        if (!ret.TryGetValue(kv.Key, out list))
+                        {
+                            list = new List<MethodInfo>();
+                            ret[kv.Key] = list;
+                        }
+                        list.Add(mi);
+                    }
+            }
+            return ret;
+        }
 
         public static IPersistentVector MSig(string name, Type[] paramTypes, Type retType)
         {

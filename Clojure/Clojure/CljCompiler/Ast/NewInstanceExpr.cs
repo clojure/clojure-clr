@@ -166,7 +166,6 @@ namespace clojure.lang.CljCompiler.Ast
             Type superClass = typeof(Object);
 
             Dictionary<IPersistentVector, List<MethodInfo>> overrideables;
-            Dictionary<IPersistentVector, HashSet<Type>> covariants;
             GatherMethods(superClass, RT.seq(interfaces), out overrideables);
 
             ret._methodMap = overrideables;

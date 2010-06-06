@@ -84,6 +84,11 @@ namespace clojure.lang.CljCompiler.Ast
             set { _localsUsedInCatchFinally = value; }
         }
 
+        protected Type _explicitInterface = null;
+        protected MethodInfo _explicitMethodInfo = null;
+
+        protected bool IsExplicit { get { return _explicitInterface != null; } }
+
         #endregion
 
         #region abstract methods
@@ -230,6 +235,10 @@ namespace clojure.lang.CljCompiler.Ast
                 gen.EmitLoadArg(i);                         
             gen.EmitCall(staticMethodInfo);                 
             gen.Emit(OpCodes.Ret);
+
+            if ( IsExplicit )
+                tb.DefineMethodOverride(mb, _explicitMethodInfo);            
+
         }
 
         #endregion

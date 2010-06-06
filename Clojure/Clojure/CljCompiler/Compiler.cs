@@ -1097,7 +1097,7 @@ namespace clojure.lang
                     throw new InvalidOperationException(string.Format("var: {0} is not public", symbol));
                 return v;
             }
-            else if (symbol.Name.IndexOf('.') > 0 || symbol.Name[0] == '[')
+            else if (symbol.Name.IndexOf('.') > 0 || symbol.Name[symbol.Name.Length-1] == ']')
                 return RT.classForName(symbol.Name);
             else if (symbol.Equals(NS))
                 return RT.NS_VAR;
