@@ -223,19 +223,28 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Class generation
 
+        public override FnMode CompileMode()
+        {
+            return FnMode.Light;
+        }
+
         protected override Type GenerateClassForImmediate(GenContext context)
         {
+            //if (_protocolCallsites.count() > 0)
+            //{
+            //    context = context.ChangeMode(CompilerMode.File);
+            //    return GenerateClassForFile(context);
+            //}
+
             ObjType = _baseType = GetBaseClass(context, _superType);
             return _baseType;
         }
-
 
         protected override Type GenerateClassForFile(GenContext context)
         {
             // Needs its own GenContext so it has its own DynInitHelper
             GenContext genC = context.WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString() );
             return EnsureTypeBuilt(genC);
-
         }
 
         #endregion 
@@ -246,7 +255,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return base.GenDlr(context);
         }
-
 
         protected override void GenerateMethods(GenContext context)
         {

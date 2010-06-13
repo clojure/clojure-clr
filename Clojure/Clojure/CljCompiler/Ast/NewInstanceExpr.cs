@@ -190,6 +190,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.PROTOCOL_CALLSITES, PersistentVector.EMPTY,
                         Compiler.VAR_CALLSITES, PersistentVector.EMPTY
                         ));
+
                 if (ret.IsDefType)
                 {
                     Var.pushThreadBindings(
@@ -273,8 +274,9 @@ namespace clojure.lang.CljCompiler.Ast
         {
 
             //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
-            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", CompilerMode.Immediate);
-            TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.COMPILE_STUB_PREFIX + "." + ret.InternalName, TypeAttributes.Public|TypeAttributes.Abstract, super, interfaces);
+            //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", CompilerMode.Immediate);
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", AssemblyMode.Dynamic, FnMode.Full);
+            TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.COMPILE_STUB_PREFIX + "." + ret.InternalName, TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
 
             tb.DefineDefaultConstructor(MethodAttributes.Public);
 
@@ -295,28 +297,32 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             // ctor that takes closed-overs and does nothing
-            ConstructorBuilder cb = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, ret.CtorTypes());
-            ILGen ilg = new ILGen(cb.GetILGenerator());
-            ilg.EmitLoadArg(0);
-            ilg.Emit(OpCodes.Call,super.GetConstructor(Type.EmptyTypes));
-            ilg.Emit(OpCodes.Ret);
-
-            if (ret.altCtorDrops > 0)
+            if (ret.CtorTypes().Length > 0)
             {
-                Type[] ctorTypes = ret.CtorTypes();
-                int newLen = ctorTypes.Length - ret.altCtorDrops;
-                Type[] altCtorTypes = new Type[newLen];
-                for (int i = 0; i < altCtorTypes.Length; i++)
-                    altCtorTypes[i] = ctorTypes[i];
-                ConstructorBuilder cb2 = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
-                ILGen ilg2 = new ILGen(cb2.GetILGenerator());
-                ilg2.EmitLoadArg(0);
-                for (int i = 0; i < newLen; i++)
-                    ilg2.EmitLoadArg(i + 1);
-                for (int i = 0; i < ret.altCtorDrops; i++)
-                    ilg2.EmitNull();
-                ilg2.Emit(OpCodes.Call, cb);
-                ilg2.Emit(OpCodes.Ret);
+                ConstructorBuilder cb = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, ret.CtorTypes());
+                ILGen ilg = new ILGen(cb.GetILGenerator());
+                ilg.EmitLoadArg(0);
+                ilg.Emit(OpCodes.Call, super.GetConstructor(Type.EmptyTypes));
+                ilg.Emit(OpCodes.Ret);
+
+
+                if (ret.altCtorDrops > 0)
+                {
+                    Type[] ctorTypes = ret.CtorTypes();
+                    int newLen = ctorTypes.Length - ret.altCtorDrops;
+                    Type[] altCtorTypes = new Type[newLen];
+                    for (int i = 0; i < altCtorTypes.Length; i++)
+                        altCtorTypes[i] = ctorTypes[i];
+                    ConstructorBuilder cb2 = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
+                    ILGen ilg2 = new ILGen(cb2.GetILGenerator());
+                    ilg2.EmitLoadArg(0);
+                    for (int i = 0; i < newLen; i++)
+                        ilg2.EmitLoadArg(i + 1);
+                    for (int i = 0; i < ret.altCtorDrops; i++)
+                        ilg2.EmitNull();
+                    ilg2.Emit(OpCodes.Call, cb);
+                    ilg2.Emit(OpCodes.Ret);
+                }
             }
 
             Type t = tb.CreateType();
@@ -464,8 +470,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-
         #region Class creation
+
+        public override FnMode CompileMode()
+        {
+            return FnMode.Full;
+        }
 
         protected override Type GenerateClassForImmediate(GenContext context)
         {
@@ -474,7 +484,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override Type GenerateClassForFile(GenContext context)
         {
-            GenContext newC = context.ChangeMode(CompilerMode.File).WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString());
+            //GenContext newC = context.ChangeMode(CompilerMode.File).WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString());
+            GenContext newC = context.WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString());
             return EnsureTypeBuilt(newC);
         }
 
@@ -485,10 +496,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override Expression GenDlrImmediate(GenContext context)
         {
-            GenContext newC = context.ChangeMode(CompilerMode.File);
-            //newC = CreateContext(newC, null, null);
-
-            Expression expr =  GenDlrForFile(newC,false);
+            //GenContext newC = context.ChangeMode(CompilerMode.File);
+            //Expression expr = GenDlrForFile(newC, false);
+            Expression expr = GenDlrForFile(context, false);
             return expr;
         }
 

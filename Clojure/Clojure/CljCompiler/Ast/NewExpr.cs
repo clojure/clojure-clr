@@ -159,8 +159,8 @@ namespace clojure.lang.CljCompiler.Ast
             // But I can't override ReturnType in DefaultCreateInstanceBinder and this causes an error.
             // Look for the conversion below.
 
-          
-            if (context.Mode == CompilerMode.File)
+            //if (context.Mode == CompilerMode.File)
+            if (context.DynInitHelper != null)
                 call = context.DynInitHelper.ReduceDyn(dyn);
             else
                 call = dyn;

@@ -57,7 +57,7 @@
           test-names))
 
 (defn run
-  "Runs all defined tests"
+  "Runs all defined tests"	
   []
   (println "Loading tests...")
   (apply require :reload-all test-namespaces)

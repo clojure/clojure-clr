@@ -29,7 +29,7 @@ namespace clojure.lang
 
         #region Data
 
-        static GenContext _staticContext = new GenContext("proxy", CompilerMode.Immediate);
+        //static GenContext _staticContext = new GenContext("proxy", CompilerMode.Immediate);
         const string _methodMapFieldName = "__clojureFnMap";
         static readonly MethodInfo Method_IPersistentCollection_Cons = typeof(IPersistentCollection).GetMethod("cons");
         static readonly MethodInfo Method_RT_get = typeof(RT).GetMethod("get",new Type[]{ typeof(object), typeof(object) });
@@ -58,16 +58,18 @@ namespace clojure.lang
         {
             if (Compiler.IsCompiling)
             {
-                string path = (string)Compiler.COMPILE_PATH.deref();
-                if (path == null)
-                    throw new Exception("*compile-path* not set");
+                //string path = (string)Compiler.COMPILE_PATH.deref();
+                //if (path == null)
+                //    throw new Exception("*compile-path* not set");
 
-                //string dir = (string)Compiler.SOURCE_PATH.deref();
+                ////string dir = (string)Compiler.SOURCE_PATH.deref();
 
-                _context = new GenContext(className, ".dll", path, CompilerMode.File);
+                //_context = new GenContext(className, ".dll", path, CompilerMode.File);
+                _context = (GenContext)Compiler.COMPILER_CONTEXT.deref();
             }
             else
-                _context = new GenContext("proxy" + (++_saveId).ToString(), CompilerMode.Immediate);
+                //_context = new GenContext("proxy" + (++_saveId).ToString(), CompilerMode.Immediate);
+                _context = new GenContext("proxy" + (++_saveId).ToString(), AssemblyMode.Dynamic, FnMode.Light);
         }
 
 
@@ -111,8 +113,8 @@ namespace clojure.lang
             AddInterfaceProperties(proxyTB, superclass, allInterfaces, specialMethods ); // Must follow AddInterfaceMethods
 
             Type t = proxyTB.CreateType();
-            if (Compiler.IsCompiling)
-                SaveProxyContext();
+            //if (Compiler.IsCompiling)
+            //    SaveProxyContext();
             return t;
         }
 

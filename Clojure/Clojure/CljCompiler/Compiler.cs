@@ -297,14 +297,16 @@ namespace clojure.lang
         }
 
         //static GenContext _evalContext = new GenContext("eval", CompilerMode.Immediate);
-        static GenContext _evalContext = new GenContext("eval", ".dll", ".", CompilerMode.Immediate);
+        //static GenContext _evalContext = new GenContext("eval", ".dll", ".", CompilerMode.Immediate);
+        static GenContext _evalContext = new GenContext("eval", ".dll", ".", AssemblyMode.Dynamic,FnMode.Light);
         static public GenContext EvalContext { get { return _evalContext; } }
 
         static int _saveId = 0;
         public static void SaveEvalContext()
         {
             _evalContext.SaveAssembly();
-            _evalContext = new GenContext("eval", CompilerMode.Immediate);
+            //_evalContext = new GenContext("eval", CompilerMode.Immediate);
+            _evalContext = new GenContext("eval"+(_saveId++).ToString(), ".dll", ".", AssemblyMode.Dynamic,FnMode.Light);
         }
 
 
@@ -1264,8 +1266,9 @@ namespace clojure.lang
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     //LINE_AFTER.set(lntr.LineNumber);
-                    Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
-                    ret = ast.Compile().Invoke();
+                    //Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
+                    //ret = ast.Compile().Invoke();
+                    ret = eval(form);
                     //LINE_BEFORE.set(lntr.LineNumber);
                 }
             }
@@ -1324,8 +1327,11 @@ namespace clojure.lang
             LineNumberingTextReader lntr =
                 (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);
 
-            GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, CompilerMode.File);
-            GenContext evalContext = new GenContext("EvalForCompile", CompilerMode.Immediate);
+            //GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, CompilerMode.File);
+            //GenContext evalContext = new GenContext("EvalForCompile", CompilerMode.Immediate);
+
+            GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, AssemblyMode.Save,FnMode.Full);
+            GenContext evalContext = new GenContext("EvalForCompile", AssemblyMode.Dynamic,FnMode.Light);
 
             Var.pushThreadBindings(RT.map(
             SOURCE_PATH, sourcePath,

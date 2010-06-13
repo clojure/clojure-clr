@@ -31,10 +31,24 @@ namespace clojure.lang
         /// </summary>
         private readonly string _s;
 
+        public string S
+        {
+            get { return _s; }
+        } 
+
+
         /// <summary>
         /// Current position in the string.
         /// </summary>
         private readonly int _i;
+
+        public int I
+        {
+            get { return _i; }
+        } 
+
+
+
 
         #endregion
 

@@ -29,17 +29,48 @@ using Microsoft.Scripting.Generation;
 namespace clojure.lang.CljCompiler.Ast
 {
 
-    public enum CompilerMode { Immediate, File };
+    #region Enums
+
+    //public enum CompilerMode { Immediate, File };
+
+    /// <summary>
+    /// Indicates if the assembly is for dynamic (internal) use, or will be saved.
+    /// </summary>
+    public enum AssemblyMode { 
+        /// <summary>
+        /// The assembly is for dynamic (internal) use only.
+        /// </summary>
+        Dynamic, 
+
+        /// <summary>
+        /// The assembly will be saved.
+        /// </summary>
+        Save 
+    };
+
+    /// <summary>
+    /// Indicates whether we need full class generation for the current function
+    /// </summary>
+    public enum FnMode
+    {
+        // The current ObjExpr is not generating its own class
+        Light,
+
+        // The current ObjExpr is generating its own class
+        Full
+    };
+
+    #endregion
 
     public class GenContext
     {
         #region Data
 
-        CompilerMode _mode;
+        AssemblyMode _assyMode;
 
-        internal CompilerMode Mode
+        public AssemblyMode AssyMode
         {
-            get { return _mode; }
+            get { return _assyMode; }
         }
 
         readonly AssemblyGen _assyGen;
@@ -59,7 +90,6 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _assyGen.AssemblyBuilder.GetDynamicModule(_assyGen.AssemblyBuilder.GetName().Name); }
         }
 
-
         DynInitHelper _dynInitHelper;
 
         internal DynInitHelper DynInitHelper
@@ -73,43 +103,49 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _objExpr; }
         }
 
+        FnMode _fnMode;
+
+        public FnMode FnCompileMode
+        {
+            get { return _fnMode; }
+            set { _fnMode = _assyMode == AssemblyMode.Save ? FnMode.Full : value; }
+        }
+
         #endregion
 
         #region C-tors & factory methods
 
-        public GenContext(string assyName, CompilerMode mode)
-            : this(assyName, ".dll", null, mode)
+        public GenContext(string assyName, AssemblyMode assyMode, FnMode fnMode )
+            : this(assyName, ".dll", null, assyMode, fnMode)
         {
         }
 
-        public GenContext(string assyName, string extension, string directory, CompilerMode mode)
+        public GenContext(string assyName, string extension, string directory, AssemblyMode assyMode, FnMode fnMode)
         {
             AssemblyName aname = new AssemblyName(assyName);
             _assyGen = new AssemblyGen(aname, directory, extension, true);
-            _mode = mode;
-            if ( mode == CompilerMode.File )
+            _assyMode = assyMode;
+            FnCompileMode = fnMode;
+            if ( assyMode ==  AssemblyMode.Save )
                 _dynInitHelper = new DynInitHelper(_assyGen, "__InternalDynamicExpressionInits");
-        }
-
-        private GenContext(CompilerMode mode)
-        {
-            _mode = mode;
         }
 
         internal GenContext CreateWithNewType(ObjExpr objExpr)
         {
             GenContext newContext = Clone();
             newContext._objExpr = objExpr;
-             return newContext;
+
+            newContext.FnCompileMode = FnCompileMode == FnMode.Full ? FnMode.Full : objExpr.CompileMode();
+
+            return newContext;
         }
 
-        internal GenContext ChangeMode(CompilerMode newMode)
+        internal GenContext WithNewDynInitHelper(string dihClassName)
         {
-            if (_mode == newMode)
-                return this;
-
             GenContext newContext = Clone();
-            newContext._mode = newMode;
+
+            newContext._dynInitHelper = new DynInitHelper(_assyGen, dihClassName);
+
             return newContext;
         }
 
@@ -131,17 +167,5 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
-
-        internal GenContext WithNewDynInitHelper(string dihClassName)
-        {
-            GenContext newContext = Clone();
-
-            if (_mode == CompilerMode.File)
-                newContext._dynInitHelper = new DynInitHelper(_assyGen, dihClassName);
-            else
-                newContext._dynInitHelper = null;
-
-            return newContext;
-        }
     }
 }

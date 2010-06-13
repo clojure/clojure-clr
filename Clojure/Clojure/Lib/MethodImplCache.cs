@@ -24,15 +24,52 @@ namespace clojure.lang
    {
        #region Data
 
-        public readonly IPersistentMap _protocol;
-        public readonly Keyword _methodk;
+       private readonly IPersistentMap _protocol;
+
+       // core_deftype.clj compatibility
+       public IPersistentMap protocol
+       {
+           get { return _protocol; }
+       }
+
+       private readonly Keyword _methodk;
+
+       // core_deftype.clj compatibility
+       public Keyword methodk
+       {
+           get { return _methodk; }
+       } 
+
+
+
         public readonly int _shift;
         public readonly int _mask;
-        public readonly object[] _table;    //[class, fn. class, fn ...]
+        private readonly object[] _table;    //[class, fn. class, fn ...]
+
+        // core_deftype.clj compatibility
+        public object[] table
+        {
+            get { return _table; }
+        } 
+
 
         //these are not volatile by design
-        public object _lastType;
-        public IFn _lastImpl;
+        private object _lastType;
+
+       // core_deftype.clj compatibility
+        public object lastClass
+        {
+            get { return _lastType; }
+            set { _lastType = value; }  
+        }
+        private IFn _lastImpl;
+
+        // core_deftype.clj compatibility 
+        public IFn lastImpl
+        {
+            get { return _lastImpl; }
+            set { _lastImpl = value; }
+        }
 
        #endregion
 

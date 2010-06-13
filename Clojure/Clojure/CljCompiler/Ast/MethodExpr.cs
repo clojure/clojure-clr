@@ -177,7 +177,8 @@ namespace clojure.lang.CljCompiler.Ast
             InvokeMemberBinder binder = new DefaultInvokeMemberBinder(_methodName, argExprs.Length, IsStaticCall);
             DynamicExpression dyn = Expression.Dynamic(binder, returnType, argExprs);
 
-            if (context.Mode == CompilerMode.File)
+            //if (context.Mode == CompilerMode.File)
+            if ( context.DynInitHelper != null )
                 call = context.DynInitHelper.ReduceDyn(dyn);
             else
                 call = dyn;

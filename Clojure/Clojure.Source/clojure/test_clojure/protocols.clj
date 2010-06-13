@@ -33,8 +33,8 @@
 (deftest protocols-test
   (testing "protocol fns throw IllegalArgumentException if no impl matches"
     (is (thrown-with-msg?
-          IllegalArgumentException
-          #"No implementation of method: :foo of protocol: #'clojure.test-clojure.protocols.examples/ExampleProtocol found for class: java.lang.Integer"
+          ArgumentException               ;;; IllegalArgumentException
+          #"No implementation of method: :foo of protocol: #'clojure.test-clojure.protocols.examples/ExampleProtocol found for class: Int32"  ;;; java.lang.Integer
           (foo 10))))
   (testing "protocols generate a corresponding interface using _ instead of - for method names"
     (is (= ["bar" "baz" "baz" "foo" "with_quux"] (method-names clojure.test_clojure.protocols.examples.ExampleProtocol))))
@@ -43,12 +43,12 @@
                 (foo [] "foo!"))]
       (is (= "foo!" (.foo obj)) "call through interface")
       (is (= "foo!" (foo obj)) "call through protocol")))
-;;;  (testing "you can implement just part of a protocol if you want"
-;;;    (let [obj (reify ExampleProtocol
-;;;                     (baz [a b] "two-arg baz!"))]
-;;;      (is (= "two-arg baz!" (baz obj nil)))
-;;;      (is (thrown? AbstractMethodError (baz obj))))))
-)
+  (testing "you can implement just part of a protocol if you want"
+    (let [obj (reify ExampleProtocol
+                     (baz [a b] "two-arg baz!"))]
+      (is (= "two-arg baz!" (baz obj nil)))
+      (is (thrown? NotImplementedException (baz obj))))))    ;;; AbstractMethodError
+      
 (deftype ExtendTestWidget [name])
 (deftest extend-test
   (testing "you can extend a protocol to a class"
@@ -57,7 +57,7 @@
     (is (= "pow" (foo "pow"))))
   (testing "you can have two methods with the same name. Just use namespaces!"
     (extend String other/SimpleProtocol
-     {:foo (fn [s] (.toUpperCase s))})
+     {:foo (fn [s] (.ToUpper s))})                   ;;; toUpperCase
     (is (= "POW" (other/foo "pow"))))
   (testing "you can extend deftype types"
     (extend
@@ -66,7 +66,7 @@
      {:foo (fn [this] (str "widget " (.name this)))})
     (is (= "widget z" (foo (ExtendTestWidget. "z"))))))
 
-(deftype ExtendTestWidget []
+(deftype ExtendsTestWidget []
   ExampleProtocol)
 (deftest extends?-test
   (reload-example-protocols)
@@ -74,12 +74,12 @@
     (is (false? (extends? other/SimpleProtocol ExtendsTestWidget))))
   (testing "returns true if a type implements the protocol directly" ;; semantics changed 4/15/2010
     (is (true? (extends? ExampleProtocol ExtendsTestWidget))))
-  (testing "returns true if a type explicitly extends protocol"
-    (extend
-     ExtendsTestWidget
-     other/SimpleProtocol
-     {:foo identity})
-    (is (true? (extends? other/SimpleProtocol ExtendsTestWidget)))))
+	  (testing "returns true if a type explicitly extends protocol"
+		(extend
+		 ExtendsTestWidget
+		 other/SimpleProtocol
+		 {:foo identity})
+		(is (true? (extends? other/SimpleProtocol ExtendsTestWidget)))))
 
 (deftype ExtendersTestWidget [])
 (deftest extenders-test
@@ -129,19 +129,19 @@
       (is (= "second bar" (bar whatzit nil)))
       (is (= "second baz" (baz whatzit))))))
 
-(defrecord DefrecordObjectMethodsWidgetA [a])
-(defrecord DefrecordObjectMethodsWidgetB [a])
-(deftest defrecord-object-methods-test
-  (testing ".equals depends on fields and type"
-    (is (true? (.equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 1))))
-    (is (false? (.equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 2))))
-    (is (false? (.equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetB. 1)))))
-  (testing ".hashCode depends on fields and type"
-    (is (= (.hashCode (DefrecordObjectMethodsWidgetA. 1)) (.hashCode (DefrecordObjectMethodsWidgetA. 1))))
-    (is (= (.hashCode (DefrecordObjectMethodsWidgetA. 2)) (.hashCode (DefrecordObjectMethodsWidgetA. 2))))
-    (is (not= (.hashCode (DefrecordObjectMethodsWidgetA. 1)) (.hashCode (DefrecordObjectMethodsWidgetA. 2))))
-    (is (= (.hashCode (DefrecordObjectMethodsWidgetB. 1)) (.hashCode (DefrecordObjectMethodsWidgetB. 1))))
-    (is (not= (.hashCode (DefrecordObjectMethodsWidgetA. 1)) (.hashCode (DefrecordObjectMethodsWidgetB. 1))))))
+;;;(defrecord DefrecordObjectMethodsWidgetA [a])
+;;;(defrecord DefrecordObjectMethodsWidgetB [a])
+;;;(deftest defrecord-object-methods-test
+;;;  (testing ".equals depends on fields and type"
+;;;    (is (true? (.equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 1))))
+;;;    (is (false? (.equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 2))))
+;;;    (is (false? (.equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetB. 1)))))
+;;;  (testing ".hashCode depends on fields and type"
+;;;    (is (= (.hashCode (DefrecordObjectMethodsWidgetA. 1)) (.hashCode (DefrecordObjectMethodsWidgetA. 1))))
+;;;    (is (= (.hashCode (DefrecordObjectMethodsWidgetA. 2)) (.hashCode (DefrecordObjectMethodsWidgetA. 2))))
+;;;    (is (not= (.hashCode (DefrecordObjectMethodsWidgetA. 1)) (.hashCode (DefrecordObjectMethodsWidgetA. 2))))
+;;;    (is (= (.hashCode (DefrecordObjectMethodsWidgetB. 1)) (.hashCode (DefrecordObjectMethodsWidgetB. 1))))
+;;;    (is (not= (.hashCode (DefrecordObjectMethodsWidgetA. 1)) (.hashCode (DefrecordObjectMethodsWidgetB. 1))))))
 
 ;; todo
 ;; what happens if you extend after implementing directly? Extend is ignored!!

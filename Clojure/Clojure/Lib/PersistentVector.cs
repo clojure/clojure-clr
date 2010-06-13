@@ -467,6 +467,16 @@ namespace clojure.lang
             readonly int _i;
             readonly int _offset;
 
+            public int Offset
+            {
+                get { return _offset; }
+            } 
+
+            public PersistentVector Vec
+            {
+                get { return _vec; }
+            } 
+
             #endregion
 
             #region C-tors
@@ -544,6 +554,8 @@ namespace clojure.lang
 
             #endregion
 
+            #region ISeq members
+
             public override object first()
             {
                 return _node[_offset];
@@ -555,6 +567,8 @@ namespace clojure.lang
                     return new ChunkedSeq(_vec, _node, _i, _offset + 1);
                 return chunkedNext();
             }
+
+            #endregion
 
         }
 

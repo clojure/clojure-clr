@@ -23,6 +23,8 @@ namespace clojure.lang
     public interface IArraySeq : IObj, ISeq, IList, IndexedSeq, IReduce
     {
         object[] ToArray();
+        object Array();
+        int Index();
     }
 
     public static class ArraySeq
@@ -208,6 +210,16 @@ namespace clojure.lang
                 return items;
         }
 
+        public object Array()
+        {
+            return _a;
+        }
+
+        public int Index()
+        {
+            return _i;
+        }
+
         #endregion
     }
     
@@ -323,6 +335,16 @@ namespace clojure.lang
             for (int i = 0; i < _array.Length; i++)
                 items[i] = _array[i];
             return items;
+        }
+
+        public object Array()
+        {
+            return _array;
+        }
+
+        public int Index()
+        {
+            return _i;
         }
 
         #endregion

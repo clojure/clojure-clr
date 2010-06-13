@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0A74E77B-8BFF-4A64-8A16-5D0E5C9C47F3}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -55,6 +55,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="clojure\core\protocols.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="clojure\core_clr.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -78,6 +81,7 @@
     <None Include="clojure\samples\await-test.clj" />
     <None Include="clojure\samples\celsius.clj" />
     <None Include="clojure\samples\deftype\testdeftype.clj" />
+    <None Include="clojure\samples\deftype\testprotocol.clj" />
     <None Include="clojure\samples\genclass\testgenclass.clj" />
     <None Include="clojure\samples\genclass\testgenclass2.clj" />
     <None Include="clojure\samples\genclass\testgenclass3.clj" />

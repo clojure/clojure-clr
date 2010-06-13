@@ -687,7 +687,7 @@
   summarizing test results."
   ([] (run-tests *ns*))
   ([& namespaces]
-     (let [summary (assoc (apply merge-with + (map test-ns namespaces))
+     (let [summary (assoc (apply merge-with + (map test-ns namespaces)	)
                      :type :summary)]
        (report summary)
        summary)))

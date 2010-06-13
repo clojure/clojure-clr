@@ -31,7 +31,8 @@ namespace clojure.lang
         const string _mainName = "main";
       
         // For debugging purposes only: testing with no compile in process
-        static GenContext _context = new GenContext("genclass", CompilerMode.Immediate);
+        //static GenContext _context = new GenContext("genclass", CompilerMode.Immediate);
+        static GenContext _context = new GenContext("genclass", AssemblyMode.Dynamic, FnMode.Full);
 
         static readonly MethodInfo Method_RT_nth = typeof(RT).GetMethod("nth", new Type[] { typeof(object), typeof(Int32) });
         static readonly MethodInfo Method_RT_seq = typeof(RT).GetMethod("seq");
@@ -50,7 +51,8 @@ namespace clojure.lang
         public static void SaveContext()
         {
             _context.SaveAssembly();
-            _context = new GenContext("genclass", CompilerMode.Immediate);
+            //_context = new GenContext("genclass", CompilerMode.Immediate);
+            _context = new GenContext("genclass", AssemblyMode.Dynamic, FnMode.Full);
         }
          
 
@@ -82,7 +84,8 @@ namespace clojure.lang
 
             string extension = hasMain ? ".exe" : ".dll";
 
-            GenContext context = new GenContext(className,extension,path, CompilerMode.File);
+            //GenContext context = new GenContext(className, extension, path, CompilerMode.File);
+            GenContext context = new GenContext(className, extension, path, AssemblyMode.Save, FnMode.Full);
 
             // define the class
             List<Type> interfaceTypes = new List<Type>();

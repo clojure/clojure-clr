@@ -184,17 +184,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region Not yet
-
-        /*
-
-        protected string _superName = null;
-        protected TypeBuilder _baseTypeBuilder = null;
-
-        */
-
-        #endregion
-
         #region C-tors
 
         public ObjExpr(object tag)
@@ -220,21 +209,36 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
+        public abstract FnMode CompileMode();
+            // You cannot allow this to change during parsing.
+            // That's why the following does not work.
+            //return _protocolCallsites != null && _protocolCallsites.count() > 0
+            //    ? FnMode.Full
+            //    : FnMode.Light;
+
+
         public override Expression GenDlr(GenContext context)
         {
-            //_superType = GetSuperType();
-
-            switch (context.Mode)
+            //switch (context.Mode)
+            //{
+            //    case CompilerMode.Immediate:
+            //        if (_protocolCallsites.count() > 0)
+            //        {
+            //            context = context.ChangeMode(CompilerMode.File);
+            //            return GenDlrForFile(context,true);
+            //        }
+            //        return GenDlrImmediate(context);
+            //    case CompilerMode.File:
+            //        return GenDlrForFile(context,true);
+            //    default:
+            //        throw Util.UnreachableCode();
+            //}
+            switch (context.FnCompileMode)
             {
-                case CompilerMode.Immediate:
-                    if (_protocolCallsites.count() > 0)
-                    {
-                        context = context.ChangeMode(CompilerMode.File);
-                        return GenDlrForFile(context,true);
-                    }
+                case FnMode.Light:
                     return GenDlrImmediate(context);
-                case CompilerMode.File:
-                    return GenDlrForFile(context,true);
+                case FnMode.Full:
+                    return GenDlrForFile(context, true);
                 default:
                     throw Util.UnreachableCode();
             }
@@ -261,15 +265,20 @@ namespace clojure.lang.CljCompiler.Ast
         {
             GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
 
-            if (_protocolCallsites.count() > 0)
-                context = context.ChangeMode(CompilerMode.File);
+            //if (_protocolCallsites.count() > 0)
+            //    context = context.ChangeMode(CompilerMode.File);
 
             return GenerateClass(context);
         }
 
         protected Type GenerateClass(GenContext context)
         {
-            if (context.Mode == CompilerMode.Immediate)
+            //if (context.Mode == CompilerMode.Immediate)
+            //    return GenerateClassForImmediate(context);
+            //else
+            //    return GenerateClassForFile(context);
+
+            if (context.FnCompileMode == FnMode.Light)
                 return GenerateClassForImmediate(context);
             else
                 return GenerateClassForFile(context);
@@ -286,7 +295,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected Expression GenDlrForFile(GenContext context, bool convertToIFn)
         {
-            //EnsureTypeBuilt(context);
             if (IsDefType)
                 return Expression.Constant(null);
 
@@ -309,17 +317,26 @@ namespace clojure.lang.CljCompiler.Ast
             return newExpr;
         }
 
+        static int _saveId = 0;
+
         protected Type EnsureTypeBuilt(GenContext context)
         {
             if (_objType != null)
                 return _objType;
+
+            if ( context.AssyMode == AssemblyMode.Dynamic )
+                // TODO: only create a new assembly when we know there is a name conflict
+                context = new GenContext("new" + (++_saveId).ToString(), AssemblyMode.Dynamic,FnMode.Full).WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString()).CreateWithNewType(context.ObjExpr);
+
 
             TypeBuilder baseTB = GenerateFnBaseClass(context);
             _baseType = baseTB.CreateType();
 
             GenerateFnClass(context);
             _objType = _typeBuilder.CreateType();
-            context.DynInitHelper.FinalizeType();
+
+            if (context.DynInitHelper != null)
+                context.DynInitHelper.FinalizeType();
             _ctorInfo = _objType.GetConstructors()[0];  // TODO: When we have more than one c-tor, we'll have to fix this.
             return _objType;
         }
@@ -1009,7 +1026,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Expression GenLocal(GenContext context, LocalBinding lb)
         {
-            if (context.Mode == CompilerMode.File && _closes.containsKey(lb))
+            //if (context.Mode == CompilerMode.File && _closes.containsKey(lb))
+            if ( context.FnCompileMode == FnMode.Full && _closes.containsKey(lb))
             {
                 Expression expr = Expression.Field(_thisParam, lb.Name);
                 Type primtType = lb.PrimitiveType;
@@ -1026,7 +1044,8 @@ namespace clojure.lang.CljCompiler.Ast
         internal Expression GenUnboxedLocal(GenContext context, LocalBinding lb)
         {
             Type primType = lb.PrimitiveType;
-            if (context.Mode == CompilerMode.File && _closes.containsKey(lb))
+            //if (context.Mode == CompilerMode.File && _closes.containsKey(lb))
+            if (context.FnCompileMode == FnMode.Full && _closes.containsKey(lb))
                 return Expression.Convert(Expression.Field(_thisParam, lb.Name), primType);
             else
                 return lb.ParamExpression;
@@ -1035,11 +1054,20 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Expression GenConstant(GenContext context, int id, object val)
         {
-            switch (context.Mode)
+            //switch (context.Mode)
+            //{
+            //    case CompilerMode.Immediate:
+            //        return Expression.Constant(val);
+            //    case CompilerMode.File:
+            //        return Expression.Field(null, _baseType, ConstantName(id));
+            //    default:
+            //        throw Util.UnreachableCode();
+            //}
+            switch ( context.FnCompileMode )
             {
-                case CompilerMode.Immediate:
+                case FnMode.Light:
                     return Expression.Constant(val);
-                case CompilerMode.File:
+                case FnMode.Full:
                     return Expression.Field(null, _baseType, ConstantName(id));
                 default:
                     throw Util.UnreachableCode();
@@ -1073,25 +1101,5 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
-
-        #region not yet
-
-        /*
-
-
-        static readonly ConstructorInfo AFunction_Default_Ctor = typeof(AFunction).GetConstructor(Type.EmptyTypes);
-        static readonly ConstructorInfo RestFn_Int_Ctor = typeof(RestFn).GetConstructor(new Type[] { typeof(int) });
-
-
-        #endregion
-
-
-        #region Code generation support
-
-
-
-       */
-        #endregion
-
     }
 }

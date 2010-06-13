@@ -31,7 +31,8 @@ namespace clojure.lang
     {
         #region Data
 
-        static GenContext _context = new GenContext("delegates", CompilerMode.Immediate);
+        //static GenContext _context = new GenContext("delegates", CompilerMode.Immediate);
+        static GenContext _context = new GenContext("delegates", AssemblyMode.Dynamic, FnMode.Light);
 
         #endregion
 
@@ -41,7 +42,8 @@ namespace clojure.lang
         public static void SaveProxyContext()
         {
             _context.SaveAssembly();
-            _context = new GenContext("delegates", CompilerMode.Immediate);
+            //_context = new GenContext("delegates", CompilerMode.Immediate);
+            _context = new GenContext("delegates", AssemblyMode.Dynamic,FnMode.Light);
         }
 
         #endregion

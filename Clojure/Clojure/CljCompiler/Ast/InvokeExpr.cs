@@ -161,8 +161,9 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Expression fn;
 
-            if (_isDirect && context.Mode == CompilerMode.File)
-            {
+            //if (_isDirect && context.Mode == CompilerMode.File)
+            if (_isDirect && context.FnCompileMode == FnMode.Full)
+                {
                 // TODO: Determine if this optimization is valid for Immediate mode
                 ParameterExpression v = Expression.Parameter(typeof(IFn));
                 Expression initV = Expression.Assign(v, Expression.Field(null, context.ObjExpr.BaseType, context.ObjExpr.VarCallsiteName(_siteIndex)));
@@ -246,6 +247,100 @@ namespace clojure.lang.CljCompiler.Ast
         // TODO: PRIORITY: IMPLEMENT protocolOn
 
         private Expression GenProto(GenContext context, Expression fn)
+        {
+            switch (context.FnCompileMode)
+            {
+                case FnMode.Light:
+                    return GenProtoLight(context, fn);
+                case FnMode.Full:
+                    return GenProtoFull(context, fn);
+                default:
+                    throw Util.UnreachableCode();
+            }
+        }
+
+        // TODO: remove duplicate code between GenProtoLight and GenProtoFull
+
+        private Expression GenProtoLight(GenContext context, Expression fn)
+        {
+            Var v = ((VarExpr)_fexpr).Var;
+
+            Expr e = (Expr)_args.nth(0);
+
+            ParameterExpression fnParam = Expression.Parameter(typeof(IFn), "fn");
+            ParameterExpression targetParam = Expression.Parameter(typeof(Object), "target");
+            ParameterExpression targetTypeParam = Expression.Parameter(typeof(Type), "targetType");
+            ParameterExpression vpfnParam = Expression.Parameter(typeof(AFunction), "vpfn");
+            ParameterExpression implParam = Expression.Parameter(typeof(IFn), "implFn");
+            ParameterExpression thisParam = context.ObjExpr.ThisParam;
+
+
+            Expression fnParamAssign = Expression.Assign(fnParam, Expression.Convert(fn, typeof(IFn)));
+            Expression targetParamAssign = Expression.Assign(targetParam, Compiler.MaybeBox(e.GenDlr(context)));
+            Expression targetTypeParamAssign =
+                Expression.Assign(
+                    targetTypeParam,
+                    Expression.Call(null, Compiler.Method_Util_classOf, targetParam));
+            Expression vpfnParamAssign =
+                Expression.Assign(
+                    vpfnParam,
+                    Expression.Convert(Expression.Call(context.ObjExpr.GenVar(context, v), Compiler.Method_Var_getRawRoot), typeof(AFunction)));
+
+            Expression implParamAssign =
+                Expression.Block(
+                    Expression.Assign(
+                        implParam,
+                        Expression.Call(
+                            Expression.Property(vpfnParam, Compiler.Method_AFunction_MethodImplCache),
+                            Compiler.Method_MethodImplCache_fnFor,
+                            targetTypeParam)),
+                    Expression.IfThen(
+                        Expression.Equal(implParam, Expression.Constant(null)),
+                        Expression.Assign(implParam, vpfnParam)));
+
+
+
+            LabelTarget clear1Label = Expression.Label("clear1");
+            LabelTarget clear2Label = Expression.Label("clear2");
+            LabelTarget callLabel = Expression.Label("call");
+
+            Expression block1 = Expression.Block(fnParamAssign, targetParamAssign);
+            Expression block2 = Expression.Block(
+                targetTypeParamAssign,
+                vpfnParamAssign,
+                implParamAssign,
+                GenerateArgsAndCall(context, fnParam, targetParam));
+
+            Expression block;
+
+            if (_protocolOn != null)
+            {
+                Expression[] args = new Expression[_args.count() - 1];
+                for (int i = 1; i < _args.count(); i++)
+                {
+                    Expression bare = ((Expr)_args.nth(i)).GenDlr(context);
+                    args[i - 1] = Compiler.MaybeBox(bare);
+                }
+
+                block = Expression.Block(
+                    new ParameterExpression[] { fnParam, targetParam, targetTypeParam, vpfnParam, implParam },
+                    block1,
+                    Expression.Condition(
+                        Expression.TypeIs(targetParam, _protocolOn),
+                        Compiler.MaybeBox(Expression.Call(Expression.Convert(targetParam, _protocolOn), _onMethod, args)),
+                        block2));
+            }
+            else
+                block = Expression.Block(
+                        new ParameterExpression[] { fnParam, targetParam, targetTypeParam, vpfnParam, implParam },
+                        block1,
+                        block2);
+
+            return block;
+        }
+
+
+        private Expression GenProtoFull(GenContext context, Expression fn)
         {
             Var v = ((VarExpr)_fexpr).Var;
 

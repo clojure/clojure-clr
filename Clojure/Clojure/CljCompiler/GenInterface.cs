@@ -32,18 +32,19 @@ namespace clojure.lang
 
             if (Compiler.IsCompiling)
             {
-                string path = (string)Compiler.COMPILE_PATH.deref();
-                if (path == null)
-                    throw new Exception("*compile-path* not set");
-                context = new GenContext(iName, ".dll", path, CompilerMode.File);
+                //string path = (string)Compiler.COMPILE_PATH.deref();
+                //if (path == null)
+                //    throw new Exception("*compile-path* not set");
+                //context = new GenContext(iName, ".dll", path, CompilerMode.File);
+                context = (GenContext)Compiler.COMPILER_CONTEXT.deref();
             }
             else
                 // TODO: In CLR4, should create a collectible type?
-                context = new GenContext(iName, ".dll", ".", CompilerMode.File);
+                //context = new GenContext(iName, ".dll", ".", CompilerMode.File);
+                context = new GenContext(iName, ".dll", ".", AssemblyMode.Dynamic, FnMode.Full);
 
             Type[] interfaceTypes = GenClass.CreateTypeArray(extends == null ? null : extends.seq());
 
-            //TypeBuilder proxyTB = context.ModuleBldr.DefineType(
             TypeBuilder proxyTB = context.ModuleBuilder.DefineType(
                 iName,
                 TypeAttributes.Interface | TypeAttributes.Public | TypeAttributes.Abstract,
@@ -55,8 +56,8 @@ namespace clojure.lang
 
             Type t = proxyTB.CreateType();
 
-            if ( Compiler.IsCompiling )
-                context.SaveAssembly();
+            //if ( Compiler.IsCompiling )
+            //    context.SaveAssembly();
 
             Compiler.RegisterDuplicateType(t);
 
