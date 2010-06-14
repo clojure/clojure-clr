@@ -149,7 +149,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ret._closes = new PersistentArrayMap(closesvec);
                 ret._fields = fmap;
                 for (int i = fieldSyms.count() - 1; i >= 0 && ((Symbol)fieldSyms.nth(i)).Name.StartsWith("__"); --i)
-                    ret.altCtorDrops++;
+                    ret._altCtorDrops++;
             }
 
             // Java TODO: set up volatiles
@@ -306,10 +306,10 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Ret);
 
 
-                if (ret.altCtorDrops > 0)
+                if (ret._altCtorDrops > 0)
                 {
                     Type[] ctorTypes = ret.CtorTypes();
-                    int newLen = ctorTypes.Length - ret.altCtorDrops;
+                    int newLen = ctorTypes.Length - ret._altCtorDrops;
                     Type[] altCtorTypes = new Type[newLen];
                     for (int i = 0; i < altCtorTypes.Length; i++)
                         altCtorTypes[i] = ctorTypes[i];
@@ -318,7 +318,7 @@ namespace clojure.lang.CljCompiler.Ast
                     ilg2.EmitLoadArg(0);
                     for (int i = 0; i < newLen; i++)
                         ilg2.EmitLoadArg(i + 1);
-                    for (int i = 0; i < ret.altCtorDrops; i++)
+                    for (int i = 0; i < ret._altCtorDrops; i++)
                         ilg2.EmitNull();
                     ilg2.Emit(OpCodes.Call, cb);
                     ilg2.Emit(OpCodes.Ret);

@@ -169,7 +169,7 @@ namespace clojure.lang.CljCompiler.Ast
         protected PersistentVector _constants;
         protected int _constantsID;
 
-        protected int altCtorDrops = 0;
+        protected int _altCtorDrops = 0;
 
         protected IPersistentVector _keywordCallsites;
         protected IPersistentVector _protocolCallsites;
@@ -634,6 +634,9 @@ namespace clojure.lang.CljCompiler.Ast
             GenerateStaticConstructor(_typeBuilder, _baseType);
             _ctorInfo = GenerateConstructor(_typeBuilder, _baseType);
 
+            if (_altCtorDrops > 0)
+                GenerateFieldOnlyConstructor(_typeBuilder, _baseType);
+
             if (!IsDefType)
             {
                 _nonmetaCtorInfo = GenerateNonMetaConstructor(_typeBuilder, _baseType);
@@ -646,6 +649,7 @@ namespace clojure.lang.CljCompiler.Ast
             GenContext newContext = CreateContext(context, _typeBuilder, _baseType);
             GenerateMethods(newContext);
         }
+
 
         private void GenerateStaticConstructor(TypeBuilder fnTB, Type baseType)
         {
@@ -956,6 +960,32 @@ namespace clojure.lang.CljCompiler.Ast
             gen.Emit(OpCodes.Ret);
             return cb;
         }
+
+
+        private ConstructorBuilder GenerateFieldOnlyConstructor(TypeBuilder fnTB, Type baseType)
+        {
+            Type[] ctorTypes = CtorTypes();
+            Type[] altCtorTypes = new Type[ctorTypes.Length - _altCtorDrops];
+            for (int i = 0; i < altCtorTypes.Length; i++)
+                altCtorTypes[i] = ctorTypes[i];
+
+            ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
+            ILGen gen = new ILGen(cb.GetILGenerator());
+
+            //Call full constructor
+            gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
+            for (int i = 0; i < altCtorTypes.Length; i++)
+                gen.EmitLoadArg(i + 1);
+
+            for (int i = 0; i < _altCtorDrops; i++)
+                gen.EmitNull();
+
+            gen.Emit(OpCodes.Call, _ctorInfo);
+
+            gen.Emit(OpCodes.Ret);
+            return cb;
+        }
+
 
         private ConstructorBuilder GenerateNonMetaConstructor(TypeBuilder fnTB, Type baseType)
         {

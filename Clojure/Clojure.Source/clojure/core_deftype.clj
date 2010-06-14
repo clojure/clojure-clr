@@ -101,6 +101,7 @@
   (let [[interfaces methods] (parse-opts+specs opts+specs)]
     (with-meta `(reify* ~interfaces ~@methods) (meta &form))))
 
+
 (defn hash-combine [x y] 
   (clojure.lang.Util/hashCombine x (clojure.lang.Util/hash y)))
 
@@ -163,15 +164,15 @@
              (conj m 
                    `(count [~'this] (+ ~(count base-fields) (count ~'__extmap)))
                    `(empty [~'this] (throw (InvalidOperationException. (str "Can't create empty: " ~(str classname)))))   ;;; UnsupportedOperationException
-                   `(cons [~'this ~'e] (let [[~'k ~'v] ~'e] (.assoc ~'this ~'k ~'v)))
-                   `(equiv [~'this ~'o] (.equals ~'this ~'o))
+                   `(#^ clojure.lang.IPersistentMap cons [~'this ~'e] (let [[~'k ~'v] ~'e] (.assoc ~'this ~'k ~'v)))      ;;; type hint added
+                   `(equiv [~'this ~'o] (.Equals ~'this ~'o))                                                             ;;; .equals
                    `(containsKey [~'this ~'k] (not (identical? ~'this (.valAt ~'this ~'k ~'this))))
                    `(entryAt [~'this ~'k] (let [~'v (.valAt ~'this ~'k ~'this)]
                                             (when-not (identical? ~'this ~'v)
                                               (clojure.lang.MapEntry. ~'k ~'v))))
                    `(seq [~'this] (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
                                           ~'__extmap))
-                   `(assoc [~'this ~'gk__4242 ~'gv__4242]
+                   `(#^ clojure.lang.IPersistentMap assoc [~'this ~'gk__4242 ~'gv__4242]                        ;;; type hint added
                      (condp identical? ~'gk__4242
                        ~@(mapcat (fn [fld]
                                    [(keyword fld) (list* `new tagname (replace {fld 'gv__4242} fields))])
@@ -185,17 +186,22 @@
                                             (dissoc (with-meta (into {} ~'this) ~'__meta) ~'k)
                                             (new ~tagname ~@(remove #{'__extmap} fields) 
                                                  (not-empty (dissoc ~'__extmap ~'k))))))])
+      (ipc [[i m]]
+           [(conj i 'clojure.lang.IPersistentCollection)
+            (conj m
+                  `(clojure.lang.IPersistentCollection.cons [~'this ~'e]                                          ;;; ADDED
+                        (let [[~'k ~'v] ~'e] (.assoc ~'this ~'k ~'v))))])                                         ;;; ADDED
       (associative                                                                                                ;;; ADDED
             [[i m]]                                                                                               ;;; ADDED
             [(conj i 'clojure.lang.Associative)                                                                   ;;; ADDED
-             (conj m                                                                                              ;;; ADDED
-                   `(assoc [~'this ~'gk__4242 ~'gv__4242]                                                         ;;; ADDED
+             (conj m 
+                   `(clojure.lang.Associative.assoc [~'this ~'gk__4242 ~'gv__4242]                                ;;; ADDED
                      (condp identical? ~'gk__4242                                                                 ;;; ADDED
                        ~@(mapcat (fn [fld]                                                                        ;;; ADDED
                                    [(keyword fld) (list* `new tagname (replace {fld 'gv__4242} fields))])         ;;; ADDED
                                  base-fields)                                                                     ;;; ADDED
                        (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap ~'gk__4242 ~'gv__4242)))))])]       ;;; ADDED
-     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap associative)]
+     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap associative ipc)]                              ;;; Associative, ipc added
        `(deftype* ~tagname ~classname ~(conj hinted-fields '__meta '__extmap) 
           :implements ~(vec i) 
           ~@m)))))

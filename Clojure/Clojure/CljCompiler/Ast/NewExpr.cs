@@ -51,6 +51,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         private ConstructorInfo ComputeCtor()
         {
+            if (Compiler.COMPILE_STUB_CLASS.isBound && _type == Compiler.COMPILE_STUB_CLASS.deref())
+                return null;
+
             int numArgs = _args.Count;
 
             int numCtors;

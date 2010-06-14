@@ -71,7 +71,7 @@
 xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)\clojure\*.pdb $(TargetDir)\clojure\ /Y /s
 xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)*_COMP.dll $(TargetDir) /Y /s
 xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)*_COMP.pdb $(TargetDir) /Y /s
-xcopy $(SolutionDir)\Clojure.Source\clojure\test_clojure.clj $(TargetDir)\clojure\ 
+xcopy $(SolutionDir)\Clojure.Source\clojure\test_clojure.clj $(TargetDir)\clojure\  /Y /s
 xcopy $(SolutionDir)\Clojure.Source\clojure\test_clojure\*.clj $(TargetDir)\clojure\test_clojure\ /Y /s
 </PostBuildEvent>
   </PropertyGroup>

@@ -129,19 +129,19 @@
       (is (= "second bar" (bar whatzit nil)))
       (is (= "second baz" (baz whatzit))))))
 
-;;;(defrecord DefrecordObjectMethodsWidgetA [a])
-;;;(defrecord DefrecordObjectMethodsWidgetB [a])
-;;;(deftest defrecord-object-methods-test
-;;;  (testing ".equals depends on fields and type"
-;;;    (is (true? (.equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 1))))
-;;;    (is (false? (.equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 2))))
-;;;    (is (false? (.equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetB. 1)))))
-;;;  (testing ".hashCode depends on fields and type"
-;;;    (is (= (.hashCode (DefrecordObjectMethodsWidgetA. 1)) (.hashCode (DefrecordObjectMethodsWidgetA. 1))))
-;;;    (is (= (.hashCode (DefrecordObjectMethodsWidgetA. 2)) (.hashCode (DefrecordObjectMethodsWidgetA. 2))))
-;;;    (is (not= (.hashCode (DefrecordObjectMethodsWidgetA. 1)) (.hashCode (DefrecordObjectMethodsWidgetA. 2))))
-;;;    (is (= (.hashCode (DefrecordObjectMethodsWidgetB. 1)) (.hashCode (DefrecordObjectMethodsWidgetB. 1))))
-;;;    (is (not= (.hashCode (DefrecordObjectMethodsWidgetA. 1)) (.hashCode (DefrecordObjectMethodsWidgetB. 1))))))
+(defrecord DefrecordObjectMethodsWidgetA [a])
+(defrecord DefrecordObjectMethodsWidgetB [a])
+(deftest defrecord-object-methods-test
+  (testing ".equals depends on fields and type"
+    (is (true? (.Equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 1))))             ;;; .equals
+    (is (false? (.Equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 2))))
+    (is (false? (.Equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetB. 1)))))
+  (testing ".hashCode depends on fields and type"
+    (is (= (.GetHashCode (DefrecordObjectMethodsWidgetA. 1)) (.GetHashCode (DefrecordObjectMethodsWidgetA. 1))))         ;;; .hashCode
+    (is (= (.GetHashCode (DefrecordObjectMethodsWidgetA. 2)) (.GetHashCode (DefrecordObjectMethodsWidgetA. 2))))         ;;; .hashCode
+    (is (not= (.GetHashCode (DefrecordObjectMethodsWidgetA. 1)) (.GetHashCode (DefrecordObjectMethodsWidgetA. 2))))      ;;; .hashCode
+    (is (= (.GetHashCode (DefrecordObjectMethodsWidgetB. 1)) (.GetHashCode (DefrecordObjectMethodsWidgetB. 1))))         ;;; .hashCode
+    (is (not= (.GetHashCode (DefrecordObjectMethodsWidgetA. 1)) (.GetHashCode (DefrecordObjectMethodsWidgetB. 1))))))    ;;; .hashCode
 
 ;; todo
 ;; what happens if you extend after implementing directly? Extend is ignored!!
