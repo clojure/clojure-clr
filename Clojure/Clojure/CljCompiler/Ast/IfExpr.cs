@@ -55,14 +55,14 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                if (_elseExpr == null)
-                    return _thenExpr.HasClrType;
-                else
+                //if (_elseExpr == null)
+                //    return _thenExpr.HasClrType;
+                //else
                     return _thenExpr.HasClrType
                     && _elseExpr.HasClrType
                     && (_thenExpr.ClrType == _elseExpr.ClrType
-                        || _thenExpr.ClrType == null
-                        || _elseExpr.ClrType == null);
+                        || (_thenExpr.ClrType == null && ! _elseExpr.ClrType.IsValueType)
+                        || (_elseExpr.ClrType == null && ! _thenExpr.ClrType.IsValueType));
             }
         }
 
@@ -70,12 +70,13 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                Type thenType = _thenExpr.ClrType;
+                //Type thenType = _thenExpr.ClrType;
 
-                if (_elseExpr == null)
-                    return thenType;
-                else
-                    return thenType ?? _elseExpr.ClrType;
+                //if (_elseExpr == null)
+                //    return thenType;
+                //else
+                //    return thenType ?? _elseExpr.ClrType;
+                return _thenExpr.ClrType ?? _elseExpr.ClrType;
             }
         }
 
@@ -100,7 +101,8 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Expr testExpr = Compiler.GenerateAST(RT.second(form), pcon.SetRecur(false).SetAssign(false));
                 Expr thenExpr = Compiler.GenerateAST(RT.third(form), pcon.SetAssign(false));
-                Expr elseExpr = form.count() == 4 ? Compiler.GenerateAST(RT.fourth(form), pcon.SetAssign(false)) : null;
+                //Expr elseExpr = form.count() == 4 ? Compiler.GenerateAST(RT.fourth(form), pcon.SetAssign(false)) : null;
+                Expr elseExpr = Compiler.GenerateAST(RT.fourth(form), pcon.SetAssign(false));
 
                 return new IfExpr((IPersistentMap)Compiler.SOURCE_SPAN.deref(), testExpr, thenExpr, elseExpr);
             }
@@ -132,9 +134,10 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             Expression thenCode = _thenExpr.GenDlr(context);
-            Expression elseCode = _elseExpr == null
-                ? Expression.Constant(null, typeof(object))
-                : _elseExpr.GenDlr(context);
+            //Expression elseCode = _elseExpr == null
+            //    ? Expression.Constant(null, typeof(object))
+            //    : _elseExpr.GenDlr(context);
+            Expression elseCode = _elseExpr.GenDlr(context);
 
             Type targetType = typeof(object);
             if (this.HasClrType && this.ClrType != null)
