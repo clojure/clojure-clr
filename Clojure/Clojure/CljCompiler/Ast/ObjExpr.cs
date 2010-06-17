@@ -331,14 +331,30 @@ namespace clojure.lang.CljCompiler.Ast
 
             TypeBuilder baseTB = GenerateFnBaseClass(context);
             _baseType = baseTB.CreateType();
+            // patch this param type
 
-            GenerateFnClass(context);
-            _objType = _typeBuilder.CreateType();
+            try
+            {
+                if (IsDefType)
+                {
+                    Var.pushThreadBindings(RT.map(
+                        Compiler.COMPILE_STUB_ORIG_CLASS, Compiler.COMPILE_STUB_CLASS.deref(),
+                        Compiler.COMPILE_STUB_CLASS, _baseType));
+                }
 
-            if (context.DynInitHelper != null)
-                context.DynInitHelper.FinalizeType();
-            _ctorInfo = _objType.GetConstructors()[0];  // TODO: When we have more than one c-tor, we'll have to fix this.
-            return _objType;
+                GenerateFnClass(context);
+                _objType = _typeBuilder.CreateType();
+
+                if (context.DynInitHelper != null)
+                    context.DynInitHelper.FinalizeType();
+                _ctorInfo = _objType.GetConstructors()[0];  // TODO: When we have more than one c-tor, we'll have to fix this.
+                return _objType;
+            }
+            finally
+            {
+                if ( IsDefType )
+                    Var.popThreadBindings();
+            }
         }
 
         #endregion

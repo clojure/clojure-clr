@@ -35,10 +35,11 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _sym; }
         }
 
-        private readonly Symbol _tag;
+        private  Symbol _tag;
         public Symbol Tag
         {
             get { return _tag; }
+            set { _tag = value; }
         }
 
         private Expr _init;

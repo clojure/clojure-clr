@@ -76,11 +76,18 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
+            Type targetType = _targetType;
+
+            Type stubType = Compiler.COMPILE_STUB_ORIG_CLASS.isBound ? (Type)Compiler.COMPILE_STUB_ORIG_CLASS.deref() : null;
+
+            if ( _targetType == stubType )
+                targetType = context.ObjExpr.BaseType;
+
             Expression target = _target.GenDlr(context);
             Expression call;
-            if (_targetType != null && _tinfo != null)
+            if (targetType != null && _tinfo != null)
             {
-                Expression convTarget = Expression.Convert(target, _targetType);
+                Expression convTarget = Expression.Convert(target, targetType);
                 Expression access = GenAccess(convTarget);
                 call = Compiler.MaybeBox(access);
             }

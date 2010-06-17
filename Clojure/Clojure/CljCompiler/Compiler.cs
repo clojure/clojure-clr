@@ -158,8 +158,7 @@ namespace clojure.lang
 
         internal static readonly Var COMPILE_STUB_SYM = Var.create(null);
         internal static readonly Var COMPILE_STUB_CLASS = Var.create(null);
-
-
+        internal static readonly Var COMPILE_STUB_ORIG_CLASS = Var.create(null);
 
         internal static readonly Var COMPILER_CONTEXT = Var.create(null);
 

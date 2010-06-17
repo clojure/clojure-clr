@@ -131,9 +131,9 @@
                         (boolean 
                          (or (identical? ~'this ~'o)
                              (when (identical? (class ~'this) (class ~'o))
-                               (let [~'o ~(with-meta 'o {:tag tagname})]
+                               ;;;(let [~'o ~(with-meta 'o {:tag tagname})]    ----------------major loss of type hint here.
                                  (and  ~@(map (fn [fld] `(= ~fld (. ~'o ~fld))) base-fields)
-                                       (= ~'__extmap (. ~'o ~'__extmap)))))))))])
+                                       (= ~'__extmap (. ~'o ~'__extmap))))))))])                  ;;; removed one ) bfore the ] to make up for the let.
       (iobj [[i m]] 
             [(conj i 'clojure.lang.IObj)
              (conj m `(meta [~'this] ~'__meta)
@@ -148,7 +148,7 @@
                 `(getLookupThunk [~'this ~'k]
                    (let [~'gclass (class ~'this)]              
                      (case ~'k
-                           ~@(let [hinted-target (with-meta 'gtarget {:tag tagname})] 
+                           ~@(let [hinted-target 'gtarget]    ;;;  Major loss of type hint here: [hinted-target (with-meta 'gtarget {:tag tagname})] 
                                (mapcat 
                                 (fn [fld]
                                   [(keyword fld) 

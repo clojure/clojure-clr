@@ -177,8 +177,11 @@ namespace clojure.lang.CljCompiler.Ast
             List<ParameterExpression> parms = new List<ParameterExpression>(_argLocals.count() + 1);
 
             ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
-            if ( _thisBinding != null )
+            if (_thisBinding != null)
+            {
                 _thisBinding.ParamExpression = thisParm;
+                _thisBinding.Tag = Symbol.intern(null, fn.BaseType.FullName);
+            }
             fn.ThisParam = thisParm;
             parms.Add(thisParm);
 

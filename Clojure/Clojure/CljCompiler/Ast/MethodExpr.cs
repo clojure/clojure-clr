@@ -87,6 +87,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected Expression GenDlrForMethod(GenContext context)
         {
+            if (_method.DeclaringType == (Type)Compiler.COMPILE_STUB_ORIG_CLASS.deref())
+                _method = FindEquivalentMethod(_method, context.ObjExpr.BaseType);            
+            
             int argCount = _args.Count;
 
 
@@ -157,6 +160,19 @@ namespace clojure.lang.CljCompiler.Ast
 
             return call;
         }
+
+        private MethodInfo FindEquivalentMethod(MethodInfo _method, Type baseType)
+        {
+            BindingFlags flags = BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic;
+
+            if (IsStaticCall)
+                flags |= BindingFlags.Static;
+            else
+                flags |= BindingFlags.Instance;
+          
+            return baseType.GetMethod(_method.Name,flags, null, Compiler.GetTypes(_method.GetParameters()), null);
+        }
+
 
         private Expression GenerateComplexCall(GenContext context)
         {
