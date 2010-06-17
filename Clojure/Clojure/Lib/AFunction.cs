@@ -27,7 +27,7 @@ namespace clojure.lang
     {
         #region Data
 
-        public MethodImplCache __methodImplCache;
+        public volatile MethodImplCache __methodImplCache;
 
         public MethodImplCache MethodImplCache
         {

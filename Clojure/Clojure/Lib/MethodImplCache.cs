@@ -53,23 +53,23 @@ namespace clojure.lang
         } 
 
 
-        //these are not volatile by design
-        private object _lastType;
+       // //these are not volatile by design
+       // private object _lastType;
 
-       // core_deftype.clj compatibility
-        public object lastClass
-        {
-            get { return _lastType; }
-            set { _lastType = value; }  
-        }
-        private IFn _lastImpl;
+       //// core_deftype.clj compatibility
+       // public object lastClass
+       // {
+       //     get { return _lastType; }
+       //     set { _lastType = value; }  
+       // }
+       // private IFn _lastImpl;
 
-        // core_deftype.clj compatibility 
-        public IFn lastImpl
-        {
-            get { return _lastImpl; }
-            set { _lastImpl = value; }
-        }
+       // // core_deftype.clj compatibility 
+       // public IFn lastImpl
+       // {
+       //     get { return _lastImpl; }
+       //     set { _lastImpl = value; }
+        //}
 
        #endregion
 
@@ -87,7 +87,7 @@ namespace clojure.lang
             _shift = shift;
             _mask = mask;
             _table = table;
-            _lastType = this;
+            //_lastType = this;
         }
 
        #endregion
@@ -98,14 +98,15 @@ namespace clojure.lang
        // initial lowercase for core.clj compatibility
        public IFn fnFor(Type t)
         {
-            if (t == _lastType)
-                return _lastImpl;
+            //if (t == _lastType)
+            //    return _lastImpl;
             int idx = ((Util.hash(t) >> _shift) & _mask) << 1;
             if (idx < _table.Length && _table[idx] == t)
             {
-                _lastType = t;
-                return _lastImpl =
-                        (IFn)_table[idx + 1];
+                //_lastType = t;
+                //return _lastImpl =
+                //        (IFn)_table[idx + 1];
+                return (IFn)_table[idx + 1];
             }
             return null;
         }
