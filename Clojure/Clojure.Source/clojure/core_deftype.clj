@@ -392,16 +392,22 @@
 (defn- super-chain [#^Type c]           ;;; Class
   (when c
     (cons c (super-chain (.BaseType c)))))                 ;;; getSuperclass
-
+    
+(defn- pref
+  ([] nil)
+  ([a] a) 
+  ([#^Type a #^Type b]                                 ;;; Class
+     (if (.IsAssignableFrom a b) b a)))                ;;; isAssignableFrom
+    
 (defn find-protocol-impl [protocol x]
   (if (instance? (:on-interface protocol) x)
     x
     (let [c (class x)
           impl #(get (:impls protocol) %)]
       (or (impl c)
-                                        ;todo - fix this so takes most-derived interface as well
           (and c (or (first (remove nil? (map impl (butlast (super-chain c)))))
-                     (first (remove nil? (map impl (disj (supers c) Object))))
+                     (when-let [t (reduce pref (filter impl (disj (supers c) Object)))]
+                       (impl t))
                      (impl Object)))))))
 
 (defn find-protocol-method [protocol methodk x]
