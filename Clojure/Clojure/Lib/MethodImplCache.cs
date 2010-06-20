@@ -22,6 +22,41 @@ namespace clojure.lang
     // TODO: This is a cache for a type=>IFn map.  Should be replaced by the DLR CallSite mechanism
    public sealed class MethodImplCache
    {
+       #region nested class
+
+       public sealed class Entry
+       {
+           #region Data
+
+           readonly Type _t;
+
+           public Type T
+           {
+               get { return _t; }
+           }
+
+           readonly IFn _fn;
+
+           public IFn Fn
+           {
+               get { return _fn; }
+           }
+
+           #endregion
+
+           #region C-tors
+
+           public Entry(Type t, IFn fn)
+           {
+               _t = t;
+               _fn = fn;
+           }
+
+           #endregion
+       }
+
+       #endregion
+
        #region Data
 
        private readonly IPersistentMap _protocol;
@@ -42,9 +77,11 @@ namespace clojure.lang
 
 
 
-        public readonly int _shift;
-        public readonly int _mask;
-        private readonly object[] _table;    //[class, fn. class, fn ...]
+       public readonly int _shift;
+       public readonly int _mask;
+       private readonly object[] _table;    //[class, entry. class, entry ...]
+
+       volatile Entry _mre = null;
 
         // core_deftype.clj compatibility
         public object[] table
@@ -97,16 +134,21 @@ namespace clojure.lang
         
        // initial lowercase for core.clj compatibility
        public IFn fnFor(Type t)
-        {
-            //if (t == _lastType)
-            //    return _lastImpl;
+       {
+           Entry last = _mre;
+           if (last != null && last.T == t)
+               return last.Fn;
+           return FindFnFor(t);
+       }
+
+       IFn FindFnFor(Type t)
+       {
             int idx = ((Util.hash(t) >> _shift) & _mask) << 1;
             if (idx < _table.Length && _table[idx] == t)
             {
-                //_lastType = t;
-                //return _lastImpl =
-                //        (IFn)_table[idx + 1];
-                return (IFn)_table[idx + 1];
+                Entry e = ((Entry)table[idx + 1]);
+                _mre = e;
+                return e != null ? e.Fn : null;
             }
             return null;
         }

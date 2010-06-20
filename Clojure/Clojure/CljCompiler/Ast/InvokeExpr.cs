@@ -264,56 +264,34 @@ namespace clojure.lang.CljCompiler.Ast
         private Expression GenProtoLight(GenContext context, Expression fn)
         {
             Var v = ((VarExpr)_fexpr).Var;
-
             Expr e = (Expr)_args.nth(0);
 
-            ParameterExpression fnParam = Expression.Parameter(typeof(IFn), "fn");
             ParameterExpression targetParam = Expression.Parameter(typeof(Object), "target");
             ParameterExpression targetTypeParam = Expression.Parameter(typeof(Type), "targetType");
             ParameterExpression vpfnParam = Expression.Parameter(typeof(AFunction), "vpfn");
-            ParameterExpression implParam = Expression.Parameter(typeof(IFn), "implFn");
             ParameterExpression thisParam = context.ObjExpr.ThisParam;
 
-
-            Expression fnParamAssign = Expression.Assign(fnParam, Expression.Convert(fn, typeof(IFn)));
             Expression targetParamAssign = Expression.Assign(targetParam, Compiler.MaybeBox(e.GenDlr(context)));
             Expression targetTypeParamAssign =
                 Expression.Assign(
                     targetTypeParam,
                     Expression.Call(null, Compiler.Method_Util_classOf, targetParam));
+
             Expression vpfnParamAssign =
                 Expression.Assign(
                     vpfnParam,
                     Expression.Convert(Expression.Call(context.ObjExpr.GenVar(context, v), Compiler.Method_Var_getRawRoot), typeof(AFunction)));
 
-            Expression implParamAssign =
-                Expression.Block(
-                    Expression.Assign(
-                        implParam,
-                        Expression.Call(
-                            Expression.Property(vpfnParam, Compiler.Method_AFunction_MethodImplCache),
-                            Compiler.Method_MethodImplCache_fnFor,
-                            targetTypeParam)),
-                    Expression.IfThen(
-                        Expression.Equal(implParam, Expression.Constant(null)),
-                        Expression.Assign(implParam, vpfnParam)));
-
-
-
-            LabelTarget clear1Label = Expression.Label("clear1");
-            LabelTarget clear2Label = Expression.Label("clear2");
-            LabelTarget callLabel = Expression.Label("call");
-
-            Expression block1 = Expression.Block(fnParamAssign, targetParamAssign);
-            Expression block2 = Expression.Block(
-                targetTypeParamAssign,
-                vpfnParamAssign,
-                implParamAssign,
-                GenerateArgsAndCall(context, fnParam, targetParam));
-
-            Expression block;
-
-            if (_protocolOn != null)
+            if (_protocolOn == null)
+            {
+                return Expression.Block(
+                    new ParameterExpression[] { targetParam, targetTypeParam, vpfnParam },
+                    targetParamAssign,
+                    targetTypeParamAssign,
+                    vpfnParamAssign,
+                    GenerateArgsAndCall(context, vpfnParam, targetParam));
+            }
+            else
             {
                 Expression[] args = new Expression[_args.count() - 1];
                 for (int i = 1; i < _args.count(); i++)
@@ -322,108 +300,135 @@ namespace clojure.lang.CljCompiler.Ast
                     args[i - 1] = Compiler.MaybeBox(bare);
                 }
 
-                block = Expression.Block(
-                    new ParameterExpression[] { fnParam, targetParam, targetTypeParam, vpfnParam, implParam },
-                    block1,
-                    Expression.Condition(
-                        Expression.TypeIs(targetParam, _protocolOn),
-                        Compiler.MaybeBox(Expression.Call(Expression.Convert(targetParam, _protocolOn), _onMethod, args)),
-                        block2));
-            }
-            else
-                block = Expression.Block(
-                        new ParameterExpression[] { fnParam, targetParam, targetTypeParam, vpfnParam, implParam },
-                        block1,
-                        block2);
+                return Expression.Block(
+                     new ParameterExpression[] { targetParam, targetTypeParam, vpfnParam },
+                     targetParamAssign,
+                     targetTypeParamAssign,
+                     Expression.Condition(
+                        Expression.Not(Expression.TypeIs(targetParam, _protocolOn)),
+                        Expression.Block(
+                            vpfnParamAssign,
+                            GenerateArgsAndCall(context, vpfnParam, targetParam)),
+                         Compiler.MaybeBox(Expression.Call(Expression.Convert(targetParam, _protocolOn), _onMethod, args))));
 
-            return block;
+            }
+
+            //Var v = ((VarExpr)_fexpr).Var;
+
+            //Expr e = (Expr)_args.nth(0);
+
+            //ParameterExpression fnParam = Expression.Parameter(typeof(IFn), "fn");
+            //ParameterExpression targetParam = Expression.Parameter(typeof(Object), "target");
+            //ParameterExpression targetTypeParam = Expression.Parameter(typeof(Type), "targetType");
+            //ParameterExpression vpfnParam = Expression.Parameter(typeof(AFunction), "vpfn");
+            //ParameterExpression implParam = Expression.Parameter(typeof(IFn), "implFn");
+            //ParameterExpression thisParam = context.ObjExpr.ThisParam;
+
+
+            //Expression fnParamAssign = Expression.Assign(fnParam, Expression.Convert(fn, typeof(IFn)));
+            //Expression targetParamAssign = Expression.Assign(targetParam, Compiler.MaybeBox(e.GenDlr(context)));
+            //Expression targetTypeParamAssign =
+            //    Expression.Assign(
+            //        targetTypeParam,
+            //        Expression.Call(null, Compiler.Method_Util_classOf, targetParam));
+            //Expression vpfnParamAssign =
+            //    Expression.Assign(
+            //        vpfnParam,
+            //        Expression.Convert(Expression.Call(context.ObjExpr.GenVar(context, v), Compiler.Method_Var_getRawRoot), typeof(AFunction)));
+
+            //Expression implParamAssign =
+            //    Expression.Block(
+            //        Expression.Assign(
+            //            implParam,
+            //            Expression.Call(
+            //                Expression.Property(vpfnParam, Compiler.Method_AFunction_MethodImplCache),
+            //                Compiler.Method_MethodImplCache_fnFor,
+            //                targetTypeParam)),
+            //        Expression.IfThen(
+            //            Expression.Equal(implParam, Expression.Constant(null)),
+            //            Expression.Assign(implParam, vpfnParam)));
+
+
+
+            //LabelTarget clear1Label = Expression.Label("clear1");
+            //LabelTarget clear2Label = Expression.Label("clear2");
+            //LabelTarget callLabel = Expression.Label("call");
+
+            //Expression block1 = Expression.Block(fnParamAssign, targetParamAssign);
+            //Expression block2 = Expression.Block(
+            //    targetTypeParamAssign,
+            //    vpfnParamAssign,
+            //    implParamAssign,
+            //    GenerateArgsAndCall(context, fnParam, targetParam));
+
+            //Expression block;
+
+            //if (_protocolOn != null)
+            //{
+            //    Expression[] args = new Expression[_args.count() - 1];
+            //    for (int i = 1; i < _args.count(); i++)
+            //    {
+            //        Expression bare = ((Expr)_args.nth(i)).GenDlr(context);
+            //        args[i - 1] = Compiler.MaybeBox(bare);
+            //    }
+
+            //    block = Expression.Block(
+            //        new ParameterExpression[] { fnParam, targetParam, targetTypeParam, vpfnParam, implParam },
+            //        block1,
+            //        Expression.Condition(
+            //            Expression.TypeIs(targetParam, _protocolOn),
+            //            Compiler.MaybeBox(Expression.Call(Expression.Convert(targetParam, _protocolOn), _onMethod, args)),
+            //            block2));
+            //}
+            //else
+            //    block = Expression.Block(
+            //            new ParameterExpression[] { fnParam, targetParam, targetTypeParam, vpfnParam, implParam },
+            //            block1,
+            //            block2);
+
+            //return block;
         }
 
 
         private Expression GenProtoFull(GenContext context, Expression fn)
         {
             Var v = ((VarExpr)_fexpr).Var;
-
             Expr e = (Expr)_args.nth(0);
 
-            ParameterExpression fnParam = Expression.Parameter(typeof(IFn), "fn"); 
             ParameterExpression targetParam = Expression.Parameter(typeof(Object), "target");
             ParameterExpression targetTypeParam = Expression.Parameter(typeof(Type), "targetType");
             ParameterExpression vpfnParam = Expression.Parameter(typeof(AFunction), "vpfn");
-            ParameterExpression implParam = Expression.Parameter(typeof(IFn), "implFn");
             ParameterExpression thisParam = context.ObjExpr.ThisParam;
 
-
-            Expression fnParamAssign = Expression.Assign(fnParam, Expression.Convert(fn, typeof(IFn)));
             Expression targetParamAssign = Expression.Assign(targetParam, e.GenDlr(context));
             Expression targetTypeParamAssign =
                 Expression.Assign(
                     targetTypeParam,
                     Expression.Call(null, Compiler.Method_Util_classOf, targetParam));
-            Expression vpfnParamAssign =
-                Expression.Assign(
-                    vpfnParam,
-                    Expression.Convert(Expression.Call(context.ObjExpr.GenVar(context, v), Compiler.Method_Var_getRawRoot), typeof(AFunction)));
 
             Expression cachedTypeField = Expression.Field(thisParam, context.ObjExpr.CachedTypeField(_siteIndex));
-            Expression cachedProtoFnField = Expression.Field(thisParam, context.ObjExpr.CachedProtoFnField(_siteIndex));
-            Expression cachedProtoImplField = Expression.Field(thisParam, context.ObjExpr.CachedProtoImplField(_siteIndex));
 
             Expression setCachedClass =
                 Expression.Assign(
                     cachedTypeField,
                     targetTypeParam);
 
-            Expression setCachedProtoFn =
-                Expression.Block(
-                    Expression.Assign(cachedProtoFnField, vpfnParam),
-                    Expression.Assign(
-                        implParam,
-                        Expression.Call(
-                            Expression.Property(vpfnParam, Compiler.Method_AFunction_MethodImplCache),
-                            Compiler.Method_MethodImplCache_fnFor,
-                            targetTypeParam)),
-                    Expression.IfThenElse(
-                        Expression.Equal(implParam, Expression.Constant(null)),
-                        Expression.Block(
-                            Expression.Assign(cachedProtoFnField, Expression.Constant(null,typeof(AFunction))),
-                            Expression.Assign(implParam, vpfnParam)),
-                        Expression.Assign(
-                            cachedProtoImplField,
-                            implParam)));
+            Expression vpfnParamAssign =
+                Expression.Assign(
+                    vpfnParam,
+                    Expression.Convert(Expression.Call(context.ObjExpr.GenVar(context, v), Compiler.Method_Var_getRawRoot), typeof(AFunction)));
 
-            Expression standardImplParamAssign = Expression.Assign(implParam, cachedProtoImplField);
-
-
-            LabelTarget clear1Label = Expression.Label("clear1");
-            LabelTarget clear2Label = Expression.Label("clear2");
-            LabelTarget callLabel = Expression.Label("call");
-
-            Expression block1 = Expression.Block(fnParamAssign, targetParamAssign);
-            Expression block2 = Expression.Block(
-                targetTypeParamAssign,
-                vpfnParamAssign,
-                Expression.IfThen(
-                        Expression.NotEqual(targetTypeParam, cachedTypeField),
-                        Expression.Goto(clear1Label)),
-                    Expression.IfThen(
-                        Expression.NotEqual(vpfnParam, cachedProtoFnField),
-                        Expression.Goto(clear2Label)),
-                    standardImplParamAssign,
-                    Expression.Goto(callLabel),
-                    Expression.Label(clear1Label),
+            if (_protocolOn == null)
+            {
+                return Expression.Block(
+                    new ParameterExpression[] { targetParam, targetTypeParam, vpfnParam },
+                    targetParamAssign,
+                    targetTypeParamAssign,
                     setCachedClass,
-                    Expression.Label(clear2Label),
-                    setCachedProtoFn,
-                    Expression.Label(callLabel),
-                    GenerateArgsAndCall(context, fnParam, targetParam));
-
-
-
-
-            Expression block;
-
-            if (_protocolOn != null)
+                    vpfnParamAssign,
+                    GenerateArgsAndCall(context, vpfnParam, targetParam));
+            }
+            else
             {
                 Expression[] args = new Expression[_args.count()-1];
                 for (int i = 1; i < _args.count(); i++)
@@ -432,21 +437,124 @@ namespace clojure.lang.CljCompiler.Ast
                     args[i - 1] = Compiler.MaybeBox(bare);
                 }
 
-                block = Expression.Block(
-                    new ParameterExpression[] { fnParam, targetParam, targetTypeParam, vpfnParam, implParam },
-                    block1,
-                    Expression.Condition(
-                        Expression.TypeIs(targetParam, _protocolOn),
-                        Compiler.MaybeBox(Expression.Call(Expression.Convert(targetParam,_protocolOn), _onMethod,args)),
-                        block2));
-            }
-            else
-                block = Expression.Block(
-                        new ParameterExpression[] { fnParam, targetParam, targetTypeParam, vpfnParam, implParam },
-                        block1,
-                        block2);
+                return Expression.Block(
+                     new ParameterExpression[] { targetParam, targetTypeParam, vpfnParam },
+                     targetParamAssign,
+                     targetTypeParamAssign,
+                     Expression.Condition(
+                        Expression.Or(
+                            Expression.Equal(targetTypeParam, cachedTypeField),
+                            Expression.Not(Expression.TypeIs(targetParam, _protocolOn))),
+                        Expression.Block(
+                            setCachedClass,
+                            vpfnParamAssign,
+                            GenerateArgsAndCall(context, vpfnParam, targetParam)),
+                         Compiler.MaybeBox(Expression.Call(Expression.Convert(targetParam, _protocolOn), _onMethod, args))));                           
 
-            return block;
+            }
+
+
+            //Var v = ((VarExpr)_fexpr).Var;
+            //Expr e = (Expr)_args.nth(0);
+
+            //ParameterExpression fnParam = Expression.Parameter(typeof(IFn), "fn"); 
+            //ParameterExpression targetParam = Expression.Parameter(typeof(Object), "target");
+            //ParameterExpression targetTypeParam = Expression.Parameter(typeof(Type), "targetType");
+            //ParameterExpression vpfnParam = Expression.Parameter(typeof(AFunction), "vpfn");
+            //ParameterExpression implParam = Expression.Parameter(typeof(IFn), "implFn");
+            //ParameterExpression thisParam = context.ObjExpr.ThisParam;
+
+
+            //Expression fnParamAssign = Expression.Assign(fnParam, Expression.Convert(fn, typeof(IFn)));
+            //Expression targetParamAssign = Expression.Assign(targetParam, e.GenDlr(context));
+            //Expression targetTypeParamAssign =
+            //    Expression.Assign(
+            //        targetTypeParam,
+            //        Expression.Call(null, Compiler.Method_Util_classOf, targetParam));
+            //Expression vpfnParamAssign =
+            //    Expression.Assign(
+            //        vpfnParam,
+            //        Expression.Convert(Expression.Call(context.ObjExpr.GenVar(context, v), Compiler.Method_Var_getRawRoot), typeof(AFunction)));
+
+            //Expression cachedTypeField = Expression.Field(thisParam, context.ObjExpr.CachedTypeField(_siteIndex));
+            //Expression cachedProtoFnField = Expression.Field(thisParam, context.ObjExpr.CachedProtoFnField(_siteIndex));
+            //Expression cachedProtoImplField = Expression.Field(thisParam, context.ObjExpr.CachedProtoImplField(_siteIndex));
+
+            //Expression setCachedClass =
+            //    Expression.Assign(
+            //        cachedTypeField,
+            //        targetTypeParam);
+
+            //Expression setCachedProtoFn =
+            //    Expression.Block(
+            //        Expression.Assign(cachedProtoFnField, vpfnParam),
+            //        Expression.Assign(
+            //            implParam,
+            //            Expression.Call(
+            //                Expression.Property(vpfnParam, Compiler.Method_AFunction_MethodImplCache),
+            //                Compiler.Method_MethodImplCache_fnFor,
+            //                targetTypeParam)),
+            //        Expression.IfThenElse(
+            //            Expression.Equal(implParam, Expression.Constant(null)),
+            //            Expression.Block(
+            //                Expression.Assign(cachedProtoFnField, Expression.Constant(null,typeof(AFunction))),
+            //                Expression.Assign(implParam, vpfnParam)),
+            //            Expression.Assign(
+            //                cachedProtoImplField,
+            //                implParam)));
+
+            //Expression standardImplParamAssign = Expression.Assign(implParam, cachedProtoImplField);
+
+
+            //LabelTarget clear1Label = Expression.Label("clear1");
+            //LabelTarget clear2Label = Expression.Label("clear2");
+            //LabelTarget callLabel = Expression.Label("call");
+
+            //Expression block1 = Expression.Block(fnParamAssign, targetParamAssign);
+            //Expression block2 = Expression.Block(
+            //    targetTypeParamAssign,
+            //    vpfnParamAssign,
+            //    Expression.IfThen(
+            //            Expression.NotEqual(targetTypeParam, cachedTypeField),
+            //            Expression.Goto(clear1Label)),
+            //        Expression.IfThen(
+            //            Expression.NotEqual(vpfnParam, cachedProtoFnField),
+            //            Expression.Goto(clear2Label)),
+            //        standardImplParamAssign,
+            //        Expression.Goto(callLabel),
+            //        Expression.Label(clear1Label),
+            //        setCachedClass,
+            //        Expression.Label(clear2Label),
+            //        setCachedProtoFn,
+            //        Expression.Label(callLabel),
+            //        GenerateArgsAndCall(context, fnParam, targetParam));
+
+            //Expression block;
+
+            //if (_protocolOn != null)
+            //{
+            //    Expression[] args = new Expression[_args.count()-1];
+            //    for (int i = 1; i < _args.count(); i++)
+            //    {
+            //        Expression bare = ((Expr)_args.nth(i)).GenDlr(context);
+            //        args[i - 1] = Compiler.MaybeBox(bare);
+            //    }
+
+            //    block = Expression.Block(
+            //        new ParameterExpression[] { fnParam, targetParam, targetTypeParam, vpfnParam, implParam },
+            //        block1,
+            //        Expression.Condition(
+            //            Expression.TypeIs(targetParam, _protocolOn),
+            //            Compiler.MaybeBox(Expression.Call(Expression.Convert(targetParam,_protocolOn), _onMethod,args)),
+            //            block2));
+            //}
+            //else
+            //    block = Expression.Block(
+            //            new ParameterExpression[] { fnParam, targetParam, targetTypeParam, vpfnParam, implParam },
+            //            block1,
+            //            block2);
+
+            //return block;
         }
 
         #endregion
