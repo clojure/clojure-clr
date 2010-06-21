@@ -263,5 +263,5 @@
   here."
 
   [& options]
-  (let [options-map (apply hash-map options) ]
+  (let [options-map (into {} (map vec (partition 2 options))) ]
           `'~(generate-interface options-map)))
