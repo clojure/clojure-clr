@@ -167,7 +167,7 @@ namespace clojure.lang
 
         public long ToInt64(IFormatProvider provider)
         {
-            return Convert.ToInt64(ToDouble(provider));
+            return Convert.ToInt64(BigIntegerValue());
         }
 
         public sbyte ToSByte(IFormatProvider provider)
@@ -218,6 +218,15 @@ namespace clojure.lang
             BigDecimal numerator = BigDecimal.Create(this.numerator);
             BigDecimal denominator = BigDecimal.Create(this.denominator);
             return numerator.Divide(denominator,c);
+        }
+
+        #endregion
+
+        #region Other
+
+        public BigInteger BigIntegerValue()
+        {
+            return _numerator.Divide(_denominator);
         }
 
         #endregion
