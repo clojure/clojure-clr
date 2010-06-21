@@ -322,6 +322,14 @@ namespace clojure.lang
             return PreferTable;
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public MultiFn reset()
+        {
+            _methodTable = _methodCache = _preferTable = PersistentHashMap.EMPTY;
+            _cachedHierarchy = null;
+            return this;
+        }
+
         #endregion
 
         #region IFn members
