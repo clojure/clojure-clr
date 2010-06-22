@@ -642,7 +642,7 @@ namespace clojure.lang
                     }
                     else
                     {
-                        throw ex;
+                        throw;
                     }
                 }
                 finally
