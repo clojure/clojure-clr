@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0A74E77B-8BFF-4A64-8A16-5D0E5C9C47F3}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -120,6 +120,10 @@
     <None Include="clojure\test_clojure\data_structures.clj" />
     <None Include="clojure\test_clojure\evaluation.clj" />
     <None Include="clojure\test_clojure\for.clj" />
+    <None Include="clojure\test_clojure\genclass.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\test_clojure\genclass\examples.clj" />
     <None Include="clojure\test_clojure\java_interop.clj" />
     <None Include="clojure\test_clojure\logic.clj" />
     <None Include="clojure\test_clojure\macros.clj" />

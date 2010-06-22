@@ -39,7 +39,7 @@ namespace clojure.lang
         static readonly MethodInfo Method_RT_var2 = typeof(RT).GetMethod("var", new Type[] {typeof(String), typeof(String)});
         static readonly MethodInfo Method_IFn_applyTo_Object_ISeq = typeof(IFn).GetMethod("applyTo");
         static readonly MethodInfo Method_Var_internPrivate = typeof(Var).GetMethod("internPrivate");
-        static readonly MethodInfo Method_Var_IsBound = typeof(Var).GetMethod("get_IsBound");
+        static readonly MethodInfo Method_Var_isBound = typeof(Var).GetMethod("get_isBound");
         static readonly MethodInfo Method_Var_get = typeof(Var).GetMethod("get");
         static readonly ConstructorInfo CtorInfo_NotImplementedException_1 = typeof(NotImplementedException).GetConstructor(new Type[] { typeof(string) });
 
@@ -626,7 +626,7 @@ namespace clojure.lang
 
         private static string GetStaticVarName(string var)
         {
-            return var + "__var";
+            return Compiler.munge(var + "__var");
         }
 
         internal static Type[] CreateTypeArray(ISeq seq)
@@ -674,7 +674,7 @@ namespace clojure.lang
 
             gen.EmitFieldGet(fb);                       // gen.Emit(OpCodes.Ldsfld,fb);
             gen.Emit(OpCodes.Dup);
-            gen.EmitCall(Method_Var_IsBound);           // gen.Emit(OpCodes.Call, Method_Var_IsBound);
+            gen.EmitCall(Method_Var_isBound);           // gen.Emit(OpCodes.Call, Method_Var_IsBound);
             gen.Emit(OpCodes.Brfalse_S,falseLabel);
             gen.Emit(OpCodes.Call,Method_Var_get);
             gen.Emit(OpCodes.Br_S,endLabel);
