@@ -108,6 +108,22 @@
 (defn munge [s]
   ((if (symbol? s) symbol str) (clojure.lang.Compiler/munge (str s))))
 
+(defn- imap-cons
+  [#^clojure.lang.IPersistentMap this o]
+  (cond
+   (instance? clojure.lang.IMapEntry o)                              ;;; java.util.Map$Entry
+     (let [#^clojure.lang.IMapEntry pair o]                          ;;; java.util.Map$Entry
+       (.assoc this (.key pair) (.val pair)))                ;;; .getKey .getValue
+   (instance? clojure.lang.IPersistentVector o)
+     (let [#^clojure.lang.IPersistentVector vec o]
+       (.assoc this (.nth vec 0) (.nth vec 1)))
+   :else (loop [this this
+                o o]
+      (if (seq o)
+        (let [#^clojure.lang.IMapEntry pair (first o)]                       ;;; java.util.Map$Entry
+          (recur (.assoc this (.key pair) (.val pair)) (rest o)))    ;;; .getKey .getValue
+        this))))
+
 (defn- emit-defrecord 
   "Do not use this directly - use defrecord"
   [tagname name fields interfaces methods]
@@ -164,7 +180,7 @@
              (conj m 
                    `(count [~'this] (+ ~(count base-fields) (count ~'__extmap)))
                    `(empty [~'this] (throw (InvalidOperationException. (str "Can't create empty: " ~(str classname)))))   ;;; UnsupportedOperationException
-                   `(#^ clojure.lang.IPersistentMap cons [~'this ~'e] (let [[~'k ~'v] ~'e] (.assoc ~'this ~'k ~'v)))      ;;; type hint added
+                   `(#^ clojure.lang.IPersistentMap cons [~'this ~'e] ((var imap-cons) ~'this ~'e))                          ;;; type hint added
                    `(equiv [~'this ~'o] (.Equals ~'this ~'o))                                                             ;;; .equals
                    `(containsKey [~'this ~'k] (not (identical? ~'this (.valAt ~'this ~'k ~'this))))
                    `(entryAt [~'this ~'k] (let [~'v (.valAt ~'this ~'k ~'this)]
@@ -190,7 +206,7 @@
            [(conj i 'clojure.lang.IPersistentCollection)
             (conj m
                   `(clojure.lang.IPersistentCollection.cons [~'this ~'e]                                          ;;; ADDED
-                        (let [[~'k ~'v] ~'e] (.assoc ~'this ~'k ~'v))))])                                         ;;; ADDED
+                        ((var imap-cons) ~'this ~'e)))])                                                           ;;; ADDED
       (associative                                                                                                ;;; ADDED
             [[i m]]                                                                                               ;;; ADDED
             [(conj i 'clojure.lang.Associative)                                                                   ;;; ADDED

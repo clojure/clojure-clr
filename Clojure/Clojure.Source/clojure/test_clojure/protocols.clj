@@ -30,6 +30,15 @@
      (map #(.Name %))                        ;;; getName
      (sort)))
 
+(defrecord TestRecord [a b])
+(defn r
+  ([a b] (TestRecord. a b))
+  ([a b meta ext] (TestRecord. a b meta ext)))
+(defrecord MapEntry [k v]
+  clojure.lang.IMapEntry        ;;; java.util.Map$Entry
+  (key [_] k)                   ;;; (getKey [_] k)
+  (val [_] v))                  ;;; (getValue [_] v))
+
 (deftest protocols-test
   (testing "protocol fns throw IllegalArgumentException if no impl matches"
     (is (thrown-with-msg?
@@ -142,6 +151,20 @@
     (is (not= (.GetHashCode (DefrecordObjectMethodsWidgetA. 1)) (.GetHashCode (DefrecordObjectMethodsWidgetA. 2))))      ;;; .hashCode
     (is (= (.GetHashCode (DefrecordObjectMethodsWidgetB. 1)) (.GetHashCode (DefrecordObjectMethodsWidgetB. 1))))         ;;; .hashCode
     (is (not= (.GetHashCode (DefrecordObjectMethodsWidgetA. 1)) (.GetHashCode (DefrecordObjectMethodsWidgetB. 1))))))    ;;; .hashCode
+
+(deftest defrecord-acts-like-a-map
+  (let [rec (r 1 2)]
+    (is (= (r 1 3 {} {:c 4}) (merge rec {:b 3 :c 4})))))
+
+(deftest defrecord-interfaces-test
+  (testing "IPersistentCollection"
+    (testing ".cons"
+      (let [rec (r 1 2)]
+        (are [x] (= rec (.cons rec x))
+             nil {})
+        (is (= (r 1 3) (.cons rec {:b 3})))
+        (is (= (r 1 4) (.cons rec [:b 4])))
+        (is (= (r 1 5) (.cons rec (MapEntry. :b 5))))))))
 
 ;; todo
 ;; what happens if you extend after implementing directly? Extend is ignored!!
