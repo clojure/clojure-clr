@@ -127,6 +127,7 @@
     <None Include="clojure\test_clojure\java_interop.clj" />
     <None Include="clojure\test_clojure\logic.clj" />
     <None Include="clojure\test_clojure\macros.clj" />
+    <None Include="clojure\test_clojure\main.clj" />
     <None Include="clojure\test_clojure\metadata.clj" />
     <None Include="clojure\test_clojure\multimethods.clj" />
     <None Include="clojure\test_clojure\ns_libs.clj" />

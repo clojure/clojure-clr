@@ -221,13 +221,13 @@
   "Evals expressions in str, prints each non-nil result using prn"
   [str]
   (let [eof (Object.)
-        reader (LineNumberTextReader. (System.IO.StringReader. str))]               ;;; LineNumberingPushbackReader. java.io.StringReader.
+        reader (LineNumberingTextReader. (System.IO.StringReader. str))]               ;;; LineNumberingPushbackReader. java.io.StringReader.
       (loop [input (read reader false eof)]
         (when-not (= input eof)
           (let [value (eval input)]
             (when-not (nil? value)
               (prn value))
-            (recur (read reader false eof))))))))
+            (recur (read reader false eof)))))))
 
 (defn- init-dispatch
   "Returns the handler associated with an init opt"
