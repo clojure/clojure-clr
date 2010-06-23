@@ -113,9 +113,12 @@ namespace clojure.lang
         {
             if (_hash == -1)
             {
-                int hash = 0;
+                int hash = 1;
                 for (int i = 0; i < count(); i++)
-                    hash = Util.HashCombine(hash, Util.Hash(nth(i)));
+                {
+                    Object obj = nth(i);
+                    hash = 31 * hash + (obj == null ? 0 : obj.GetHashCode());
+                }
                 this._hash = hash;
             }
             return _hash;

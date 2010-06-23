@@ -102,7 +102,7 @@ namespace clojure.lang
         { 
             if ( _hash == -1 )
             {
-                int h = 0;
+                int h = 1;
                 for (ISeq s = seq(); s != null; s = s.next())
                     h = 31 * h + (s.first() == null ? 0 : s.first().GetHashCode());
                 _hash = h;

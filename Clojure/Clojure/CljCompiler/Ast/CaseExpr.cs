@@ -176,7 +176,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Expression body = 
                     Expression.Condition(
-                        Expression.Call(null,cmp,_expr.GenDlr(context),test.GenDlr(context)),
+                        Expression.Call(null,cmp,Compiler.MaybeBox(_expr.GenDlr(context)),Compiler.MaybeBox(test.GenDlr(context))),
                         Expression.Return(endLabel,Compiler.MaybeBox(_thens[i].GenDlr(context))),
                         Expression.Goto(defaultLabel));
 
