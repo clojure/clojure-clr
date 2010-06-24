@@ -237,6 +237,7 @@ namespace clojure.lang.CljCompiler.Ast
             //ret.getCompiledClass();
             ret.ObjType = ret.GenerateClass();
             Compiler.RegisterDuplicateType(ret.ObjType);
+            Compiler.RegisterDuplicateType(ret.BaseType);
 
             //// THis is done in an earlier loop in the JVM code.
             //// We have to do it here so that we have ret._objType defined.
@@ -310,18 +311,21 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     Type[] ctorTypes = ret.CtorTypes();
                     int newLen = ctorTypes.Length - ret._altCtorDrops;
-                    Type[] altCtorTypes = new Type[newLen];
-                    for (int i = 0; i < altCtorTypes.Length; i++)
-                        altCtorTypes[i] = ctorTypes[i];
-                    ConstructorBuilder cb2 = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
-                    ILGen ilg2 = new ILGen(cb2.GetILGenerator());
-                    ilg2.EmitLoadArg(0);
-                    for (int i = 0; i < newLen; i++)
-                        ilg2.EmitLoadArg(i + 1);
-                    for (int i = 0; i < ret._altCtorDrops; i++)
-                        ilg2.EmitNull();
-                    ilg2.Emit(OpCodes.Call, cb);
-                    ilg2.Emit(OpCodes.Ret);
+                    if (newLen > 0)
+                    {
+                        Type[] altCtorTypes = new Type[newLen];
+                        for (int i = 0; i < altCtorTypes.Length; i++)
+                            altCtorTypes[i] = ctorTypes[i];
+                        ConstructorBuilder cb2 = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
+                        ILGen ilg2 = new ILGen(cb2.GetILGenerator());
+                        ilg2.EmitLoadArg(0);
+                        for (int i = 0; i < newLen; i++)
+                            ilg2.EmitLoadArg(i + 1);
+                        for (int i = 0; i < ret._altCtorDrops; i++)
+                            ilg2.EmitNull();
+                        ilg2.Emit(OpCodes.Call, cb);
+                        ilg2.Emit(OpCodes.Ret);
+                    }
                 }
             }
 

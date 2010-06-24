@@ -167,6 +167,34 @@ namespace clojure.lang
 
         #region Interning 
 
+
+        public static bool AreDifferentInstancesOfSameClassName(Type t1, Type t2)
+        {
+            return (t1 != t2) && (t1.FullName.Equals(t2.FullName));
+        }
+
+        Type ReferenceClass(Symbol sym, Type val)
+        {
+            if (sym.Namespace != null)
+            {
+                throw new ArgumentException("Can't intern namespace-qualified symbol");
+            }
+            IPersistentMap map = getMappings();
+            Type c = (Type)map.valAt(sym);
+            while ((c == null) || (AreDifferentInstancesOfSameClassName(c, val)))
+            {
+                IPersistentMap newMap = map.assoc(sym, val);
+                _mappings.CompareAndSet(map, newMap);
+                map = getMappings();
+                c = (Type)map.valAt(sym);
+            }
+            if (c == val)
+                return c;
+
+            throw new InvalidOperationException(sym + " already refers to: " + c + " in namespace: " + Name);
+        }
+
+
         /// <summary>
         /// Intern a <see cref="Symbol">Symbol</see> in the namespace, with a (new) <see cref="Var">Var</see> as its value.
         /// </summary>
@@ -255,7 +283,7 @@ namespace clojure.lang
         /// <remarks>Named importClass instead of ImportType for core.clj compatibility.</remarks>
         public Type importClass(Symbol sym, Type t)
         {
-            return (Type)reference(sym, t);
+            return ReferenceClass(sym, t);
         }
 
 
