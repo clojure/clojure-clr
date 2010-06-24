@@ -51,8 +51,8 @@
       (is (= [:a] (keys inst1)))
       (is (= [:a :b] (keys inst2))))
     (testing "you cannot import same local name from a different namespace"
-      (is (thrown? clojure.lang.Compiler+CompilerException
-                  #"ReimportMe already refers to: class exporter.ReimportMe in namespace: importer"
+      (is (thrown? InvalidOperationException                                                     ;;; clojure.lang.Compiler+CompilerException
+                  #"ReimportMe already refers to: exporter.ReimportMe in namespace: importer"    ;;; extra word class removed
                   (binding [*ns* *ns*]
                     (eval '(do (ns exporter-2)
                                (defrecord ReimportMe [a b])

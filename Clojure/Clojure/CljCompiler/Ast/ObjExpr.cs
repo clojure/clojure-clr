@@ -337,6 +337,8 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 if (IsDefType)
                 {
+                    Compiler.RegisterDuplicateType(_baseType);
+
                     Var.pushThreadBindings(RT.map(
                         Compiler.COMPILE_STUB_ORIG_CLASS, Compiler.COMPILE_STUB_CLASS.deref(),
                         Compiler.COMPILE_STUB_CLASS, _baseType));
