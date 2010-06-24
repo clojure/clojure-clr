@@ -157,6 +157,26 @@
     (is (= (r 1 3 {} {:c 4}) (merge rec {:b 3 :c 4})))))
 
 (deftest defrecord-interfaces-test
+  (testing "java.util.Map"
+    (let [rec (r 1 2)]
+      (is (= 2 (.get_Count rec)))                   ;;; .size
+      (is (= 3 (.get_Count (assoc rec :c 3))))      ;;; .size
+      ;;;(is (not (.isEmpty rec)))
+      ;;;(is (.isEmpty (EmptyRecord.)))
+      (is (.Contains rec :a))                    ;;; containsKey
+      (is (not (.Contains rec :c)))              ;;; containsKey
+      ;;;(is (.containsValue rec 1))
+      ;;;(is (not (.containsValue rec 3)))
+      (is (= 1 (.get_Item rec :a)))              ;;; .get
+      (is (thrown? InvalidProgramException (.set_Item rec :a 1)))      ;;; UnsupportedOperationException
+      (is (thrown? InvalidProgramException (.Remove rec :a)))      ;;; UnsupportedOperationException   remove
+      ;;;(is (thrown? InvalidProgramException (.putAll rec {})))      ;;; UnsupportedOperationException
+      (is (thrown? InvalidProgramException (.Clear rec)))      ;;; UnsupportedOperationException  clear
+      (is (= #{:a :b} (.get_Keys rec)))                            ;;; keySet
+      (is (= #{1 2} (set (.get_Values rec))))                          ;;; values
+      ;;;(is (= #{[:a 1] [:b 2]} (.entrySet rec)))
+      
+      ))
   (testing "IPersistentCollection"
     (testing ".cons"
       (let [rec (r 1 2)]

@@ -202,6 +202,26 @@
                                             (dissoc (with-meta (into {} ~'this) ~'__meta) ~'k)
                                             (new ~tagname ~@(remove #{'__extmap} fields) 
                                                  (not-empty (dissoc ~'__extmap ~'k))))))])
+      (dict [[i m]]
+           [(conj i 'System.Collections.IDictionary)
+            (conj m   ;;; TODO: Need properties, really
+                  `(get_Count [~'this] (.count ~'this))
+                  `(get_IsFixedSize [~'this] true)
+                  `(get_IsReadOnly [~'this] true)
+                  `(get_IsSynchronized [~'this] true)
+                  `(get_Item [~'this ~'k] (.valAt ~'this ~'k))
+                  `(#^System.Void set_Item [~'this ~'k ~'v] (throw (NotSupportedException.)))
+                  `(Remove [~'this ~'k] (throw (NotSupportedException.)))
+                  `(get_Keys [~'this] (set (keys ~'this)))
+                  `(get_SyncRoot [~'this] ~'this)
+                  `(get_Values [~'this] (set (vals ~'this)))
+                  `(Add [~'this ~'k ~'v] (throw (NotSupportedException.)))
+                  `(Clear [~'this] (throw (NotSupportedException.)))
+                  `(Contains [~'this ~'k] (.containsKey ~'this ~'k))
+                  `(CopyTo [~'this ~'a ~'i]  (throw (InvalidOperationException.)))   ;;; TODO: implement this.  Got lazy.
+                  `(System.Collections.IDictionary.GetEnumerator [~'this]  (throw (NotSupportedException.)))   ;;; TODO: implement this.  Got lazy.
+                  `(System.Collections.IEnumerable.GetEnumerator [~'this]  (throw (NotSupportedException.)))   ;;; TODO: implement this.  Got lazy.
+                  )])                 
       (ipc [[i m]]
            [(conj i 'clojure.lang.IPersistentCollection)
             (conj m
@@ -217,7 +237,7 @@
                                    [(keyword fld) (list* `new tagname (replace {fld 'gv__4242} fields))])         ;;; ADDED
                                  base-fields)                                                                     ;;; ADDED
                        (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap ~'gk__4242 ~'gv__4242)))))])]       ;;; ADDED
-     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap associative ipc)]                              ;;; Associative, ipc added
+     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap associative ipc dict)]                              ;;; Associative, ipc added
        `(deftype* ~tagname ~classname ~(conj hinted-fields '__meta '__extmap) 
           :implements ~(vec i) 
           ~@m)))))
