@@ -488,8 +488,7 @@ namespace clojure.lang
         {
             public override object invoke(object arg1)
             {
-                // TODO: Hook in loading here.
-                return base.invoke(arg1);
+                return Compiler.loadFile(arg1.ToString());
             }
         }
 
