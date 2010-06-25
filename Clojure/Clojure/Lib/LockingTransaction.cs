@@ -447,12 +447,12 @@ namespace clojure.lang
         /// <returns><value>true</value> if enough time has elapsed; <value>false</value> otherwise.</returns>
         private bool BargeTimeElapsed()
         {
-            return DateTime.Now.Ticks - _startTime > BARGE_WAIT_TICKS;
+            return Environment.TickCount - _startTime > BARGE_WAIT_TICKS;
         }
 
         /// <summary>
         /// Try to barge a conflicting transaction.
-        /// </summary>
+        /// </summary>7
         /// <param name="refinfo">The info on the other transaction.</param>
         /// <returns><value>true</value> if we killed the other transaction; <value>false</value> otherwise.</returns>
         private bool Barge(Info refinfo)
@@ -561,7 +561,7 @@ namespace clojure.lang
                     if (i == 0)
                     {
                         _startPoint = _readPoint;
-                        _startTime = DateTime.Now.Ticks;
+                        _startTime = Environment.TickCount;
                     }
 
                     _info = new Info(RUNNING, _startPoint);
