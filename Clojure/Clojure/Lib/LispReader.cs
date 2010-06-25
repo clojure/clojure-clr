@@ -76,7 +76,7 @@ namespace clojure.lang
             _macros[';'] = new CommentReader();
             _macros['\''] = new WrappingReader(QUOTE);
             _macros['@'] = new WrappingReader(DEREF);//new DerefReader();
-            _macros['^'] = new DeprecatedWrappingReader(META, "^");
+            _macros['^'] = new MetaReader();
             _macros['`'] = new SyntaxQuoteReader();
             _macros['~'] = new UnquoteReader();
             _macros['('] = new ListReader();
