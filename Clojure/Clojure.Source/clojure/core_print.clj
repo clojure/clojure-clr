@@ -10,10 +10,10 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; printing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(import '(System.IO.System.IO.TextWriter))   ;;; was (import '(java.io Writer))    (I have replaced #^Writer with #^System.IO.TextWriter throughout
-;; Other global replaces:  .write => .Write, .append => .Write, #^Class => #^Type, #^Character => #^Char
+(import '(System.IO.System.IO.TextWriter))   ;;; was (import '(java.io Writer))    (I have replaced ^Writer with ^System.IO.TextWriter throughout
+;; Other global replaces:  .write => .Write, .append => .Write, ^Class => ^Type, ^Character => ^Char
 (def
- #^{:doc "*print-length* controls how many items of each collection the
+ ^{:doc "*print-length* controls how many items of each collection the
   printer will print. If it is bound to logical false, there is no
   limit. Otherwise, it must be bound to an integer indicating the maximum
   number of items of each collection to print. If a collection contains
@@ -23,7 +23,7 @@
  *print-length* nil)
 
 (def
- #^{:doc "*print-level* controls how many levels deep the printer will
+ ^{:doc "*print-level* controls how many levels deep the printer will
   print nested objects. If it is bound to logical false, there is no
   limit. Otherwise, it must be bound to an integer indicating the maximum
   level to print. Each argument to print is at level 0; if an argument is a
@@ -33,7 +33,7 @@
   is nil indicating no limit."}
 *print-level* nil)
 
-(defn- print-sequential [#^String begin, print-one, #^String sep, #^String end, sequence, #^System.IO.TextWriter w]
+(defn- print-sequential [^String begin, print-one, ^String sep, ^String end, sequence, ^System.IO.TextWriter w]
   (binding [*print-level* (and (not *print-dup*) *print-level* (dec *print-level*))]
     (if (and *print-level* (neg? *print-level*))
       (.Write w "#")
@@ -57,81 +57,81 @@
                 (recur xs)))))
         (.Write w end)))))
 
-(defn- print-meta [o, #^System.IO.TextWriter w]
+(defn- print-meta [o, ^System.IO.TextWriter w]
   (when-let [m (meta o)]
     (when (and (pos? (count m))
                (or *print-dup*
                    (and *print-meta* *print-readably*)))
-      (.Write w "#^")
+      (.Write w "^")
       (if (and (= (count m) 1) (:tag m))
           (pr-on (:tag m) w)
           (pr-on m w))
       (.Write w " "))))
 
-(defmethod print-method :default [o, #^System.IO.TextWriter w]
+(defmethod print-method :default [o, ^System.IO.TextWriter w]
   (print-method (vary-meta o #(dissoc % :type)) w))
 
-(defmethod print-method nil [o, #^System.IO.TextWriter w]
+(defmethod print-method nil [o, ^System.IO.TextWriter w]
   (.Write w "nil"))
 
 (defmethod print-dup nil [o w] (print-method o w))
 
-(defn print-ctor [o print-args #^System.IO.TextWriter w]
+(defn print-ctor [o print-args ^System.IO.TextWriter w]
   (.Write w "#=(")
-  (.Write w (.FullName #^Type (class o)))   ;;; .getName  => .FullName
+  (.Write w (.FullName ^Type (class o)))   ;;; .getName  => .FullName
   (.Write w ". ")
   (print-args o w)
   (.Write w ")"))
 
-(defmethod print-method Object [o, #^System.IO.TextWriter w]
+(defmethod print-method Object [o, ^System.IO.TextWriter w]
   (.Write w "#<")
   (.Write w (.Name (class o)))     ;;; .getSimpleName => .Name
   (.Write w " ")
   (.Write w (str o))
   (.Write w ">"))
 
-(defmethod print-method clojure.lang.Keyword [o, #^System.IO.TextWriter w]
+(defmethod print-method clojure.lang.Keyword [o, ^System.IO.TextWriter w]
   (.Write w (str o)))
 
 (defmethod print-dup clojure.lang.Keyword [o w] (print-method o w))
 ;;; MAJOR PROBLEM: no Number type in CLR.  We will just ask every ValueType to print itself.  TODO: Need to deal with BigDecimal and BigInteger later.
-(defmethod print-method ValueType [o, #^System.IO.TextWriter w]   ;; Number => ValueType
+(defmethod print-method ValueType [o, ^System.IO.TextWriter w]   ;; Number => ValueType
   (.Write w (str o)))
 
-(defmethod print-dup ValueType [o, #^System.IO.TextWriter w]      ;;; Number => ValueType
+(defmethod print-dup ValueType [o, ^System.IO.TextWriter w]      ;;; Number => ValueType
   (print-ctor o
               (fn [o w]
                   (print-dup (str o) w))
               w))
 
-(defmethod print-dup clojure.lang.Fn [o, #^System.IO.TextWriter w]
+(defmethod print-dup clojure.lang.Fn [o, ^System.IO.TextWriter w]
   (print-ctor o (fn [o w]) w))
 
 (prefer-method print-dup clojure.lang.IPersistentCollection clojure.lang.Fn)
 (prefer-method print-dup System.Collections.IDictionary clojure.lang.Fn)                        ;;; java.util.Map
 (prefer-method print-dup System.Collections.ICollection clojure.lang.Fn)                        ;;; java.util.Collection
 
-(defmethod print-method Boolean [o, #^System.IO.TextWriter w]
+(defmethod print-method Boolean [o, ^System.IO.TextWriter w]
   (.Write w (str o)))
 
 (defmethod print-dup Boolean [o w] (print-method o w))
 
-(defn print-simple [o, #^System.IO.TextWriter w]
+(defn print-simple [o, ^System.IO.TextWriter w]
   (print-meta o w)
   (.Write w (str o)))
 
-(defmethod print-method clojure.lang.Symbol [o, #^System.IO.TextWriter w]
+(defmethod print-method clojure.lang.Symbol [o, ^System.IO.TextWriter w]
   (print-simple o w))
 
 (defmethod print-dup clojure.lang.Symbol [o w] (print-method o w))
 
-(defmethod print-method clojure.lang.Var [o, #^System.IO.TextWriter w]
+(defmethod print-method clojure.lang.Var [o, ^System.IO.TextWriter w]
   (print-simple o w))
 
-(defmethod print-dup clojure.lang.Var [#^clojure.lang.Var o, #^System.IO.TextWriter w]
+(defmethod print-dup clojure.lang.Var [^clojure.lang.Var o, ^System.IO.TextWriter w]
   (.Write w (str "#=(var " (.Name (.ns o)) "/" (.Symbol o) ")")))   ;;; .name => .Name, .sym => .Symbol
 
-(defmethod print-method clojure.lang.ISeq [o, #^System.IO.TextWriter w]
+(defmethod print-method clojure.lang.ISeq [o, ^System.IO.TextWriter w]
   (print-meta o w)
   (print-sequential "(" pr-on " " ")" o w))
 
@@ -144,20 +144,20 @@
 
 
 
-(defmethod print-dup System.Collections.ICollection [o, #^System.IO.TextWriter w]                     ;; java.util.Collection => System.Collections.ICollection
+(defmethod print-dup System.Collections.ICollection [o, ^System.IO.TextWriter w]                     ;; java.util.Collection => System.Collections.ICollection
  (print-ctor o #(print-sequential "[" print-method " " "]" %1 %2) w))
 
-(defmethod print-dup clojure.lang.IPersistentCollection [o, #^System.IO.TextWriter w]
+(defmethod print-dup clojure.lang.IPersistentCollection [o, ^System.IO.TextWriter w]
   (print-meta o w)
   (.Write w "#=(")
-  (.Write w (.FullName #^Type (class o)))   ;; .getName => .FullName
+  (.Write w (.FullName ^Type (class o)))   ;; .getName => .FullName
   (.Write w "/create ")
   (print-sequential "[" print-dup " " "]" o w)
   (.Write w ")"))
 
 (prefer-method print-dup clojure.lang.IPersistentCollection System.Collections.ICollection)                ;; java.util.Collection => System.Collections.ICollection
 
-(def #^{:tag String 
+(def ^{:tag String 
         :doc "Returns escape string for char or nil if none"}
   char-escape-string
     {\newline "\\n"
@@ -168,7 +168,7 @@
      \formfeed "\\f"
      \backspace "\\b"})  
 
-(defmethod print-method String [#^String s, #^System.IO.TextWriter w]
+(defmethod print-method String [^String s, ^System.IO.TextWriter w]
   (if (or *print-dup* *print-readably*)
     (do (.Write w \")                          
       (dotimes [n (count s)]
@@ -181,27 +181,27 @@
 
 (defmethod print-dup String [s w] (print-method s w))
 
-(defmethod print-method clojure.lang.IPersistentVector [v, #^System.IO.TextWriter w]
+(defmethod print-method clojure.lang.IPersistentVector [v, ^System.IO.TextWriter w]
   (print-meta v w)
   (print-sequential "[" pr-on " " "]" v w))
 
 (defn- print-map [m print-one w]
   (print-sequential 
    "{"
-   (fn [e  #^System.IO.TextWriter w] 
+   (fn [e  ^System.IO.TextWriter w] 
      (do (print-one (key e) w) (.Write w \space) (print-one (val e) w)))
    ", "
    "}"
    (seq m) w))
 
-(defmethod print-method clojure.lang.IPersistentMap [m, #^System.IO.TextWriter w]
+(defmethod print-method clojure.lang.IPersistentMap [m, ^System.IO.TextWriter w]
   (print-meta m w)
   (print-map m pr-on w))
 
-(defmethod print-dup System.Collections.IDictionary [m, #^System.IO.TextWriter w]    ;;; java.util.Map
+(defmethod print-dup System.Collections.IDictionary [m, ^System.IO.TextWriter w]    ;;; java.util.Map
   (print-ctor m #(print-map (seq %1) print-method %2) w))
 
-(defmethod print-dup clojure.lang.IPersistentMap [m, #^System.IO.TextWriter w]
+(defmethod print-dup clojure.lang.IPersistentMap [m, ^System.IO.TextWriter w]
   (print-meta m w)
   (.Write w "#=(")
   (.Write w (.FullName (class m)))   ;; .getName => .FullName
@@ -211,11 +211,11 @@
   
 (prefer-method print-dup clojure.lang.IPersistentMap System.Collections.IDictionary)    ;; java.util.Map  -> System.Collections.IDictionary
 
-(defmethod print-method clojure.lang.IPersistentSet [s, #^System.IO.TextWriter w]
+(defmethod print-method clojure.lang.IPersistentSet [s, ^System.IO.TextWriter w]
   (print-meta s w)
   (print-sequential "#{" pr-on " " "}" (seq s) w))
 
-(def #^{:tag String 
+(def ^{:tag String 
         :doc "Returns name string for char or nil if none"} 
  char-name-string
    {\newline "newline"
@@ -225,7 +225,7 @@
     \formfeed "formfeed"
     \return "return"})
 
-(defmethod print-method Char [#^Char c, #^System.IO.TextWriter w]
+(defmethod print-method Char [^Char c, ^System.IO.TextWriter w]
   (if (or *print-dup* *print-readably*)
     (do (.Write w \\)
         (let [n (char-name-string c)]
@@ -244,7 +244,7 @@
 (defmethod print-dup clojure.lang.LazilyPersistentVector [o w] (print-method o w))
 
 ;;; ADDED LINES
-(defmethod print-method clojure.lang.Ratio [o  #^System.IO.TextWriter w]   (.Write w (str o)))
+(defmethod print-method clojure.lang.Ratio [o  ^System.IO.TextWriter w]   (.Write w (str o)))
 
 
 
@@ -258,14 +258,14 @@
    Byte    "Byte"     ;; Byte/TYPE "Byte/TYPE"
    Int16   "Int16"})  ;; Short/TYPE "Short/TYPE"})
   
-(defmethod print-method Type [#^Type c, #^System.IO.TextWriter w]
+(defmethod print-method Type [^Type c, ^System.IO.TextWriter w]
   (.Write w (.FullName c)))   ;;; .getName => .FullName
 
-(defmethod print-dup Type [#^Type c, #^System.IO.TextWriter w]
+(defmethod print-dup Type [^Type c, ^System.IO.TextWriter w]
   (cond
     (.IsPrimitive c) (do                                             ;; .isPrimitive
                        (.Write w "#=(identity ")
-                       (.Write w #^String (primitives-classnames c))
+                       (.Write w ^String (primitives-classnames c))
                        (.Write w ")"))
     (.IsArray c) (do                                                 ;; .isArray ,  java.lang.Class/forName =>
                    (.Write w "#=(clojure.lang.RT/classForName \"")
@@ -275,20 +275,20 @@
             (.Write w "#=")
             (.Write w (.FullName c)))))    ;;; .getName => .FullName
 
-(defmethod print-method clojure.lang.BigDecimal [b, #^System.IO.TextWriter w]    ;;; java.math.BigDecimal
+(defmethod print-method clojure.lang.BigDecimal [b, ^System.IO.TextWriter w]    ;;; java.math.BigDecimal
   (.Write w (str b))
   (.Write w "M"))
   ;;; ADDED LINES
-  (defmethod print-method clojure.lang.BigInteger [b, #^System.IO.TextWriter w]
+  (defmethod print-method clojure.lang.BigInteger [b, ^System.IO.TextWriter w]
   (.Write w (str b)))
 
-(defmethod print-method System.Text.RegularExpressions.Regex [p #^System.IO.TextWriter w]         ;;; java.util.regex.Pattern =>
+(defmethod print-method System.Text.RegularExpressions.Regex [p ^System.IO.TextWriter w]         ;;; java.util.regex.Pattern =>
   (.Write w "#\"")
-  (loop [[#^Char c & r :as s] (seq (.ToString #^System.Text.RegularExpressions.Regex p))   ;;; .pattern => .ToString
+  (loop [[^Char c & r :as s] (seq (.ToString ^System.Text.RegularExpressions.Regex p))   ;;; .pattern => .ToString
          qmode false]
     (when s
       (cond
-        (= c \\) (let [[#^Char c2 & r2] r]
+        (= c \\) (let [[^Char c2 & r2] r]
                    (.Write w \\)
                    (.Write w c2)
                    (if qmode
@@ -304,14 +304,14 @@
                    (recur r qmode)))))
   (.Write w \"))
 
-(defmethod print-dup System.Text.RegularExpressions.Regex [p #^System.IO.TextWriter w] (print-method p w))  ;;; java.util.regex.Pattern =>
+(defmethod print-dup System.Text.RegularExpressions.Regex [p ^System.IO.TextWriter w] (print-method p w))  ;;; java.util.regex.Pattern =>
   
-(defmethod print-dup clojure.lang.Namespace [#^clojure.lang.Namespace n #^System.IO.TextWriter w]
+(defmethod print-dup clojure.lang.Namespace [^clojure.lang.Namespace n ^System.IO.TextWriter w]
   (.Write w "#=(find-ns ")
   (print-dup (.Name n) w)    ;; .name
   (.Write w ")"))
 
-(defmethod print-method clojure.lang.IDeref [o #^System.IO.TextWriter w]
+(defmethod print-method clojure.lang.IDeref [o ^System.IO.TextWriter w]
   (print-sequential (format "#<%s@%x%s: "
                             (.Name (class o))     ;;; .getSimpleName => .Name
                             (.GetHashCode o)     ;;; No easy equivelent in CLR: (System/identityHashCode o)))
@@ -321,4 +321,4 @@
                               ""))
                     pr-on, "", ">", (list (if (and (future? o) (not (future-done? o))) :pending @o)), w))
 
-(def #^{:private true} print-initialized true)  
+(def ^{:private true} print-initialized true)  

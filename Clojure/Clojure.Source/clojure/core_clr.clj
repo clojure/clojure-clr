@@ -51,23 +51,23 @@
 ;;; Additional aset-XXX variants
 
 (def-aset
-  #^{:doc "Sets the value at the index/indices. Works on arrays of uint. Returns val."}
+  ^{:doc "Sets the value at the index/indices. Works on arrays of uint. Returns val."}
   aset-uint setUInt uint)
   
 (def-aset
-  #^{:doc "Sets the value at the index/indices. Works on arrays of ushort. Returns val."}
+  ^{:doc "Sets the value at the index/indices. Works on arrays of ushort. Returns val."}
   aset-ushort setUShort ushort)
   
 (def-aset
-  #^{:doc "Sets the value at the index/indices. Works on arrays of ulong. Returns val."}
+  ^{:doc "Sets the value at the index/indices. Works on arrays of ulong. Returns val."}
   aset-ulong setULong ulong)
   
 (def-aset
-  #^{:doc "Sets the value at the index/indices. Works on arrays of decimal. Returns val."}
+  ^{:doc "Sets the value at the index/indices. Works on arrays of decimal. Returns val."}
   aset-decimal setDecimal decimal)
   
 (def-aset
-  #^{:doc "Sets the value at the index/indices. Works on arrays of sbyte. Returns val."}
+  ^{:doc "Sets the value at the index/indices. Works on arrays of sbyte. Returns val."}
   aset-sbyte setSByte sbyte)
   
 (defn enum-val [t n]

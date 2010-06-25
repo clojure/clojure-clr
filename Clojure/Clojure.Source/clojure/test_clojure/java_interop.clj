@@ -393,7 +393,7 @@
 
 
 ; Type Hints, *warn-on-reflection*
-;   #^ints, #^floats, #^longs, #^doubles
+;   ^ints, ^floats, ^longs, ^doubles
 
 ; Coercions: [int, long, float, double, char, boolean, short, byte]
 ;   num

@@ -16,37 +16,37 @@
 (ns clojure.testdeftype)
 
 (definterface I1 
-  (#^Int32 m1 [#^Int32 x #^String y])
-  (#^Int32 m1 [#^String x #^Int32 y])
-  (#^Int32 m2 [#^Int32 x #^String y]))
+  (^Int32 m1 [^Int32 x ^String y])
+  (^Int32 m1 [^String x ^Int32 y])
+  (^Int32 m2 [^Int32 x ^String y]))
   
 (definterface I2
-  (#^Int32 m1 [#^Int32 x #^String y])
-  (#^String m2 [#^Int32 x #^String y])
+  (^Int32 m1 [^Int32 x ^String y])
+  (^String m2 [^Int32 x ^String y])
   (m3 [x y])
   )
 
 (deftype T1 [a b]
     I1
-    (#^Int32 m1 [_ #^Int32 x #^String y]    (unchecked-add x (.Length y)))
-    (#^Int32 m1 [_ #^String x #^Int32 y]    (unchecked-multiply (.Length x) y))
-    (#^Int32 m2 [this #^Int32 x #^String y] (unchecked-multiply (int 2) (.m1 this x y)))
+    (^Int32 m1 [_ ^Int32 x ^String y]    (unchecked-add x (.Length y)))
+    (^Int32 m1 [_ ^String x ^Int32 y]    (unchecked-multiply (.Length x) y))
+    (^Int32 m2 [this ^Int32 x ^String y] (unchecked-multiply (int 2) (.m1 this x y)))
 )
 
 (deftype T2 [a b]
     I1
-    (#^Int32 m1 [_ #^Int32 x #^String y]    (unchecked-add x (.Length y)))
-    (#^Int32 m1 [_ #^String x #^Int32 y]    (unchecked-multiply (.Length x) y))
-    (#^Int32 m2 [this #^Int32 x #^String y] (unchecked-multiply (int 2) (.m1 this x y)))
+    (^Int32 m1 [_ ^Int32 x ^String y]    (unchecked-add x (.Length y)))
+    (^Int32 m1 [_ ^String x ^Int32 y]    (unchecked-multiply (.Length x) y))
+    (^Int32 m2 [this ^Int32 x ^String y] (unchecked-multiply (int 2) (.m1 this x y)))
     I2
     (m3 [_ x y] (list a b x y))
-    (#^String user.I2.m2 [this #^Int32 x #^String y] (str y " " x))
+    (^String user.I2.m2 [this ^Int32 x ^String y] (str y " " x))
 )
 
 (deftype T3 [a b]
     I1
-    (#^Int32 m1 [_ #^Int32 x #^String y]    (unchecked-add x (.Length y)))
-    (#^Int32 m1 [_ #^String x #^Int32 y]    (unchecked-multiply (.Length x) y))
+    (^Int32 m1 [_ ^Int32 x ^String y]    (unchecked-add x (.Length y)))
+    (^Int32 m1 [_ ^String x ^Int32 y]    (unchecked-multiply (.Length x) y))
     I2
     (m3 [_ x y] (list a b x y))
 )
@@ -60,16 +60,16 @@
 (def EMPTY-NODE (VecNode nil (object-array 32)))
 
 (definterface IVecImpl
-  (#^int tailoff [])
-  (arrayFor [#^int i])
-  (pushTail [#^int level parent tailnode])
-  (popTail [#^int level node])
-  (newPath [edit #^int level node])
-  (doAssoc [#^int level node #^int i val]))
+  (^int tailoff [])
+  (arrayFor [^int i])
+  (pushTail [^int level parent tailnode])
+  (popTail [^int level node])
+  (newPath [edit ^int level node])
+  (doAssoc [^int level node ^int i val]))
 
 (definterface ArrayManager
-  (array [#^int size])
-  (#^int alength [arr])
+  (array [^int size])
+  (^int alength [arr])
   (aclone [arr])
-  (aget [arr #^int i])
-  (aset [arr #^int i val]))	
+  (aget [arr ^int i])
+  (aset [arr ^int i val]))	

@@ -19,13 +19,13 @@
  ;;; The options-handling code here is taken from the JVM version.  
  
  
- (defn- ctor-sigs [#^Type super]
-  (for [#^ConstructorInfo ctor (.GetConstructors super)
+ (defn- ctor-sigs [^Type super]
+  (for [^ConstructorInfo ctor (.GetConstructors super)
         :when (not (.IsPrivate ctor))]
     (apply vector (map #(.ParameterType %) (.GetParameters ctor)))))
  
  
- (def #^{:private true} prim->class
+ (def ^{:private true} prim->class
      {'int Int32
       'long Int64
       'float Single
@@ -37,7 +37,7 @@
       'char Char})
 
  
- (defn- #^Type the-class [x]					;;; #^Class
+ (defn- ^Type the-class [x]					;;; ^Class
   (cond 
    (class? x) x
    (contains? prim->class x) (prim->class x)
@@ -161,7 +161,7 @@
   The generated class automatically defines all of the non-private
   methods of its superclasses/interfaces. This parameter can be used
   to specify the signatures of additional methods of the generated
-  class. Static methods can be specified with #^{:static true} in the
+  class. Static methods can be specified with ^{:static true} in the
   signature's metadata. Do not repeat superclass/interface signatures
   here.
 

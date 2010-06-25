@@ -25,7 +25,7 @@
  
  
 
-(defn method-sig [#^System.Reflection.MethodInfo meth]                            ;;; [#^java.lang.reflect.Method meth]
+(defn method-sig [^System.Reflection.MethodInfo meth]                            ;;; [^java.lang.reflect.Method meth]
    [(. meth Name) (seq (. meth GetParameters)) (. meth ReturnType)])               ;;;[(. meth (getName)) (seq (. meth (getParameterTypes))) (. meth getReturnType)])
 
 (defn- most-specific [rtypes]
@@ -42,39 +42,39 @@
 
 (defn proxy-name
  {:tag String} 
- [#^Type super interfaces]                                                  ;;; Class
-  (let [inames (into (sorted-set) (map #(.Name #^Type %) interfaces))]      ;;;  .getName #^Class
+ [^Type super interfaces]                                                  ;;; Class
+  (let [inames (into (sorted-set) (map #(.Name ^Type %) interfaces))]      ;;;  .getName ^Class
     (apply str (.Replace (str *ns*) \- \_) ".proxy"                         ;;; .replace
       (interleave (repeat "$")
         (concat
           [(.Name super)]                                              ;;; .getName
-          (map #(subs % (inc (.LastIndexOf #^String % "."))) inames)       ;;; .lastIndexOf
+          (map #(subs % (inc (.LastIndexOf ^String % "."))) inames)       ;;; .lastIndexOf
           [(.ToString (hash inames) "X")] [(clojure.lang.Compiler/IsCompilingSuffix)])))))                             ;;;[(Integer/toHexString (hash inames))])))))                   
 
-(defn- generate-proxy [#^Type super interfaces]     ;;; Class
+(defn- generate-proxy [^Type super interfaces]     ;;; Class
   (clojure.lang.GenProxy/GenerateProxyClass super interfaces (proxy-name super interfaces)))  ;;;DM;;
   
 ;;;  (let [cv (new ClassWriter (. ClassWriter COMPUTE_MAXS))
 ;;;        cname (.replace (proxy-name super interfaces) \. \/) ;(str "clojure/lang/" (gensym "Proxy__"))
 ;;;        ctype (. Type (getObjectType cname))
-;;;        iname (fn [#^Class c] (.. Type (getType c) (getInternalName)))
+;;;        iname (fn [^Class c] (.. Type (getType c) (getInternalName)))
 ;;;        fmap "__clojureFnMap"
-;;;        totype (fn [#^Class c] (. Type (getType c)))
+;;;        totype (fn [^Class c] (. Type (getType c)))
 ;;;        to-types (fn [cs] (if (pos? (count cs))
 ;;;                            (into-array (map totype cs))
 ;;;                            (make-array Type 0)))
-;;;        super-type #^Type (totype super)
-;;;        imap-type #^Type (totype IPersistentMap)
+;;;        super-type ^Type (totype super)
+;;;        imap-type ^Type (totype IPersistentMap)
 ;;;        ifn-type (totype clojure.lang.IFn)
 ;;;        obj-type (totype Object)
 ;;;        sym-type (totype clojure.lang.Symbol)
 ;;;        rt-type  (totype clojure.lang.RT)
 ;;;        ex-type  (totype java.lang.UnsupportedOperationException)
 ;;;        gen-bridge 
-;;;        (fn [#^java.lang.reflect.Method meth #^java.lang.reflect.Method dest]
+;;;        (fn [^java.lang.reflect.Method meth ^java.lang.reflect.Method dest]
 ;;;            (let [pclasses (. meth (getParameterTypes))
 ;;;                  ptypes (to-types pclasses)
-;;;                  rtype #^Type (totype (. meth (getReturnType)))
+;;;                  rtype ^Type (totype (. meth (getReturnType)))
 ;;;                  m (new Method (. meth (getName)) rtype ptypes)
 ;;;                  dtype (totype (.getDeclaringClass dest))
 ;;;                  dm (new Method (. dest (getName)) (totype (. dest (getReturnType))) (to-types (. dest (getParameterTypes))))
@@ -89,10 +89,10 @@
 ;;;              (. gen (returnValue))
 ;;;              (. gen (endMethod))))
 ;;;        gen-method
-;;;        (fn [#^java.lang.reflect.Method meth else-gen]
+;;;        (fn [^java.lang.reflect.Method meth else-gen]
 ;;;            (let [pclasses (. meth (getParameterTypes))
 ;;;                  ptypes (to-types pclasses)
-;;;                  rtype #^Type (totype (. meth (getReturnType)))
+;;;                  rtype ^Type (totype (. meth (getReturnType)))
 ;;;                  m (new Method (. meth (getName)) rtype ptypes)
 ;;;                  gen (new GeneratorAdapter (. Opcodes ACC_PUBLIC) m nil nil cv)
 ;;;                  else-label (. gen (newLabel))
@@ -145,7 +145,7 @@
 ;;;    (. cv (visitField (+ (. Opcodes ACC_PRIVATE) (. Opcodes ACC_VOLATILE))
 ;;;                      fmap (. imap-type (getDescriptor)) nil nil))          
 ;;;                                        ;add ctors matching/calling super's
-;;;    (doseq [#^Constructor ctor (. super (getDeclaredConstructors))]
+;;;    (doseq [^Constructor ctor (. super (getDeclaredConstructors))]
 ;;;        (when-not (. Modifier (isPrivate (. ctor (getModifiers))))
 ;;;          (let [ptypes (to-types (. ctor (getParameterTypes)))
 ;;;                m (new Method "<init>" (. Type VOID_TYPE) ptypes)
@@ -203,7 +203,7 @@
 ;;;                                    (seq (. c (getDeclaredMethods)))
 ;;;                                    (seq (. c (getMethods))))]
 ;;;                        (if (seq meths)
-;;;                          (let [#^java.lang.reflect.Method meth (first meths)
+;;;                          (let [^java.lang.reflect.Method meth (first meths)
 ;;;                                mods (. meth (getModifiers))
 ;;;                                mk (method-sig meth)]
 ;;;                            (if (or (considered mk)
@@ -218,7 +218,7 @@
 ;;;                  (recur mm considered (. c (getSuperclass))))
 ;;;                [mm considered]))
 ;;;          ifaces-meths (into {} 
-;;;                         (for [#^Class iface interfaces meth (. iface (getMethods))
+;;;                         (for [^Class iface interfaces meth (. iface (getMethods))
 ;;;                               :let [msig (method-sig meth)] :when (not (considered msig))]
 ;;;                           {msig meth}))
 ;;;          mgroups (group-by-sig (concat mm ifaces-meths))
@@ -228,12 +228,12 @@
 ;;;          ifaces-meths (remove bridge? (vals ifaces-meths))
 ;;;          mm (remove bridge? (vals mm))]
 ;;;                                        ;add methods matching supers', if no mapping -> call super
-;;;      (doseq [[#^java.lang.reflect.Method dest bridges] mb
-;;;              #^java.lang.reflect.Method meth bridges]
+;;;      (doseq [[^java.lang.reflect.Method dest bridges] mb
+;;;              ^java.lang.reflect.Method meth bridges]
 ;;;          (gen-bridge meth dest))
-;;;      (doseq [#^java.lang.reflect.Method meth mm]
+;;;      (doseq [^java.lang.reflect.Method meth mm]
 ;;;          (gen-method meth 
-;;;                      (fn [#^GeneratorAdapter gen #^Method m]
+;;;                      (fn [^GeneratorAdapter gen ^Method m]
 ;;;                          (. gen (loadThis))
 ;;;                                        ;push args
 ;;;                        (. gen (loadArgs))
@@ -244,9 +244,9 @@
 ;;;                                                (. m (getDescriptor)))))))
 ;;;      
 ;;;                                        ;add methods matching interfaces', if no mapping -> throw
-;;;      (doseq [#^java.lang.reflect.Method meth ifaces-meths]
+;;;      (doseq [^java.lang.reflect.Method meth ifaces-meths]
 ;;;                (gen-method meth 
-;;;                            (fn [#^GeneratorAdapter gen #^Method m]
+;;;                            (fn [^GeneratorAdapter gen ^Method m]
 ;;;                                (. gen (throwException ex-type (. m (getName))))))))
 ;;;    
 ;;;                                        ;finish class def
@@ -254,7 +254,7 @@
 ;;;    [cname (. cv toByteArray)]))
 
 (defn- get-super-and-interfaces [bases]
-  (if (. #^Type (first bases) IsInterface)     ;;; #^Class  (IsInterface)
+  (if (. ^Type (first bases) IsInterface)     ;;; ^Class  (IsInterface)
     [Object bases]
     [(first bases) (next bases)]))
 
@@ -269,7 +269,7 @@
           pname (proxy-name super interfaces)]
       (or  (RT/classForName pname)                            ;;; (RT/loadClassForName pname)
            (generate-proxy super interfaces))))               ;;; (let [[cname bytecode] (generate-proxy super interfaces)]
-                                                              ;;;   (. #^DynamicClassLoader (deref clojure.lang.Compiler/LOADER) (defineClass pname bytecode))))))
+                                                              ;;;   (. ^DynamicClassLoader (deref clojure.lang.Compiler/LOADER) (defineClass pname bytecode))))))
 
 (defn construct-proxy
   "Takes a proxy class and any arguments for its superclass ctor and
@@ -283,7 +283,7 @@
   fns (which must take arguments matching the corresponding method,
   plus an additional (explicit) first arg corresponding to this, and
   sets the proxy's fn map."
-  [#^IProxy proxy mappings]
+  [^IProxy proxy mappings]
     (. proxy (__initClojureFnMappings mappings)))
 
 (defn update-proxy
@@ -295,12 +295,12 @@
   a fn, in which case the corresponding method will revert to the
   default behavior. Note that this function can be used to update the
   behavior of an existing instance without changing its identity."
-  [#^IProxy proxy mappings]
+  [^IProxy proxy mappings]
     (. proxy (__updateClojureFnMappings mappings)))
 
 (defn proxy-mappings
   "Takes a proxy instance and returns the proxy's fn map."
-  [#^IProxy proxy]
+  [^IProxy proxy]
     (. proxy (__getClojureFnMappings)))
 
 (defmacro proxy
@@ -371,9 +371,9 @@
 ;;;(defn bean
 ;;;  "Takes a Java object and returns a read-only implementation of the
 ;;;  map abstraction based upon its JavaBean properties."
-;;;  [#^Object x]
+;;;  [^Object x]
 ;;;  (let [c (. x (getClass))
-;;;	pmap (reduce (fn [m #^java.beans.PropertyDescriptor pd]
+;;;	pmap (reduce (fn [m ^java.beans.PropertyDescriptor pd]
 ;;;			 (let [name (. pd (getName))
 ;;;			       method (. pd (getReadMethod))]
 ;;;			   (if (and method (zero? (alength (. method (getParameterTypes)))))

@@ -108,18 +108,18 @@
   ((if (symbol? s) symbol str) (clojure.lang.Compiler/munge (str s))))
 
 (defn- imap-cons
-  [#^clojure.lang.IPersistentMap this o]
+  [^clojure.lang.IPersistentMap this o]
   (cond
    (instance? clojure.lang.IMapEntry o)                              ;;; java.util.Map$Entry
-     (let [#^clojure.lang.IMapEntry pair o]                          ;;; java.util.Map$Entry
+     (let [^clojure.lang.IMapEntry pair o]                          ;;; java.util.Map$Entry
        (.assoc this (.key pair) (.val pair)))                ;;; .getKey .getValue
    (instance? clojure.lang.IPersistentVector o)
-     (let [#^clojure.lang.IPersistentVector vec o]
+     (let [^clojure.lang.IPersistentVector vec o]
        (.assoc this (.nth vec 0) (.nth vec 1)))
    :else (loop [this this
                 o o]
       (if (seq o)
-        (let [#^clojure.lang.IMapEntry pair (first o)]                       ;;; java.util.Map$Entry
+        (let [^clojure.lang.IMapEntry pair (first o)]                       ;;; java.util.Map$Entry
           (recur (.assoc this (.key pair) (.val pair)) (rest o)))    ;;; .getKey .getValue
         this))))
 
@@ -179,7 +179,7 @@
              (conj m 
                    `(count [~'this] (+ ~(count base-fields) (count ~'__extmap)))
                    `(empty [~'this] (throw (InvalidOperationException. (str "Can't create empty: " ~(str classname)))))   ;;; UnsupportedOperationException
-                   `(#^ clojure.lang.IPersistentMap cons [~'this ~'e] ((var imap-cons) ~'this ~'e))                          ;;; type hint added
+                   `(^ clojure.lang.IPersistentMap cons [~'this ~'e] ((var imap-cons) ~'this ~'e))                          ;;; type hint added
                    `(equiv [~'this ~'o] (.Equals ~'this ~'o))                                                             ;;; .equals
                    `(containsKey [~'this ~'k] (not (identical? ~'this (.valAt ~'this ~'k ~'this))))
                    `(entryAt [~'this ~'k] (let [~'v (.valAt ~'this ~'k ~'this)]
@@ -187,7 +187,7 @@
                                               (clojure.lang.MapEntry. ~'k ~'v))))
                    `(seq [~'this] (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
                                           ~'__extmap))
-                   `(#^ clojure.lang.IPersistentMap assoc [~'this ~'gk__4242 ~'gv__4242]                        ;;; type hint added
+                   `(^ clojure.lang.IPersistentMap assoc [~'this ~'gk__4242 ~'gv__4242]                        ;;; type hint added
                      (condp identical? ~'gk__4242
                        ~@(mapcat (fn [fld]
                                    [(keyword fld) (list* `new tagname (replace {fld 'gv__4242} fields))])
@@ -209,7 +209,7 @@
                   `(get_IsReadOnly [~'this] true)
                   `(get_IsSynchronized [~'this] true)
                   `(get_Item [~'this ~'k] (.valAt ~'this ~'k))
-                  `(#^System.Void set_Item [~'this ~'k ~'v] (throw (NotSupportedException.)))
+                  `(^System.Void set_Item [~'this ~'k ~'v] (throw (NotSupportedException.)))
                   `(Remove [~'this ~'k] (throw (NotSupportedException.)))
                   `(get_Keys [~'this] (set (keys ~'this)))
                   `(get_SyncRoot [~'this] ~'this)
@@ -318,7 +318,7 @@
          ([~@fields] (new ~classname ~@fields nil nil))
          ([~@fields meta# extmap#] (new ~classname ~@fields meta# extmap#))))))
 
-(defn- print-defrecord [o, #^System.IO.TextWriter w]           ;;; Writer
+(defn- print-defrecord [o, ^System.IO.TextWriter w]           ;;; Writer
   (print-meta o w)
   (.Write w "#:")                                                ;;; write
   (.Write w (.Name (class o)))                                   ;;; write, getName
@@ -409,12 +409,12 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- expand-method-impl-cache [#^clojure.lang.MethodImplCache cache c f]
+(defn- expand-method-impl-cache [^clojure.lang.MethodImplCache cache c f]
   (let [cs (into {} (remove (fn [[c e]] (nil? e)) (map vec (partition 2 (.table cache)))))
         cs (assoc cs c (clojure.lang.MethodImplCache+Entry. c f))
         [shift mask] (min-hash (keys cs))
         table (make-array Object (* 2 (inc mask)))
-        table (reduce (fn [#^objects t [c e]]
+        table (reduce (fn [^objects t [c e]]
                         (let [i (* 2 (int (shift-mask shift mask (hash c))))]
                           (aset t i c)
                           (aset t (inc i) e)
@@ -422,14 +422,14 @@
                       table cs)]
     (clojure.lang.MethodImplCache. (.protocol cache) (.methodk cache) shift mask table)))
 
-(defn- super-chain [#^Type c]           ;;; Class
+(defn- super-chain [^Type c]           ;;; Class
   (when c
     (cons c (super-chain (.BaseType c)))))                 ;;; getSuperclass
     
 (defn- pref
   ([] nil)
   ([a] a) 
-  ([#^Type a #^Type b]                                 ;;; Class
+  ([^Type a ^Type b]                                 ;;; Class
      (if (.IsAssignableFrom a b) b a)))                ;;; isAssignableFrom
     
 (defn find-protocol-impl [protocol x]
@@ -447,7 +447,7 @@
   (get (find-protocol-impl protocol x) methodk))
 
 (defn- implements? [protocol atype]
-  (and atype (.IsAssignableFrom #^Type (:on-interface protocol) atype)))         ;;; isAssignableFrom, Class
+  (and atype (.IsAssignableFrom ^Type (:on-interface protocol) atype)))         ;;; isAssignableFrom, Class
 
 (defn extends? 
   "Returns true if atype  extends protocol"
@@ -465,7 +465,7 @@
   [protocol x]
   (boolean (find-protocol-impl protocol x)))
 
-(defn -cache-protocol-fn [#^clojure.lang.AFunction pf x #^Type c #^clojure.lang.IFn interf]                  ;;; Class
+(defn -cache-protocol-fn [^clojure.lang.AFunction pf x ^Type c ^clojure.lang.IFn interf]                  ;;; Class
   (let [cache  (.__methodImplCache pf)                                                                       ;;; isInstance
         f (if (.IsInstanceOfType c x)
             interf 
@@ -491,7 +491,7 @@
                       `([~@gargs]
                           (. ~(with-meta target {:tag on-interface})  ~(or on-method method) ~@(rest gargs)))))
                   arglists))
-             #^clojure.lang.AFunction f#
+             ^clojure.lang.AFunction f#
              (fn ~gthis
                ~@(map 
                   (fn [args]
@@ -508,7 +508,7 @@
          f#))))
 
 (defn -reset-methods [protocol]
-  (doseq [[#^clojure.lang.Var v build] (:method-builders protocol)]
+  (doseq [[^clojure.lang.Var v build] (:method-builders protocol)]
     (let [cache (clojure.lang.MethodImplCache. protocol (keyword (.sym v)))]
       (.bindRoot v (build cache)))))
 

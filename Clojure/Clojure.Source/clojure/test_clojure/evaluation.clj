@@ -54,7 +54,7 @@
 
 ;;; Literals tests ;;;
 
-(defmacro #^{:private true} evaluates-to-itself? [expr]
+(defmacro ^{:private true} evaluates-to-itself? [expr]
   `(let [v# ~expr
          q# (quote ~expr)]
      (is (= (eval q#) q#) (str q# " does not evaluate to itself"))))
@@ -84,7 +84,7 @@
 (def foo "abc")
 (in-ns 'resolution-test)
 (def bar 123)
-(def #^{:private true} baz 456)
+(def ^{:private true} baz 456)
 (in-ns 'clojure.test-clojure.evaluation)
 
 (defn a-match? [re s] (not (nil? (re-find re s))))                   ;;; re-matches  -- I can't expect an exact match.
@@ -208,7 +208,7 @@
       "Metadata maps yield maps whose contents are the evaluated values of
       the objects they contain. If a vector or map has metadata, the evaluated
       metadata map will become the metadata of the resulting value."
-      (is (= (eval #^{:x x} '[x y]) #^{:x 1} [1 2]))))
+      (is (= (eval ^{:x x} '[x y]) ^{:x 1} [1 2]))))
 
   (test-that
     "An empty list () evaluates to an empty list."

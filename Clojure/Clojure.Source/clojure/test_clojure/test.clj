@@ -72,7 +72,7 @@
   (is (re-find #"ab" "abbabba") "Should pass")
   (is (re-find #"cd" "abbabba") "Should fail"))
 
-(deftest #^{:has-meta true} can-add-metadata-to-tests
+(deftest ^{:has-meta true} can-add-metadata-to-tests
   (is (:has-meta (meta #'can-add-metadata-to-tests)) "Should pass"))
 
 ;; still have to declare the symbol before testing unbound symbols

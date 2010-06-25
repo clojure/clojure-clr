@@ -42,7 +42,7 @@
   clojure.lang.UntypedArraySeq                             ;;; ArraySeq
   (internal-reduce
        [a-seq f val]
-       (let [#^objects arr (.Array a-seq)]           ;;; .array
+       (let [^objects arr (.Array a-seq)]           ;;; .array
          (loop [i (.Index a-seq)                     ;;; .index
                 val val]
            (if (< i (alength arr))

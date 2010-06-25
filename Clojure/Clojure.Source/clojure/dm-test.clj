@@ -24,7 +24,7 @@
 
 ; basic check of type tagging from the Clojure docs:
 (defn len [x]  (. x Length))
-(defn len2 [#^String x] (. x Length))
+(defn len2 [^String x] (. x Length))
 
 (defn test-len [] (time (reduce + (map len (replicate 10000 "asdf")))))
 (defn test-len2 [] (time (reduce + (map len2 (replicate 10000 "asdf")))))

@@ -3,7 +3,7 @@
 (definterface ExampleInterface
   (foo [a])
   (foo [a b])
-  (foo [a #^int b]))
+  (foo [a ^int b]))
 
 (gen-class :name clojure.test-clojure.genclass.examples.ExampleClass
            :implements [clojure.test-clojure.genclass.examples.ExampleInterface])

@@ -281,7 +281,7 @@
 
 (deftest t-Regex)
 
-;; Metadata (#^)
+;; Metadata (^)
 
 (deftest t-Metadata)
 

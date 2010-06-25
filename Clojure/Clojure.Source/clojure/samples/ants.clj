@@ -233,7 +233,7 @@
 (def scale 5)
 
 
-(defn fill-cell [#^Graphics g x y #^Color c]
+(defn fill-cell [^Graphics g x y ^Color c]
   (let [b (new SolidBrush c) ]
     (.FillRectangle g b (* x scale) (* y scale) scale scale)
     (.Dispose b)))
@@ -245,7 +245,7 @@
 (def red-pen   (new Pen (.Red Color)))
 (def blue-pen  (new Pen (.Blue Color)))
 
-(defn render-ant [ant #^Graphics g x y]
+(defn render-ant [ant ^Graphics g x y]
   (let [[hx hy tx ty]  ({0 [2 0 2 4] 
                         1 [4 0 0 4] 
                         2 [4 2 0 2] 
@@ -264,7 +264,7 @@
         (+ ty (* y scale)))))
 
 
-(defn render-place [ #^Graphics g p x y]
+(defn render-place [ ^Graphics g p x y]
   (when (pos? (:pher p))
     (fill-cell g x y 
         (.FromArgb Color (int (min 255 (* 255 (/ (:pher p) pher-scale)))) (.Green Color))))
