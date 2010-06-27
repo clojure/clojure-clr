@@ -40,6 +40,6 @@
 
 (deftype ^{System.SerializableAttribute {}}  T1 [a ^{ dm.PetTypeAttribute x } b]
     I3
-    (^{ dm.PetTypeAttribute x } m1 [_ x y]    x)
-    (m2 [this x y] y)
+    (^{ dm.PetTypeAttribute x } m1 [_ p q]    p)
+    (m2 [_ p ^{ dm.PetTypeAttribute x } q] q)
 )

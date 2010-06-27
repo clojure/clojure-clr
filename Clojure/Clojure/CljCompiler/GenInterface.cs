@@ -78,7 +78,7 @@ namespace clojure.lang
 
         public static IPersistentMap ExtractAttributes(IPersistentMap meta)
         {
-            if (EXTRACT_ATTRIBUTES.isBound)
+            if (meta != null && EXTRACT_ATTRIBUTES.isBound)
                 return (IPersistentMap)EXTRACT_ATTRIBUTES.invoke(meta);
 
             return PersistentArrayMap.EMPTY;
@@ -103,6 +103,11 @@ namespace clojure.lang
                 mb.SetCustomAttribute(CreateCustomAttributeBuilder((IMapEntry)(s.first())));
         }
 
+        public static void SetCustomAttributes(ParameterBuilder pb, IPersistentMap attributes)
+        {
+            for (ISeq s = RT.seq(attributes); s != null; s = s.next())
+                pb.SetCustomAttribute(CreateCustomAttributeBuilder((IMapEntry)(s.first())));
+        }
 
         static readonly Keyword ARGS_KEY = Keyword.intern(null,"__args");
 

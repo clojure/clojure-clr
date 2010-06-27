@@ -90,6 +90,7 @@ namespace clojure.lang.CljCompiler.Ast
         protected bool IsExplicit { get { return _explicitInterface != null; } }
 
         protected IPersistentMap _methodMeta;
+        protected IPersistentVector _parms;
 
         #endregion
 
@@ -236,6 +237,15 @@ namespace clojure.lang.CljCompiler.Ast
             MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, ReturnType, ArgTypes);
 
             GenInterface.SetCustomAttributes(mb, _methodMeta);
+            for (int i = 0; i < _parms.count(); i++)
+            {
+                IPersistentMap meta = GenInterface.ExtractAttributes(RT.meta(_parms.nth(i)));
+                if (meta != null)
+                {
+                    ParameterBuilder pb = mb.DefineParameter(i + 1, ParameterAttributes.None, ((Symbol)_parms.nth(i)).Name);
+                    GenInterface.SetCustomAttributes(pb, meta);
+                }
+            }
 
             ILGen gen = new ILGen(mb.GetILGenerator());
             gen.EmitLoadArg(0);                             
