@@ -55,7 +55,7 @@ namespace clojure.lang.CljCompiler.Ast
         
         public sealed class DefTypeParser : IParser
         {
-            public Expr Parse(object frm, ParserContext pcon) 
+            public Expr Parse(object frm, ParserContext pcon)
             {
 
                 // frm is: (deftype* tagname classname [fields] :implements [interfaces] :tag tagname methods*)
@@ -63,24 +63,24 @@ namespace clojure.lang.CljCompiler.Ast
                 ISeq rform = (ISeq)frm;
                 rform = RT.next(rform);
 
-                string tagname = ((Symbol) rform.first()).ToString();
-			rform = rform.next();
-			string classname = ((Symbol) rform.first()).ToString();
-			rform = rform.next();
-			IPersistentVector fields = (IPersistentVector) rform.first();
-			rform = rform.next();
-			IPersistentMap opts = PersistentHashMap.EMPTY;
-			while(rform != null && rform.first() is Keyword)
-				{
-				opts = opts.assoc(rform.first(), RT.second(rform));
-				rform = rform.next().next();
-				}
+                string tagname = ((Symbol)rform.first()).ToString();
+                rform = rform.next();
+                Symbol classname = (Symbol)rform.first();
+                rform = rform.next();
+                IPersistentVector fields = (IPersistentVector)rform.first();
+                rform = rform.next();
+                IPersistentMap opts = PersistentHashMap.EMPTY;
+                while (rform != null && rform.first() is Keyword)
+                {
+                    opts = opts.assoc(rform.first(), RT.second(rform));
+                    rform = rform.next().next();
+                }
 
-			ObjExpr ret = Build((IPersistentVector)RT.get(opts,Compiler.IMPLEMENTS_KEY, PersistentVector.EMPTY),fields,null,tagname, classname,
-			             (Symbol) RT.get(opts,RT.TAG_KEY),rform,frm);
+                ObjExpr ret = Build((IPersistentVector)RT.get(opts, Compiler.IMPLEMENTS_KEY, PersistentVector.EMPTY), fields, null, tagname, classname,
+                             (Symbol)RT.get(opts, RT.TAG_KEY), rform, frm);
 
-            return ret;
-            
+                return ret;
+
             }
         }
 
@@ -105,7 +105,7 @@ namespace clojure.lang.CljCompiler.Ast
                 rform = RT.next(rform);
 
                 //return Build(interfaces, null, null, className, className, null, rform);
-                ObjExpr ret = Build(interfaces, null, null, className, className, null, rform,frm);
+                ObjExpr ret = Build(interfaces, null, null, className, Symbol.intern(className), null, rform,frm);
                 if (frm is IObj && ((IObj)frm).meta() != null)
                     return new MetaExpr(ret, (MapExpr)MapExpr.Parse(((IObj)frm).meta()));
                 else
@@ -118,14 +118,15 @@ namespace clojure.lang.CljCompiler.Ast
             IPersistentVector fieldSyms, 
             Symbol thisSym,
             string tagName, 
-            string className, 
+            Symbol className, 
             Symbol typeTag, 
             ISeq methodForms,
             Object frm)
         {
             NewInstanceExpr ret = new NewInstanceExpr(null);
             ret._src = frm;
-            ret._name = className;
+            ret._name = className.ToString();
+            ret._classMeta = GenInterface.ExtractAttributes(RT.meta(className));
             ret.InternalName = ret.Name;  // ret.Name.Replace('.', '/');
             ret.ObjType = null; 
 

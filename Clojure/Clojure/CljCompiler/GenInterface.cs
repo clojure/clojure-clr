@@ -70,25 +70,47 @@ namespace clojure.lang
         #region Defining methods
 
 
-        private static void SetCustomAttributes(TypeBuilder tb, IPersistentMap attributes)
-        {
-            // attributes = ( [ type value]... }
-            // value = { :key value ... }
-            // Special key :__args indicates positional arguments
+        // attributes = ( [ type value]... }
+        // value = { :key value ... }
+        // Special key :__args indicates positional arguments
 
-            for (ISeq s = RT.seq(attributes); s != null; s = s.next())
-                SetCustomAttribute(tb, (IMapEntry) s.first());
+        public static readonly Var EXTRACT_ATTRIBUTES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),Symbol.create("extract-attributes"));
+
+        public static IPersistentMap ExtractAttributes(IPersistentMap meta)
+        {
+            if (EXTRACT_ATTRIBUTES.isBound)
+                return (IPersistentMap)EXTRACT_ATTRIBUTES.invoke(meta);
+
+            return PersistentArrayMap.EMPTY;
         }
+
+
+        public static void SetCustomAttributes(TypeBuilder tb, IPersistentMap attributes)
+        {
+            for (ISeq s = RT.seq(attributes); s != null; s = s.next())
+                tb.SetCustomAttribute(CreateCustomAttributeBuilder((IMapEntry)(s.first())));
+        }
+
+        public static void SetCustomAttributes(FieldBuilder fb, IPersistentMap attributes)
+        {
+            for (ISeq s = RT.seq(attributes); s != null; s = s.next())
+                fb.SetCustomAttribute(CreateCustomAttributeBuilder((IMapEntry)(s.first())));
+        }
+
+        public static void SetCustomAttributes(MethodBuilder mb, IPersistentMap attributes)
+        {
+            for (ISeq s = RT.seq(attributes); s != null; s = s.next())
+                mb.SetCustomAttribute(CreateCustomAttributeBuilder((IMapEntry)(s.first())));
+        }
+
 
         static readonly Keyword ARGS_KEY = Keyword.intern(null,"__args");
 
 
-        private static void SetCustomAttribute(TypeBuilder tb, IMapEntry me)
+        private static CustomAttributeBuilder CreateCustomAttributeBuilder(IMapEntry me)
         {
             Type t = (Type) me.key();
             IPersistentMap args = (IPersistentMap)me.val();
-
-            Console.WriteLine("Here");
 
             object[] ctorArgs = new object[0];
             Type[] ctorTypes = Type.EmptyTypes;
@@ -136,7 +158,7 @@ namespace clojure.lang
 
             CustomAttributeBuilder cb = new CustomAttributeBuilder(ctor,ctorArgs,pInfos.ToArray(),pVals.ToArray(),fInfos.ToArray(),fVals.ToArray());
 
-            tb.SetCustomAttribute(cb);
+            return cb;
         }
 
         private static Type[] GetCtorTypes(object[] args)

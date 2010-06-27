@@ -26,5 +26,20 @@
 (gen-interface 
   :name ^{System.SerializableAttribute {} dm.PetTypeAttribute x} test.I1
   :methods [ [m1 [] Object] ])
+  
+(definterface ^{System.SerializableAttribute {} dm.PetTypeAttribute x} I2 (m2 []))
 
 ; (seq (.GetCustomAttributes test.I1 true))
+; (seq (.GetCustomAttributes I2 true))
+
+
+(definterface ^{ dm.PetTypeAttribute x } I3 
+  (m1 [ x  y])
+  (m2 [x y]))
+  
+
+(deftype ^{System.SerializableAttribute {}}  T1 [a ^{ dm.PetTypeAttribute x } b]
+    I3
+    (^{ dm.PetTypeAttribute x } m1 [_ x y]    x)
+    (m2 [this x y] y)
+)

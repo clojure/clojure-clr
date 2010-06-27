@@ -182,6 +182,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected Object _src;
 
+        protected IPersistentMap _classMeta;
+
         #endregion
 
         #region C-tors
@@ -374,6 +376,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             TypeBuilder baseTB = context.ModuleBuilder.DefineType(baseClassName, TypeAttributes.Public | TypeAttributes.Abstract, _superType,interfaces);
 
+            GenInterface.SetCustomAttributes(baseTB, _classMeta);
 
             GenerateConstantFields(baseTB);
 
@@ -459,6 +462,8 @@ namespace clojure.lang.CljCompiler.Ast
                 FieldBuilder fb = markVolatile 
                     ? baseTB.DefineField(lb.Name,type, new Type[] { typeof(IsVolatile) }, Type.EmptyTypes, attributes)
                     : baseTB.DefineField(lb.Name, type, attributes);
+
+                GenInterface.SetCustomAttributes(fb, GenInterface.ExtractAttributes(RT.meta(lb.Symbol)));
 
                 _closedOverFields.Add(fb);
                 _closedOverFieldsMap[lb] = fb;
@@ -648,6 +653,8 @@ namespace clojure.lang.CljCompiler.Ast
             _typeBuilder = context.AssemblyGen.DefinePublicType(_internalName, _baseType, true);
             for (int i =0; i<_interfaces.count(); i++ )
                 _typeBuilder.AddInterfaceImplementation((Type)_interfaces.nth(i));
+
+            GenInterface.SetCustomAttributes(_typeBuilder, _classMeta);
 
             GenerateStaticConstructor(_typeBuilder, _baseType);
             _ctorInfo = GenerateConstructor(_typeBuilder, _baseType);

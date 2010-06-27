@@ -89,6 +89,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected bool IsExplicit { get { return _explicitInterface != null; } }
 
+        protected IPersistentMap _methodMeta;
+
         #endregion
 
         #region abstract methods
@@ -232,6 +234,9 @@ namespace clojure.lang.CljCompiler.Ast
             TypeBuilder tb = context.ObjExpr.TypeBuilder;
 
             MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, ReturnType, ArgTypes);
+
+            GenInterface.SetCustomAttributes(mb, _methodMeta);
+
             ILGen gen = new ILGen(mb.GetILGenerator());
             gen.EmitLoadArg(0);                             
             for (int i = 1; i <= _argLocals.count(); i++)
