@@ -239,7 +239,7 @@
                                  base-fields)                                                                     ;;; ADDED
                        (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap ~'gk__4242 ~'gv__4242)))))])]       ;;; ADDED
      (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap associative ipc dict)]                              ;;; Associative, ipc added
-       `(deftype* ~tagname ~classname ~(conj hinted-fields '__meta '__extmap) 
+       `(deftype* ~tagname ~(vary-meta classname merge {System.SerializableAttribute {}}) ~(conj hinted-fields '__meta '__extmap) 
           :implements ~(vec i) 
           ~@m)))))
 
