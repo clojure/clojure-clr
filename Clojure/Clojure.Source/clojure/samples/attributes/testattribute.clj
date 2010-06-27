@@ -34,8 +34,8 @@
 
 
 (definterface ^{ dm.PetTypeAttribute x } I3 
-  (m1 [ x  y])
-  (m2 [x y]))
+  (^{ dm.PetTypeAttribute x } m1 [ x  y])
+  (m2 [x ^{ dm.PetTypeAttribute x } y]))
   
 
 (deftype ^{System.SerializableAttribute {}}  T1 [a ^{ dm.PetTypeAttribute x } b]

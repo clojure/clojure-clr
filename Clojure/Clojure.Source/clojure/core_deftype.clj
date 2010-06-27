@@ -15,7 +15,7 @@
   [name & sigs]
   (let [tag (fn tag [x] (if (seq? x) (list (first x) (tag (second x))) (or (:tag (meta x)) Object)))
         psig (fn [[name [& args]]]
-               (vector name (vec (map tag args)) (tag name)))
+               (vector name (vec (map tag args)) (tag name) (map meta args)))
         cname (with-meta (symbol (str *ns* "." name)) (meta name))]
     `(do (gen-interface :name ~cname :methods ~(vec (map psig sigs)))
          (import ~cname))))

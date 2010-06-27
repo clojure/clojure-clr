@@ -67,8 +67,7 @@ namespace clojure.lang
 
         #endregion
 
-        #region Defining methods
-
+        #region Fun with attributes
 
         // attributes = ( [ type value]... }
         // value = { :key value ... }
@@ -183,7 +182,11 @@ namespace clojure.lang
 
             return args;
         }
+        
+        
+        #endregion
 
+        #region Defining methods
 
         private static void DefineMethods(TypeBuilder proxyTB, ISeq methods)
         {
@@ -193,11 +196,26 @@ namespace clojure.lang
 
         private static void DefineMethod(TypeBuilder proxyTB, IPersistentVector sig)
         {
-            string mname = (string)sig.nth(0);
+            Symbol mname = (Symbol)sig.nth(0);
             Type[] paramTypes = GenClass.CreateTypeArray((ISeq)sig.nth(1));
             Type retType = (Type)sig.nth(2);
+            ISeq pmetas = (ISeq)(sig.count() >= 4 ? sig.nth(3) : null);
 
-            MethodBuilder mb = proxyTB.DefineMethod(mname, MethodAttributes.Abstract | MethodAttributes.Public| MethodAttributes.Virtual, retType, paramTypes);
+            MethodBuilder mb = proxyTB.DefineMethod(mname.Name, MethodAttributes.Abstract | MethodAttributes.Public| MethodAttributes.Virtual, retType, paramTypes);
+
+            SetCustomAttributes(mb, GenInterface.ExtractAttributes(RT.meta(mname)));
+            int i=1;
+            for (ISeq s = pmetas; s != null; s = s.next(), i++)
+            {
+                IPersistentMap meta = GenInterface.ExtractAttributes((IPersistentMap)s.first());
+                if (meta != null && meta.count() > 0)
+                {
+                    ParameterBuilder pb = mb.DefineParameter(i, ParameterAttributes.None, String.Format("p_{0}",i));
+                    GenInterface.SetCustomAttributes(pb, meta);
+                }
+            }
+
+        
         }
 
         #endregion

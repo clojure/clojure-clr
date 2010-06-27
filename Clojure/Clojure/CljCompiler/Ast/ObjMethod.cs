@@ -237,13 +237,16 @@ namespace clojure.lang.CljCompiler.Ast
             MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, ReturnType, ArgTypes);
 
             GenInterface.SetCustomAttributes(mb, _methodMeta);
-            for (int i = 0; i < _parms.count(); i++)
+            if (_parms != null)
             {
-                IPersistentMap meta = GenInterface.ExtractAttributes(RT.meta(_parms.nth(i)));
-                if (meta != null)
+                for (int i = 0; i < _parms.count(); i++)
                 {
-                    ParameterBuilder pb = mb.DefineParameter(i + 1, ParameterAttributes.None, ((Symbol)_parms.nth(i)).Name);
-                    GenInterface.SetCustomAttributes(pb, meta);
+                    IPersistentMap meta = GenInterface.ExtractAttributes(RT.meta(_parms.nth(i)));
+                    if (meta != null && meta.count() > 0)
+                    {
+                        ParameterBuilder pb = mb.DefineParameter(i + 1, ParameterAttributes.None, ((Symbol)_parms.nth(i)).Name);
+                        GenInterface.SetCustomAttributes(pb, meta);
+                    }
                 }
             }
 
