@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="clojure\samples\attributes\C.cs" />
     <Compile Include="clojure\samples\genclass\C.cs" />
     <Compile Include="clojure\samples\interop\C.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -78,6 +79,7 @@
     <None Include="clojure\main.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="clojure\samples\attributes\testattribute.clj" />
     <None Include="clojure\samples\await-test.clj" />
     <None Include="clojure\samples\celsius.clj" />
     <None Include="clojure\samples\deftype\testdeftype.clj" />

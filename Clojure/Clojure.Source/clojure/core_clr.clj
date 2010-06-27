@@ -84,4 +84,54 @@
   (throw (ArgumentException. "by-ref not used at top-level in an interop call or method signature")))
   
 
+; Attribute handling
+
+(defn enum? [v]
+  (instance? Enum v))
   
+(defn array? [v]
+  (instance? Array v))
+
+(defn- is-attribute? [c]
+  (and (class? c)
+       (.IsAssignableFrom System.Attribute c)))
+
+(defn- attribute-filter [[k v]]
+  (when (symbol? k)
+    (when-let [c (resolve k)]
+      (is-attribute? c))))
+      
+      
+; Note: we are not handling the non-CLS-compliant case of a one-dimensional array of arg values -- yet.
+
+(defn- normalize-attribute-arg-value [v]
+  (cond
+	(symbol? v) (let [ev (eval v)]
+	              (enum? ev) ev
+	              (class? ev) ev
+	              :else   ev ) ;(throw (ArgumentException. (str "Unsupported attribute argument value: " v " of class " (class ev)))))
+	:else v))
+     
+      
+(defn- normalize-attribute-arg [arg]
+  (cond
+     (vector? arg) { :__args (map normalize-attribute-arg-value arg) }
+     (map? arg)    (into {} (map (fn [k v] [k (normalize-attribute-arg-value v)]) arg))
+     :else         { :__args [ (normalize-attribute-arg-value arg) ] }))
+    
+(defn- resolve-attribute [v]
+  (cond
+    (is-attribute? v) v
+    (symbol? v) (when-let [c (resolve v)]
+                   (when (is-attribute? c)
+                     c))
+    :else nil))
+         
+
+(defn- extract-attributes [m]
+   (into {} 
+     (remove nil? 
+       (for [[k v] (seq m)]
+         (when-let [c (resolve-attribute k)]
+           [ c (normalize-attribute-arg v) ])))))
+                

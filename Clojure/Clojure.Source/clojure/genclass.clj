@@ -231,7 +231,7 @@
   [{:keys [name extends methods]}]
   (let [extendTypes (map the-class extends)
         methodSigs (map (fn [[mname pclasses rclass]] [(str mname) (map the-class-maybe-by-ref pclasses) (the-class rclass)]) methods)]
-	(clojure.lang.GenInterface/GenerateInterface (str name) extendTypes methodSigs)))
+	(clojure.lang.GenInterface/GenerateInterface (str name) (extract-attributes (meta name)) extendTypes methodSigs)))
 
 
 (defmacro gen-interface

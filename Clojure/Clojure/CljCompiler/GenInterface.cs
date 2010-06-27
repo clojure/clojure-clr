@@ -26,7 +26,7 @@ namespace clojure.lang
     {
         #region Factory
 
-        public static Type GenerateInterface(string iName, ISeq extends, ISeq methods)
+        public static Type GenerateInterface(string iName, IPersistentMap attributes, ISeq extends, ISeq methods)
         {
             GenContext context;
 
@@ -51,6 +51,7 @@ namespace clojure.lang
                 null,
                 interfaceTypes);
 
+            SetCustomAttributes(proxyTB, attributes);
 
             DefineMethods(proxyTB, methods);
 
@@ -67,6 +68,95 @@ namespace clojure.lang
         #endregion
 
         #region Defining methods
+
+
+        private static void SetCustomAttributes(TypeBuilder tb, IPersistentMap attributes)
+        {
+            // attributes = ( [ type value]... }
+            // value = { :key value ... }
+            // Special key :__args indicates positional arguments
+
+            for (ISeq s = RT.seq(attributes); s != null; s = s.next())
+                SetCustomAttribute(tb, (IMapEntry) s.first());
+        }
+
+        static readonly Keyword ARGS_KEY = Keyword.intern(null,"__args");
+
+
+        private static void SetCustomAttribute(TypeBuilder tb, IMapEntry me)
+        {
+            Type t = (Type) me.key();
+            IPersistentMap args = (IPersistentMap)me.val();
+
+            Console.WriteLine("Here");
+
+            object[] ctorArgs = new object[0];
+            Type[] ctorTypes = Type.EmptyTypes;
+
+            List<PropertyInfo> pInfos = new List<PropertyInfo>();
+            List<Object> pVals = new List<object>();
+            List<FieldInfo> fInfos = new List<FieldInfo>();
+            List<Object> fVals = new List<object>();
+
+            for (ISeq s = RT.seq(args); s != null; s = s.next())
+            {
+                IMapEntry m2 = (IMapEntry)s.first();
+                Keyword k = (Keyword) m2.key();
+                object v = m2.val();
+                if (k == ARGS_KEY)
+                {
+                    ctorArgs = GetCtorArgs((IPersistentVector)v);
+                    ctorTypes = GetCtorTypes(ctorArgs);
+                }
+                else
+                {
+                    string name = k.Name;
+                    PropertyInfo pInfo = t.GetProperty(name);
+                    if (pInfo != null)
+                    {
+                        pInfos.Add(pInfo);
+                        pVals.Add(v);
+                        continue;
+                    }
+
+                    FieldInfo fInfo = t.GetField(name);
+                    if (fInfo != null)
+                    {
+                        fInfos.Add(fInfo);
+                        fVals.Add(v);
+                        continue;
+                    }
+                    throw new ArgumentException(String.Format("Unknown field/property: {0} for attribute: {1}", k.Name, t.FullName));
+                }
+            }
+
+            ConstructorInfo ctor = t.GetConstructor(ctorTypes);
+            if (ctor == null)
+                throw new ArgumentException(String.Format("Unable to find constructor for attribute: {0}", t.FullName));
+
+            CustomAttributeBuilder cb = new CustomAttributeBuilder(ctor,ctorArgs,pInfos.ToArray(),pVals.ToArray(),fInfos.ToArray(),fVals.ToArray());
+
+            tb.SetCustomAttribute(cb);
+        }
+
+        private static Type[] GetCtorTypes(object[] args)
+        {
+            Type[] types = new Type[args.Length];
+            for (int i = 0; i < args.Length; i++)
+                types[i] = args[i].GetType();
+
+            return types;
+        }
+
+        private static object[] GetCtorArgs(IPersistentVector v)
+        {
+            object[] args = new object[v.length()];
+            for (int i = 0; i < v.length(); i++)
+                args[i] = v.nth(i);
+
+            return args;
+        }
+
 
         private static void DefineMethods(TypeBuilder proxyTB, ISeq methods)
         {
