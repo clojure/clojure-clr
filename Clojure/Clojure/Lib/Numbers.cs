@@ -253,9 +253,10 @@ namespace clojure.lang
 
         public static bool equiv(object x, object y)
         {
-            return Util.IsNumeric(x)
-                && Util.IsNumeric(y)
-                && DoOp(x, y, BoolBinaryOpCode.Equiv);
+            //return Util.IsNumeric(x)
+            //    && Util.IsNumeric(y)
+            //    && DoOp(x, y, BoolBinaryOpCode.Equiv);
+            return DoOp(x, y, BoolBinaryOpCode.Equiv);
         }
 
         internal static bool EquivArg1Numeric(object x, object y)
