@@ -215,6 +215,7 @@
   to reference the load code for the implementing namespace. Should be
   true when implementing-ns is the default, false if you intend to
   load the code via some other method."
+  {:added "1.0"}
 
   [& options]
     (let [x *compile-files*]
@@ -261,6 +262,7 @@
   This parameter is used to specify the signatures of the methods of
   the generated interface.  Do not repeat superinterface signatures
   here."
+  {:added "1.0"}
 
   [& options]
   (let [options-map (into {} (map vec (partition 2 options))) ]

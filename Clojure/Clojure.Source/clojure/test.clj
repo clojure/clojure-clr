@@ -499,6 +499,7 @@
 (defmacro try-expr
   "Used by the 'is' macro to catch unexpected exceptions.
   You don't call this."
+  {:added "1.0"}
   [msg form]
   `(try ~(assert-expr msg form)
         (catch Exception t#                                       ;;; Throwable
