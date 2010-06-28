@@ -77,7 +77,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (t == null)
                     instance = Compiler.GenerateAST(RT.second(form),new ParserContext(false,false));
 
-                bool isZeroArityCall = RT.Length(form) == 3 && RT.third(form) is Symbol;
+                bool isZeroArityCall = RT.Length(form) == 3 && (RT.third(form) is Symbol || RT.third(form) is Keyword);
 
                 if (isZeroArityCall)
                 {
@@ -85,7 +85,7 @@ namespace clojure.lang.CljCompiler.Ast
                     FieldInfo finfo = null;
                     MethodInfo minfo = null;
 
-                    Symbol sym = (Symbol)RT.third(form);
+                    Symbol sym = (RT.third(form) is Keyword) ? ((Keyword)RT.third(form)).Symbol : (Symbol)RT.third(form);
                     string fieldName = Compiler.munge(sym.Name);
                     // The JVM version does not have to worry about Properties.  It captures 0-arity methods under fields.
                     // We have to put in special checks here for this.
