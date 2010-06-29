@@ -314,7 +314,7 @@
 ;;; making the appropriate adjustments. Return the remainder of the string
 (defn- write-initial-lines 
   [^TextWriter this ^String s] 
-  (let [lines (.Split s "\n" -1)]
+  (let [lines (.Split #"\n" s )]                                                      ;;; (.Split s "\n" -1)
     (if (= (count lines) 1)
       s
       (dosync 
@@ -384,7 +384,7 @@
           (condp = (class x)
             String 
             (let [^String s0 (write-initial-lines this x)
-                  ^String s (.replaceFirst s0 "\\s+$" "")          ;;; TODO: Figure out replaceFirst
+                  ^String s (.Replace #"\\s+$" s0 "" 1)                              ;;; (.replaceFirst s0 "\\s+$" "")
                   white-space (.Substring s0 (count s))
                   mode (getf :mode)]
               (dosync
@@ -397,6 +397,8 @@
                        newpos (+ oldpos (count s0))]
                    (setf :pos newpos)
                    (add-to-buffer this (make-buffer-blob s white-space oldpos newpos))))))
+			Char
+			(p-write-char this x)
 
             Int32
             (p-write-char this x))))

@@ -223,7 +223,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
                 [nil nil]) 
              val))))
 
-;;; TODO: xlated-val does not seem to be used here.
+;;; TODO: xlated-val does not seem to be used here.   ---- ;;;; I had to use it to prevent the call to remainders from returning a Double instead of an integer in the last position
 (defn- base-str
   "Return val as a string in the given base"
   [base val]
@@ -237,7 +237,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
       (apply str 
              (map 
               #(if (< % 10) (char (+ (int \0) %)) (char (+ (int \a) (- % 10)))) 
-              (remainders base val))))))
+              (remainders base xlated-val))))))
 
 (def ^{:private true}
      java-base-formats {8 "%o", 10 "%d", 16 "%x"})
@@ -1025,7 +1025,10 @@ Note this should only be used for the last one in the sequence"
 		String 
 		(let [s ^String x]
 		  (.Write writer (.ToLower s)))                        ;;; write toLowerCase
-
+		  
+		Char  
+		(.Write writer (int (Char/ToLower ^Char x)))
+		
 		Int32                                                                 ;;; Integer
 		(let [c ^Char x]                                                      ;;; Character
 		  (.Write writer (int (Char/ToLower (char c))))))))))                 ;;; .write Character/toLowerCase
@@ -1043,6 +1046,9 @@ Note this should only be used for the last one in the sequence"
 		String 
 		(let [s ^String x]
 		  (.Write writer (.ToUpper s)))
+		  
+		Char
+		(.Write writer (int (Char/ToUpper ^Char x)))
 
 		Int32
 		(let [c ^Char x]
@@ -1067,7 +1073,7 @@ Note this should only be used for the last one in the sequence"
                        offset (and match (inc (.start m)))]            ;;; .start
                    (if offset
                      [(str (subs s 0 offset) 
-                           (Char/ToUpper ^Char (nth s offset)))   ;;; Character/toUpperCase  Character
+                           (Char/ToUpper ^Char (char (nth s offset))))   ;;; Character/toUpperCase  Character  (char ... ) wrapper added
                       (subs s (inc offset))]
                      [s nil]))))
              s)))))
@@ -1092,7 +1098,12 @@ Note this should only be used for the last one in the sequence"
                (ref-set last-was-whitespace? 
                         (Char/IsWhiteSpace 
                          ^Char (nth s (dec (count s)))))))
-
+			Char
+			(let [c (char x)]
+              (let [mod-c (if @last-was-whitespace? (Char/ToUpper ^Char (char x)) c)] 
+                (.Write writer (int mod-c))
+                (dosync (ref-set last-was-whitespace? (Char/IsWhiteSpace ^Char (char x))))))
+            
             Int32
             (let [c (char x)]
               (let [mod-c (if @last-was-whitespace? (Char/ToUpper ^Char (char x)) c)] 
@@ -1119,12 +1130,20 @@ Note this should only be used for the last one in the sequence"
                        (if offset
                          (do (.Write writer 
                                    (str (subs s 0 offset) 
-                                        (Char/ToUpper ^Char (nth s offset))
+                                        (Char/ToUpper ^Char (char (nth s offset)))      ;; added (char ... )
                                         (.ToLower ^String (subs s (inc offset)))))
                            (dosync (ref-set capped true)))
                          (.Write writer s))) 
                      (.Write writer (.ToLower s))))
-
+				 
+				 Char
+                 (let [c ^Char (char x)]
+                   (if (and (not @capped) (Char/IsLetter c))
+                     (do
+                       (dosync (ref-set capped true))
+                       (.Write writer (int (Char/ToUpper c))))
+                     (.Write writer (int (Char/ToLower c)))))
+				 
                  Int32
                  (let [c ^Char (char x)]
                    (if (and (not @capped) (Char/IsLetter c))

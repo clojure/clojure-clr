@@ -51,6 +51,14 @@
               (set-field this :line (inc (get-field this :line))))
 	    (set-field this :cur (inc (get-field this :cur)))))
   (.Write ^TextWriter (get-field this :base) c))
+  
+(defn- cc-write-char [^TextWriter this ^Char c]                  ;;; ADDED
+  (dosync (if (= c \newline)
+	    (do
+              (set-field this :cur 0)
+              (set-field this :line (inc (get-field this :line))))
+	    (set-field this :cur (inc (get-field this :cur)))))
+  (.Write ^TextWriter (get-field this :base) c))  
 
 (defn- column-writer   
   ([writer] (column-writer writer *default-page-width*))
@@ -64,9 +72,10 @@
                (.Write writer cbuf off len)))
           ([x]
              (condp = (class x)
+
                String 
                (let [^String s x
-                     nl (.LastIndexOf s (int \newline))]
+                     nl (.LastIndexOf s \newline)]                                        ;;; (int \newline)
                  (dosync (if (neg? nl)
                            (set-field this :cur (+ (get-field this :cur) (count s)))
                            (do
@@ -74,6 +83,9 @@
                              (set-field this :line (+ (get-field this :line)
                                                       (count (filter #(= % \newline) s)))))))
                  (.Write ^TextWriter (get-field this :base) s))
+                 
+               Char
+               (cc-write-char this x)
 
                Int32
                (c-write-char this x))))))))

@@ -401,7 +401,7 @@
          (condp = (class x)
            String 
            (let [s0 (write-initial-lines this x)
-                 s (.replaceFirst s0 "\\s+$" "")                   ;;; TODO: Figure out the replacement for this.
+                 s  (.Replace #"\\s+$" s0 "" 1)                              ;;; (.replaceFirst s0 "\\s+$" "")                   
                  white-space (.Substring s0 (count s))
                  mode (getf :mode)]
              (if (= mode :writing)
