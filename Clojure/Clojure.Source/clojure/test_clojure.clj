@@ -52,6 +52,9 @@
       :protocols
       ; :genclass   -- TODO: We have some problems with classpaths -- this is a perfect example
       :main
+      ;:vectors
+      ;:annotations
+      :pprint
       ])
 
 (def test-namespaces

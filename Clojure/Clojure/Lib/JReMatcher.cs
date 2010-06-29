@@ -147,6 +147,16 @@ namespace clojure.lang
         }
 
 
+        public int start()
+        {
+            return _match.Index;
+        }
+
+        public int end()
+        {
+            return _match.Index + _match.Length;
+        }
+
         #endregion
 
     }

@@ -10,7 +10,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; printing ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(import '(System.IO.System.IO.TextWriter))   ;;; was (import '(java.io Writer))    (I have replaced ^Writer with ^System.IO.TextWriter throughout
+(import '(System.IO.TextWriter))   ;;; was (import '(java.io Writer))    (I have replaced ^Writer with ^System.IO.TextWriter throughout
 ;; Other global replaces:  .write => .Write, .append => .Write, ^Class => ^Type, ^Character => ^Char
 (def
  ^{:doc "*print-length* controls how many items of each collection the
