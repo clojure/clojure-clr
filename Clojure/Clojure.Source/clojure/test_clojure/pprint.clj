@@ -15,4 +15,4 @@
         clojure.pprint))
 
 (load "pprint/test_cl_format")
-(load "pprint/test_pretty")
+;(load "pprint/test_pretty")

@@ -398,7 +398,9 @@
                    (setf :pos newpos)
                    (add-to-buffer this (make-buffer-blob s white-space oldpos newpos))))))
 			Char
-			(p-write-char this x)
+            (.Write writer x)
+
+			;(p-write-char this x)
 
             Int32
             (p-write-char this x))))

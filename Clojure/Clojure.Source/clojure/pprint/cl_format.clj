@@ -1019,7 +1019,7 @@ Note this should only be used for the last one in the sequence"
     (Close [] (.Close writer))                          ;;; close
     (Flush [] (.Flush writer))                          ;;; flush
     (Write ([^chars cbuf ^Int32 off ^Int32 len]     ;;;  write Integer
-              (.Write writer cbuf off len))         ;;; write
+              (.Write writer cbuf off len))         ;;; write             
            ([x]
               (condp = (class x)
 		String 
@@ -1099,10 +1099,12 @@ Note this should only be used for the last one in the sequence"
                         (Char/IsWhiteSpace 
                          ^Char (nth s (dec (count s)))))))
 			Char
-			(let [c (char x)]
-              (let [mod-c (if @last-was-whitespace? (Char/ToUpper ^Char (char x)) c)] 
-                (.Write writer (int mod-c))
-                (dosync (ref-set last-was-whitespace? (Char/IsWhiteSpace ^Char (char x))))))
+            (.Write writer ^Char x)
+
+			;(let [c (char x)]
+            ;  (let [mod-c (if @last-was-whitespace? (Char/ToUpper ^Char (char x)) c)] 
+            ;    (.Write writer (int mod-c))
+            ;    (dosync (ref-set last-was-whitespace? (Char/IsWhiteSpace ^Char (char x))))))
             
             Int32
             (let [c (char x)]
@@ -1118,7 +1120,7 @@ Note this should only be used for the last one in the sequence"
       (Close [] (.Close writer))
       (Flush [] (.Flush writer))
       (Write ([^chars cbuf ^Int32 off ^Int32 len] 
-                (.Write writer cbuf off len))
+                (.Write writer cbuf off len))               
              ([x]
                 (condp = (class x)
                  String 
@@ -1137,12 +1139,14 @@ Note this should only be used for the last one in the sequence"
                      (.Write writer (.ToLower s))))
 				 
 				 Char
-                 (let [c ^Char (char x)]
-                   (if (and (not @capped) (Char/IsLetter c))
-                     (do
-                       (dosync (ref-set capped true))
-                       (.Write writer (int (Char/ToUpper c))))
-                     (.Write writer (int (Char/ToLower c)))))
+                 (.Write writer ^Char x)
+
+                 ;(let [c ^Char (char x)]
+                 ;  (if (and (not @capped) (Char/IsLetter c))
+                 ;    (do
+                 ;      (dosync (ref-set capped true))
+                 ;      (.Write writer (int (Char/ToUpper c))))
+                 ;    (.Write writer (int (Char/ToLower c)))))
 				 
                  Int32
                  (let [c ^Char (char x)]
