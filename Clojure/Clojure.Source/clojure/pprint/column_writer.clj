@@ -84,8 +84,8 @@
                                                       (count (filter #(= % \newline) s)))))))
                  (.Write ^TextWriter (get-field this :base) s))
                  
-               Char
-               (.Write writer ^Char x)
+               ;Char
+               ;(.Write writer ^Char x)
 
                ;;(cc-write-char this x)
 

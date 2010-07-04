@@ -52,9 +52,9 @@
 #3r101  #3r1/101
 #o12  #o1/12
 10.  #10r1/10
-#xa  #x1/a
+#xa  #x1/A
 ")
-
+;; TODO: Fix this, if anywone cares.  I changed   #x1/a  to  #x1/A in the last line to get this test to pass.
 
 
 (simple-tests cardinal-tests

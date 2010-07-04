@@ -1026,8 +1026,8 @@ Note this should only be used for the last one in the sequence"
 		(let [s ^String x]
 		  (.Write writer (.ToLower s)))                        ;;; write toLowerCase
 		  
-		Char  
-		(.Write writer (int (Char/ToLower ^Char x)))
+		;Char  
+		;(.Write writer (int (Char/ToLower ^Char x)))
 		
 		Int32                                                                 ;;; Integer
 		(let [c ^Char x]                                                      ;;; Character
@@ -1047,8 +1047,8 @@ Note this should only be used for the last one in the sequence"
 		(let [s ^String x]
 		  (.Write writer (.ToUpper s)))
 		  
-		Char
-		(.Write writer (int (Char/ToUpper ^Char x)))
+		;Char
+		;(.Write writer (int (Char/ToUpper ^Char x)))
 
 		Int32
 		(let [c ^Char x]
@@ -1098,13 +1098,8 @@ Note this should only be used for the last one in the sequence"
                (ref-set last-was-whitespace? 
                         (Char/IsWhiteSpace 
                          ^Char (nth s (dec (count s)))))))
-			Char
-            (.Write writer ^Char x)
-
-			;(let [c (char x)]
-            ;  (let [mod-c (if @last-was-whitespace? (Char/ToUpper ^Char (char x)) c)] 
-            ;    (.Write writer (int mod-c))
-            ;    (dosync (ref-set last-was-whitespace? (Char/IsWhiteSpace ^Char (char x))))))
+			;Char
+            ;(.Write writer ^Char x)
             
             Int32
             (let [c (char x)]
@@ -1138,15 +1133,8 @@ Note this should only be used for the last one in the sequence"
                          (.Write writer s))) 
                      (.Write writer (.ToLower s))))
 				 
-				 Char
-                 (.Write writer ^Char x)
-
-                 ;(let [c ^Char (char x)]
-                 ;  (if (and (not @capped) (Char/IsLetter c))
-                 ;    (do
-                 ;      (dosync (ref-set capped true))
-                 ;      (.Write writer (int (Char/ToUpper c))))
-                 ;    (.Write writer (int (Char/ToLower c)))))
+				 ;Char
+                 ;(.Write writer ^Char x)
 				 
                  Int32
                  (let [c ^Char (char x)]
