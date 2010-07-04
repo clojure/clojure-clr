@@ -75,7 +75,18 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override Type[] ArgTypes
         {
-            get { return Compiler.CreateObjectTypeArray(NumParams); }
+            get 
+            {
+                if (IsVariadic && _reqParms.count() == Compiler.MAX_POSITIONAL_ARITY)
+                {
+                    Type[] ret = new Type[Compiler.MAX_POSITIONAL_ARITY + 1];
+                    for (int i = 0; i < Compiler.MAX_POSITIONAL_ARITY + 1; i++)
+                        ret[i] = typeof(Object);
+                    return ret;
+                }
+                
+                return Compiler.CreateObjectTypeArray(NumParams); 
+            }
         }
 
         protected override Type ReturnType
