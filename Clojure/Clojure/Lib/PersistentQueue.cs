@@ -88,7 +88,7 @@ namespace clojure.lang
             for (ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
                 if (ms == null || !Util.equals(s.first(), ms.first()))
                     return false;
-            return ms.next() == null;
+            return ms == null;
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace clojure.lang
             for (ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
                 if ( ms == null || ! Util.equiv(s.first(),ms.first()))
                     return false;
-            return ms.next() == null;
+            return ms == null;
         }
 
 
