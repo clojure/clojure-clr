@@ -33,6 +33,8 @@ namespace clojure.lang.CljCompiler.Ast
             //TypeBuilder baseTB = context.ModuleBldr.DefineType(name, TypeAttributes.Class | TypeAttributes.Public, baseClass);
             TypeBuilder baseTB = context.AssemblyGen.DefinePublicType(name, baseClass, true);
 
+            ObjExpr.MarkAsSerializable(baseTB);
+
             baseTB.DefineDefaultConstructor(MethodAttributes.Public);
 
             FieldBuilder metaField = baseTB.DefineField("_meta", typeof(IPersistentMap), FieldAttributes.Public);

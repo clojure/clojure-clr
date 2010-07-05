@@ -21,6 +21,7 @@ using System.Collections;
 
 namespace clojure.lang
 {
+    [Serializable]
     public abstract class APersistentSet: AFn, IPersistentSet, ICollection  // , Set -- no equivalent
     {
         #region Data

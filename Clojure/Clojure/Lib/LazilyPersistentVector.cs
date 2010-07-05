@@ -205,6 +205,7 @@ namespace clojure.lang
         //}
 
 
+        [Serializable]
         sealed class ChunkedSeq : ASeq, IChunkedSeq, IndexedSeq
         {
             #region Data

@@ -24,6 +24,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents a rational number.
     /// </summary>
+    [Serializable]
     public sealed class Ratio: IComparable, IConvertible
     {
         #region Data

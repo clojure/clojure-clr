@@ -148,7 +148,10 @@ namespace clojure.lang
         protected Symbol (SerializationInfo info, StreamingContext context)
         {
             _name = String.Intern(info.GetString("_name"));
-            _ns = String.Intern(info.GetString("_ns"));
+
+            string nsStr = info.GetString("_ns");
+            _ns = nsStr == null ? null : String.Intern(nsStr);
+
             _hash = ComputeHashCode();
         }
 

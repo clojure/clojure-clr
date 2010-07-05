@@ -269,6 +269,8 @@ namespace clojure.lang
         internal static readonly ConstructorInfo Ctor_KeywordLookupSite_2 = typeof(KeywordLookupSite).GetConstructor(new Type[] { typeof(int), typeof(Keyword) });
         internal static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
 
+        internal static readonly ConstructorInfo Ctor_Serializable = typeof(SerializableAttribute).GetConstructor(Type.EmptyTypes);
+
         internal static readonly MethodInfo[] Methods_IFn_invoke = new MethodInfo[MAX_POSITIONAL_ARITY + 2];
 
         internal static Type[] CreateObjectTypeArray(int size)

@@ -21,6 +21,7 @@ using System.Runtime.CompilerServices;
 
 namespace clojure.lang
 {
+    [Serializable]
     public sealed class LazySeq : Obj, ISeq, ICollection, IList  // Should we do IList -- has index accessor
     {
         #region Data

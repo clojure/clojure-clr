@@ -23,6 +23,7 @@ namespace clojure.lang
     /// Represents a structure map (map with fixed set of quickly accessible keys).
     /// </summary>
     /// <remarks>See the Clojure API for more information.</remarks>
+    [Serializable]
     public class PersistentStructMap : APersistentMap, IObj
     {
 
@@ -446,6 +447,7 @@ namespace clojure.lang
         /// <remarks>Combines an index-iteration over the array of fixed keys, 
         /// followed by a regular iteration of the map of non-fixed keys.
         /// </remarks>
+        [Serializable]
         sealed class Seq : ASeq
         {
             #region Data

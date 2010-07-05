@@ -17,10 +17,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
+using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
-    public class EnumeratorSeq : ASeq
+    [Serializable]
+    public class EnumeratorSeq : ASeq, ISerializable
     {
         #region Nested classes
 
@@ -126,6 +128,15 @@ namespace clojure.lang
             return meta == _meta
                 ? this
                 : new EnumeratorSeq(meta, _enumerator, _state);
+        }
+
+        #endregion
+
+        #region ISerializable Members
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            throw new SerializationException("Serialization not supported for EnumeratorSeq");
         }
 
         #endregion

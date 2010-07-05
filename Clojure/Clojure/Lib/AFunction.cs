@@ -23,10 +23,12 @@ namespace clojure.lang
     /// <summary>
     /// Base class providing IComparer implementation on top of <see cref="AFn">AFn</see>.  Internal use by compiler.
     /// </summary>
+    [Serializable]
     public abstract class AFunction : AFn, IObj, Fn, IComparer
     {
         #region Data
 
+        [NonSerialized]
         public volatile MethodImplCache __methodImplCache;
 
         public MethodImplCache MethodImplCache

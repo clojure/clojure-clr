@@ -19,6 +19,7 @@ using System.Text;
 
 namespace clojure.lang
 {
+    [Serializable]
     public class ChunkedCons : ASeq, IChunkedSeq
     {
         #region Data

@@ -89,7 +89,7 @@ namespace clojure.lang.CljCompiler.Ast
                 lb.IsByRef;
         }
 
-
+        [NonSerialized]
         protected Type _superType;
 
         protected Type _baseType = null;
@@ -376,6 +376,8 @@ namespace clojure.lang.CljCompiler.Ast
 
             TypeBuilder baseTB = context.ModuleBuilder.DefineType(baseClassName, TypeAttributes.Public | TypeAttributes.Abstract, _superType,interfaces);
 
+            MarkAsSerializable(baseTB);
+
             GenInterface.SetCustomAttributes(baseTB, _classMeta);
 
             GenerateConstantFields(baseTB);
@@ -653,6 +655,8 @@ namespace clojure.lang.CljCompiler.Ast
             _typeBuilder = context.AssemblyGen.DefinePublicType(_internalName, _baseType, true);
             for (int i =0; i<_interfaces.count(); i++ )
                 _typeBuilder.AddInterfaceImplementation((Type)_interfaces.nth(i));
+
+            MarkAsSerializable(_typeBuilder);
 
             GenInterface.SetCustomAttributes(_typeBuilder, _classMeta);
 
@@ -1054,6 +1058,12 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
 
         #region other
+
+        internal static void MarkAsSerializable(TypeBuilder tb)
+        {
+            tb.SetCustomAttribute(new CustomAttributeBuilder(Compiler.Ctor_Serializable, new object[0]));
+        }
+
 
         protected abstract void GenerateMethods(GenContext context);
 

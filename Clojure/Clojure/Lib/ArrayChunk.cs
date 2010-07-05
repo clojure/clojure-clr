@@ -19,6 +19,7 @@ using System.Text;
 
 namespace clojure.lang
 {
+    [Serializable]
     public sealed class ArrayChunk : IChunk
     {
         #region Data

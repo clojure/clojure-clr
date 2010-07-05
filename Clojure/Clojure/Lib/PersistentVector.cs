@@ -24,14 +24,17 @@ namespace clojure.lang
     /// <summary>
     /// Implements a persistent vector using a specialized form of array-mapped hash trie.
     /// </summary>
+    [Serializable]
     public class PersistentVector: APersistentVector, IObj, IEditableCollection
     {
         #region Node class
 
+        [Serializable]
         public class Node
         {
             #region Data
 
+            [NonSerialized]
             readonly AtomicReference<Thread> _edit;
 
             public AtomicReference<Thread> Edit
@@ -458,6 +461,7 @@ namespace clojure.lang
             return new ChunkedSeq(this, 0, 0);
         }
 
+        [Serializable]
         sealed public class ChunkedSeq : ASeq, IChunkedSeq
         {
             #region Data

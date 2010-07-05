@@ -25,6 +25,7 @@ namespace clojure.lang
     /// <summary>
     /// Provides a basic impelmentation of <see cref="IPersistentMap">IPersistentMap</see> functionality.
     /// </summary>
+    [Serializable]
     public abstract class APersistentMap: AFn, IPersistentMap, IDictionary, IEnumerable<IMapEntry>
     {
         #region  Data
@@ -353,6 +354,7 @@ namespace clojure.lang
         /// <summary>
         /// Implements a sequence across the keys of map.
         /// </summary>
+        [Serializable]
         public sealed class KeySeq : ASeq
         {
             #region Data
@@ -415,6 +417,7 @@ namespace clojure.lang
         /// <summary>
         /// Implements a sequence across the values of a map.
         /// </summary>
+        [Serializable]
         public sealed class ValSeq : ASeq
         {
             #region Data

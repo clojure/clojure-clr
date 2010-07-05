@@ -98,6 +98,7 @@ namespace clojure.lang
         #endregion
     }
 
+    [Serializable]
     public class UntypedArraySeq : ASeq, IArraySeq
     {
         #region Data
@@ -222,7 +223,8 @@ namespace clojure.lang
 
         #endregion
     }
-    
+
+    [Serializable]
     public class TypedArraySeq<T> : ASeq, IArraySeq
     {
         #region Data

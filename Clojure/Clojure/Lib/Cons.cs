@@ -22,6 +22,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements an immutable cons cell.
     /// </summary>
+    [Serializable]
     public sealed class Cons: ASeq
     {
         // Any reason not to seal this class?

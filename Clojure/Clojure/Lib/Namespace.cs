@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
@@ -34,7 +35,8 @@ namespace clojure.lang
     /// </para>
     /// <para>One namespace can also refer to another namespace by an alias.</para>
     /// </remarks>
-    public class Namespace : AReference
+    [Serializable]
+    public class Namespace : AReference, ISerializable
     {
         #region Data
 
@@ -54,11 +56,13 @@ namespace clojure.lang
         /// <summary>
         /// Maps <see cref="Symbol">Symbol</see>s to their values (Types, <see cref="Var">Var</see>s, or arbitrary).
         /// </summary>
+        [NonSerialized]
         private readonly AtomicReference<IPersistentMap> _mappings = new AtomicReference<IPersistentMap>();
 
         /// <summary>
         /// Maps <see cref="Symbol">Symbol</see>s to other namespaces (aliases).
         /// </summary>
+        [NonSerialized]
         private readonly AtomicReference<IPersistentMap> _aliases = new AtomicReference<IPersistentMap>();
 
 
@@ -423,6 +427,33 @@ namespace clojure.lang
             return Aliases;
         }
 
+
+        #endregion
+
+        #region ISerializable Members
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.SetType(typeof(NamespaceSerializationHelper));
+            info.AddValue("_name",_name);
+        }
+
+        [Serializable]
+        class NamespaceSerializationHelper : IObjectReference
+        {
+
+            Symbol _name;
+
+            #region IObjectReference Members
+
+            public object GetRealObject(StreamingContext context)
+            {
+                string name = (String)context.Context;
+                return Namespace.findOrCreate(_name);
+            }
+
+            #endregion
+        }
 
         #endregion
     }

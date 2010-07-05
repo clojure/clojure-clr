@@ -19,6 +19,7 @@ using System.Text;
 
 namespace clojure.lang
 {
+    [Serializable]
     public abstract class RestFn : AFunction
     {
         #region Interface

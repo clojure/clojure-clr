@@ -36,6 +36,7 @@ namespace clojure.lang
     /// <para>No sub-tree pools or root-resizing</para>
     /// <para>Any errors are Rich Hickey's (so he says), except those that I introduced.</para>
     /// </remarks>
+    [Serializable]
     public class PersistentHashMap: APersistentMap, IEditableCollection, IObj
     {
         #region Data
@@ -397,7 +398,7 @@ namespace clojure.lang
         {
             #region Data
 
-            AtomicReference<Thread> _edit;
+            [NonSerialized] AtomicReference<Thread> _edit;
             INode _root;
             int _count;
             bool _hasNull;
@@ -685,13 +686,14 @@ namespace clojure.lang
 
         #endregion
 
+        [Serializable]
         sealed class ArrayNode : INode
         {
             #region Data
 
             int _count;
             readonly INode[] _array;
-            readonly AtomicReference<Thread> _edit;
+            [NonSerialized] readonly AtomicReference<Thread> _edit;
 
             #endregion
 
@@ -842,6 +844,7 @@ namespace clojure.lang
 
             #region Seq implementation
 
+            [Serializable]
             class Seq : ASeq
             {
                 #region Data
@@ -913,6 +916,7 @@ namespace clojure.lang
         /// <summary>
         ///  Represents an internal node in the trie, not full.
         /// </summary>
+        [Serializable]
         sealed class BitmapIndexedNode : INode
         {
             #region Data
@@ -921,7 +925,7 @@ namespace clojure.lang
 
             int _bitmap;
             object[] _array;
-            readonly AtomicReference<Thread> _edit;
+            [NonSerialized] readonly AtomicReference<Thread> _edit;
 
             #endregion
 
@@ -1222,6 +1226,7 @@ namespace clojure.lang
         /// <summary>
         /// Represents a leaf node corresponding to multiple map entries, all with keys that have the same hash value.
         /// </summary>
+        [Serializable]
         sealed class HashCollisionNode : INode
         {
             #region Data
@@ -1229,7 +1234,7 @@ namespace clojure.lang
             readonly int _hash;
             int _count;
             object[] _array;
-            readonly AtomicReference<Thread> _edit;
+            [NonSerialized] readonly AtomicReference<Thread> _edit;
 
             #endregion
 
@@ -1406,6 +1411,7 @@ namespace clojure.lang
         }
 
 
+        [Serializable]
         sealed class NodeSeq : ASeq
         {
 

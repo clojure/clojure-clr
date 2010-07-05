@@ -25,6 +25,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using RTProperties = clojure.runtime.Properties;
+using System.Runtime.Serialization;
 //using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
@@ -617,12 +618,12 @@ namespace clojure.lang
                 return ((Seqable)coll).seq();
             else if (coll == null)
                 return null;
-            else if (coll is IEnumerable)  // java: Iterable
-                return EnumeratorSeq.create(((IEnumerable)coll).GetEnumerator());  // IteratorSeq
             else if (coll.GetType().IsArray)
                 return ArraySeq.createFromObject(coll);
             else if (coll is string)
                 return StringSeq.create((string)coll);
+            else if (coll is IEnumerable)  // java: Iterable  -- reordered clauses so others take precedence.
+                return EnumeratorSeq.create(((IEnumerable)coll).GetEnumerator());  // IteratorSeq
             // The equivalent for Java:Map is IDictionary.  IDictionary is IEnumerable, so is handled above.
             //else if(coll isntanceof Map)  
             //     return seq(((Map) coll).entrySet());
@@ -1747,7 +1748,8 @@ namespace clojure.lang
 
         #region Things not in the Java version
 
-        class DefaultComparer : IComparer
+        [Serializable]
+        class DefaultComparer : IComparer, ISerializable
         {
             #region IComparer Members
 
@@ -1765,6 +1767,29 @@ namespace clojure.lang
             {
                 return Util.compare(x, y);  // was ((IComparable)x).CompareTo(y);-- changed in Java rev 1145
             }
+
+            #endregion
+
+            #region ISerializable Members
+
+            public void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                info.SetType(typeof(DefaultComparerSerializationHelper));
+            }
+
+            [Serializable]
+            class DefaultComparerSerializationHelper : IObjectReference
+            {
+                #region IObjectReference Members
+
+                public object GetRealObject(StreamingContext context)
+                {
+                    return DEFAULT_COMPARER;
+                }
+
+                #endregion
+            }
+
 
             #endregion
         }

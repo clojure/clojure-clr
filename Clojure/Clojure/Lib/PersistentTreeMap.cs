@@ -29,6 +29,7 @@ namespace clojure.lang
     /// i.e., add/remove etc return new values.</para
     /// <para>See Okasaki, Kahrs, Larsen et al</para>
     /// </remarks>
+    [Serializable]
     public class PersistentTreeMap : APersistentMap, IObj, Reversible, Sorted
     {
         #region Data
@@ -655,6 +656,7 @@ namespace clojure.lang
 
         #endregion
 
+        [Serializable]
         abstract internal class Node : AMapEntry
         {
             #region Data
@@ -716,6 +718,7 @@ namespace clojure.lang
 
         }  // end class Node
 
+        [Serializable]
         class Black : Node
         {
             public Black(object key)
@@ -759,6 +762,7 @@ namespace clojure.lang
             }
         }
 
+        [Serializable]
         class BlackVal : Black
         {
             protected readonly object _val;
@@ -784,6 +788,7 @@ namespace clojure.lang
             }
         }
 
+        [Serializable]
         class BlackBranch : Black
         {
 
@@ -806,6 +811,7 @@ namespace clojure.lang
             }
         }
 
+        [Serializable]
         class BlackBranchVal : BlackBranch
         {
             readonly object _val;
@@ -829,6 +835,7 @@ namespace clojure.lang
             }
         }
 
+        [Serializable]
         class Red : Node
         {
             public Red(object key)
@@ -874,6 +881,7 @@ namespace clojure.lang
 
         }
 
+        [Serializable]
         class RedVal : Red
         {
             protected readonly object _val;
@@ -898,6 +906,7 @@ namespace clojure.lang
 
         }
 
+        [Serializable]
         class RedBranch : Red
         {
 
@@ -944,6 +953,7 @@ namespace clojure.lang
 
         }
 
+        [Serializable]
         class RedBranchVal : RedBranch
         {
             readonly object _val;
@@ -968,6 +978,7 @@ namespace clojure.lang
             }
         }
 
+        [Serializable]
         class Seq : ASeq
         {
             #region Data

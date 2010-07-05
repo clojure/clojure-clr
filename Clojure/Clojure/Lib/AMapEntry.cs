@@ -22,6 +22,7 @@ namespace clojure.lang
     /// <summary>
     /// Provides a basic implementation of <see cref="IMapEntry">IMapEntry</see>.
     /// </summary>
+    [Serializable]
     public abstract class AMapEntry: APersistentVector, IMapEntry
     {
 

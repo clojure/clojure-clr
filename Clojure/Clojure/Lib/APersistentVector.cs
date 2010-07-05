@@ -23,6 +23,7 @@ namespace clojure.lang
     /// <summary>
     /// Provides a basic implementation of <see cref="IPersistentVector">IPersistentVector</see> functionality.
     /// </summary>
+    [Serializable]
     public abstract class APersistentVector: AFn, IPersistentVector, IList, IComparable
     {
         #region Data
@@ -485,6 +486,7 @@ namespace clojure.lang
         /// Internal class providing <see cref="ISeq">ISeq</see> functionality for <see cref="APersistentVector">APersistentVector</see>.
         /// </summary>
         /// <remarks>This class should be private.  Public only for DLR debugging output.</remarks>
+        [Serializable]
         public sealed class Seq : ASeq, IndexedSeq, IReduce, Counted  // Counted left out of Java version
         {
             // TODO: something more efficient  (todo = from Java)
@@ -632,6 +634,7 @@ namespace clojure.lang
         /// Internal class providing reverse <see cref="ISeq">ISeq</see> functionality for <see cref="APersistentVector">APersistentVector</see>.
         /// </summary>
         /// <remarks>This class should be private.  Public only for DLR debugging output.</remarks>
+        [Serializable]
         public sealed class RSeq : ASeq, IndexedSeq, IReduce, Counted  // IReduce left out of Java version
         {
 
@@ -781,6 +784,7 @@ namespace clojure.lang
         /// <summary>
         /// Internal class providing subvector functionality for <see cref="APersistentVector">APersistentVector</see>.
         /// </summary>
+        [Serializable]
         public sealed class SubVector : APersistentVector, IPersistentCollection, IObj
         {
             #region Data

@@ -26,6 +26,7 @@ namespace clojure.lang
     // Eventually, we need to do overloading to solve this problem.
     // Overloading is not possible at the moment do to a bug in LambdaExpression.CompileToMethod
 
+    [Serializable]
     public class RestFnImpl : RestFn, Fn
     // Per Java Rev 1122, need to make all true functions implement this marker interface, 
     // In java version this is done by making the per-funcion generated class implement the interface.  

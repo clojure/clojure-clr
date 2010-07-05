@@ -25,6 +25,7 @@ namespace clojure.lang
     /// <summary>
     /// Provides basic implementation of <see cref="ISeq"/> functionality.
     /// </summary>
+    [Serializable]
     public abstract class ASeq: Obj, ISeq, IList
     {
         #region Data

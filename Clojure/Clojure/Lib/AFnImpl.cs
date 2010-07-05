@@ -29,6 +29,7 @@ namespace clojure.lang
     /// We can do that, too, once we start generating per-function classes.
     /// And then it goes away again in Rev 1161.  Sigh.</para>
     /// </remarks>
+    [Serializable]
     public class AFnImpl : /*AFn*/ AFunction /* per rev 1161*/ , Fn  
     {
         IPersistentMap _meta;

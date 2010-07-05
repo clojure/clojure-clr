@@ -23,6 +23,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements an persistent, ordered set.
     /// </summary>
+    [Serializable]
     public class PersistentTreeSet : APersistentSet, IObj, Reversible, Sorted
     {
         #region Data

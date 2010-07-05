@@ -33,6 +33,7 @@ namespace clojure.lang
     /// but you won't be able to distinguish a <value>null</value> value via <see cref="valAt">valAt</see> --
     /// use <see cref="contains">contains</see> or <see cref="entryAt">entryAt</see>.</para>
     /// </remarks>
+    [Serializable]
     public class PersistentArrayMap : APersistentMap, IObj, IEditableCollection
     {
         // any reason not to seal this class?
@@ -386,6 +387,7 @@ namespace clojure.lang
         /// Internal class providing an <see cref="ISeq">ISeq</see> 
         /// for <see cref="PersistentArrayMap">PersistentArrayMap</see>s.
         /// </summary>
+        [Serializable]
         protected sealed class Seq : ASeq, Counted
         {
             #region Data
@@ -499,7 +501,8 @@ namespace clojure.lang
 
             int _len;
             readonly object[] _array;
-            Thread _owner;
+            
+            [NonSerialized] Thread _owner;
 
             #endregion
 

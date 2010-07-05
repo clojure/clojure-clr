@@ -55,6 +55,7 @@
       ;:vectors
       ;:annotations
       :pprint
+      :serialization
       ])
 
 (def test-namespaces

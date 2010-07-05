@@ -29,6 +29,7 @@ namespace clojure.lang
     /// as the rear, which is in-order,
     /// so no reversing or suspensions required for persistent use.</para>
     /// </remarks>
+    [Serializable]
     public class PersistentQueue : Obj, IPersistentList, ICollection
     {
         #region Data
@@ -260,6 +261,7 @@ namespace clojure.lang
         /// <summary>
         /// Represents an <see cref="ISeq">ISeq</see> over a <see cref="PersistentQueue">PersistentQueue</see>.
         /// </summary>
+        [Serializable]
         sealed class Seq : ASeq
         {
             #region Data

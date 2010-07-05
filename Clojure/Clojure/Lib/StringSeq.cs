@@ -22,7 +22,8 @@ namespace clojure.lang
     /// <summary>
     /// A sequence of characters from a string.
     /// </summary>
-    public class StringSeq: ASeq, IndexedSeq
+    [Serializable]
+    public class StringSeq : ASeq, IndexedSeq
     {
         #region Data
 
