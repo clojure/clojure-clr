@@ -99,6 +99,8 @@ namespace clojure.lang.CljCompiler.Ast
 
             List<int> refPositions = new List<int>();
 
+            ParameterInfo[] methodParms = _method.GetParameters();
+
             for (int i=0; i< argCount; i++ )
             {
                 HostArg ha = _args[i];
@@ -113,15 +115,18 @@ namespace clojure.lang.CljCompiler.Ast
                     case HostArg.ParameterType.ByRef:
                         t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
                         refPositions.Add(i);
+                        argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(context, argType, e), methodParms[i].ParameterType.GetElementType()), BindingRestrictions.Empty));
                         break;
                     case HostArg.ParameterType.Standard:
                         t = argType;
+                        argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(context, argType, e), methodParms[i].ParameterType), BindingRestrictions.Empty));
+
                         break;
                     default:
                         throw Util.UnreachableCode();
                 }
                 // TODO: Rethink how we are getting typing done.
-                argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(context, argType, e), argType), BindingRestrictions.Empty));
+                //argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(context, argType, e), argType), BindingRestrictions.Empty));
                 //argsPlus.Add(new DynamicMetaObject(GenTypedArg(context, argType, e), BindingRestrictions.Empty));
             }
 

@@ -239,6 +239,9 @@ namespace clojure.lang.CljCompiler.Ast
             if (methods.Count == 0)
                 return null;
 
+            if (methods.Count == 1)
+                return methods[0];
+
             IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(argCount + (isStatic ? 0 : 1));
             if (!isStatic)
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(targetType), BindingRestrictions.Empty));

@@ -1900,6 +1900,13 @@ namespace clojure.lang
             }
         }
 
+
+        public static string CultureToString(object x)
+        {
+            return String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", x);
+        }
+
+
         #endregion
 
         #region Loading/compiling

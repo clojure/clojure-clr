@@ -449,7 +449,7 @@
    :added "1.0"}
   ([] "")
   ([^Object x]
-   (if (nil? x) "" (String/Format System.Globalization.CultureInfo/InvariantCulture "{0}" x)))    ;;;(if (nil? x) "" (. x (toString))))   ;; java: toString
+   (if (nil? x) "" (clojure.lang.RT/CultureToString x)))    ;;;(if (nil? x) "" (. x (toString))))   ;; java: toString
   ([x & ys]
      ((fn [^StringBuilder sb more]
           (if more
