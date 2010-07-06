@@ -2029,6 +2029,24 @@ namespace clojure.lang
             return path.Replace('/', Path.DirectorySeparatorChar);
         }
 
+
+        // duck typing stderr plays nice with e.g. swank 
+        public static TextWriter errPrintWriter()
+        {
+            object w = ERR.deref();
+            if (w is TextWriter)
+            {
+                return (TextWriter)w;
+            }
+            else if (w is Stream)
+            {
+                return new StreamWriter((Stream)w);
+            }
+            else
+                throw new ArgumentException("Unknown type for *err*");
+        }
+
+
         #endregion
     }
 }

@@ -243,7 +243,7 @@ namespace clojure.lang
 
         private void WarnOnReplace(Symbol sym, object o, object v)
         {
-            ((TextWriter)RT.ERR.deref()).WriteLine("WARNING: {0} already refers to: {1} in namespace: {2}, being replaced by: {3}",
+            RT.errPrintWriter().WriteLine("WARNING: {0} already refers to: {1} in namespace: {2}, being replaced by: {3}",
                 sym, o, _name, v);
         }
 

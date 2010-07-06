@@ -32,7 +32,7 @@ namespace BootstrapCompile
         static void Main(string[] args)
         {
             TextWriter outTW = (TextWriter)RT.OUT.deref();
-            TextWriter errTW = (TextWriter)RT.ERR.deref();
+            TextWriter errTW = RT.errPrintWriter();
 
             string path = Environment.GetEnvironmentVariable(PATH_PROP);
             // TODO: get rid of this when we have the full build process set up
