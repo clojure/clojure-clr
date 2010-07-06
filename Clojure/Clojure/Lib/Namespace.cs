@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Runtime.Serialization;
+using System.IO;
 
 namespace clojure.lang
 {
@@ -228,8 +229,22 @@ namespace clojure.lang
             if ((o is Var) && ((Var)o).Namespace == this)
                 return (Var)o;
 
-            // race condition
-            throw new InvalidOperationException(String.Format("{0} already refers to: {1} in namespace: {2}", sym, o, _name));
+            //throw new InvalidOperationException(String.Format("{0} already refers to: {1} in namespace: {2}", sym, o, _name));
+            if (v == null)
+                v = new Var(this, sym);
+
+            WarnOnReplace(sym, o, v);
+
+            while (!_mappings.CompareAndSet(map, map.assoc(sym, v)))
+                map = Mappings;
+
+            return v;
+        }
+
+        private void WarnOnReplace(Symbol sym, object o, object v)
+        {
+            ((TextWriter)RT.ERR.deref()).WriteLine("WARNING: {0} already refers to: {1} in namespace: {2}, being replaced by: {3}",
+                sym, o, _name, v);
         }
 
         /// <summary>
@@ -257,7 +272,14 @@ namespace clojure.lang
             if ( o == val )
                 return o;
 
-            throw new InvalidOperationException(String.Format("{0} already refers to: {1} in namespace: {2}", sym, o, _name));
+            //throw new InvalidOperationException(String.Format("{0} already refers to: {1} in namespace: {2}", sym, o, _name));
+
+            WarnOnReplace(sym, o, val);
+
+            while (!_mappings.CompareAndSet(map, map.assoc(sym, val)))
+                map = Mappings;
+
+            return val;
         }
 
         /// <summary>

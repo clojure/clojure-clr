@@ -89,8 +89,10 @@ namespace clojure.lang.CljCompiler.Ast
                 if (!v.Namespace.Equals(Compiler.CurrentNamespace))
                 {
                     if (sym.Namespace == null)
-                        throw new Exception(string.Format("Name conflict, can't def {0} because namespace: {1} refers to: {2}",
-                                    sym, Compiler.CurrentNamespace.Name, v));
+                        v = Compiler.CurrentNamespace.intern(sym);
+
+                    //throw new Exception(string.Format("Name conflict, can't def {0} because namespace: {1} refers to: {2}",
+                    //            sym, Compiler.CurrentNamespace.Name, v));
                     else
                         throw new Exception("Can't create defs outside of current namespace");
                 }
