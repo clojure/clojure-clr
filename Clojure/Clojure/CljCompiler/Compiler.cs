@@ -1230,19 +1230,19 @@ namespace clojure.lang
                 throw new FileNotFoundException("Cannot find file to load",filename);
 
             using (TextReader rdr = finfo.OpenText())
-                return load(rdr, finfo.FullName, finfo.Name);
+                return load(rdr, finfo.FullName, finfo.Name,filename);
         }
 
 
-        public static object load(TextReader rdr)
+        public static object load(TextReader rdr, string relativePath)
         {
-            return load(rdr, null, "NO_SOURCE_FILE");
+            return load(rdr, null, "NO_SOURCE_FILE",relativePath);  // ?
         }
 
         public delegate object ReplDelegate();
 
 
-        public static object load(TextReader rdr, string sourcePath, string sourceName)
+        public static object load(TextReader rdr, string sourcePath, string sourceName, string relativePath)
         {
             object ret = null;
             object eofVal = new object();
@@ -1314,7 +1314,7 @@ namespace clojure.lang
             return COMPILER_CONTEXT.deref() == null ? "_INTERP" : "_COMP";
         }
 
-        internal static object Compile(TextReader rdr, string sourceDirectory, string sourceName)
+        internal static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
         {
             if (COMPILE_PATH.deref() == null)
                 throw new Exception("*compile-path* not set");
@@ -1323,7 +1323,7 @@ namespace clojure.lang
             object form;
 
             //string sourcePath = sourceDirectory == null ? sourceName : sourceDirectory + "\\" + sourceName;
-            string sourcePath = sourceDirectory;  // I hope this is enough
+            string sourcePath = relativePath;
 
             LineNumberingTextReader lntr =
                 (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);

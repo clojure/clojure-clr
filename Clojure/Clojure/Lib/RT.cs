@@ -1911,15 +1911,15 @@ namespace clojure.lang
 
         #region Loading/compiling
 
-        public static void load(String pathname)
+        public static void load(String relativePath)
         {
-            load(pathname, true);
+            load(relativePath, true);
         }
 
-        public static void load(String pathname, Boolean failIfNotFound)
+        public static void load(String relativePath, Boolean failIfNotFound)
         {
-            string assemblyname = pathname + ".clj.dll";
-            string cljname = pathname + ".clj";
+            string assemblyname = relativePath + ".clj.dll";
+            string cljname = relativePath + ".clj";
 
             FileInfo assyInfo = FindFile(assemblyname);
             FileInfo cljInfo = FindFile(cljname);
@@ -1944,9 +1944,9 @@ namespace clojure.lang
             if (!loaded && cljInfo != null)
             {
                 if (booleanCast(Compiler.COMPILE_FILES.deref()))
-                    Compile(cljInfo);
+                    Compile(cljInfo,cljname);
                 else
-                    LoadScript(cljInfo); ;
+                    LoadScript(cljInfo, cljname); ;
             }
             else if (!loaded && failIfNotFound)
                 throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));
@@ -1968,23 +1968,23 @@ namespace clojure.lang
         {
             FileInfo cljInfo = FindFile(cljname);
             if (cljInfo != null)
-                LoadScript(cljInfo);
+                LoadScript(cljInfo,cljname);
             else if (failIfNotFound)
                 throw new FileNotFoundException(String.Format("Could not locate Clojure resource on {0}", CLOJURE_LOAD_PATH));
         }
 
 
-        public  static void LoadScript(FileInfo cljInfo)
+        public  static void LoadScript(FileInfo cljInfo, string relativePath)
         {
             using (TextReader rdr = cljInfo.OpenText())
-                Compiler.load(rdr, cljInfo.FullName, cljInfo.Name);
+                Compiler.load(rdr, cljInfo.FullName, cljInfo.Name, relativePath);
         }
 
 
-        private static void Compile(FileInfo cljInfo)
+        private static void Compile(FileInfo cljInfo, string relativePath)
         {
             using ( TextReader rdr = cljInfo.OpenText() )
-                Compiler.Compile(rdr, cljInfo.Directory.FullName, cljInfo.Name);
+                Compiler.Compile(rdr, cljInfo.Directory.FullName, cljInfo.Name, relativePath);
         }
 
 
