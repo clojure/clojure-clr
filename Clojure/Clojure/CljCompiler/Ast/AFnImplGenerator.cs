@@ -101,6 +101,7 @@ namespace clojure.lang.CljCompiler.Ast
             gen.MarkLabel(eqLabel);
             // Equal to Null: throw WrongArityException
             gen.EmitLoadArg(0);                                 // gen.Emit(OpCodes.Ldarg_0);
+            gen.EmitInt(numArgs);
             gen.EmitCall(Method_AFn_WrongArityException);       // gen.Emit(OpCodes.Call, Method_AFn_WrongArityException);
             gen.Emit(OpCodes.Throw);          
           }

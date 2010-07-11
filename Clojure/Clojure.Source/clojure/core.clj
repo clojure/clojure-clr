@@ -5249,7 +5249,7 @@
   {:added "1.0"}
   ([f coll]
      (if-let [s (seq coll)]
-       (reduce f (first s) (next s))
+       (reduce-new f (first s) (next s))
        (f)))
   ([f val coll]
      (let [s (seq coll)]

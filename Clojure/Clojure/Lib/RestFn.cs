@@ -425,7 +425,7 @@ namespace clojure.lang
                             , Util.Ret1(args.next(), args = null));
 
             }
-            throw WrongArityException();
+            throw WrongArityException(-1);
         }
 
 
@@ -436,7 +436,7 @@ namespace clojure.lang
                 case 0:
                     return doInvoke(null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(0);
             }
 
         }
@@ -450,7 +450,7 @@ namespace clojure.lang
                 case 1:
                     return doInvoke(Util.Ret1(arg1, arg1 = null), null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(1);
             }
 
         }
@@ -475,7 +475,7 @@ namespace clojure.lang
                         Util.Ret1(arg2, arg2 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(2);
             }
 
         }
@@ -509,7 +509,7 @@ namespace clojure.lang
                         Util.Ret1(arg3, arg3 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(3);
             }
 
         }
@@ -554,7 +554,7 @@ namespace clojure.lang
                         Util.Ret1(arg4, arg4 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(4);
             }
 
         }
@@ -612,7 +612,7 @@ namespace clojure.lang
                         Util.Ret1(arg5, arg5 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(5);
             }
 
         }
@@ -685,7 +685,7 @@ namespace clojure.lang
                         Util.Ret1(arg6, arg6 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(6);
             }
 
         }
@@ -775,7 +775,7 @@ namespace clojure.lang
                         Util.Ret1(arg7, arg7 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(7);
             }
 
         }
@@ -885,7 +885,7 @@ namespace clojure.lang
                         Util.Ret1(arg8, arg8 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(8);
             }
 
         }
@@ -1016,7 +1016,7 @@ namespace clojure.lang
                         Util.Ret1(arg9, arg9 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(9);
             }
 
         }
@@ -1169,7 +1169,7 @@ namespace clojure.lang
                         Util.Ret1(arg10, arg10 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(10);
             }
 
         }
@@ -1348,7 +1348,7 @@ namespace clojure.lang
                         Util.Ret1(arg11, arg11 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(11);
             }
 
         }
@@ -1554,7 +1554,7 @@ namespace clojure.lang
                         Util.Ret1(arg12, arg12 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(12);
             }
 
         }
@@ -1789,7 +1789,7 @@ namespace clojure.lang
                         Util.Ret1(arg13, arg13 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(13);
             }
 
         }
@@ -2055,7 +2055,7 @@ namespace clojure.lang
                         Util.Ret1(arg14, arg14 = null),
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(14);
             }
 
         }
@@ -2355,7 +2355,7 @@ namespace clojure.lang
                         Util.Ret1(arg15, arg15 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(15);
             }
 
         }
@@ -2690,7 +2690,7 @@ namespace clojure.lang
                         Util.Ret1(arg16, arg16 = null),
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(16);
             }
 
         }
@@ -3062,7 +3062,7 @@ namespace clojure.lang
                         Util.Ret1(arg17, arg17 = null),
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(17);
             }
 
         }
@@ -3457,7 +3457,7 @@ namespace clojure.lang
                         Util.Ret1(arg18, arg18 = null),
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(18);
             }
 
         }
@@ -3909,7 +3909,7 @@ namespace clojure.lang
                         Util.Ret1(arg19, arg19 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(19);
             }
 
         }
@@ -4401,7 +4401,7 @@ namespace clojure.lang
                         Util.Ret1(arg20, arg20 = null), 
                         null);
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(20);
             }
 
         }
@@ -4916,7 +4916,7 @@ namespace clojure.lang
                         Util.Ret1(arg20, arg20 = null), 
                         ArraySeq.create(args));
                 default:
-                    throw WrongArityException();
+                    throw WrongArityException(21);
             }
 
         }

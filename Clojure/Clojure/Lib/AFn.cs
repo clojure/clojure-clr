@@ -30,110 +30,110 @@ namespace clojure.lang
 
         public virtual object invoke()
         {
-            throw WrongArityException();
+            throw WrongArityException(0);
         }
 
         public virtual object invoke(object arg1)
         {
-            throw WrongArityException();
+            throw WrongArityException(1);
         }
 
         public virtual object invoke(object arg1, object arg2)
         {
-            throw WrongArityException();
+            throw WrongArityException(2);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3)
         {
-            throw WrongArityException();
+            throw WrongArityException(3);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4)
         {
-            throw WrongArityException();
+            throw WrongArityException(4);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5)
         {
-            throw WrongArityException();
+            throw WrongArityException(5);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
             object arg6)
         {
-            throw WrongArityException();
+            throw WrongArityException(6);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
             object arg6, object arg7)
         {
-            throw WrongArityException();
+            throw WrongArityException(7);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
             object arg6, object arg7, object arg8)
         {
-            throw WrongArityException();
+            throw WrongArityException(8);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
             object arg6, object arg7, object arg8, object arg9)
         {
-            throw WrongArityException();
+            throw WrongArityException(9);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
             object arg6, object arg7, object arg8, object arg9, object arg10)
         {
-            throw WrongArityException();
+            throw WrongArityException(10);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
             object arg6, object arg7, object arg8, object arg9, object arg10, object arg11)
         {
-            throw WrongArityException();
+            throw WrongArityException(11);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
             object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
             object arg12)
         {
-            throw WrongArityException();
+            throw WrongArityException(12);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
             object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
             object arg12, object arg13)
         {
-            throw WrongArityException();
+            throw WrongArityException(13);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
             object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
             object arg12, object arg13, object arg14)
         {
-            throw WrongArityException();
+            throw WrongArityException(14);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
             object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
             object arg12, object arg13, object arg14, object arg15)
         {
-            throw WrongArityException();
+            throw WrongArityException(15);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
             object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
             object arg12, object arg13, object arg14, object arg15, object arg16)
         {
-            throw WrongArityException();
+            throw WrongArityException(16);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
             object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, 
             object arg12, object arg13, object arg14, object arg15, object arg16, object arg17)
         {
-            throw WrongArityException();
+            throw WrongArityException(17);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
@@ -141,7 +141,7 @@ namespace clojure.lang
             object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, 
             object arg18)
         {
-            throw WrongArityException();
+            throw WrongArityException(18);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
@@ -149,7 +149,7 @@ namespace clojure.lang
             object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, 
             object arg18, object arg19)
         {
-            throw WrongArityException();
+            throw WrongArityException(19);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
@@ -157,7 +157,7 @@ namespace clojure.lang
             object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, 
             object arg18, object arg19, object arg20)
         {
-            throw WrongArityException();
+            throw WrongArityException(20);
         }
 
         public virtual object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, 
@@ -165,7 +165,7 @@ namespace clojure.lang
             object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, 
             object arg18, object arg19, object arg20, params object[] args)
         {
-            throw WrongArityException();
+            throw WrongArityException(21);
         }
 
 
@@ -461,11 +461,12 @@ namespace clojure.lang
         }
 
 
-        public Exception WrongArityException()
+        public Exception WrongArityException(int i)
         {
             string name = Util.NameForType(GetType()); 
             int suffix = name.LastIndexOf("__");  // NOt sure if this is necessary
-            return new ArgumentException(String.Format("Wrong number of args passed to: {0}",
+            return new ArgumentException(String.Format("Wrong number of args ({0}) passed to: {1}",
+                i,
                 (suffix == -1 ? name : name.Substring(0, suffix)).Replace('_', '-')));
         }
 

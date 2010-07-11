@@ -288,126 +288,126 @@ namespace clojure.lang
 
         protected override object doInvoke(object args)
         {
-            if (_fnDo0 == null) throw WrongArityException();
+            if (_fnDo0 == null) throw WrongArityException(0);
             return _fnDo0(args);
         }
         protected override object doInvoke(object arg1, object args)
         {
-            if (_fnDo1 == null) throw WrongArityException();
+            if (_fnDo1 == null) throw WrongArityException(1);
             return _fnDo1(arg1, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object args)
         {
-            if (_fnDo2 == null) throw WrongArityException();
+            if (_fnDo2 == null) throw WrongArityException(2);
             return _fnDo2(arg1, arg2, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object args)
         {
-            if (_fnDo3 == null) throw WrongArityException();
+            if (_fnDo3 == null) throw WrongArityException(3);
             return _fnDo3(arg1, arg2, arg3, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object args)
         {
-            if (_fnDo4 == null) throw WrongArityException();
+            if (_fnDo4 == null) throw WrongArityException(4);
             return _fnDo4(arg1, arg2, arg3, arg4, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object args)
         {
-            if (_fnDo5 == null) throw WrongArityException();
+            if (_fnDo5 == null) throw WrongArityException(5);
             return _fnDo5(arg1, arg2, arg3, arg4, arg5, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object args)
         {
-            if (_fnDo6 == null) throw WrongArityException();
+            if (_fnDo6 == null) throw WrongArityException(6);
             return _fnDo6(arg1, arg2, arg3, arg4, arg5, arg6, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object args)
         {
-            if (_fnDo7 == null) throw WrongArityException();
+            if (_fnDo7 == null) throw WrongArityException(7);
             return _fnDo7(arg1, arg2, arg3, arg4, arg5, arg6, arg7, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object args)
         {
-            if (_fnDo8 == null) throw WrongArityException();
+            if (_fnDo8 == null) throw WrongArityException(8);
             return _fnDo8(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object args)
         {
-            if (_fnDo9 == null) throw WrongArityException();
+            if (_fnDo9 == null) throw WrongArityException(9);
             return _fnDo9(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object args)
         {
-            if (_fnDo10 == null) throw WrongArityException();
+            if (_fnDo10 == null) throw WrongArityException(10);
             return _fnDo10(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object args)
         {
-            if (_fnDo11 == null) throw WrongArityException();
+            if (_fnDo11 == null) throw WrongArityException(11);
             return _fnDo11(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object args)
         {
-            if (_fnDo12 == null) throw WrongArityException();
+            if (_fnDo12 == null) throw WrongArityException(12);
             return _fnDo12(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object args)
         {
-            if (_fnDo13 == null) throw WrongArityException();
+            if (_fnDo13 == null) throw WrongArityException(13);
             return _fnDo13(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object args)
         {
-            if (_fnDo14 == null) throw WrongArityException();
+            if (_fnDo14 == null) throw WrongArityException(14);
             return _fnDo14(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object args)
         {
-            if (_fnDo15 == null) throw WrongArityException();
+            if (_fnDo15 == null) throw WrongArityException(15);
             return _fnDo15(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object args)
         {
-            if (_fnDo16 == null) throw WrongArityException();
+            if (_fnDo16 == null) throw WrongArityException(16);
             return _fnDo16(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, object args)
         {
-            if (_fnDo17 == null) throw WrongArityException();
+            if (_fnDo17 == null) throw WrongArityException(17);
             return _fnDo17(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, object arg18, object args)
         {
-            if (_fnDo18 == null) throw WrongArityException();
+            if (_fnDo18 == null) throw WrongArityException(18);
             return _fnDo18(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, object arg18, object arg19, object args)
         {
-            if (_fnDo19 == null) throw WrongArityException();
+            if (_fnDo19 == null) throw WrongArityException(19);
             return _fnDo19(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, args);
         }
 
         protected override object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, object arg18, object arg19, object arg20, object args)
         {
-            if (_fnDo20 == null) throw WrongArityException();
+            if (_fnDo20 == null) throw WrongArityException(20);
             return _fnDo20(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, args);
         }
 

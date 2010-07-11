@@ -161,132 +161,132 @@ namespace clojure.lang
 
         public override object invoke()
         {
-            if (_fn0 == null) throw WrongArityException();
+            if (_fn0 == null) throw WrongArityException(0);
             return _fn0();
         }
         public override object invoke(object arg1)
         {
-            if (_fn1 == null) throw WrongArityException();
+            if (_fn1 == null) throw WrongArityException(1);
             return _fn1(arg1);
         }
 
         public override object invoke(object arg1, object arg2)
         {
-            if (_fn2 == null) throw WrongArityException();
+            if (_fn2 == null) throw WrongArityException(2);
             return _fn2(arg1, arg2);
         }
 
         public override object invoke(object arg1, object arg2, object arg3)
         {
-            if (_fn3 == null) throw WrongArityException();
+            if (_fn3 == null) throw WrongArityException(3);
             return _fn3(arg1, arg2, arg3);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4)
         {
-            if (_fn4 == null) throw WrongArityException();
+            if (_fn4 == null) throw WrongArityException(4);
             return _fn4(arg1, arg2, arg3, arg4);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5)
         {
-            if (_fn5 == null) throw WrongArityException();
+            if (_fn5 == null) throw WrongArityException(5);
             return _fn5(arg1, arg2, arg3, arg4, arg5);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6)
         {
-            if (_fn6 == null) throw WrongArityException();
+            if (_fn6 == null) throw WrongArityException(6);
             return _fn6(arg1, arg2, arg3, arg4, arg5, arg6);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7)
         {
-            if (_fn7 == null) throw WrongArityException();
+            if (_fn7 == null) throw WrongArityException(7);
             return _fn7(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8)
         {
-            if (_fn8 == null) throw WrongArityException();
+            if (_fn8 == null) throw WrongArityException(8);
             return _fn8(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9)
         {
-            if (_fn9 == null) throw WrongArityException();
+            if (_fn9 == null) throw WrongArityException(9);
             return _fn9(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10)
         {
-            if (_fn10 == null) throw WrongArityException();
+            if (_fn10 == null) throw WrongArityException(10);
             return _fn10(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11)
         {
-            if (_fn11 == null) throw WrongArityException();
+            if (_fn11 == null) throw WrongArityException(11);
             return _fn11(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12)
         {
-            if (_fn12 == null) throw WrongArityException();
+            if (_fn12 == null) throw WrongArityException(12);
             return _fn12(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13)
         {
-            if (_fn13 == null) throw WrongArityException();
+            if (_fn13 == null) throw WrongArityException(13);
             return _fn13(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14)
         {
-            if (_fn14 == null) throw WrongArityException();
+            if (_fn14 == null) throw WrongArityException(14);
             return _fn14(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15)
         {
-            if (_fn15 == null) throw WrongArityException();
+            if (_fn15 == null) throw WrongArityException(15);
             return _fn15(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16)
         {
-            if (_fn16 == null) throw WrongArityException();
+            if (_fn16 == null) throw WrongArityException(16);
             return _fn16(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17)
         {
-            if (_fn17 == null) throw WrongArityException();
+            if (_fn17 == null) throw WrongArityException(17);
             return _fn17(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, object arg18)
         {
-            if (_fn18 == null) throw WrongArityException();
+            if (_fn18 == null) throw WrongArityException(18);
             return _fn18(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, object arg18, object arg19)
         {
-            if (_fn19 == null) throw WrongArityException();
+            if (_fn19 == null) throw WrongArityException(19);
             return _fn19(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, object arg18, object arg19, object arg20)
         {
-            if (_fn20 == null) throw WrongArityException();
+            if (_fn20 == null) throw WrongArityException(20);
             return _fn20(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20);
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, object arg18, object arg19, object arg20, params object[] args)
         {
-            if (_fnRest == null) throw WrongArityException();
+            if (_fnRest == null) throw WrongArityException(21);
             return _fnRest(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, args);
         }
 
