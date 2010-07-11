@@ -49,9 +49,22 @@
                 val val]
            (if (< i (alength arr))
              (recur (inc i) (f val (aget arr i)))
-             val)))))
-  
+             val))))
 
+  Object                                       ;;;java.lang.Object
+  (internal-reduce
+   [s f val]
+   (loop [cls (class s)
+          s s
+          f f
+          val val]
+     (if-let [s (seq s)]
+       ;; roll over to faster implementation if underlying seq changes type
+       (if (identical? (class s) cls)
+         (recur cls (next s) f (f val (first s)))
+         (internal-reduce s f val))
+       val))))
+       
 (def arr-impl
   '(internal-reduce
        [a-seq f val]
