@@ -2013,7 +2013,7 @@ namespace clojure.lang
         }
 
 
-        static FileInfo FindFile(string filename)
+        public static FileInfo FindFile(string filename)
         {
             FileInfo fi;
 

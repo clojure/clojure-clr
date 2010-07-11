@@ -57,6 +57,7 @@
       :pprint
       :serialization
       :rt
+      :repl
       ])
 
 (def test-namespaces

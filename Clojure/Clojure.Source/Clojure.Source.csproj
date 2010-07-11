@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0A74E77B-8BFF-4A64-8A16-5D0E5C9C47F3}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -188,6 +188,9 @@
     <None Include="clojure\pprint\utilities.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="clojure\repl.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="clojure\samples\stm\teststm.clj" />
     <None Include="clojure\test_clojure\pprint.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -201,6 +204,8 @@
     <None Include="clojure\test_clojure\pprint\test_pretty.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="clojure\test_clojure\repl\example.clj" />
+    <None Include="clojure\test_clojure\repl.clj" />
     <None Include="clojure\test_clojure\rt.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -194,6 +194,7 @@
       (catch Exception e                ;;; Throwable
         (caught e)
         (set! *e e)))
+     (use 'clojure.repl)
      (prompt)
      (flush)
      (loop []
