@@ -52,6 +52,16 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override DynamicMetaObject FallbackInvokeMember(DynamicMetaObject target, DynamicMetaObject[] args, DynamicMetaObject errorSuggestion)
         {
+            if (target.HasValue && target.Value == null)
+                return errorSuggestion ??
+                    new DynamicMetaObject(
+                        Expression.Throw(
+                            Expression.New(typeof(MissingMethodException).GetConstructor(new Type[] { typeof(string) }),
+                                Expression.Constant(String.Format("Cannot call {0} method named {1} on nil", _isStatic ? "static" : "instance", this.Name))),
+                            typeof(object)),
+                            BindingRestrictions.GetInstanceRestriction(target.Expression, null));
+
+
             OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
             Type typeToUse = _isStatic && target.Value is Type ? (Type)target.Value : target.LimitType;
 

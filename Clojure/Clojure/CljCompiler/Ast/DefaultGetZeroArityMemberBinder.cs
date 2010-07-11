@@ -51,6 +51,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override DynamicMetaObject FallbackGetMember(DynamicMetaObject target, DynamicMetaObject errorSuggestion)
         {
+            if ( target.HasValue && target.Value == null )
+                return errorSuggestion ??
+                    new DynamicMetaObject(
+                        Expression.Throw(
+                            Expression.New(typeof(MissingMethodException).GetConstructor(new Type[] { typeof(string) }),
+                                Expression.Constant(String.Format("Cannot call {0} field/property/member name {1} on nil", _isStatic ? "static" : "instance", this.Name))),
+                            typeof(object)),
+                            BindingRestrictions.GetInstanceRestriction(target.Expression,null));
+
             Expression instanceExpr = _isStatic ? null : Expression.Convert(target.Expression, target.LimitType);
             Type typeToUse = _isStatic && target.Value is Type ? (Type)target.Value : target.LimitType;
 
@@ -77,7 +86,7 @@ namespace clojure.lang.CljCompiler.Ast
                 new DynamicMetaObject(
                     Expression.Throw(
                         Expression.New(typeof(MissingMethodException).GetConstructor(new Type[] { typeof(string) }),
-                            Expression.Constant(String.Format("Cannot find {0} field/proprerty/member name {1}", _isStatic ? "static" : "instance", this.Name))),
+                            Expression.Constant(String.Format("Cannot find {0} field/property/member name {1}", _isStatic ? "static" : "instance", this.Name))),
                         typeof(object)),
                     target.Restrictions);
         }
