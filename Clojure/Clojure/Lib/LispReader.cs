@@ -534,8 +534,7 @@ namespace clojure.lang
                     if (ns == null)
                         ns = Namespace.find(nsSym);
                     if (ns == null)
-                        //ClojureJVM: is ns is Null, get a NPE.  Not sure that is a good thing.  I like my solution better.
-                        return Keyword.intern(nsSym.Name, nameStr);
+                        return null;
                     else
                         return Keyword.intern(Compiler.CurrentNamespace.Name.getName(), nameStr);
                 }
