@@ -1573,7 +1573,7 @@ namespace clojure.lang
             {
                 quotient = dividend.Divide(divisor, c);
             }
-            catch (ArithmeticException e)
+            catch (ArithmeticException )
             {
                 throw new ArithmeticException("Non-terminating decimal expansion; no exact representable decimal result.");
             }

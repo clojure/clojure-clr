@@ -4371,7 +4371,7 @@ namespace Clojure.Tests.LibTests
                 BigDecimal val = arg1.DivideInteger(arg2, c);
                 Expect(false);
             }
-            catch (ArithmeticException e)
+            catch (ArithmeticException )
             {
                 Expect(true);
             }

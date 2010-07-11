@@ -328,7 +328,7 @@ namespace clojure.lang
 
             #region IObj methods
 
-            public IPersistentMap meta()
+            public override IPersistentMap meta()
             {
                 return _meta;
             }

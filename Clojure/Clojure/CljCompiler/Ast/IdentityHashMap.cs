@@ -11,7 +11,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             #region IEqualityComparer<object> Members
 
-            public bool Equals(Object x, Object y)
+            public new bool Equals(Object x, Object y)
             {
                 return Object.ReferenceEquals(x, y);
             }
@@ -25,7 +25,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         public IdentityHashMap()
-            : base()
+            : base(new RefCmp())
         {
         }
     }

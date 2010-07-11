@@ -38,7 +38,7 @@ namespace clojure.lang
 
         #region A little debugging aid
 
-        static int _saveId = 0;
+        //static int _saveId = 0;
         public static void SaveProxyContext()
         {
             _context.SaveAssembly();

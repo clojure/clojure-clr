@@ -221,7 +221,7 @@ namespace clojure.lang
             return node[i & 0x01f];
         }
 
-        public Object nth(int i, Object notFound)
+        public override Object nth(int i, Object notFound)
         {
             if (i >= 0 && i < _cnt)
                 return nth(i);
