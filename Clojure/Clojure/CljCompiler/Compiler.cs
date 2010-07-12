@@ -313,11 +313,15 @@ namespace clojure.lang
 
         public static Expression<ReplDelegate> GenerateLambda(object form, bool addPrint)
         {
-            return GenerateLambda(_evalContext, form, addPrint);
+            return GenerateLambda(_evalContext, form, null, addPrint);
         }
 
+        public static Expression<ReplDelegate> GenerateLambda(object form, string name, bool addPrint)
+        {
+            return GenerateLambda(_evalContext, form, name, addPrint);
+        }
 
-        internal static Expression<ReplDelegate> GenerateLambda(GenContext context, object form, bool addPrint)
+        internal static Expression<ReplDelegate> GenerateLambda(GenContext context, object form, string name, bool addPrint)
         {
             Expr ast = GenerateWrappedAst(form);
             Expression expr = GenerateInvokedDlrFromWrappedAst(context,ast);
@@ -1198,7 +1202,7 @@ namespace clojure.lang
                 }
                 else if (form is IPersistentCollection && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def")))
                 {
-                    Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
+                    Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, "eval" + RT.nextID().ToString(), false);
                     return ast.Compile().Invoke();
                 }
                 else
