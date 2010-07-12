@@ -83,8 +83,13 @@ namespace clojure.lang.CljCompiler.Ast
             if (RT.second(form) is Symbol)
                 name = ((Symbol)RT.second(form)).Name;
 
-            string simpleName = (name == null ? "fn" : Compiler.munge(name).Replace(".", "_DOT_")) + "__" + RT.nextID();
-            
+            //string simpleName = (name == null ? "fn" : Compiler.munge(name).Replace(".", "_DOT_")) + "__" + RT.nextID();
+            string simpleName = name != null ?
+                        (Compiler.munge(name).Replace(".", "_DOT_")
+                        + (enclosingMethod != null ? "__" + RT.nextID() : ""))
+                        : ("fn"
+                          + "__" + RT.nextID());            
+
             Name = baseName + simpleName;
             InternalName = Name.Replace('.', '/');
 
