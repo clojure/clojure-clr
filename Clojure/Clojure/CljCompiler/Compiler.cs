@@ -1315,7 +1315,8 @@ namespace clojure.lang
 
         public static string IsCompilingSuffix()
         {
-            return COMPILER_CONTEXT.deref() == null ? "_INTERP" : "_COMP";
+            GenContext context = (GenContext) COMPILER_CONTEXT.deref();
+            return context == null ? "_INTERP" : "_COMP_" + (new AssemblyName(context.AssemblyBuilder.FullName)).Name;
         }
 
         internal static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
