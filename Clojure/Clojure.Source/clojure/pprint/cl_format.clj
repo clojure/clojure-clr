@@ -1026,9 +1026,6 @@ Note this should only be used for the last one in the sequence"
 		(let [s ^String x]
 		  (.Write writer (.ToLower s)))                        ;;; write toLowerCase
 		  
-		;Char  
-		;(.Write writer (int (Char/ToLower ^Char x)))
-		
 		Int32                                                                 ;;; Integer
 		(let [c ^Char x]                                                      ;;; Character
 		  (.Write writer (int (Char/ToLower (char c))))))))))                 ;;; .write Character/toLowerCase
@@ -1047,9 +1044,6 @@ Note this should only be used for the last one in the sequence"
 		(let [s ^String x]
 		  (.Write writer (.ToUpper s)))
 		  
-		;Char
-		;(.Write writer (int (Char/ToUpper ^Char x)))
-
 		Int32
 		(let [c ^Char x]
 		  (.Write writer (int (Char/ToUpper (char c))))))))))
@@ -1098,9 +1092,7 @@ Note this should only be used for the last one in the sequence"
                (ref-set last-was-whitespace? 
                         (Char/IsWhiteSpace 
                          ^Char (nth s (dec (count s)))))))
-			;Char
-            ;(.Write writer ^Char x)
-            
+
             Int32
             (let [c (char x)]
               (let [mod-c (if @last-was-whitespace? (Char/ToUpper ^Char (char x)) c)] 
@@ -1132,9 +1124,6 @@ Note this should only be used for the last one in the sequence"
                            (dosync (ref-set capped true)))
                          (.Write writer s))) 
                      (.Write writer (.ToLower s))))
-				 
-				 ;Char
-                 ;(.Write writer ^Char x)
 				 
                  Int32
                  (let [c ^Char (char x)]
@@ -1895,13 +1884,7 @@ format-in can be either a control string or a previously compiled format."
   {:added "1.2"}
   [format-in]
   `(let [format-in# ~format-in
-         my-c-c# (var-get (get (ns-interns (the-ns 'clojure.pprint))
-                               '~'cached-compile))
-         my-e-f# (var-get (get (ns-interns (the-ns 'clojure.pprint))
-                               '~'execute-format))
-         my-i-n# (var-get (get (ns-interns (the-ns 'clojure.pprint))
-                               '~'init-navigator))
-         cf# (if (string? format-in#) (my-c-c# format-in#) format-in#)]
+         cf# (if (string? format-in#) (#'clojure.pprint/cached-compile format-in#) format-in#)]
      (fn [& args#]
-       (let [navigator# (my-i-n# args#)]
-         (my-e-f# cf# navigator#)))))
+       (let [navigator# (#'clojure.pprint/init-navigator args#)]
+         (#'clojure.pprint/execute-format cf# navigator#)))))
