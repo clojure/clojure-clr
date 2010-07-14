@@ -66,3 +66,9 @@
 ;     #"Reflection warning, clojure/test_clojure/rt.clj:\d+ - call to java.lang.String ctor can't be resolved.\n"
 ;     (defn foo [] (String. 1 2 3)))));
 ; TODO: Restore reflection warnings.
+(def example-var)
+(deftest binding-root-clears-macro-metadata
+  (alter-meta! #'example-var assoc :macro true)
+  (is (contains? (meta #'example-var) :macro))
+  (.bindRoot #'example-var 0)
+  (is (not (contains? (meta #'example-var) :macro))))

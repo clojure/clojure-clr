@@ -449,7 +449,8 @@ namespace clojure.lang
             object oldroot = hasRoot() ? _root : null;
             _root = root;
             //alterMeta(_assoc, RT.list(_macroKey, RT.F));
-            alterMeta(_assoc, RT.list(_macroKey, false));
+            //alterMeta(_assoc, RT.list(_macroKey, false));
+            alterMeta(_dissoc, RT.list(_macroKey));
             notifyWatches(oldroot, _root);
         }
 
@@ -880,6 +881,19 @@ namespace clojure.lang
         /// Used in calls to alterMeta, above.
         /// </summary>
         static IFn _assoc = new AssocFn();
+
+        class DissocFn : AFn
+        {
+            public override object invoke(object m, object k)
+            {
+                return RT.dissoc(m, k);
+            }
+        }
+
+        /// <summary>
+        /// Used in calls to alterMeta, above.
+        /// </summary>
+        static IFn _dissoc = new DissocFn();
 
         #endregion
     }
