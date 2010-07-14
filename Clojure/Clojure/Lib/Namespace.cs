@@ -229,11 +229,10 @@ namespace clojure.lang
             if ((o is Var) && ((Var)o).Namespace == this)
                 return (Var)o;
 
-            //throw new InvalidOperationException(String.Format("{0} already refers to: {1} in namespace: {2}", sym, o, _name));
             if (v == null)
                 v = new Var(this, sym);
 
-            WarnOnReplace(sym, o, v);
+            WarnOrFailOnReplace(sym, o, v);
 
             while (!_mappings.CompareAndSet(map, map.assoc(sym, v)))
                 map = Mappings;
@@ -241,8 +240,15 @@ namespace clojure.lang
             return v;
         }
 
-        private void WarnOnReplace(Symbol sym, object o, object v)
+        private void WarnOrFailOnReplace(Symbol sym, object o, object v)
         {
+            if (o is Var)
+            {
+                if (((Var)o).ns != RT.CLOJURE_NS)
+                {
+                    throw new InvalidOperationException(sym + " already refers to: " + o + " in namespace: " + _name);
+                }
+            }
             RT.errPrintWriter().WriteLine("WARNING: {0} already refers to: {1} in namespace: {2}, being replaced by: {3}",
                 sym, o, _name, v);
         }
@@ -272,9 +278,7 @@ namespace clojure.lang
             if ( o == val )
                 return o;
 
-            //throw new InvalidOperationException(String.Format("{0} already refers to: {1} in namespace: {2}", sym, o, _name));
-
-            WarnOnReplace(sym, o, val);
+            WarnOrFailOnReplace(sym, o, val);
 
             while (!_mappings.CompareAndSet(map, map.assoc(sym, val)))
                 map = Mappings;

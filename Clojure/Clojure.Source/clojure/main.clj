@@ -194,7 +194,7 @@
       (catch Exception e                ;;; Throwable
         (caught e)
         (set! *e e)))
-     (use 'clojure.repl)
+     (use '[clojure.repl :only (source-fn apropos dir-fn dir)])
      (prompt)
      (flush)
      (loop []
