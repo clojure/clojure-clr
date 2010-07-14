@@ -81,7 +81,13 @@
     (let [obj (reify ExampleProtocol
                      (baz [a b] "two-arg baz!"))]
       (is (= "two-arg baz!" (baz obj nil)))
-      (is (thrown? NotImplementedException (baz obj))))))    ;;; AbstractMethodError
+      (is (thrown? NotImplementedException (baz obj)))))    ;;; AbstractMethodError
+  (testing "you can redefine a protocol with different methods"
+    (eval '(defprotocol Elusive (old-method [x])))
+    (eval '(defprotocol Elusive (new-method [x])))
+    (is (= :new-method (eval '(new-method (reify Elusive (new-method [x] :new-method))))))
+    (is (fails-with-cause? ArgumentException #"No method of interface: user\.Elusive found for function: old-method of protocol: Elusive \(The protocol method may have been defined before and removed\.\)"   ;;; IllegalArgumentException
+          (eval '(old-method (reify Elusive (new-method [x] :new-method))))))))
       
 (deftype ExtendTestWidget [name])
 (deftype HasProtocolInline []

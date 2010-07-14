@@ -70,7 +70,14 @@ namespace clojure.lang.CljCompiler.Ast
                     if (_protocolOn != null)
                     {
                         IPersistentMap mmap = (IPersistentMap)RT.get(pvar.get(), _methodMapKey);
-                        string mname = Compiler.munge(((Keyword)mmap.valAt(Keyword.intern(fvar.Symbol))).Symbol.ToString());
+                        Keyword mmapVal = (Keyword)mmap.valAt(Keyword.intern(fvar.sym));
+                        if (mmapVal == null)
+                        {
+                            throw new ArgumentException(String.Format("No method of interface: {0} found for function: {1} of protocol: {2} (The protocol method may have been defined before and removed.)",
+                                _protocolOn.FullName, fvar.Symbol, pvar.Symbol));
+                        }
+                        String mname = Compiler.munge(mmapVal.Symbol.ToString());
+                       
                         List<MethodInfo> methods = Reflector.GetMethods(_protocolOn, mname, args.count() - 1,  false);
                         if (methods.Count != 1)
                             throw new ArgumentException(String.Format("No single method: {0} of interface: {1} found for function: {2} of protocol: {3}",
