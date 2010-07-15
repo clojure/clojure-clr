@@ -679,26 +679,25 @@ namespace clojure.lang
             return bitOps(x).testBit(x, n);
         }
 
-        public static object shiftLeft(object x, int n)
+        public static object shiftLeft(object x, object n)
         {
-            return bitOps(x).shiftLeft(x, n);
+            return bitOps(x).shiftLeft(x, Util.ConvertToInt(n));
         }
 
-        // Adding the shiftLeft/shiftRIght(int,int) overloads messes up the tests
-        //public static int shiftLeft(int x, int n)
-        //{
-        //    return n >= 0 ? x << n : x >> Math.Abs(n);
-        //}
-
-        public static object shiftRight(object x, int n)
+        public static int shiftLeft(int x, int n)
         {
-            return bitOps(x).shiftRight(x, n);
+            return n >= 0 ? x << n : x >> Math.Abs(n);
         }
 
-        //public static int shiftRight(int x, int n)
-        //{
-        //    return n >= 0 ? x >> n : x << Math.Abs(n);
-        //}
+        public static object shiftRight(object x, object n)
+        {
+            return bitOps(x).shiftRight(x, Util.ConvertToInt(n));
+        }
+
+        public static int shiftRight(int x, int n)
+        {
+            return n >= 0 ? x >> n : x << Math.Abs(n);
+        }
 
         #endregion
 
