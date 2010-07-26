@@ -399,7 +399,7 @@ namespace clojure.lang
             = Var.intern(CLOJURE_NS, Symbol.create("*print-length*"),null);
 
         public static readonly Var ALLOW_SYMBOL_ESCAPE
-            = Var.intern(CLOJURE_NS, Symbol.create("*allow-symbol-escape*"),false);
+            = Var.intern(CLOJURE_NS, Symbol.create("*allow-symbol-escape*"),true);
 
         #endregion
 
