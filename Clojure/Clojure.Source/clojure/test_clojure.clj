@@ -58,6 +58,7 @@
       :serialization
       :rt
       :repl
+      :clr.io                ;;; java.io
       ])
 
 (def test-namespaces

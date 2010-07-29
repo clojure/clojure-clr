@@ -3918,23 +3918,6 @@
   {:added "1.0"}
   [v] (instance? clojure.lang.Var v))
 
-(defn slurp
-  "Reads the file named by f using the encoding enc into a string
-  and returns it."
-  {:added "1.0"}
-  ([f] (slurp f (. System.Text.Encoding Default)))      ;;; (slurp f (.name (java.nio.charset.Charset/defaultCharset))))
-  ([^String f  ^System.Text.Encoding enc]             ;;; [^String f ^String enc]
-  (with-open [ r ( new System.IO.StreamReader f enc)]   ;;; (new java.io.BufferedReader
-                                                        ;;;   (new java.io.InputStreamReader
-                                                        ;;;      (new java.io.FileInputStream f) enc))]
-    (let [sb (new StringBuilder)]
-      (loop [c (.Read r)]                      ;;; read -> Read
-        (if (neg? c)
-          (str sb)
-          (do
-            (.Append sb (char c))              ;;; append -> Append
-            (recur (.Read r)))))))))           ;;; read -> Read
-
 (defn subs
   "Returns the substring of s beginning at start inclusive, and ending
   at end (defaults to length of string), exclusive."
@@ -5315,7 +5298,7 @@
 (load "core_print")
 (load "genclass")
 (load "core_deftype")
-(load "core/protocols")
+(load "core/protocols")  (load "clr/io") ; added
 ;(load "gvec")
 
 ;; redefine reduce with internal-reduce
@@ -5337,6 +5320,39 @@
   ([f val coll]
      (let [s (seq coll)]
        (clojure.core.protocols/internal-reduce s f val))))
+
+(require '[clojure.clr.io :as cio])                                              ;;; '[clojure.java.io :as jio])
+
+(defn- normalize-slurp-opts
+  [opts]
+  (if (not (keyword? (first opts)))                                              ;;; (string? (first opts))
+    (do
+      (println "WARNING: (slurp f enc) is deprecated, use (slurp f :encoding enc).")
+      [:encoding (first opts)])
+    opts))
+
+(defn slurp
+  "Reads the file named by f using the encoding enc into a string
+  and returns it."
+  {:added "1.0"}
+  ([f & opts]
+     (let [opts (normalize-slurp-opts opts)
+           sb (StringBuilder.)]
+       (with-open [^System.IO.TextReader r (apply cio/text-reader f opts)]         ;;; java.io.Reader   jio/reader
+         (loop [c (.Read r)]                                                  ;;; .read
+           (if (neg? c)
+             (str sb)
+             (do
+               (.Append sb (char c))                                          ;;; .append
+               (recur (.Read r)))))))))                                       ;;; .read
+
+(defn spit
+  "Opposite of slurp.  Opens f with writer, writes content, then
+  closes f."
+  {:added "1.2"}
+  [f content & options]
+  (with-open [^System.IO.TextWriter w (apply cio/text-writer f options)]            ;;; java.io.Writer   jio/writer
+    (.Write w content)))                                                       ;;; .write
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; futures (needs proxy);;;;;;;;;;;;;;;;;;
 (defn future-call 

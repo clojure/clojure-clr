@@ -10,7 +10,7 @@
   ^{:author "David Miller",
      :doc "Shamelessly based on the clojure.java.io package authored by Stuart Sierra, Chas Emerick, Stuart Halloway.
      This file defines polymorphic I/O utility functions for Clojure."}
-    clojure.java.io
+    clojure.clr.io
     (:import 
      (System.IO 
        Stream  BufferedStream 
@@ -23,7 +23,7 @@
      (System.Net.Sockets 
        Socket NetworkStream) 
      (System.Text 
-       Encoding UTF8Encoding Decoder Encoder)
+       Encoding UTF8Encoding UnicodeEncoding UTF32Encoding UTF7Encoding ASCIIEncoding Decoder Encoder)
      (System 
        Uri UriFormatException)))
      
@@ -44,7 +44,7 @@
     
   FileInfo
   (as-file [f] f)
-  (as-uri [f] (Uri. (str "file://" (.FullPath f))))
+  (as-uri [f] (Uri. (str "file://" (.FullName f))))
 
   Uri
   (as-uri [u] u)
@@ -159,9 +159,22 @@
   [x & opts]
   (make-binary-writer x (when opts (apply hash-map opts))))  
   
-
+(def string->encoding
+  { "UTF-8" (UTF8Encoding.)
+    "UTF-16" (UnicodeEncoding.)
+    "UTF-32" (UTF32Encoding.)
+    "UTF-7" (UTF7Encoding.)
+    "ascii" (ASCIIEncoding.)
+    "ASCII" (ASCIIEncoding.)
+    "us-ascii" (ASCIIEncoding.)})
+   
+(defn- normalize-encoding [key]
+   (if (string? key)
+       (get string->encoding key)
+       key))   
+   
 (defn- ^Encoding encoding [opts]
-  (or (:encoding opts) UTF8Encoding))
+  (or (normalize-encoding (:encoding opts)) (get string->encoding "UTF-8")))
 
 (defn- buffer-size [opts]
   (or (:buffer-size opts) 1024))
@@ -169,7 +182,7 @@
 (defn- ^FileMode file-mode [mode opts]
   (or (:file-mode opts)
       (if (= mode :read)
-          FileMode/Create
+          FileMode/Open
           FileMode/OpenOrCreate)))
   
 (defn- ^FileShare file-share [opts]
@@ -250,17 +263,19 @@
   (assoc default-streams-impl
     :make-input-stream (fn [^FileInfo x opts] 
       (make-input-stream 
-        (FileStream. (file-mode :read opts) 
-                     (file-share opts) 
+        (FileStream. (.FullName x)
+                     (file-mode :read opts) 
                      (file-access :read opts) 
+                     (file-share opts) 
                      (buffer-size opts) 
                      (file-options opts)) 
          opts))
     :make-output-stream (fn [^FileInfo x opts] 
       (make-output-stream 
-        (FileStream. (file-mode :write opts) 
-                     (file-share opts) 
+        (FileStream. (.FullName x)
+                     (file-mode :write opts) 
                      (file-access :write opts) 
+                     (file-share opts) 
                      (buffer-size opts) 
                      (file-options opts)) 
          opts))))
@@ -315,21 +330,25 @@
   (fn [input output opts] [(type input) (type output)]))
 
 (defmethod do-copy [Stream Stream] [^Stream input ^Stream output opts]
-  (let [ ^bytes buffer (make-array Byte (buffer-size opts))]
+  (let [ len (buffer-size opts)
+         ^bytes buffer (make-array Byte len)]
     (loop []
-      (let [size (.Read input buffer)]
+      (let [size (.Read input buffer 0 len)]
         (when (pos? size)
           (do (.Write output buffer 0 size)
               (recur)))))))
 
 (defmethod do-copy [Stream TextWriter] [^Stream input ^TextWriter output opts]
-  (let [ ^bytes  buffer (make-array Byte (buffer-size opts))
+  (let [ len (buffer-size opts) 
+         ^bytes  buffer (make-array Byte len)
          ^Decoder decoder (.GetDecoder (encoding opts)) ]         
     (loop []
-      (let [size (.Read input buffer)]
+      (let [size (.Read input buffer 0 len)]
         (when (pos? size)
-          (let [chbuf (.GetChars decoder buffer 0 size)]
-            (do (.Write output chbuf)
+          (let [ cnt (.GetCharCount decoder buffer 0 size)
+                 chbuf (make-array Char cnt)]
+            (do (.GetChars decoder buffer 0 size chbuf 0)
+                (.Write output chbuf)
                 (recur))))))))
 
 (defmethod do-copy [Stream FileInfo] [^Stream input ^FileInfo output opts]
@@ -337,19 +356,23 @@
     (do-copy input out opts)))
 
 (defmethod do-copy [TextReader Stream] [^TextReader input ^Stream output opts]
-  (let [ ^chars buffer (make-array Char (buffer-size opts))
+  (let [ len (buffer-size opts)
+         ^chars buffer (make-array Char len)
          ^Encoder encoder (.GetEncoder (encoding opts))]
     (loop []
-      (let [size (.Read input buffer)]
+      (let [size (.Read input buffer 0 len)]
         (when (pos? size)
-          (let [bytes (.GetBytes encoder buffer 0 size)]
-            (do (.Write output bytes)
+          (let [cnt (.GetByteCount encoder buffer 0 size true)
+                bytes (make-array Byte cnt)]
+            (do (.GetBytes encoder buffer 0 size bytes 0 true)
+                (.Write output bytes 0 cnt)
                 (recur))))))))
 
 (defmethod do-copy [TextReader TextWriter] [^TextReader input ^TextWriter output opts]
-  (let [^chars buffer (make-array Char (buffer-size opts))]
+  (let [ len (buffer-size opts)
+         ^chars buffer (make-array Char len)]
     (loop []
-      (let [size (.Read input buffer)]
+      (let [size (.Read input buffer 0 len)]
         (when (pos? size)
           (do (.Write output buffer 0 size)
               (recur)))))))
