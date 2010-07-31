@@ -550,7 +550,8 @@
             keyword? (recur (assoc opts (first sigs) (second sigs)) (nnext sigs))
             [opts sigs]))
         sigs (reduce (fn [m s]
-                       (let [mname (with-meta (first s) nil)
+                       (let [name-meta (meta (first s))
+                             mname (with-meta (first s) nil)
                              [arglists doc]
                                (loop [as [] rs (rest s)]
                                  (if (vector? (first rs))
@@ -558,10 +559,11 @@
                                    [(seq as) (first rs)]))]
                          (when (some #{0} (map count arglists))
                            (throw (ArgumentException. (str "Protocol fn: " mname " must take at least one arg"))))   ;;;IllegalArgumentException
-                         (assoc m (keyword mname)  
-                                {:name (vary-meta mname assoc :doc doc :arglists arglists)
-                                 :arglists arglists
-                                 :doc doc})))
+                         (assoc m (keyword mname)
+                                (merge name-meta
+                                       {:name (vary-meta mname assoc :doc doc :arglists arglists)
+                                        :arglists arglists
+                                        :doc doc}))))
                      {} sigs)
         meths (mapcat (fn [sig]
                         (let [m (munge (:name sig))]
@@ -587,8 +589,8 @@
                        :method-builders 
                         ~(apply hash-map 
                                 (mapcat 
-                                 (fn [s] 
-                                   [`(intern *ns* (with-meta '~(:name s) {:protocol (var ~name)}))
+                                 (fn [s]
+                                   [`(intern *ns* (with-meta '~(:name s) (merge '~s {:protocol (var ~name)})))
                                     (emit-method-builder (:on-interface opts) (:name s) (:on s) (:arglists s))])
                                  (vals sigs)))))
      (-reset-methods ~name)

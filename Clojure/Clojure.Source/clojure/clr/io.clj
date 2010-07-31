@@ -30,8 +30,8 @@
 
 (defprotocol ^{:added "1.2"} Coercions
   "Coerce between various 'resource-namish' things."
-  (^FileInfo as-file [x] "Coerce argument to a file.")
-  (^Uri as-uri [x] "Coerce argument to a URI."))
+  (^{:tag FileInfo, :added "1.2"} as-file [x] "Coerce argument to a file.")
+  (^{:tag Uri, :added "1.2"} as-uri [x] "Coerce argument to a URI."))
 
 (extend-protocol Coercions
   nil
