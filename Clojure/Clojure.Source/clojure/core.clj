@@ -5296,13 +5296,13 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language") (load "core_clr")
+(alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language") (load "core_clr")  ;;; Added
 (load "core_proxy")
 (load "core_print")
 (load "genclass")
 (load "core_deftype")
-(load "core/protocols")  (load "clr/io") ; added
-;(load "gvec")
+(load "core/protocols")
+;(load "gvec")             -- not implemented yet
 
 ;; redefine reduce with internal-reduce
 (defn reduce-new
