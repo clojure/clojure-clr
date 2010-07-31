@@ -71,3 +71,15 @@
     (is (thrown? InvalidOperationException                               ;;; IllegalStateException
                  #"Integer already refers to: class java.lang.Integer"
                  (defrecord Int32 [])))))                                ;;; Integer
+
+(deftest refer-error-messages
+  (let [temp-ns (gensym)]
+    (binding [*ns* *ns*]
+      (in-ns temp-ns)
+      (eval '(def ^{:private true} hidden-var)))
+    (testing "referring to something that does not exist"
+      (is (thrown-with-msg? InvalidOperationException #"nonexistent-var does not exist"      ;;; IllegalAccessError
+            (refer temp-ns :only '(nonexistent-var)))))
+    (testing "referring to something non-public"
+      (is (thrown-with-msg? InvalidOperationException #"hidden-var is not public"            ;;; IllegalAccessError
+            (refer temp-ns :only '(hidden-var)))))))                 
