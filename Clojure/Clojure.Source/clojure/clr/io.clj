@@ -341,14 +341,14 @@
 (defmethod do-copy [Stream TextWriter] [^Stream input ^TextWriter output opts]
   (let [ len (buffer-size opts) 
          ^bytes  buffer (make-array Byte len)
-         ^Decoder decoder (.GetDecoder (encoding opts)) ]         
+         ^Decoder decoder (.GetDecoder (encoding opts)) ]   
     (loop []
       (let [size (.Read input buffer 0 len)]
         (when (pos? size)
           (let [ cnt (.GetCharCount decoder buffer 0 size)
                  chbuf (make-array Char cnt)]
             (do (.GetChars decoder buffer 0 size chbuf 0)
-                (.Write output chbuf)
+                (.Write output chbuf 0 cnt)
                 (recur))))))))
 
 (defmethod do-copy [Stream FileInfo] [^Stream input ^FileInfo output opts]

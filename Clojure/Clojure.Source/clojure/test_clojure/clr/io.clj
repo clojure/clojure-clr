@@ -75,12 +75,12 @@
  
 (defn data-fixture
   "in memory fixture data for tests"
-  [encoding]
-  (let [bs (get-bytes "hello" encoding)
+  [in-encoding out-encoding]
+  (let [bs (get-bytes "hello" in-encoding)
         i (MemoryStream. bs)
-        r (StreamReader. i)
+        r (StreamReader. i in-encoding)
         o (MemoryStream.)
-        w (StreamWriter. o)]
+        w (StreamWriter. o out-encoding )]
     {:bs bs
      :i i
      :r r
@@ -100,24 +100,28 @@
          
          opts
          [{} {:buffer-size 256}]]
-     (let [{:keys [s o] :as d} (data-fixture utf8)]
+     (let [{:keys [s o] :as d} (data-fixture utf8 utf8)]
+     (prn (str (class (in d)) ", " (class (out d))))
+     (prn (str "combination " test opts))
+     (prn (str (flatten (vec opts))))
        (apply copy (in d) (out d) (flatten (vec opts)))
        #_(when (= out :w) (.Flush (:w d)))
        (.Flush (out d))
+       (prn "testing")
        (bytes-should-equal (get-bytes s utf8)
                            (.ToArray o)
                            (str "combination " test opts))))))
 
 (deftest test-copy-encodings
   (testing "from inputstream UTF-16 to writer UTF-8"
-    (let [{:keys [i s o w bs]} (data-fixture utf16)]
+    (let [{:keys [i s o w bs]} (data-fixture utf16 utf8)]
       (copy i w :encoding utf16)
       (.Flush w)
       (bytes-should-equal (get-bytes s utf8) (.ToArray o) "")))
   (testing "from reader UTF-8 to output-stream UTF-16"
-    (let [{:keys [r o s]} (data-fixture utf8)]
+    (let [{:keys [r o s]} (data-fixture utf8 utf16)]
       (copy r o :encoding utf16)
-      (bytes-should-equal (get-bytes s utf8) (.ToArray o) ""))))
+      (bytes-should-equal (get-bytes s utf16) (.ToArray o) ""))))
 
 ;(deftest test-as-file
 ;  (are [result input] (= result (as-file input))

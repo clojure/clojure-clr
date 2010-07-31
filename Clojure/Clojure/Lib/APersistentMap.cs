@@ -322,7 +322,9 @@ namespace clojure.lang
 
         public void CopyTo(Array array, int index)
         {
-            ((ICollection)seq()).CopyTo(array, index);
+            ISeq s = seq();
+            if ( s != null )
+                ((ICollection)s).CopyTo(array, index);
         }
 
         public int Count
