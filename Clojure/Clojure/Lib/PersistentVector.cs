@@ -780,7 +780,7 @@ namespace clojure.lang
                 int newshift = _shift;
                 if (newroot == null)
                 {
-                    newroot = EMPTY_NODE;
+                    newroot = new Node(_root.Edit);
                 }
                 if (_shift > 5 && newroot.Array[1] == null)
                 {
