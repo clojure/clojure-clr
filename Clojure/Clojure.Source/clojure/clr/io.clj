@@ -30,8 +30,8 @@
 
 (defprotocol ^{:added "1.2"} Coercions
   "Coerce between various 'resource-namish' things."
-  (as-file [x] "Coerce argument to a file.")
-  (as-uri [x] "Coerce argument to a URI."))
+  (^FileInfo as-file [x] "Coerce argument to a file.")
+  (^Uri as-uri [x] "Coerce argument to a URI."))
 
 (extend-protocol Coercions
   nil
@@ -53,13 +53,30 @@
 	  (as-file (.LocalPath u))
       (throw (ArgumentException. "Not a file: " u)))))
 
-(defprotocol IOFactory
-  (make-text-reader [x opts])
-  (make-text-writer [x opts])
-  (make-input-stream [x opts])
-  (make-output-stream [x opts])
-  (make-binary-reader [x opts])
-  (make-binary-writer [x opts]))
+(defprotocol ^{:added "1.2"} IOFactory
+  "Factory functions that create ready-to-use, buffered versions of
+   the various Java I/O stream types, on top of anything that can
+   be unequivocally converted to the requested kind of stream.
+
+   Common options include
+   
+     :buffer-size   Ths size of buffer to use (default: 1024).
+     :file-share    A value from the System.IO.FileShare enumeration.
+     :file-mode     A value from the System.IO.FileMode enumeration.
+     :file-access   A value from the System.IO.FileAccess enumeration.
+     :file-options  A value from the System.IO.FileOptions enumeration.
+     :encoding  The encoding to use, either as a string, e.g. \"UTF-8\",
+                a keyword, e.g. :utf-8, or a an System.Text.Encoding instance,
+                e.g., (System.Text.UTF8Encoding.)
+
+   Callers should generally prefer the higher level API provided by
+   reader, writer, input-stream, and output-stream."
+  (^{:added "1.2"} make-text-reader [x opts] "Creates a TextReader.  See also IOFactory docs.")
+  (^{:added "1.2"} make-text-writer [x opts] "Creates a TextWriter.  See also IOFactory docs.")
+  (^{:added "1.2"} make-input-stream [x opts] "Creates a Stream in input mode.  See also IOFactory docs.")
+  (^{:added "1.2"} make-output-stream [x opts] "Creates a Stream in output mode.  See also IOFactory docs.")
+  (^{:added "1.2"} make-binary-reader [x opts] "Creates a BinaryReader.  See also IOFactory docs.")
+  (^{:added "1.2"} make-binary-writer [x opts] "Creates a BinaryWriter.  See also IOFactory docs."))
 
 (defn ^TextReader text-reader
   "Attempts to coerce its argument into an open System.IO.TextReader.
@@ -166,7 +183,17 @@
     "UTF-7" (UTF7Encoding.)
     "ascii" (ASCIIEncoding.)
     "ASCII" (ASCIIEncoding.)
-    "us-ascii" (ASCIIEncoding.)})
+    "us-ascii" (ASCIIEncoding.)
+    :utf8 (UTF8Encoding.)
+    :utf16 (UnicodeEncoding.)
+    :utf32 (UTF32Encoding.)
+    :utf7 (UTF7Encoding.)
+    :ascii (ASCIIEncoding.)
+    :utf-8 (UTF8Encoding.)
+    :utf-16 (UnicodeEncoding.)
+    :utf-32 (UTF32Encoding.)
+    :utf-7 (UTF7Encoding.)   
+    })
    
 (defn- normalize-encoding [key]
    (if (string? key)

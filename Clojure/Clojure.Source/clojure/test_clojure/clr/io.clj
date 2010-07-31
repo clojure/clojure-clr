@@ -101,13 +101,9 @@
          opts
          [{} {:buffer-size 256}]]
      (let [{:keys [s o] :as d} (data-fixture utf8 utf8)]
-     (prn (str (class (in d)) ", " (class (out d))))
-     (prn (str "combination " test opts))
-     (prn (str (flatten (vec opts))))
        (apply copy (in d) (out d) (flatten (vec opts)))
        #_(when (= out :w) (.Flush (:w d)))
        (.Flush (out d))
-       (prn "testing")
        (bytes-should-equal (get-bytes s utf8)
                            (.ToArray o)
                            (str "combination " test opts))))))
