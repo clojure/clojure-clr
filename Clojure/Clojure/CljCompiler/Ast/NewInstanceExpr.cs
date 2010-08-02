@@ -213,13 +213,13 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 ret._methods = methods;
-                ret._keywords = (IPersistentMap)Compiler.KEYWORDS.deref();
-                ret._vars = (IPersistentMap)Compiler.VARS.deref();
-                ret._constants = (PersistentVector)Compiler.CONSTANTS.deref();
+                ret.Keywords = (IPersistentMap)Compiler.KEYWORDS.deref();
+                ret.Vars = (IPersistentMap)Compiler.VARS.deref();
+                ret.Constants = (PersistentVector)Compiler.CONSTANTS.deref();
                 ret._constantsID = RT.nextID();
-                ret._keywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
-                ret._protocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
-                ret._varCallsites = (IPersistentVector)Compiler.VAR_CALLSITES.deref();
+                ret.KeywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
+                ret.ProtocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
+                ret.VarCallsites = (IPersistentVector)Compiler.VAR_CALLSITES.deref();
             }
             finally
             {

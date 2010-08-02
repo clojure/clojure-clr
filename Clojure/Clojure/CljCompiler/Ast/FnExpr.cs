@@ -200,12 +200,12 @@ namespace clojure.lang.CljCompiler.Ast
 
                 fn._methods = allMethods;
                 fn._variadicMethod = variadicMethod;
-                fn._keywords = (IPersistentMap)Compiler.KEYWORDS.deref();
-                fn._vars = (IPersistentMap)Compiler.VARS.deref();
-                fn._constants = (PersistentVector)Compiler.CONSTANTS.deref();
-                fn._keywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
-                fn._protocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
-                fn._varCallsites = (IPersistentVector)Compiler.VAR_CALLSITES.deref();
+                fn.Keywords = (IPersistentMap)Compiler.KEYWORDS.deref();
+                fn.Vars = (IPersistentMap)Compiler.VARS.deref();
+                fn.Constants = (PersistentVector)Compiler.CONSTANTS.deref();
+                fn.KeywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
+                fn.ProtocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
+                fn.VarCallsites = (IPersistentVector)Compiler.VAR_CALLSITES.deref();
 
                 fn._constantsID = RT.nextID();
             }
@@ -215,13 +215,23 @@ namespace clojure.lang.CljCompiler.Ast
             }
             
             // JAVA: fn.compile();
-            fn._superType = fn.GetSuperType();
-            fn.GenerateClass();
+            fn.Compile();
 
             if (origForm is IObj && ((IObj)origForm).meta() != null)
                 return new MetaExpr(fn, (MapExpr)MapExpr.Parse(((IObj)origForm).meta()));
             else
                 return fn;
+        }
+
+        internal Type Compile()
+        {
+            _superType = GetSuperType();
+            return GenerateClass();
+        }
+
+        internal void AddMethod(FnMethod method)
+        {
+            _methods = RT.conj(_methods,method);
         }
 
         #endregion
