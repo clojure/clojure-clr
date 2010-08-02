@@ -44,6 +44,15 @@ namespace clojure.lang.CljCompiler.Ast
         {
         }
 
+        // For top-level compilation only
+        public FnMethod(FnExpr fn, ObjMethod parent, BodyExpr body)
+            :base(fn,parent)
+        {
+            _body = body;
+            _argLocals = PersistentVector.EMPTY;
+            //_thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null, false);
+        }
+
         #endregion
 
         #region ObjMethod methods

@@ -164,16 +164,54 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected bool IsDefType { get { return _fields != null; } }
 
-        protected IPersistentMap _keywords = PersistentHashMap.EMPTY;         // Keyword -> KeywordExpr
-        protected IPersistentMap _vars = PersistentHashMap.EMPTY;
-        protected PersistentVector _constants;
+        private IPersistentMap _keywords = PersistentHashMap.EMPTY;         // Keyword -> KeywordExpr
+
+        internal IPersistentMap Keywords
+        {
+            get { return _keywords; }
+            set { _keywords = value; }
+        }
+        private IPersistentMap _vars = PersistentHashMap.EMPTY;
+
+        internal IPersistentMap Vars
+        {
+            get { return _vars; }
+            set { _vars = value; }
+        }
+        private PersistentVector _constants;
+
+        internal PersistentVector Constants
+        {
+            get { return _constants; }
+            set { _constants = value; }
+        }
         protected int _constantsID;
+
+
 
         protected int _altCtorDrops = 0;
 
-        protected IPersistentVector _keywordCallsites;
-        protected IPersistentVector _protocolCallsites;
-        protected IPersistentVector _varCallsites;
+        private IPersistentVector _keywordCallsites;
+
+        internal IPersistentVector KeywordCallsites
+        {
+            get { return _keywordCallsites; }
+            set { _keywordCallsites = value; }
+        }
+        private IPersistentVector _protocolCallsites;
+
+        internal IPersistentVector ProtocolCallsites
+        {
+            get { return _protocolCallsites; }
+            set { _protocolCallsites = value; }
+        }
+        private IPersistentVector _varCallsites;
+
+        internal IPersistentVector VarCallsites
+        {
+            get { return _varCallsites; }
+            set { _varCallsites = value; }
+        }
 
         protected ConstructorInfo _ctorInfo;
         protected ConstructorInfo _nonmetaCtorInfo;

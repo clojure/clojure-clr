@@ -1337,7 +1337,7 @@ namespace clojure.lang
             //GenContext evalContext = new GenContext("EvalForCompile", CompilerMode.Immediate);
 
             GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, AssemblyMode.Save,FnMode.Full);
-            GenContext evalContext = new GenContext("EvalForCompile", AssemblyMode.Dynamic,FnMode.Light);
+            GenContext evalContext = new GenContext("EvalForCompile", AssemblyMode.Dynamic,FnMode.Full);
 
             Var.pushThreadBindings(RT.map(
             SOURCE_PATH, sourcePath,
@@ -1350,7 +1350,14 @@ namespace clojure.lang
             CONSTANT_IDS, new IdentityHashMap(),
             KEYWORDS, PersistentHashMap.EMPTY,
             VARS, PersistentHashMap.EMPTY,
-            COMPILER_CONTEXT, context
+            KEYWORD_CALLSITES, PersistentVector.EMPTY,
+            VAR_CALLSITES, PersistentVector.EMPTY,
+            PROTOCOL_CALLSITES, PersistentVector.EMPTY,
+            COMPILER_CONTEXT, context,
+            METHOD, null,
+            LOCAL_ENV, null,
+            LOOP_LOCALS, null,
+            NEXT_LOCAL_NUM, 0
             ));
 
 
@@ -1359,14 +1366,15 @@ namespace clojure.lang
 
                 TypeBuilder exprTB = context.AssemblyGen.DefinePublicType("__REPL__", typeof(object), true);
 
-                List<string> names = new List<string>();
+                //List<string> names = new List<string>();
+                List<Expr> exprs = new List<Expr>();
 
                 int i = 0;
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     //Java version: LINE_AFTER.set(lntr.LineNumber);
 
-                    Compile1(context, exprTB, form, names, ref i);
+                    Compile1(context, evalContext, exprTB, form, exprs, ref i);
 
 
                     //Java version: LINE_BEFORE.set(lntr.LineNumber);
@@ -1382,14 +1390,39 @@ namespace clojure.lang
                 Expression pushNSExpr = Expression.Call(null, Method_Compiler_PushNS);
                 Expression popExpr = Expression.Call(null, Method_Var_popThreadBindings);
 
-                List<Expression> inits = new List<Expression>();
-                foreach (string name in names)
-                {
-                    Expression call = Expression.Call(exprType, name, Type.EmptyTypes);
-                    inits.Add(call);
-                }
+                //List<Expression> inits = new List<Expression>();
+                //foreach (string name in names)
+                //{
+                //    Expression call = Expression.Call(exprType, name, Type.EmptyTypes);
+                //    inits.Add(call);
+                //}
 
-                Expression tryCatch = Expression.TryCatchFinally(Expression.Block(inits), popExpr);
+                //if (inits.Count == 0)
+                //    inits.Add(Expression.Constant(null));
+
+                //Expression tryCatch = Expression.TryCatchFinally(Expression.Block(inits), popExpr);
+
+                FnExpr fn = new FnExpr(null);
+                BodyExpr bodyExpr = new BodyExpr(PersistentVector.create1(exprs));
+                FnMethod method = new FnMethod(fn, null, bodyExpr);
+                fn.AddMethod(method);
+
+                fn.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.'));
+
+                fn.Keywords = (IPersistentMap)KEYWORDS.deref();
+                fn.Vars = (IPersistentMap)VARS.deref();
+                fn.Constants = (PersistentVector)CONSTANTS.deref();
+
+                fn.KeywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
+                fn.ProtocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
+                fn.VarCallsites = (IPersistentVector)VAR_CALLSITES.deref();
+
+                fn.Compile();
+
+                Expression fnNew = fn.GenDlr(context);
+                Expression fnInvoke = Expression.Call(fnNew, fnNew.Type.GetMethod("invoke", System.Type.EmptyTypes));
+
+                Expression tryCatch = Expression.TryCatchFinally(fnInvoke, popExpr);
 
                 Expression body = Expression.Block(pushNSExpr, tryCatch);
 
@@ -1413,7 +1446,7 @@ namespace clojure.lang
             return null;
         }
 
-        private static void Compile1(GenContext context, TypeBuilder exprTB, object form, List<string> names, ref int i)
+        private static void Compile1(GenContext compileContext, GenContext evalContext, TypeBuilder exprTB, object form, List<Expr> exprs, ref int i)
         {
 
             int line = (int)LINE.deref();
@@ -1432,7 +1465,7 @@ namespace clojure.lang
                 if (form is IPersistentCollection && Util.Equals(RT.first(form), DO))
                 {
                     for (ISeq s = RT.next(form); s != null; s = RT.next(s))
-                        Compile1(context, exprTB, RT.first(s), names, ref i);
+                        Compile1(compileContext, evalContext, exprTB, RT.first(s), exprs, ref i);
                 }
                 else
                 {
@@ -1442,18 +1475,23 @@ namespace clojure.lang
                     // and then eval using the eval context
 
                     Expr ast = GenerateWrappedAst(form);
+                    exprs.Add(new InvokeExpr((string)Compiler.SOURCE.deref(),
+                (IPersistentMap)Compiler.SOURCE_SPAN.deref(), //Compiler.GetSourceSpanMap(form),
+                Compiler.TagOf(form),
+                ast,
+                PersistentVector.EMPTY));
 
                     // Compile to assembly
-                    Expression exprForCompile = GenerateInvokedDlrFromWrappedAst(context, ast);
+                    Expression exprForCompile = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
                     Expression<ReplDelegate> lambdaForCompile = Expression.Lambda<ReplDelegate>(Expression.Convert(exprForCompile, typeof(Object)), "ReplCall", null);
 
                     // TODO: gather all the exprForCompiles into one BIG lambda.  Then we only need one BIG method.
-                    MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
-                        MethodAttributes.Public | MethodAttributes.Static);
+                    //MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
+                    //    MethodAttributes.Public | MethodAttributes.Static);
                     //ast.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());
-                    lambdaForCompile.CompileToMethod(methodBuilder, true);
+                    //lambdaForCompile.CompileToMethod(methodBuilder, true);
 
-                    names.Add(methodBuilder.Name);
+                    //names.Add(methodBuilder.Name);
 
                     //// evaluate in this environment
                     //Expression exprForEval = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
