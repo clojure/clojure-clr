@@ -1339,6 +1339,13 @@ namespace clojure.lang
             GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, AssemblyMode.Save,FnMode.Full);
             GenContext evalContext = new GenContext("EvalForCompile", AssemblyMode.Dynamic,FnMode.Full);
 
+            FnExpr fn = new FnExpr(null);
+            fn.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.'));
+            FnMethod fnm = new FnMethod(fn, null);
+
+            context = context.CreateWithNewType(fn);
+            //evalContext = evalContext.CreateWithNewType(fn);
+
             Var.pushThreadBindings(RT.map(
             SOURCE_PATH, sourcePath,
             SOURCE, sourceName,
@@ -1354,7 +1361,7 @@ namespace clojure.lang
             VAR_CALLSITES, PersistentVector.EMPTY,
             PROTOCOL_CALLSITES, PersistentVector.EMPTY,
             COMPILER_CONTEXT, context,
-            METHOD, null,
+            METHOD, fnm,
             LOCAL_ENV, null,
             LOOP_LOCALS, null,
             NEXT_LOCAL_NUM, 0
@@ -1402,12 +1409,10 @@ namespace clojure.lang
 
                 //Expression tryCatch = Expression.TryCatchFinally(Expression.Block(inits), popExpr);
 
-                FnExpr fn = new FnExpr(null);
                 BodyExpr bodyExpr = new BodyExpr(PersistentVector.create1(exprs));
                 FnMethod method = new FnMethod(fn, null, bodyExpr);
                 fn.AddMethod(method);
 
-                fn.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.'));
 
                 fn.Keywords = (IPersistentMap)KEYWORDS.deref();
                 fn.Vars = (IPersistentMap)VARS.deref();
@@ -1474,31 +1479,47 @@ namespace clojure.lang
                     // and then compile using the compile context
                     // and then eval using the eval context
 
-                    Expr ast = GenerateWrappedAst(form);
-                    exprs.Add(new InvokeExpr((string)Compiler.SOURCE.deref(),
-                (IPersistentMap)Compiler.SOURCE_SPAN.deref(), //Compiler.GetSourceSpanMap(form),
-                Compiler.TagOf(form),
-                ast,
-                PersistentVector.EMPTY));
+                //    Expr ast = GenerateWrappedAst(form);
+                //    exprs.Add(new InvokeExpr((string)Compiler.SOURCE.deref(),
+                //(IPersistentMap)Compiler.SOURCE_SPAN.deref(), //Compiler.GetSourceSpanMap(form),
+                //Compiler.TagOf(form),
+                //ast,
+                //PersistentVector.EMPTY));
 
-                    // Compile to assembly
-                    Expression exprForCompile = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
-                    Expression<ReplDelegate> lambdaForCompile = Expression.Lambda<ReplDelegate>(Expression.Convert(exprForCompile, typeof(Object)), "ReplCall", null);
+                    Expr ast = GenerateAST(form, new ParserContext(false, false));
+                    exprs.Add(ast);
 
-                    // TODO: gather all the exprForCompiles into one BIG lambda.  Then we only need one BIG method.
-                    //MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
-                    //    MethodAttributes.Public | MethodAttributes.Static);
-                    //ast.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());
-                    //lambdaForCompile.CompileToMethod(methodBuilder, true);
 
-                    //names.Add(methodBuilder.Name);
+                    Var.pushThreadBindings(RT.map(
+                        COMPILER_CONTEXT, evalContext,
+                        METHOD, null));
 
-                    //// evaluate in this environment
-                    //Expression exprForEval = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
-                    //LambdaExpression lambdaForEval = Expression.Lambda(exprForEval, "ReplCall", null);
-                    Expression<ReplDelegate> lambdaForEval = lambdaForCompile;
+                    try
+                    {
+                        // Compile to assembly
+                        ast = GenerateWrappedAst(form);
+                        Expression exprForCompile = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
+                        Expression<ReplDelegate> lambdaForCompile = Expression.Lambda<ReplDelegate>(Expression.Convert(exprForCompile, typeof(Object)), "ReplCall", null);
 
-                    lambdaForEval.Compile().Invoke();
+                        // TODO: gather all the exprForCompiles into one BIG lambda.  Then we only need one BIG method.
+                        //MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
+                        //    MethodAttributes.Public | MethodAttributes.Static);
+                        //ast.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());
+                        //lambdaForCompile.CompileToMethod(methodBuilder, true);
+
+                        //names.Add(methodBuilder.Name);
+
+                        //// evaluate in this environment
+                        //Expression exprForEval = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
+                        //LambdaExpression lambdaForEval = Expression.Lambda(exprForEval, "ReplCall", null);
+                        Expression<ReplDelegate> lambdaForEval = lambdaForCompile;
+
+                        lambdaForEval.Compile().Invoke();
+                    }
+                    finally
+                    {
+                        Var.popThreadBindings();
+                    }
                 }
             }
             finally
