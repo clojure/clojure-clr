@@ -60,6 +60,7 @@
       :repl
       :clr.io                ;;; java.io
       :transients            ;;; Not yet added in JVM version, not sure why
+      :def                   ;;; Not yet added in JVM version, not sure why
       ])
 
 (def test-namespaces
