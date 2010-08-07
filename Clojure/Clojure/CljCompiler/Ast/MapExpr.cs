@@ -31,6 +31,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         readonly IPersistentVector _keyvals;
 
+        public IPersistentVector KeyVals
+        {
+            get { return _keyvals; }
+        } 
+
+
         #endregion
 
         #region Ctors

@@ -338,7 +338,9 @@ namespace clojure.lang
         
         public static readonly Keyword END_COLUMN_KEY
             = Keyword.intern(null, "end-column");
- 
+
+        public static readonly Keyword DECLARED_KEY
+            = Keyword.intern(null, "declared");
 
         #endregion
 

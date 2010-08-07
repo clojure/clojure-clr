@@ -198,6 +198,7 @@
     </None>
     <None Include="clojure\samples\stm\teststm.clj" />
     <None Include="clojure\test_clojure\clr\io.clj" />
+    <None Include="clojure\test_clojure\helpers.clj" />
     <None Include="clojure\test_clojure\pprint.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

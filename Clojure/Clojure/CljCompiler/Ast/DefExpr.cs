@@ -134,15 +134,37 @@ namespace clojure.lang.CljCompiler.Ast
             if (_initProvided)
                 // Java doesn't Box here, but we have to deal with unboxed bool values
                 exprs.Add(Expression.Call(parm, Compiler.Method_Var_bindRoot, Compiler.MaybeBox(_init.GenDlr(context))));
-            
+
             if (_meta != null)
-                // Java casts to IPersistentMap on the _meta, but Expression.Call can handle that for us.
-                exprs.Add(Expression.Call(parm, Compiler.Method_Var_setMeta, _meta.GenDlr(context)));
+            {
+                if (_initProvided || IncludesExplicitMetadata((MapExpr)_meta))
+                {
+                    // Java casts to IPersistentMap on the _meta, but Expression.Call can handle that for us.
+                    exprs.Add(Expression.Call(parm, Compiler.Method_Var_setMeta, _meta.GenDlr(context)));
+                }
+            }
 
             exprs.Add(parm);
 
             return Expression.Block(new ParameterExpression[] { parm }, exprs);
         }
+
+        #endregion
+
+        #region Misc
+
+        private bool IncludesExplicitMetadata(MapExpr expr) {
+        for(int i=0; i < expr.KeyVals.count(); i += 2)
+            {
+                Keyword k = ((KeywordExpr)expr.KeyVals.nth(i)).Kw;
+                if ((k != RT.FILE_KEY) &&
+                    (k != RT.DECLARED_KEY) &&
+                    (k != RT.SOURCE_SPAN_KEY ) &&
+                    (k != RT.LINE_KEY))
+                    return true;
+            }
+        return false;
+    }
 
         #endregion
     }
