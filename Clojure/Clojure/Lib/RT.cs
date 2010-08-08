@@ -1633,6 +1633,11 @@ namespace clojure.lang
                 Var v = x as Var;
                 w.Write("#=(var {0}/{1})", v.Namespace.Name, v.Symbol);
             }
+            else if (x is Regex)
+            {
+                Regex r = (Regex)x;
+                w.Write("#\"{0}\"", r.ToString());
+            }
             //else
             //    w.Write(x.ToString());
             // The clause above is what Java has, and would have been nice.
