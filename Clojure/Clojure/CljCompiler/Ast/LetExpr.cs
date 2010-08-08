@@ -24,7 +24,7 @@ using System.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class LetExpr : Expr
+    class LetExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
@@ -134,6 +134,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
+            return GenDlr(context, false);
+        }
+
+        private Expression GenDlr(GenContext context, bool genUnboxed)
+        {
             LabelTarget loopLabel = Expression.Label();
 
             List<ParameterExpression> parms = new List<ParameterExpression>();
@@ -159,7 +164,9 @@ namespace clojure.lang.CljCompiler.Ast
                 if (_isLoop)
                     Var.pushThreadBindings(PersistentHashMap.create(Compiler.LOOP_LABEL, loopLabel));
 
-                forms.Add(_body.GenDlr(context));
+                Expression form = genUnboxed ? ((MaybePrimitiveExpr)_body).GenDlrUnboxed(context) : _body.GenDlr(context);
+
+                forms.Add(form);
             }
             finally
             {
@@ -172,6 +179,20 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
  
+
+        #endregion
+
+        #region MaybePrimitiveExpr Members
+
+        public bool CanEmitPrimitive
+        {
+            get { return _body is MaybePrimitiveExpr && ((MaybePrimitiveExpr)_body).CanEmitPrimitive; }
+        }
+
+        public Expression GenDlrUnboxed(GenContext context)
+        {
+            return GenDlr(context, true);
+        }
 
         #endregion
     }

@@ -26,7 +26,7 @@ using clojure.runtime;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class IfExpr : Expr
+    class IfExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
@@ -55,29 +55,17 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                //if (_elseExpr == null)
-                //    return _thenExpr.HasClrType;
-                //else
-                    return _thenExpr.HasClrType
-                    && _elseExpr.HasClrType
-                    && (_thenExpr.ClrType == _elseExpr.ClrType
-                        || (_thenExpr.ClrType == null && ! _elseExpr.ClrType.IsValueType)
-                        || (_elseExpr.ClrType == null && ! _thenExpr.ClrType.IsValueType));
+                return _thenExpr.HasClrType
+                && _elseExpr.HasClrType
+                && (_thenExpr.ClrType == _elseExpr.ClrType
+                    || (_thenExpr.ClrType == null && !_elseExpr.ClrType.IsValueType)
+                    || (_elseExpr.ClrType == null && !_thenExpr.ClrType.IsValueType));
             }
         }
 
         public override Type ClrType
         {
-            get
-            {
-                //Type thenType = _thenExpr.ClrType;
-
-                //if (_elseExpr == null)
-                //    return thenType;
-                //else
-                //    return thenType ?? _elseExpr.ClrType;
-                return _thenExpr.ClrType ?? _elseExpr.ClrType;
-            }
+            get { return _thenExpr.ClrType ?? _elseExpr.ClrType; }
         }
 
         #endregion
@@ -114,7 +102,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenDlr(GenContext context)
         {
-            //bool testIsBool = _testExpr is MaybePrimitiveExpr && _testExpr.HasClrType && _testExpr.ClrType == typeof(bool);
+            return GenDlr(context, false);
+        }
+
+        private Expression GenDlr(GenContext context, bool genUnboxed)
+        {
             bool testIsBool = Compiler.MaybePrimitiveType(_testExpr) == typeof(bool);
 
             Expression testCode;
@@ -133,11 +125,9 @@ namespace clojure.lang.CljCompiler.Ast
                 testCode = Expression.Block(typeof(bool), new ParameterExpression[] { testVar }, assign, boolExpr);
             }
 
-            Expression thenCode = _thenExpr.GenDlr(context);
-            //Expression elseCode = _elseExpr == null
-            //    ? Expression.Constant(null, typeof(object))
-            //    : _elseExpr.GenDlr(context);
-            Expression elseCode = _elseExpr.GenDlr(context);
+            Expression thenCode = genUnboxed ? ((MaybePrimitiveExpr)_thenExpr).GenDlrUnboxed(context) : _thenExpr.GenDlr(context);
+
+            Expression elseCode = genUnboxed ? ((MaybePrimitiveExpr)_elseExpr).GenDlrUnboxed(context) : _elseExpr.GenDlr(context);
 
             Type targetType = typeof(object);
             if (this.HasClrType && this.ClrType != null)
@@ -188,6 +178,34 @@ namespace clojure.lang.CljCompiler.Ast
             Expression cond = Expression.Condition(testCode, thenCode, elseCode, targetType);
             cond = Compiler.MaybeAddDebugInfo(cond, _sourceSpan);
             return cond;
+        }
+
+        #endregion
+
+        #region MaybePrimitiveExpr Members
+
+        public bool CanEmitPrimitive
+        {
+            get 
+            {
+                try
+                {
+                    return _thenExpr is MaybePrimitiveExpr
+                        && _elseExpr is MaybePrimitiveExpr
+                        && _thenExpr.ClrType == _elseExpr.ClrType
+                        && ((MaybePrimitiveExpr)_thenExpr).CanEmitPrimitive
+                        && ((MaybePrimitiveExpr)_elseExpr).CanEmitPrimitive;
+                }
+                catch ( Exception )
+                {
+                    return false;
+                }
+            }
+        }
+
+        public Expression GenDlrUnboxed(GenContext context)
+        {
+            return GenDlr(context, true);
         }
 
         #endregion

@@ -1065,6 +1065,11 @@ namespace clojure.lang
             return x != null;
         }
 
+        static public bool booleanCast(bool x)
+        {
+            return x;
+        }
+
         public static byte byteCast(object x)
         {
             return (byte)Util.ConvertToInt(x); 
