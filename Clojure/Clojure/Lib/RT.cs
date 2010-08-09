@@ -1919,6 +1919,40 @@ namespace clojure.lang
         }
 
 
+        // Surprisingly hard, due to non-BMP (multiple character) codes.
+        // This solution from http://stackoverflow.com/questions/228038/best-way-to-reverse-a-string-in-c-2-0
+        public static string StringReverse(string input)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+
+            // allocate a buffer to hold the output
+            char[] output = new char[input.Length];
+            for (int outputIndex = 0, inputIndex = input.Length - 1; outputIndex < input.Length; outputIndex++, inputIndex--)
+            {
+                // check for surrogate pair
+                if (input[inputIndex] >= 0xDC00 && input[inputIndex] <= 0xDFFF &&
+                        inputIndex > 0 && input[inputIndex - 1] >= 0xD800 && input[inputIndex - 1] <= 0xDBFF)
+                {
+                    // preserve the order of the surrogate pair code units
+                    output[outputIndex + 1] = input[inputIndex];
+                    output[outputIndex] = input[inputIndex - 1];
+                    outputIndex++;
+                    inputIndex--;
+                }
+                else
+                {
+                    output[outputIndex] = input[inputIndex];
+                }
+            }
+
+            return new string(output);
+        }
+
+
+        
+
+
         #endregion
 
         #region Loading/compiling

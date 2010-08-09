@@ -67,6 +67,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>$(TargetPath) clojure.core clojure.set clojure.zip clojure.main clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl</PostBuildEvent>
+    <PostBuildEvent>$(TargetPath) clojure.core clojure.set clojure.zip clojure.main clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.string</PostBuildEvent>
   </PropertyGroup>
 </Project>
