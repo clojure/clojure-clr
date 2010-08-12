@@ -23,9 +23,10 @@
         psig (fn [[name [& args]]]
                (vector name (vec (map tag args)) (tag name) (map meta args)))
         cname (with-meta (symbol (str *ns* "." name)) (meta name))]
-    `(do (gen-interface :name ~cname :methods ~(vec (map psig sigs)))
-         (import ~cname))))
-
+    `(let [] 
+       (gen-interface :name ~cname :methods ~(vec (map psig sigs)))
+       (import ~cname))))
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;; reify/deftype ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- parse-opts [s]
