@@ -11,15 +11,16 @@
   (is (= "tab" (s/reverse "bat"))))
 
 (deftest t-replace
-  (is (= "faabar" (s/replace \o \a "foobar")))
-  (is (= "barbarbar" (s/replace "foo" "bar" "foobarfoo")))
-  (is (= "FOObarFOO" (s/replace #"foo" s/upper-case  "foobarfoo"))))
+  (is (= "faabar" (s/replace "foobar" \o \a)))
+  (is (= "barbarbar" (s/replace "foobarfoo" "foo" "bar")))
+  (is (= "FOObarFOO" (s/replace "foobarfoo" #"foo" s/upper-case))))
 
 (deftest t-replace-first
   (is (= "barbarfoo" (s/replace-first "foobarfoo" "foo" "bar")))
   (is (= "barbarfoo" (s/replace-first "foobarfoo" #"foo" "bar")))
+  (is (= "z.ology" (s/replace-first "zoology" \o \.)))
   (is (= "FOObarfoo" (s/replace-first "foobarfoo" #"foo" s/upper-case))))
-
+  
 (deftest t-join
   (are [x coll] (= x (s/join coll))
        "" nil

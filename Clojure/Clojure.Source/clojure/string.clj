@@ -50,9 +50,9 @@ Design notes for clojure.string:
   (clojure.lang.RT/StringReverse s))                           ;;; (.toString (.reverse (StringBuilder. s))))
 
 (defn- replace-by
-  [re f ^String s]
+  [^String s re f]
   (.Replace re s                                                     ;;; (let [m (re-matcher re s)]
-        ^MatchEvaluator (gen-delegate MatchEvaluator [m] (f m))))    ;;;   (let [buffer (StringBuffer. (.length s))]
+        ^MatchEvaluator (gen-delegate MatchEvaluator [m] (f (.ToString m)))))    ;;;   (let [buffer (StringBuffer. (.length s))]
                                                                      ;;;     (loop []
                                                                      ;;;       (if (.find m)
                                                                      ;;;         (do (.appendReplacement m buffer (f (re-groups m)))
@@ -80,38 +80,51 @@ Design notes for clojure.string:
                              (replace-by s match replacement))
    :else (throw (ArgumentException. (str "Invalid match arg: " match)))))                 ;;; IllegalArgumentException
 
-(defn replace-first-by
+(defn- replace-first-by
   "Replace first match of re in s with the result of
   (f (re-groups the-match))."
   [^String s ^Regex re f]                                            ;;; Pattern
                                                                      ;;;(let [m (re-matcher re s)]
     (.Replace re s                                                   ;;;    (let [buffer (StringBuffer.)]
-         ^MatchEvaluator (gen-delegate MatchEvaluator [m] (f m))     ;;;     (if (.find m)
+         ^MatchEvaluator (gen-delegate MatchEvaluator [m] (f (.ToString m)))     ;;;     (if (.find m)
           1))                                                        ;;;       (let [rep (f (re-groups m))]
                                                                      ;;;         (.appendReplacement m buffer rep)
                                                                      ;;;         (.appendTail m buffer)
                                                                      ;;;         (str buffer))))))
 
+(defn- replace-first-char
+  [^String s ^Char match replace]                                    ;;; Character
+  (let [                                                          ;;; s (.toString s)
+        i (.IndexOf s match)]                                 ;;; .indexOf (int match)
+    (if (= -1 i)
+      s
+      (str (subs s 0 i) replace (subs s (inc i))))))
+      
 (defn replace-first
   "Replaces the first instance of match with replacement in s.
 
    match/replacement can be:
 
-   string / string
    char / char
+   string / string
    pattern / (string or function of match).
 
    See also replace-all."
   {:added "1.2"}
   [^String s match replacement]
-  (cond
-   (instance? String match)
-    (.Replace (Regex. (Regex/Escape ^String match)) ^String replacement s 1)      ;;; (.replaceFirst s (Pattern/quote ^String match) ^String replacement)
-   (instance? Regex match)                                           ;;; Pattern
-   (if (string? replacement)
-     (.Replace ^Regex match s ^String replacement 1)                                   ;;; (.replaceFirst (re-matcher ^Pattern match s) ^String replacement)
-     (replace-first-by s match replacement))
+  ;;;(let [s (.toString s)]
+    (cond
+     (instance? Char match)                                                        ;;; Character
+       (replace-first-char s ^Char match replacement)
+     (instance? String match)
+      (.Replace (Regex. (Regex/Escape ^String match))  s ^String replacement 1)      ;;; (.replaceFirst s (Pattern/quote ^String match) ^String replacement)
+     (instance? Regex match)                                           ;;; Pattern
+      (if (string? replacement)
+       (.Replace ^Regex match s ^String replacement 1)                                   ;;; (.replaceFirst (re-matcher ^Pattern match s) ^String replacement)
+       (replace-first-by s match replacement))
    :else (throw (ArgumentException. (str "Invalid match arg: " match)))))          ;;; IllegalArgumentException
+
+
 
 
 (defn ^String join
@@ -158,7 +171,7 @@ Design notes for clojure.string:
   {:added "1.2"}
   ([^String s ^Regex re]                                                   ;;; ^Pattern 
      (LazilyPersistentVector/createOwning (.Split re s)))                  ;;; .split
-  ([^String s ^Regex re limit s]                                           ;;; ^Pattern 
+  ([^String s ^Regex re limit]                                             ;;; ^Pattern 
      (LazilyPersistentVector/createOwning (.Split re s limit))))           ;;; .split
  
 (defn split-lines
