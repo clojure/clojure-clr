@@ -784,7 +784,7 @@ namespace clojure.lang
                 }
                 if (_shift > 5 && newroot.Array[1] == null)
                 {
-                    newroot = (Node)newroot.Array[0];
+                    newroot = EnsureEditable((Node)newroot.Array[0]);
                     newshift -= 5;
                 }
                 _root = newroot;
