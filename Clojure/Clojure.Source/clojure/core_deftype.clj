@@ -147,32 +147,33 @@
         fields (conj fields '__meta '__extmap)]
     (when (some #{:volatile-mutable :unsynchronized-mutable} (mapcat (comp keys meta) hinted-fields))
       (throw (ArgumentException. ":volatile-mutable or :unsynchronized-mutable not supported for record fields")))   ;;; IllegalArgumentException
+    (let [gs (gensym)]
     (letfn 
      [(eqhash [[i m]] 
         [i
          (conj m 
-               `(GetHashCode [~'this] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))   ;;; hashCode
-               `(Equals [~'this ~'o]                                                                               ;;; equals
+               `(GetHashCode [this#] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))   ;;; hashCode
+               `(Equals [this# ~gs]                                                                               ;;; equals
                         (boolean 
-                         (or (identical? ~'this ~'o)
-                             (when (identical? (class ~'this) (class ~'o))
-                               ;;;(let [~'o ~(with-meta 'o {:tag tagname})]    ----------------major loss of type hint here.
-                                 (and  ~@(map (fn [fld] `(= ~fld (. ~'o ~fld))) base-fields)
-                                       (= ~'__extmap (. ~'o ~'__extmap))))))))])                  ;;; removed one ) bfore the ] to make up for the let.
+                         (or (identical? this# ~gs)
+                             (when (identical? (class this#) (class ~gs))
+                               (let [~gs ~gs ]     ;;; ~(with-meta gs {:tag tagname})]    ----------------major loss of type hint here.
+                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~fld))) base-fields)
+                                       (= ~'__extmap (. ~gs ~'__extmap)))))))))]) 
       (iobj [[i m]] 
             [(conj i 'clojure.lang.IObj)
-             (conj m `(meta [~'this] ~'__meta)
-                   `(withMeta [~'this ~'m] (new ~tagname ~@(replace {'__meta 'm} fields))))])
+             (conj m `(meta [this#] ~'__meta)
+                   `(withMeta [this# ~gs] (new ~tagname ~@(replace {'__meta gs} fields))))])
       (ilookup [[i m]] 
          [(conj i 'clojure.lang.ILookup 'clojure.lang.IKeywordLookup)
-          (conj m `(valAt [~'this ~'k] (.valAt ~'this ~'k nil))
-                `(valAt [~'this ~'k ~'else] 
-                   (case ~'k ~@(mapcat (fn [fld] [(keyword fld) fld]) 
+          (conj m `(valAt [this# k#] (.valAt this# k# nil))
+                `(valAt [this# k# else#] 
+                   (case k# ~@(mapcat (fn [fld] [(keyword fld) fld]) 
                                        base-fields)
-                         (get ~'__extmap ~'k ~'else)))
-                `(getLookupThunk [~'this ~'k]
-                   (let [~'gclass (class ~'this)]              
-                     (case ~'k
+                         (get ~'__extmap k# else#)))
+                `(getLookupThunk [this# k#]
+                   (let [~'gclass (class this#)]              
+                     (case k#
                            ~@(let [hinted-target 'gtarget]    ;;;  Major loss of type hint here: [hinted-target (with-meta 'gtarget {:tag tagname})] 
                                (mapcat 
                                 (fn [fld]
@@ -187,69 +188,69 @@
       (imap [[i m]] 
             [(conj i 'clojure.lang.IPersistentMap)
              (conj m 
-                   `(count [~'this] (+ ~(count base-fields) (count ~'__extmap)))
-                   `(empty [~'this] (throw (InvalidOperationException. (str "Can't create empty: " ~(str classname)))))   ;;; UnsupportedOperationException
-                   `(^ clojure.lang.IPersistentMap cons [~'this ~'e] ((var imap-cons) ~'this ~'e))                          ;;; type hint added
-                   `(equiv [~'this ~'o] (.Equals ~'this ~'o))                                                             ;;; .equals
-                   `(containsKey [~'this ~'k] (not (identical? ~'this (.valAt ~'this ~'k ~'this))))
-                   `(entryAt [~'this ~'k] (let [~'v (.valAt ~'this ~'k ~'this)]
-                                            (when-not (identical? ~'this ~'v)
-                                              (clojure.lang.MapEntry. ~'k ~'v))))
-                   `(seq [~'this] (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
+                   `(count [this#] (+ ~(count base-fields) (count ~'__extmap)))
+                   `(empty [this#] (throw (InvalidOperationException. (str "Can't create empty: " ~(str classname)))))   ;;; UnsupportedOperationException
+                   `(^ clojure.lang.IPersistentMap cons [this# e#] ((var imap-cons) this# e#))                          ;;; type hint added
+                   `(equiv [this# o#] (.Equals this# o#))                                                             ;;; .equals
+                   `(containsKey [this# k#] (not (identical? this# (.valAt this# k# this#))))
+                   `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
+                                            (when-not (identical? this# v#)
+                                              (clojure.lang.MapEntry. k# v#))))
+                   `(seq [this#] (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
                                           ~'__extmap))
-                   `(^ clojure.lang.IPersistentMap assoc [~'this ~'gk__4242 ~'gv__4242]                        ;;; type hint added
-                     (condp identical? ~'gk__4242
+                   `(^ clojure.lang.IPersistentMap assoc [this# k# ~gs]                        ;;; type hint added
+                     (condp identical? k#
                        ~@(mapcat (fn [fld]
-                                   [(keyword fld) (list* `new tagname (replace {fld 'gv__4242} fields))])
+                                   [(keyword fld) (list* `new tagname (replace {fld gs} fields))])
                                  base-fields)
-                       (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap ~'gk__4242 ~'gv__4242))))
-                   `(assocEx [~'this ~'k ~'v]                                                                    ;;; ADDED
-                       (if (.containsKey ~'k)                                                                    ;;; ADDED
+                       (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap k# ~gs))))
+                   `(assocEx [this# k# v#]                                                                    ;;; ADDED
+                       (if (.containsKey k#)                                                                    ;;; ADDED
                            (throw (Exception. "Key already present"))                                            ;;; ADDED
-                           (.assoc ~'this ~'k ~'v)))                                                             ;;; ADDED
-                   `(without [~'this ~'k] (if (contains? #{~@(map keyword base-fields)} ~'k)
-                                            (dissoc (with-meta (into {} ~'this) ~'__meta) ~'k)
+                           (.assoc this# k# v#)))                                                             ;;; ADDED
+                   `(without [this# k#] (if (contains? #{~@(map keyword base-fields)} k#)
+                                            (dissoc (with-meta (into {} this#) ~'__meta) k#)
                                             (new ~tagname ~@(remove #{'__extmap} fields) 
-                                                 (not-empty (dissoc ~'__extmap ~'k))))))])
+                                                 (not-empty (dissoc ~'__extmap k#))))))])
       (dict [[i m]]
            [(conj i 'System.Collections.IDictionary)
             (conj m   ;;; TODO: Need properties, really
-                  `(get_Count [~'this] (.count ~'this))
-                  `(get_IsFixedSize [~'this] true)
-                  `(get_IsReadOnly [~'this] true)
-                  `(get_IsSynchronized [~'this] true)
-                  `(get_Item [~'this ~'k] (.valAt ~'this ~'k))
-                  `(^System.Void set_Item [~'this ~'k ~'v] (throw (NotSupportedException.)))
-                  `(Remove [~'this ~'k] (throw (NotSupportedException.)))
-                  `(get_Keys [~'this] (set (keys ~'this)))
-                  `(get_SyncRoot [~'this] ~'this)
-                  `(get_Values [~'this] (set (vals ~'this)))
-                  `(Add [~'this ~'k ~'v] (throw (NotSupportedException.)))
-                  `(Clear [~'this] (throw (NotSupportedException.)))
-                  `(Contains [~'this ~'k] (.containsKey ~'this ~'k))
-                  `(CopyTo [~'this ~'a ~'i]  (throw (InvalidOperationException.)))   ;;; TODO: implement this.  Got lazy.
-                  `(System.Collections.IDictionary.GetEnumerator [~'this]  (throw (NotSupportedException.)))   ;;; TODO: implement this.  Got lazy.
-                  `(System.Collections.IEnumerable.GetEnumerator [~'this]  (throw (NotSupportedException.)))   ;;; TODO: implement this.  Got lazy.
+                  `(get_Count [this#] (.count this#))
+                  `(get_IsFixedSize [this#] true)
+                  `(get_IsReadOnly [this#] true)
+                  `(get_IsSynchronized [this#] true)
+                  `(get_Item [this# k#] (.valAt this# k#))
+                  `(^System.Void set_Item [this# k# v#] (throw (NotSupportedException.)))
+                  `(Remove [this# k#] (throw (NotSupportedException.)))
+                  `(get_Keys [this#] (set (keys this#)))
+                  `(get_SyncRoot [this#] this#)
+                  `(get_Values [this#] (set (vals this#)))
+                  `(Add [this# k# v#] (throw (NotSupportedException.)))
+                  `(Clear [this#] (throw (NotSupportedException.)))
+                  `(Contains [this# k#] (.containsKey this# k#))
+                  `(CopyTo [this# a# i#]  (throw (InvalidOperationException.)))   ;;; TODO: implement this.  Got lazy.
+                  `(System.Collections.IDictionary.GetEnumerator [this#]  (throw (NotSupportedException.)))   ;;; TODO: implement this.  Got lazy.
+                  `(System.Collections.IEnumerable.GetEnumerator [this#]  (throw (NotSupportedException.)))   ;;; TODO: implement this.  Got lazy.
                   )])                 
       (ipc [[i m]]
            [(conj i 'clojure.lang.IPersistentCollection)
             (conj m
-                  `(clojure.lang.IPersistentCollection.cons [~'this ~'e]                                          ;;; ADDED
-                        ((var imap-cons) ~'this ~'e)))])                                                           ;;; ADDED
-      (associative                                                                                                ;;; ADDED
-            [[i m]]                                                                                               ;;; ADDED
-            [(conj i 'clojure.lang.Associative)                                                                   ;;; ADDED
+                  `(clojure.lang.IPersistentCollection.cons [this# e#]                                   ;;; ADDED
+                        ((var imap-cons) this# e#)))])                                                   ;;; ADDED
+      (associative                                                                                       ;;; ADDED
+            [[i m]]                                                                                      ;;; ADDED
+            [(conj i 'clojure.lang.Associative)                                                          ;;; ADDED
              (conj m 
-                   `(clojure.lang.Associative.assoc [~'this ~'gk__4242 ~'gv__4242]                                ;;; ADDED
-                     (condp identical? ~'gk__4242                                                                 ;;; ADDED
-                       ~@(mapcat (fn [fld]                                                                        ;;; ADDED
-                                   [(keyword fld) (list* `new tagname (replace {fld 'gv__4242} fields))])         ;;; ADDED
-                                 base-fields)                                                                     ;;; ADDED
-                       (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap ~'gk__4242 ~'gv__4242)))))])]       ;;; ADDED
+                   `(clojure.lang.Associative.assoc [this# k# ~gs]                                        ;;; ADDED
+                     (condp identical? k#                                                                 ;;; ADDED
+                       ~@(mapcat (fn [fld]                                                                ;;; ADDED
+                                   [(keyword fld) (list* `new tagname (replace {fld gs} fields))])        ;;; ADDED
+                                 base-fields)                                                             ;;; ADDED
+                       (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap k# ~gs)))))])]      ;;; ADDED
      (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap associative ipc dict)]                              ;;; Associative, ipc added
        `(deftype* ~tagname ~(vary-meta classname merge {System.SerializableAttribute {}}) ~(conj hinted-fields '__meta '__extmap) 
           :implements ~(vec i) 
-          ~@m)))))
+          ~@m))))))
 
 (defmacro defrecord
   "Alpha - subject to change
