@@ -48,3 +48,13 @@
                 :expected '~form, :actual t#})
        (report {:type :fail, :message ~msg,
                 :expected '~form, :actual t#})))))
+
+(defn get-field
+  "Access to private or protected field.  field-name is a symbol or
+  keyword."
+  ([klass field-name]
+     (get-field klass field-name nil))
+  ([klass field-name inst]
+     (-> klass (.GetField (name field-name) System.Reflection.BindingFlags/NonPublic )                ;;; .getDeclaredField
+         ;;;(doto (.setAccessible true))
+         (.GetValue inst))))                                       ;;; .get

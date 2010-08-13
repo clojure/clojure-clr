@@ -52,7 +52,18 @@
       (seq? x) (list (first x) (the-class (second x)))    ; (by-ref v)
       :else (the-class x)))
   
+;; someday this can be made codepoint aware
+(defn- valid-java-method-name
+  [^String s]
+  (= s (clojure.lang.Compiler/munge s)))
+
+(defn- validate-generate-class-options
+  [{:keys [methods]}]
+  (let [[mname] (remove valid-java-method-name (map (comp str first) methods))]
+    (when mname (throw (ArgumentException. (str "Not a valid method name: " mname))))))     ;;; IllegalArgumentException.
+  
  (defn- generate-class [options-map]
+   (validate-generate-class-options options-map)
    (let [default-options {:prefix "-" :load-impl-ns true :impl-ns (ns-name *ns*)}
         {:keys [name extends implements constructors methods main factory state init exposes 
                 exposes-methods prefix load-impl-ns impl-ns post-init]} 

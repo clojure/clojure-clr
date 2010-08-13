@@ -9,19 +9,8 @@
 ; Author: Stuart Halloway
 
 (ns clojure.test-clojure.genclass
-  (:use clojure.test)
+  (:use clojure.test clojure.test-clojure.helpers)
   (:import clojure.test-clojure.genclass.examples.ExampleClass))
-
-;; pull this up to a suite-wide helper if you find other tests need it!
-(defn get-field
-  "Access to private or protected field.  field-name is a symbol or
-  keyword."
-  ([klass field-name]
-     (get-field klass field-name nil))
-  ([klass field-name inst]
-     (-> klass (.GetField (name field-name) System.Reflection.BindingFlags/NonPublic )                ;;; .getDeclaredField
-         ;;;(doto (.setAccessible true))
-         (.GetValue inst))))                                       ;;; .get
 
 (deftest arg-support
   (let [example (ExampleClass.)
@@ -37,3 +26,7 @@
     ;;;(is (= #'clojure.test-clojure.genclass.examples/-toString   ------ TODO: Figure out why JVM can find this var, we can't.
     ;;;       (get-field ExampleClass 'toString__var))))
            )
+
+(deftest genclass-option-validation
+  (is (fails-with-cause? ArgumentException #"Not a valid method name: has-hyphen"                            ;;; IllegalArgumentException
+        (@#'clojure.core/validate-generate-class-options {:methods '[[fine [] void] [has-hyphen [] void]]}))))
