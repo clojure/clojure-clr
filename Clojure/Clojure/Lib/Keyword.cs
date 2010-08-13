@@ -44,8 +44,8 @@ namespace clojure.lang
         /// </summary>
         /// <remarks>Why introduce the JavaConcurrentDictionary?  
         /// We really only need a synchronized hash table with one operation: PutIfAbsent.</remarks>
-        private static JavaConcurrentDictionary<Symbol,Keyword> _symKeyMap 
-            = new JavaConcurrentDictionary<Symbol,Keyword>();
+        private static JavaConcurrentDictionary<Symbol,WeakReference> _symKeyMap
+            = new JavaConcurrentDictionary<Symbol, WeakReference>();
 
         internal Symbol Symbol
         {
@@ -63,9 +63,22 @@ namespace clojure.lang
         /// <returns>A keyword</returns>
         public static Keyword intern(Symbol sym)
         {
+            // TODO: Analyze this code for improvements
             Keyword k = new Keyword(sym);
-            Keyword existing = _symKeyMap.PutIfAbsent(sym, k);
-            return existing == null ? k : existing;
+            //Keyword existing = _symKeyMap.PutIfAbsent(sym, k);
+            //return existing == null ? k : existing;
+            WeakReference wr = new WeakReference(k);
+            wr.Target = k;
+            WeakReference existingRef = _symKeyMap.PutIfAbsent(sym, wr);
+            if (existingRef == null)
+                return k;
+            Keyword existingk = (Keyword)existingRef.Target;
+            if (existingk != null)
+                return existingk;
+            // entry died in the interim, do over
+            // let's not get confused, remove it.  (else infinite loop).
+            _symKeyMap.Remove(sym);
+            return intern(sym);
         }
 
         /// <summary>
