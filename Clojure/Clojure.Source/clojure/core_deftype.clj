@@ -759,10 +759,10 @@
   extend-type and extend-class:
 
   (extend-protocol Protocol
-    ::AType
+    AType
       (foo [x] ...)
       (bar [x y] ...)
-    ::BType
+    BType
       (foo [x] ...)
       (bar [x y] ...)
     AClass
@@ -775,13 +775,13 @@
   expands into:
 
   (do
-   (clojure.core/extend-type ::AType Protocol 
+   (clojure.core/extend-type AType Protocol 
      (foo [x] ...) 
      (bar [x y] ...))
-   (clojure.core/extend-type ::BType Protocol 
+   (clojure.core/extend-type BType Protocol 
      (foo [x] ...) 
      (bar [x y] ...))
-   (clojure.core/extend-class AClass Protocol 
+   (clojure.core/extend-type AClass Protocol 
      (foo [x] ...) 
      (bar [x y] ...))
    (clojure.core/extend-type nil Protocol 
