@@ -5367,11 +5367,11 @@
 
 (defn spit
   "Opposite of slurp.  Opens f with writer, writes content, then
-  closes f."
+  closes f.  Options passed to clojure.java.io/writer."
   {:added "1.2"}
   [f content & options]
   (with-open [^System.IO.TextWriter w (apply cio/text-writer f options)]            ;;; java.io.Writer   jio/writer
-    (.Write w content)))                                                       ;;; .write
+    (.Write w (str content))))                                                       ;;; .write
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; futures (needs proxy);;;;;;;;;;;;;;;;;;
 (defn future-call 
