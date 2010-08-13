@@ -196,8 +196,8 @@
                    `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
                                             (when-not (identical? this# v#)
                                               (clojure.lang.MapEntry. k# v#))))
-                   `(seq [this#] (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
-                                          ~'__extmap))
+                   `(seq [this#] (seq (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
+                                          ~'__extmap)))
                    `(^ clojure.lang.IPersistentMap assoc [this# k# ~gs]                        ;;; type hint added
                      (condp identical? k#
                        ~@(mapcat (fn [fld]
