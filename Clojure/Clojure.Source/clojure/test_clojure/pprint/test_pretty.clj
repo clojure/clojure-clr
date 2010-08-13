@@ -245,4 +245,30 @@ Usage: *hello*
  )
 
 
+;;; Some simple tests of dispatch
+
+(defmulti 
+  test-dispatch
+  "A test dispatch method"
+  {:added "1.2" :arglists '[[object]]} 
+  #(and (seq %) (not (string? %))))
+
+(defmethod test-dispatch true [avec]
+  (pprint-logical-block :prefix "[" :suffix "]"
+    (loop [aseq (seq avec)]
+      (when aseq
+  (write-out (first aseq))
+  (when (next aseq)
+    (.Write ^System.IO.TextWriter *out* " ")                    ;;;(.write ^java.io.Writer *out* " ")
+    (pprint-newline :linear)
+    (recur (next aseq)))))))
+
+(defmethod test-dispatch false [aval] (pr aval))
+
+(simple-tests dispatch-tests
+  (with-pprint-dispatch test-dispatch
+    (with-out-str 
+      (pprint '("hello" "there"))))
+  "[\"hello\" \"there\"]\n"
+)
 
