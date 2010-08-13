@@ -195,6 +195,7 @@
         (caught e)
         (set! *e e)))
      (use '[clojure.repl :only (source-fn apropos dir-fn dir)])
+     (use '[clojure.pprint :only (pp pprint)])
      (prompt)
      (flush)
      (loop []
