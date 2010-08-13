@@ -85,14 +85,14 @@ namespace clojure.lang.CljCompiler.Ast
                         _onMethod = methods[0];
                     }
                 }
-                else if (pvar == null && Compiler.VAR_CALLSITES.isBound
-                    && fvar.Namespace.Name.Name.StartsWith("clojure")
-                    && !RT.booleanCast(RT.get(RT.meta(fvar), _dynamicKey)))
-                {
-                    // Java TODO: more specific criteria for binding these
-                    _isDirect = true;
-                    _siteIndex = Compiler.RegisterVarCallsite(fvar);
-                }
+                //else if (pvar == null && Compiler.VAR_CALLSITES.isBound
+                //    && fvar.Namespace.Name.Name.StartsWith("clojure")
+                //    && !RT.booleanCast(RT.get(RT.meta(fvar), _dynamicKey)))
+                //{
+                //    // Java TODO: more specific criteria for binding these
+                //    _isDirect = true;
+                //    _siteIndex = Compiler.RegisterVarCallsite(fvar);
+                //}
             }
 
             _tag = tag ?? (fexpr is VarExpr ? ((VarExpr)fexpr).Tag : null);
