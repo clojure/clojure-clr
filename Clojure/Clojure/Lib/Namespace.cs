@@ -244,10 +244,11 @@ namespace clojure.lang
         {
             if (o is Var)
             {
-                if (((Var)o).ns != RT.CLOJURE_NS)
-                {
+                Namespace ns = ((Var)o).Namespace;
+                if (ns == this)
+                    return;
+                if (ns != RT.CLOJURE_NS)
                     throw new InvalidOperationException(sym + " already refers to: " + o + " in namespace: " + _name);
-                }
             }
             RT.errPrintWriter().WriteLine("WARNING: {0} already refers to: {1} in namespace: {2}, being replaced by: {3}",
                 sym, o, _name, v);
