@@ -149,7 +149,6 @@
     <None Include="clojure\test_clojure\special.clj" />
     <None Include="clojure\test_clojure\test.clj" />
     <None Include="clojure\test_clojure\test_fixtures.clj" />
-    <None Include="clojure\test_clojure\test_utils.clj" />
     <None Include="clojure\test_clojure\vars.clj" />
     <None Include="clojure\walk.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
