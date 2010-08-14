@@ -155,3 +155,12 @@
 ;      (with-open [s (input-stream expr)]
 ;        (stream-should-have s bytes msg)))))
 
+;(deftest test-socket-iofactory
+;  (let [port 65321
+;        server-socket (ServerSocket. port)
+;        client-socket (Socket. "localhost" port)]
+;    (try
+;      (is (instance? InputStream (input-stream client-socket)))
+;      (is (instance? OutputStream (output-stream client-socket)))
+;      (finally (.close server-socket)
+;               (.close client-socket)))))
