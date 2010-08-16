@@ -179,6 +179,11 @@ namespace clojure.lang.CljCompiler.Ast
             //Symbol stubTag = Symbol.intern(null,stub.FullName);
             //Symbol thisTag = Symbol.intern(null, tagName);
 
+            // Needs its own GenContext so it has its own DynInitHelper
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
+            GenContext genC = context.WithNewDynInitHelper(ret.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
+            genC.FnCompileMode = FnMode.Full;
+
             try
             {
                 Var.pushThreadBindings(
@@ -189,7 +194,8 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.VARS, PersistentHashMap.EMPTY,
                         Compiler.KEYWORD_CALLSITES, PersistentVector.EMPTY,
                         Compiler.PROTOCOL_CALLSITES, PersistentVector.EMPTY,
-                        Compiler.VAR_CALLSITES, PersistentVector.EMPTY
+                        Compiler.VAR_CALLSITES, PersistentVector.EMPTY,
+                        Compiler.COMPILER_CONTEXT, genC
                         ));
 
                 if (ret.IsDefType)
@@ -236,7 +242,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             //ret.Compile(SlashName(superClass),inames,false);
             //ret.getCompiledClass();
-            ret.ObjType = ret.GenerateClass();
+            ret.ObjType = ret.GenerateClass(genC);
             Compiler.RegisterDuplicateType(ret.ObjType);
 
             //// THis is done in an earlier loop in the JVM code.

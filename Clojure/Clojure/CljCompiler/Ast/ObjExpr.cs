@@ -263,15 +263,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Class generation
 
-        protected Type GenerateClass()
-        {
-            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
+        //protected Type GenerateClass()
+        //{
+        //    GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
 
-            //if (_protocolCallsites.count() > 0)
-            //    context = context.ChangeMode(CompilerMode.File);
+        //    //if (_protocolCallsites.count() > 0)
+        //    //    context = context.ChangeMode(CompilerMode.File);
 
-            return GenerateClass(context);
-        }
+        //    return GenerateClass(context);
+        //}
 
         protected Type GenerateClass(GenContext context)
         {

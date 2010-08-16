@@ -216,7 +216,12 @@ namespace clojure.lang.CljCompiler.Ast
             
             // JAVA: fn.compile();
             fn._superType = fn.GetSuperType();
-            fn.GenerateClass();
+
+            // Needs its own GenContext so it has its own DynInitHelper
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
+            GenContext genC = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
+
+            fn.GenerateClass(genC);
 
             if (origForm is IObj && ((IObj)origForm).meta() != null)
                 return new MetaExpr(fn, (MapExpr)MapExpr.Parse(((IObj)origForm).meta()));
@@ -247,9 +252,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override Type GenerateClassForFile(GenContext context)
         {
-            // Needs its own GenContext so it has its own DynInitHelper
-            GenContext genC = context.WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString() );
-            return EnsureTypeBuilt(genC);
+            return EnsureTypeBuilt(context);
         }
 
         #endregion 
