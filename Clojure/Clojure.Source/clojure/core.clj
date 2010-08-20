@@ -5330,7 +5330,7 @@
 (load "genclass")
 (load "core_deftype")
 (load "core/protocols")
-;(load "gvec")             -- not implemented yet
+(load "gvec")
 
 ;; redefine reduce with internal-reduce
 #_(defn reduce

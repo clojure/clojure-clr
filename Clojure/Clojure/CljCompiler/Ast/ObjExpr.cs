@@ -240,7 +240,7 @@ namespace clojure.lang.CljCompiler.Ast
                 case FnMode.Light:
                     return GenDlrImmediate(context);
                 case FnMode.Full:
-                    return GenDlrForFile(context, true);
+                    return GenDlrForFile(context, false);      // trying it this way now
                 default:
                     throw Util.UnreachableCode();
             }

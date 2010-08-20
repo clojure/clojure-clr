@@ -53,21 +53,21 @@
 
 (deftype VecSeq [^clojure.core.ArrayManager am ^clojure.core.IVecImpl vec anode ^int i ^int offset] 
   :no-print true
-
-  clojure.core.protocols.InternalReduce
-  (internal-reduce
-   [_ f val]
-   (loop [result val
-          aidx offset]
-     (if (< aidx (count vec))
-       (let [node (.arrayFor vec aidx)
-             result (loop [result result
-                           node-idx (bit-and (int 0x1f) aidx)]
-                      (if (< node-idx (.alength am node))
-                        (recur (f result (.aget am node node-idx)) (inc node-idx))
-                        result))]
-         (recur result (bit-and (int 0xffe0) (+ aidx (int 32)))))
-       result)))
+; TODO: Figure out why compiling this causes an error when loading the assembly (bad type)
+;  clojure.core.protocols.InternalReduce
+;  (internal-reduce
+;   [_ f val]
+;   (loop [result val
+;          aidx offset]
+;     (if (< aidx (count vec))
+;       (let [node (.arrayFor vec aidx)
+;             result (loop [result result
+;                           node-idx (bit-and (int 0x1f) aidx)]
+;                      (if (< node-idx (.alength am node))
+;                        (recur (f result (.aget am node node-idx)) (inc node-idx))
+;                        result))]
+;         (recur result (bit-and (int 0xffe0) (+ aidx (int 32)))))
+;       result)))
   
   clojure.lang.ISeq
   (first [_] (.aget am anode offset))
@@ -294,20 +294,20 @@
         (loop [node root level shift]
           (if (zero? level)
             (.arr node)
-            (recur (aget ^objects (.arr node) (bit-and (bit-shift-right i level) (int 0x1f))) 
+            (recur (aget (.arr node) (bit-and (bit-shift-right i level) (int 0x1f)))               ;;; Got rid of ^objects tag on (.arr node)  TODO: Figure out why we don't compile properly with the tag.
                    (- level (int 5))))))
       (throw (IndexOutOfRangeException.))))                                                        ;;; IndexOutOfBoundsException
 
   (pushTail [this level parent tailnode]
     (let [subidx (bit-and (bit-shift-right (dec cnt) level) (int 0x1f))
-          ret (VecNode. (.edit parent) (aclone ^objects (.arr parent)))
+          ret (VecNode. (.edit parent) (aclone  (.arr parent)))                            ;;; Got rid of ^objects tag on (.arr parent)  TODO: Figure out why we don't compile properly with the tag.
           node-to-insert (if (= level (int 5))
                            tailnode
-                           (let [child (aget ^objects (.arr parent) subidx)]
+                           (let [child (aget (.arr parent) subidx)]               ;;; Got rid of ^objects tag on (.arr parent)  TODO: Figure out why we don't compile properly with the tag.
                              (if child
                                (.pushTail this (- level (int 5)) child tailnode)
                                (.newPath this (.edit root) (- level (int 5)) tailnode))))]
-      (aset ^objects (.arr ret) subidx node-to-insert)
+      (aset (.arr ret) subidx node-to-insert)                                             ;;; Got rid of ^objects tag on (.arr ret)  TODO: Figure out why we don't compile properly with the tag.
       ret))
 
   (popTail [this level node]
@@ -437,7 +437,7 @@
   (Insert [_ i v] (throw (InvalidOperationException.)))
   (Remove [_ v] (throw (InvalidOperationException.)))
   (RemoveAt [_ i] (throw (InvalidOperationException.)))
-  (Contains [this o] #(= % o) false);;;;;;;;;;;;;;;;;(boolean (some #(= % o) this)))
+  (Contains [this o] (boolean (some #(= % o) this)))
   (IndexOf [this o]
     (loop [i (int 0)]
       (cond
@@ -446,10 +446,7 @@
         :else (recur (inc i)))))
   (get_IsFixedSize [_] true)
   (get_Item [this i] (.nth this i))
-  (set_Item [_ i v] (throw (InvalidOperationException.)))
-
-  
-)
+  (set_Item [_ i v] (throw (InvalidOperationException.))))
 
 (defmethod print-method ::Vec [v w]
   ((get (methods print-method) clojure.lang.IPersistentVector) v w))
@@ -484,9 +481,4 @@
   (let [am ^clojure.core.ArrayManager (ams t)]
     (Vec. am 0 5 EMPTY-NODE (.array am 0) nil)))
 
-
-
-(deftype Vec [^clojure.core.ArrayManager am ^int cnt ^int shift root tail _meta]
-  System.Collections.IList
-    (Contains [this o] #(= % o) false))
 
