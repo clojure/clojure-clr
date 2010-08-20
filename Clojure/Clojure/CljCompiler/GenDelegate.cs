@@ -66,13 +66,16 @@ namespace clojure.lang
                 parms.Add(pe);
                 callArgs.Add(Compiler.MaybeBox(pe));
             }
-            Expression body = 
-                Expression.Convert(
-                    Expression.Call(
-                        Expression.Constant(fn),
-                        Compiler.Methods_IFn_invoke[parms.Count], 
-                        callArgs),
-                    returnType);
+
+            Expression call =                    
+                Expression.Call(
+                    Expression.Constant(fn),
+                    Compiler.Methods_IFn_invoke[parms.Count], 
+                    callArgs);
+
+            Expression body =  returnType == typeof(void)
+                ? (Expression)Expression.Block(call,Expression.Default(typeof(void)))
+                : (Expression)Expression.Convert(call, returnType);
 
             LambdaExpression lambda = Expression.Lambda(delegateType, body, true, parms);
 
