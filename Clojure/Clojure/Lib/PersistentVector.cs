@@ -827,7 +827,7 @@ namespace clojure.lang
 
             public ITransientAssociative assoc(object key, object val)
             {
-                if (Util.IsInteger(key.GetType()))
+                if (Util.IsIntegerType(key.GetType()))
                 {
                     int i = Util.ConvertToInt(key);
                     return assocN(i, val);
@@ -896,7 +896,7 @@ namespace clojure.lang
             public object valAt(object key, object notFound)
             {
                 EnsureEditable();
-                if (Util.IsInteger(key.GetType()))
+                if (Util.IsIntegerType(key.GetType()))
                 {
                     int i = Util.ConvertToInt(key);
                     if (i >= 0 && i < count())

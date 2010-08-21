@@ -600,7 +600,13 @@ namespace clojure.lang
         }
 
 
-        internal static bool IsInteger(Type type)
+        public static bool IsInteger(object o)
+        {
+            return o != null && IsIntegerType(o.GetType());
+
+        }
+
+        internal static bool IsIntegerType(Type type)
         {
             //type = GetNonNullableType(type);
             //if (!type.IsEnum)
