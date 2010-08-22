@@ -152,14 +152,8 @@
      [(eqhash [[i m]] 
         [i
          (conj m 
-               `(GetHashCode [this#] (-> ~tag hash ~@(map #(list `hash-combine %) (remove #{'__meta} fields))))   ;;; hashCode
-               `(Equals [this# ~gs]                                                                               ;;; equals
-                        (boolean 
-                         (or (identical? this# ~gs)
-                             (when (identical? (class this#) (class ~gs))
-                               (let [~gs ~gs ]     ;;; ~(with-meta gs {:tag tagname})]    ----------------major loss of type hint here.
-                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~fld))) base-fields)
-                                       (= ~'__extmap (. ~gs ~'__extmap)))))))))]) 
+               `(GetHashCode [this#] (clojure.lang.APersistentMap/mapHash this#))              ;;; hashCode
+               `(Equals [this# ~gs] (clojure.lang.APersistentMap/mapEquals this# ~gs)))])       ;;; equals
       (iobj [[i m]] 
             [(conj i 'clojure.lang.IObj)
              (conj m `(meta [this#] ~'__meta)
@@ -191,7 +185,13 @@
                    `(count [this#] (+ ~(count base-fields) (count ~'__extmap)))
                    `(empty [this#] (throw (InvalidOperationException. (str "Can't create empty: " ~(str classname)))))   ;;; UnsupportedOperationException
                    `(^ clojure.lang.IPersistentMap cons [this# e#] ((var imap-cons) this# e#))                          ;;; type hint added
-                   `(equiv [this# o#] (.Equals this# o#))                                                             ;;; .equals
+                   `(equiv [this# ~gs]
+                        (boolean 
+                         (or (identical? this# ~gs)
+                             (when (identical? (class this#) (class ~gs))
+                               (let [~gs ~gs ]     ;;; ~(with-meta gs {:tag tagname})]    ----------------major loss of type hint here.  TODO: Figure out what the problem is
+                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~fld))) base-fields)
+                                       (= ~'__extmap (. ~gs ~'__extmap))))))))
                    `(containsKey [this# k#] (not (identical? this# (.valAt this# k# this#))))
                    `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
                                             (when-not (identical? this# v#)

@@ -44,12 +44,19 @@ namespace clojure.lang
             {
                 if (IsNumeric(k1) && IsNumeric(k2))
                     return Numbers.equiv(k1, k2);
-                    //return Numbers.EquivArg1Numeric(k1,k2);
-                else if (k1 is IPersistentCollection && k2 is IPersistentCollection)
-                    return ((IPersistentCollection)k1).equiv(k2);
+                //return Numbers.EquivArg1Numeric(k1,k2);
+                else if (k1 is IPersistentCollection || k2 is IPersistentCollection)
+                    return pcequiv(k1, k2);
                 return k1.Equals(k2);
             }
             return false;
+        }
+
+        public static bool pcequiv(object k1, object k2)
+        {
+            if (k1 is IPersistentCollection)
+                return ((IPersistentCollection)k1).equiv(k2);
+            return ((IPersistentCollection)k2).equiv(k1);
         }
 
         public static bool equals(object k1, object k2)
@@ -600,7 +607,13 @@ namespace clojure.lang
         }
 
 
-        internal static bool IsInteger(Type type)
+        public static bool IsInteger(object o)
+        {
+            return o != null && IsIntegerType(o.GetType());
+
+        }
+
+        internal static bool IsIntegerType(Type type)
         {
             //type = GetNonNullableType(type);
             //if (!type.IsEnum)

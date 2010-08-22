@@ -175,22 +175,16 @@
 (defrecord DefrecordObjectMethodsWidgetA [a])
 (defrecord DefrecordObjectMethodsWidgetB [a])
 (deftest defrecord-object-methods-test
-  (testing ".equals depends on fields and type"
-    (is (true? (.Equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 1))))             ;;; .equals
-    (is (false? (.Equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 2))))
-    (is (false? (.Equals (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetB. 1)))))
-  (testing ".hashCode depends on fields and type"
-    (is (= (.GetHashCode (DefrecordObjectMethodsWidgetA. 1)) (.GetHashCode (DefrecordObjectMethodsWidgetA. 1))))         ;;; .hashCode
-    (is (= (.GetHashCode (DefrecordObjectMethodsWidgetA. 2)) (.GetHashCode (DefrecordObjectMethodsWidgetA. 2))))         ;;; .hashCode
-    (is (not= (.GetHashCode (DefrecordObjectMethodsWidgetA. 1)) (.GetHashCode (DefrecordObjectMethodsWidgetA. 2))))      ;;; .hashCode
-    (is (= (.GetHashCode (DefrecordObjectMethodsWidgetB. 1)) (.GetHashCode (DefrecordObjectMethodsWidgetB. 1))))         ;;; .hashCode
-    (is (not= (.GetHashCode (DefrecordObjectMethodsWidgetA. 1)) (.GetHashCode (DefrecordObjectMethodsWidgetB. 1))))))    ;;; .hashCode
+  (testing "= depends on fields and type"
+    (is (true? (= (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 1))))
+    (is (false? (= (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetA. 2))))
+    (is (false? (= (DefrecordObjectMethodsWidgetA. 1) (DefrecordObjectMethodsWidgetB. 1))))))
 
 (deftest defrecord-acts-like-a-map
   (let [rec (r 1 2)]
-    (is (= (r 1 3 {} {:c 4}) (merge rec {:b 3 :c 4})))
-    (is (= {:foo 1 :b 2} (set/rename-keys rec {:a :foo})))
-    (is (= {:a 11 :b 2 :c 10} (merge-with + rec {:a 10 :c 10})))))
+    (is (.Equals (r 1 3 {} {:c 4}) (merge rec {:b 3 :c 4})))                   ;;; .equals
+    (is (.Equals {:foo 1 :b 2} (set/rename-keys rec {:a :foo})))               ;;; .equals
+    (is (.Equals {:a 11 :b 2 :c 10} (merge-with + rec {:a 10 :c 10})))))       ;;; .equals
 
 (deftest defrecord-interfaces-test
   (testing "java.util.Map"
