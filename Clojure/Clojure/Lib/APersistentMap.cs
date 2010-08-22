@@ -26,7 +26,7 @@ namespace clojure.lang
     /// Provides a basic impelmentation of <see cref="IPersistentMap">IPersistentMap</see> functionality.
     /// </summary>
     [Serializable]
-    public abstract class APersistentMap: AFn, IPersistentMap, IDictionary, IEnumerable<IMapEntry>
+    public abstract class APersistentMap: AFn, IPersistentMap, IDictionary, IEnumerable<IMapEntry>, MapEquivalence
     {
         #region  Data
         
@@ -57,7 +57,12 @@ namespace clojure.lang
         /// otherwise, false.</returns>
         public override bool Equals(object obj)
         {
-            if (this == obj)
+            return mapEquals(this, obj);
+        }
+
+        public static bool mapEquals(IPersistentMap m1, Object obj)
+        {
+            if (m1 == obj)
                 return true;
 
             //if(!(obj instanceof Map))
@@ -71,13 +76,13 @@ namespace clojure.lang
             // Java had the following.
             // This works on other APersistentMap implementations, but not on
             //  arbitrary dictionaries.
-            //if (d.Count != this.Count || d.GetHashCode() != this.GetHashCode())
+            //if (d.Count != m1.Count || d.GetHashCode() != m1.GetHashCode())
             //    return false;
 
-            if (d.Count != this.Count)
+            if (d.Count != m1.count())
                 return false;
 
-            for (ISeq s = seq(); s != null; s = s.next())
+            for (ISeq s = m1.seq(); s != null; s = s.next())
             {
                 IMapEntry me = (IMapEntry)s.first();
                 bool found = d.Contains(me.key());
@@ -95,18 +100,21 @@ namespace clojure.lang
         /// <remarks>Valud-based = relies on all entries.  Once computed, it is cached.</remarks>
         public override int GetHashCode()
         {
-            if (_hash == -1)
-            {
-                int hash = 0;
-                for (ISeq s = seq(); s != null; s = s.next())
-                {
-                    IMapEntry me = (IMapEntry)s.first();
-                    hash += (me.key() == null ? 0 : me.key().GetHashCode())
-                        ^ (me.val() == null ? 0 : me.val().GetHashCode());
-                }
-                _hash = hash;
-            }
+            if (_hash == -1 )
+                _hash = mapHash(this);
             return _hash;
+        }
+
+        public static int mapHash(IPersistentMap m)
+        {
+            int hash = 0;
+            for (ISeq s = m.seq(); s != null; s = s.next())
+            {
+                IMapEntry me = (IMapEntry)s.first();
+                hash += (me.key() == null ? 0 : me.key().GetHashCode())
+                    ^ (me.val() == null ? 0 : me.val().GetHashCode());
+            }
+            return hash;
         }
 
 
@@ -160,6 +168,9 @@ namespace clojure.lang
             //if(!(obj instanceof Map))
             //    return false;
             //Map m = (Map) obj;
+
+            if (obj is IPersistentMap && !(obj is MapEquivalence))
+                return false;
 
             IDictionary d = obj as IDictionary;
             if (d == null)

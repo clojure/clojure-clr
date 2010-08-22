@@ -152,6 +152,7 @@
     <Compile Include="Lib\JReMatcher.cs" />
     <Compile Include="Lib\KeywordLookupSite.cs" />
     <Compile Include="Lib\LazySeq.cs" />
+    <Compile Include="Lib\MapEquivalence.cs" />
     <Compile Include="Lib\MethodImplCache.cs" />
     <Compile Include="Lib\Seqable.cs" />
     <Compile Include="Readers\LineNumberingTextReader.cs" />
