@@ -21,6 +21,7 @@ using System.Reflection;
 using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
+using Microsoft.Scripting.Ast; //for Utils in GenDlrForMethod
 #endif
 using System.IO;
 using System.Dynamic;

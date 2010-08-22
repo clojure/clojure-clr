@@ -12,7 +12,9 @@
  *   Author: David Miller
  **/
 
+#if CLR2
 extern alias MSC;
+#endif
 
 using System;
 using System.Collections.Generic;
@@ -113,7 +115,11 @@ namespace clojure.lang.CljCompiler.Ast
                 switch (ha.ParamType)
                 {
                     case HostArg.ParameterType.ByRef:
+#if CLR2
                         t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+#else
+                        t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+#endif
                         refPositions.Add(i);
                         argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(context, argType, e), methodParms[i].ParameterType.GetElementType()), BindingRestrictions.Empty));
                         break;
@@ -248,7 +254,12 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     case HostArg.ParameterType.ByRef:
                         {
+#if CLR2
                             Type sbType = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+#else
+                            Type sbType = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+#endif
+
                             ParameterExpression sbParam = Expression.Parameter(sbType, String.Format("__sb_{0}", sbParams.Count));
                             ConstructorInfo[] cinfos = sbType.GetConstructors();
                             Expression sbInit1 =

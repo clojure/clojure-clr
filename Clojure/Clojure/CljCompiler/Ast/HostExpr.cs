@@ -12,7 +12,9 @@
  *   Author: David Miller
  **/
 
+#if CLR2
 extern alias MSC;
+#endif
 
 using System;
 using System.Collections.Generic;
@@ -256,7 +258,12 @@ namespace clojure.lang.CljCompiler.Ast
                 switch (ha.ParamType)
                 {
                     case HostArg.ParameterType.ByRef:
+#if CLR2
                         t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+#else
+                        t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+#endif
+
                         break;
                     case HostArg.ParameterType.Standard:
                         t = argType;

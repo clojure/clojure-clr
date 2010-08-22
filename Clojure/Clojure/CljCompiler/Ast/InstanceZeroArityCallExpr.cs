@@ -16,9 +16,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Dynamic;
 #if CLR2
 using Microsoft.Scripting.Ast;
-using System.Dynamic;
 #else
 using System.Linq.Expressions;
 #endif

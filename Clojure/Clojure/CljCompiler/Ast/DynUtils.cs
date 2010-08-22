@@ -110,7 +110,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         // From Microsoft.Scripting.Utils.CollectionExtensions
         // Name needs to be different so it doesn't conflict with Enumerable.Select
+#if CLR2
         internal static U[] Map<T, U>(this ICollection<T> collection, Microsoft.Scripting.Utils.Func<T, U> select)
+#else
+        internal static U[] Map<T, U>(this ICollection<T> collection, Func<T, U> select)
+#endif
+
         {
             int count = collection.Count;
             U[] result = new U[count];
