@@ -13,18 +13,12 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Reflection;
 #if CLR2
 using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-using System.IO;
-using AstUtils = Microsoft.Scripting.Ast.Utils;
-using Microsoft.Scripting;
 
 
 namespace clojure.lang.CljCompiler.Ast

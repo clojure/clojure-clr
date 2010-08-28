@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 using System.Threading;
@@ -24,7 +23,6 @@ using Microsoft.Scripting.Ast;
 using System.Linq.Expressions;
 #endif
 using clojure.lang.CljCompiler.Ast;
-using clojure.runtime;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;

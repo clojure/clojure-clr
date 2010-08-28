@@ -12,10 +12,7 @@
  *   Author: David Miller
  **/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
 #if CLR2
 using Microsoft.Scripting.Ast;
 #else

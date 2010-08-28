@@ -73,6 +73,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>clojure-icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -118,6 +121,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="clojure-icon.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -127,12 +133,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)\clojure\*.dll $(TargetDir)\clojure\ /Y /s
-xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)\clojure\*.pdb $(TargetDir)\clojure\ /Y /s
-xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)*_COMP.dll $(TargetDir) /Y /s
-xcopy $(SolutionDir)\Clojure.Compile\$(OutDir)*_COMP.pdb $(TargetDir) /Y /s
-xcopy $(SolutionDir)\Clojure.Source\clojure\test_clojure.clj $(TargetDir)\clojure\  /Y /s
-xcopy $(SolutionDir)\Clojure.Source\clojure\test_clojure\*.clj $(TargetDir)\clojure\test_clojure\ /Y /s
-</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

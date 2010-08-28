@@ -13,15 +13,12 @@
  **/
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.IO;
-using System.Collections;
-using clojure.runtime;
 //using BigDecimal = java.math.BigDecimal;
-using Microsoft.Scripting;
 
 namespace clojure.lang
 {

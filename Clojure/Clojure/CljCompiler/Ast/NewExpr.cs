@@ -14,8 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Reflection;
 #if CLR2
 using Microsoft.Scripting.Ast;
@@ -23,7 +21,6 @@ using Microsoft.Scripting.Ast;
 using System.Linq.Expressions;
 using Microsoft.Scripting.Ast; //for Utils in GenDlrForMethod
 #endif
-using System.IO;
 using System.Dynamic;
 
 namespace clojure.lang.CljCompiler.Ast

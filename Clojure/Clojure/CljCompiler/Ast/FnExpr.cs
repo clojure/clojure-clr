@@ -15,7 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+
 #if CLR2
 using Microsoft.Scripting.Ast;
 #else
@@ -23,8 +23,6 @@ using System.Linq.Expressions;
 #endif
 using System.Reflection.Emit;
 using System.Reflection;
-using System.Collections;
-using System.Runtime.CompilerServices;
 using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast

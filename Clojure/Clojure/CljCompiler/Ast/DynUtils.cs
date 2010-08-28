@@ -12,10 +12,8 @@
  *   Author: David Miller
  **/
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
 #if CLR2
 using Microsoft.Scripting.Ast;
 #else
@@ -113,7 +111,7 @@ namespace clojure.lang.CljCompiler.Ast
 #if CLR2
         internal static U[] Map<T, U>(this ICollection<T> collection, Microsoft.Scripting.Utils.Func<T, U> select)
 #else
-        internal static U[] Map<T, U>(this ICollection<T> collection, Func<T, U> select)
+        internal static U[] Map<T, U>(this ICollection<T> collection, System.Func<T, U> select)
 #endif
 
         {

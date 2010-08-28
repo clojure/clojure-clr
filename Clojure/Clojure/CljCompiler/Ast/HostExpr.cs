@@ -19,22 +19,17 @@ extern alias MSC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Reflection;
 #if CLR2
 using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-using Microsoft.Scripting;
 
-using clojure.runtime;
-using System.IO;
 using System.Dynamic;
 using Microsoft.Scripting.Actions.Calls;
 using Microsoft.Scripting.Actions;
 using Microsoft.Scripting.Runtime;
-using System.Runtime.CompilerServices;
 
 namespace clojure.lang.CljCompiler.Ast
 {

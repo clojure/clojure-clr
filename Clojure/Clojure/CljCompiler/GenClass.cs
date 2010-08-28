@@ -15,11 +15,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Reflection.Emit;
-using clojure.lang.CljCompiler.Ast;
 using System.Reflection;
+using System.Reflection.Emit;
 using clojure.lang.CljCompiler;
+using clojure.lang.CljCompiler.Ast;
 using Microsoft.Scripting.Generation;
 
 namespace clojure.lang

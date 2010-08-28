@@ -13,12 +13,8 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
-using clojure.lang;
-using System.Diagnostics;
 
 namespace clojure.lang
 {
