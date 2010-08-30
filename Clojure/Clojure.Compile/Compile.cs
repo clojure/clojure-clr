@@ -49,25 +49,30 @@ namespace BootstrapCompile
             string warnVal =  Environment.GetEnvironmentVariable(REFLECTION_WARNING_PROP);
             bool warnOnReflection = warnVal == null ? false : warnVal.Equals(true);
 
-            try 
+            try
             {
                 Var.pushThreadBindings(RT.map(
-                    Compiler.COMPILE_PATH,path,
-                    RT.WARN_ON_REFLECTION,warnOnReflection
+                    Compiler.COMPILE_PATH, path,
+                    RT.WARN_ON_REFLECTION, warnOnReflection
                     ));
 
                 Stopwatch sw = new Stopwatch();
 
-                foreach ( string lib in args )
+                foreach (string lib in args)
                 {
                     sw.Reset();
                     sw.Start();
-                    outTW.Write("Compiling {0} to {1}",lib,path);
+                    outTW.Write("Compiling {0} to {1}", lib, path);
                     outTW.Flush();
                     Compiler.COMPILE.invoke(Symbol.intern(lib));
                     sw.Stop();
                     outTW.WriteLine(" -- {0} milliseconds.", sw.ElapsedMilliseconds);
                 }
+            }
+            catch (Exception e)
+            {
+                errTW.WriteLine(e.ToString());
+                Environment.Exit(1);
             }
             finally
             {
