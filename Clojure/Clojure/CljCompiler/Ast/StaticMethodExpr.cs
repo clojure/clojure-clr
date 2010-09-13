@@ -63,6 +63,21 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region eval
+
+        // TODO: Handle by-ref
+        public override object Eval()
+        {
+            object[] argvals = new object[_args.Count];
+            for (int i = 0; i < _args.Count; i++)
+                argvals[i] = _args[i].ArgExpr.Eval();
+            if (_method != null)
+                return _method.Invoke(null, argvals);
+            return Reflector.InvokeStaticMethod(_type, _methodName, argvals);
+        }
+
+        #endregion
+
         #region Code generation
 
         protected override bool IsStaticCall
@@ -70,7 +85,7 @@ namespace clojure.lang.CljCompiler.Ast
             get { return true; }
         }
 
-        protected override Expression GenTargetExpression(GenContext context)
+        protected override Expression GenTargetExpression(ObjExpr objx, GenContext context)
         {
             return Expression.Constant(_type, typeof(Type));
         }

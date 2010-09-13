@@ -104,7 +104,25 @@ namespace clojure.lang
             if (method != null)
                 return method.Invoke(target, new object[0]);
 
-            throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldname, t));
+            throw new ArgumentException(String.Format("No matching instance field/property found: {0} for {1}", fieldname, t));
+        }
+
+        public static object GetStaticFieldOrProperty(Type t, string fieldname)
+        {
+            FieldInfo field = GetField(t, fieldname, true);
+            if (field != null)
+                return field.GetValue(null);
+
+            PropertyInfo prop = GetProperty(t, fieldname, true);
+            if (prop != null)
+                return prop.GetValue(null, new object[0]);
+
+            MethodInfo method = GetArityZeroMethod(t, fieldname, true);
+
+            if (method != null)
+                return method.Invoke(null, new object[0]);
+
+            throw new ArgumentException(String.Format("No matching static field/property found: {0} for {1}", fieldname, t));
         }
 
         #endregion
@@ -233,7 +251,7 @@ namespace clojure.lang
             return InvokeStaticMethod(t, methodName, args);
         }
 
-        static Object InvokeStaticMethod(Type t, String methodName, Object[] args)
+        public static Object InvokeStaticMethod(Type t, String methodName, Object[] args)
         {
             if (methodName.Equals("new"))
                 return InvokeConstructor(t, args);
@@ -310,7 +328,7 @@ namespace clojure.lang
 
 
 
-        private static object[] BoxArgs(ParameterInfo[] pinfos, object[] args)
+        public static object[] BoxArgs(ParameterInfo[] pinfos, object[] args)
         {
             if (pinfos.Length == 0)
                 return null;
@@ -323,6 +341,9 @@ namespace clojure.lang
 
         private static object BoxArg(ParameterInfo pinfo, object arg)
         {
+            if (arg == null)
+                return arg;
+
             Type paramType = pinfo.ParameterType;
             Type argType = arg.GetType();
 

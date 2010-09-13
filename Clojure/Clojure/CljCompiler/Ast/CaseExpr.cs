@@ -36,14 +36,7 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Dictionary<int, Expr> _thens;
         readonly bool _allKeywords;
 
-        //readonly int _line;
-
         readonly IPersistentMap _sourceSpan;
-
-
-        //final static Method hashMethod = Method.getMethod("int hash(Object)");
-        //final static Method hashCodeMethod = Method.getMethod("int hashCode()");
-        //final static Method equalsMethod = Method.getMethod("boolean equals(Object, Object)");
 
         #endregion
 
@@ -74,17 +67,18 @@ namespace clojure.lang.CljCompiler.Ast
             //prepared by case macro and presumed correct
             //case macro binds actual expr in let so expr is always a local,
             //no need to worry about multiple evaluation
-            public Expr Parse(object frm, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frm)
             {
-                ParserContext pass = new ParserContext(false,false);
-
                 ISeq form = (ISeq) frm;
+
+                if (pcon.Rhc == RHC.Eval)
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)),"case__"+RT.nextID());
 
                 PersistentVector args = PersistentVector.create(form.next());
                 Dictionary<int,Expr> tests = new Dictionary<int,Expr>();
                 Dictionary<int,Expr> thens = new Dictionary<int,Expr>();
 
-                LocalBindingExpr testexpr = (LocalBindingExpr)Compiler.GenerateAST(args.nth(0), pass);
+                LocalBindingExpr testexpr = (LocalBindingExpr)Compiler.Analyze(pcon.SetRhc(RHC.Expression),args.nth(0));
                 //testexpr.shouldClear = false;
             
                 //PathNode branch = new PathNode(PATHTYPE.BRANCH, (PathNode) CLEAR_PATH.get());
@@ -100,7 +94,7 @@ namespace clojure.lang.CljCompiler.Ast
                     //{
                     //    Var.pushThreadBindings(
                     //        RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
-                    thenExpr = Compiler.GenerateAST(me.val(), pass);
+                    thenExpr = Compiler.Analyze(pcon,me.val());
                     //}
                     //finally
                     //{
@@ -114,7 +108,7 @@ namespace clojure.lang.CljCompiler.Ast
                 //{
                 //    Var.pushThreadBindings(
                 //        RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
-                defaultExpr = Compiler.GenerateAST(args.nth(5), pass);
+                defaultExpr = Compiler.Analyze(pcon,args.nth(5));
                 //}
                 //finally
                 //{
@@ -135,6 +129,15 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
         
+        #endregion
+
+        #region eval
+
+        public override object Eval()
+        {
+            throw new InvalidOperationException("Can't eval case");
+        }
+
         #endregion
 
         #region Code generation
@@ -160,7 +163,7 @@ namespace clojure.lang.CljCompiler.Ast
         ///    end_label:
         ///      
         /// </remarks>
-        public override Expression GenDlr(GenContext context)
+        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             LabelTarget defaultLabel = Expression.Label("default");
             LabelTarget endLabel = Expression.Label(typeof(Object),"end");
@@ -176,8 +179,8 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Expression body = 
                     Expression.Condition(
-                        Expression.Call(null,cmp,Compiler.MaybeBox(_expr.GenDlr(context)),Compiler.MaybeBox(test.GenDlr(context))),
-                        Expression.Return(endLabel,Compiler.MaybeBox(_thens[i].GenDlr(context))),
+                        Expression.Call(null,cmp,Compiler.MaybeBox(_expr.GenCode(RHC.Expression, objx, context)),Compiler.MaybeBox(test.GenCode(RHC.Expression,objx,context))),
+                        Expression.Return(endLabel,Compiler.MaybeBox(_thens[i].GenCode(RHC.Expression,objx,context))),
                         Expression.Goto(defaultLabel));
 
                 cases.Add(Expression.SwitchCase(body, Expression.Constant(i)));
@@ -188,7 +191,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression testExpr = 
                 Expression.And(
                     Expression.RightShift(
-                        Expression.Call(null,Compiler.Method_Util_Hash,_expr.GenDlr(context)),
+                        Expression.Call(null,Compiler.Method_Util_Hash,Expression.Convert(_expr.GenCode(RHC.Expression, objx, context),typeof(Object))),
                         Expression.Constant(_shift)),
                     Expression.Constant(_mask));
 
@@ -196,7 +199,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression defaultExpr =
                 Expression.Block(
                     Expression.Label(defaultLabel),
-                    Expression.Return(endLabel,Compiler.MaybeBox(_defaultExpr.GenDlr(context))));
+                    Expression.Return(endLabel,Compiler.MaybeBox(_defaultExpr.GenCode(RHC.Expression,objx,context))));
 
             Expression switchExpr = Expression.Switch(testExpr, defaultExpr, cases.ToArray<SwitchCase>());
 

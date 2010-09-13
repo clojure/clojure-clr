@@ -32,17 +32,31 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         // Java: when closures are defined inside other closures,
-        // the closed over locals need to be propagated to the enclosing fn
+        // the closed over locals need to be propagated to the enclosing objx
         readonly ObjMethod _parent;
-        
+        IPersistentMap _locals = null;       // localbinding => localbinding
+        IPersistentMap _indexLocals = null;  // num -> localbinding
+        protected Expr _body = null;
+        ObjExpr _objx;
+        protected IPersistentVector _argLocals;
+        int _maxLocal = 0;
+        IPersistentSet _localsUsedInCatchFinally = PersistentHashSet.EMPTY;
+        protected IPersistentMap _methodMeta;
+
+        protected LocalBinding _thisBinding;
+        protected Type _explicitInterface = null;
+        protected MethodInfo _explicitMethodInfo = null;
+
+        protected IPersistentVector _parms;
+
+        #endregion
+
+        #region Data accessors
+
         internal ObjMethod Parent
         {
             get { return _parent; }
         }
-        
-        IPersistentMap _locals = null;       // localbinding => localbinding
-        IPersistentMap _indexLocals = null;  // num -> localbinding
-
 
         public IPersistentMap Locals
         {
@@ -56,19 +70,11 @@ namespace clojure.lang.CljCompiler.Ast
             set { _indexLocals = value; }
         }
 
-        protected LocalBinding _thisBinding;
-
-        protected Expr _body = null;
-        
-        ObjExpr _objx;
         internal ObjExpr Objx
         {
             get { return _objx; }
             //set { _objx = value; }
         }
-
-        protected IPersistentVector _argLocals;
-        int _maxLocal = 0;
 
         public int MaxLocal
         {
@@ -76,21 +82,13 @@ namespace clojure.lang.CljCompiler.Ast
             set { _maxLocal = value; }
         }
 
-        IPersistentSet _localsUsedInCatchFinally = PersistentHashSet.EMPTY;
-
         public IPersistentSet LocalsUsedInCatchFinally
         {
             get { return _localsUsedInCatchFinally; }
             set { _localsUsedInCatchFinally = value; }
         }
 
-        protected Type _explicitInterface = null;
-        protected MethodInfo _explicitMethodInfo = null;
-
         protected bool IsExplicit { get { return _explicitInterface != null; } }
-
-        protected IPersistentMap _methodMeta;
-        protected IPersistentVector _parms;
 
         #endregion
 
@@ -106,52 +104,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region not yet
-
-        /*        
-         * 
-         * 
-                 internal bool IsVariadic
-        {
-            get { return _restParm != null; }
-        }
-
-
-        internal int NumParams
-        {
-            get { return _reqParms.count() + (IsVariadic ? 1 : 0); }
-        }
-
-        internal int RequiredArity
-        {
-            get { return _reqParms.count(); }
-        } 
-
-
-        //int _line;
-
-
-
-        internal bool IsVariadic
-        {
-            get { return _restParm != null; }
-        }
-
-
-        internal int NumParams
-        {
-            get { return _reqParms.count() + (IsVariadic ? 1 : 0); }
-        }
-
-        internal int RequiredArity
-        {
-            get { return _reqParms.count(); }
-        }
-        */
-
-
-        #endregion
-
         #region Ctors
 
         public ObjMethod(ObjExpr fn, ObjMethod parent)
@@ -164,28 +116,27 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        internal void GenerateCode(GenContext context)
+        internal void GenerateCode(ObjExpr objx, GenContext context)
         {
-            MethodBuilder mb = GenerateStaticMethod(context);
-            GenerateMethod(mb, context);
+            MethodBuilder mb = GenerateStaticMethod(objx, context);
+            GenerateMethod(mb, objx, context);
         }
 
 
-        MethodBuilder GenerateStaticMethod(GenContext context)
+        MethodBuilder GenerateStaticMethod(ObjExpr objx, GenContext context)
         {
             string methodName = StaticMethodName;
-            ObjExpr fn = context.ObjExpr;
-            TypeBuilder tb = fn.TypeBuilder;
+            TypeBuilder tb = objx.TypeBuilder;
 
             List<ParameterExpression> parms = new List<ParameterExpression>(_argLocals.count() + 1);
 
-            ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
+            ParameterExpression thisParm = Expression.Parameter(objx.BaseType, "this");
             if (_thisBinding != null)
             {
                 _thisBinding.ParamExpression = thisParm;
-                _thisBinding.Tag = Symbol.intern(null, fn.BaseType.FullName);
+                _thisBinding.Tag = Symbol.intern(null, objx.BaseType.FullName);
             }
-            fn.ThisParam = thisParm;
+            objx.ThisParam = thisParm;
             parms.Add(thisParm);
 
             try
@@ -207,7 +158,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Expression body =
                     Expression.Block(
                         Expression.Label(loopLabel),
-                        _body.GenDlr(context));
+                        _body.GenCode(RHC.Return,objx,context));
 
                 Expression convBody = Compiler.MaybeConvert(body, ReturnType);
 
@@ -229,10 +180,10 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        void GenerateMethod(MethodInfo staticMethodInfo, GenContext context)
+        void GenerateMethod(MethodInfo staticMethodInfo, ObjExpr objx, GenContext context)
         {
 
-            TypeBuilder tb = context.ObjExpr.TypeBuilder;
+            TypeBuilder tb = objx.TypeBuilder;
 
             MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, ReturnType, ArgTypes);
 

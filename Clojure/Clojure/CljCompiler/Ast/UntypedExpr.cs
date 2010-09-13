@@ -15,20 +15,32 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+#if CLR2
+using Microsoft.Scripting.Ast;
+#else
+using System.Linq.Expressions;
+#endif
 using System.Text;
 
 namespace clojure.lang.CljCompiler.Ast
 {
     abstract class UntypedExpr : Expr
     {
-        public override bool HasClrType
+        #region Expr Members
+        
+        public bool HasClrType
         {
             get { return false;  }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
-            get { throw new ArgumentException("Has no CLR class"); }
+            get { throw new ArgumentException("Has no CLR type"); }
         }
+
+        public abstract object Eval();
+        public abstract Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
+
+        #endregion
     }
 }

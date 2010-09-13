@@ -27,11 +27,11 @@ using Microsoft.Scripting;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    abstract class InstanceFieldOrProprtyExpr<TInfo> : FieldOrPropertyExpr
+    abstract class InstanceFieldOrPropertyExpr<TInfo> : FieldOrPropertyExpr
     {
         #region Data
 
-        readonly Expr _target;
+        protected readonly Expr _target;
         protected readonly Type _targetType;
         protected readonly TInfo _tinfo;
         readonly string _fieldName;
@@ -43,7 +43,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public InstanceFieldOrProprtyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string fieldName, TInfo tinfo)
+        public InstanceFieldOrPropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string fieldName, TInfo tinfo)
         {
             _source = source;
             _spanMap = spanMap;
@@ -74,21 +74,21 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             Type targetType = _targetType;
 
             Type stubType = Compiler.COMPILE_STUB_ORIG_CLASS.isBound ? (Type)Compiler.COMPILE_STUB_ORIG_CLASS.deref() : null;
 
             if ( _targetType == stubType )
-                targetType = context.ObjExpr.BaseType;
+                targetType = objx.BaseType;
 
-            Expression target = _target.GenDlr(context);
+            Expression target = _target.GenCode(RHC.Expression, objx, context);
             Expression call;
             if (targetType != null && _tinfo != null)
             {
                 Expression convTarget = Expression.Convert(target, targetType);
-                Expression access = GenAccess(convTarget);
+                Expression access = GenAccess(rhc, objx, convTarget);
                 call = Compiler.MaybeBox(access);
             }
             else
@@ -100,15 +100,15 @@ namespace clojure.lang.CljCompiler.Ast
             return call;
         }
 
-        protected abstract Expression GenAccess(Expression target);
+        protected abstract Expression GenAccess(RHC rhc, ObjExpr objx, Expression target);
 
-        public override Expression GenDlrUnboxed(GenContext context)
+        public override Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
-            Expression target = _target.GenDlr(context);
+            Expression target = _target.GenCode(RHC.Expression, objx, context);
             if (_targetType != null && _tinfo != null)
             {
                 Expression convTarget = Expression.Convert(target, _targetType);
-                Expression access = GenAccess(convTarget);
+                Expression access = GenAccess(rhc,objx, convTarget);
                 return access;
             }
             else
@@ -119,15 +119,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region AssignableExpr Members
 
-        public override Expression GenAssignDlr(GenContext context, Expr val)
+        public override Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
         {
-            Expression target = _target.GenDlr(context);
-            Expression valExpr = val.GenDlr(context);
+            Expression target = _target.GenCode(RHC.Expression, objx, context);
+            Expression valExpr = val.GenCode(RHC.Expression, objx, context);
             Expression call;
             if (_targetType != null && _tinfo != null)
             {
                 Expression convTarget = Expression.Convert(target, _targetType);
-                Expression access = GenAccess(convTarget);
+                Expression access = GenAccess(rhc, objx, convTarget);
                 call = Expression.Assign(access, Expression.Convert(valExpr,access.Type));
             }
             else
@@ -146,7 +146,7 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
     }
 
-    sealed class InstanceFieldExpr : InstanceFieldOrProprtyExpr<FieldInfo>
+    sealed class InstanceFieldExpr : InstanceFieldOrPropertyExpr<FieldInfo>
     {
         #region C-tors
 
@@ -166,9 +166,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region eval
+
+        // TODO: Handle by-ref
+        public override object Eval()
+        {
+            return _tinfo.GetValue(_target.Eval());
+        }
+
+        #endregion
+
         #region Code generation
 
-        protected override Expression GenAccess(Expression target)
+        protected override Expression GenAccess(RHC rhc, ObjExpr objx, Expression target)
         {
             return Expression.Field(target, _tinfo);
         }
@@ -179,10 +189,22 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+        #region AssignableExpr members
+
+        public override object EvalAssign(Expr val)
+        {
+            object target = _target.Eval();
+            object e = val.Eval();
+            _tinfo.SetValue(target, e);
+            return e;
+        }
+        
+        #endregion
     }
 
 
-    sealed class InstancePropertyExpr : InstanceFieldOrProprtyExpr<PropertyInfo>
+    sealed class InstancePropertyExpr : InstanceFieldOrPropertyExpr<PropertyInfo>
     {
         #region C-tors
 
@@ -202,9 +224,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region eval
+
+        // TODO: Handle by-ref
+        public override object Eval()
+        {
+            return _tinfo.GetValue(_target.Eval(), new object[0]);
+        }
+
+        #endregion
+
         #region Code generation
 
-        protected override Expression GenAccess(Expression target)
+        protected override Expression GenAccess(RHC rhc, ObjExpr objx, Expression target)
         {
             return Expression.Property(target, _tinfo);
         }
@@ -212,6 +244,18 @@ namespace clojure.lang.CljCompiler.Ast
         public override bool CanEmitPrimitive
         {
             get { return _targetType != null && _tinfo != null && Util.IsPrimitive(_tinfo.PropertyType); }
+        }
+
+        #endregion
+
+        #region AssignableExpr members
+
+        public override object EvalAssign(Expr val)
+        {
+            object target = _target.Eval();
+            object e = val.Eval();
+            _tinfo.SetValue(target, e,new object[0]);
+            return e;
         }
 
         #endregion

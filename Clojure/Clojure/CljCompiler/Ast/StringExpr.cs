@@ -24,11 +24,16 @@ using System.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class StringExpr : Expr
+    class StringExpr : LiteralExpr
     {
         #region Data
 
         readonly string _str;
+
+        public override object Val
+        {
+            get { return _str; }
+        }
 
         #endregion
 
@@ -57,11 +62,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             return Expression.Constant(String.Intern(_str));
         }
 
         #endregion
+
     }
 }

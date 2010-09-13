@@ -44,12 +44,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return true; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return typeof(IPersistentVector); }
         }
@@ -58,25 +58,56 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Parsing
 
-        public static Expr Parse(IPersistentVector form)
+        public static Expr Parse(ParserContext pcon, IPersistentVector form)
         {
-            ParserContext pcon = new ParserContext(false, false);
+            ParserContext pconToUse = pcon.EvEx();
+            bool constant = true;
 
             IPersistentVector args = PersistentVector.EMPTY;
             for (int i = 0; i < form.count(); i++ )
-                args = (IPersistentVector)args.cons(Compiler.GenerateAST(form.nth(i),pcon));
+            {
+                Expr v = Compiler.Analyze(pconToUse, form.nth(i));
+                args = (IPersistentVector)args.cons(v);
+                if ( !(v is LiteralExpr) )
+                    constant = false;
+            }
 
             Expr ret = new VectorExpr(args);
-            return Compiler.OptionallyGenerateMetaInit(form, ret);
+            if ( form is IObj && ((IObj)form).meta() != null )
+                return Compiler.OptionallyGenerateMetaInit(pcon,form, ret);
+            else if ( constant )
+            {
+                IPersistentVector rv = PersistentVector.EMPTY;
+                for ( int i=0; i<args.count(); i++ )
+                {
+                    LiteralExpr ve = (LiteralExpr)args.nth(i);
+                    rv = (IPersistentVector)rv.cons(ve.Val);
+                }
+                return new ConstantExpr(rv);
+            }
+            else
+                return ret;
+        }
+
+        #endregion
+
+        #region eval
+
+        public object Eval()
+        {
+            IPersistentVector ret = PersistentVector.EMPTY;
+            for (int i = 0; i < _args.count(); i++)
+                ret = (IPersistentVector)ret.cons(((Expr)_args.nth(i)).Eval());
+            return ret;
         }
 
         #endregion
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            Expression argArray = Compiler.GenArgArray(context, _args);
+            Expression argArray = Compiler.GenArgArray(rhc, objx, context, _args);
             Expression ret = Expression.Call(Compiler.Method_RT_vector, argArray);
             return ret;
         }

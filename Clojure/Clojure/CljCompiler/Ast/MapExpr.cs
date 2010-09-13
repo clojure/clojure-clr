@@ -50,12 +50,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return true; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return typeof(IPersistentMap); }
         }
@@ -64,28 +64,56 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Parsing
 
-        public static Expr Parse(IPersistentMap form)
+        public static Expr Parse(ParserContext pcon, IPersistentMap form)
         {
-            ParserContext pcon = new ParserContext(false, false);
+            ParserContext pconToUse = pcon.EvEx();
+            bool constant = true;
 
             IPersistentVector keyvals = PersistentVector.EMPTY;
             for (ISeq s = RT.seq(form); s != null; s = s.next())
             {
                 IMapEntry e = (IMapEntry)s.first();
-                keyvals = (IPersistentVector)keyvals.cons(Compiler.GenerateAST(e.key(),pcon));
-                keyvals = (IPersistentVector)keyvals.cons(Compiler.GenerateAST(e.val(),pcon));
+                Expr k = Compiler.Analyze(pconToUse, e.key());
+                Expr v = Compiler.Analyze(pconToUse, e.val());
+                keyvals = (IPersistentVector)keyvals.cons(k);
+                keyvals = (IPersistentVector)keyvals.cons(v);
+                if (!(k is LiteralExpr && v is LiteralExpr))
+                    constant = false;
             }
             Expr ret = new MapExpr(keyvals);
-            return Compiler.OptionallyGenerateMetaInit(form, ret);
+            if (form is IObj && ((IObj)form).meta() != null)
+                return Compiler.OptionallyGenerateMetaInit(pcon, form, ret);
+            else if (constant)
+            {
+                IPersistentMap m = PersistentHashMap.EMPTY;
+                for (int i = 0; i < keyvals.length(); i += 2)
+                    m = m.assoc(((LiteralExpr)keyvals.nth(i)).Val, ((LiteralExpr)keyvals.nth(i + 1)).Val);
+                return new ConstantExpr(m);
+            }
+            else
+                return ret;
         }
+
+        #endregion
+
+        #region eval
+
+        public object Eval()
+        {
+            Object[] ret = new Object[_keyvals.count()];
+            for (int i = 0; i < _keyvals.count(); i++)
+                ret[i] = ((Expr)_keyvals.nth(i)).Eval();
+            return RT.map(ret);
+        }
+
 
         #endregion
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            Expression argArray = Compiler.GenArgArray(context, _keyvals);
+            Expression argArray = Compiler.GenArgArray(rhc,objx, context, _keyvals);
             Expression ret = Expression.Call(Compiler.Method_RT_map, argArray);
             return ret;
         }

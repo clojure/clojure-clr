@@ -19,16 +19,33 @@ using System.Text;
 
 namespace clojure.lang.CljCompiler.Ast
 {
+    // RHC = Rich Hickey Context -- same enum as Compiler.C in the Java version
+    public enum RHC
+    {
+        Statement, // value ignored
+        Expression, // value required
+        Return, // tail position relative to enclosing recur frame
+        Eval
+    }
+
     // value semantics
     public class ParserContext
     {
         #region Data
 
-        readonly bool _isRecurContext;
+        readonly RHC _rhc;
+
+        internal RHC Rhc
+        {
+            get { return _rhc; }
+        } 
+
+
+        //readonly bool _isRecurContext;
 
         public bool IsRecurContext
         {
-            get { return _isRecurContext; }
+            get { return _rhc == RHC.Return; }
         }
 
         readonly bool _isAssignContext;
@@ -43,15 +60,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region C-tors
 
-        public ParserContext()
+        public ParserContext(RHC rhc)
         {
+            _rhc = rhc;
             _isAssignContext = false;
-            _isRecurContext = false;
         }
 
-        public ParserContext(bool isRecurContext, bool isAssignContext)
+        public ParserContext(RHC rhc, bool isAssignContext)
         {
-            _isRecurContext = isRecurContext;
+            _rhc = rhc;
             _isAssignContext = isAssignContext;
         }
 
@@ -59,12 +76,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Modifiers
 
-        public ParserContext SetRecur(bool value)
+        public ParserContext SetRhc(RHC rhc)
         {
-            if (_isRecurContext == value)
+            if (_rhc == rhc)
                 return this;
 
-            return new ParserContext(value, _isAssignContext);
+            return new ParserContext(rhc, _isAssignContext);
         }
 
         public ParserContext SetAssign(bool value)
@@ -72,7 +89,14 @@ namespace clojure.lang.CljCompiler.Ast
             if (_isAssignContext == value)
                 return this;
 
-            return new ParserContext(_isRecurContext, value);
+            return new ParserContext(_rhc, value);
+        }
+
+        public ParserContext EvEx()
+        {
+            if (_rhc == RHC.Eval)
+                return this;
+            return SetRhc(RHC.Expression);
         }
 
         #endregion
@@ -85,12 +109,12 @@ namespace clojure.lang.CljCompiler.Ast
             if (obj == null)
                 return false;
 
-            return _isRecurContext == pc._isRecurContext && _isAssignContext == pc._isAssignContext;
+            return _rhc == pc._rhc && _isAssignContext == pc._isAssignContext;
         }
 
         public override int GetHashCode()
         {
-            return Util.HashCombine(_isAssignContext.GetHashCode(), _isRecurContext.GetHashCode());
+            return Util.HashCombine(_isAssignContext.GetHashCode(), _rhc.GetHashCode());
         }
 
         #endregion

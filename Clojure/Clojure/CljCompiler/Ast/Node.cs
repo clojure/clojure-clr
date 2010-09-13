@@ -20,6 +20,9 @@ using Microsoft.Scripting;
 
 namespace clojure.lang.CljCompiler.Ast
 {
+    // TODO: Remove Node class
+
+    /*
     /// <summary>
     /// Base class for AST expressions in the compiler.
     /// </summary>
@@ -69,4 +72,5 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
     }
+     */
 }

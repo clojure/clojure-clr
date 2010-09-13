@@ -81,12 +81,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return true; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return _type; }
         }
@@ -97,7 +97,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frm)
             {
                 //int line = (int)Compiler.LINE.deref();
 
@@ -112,7 +112,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (t == null)
                     throw new ArgumentException("Unable to resolve classname: " + RT.second(form));
 
-                List<HostArg> args = HostExpr.ParseArgs(RT.next(RT.next(form)));
+                List<HostArg> args = HostExpr.ParseArgs(pcon, RT.next(RT.next(form)));
 
                 return new NewExpr(t, args, (IPersistentMap)Compiler.SOURCE_SPAN.deref());
             }
@@ -120,18 +120,32 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            Object[] argvals = new Object[_args.Count()];
+            for (int i = 0; i < _args.Count; i++)
+                argvals[i] = _args[i].ArgExpr.Eval();
+            if ( _ctor != null )
+                return _ctor.Invoke(Reflector.BoxArgs(_ctor.GetParameters(),argvals));  // TODO: Deal with ByRef parameters
+            return Reflector.InvokeConstructor(_type,argvals);
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             Expression call;
 
             if (_ctor != null)
-                call = GenDlrForMethod(context);
+                call = GenDlrForMethod(rhc, objx, context);
             else if (_isNoArgValueTypeCtor)
                 call = Expression.Default(_type);
             else
-                call = GenerateComplexCall(context);
+                call = GenerateComplexCall(rhc, objx, context);
 
             call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
@@ -139,7 +153,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         // TODO: See if it is worth removing the code duplication with MethodExp.GenDlr.
 
-        private Expression GenerateComplexCall(GenContext context)
+        private Expression GenerateComplexCall(RHC rhc, ObjExpr objx, GenContext context)
         {
             Expression call;
 
@@ -149,12 +163,12 @@ namespace clojure.lang.CljCompiler.Ast
             List<ParameterExpression> sbParams = new List<ParameterExpression>();
             List<Expression> sbInits = new List<Expression>();
             List<Expression> sbTransfers = new List<Expression>();
-            MethodExpr.GenerateComplexArgList(context, _args, out exprs, out sbParams, out sbInits, out sbTransfers);
+            MethodExpr.GenerateComplexArgList(objx, context, _args, out exprs, out sbParams, out sbInits, out sbTransfers);
 
             Expression[] argExprs = DynUtils.ArrayInsert<Expression>(target, exprs);
 
 
-            Type returnType = ClrType;
+            Type returnType = this.ClrType;
 
             CreateInstanceBinder binder = new DefaultCreateInstanceBinder(_args.Count);
             DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), argExprs);
@@ -197,11 +211,11 @@ namespace clojure.lang.CljCompiler.Ast
             //return Expression.Constant(_type, typeof(Type));
         }
 
-        Expression GenDlrForMethod(GenContext context)
+        Expression GenDlrForMethod(RHC rhc, ObjExpr objx, GenContext context)
         {
             // The ctor is uniquely determined.
 
-            Expression[] args = HostExpr.GenTypedArgs(context, _ctor.GetParameters(), _args);
+            Expression[] args = HostExpr.GenTypedArgs(objx, context, _ctor.GetParameters(), _args);
             return Utils.SimpleNewHelper(_ctor, args);
 
             // JAVA: emitClearLocals

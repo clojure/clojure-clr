@@ -48,7 +48,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frm)
             {
                 ISeq form = (ISeq)frm;
 
@@ -75,7 +75,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Expr instance = null;
                 if (t == null)
-                    instance = Compiler.GenerateAST(RT.second(form),new ParserContext(false,false));
+                    instance = Compiler.Analyze(pcon.EvEx(),RT.second(form));
 
                 bool isZeroArityCall = RT.Length(form) == 3 && (RT.third(form) is Symbol || RT.third(form) is Keyword);
 
@@ -141,7 +141,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 string methodName = Compiler.munge(((Symbol)RT.first(call)).Name);
 
-                List<HostArg> args = ParseArgs(RT.next(call));
+                List<HostArg> args = ParseArgs(pcon, RT.next(call));
 
                 return t != null
                     ? (MethodExpr)(new StaticMethodExpr(source, spanMap, tag, t, methodName, args))
@@ -150,7 +150,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        internal static List<HostArg> ParseArgs(ISeq argSeq)
+        internal static List<HostArg> ParseArgs(ParserContext pcon, ISeq argSeq)
         {
             List<HostArg> args = new List<HostArg>();
 
@@ -179,7 +179,7 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
-                Expr expr = Compiler.GenerateAST(arg, new ParserContext(false,false));
+                Expr expr = Compiler.Analyze(pcon.EvEx(),arg);
 
                 args.Add(new HostArg(paramType, expr, lb));
             }
@@ -190,10 +190,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region Code generation
+        #region Expr Members
+
+        public abstract bool HasClrType { get; }
+        public abstract Type ClrType { get; }
+        public abstract object Eval();
+        public abstract Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
+
+        #endregion
+
+        #region MaybePrimitiveExpr 
 
         public abstract bool CanEmitPrimitive { get; }
-        public abstract Expression GenDlrUnboxed(GenContext context);
+        public abstract Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context);
 
         #endregion
 
@@ -344,21 +353,21 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        internal static Expression[] GenTypedArgs(GenContext context, ParameterInfo[] parms, List<HostArg> args)
+        internal static Expression[] GenTypedArgs(ObjExpr objx, GenContext context, ParameterInfo[] parms, List<HostArg> args)
         {
             Expression[] exprs = new Expression[parms.Length];
             for (int i = 0; i < parms.Length; i++)
-                exprs[i] = GenTypedArg(context,parms[i].ParameterType, args[i].ArgExpr);
+                exprs[i] = GenTypedArg(objx, context, parms[i].ParameterType, args[i].ArgExpr);
             return exprs;
         }
 
-        internal static Expression GenTypedArg(GenContext context, Type type, Expr arg)
+        internal static Expression GenTypedArg(ObjExpr objx, GenContext context, Type type, Expr arg)
         {
             if (Compiler.MaybePrimitiveType(arg) == type)
-                return ((MaybePrimitiveExpr)arg).GenDlrUnboxed(context);
+                return ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
             else
             {
-                Expression argExpr = arg.GenDlr(context);
+                Expression argExpr = arg.GenCode(RHC.Expression, objx, context);
                 return GenMaybeUnboxedArg(type, argExpr);
             }
         }

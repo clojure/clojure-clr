@@ -30,7 +30,7 @@ namespace clojure.lang
     /// And then it goes away again in Rev 1161.  Sigh.</para>
     /// </remarks>
     [Serializable]
-    public class AFnImpl : /*AFn*/ AFunction /* per rev 1161*/ , Fn  
+    public class AFnImpl : /*AFn*/ AFunction /* per rev 1161*/ , Fn 
     {
         IPersistentMap _meta;
 

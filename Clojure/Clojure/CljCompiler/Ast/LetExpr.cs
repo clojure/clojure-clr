@@ -47,12 +47,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return _body.HasClrType; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return _body.ClrType; }
         }
@@ -63,9 +63,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frm)
             {
-                ISeq form = (ISeq) frm;
+                ISeq form = (ISeq)frm;
 
                 // form => (let  [var1 val1 var2 val2 ... ] body ... )
                 //      or (loop [var1 val1 var2 val2 ... ] body ... )
@@ -82,62 +82,138 @@ namespace clojure.lang.CljCompiler.Ast
 
                 ISeq body = RT.next(RT.next(form));
 
-                IPersistentMap dynamicBindings = RT.map(
-                    Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
-                    Compiler.NEXT_LOCAL_NUM,Compiler.NEXT_LOCAL_NUM.deref());
+                if (pcon.Rhc == RHC.Eval
+                    || (pcon.Rhc == RHC.Expression && isLoop))
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)),"let__"+RT.nextID());
 
-                if (isLoop)
-                    dynamicBindings = dynamicBindings.assoc(Compiler.LOOP_LOCALS, null);
+                ObjMethod method = (ObjMethod)Compiler.METHOD.deref();
+                IPersistentMap backupMethodLocals = method.Locals;
+                IPersistentMap backupMethodIndexLocals = method.IndexLocals;
+                IPersistentVector recurMismatches = null;
 
-                try
+
+                // we might repeat once if a loop with a recurMismatch, return breaks
+                while (true)
                 {
-                    Var.pushThreadBindings(dynamicBindings);
 
-                    IPersistentVector bindingInits = PersistentVector.EMPTY;
-                    IPersistentVector loopLocals = PersistentVector.EMPTY;
+                    IPersistentMap dynamicBindings = RT.map(
+                        Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
+                        Compiler.NEXT_LOCAL_NUM, Compiler.NEXT_LOCAL_NUM.deref());
 
-                    for (int i = 0; i < bindings.count(); i += 2)
-                    {
-                        if (!(bindings.nth(i) is Symbol))
-                            throw new ArgumentException("Bad binding form, expected symbol, got " + bindings.nth(i));
 
-                        Symbol sym = (Symbol)bindings.nth(i);
-                        if (sym.Namespace != null)
-                            throw new Exception("Can't let qualified name: " + sym);
-
-                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1), sym.Name, pcon.SetRecur(false).SetAssign(false));
-                        // Sequential enhancement of env (like Lisp let*)
-                        LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), init,false);
-                        BindingInit bi = new BindingInit(b, init);
-                        bindingInits = bindingInits.cons(bi);
-
-                        if (isLoop)
-                            loopLocals = loopLocals.cons(b);
-                    }
                     if (isLoop)
-                        Compiler.LOOP_LOCALS.set(loopLocals);
+                        dynamicBindings = dynamicBindings.assoc(Compiler.LOOP_LOCALS, null);
 
-                    return new LetExpr(bindingInits,
-                        new BodyExpr.Parser().Parse(body, pcon.SetRecur(isLoop || pcon.IsRecurContext).SetAssign(false)),
-                        isLoop);
-                }
-                finally
-                {
-                    Var.popThreadBindings();
+                    try
+                    {
+                        Var.pushThreadBindings(dynamicBindings);
+
+                        IPersistentVector bindingInits = PersistentVector.EMPTY;
+                        IPersistentVector loopLocals = PersistentVector.EMPTY;
+
+                        for (int i = 0; i < bindings.count(); i += 2)
+                        {
+                            if (!(bindings.nth(i) is Symbol))
+                                throw new ArgumentException("Bad binding form, expected symbol, got " + bindings.nth(i));
+
+                            Symbol sym = (Symbol)bindings.nth(i);
+                            if (sym.Namespace != null)
+                                throw new Exception("Can't let qualified name: " + sym);
+
+                            Expr init = Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), bindings.nth(i + 1), sym.Name);
+                            if (isLoop)
+                            {
+                                if (recurMismatches != null && ((LocalBinding)recurMismatches.nth(i / 2)).RecurMistmatch)
+                                {
+                                    HostArg ha = new HostArg(HostArg.ParameterType.Standard,init,null);
+                                    List<HostArg> has = new List<HostArg>(1);
+                                    has.Add(ha);
+                                    init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "box", has);                                        
+                                    if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                                        RT.errPrintWriter().WriteLine("Auto-boxing loop arg: " + sym);
+                                }
+                                else if (Compiler.MaybePrimitiveType(init) == typeof(int))
+                                {
+                                    HostArg ha = new HostArg(HostArg.ParameterType.Standard, init, null);
+                                    List<HostArg> has = new List<HostArg>(1);
+                                    has.Add(ha); 
+                                    init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "longCast", has);
+                                }
+                                else if (Compiler.MaybePrimitiveType(init) == typeof(float))
+                                {
+                                    HostArg ha = new HostArg(HostArg.ParameterType.Standard, init, null);
+                                    List<HostArg> has = new List<HostArg>(1);
+                                    has.Add(ha);
+                                    init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "doubleCast", has);
+                                }
+                            }
+
+                            // Sequential enhancement of env (like Lisp let*)
+                            LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), init, false);
+                            BindingInit bi = new BindingInit(b, init);
+                            bindingInits = bindingInits.cons(bi);
+
+                            if (isLoop)
+                                loopLocals = loopLocals.cons(b);
+                        }
+                        if (isLoop)
+                            Compiler.LOOP_LOCALS.set(loopLocals);
+
+                        Expr bodyExpr;
+                        try
+                        {
+                            if (isLoop)
+                            {
+                                // stuff with clear paths
+                            }
+                            bodyExpr = new BodyExpr.Parser().Parse(isLoop ? pcon.SetRhc(RHC.Return) : pcon, body);
+                        }
+                        finally
+                        {
+                            if (isLoop)
+                            {
+                                // stuff with clear paths
+                                recurMismatches = null;
+                                for (int i = 0; i < loopLocals.count(); i++)
+                                {
+                                    LocalBinding lb = (LocalBinding)loopLocals.nth(i);
+                                    if (lb.RecurMistmatch)
+                                        recurMismatches = loopLocals;
+                                }
+                            }
+                        }
+
+                        if (recurMismatches == null)
+                            return new LetExpr(bindingInits, bodyExpr, isLoop);
+
+                    }
+                    finally
+                    {
+                        Var.popThreadBindings();
+                    }
                 }
             }
         }
 
         #endregion
 
-        #region Code generation
+        #region eval
 
-        public override Expression GenDlr(GenContext context)
+        public object Eval()
         {
-            return GenDlr(context, false);
+            throw new InvalidOperationException("Can't eval let/loop");
         }
 
-        private Expression GenDlr(GenContext context, bool genUnboxed)
+        #endregion
+
+        #region Code generation
+
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        {
+            return GenCode(rhc, objx, context, false);
+        }
+
+        private Expression GenCode(RHC rhc, ObjExpr objx, GenContext context, bool genUnboxed)
         {
             LabelTarget loopLabel = Expression.Label();
 
@@ -152,7 +228,7 @@ namespace clojure.lang.CljCompiler.Ast
                 bi.Binding.ParamExpression = parmExpr;
                 parms.Add(parmExpr);
                 //forms.Add(Expression.Assign(parmExpr, Compiler.MaybeBox(bi.Init.GenDlr(context))));
-                Expression initExpr = primType != null ? ((MaybePrimitiveExpr)bi.Init).GenDlrUnboxed(context) : Compiler.MaybeBox(bi.Init.GenDlr(context));
+                Expression initExpr = primType != null ? ((MaybePrimitiveExpr)bi.Init).GenCodeUnboxed(RHC.Expression,objx,context) : Compiler.MaybeBox(bi.Init.GenCode(RHC.Expression,objx,context));
                 forms.Add(Expression.Assign(parmExpr, initExpr));
             }
 
@@ -164,7 +240,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (_isLoop)
                     Var.pushThreadBindings(PersistentHashMap.create(Compiler.LOOP_LABEL, loopLabel));
 
-                Expression form = genUnboxed ? ((MaybePrimitiveExpr)_body).GenDlrUnboxed(context) : _body.GenDlr(context);
+                Expression form = genUnboxed ? ((MaybePrimitiveExpr)_body).GenCodeUnboxed(rhc,objx,context) : _body.GenCode(rhc,objx,context);
 
                 forms.Add(form);
             }
@@ -189,9 +265,9 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _body is MaybePrimitiveExpr && ((MaybePrimitiveExpr)_body).CanEmitPrimitive; }
         }
 
-        public Expression GenDlrUnboxed(GenContext context)
+        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return GenDlr(context, true);
+            return GenCode(rhc, objx, context, true);
         }
 
         #endregion

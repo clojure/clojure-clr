@@ -24,14 +24,13 @@ using System.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    /// <summary>
-    /// Base class for all AST expressions.
-    /// </summary>
-    public abstract class Expr : Node
-    {
-     	public abstract bool HasClrType { get; }
-        public abstract Type ClrType { get; }
 
-        public abstract Expression GenDlr(GenContext context);
+    public interface Expr
+    {
+        bool HasClrType { get; }
+        Type ClrType { get; }
+
+        object Eval();
+        Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
     }
 }

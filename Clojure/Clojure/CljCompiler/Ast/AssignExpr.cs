@@ -46,12 +46,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return _val.HasClrType; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return _val.ClrType; }
         }
@@ -62,26 +62,35 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frm)
             {
                 ISeq form = (ISeq)frm;
                 if (RT.Length(form) != 3)
                     throw new ArgumentException("Malformed assignment, expecting (set! target val)");
-                Expr target = Compiler.GenerateAST(RT.second(form), pcon.SetRecur(false).SetAssign(true));
+                Expr target = Compiler.Analyze(new ParserContext(RHC.Expression, true), RT.second(form));
                 if (!(target is AssignableExpr))
                     throw new ArgumentException("Invalid assignment target");
                 return new AssignExpr((AssignableExpr)target,
-                    Compiler.GenerateAST(RT.third(form), pcon.SetRecur(false).SetAssign(false)));
+                    Compiler.Analyze(pcon.SetRhc(RHC.Expression),RT.third(form)));
             }
+        }
+
+        #endregion
+
+        #region Eval
+
+        public object Eval()
+        {
+            return _target.EvalAssign(_val);
         }
 
         #endregion
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return _target.GenAssignDlr(context, _val);
+            return _target.GenAssign(rhc,objx,context,_val);
         }
 
         #endregion

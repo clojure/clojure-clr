@@ -109,7 +109,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         enum ParamParseState { Required, Rest, Done };
 
-        internal static FnMethod Parse(FnExpr fn, ISeq form)
+        internal static FnMethod Parse(FnExpr fn, ISeq form, bool isStatic)
         {
             // ([args] body ... )
 
@@ -173,7 +173,7 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new Exception(string.Format("Can't specify more than {0} parameters", Compiler.MAX_POSITIONAL_ARITY));
                 Compiler.LOOP_LOCALS.set(argLocals);
                 method._argLocals = argLocals;
-                method._body = (new BodyExpr.Parser()).Parse(body,new ParserContext(true,false));
+                method._body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return),body);
                 return method;
             }
             finally
@@ -186,7 +186,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Immediate mode compilation
 
-        internal LambdaExpression GenerateImmediateLambda(GenContext context)
+        internal LambdaExpression GenerateImmediateLambda(RHC rhc, ObjExpr objx, GenContext context)
         {
             List<ParameterExpression> parmExprs = new List<ParameterExpression>(_argLocals.count());
             //List<ParameterExpression> typedParmExprs = new List<ParameterExpression>();
@@ -196,8 +196,8 @@ namespace clojure.lang.CljCompiler.Ast
             //ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
             //_thisBinding.ParamExpression = thisParm;
             //fn.ThisParam = thisParm;
-            ObjExpr fn = context.ObjExpr;
-            _thisBinding.ParamExpression = fn.ThisParam;
+
+            _thisBinding.ParamExpression = objx.ThisParam;
 
             try
             {
@@ -226,7 +226,7 @@ namespace clojure.lang.CljCompiler.Ast
                 List<Expression> bodyExprs = new List<Expression>();
                 //bodyExprs.AddRange(typedParmInitExprs);
                 bodyExprs.Add(Expression.Label(loopLabel));
-                bodyExprs.Add(Compiler.MaybeBox(_body.GenDlr(context)));
+                bodyExprs.Add(Compiler.MaybeBox(_body.GenCode(rhc,objx,context)));
 
 
                 Expression block;

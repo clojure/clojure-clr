@@ -67,16 +67,27 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region Code generation
+        #region eval
 
-        public override Expression GenDlr(GenContext context)
+        // TODO: Handle by-ref
+        public override object Eval()
         {
-            return Compiler.MaybeBox(GenDlrUnboxed(context));
+            object target = _target.Eval();
+            return Reflector.CallInstanceMethod(_memberName, target, new object[0]);
         }
 
-        public override Expression GenDlrUnboxed(GenContext context)
+        #endregion
+
+        #region Code generation
+
+        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            Expression target = _target.GenDlr(context);
+            return Compiler.MaybeBox(GenCodeUnboxed(rhc, objx, context));
+        }
+
+        public override Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        {
+            Expression target = _target.GenCode(RHC.Expression, objx, context);
 
             Type returnType = HasClrType ? ClrType : typeof(object);
 

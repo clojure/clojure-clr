@@ -85,12 +85,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return _tryExpr.HasClrType; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return _tryExpr.ClrType; }
         }
@@ -101,9 +101,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frm)
             {
                 ISeq form = (ISeq)frm;
+
+                if (pcon.Rhc != RHC.Return)
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)), "try__" + RT.nextID());
 
                 // (try try-expr* catch-expr* finally-expr?)
                 // catch-expr: (catch class sym expr*)
@@ -131,7 +134,7 @@ namespace clojure.lang.CljCompiler.Ast
                     else
                     {
                         if (bodyExpr == null)
-                            bodyExpr = new BodyExpr.Parser().Parse(RT.seq(body), pcon.SetAssign(false));
+                            bodyExpr = new BodyExpr.Parser().Parse(pcon.SetAssign(false),RT.seq(body));
                         if (Util.equals(op, Compiler.CATCH))
                         {
                             Type t = HostExpr.MaybeType(RT.second(f), false);
@@ -146,7 +149,6 @@ namespace clojure.lang.CljCompiler.Ast
                             IPersistentMap dynamicBindings = RT.map(
                                 Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
                                 Compiler.NEXT_LOCAL_NUM, Compiler.NEXT_LOCAL_NUM.deref(),
-                                //Compiler.IN_CATCH_FINALLY, RT.T);
                                 Compiler.IN_CATCH_FINALLY, true);
 
                             try
@@ -155,7 +157,7 @@ namespace clojure.lang.CljCompiler.Ast
                                 LocalBinding lb = Compiler.RegisterLocal(sym,
                                     (Symbol)(RT.second(f) is Symbol ? RT.second(f) : null),
                                     null,false);
-                                Expr handler = (new BodyExpr.Parser()).Parse(RT.next(RT.next(RT.next(f))), pcon.SetAssign(false));
+                                Expr handler = (new BodyExpr.Parser()).Parse(pcon.SetAssign(false), RT.next(RT.next(RT.next(f))));
                                 catches = catches.cons(new CatchClause(t, lb, handler)); ;
                             }
                             finally
@@ -172,7 +174,7 @@ namespace clojure.lang.CljCompiler.Ast
                             {
                                 //Var.pushThreadBindings(RT.map(Compiler.IN_CATCH_FINALLY, RT.T));
                                 Var.pushThreadBindings(RT.map(Compiler.IN_CATCH_FINALLY, true));
-                                finallyExpr = (new BodyExpr.Parser()).Parse(RT.next(f), pcon.SetRecur(false).SetAssign(false));
+                                finallyExpr = (new BodyExpr.Parser()).Parse(pcon.SetRhc(RHC.Statement).SetAssign(false), RT.next(f));
                             }
                             finally
                             {
@@ -183,18 +185,27 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 if ( bodyExpr == null )
-                    bodyExpr = (new BodyExpr.Parser()).Parse(RT.seq(body), pcon.SetAssign(false));
+                    bodyExpr = (new BodyExpr.Parser()).Parse(pcon, RT.seq(body));
                 return new TryExpr(bodyExpr, catches, finallyExpr, retLocal, finallyLocal);
               }
         }
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            throw new InvalidOperationException("Can't eval try");
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            Expression basicBody = _tryExpr.GenDlr(context);
+            Expression basicBody = _tryExpr.GenCode(rhc, objx, context);
             if (basicBody.Type == typeof(void))
                 basicBody = Expression.Block(basicBody, Expression.Default(typeof(object)));
             Expression tryBody = Expression.Convert(basicBody,typeof(object));
@@ -205,12 +216,12 @@ namespace clojure.lang.CljCompiler.Ast
                 CatchClause clause = (CatchClause) _catchExprs.nth(i);
                 ParameterExpression parmExpr = Expression.Parameter(clause.Type, clause.Lb.Name);
                 clause.Lb.ParamExpression = parmExpr;
-                catches[i] = Expression.Catch(parmExpr, Expression.Convert(clause.Handler.GenDlr(context), typeof(object)));
+                catches[i] = Expression.Catch(parmExpr, Expression.Convert(clause.Handler.GenCode(rhc, objx, context), typeof(object)));
             }
 
             TryExpression tryStmt = _finallyExpr == null
                 ? Expression.TryCatch(tryBody, catches)
-                : Expression.TryCatchFinally(tryBody, _finallyExpr.GenDlr(context), catches);
+                : Expression.TryCatchFinally(tryBody, _finallyExpr.GenCode(RHC.Statement, objx, context), catches);
 
             return tryStmt;
         }

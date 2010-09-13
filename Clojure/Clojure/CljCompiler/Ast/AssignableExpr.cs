@@ -27,6 +27,7 @@ namespace clojure.lang.CljCompiler.Ast
 {
     interface AssignableExpr
     {
-        Expression GenAssignDlr(GenContext context, Expr val);
+        object EvalAssign(Expr val);
+        Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val);
     }
 }

@@ -27,6 +27,19 @@ namespace clojure.lang.CljCompiler.Ast
     abstract class LiteralExpr : Expr
     {
         public abstract object Val { get; }
+
+        public object Eval()
+        {
+            return Val;
+        }
+
+        #region Expr Members
+
+        public abstract bool HasClrType { get; }
+        public abstract Type ClrType { get; }
+        public abstract Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
+
+        #endregion
     }
 
 

@@ -53,12 +53,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return _tag != null || _b.HasClrType; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get 
             {
@@ -70,17 +70,26 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            throw new InvalidOperationException("Can't eval locals");
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return context.ObjExpr.GenLocal(context,_b);
+            return objx.GenLocal(context,_b);
         }
 
 
-        public Expression GenDlrUnboxed(GenContext context)
+        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return context.ObjExpr.GenUnboxedLocal(context,_b);
+            return objx.GenUnboxedLocal(context, _b);
         }
 
         #endregion
@@ -96,11 +105,16 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region AssignableExpr Members
 
-        public Expression GenAssignDlr(GenContext context, Expr val)
+        public Object EvalAssign(Expr val)
+        {
+            throw new InvalidOperationException("Can't eval locals");
+        }
+
+        public Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
         {
             return Expression.Block(
-                context.ObjExpr.GenAssignLocal(context,_b,val),
-                context.ObjExpr.GenLocal(context,_b));
+                objx.GenAssignLocal(context,_b,val),
+                objx.GenLocal(context,_b));
         }
 
         #endregion

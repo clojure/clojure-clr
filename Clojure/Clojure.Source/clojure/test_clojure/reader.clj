@@ -77,7 +77,7 @@
                        (recur (inc i) (conj l i))
                        l))]
       (is (= [4 3 2 1 0] sequence))
-      (is (every? #(instance? Int32 %)              ;;; Integer
+      (is (every? #(instance? Int64 %)              ;;; Long
                   sequence))))
 
   ; Read BigInteger

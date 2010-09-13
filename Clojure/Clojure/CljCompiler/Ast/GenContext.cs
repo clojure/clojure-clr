@@ -97,11 +97,11 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _dynInitHelper; }
         } 
 
-        ObjExpr _objExpr = null;
-        internal ObjExpr ObjExpr
-        {
-            get { return _objExpr; }
-        }
+        //ObjExpr _objExpr = null;
+        //internal ObjExpr ObjExpr
+        //{
+        //    get { return _objExpr; }
+        //}
 
         FnMode _fnMode;
 
@@ -130,15 +130,15 @@ namespace clojure.lang.CljCompiler.Ast
                 _dynInitHelper = new DynInitHelper(_assyGen, "__InternalDynamicExpressionInits");
         }
 
-        internal GenContext CreateWithNewType(ObjExpr objExpr)
-        {
-            GenContext newContext = Clone();
-            newContext._objExpr = objExpr;
+        //internal GenContext CreateWithNewType(ObjExpr objExpr)
+        //{
+        //    GenContext newContext = Clone();
+        //    newContext._objExpr = objExpr;
 
-            newContext.FnCompileMode = FnCompileMode == FnMode.Full ? FnMode.Full : objExpr.CompileMode();
+        //    newContext.FnCompileMode = FnCompileMode == FnMode.Full ? FnMode.Full : objExpr.CompileMode();
 
-            return newContext;
-        }
+        //    return newContext;
+        //}
 
         internal GenContext WithNewDynInitHelper(string dihClassName)
         {

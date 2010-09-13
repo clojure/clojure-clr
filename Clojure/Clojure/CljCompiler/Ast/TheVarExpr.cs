@@ -44,12 +44,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return true; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return typeof(Var); }
         }
@@ -60,7 +60,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object form)
             {
                 Symbol sym = (Symbol)RT.second(form);
                 Var v = Compiler.LookupVar(sym, false);
@@ -72,11 +72,20 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            return _var;
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return context.ObjExpr.GenVar(context,_var);
+            return objx.GenVar(context,_var);
         }
 
         #endregion

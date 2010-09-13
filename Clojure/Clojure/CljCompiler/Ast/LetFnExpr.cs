@@ -47,12 +47,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return _body.HasClrType; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return _body.ClrType; }
         }
@@ -63,7 +63,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frm)
             {
                 ISeq form = (ISeq)frm;
 
@@ -75,9 +75,12 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new ArgumentException("Bad binding form, expected vector");
 
                 if ((bindings.count() % 2) != 0)
-                    throw new ArgumentException("Bad binding form, expected matched symbol/value pairs.");
+                    throw new ArgumentException("Bad binding form, expected matched symbol/expression pairs.");
 
                 ISeq body = RT.next(RT.next(form));
+
+                if (pcon.Rhc == RHC.Eval)
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)), "letfn__" + RT.nextID());
 
                 IPersistentMap dynamicBindings = RT.map(
                     Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
@@ -99,23 +102,22 @@ namespace clojure.lang.CljCompiler.Ast
                             throw new Exception("Can't let qualified name: " + sym);
 
                         LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), null,false);
+                        // b.CanBeCleared = false;
                         lbs = lbs.cons(b);
                     }
 
                     IPersistentVector bindingInits = PersistentVector.EMPTY;
-
                     for (int i = 0; i < bindings.count(); i += 2)
                     {
                         Symbol sym = (Symbol)bindings.nth(i);
-                        Expr init = Compiler.GenerateAST(bindings.nth(i + 1),sym.Name,pcon.SetRecur(false));
-                        // Sequential enhancement of env (like Lisp let*)
+                        Expr init = Compiler.Analyze(pcon.SetRhc(RHC.Expression),bindings.nth(i + 1));
                         LocalBinding b = (LocalBinding)lbs.nth(i / 2);
                         b.Init = init;
                         BindingInit bi = new BindingInit(b, init);
                         bindingInits = bindingInits.cons(bi);
                     }
 
-                    return new LetFnExpr(bindingInits,new BodyExpr.Parser().Parse(body,pcon));
+                    return new LetFnExpr(bindingInits,new BodyExpr.Parser().Parse(pcon, body));
                 }
                 finally
                 {
@@ -126,9 +128,18 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            throw new InvalidOperationException("Can't eval letfns");
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             int n = _bindingInits.count();
             List<ParameterExpression> parms = new List<ParameterExpression>(n);
@@ -148,11 +159,11 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 BindingInit bi = (BindingInit)_bindingInits.nth(i);
                 ParameterExpression parmExpr = (ParameterExpression)bi.Binding.ParamExpression;
-                forms.Add(Expression.Assign(parmExpr, bi.Init.GenDlr(context)));
+                forms.Add(Expression.Assign(parmExpr, bi.Init.GenCode(RHC.Expression,objx,context)));
             }
 
             // The work
-            forms.Add(_body.GenDlr(context));
+            forms.Add(_body.GenCode(rhc,objx,context));
             return Expression.Block(parms,forms);
         }
 

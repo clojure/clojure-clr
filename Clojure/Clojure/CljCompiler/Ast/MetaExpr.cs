@@ -30,7 +30,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Expr _expr;
-        readonly MapExpr _meta;
+        readonly Expr _meta;
 
         #endregion
 
@@ -46,26 +46,35 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return _expr.HasClrType; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return _expr.ClrType; }
         }
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            return ((IObj)_expr.Eval()).withMeta((IPersistentMap)_meta.Eval());
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            Expression objExpr = _expr.GenDlr(context);
+            Expression objExpr = _expr.GenCode(RHC.Expression, objx, context);
             Expression iobjExpr = Expression.Convert(objExpr, typeof(IObj));
 
-            Expression metaExpr = _meta.GenDlr(context);
+            Expression metaExpr = _meta.GenCode(RHC.Expression, objx, context);
             // Do we need a conversion here?  probably not.
     
             Expression ret = Expression.Call(iobjExpr, Compiler.Method_IObj_withMeta, metaExpr);

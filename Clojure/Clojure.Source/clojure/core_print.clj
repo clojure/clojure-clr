@@ -100,6 +100,22 @@
 (defmethod print-method ValueType [o, ^System.IO.TextWriter w]   ;; Number => ValueType
   (.Write w (str o)))
 
+;;; DM ADDED
+
+(defn- fp-str [x]
+   (let [s (str x)]
+     (if (or (.Contains s ".") (.Contains s "E"))
+       s
+       (str s ".0"))))
+       
+(defmethod print-method Double [o, ^System.IO.TextWriter w]
+  (.Write w (fp-str o)))
+
+(defmethod print-method Single [o, ^System.IO.TextWriter w]
+  (.Write w (fp-str o)))
+
+;;;
+
 (defmethod print-dup ValueType [o, ^System.IO.TextWriter w]      ;;; Number => ValueType
   (print-ctor o
               (fn [o w]
@@ -114,7 +130,7 @@
 (prefer-method print-dup System.Collections.ICollection clojure.lang.Fn)                        ;;; java.util.Collection
 
 (defmethod print-method Boolean [o, ^System.IO.TextWriter w]
-  (.Write w (str o)))
+  (.Write w (if o "true" "false")))                                                ;;; (.Write w (str o)))  else we get True False
 
 (defmethod print-dup Boolean [o w] (print-method o w))
 

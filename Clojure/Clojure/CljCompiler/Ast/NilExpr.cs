@@ -51,7 +51,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             return Expression.Constant(null);
         }
