@@ -212,7 +212,6 @@ namespace clojure.lang.CljCompiler.Ast
         //    // Needs its own GenContext so it has its own DynInitHelper
         //    GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
         //    GenContext genC = context.WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString());
-
         //    _superType = GetSuperType();
         //    return GenerateClass(genC);
         //}

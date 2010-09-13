@@ -2932,9 +2932,15 @@ namespace clojure.lang
                 fn.KeywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
                 fn.ProtocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
                 fn.VarCallsites = (IPersistentVector)VAR_CALLSITES.deref();
+<<<<<<< HEAD:Clojure/Clojure/CljCompiler/Compiler.cs
 
                 fn.Compile();
 
+=======
+
+                fn.Compile();
+
+>>>>>>> 3377874db842eab34cc8f7ba6055526cfe0362a2:Clojure/Clojure/CljCompiler/Compiler.cs
                 Expression fnNew = fn.GenDlr(context);
                 Expression fnInvoke = Expression.Call(fnNew, fnNew.Type.GetMethod("invoke", System.Type.EmptyTypes));
 
@@ -2999,6 +3005,7 @@ namespace clojure.lang
 
                     Expr ast = GenerateAST(form, new ParserContext(false, false));
                     exprs.Add(ast);
+<<<<<<< HEAD:Clojure/Clojure/CljCompiler/Compiler.cs
 
 
                     Var.pushThreadBindings(RT.map(
@@ -3025,6 +3032,34 @@ namespace clojure.lang
                         //LambdaExpression lambdaForEval = Expression.Lambda(exprForEval, "ReplCall", null);
                         Expression<ReplDelegate> lambdaForEval = lambdaForCompile;
 
+=======
+
+
+                    Var.pushThreadBindings(RT.map(
+                        COMPILER_CONTEXT, evalContext,
+                        METHOD, null));
+
+                    try
+                    {
+                        // Compile to assembly
+                        ast = GenerateWrappedAst(form);
+                        Expression exprForCompile = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
+                        Expression<ReplDelegate> lambdaForCompile = Expression.Lambda<ReplDelegate>(Expression.Convert(exprForCompile, typeof(Object)), "ReplCall", null);
+
+                        // TODO: gather all the exprForCompiles into one BIG lambda.  Then we only need one BIG method.
+                        //MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
+                        //    MethodAttributes.Public | MethodAttributes.Static);
+                        //ast.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());
+                        //lambdaForCompile.CompileToMethod(methodBuilder, true);
+
+                        //names.Add(methodBuilder.Name);
+
+                        //// evaluate in this environment
+                        //Expression exprForEval = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
+                        //LambdaExpression lambdaForEval = Expression.Lambda(exprForEval, "ReplCall", null);
+                        Expression<ReplDelegate> lambdaForEval = lambdaForCompile;
+
+>>>>>>> 3377874db842eab34cc8f7ba6055526cfe0362a2:Clojure/Clojure/CljCompiler/Compiler.cs
                         lambdaForEval.Compile().Invoke();
                     }
                     finally
