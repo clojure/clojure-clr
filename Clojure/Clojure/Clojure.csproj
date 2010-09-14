@@ -109,7 +109,6 @@
     <Compile Include="CljCompiler\Ast\MonitorExitExpr.cs" />
     <Compile Include="CljCompiler\Ast\NewExpr.cs" />
     <Compile Include="CljCompiler\Ast\NilExpr.cs" />
-    <Compile Include="CljCompiler\Ast\Node.cs" />
     <Compile Include="CljCompiler\Ast\RecurExpr.cs" />
     <Compile Include="CljCompiler\Ast\SetExpr.cs" />
     <Compile Include="CljCompiler\Ast\StaticFieldExpr.cs" />

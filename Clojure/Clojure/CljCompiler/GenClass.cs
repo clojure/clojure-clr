@@ -32,7 +32,7 @@ namespace clojure.lang
       
         // For debugging purposes only: testing with no compile in process
         //static GenContext _context = new GenContext("genclass", CompilerMode.Immediate);
-        static GenContext _context = new GenContext("genclass", AssemblyMode.Dynamic, FnMode.Full);
+        static GenContext _context = new GenContext("genclass", false);
 
         static readonly MethodInfo Method_RT_nth = typeof(RT).GetMethod("nth", new Type[] { typeof(object), typeof(Int32) });
         static readonly MethodInfo Method_RT_seq = typeof(RT).GetMethod("seq");
@@ -52,7 +52,7 @@ namespace clojure.lang
         {
             _context.SaveAssembly();
             //_context = new GenContext("genclass", CompilerMode.Immediate);
-            _context = new GenContext("genclass", AssemblyMode.Dynamic, FnMode.Full);
+            _context = new GenContext("genclass", false);
         }
          
 
@@ -85,7 +85,7 @@ namespace clojure.lang
             string extension = hasMain ? ".exe" : ".dll";
 
             //GenContext context = new GenContext(className, extension, path, CompilerMode.File);
-            GenContext context = new GenContext(className, extension, path, AssemblyMode.Save, FnMode.Full);
+            GenContext context = new GenContext(className, extension, path, true);
 
             // define the class
             List<Type> interfaceTypes = new List<Type>();

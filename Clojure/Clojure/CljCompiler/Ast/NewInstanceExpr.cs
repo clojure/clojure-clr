@@ -170,7 +170,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             // Needs its own GenContext so it has its own DynInitHelper
             // Can't reuse Compiler.EvalContext if it is a DefType because we have to use the given name and will get a conflict on redefinition
-            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? (ret.IsDefType ? new GenContext("deftype" + RT.nextID().ToString(),".dll",".",AssemblyMode.Save, FnMode.Full) : Compiler.EvalContext);
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? (ret.IsDefType ? new GenContext("deftype" + RT.nextID().ToString(),".dll",".",true) : Compiler.EvalContext);
             GenContext genC = context.WithNewDynInitHelper(ret.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
             //genC.FnCompileMode = FnMode.Full;
 
@@ -224,17 +224,6 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.popThreadBindings();
             }
 
-            //// TODO: This is silly.  We have the superClass in hand.  Might as well stash it.
-            ////ret._superName = SlashName(superClass);
-            ////ret._superType = superClass;
-            //ret._superType = stub;
-            //// asdf: IF this works, I'll be totally amazed.
-
-            ////ret.Compile(SlashName(superClass),inames,false);
-            ////ret.getCompiledClass();
-            //ret.ObjType = ret.GenerateClass(genC);
-            //Compiler.RegisterDuplicateType(ret.ObjType);
-
             ret.Compile(stub, interfaces, false, genC);
             Compiler.RegisterDuplicateType(ret.CompiledType);
 
@@ -251,18 +240,18 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         /***
- * Current host interop uses reflection, which requires pre-existing classes
- * Work around this by:
- * Generate a stub class that has the same interfaces and fields as the class we are generating.
- * Use it as a type hint for this, and bind the simple name of the class to this stub (in resolve etc)
- * Unmunge the name (using a magic prefix) on any code gen for classes
- */
+         * Current host interop uses reflection, which requires pre-existing classes
+         * Work around this by:
+         * Generate a stub class that has the same interfaces and fields as the class we are generating.
+         * Use it as a type hint for this, and bind the simple name of the class to this stub (in resolve etc)
+         * Unmunge the name (using a magic prefix) on any code gen for classes
+         */
         static Type CompileStub(Type super, NewInstanceExpr ret, Type[] interfaces, Object frm)
         {
 
             //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
             //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", CompilerMode.Immediate);
-            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", AssemblyMode.Dynamic, FnMode.Full);
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", false);
             TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.COMPILE_STUB_PREFIX + "." + ret.InternalName, TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
 
             tb.DefineDefaultConstructor(MethodAttributes.Public);
@@ -394,37 +383,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region Class creation
-
-        //public override FnMode CompileMode()
-        //{
-        //    return FnMode.Full;
-        //}
-
-        //protected override Type GenerateClassForImmediate(GenContext context)
-        //{
-        //    return GenerateClassForFile(context);
-        //}
-
-        //protected override Type GenerateClassForFile(GenContext context)
-        //{
-        //    //GenContext newC = context.ChangeMode(CompilerMode.File).WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString());
-        //    GenContext newC = context.WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString());
-        //    return EnsureTypeBuilt(newC);
-        //}
-
-        #endregion
-
         #region Code generation
-
-
-        //protected override Expression GenDlrImmediate(GenContext context)
-        //{
-        //    //GenContext newC = context.ChangeMode(CompilerMode.File);
-        //    //Expression expr = GenDlrForFile(newC, false);
-        //    Expression expr = GenDlrForFile(context, false);
-        //    return expr;
-        //}
 
         protected override void GenerateMethods(GenContext context)
         {
@@ -465,6 +424,5 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
-
     }
 }

@@ -96,7 +96,6 @@ namespace clojure.lang.CljCompiler.Ast
 
             Expression call = dyn;
 
-            //if ( context.Mode == CompilerMode.File )
             if ( context.DynInitHelper != null )
                 call = context.DynInitHelper.ReduceDyn(dyn);
 

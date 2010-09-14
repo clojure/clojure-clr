@@ -30,6 +30,22 @@ using System.Runtime.CompilerServices;
 
 namespace clojure.lang.CljCompiler.Ast
 {
+    #region Enums
+
+    /// <summary>
+    /// Indicates whether we need full class generation for the current function
+    /// </summary>
+    public enum FnMode
+    {
+        // The current ObjExpr is not generating its own class
+        Light,
+
+        // The current ObjExpr is generating its own class
+        Full
+    };
+
+    #endregion
+
     public class ObjExpr : Expr
     {
         #region Data
@@ -63,26 +79,19 @@ namespace clojure.lang.CljCompiler.Ast
         protected IPersistentMap _classMeta;
         private bool _isStatic;
 
-
-        //[NonSerialized]
-        //protected Type _superType;
-
         protected Type _baseType = null;
 
         
         protected TypeBuilder _typeBuilder = null;
         protected ParameterExpression _thisParam = null;
 
-        protected FnMode _fnMode = FnMode.Full;
+        private FnMode _fnMode = FnMode.Full;
 
-        //private Type _objType;
-
-        //internal Type ObjType
-        //{
-        //    get { return _objType; }
-        //    set { _objType = value; }
-        //}
-
+        public FnMode FnMode
+        {
+            get { return _fnMode; }
+            set { _fnMode = value; }
+        }
 
         protected FieldBuilder _metaField;
 
@@ -1017,9 +1026,6 @@ namespace clojure.lang.CljCompiler.Ast
             return cb;
         }
 
-
-
-
         #endregion
 
         #region other
@@ -1029,15 +1035,9 @@ namespace clojure.lang.CljCompiler.Ast
             tb.SetCustomAttribute(new CustomAttributeBuilder(Compiler.Ctor_Serializable, new object[0]));
         }
 
-
         protected virtual void GenerateMethods(GenContext context)
         {
         }
-
-        //protected GenContext CreateContext(GenContext incomingContext, TypeBuilder fnTB, Type baseType)
-        //{
-        //    return incomingContext.CreateWithNewType(this);
-        //}
 
         #endregion
 
@@ -1104,7 +1104,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Expression GenLocal(GenContext context, LocalBinding lb)
         {
-            //if (context.FnCompileMode == FnMode.Full && _closes.containsKey(lb))
             if (_closes.containsKey(lb) && _fnMode == FnMode.Full )
             {
                 Expression expr = Expression.Field(_thisParam, lb.Name);
@@ -1122,7 +1121,6 @@ namespace clojure.lang.CljCompiler.Ast
         internal Expression GenUnboxedLocal(GenContext context, LocalBinding lb)
         {
             Type primType = lb.PrimitiveType;
-            //if (context.FnCompileMode == FnMode.Full && _closes.containsKey(lb))
             if (_closes.containsKey(lb) && _fnMode == FnMode.Full)
                 return Expression.Convert(Expression.Field(_thisParam, lb.Name), primType);
             else
@@ -1132,15 +1130,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Expression GenConstant(GenContext context, int id, object val)
         {
-            //switch ( context.FnCompileMode )
-            //{
-            //    case FnMode.Light:
-            //        return Expression.Constant(val);
-            //    case FnMode.Full:
-            //        return Expression.Field(null, _baseType, ConstantName(id));
-            //    default:
-            //        throw Util.UnreachableCode();
-            //}
             if (_fnMode == FnMode.Full)
                 return Expression.Field(null, _baseType, ConstantName(id));
 
@@ -1169,55 +1158,5 @@ namespace clojure.lang.CljCompiler.Ast
 
 
         #endregion
-
-
-
-
-        #region old code
-
-        //public abstract FnMode CompileMode();
-        // You cannot allow this to change during parsing.
-        // That's why the following does not work.
-        //return _protocolCallsites != null && _protocolCallsites.count() > 0
-        //    ? FnMode.Full
-        //    : FnMode.Light;
-
-
-        //public Expression GenDlr(GenContext context)
-        //{
-        //    switch (context.FnCompileMode)
-        //    {
-        //        case FnMode.Light:
-        //            return GenDlrImmediate(context);
-        //        case FnMode.Full:
-        //            return GenDlrForFile(context, false);      // trying it this way now
-        //        default:
-        //            throw Util.UnreachableCode();
-        //    }
-        //}
-
-
-        #region Immediate-mode compilation
-
-        //protected abstract Expression GenDlrImmediate(GenContext context);
-
-        #endregion
-
-        #region Class generation
-
-        //protected Type GenerateClass(GenContext context)
-        //{
-        //    if (context.FnCompileMode == FnMode.Light)
-        //        return GenerateClassForImmediate(context);
-        //    else
-        //        return GenerateClassForFile(context);
-        //}
-
-        //protected abstract Type GenerateClassForImmediate(GenContext context);
-        //protected abstract Type GenerateClassForFile(GenContext context);
-
-        #endregion
-
-        #endregion    
     }
 }

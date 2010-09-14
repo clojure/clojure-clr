@@ -189,13 +189,6 @@ namespace clojure.lang.CljCompiler.Ast
         internal LambdaExpression GenerateImmediateLambda(RHC rhc, ObjExpr objx, GenContext context)
         {
             List<ParameterExpression> parmExprs = new List<ParameterExpression>(_argLocals.count());
-            //List<ParameterExpression> typedParmExprs = new List<ParameterExpression>();
-            //List<Expression> typedParmInitExprs = new List<Expression>();
-
-            //FnExpr fn = context.FnExpr;
-            //ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
-            //_thisBinding.ParamExpression = thisParm;
-            //fn.ThisParam = thisParm;
 
             _thisBinding.ParamExpression = objx.ThisParam;
 
@@ -214,14 +207,6 @@ namespace clojure.lang.CljCompiler.Ast
                     b.ParamExpression = pexpr;
                     parmExprs.Add(pexpr);
                 }
-
-
-                // TODO:  Eventually, type this param to ISeq.  
-                // This will require some reworking with signatures in various places around here.
-                //if (fn.IsVariadic)
-                //    parmExprs.Add(Expression.Parameter(typeof(object), "____REST"));
-
-                // If we have any typed parameters, we need to add an extra block to do the initialization.
 
                 List<Expression> bodyExprs = new List<Expression>();
                 //bodyExprs.AddRange(typedParmInitExprs);

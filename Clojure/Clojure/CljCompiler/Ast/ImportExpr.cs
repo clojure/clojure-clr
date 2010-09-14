@@ -65,7 +65,6 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-
         #endregion
 
         #region eval

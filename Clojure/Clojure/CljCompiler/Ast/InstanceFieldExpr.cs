@@ -203,7 +203,6 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
     }
 
-
     sealed class InstancePropertyExpr : InstanceFieldOrPropertyExpr<PropertyInfo>
     {
         #region C-tors

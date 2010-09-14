@@ -36,7 +36,6 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _keyvals; }
         } 
 
-
         #endregion
 
         #region Ctors

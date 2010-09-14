@@ -47,21 +47,21 @@
       :test-fixtures
       ;; libraries
       :clojure-set
-    ;  :clojure-xml
+      ; :clojure-xml
       :clojure-zip
       :protocols
       ; :genclass   -- TODO: We have some problems with classpaths -- this is a perfect example
       :main
-      :vectors
-      ;:annotations
-      :pprint
+  ;    :vectors
+      ; :annotations
+  ;    :pprint
       :serialization
       :rt
       :repl
       :clr.io                ;;; java.io
       :string
-      ;:java.javadoc
-      ;:java.shell
+      ; :java.javadoc
+      ; :java.shell
       :transients            
       :def
       ])

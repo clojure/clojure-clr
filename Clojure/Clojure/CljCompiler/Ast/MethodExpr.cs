@@ -277,7 +277,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected abstract bool IsStaticCall { get; }
         protected abstract Expression GenTargetExpression(ObjExpr objx, GenContext context);
-        //protected abstract Expression GenDlrForMethod(GenContext context);
 
         public override bool CanEmitPrimitive
         {

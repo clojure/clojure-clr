@@ -90,14 +90,6 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Constant(_type, typeof(Type));
         }
 
-        //protected override Expression GenDlrForMethod(GenContext context)
-        //{
-        //    Expression target = _target.GenDlr(context);
-        //    Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
-
-        //    return AstUtils.ComplexCallHelper(target,_method, args);
-        //}
-
         #endregion
     }
 }

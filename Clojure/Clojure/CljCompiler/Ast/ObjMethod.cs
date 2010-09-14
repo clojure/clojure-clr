@@ -214,6 +214,5 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
-
     }
 }

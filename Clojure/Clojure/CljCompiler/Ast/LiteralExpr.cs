@@ -28,12 +28,12 @@ namespace clojure.lang.CljCompiler.Ast
     {
         public abstract object Val { get; }
 
+        #region Expr Members
+
         public object Eval()
         {
             return Val;
         }
-
-        #region Expr Members
 
         public abstract bool HasClrType { get; }
         public abstract Type ClrType { get; }
@@ -41,6 +41,4 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
     }
-
-
 }

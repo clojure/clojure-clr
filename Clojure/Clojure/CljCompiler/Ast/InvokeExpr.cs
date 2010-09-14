@@ -189,7 +189,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression fn;
 
             //if (_isDirect && context.Mode == CompilerMode.File)
-            if (_isDirect && context.FnCompileMode == FnMode.Full)
+            if (_isDirect && objx.FnMode == FnMode.Full)
                 {
                 // TODO: Determine if this optimization is valid for Immediate mode
                 ParameterExpression v = Expression.Parameter(typeof(IFn));
@@ -275,7 +275,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private Expression GenProto(RHC rhc, ObjExpr objx, GenContext context, Expression fn)
         {
-            switch (context.FnCompileMode)
+            switch (objx.FnMode)
             {
                 case FnMode.Light:
                     return GenProtoLight(rhc,objx,context, fn);

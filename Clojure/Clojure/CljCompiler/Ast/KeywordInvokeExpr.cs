@@ -79,7 +79,7 @@ namespace clojure.lang.CljCompiler.Ast
         public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             //if (context.Mode == CompilerMode.Immediate)
-            if (context.FnCompileMode == FnMode.Light )
+            if (objx.FnMode == FnMode.Light )
             {
                 // This will emit a plain Keyword reference, rather than a callsite.
                 InvokeExpr ie = new InvokeExpr(_source, _spanMap, (Symbol)_tag, _kw, RT.vector(_target));
