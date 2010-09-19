@@ -82,35 +82,35 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new ArgumentException(string.Format("Mismatched argument count to recur, expected: {0} args, got {1}", 
                         loopLocals.count(), args.count()));
 
-                for (int i = 0; i < loopLocals.count(); i++)
-                {
-                    LocalBinding lb = (LocalBinding)loopLocals.nth(i);
-                    Type primt = lb.PrimitiveType;
-                    if (primt != null)
-                    {
-                        bool mismatch = false;
-                        Type pt = Compiler.MaybePrimitiveType((Expr)args.nth(i));
-                        if (pt == typeof(long))
-                        {
-                            if (!(pt == typeof(long) || pt == typeof(int) || pt == typeof(short) || pt == typeof(uint) || pt == typeof(ushort) || pt == typeof(ulong)
-                                || pt == typeof(char) || pt == typeof(byte) || pt == typeof(sbyte)))
-                                mismatch = true;
-                        }
-                        else if (pt == typeof(double))
-                        {
-                            if (!(pt == typeof(double) || pt == typeof(float)))
-                                mismatch = true;
-                        }
+                //for (int i = 0; i < loopLocals.count(); i++)
+                //{
+                //    LocalBinding lb = (LocalBinding)loopLocals.nth(i);
+                //    Type primt = lb.PrimitiveType;
+                //    if (primt != null)
+                //    {
+                //        bool mismatch = false;
+                //        Type pt = Compiler.MaybePrimitiveType((Expr)args.nth(i));
+                //        if (pt == typeof(long))
+                //        {
+                //            if (!(pt == typeof(long) || pt == typeof(int) || pt == typeof(short) || pt == typeof(uint) || pt == typeof(ushort) || pt == typeof(ulong)
+                //                || pt == typeof(char) || pt == typeof(byte) || pt == typeof(sbyte)))
+                //                mismatch = true;
+                //        }
+                //        else if (pt == typeof(double))
+                //        {
+                //            if (!(pt == typeof(double) || pt == typeof(float)))
+                //                mismatch = true;
+                //        }
 
-                        if (mismatch)
-                        {
-                            lb.RecurMistmatch = true;
-                            if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-                                RT.errPrintWriter().WriteLine("{0}:{1} recur arg for primitive local: {2} is not matching primitive, had: {3}, needed {4}",
-                                    "Source", "Line", lb.Name, pt != null ? pt.Name : "Object", primt.Name);
-                        }
-                    }
-                }
+                //        if (mismatch)
+                //        {
+                //            lb.RecurMistmatch = true;
+                //            if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                //                RT.errPrintWriter().WriteLine("{0}:{1} recur arg for primitive local: {2} is not matching primitive, had: {3}, needed {4}",
+                //                    "Source", "Line", lb.Name, pt != null ? pt.Name : "Object", primt.Name);
+                //        }
+                //    }
+                //}
                 return new RecurExpr(loopLocals, args);
             }
         }

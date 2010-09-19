@@ -121,32 +121,32 @@ namespace clojure.lang.CljCompiler.Ast
                                 throw new Exception("Can't let qualified name: " + sym);
 
                             Expr init = Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), bindings.nth(i + 1), sym.Name);
-                            if (isLoop)
-                            {
-                                if (recurMismatches != null && ((LocalBinding)recurMismatches.nth(i / 2)).RecurMistmatch)
-                                {
-                                    HostArg ha = new HostArg(HostArg.ParameterType.Standard,init,null);
-                                    List<HostArg> has = new List<HostArg>(1);
-                                    has.Add(ha);
-                                    init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "box", has);                                        
-                                    if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-                                        RT.errPrintWriter().WriteLine("Auto-boxing loop arg: " + sym);
-                                }
-                                else if (Compiler.MaybePrimitiveType(init) == typeof(int))
-                                {
-                                    HostArg ha = new HostArg(HostArg.ParameterType.Standard, init, null);
-                                    List<HostArg> has = new List<HostArg>(1);
-                                    has.Add(ha); 
-                                    init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "longCast", has);
-                                }
-                                else if (Compiler.MaybePrimitiveType(init) == typeof(float))
-                                {
-                                    HostArg ha = new HostArg(HostArg.ParameterType.Standard, init, null);
-                                    List<HostArg> has = new List<HostArg>(1);
-                                    has.Add(ha);
-                                    init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "doubleCast", has);
-                                }
-                            }
+                            //if (isLoop)
+                            //{
+                            //    if (recurMismatches != null && ((LocalBinding)recurMismatches.nth(i / 2)).RecurMistmatch)
+                            //    {
+                            //        HostArg ha = new HostArg(HostArg.ParameterType.Standard,init,null);
+                            //        List<HostArg> has = new List<HostArg>(1);
+                            //        has.Add(ha);
+                            //        init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "box", has);                                        
+                            //        if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                            //            RT.errPrintWriter().WriteLine("Auto-boxing loop arg: " + sym);
+                            //    }
+                            //    else if (Compiler.MaybePrimitiveType(init) == typeof(int))
+                            //    {
+                            //        HostArg ha = new HostArg(HostArg.ParameterType.Standard, init, null);
+                            //        List<HostArg> has = new List<HostArg>(1);
+                            //        has.Add(ha); 
+                            //        init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "longCast", has);
+                            //    }
+                            //    else if (Compiler.MaybePrimitiveType(init) == typeof(float))
+                            //    {
+                            //        HostArg ha = new HostArg(HostArg.ParameterType.Standard, init, null);
+                            //        List<HostArg> has = new List<HostArg>(1);
+                            //        has.Add(ha);
+                            //        init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "doubleCast", has);
+                            //    }
+                            //}
 
                             // Sequential enhancement of env (like Lisp let*)
                             LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), init, false);
