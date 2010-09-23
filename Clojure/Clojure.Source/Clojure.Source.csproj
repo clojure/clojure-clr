@@ -276,6 +276,9 @@
     <None Include="clojure\core_deftype.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="clojure\clr\shell.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="clojure\clr\io.clj">
