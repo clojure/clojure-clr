@@ -157,9 +157,17 @@ namespace clojure.lang
         #region Data
 
         /// <summary>
-        /// Values for this reference.
+        /// Values at points in time for this reference.
         /// </summary>
         TVal _tvals;
+
+        /// <summary>
+        /// Values at points in time for this reference.
+        /// </summary>
+        internal TVal TVals
+        {
+            get { return _tvals; }
+        }
 
         /// <summary>
         /// Number of faults for the reference.
@@ -340,7 +348,7 @@ namespace clojure.lang
                 //Console.WriteLine("Thr {0}, {1}: No-trans get => {2}", Thread.CurrentThread.ManagedThreadId,DebugStr(), ret);
                 return ret;
             }
-            return t.DoGet(this, _tvals);
+            return t.DoGet(this);
         }
 
         object currentVal()
@@ -487,7 +495,7 @@ namespace clojure.lang
         public object alter(IFn fn, ISeq args)
         {
             LockingTransaction t = LockingTransaction.GetEx();
-            return t.DoSet(this, fn.applyTo(RT.cons(t.DoGet(this, _tvals), args)));
+            return t.DoSet(this, fn.applyTo(RT.cons(t.DoGet(this), args)));
         }
 
         /// <summary>

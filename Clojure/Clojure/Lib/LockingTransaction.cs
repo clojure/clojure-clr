@@ -709,7 +709,7 @@ namespace clojure.lang
         /// <param name="r"></param>
         /// <param name="tvals"></param>
         /// <returns>The value.</returns>
-        internal object DoGet(Ref r, Ref.TVal tvals)
+        internal object DoGet(Ref r)
         {
             if (!_info.IsRunning)
                 throw _retryex;
@@ -720,16 +720,16 @@ namespace clojure.lang
             try
             {
                 r.EnterReadLock();
-                if (tvals == null)
+                if (r.TVals == null)
                     throw new InvalidOperationException(r.ToString() + " is not bound.");
-                Ref.TVal ver = tvals;
+                Ref.TVal ver = r.TVals;
                 do
                 {
                     if (ver.Point <= _readPoint)
                     {
                         return ver.Val;
                     }
-                } while ((ver = ver.Prior) != tvals);
+                } while ((ver = ver.Prior) != r.TVals);
             }
             finally
             {
