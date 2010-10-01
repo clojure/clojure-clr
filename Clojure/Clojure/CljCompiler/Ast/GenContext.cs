@@ -24,50 +24,9 @@ using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-
-    #region Enums
-
-    //public enum CompilerMode { Immediate, File };
-
-    /// <summary>
-    /// Indicates if the assembly is for dynamic (internal) use, or will be saved.
-    /// </summary>
-    public enum AssemblyMode { 
-        /// <summary>
-        /// The assembly is for dynamic (internal) use only.
-        /// </summary>
-        Dynamic, 
-
-        /// <summary>
-        /// The assembly will be saved.
-        /// </summary>
-        Save 
-    };
-
-    /// <summary>
-    /// Indicates whether we need full class generation for the current function
-    /// </summary>
-    public enum FnMode
-    {
-        // The current ObjExpr is not generating its own class
-        Light,
-
-        // The current ObjExpr is generating its own class
-        Full
-    };
-
-    #endregion
-
     public class GenContext
     {
         #region Data
-
-        AssemblyMode _assyMode;
-
-        public AssemblyMode AssyMode
-        {
-            get { return _assyMode; }
-        }
 
         readonly AssemblyGen _assyGen;
 
@@ -93,47 +52,21 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _dynInitHelper; }
         } 
 
-        ObjExpr _objExpr = null;
-        internal ObjExpr ObjExpr
-        {
-            get { return _objExpr; }
-        }
-
-        FnMode _fnMode;
-
-        public FnMode FnCompileMode
-        {
-            get { return _fnMode; }
-            set { _fnMode = _assyMode == AssemblyMode.Save ? FnMode.Full : value; }
-        }
-
         #endregion
 
         #region C-tors & factory methods
 
-        public GenContext(string assyName, AssemblyMode assyMode, FnMode fnMode )
-            : this(assyName, ".dll", null, assyMode, fnMode)
+        public GenContext(string assyName, bool createDynInitHelper)
+            : this(assyName, ".dll", null, createDynInitHelper)
         {
         }
 
-        public GenContext(string assyName, string extension, string directory, AssemblyMode assyMode, FnMode fnMode)
+        public GenContext(string assyName, string extension, string directory, bool createDynInitHelper)
         {
             AssemblyName aname = new AssemblyName(assyName);
             _assyGen = new AssemblyGen(aname, directory, extension, true);
-            _assyMode = assyMode;
-            FnCompileMode = fnMode;
-            if ( assyMode ==  AssemblyMode.Save )
+            if ( createDynInitHelper )
                 _dynInitHelper = new DynInitHelper(_assyGen, "__InternalDynamicExpressionInits");
-        }
-
-        internal GenContext CreateWithNewType(ObjExpr objExpr)
-        {
-            GenContext newContext = Clone();
-            newContext._objExpr = objExpr;
-
-            newContext.FnCompileMode = FnCompileMode == FnMode.Full ? FnMode.Full : objExpr.CompileMode();
-
-            return newContext;
         }
 
         internal GenContext WithNewDynInitHelper(string dihClassName)

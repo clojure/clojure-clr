@@ -44,19 +44,31 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object form)
             {
-                return new ThrowExpr(Compiler.GenerateAST(RT.second(form), pcon.SetRecur(false).SetAssign(false)));
+                if (pcon.Rhc == RHC.Eval)
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)), "throw__" + RT.nextID());
+
+                return new ThrowExpr(Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), RT.second(form)));
             }
+        }
+
+        #endregion
+
+        #region eval
+
+        public override object Eval()
+        {
+            throw new Exception("Can't eval throw");
         }
 
         #endregion
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            Expression exc = _excExpr.GenDlr(context);
+            Expression exc = _excExpr.GenCode(RHC.Expression, objx, context);
             Expression exc2 = Expression.Convert(exc, typeof(Exception));
 
             return Expression.Throw(exc2,typeof(object));

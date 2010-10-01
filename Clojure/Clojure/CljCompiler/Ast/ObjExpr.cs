@@ -30,22 +30,93 @@ using System.Runtime.CompilerServices;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    abstract class ObjExpr : Expr
-    {
+    #region Enums
 
+    /// <summary>
+    /// Indicates whether we need full class generation for the current function
+    /// </summary>
+    public enum FnMode
+    {
+        // The current ObjExpr is not generating its own class
+        Light,
+
+        // The current ObjExpr is generating its own class
+        Full
+    };
+
+    #endregion
+
+    public class ObjExpr : Expr
+    {
         #region Data
 
         const string CONST_PREFIX = "const__";
         const string STATIC_CTOR_HELPER_NAME = "__static_ctor_helper";
 
         protected string _name;
+        private string _internalName;
+        protected string _thisName;
+        protected readonly object _tag;
+        protected IPersistentMap _closes = PersistentHashMap.EMPTY;         // localbinding -> itself
+        protected IPersistentVector _closesExprs = PersistentVector.EMPTY;  // localbinding exprs
+        protected IPersistentSet _volatiles = PersistentHashSet.EMPTY;      // symbols
+        protected IPersistentMap _fields = null;                            // symbol -> lb
+        private IPersistentMap _keywords = PersistentHashMap.EMPTY;         // Keyword -> KeywordExpr
+        private IPersistentMap _vars = PersistentHashMap.EMPTY;
+        Type _compiledType;
+        // int line;
+        private PersistentVector _constants;
+        protected int _constantsID;
+        protected int _altCtorDrops = 0;
+
+        private IPersistentVector _keywordCallsites;
+        private IPersistentVector _protocolCallsites;
+        private IPersistentVector _varCallsites;
+
+        protected bool _onceOnly = false;
+
+        protected Object _src;
+        protected IPersistentMap _classMeta;
+        private bool _isStatic;
+
+        protected Type _baseType = null;
+
+        
+        protected TypeBuilder _typeBuilder = null;
+        protected ParameterExpression _thisParam = null;
+
+        private FnMode _fnMode = FnMode.Full;
+
+        public FnMode FnMode
+        {
+            get { return _fnMode; }
+            set { _fnMode = value; }
+        }
+
+        protected FieldBuilder _metaField;
+
+        protected List<FieldBuilder> _closedOverFields;
+        private Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;        
+        protected List<FieldBuilder> _keywordLookupSiteFields;
+        protected List<FieldBuilder> _thunkFields;
+        protected List<FieldBuilder> _cachedTypeFields;
+        protected List<FieldBuilder> _cachedProtoFnFields;
+        protected List<FieldBuilder> _cachedProtoImplFields;
+
+
+        protected IPersistentCollection _methods;
+        protected ConstructorInfo _ctorInfo;
+        protected ConstructorInfo _nonmetaCtorInfo;
+
+        #endregion
+
+        #region Data accessors
+
         public string Name
         {
             get { return _name; }
             set { _name = value; }
         }
-
-        private string _internalName;
 
         internal string InternalName
         {
@@ -53,25 +124,29 @@ namespace clojure.lang.CljCompiler.Ast
             set { _internalName = value; }
         }
 
-        protected string _thisName;
         public string ThisName
         {
             get { return _thisName; }
             //set { _thisName = value; }
         }
 
-
-        protected readonly object _tag;
-
-        protected IPersistentMap _closes = PersistentHashMap.EMPTY;          // localbinding -> itself
-
         public IPersistentMap Closes
         {
             get { return _closes; }
             set { _closes = value; }
         }
-        protected IPersistentVector _closesExprs = PersistentVector.EMPTY;
-        protected IPersistentSet _volatiles = PersistentHashSet.EMPTY;
+
+        internal IPersistentMap Keywords
+        {
+            get { return _keywords; }
+            set { _keywords = value; }
+        }
+
+        internal IPersistentMap Vars
+        {
+            get { return _vars; }
+            set { _vars = value; }
+        }
 
         internal bool IsVolatile(LocalBinding lb)
         {
@@ -89,44 +164,51 @@ namespace clojure.lang.CljCompiler.Ast
                 lb.IsByRef;
         }
 
-        [NonSerialized]
-        protected Type _superType;
+        internal PersistentVector Constants
+        {
+            get { return _constants; }
+            set { _constants = value; }
+        }
+           
+        internal IPersistentVector KeywordCallsites
+        {
+            get { return _keywordCallsites; }
+            set { _keywordCallsites = value; }
+        }
 
-        protected Type _baseType = null;
+        internal IPersistentVector ProtocolCallsites
+        {
+            get { return _protocolCallsites; }
+            set { _protocolCallsites = value; }
+        }
+
+        internal IPersistentVector VarCallsites
+        {
+            get { return _varCallsites; }
+            set { _varCallsites = value; }
+        }
+
+        protected bool IsStatic
+        {
+            get { return _isStatic; }
+            set { _isStatic = value; }
+        }
+
         public Type BaseType
         {
             get { return _baseType; }
         }
-        
-        protected TypeBuilder _typeBuilder = null;
+
         public TypeBuilder TypeBuilder
         {
             get { return _typeBuilder; }
         }
 
-        private Type _objType;
-
-        internal Type ObjType
-        {
-            get { return _objType; }
-            set { _objType = value; }
-        }
-
-        protected ParameterExpression _thisParam = null;
         public ParameterExpression ThisParam
         {
             get { return _thisParam; }
             set { _thisParam = value; }
         }
-
-        protected FieldBuilder _metaField;
-
-        protected List<FieldBuilder> _closedOverFields;
-        protected Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;
-
-        
-        protected List<FieldBuilder> _keywordLookupSiteFields;
-        protected List<FieldBuilder> _thunkFields;
 
         internal FieldBuilder ThunkField(int i)
         {
@@ -137,11 +219,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return _keywordLookupSiteFields[i];
         }
-
-
-        protected List<FieldBuilder> _cachedTypeFields;
-        protected List<FieldBuilder> _cachedProtoFnFields;
-        protected List<FieldBuilder> _cachedProtoImplFields;
 
         internal FieldBuilder CachedTypeField(int i)
         {
@@ -158,31 +235,24 @@ namespace clojure.lang.CljCompiler.Ast
             return _cachedProtoImplFields[i];
         }
 
-        protected IPersistentCollection _methods;
-
-        protected IPersistentMap _fields = null;
-
         protected bool IsDefType { get { return _fields != null; } }
 
-        protected IPersistentMap _keywords = PersistentHashMap.EMPTY;         // Keyword -> KeywordExpr
-        protected IPersistentMap _vars = PersistentHashMap.EMPTY;
-        protected PersistentVector _constants;
-        protected int _constantsID;
+        protected Type CompiledType 
+        { 
+            get 
+            {
+                if (_compiledType == null)
+                    // can't do much
+                    // Java will get the loader and define the clas from the stored bytecodes
+                    // Not sure what the equivalent would be.
+                    throw new Exception("ObjExpr type not compiled");
+                return _compiledType;
+            }
+            set { _compiledType = value; }
+        }
 
-        protected int _altCtorDrops = 0;
+        protected bool OnceOnly { get { return _onceOnly; } }
 
-        protected IPersistentVector _keywordCallsites;
-        protected IPersistentVector _protocolCallsites;
-        protected IPersistentVector _varCallsites;
-
-        protected ConstructorInfo _ctorInfo;
-        protected ConstructorInfo _nonmetaCtorInfo;
-
-        protected IPersistentVector _interfaces = PersistentVector.EMPTY;
-
-        protected Object _src;
-
-        protected IPersistentMap _classMeta;
 
         #endregion
 
@@ -197,142 +267,61 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public virtual bool HasClrType
         {
             get { return true; }
         }
 
-        public override Type ClrType
+        public virtual Type ClrType
         {
-            get { return _objType ?? (_tag != null ? HostExpr.TagToType(_tag) : typeof(IFn)); }
+            get { return _compiledType ?? (_tag != null ? HostExpr.TagToType(_tag) : typeof(IFn)); }
         }
 
         #endregion
 
-        #region Code generation
+        #region Misc support
 
-        public abstract FnMode CompileMode();
-            // You cannot allow this to change during parsing.
-            // That's why the following does not work.
-            //return _protocolCallsites != null && _protocolCallsites.count() > 0
-            //    ? FnMode.Full
-            //    : FnMode.Light;
-
-
-        public override Expression GenDlr(GenContext context)
+        public static string TrimGenID(string name)
         {
-            //switch (context.Mode)
-            //{
-            //    case CompilerMode.Immediate:
-            //        if (_protocolCallsites.count() > 0)
-            //        {
-            //            context = context.ChangeMode(CompilerMode.File);
-            //            return GenDlrForFile(context,true);
-            //        }
-            //        return GenDlrImmediate(context);
-            //    case CompilerMode.File:
-            //        return GenDlrForFile(context,true);
-            //    default:
-            //        throw Util.UnreachableCode();
-            //}
-            switch (context.FnCompileMode)
-            {
-                case FnMode.Light:
-                    return GenDlrImmediate(context);
-                case FnMode.Full:
-                    return GenDlrForFile(context, false);      // trying it this way now
-                default:
-                    throw Util.UnreachableCode();
-            }
+            int i = name.LastIndexOf("__");
+            return i == -1 ? name : name.Substring(0, i);
         }
 
-        /*
-        protected virtual Type GetSuperType()
+        internal Type[] CtorTypes()
         {
-            return Type.GetType(_superName);
-        }
-        */
+            int i = IsDefType ? 0 : 1;
 
-        #endregion
+            Type[] ret = new Type[_closes.count() + i];
 
-        #region Immediate-mode compilation
+            if (!IsDefType)
+                ret[0] = typeof(IPersistentMap);
 
-        protected abstract Expression GenDlrImmediate(GenContext context);
-
-        #endregion
-
-        #region Class generation
-
-        //protected Type GenerateClass()
-        //{
-        //    GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
-
-        //    //if (_protocolCallsites.count() > 0)
-        //    //    context = context.ChangeMode(CompilerMode.File);
-
-        //    return GenerateClass(context);
-        //}
-
-        protected Type GenerateClass(GenContext context)
-        {
-            //if (context.Mode == CompilerMode.Immediate)
-            //    return GenerateClassForImmediate(context);
-            //else
-            //    return GenerateClassForFile(context);
-
-            if (context.FnCompileMode == FnMode.Light)
-                return GenerateClassForImmediate(context);
-            else
-                return GenerateClassForFile(context);
-        }
-
-        protected abstract Type GenerateClassForImmediate(GenContext context);
-        protected abstract Type GenerateClassForFile(GenContext context);
-
-
-
-        #endregion
-
-        #region File-mode compilation
-
-        protected Expression GenDlrForFile(GenContext context, bool convertToIFn)
-        {
-            if (IsDefType)
-                return Expression.Constant(null);
-
-            List<Expression> args = new List<Expression>(_closes.count()+1);
-            args.Add(Expression.Constant(null,typeof(IPersistentMap))); // meta
-            for (ISeq s = RT.keys(_closes); s != null; s = s.next())
+            for (ISeq s = RT.keys(_closes); s != null; s = s.next(), i++)
             {
                 LocalBinding lb = (LocalBinding)s.first();
-                if (lb.PrimitiveType != null)
-                    args.Add(context.ObjExpr.GenUnboxedLocal(context, lb));
-                else
-                    args.Add(context.ObjExpr.GenLocal(context, lb));
+                ret[i] = lb.PrimitiveType ?? typeof(object);
             }
-
-            Expression newExpr = Expression.New(_ctorInfo, args);
-
-            if ( convertToIFn )
-                newExpr = Expression.Convert(newExpr,typeof(IFn));
-
-            return newExpr;
+            return ret;
         }
 
-        static int _saveId = 0;
+        #endregion
 
-        protected Type EnsureTypeBuilt(GenContext context)
+        #region Compiling (class generation)
+
+        //static int _saveId = 0;
+
+        public Type Compile(Type superType, IPersistentVector interfaces, bool oneTimeUse, GenContext context)
         {
-            if (_objType != null)
-                return _objType;
+            if (_compiledType != null)
+                return _compiledType;
 
-            if ( context.AssyMode == AssemblyMode.Dynamic )
-                // TODO: only create a new assembly when we know there is a name conflict
-                context = new GenContext("new" + (++_saveId).ToString(), AssemblyMode.Dynamic,FnMode.Full).WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString()).CreateWithNewType(context.ObjExpr);
+            //if ( context.AssyMode == AssemblyMode.Dynamic )
+            //    // TODO: only create a new assembly when we know there is a name conflict
+            //    context = new GenContext("new" + (++_saveId).ToString(), AssemblyMode.Dynamic,FnMode.Full).WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString()).CreateWithNewType(context.ObjExpr);
 
-
-            TypeBuilder baseTB = GenerateFnBaseClass(context);
+            TypeBuilder baseTB = GenerateFnBaseClass(superType,context);
             _baseType = baseTB.CreateType();
+
             // patch this param type
 
             try
@@ -346,13 +335,14 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.COMPILE_STUB_CLASS, _baseType));
                 }
 
-                GenerateFnClass(context);
-                _objType = _typeBuilder.CreateType();
+                GenerateFnClass(interfaces, context);
+                _compiledType = _typeBuilder.CreateType();
 
                 if (context.DynInitHelper != null)
                     context.DynInitHelper.FinalizeType();
-                _ctorInfo = _objType.GetConstructors()[0];  // TODO: When we have more than one c-tor, we'll have to fix this.
-                return _objType;
+
+                _ctorInfo = _compiledType.GetConstructors()[0];  // TODO: When we have more than one c-tor, we'll have to fix this.
+                return _compiledType;
             }
             finally
             {
@@ -360,24 +350,21 @@ namespace clojure.lang.CljCompiler.Ast
                     Var.popThreadBindings();
             }
         }
-
         #endregion
 
         #region  Base class construction
 
-        private TypeBuilder GenerateFnBaseClass(GenContext context)
+        private TypeBuilder GenerateFnBaseClass(Type superType, GenContext context)
         {
-            string baseClassName = _internalName + "_base";
+            string baseClassName = _internalName + "__base__" + RT.nextID();
 
             Type[] interfaces = new Type[0];
 
-            if ( _keywordCallsites.count() > 0 )
+            if (_keywordCallsites.count() > 0)
                 interfaces = new Type[] { typeof(ILookupHost) };
 
-            TypeBuilder baseTB = context.ModuleBuilder.DefineType(baseClassName, TypeAttributes.Public | TypeAttributes.Abstract, _superType,interfaces);
-
+            TypeBuilder baseTB = context.ModuleBuilder.DefineType(baseClassName, TypeAttributes.Public | TypeAttributes.Abstract, superType, interfaces);
             MarkAsSerializable(baseTB);
-
             GenInterface.SetCustomAttributes(baseTB, _classMeta);
 
             GenerateConstantFields(baseTB);
@@ -391,7 +378,7 @@ namespace clojure.lang.CljCompiler.Ast
             GenerateSwapThunk(baseTB);
             GenerateProtocolCallsites(baseTB);
 
-            GenerateBaseClassConstructor(baseTB);
+            GenerateBaseClassConstructor(superType,baseTB);
 
             return baseTB;
         }
@@ -435,7 +422,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             return typeof(object);
         }
-        
+
         #endregion
 
         #region Generating closed-over fields
@@ -461,8 +448,8 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Type type = lb.PrimitiveType ?? typeof(object);
 
-                FieldBuilder fb = markVolatile 
-                    ? baseTB.DefineField(lb.Name,type, new Type[] { typeof(IsVolatile) }, Type.EmptyTypes, attributes)
+                FieldBuilder fb = markVolatile
+                    ? baseTB.DefineField(lb.Name, type, new Type[] { typeof(IsVolatile) }, Type.EmptyTypes, attributes)
                     : baseTB.DefineField(lb.Name, type, attributes);
 
                 GenInterface.SetCustomAttributes(fb, GenInterface.ExtractAttributes(RT.meta(lb.Symbol)));
@@ -542,15 +529,15 @@ namespace clojure.lang.CljCompiler.Ast
 
             MethodBuilder mbs = tb.DefineMethod("swapThunk_static", MethodAttributes.Public | MethodAttributes.Static, typeof(void), new Type[] { typeof(int), typeof(ILookupThunk) });
 
-            ParameterExpression pi = Expression.Parameter(typeof(int),"i");
-            ParameterExpression pt = Expression.Parameter(typeof(ILookupThunk),"t");
+            ParameterExpression pi = Expression.Parameter(typeof(int), "i");
+            ParameterExpression pt = Expression.Parameter(typeof(ILookupThunk), "t");
 
             List<SwitchCase> cases = new List<SwitchCase>(_keywordCallsites.count());
-            for ( int i=0; i<_keywordCallsites.count(); i++ )
-                cases.Add( 
+            for (int i = 0; i < _keywordCallsites.count(); i++)
+                cases.Add(
                     Expression.SwitchCase(
                         Expression.Block(
-                            Expression.Assign(Expression.Field(null,_thunkFields[i]),pt),
+                            Expression.Assign(Expression.Field(null, _thunkFields[i]), pt),
                             Expression.Default(typeof(void))),
                         Expression.Constant(i)));
 
@@ -558,7 +545,7 @@ namespace clojure.lang.CljCompiler.Ast
             LambdaExpression lambda = Expression.Lambda(body, pi, pt);
             lambda.CompileToMethod(mbs);
 
-            MethodBuilder mb = tb.DefineMethod("swapThunk", MethodAttributes.Public|MethodAttributes.HideBySig|MethodAttributes.Virtual, typeof(void), new Type[] { typeof(int), typeof(ILookupThunk) });
+            MethodBuilder mb = tb.DefineMethod("swapThunk", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual, typeof(void), new Type[] { typeof(int), typeof(ILookupThunk) });
             ILGen gen = new ILGen(mb.GetILGenerator());
             gen.EmitLoadArg(0);
             gen.EmitLoadArg(1);
@@ -608,9 +595,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Generating base class c-tor
 
-        private void GenerateBaseClassConstructor(TypeBuilder baseTB)
+        private void GenerateBaseClassConstructor(Type superType, TypeBuilder baseTB)
         {
-            ConstructorInfo ci = _superType.GetConstructor(Type.EmptyTypes);
+            ConstructorInfo ci = superType.GetConstructor(Type.EmptyTypes);
 
             if (ci == null)
                 return;
@@ -650,11 +637,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Fn class construction
 
-        private void GenerateFnClass(GenContext context)
+        private void GenerateFnClass(IPersistentVector interfaces, GenContext context)
         {
-            _typeBuilder = context.AssemblyGen.DefinePublicType(_internalName, _baseType, true);
-            for (int i =0; i<_interfaces.count(); i++ )
-                _typeBuilder.AddInterfaceImplementation((Type)_interfaces.nth(i));
+            string publicTypeName = IsDefType ? _internalName : _internalName + "__" + RT.nextID();
+
+            _typeBuilder = context.AssemblyGen.DefinePublicType(publicTypeName, _baseType, true);
+            for (int i = 0; i < interfaces.count(); i++)
+                _typeBuilder.AddInterfaceImplementation((Type)interfaces.nth(i));
 
             MarkAsSerializable(_typeBuilder);
 
@@ -675,8 +664,9 @@ namespace clojure.lang.CljCompiler.Ast
             // The incoming context holds info on the containing function.
             // That is the one that holds the closed-over variable values.
 
-            GenContext newContext = CreateContext(context, _typeBuilder, _baseType);
-            GenerateMethods(newContext);
+            //GenContext newContext = CreateContext(context, _typeBuilder, _baseType);
+            //GenerateMethods(newContext);
+            GenerateMethods(context);
         }
 
 
@@ -909,7 +899,7 @@ namespace clojure.lang.CljCompiler.Ast
                         parm,
                         Expression.New(Compiler.Ctor_KeywordLookupSite_2, new Expression[] { nArg, kArg }));
                 Expression siteAssign = Expression.Assign(Expression.Field(null, _keywordLookupSiteFields[i]), parm);
-                Expression thunkAssign = Expression.Assign(Expression.Field(null, _thunkFields[i]), Expression.Convert(parm,typeof(ILookupThunk)));
+                Expression thunkAssign = Expression.Assign(Expression.Field(null, _thunkFields[i]), Expression.Convert(parm, typeof(ILookupThunk)));
                 inits.Add(parmAssign);
                 inits.Add(siteAssign);
                 inits.Add(thunkAssign);
@@ -918,7 +908,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             Expression allInits = Expression.Block(new ParameterExpression[] { parm }, inits);
             LambdaExpression lambda = Expression.Lambda(allInits);
-            MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_kwcallsites", MethodAttributes.Private | MethodAttributes.Static,typeof(void),Type.EmptyTypes);
+            MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_kwcallsites", MethodAttributes.Private | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
             lambda.CompileToMethod(methodBuilder, true);
             return methodBuilder;
 
@@ -928,7 +918,7 @@ namespace clojure.lang.CljCompiler.Ast
         private void GenerateMetaFunctions(TypeBuilder fnTB)
         {
             // IPersistentMap meta()
-            MethodBuilder metaMB = fnTB.DefineMethod("meta", MethodAttributes.Public|MethodAttributes.Virtual|MethodAttributes.ReuseSlot,typeof(IPersistentMap),Type.EmptyTypes);
+            MethodBuilder metaMB = fnTB.DefineMethod("meta", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.ReuseSlot, typeof(IPersistentMap), Type.EmptyTypes);
             ILGen gen = new ILGen(metaMB.GetILGenerator());
             gen.EmitLoadArg(0);
             gen.EmitFieldGet(_metaField);
@@ -958,7 +948,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, CtorTypes());
             ILGen gen = new ILGen(cb.GetILGenerator());
- 
+
             //Call base constructor
             ConstructorInfo baseCtorInfo = baseType.GetConstructor(Type.EmptyTypes);
             gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
@@ -1036,25 +1026,6 @@ namespace clojure.lang.CljCompiler.Ast
             return cb;
         }
 
-
-        internal Type[] CtorTypes()
-        {
-
-            int i = IsDefType ? 0 : 1;
-
-            Type[] ret = new Type[_closes.count()+i];
-
-            if (!IsDefType)
-                ret[0] = typeof(IPersistentMap);
-
-            for (ISeq s = RT.keys(_closes); s != null; s = s.next(), i++)
-            {
-                LocalBinding lb = (LocalBinding)s.first();
-                ret[i] = lb.PrimitiveType ?? typeof(object);
-            }
-            return ret;
-        }
-
         #endregion
 
         #region other
@@ -1064,18 +1035,59 @@ namespace clojure.lang.CljCompiler.Ast
             tb.SetCustomAttribute(new CustomAttributeBuilder(Compiler.Ctor_Serializable, new object[0]));
         }
 
-
-        protected abstract void GenerateMethods(GenContext context);
-
-        protected GenContext CreateContext(GenContext incomingContext, TypeBuilder fnTB, Type baseType)
+        protected virtual void GenerateMethods(GenContext context)
         {
-            return incomingContext.CreateWithNewType(this);
         }
 
         #endregion
 
         #endregion
 
+        #region Eval
+
+        public virtual object Eval()
+        {
+            if (IsDefType)
+                return null;
+            return Activator.CreateInstance(CompiledType);
+        }
+
+        #endregion
+
+        #region Code generation
+
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context, bool convertToIFn)
+        {
+            Expression newExpr = GenCode(rhc,objx,context);
+            if ( convertToIFn )
+                newExpr = Expression.Convert(newExpr,typeof(IFn));
+
+            return newExpr;
+        }
+
+        public virtual Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        {
+            if (IsDefType)
+                return Expression.Constant(null);
+
+            List<Expression> args = new List<Expression>(_closes.count()+1);
+            args.Add(Expression.Constant(null,typeof(IPersistentMap))); // meta
+            for (ISeq s = RT.keys(_closes); s != null; s = s.next())
+            {
+                LocalBinding lb = (LocalBinding)s.first();
+                if (lb.PrimitiveType != null)
+                    args.Add(objx.GenUnboxedLocal(context, lb));
+                else
+                    args.Add(objx.GenLocal(context, lb));
+            }
+
+            Expression newExpr = Expression.New(_ctorInfo, args);
+
+            return newExpr;
+        }
+
+        #endregion
+ 
         #region Code generation support
 
         internal Expression GenAssignLocal(GenContext context, LocalBinding lb, Expr val)
@@ -1085,14 +1097,14 @@ namespace clojure.lang.CljCompiler.Ast
 
             FieldBuilder fb;
             if ( _closedOverFieldsMap.TryGetValue(lb,out fb) )
-                return Expression.Assign(Expression.Field(_thisParam,_closedOverFieldsMap[lb]), val.GenDlr(context));
-            return Expression.Assign(lb.ParamExpression, val.GenDlr(context));
+                return Expression.Assign(Expression.Field(_thisParam,_closedOverFieldsMap[lb]), val.GenCode(RHC.Expression,this,context));
+
+            return Expression.Assign(lb.ParamExpression, val.GenCode(RHC.Expression,this,context));
         }
 
         internal Expression GenLocal(GenContext context, LocalBinding lb)
         {
-            //if (context.Mode == CompilerMode.File && _closes.containsKey(lb))
-            if ( context.FnCompileMode == FnMode.Full && _closes.containsKey(lb))
+            if (_closes.containsKey(lb) && _fnMode == FnMode.Full )
             {
                 Expression expr = Expression.Field(_thisParam, lb.Name);
                 Type primtType = lb.PrimitiveType;
@@ -1109,8 +1121,7 @@ namespace clojure.lang.CljCompiler.Ast
         internal Expression GenUnboxedLocal(GenContext context, LocalBinding lb)
         {
             Type primType = lb.PrimitiveType;
-            //if (context.Mode == CompilerMode.File && _closes.containsKey(lb))
-            if (context.FnCompileMode == FnMode.Full && _closes.containsKey(lb))
+            if (_closes.containsKey(lb) && _fnMode == FnMode.Full)
                 return Expression.Convert(Expression.Field(_thisParam, lb.Name), primType);
             else
                 return lb.ParamExpression;
@@ -1119,24 +1130,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Expression GenConstant(GenContext context, int id, object val)
         {
-            //switch (context.Mode)
-            //{
-            //    case CompilerMode.Immediate:
-            //        return Expression.Constant(val);
-            //    case CompilerMode.File:
-            //        return Expression.Field(null, _baseType, ConstantName(id));
-            //    default:
-            //        throw Util.UnreachableCode();
-            //}
-            switch ( context.FnCompileMode )
-            {
-                case FnMode.Light:
-                    return Expression.Constant(val);
-                case FnMode.Full:
-                    return Expression.Field(null, _baseType, ConstantName(id));
-                default:
-                    throw Util.UnreachableCode();
-            }
+            if (_fnMode == FnMode.Full)
+                return Expression.Field(null, _baseType, ConstantName(id));
+
+            return Expression.Constant(val);
         }
 
         internal Expression GenVar(GenContext context, Var var)
@@ -1154,16 +1151,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Expression GenLetFnInits(GenContext context, ParameterExpression parm, FnExpr fn, IPersistentSet leFnLocals)
         {
+            // TODO: Implement this!!!!!!!!!!!!!!!!
             // fn is the enclosing IFn, not this.
             throw new NotImplementedException();
         }
 
-
-        public static string TrimGenID(string name)
-        {
-            int i = name.LastIndexOf("__");
-            return i == -1 ? name : name.Substring(0, i);
-        }
 
         #endregion
     }

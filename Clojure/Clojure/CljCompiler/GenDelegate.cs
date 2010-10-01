@@ -30,7 +30,7 @@ namespace clojure.lang
         #region Data
 
         //static GenContext _context = new GenContext("delegates", CompilerMode.Immediate);
-        static GenContext _context = new GenContext("delegates", AssemblyMode.Dynamic, FnMode.Light);
+        static GenContext _context = new GenContext("delegates", false);
 
         #endregion
 
@@ -41,7 +41,7 @@ namespace clojure.lang
         {
             _context.SaveAssembly();
             //_context = new GenContext("delegates", CompilerMode.Immediate);
-            _context = new GenContext("delegates", AssemblyMode.Dynamic,FnMode.Light);
+            _context = new GenContext("delegates", false);
         }
 
         #endregion

@@ -43,20 +43,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-
-        #region Type mangling
-
-
-        #endregion
-
         #region Parsing
-        
         
         public sealed class DefTypeParser : IParser
         {
-            public Expr Parse(object frm, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frm)
             {
-
                 // frm is: (deftype* tagname classname [fields] :implements [interfaces] :tag tagname methods*)
 
                 ISeq rform = (ISeq)frm;
@@ -79,14 +71,13 @@ namespace clojure.lang.CljCompiler.Ast
                              (Symbol)RT.get(opts, RT.TAG_KEY), rform, frm);
 
                 return ret;
-
             }
         }
 
 
         public sealed class ReifyParser : IParser
         {
-            public Expr Parse(object frm, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frm)
             {
                 // frm is:  (reify this-name? [interfaces] (method-name [args] body)* )
                 ISeq form = (ISeq)frm;
@@ -103,10 +94,9 @@ namespace clojure.lang.CljCompiler.Ast
 
                 rform = RT.next(rform);
 
-                //return Build(interfaces, null, null, className, className, null, rform);
                 ObjExpr ret = Build(interfaces, null, null, className, Symbol.intern(className), null, rform,frm);
                 if (frm is IObj && ((IObj)frm).meta() != null)
-                    return new MetaExpr(ret, (MapExpr)MapExpr.Parse(((IObj)frm).meta()));
+                    return new MetaExpr(ret, (MapExpr)MapExpr.Parse(pcon.EvEx(),((IObj)frm).meta()));
                 else
                     return ret;
             }
@@ -127,7 +117,7 @@ namespace clojure.lang.CljCompiler.Ast
             ret._name = className.ToString();
             ret._classMeta = GenInterface.ExtractAttributes(RT.meta(className));
             ret.InternalName = ret.Name;  // ret.Name.Replace('.', '/');
-            ret.ObjType = null; 
+            // Java: ret.objtype = Type.getObjectType(ret.internalName);
 
             if (thisSym != null)
                 ret._thisName = thisSym.Name;
@@ -169,7 +159,6 @@ namespace clojure.lang.CljCompiler.Ast
             GatherMethods(superClass, RT.seq(interfaces), out overrideables);
 
             ret._methodMap = overrideables;
-            ret._interfaces = interfaces;
 
             //string[] inames = InterfaceNames(interfaces);
 
@@ -179,9 +168,10 @@ namespace clojure.lang.CljCompiler.Ast
             //Symbol thisTag = Symbol.intern(null, tagName);
 
             // Needs its own GenContext so it has its own DynInitHelper
-            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
+            // Can't reuse Compiler.EvalContext if it is a DefType because we have to use the given name and will get a conflict on redefinition
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? (ret.IsDefType ? new GenContext("deftype" + RT.nextID().ToString(),".dll",".",true) : Compiler.EvalContext);
             GenContext genC = context.WithNewDynInitHelper(ret.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
-            genC.FnCompileMode = FnMode.Full;
+            //genC.FnCompileMode = FnMode.Full;
 
             try
             {
@@ -218,13 +208,13 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 ret._methods = methods;
-                ret._keywords = (IPersistentMap)Compiler.KEYWORDS.deref();
-                ret._vars = (IPersistentMap)Compiler.VARS.deref();
-                ret._constants = (PersistentVector)Compiler.CONSTANTS.deref();
+                ret.Keywords = (IPersistentMap)Compiler.KEYWORDS.deref();
+                ret.Vars = (IPersistentMap)Compiler.VARS.deref();
+                ret.Constants = (PersistentVector)Compiler.CONSTANTS.deref();
                 ret._constantsID = RT.nextID();
-                ret._keywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
-                ret._protocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
-                ret._varCallsites = (IPersistentVector)Compiler.VAR_CALLSITES.deref();
+                ret.KeywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
+                ret.ProtocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
+                ret.VarCallsites = (IPersistentVector)Compiler.VAR_CALLSITES.deref();
             }
             finally
             {
@@ -233,29 +223,8 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.popThreadBindings();
             }
 
-            // TODO: This is silly.  We have the superClass in hand.  Might as well stash it.
-            //ret._superName = SlashName(superClass);
-            //ret._superType = superClass;
-            ret._superType = stub;
-            // asdf: IF this works, I'll be totally amazed.
-
-            //ret.Compile(SlashName(superClass),inames,false);
-            //ret.getCompiledClass();
-            ret.ObjType = ret.GenerateClass(genC);
-            Compiler.RegisterDuplicateType(ret.ObjType);
-
-            //// THis is done in an earlier loop in the JVM code.
-            //// We have to do it here so that we have ret._objType defined.
-
-            //if (fieldSyms != null)
-            //{
-            //    for (int i = 0; i < fieldSyms.count(); i++)
-            //    {
-            //        Symbol sym = (Symbol)fieldSyms.nth(i);
-            //        if (!sym.Name.StartsWith("__"))
-            //            CompileLookupThunk(ret, sym);
-            //    }
-            //}
+            ret.Compile(stub, interfaces, false, genC);
+            Compiler.RegisterDuplicateType(ret.CompiledType);
 
             return ret;
         }
@@ -270,18 +239,18 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         /***
- * Current host interop uses reflection, which requires pre-existing classes
- * Work around this by:
- * Generate a stub class that has the same interfaces and fields as the class we are generating.
- * Use it as a type hint for this, and bind the simple name of the class to this stub (in resolve etc)
- * Unmunge the name (using a magic prefix) on any code gen for classes
- */
+         * Current host interop uses reflection, which requires pre-existing classes
+         * Work around this by:
+         * Generate a stub class that has the same interfaces and fields as the class we are generating.
+         * Use it as a type hint for this, and bind the simple name of the class to this stub (in resolve etc)
+         * Unmunge the name (using a magic prefix) on any code gen for classes
+         */
         static Type CompileStub(Type super, NewInstanceExpr ret, Type[] interfaces, Object frm)
         {
 
             //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
             //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", CompilerMode.Immediate);
-            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", AssemblyMode.Dynamic, FnMode.Full);
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", false);
             TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.COMPILE_STUB_PREFIX + "." + ret.InternalName, TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
 
             tb.DefineDefaultConstructor(MethodAttributes.Public);
@@ -340,44 +309,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        //private static Type CompileLookupThunk(NewInstanceExpr ret, Symbol fld)
-        //{
-        //    GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
-
-        //    string className = ret.InternalName + "$__lookup__" + fld.Name;
-        //    Type ftype = Compiler.TagType(Compiler.TagOf(fld));
-
-        //    // Java: workaround until full support for type-hinted non-primitive fields
-        //    if (!ftype.IsValueType)
-        //        ftype = typeof(Object);
-
-        //    TypeBuilder tb = context.ModuleBuilder.DefineType(className, TypeAttributes.Public | TypeAttributes.Sealed, typeof(object), new Type[] { typeof(ILookupThunk) });
-
-        //    ConstructorBuilder cb = tb.DefineDefaultConstructor(MethodAttributes.Public);
-
-        //    MethodBuilder mb = tb.DefineMethod("get", MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(Object), new Type[] { typeof(Object) });
-        //    ILGen ilg = new ILGen(mb.GetILGenerator());
-        //    Label faultLabel = ilg.DefineLabel();
-        //    Label endLabel = ilg.DefineLabel();
-        //    ilg.EmitLoadArg(0);
-        //    ilg.Emit(OpCodes.Dup);
-        //    ilg.Emit(OpCodes.Isinst, ret.ObjType);
-        //    ilg.Emit(OpCodes.Brfalse_S, faultLabel);
-        //    ilg.Emit(OpCodes.Castclass, ret.ObjType);
-        //    ilg.EmitFieldGet(ret.ObjType, Compiler.munge(fld.Name));
-        //    ilg.Emit(OpCodes.Br_S, endLabel);
-        //    ilg.MarkLabel(faultLabel);
-        //    ilg.Emit(OpCodes.Pop);
-        //    ilg.EmitLoadArg(0);
-        //    ilg.MarkLabel(endLabel);
-        //    ilg.Emit(OpCodes.Ret);
-
-        //    return tb.CreateType();
-        //}
-
-
-
-
+ 
         static string[] InterfaceNames(IPersistentVector interfaces)
         {
             int icnt = interfaces.count();
@@ -409,34 +341,6 @@ namespace clojure.lang.CljCompiler.Ast
                 GatherMethods((Type)interfaces.first(), allm);
 
             overrides = allm;
-
-            //overrides = new Dictionary<IPersistentVector, List<MethodInfo>>();
-            //foreach (KeyValuePair<IPersistentVector, List<MethodInfo>> kv in allm)
-            //{
-            //    IPersistentVector mk = kv.Key;
-            //    mk = (IPersistentVector)mk.pop();
-            //    List<MethodInfo> ms = kv.Value;
-            //    // TODO: explicit implementation of interfaces
-            //    if (overrides.ContainsKey(mk)) 
-            //    {
-            //        HashSet<Type> cvs;
-            //        if ( ! covariants.TryGetValue(mk,out cvs) )
-            //        {
-            //            cvs = new HashSet<Type>();
-            //            covariants[mk] = cvs;
-            //        }
-            //        MethodInfo om = overrides[mk];
-            //        if (om.ReturnType.IsAssignableFrom(m.ReturnType))
-            //        {
-            //            cvs.Add(om.ReturnType);
-            //            overrides[mk] = m;
-            //        }
-            //        else
-            //            cvs.Add(m.ReturnType);
-            //    }
-            //    else
-            //        overrides[mk] = m;
-            //}
         }
 
         static void GatherMethods(Type t, Dictionary<IPersistentVector, List<MethodInfo>> mm)
@@ -448,7 +352,6 @@ namespace clojure.lang.CljCompiler.Ast
             if (t.IsInterface)
                 foreach (Type it in t.GetInterfaces())
                     GatherMethods(it, mm);
-
         }
 
         static void ConsiderMethod(MethodInfo m, Dictionary<IPersistentVector, List<MethodInfo>> mm)
@@ -479,37 +382,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region Class creation
-
-        public override FnMode CompileMode()
-        {
-            return FnMode.Full;
-        }
-
-        protected override Type GenerateClassForImmediate(GenContext context)
-        {
-            return GenerateClassForFile(context);
-        }
-
-        protected override Type GenerateClassForFile(GenContext context)
-        {
-            //GenContext newC = context.ChangeMode(CompilerMode.File).WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString());
-            GenContext newC = context.WithNewDynInitHelper(InternalName + "__dynInitHelper_" + RT.nextID().ToString());
-            return EnsureTypeBuilt(newC);
-        }
-
-        #endregion
-
         #region Code generation
-
-
-        protected override Expression GenDlrImmediate(GenContext context)
-        {
-            //GenContext newC = context.ChangeMode(CompilerMode.File);
-            //Expression expr = GenDlrForFile(newC, false);
-            Expression expr = GenDlrForFile(context, false);
-            return expr;
-        }
 
         protected override void GenerateMethods(GenContext context)
         {
@@ -518,7 +391,7 @@ namespace clojure.lang.CljCompiler.Ast
             for (ISeq s = RT.seq(_methods); s != null; s = s.next())
             {
                 NewInstanceMethod method = (NewInstanceMethod)s.first();
-                method.GenerateCode(context);
+                method.GenerateCode(this,context);
                 implemented.UnionWith(method.MethodInfos);
             }
 
@@ -550,6 +423,5 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
-
     }
 }

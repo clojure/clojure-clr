@@ -125,9 +125,11 @@
     <Compile Include="CljCompiler\Ast\MethodParamExpr.cs" />
     <Compile Include="CljCompiler\Ast\NewInstanceExpr.cs" />
     <Compile Include="CljCompiler\Ast\NewInstanceMethod.cs" />
+    <Compile Include="CljCompiler\Ast\NumberExpr.cs" />
     <Compile Include="CljCompiler\Ast\ObjExpr.cs" />
     <Compile Include="CljCompiler\Ast\ObjMethod.cs" />
     <Compile Include="CljCompiler\Ast\ParserContext.cs" />
+    <Compile Include="CljCompiler\Ast\StaticInvokeExpr.cs" />
     <Compile Include="CljCompiler\GenClass.cs" />
     <Compile Include="CljCompiler\GenInterface.cs" />
     <Compile Include="CljCompiler\MethodSignature.cs" />
@@ -167,7 +169,6 @@
     <Compile Include="CljCompiler\Ast\MonitorExitExpr.cs" />
     <Compile Include="CljCompiler\Ast\NewExpr.cs" />
     <Compile Include="CljCompiler\Ast\NilExpr.cs" />
-    <Compile Include="CljCompiler\Ast\Node.cs" />
     <Compile Include="CljCompiler\Ast\RecurExpr.cs" />
     <Compile Include="CljCompiler\Ast\SetExpr.cs" />
     <Compile Include="CljCompiler\Ast\StaticFieldExpr.cs" />

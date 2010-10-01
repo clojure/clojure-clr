@@ -60,24 +60,24 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             Expression call;
 
             if (_method != null)
-                call = GenDlrForMethod(context);
+                call = GenDlrForMethod(objx, context);
             else
-                call = GenerateComplexCall(context);
+                call = GenerateComplexCall(objx, context);
             call = Compiler.MaybeAddDebugInfo(call, _spanMap);
             return call;
 
         }
 
-        public override Expression GenDlrUnboxed(GenContext context)
+        public override Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             if (_method != null)
             {
-                Expression call = GenDlrForMethod(context);
+                Expression call = GenDlrForMethod(objx,context);
                 call = Compiler.MaybeAddDebugInfo(call, _spanMap);
                 return call;
             }
@@ -86,17 +86,17 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        protected Expression GenDlrForMethod(GenContext context)
+        protected Expression GenDlrForMethod(ObjExpr objx, GenContext context)
         {
             if (_method.DeclaringType == (Type)Compiler.COMPILE_STUB_ORIG_CLASS.deref())
-                _method = FindEquivalentMethod(_method, context.ObjExpr.BaseType);            
+                _method = FindEquivalentMethod(_method, objx.BaseType);            
             
             int argCount = _args.Count;
 
 
             IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(argCount + (IsStaticCall ? 0 : 1));
             if (!IsStaticCall)
-                argsPlus.Add(new DynamicMetaObject(GenTargetExpression(context), BindingRestrictions.Empty));
+                argsPlus.Add(new DynamicMetaObject(GenTargetExpression(objx, context), BindingRestrictions.Empty));
 
             List<int> refPositions = new List<int>();
 
@@ -120,11 +120,11 @@ namespace clojure.lang.CljCompiler.Ast
                         t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
 #endif
                         refPositions.Add(i);
-                        argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(context, argType, e), methodParms[i].ParameterType.GetElementType()), BindingRestrictions.Empty));
+                        argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(objx, context, argType, e), methodParms[i].ParameterType.GetElementType()), BindingRestrictions.Empty));
                         break;
                     case HostArg.ParameterType.Standard:
                         t = argType;
-                        argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(context, argType, e), methodParms[i].ParameterType), BindingRestrictions.Empty));
+                        argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(objx, context, argType, e), methodParms[i].ParameterType), BindingRestrictions.Empty));
 
                         break;
                     default:
@@ -184,17 +184,17 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        private Expression GenerateComplexCall(GenContext context)
+        private Expression GenerateComplexCall(ObjExpr objx, GenContext context)
         {
             Expression call;
 
-            Expression target = GenTargetExpression(context);
+            Expression target = GenTargetExpression(objx, context);
 
             List<Expression> exprs = new List<Expression>(_args.Count);
             List<ParameterExpression> sbParams = new List<ParameterExpression>();
             List<Expression> sbInits = new List<Expression>();
             List<Expression> sbTransfers = new List<Expression>();
-            GenerateComplexArgList(context, _args, out exprs, out sbParams, out sbInits, out sbTransfers);
+            GenerateComplexArgList(objx, context, _args, out exprs, out sbParams, out sbInits, out sbTransfers);
 
             Expression[] argExprs = DynUtils.ArrayInsert<Expression>(target, exprs);
 
@@ -230,6 +230,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
        internal static void GenerateComplexArgList(
+           ObjExpr objx,
             GenContext context,
             List<HostArg> args,
             out List<Expression> argExprs,
@@ -275,7 +276,7 @@ namespace clojure.lang.CljCompiler.Ast
                         }
                         break;
                     case HostArg.ParameterType.Standard:
-                        argExprs.Add(e.GenDlr(context));
+                        argExprs.Add(e.GenCode(RHC.Expression, objx, context));
                         break;
 
                     default:
@@ -285,8 +286,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         protected abstract bool IsStaticCall { get; }
-        protected abstract Expression GenTargetExpression(GenContext context);
-        //protected abstract Expression GenDlrForMethod(GenContext context);
+        protected abstract Expression GenTargetExpression(ObjExpr objx, GenContext context);
 
         public override bool CanEmitPrimitive
         {

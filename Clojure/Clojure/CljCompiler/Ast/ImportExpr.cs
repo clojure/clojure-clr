@@ -41,12 +41,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return false; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { throw new ArgumentException("ImportExpr has no Java class"); }
         }
@@ -57,18 +57,28 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frm)
             {
                 return new ImportExpr((string)RT.second(frm));
             }
         }
 
+        #endregion
+
+        #region eval
+
+        public object Eval()
+        {
+            Namespace ns = (Namespace)RT.CURRENT_NS.deref();
+            ns.importClass(RT.classForName(_c));
+            return null;
+        }
 
         #endregion
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             Expression getTypeExpr = Expression.Call(null, Compiler.Method_RT_classForName, Expression.Constant(_c));
             Expression getNsExpr = Expression.Property(null, Compiler.Method_Compiler_CurrentNamespace);
@@ -76,6 +86,5 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
-
     }
 }

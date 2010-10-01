@@ -31,12 +31,6 @@ using AstUtils = Microsoft.Scripting.Ast.Utils;
 
 namespace clojure.lang
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <remarks>
-    /// <para>The translation isSEXPR -> AST -> ExpressionTree.  </para>
-    /// </remarks>
     public static class Compiler
     {
         #region other constants
@@ -73,7 +67,6 @@ namespace clojure.lang
         public static readonly Symbol REIFY = Symbol.create("reify*");
         public static readonly Symbol _AMP_ = Symbol.create("&");
 
-
         public static readonly Symbol IDENTITY = Symbol.create("clojure.core", "identity");
 
         static readonly Symbol NS = Symbol.create("ns");
@@ -83,13 +76,14 @@ namespace clojure.lang
 
         internal static readonly Symbol CLASS = Symbol.create("System.Type");
 
-
         #endregion
 
         #region Keywords
 
         static readonly Keyword INLINE_KEY = Keyword.intern(null, "inline");
         static readonly Keyword INLINE_ARITIES_KEY = Keyword.intern(null, "inline-arities");
+        internal static readonly Keyword STATIC_KEY = Keyword.intern(null, "static");
+        internal static readonly Keyword ARGLISTS_KEY = Keyword.intern(null, "arglists");
 
         static readonly Keyword VOLATILE_KEY = Keyword.intern(null,"volatile");
         internal static readonly Keyword IMPLEMENTS_KEY = Keyword.intern(null,"implements");
@@ -295,722 +289,6 @@ namespace clojure.lang
                 = typeof(IFn).GetMethod("invoke", types);
         }
 
-        //static GenContext _evalContext = new GenContext("eval", CompilerMode.Immediate);
-        //static GenContext _evalContext = new GenContext("eval", ".dll", ".", CompilerMode.Immediate);
-        static GenContext _evalContext = new GenContext("eval", ".dll", ".", AssemblyMode.Dynamic,FnMode.Light);
-        static public GenContext EvalContext { get { return _evalContext; } }
-
-        static int _saveId = 0;
-        public static void SaveEvalContext()
-        {
-            _evalContext.SaveAssembly();
-            //_evalContext = new GenContext("eval", CompilerMode.Immediate);
-            _evalContext = new GenContext("eval"+(_saveId++).ToString(), ".dll", ".", AssemblyMode.Dynamic,FnMode.Light);
-        }
-
-
-        public static Expression<ReplDelegate> GenerateLambda(object form, bool addPrint)
-        {
-            return GenerateLambda(_evalContext, form, null, addPrint);
-        }
-
-        public static Expression<ReplDelegate> GenerateLambda(object form, string name, bool addPrint)
-        {
-            return GenerateLambda(_evalContext, form, name, addPrint);
-        }
-
-        internal static Expression<ReplDelegate> GenerateLambda(GenContext context, object form, string name, bool addPrint)
-        {
-            Expr ast = GenerateWrappedAst(form);
-            Expression expr = GenerateInvokedDlrFromWrappedAst(context,ast);
-            if (addPrint)
-            {
-                expr = Expression.Call(Method_RT_printToConsole, expr);
-            }
-
-            return Expression.Lambda<ReplDelegate>(expr, "REPLCall", null);
-        }
-
-        internal static Expression GenerateInvokedDlrFromWrappedAst(GenContext context, Expr ast)
-        {
-            Expression formExpr = GenerateDlrExpression(context, ast);
-            Expression finalExpr = Expression.Call(formExpr, formExpr.Type.GetMethod("invoke", System.Type.EmptyTypes));
-            return finalExpr;
-        }
-
-        internal static Expr GenerateWrappedAst(object form)
-        {
-            // TODO: Get rid of this extra wrap.  See how the JVM version handles setting up the context for compiling the form.
-            object wrappedForm = RT.list(FN, PersistentVector.EMPTY, RT.list(DO, form));
-            Expr ast = GenerateAST(wrappedForm, new ParserContext(false,false));
-            return ast;
-        }
-
-        #endregion
-
-        #region Boxing arguments
-
-        internal static Expression MaybeBox(Expression expr)
-        {
-            if (expr.Type == typeof(void))
-                // I guess we'll pass a void.  This happens when we have a throw, for example.
-                return Expression.Block(expr, Expression.Default(typeof(object)));
-
-            return expr.Type.IsValueType
-                ? Expression.Convert(expr, typeof(object))
-                : expr;
-        }
-
-        internal static Expression MaybeDeVoid(Expression expr)
-        {
-            if (expr.Type == typeof(void))
-                // I guess we'll pass a void.  This happens when we have a throw, for example.
-                return Expression.Block(expr, Expression.Default(typeof(object)));
-
-            return expr;
-        }
-
-        internal static Expression MaybeConvert(Expression expr, Type type)
-        {
-            if (type == typeof(void))
-                type = typeof(object);
-
-            if (expr.Type == typeof(void))
-                // I guess we'll pass a void.  This happens when we have a throw, for example.
-                return Expression.Block(expr, Expression.Default(type));
-
-            if (expr.Type == type)
-                return expr;
-
-            return Expression.Convert(expr, type);
-        }
-
-        #endregion
-
-        #region Duplicate types
-
-        static Dictionary<String, Type> _duplicateTypeMap = new Dictionary<string, Type>();
-
-        internal static void RegisterDuplicateType(Type type)
-        {
-            _duplicateTypeMap[type.FullName] = type;
-        }
-
-        internal static Type FindDuplicateType(string typename)
-        {
-            Type type;
-            _duplicateTypeMap.TryGetValue(typename, out type);
-            return type;
-        }
-
-        #endregion
-
-        #region  AST generation
-
-        internal static LiteralExpr NIL_EXPR = new NilExpr();
-        static LiteralExpr TRUE_EXPR = new BooleanExpr(true);
-        static LiteralExpr FALSE_EXPR = new BooleanExpr(false);
-
-        // Equivalent to Java: Compiler.analyze()
-        public static Expr GenerateAST(object form, ParserContext pcon)
-        {
-            return GenerateAST(form, null, pcon);
-        }
-
-        public static Expr GenerateAST(object form, string name, ParserContext pcon)
-        {
-            //try
-            //{
-                if (form is LazySeq)
-                {
-                    form = RT.seq(form);
-                    if (form == null)
-                        form = PersistentList.EMPTY;
-                }
-                if (form == null)
-                    return NIL_EXPR;
-                else if (form is Boolean)
-                    return ((bool)form) ? TRUE_EXPR : FALSE_EXPR;
-
-                Type type = form.GetType();
-
-                if (type == typeof(Symbol))
-                    return AnalyzeSymbol((Symbol)form);
-                else if (type == typeof(Keyword))
-                    return RegisterKeyword((Keyword)form);
-                else if (type == typeof(String))
-                    return new StringExpr((String)form);
-                else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
-                    return OptionallyGenerateMetaInit(form, new EmptyExpr(form));
-                else if (form is ISeq)
-                    return AnalyzeSeq((ISeq)form, name,pcon);
-                else if (form is IPersistentVector)
-                    return VectorExpr.Parse((IPersistentVector)form);
-                else if (form is IPersistentMap)
-                    return MapExpr.Parse((IPersistentMap)form);
-                else if (form is IPersistentSet)
-                    return SetExpr.Parse((IPersistentSet)form);
-                else
-                    return new ConstantExpr(form);
-            //}
-            //catch (Exception e)
-            //{
-            //    if (!(e is CompilerException))
-            //        throw new CompilerException((string)SOURCE.deref(), (int)LINE.deref(), e);
-            //    else
-            //        throw e;
-            //}
-        }
-
-        internal static Expr OptionallyGenerateMetaInit(object form, Expr expr)
-        {
-            Expr ret = expr;
-           
-            IObj o = form as IObj;
-            if (o != null && o.meta() != null)
-                ret = new MetaExpr(ret, (MapExpr)MapExpr.Parse(o.meta()));
-                    
-            return ret;
-        }
-
-        private static Expr AnalyzeSymbol(Symbol symbol)
-        {
-            Symbol tag = TagOf(symbol);
-
-            if (symbol.Namespace == null)
-            {
-                LocalBinding b = ReferenceLocal(symbol);
-                if (b != null)
-                    return new LocalBindingExpr(b, tag);
-            }
-            else
-            {
-                if (namespaceFor(symbol) == null)
-                {
-                    Symbol nsSym = Symbol.create(symbol.Namespace);
-                    Type t = HostExpr.MaybeType(nsSym, false);
-                    if (t != null)
-                    {
-                        FieldInfo finfo;
-                        PropertyInfo pinfo;
-
-                        if ((finfo = Reflector.GetField(t, symbol.Name, true)) != null)
-                            return new StaticFieldExpr((string)SOURCE.deref(), null, tag, t, symbol.Name,finfo);
-                        else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) != null)
-                            return new StaticPropertyExpr((string)SOURCE.deref(), null, tag, t, symbol.Name, pinfo);
-                    }
-                    throw new Exception(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
-                }
-            }
-
-            object o = Compiler.Resolve(symbol);
-            if (o is Var)
-            {
-                Var v = (Var)o;
-                if (IsMacro(v) != null)
-                    throw new Exception("Can't take the value of a macro: " + v);
-                RegisterVar(v);
-                return new VarExpr(v, tag);
-            }
-            else if (o is Type)
-                return new ConstantExpr(o);
-            else if (o is Symbol)
-                return new UnresolvedVarExpr((Symbol)o);
-
-            throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));
-        }
-
-
-        private static Expr AnalyzeSeq(ISeq form, string name, ParserContext pcon)
-        {
-            int line = (int)LINE.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
-                line = (int)RT.meta(form).valAt(RT.LINE_KEY);
-            IPersistentMap sourceSpan = (IPersistentMap)SOURCE_SPAN.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SOURCE_SPAN_KEY))
-                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SOURCE_SPAN_KEY);
-
-            Var.pushThreadBindings(RT.map(LINE, line, SOURCE_SPAN, sourceSpan));
-
-            try
-            {
-
-                object exp = MacroexpandSeq1(form);
-                if (exp != form)
-                    return GenerateAST(exp, name, pcon);
-
-                object op = RT.first(form);
-
-                if (op == null)
-                    throw new ArgumentNullException("Can't call nil");
-
-                IFn inline = IsInline(op, RT.count(RT.next(form)));
-
-                if (inline != null)
-                    return GenerateAST(MaybeTransferSourceInfo(PreserveTag(form,inline.applyTo(RT.next(form))),form),pcon);
-
-                IParser p;
-                if (op.Equals(FN))
-                    return FnExpr.Parse(form, name,pcon);
-                if ((p = GetSpecialFormParser(op)) != null)
-                    return p.Parse(form,pcon);
-                else
-                    return InvokeExpr.Parse(form);
-            }
-            //catch (Exception e)
-            //{
-            //    if (!(e is CompilerException))
-            //        throw new CompilerException((string)SOURCE.deref(), (int)LINE.deref(), e);
-            //    else
-            //        throw e;
-            //}
-            finally
-            {
-                Var.popThreadBindings();
-            }
-        }
-
-
-        static object Macroexpand1(object form)
-        {
-            return (form is ISeq)
-                ? MacroexpandSeq1((ISeq)form)
-                : form;
-        }
-
-        static object Macroexpand(object form)
-        {
-            object exf = Macroexpand1(form);
-            if (exf != form)
-                return Macroexpand(exf);
-            return form;
-        }
-
-        static object PreserveTag(ISeq src, object dst)
-        {
-            Symbol tag = TagOf(src);
-            if (tag != null && dst is IObj)
-            {
-                IPersistentMap meta = RT.meta(dst);
-                return ((IObj)dst).withMeta((IPersistentMap)RT.assoc(meta, RT.TAG_KEY, tag));
-            }
-            return dst;
-        }
-
-        private static object MacroexpandSeq1(ISeq form)
-        {
-            object op = RT.first(form);
-
-            if (IsSpecial(op))
-                return form;
-
-            // macro expansion
-            Var v = IsMacro(op);
-            if (v != null)
-            {
-                return v.applyTo(RT.cons(form, RT.cons(LOCAL_ENV.get(), form.next())));
-            }
-            else
-            {
-                if (op is Symbol)
-                {
-                    Symbol sym = (Symbol)op;
-                    string sname = sym.Name;
-                    // (.substring s 2 5) => (. x substring 2 5)
-                    if (sname[0] == '.')
-                    {
-                        if (form.count() < 2)
-                            throw new ArgumentException("Malformed member expression, expecting (.member target ...)");
-                        Symbol method = Symbol.intern(sname.Substring(1));
-                        object target = RT.second(form);
-                        if (HostExpr.MaybeType(target, false) != null)
-                            target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY, CLASS));
-                        // JVM: return RT.listStar(DOT, target, method, form.next().next());
-                        // We need to make sure source information gets transferred
-                        return MaybeTransferSourceInfo(PreserveTag(form,RT.listStar(DOT, target, method, form.next().next())), form);
-                    }
-                    else if (NamesStaticMember(sym))
-                    {
-                        Symbol target = Symbol.intern(sym.Namespace);
-                        Type t = HostExpr.MaybeType(target, false);
-                        if (t != null)
-                        {
-                            Symbol method = Symbol.intern(sym.Name);
-                            // JVM: return RT.listStar(Compiler.DOT, target, method, form.next());
-                            // We need to make sure source information gets transferred
-                            return MaybeTransferSourceInfo(PreserveTag(form,RT.listStar(Compiler.DOT, target, method, form.next())), form);
-                        }
-                    }
-                    else
-                    {
-                        // (x.substring 2 5) =>  (. x substring 2 5)
-                        int index = sname.LastIndexOf('.');
-                        if (index == sname.Length - 1)
-                            // JVM: return RT.listStar(Compiler.NEW, Symbol.intern(sname.Substring(0, index)), form.next());
-                            // We need to make sure source information gets transferred
-                            return MaybeTransferSourceInfo(RT.listStar(Compiler.NEW, Symbol.intern(sname.Substring(0, index)), form.next()), form);
-                    }
-                }
-
-            }
-            return form;
-        }
-
-        static object MaybeTransferSourceInfo(object newForm, object oldForm)
-        {
-            IObj newObj = newForm as IObj;
-            if (newObj == null)
-                return newForm;
-
-            IObj oldObj = oldForm as IObj;
-            if (oldObj == null)
-                return newForm;
-
-            IPersistentMap oldMeta = oldObj.meta();
-            if (oldMeta == null)
-                return newForm;
-
-            IPersistentMap spanMap = (IPersistentMap)oldMeta.valAt(RT.SOURCE_SPAN_KEY);
-            if (spanMap != null)
-            {
-                IPersistentMap newMeta = newObj.meta();
-                if (newMeta == null) 
-                    newMeta = RT.map();
-
-                newMeta = newMeta.assoc(RT.SOURCE_SPAN_KEY, spanMap);
-
-                return newObj.withMeta(newMeta);
-            }
-
-            return newForm;
-        }
-
-        internal static bool NamesStaticMember(Symbol sym)
-        {
-            return sym.Namespace != null && NamespaceFor(sym) == null;
-        }
-
-        private static IFn IsInline(object op, int arity)
-        {
-            // Java:  	//no local inlines for now
-            if (op is Symbol && ReferenceLocal((Symbol)op) != null)
-                return null;
-
-            if (op is Symbol || op is Var)
-            {
-                Var v = (op is Var) ? (Var)op : LookupVar((Symbol)op, false);
-                if (v != null)
-                {
-                    if (v.Namespace != CurrentNamespace && !v.isPublic)
-                        throw new InvalidOperationException("var: " + v + " is not public");
-                    IFn ret = (IFn)RT.get(v.meta(), INLINE_KEY);
-                    if (ret != null)
-                    {
-                        IFn arityPred = (IFn)RT.get(v.meta(), INLINE_ARITIES_KEY);
-                        if (arityPred == null || RT.booleanCast(arityPred.invoke(arity)))
-                            return ret;
-                    }
-                }
-            }
-            return null;
-        }
-
-        internal static Var LookupVar(Symbol sym, bool internNew)
-        {
-            Var var = null;
-
-            // Note: ns-qualified vars in other namespaces must exist already
-            if (sym.Namespace != null)
-            {
-                Namespace ns = Compiler.NamespaceFor(sym);
-                if (ns == null)
-                    return null;
-                Symbol name = Symbol.create(sym.Name);
-                if (internNew && ns == CurrentNamespace)
-                    var = CurrentNamespace.intern(name);
-                else
-                    var = ns.FindInternedVar(name);
-            }
-            else if (sym.Equals(NS))
-                var = RT.NS_VAR;
-            else if (sym.Equals(IN_NS))
-                var = RT.IN_NS_VAR;
-            else
-            {
-                // is it mapped?
-                Object o = CurrentNamespace.GetMapping(sym);
-                if (o == null)
-                {
-                    // introduce a new var in the current ns
-                    if (internNew)
-                        var = CurrentNamespace.intern(Symbol.create(sym.Name));
-                }
-                else if (o is Var)
-                    var = (Var)o;
-                else
-                    throw new Exception(string.Format("Expecting var, but {0} is mapped to {1}", sym, o));
-            }
-            if (var != null)
-                RegisterVar(var);
-            return var;
-        }
-
-        private static Var IsMacro(Object op)
-        {
-            if (op is Symbol && ReferenceLocal((Symbol)op) != null)
-                return null;
-            if (op is Symbol || op is Var)
-            {
-                Var v = (op is Var) ? (Var)op : LookupVar((Symbol)op, false);
-                if (v != null && v.IsMacro)
-                {
-                    if (v.Namespace != CurrentNamespace && !v.IsPublic)
-                        throw new InvalidOperationException(string.Format("Var: {0} is not public", v));
-                    return v;
-                }
-            }
-            return null;
-        }
-
-        private static void RegisterVar(Var v)
-        {
-            if (!VARS.isBound)
-                return;
-            IPersistentMap varsMap = (IPersistentMap)VARS.deref();
-            Object id = RT.get(varsMap, v);
-            if (id == null)
-            {
-                VARS.set(RT.assoc(varsMap, v, RegisterConstant(v)));
-            }
-        }
-
-
-        internal static int RegisterConstant(Object o)
-        {
-            if (!CONSTANTS.isBound)
-                return -1;
-            PersistentVector v = (PersistentVector)CONSTANTS.deref();
-            IdentityHashMap ids = (IdentityHashMap)CONSTANT_IDS.deref();
-            int i;
-            if ( ids.TryGetValue(o, out i) )
-                return i;
-            CONSTANTS.set(RT.conj(v, o));
-            ids[o] = v.count();
-            return v.count();
-        }
-
-        internal static KeywordExpr RegisterKeyword(Keyword keyword)
-        {
-            if (!KEYWORDS.isBound)
-                return new KeywordExpr(keyword);
-
-            IPersistentMap keywordsMap = (IPersistentMap)KEYWORDS.deref();
-            object id = RT.get(keywordsMap, keyword);
-            if (id == null)
-                KEYWORDS.set(RT.assoc(keywordsMap, keyword, RegisterConstant(keyword)));
-            return new KeywordExpr(keyword);
-        }
-
-        internal static int RegisterKeywordCallsite(Keyword keyword)
-        {
-            if (!KEYWORD_CALLSITES.isBound)
-                throw new InvalidOperationException("KEYWORD_CALLSITES is not bound");
-
-            IPersistentVector keywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
-            keywordCallsites = keywordCallsites.cons(keyword);
-            KEYWORD_CALLSITES.set(keywordCallsites);
-            return keywordCallsites.count() - 1;
-        }
-
-        internal static int RegisterProtocolCallsite(Var v)
-        {
-            if (!PROTOCOL_CALLSITES.isBound)
-                throw new InvalidOperationException("PROTOCOL_CALLSITES is not bound");
-
-            IPersistentVector protocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
-            protocolCallsites = protocolCallsites.cons(v);
-            PROTOCOL_CALLSITES.set(protocolCallsites);
-            return protocolCallsites.count() - 1;
-        }
-
-        internal static int RegisterVarCallsite(Var v)
-        {
-            if (!VAR_CALLSITES.isBound)
-                throw new InvalidOperationException("VAR_CALLSITES is not bound");
-
-            IPersistentVector varCallsites = (IPersistentVector)VAR_CALLSITES.deref();
-            varCallsites = varCallsites.cons(v);
-            VAR_CALLSITES.set(varCallsites);
-            return varCallsites.count() - 1;
-        }
-
-        internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init, bool isArg)
-        {
-            return RegisterLocal(sym, tag, init, isArg, false);
-        }
-
-        internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init, bool isArg, bool isByRef)
-        {
-            int num = GetAndIncLocalNum();
-
-            LocalBinding b = new LocalBinding(num,sym, tag, init, isArg, isByRef);
-
-            IPersistentMap localsMap = (IPersistentMap)LOCAL_ENV.deref();
-            LOCAL_ENV.set(RT.assoc(localsMap,b.Symbol, b));
-            ObjMethod method = (ObjMethod)METHOD.deref();
-            method.Locals = (IPersistentMap)RT.assoc(method.Locals,b, b);
-            method.IndexLocals = (IPersistentMap)RT.assoc(method.IndexLocals, num, b);
-            return b;
-        }
-
-        internal static int GetAndIncLocalNum()
-        {
-            int num = (int)NEXT_LOCAL_NUM.deref();
-            ObjMethod m = (ObjMethod)METHOD.deref();
-            if (num > m.MaxLocal)
-                m.MaxLocal = num;
-            NEXT_LOCAL_NUM.set(num + 1);
-            return num;
-        }
-
-        internal static LocalBinding ReferenceLocal(Symbol symbol)
-        {
-            if (!LOCAL_ENV.isBound)
-                return null;
-
-            LocalBinding b = (LocalBinding)RT.get(LOCAL_ENV.deref(), symbol);
-            if (b != null)
-            {
-                ObjMethod method = (ObjMethod)METHOD.deref();
-                CloseOver(b, method);
-            }
-
-            return b;
-        }
-
-        static void CloseOver(LocalBinding b, ObjMethod method)
-        {
-            if (b != null && method != null)
-            {
-                if (RT.get(method.Locals, b) == null)
-                {
-                    method.Objx.Closes = (IPersistentMap)RT.assoc(method.Objx.Closes, b, b);
-                    CloseOver(b, method.Parent);
-                }
-                else if (IN_CATCH_FINALLY.deref() != null)
-                {
-                    method.LocalsUsedInCatchFinally = (PersistentHashSet)method.LocalsUsedInCatchFinally.cons(b.Index);
-                }
-            }
-        }
-
-        internal static Type[] GetTypes(ParameterInfo[] ps)
-        {
-            Type[] ts = new Type[ps.Length];
-            for (int i = 0; i < ps.Length; i++)
-                ts[i] = ps[i].ParameterType;
-            return ts;
-        }
-
-        internal static Symbol TagOf(object o)
-        {
-            object tag = RT.get(RT.meta(o), RT.TAG_KEY);
-            if (tag is Symbol)
-                return (Symbol)tag;
-            else if (tag is string)
-                return Symbol.intern(null, (String)tag);
-            return null;
-        }
-
-
-	    static Type PrimType(Symbol sym){
-		    if(sym == null)
-			    return null;
-		    Type t = null;
-            switch( sym.Name )
-            {
-                case "int": t = typeof(int); break;
-                case "long": t = typeof(long); break;
-                case "float": t= typeof(float); break;
-                case "double": t= typeof(double); break;
-                case "char": t = typeof(char); break;
-                case "short": t = typeof(short); break;
-                case "byte": t = typeof(byte); break;
-                case "bool":
-                case "boolean": t= typeof(bool); break;
-                case "void": t = typeof(void); break;
-                case "uint": t = typeof(uint); break;
-                case "ulong": t = typeof(ulong); break;
-                case "ushort": t = typeof(ushort); break;
-                case "sbyte": t  = typeof(sbyte); break;
-            }	
-            return t;
-	    }
-
-        internal static Type TagType(Object tag)
-        {
-            if (tag == null)
-                return typeof(object);
-            Type t = null;
-            if (tag is Symbol)
-                t = PrimType((Symbol)tag);
-            if (t == null)
-                t = HostExpr.TagToType(tag);
-            return t;
-        }
-
-        private static IPersistentMap CHAR_MAP = PersistentHashMap.create('-', "_",
-            //		                         '.', "_DOT_",
-             ':', "_COLON_",
-             '+', "_PLUS_",
-             '>', "_GT_",
-             '<', "_LT_",
-             '=', "_EQ_",
-             '~', "_TILDE_",
-             '!', "_BANG_",
-             '@', "_CIRCA_",
-             '#', "_SHARP_",
-             '$', "_DOLLARSIGN_",
-             '%', "_PERCENT_",
-             '^', "_CARET_",
-             '&', "_AMPERSAND_",
-             '*', "_STAR_",
-             '|', "_BAR_",
-             '{', "_LBRACE_",
-             '}', "_RBRACE_",
-             '[', "_LBRACK_",
-             ']', "_RBRACK_",
-             '/', "_SLASH_",
-             '\\', "_BSLASH_",
-             '?', "_QMARK_"
-             );
-
-
-        // Used in core_deftype, so initial lowercase required for compatibility
-        public static string munge(string name)
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (char c in name)
-            {
-                string sub = (string)CHAR_MAP.valAt(c);
-                if (sub == null)
-                    sb.Append(c);
-                else
-                    sb.Append(sub);
-            }
-            return sb.ToString();
-        }
-
-        #endregion
-
-        #region Code generation
-
-        internal static Expression GenerateDlrExpression(GenContext context, Expr expr)
-        {
-
-            return expr.GenDlr(context);
-        }
-
         #endregion
 
         #region Symbol/namespace resolving
@@ -1102,7 +380,7 @@ namespace clojure.lang
                     throw new InvalidOperationException(string.Format("var: {0} is not public", symbol));
                 return v;
             }
-            else if (symbol.Name.IndexOf('.') > 0 || symbol.Name[symbol.Name.Length-1] == ']')
+            else if (symbol.Name.IndexOf('.') > 0 || symbol.Name[symbol.Name.Length - 1] == ']')
                 return RT.classForName(symbol.Name);
             else if (symbol.Equals(NS))
                 return RT.NS_VAR;
@@ -1118,7 +396,7 @@ namespace clojure.lang
                 {
                     if (RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.deref()))
                         return symbol;
-                    else 
+                    else
                         throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));
                 }
                 return o;
@@ -1138,10 +416,10 @@ namespace clojure.lang
                 Var v = ns.FindInternedVar(Symbol.create(symbol.Name));
                 if (v == null)
                     return null;
-                 return v;
+                return v;
             }
-            else if (symbol.Name.IndexOf('.') > 0  && !symbol.Name.EndsWith(".")
-                || symbol.Name[symbol.Name.Length-1] == ']')              /// JAVA: symbol.Name[0] == '[')
+            else if (symbol.Name.IndexOf('.') > 0 && !symbol.Name.EndsWith(".")
+                || symbol.Name[symbol.Name.Length - 1] == ']')              /// JAVA: symbol.Name[0] == '[')
                 return RT.classForName(symbol.Name);
             else if (symbol.Equals(NS))
                 return RT.NS_VAR;
@@ -1154,12 +432,12 @@ namespace clojure.lang
             }
         }
 
-        public  static Namespace NamespaceFor(Symbol symbol)
+        public static Namespace NamespaceFor(Symbol symbol)
         {
             return NamespaceFor(CurrentNamespace, symbol);
         }
 
-        public  static Namespace NamespaceFor(Namespace n, Symbol symbol)
+        public static Namespace NamespaceFor(Namespace n, Symbol symbol)
         {
             // Note: presumes non-nil sym.ns
             // first check against CurrentNamespace's aliases
@@ -1173,11 +451,350 @@ namespace clojure.lang
 
         #endregion
 
-        #region Interface to core.clj
+        #region Bindings, registration
+        
+        private static void RegisterVar(Var v)
+        {
+            if (!VARS.isBound)
+                return;
+            IPersistentMap varsMap = (IPersistentMap)VARS.deref();
+            Object id = RT.get(varsMap, v);
+            if (id == null)
+            {
+                VARS.set(RT.assoc(varsMap, v, RegisterConstant(v)));
+            }
+        }
+
+        internal static Var LookupVar(Symbol sym, bool internNew)
+        {
+            Var var = null;
+
+            // Note: ns-qualified vars in other namespaces must exist already
+            if (sym.Namespace != null)
+            {
+                Namespace ns = Compiler.NamespaceFor(sym);
+                if (ns == null)
+                    return null;
+                Symbol name = Symbol.create(sym.Name);
+                if (internNew && ns == CurrentNamespace)
+                    var = CurrentNamespace.intern(name);
+                else
+                    var = ns.FindInternedVar(name);
+            }
+            else if (sym.Equals(NS))
+                var = RT.NS_VAR;
+            else if (sym.Equals(IN_NS))
+                var = RT.IN_NS_VAR;
+            else
+            {
+                // is it mapped?
+                Object o = CurrentNamespace.GetMapping(sym);
+                if (o == null)
+                {
+                    // introduce a new var in the current ns
+                    if (internNew)
+                        var = CurrentNamespace.intern(Symbol.create(sym.Name));
+                }
+                else if (o is Var)
+                    var = (Var)o;
+                else
+                    throw new Exception(string.Format("Expecting var, but {0} is mapped to {1}", sym, o));
+            }
+            if (var != null)
+                RegisterVar(var);
+            return var;
+        }
 
 
-        // The following methods are named (and initial LC) for core.clj compatibility
 
+        internal static int RegisterConstant(Object o)
+        {
+            if (!CONSTANTS.isBound)
+                return -1;
+            PersistentVector v = (PersistentVector)CONSTANTS.deref();
+            IdentityHashMap ids = (IdentityHashMap)CONSTANT_IDS.deref();
+            int i;
+            if (ids.TryGetValue(o, out i))
+                return i;
+            CONSTANTS.set(RT.conj(v, o));
+            ids[o] = v.count();
+            return v.count();
+        }
+
+        internal static KeywordExpr RegisterKeyword(Keyword keyword)
+        {
+            if (!KEYWORDS.isBound)
+                return new KeywordExpr(keyword);
+
+            IPersistentMap keywordsMap = (IPersistentMap)KEYWORDS.deref();
+            object id = RT.get(keywordsMap, keyword);
+            if (id == null)
+                KEYWORDS.set(RT.assoc(keywordsMap, keyword, RegisterConstant(keyword)));
+            return new KeywordExpr(keyword);
+        }
+
+        internal static int RegisterKeywordCallsite(Keyword keyword)
+        {
+            if (!KEYWORD_CALLSITES.isBound)
+                throw new InvalidOperationException("KEYWORD_CALLSITES is not bound");
+
+            IPersistentVector keywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
+            keywordCallsites = keywordCallsites.cons(keyword);
+            KEYWORD_CALLSITES.set(keywordCallsites);
+            return keywordCallsites.count() - 1;
+        }
+
+        internal static int RegisterProtocolCallsite(Var v)
+        {
+            if (!PROTOCOL_CALLSITES.isBound)
+                throw new InvalidOperationException("PROTOCOL_CALLSITES is not bound");
+
+            IPersistentVector protocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
+            protocolCallsites = protocolCallsites.cons(v);
+            PROTOCOL_CALLSITES.set(protocolCallsites);
+            return protocolCallsites.count() - 1;
+        }
+
+        internal static int RegisterVarCallsite(Var v)
+        {
+            if (!VAR_CALLSITES.isBound)
+                throw new InvalidOperationException("VAR_CALLSITES is not bound");
+
+            IPersistentVector varCallsites = (IPersistentVector)VAR_CALLSITES.deref();
+            varCallsites = varCallsites.cons(v);
+            VAR_CALLSITES.set(varCallsites);
+            return varCallsites.count() - 1;
+        }
+
+        internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init, bool isArg)
+        {
+            return RegisterLocal(sym, tag, init, isArg, false);
+        }
+
+        internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init, bool isArg, bool isByRef)
+        {
+            int num = GetAndIncLocalNum();
+            LocalBinding b = new LocalBinding(num, sym, tag, init, isArg, isByRef);
+            IPersistentMap localsMap = (IPersistentMap)LOCAL_ENV.deref();
+            LOCAL_ENV.set(RT.assoc(localsMap, b.Symbol, b));
+            ObjMethod method = (ObjMethod)METHOD.deref();
+            method.Locals = (IPersistentMap)RT.assoc(method.Locals, b, b);
+            method.IndexLocals = (IPersistentMap)RT.assoc(method.IndexLocals, num, b);
+            return b;
+        }
+
+        internal static int GetAndIncLocalNum()
+        {
+            int num = (int)NEXT_LOCAL_NUM.deref();
+            ObjMethod m = (ObjMethod)METHOD.deref();
+            if (num > m.MaxLocal)
+                m.MaxLocal = num;
+            NEXT_LOCAL_NUM.set(num + 1);
+            return num;
+        }
+
+        internal static LocalBinding ReferenceLocal(Symbol symbol)
+        {
+            if (!LOCAL_ENV.isBound)
+                return null;
+
+            LocalBinding b = (LocalBinding)RT.get(LOCAL_ENV.deref(), symbol);
+            if (b != null)
+            {
+                ObjMethod method = (ObjMethod)METHOD.deref();
+                CloseOver(b, method);
+            }
+
+            return b;
+        }
+
+        static void CloseOver(LocalBinding b, ObjMethod method)
+        {
+            if (b != null && method != null)
+            {
+                if (RT.get(method.Locals, b) == null)
+                {
+                    method.Objx.Closes = (IPersistentMap)RT.assoc(method.Objx.Closes, b, b);
+                    CloseOver(b, method.Parent);
+                }
+                else if (IN_CATCH_FINALLY.deref() != null)
+                {
+                    method.LocalsUsedInCatchFinally = (PersistentHashSet)method.LocalsUsedInCatchFinally.cons(b.Index);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Boxing arguments
+
+        internal static Expression MaybeBox(Expression expr)
+        {
+            if (expr.Type == typeof(void))
+                // I guess we'll pass a void.  This happens when we have a throw, for example.
+                return Expression.Block(expr, Expression.Default(typeof(object)));
+
+            return expr.Type.IsValueType
+                ? Expression.Convert(expr, typeof(object))
+                : expr;
+        }
+
+        #endregion
+
+        #region other type hacking
+
+        internal static Type MaybePrimitiveType(Expr e)
+        {
+            if (e is MaybePrimitiveExpr && e.HasClrType && ((MaybePrimitiveExpr)e).CanEmitPrimitive)
+            {
+                Type t = e.ClrType;
+                if (Util.IsPrimitive(t))
+                    return t;
+            }
+            return null;
+        }
+
+        internal static Expression GenArgArray(RHC rhc, ObjExpr objx, GenContext context, IPersistentVector args)
+        {
+            Expression[] exprs = new Expression[args.count()];
+
+            for (int i = 0; i < args.count(); i++)
+            {
+                Expr arg = (Expr)args.nth(i);
+                exprs[i] = Compiler.MaybeBox(arg.GenCode(RHC.Expression,objx,context));
+            }
+
+            Expression argArray = Expression.NewArrayInit(typeof(object), exprs);
+            return argArray;
+        }
+
+        internal static Expression MaybeConvert(Expression expr, Type type)
+        {
+            if (type == typeof(void))
+                type = typeof(object);
+
+            if (expr.Type == typeof(void))
+                // I guess we'll pass a void.  This happens when we have a throw, for example.
+                return Expression.Block(expr, Expression.Default(type));
+
+            if (expr.Type == type)
+                return expr;
+
+            return Expression.Convert(expr, type);
+        }
+
+
+        static Type PrimType(Symbol sym)
+        {
+            if (sym == null)
+                return null;
+            Type t = null;
+            switch (sym.Name)
+            {
+                case "int": t = typeof(int); break;
+                case "long": t = typeof(long); break;
+                case "float": t = typeof(float); break;
+                case "double": t = typeof(double); break;
+                case "char": t = typeof(char); break;
+                case "short": t = typeof(short); break;
+                case "byte": t = typeof(byte); break;
+                case "bool":
+                case "boolean": t = typeof(bool); break;
+                case "void": t = typeof(void); break;
+                case "uint": t = typeof(uint); break;
+                case "ulong": t = typeof(ulong); break;
+                case "ushort": t = typeof(ushort); break;
+                case "sbyte": t = typeof(sbyte); break;
+            }
+            return t;
+        }
+
+        internal static Type TagType(Object tag)
+        {
+            if (tag == null)
+                return typeof(object);
+            Type t = null;
+            if (tag is Symbol)
+                t = PrimType((Symbol)tag);
+            if (t == null)
+                t = HostExpr.TagToType(tag);
+            return t;
+        }
+
+        #endregion
+
+        #region Name munging
+
+        private static IPersistentMap CHAR_MAP = PersistentHashMap.create('-', "_",
+            //		                         '.', "_DOT_",
+             ':', "_COLON_",
+             '+', "_PLUS_",
+             '>', "_GT_",
+             '<', "_LT_",
+             '=', "_EQ_",
+             '~', "_TILDE_",
+             '!', "_BANG_",
+             '@', "_CIRCA_",
+             '#', "_SHARP_",
+             '$', "_DOLLARSIGN_",
+             '%', "_PERCENT_",
+             '^', "_CARET_",
+             '&', "_AMPERSAND_",
+             '*', "_STAR_",
+             '|', "_BAR_",
+             '{', "_LBRACE_",
+             '}', "_RBRACE_",
+             '[', "_LBRACK_",
+             ']', "_RBRACK_",
+             '/', "_SLASH_",
+             '\\', "_BSLASH_",
+             '?', "_QMARK_"
+             );
+
+
+        // Used in core_deftype, so initial lowercase required for compatibility
+        public static string munge(string name)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in name)
+            {
+                string sub = (string)CHAR_MAP.valAt(c);
+                if (sub == null)
+                    sb.Append(c);
+                else
+                    sb.Append(sub);
+            }
+            return sb.ToString();
+        }
+
+        #endregion
+
+        #region Duplicate types
+
+        static Dictionary<String, Type> _duplicateTypeMap = new Dictionary<string, Type>();
+
+        internal static void RegisterDuplicateType(Type type)
+        {
+            _duplicateTypeMap[type.FullName] = type;
+        }
+
+        internal static Type FindDuplicateType(string typename)
+        {
+            Type type;
+            _duplicateTypeMap.TryGetValue(typename, out type);
+            return type;
+        }
+
+        #endregion
+
+        #region eval
+
+        /// <summary>
+        ///  
+        /// </summary>
+        /// <param name="form"></param>
+        /// <returns></returns>
+        /// <remarks>Initial lowercase for core.clj compatibility</remarks>
         public static object eval(object form)
         {
             int line = (int)LINE.deref();
@@ -1186,6 +803,9 @@ namespace clojure.lang
             IPersistentMap sourceSpan = (IPersistentMap)SOURCE_SPAN.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SOURCE_SPAN_KEY))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SOURCE_SPAN_KEY);
+
+            ParserContext pconExpr = new ParserContext(RHC.Expression);
+            ParserContext pconEval = new ParserContext(RHC.Eval);
 
             Var.pushThreadBindings(RT.map(LINE, line, SOURCE_SPAN, sourceSpan, COMPILER_CONTEXT, null));
             try
@@ -1200,14 +820,19 @@ namespace clojure.lang
                 }
                 else if (form is IPersistentCollection && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def")))
                 {
-                    Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, "eval" + RT.nextID().ToString(), false);
-                    return ast.Compile().Invoke();
+                    ObjExpr objx = (ObjExpr)Analyze(pconExpr, RT.list(FN, PersistentVector.EMPTY, form), "eval__" + RT.nextID());
+                    IFn fn = (IFn)objx.Eval();
+                    return fn.invoke();
+                    //Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, "eval" + RT.nextID().ToString(), false);
+                    //return ast.Compile().Invoke();
                 }
                 else
                 {
+                    Expr expr = Analyze(pconEval, form);
+                    return expr.Eval();
                     // In the Java version, one would actually eval.
-                    Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
-                    return ast.Compile().Invoke();
+                    //Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
+                    //return ast.Compile().Invoke();
                 }
             }
             finally
@@ -1216,11 +841,512 @@ namespace clojure.lang
             }
         }
 
+        #endregion
+
+        #region Macroexpansion
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="form"></param>
+        /// <returns></returns>
+        /// <remarks>Initial lowercase for core.clj compatibility</remarks>
         public static object macroexpand1(object form)
         {
-            return Macroexpand1(form);
+            return (form is ISeq)
+                ? MacroexpandSeq1((ISeq)form)
+                : form;
         }
-        
+
+        static object Macroexpand(object form)
+        {
+            object exf = macroexpand1(form);
+            if (exf != form)
+                return Macroexpand(exf);
+            return form;
+        }
+
+        private static object MacroexpandSeq1(ISeq form)
+        {
+            object op = RT.first(form);
+
+            if (IsSpecial(op))
+                return form;
+
+            // macro expansion
+            Var v = IsMacro(op);
+            if (v != null)
+            {
+                // TODO: Check this against current code
+                return v.applyTo(RT.cons(form, RT.cons(LOCAL_ENV.get(), form.next())));
+            }
+            else
+            {
+                if (op is Symbol)
+                {
+                    Symbol sym = (Symbol)op;
+                    string sname = sym.Name;
+                    // (.substring s 2 5) => (. x substring 2 5)
+                    if (sname[0] == '.')
+                    {
+                        if (form.count() < 2)
+                            throw new ArgumentException("Malformed member expression, expecting (.member target ...)");
+                        Symbol method = Symbol.intern(sname.Substring(1));
+                        object target = RT.second(form);
+                        if (HostExpr.MaybeType(target, false) != null)
+                            target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY, CLASS));
+                        // We need to make sure source information gets transferred
+                        return MaybeTransferSourceInfo(PreserveTag(form, RT.listStar(DOT, target, method, form.next().next())), form);
+                    }
+                    else if (NamesStaticMember(sym))
+                    {
+                        Symbol target = Symbol.intern(sym.Namespace);
+                        Type t = HostExpr.MaybeType(target, false);
+                        if (t != null)
+                        {
+                            Symbol method = Symbol.intern(sym.Name);
+                            // We need to make sure source information gets transferred
+                            return MaybeTransferSourceInfo(PreserveTag(form, RT.listStar(Compiler.DOT, target, method, form.next())), form);
+                        }
+                    }
+                    else
+                    {
+                        // (x.substring 2 5) =>  (. x substring 2 5)
+                        // also (package.class.name ... ) (. package.class name ... )
+                        int index = sname.LastIndexOf('.');
+                        if (index == sname.Length - 1)
+                            // We need to make sure source information gets transferred
+                            return MaybeTransferSourceInfo(RT.listStar(Compiler.NEW, Symbol.intern(sname.Substring(0, index)), form.next()), form);
+                    }
+                }
+
+            }
+            return form;
+        }
+
+        private static Var IsMacro(Object op)
+        {
+            if (op is Symbol && ReferenceLocal((Symbol)op) != null)
+                return null;
+            if (op is Symbol || op is Var)
+            {
+                Var v = (op is Var) ? (Var)op : LookupVar((Symbol)op, false);
+                if (v != null && v.IsMacro)
+                {
+                    if (v.Namespace != CurrentNamespace && !v.IsPublic)
+                        throw new InvalidOperationException(string.Format("Var: {0} is not public", v));
+                    return v;
+                }
+            }
+            return null;
+        }
+
+        private static IFn IsInline(object op, int arity)
+        {
+            // Java:  	//no local inlines for now
+            if (op is Symbol && ReferenceLocal((Symbol)op) != null)
+                return null;
+
+            if (op is Symbol || op is Var)
+            {
+                Var v = (op is Var) ? (Var)op : LookupVar((Symbol)op, false);
+                if (v != null)
+                {
+                    if (v.Namespace != CurrentNamespace && !v.isPublic)
+                        throw new InvalidOperationException("var: " + v + " is not public");
+                    IFn ret = (IFn)RT.get(v.meta(), INLINE_KEY);
+                    if (ret != null)
+                    {
+                        IFn arityPred = (IFn)RT.get(v.meta(), INLINE_ARITIES_KEY);
+                        if (arityPred == null || RT.booleanCast(arityPred.invoke(arity)))
+                            return ret;
+                    }
+                }
+            }
+            return null;
+        }
+
+        static object MaybeTransferSourceInfo(object newForm, object oldForm)
+        {
+            IObj newObj = newForm as IObj;
+            if (newObj == null)
+                return newForm;
+
+            IObj oldObj = oldForm as IObj;
+            if (oldObj == null)
+                return newForm;
+
+            IPersistentMap oldMeta = oldObj.meta();
+            if (oldMeta == null)
+                return newForm;
+
+            IPersistentMap spanMap = (IPersistentMap)oldMeta.valAt(RT.SOURCE_SPAN_KEY);
+            if (spanMap != null)
+            {
+                IPersistentMap newMeta = newObj.meta();
+                if (newMeta == null)
+                    newMeta = RT.map();
+
+                newMeta = newMeta.assoc(RT.SOURCE_SPAN_KEY, spanMap);
+
+                return newObj.withMeta(newMeta);
+            }
+
+            return newForm;
+        }
+
+        static object PreserveTag(ISeq src, object dst)
+        {
+            Symbol tag = TagOf(src);
+            if (tag != null && dst is IObj)
+            {
+                IPersistentMap meta = RT.meta(dst);
+                return ((IObj)dst).withMeta((IPersistentMap)RT.assoc(meta, RT.TAG_KEY, tag));
+            }
+            return dst;
+        }
+
+        internal static Type[] GetTypes(ParameterInfo[] ps)
+        {
+            Type[] ts = new Type[ps.Length];
+            for (int i = 0; i < ps.Length; i++)
+                ts[i] = ps[i].ParameterType;
+            return ts;
+        }
+
+        internal static Symbol TagOf(object o)
+        {
+            object tag = RT.get(RT.meta(o), RT.TAG_KEY);
+            if (tag is Symbol)
+                return (Symbol)tag;
+            else if (tag is string)
+                return Symbol.intern(null, (String)tag);
+            return null;
+        }
+
+        internal static bool NamesStaticMember(Symbol sym)
+        {
+            return sym.Namespace != null && NamespaceFor(sym) == null;
+        }
+
+        #endregion
+
+        #region Compilation
+
+        internal static SymbolDocumentInfo DocInfo()
+        {
+            return (SymbolDocumentInfo)DOCUMENT_INFO.deref();
+        }
+
+        static bool GetLocation(IPersistentMap spanMap, Keyword key, out int val)
+        {
+            object oval = spanMap.valAt(key);
+            if (oval != null && oval is int)
+            {
+                val = (int)oval;
+                return true;
+            }
+            val = -1;
+            return false;
+        }
+
+        static bool GetLocations(IPersistentMap spanMap, out int startLine, out int startCol, out int finishLine, out int finishCol)
+        {
+            startLine = -1;
+            startCol = -1;
+            finishLine = -1;
+            finishCol = -1;
+
+            return GetLocation(spanMap, RT.START_LINE_KEY, out startLine)
+                && GetLocation(spanMap, RT.START_COLUMN_KEY, out startCol)
+                && GetLocation(spanMap, RT.END_LINE_KEY, out finishLine)
+                && GetLocation(spanMap, RT.END_COLUMN_KEY, out finishCol);
+        }
+
+        internal static Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap)
+        {
+            if (spanMap != null & Compiler.DocInfo() != null)
+            {
+                int startLine;
+                int startCol;
+                int finishLine;
+                int finishCol;
+                if (GetLocations(spanMap, out startLine, out startCol, out finishLine, out finishCol))
+                    return AstUtils.AddDebugInfo(expr,
+                        Compiler.DocInfo(),
+                        new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.START_LINE_KEY), (int)spanMap.valAt(RT.START_COLUMN_KEY)),
+                        new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.END_LINE_KEY), (int)spanMap.valAt(RT.END_COLUMN_KEY)));
+            }
+            return expr;
+        }
+
+        static GenContext _evalContext = new GenContext("eval", ".dll", null, false);
+        static public GenContext EvalContext { get { return _evalContext; } }
+
+        static int _saveId = 0;
+        public static void SaveEvalContext()
+        {
+            _evalContext.SaveAssembly();
+            //_evalContext = new GenContext("eval", CompilerMode.Immediate);
+            _evalContext = new GenContext("eval" + (_saveId++).ToString(), ".dll", null, false);
+        }
+
+        public static bool IsCompiling
+        {
+            get { return COMPILER_CONTEXT.deref() != null; }
+        }
+
+        public static string IsCompilingSuffix()
+        {
+            GenContext context = (GenContext)COMPILER_CONTEXT.deref();
+            return context == null ? "_INTERP" : "_COMP_" + (new AssemblyName(context.AssemblyBuilder.FullName)).Name;
+        }
+
+        internal static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
+        {
+            if (COMPILE_PATH.deref() == null)
+                throw new Exception("*compile-path* not set");
+
+            object eofVal = new object();
+            object form;
+
+            //string sourcePath = sourceDirectory == null ? sourceName : sourceDirectory + "\\" + sourceName;
+            string sourcePath = relativePath;
+
+            LineNumberingTextReader lntr =
+                (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);
+
+            //GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, CompilerMode.File);
+            //GenContext evalContext = new GenContext("EvalForCompile", CompilerMode.Immediate);
+
+            GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, true);
+            GenContext evalContext = new GenContext("EvalForCompile", false);
+
+            //FnExpr fn = new FnExpr(null);
+            //fn.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.'));
+            //FnMethod fnm = new FnMethod(fn, null);
+
+            //context = context.CreateWithNewType(fn);
+            //evalContext = evalContext.CreateWithNewType(fn);
+
+            Var.pushThreadBindings(RT.map(
+                SOURCE_PATH, sourcePath,
+                SOURCE, sourceName,
+                METHOD, null,
+                LOCAL_ENV, null,
+                LOOP_LOCALS, null,
+                NEXT_LOCAL_NUM, 0,
+                RT.CURRENT_NS, RT.CURRENT_NS.deref(),
+                    //LINE_BEFORE, lntr.LineNumber,
+                    //LINE_AFTER, lntr.LineNumber,
+                DOCUMENT_INFO, Expression.SymbolDocument(sourceName),  // I hope this is enough
+                CONSTANTS, PersistentVector.EMPTY,
+                CONSTANT_IDS, new IdentityHashMap(),
+                KEYWORDS, PersistentHashMap.EMPTY,
+                VARS, PersistentHashMap.EMPTY,
+                KEYWORD_CALLSITES, PersistentVector.EMPTY,  // jvm doesn't do this, don't know why
+                VAR_CALLSITES, PersistentVector.EMPTY,      // jvm doesn't do this, don't know why
+                PROTOCOL_CALLSITES, PersistentVector.EMPTY, // jvm doesn't do this, don't know why
+                COMPILER_CONTEXT, context
+                ));
+
+
+            try
+            {
+                FnExpr objx = new FnExpr(null);
+                objx.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.')) + "__init";
+
+                TypeBuilder exprTB = context.AssemblyGen.DefinePublicType("__REPL__", typeof(object), true);
+
+                //List<string> names = new List<string>();
+                List<Expr> exprs = new List<Expr>();
+
+                int i = 0;
+                while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
+                {
+                    //Java version: LINE_AFTER.set(lntr.LineNumber);
+
+                    Compile1(context, evalContext, exprTB, form, exprs, ref i);
+
+
+                    //Java version: LINE_BEFORE.set(lntr.LineNumber);
+                }
+
+                Type exprType = exprTB.CreateType();
+
+                // Need to put the loader init in its own type because we can't generate calls on the MethodBuilders
+                //  until after their types have been closed.
+
+                TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
+
+                Expression pushNSExpr = Expression.Call(null, Method_Compiler_PushNS);
+                Expression popExpr = Expression.Call(null, Method_Var_popThreadBindings);
+
+                //List<Expression> inits = new List<Expression>();
+                //foreach (string name in names)
+                //{
+                //    Expression call = Expression.Call(exprType, name, Type.EmptyTypes);
+                //    inits.Add(call);
+                //}
+
+                //if (inits.Count == 0)
+                //    inits.Add(Expression.Constant(null));
+
+                //Expression tryCatch = Expression.TryCatchFinally(Expression.Block(inits), popExpr);
+
+                BodyExpr bodyExpr = new BodyExpr(PersistentVector.create1(exprs));
+                FnMethod method = new FnMethod(objx, null, bodyExpr);
+                objx.AddMethod(method);
+
+
+                objx.Keywords = (IPersistentMap)KEYWORDS.deref();
+                objx.Vars = (IPersistentMap)VARS.deref();
+                objx.Constants = (PersistentVector)CONSTANTS.deref();
+
+                objx.KeywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
+                objx.ProtocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
+                objx.VarCallsites = (IPersistentVector)VAR_CALLSITES.deref();
+
+                objx.Compile(typeof(AFunction), PersistentVector.EMPTY, false, context);
+
+                Expression fnNew = objx.GenCode(RHC.Expression,objx,context);
+                Expression fnInvoke = Expression.Call(fnNew, fnNew.Type.GetMethod("invoke", System.Type.EmptyTypes));
+
+                Expression tryCatch = Expression.TryCatchFinally(fnInvoke, popExpr);
+
+                Expression body = Expression.Block(pushNSExpr, tryCatch);
+
+                // create initializer call
+                MethodBuilder mbInit = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static);
+                LambdaExpression initFn = Expression.Lambda(body);
+                initFn.CompileToMethod(mbInit, DebugInfoGenerator.CreatePdbGenerator());
+
+                initTB.CreateType();
+
+                context.SaveAssembly();
+            }
+            catch (LispReader.ReaderException e)
+            {
+                throw new CompilerException(sourceName, e.Line, e.InnerException);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+            return null;
+        }
+
+        private static void Compile1(GenContext compileContext, GenContext evalContext, TypeBuilder exprTB, object form, List<Expr> exprs, ref int i)
+        {
+
+            int line = (int)LINE.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
+                line = (int)RT.meta(form).valAt(RT.LINE_KEY);
+            IPersistentMap sourceSpan = (IPersistentMap)SOURCE_SPAN.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SOURCE_SPAN_KEY))
+                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SOURCE_SPAN_KEY);
+
+            Var.pushThreadBindings(RT.map(LINE, line, SOURCE_SPAN, sourceSpan));
+
+            ParserContext pcontext = new ParserContext(RHC.Eval);
+
+            try
+            {
+
+                form = Macroexpand(form);
+                if (form is IPersistentCollection && Util.Equals(RT.first(form), DO))
+                {
+                    for (ISeq s = RT.next(form); s != null; s = RT.next(s))
+                        Compile1(compileContext, evalContext, exprTB, RT.first(s), exprs, ref i);
+                }
+                else
+                {
+                    Expr expr = Analyze(pcontext, form);
+                    exprs.Add(expr);     // should pick up the keywords/vars/constants here
+                    expr.Eval();
+
+
+                    // To avoid expanding macros more than once, we generate the AST only once,
+                    // and then compile using the compile context
+                    // and then eval using the eval context
+
+                    //    Expr ast = GenerateWrappedAst(form);
+                    //    exprs.Add(new InvokeExpr((string)Compiler.SOURCE.deref(),
+                    //(IPersistentMap)Compiler.SOURCE_SPAN.deref(), //Compiler.GetSourceSpanMap(form),
+                    //Compiler.TagOf(form),
+                    //ast,
+                    //PersistentVector.EMPTY));
+
+                    //Expr ast = GenerateAST(form, new ParserContext(false, false));
+                    //exprs.Add(ast);
+
+
+                    //Var.pushThreadBindings(RT.map(
+                    //    COMPILER_CONTEXT, evalContext,
+                    //    METHOD, null));
+
+                    //try
+                    //{
+                    //    // Compile to assembly
+                    //    ast = GenerateWrappedAst(form);
+                    //    Expression exprForCompile = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
+                    //    Expression<ReplDelegate> lambdaForCompile = Expression.Lambda<ReplDelegate>(Expression.Convert(exprForCompile, typeof(Object)), "ReplCall", null);
+
+                    //    // TODO: gather all the exprForCompiles into one BIG lambda.  Then we only need one BIG method.
+                    //    //MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
+                    //    //    MethodAttributes.Public | MethodAttributes.Static);
+                    //    //ast.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());
+                    //    //lambdaForCompile.CompileToMethod(methodBuilder, true);
+
+                    //    //names.Add(methodBuilder.Name);
+
+                    //    //// evaluate in this environment
+                    //    //Expression exprForEval = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
+                    //    //LambdaExpression lambdaForEval = Expression.Lambda(exprForEval, "ReplCall", null);
+                    //    Expression<ReplDelegate> lambdaForEval = lambdaForCompile;
+
+                    //    lambdaForEval.Compile().Invoke();
+                    //}
+                    //finally
+                    //{
+                    //    Var.popThreadBindings();
+                    //}
+                }
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+        }
+
+        public static void PushNS()
+        {
+            Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.create("clojure.core"),
+                                                                       Symbol.create("*ns*")), null));
+        }
+
+
+        internal static bool LoadAssembly(FileInfo assyInfo)
+        {
+            Assembly assy = Assembly.LoadFile(assyInfo.FullName);
+            Type initType = assy.GetType("__Init__");
+            if (initType == null)
+            {
+                Console.WriteLine("Bad assembly");
+                return false;
+            }
+            try
+            {
+                initType.InvokeMember("Initialize", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, null, new object[0]);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error initializing {0}: {1}", assyInfo.FullName, e.Message);
+                return false;
+            }
+        }
+
         #endregion
 
         #region Loading
@@ -1228,17 +1354,17 @@ namespace clojure.lang
         public static object loadFile(string filename)
         {
             FileInfo finfo = new FileInfo(filename);
-            if ( ! finfo.Exists )
-                throw new FileNotFoundException("Cannot find file to load",filename);
+            if (!finfo.Exists)
+                throw new FileNotFoundException("Cannot find file to load", filename);
 
             using (TextReader rdr = finfo.OpenText())
-                return load(rdr, finfo.FullName, finfo.Name,filename);
+                return load(rdr, finfo.FullName, finfo.Name, filename);
         }
 
 
         public static object load(TextReader rdr, string relativePath)
         {
-            return load(rdr, null, "NO_SOURCE_FILE",relativePath);  // ?
+            return load(rdr, null, "NO_SOURCE_FILE", relativePath);  // ?
         }
 
         public delegate object ReplDelegate();
@@ -1289,131 +1415,113 @@ namespace clojure.lang
 
         #endregion
 
-        #region Compiling
+        #region Form analysis
 
-        internal static SymbolDocumentInfo DocInfo()
+        internal static LiteralExpr NIL_EXPR = new NilExpr();
+        static LiteralExpr TRUE_EXPR = new BooleanExpr(true);
+        static LiteralExpr FALSE_EXPR = new BooleanExpr(false);
+
+        public static Expr Analyze(ParserContext pcontext, object form)
         {
-            return (SymbolDocumentInfo)DOCUMENT_INFO.deref();
+            return Analyze(pcontext, form, null);
         }
 
-        internal static Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap)
+        public static Expr Analyze(ParserContext pcontext, object form, string name)
         {
-            if (spanMap != null & Compiler.DocInfo() != null)
-                return AstUtils.AddDebugInfo(expr,
-                    Compiler.DocInfo(),
-                    new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.START_LINE_KEY), (int)spanMap.valAt(RT.START_COLUMN_KEY)),
-                    new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.END_LINE_KEY), (int)spanMap.valAt(RT.END_COLUMN_KEY)));
-            return expr;
-        }
-
-        public static bool IsCompiling
-        {
-            get { return COMPILER_CONTEXT.deref() != null; }
-        }
-
-        public static string IsCompilingSuffix()
-        {
-            GenContext context = (GenContext) COMPILER_CONTEXT.deref();
-            return context == null ? "_INTERP" : "_COMP_" + (new AssemblyName(context.AssemblyBuilder.FullName)).Name;
-        }
-
-        internal static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
-        {
-            if (COMPILE_PATH.deref() == null)
-                throw new Exception("*compile-path* not set");
-
-            object eofVal = new object();
-            object form;
-
-            //string sourcePath = sourceDirectory == null ? sourceName : sourceDirectory + "\\" + sourceName;
-            string sourcePath = relativePath;
-
-            LineNumberingTextReader lntr =
-                (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);
-
-            //GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, CompilerMode.File);
-            //GenContext evalContext = new GenContext("EvalForCompile", CompilerMode.Immediate);
-
-            GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, AssemblyMode.Save,FnMode.Full);
-            GenContext evalContext = new GenContext("EvalForCompile", AssemblyMode.Dynamic,FnMode.Light);
-
-            Var.pushThreadBindings(RT.map(
-            SOURCE_PATH, sourcePath,
-            SOURCE, sourceName,
-            RT.CURRENT_NS, RT.CURRENT_NS.deref(),
-            //LINE_BEFORE, lntr.LineNumber,
-            //LINE_AFTER, lntr.LineNumber,
-            DOCUMENT_INFO, Expression.SymbolDocument(sourceName),  // I hope this is enough
-            CONSTANTS, PersistentVector.EMPTY,
-            CONSTANT_IDS, new IdentityHashMap(),
-            KEYWORDS, PersistentHashMap.EMPTY,
-            VARS, PersistentHashMap.EMPTY,
-            COMPILER_CONTEXT, context
-            ));
-
-
-            try
+            if (form is LazySeq)
             {
+                form = RT.seq(form);
+                if (form == null)
+                    form = PersistentList.EMPTY;
+            }
+            if (form == null)
+                return NIL_EXPR;
+            else if (form is Boolean)
+                return ((bool)form) ? TRUE_EXPR : FALSE_EXPR;
 
-                TypeBuilder exprTB = context.AssemblyGen.DefinePublicType("__REPL__", typeof(object), true);
+            Type type = form.GetType();
 
-                List<string> names = new List<string>();
+            if (type == typeof(Symbol))
+                return AnalyzeSymbol((Symbol)form);
+            else if (type == typeof(Keyword))
+                return RegisterKeyword((Keyword)form);
+            //else if (Util.IsNumeric(form))
+            //    return NumberExpr.Parse(form);
+            else if (type == typeof(String))
+                return new StringExpr(String.Intern((String)form));
+            else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
+                return OptionallyGenerateMetaInit(pcontext, form, new EmptyExpr(form));
+            else if (form is ISeq)
+                return AnalyzeSeq(pcontext, (ISeq)form, name);
+            else if (form is IPersistentVector)
+                return VectorExpr.Parse(pcontext, (IPersistentVector)form);
+            else if (form is IPersistentMap)
+                return MapExpr.Parse(pcontext, (IPersistentMap)form);
+            else if (form is IPersistentSet)
+                return SetExpr.Parse(pcontext, (IPersistentSet)form);
+            else
+                return new ConstantExpr(form);
+        }
 
-                int i = 0;
-                while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
+        internal static Expr OptionallyGenerateMetaInit(ParserContext pcon, object form, Expr expr)
+        {
+            Expr ret = expr;
+
+            if ( RT.meta(form) != null )
+                ret = new MetaExpr(ret, (MapExpr)MapExpr.Parse(pcon.EvEx(),((IObj)form).meta()));
+
+            return ret;
+        }
+
+        private static Expr AnalyzeSymbol(Symbol symbol)
+        {
+            Symbol tag = TagOf(symbol);
+
+            if (symbol.Namespace == null) // ns-qualified syms are always Vars
+            {
+                LocalBinding b = ReferenceLocal(symbol);
+                if (b != null)
+                    return new LocalBindingExpr(b, tag);
+            }
+            else
+            {
+                if (namespaceFor(symbol) == null)
                 {
-                    //Java version: LINE_AFTER.set(lntr.LineNumber);
+                    Symbol nsSym = Symbol.create(symbol.Namespace);
+                    Type t = HostExpr.MaybeType(nsSym, false);
+                    if (t != null)
+                    {
+                        FieldInfo finfo;
+                        PropertyInfo pinfo;
 
-                    Compile1(context, exprTB, form, names, ref i);
-
-
-                    //Java version: LINE_BEFORE.set(lntr.LineNumber);
+                        if ((finfo = Reflector.GetField(t, symbol.Name, true)) != null)
+                            return new StaticFieldExpr((string)SOURCE.deref(), null, tag, t, symbol.Name, finfo);
+                        else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) != null)
+                            return new StaticPropertyExpr((string)SOURCE.deref(), null, tag, t, symbol.Name, pinfo);
+                    }
+                    throw new Exception(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
                 }
-
-                Type exprType = exprTB.CreateType();
-
-                // Need to put the loader init in its own type because we can't generate calls on the MethodBuilders
-                //  until after their types have been closed.
-
-                TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
-
-                Expression pushNSExpr = Expression.Call(null, Method_Compiler_PushNS);
-                Expression popExpr = Expression.Call(null, Method_Var_popThreadBindings);
-
-                List<Expression> inits = new List<Expression>();
-                foreach (string name in names)
-                {
-                    Expression call = Expression.Call(exprType, name, Type.EmptyTypes);
-                    inits.Add(call);
-                }
-
-                Expression tryCatch = Expression.TryCatchFinally(Expression.Block(inits), popExpr);
-
-                Expression body = Expression.Block(pushNSExpr, tryCatch);
-
-                // create initializer call
-                MethodBuilder mbInit = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static);
-                LambdaExpression initFn = Expression.Lambda(body);
-                initFn.CompileToMethod(mbInit, DebugInfoGenerator.CreatePdbGenerator());
-
-                initTB.CreateType();
-
-                context.SaveAssembly();
             }
-            catch (LispReader.ReaderException e)
+
+            object o = Compiler.Resolve(symbol);
+            if (o is Var)
             {
-                throw new CompilerException(sourceName, e.Line, e.InnerException);
+                Var v = (Var)o;
+                if (IsMacro(v) != null)
+                    throw new Exception("Can't take the value of a macro: " + v);
+                RegisterVar(v);
+                return new VarExpr(v, tag);
             }
-            finally
-            {
-                Var.popThreadBindings();
-            }
-            return null;
+            else if (o is Type)
+                return new ConstantExpr(o);
+            else if (o is Symbol)
+                return new UnresolvedVarExpr((Symbol)o);
+
+            throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));
         }
 
-        private static void Compile1(GenContext context, TypeBuilder exprTB, object form, List<string> names, ref int i)
+        private static Expr AnalyzeSeq(ParserContext pcon, ISeq form, string name )
         {
-
             int line = (int)LINE.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
                 line = (int)RT.meta(form).valAt(RT.LINE_KEY);
@@ -1426,40 +1534,26 @@ namespace clojure.lang
             try
             {
 
-                form = Macroexpand(form);
-                if (form is IPersistentCollection && Util.Equals(RT.first(form), DO))
-                {
-                    for (ISeq s = RT.next(form); s != null; s = RT.next(s))
-                        Compile1(context, exprTB, RT.first(s), names, ref i);
-                }
+                object me = MacroexpandSeq1(form);
+                if (me != form)
+                    return Analyze(pcon, me, name);
+
+                object op = RT.first(form);
+                if (op == null)
+                    throw new ArgumentNullException("Can't call nil");
+
+                IFn inline = IsInline(op, RT.count(RT.next(form)));
+
+                if (inline != null)
+                    return Analyze(pcon,MaybeTransferSourceInfo(PreserveTag(form, inline.applyTo(RT.next(form))), form));
+
+                IParser p;
+                if (op.Equals(FN))
+                    return FnExpr.Parse(pcon,form, name);
+                if ((p = GetSpecialFormParser(op)) != null)
+                    return p.Parse(pcon,form);
                 else
-                {
-
-                    // To avoid expanding macros more than once, we generate the AST only once,
-                    // and then compile using the compile context
-                    // and then eval using the eval context
-
-                    Expr ast = GenerateWrappedAst(form);
-
-                    // Compile to assembly
-                    Expression exprForCompile = GenerateInvokedDlrFromWrappedAst(context, ast);
-                    Expression<ReplDelegate> lambdaForCompile = Expression.Lambda<ReplDelegate>(Expression.Convert(exprForCompile, typeof(Object)), "ReplCall", null);
-
-                    // TODO: gather all the exprForCompiles into one BIG lambda.  Then we only need one BIG method.
-                    MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
-                        MethodAttributes.Public | MethodAttributes.Static);
-                    //ast.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());
-                    lambdaForCompile.CompileToMethod(methodBuilder, true);
-
-                    names.Add(methodBuilder.Name);
-
-                    //// evaluate in this environment
-                    //Expression exprForEval = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
-                    //LambdaExpression lambdaForEval = Expression.Lambda(exprForEval, "ReplCall", null);
-                    Expression<ReplDelegate> lambdaForEval = lambdaForCompile;
-
-                    lambdaForEval.Compile().Invoke();
-                }
+                    return InvokeExpr.Parse(pcon,form);
             }
             finally
             {
@@ -1467,33 +1561,6 @@ namespace clojure.lang
             }
         }
 
-        public static void PushNS()
-        {
-            Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.create("clojure.core"),
-                                                                       Symbol.create("*ns*")), null));
-        }
-
-
-        internal static bool LoadAssembly(FileInfo assyInfo)
-        {
-            Assembly assy = Assembly.LoadFile(assyInfo.FullName);
-            Type initType = assy.GetType("__Init__");
-            if (initType == null)
-            {
-                Console.WriteLine("Bad assembly");
-                return false;
-            }
-            try
-            {
-                initType.InvokeMember("Initialize", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, null, new object[0]);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Error initializing {0}: {1}", assyInfo.FullName, e.Message);
-                return false;
-            }
-        }
 
         #endregion
 
@@ -1513,57 +1580,10 @@ namespace clojure.lang
 
             static string ErrorMsg(string source, int line, string s)
             {
-                return string.Format("{0} ({1}:{2})",s, source,line);
+                return string.Format("{0} ({1}:{2})", s, source, line);
             }
 
-        }   
-
-        #endregion
-
-        #region Things to move elsewhere
-
-        internal static Type MaybePrimitiveType(Expr e)
-        {
-            if (e is MaybePrimitiveExpr && e.HasClrType && ((MaybePrimitiveExpr)e).CanEmitPrimitive)
-            {
-                Type t = e.ClrType;
-                if (Util.IsPrimitive(t))
-                    return t;
-            }
-            return null;
         }
-
-        internal static Expression GenArgArray(GenContext context, IPersistentVector args)
-        {
-            Expression[] exprs = new Expression[args.count()];
-
-            for (int i = 0; i < args.count(); i++)
-            {
-                Expr arg = (Expr)args.nth(i);
-                exprs[i] = Compiler.MaybeBox(arg.GenDlr(context));
-            }
-
-            Expression argArray = Expression.NewArrayInit(typeof(object), exprs);
-            return argArray;
-        }
-
-        //internal static Expression[] GenTypedArgArray(GenContext context, ParameterInfo[] infos, IPersistentVector args)
-        //{
-        //    Expression[] exprs = new Expression[args.count()];
-
-        //    for (int i = 0; i < infos.Length; i++)
-        //    {
-        //        Expr e = (Expr)args.nth(i);
-        //        // Java: this is in a try/catch, where the catch prints a stack trace
-        //        if (MaybePrimitiveType(e) == infos[i].ParameterType)
-        //            exprs[i] = ((MaybePrimitiveExpr)e).GenDlrUnboxed(context);
-        //        else
-        //            // Java follows this with: HostExpr.emitUnboxArg(fn, gen, parameterTypes[i]);
-        //            //exprs[i] = e.GenDlr(context);
-        //            exprs[i] = Expression.Convert(e.GenDlr(context), infos[i].ParameterType); ;
-        //    }
-        //    return exprs;
-        //}
 
         #endregion
     }

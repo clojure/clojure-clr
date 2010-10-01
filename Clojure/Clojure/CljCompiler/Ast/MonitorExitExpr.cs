@@ -12,7 +12,7 @@
  *   Author: David Miller
  **/
 
-
+using System;
 #if CLR2
 using Microsoft.Scripting.Ast;
 #else
@@ -43,21 +43,30 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object form)
             {
-                return new MonitorExitExpr(Compiler.GenerateAST(RT.second(form),pcon.SetRecur(false)));
+                return new MonitorExitExpr(Compiler.Analyze(pcon.SetRhc(RHC.Expression),RT.second(form)));
             }
+        }
+
+        #endregion
+
+        #region eval
+
+        public override object Eval()
+        {
+            throw new InvalidOperationException("Can't eval monitor-exit");
         }
 
         #endregion
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             return Expression.Block(
-                Expression.Call(Compiler.Method_Monitor_Exit, _target.GenDlr(context)),
-                Compiler.NIL_EXPR.GenDlr(context));
+                Expression.Call(Compiler.Method_Monitor_Exit, _target.GenCode(RHC.Expression, objx, context)),
+                Compiler.NIL_EXPR.GenCode(rhc, objx, context));
         }
 
         #endregion

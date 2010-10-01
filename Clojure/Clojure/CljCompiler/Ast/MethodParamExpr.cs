@@ -42,21 +42,30 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return _t != null; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return _t; }
         }
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            throw new Exception("Can't eval");
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             throw new InvalidOperationException("Can't emit");
         }
@@ -70,7 +79,7 @@ namespace clojure.lang.CljCompiler.Ast
             get { return Util.IsPrimitive(_t); }
         }
 
-        public Expression GenDlrUnboxed(GenContext context)
+        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             throw new InvalidOperationException("Can't emit");
         }

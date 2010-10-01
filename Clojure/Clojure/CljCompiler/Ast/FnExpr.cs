@@ -29,7 +29,6 @@ namespace clojure.lang.CljCompiler.Ast
 {
     class FnExpr : ObjExpr
     {
-
         #region Data
 
         static readonly Keyword KW_ONCE = Keyword.intern(null, "once");
@@ -37,24 +36,6 @@ namespace clojure.lang.CljCompiler.Ast
         FnMethod _variadicMethod = null;
 
         bool IsVariadic { get { return _variadicMethod != null; } }
-
-        bool _onceOnly = false;
-
-        #endregion
-
-        #region not yet
-        /*
-         * 
-         * 
-        static readonly Keyword KW_SUPER_NAME = Keyword.intern(null, "super-name");
-
-        string _simpleName;
-
-
-
-        //int _line;
-         
-         */
 
         #endregion
 
@@ -81,7 +62,6 @@ namespace clojure.lang.CljCompiler.Ast
             if (RT.second(form) is Symbol)
                 name = ((Symbol)RT.second(form)).Name;
 
-            //string simpleName = (name == null ? "fn" : Compiler.munge(name).Replace(".", "_DOT_")) + "__" + RT.nextID();
             string simpleName = name != null ?
                         (Compiler.munge(name).Replace(".", "_DOT_")
                         + (enclosingMethod != null ? "__" + RT.nextID() : ""))
@@ -90,9 +70,6 @@ namespace clojure.lang.CljCompiler.Ast
 
             Name = baseName + simpleName;
             InternalName = Name.Replace('.', '/');
-
-            ObjType = RT.classForName(InternalName);
-            // fn.fntype = Type.getObjectType(fn.internalName) -- JAVA            
         }
 
         #endregion
@@ -119,9 +96,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Parsing
 
-        public static Expr Parse(object frm, string name, ParserContext pcon)
+        public static Expr Parse(ParserContext pcon, ISeq form, string name)
         {
-            ISeq form = (ISeq)frm;
             ISeq origForm = form;
 
             FnExpr fn = new FnExpr(Compiler.TagOf(form));
@@ -132,8 +108,9 @@ namespace clojure.lang.CljCompiler.Ast
                 fn._onceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), KW_ONCE));
             }
 
-
             fn.ComputeNames(form, name);
+
+            // Java: fn.objtype = Type.getObjectType(fn.internalName) -- makes no sense for us, this is ASM only.
 
             try
             {
@@ -149,22 +126,15 @@ namespace clojure.lang.CljCompiler.Ast
                 //arglist might be preceded by symbol naming this fn
                 if (RT.second(form) is Symbol)
                 {
-                    fn._thisName = ((Symbol)RT.second(form)).Name;
+                    Symbol nm = (Symbol)RT.second(form);
+                    fn._thisName = nm.Name;
+                    fn.IsStatic = RT.booleanCast(RT.get(nm.meta(), Compiler.STATIC_KEY));
                     form = RT.cons(Compiler.FN, RT.next(RT.next(form)));
                 }
 
-                //  Added to improve stack trace messages.
-                //  This seriously hoses compilation of core.clj.  Needs investigation.
-                //  Backing this out.
-                //else if (name != null)
-                //{
-                //    fn._thisName = name;
-                //}
-
                 // Normalize body
-                // If it is (fn [arg...] body ...), turn it into
-                //          (fn ([arg...] body...))
-                // so that we can treat uniformly as (fn ([arg...] body...) ([arg...] body...) ... )
+			    //now (fn [args] body...) or (fn ([args] body...) ([args2] body2...) ...)
+			    //turn former into latter
                 if (RT.second(form) is IPersistentVector)
                     form = RT.list(Compiler.FN, RT.next(form));
 
@@ -173,7 +143,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 for (ISeq s = RT.next(form); s != null; s = RT.next(s))
                 {
-                    FnMethod f = FnMethod.Parse(fn, (ISeq)RT.first(s));
+                    FnMethod f = FnMethod.Parse(fn, (ISeq)RT.first(s),fn.IsStatic);
                     if (f.IsVariadic)
                     {
                         if (variadicMethod == null)
@@ -190,6 +160,9 @@ namespace clojure.lang.CljCompiler.Ast
                 if (variadicMethod != null && methods.Count > 0 && methods.Keys.Max() >= variadicMethod.NumParams)
                     throw new Exception("Can't have fixed arity methods with more params than the variadic method.");
 
+                if ( fn.IsStatic && fn.Closes.count() > 0 )
+                    throw new ArgumentException("static fns can't be closures");
+
                 IPersistentCollection allMethods = null;
                 foreach (FnMethod method in methods.Values)
                     allMethods = RT.conj(allMethods, method);
@@ -198,12 +171,12 @@ namespace clojure.lang.CljCompiler.Ast
 
                 fn._methods = allMethods;
                 fn._variadicMethod = variadicMethod;
-                fn._keywords = (IPersistentMap)Compiler.KEYWORDS.deref();
-                fn._vars = (IPersistentMap)Compiler.VARS.deref();
-                fn._constants = (PersistentVector)Compiler.CONSTANTS.deref();
-                fn._keywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
-                fn._protocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
-                fn._varCallsites = (IPersistentVector)Compiler.VAR_CALLSITES.deref();
+                fn.Keywords = (IPersistentMap)Compiler.KEYWORDS.deref();
+                fn.Vars = (IPersistentMap)Compiler.VARS.deref();
+                fn.Constants = (PersistentVector)Compiler.CONSTANTS.deref();
+                fn.KeywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
+                fn.ProtocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
+                fn.VarCallsites = (IPersistentVector)Compiler.VAR_CALLSITES.deref();
 
                 fn._constantsID = RT.nextID();
             }
@@ -211,55 +184,56 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Var.popThreadBindings();
             }
-            
-            // JAVA: fn.compile();
-            fn._superType = fn.GetSuperType();
 
-            // Needs its own GenContext so it has its own DynInitHelper
-            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
-            GenContext genC = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
+            if (Compiler.IsCompiling)
+            {
+                GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
+                GenContext genC = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
 
-            fn.GenerateClass(genC);
+                fn.Compile(fn.IsVariadic ? typeof(RestFn) : typeof(AFunction), PersistentVector.EMPTY, fn.OnceOnly, genC);
+            }
+            else
+            {
+                fn.CompiledType = fn.GetPrecompiledType();
+                fn.FnMode = FnMode.Light;
+            }
 
             if (origForm is IObj && ((IObj)origForm).meta() != null)
-                return new MetaExpr(fn, (MapExpr)MapExpr.Parse(((IObj)origForm).meta()));
+                return new MetaExpr(fn, (MapExpr)MapExpr.Parse(pcon.EvEx(),((IObj)origForm).meta()));
             else
                 return fn;
         }
 
+        internal void AddMethod(FnMethod method)
+        {
+            _methods = RT.conj(_methods,method);
+        }
+
         #endregion
 
-        #region Class generation
+        #region eval
 
-        public override FnMode CompileMode()
+        public override object Eval()
         {
-            return FnMode.Light;
+            if (FnMode == FnMode.Full)
+                return base.Eval();
+
+            Expression fn = GenImmediateCode(RHC.Expression, this, Compiler.EvalContext);
+            Expression<Compiler.ReplDelegate> lambdaForCompile = Expression.Lambda<Compiler.ReplDelegate>(Expression.Convert(fn, typeof(Object)), "ReplCall", null);
+            return lambdaForCompile.Compile().Invoke();
+
         }
 
-        protected override Type GenerateClassForImmediate(GenContext context)
-        {
-            //if (_protocolCallsites.count() > 0)
-            //{
-            //    context = context.ChangeMode(CompilerMode.File);
-            //    return GenerateClassForFile(context);
-            //}
-
-            ObjType = _baseType = GetBaseClass(context, _superType);
-            return _baseType;
-        }
-
-        protected override Type GenerateClassForFile(GenContext context)
-        {
-            return EnsureTypeBuilt(context);
-        }
-
-        #endregion 
+        #endregion
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return base.GenDlr(context);
+            if (FnMode == FnMode.Full)
+                return base.GenCode(rhc, objx, context);
+
+            return GenImmediateCode(rhc, objx, context);
         }
 
         protected override void GenerateMethods(GenContext context)
@@ -267,14 +241,11 @@ namespace clojure.lang.CljCompiler.Ast
             for (ISeq s = RT.seq(_methods); s != null; s = s.next())
             {
                 FnMethod method = (FnMethod)s.first();
-                method.GenerateCode(context);
+                method.GenerateCode(this,context);
             }
 
             if (IsVariadic)
-            {
-                TypeBuilder tb = context.ObjExpr.TypeBuilder;
-                GenerateGetRequiredArityMethod(tb, _variadicMethod.RequiredArity);
-            }
+                GenerateGetRequiredArityMethod(TypeBuilder, _variadicMethod.RequiredArity);
         }
 
         static MethodBuilder GenerateGetRequiredArityMethod(TypeBuilder tb, int requiredArity)
@@ -296,44 +267,28 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Immediate mode compilation
 
-
-        protected override Expression GenDlrImmediate(GenContext context)
+        protected Type GetPrecompiledType()
         {
-            //_baseType = GetBaseClass(context, _superType);
-            return GenerateImmediateLambda(context, _baseType);
+            return IsVariadic ? typeof(RestFnImpl) : typeof(AFnImpl);
         }
 
-        protected Type GetSuperType()
+        Expression GenImmediateCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            //return _superName != null
-            //    ? Type.GetType(_superName)
-            //    : IsVariadic
-            //    ? typeof(RestFn)
-            //    : typeof(AFunction);
-            return IsVariadic
-                ? typeof(RestFn)
-                : typeof(AFunction);
-        }
-
-        private Expression GenerateImmediateLambda(GenContext context, Type baseClass)
-        {
-            ParameterExpression p1 = Expression.Parameter(baseClass, "__x__");
+            ParameterExpression p1 = Expression.Parameter(CompiledType, "__x__");
             _thisParam = p1;
 
             List<Expression> exprs = new List<Expression>();
 
-            if (baseClass == typeof(RestFnImpl))
+            if (CompiledType == typeof(RestFnImpl))
                 exprs.Add(Expression.Assign(p1,
                           Expression.New(Compiler.Ctor_RestFnImpl_1, Expression.Constant(_variadicMethod.RequiredArity))));
             else
                 exprs.Add(Expression.Assign(p1, Expression.New(p1.Type)));
 
-            GenContext newContext = CreateContext(context, null, baseClass);
-
             for (ISeq s = RT.seq(_methods); s != null; s = s.next())
             {
                 FnMethod method = (FnMethod)s.first();
-                LambdaExpression lambda = method.GenerateImmediateLambda(newContext);
+                LambdaExpression lambda = method.GenerateImmediateLambda(rhc,this,context);
                 string fieldName = IsVariadic && method.IsVariadic
                     ? "_fnDo" + method.RequiredArity
                     : "_fn" + method.NumParams;
@@ -346,126 +301,7 @@ namespace clojure.lang.CljCompiler.Ast
             return expr;
         }
 
-        private static Type GetBaseClass(GenContext context, Type superType)
-        {
-            Type baseClass = LookupBaseClass(superType);
-            if (baseClass != null)
-                return baseClass;
-
-            baseClass = GenerateBaseClass(context, superType);
-            baseClass = RegisterBaseClass(superType, baseClass);
-            return baseClass;
-        }
-
-        static AtomicReference<IPersistentMap> _baseClassMapRef = new AtomicReference<IPersistentMap>(PersistentHashMap.EMPTY);
-
-        static FnExpr()
-        {
-            _baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(RestFn), typeof(RestFnImpl)));
-            //_baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(AFn),typeof(AFnImpl)));
-        }
-
-
-        private static Type LookupBaseClass(Type superType)
-        {
-            return (Type)_baseClassMapRef.Get().valAt(superType);
-        }
-
-        private static Type RegisterBaseClass(Type superType, Type baseType)
-        {
-            IPersistentMap map = _baseClassMapRef.Get();
-
-            while (!map.containsKey(superType))
-            {
-                IPersistentMap newMap = map.assoc(superType, baseType);
-                _baseClassMapRef.CompareAndSet(map, newMap);
-                map = _baseClassMapRef.Get();
-            }
-
-            return LookupBaseClass(superType);  // may not be the one we defined -- race condition
-        }
-
-
-        private static Type GenerateBaseClass(GenContext context, Type superType)
-        {
-            return AFnImplGenerator.Create(context, superType);
-        }
-
-
 
         #endregion
-
-        #region not yet
-        /* 
-
-
-
-
-        protected override Type GetBaseClass(GenContext context, Type superType)
-        {
-            if (superType == typeof(RestFn))
-            {
-                int reqArity = _variadicMethod.RequiredArity;
-                Type baseClass = LookupRestFnBaseClass(reqArity);
-                if (baseClass != null)
-                    return baseClass;
-
-                baseClass = GenerateRestFnBaseClass(context, reqArity);
-                baseClass = RegisterRestFnBaseClass(reqArity, baseClass);
-                return baseClass;
-
-            }
-
-            return base.GetBaseClass(context, superType);
-        }
-
-
-        static AtomicReference<IPersistentMap> _restFnClassMapRef = new AtomicReference<IPersistentMap>(PersistentHashMap.EMPTY);
-
-        //static ObjExpr()
-        //{
-        //    _baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(RestFn),typeof(RestFnImpl)));
-        //    //_baseClassMapRef.Set(_baseClassMapRef.Get().assoc(typeof(AFn),typeof(AFnImpl)));
-        //}
-
-
-        private static Type LookupRestFnBaseClass(int reqArity)
-        {
-            return (Type)_restFnClassMapRef.Get().valAt(reqArity);
-        }
-
-        private static Type RegisterRestFnBaseClass( int reqArity, Type baseType)
-        {
-            IPersistentMap map = _restFnClassMapRef.Get();
-
-            while (!map.containsKey(reqArity))
-            {
-                IPersistentMap newMap = map.assoc(reqArity, baseType);
-                _restFnClassMapRef.CompareAndSet(map, newMap);
-                map = _restFnClassMapRef.Get();
-            }
-
-            return LookupRestFnBaseClass(reqArity);  // may not be the one we defined -- race condition
-        }
-
-
-        private static Type GenerateRestFnBaseClass(GenContext context, int reqArity)
-        {
-            string name = "RestFnImpl__" + reqArity.ToString();
-            TypeBuilder baseTB = context.AssemblyGen.DefinePublicType(name, typeof(RestFnImpl), true);
-
-            GenerateGetRequiredArityMethod(baseTB, reqArity);
-
-            return baseTB.CreateType();
-        }
-
-
-
-
-
-        
-        */
-        #endregion
-
     }
 }

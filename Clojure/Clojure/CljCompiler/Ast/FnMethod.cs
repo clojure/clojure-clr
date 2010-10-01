@@ -39,6 +39,15 @@ namespace clojure.lang.CljCompiler.Ast
         {
         }
 
+        // For top-level compilation only
+        public FnMethod(FnExpr fn, ObjMethod parent, BodyExpr body)
+            :base(fn,parent)
+        {
+            _body = body;
+            _argLocals = PersistentVector.EMPTY;
+            //_thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null, false);
+        }
+
         #endregion
 
         #region ObjMethod methods
@@ -95,7 +104,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         enum ParamParseState { Required, Rest, Done };
 
-        internal static FnMethod Parse(FnExpr fn, ISeq form)
+        internal static FnMethod Parse(FnExpr fn, ISeq form, bool isStatic)
         {
             // ([args] body ... )
 
@@ -159,7 +168,7 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new Exception(string.Format("Can't specify more than {0} parameters", Compiler.MAX_POSITIONAL_ARITY));
                 Compiler.LOOP_LOCALS.set(argLocals);
                 method._argLocals = argLocals;
-                method._body = (new BodyExpr.Parser()).Parse(body,new ParserContext(true,false));
+                method._body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return),body);
                 return method;
             }
             finally
@@ -172,18 +181,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Immediate mode compilation
 
-        internal LambdaExpression GenerateImmediateLambda(GenContext context)
+        internal LambdaExpression GenerateImmediateLambda(RHC rhc, ObjExpr objx, GenContext context)
         {
             List<ParameterExpression> parmExprs = new List<ParameterExpression>(_argLocals.count());
-            //List<ParameterExpression> typedParmExprs = new List<ParameterExpression>();
-            //List<Expression> typedParmInitExprs = new List<Expression>();
 
-            //FnExpr fn = context.FnExpr;
-            //ParameterExpression thisParm = Expression.Parameter(fn.BaseType, "this");
-            //_thisBinding.ParamExpression = thisParm;
-            //fn.ThisParam = thisParm;
-            ObjExpr fn = context.ObjExpr;
-            _thisBinding.ParamExpression = fn.ThisParam;
+            _thisBinding.ParamExpression = objx.ThisParam;
 
             try
             {
@@ -201,18 +203,10 @@ namespace clojure.lang.CljCompiler.Ast
                     parmExprs.Add(pexpr);
                 }
 
-
-                // TODO:  Eventually, type this param to ISeq.  
-                // This will require some reworking with signatures in various places around here.
-                //if (fn.IsVariadic)
-                //    parmExprs.Add(Expression.Parameter(typeof(object), "____REST"));
-
-                // If we have any typed parameters, we need to add an extra block to do the initialization.
-
                 List<Expression> bodyExprs = new List<Expression>();
                 //bodyExprs.AddRange(typedParmInitExprs);
                 bodyExprs.Add(Expression.Label(loopLabel));
-                bodyExprs.Add(Compiler.MaybeBox(_body.GenDlr(context)));
+                bodyExprs.Add(Compiler.MaybeBox(_body.GenCode(rhc,objx,context)));
 
 
                 Expression block;

@@ -49,12 +49,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return true; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return typeof(Var); }
         }
@@ -65,7 +65,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object form)
             {
                 // (def x) or (def x initexpr)
                 if (RT.count(form) > 3)
@@ -96,15 +96,23 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 IPersistentMap mm = sym.meta();
+                if (RT.booleanCast(RT.get(mm, Compiler.STATIC_KEY)))
+                {
+                    IPersistentMap vm = v.meta();
+                    vm = (IPersistentMap)RT.assoc(vm, Compiler.STATIC_KEY, true);
+                    // drop quote
+                    vm = (IPersistentMap)RT.assoc(vm, Compiler.ARGLISTS_KEY, RT.second(mm.valAt(Compiler.ARGLISTS_KEY)));
+                    v.setMeta(vm);
+                }
+
                 Object source_path = Compiler.SOURCE_PATH.deref();
                 source_path = source_path ?? "NO_SOURCE_FILE";
                 mm = (IPersistentMap)RT.assoc(mm,RT.LINE_KEY, Compiler.LINE.deref())
                     .assoc(RT.FILE_KEY, source_path)
                     .assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
 
-                ParserContext pass = pcon.SetRecur(false).SetAssign(false);
-                Expr meta =  mm == null ? null : Compiler.GenerateAST(mm,pass);
-                Expr init = Compiler.GenerateAST(RT.third(form), v.Symbol.Name, pass);
+                Expr meta =  mm == null ? null : Compiler.Analyze(pcon.EvEx(),mm);
+                Expr init = Compiler.Analyze(pcon.EvEx(),RT.third(form), v.Symbol.Name);
                 bool initProvided = RT.count(form) == 3;
 
                 return new DefExpr(v, init, meta, initProvided);
@@ -113,15 +121,32 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            if (_initProvided)
+                _var.bindRoot(_init.Eval());
+            if (_meta != null)
+            {
+                IPersistentMap metaMap = (IPersistentMap)_meta.Eval();
+                if (_initProvided || true) // includesExplicitMetadata((MapExpr)_meta))
+                    _var.setMeta((IPersistentMap)_meta.Eval());
+            }
+            return _var;
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             List<Expression> exprs = new List<Expression>();
 
             ParameterExpression parm = Expression.Parameter(typeof(Var), "v");
 
-            Expression varExpr = context.ObjExpr.GenVar(context,_var);
+            Expression varExpr = objx.GenVar(context,_var);
 
             exprs.Add(Expression.Assign(parm, varExpr));
 
@@ -129,16 +154,16 @@ namespace clojure.lang.CljCompiler.Ast
             // The Java code does the following in the opposite order (as modified in commit #430dd4f, Jan 19, 2010)
             // However, the call to bindRoot sets :macro to False.  I'm not sure how it works now in the JVM version.
 
-            if (_initProvided)
+            if (_initProvided )
                 // Java doesn't Box here, but we have to deal with unboxed bool values
-                exprs.Add(Expression.Call(parm, Compiler.Method_Var_bindRoot, Compiler.MaybeBox(_init.GenDlr(context))));
+                exprs.Add(Expression.Call(parm, Compiler.Method_Var_bindRoot, Compiler.MaybeBox(_init.GenCode(RHC.Expression,objx,context))));
 
             if (_meta != null)
             {
                 if (_initProvided || IncludesExplicitMetadata((MapExpr)_meta))
                 {
                     // Java casts to IPersistentMap on the _meta, but Expression.Call can handle that for us.
-                    exprs.Add(Expression.Call(parm, Compiler.Method_Var_setMeta, _meta.GenDlr(context)));
+                    exprs.Add(Expression.Call(parm, Compiler.Method_Var_setMeta, _meta.GenCode(RHC.Expression,objx,context)));
                 }
             }
 

@@ -1345,7 +1345,10 @@ namespace clojure.lang
                     if (fs.Name.EndsWith("."))
                     {
                         Object[] args = RT.toArray(RT.next(o));
-                        return Reflector.InvokeConstructor(RT.classForName(fs.Name.Substring(0, fs.Name.Length - 1)), args);
+                        //return Reflector.InvokeConstructor(RT.classForName(fs.Name.Substring(0, fs.Name.Length - 1)), args);
+                        // I think the JVM code is wrong here
+                        string s = fs.ToString();
+                        return Reflector.InvokeConstructor(RT.classForName(s.Substring(0, s.Length - 1)), args);
                     }
                     if (Compiler.NamesStaticMember(fs))
                     {

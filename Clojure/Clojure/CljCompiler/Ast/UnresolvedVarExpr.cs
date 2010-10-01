@@ -42,21 +42,30 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return false; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { throw new InvalidOperationException("UnresolvedVarExpr has no CLR type");  }
         }
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            throw new ArgumentException("UnresolvedVarExpr cannot be evalled");
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             return Expression.Empty();
         }

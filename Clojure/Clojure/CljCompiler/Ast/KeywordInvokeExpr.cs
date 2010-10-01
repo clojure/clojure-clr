@@ -51,43 +51,52 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return _tag != null; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return HostExpr.TagToType(_tag); }
         }
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            return _kw.Kw.invoke(_target.Eval());
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             //if (context.Mode == CompilerMode.Immediate)
-            if (context.FnCompileMode == FnMode.Light )
+            if (objx.FnMode == FnMode.Light )
             {
                 // This will emit a plain Keyword reference, rather than a callsite.
                 InvokeExpr ie = new InvokeExpr(_source, _spanMap, (Symbol)_tag, _kw, RT.vector(_target));
-                return ie.GenDlr(context);
+                return ie.GenCode(rhc, objx, context);
             }
             else
             {
 
                 ParameterExpression thunkParam = Expression.Parameter(typeof(ILookupThunk), "thunk");
-                Expression assignThunk = Expression.Assign(thunkParam, Expression.Field(null, context.ObjExpr.ThunkField(_siteIndex)));
+                Expression assignThunk = Expression.Assign(thunkParam, Expression.Field(null, objx.ThunkField(_siteIndex)));
 
                 ParameterExpression targetParam = Expression.Parameter(typeof(object), "target");
-                Expression assignTarget = Expression.Assign(targetParam,_target.GenDlr(context));
+                Expression assignTarget = Expression.Assign(targetParam,_target.GenCode(RHC.Expression, objx, context));
 
                 ParameterExpression valParam = Expression.Parameter(typeof(Object), "val");
                 Expression assignVal = Expression.Assign(valParam, Expression.Call(thunkParam, Compiler.Method_ILookupThunk_get,targetParam));
 
                 ParameterExpression siteParam = Expression.Parameter(typeof(KeywordLookupSite), "site");
-                Expression assignSite = Expression.Assign(siteParam, Expression.Field(null, context.ObjExpr.KeywordLookupSiteField(_siteIndex)));
+                Expression assignSite = Expression.Assign(siteParam, Expression.Field(null, objx.KeywordLookupSiteField(_siteIndex)));
 
                 Expression block =
                     Expression.Block(typeof(Object), new ParameterExpression[] { thunkParam, valParam, targetParam },
@@ -99,7 +108,7 @@ namespace clojure.lang.CljCompiler.Ast
                             valParam,
                             Expression.Block(typeof(Object), new ParameterExpression[] { siteParam },
                                 assignSite,
-                                Expression.Call(siteParam, Compiler.Method_ILookupSite_fault, targetParam, context.ObjExpr.ThisParam)),
+                                Expression.Call(siteParam, Compiler.Method_ILookupSite_fault, targetParam, objx.ThisParam)),
                             typeof(object)));
 
 

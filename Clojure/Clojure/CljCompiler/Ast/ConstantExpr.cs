@@ -65,7 +65,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object form, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object form)
             {
                 object v = RT.second(form);
                 if (v == null)
@@ -79,11 +79,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             // Java: fn.emitConstant(gen,id)
             //return Expression.Constant(_v);
-            return context.ObjExpr.GenConstant(context,_id,_v);
+            return objx.GenConstant(context,_id,_v);
         }
 
         #endregion

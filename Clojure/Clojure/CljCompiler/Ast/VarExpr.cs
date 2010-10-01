@@ -39,7 +39,6 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _tag; }
         } 
 
-
         #endregion
 
         #region Ctors
@@ -55,23 +54,32 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return _tag != null; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return HostExpr.TagToType(_tag); }
         }
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            return _var.deref();
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            Expression varExpr = context.ObjExpr.GenVar(context,_var);
+            Expression varExpr = objx.GenVar(context,_var);
             return Expression.Call(varExpr, Compiler.Method_Var_get);
         }
 
@@ -79,11 +87,16 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region AssignableExpr Members
 
-        public Expression GenAssignDlr(GenContext context, Expr val)
+        public Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
         {
-            Expression varExpr = context.ObjExpr.GenVar(context, _var);
-            Expression valExpr = val.GenDlr(context);
+            Expression varExpr = objx.GenVar(context, _var);
+            Expression valExpr = val.GenCode(RHC.Expression,objx,context);
             return Expression.Call(varExpr, Compiler.Method_Var_set, Compiler.MaybeBox(valExpr));
+        }
+
+        public object EvalAssign(Expr val)
+        {
+            return _var.set(val.Eval());
         }
 
         #endregion

@@ -50,12 +50,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return LastExpr.HasClrType; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return LastExpr.ClrType; }
         }
@@ -66,7 +66,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frms, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frms)
             {
                 ISeq forms = (ISeq)frms;
 
@@ -75,30 +75,47 @@ namespace clojure.lang.CljCompiler.Ast
 
                 IPersistentVector exprs = PersistentVector.EMPTY;
 
-                for (ISeq s = forms; s != null; s = s.next())
-                    exprs = exprs.cons(Compiler.GenerateAST(s.first(),pcon.SetAssign(false).SetRecur(pcon.IsRecurContext&&s.next() == null)));
-  
+                for (; forms != null; forms = forms.next())
+                {
+                    Expr e = (pcon.Rhc != RHC.Eval && (pcon.Rhc == RHC.Statement || forms.next() != null))
+                        ? Compiler.Analyze(pcon.SetRhc(RHC.Statement), forms.first())
+                        : Compiler.Analyze(pcon, forms.first());
+                    exprs = exprs.cons(e);
+                }
                 if (exprs.count() == 0)
                     exprs = exprs.cons(Compiler.NIL_EXPR);
 
                 return new BodyExpr(exprs);
-
             }
+        }
+
+        #endregion
+
+        #region eval
+
+        public object Eval()
+        {
+            object ret = null;
+            for ( int i=0; i<_exprs.count(); i++ )
+                ret = ((Expr)_exprs.nth(i)).Eval();
+
+            return ret;
         }
 
         #endregion
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             List<Expression> exprs = new List<Expression>(_exprs.count());
 
-            for (int i = 0; i < _exprs.count(); i++)
+            for (int i = 0; i < _exprs.count()-1; i++)
             {
                 Expr e = (Expr)_exprs.nth(i);
-                exprs.Add(e.GenDlr(context));
+                exprs.Add(e.GenCode(RHC.Statement,objx,context));
             }
+            exprs.Add(LastExpr.GenCode(rhc, objx, context));
 
             return Expression.Block(exprs);
         }
@@ -112,18 +129,18 @@ namespace clojure.lang.CljCompiler.Ast
             get { return LastExpr is MaybePrimitiveExpr && ((MaybePrimitiveExpr)LastExpr).CanEmitPrimitive; }
         }
 
-        public Expression GenDlrUnboxed(GenContext context)
+        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             List<Expression> exprs = new List<Expression>(_exprs.count());
 
             for (int i = 0; i < _exprs.count()-1; i++)
             {
                 Expr e = (Expr)_exprs.nth(i);
-                exprs.Add(e.GenDlr(context));
+                exprs.Add(e.GenCode(RHC.Statement,objx,context));
             }
 
             MaybePrimitiveExpr last = (MaybePrimitiveExpr)LastExpr;
-            exprs.Add(last.GenDlrUnboxed(context));
+            exprs.Add(last.GenCodeUnboxed(rhc,objx,context));
 
             return Expression.Block(exprs);
         }

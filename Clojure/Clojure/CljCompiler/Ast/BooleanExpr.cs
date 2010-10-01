@@ -31,7 +31,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override object Val
         {
-            //get { return _val ? RT.T : RT.F; }
             get { return _val; }
         }
 
@@ -62,7 +61,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             return Expression.Constant(_val);
         }

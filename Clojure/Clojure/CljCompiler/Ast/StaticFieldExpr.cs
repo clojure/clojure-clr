@@ -61,19 +61,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return Compiler.MaybeBox(GenDlrUnboxed(context));
+            return Compiler.MaybeBox(GenCodeUnboxed(rhc, objx, context));
         }
 
         #endregion
 
         #region AssignableExpr Members
 
-        public override Expression GenAssignDlr(GenContext context, Expr val)
+        public override Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
         {
-            Expression access = GenDlrUnboxed(context);
-            Expression valExpr = val.GenDlr(context);
+            Expression access = GenCodeUnboxed(RHC.Expression, objx, context);
+            Expression valExpr = val.GenCode(RHC.Expression, objx, context);
             Expression assign = Expression.Assign(access, valExpr);
             assign = Compiler.MaybeAddDebugInfo(assign, _spanMap);
             return assign;
@@ -102,9 +102,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region eval
+
+        // TODO: Handle by-ref
+        public override object Eval()
+        {
+            return _tinfo.GetValue(null);
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlrUnboxed(GenContext context)
+        public override Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             Expression field = Expression.Field(null, _tinfo);
             field = Compiler.MaybeAddDebugInfo(field, _spanMap);
@@ -116,6 +126,17 @@ namespace clojure.lang.CljCompiler.Ast
             get { return Util.IsPrimitive(_tinfo.FieldType); }
         }
 
+
+        #endregion
+
+        #region AssignableExpr members
+
+        public override object EvalAssign(Expr val)
+        {
+            object e = val.Eval();
+            _tinfo.SetValue(null, e);
+            return e;
+        }
 
         #endregion
     }
@@ -140,9 +161,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region eval
+
+        // TODO: Handle by-ref
+        public override object Eval()
+        {
+            return _tinfo.GetValue(null,new object[0]);
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlrUnboxed(GenContext context)
+        public override Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             Expression prop = Expression.Property(null, _tinfo);
             prop = Compiler.MaybeAddDebugInfo(prop, _spanMap);
@@ -154,6 +185,17 @@ namespace clojure.lang.CljCompiler.Ast
             get { return Util.IsPrimitive(_tinfo.PropertyType); }
         }
 
+
+        #endregion
+
+        #region AssignableExpr members
+
+        public override object EvalAssign(Expr val)
+        {
+            object e = val.Eval();
+            _tinfo.SetValue(null, e, new object[0]);
+            return e;
+        }
 
         #endregion
     }

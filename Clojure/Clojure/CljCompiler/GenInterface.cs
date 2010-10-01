@@ -39,7 +39,7 @@ namespace clojure.lang
             else
                 // TODO: In CLR4, should create a collectible type?
                 //context = new GenContext(iName, ".dll", ".", CompilerMode.File);
-                context = new GenContext(iName, ".dll", ".", AssemblyMode.Dynamic, FnMode.Full);
+                context = new GenContext(iName, ".dll", ".", false);
 
             Type[] interfaceTypes = GenClass.CreateTypeArray(extends == null ? null : extends.seq());
 

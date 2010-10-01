@@ -47,23 +47,34 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return true; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return typeof(bool); }
         }
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            if (_t.IsInstanceOfType(_expr.Eval()))
+                return true;
+            return false;
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return Expression.Convert(GenDlrUnboxed(context), typeof(Object));
+            return Expression.Convert(GenCodeUnboxed(RHC.Expression, objx, context), typeof(Object));
         }
 
         #endregion
@@ -75,9 +86,9 @@ namespace clojure.lang.CljCompiler.Ast
             get { return true; }
         }
 
-        public Expression GenDlrUnboxed(GenContext context)
+        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return Expression.TypeIs(_expr.GenDlr(context), _t); ;
+            return Expression.TypeIs(_expr.GenCode(RHC.Expression, objx, context), _t); ;
         }
 
         #endregion

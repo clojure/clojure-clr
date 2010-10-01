@@ -46,6 +46,22 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region eval
+
+        // TODO: handle by-ref
+        public override object Eval()
+        {
+            object targetVal = _target.Eval();
+            object[] argvals = new object[_args.Count];
+            for (int i = 0; i < _args.Count; i++)
+                argvals[i] = _args[i].ArgExpr.Eval();
+            if (_method != null)
+                return _method.Invoke(targetVal, argvals);
+            return Reflector.CallInstanceMethod(_methodName, targetVal, argvals);
+        }
+
+        #endregion
+
         #region Type mangling
 
         public override bool HasClrType
@@ -67,22 +83,14 @@ namespace clojure.lang.CljCompiler.Ast
             get { return false; }
         }
 
-        protected override Expression GenTargetExpression(GenContext context)
+        protected override Expression GenTargetExpression(ObjExpr objx, GenContext context)
         {
-            Expression expr = _target.GenDlr(context);
+            Expression expr = _target.GenCode(RHC.Expression, objx, context);
             if ( _target.HasClrType )
                 expr =  Expression.Convert(expr,_target.ClrType);
 
             return expr;
         }
-
-        //protected override Expression GenDlrForMethod(GenContext context)
-        //{
-        //    Expression target = _target.GenDlr(context);
-        //    Expression[] args = GenTypedArgs(context, _method.GetParameters(), _args);
-
-        //    return AstUtils.ComplexCallHelper(target,_method, args);
-        //}
 
         #endregion
     }

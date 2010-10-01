@@ -48,7 +48,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get
             {
@@ -60,7 +60,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return _thenExpr.ClrType ?? _elseExpr.ClrType; }
         }
@@ -71,7 +71,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frm)
             {
                 ISeq form = (ISeq)frm;
 
@@ -84,10 +84,9 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new Exception("Too few arguments to if");
 
 
-                Expr testExpr = Compiler.GenerateAST(RT.second(form), pcon.SetRecur(false).SetAssign(false));
-                Expr thenExpr = Compiler.GenerateAST(RT.third(form), pcon.SetAssign(false));
-                //Expr elseExpr = form.count() == 4 ? Compiler.GenerateAST(RT.fourth(form), pcon.SetAssign(false)) : null;
-                Expr elseExpr = Compiler.GenerateAST(RT.fourth(form), pcon.SetAssign(false));
+                Expr testExpr = Compiler.Analyze(pcon.EvEx().SetAssign(false),RT.second(form));
+                Expr thenExpr = Compiler.Analyze(pcon.SetAssign(false), RT.third(form));
+                Expr elseExpr = Compiler.Analyze(pcon.SetAssign(false), RT.fourth(form));
 
                 return new IfExpr((IPersistentMap)Compiler.SOURCE_SPAN.deref(), testExpr, thenExpr, elseExpr);
             }
@@ -95,25 +94,37 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region Code generation
+        #region eval
 
-        public override Expression GenDlr(GenContext context)
+        public object Eval()
         {
-            return GenDlr(context, false);
+            Object t = _testExpr.Eval();
+            if (RT.booleanCast(t))
+                return _thenExpr.Eval();
+            return _elseExpr.Eval();
         }
 
-        private Expression GenDlr(GenContext context, bool genUnboxed)
+        #endregion
+
+        #region Code generation
+
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        {
+            return GenCode(rhc, objx, context, false);
+        }
+
+        private Expression GenCode(RHC rhc, ObjExpr objx, GenContext context, bool genUnboxed)
         {
             bool testIsBool = Compiler.MaybePrimitiveType(_testExpr) == typeof(bool);
 
             Expression testCode;
 
             if (testIsBool)
-                testCode = ((MaybePrimitiveExpr)_testExpr).GenDlrUnboxed(context);
+                testCode = ((MaybePrimitiveExpr)_testExpr).GenCodeUnboxed(RHC.Expression,objx,context);
             else
             {
                 ParameterExpression testVar = Expression.Parameter(typeof(object), "__test");
-                Expression assign = Expression.Assign(testVar, Compiler.MaybeBox(_testExpr.GenDlr(context)));
+                Expression assign = Expression.Assign(testVar, Compiler.MaybeBox(_testExpr.GenCode(RHC.Expression,objx, context)));
                 Expression boolExpr =
                     Expression.Not(
                         Expression.OrElse(
@@ -122,9 +133,9 @@ namespace clojure.lang.CljCompiler.Ast
                 testCode = Expression.Block(typeof(bool), new ParameterExpression[] { testVar }, assign, boolExpr);
             }
 
-            Expression thenCode = genUnboxed ? ((MaybePrimitiveExpr)_thenExpr).GenDlrUnboxed(context) : _thenExpr.GenDlr(context);
+            Expression thenCode = genUnboxed ? ((MaybePrimitiveExpr)_thenExpr).GenCodeUnboxed(rhc, objx, context) : _thenExpr.GenCode(rhc, objx, context);
 
-            Expression elseCode = genUnboxed ? ((MaybePrimitiveExpr)_elseExpr).GenDlrUnboxed(context) : _elseExpr.GenDlr(context);
+            Expression elseCode = genUnboxed ? ((MaybePrimitiveExpr)_elseExpr).GenCodeUnboxed(rhc, objx, context) : _elseExpr.GenCode(rhc, objx, context);
 
             Type targetType = typeof(object);
             if (this.HasClrType && this.ClrType != null)
@@ -200,9 +211,9 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        public Expression GenDlrUnboxed(GenContext context)
+        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return GenDlr(context, true);
+            return GenCode(rhc, objx, context, true);
         }
 
         #endregion

@@ -268,7 +268,7 @@ namespace clojure.lang.CljCompiler.Ast
                 method._methodMeta = GenInterface.ExtractAttributes(RT.meta(name));
                 method._parms = parms;
                 method._argLocals = argLocals;
-                method._body = (new BodyExpr.Parser()).Parse(body, new ParserContext(true,false));
+                method._body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return), body);
                 return method;
             }
             finally

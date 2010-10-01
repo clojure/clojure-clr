@@ -77,10 +77,17 @@ namespace clojure.lang.CljCompiler.Ast
         public bool IsByRef
         {
             get { return _isByRef; }
-        } 
+        }
 
+        bool _canBeCleared = true;
 
+        bool _recurMistmatch = false;
 
+        public bool RecurMistmatch
+        {
+            get { return _recurMistmatch; }
+            set { _recurMistmatch = value; }
+        }
 
         #endregion
 
@@ -124,9 +131,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 return _tag != null
                     ? HostExpr.TagToType(_tag)
-                    : _init != null
-                    ? _init.ClrType
-                    : null;
+                    : _init.ClrType;
             }
         }
 

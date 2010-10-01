@@ -12,9 +12,9 @@
  *   Author: David Miller
  **/
 
-
+using System;
 #if CLR2
-
+using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
@@ -24,7 +24,18 @@ namespace clojure.lang.CljCompiler.Ast
     abstract class LiteralExpr : Expr
     {
         public abstract object Val { get; }
+
+        #region Expr Members
+
+        public object Eval()
+        {
+            return Val;
+        }
+
+        public abstract bool HasClrType { get; }
+        public abstract Type ClrType { get; }
+        public abstract Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
+
+        #endregion
     }
-
-
 }

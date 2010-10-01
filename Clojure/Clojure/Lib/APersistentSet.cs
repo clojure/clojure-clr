@@ -99,7 +99,7 @@ namespace clojure.lang
             if (s == null)
                 return false;
 
-            if (s.count() != count() || s.GetHashCode() != GetHashCode())
+            if (s.count() != count() )   /// JVM has also: || s.GetHashCode() != GetHashCode()),, but I can't guarantee this
                 return false;
 
             for (ISeq seq = s.seq(); seq != null; seq = seq.next())

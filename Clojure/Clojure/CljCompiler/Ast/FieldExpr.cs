@@ -26,7 +26,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region AssignableExpr Members
 
-        public abstract Expression GenAssignDlr(GenContext context, Expr val);
+        public abstract object EvalAssign(Expr val);
+        public abstract Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val);
 
         #endregion
     }

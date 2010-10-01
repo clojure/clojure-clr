@@ -593,6 +593,9 @@ namespace clojure.lang
 
         public static string NameForType(Type t)
         {
+            if (t == null)
+                Console.WriteLine("Bad type");
+
             if (!t.IsNested)
                 return t.Name;
 

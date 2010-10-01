@@ -45,12 +45,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Type mangling
 
-        public override bool HasClrType
+        public bool HasClrType
         {
             get { return true; }
         }
 
-        public override Type ClrType
+        public Type ClrType
         {
             get { return typeof(void); }  // Java: returns null.
         }
@@ -61,13 +61,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(object frm, ParserContext pcon)
+            public Expr Parse(ParserContext pcon, object frm)
             {
                 ISeq form = (ISeq)frm;
 
                 IPersistentVector loopLocals = (IPersistentVector)Compiler.LOOP_LOCALS.deref();
 
-                if (! pcon.IsRecurContext || loopLocals == null)
+                if ( pcon.Rhc != RHC.Return || loopLocals == null)
                     throw new InvalidOperationException("Can only recur from tail position");
 
                 if (Compiler.IN_CATCH_FINALLY.deref() != null)
@@ -75,21 +75,59 @@ namespace clojure.lang.CljCompiler.Ast
 
                 IPersistentVector args = PersistentVector.EMPTY;
 
-                for (ISeq s = form.next(); s != null; s = s.next())
-                    args = args.cons(Compiler.GenerateAST(s.first(), pcon.SetRecur(false).SetAssign(false)));
+                for (ISeq s = RT.seq(form.next()); s != null; s = s.next())
+                    args = args.cons(Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false),s.first()));
                 if (args.count() != loopLocals.count())
                     throw new ArgumentException(string.Format("Mismatched argument count to recur, expected: {0} args, got {1}", 
                         loopLocals.count(), args.count()));
 
+                //for (int i = 0; i < loopLocals.count(); i++)
+                //{
+                //    LocalBinding lb = (LocalBinding)loopLocals.nth(i);
+                //    Type primt = lb.PrimitiveType;
+                //    if (primt != null)
+                //    {
+                //        bool mismatch = false;
+                //        Type pt = Compiler.MaybePrimitiveType((Expr)args.nth(i));
+                //        if (pt == typeof(long))
+                //        {
+                //            if (!(pt == typeof(long) || pt == typeof(int) || pt == typeof(short) || pt == typeof(uint) || pt == typeof(ushort) || pt == typeof(ulong)
+                //                || pt == typeof(char) || pt == typeof(byte) || pt == typeof(sbyte)))
+                //                mismatch = true;
+                //        }
+                //        else if (pt == typeof(double))
+                //        {
+                //            if (!(pt == typeof(double) || pt == typeof(float)))
+                //                mismatch = true;
+                //        }
+
+                //        if (mismatch)
+                //        {
+                //            lb.RecurMistmatch = true;
+                //            if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                //                RT.errPrintWriter().WriteLine("{0}:{1} recur arg for primitive local: {2} is not matching primitive, had: {3}, needed {4}",
+                //                    "Source", "Line", lb.Name, pt != null ? pt.Name : "Object", primt.Name);
+                //        }
+                //    }
+                //}
                 return new RecurExpr(loopLocals, args);
             }
         }
 
         #endregion
 
+        #region eval
+
+        public object Eval()
+        {
+            throw new InvalidOperationException("Can't eval recur");
+        }
+
+        #endregion
+
         #region Code generation
 
-        public override Expression GenDlr(GenContext context)
+        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             LabelTarget loopLabel = (LabelTarget)Compiler.LOOP_LABEL.deref();
             if (loopLabel == null)
@@ -107,7 +145,7 @@ namespace clojure.lang.CljCompiler.Ast
                 LocalBinding b = (LocalBinding)_loopLocals.nth(i);
                 Expr arg = (Expr)_args.nth(i);
                 ParameterExpression tempVar = Expression.Parameter(b.ParamExpression.Type, "__local__" + i);
-                Expression valExpr = ((Expr)_args.nth(i)).GenDlr(context);
+                Expression valExpr = ((Expr)_args.nth(i)).GenCode(RHC.Expression, objx, context);
                 tempVars.Add(tempVar);
 
                 if (tempVar.Type == typeof(Object))
