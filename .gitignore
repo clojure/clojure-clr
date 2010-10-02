@@ -11,3 +11,6 @@ obj
 lib/*/*.dll
 lib/*/*.xml
 lib/*/*.pdb
+lib/*/*/*.dll
+lib/*/*/*.xml
+lib/*/*/*.pdb
