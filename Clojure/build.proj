@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug 3.5</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <cljc>Clojure.Compile.exe</cljc>
+    <clji>Clojure.Main.exe</clji>
+  </PropertyGroup>
+  
+  <!--Is there a way to avoid this duplication? This is also encoded in the project files, although relative to a different path -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug 3.5|AnyCPU' ">
+    <OutputPath>..\bin\3.5\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release 3.5|AnyCPU' ">
+    <OutputPath>..\bin\3.5\Release\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug 4.0|AnyCPU' ">
+    <OutputPath>..\bin\4.0\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release 4.0|AnyCPU' ">
+    <OutputPath>..\bin\4.0\Release\</OutputPath>
+  </PropertyGroup>
+  
+  <Target Name="Build">
+    <!--the continue on error should be removed once SimpleConsole works/is removed-->
+    <MSBuild Projects="ClojureCLR.sln" Properties="Configuration=$(Configuration)" ContinueOnError="true"/>
+  </Target>
+  
+  <Target Name="CompileTest" DependsOnTargets="Build">
+    <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.protocols.more-examples clojure.test-clojure.repl.example" 
+          WorkingDirectory="$(OutputPath)"/>
+  </Target>
+  
+  <Target Name="Test" DependsOnTargets="Build;CompileTest">
+    <Copy SkipUnchangedFiles="true" SourceFiles="runtests.clj" DestinationFolder="$(OutputPath)" />
+    <Exec Command="$(OutputPath)\$(clji) runtests.clj"/>
+  </Target>
+  
+  <Target Name="Dist" DependsOnTargets="Build">
+    <ItemGroup>
+      <!--DLR-->
+      <DistFiles Include="$(OutputPath)\Microsoft.*" />
+      <!--Clojure dlls and exes-->
+      <DistFiles Include="$(OutputPath)\Clojure.*" 
+                 Exclude="$(OutputPath)\Clojure.Test.dll;$(OutputPath)\Clojure.Test.pdb;
+                          $(OutputPath)\Clojure.Source.dll;$(OutputPath)\Clojoure.Source.pdb" />
+      <!--clj and AOT clj files-->
+      <DistFiles Include="$(OutputPath)\clojure\**\*" Exclude="$(OutputPath)\clojure\test_clojure\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DistFiles)" DestinationFolder="dist\$(Configuration)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

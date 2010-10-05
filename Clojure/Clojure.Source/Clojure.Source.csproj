@@ -90,7 +90,9 @@
     <None Include="clojure\gvec.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="clojure\samples\ants.clj" />
+    <None Include="clojure\samples\ants.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="clojure\core.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -106,17 +108,39 @@
     <None Include="clojure\main.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="clojure\samples\attributes\testattribute.clj" />
-    <None Include="clojure\samples\await-test.clj" />
-    <None Include="clojure\samples\celsius.clj" />
-    <None Include="clojure\samples\deftype\testdeftype.clj" />
-    <None Include="clojure\samples\deftype\testprotocol.clj" />
-    <None Include="clojure\samples\genclass\testgenclass.clj" />
-    <None Include="clojure\samples\genclass\testgenclass2.clj" />
-    <None Include="clojure\samples\genclass\testgenclass3.clj" />
-    <None Include="clojure\samples\genclass\testmvc.clj" />
-    <None Include="clojure\samples\interop\testinterop.clj" />
-    <None Include="clojure\samples\proxy\testproxy.clj" />
+    <None Include="clojure\samples\attributes\testattribute.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\samples\await-test.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\samples\celsius.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\samples\deftype\testdeftype.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\samples\deftype\testprotocol.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\samples\genclass\testgenclass.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\samples\genclass\testgenclass2.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\samples\genclass\testgenclass3.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\samples\genclass\testmvc.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\samples\interop\testinterop.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\samples\proxy\testproxy.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="clojure\set.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -138,7 +162,9 @@
     <None Include="clojure\test\tap.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="clojure\test_clojure.clj" />
+    <None Include="clojure\test_clojure.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="clojure\test_clojure\agents.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -285,7 +311,9 @@
     <None Include="clojure\repl.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="clojure\samples\stm\teststm.clj" />
+    <None Include="clojure\samples\stm\teststm.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="clojure\test_clojure\clr\io.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
