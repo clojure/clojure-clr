@@ -39,14 +39,18 @@
   <Target Name="Dist" DependsOnTargets="Build">
     <ItemGroup>
       <!--DLR-->
-      <DistFiles Include="$(OutputPath)\Microsoft.*" />
+      <Dlls Include="$(OutputPath)\Microsoft.*" />
       <!--Clojure dlls and exes-->
-      <DistFiles Include="$(OutputPath)\Clojure.*" 
-                 Exclude="$(OutputPath)\Clojure.Test.dll;$(OutputPath)\Clojure.Test.pdb;
-                          $(OutputPath)\Clojure.Source.dll;$(OutputPath)\Clojoure.Source.pdb" />
+      <Dlls Include="$(OutputPath)\Clojure.*" 
+                 Exclude="$(OutputPath)\Clojure.Tests.dll;$(OutputPath)\Clojure.Tests.pdb;
+                          $(OutputPath)\Clojure.Source.dll;$(OutputPath)\Clojure.Source.pdb;
+                          $(OutputPath)\clojure.test-clojure.genclass.examples.ExampleClass.dll;
+                          $(OutputPath)\clojure.test-clojure.genclass.examples.ExampleClass.pdb;
+                          $(OutputPath)\Clojure.Main.vshost.exe;$(OutputPath)\Clojure.Main.vshost.exe.manifest" />
       <!--clj and AOT clj files-->
-      <DistFiles Include="$(OutputPath)\clojure\**\*" Exclude="$(OutputPath)\clojure\test_clojure\**\*" />
+      <CljFiles Include="$(OutputPath)\clojure\**\*" Exclude="$(OutputPath)\clojure\test_clojure\**\*" />
     </ItemGroup>
-    <Copy SourceFiles="@(DistFiles)" DestinationFolder="dist\$(Configuration)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(Dlls)" DestinationFolder="..\dist\$(Configuration)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(CljFiles)" DestinationFolder="..\dist\$(Configuration)\clojure\%(RecursiveDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>
