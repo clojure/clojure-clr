@@ -50,6 +50,13 @@ namespace clojure.lang.CljCompiler.Ast
         internal DynInitHelper DynInitHelper
         {
             get { return _dynInitHelper; }
+        }
+
+        readonly bool _isDebuggable;
+
+        public bool IsDebuggable
+        {
+            get { return _isDebuggable; }
         } 
 
         #endregion
@@ -63,8 +70,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public GenContext(string assyName, string extension, string directory, bool createDynInitHelper)
         {
+            _isDebuggable = true;
             AssemblyName aname = new AssemblyName(assyName);
-            _assyGen = new AssemblyGen(aname, directory, extension, true);
+            _assyGen = new AssemblyGen(aname, directory, extension, _isDebuggable);
             if ( createDynInitHelper )
                 _dynInitHelper = new DynInitHelper(_assyGen, "__InternalDynamicExpressionInits");
         }

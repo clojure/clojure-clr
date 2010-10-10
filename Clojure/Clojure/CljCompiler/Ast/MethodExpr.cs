@@ -68,7 +68,7 @@ namespace clojure.lang.CljCompiler.Ast
                 call = GenDlrForMethod(objx, context);
             else
                 call = GenerateComplexCall(objx, context);
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
             return call;
 
         }
@@ -78,7 +78,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (_method != null)
             {
                 Expression call = GenDlrForMethod(objx,context);
-                call = Compiler.MaybeAddDebugInfo(call, _spanMap);
+                call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
                 return call;
             }
             else

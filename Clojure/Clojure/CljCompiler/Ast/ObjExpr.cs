@@ -391,7 +391,10 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 string fieldName = ConstantName(i);
                 Type fieldType = ConstantType(i);
-                FieldBuilder fb = baseTB.DefineField(fieldName, fieldType, FieldAttributes.FamORAssem | FieldAttributes.Static);
+                if (!fieldType.IsPrimitive)
+                {
+                    FieldBuilder fb = baseTB.DefineField(fieldName, fieldType, FieldAttributes.FamORAssem | FieldAttributes.Static);
+                }
             }
         }
 
@@ -649,7 +652,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             GenInterface.SetCustomAttributes(_typeBuilder, _classMeta);
 
-            GenerateStaticConstructor(_typeBuilder, _baseType);
+            GenerateStaticConstructor(_typeBuilder, _baseType, context.IsDebuggable);
             _ctorInfo = GenerateConstructor(_typeBuilder, _baseType);
 
             if (_altCtorDrops > 0)
@@ -670,14 +673,14 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        private void GenerateStaticConstructor(TypeBuilder fnTB, Type baseType)
+        private void GenerateStaticConstructor(TypeBuilder fnTB, Type baseType, bool isDebuggable)
         {
             if (_constants.count() > 0)
             {
                 ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
-                MethodBuilder method1 = GenerateConstants(fnTB, baseType);
-                MethodBuilder method2 = GenerateVarCallsiteInits(fnTB, baseType);
-                MethodBuilder method3 = GenerateKeywordCallsiteInit(fnTB, baseType);
+                MethodBuilder method1 = GenerateConstants(fnTB, baseType, isDebuggable);
+                MethodBuilder method2 = GenerateVarCallsiteInits(fnTB, baseType, isDebuggable);
+                MethodBuilder method3 = GenerateKeywordCallsiteInit(fnTB, baseType, isDebuggable);
                 ILGen gen = new ILGen(cb.GetILGenerator());
                 gen.EmitCall(method1);       // gen.Emit(OpCodes.Call, method1);
                 if (method2 != null)
@@ -691,7 +694,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Generating constants
 
-        private MethodBuilder GenerateConstants(TypeBuilder fnTB, Type baseType)
+        private MethodBuilder GenerateConstants(TypeBuilder fnTB, Type baseType, bool isDebuggable)
         {
             try
             {
@@ -701,18 +704,21 @@ namespace clojure.lang.CljCompiler.Ast
                 for (int i = 0; i < _constants.count(); i++)
                 {
                     Expression expr = GenerateValue(_constants.nth(i));
-                    Expression init =
-                        Expression.Assign(
-                            Expression.Field(null, baseType, ConstantName(i)),
-                            Expression.Convert(expr, ConstantType(i)));
-                    inits.Add(init);
+                    if (!expr.Type.IsPrimitive)
+                    {
+                        Expression init =
+                            Expression.Assign(
+                                Expression.Field(null, baseType, ConstantName(i)),
+                                Expression.Convert(expr, ConstantType(i)));
+                        inits.Add(init);
+                    }
                 }
                 inits.Add(Expression.Default(typeof(void)));
 
                 Expression block = Expression.Block(inits);
                 LambdaExpression lambda = Expression.Lambda(block);
                 MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_constants", MethodAttributes.Private | MethodAttributes.Static);
-                lambda.CompileToMethod(methodBuilder, true);
+                lambda.CompileToMethod(methodBuilder, isDebuggable );
                 return methodBuilder;
             }
             finally
@@ -844,7 +850,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region  Generating other initializers
 
-        private MethodBuilder GenerateVarCallsiteInits(TypeBuilder fnTB, Type baseType)
+        private MethodBuilder GenerateVarCallsiteInits(TypeBuilder fnTB, Type baseType, bool isDebuggable)
         {
             if (_varCallsites.count() == 0)
                 return null;
@@ -877,12 +883,12 @@ namespace clojure.lang.CljCompiler.Ast
             Expression allInits = Expression.Block(inits);
             LambdaExpression lambda = Expression.Lambda(allInits);
             MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_callsites", MethodAttributes.Private | MethodAttributes.Static);
-            lambda.CompileToMethod(methodBuilder, true);
+            lambda.CompileToMethod(methodBuilder, isDebuggable);
             return methodBuilder;
         }
 
 
-        private MethodBuilder GenerateKeywordCallsiteInit(TypeBuilder fnTB, Type baseType)
+        private MethodBuilder GenerateKeywordCallsiteInit(TypeBuilder fnTB, Type baseType, bool isDebuggable)
         {
             if (_keywordCallsites.count() == 0)
                 return null;
@@ -909,7 +915,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression allInits = Expression.Block(new ParameterExpression[] { parm }, inits);
             LambdaExpression lambda = Expression.Lambda(allInits);
             MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_kwcallsites", MethodAttributes.Private | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
-            lambda.CompileToMethod(methodBuilder, true);
+            lambda.CompileToMethod(methodBuilder, isDebuggable);
             return methodBuilder;
 
         }
@@ -1130,7 +1136,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Expression GenConstant(GenContext context, int id, object val)
         {
-            if (_fnMode == FnMode.Full)
+            if (_fnMode == FnMode.Full && ! val.GetType().IsPrimitive)
                 return Expression.Field(null, _baseType, ConstantName(id));
 
             return Expression.Constant(val);
