@@ -1063,9 +1063,9 @@ namespace clojure.lang
                 && GetLocation(spanMap, RT.END_COLUMN_KEY, out finishCol);
         }
 
-        internal static Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap)
+        internal static Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap, bool isDebuggable)
         {
-            if (spanMap != null & Compiler.DocInfo() != null)
+            if ( isDebuggable && spanMap != null & Compiler.DocInfo() != null)
             {
                 int startLine;
                 int startCol;
@@ -1116,18 +1116,8 @@ namespace clojure.lang
             LineNumberingTextReader lntr =
                 (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);
 
-            //GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, CompilerMode.File);
-            //GenContext evalContext = new GenContext("EvalForCompile", CompilerMode.Immediate);
-
             GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, true);
             GenContext evalContext = new GenContext("EvalForCompile", false);
-
-            //FnExpr fn = new FnExpr(null);
-            //fn.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.'));
-            //FnMethod fnm = new FnMethod(fn, null);
-
-            //context = context.CreateWithNewType(fn);
-            //evalContext = evalContext.CreateWithNewType(fn);
 
             Var.pushThreadBindings(RT.map(
                 SOURCE_PATH, sourcePath,
@@ -1182,27 +1172,13 @@ namespace clojure.lang
                 Expression pushNSExpr = Expression.Call(null, Method_Compiler_PushNS);
                 Expression popExpr = Expression.Call(null, Method_Var_popThreadBindings);
 
-                //List<Expression> inits = new List<Expression>();
-                //foreach (string name in names)
-                //{
-                //    Expression call = Expression.Call(exprType, name, Type.EmptyTypes);
-                //    inits.Add(call);
-                //}
-
-                //if (inits.Count == 0)
-                //    inits.Add(Expression.Constant(null));
-
-                //Expression tryCatch = Expression.TryCatchFinally(Expression.Block(inits), popExpr);
-
                 BodyExpr bodyExpr = new BodyExpr(PersistentVector.create1(exprs));
                 FnMethod method = new FnMethod(objx, null, bodyExpr);
                 objx.AddMethod(method);
 
-
                 objx.Keywords = (IPersistentMap)KEYWORDS.deref();
                 objx.Vars = (IPersistentMap)VARS.deref();
                 objx.Constants = (PersistentVector)CONSTANTS.deref();
-
                 objx.KeywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
                 objx.ProtocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
                 objx.VarCallsites = (IPersistentVector)VAR_CALLSITES.deref();
@@ -1219,7 +1195,8 @@ namespace clojure.lang
                 // create initializer call
                 MethodBuilder mbInit = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static);
                 LambdaExpression initFn = Expression.Lambda(body);
-                initFn.CompileToMethod(mbInit, DebugInfoGenerator.CreatePdbGenerator());
+                //initFn.CompileToMethod(mbInit, DebugInfoGenerator.CreatePdbGenerator());
+                initFn.CompileToMethod(mbInit, context.IsDebuggable);
 
                 initTB.CreateType();
 
@@ -1264,53 +1241,6 @@ namespace clojure.lang
                     Expr expr = Analyze(pcontext, form);
                     exprs.Add(expr);     // should pick up the keywords/vars/constants here
                     expr.Eval();
-
-
-                    // To avoid expanding macros more than once, we generate the AST only once,
-                    // and then compile using the compile context
-                    // and then eval using the eval context
-
-                    //    Expr ast = GenerateWrappedAst(form);
-                    //    exprs.Add(new InvokeExpr((string)Compiler.SOURCE.deref(),
-                    //(IPersistentMap)Compiler.SOURCE_SPAN.deref(), //Compiler.GetSourceSpanMap(form),
-                    //Compiler.TagOf(form),
-                    //ast,
-                    //PersistentVector.EMPTY));
-
-                    //Expr ast = GenerateAST(form, new ParserContext(false, false));
-                    //exprs.Add(ast);
-
-
-                    //Var.pushThreadBindings(RT.map(
-                    //    COMPILER_CONTEXT, evalContext,
-                    //    METHOD, null));
-
-                    //try
-                    //{
-                    //    // Compile to assembly
-                    //    ast = GenerateWrappedAst(form);
-                    //    Expression exprForCompile = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
-                    //    Expression<ReplDelegate> lambdaForCompile = Expression.Lambda<ReplDelegate>(Expression.Convert(exprForCompile, typeof(Object)), "ReplCall", null);
-
-                    //    // TODO: gather all the exprForCompiles into one BIG lambda.  Then we only need one BIG method.
-                    //    //MethodBuilder methodBuilder = exprTB.DefineMethod(String.Format("REPL_{0:0000}", i++),
-                    //    //    MethodAttributes.Public | MethodAttributes.Static);
-                    //    //ast.CompileToMethod(methodBuilder,DebugInfoGenerator.CreatePdbGenerator());
-                    //    //lambdaForCompile.CompileToMethod(methodBuilder, true);
-
-                    //    //names.Add(methodBuilder.Name);
-
-                    //    //// evaluate in this environment
-                    //    //Expression exprForEval = GenerateInvokedDlrFromWrappedAst(evalContext, ast);
-                    //    //LambdaExpression lambdaForEval = Expression.Lambda(exprForEval, "ReplCall", null);
-                    //    Expression<ReplDelegate> lambdaForEval = lambdaForCompile;
-
-                    //    lambdaForEval.Compile().Invoke();
-                    //}
-                    //finally
-                    //{
-                    //    Var.popThreadBindings();
-                    //}
                 }
             }
             finally

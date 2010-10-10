@@ -207,7 +207,7 @@ namespace clojure.lang.CljCompiler.Ast
                     switchExpr,
                     Expression.Label(endLabel, Expression.Default(typeof(Object))));
 
-            block = Compiler.MaybeAddDebugInfo(block, _sourceSpan);
+            block = Compiler.MaybeAddDebugInfo(block, _sourceSpan, context.IsDebuggable);
             return block;
         }
 

@@ -92,7 +92,7 @@ namespace clojure.lang.CljCompiler.Ast
                 call = Expression.Call(Compiler.Method_Reflector_GetInstanceFieldOrProperty, target, Expression.Constant(_fieldName));
                 call = Compiler.MaybeBox(call);
             }
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
             return call;
         }
 
@@ -135,7 +135,7 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.MaybeBox(valExpr));
             }
 
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
             return call;
         }
 

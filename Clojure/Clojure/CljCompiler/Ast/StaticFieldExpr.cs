@@ -75,7 +75,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression access = GenCodeUnboxed(RHC.Expression, objx, context);
             Expression valExpr = val.GenCode(RHC.Expression, objx, context);
             Expression assign = Expression.Assign(access, valExpr);
-            assign = Compiler.MaybeAddDebugInfo(assign, _spanMap);
+            assign = Compiler.MaybeAddDebugInfo(assign, _spanMap, context.IsDebuggable);
             return assign;
         }
 
@@ -117,7 +117,7 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             Expression field = Expression.Field(null, _tinfo);
-            field = Compiler.MaybeAddDebugInfo(field, _spanMap);
+            field = Compiler.MaybeAddDebugInfo(field, _spanMap, context.IsDebuggable);
             return field;
         }
 
@@ -176,7 +176,7 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             Expression prop = Expression.Property(null, _tinfo);
-            prop = Compiler.MaybeAddDebugInfo(prop, _spanMap);
+            prop = Compiler.MaybeAddDebugInfo(prop, _spanMap, context.IsDebuggable);
             return prop;
         }
 

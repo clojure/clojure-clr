@@ -145,7 +145,7 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 call = GenerateComplexCall(rhc, objx, context);
 
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
             return call;
         }
 

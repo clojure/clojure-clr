@@ -112,7 +112,7 @@ namespace clojure.lang.CljCompiler.Ast
                             typeof(object)));
 
 
-                block = Compiler.MaybeAddDebugInfo(block, _spanMap);
+                block = Compiler.MaybeAddDebugInfo(block, _spanMap, context.IsDebuggable);
                 return block;
             }
         } 

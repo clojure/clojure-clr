@@ -184,7 +184,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             Expression cond = Expression.Condition(testCode, thenCode, elseCode, targetType);
-            cond = Compiler.MaybeAddDebugInfo(cond, _sourceSpan);
+            cond = Compiler.MaybeAddDebugInfo(cond, _sourceSpan, context.IsDebuggable);
             return cond;
         }
 

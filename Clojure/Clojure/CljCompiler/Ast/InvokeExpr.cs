@@ -207,14 +207,14 @@ namespace clojure.lang.CljCompiler.Ast
             Expression[] args = new Expression[_args.count()];
             args[0] = arg0;
             GenerateArgs(rhc, objx, context, args, 1);
-            return GenerateCall(fn,args);
+            return GenerateCall(fn,args,context.IsDebuggable);
         }
 
         private Expression GenerateArgsAndCall(RHC rhc, ObjExpr objx, GenContext context, Expression fn)
         {
             Expression[] args = new Expression[_args.count()];
             GenerateArgs(rhc, objx, context, args, 0);
-            return GenerateCall(fn, args);
+            return GenerateCall(fn, args, context.IsDebuggable);
         }
 
         private void GenerateArgs(RHC rhc, ObjExpr objx, GenContext context, Expression[] args, int firstIndex)
@@ -229,10 +229,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         }
 
-        private Expression GenerateCall(Expression fn, Expression[] args)
+        private Expression GenerateCall(Expression fn, Expression[] args, bool isDebuggable)
         {
             Expression call = GenerateInvocation(fn, args);
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap, isDebuggable);
             return call;
         }
 

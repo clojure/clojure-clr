@@ -96,7 +96,7 @@ namespace clojure.lang.CljCompiler.Ast
             if ( context.DynInitHelper != null )
                 call = context.DynInitHelper.ReduceDyn(dyn);
 
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap);
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
             return call;
         }
 
