@@ -391,7 +391,10 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 string fieldName = ConstantName(i);
                 Type fieldType = ConstantType(i);
-                FieldBuilder fb = baseTB.DefineField(fieldName, fieldType, FieldAttributes.FamORAssem | FieldAttributes.Static);
+                if (!fieldType.IsPrimitive)
+                {
+                    FieldBuilder fb = baseTB.DefineField(fieldName, fieldType, FieldAttributes.FamORAssem | FieldAttributes.Static);
+                }
             }
         }
 
@@ -701,11 +704,14 @@ namespace clojure.lang.CljCompiler.Ast
                 for (int i = 0; i < _constants.count(); i++)
                 {
                     Expression expr = GenerateValue(_constants.nth(i));
-                    Expression init =
-                        Expression.Assign(
-                            Expression.Field(null, baseType, ConstantName(i)),
-                            Expression.Convert(expr, ConstantType(i)));
-                    inits.Add(init);
+                    if (!expr.Type.IsPrimitive)
+                    {
+                        Expression init =
+                            Expression.Assign(
+                                Expression.Field(null, baseType, ConstantName(i)),
+                                Expression.Convert(expr, ConstantType(i)));
+                        inits.Add(init);
+                    }
                 }
                 inits.Add(Expression.Default(typeof(void)));
 
@@ -1130,7 +1136,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Expression GenConstant(GenContext context, int id, object val)
         {
-            if (_fnMode == FnMode.Full)
+            if (_fnMode == FnMode.Full && ! val.GetType().IsPrimitive)
                 return Expression.Field(null, _baseType, ConstantName(id));
 
             return Expression.Constant(val);
