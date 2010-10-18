@@ -2,28 +2,27 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug 3.5</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <!--<Platform Condition=" '$(Platform)' == '' ">Any CPU</Platform>-->
     <cljc>Clojure.Compile.exe</cljc>
     <clji>Clojure.Main.exe</clji>
   </PropertyGroup>
   
   <!--Is there a way to avoid this duplication? This is also encoded in the project files, although relative to a different path -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug 3.5|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug 3.5' ">
     <OutputPath>..\bin\3.5\Debug\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release 3.5|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release 3.5' ">
     <OutputPath>..\bin\3.5\Release\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug 4.0|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug 4.0' ">
     <OutputPath>..\bin\4.0\Debug\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release 4.0|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release 4.0' ">
     <OutputPath>..\bin\4.0\Release\</OutputPath>
   </PropertyGroup>
   
   <Target Name="Build">
-    <!--the continue on error should be removed once SimpleConsole works/is removed-->
-    <MSBuild Projects="ClojureCLR.sln" Properties="Configuration=$(Configuration)" ContinueOnError="true"/>
+    <MSBuild Projects="ClojureCLR.sln"/>
   </Target>
   
   <Target Name="CompileTest" DependsOnTargets="Build">
@@ -33,7 +32,8 @@
   
   <Target Name="Test" DependsOnTargets="Build;CompileTest">
     <Copy SkipUnchangedFiles="true" SourceFiles="runtests.clj" DestinationFolder="$(OutputPath)" />
-    <Exec Command="$(OutputPath)\$(clji) runtests.clj"/>
+    <Exec Command="$(clji) runtests.clj"
+          WorkingDirectory="$(OutputPath)"/>
   </Target>
   
   <Target Name="Dist" DependsOnTargets="Build">
