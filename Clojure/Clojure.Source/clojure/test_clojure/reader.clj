@@ -77,7 +77,7 @@
                        (recur (inc i) (conj l i))
                        l))]
       (is (= [4 3 2 1 0] sequence))
-      (is (every? #(instance? Int64 %)              ;;; Long
+      (is (every? #(instance? Int32 %)              ;;; Long -- will be Int64 when I catch up to the proper commit on num branch.
                   sequence))))
 
   ; Read BigInteger

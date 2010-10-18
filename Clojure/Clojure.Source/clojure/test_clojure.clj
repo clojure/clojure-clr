@@ -52,9 +52,9 @@
       :protocols
       ; :genclass   -- TODO: We have some problems with classpaths -- this is a perfect example
       :main
-  ;    :vectors
+      :vectors
       ; :annotations
-  ;    :pprint
+      :pprint
       :serialization
       :rt
       :repl

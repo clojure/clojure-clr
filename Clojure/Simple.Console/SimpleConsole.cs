@@ -85,8 +85,10 @@ Please use Clojure.Main for everyday chores."
             {
                 try
                 {
-                    LambdaExpression ast = Compiler.GenerateLambda(form, addPrint);
-                    ret = ast.Compile().DynamicInvoke();
+                    //LambdaExpression ast = Compiler.GenerateLambda(form, addPrint);
+                    //ret = ast.Compile().DynamicInvoke();
+                    ret = Compiler.eval(form);
+                    RT.print(ret, Console.Out);
                 }
                 catch (Exception ex)
                 {

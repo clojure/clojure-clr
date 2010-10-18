@@ -198,10 +198,10 @@
       ;;;(is (.containsValue rec 1))
       ;;;(is (not (.containsValue rec 3)))
       (is (= 1 (.get_Item rec :a)))              ;;; .get
-      (is (thrown? InvalidProgramException (.set_Item rec :a 1)))      ;;; UnsupportedOperationException set
-      (is (thrown? InvalidProgramException (.Remove rec :a)))      ;;; UnsupportedOperationException   remove
-      ;;;(is (thrown? InvalidProgramException (.putAll rec {})))      ;;; UnsupportedOperationException
-      (is (thrown? InvalidProgramException (.Clear rec)))      ;;; UnsupportedOperationException  clear
+      (is (thrown? NotSupportedException (.set_Item rec :a 1)))      ;;; UnsupportedOperationException set
+      (is (thrown? NotSupportedException (.Remove rec :a)))      ;;; UnsupportedOperationException   remove
+      ;;;(is (thrown? NotSupportedException (.putAll rec {})))      ;;; UnsupportedOperationException
+      (is (thrown? NotSupportedException (.Clear rec)))      ;;; UnsupportedOperationException  clear
       (is (= #{:a :b} (.get_Keys rec)))                            ;;; keySet
       (is (= #{1 2} (set (.get_Values rec))))                          ;;; values
       ;;;(is (= #{[:a 1] [:b 2]} (.entrySet rec)))
