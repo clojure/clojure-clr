@@ -1146,8 +1146,10 @@ namespace clojure.lang
                 //    line = ((LineNumberingTextReader)r).LineNumber;
                 //object meta = read(r, true, null, true);
                 object meta = ReadAux(r);
-                if (meta is Symbol || meta is Keyword || meta is String)
+                if (meta is Symbol || meta is String)
                     meta = RT.map(RT.TAG_KEY, meta);
+                else if (meta is Keyword)
+                    meta = RT.map(meta, true);
                 else if (!(meta is IPersistentMap))
                     throw new ArgumentException("Metadata must be Symbol,Keyword,String or Map");
 
@@ -1167,7 +1169,13 @@ namespace clojure.lang
                         ((IReference)o).resetMeta((IPersistentMap)meta);
                         return o;
                     }
-                    return ((IObj)o).withMeta((IPersistentMap)meta);
+                    object ometa = RT.meta(o);
+                    for (ISeq s = RT.seq(meta); s != null; s = s.next())
+                    {
+                        IMapEntry kv = (IMapEntry)s.first();
+                        ometa = RT.assoc(ometa, kv.key(), kv.val());
+                    }
+                    return ((IObj)o).withMeta((IPersistentMap)ometa);
                 }
                 else
                     throw new ArgumentException("Metadata can only be applied to IMetas");
