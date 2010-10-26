@@ -19,8 +19,8 @@
 
 (deftest test-identity
   ; exactly 1 argument needed
-  (is (thrown? ArgumentException (identity)))             ;;; IllegalArgumentException
-  (is (thrown? ArgumentException (identity 1 2)))         ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (identity)))             ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (identity 1 2)))         ;;; IllegalArgumentException
 
   (are [x] (= (identity x) x)
       nil

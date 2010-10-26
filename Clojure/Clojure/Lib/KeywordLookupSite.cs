@@ -20,16 +20,14 @@ namespace clojure.lang
     {
         #region Data
 
-        readonly int _n;
         readonly Keyword _k;
 
         #endregion
 
         #region C-tors
 
-        public KeywordLookupSite(int n, Keyword k)
+        public KeywordLookupSite(Keyword k)
         {
-            _n = n;
             _k = k;
         }
 
@@ -37,17 +35,15 @@ namespace clojure.lang
 
         #region ILookupSite Members
 
-        public object fault(object target, ILookupHost host)
+        public ILookupThunk fault(object target)
         {
             if (target is IKeywordLookup)
-                return Install(target, host);
+                return Install(target);
             else if (target is ILookup)
             {
-                host.swapThunk(_n, CreateThunk(target.GetType()));
-                return ((ILookup)target).valAt(_k);
+                return CreateThunk(target.GetType());
             }
-            host.swapThunk(_n, this);
-            return RT.get(target, _k);
+            return this;
         }
 
         #endregion
@@ -65,16 +61,13 @@ namespace clojure.lang
 
         #region Implementation
 
-        private object Install(object target, ILookupHost host)
+        private ILookupThunk Install(object target)
         {
             ILookupThunk t = ((IKeywordLookup)target).getLookupThunk(_k);
             if (t != null)
-            {
-                host.swapThunk(_n, t);
-                return t.get(target);
-            }
-            host.swapThunk(_n, CreateThunk(target.GetType()));
-            return ((ILookup)target).valAt(_k);
+                return t;
+
+            return CreateThunk(target.GetType());
         }
 
         private ILookupThunk CreateThunk(Type type)

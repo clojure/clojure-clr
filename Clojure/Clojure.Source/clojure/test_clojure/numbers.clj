@@ -205,9 +205,9 @@
 
 (deftest test-mod
   ; wrong number of args
-  (is (thrown? ArgumentException (mod)))           ;;; IllegalArgumentException
-  (is (thrown? ArgumentException (mod 1)))         ;;; IllegalArgumentException
-  (is (thrown? ArgumentException (mod 3 2 1)))     ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (mod)))           ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (mod 1)))         ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (mod 3 2 1)))     ;;; IllegalArgumentException
 
   ; divide by zero
   (is (thrown? ArithmeticException (mod 9 0)))
@@ -255,9 +255,9 @@
 
 (deftest test-rem
   ; wrong number of args
-  (is (thrown? ArgumentException (rem)))           ;;; IllegalArgumentException
-  (is (thrown? ArgumentException (rem 1)))         ;;; IllegalArgumentException
-  (is (thrown? ArgumentException (rem 3 2 1)))     ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (rem)))           ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (rem 1)))         ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (rem 3 2 1)))     ;;; IllegalArgumentException
 
   ; divide by zero
   (is (thrown? ArithmeticException (rem 9 0)))
@@ -302,9 +302,9 @@
 
 (deftest test-quot
   ; wrong number of args
-  (is (thrown? ArgumentException (quot)))           ;;; IllegalArgumentException
-  (is (thrown? ArgumentException (quot 1)))         ;;; IllegalArgumentException
-  (is (thrown? ArgumentException (quot 3 2 1)))     ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (quot)))           ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (quot 1)))         ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (quot 3 2 1)))     ;;; IllegalArgumentException
 
   ; divide by zero
   (is (thrown? ArithmeticException (quot 9 0)))

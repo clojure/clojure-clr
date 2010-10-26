@@ -1018,8 +1018,8 @@ Note this should only be used for the last one in the sequence"
   (proxy [System.IO.TextWriter] []                      ;;; java.io.Writer
     (Close [] (.Close writer))                          ;;; close
     (Flush [] (.Flush writer))                          ;;; flush
-    (Write ([^chars cbuf ^Int32 off ^Int32 len]     ;;;  write Integer
-              (.Write writer cbuf off len))         ;;; write             
+    (Write ([^chars cbuf off len]     ;;;  write  ^Integer hint removed from off,len
+              (.Write writer cbuf ^Int32 off ^Int32 len))         ;;; write, hints added             
            ([x]
               (condp = (class x)
 		String 
@@ -1027,7 +1027,7 @@ Note this should only be used for the last one in the sequence"
 		  (.Write writer (.ToLower s)))                        ;;; write toLowerCase
 		  
 		Int32                                                                 ;;; Integer
-		(let [c ^Char x]                                                      ;;; Character
+		(let [c  x]                                                      ;;; Character hint removoed
 		  (.Write writer (int (Char/ToLower (char c))))))))))                 ;;; .write Character/toLowerCase
 		  
 (defn- upcase-writer 
@@ -1036,8 +1036,8 @@ Note this should only be used for the last one in the sequence"
   (proxy [System.IO.TextWriter] []                                   ;;; java.io.Writer
     (Close [] (.Close writer))
     (Flush [] (.Flush writer))
-    (Write ([^chars cbuf ^Int32 off ^Int32 len] 
-              (.Write writer cbuf off len))
+    (Write ([^chars cbuf off  len]                          ;;; ^Integer hint removed from off, len
+              (.Write writer cbuf ^Int32 off ^Int32 len))   ;; Int32 hints added
            ([x]
               (condp = (class x)
 		String 
@@ -1045,7 +1045,7 @@ Note this should only be used for the last one in the sequence"
 		  (.Write writer (.ToUpper s)))
 		  
 		Int32
-		(let [c ^Char x]
+		(let [c x]           ;;; Character hint removed from c
 		  (.Write writer (int (Char/ToUpper (char c))))))))))
 
 (defn- capitalize-string
@@ -1080,8 +1080,8 @@ Note this should only be used for the last one in the sequence"
       (Close [] (.Close writer))
       (Flush [] (.Flush writer))
       (Write 
-       ([^chars cbuf ^Int32 off ^Int32 len] 
-          (.Write writer cbuf off len))
+       ([^chars cbuf off len]  (let [off (int off) len (int len)]   ;;; remove ^Integer hints on off, len 
+          (.Write writer cbuf off len))  )
        ([x]
           (condp = (class x)
             String 
@@ -1106,8 +1106,8 @@ Note this should only be used for the last one in the sequence"
     (proxy [System.IO.TextWriter] []
       (Close [] (.Close writer))
       (Flush [] (.Flush writer))
-      (Write ([^chars cbuf ^Int32 off ^Int32 len] 
-                (.Write writer cbuf off len))               
+      (Write ([^chars cbuf off len] (let [off (int off) len (int len)]   ;;; remove ^Integer hints on off, len 
+                (.Write writer cbuf off len)) )               
              ([x]
                 (condp = (class x)
                  String 

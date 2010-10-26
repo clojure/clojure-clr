@@ -44,13 +44,13 @@
 (defn- get-writer [this]
   (get-field this :base))
 
-(defn- c-write-char [^TextWriter this ^Int32 c]
+(defn- c-write-char [^TextWriter this c]  (let [c (int c)]   ;;; in place of ^Integer
   (dosync (if (= c (int \newline))
 	    (do
               (set-field this :cur 0)
               (set-field this :line (inc (get-field this :line))))
 	    (set-field this :cur (inc (get-field this :cur)))))
-  (.Write ^TextWriter (get-field this :base) (char c)))
+  (.Write ^TextWriter (get-field this :base) (char c))) )
   
 ;(defn- cc-write-char [^TextWriter this ^Char c]                  ;;; ADDED
 ;  (dosync (if (= c \newline)
@@ -67,9 +67,9 @@
        (proxy [TextWriter IDeref] []
          (deref [] fields)
          (Write
-          ([^chars cbuf ^Int32 off ^Int32 len] 
+          ([^chars cbuf off len]   (let [off (int off) len (int len)]       ;;; removed ^Integer hints on off, len 
              (let [^TextWriter writer (get-field this :base)] 
-               (.Write writer cbuf off len)))               
+               (.Write writer cbuf off len))) )              
           ([x]
              (condp = (class x)
 

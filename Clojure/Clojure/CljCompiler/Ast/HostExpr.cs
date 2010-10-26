@@ -453,6 +453,17 @@ namespace clojure.lang.CljCompiler.Ast
                         object o = Compiler.CurrentNamespace.GetMapping(sym);
                         if (o is Type)
                             t = (Type)o;
+                        else
+                        {
+                            try
+                            {
+                                t = RT.classForName(sym.Name);
+                            }
+                            catch (Exception)
+                            {
+                                //aargh
+                            }
+                        }
                     }
 
                 }

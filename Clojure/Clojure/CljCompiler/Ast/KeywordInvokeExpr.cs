@@ -85,32 +85,46 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else
             {
+                // pseudo-code:
+                //  ILookupThunk thunk = objclass.ThunkField(i)
+                //  object target = ...code...
+                //  object val = thunk.get(target)
+                //  if ( val != thunk )
+                //     return val
+                //  else
+                //     KeywordLookupSite site = objclass.SiteField(i)
+                //     thunk = site.fault(target)
+                //     objclass.ThunkField(i) = thunk
+                //     val = thunk.get(target)
+                //     return val
 
                 ParameterExpression thunkParam = Expression.Parameter(typeof(ILookupThunk), "thunk");
-                Expression assignThunk = Expression.Assign(thunkParam, Expression.Field(null, objx.ThunkField(_siteIndex)));
-
                 ParameterExpression targetParam = Expression.Parameter(typeof(object), "target");
-                Expression assignTarget = Expression.Assign(targetParam,_target.GenCode(RHC.Expression, objx, context));
-
                 ParameterExpression valParam = Expression.Parameter(typeof(Object), "val");
-                Expression assignVal = Expression.Assign(valParam, Expression.Call(thunkParam, Compiler.Method_ILookupThunk_get,targetParam));
-
                 ParameterExpression siteParam = Expression.Parameter(typeof(KeywordLookupSite), "site");
+
+                
+                Expression assignThunkFromField = Expression.Assign(thunkParam, Expression.Field(null, objx.ThunkField(_siteIndex)));
+                Expression assignThunkFromSite = Expression.Assign(thunkParam, Expression.Call(siteParam, Compiler.Method_ILookupSite_fault, targetParam));
+                Expression assignFieldFromThunk = Expression.Assign(Expression.Field(null, objx.ThunkField(_siteIndex)), thunkParam);
+                Expression assignTarget = Expression.Assign(targetParam,_target.GenCode(RHC.Expression, objx, context));
+                Expression assignVal = Expression.Assign(valParam, Expression.Call(thunkParam, Compiler.Method_ILookupThunk_get,targetParam));
                 Expression assignSite = Expression.Assign(siteParam, Expression.Field(null, objx.KeywordLookupSiteField(_siteIndex)));
+
 
                 Expression block =
                     Expression.Block(typeof(Object), new ParameterExpression[] { thunkParam, valParam, targetParam },
-                        assignThunk,
+                        assignThunkFromField,
                         assignTarget,
                         assignVal,
-                        Expression.Condition(
-                            Expression.NotEqual(valParam, thunkParam),
-                            valParam,
+                        Expression.IfThen(
+                            Expression.Equal(valParam, thunkParam),
                             Expression.Block(typeof(Object), new ParameterExpression[] { siteParam },
                                 assignSite,
-                                Expression.Call(siteParam, Compiler.Method_ILookupSite_fault, targetParam, objx.ThisParam)),
-                            typeof(object)));
-
+                                assignThunkFromSite,
+                                assignFieldFromThunk,
+                                assignVal)),
+                        valParam);
 
                 block = Compiler.MaybeAddDebugInfo(block, _spanMap, context.IsDebuggable);
                 return block;

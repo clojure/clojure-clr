@@ -13,6 +13,6 @@ namespace clojure.lang
 {
     public interface ILookupSite
     {
-        object fault(object target, ILookupHost host);
+        ILookupThunk fault(object target);
     }
 }

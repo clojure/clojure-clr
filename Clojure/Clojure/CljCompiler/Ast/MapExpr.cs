@@ -67,6 +67,7 @@ namespace clojure.lang.CljCompiler.Ast
             bool constant = true;
 
             IPersistentVector keyvals = PersistentVector.EMPTY;
+
             for (ISeq s = RT.seq(form); s != null; s = s.next())
             {
                 IMapEntry e = (IMapEntry)s.first();

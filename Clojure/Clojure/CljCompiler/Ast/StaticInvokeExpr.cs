@@ -122,7 +122,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            string cname = v.Namespace.Name.Name.Replace('.', '/').Replace('-', '_') + "$" + Compiler.munge(v.sym.Name);
+            string cname = v.Namespace.Name.Name.Replace('.', '/').Replace('-', '_').Replace('-','_') + "$" + Compiler.munge(v.sym.Name);
             Type target = RT.classForName(cname);  // not sure this will work.
 
             IPersistentVector argv = PersistentVector.EMPTY;
@@ -163,7 +163,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
-            throw new NotImplementedException("TODO: Implement StaticInvodeExpr.GenCodeUnboxed");
+            throw new NotImplementedException("TODO: Implement StaticInvokeExpr.GenCodeUnboxed");
         }
 
         #endregion

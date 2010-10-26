@@ -93,12 +93,12 @@ Design notes for clojure.string:
                                                                      ;;;         (str buffer))))))
 
 (defn- replace-first-char
-  [^String s ^Char match replace]                                    ;;; Character
+  [^String s  match replace] (let [match ^Char (char match)]                                   ;;; Character hint on match
   (let [                                                          ;;; s (.toString s)
         i (.IndexOf s match)]                                 ;;; .indexOf (int match)
     (if (= -1 i)
       s
-      (str (subs s 0 i) replace (subs s (inc i))))))
+      (str (subs s 0 i) replace (subs s (inc i))))))  )
       
 (defn replace-first
   "Replaces the first instance of match with replacement in s.

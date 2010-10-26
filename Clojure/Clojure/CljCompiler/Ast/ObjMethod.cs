@@ -47,6 +47,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected IPersistentVector _parms;
 
+        protected MethodBuilder _staticMethodBuilder;
+
         #endregion
 
         #region Data accessors
@@ -116,8 +118,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal void GenerateCode(ObjExpr objx, GenContext context)
         {
-            MethodBuilder mb = GenerateStaticMethod(objx, context);
-            GenerateMethod(mb, objx, context);
+            GenerateStaticMethod(objx, context);
+            GenerateMethod(objx, context);
         }
 
 
@@ -167,7 +169,14 @@ namespace clojure.lang.CljCompiler.Ast
                 // TODO: Cache all the CreateObjectTypeArray values
                 MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static, ReturnType, argTypes);
 
+                Console.Write("StMd: {0} {1}(", ReturnType.Name, methodName);
+                foreach (Type t in argTypes)
+                    Console.Write("{0}", t.Name);
+                Console.WriteLine(")");
+
                 lambda.CompileToMethod(mb, context.IsDebuggable);
+
+                _staticMethodBuilder = mb;
                 return mb;
             }
             finally
@@ -178,12 +187,18 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        void GenerateMethod(MethodInfo staticMethodInfo, ObjExpr objx, GenContext context)
+        void GenerateMethod(ObjExpr objx, GenContext context)
         {
 
             TypeBuilder tb = objx.TypeBuilder;
 
             MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, ReturnType, ArgTypes);
+
+
+            Console.Write("InMd: {0} {1}(", ReturnType.Name, MethodName);
+            foreach (Type t in ArgTypes)
+                Console.Write("{0}", t.Name);
+            Console.WriteLine(")");
 
             GenInterface.SetCustomAttributes(mb, _methodMeta);
             if (_parms != null)
@@ -203,7 +218,7 @@ namespace clojure.lang.CljCompiler.Ast
             gen.EmitLoadArg(0);                             
             for (int i = 1; i <= _argLocals.count(); i++)
                 gen.EmitLoadArg(i);                         
-            gen.EmitCall(staticMethodInfo);                 
+            gen.EmitCall(_staticMethodBuilder);                 
             gen.Emit(OpCodes.Ret);
 
             if ( IsExplicit )

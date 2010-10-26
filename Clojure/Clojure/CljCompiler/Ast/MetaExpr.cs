@@ -34,7 +34,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public MetaExpr(Expr expr, MapExpr meta)
+        public MetaExpr(Expr expr, Expr meta)
         {
             _expr = expr;
             _meta = meta;
@@ -73,7 +73,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression iobjExpr = Expression.Convert(objExpr, typeof(IObj));
 
             Expression metaExpr = _meta.GenCode(RHC.Expression, objx, context);
-            // Do we need a conversion here?  probably not.
+            metaExpr = Expression.Convert(metaExpr, typeof(IPersistentMap));
     
             Expression ret = Expression.Call(iobjExpr, Compiler.Method_IObj_withMeta, metaExpr);
 

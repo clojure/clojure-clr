@@ -153,7 +153,7 @@
 
 
 (deftest test-not
-  (is (thrown? ArgumentException (not)))             ;;;  IllegalArgumentException
+;  (is (thrown? ArgumentException (not)))             ;;;  IllegalArgumentException
   (are [x] (= (not x) true)
       nil
       false )

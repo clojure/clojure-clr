@@ -343,7 +343,7 @@
      (.Write (getf :base) tws)
      (setf :trailing-white-space nil))))
 
-(defn- p-write-char [^TextWriter this ^Int32 c]
+(defn- p-write-char [^TextWriter this c]  (let [c (int c)]   ;;; replacing type hint ^Int32 c
   (if (= (getf :mode) :writing)
     (do 
       (write-white-space this)
@@ -354,7 +354,7 @@
             newpos (inc oldpos)]
         (dosync
          (setf :pos newpos)
-         (add-to-buffer this (make-buffer-blob (str (char c)) nil oldpos newpos)))))))
+         (add-to-buffer this (make-buffer-blob (str (char c)) nil oldpos newpos))))))) )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

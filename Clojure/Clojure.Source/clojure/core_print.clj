@@ -245,12 +245,12 @@
     \formfeed "formfeed"
     \return "return"})
 
-(defmethod print-method Char [^Char c, ^System.IO.TextWriter w]
+(defmethod print-method Char [c, ^System.IO.TextWriter w]          ;;; ^Character c
   (if (or *print-dup* *print-readably*)
     (do (.Write w \\)
         (let [n (char-name-string c)]
-          (if n (.Write w n) (.Write w c))))
-    (.Write w c))
+          (if n (.Write w n) (.Write w ^Char c))))
+    (.Write w ^Char c))
   nil)
 
 (defmethod print-dup Char   [c w] (print-method c w))             ;;; java.lang.Character

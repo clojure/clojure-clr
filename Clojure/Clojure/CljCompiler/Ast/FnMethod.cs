@@ -29,6 +29,8 @@ namespace clojure.lang.CljCompiler.Ast
         
         protected IPersistentVector _reqParms = PersistentVector.EMPTY;  // localbinding => localbinding
         protected LocalBinding _restParm = null;
+        Type[] _argTypes;
+        Type _retType;
 
         #endregion
 
@@ -121,11 +123,18 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.LOOP_LOCALS, null,
                     Compiler.NEXT_LOCAL_NUM, 0));
 
+                method._retType = Compiler.TagType(Compiler.TagOf(parms));
+                if (method._retType.IsPrimitive && !(method._retType == typeof(double) || method._retType == typeof(long)))
+                    throw new ArgumentException("Only long and double primitives are supported");
+
                 // register 'this' as local 0  
-                method._thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null,false);
+                if ( !isStatic )
+                    method._thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null,false);
 
                 ParamParseState paramState = ParamParseState.Required;
                 IPersistentVector argLocals = PersistentVector.EMPTY;
+                List<Type> argTypes = new List<Type>();
+
                 int parmsCount = parms.count();
 
                 for (int i = 0; i < parmsCount; i++)
@@ -137,6 +146,9 @@ namespace clojure.lang.CljCompiler.Ast
                         throw new Exception("Can't use qualified name as parameter: " + p);
                     if (p.Equals(Compiler._AMP_))
                     {
+                        //if (isStatic)
+                        //    throw new Exception("Variadic fns cannot be static");
+
                         if (paramState == ParamParseState.Required)
                             paramState = ParamParseState.Rest;
                         else
@@ -144,7 +156,20 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                     else
                     {
-                        LocalBinding b = Compiler.RegisterLocal(p,
+                        Type pt = Compiler.TagType(Compiler.TagOf(p));
+                        if (pt.IsPrimitive && !isStatic)
+                            throw new Exception("Non-static fn can't have primitive parameter: " + p);
+                        if (pt.IsPrimitive && !(pt == typeof(double) || pt == typeof(long)))
+                            throw new ArgumentException("Only long and double primitives are supported: " + p);
+
+                        if (paramState == ParamParseState.Rest && Compiler.TagOf(p) != null)
+                            throw new Exception("& arg cannot have type hint");
+                        if (paramState == ParamParseState.Rest)
+                            pt = typeof(ISeq);
+                        argTypes.Add(pt);
+                        LocalBinding b = isStatic
+                            ? Compiler.RegisterLocal(p,null, new MethodParamExpr(pt), true)
+                            : Compiler.RegisterLocal(p,
                             paramState == ParamParseState.Rest ? Compiler.ISEQ : Compiler.TagOf(p),
                             null,true);
 
@@ -168,6 +193,8 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new Exception(string.Format("Can't specify more than {0} parameters", Compiler.MAX_POSITIONAL_ARITY));
                 Compiler.LOOP_LOCALS.set(argLocals);
                 method._argLocals = argLocals;
+                if (isStatic)
+                    method._argTypes = argTypes.ToArray();
                 method._body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return),body);
                 return method;
             }
@@ -185,7 +212,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             List<ParameterExpression> parmExprs = new List<ParameterExpression>(_argLocals.count());
 
-            _thisBinding.ParamExpression = objx.ThisParam;
+            if (_thisBinding != null )
+                _thisBinding.ParamExpression = objx.ThisParam;
 
             try
             {

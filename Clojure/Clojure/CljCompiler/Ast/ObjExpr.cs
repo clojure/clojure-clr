@@ -356,12 +356,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         private TypeBuilder GenerateFnBaseClass(Type superType, GenContext context)
         {
-            string baseClassName = _internalName + "__base__" + RT.nextID();
+            string baseClassName = _internalName + "__base" + (IsDefType || (IsStatic && Compiler.IsCompiling) ? "" : "__" + RT.nextID().ToString());
+
+            Console.WriteLine("DefStaticFn {0}, {1}", baseClassName, context.AssemblyBuilder.GetName().Name);
 
             Type[] interfaces = new Type[0];
-
-            if (_keywordCallsites.count() > 0)
-                interfaces = new Type[] { typeof(ILookupHost) };
 
             TypeBuilder baseTB = context.ModuleBuilder.DefineType(baseClassName, TypeAttributes.Public | TypeAttributes.Abstract, superType, interfaces);
             MarkAsSerializable(baseTB);
@@ -377,6 +376,8 @@ namespace clojure.lang.CljCompiler.Ast
             GenerateKeywordCallsites(baseTB);
             GenerateSwapThunk(baseTB);
             GenerateProtocolCallsites(baseTB);
+
+            GenerateBaseClassMethods(baseTB, context);
 
             GenerateBaseClassConstructor(superType,baseTB);
 
@@ -636,13 +637,24 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region base class methods
+
+        protected virtual void GenerateBaseClassMethods(TypeBuilder baseTB, GenContext context)
+        {
+            // do nothing in the base case.
+        }
+
+        #endregion
+
         #endregion
 
         #region Fn class construction
 
         private void GenerateFnClass(IPersistentVector interfaces, GenContext context)
         {
-            string publicTypeName = IsDefType ? _internalName : _internalName + "__" + RT.nextID();
+            string publicTypeName = IsDefType || (IsStatic && Compiler.IsCompiling) ? _internalName : _internalName + "__" + RT.nextID();
+
+            Console.WriteLine("DefFn {0}, {1}", publicTypeName, context.AssemblyBuilder.GetName().Name);
 
             _typeBuilder = context.AssemblyGen.DefinePublicType(publicTypeName, _baseType, true);
             for (int i = 0; i < interfaces.count(); i++)
@@ -898,12 +910,11 @@ namespace clojure.lang.CljCompiler.Ast
 
             for (int i = 0; i < _keywordCallsites.count(); i++)
             {
-                Expression nArg = Expression.Constant(i);
                 Expression kArg = GenerateValue(_keywordCallsites.nth(i));
                 Expression parmAssign =
                     Expression.Assign(
                         parm,
-                        Expression.New(Compiler.Ctor_KeywordLookupSite_2, new Expression[] { nArg, kArg }));
+                        Expression.New(Compiler.Ctor_KeywordLookupSite_1, new Expression[] { kArg }));
                 Expression siteAssign = Expression.Assign(Expression.Field(null, _keywordLookupSiteFields[i]), parm);
                 Expression thunkAssign = Expression.Assign(Expression.Field(null, _thunkFields[i]), Expression.Convert(parm, typeof(ILookupThunk)));
                 inits.Add(parmAssign);
@@ -1110,13 +1121,18 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Expression GenLocal(GenContext context, LocalBinding lb)
         {
-            if (_closes.containsKey(lb) && _fnMode == FnMode.Full )
+            if ( _fnMode == FnMode.Full )
             {
-                Expression expr = Expression.Field(_thisParam, lb.Name);
-                Type primtType = lb.PrimitiveType;
-                if (primtType != null)
-                    expr = Compiler.MaybeBox(Expression.Convert(expr, primtType));
-                return expr;
+                if (_closes.containsKey(lb))
+                {
+                    Expression expr = Expression.Field(_thisParam, lb.Name);
+                    Type primtType = lb.PrimitiveType;
+                    if (primtType != null)
+                        expr = Compiler.MaybeBox(Expression.Convert(expr, primtType));
+                    return expr;
+                }
+                else
+                    return lb.ParamExpression;
             }
             else
             {

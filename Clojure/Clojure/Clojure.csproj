@@ -76,22 +76,22 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Dynamic" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
-        <HintPath>..\..\lib\DLR\2.0\Microsoft.Dynamic.dll</HintPath>
+      <HintPath>..\..\lib\DLR\2.0\Microsoft.Dynamic.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Dynamic" Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">
       <HintPath>..\..\lib\DLR\4.0\Microsoft.Dynamic.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Scripting"  Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
+    <Reference Include="Microsoft.Scripting" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
       <HintPath>..\..\lib\DLR\2.0\Microsoft.Scripting.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Scripting"  Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">
+    <Reference Include="Microsoft.Scripting" Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">
       <HintPath>..\..\lib\DLR\4.0\Microsoft.Scripting.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Scripting.Core"  Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
+    <Reference Include="Microsoft.Scripting.Core" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
       <HintPath>..\..\lib\DLR\2.0\Microsoft.Scripting.Core.dll</HintPath>
       <Aliases>global,MSC</Aliases>
     </Reference>
-    <Reference Include="Microsoft.Scripting.ExtensionAttribute"  Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
+    <Reference Include="Microsoft.Scripting.ExtensionAttribute" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
       <HintPath>..\..\lib\DLR\2.0\Microsoft.Scripting.ExtensionAttribute.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -200,7 +200,6 @@
     <Compile Include="Lib\IEditableCollection.cs" />
     <Compile Include="Lib\IKeywordLookup.cs" />
     <Compile Include="Lib\ILookup.cs" />
-    <Compile Include="Lib\ILookupHost.cs" />
     <Compile Include="Lib\ILookupSite.cs" />
     <Compile Include="Lib\ILookupThunk.cs" />
     <Compile Include="Lib\ITransientAssociative.cs" />

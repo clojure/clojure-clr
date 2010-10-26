@@ -416,7 +416,7 @@
   (with-open [in (make-input-stream input opts)]
     (do-copy in output opts)))
 
-(defmethod do-copy [FileInfo FileInfo] [^File input ^File output opts]
+(defmethod do-copy [FileInfo FileInfo] [^FileInfo input ^FileInfo output opts]
   (with-open [in (make-input-stream input opts)
               out (make-output-stream output opts)]
     (do-copy in out opts)))
@@ -430,7 +430,7 @@
 (defmethod do-copy [String FileInfo] [^String input ^FileInfo output opts]
   (do-copy (StringReader. input) output opts))
 
-(defmethod do-copy [|System.Byte[]| Stream] [^bytes input ^OutputStreStreamam output opts]
+(defmethod do-copy [|System.Byte[]| Stream] [^bytes input ^Stream output opts]
   (do-copy (MemoryStream. input) output opts))
 
 (defmethod do-copy [|System.Byte[]| TextWriter] [^bytes input ^TextWriter output opts]

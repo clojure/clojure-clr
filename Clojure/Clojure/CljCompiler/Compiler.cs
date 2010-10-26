@@ -76,6 +76,8 @@ namespace clojure.lang
 
         internal static readonly Symbol CLASS = Symbol.create("System.Type");
 
+        internal static readonly Symbol INVOKE_STATIC = Symbol.create("invokeStatic");
+
         #endregion
 
         #region Keywords
@@ -258,7 +260,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Var_getRawRoot = typeof(Var).GetMethod("getRawRoot");
         internal static readonly MethodInfo Method_Var_getRoot = typeof(Var).GetMethod("getRoot");
 
-        internal static readonly ConstructorInfo Ctor_KeywordLookupSite_2 = typeof(KeywordLookupSite).GetConstructor(new Type[] { typeof(int), typeof(Keyword) });
+        internal static readonly ConstructorInfo Ctor_KeywordLookupSite_1 = typeof(KeywordLookupSite).GetConstructor(new Type[] { typeof(Keyword) });
         internal static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
 
         internal static readonly ConstructorInfo Ctor_Serializable = typeof(SerializableAttribute).GetConstructor(Type.EmptyTypes);

@@ -115,10 +115,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expr Parse(ParserContext pcon, ISeq form)
         {
-            pcon = pcon.EvEx();
-
             // TODO: DO we need the recur context here and below?
-            Expr fexpr = Compiler.Analyze(pcon,form.first());
+            Expr fexpr = Compiler.Analyze(pcon.EvEx(),form.first());
 
             if ( fexpr is VarExpr && ((VarExpr)fexpr).Var.Equals(Compiler.INSTANCE))
             {
@@ -133,19 +131,23 @@ namespace clojure.lang.CljCompiler.Ast
             if (fexpr is VarExpr && pcon.Rhc != RHC.Eval)
             {
                 Var v = ((VarExpr)fexpr).Var;
-                if (RT.booleanCast(RT.get(RT.meta(v), Compiler.STATIC_KEY)))
-                    return StaticInvokeExpr.Parse(v, RT.next(form), Compiler.TagOf(form));
+                //if (RT.booleanCast(RT.get(RT.meta(v), Compiler.STATIC_KEY)))
+                //{
+                //    Symbol cname = Symbol.intern(v.Namespace.Name + "$" + Compiler.munge(v.Symbol.Name));
+                //    return Compiler.Analyze(pcon,RT.listStar(Compiler.DOT,cname,Compiler.INVOKE_STATIC, RT.next(form)));
+                //    //return StaticInvokeExpr.Parse(v, RT.next(form), Compiler.TagOf(form));
+                //}
             }
 
             if (fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KEYWORD_CALLSITES.isBound)
             {
-                Expr target = Compiler.Analyze(pcon, RT.second(form));
+                Expr target = Compiler.Analyze(pcon.EvEx(), RT.second(form));
                 return new KeywordInvokeExpr((string)Compiler.SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), Compiler.TagOf(form), (KeywordExpr)fexpr, target);
             }
 
             IPersistentVector args = PersistentVector.EMPTY;
             for ( ISeq s = RT.seq(form.next()); s != null; s = s.next())
-                args = args.cons(Compiler.Analyze(pcon,s.first()));
+                args = args.cons(Compiler.Analyze(pcon.EvEx(),s.first()));
             return new InvokeExpr((string)Compiler.SOURCE.deref(),
                 (IPersistentMap)Compiler.SOURCE_SPAN.deref(), //Compiler.GetSourceSpanMap(form),
                 Compiler.TagOf(form),

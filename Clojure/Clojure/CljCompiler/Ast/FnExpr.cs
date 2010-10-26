@@ -199,7 +199,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             if (origForm is IObj && ((IObj)origForm).meta() != null)
-                return new MetaExpr(fn, (MapExpr)MapExpr.Parse(pcon.EvEx(),((IObj)origForm).meta()));
+                return new MetaExpr(fn, MapExpr.Parse(pcon.EvEx(),((IObj)origForm).meta()));
             else
                 return fn;
         }
