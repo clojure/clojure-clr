@@ -79,14 +79,19 @@ namespace clojure.lang.CljCompiler.Ast
                     constant = false;
             }
             Expr ret = new MapExpr(keyvals);
+
             if (form is IObj && ((IObj)form).meta() != null)
                 return Compiler.OptionallyGenerateMetaInit(pcon, form, ret);
             else if (constant)
             {
-                IPersistentMap m = PersistentHashMap.EMPTY;
-                for (int i = 0; i < keyvals.length(); i += 2)
-                    m = m.assoc(((LiteralExpr)keyvals.nth(i)).Val, ((LiteralExpr)keyvals.nth(i + 1)).Val);
-                return new ConstantExpr(m);
+                // This 'optimzation' works, mostly, unless you have nested map values.
+                // The nested map values do not participate in the constants map, so you end up with the code to create the keys.
+                // Result: huge duplication of keyword creation.  3X increase in init time to the REPL.
+                //IPersistentMap m = PersistentHashMap.EMPTY;
+                //for (int i = 0; i < keyvals.length(); i += 2)
+                //    m = m.assoc(((LiteralExpr)keyvals.nth(i)).Val, ((LiteralExpr)keyvals.nth(i + 1)).Val);
+                //return new ConstantExpr(m);
+                return ret;
             }
             else
                 return ret;

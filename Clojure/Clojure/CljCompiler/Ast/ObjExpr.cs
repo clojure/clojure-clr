@@ -358,7 +358,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             string baseClassName = _internalName + "__base" + (IsDefType || (IsStatic && Compiler.IsCompiling) ? "" : "__" + RT.nextID().ToString());
 
-            Console.WriteLine("DefStaticFn {0}, {1}", baseClassName, context.AssemblyBuilder.GetName().Name);
+            //Console.WriteLine("DefStaticFn {0}, {1}", baseClassName, context.AssemblyBuilder.GetName().Name);
 
             Type[] interfaces = new Type[0];
 
@@ -654,7 +654,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             string publicTypeName = IsDefType || (IsStatic && Compiler.IsCompiling) ? _internalName : _internalName + "__" + RT.nextID();
 
-            Console.WriteLine("DefFn {0}, {1}", publicTypeName, context.AssemblyBuilder.GetName().Name);
+            //Console.WriteLine("DefFn {0}, {1}", publicTypeName, context.AssemblyBuilder.GetName().Name);
 
             _typeBuilder = context.AssemblyGen.DefinePublicType(publicTypeName, _baseType, true);
             for (int i = 0; i < interfaces.count(); i++)

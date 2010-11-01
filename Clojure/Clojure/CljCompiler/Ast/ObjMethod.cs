@@ -169,10 +169,10 @@ namespace clojure.lang.CljCompiler.Ast
                 // TODO: Cache all the CreateObjectTypeArray values
                 MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static, ReturnType, argTypes);
 
-                Console.Write("StMd: {0} {1}(", ReturnType.Name, methodName);
-                foreach (Type t in argTypes)
-                    Console.Write("{0}", t.Name);
-                Console.WriteLine(")");
+                //Console.Write("StMd: {0} {1}(", ReturnType.Name, methodName);
+                //foreach (Type t in argTypes)
+                //    Console.Write("{0}", t.Name);
+                //Console.WriteLine(")");
 
                 lambda.CompileToMethod(mb, context.IsDebuggable);
 
@@ -195,10 +195,10 @@ namespace clojure.lang.CljCompiler.Ast
             MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, ReturnType, ArgTypes);
 
 
-            Console.Write("InMd: {0} {1}(", ReturnType.Name, MethodName);
-            foreach (Type t in ArgTypes)
-                Console.Write("{0}", t.Name);
-            Console.WriteLine(")");
+            //Console.Write("InMd: {0} {1}(", ReturnType.Name, MethodName);
+            //foreach (Type t in ArgTypes)
+            //    Console.Write("{0}", t.Name);
+            //Console.WriteLine(")");
 
             GenInterface.SetCustomAttributes(mb, _methodMeta);
             if (_parms != null)
