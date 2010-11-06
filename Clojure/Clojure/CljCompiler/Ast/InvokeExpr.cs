@@ -131,12 +131,9 @@ namespace clojure.lang.CljCompiler.Ast
             if (fexpr is VarExpr && pcon.Rhc != RHC.Eval)
             {
                 Var v = ((VarExpr)fexpr).Var;
-                //if (RT.booleanCast(RT.get(RT.meta(v), Compiler.STATIC_KEY)))
-                //{
-                //    Symbol cname = Symbol.intern(v.Namespace.Name + "$" + Compiler.munge(v.Symbol.Name));
-                //    return Compiler.Analyze(pcon,RT.listStar(Compiler.DOT,cname,Compiler.INVOKE_STATIC, RT.next(form)));
-                //    //return StaticInvokeExpr.Parse(v, RT.next(form), Compiler.TagOf(form));
-                //}
+                IPersistentMap meta = RT.meta(v);
+                if (RT.booleanCast(RT.get(meta, Compiler.STATIC_KEY)) && !RT.booleanCast(RT.get(meta,Compiler.NOLINK_KEY)))
+                    return StaticInvokeExpr.Parse(v, RT.next(form), Compiler.TagOf(form));
             }
 
             if (fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KEYWORD_CALLSITES.isBound)

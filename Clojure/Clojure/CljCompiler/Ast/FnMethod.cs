@@ -76,7 +76,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override string StaticMethodName
         {
-            get { return String.Format("__invokeHelper_{0}{1}", RequiredArity, IsVariadic ? "v" : string.Empty); }
+            get
+            {
+                if (Objx.IsStatic && Compiler.IsCompiling)
+                    return "InvokeStatic";
+                return String.Format("__invokeHelper_{0}{1}", RequiredArity, IsVariadic ? "v" : string.Empty);
+            }
         }
 
         protected override Type[] ArgTypes
@@ -193,8 +198,8 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new Exception(string.Format("Can't specify more than {0} parameters", Compiler.MAX_POSITIONAL_ARITY));
                 Compiler.LOOP_LOCALS.set(argLocals);
                 method._argLocals = argLocals;
-                if (isStatic)
-                    method._argTypes = argTypes.ToArray();
+                //if (isStatic)
+                //    method._argTypes = argTypes.ToArray();
                 method._body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return),body);
                 return method;
             }

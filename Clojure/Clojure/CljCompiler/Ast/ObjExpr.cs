@@ -188,7 +188,7 @@ namespace clojure.lang.CljCompiler.Ast
             set { _varCallsites = value; }
         }
 
-        protected bool IsStatic
+        public bool IsStatic
         {
             get { return _isStatic; }
             set { _isStatic = value; }

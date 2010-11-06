@@ -363,6 +363,14 @@ namespace clojure.lang.CljCompiler.Ast
             return exprs;
         }
 
+        internal static Expression[] GenTypedArgs(ObjExpr objx, GenContext context, Type[] paramTypes, IPersistentVector args)
+        {
+            Expression[] exprs = new Expression[paramTypes.Length];
+            for (int i = 0; i < paramTypes.Length; i++)
+                exprs[i] = GenTypedArg(objx, context, paramTypes[i], (Expr)args.nth(i));
+            return exprs;
+        }
+
         internal static Expression GenTypedArg(ObjExpr objx, GenContext context, Type type, Expr arg)
         {
             if (Compiler.MaybePrimitiveType(arg) == type)

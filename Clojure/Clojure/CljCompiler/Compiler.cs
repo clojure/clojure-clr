@@ -86,6 +86,7 @@ namespace clojure.lang
         static readonly Keyword INLINE_ARITIES_KEY = Keyword.intern(null, "inline-arities");
         internal static readonly Keyword STATIC_KEY = Keyword.intern(null, "static");
         internal static readonly Keyword ARGLISTS_KEY = Keyword.intern(null, "arglists");
+        internal static readonly Keyword NOLINK_KEY = Keyword.intern(null, "__nolink");
 
         static readonly Keyword VOLATILE_KEY = Keyword.intern(null,"volatile");
         internal static readonly Keyword IMPLEMENTS_KEY = Keyword.intern(null,"implements");
@@ -202,6 +203,8 @@ namespace clojure.lang
         #region MethodInfos, etc.
 
         internal static readonly PropertyInfo Method_AFunction_MethodImplCache = typeof(AFunction).GetProperty("MethodImplCache");
+
+        internal static readonly MethodInfo Method_ArraySeq_create = typeof(ArraySeq).GetMethod("create", BindingFlags.Static | BindingFlags.Public,null, new Type[] { typeof(object[]) }, null);
 
         internal static readonly PropertyInfo Method_Compiler_CurrentNamespace = typeof(Compiler).GetProperty("CurrentNamespace");
         internal static readonly MethodInfo Method_Compiler_PushNS = typeof(Compiler).GetMethod("PushNS");
@@ -1260,7 +1263,7 @@ namespace clojure.lang
 
         internal static bool LoadAssembly(FileInfo assyInfo)
         {
-            Assembly assy = Assembly.LoadFile(assyInfo.FullName);
+            Assembly assy = Assembly.LoadFrom(assyInfo.FullName);
             Type initType = assy.GetType("__Init__");
             if (initType == null)
             {

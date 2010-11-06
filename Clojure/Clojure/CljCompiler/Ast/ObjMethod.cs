@@ -129,6 +129,7 @@ namespace clojure.lang.CljCompiler.Ast
             TypeBuilder tb = objx.TypeBuilder;
 
             List<ParameterExpression> parms = new List<ParameterExpression>(_argLocals.count() + 1);
+            List<Type> parmTypes = new List<Type>(_argLocals.count() + 1);
 
             ParameterExpression thisParm = Expression.Parameter(objx.BaseType, "this");
             if (_thisBinding != null)
@@ -138,6 +139,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             objx.ThisParam = thisParm;
             parms.Add(thisParm);
+            parmTypes.Add(objx.BaseType);
 
             try
             {
@@ -153,6 +155,7 @@ namespace clojure.lang.CljCompiler.Ast
                     ParameterExpression parm = Expression.Parameter(argTypes[i], lb.Name);
                     lb.ParamExpression = parm;
                     parms.Add(parm);
+                    parmTypes.Add(argTypes[i]);
                 }
 
                 Expression body =
@@ -167,11 +170,11 @@ namespace clojure.lang.CljCompiler.Ast
 
 
                 // TODO: Cache all the CreateObjectTypeArray values
-                MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static, ReturnType, argTypes);
+                MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static|MethodAttributes.Public, ReturnType, parmTypes.ToArray());
 
                 //Console.Write("StMd: {0} {1}(", ReturnType.Name, methodName);
-                //foreach (Type t in argTypes)
-                //    Console.Write("{0}", t.Name);
+                //foreach (Type t in parmTypes)
+                //    Console.Write("{0}, ", t.Name);
                 //Console.WriteLine(")");
 
                 lambda.CompileToMethod(mb, context.IsDebuggable);
