@@ -303,7 +303,7 @@ namespace clojure.lang.CljCompiler.Ast
             return infos;
         }
 
-        private static List<MethodBase> GetMethods(Type targetType, int arity, string methodName, bool getStatics)
+        internal static List<MethodBase> GetMethods(Type targetType, int arity, string methodName, bool getStatics)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
             flags |= getStatics ? BindingFlags.Static : BindingFlags.Instance;

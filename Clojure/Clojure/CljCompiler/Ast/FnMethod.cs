@@ -84,9 +84,20 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+        protected override Type[] StaticMethodArgTypes
+        {
+            get
+            {
+                if (_argTypes != null)
+                    return _argTypes;
+
+                return ArgTypes;
+            }
+        }
+
         protected override Type[] ArgTypes
         {
-            get 
+            get
             {
                 if (IsVariadic && _reqParms.count() == Compiler.MAX_POSITIONAL_ARITY)
                 {
@@ -95,8 +106,8 @@ namespace clojure.lang.CljCompiler.Ast
                         ret[i] = typeof(Object);
                     return ret;
                 }
-                
-                return Compiler.CreateObjectTypeArray(NumParams); 
+
+                return Compiler.CreateObjectTypeArray(NumParams);
             }
         }
 
@@ -198,8 +209,8 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new Exception(string.Format("Can't specify more than {0} parameters", Compiler.MAX_POSITIONAL_ARITY));
                 Compiler.LOOP_LOCALS.set(argLocals);
                 method._argLocals = argLocals;
-                //if (isStatic)
-                //    method._argTypes = argTypes.ToArray();
+                if (isStatic)
+                    method._argTypes = argTypes.ToArray();
                 method._body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return),body);
                 return method;
             }

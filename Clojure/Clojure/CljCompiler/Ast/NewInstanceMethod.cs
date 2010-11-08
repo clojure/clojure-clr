@@ -66,6 +66,11 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _name + "__static"; }
         }
 
+        protected override Type[] StaticMethodArgTypes
+        {
+            get { return _argTypes; }
+        }
+
         protected override Type[] ArgTypes
         {
             get { return _argTypes; }

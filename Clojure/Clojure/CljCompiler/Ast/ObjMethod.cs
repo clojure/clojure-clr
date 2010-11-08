@@ -101,6 +101,7 @@ namespace clojure.lang.CljCompiler.Ast
         protected abstract string StaticMethodName { get; }
         protected abstract Type ReturnType { get; }
         protected abstract Type[] ArgTypes { get; }
+        protected abstract Type[] StaticMethodArgTypes { get; }
 
         #endregion
 
