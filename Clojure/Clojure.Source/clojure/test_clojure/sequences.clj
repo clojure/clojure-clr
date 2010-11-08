@@ -310,11 +310,11 @@
 
 
 (deftest test-next
-  (is (thrown? ArgumentException (next)))            ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (next)))            ;;; IllegalArgumentException
   (is (thrown? ArgumentException (next true)))       ;;; IllegalArgumentException
   (is (thrown? ArgumentException (next false)))      ;;; IllegalArgumentException
   (is (thrown? ArgumentException (next 1)))          ;;; IllegalArgumentException
-  (is (thrown? ArgumentException (next 1 2)))        ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (next 1 2)))        ;;; IllegalArgumentException
   (is (thrown? ArgumentException (next \a)))         ;;; IllegalArgumentException
   (is (thrown? ArgumentException (next 's)))         ;;; IllegalArgumentException
   (is (thrown? ArgumentException (next :k)))         ;;; IllegalArgumentException
@@ -445,7 +445,7 @@
 ;; (ffirst coll) = (first (first coll))
 ;;
 (deftest test-ffirst
-  (is (thrown? ArgumentException (ffirst)))         ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (ffirst)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (ffirst nil) nil
 
@@ -465,7 +465,7 @@
 ;; (fnext coll) = (first (next coll)) = (second coll)
 ;;
 (deftest test-fnext
-  (is (thrown? ArgumentException (fnext)))         ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (fnext)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (fnext nil) nil
 
@@ -486,11 +486,10 @@
     (fnext (sorted-set 1 2 3 4)) 2 ))
 
 
-
 ;; (nfirst coll) = (next (first coll))
 ;;
 (deftest test-nfirst
-  (is (thrown? ArgumentException (nfirst)))         ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (nfirst)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (nfirst nil) nil
 
@@ -510,7 +509,7 @@
 ;; (nnext coll) = (next (next coll))
 ;;
 (deftest test-nnext
-  (is (thrown? ArgumentException (nnext)))         ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (nnext)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (nnext nil) nil
 
