@@ -42,13 +42,13 @@ namespace clojure.lang.CljCompiler.Ast
             get
             {
                 if (_n is int)
-                    return typeof(int);
+                    return typeof(long);
                 else if (_n is double)
                     return typeof(double);
                 else if (_n is long)
                     return typeof(long);
                 else
-                    throw new InvalidOperationException("Unsupported Number type: " + _n.GetType().Name);
+                    throw new ArgumentException("Unsupported Number type: " + _n.GetType().Name);
             }
         }
 
@@ -93,7 +93,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return Expression.Constant(_n);
+            if (_n is int)
+                Expression.Constant((long)_n, typeof(long));
+            else if (_n is double)
+                Expression.Constant(_n, typeof(double));
+            else if ( _n is long )
+                return Expression.Constant(_n,typeof(long));
+
+            throw new ArgumentException("Unsupported Number type: " + _n.GetType().Name);
         }
 
         #endregion

@@ -61,10 +61,10 @@ namespace Clojure.Tests.LibTests
             BigInteger b3 = BigInteger.Create(Int32.MaxValue);
             BigInteger b4 = BigInteger.Create(Int32.MinValue);
                 
-            ExpectInt32(Numbers.reduce(b1));
-            ExpectInt32(Numbers.reduce(b2));
-            ExpectInt32(Numbers.reduce(b3));
-            ExpectInt32(Numbers.reduce(b4));
+            ExpectInt32(Numbers.reduceBigInteger(b1));
+            ExpectInt32(Numbers.reduceBigInteger(b2));
+            ExpectInt32(Numbers.reduceBigInteger(b3));
+            ExpectInt32(Numbers.reduceBigInteger(b4));
         }
 
         [Test]
@@ -79,40 +79,40 @@ namespace Clojure.Tests.LibTests
             BigInteger b3 = BigInteger.Parse("123456789012345678901234567890");
             BigInteger b4 = b3.Negate();
 
-            ExpectSameObject(b1, Numbers.reduce(b1));
-            ExpectSameObject(b2, Numbers.reduce(b2));
-            ExpectSameObject(b3, Numbers.reduce(b3));
-            ExpectSameObject(b4, Numbers.reduce(b4));
+            ExpectSameObject(b1, Numbers.reduceBigInteger(b1));
+            ExpectSameObject(b2, Numbers.reduceBigInteger(b2));
+            ExpectSameObject(b3, Numbers.reduceBigInteger(b3));
+            ExpectSameObject(b4, Numbers.reduceBigInteger(b4));
         }
 
-        [Test]
-        public void ReduceOnLongReducesSmallerValues()
-        {
-            long b1 = 123;
-            long b2 = 0;
-            long b3 = Int32.MaxValue;
-            long b4 = Int32.MinValue;
+        //[Test]
+        //public void ReduceOnLongReducesSmallerValues()
+        //{
+        //    long b1 = 123;
+        //    long b2 = 0;
+        //    long b3 = Int32.MaxValue;
+        //    long b4 = Int32.MinValue;
 
-            ExpectInt32(Numbers.reduce(b1));
-            ExpectInt32(Numbers.reduce(b2));
-            ExpectInt32(Numbers.reduce(b3));
-            ExpectInt32(Numbers.reduce(b4));
-        }
+        //    ExpectInt32(Numbers.reduce(b1));
+        //    ExpectInt32(Numbers.reduce(b2));
+        //    ExpectInt32(Numbers.reduce(b3));
+        //    ExpectInt32(Numbers.reduce(b4));
+        //}
 
 
-        [Test]
-        public void ReduceOnLongReturnsLargerValues()
-        {
-            long b1 = ((long)Int32.MaxValue) + 1;
-            long b2 = ((long)Int32.MinValue) - 1;
-            long b3 = 123456789000;
-            long b4 = -b3;
+        //[Test]
+        //public void ReduceOnLongReturnsLargerValues()
+        //{
+        //    long b1 = ((long)Int32.MaxValue) + 1;
+        //    long b2 = ((long)Int32.MinValue) - 1;
+        //    long b3 = 123456789000;
+        //    long b4 = -b3;
 
-            ExpectEqualObject(b1, Numbers.reduce(b1));
-            ExpectEqualObject(b2, Numbers.reduce(b2));
-            ExpectEqualObject(b3, Numbers.reduce(b3));
-            ExpectEqualObject(b4, Numbers.reduce(b4));
-        }
+        //    ExpectEqualObject(b1, Numbers.reduce(b1));
+        //    ExpectEqualObject(b2, Numbers.reduce(b2));
+        //    ExpectEqualObject(b3, Numbers.reduce(b3));
+        //    ExpectEqualObject(b4, Numbers.reduce(b4));
+        //}
 
         #endregion
 

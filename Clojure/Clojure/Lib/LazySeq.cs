@@ -49,7 +49,10 @@ namespace clojure.lang
 
         public override int GetHashCode()
         {
-            return Util.hash(seq());
+            ISeq s = seq();
+            if (s == null)
+                return 1;
+            return Util.hash(s);
         }
 
         public override bool Equals(object obj)

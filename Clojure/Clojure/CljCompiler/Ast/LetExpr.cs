@@ -85,15 +85,15 @@ namespace clojure.lang.CljCompiler.Ast
                     || (pcon.Rhc == RHC.Expression && isLoop))
                     return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)),"let__"+RT.nextID());
 
-                ObjMethod method = (ObjMethod)Compiler.METHOD.deref();
-                IPersistentMap backupMethodLocals = method.Locals;
-                IPersistentMap backupMethodIndexLocals = method.IndexLocals;
-                IPersistentVector recurMismatches = null;
+                //ObjMethod method = (ObjMethod)Compiler.METHOD.deref();
+                //IPersistentMap backupMethodLocals = method.Locals;
+                //IPersistentMap backupMethodIndexLocals = method.IndexLocals;
+                //IPersistentVector recurMismatches = null;
 
 
                 // we might repeat once if a loop with a recurMismatch, return breaks
-                while (true)
-                {
+                //while (true)
+                //{
 
                     IPersistentMap dynamicBindings = RT.map(
                         Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
@@ -120,6 +120,22 @@ namespace clojure.lang.CljCompiler.Ast
                                 throw new Exception("Can't let qualified name: " + sym);
 
                             Expr init = Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), bindings.nth(i + 1), sym.Name);
+                            if (isLoop)
+                            {
+                                if (Compiler.MaybePrimitiveType(init) == typeof(int))
+                                {
+                                    List<HostArg> args = new List<HostArg>();
+                                    args.Add(new HostArg(HostArg.ParameterType.Standard, init, null));
+                                    init = new StaticMethodExpr("", null, null, typeof(RT), "longCast", args);
+                                }
+                                else if (Compiler.MaybePrimitiveType(init) == typeof(float))
+                                {
+                                    List<HostArg> args = new List<HostArg>();
+                                    args.Add(new HostArg(HostArg.ParameterType.Standard, init, null));
+                                    init = new StaticMethodExpr("", null, null, typeof(RT), "doubleCast", args);
+                                }
+                            }
+
                             //if (isLoop)
                             //{
                             //    if (recurMismatches != null && ((LocalBinding)recurMismatches.nth(i / 2)).RecurMistmatch)
@@ -161,36 +177,39 @@ namespace clojure.lang.CljCompiler.Ast
                         Expr bodyExpr;
                         try
                         {
-                            if (isLoop)
-                            {
-                                // stuff with clear paths
-                            }
+                            //if (isLoop)
+                            //{
+                            //    // stuff with clear paths
+                            //}
                             bodyExpr = new BodyExpr.Parser().Parse(isLoop ? pcon.SetRhc(RHC.Return) : pcon, body);
                         }
                         finally
                         {
-                            if (isLoop)
-                            {
-                                // stuff with clear paths
-                                recurMismatches = null;
-                                for (int i = 0; i < loopLocals.count(); i++)
-                                {
-                                    LocalBinding lb = (LocalBinding)loopLocals.nth(i);
-                                    if (lb.RecurMistmatch)
-                                        recurMismatches = loopLocals;
-                                }
-                            }
+                            //        if (isLoop)
+                            //        {
+                            //            // stuff with clear paths
+                            //            recurMismatches = null;
+                            //            for (int i = 0; i < loopLocals.count(); i++)
+                            //            {
+                            //                LocalBinding lb = (LocalBinding)loopLocals.nth(i);
+                            //                if (lb.RecurMistmatch)
+                            //                    recurMismatches = loopLocals;
+                            //            }
+                            //        }
+                            //    }
+
+                            //    if (recurMismatches == null)
+                            //Var.popThreadBindings();
                         }
 
-                        if (recurMismatches == null)
-                            return new LetExpr(bindingInits, bodyExpr, isLoop);
+                        return new LetExpr(bindingInits, bodyExpr, isLoop);
 
                     }
                     finally
                     {
                         Var.popThreadBindings();
                     }
-                }
+                //}
             }
         }
 

@@ -1380,8 +1380,8 @@ namespace clojure.lang
                 return AnalyzeSymbol((Symbol)form);
             else if (type == typeof(Keyword))
                 return RegisterKeyword((Keyword)form);
-            //else if (Util.IsNumeric(form))
-            //    return NumberExpr.Parse(form);
+            else if (Util.IsNumeric(form))
+                return NumberExpr.Parse(form);
             else if (type == typeof(String))
                 return new StringExpr(String.Intern((String)form));
             else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)

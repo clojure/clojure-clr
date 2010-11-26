@@ -142,18 +142,76 @@ namespace clojure.lang.CljCompiler.Ast
             // Evaluate all the init forms into local variables.
             for (int i = 0; i < _loopLocals.count(); i++)
             {
-                LocalBinding b = (LocalBinding)_loopLocals.nth(i);
+                LocalBinding lb = (LocalBinding)_loopLocals.nth(i);
                 Expr arg = (Expr)_args.nth(i);
-                ParameterExpression tempVar = Expression.Parameter(b.ParamExpression.Type, "__local__" + i);
-                Expression valExpr = ((Expr)_args.nth(i)).GenCode(RHC.Expression, objx, context);
+
+                ParameterExpression tempVar;
+                Expression valExpr;
+
+                Type primt = lb.PrimitiveType;
+                if (primt != null)
+                {
+                    tempVar = Expression.Parameter(primt, "__local__" + i);
+
+                    Type pt = Compiler.MaybePrimitiveType(arg);
+                    if (pt == primt)
+                    {
+                        valExpr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                        // do nothing
+                    }
+                    else if (primt == typeof(long) && pt == typeof(int))
+                    {
+                        valExpr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                        valExpr = Expression.Convert(valExpr, primt);
+                    }
+                    else if (primt == typeof(double) && pt == typeof(float))
+                    {
+                        valExpr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                        valExpr = Expression.Convert(valExpr, primt);
+                    }
+                    else if (primt == typeof(int) && pt == typeof(long))
+                    {
+                        valExpr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                        valExpr = Expression.Convert(valExpr, primt);
+                    }
+                    else if (primt == typeof(float) && pt == typeof(double))
+                    {
+                        valExpr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                        valExpr = Expression.Convert(valExpr, primt);
+                    }
+                    else
+                    {
+                        if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                            RT.errPrintWriter().WriteLine("recur arg for primitive local: {0} must be matching primitive, had: {1}, needed {2}",
+                                lb.Name, (arg.HasClrType ? arg.ClrType.Name : "Object"), primt.Name);
+                        valExpr = arg.GenCode(RHC.Expression, objx, context);
+                       // valExpr = Expression.Convert(valExpr, primt);
+                    }
+
+                }
+                else
+                {
+                    tempVar = Expression.Parameter(lb.ParamExpression.Type, "__local__" + i);
+                    valExpr = arg.GenCode(RHC.Expression, objx, context);
+                }
+                    
+
+                //ParameterExpression tempVar = Expression.Parameter(lb.ParamExpression.Type, "__local__" + i);
+                //Expression valExpr = ((Expr)_args.nth(i)).GenCode(RHC.Expression, objx, context);
                 tempVars.Add(tempVar);
 
-                if (tempVar.Type == typeof(Object))
+                //if (tempVar.Type == typeof(Object))
+                //    tempAssigns.Add(Expression.Assign(tempVar, Compiler.MaybeBox(valExpr)));
+                //else
+                //    tempAssigns.Add(Expression.Assign(tempVar, Expression.Convert(valExpr, tempVar.Type)));
+                if (valExpr.Type.IsPrimitive && !tempVar.Type.IsPrimitive)
                     tempAssigns.Add(Expression.Assign(tempVar, Compiler.MaybeBox(valExpr)));
+                else if (!valExpr.Type.IsPrimitive && tempVar.Type.IsPrimitive)
+                    tempAssigns.Add(Expression.Assign(tempVar, MethodExpr.GenConvertMaybePrim(valExpr, tempVar.Type)));
                 else
-                    tempAssigns.Add(Expression.Assign(tempVar, Expression.Convert(valExpr, tempVar.Type)));
+                    tempAssigns.Add(Expression.Assign(tempVar, valExpr));
 
-                finalAssigns.Add(Expression.Assign(b.ParamExpression, tempVar));
+                finalAssigns.Add(Expression.Assign(lb.ParamExpression, tempVar));
             }
 
             List<Expression> exprs = tempAssigns;

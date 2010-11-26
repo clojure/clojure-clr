@@ -593,7 +593,7 @@ namespace clojure.lang
 
         #region Reading numbers
 
-        static Regex intRE   = new Regex("^([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)$");
+        static Regex intRE   = new Regex("^([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?$");
         static Regex ratioRE = new Regex("^([-+]?[0-9]+)/([0-9]+)$");
         static Regex floatRE = new Regex("^([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?$");
 
@@ -625,9 +625,13 @@ namespace clojure.lang
             Match m = intRE.Match(s);
             if ( m.Success )
             {
-                if ( m.Groups[2].Success )
-                    // matched 0 only
-                    return 0;
+                if (m.Groups[2].Success)
+                {
+                    // matched 0  or 0N only
+                    if (m.Groups[8].Success)
+                        return BigInteger.ZERO;
+                    return 0L;
+                }
                 bool isNeg = m.Groups[1].Value == "-";
                 string n = null;
                 int radix = 10;
@@ -654,10 +658,11 @@ namespace clojure.lang
                 if (n == null)
                     return null;
 
-                //BigInteger bn = new BigInteger(n, radix);
                 BigInteger bn = BigInteger.Parse(n, radix);
-                //return Numbers.reduce(isNeg ? bn.negate() : bn);
-                return Numbers.reduce(isNeg ? bn.Negate() : bn);
+                if (m.Groups[8].Success) // N suffix
+                    return isNeg ? bn.Negate() : bn;
+
+                return Numbers.reduceBigInteger(isNeg ? bn.Negate() : bn);
 
             }
             m = floatRE.Match(s);
@@ -683,7 +688,9 @@ namespace clojure.lang
                 if (numerString[0] == '+')
                     numerString = numerString.Substring(1);
                 //return Numbers.BIDivide(new BigInteger(numerString), new BigInteger(denomString));
-                return Numbers.BIDivide(BigInteger.Parse(numerString), BigInteger.Parse(denomString));
+                return Numbers.divide(
+                    Numbers.reduceBigInteger(BigInteger.Parse(numerString)), 
+                    Numbers.reduceBigInteger(BigInteger.Parse(denomString)));
             }
             return null;
         }

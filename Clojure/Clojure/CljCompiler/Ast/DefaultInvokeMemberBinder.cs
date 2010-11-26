@@ -26,14 +26,87 @@ using Microsoft.Scripting.Runtime;
 using Microsoft.Scripting.Actions;
 using Microsoft.Scripting.Actions.Calls;
 using System.Reflection;
+using Microsoft.Scripting.Utils;
 
 namespace clojure.lang.CljCompiler.Ast
 {
+    public class NumericConvertBinder : DefaultBinder
+    {
+        public static NumericConvertBinder Instance = new NumericConvertBinder();
+
+        public override bool CanConvertFrom(Type fromType, Type toType, bool toNotNullable, NarrowingLevel level)
+        {
+            if (level == NarrowingLevel.All)
+            {
+                if (fromType == typeof(long))
+                {
+                    if (toType == typeof(int) || toType == typeof(uint) || toType == typeof(short) || toType == typeof(ushort) || toType == typeof(byte) || toType == typeof(sbyte))
+                        return true;
+                }
+                else if (fromType == typeof(double))
+                {
+                    if (toType == typeof(float))
+                        return true;
+                }
+            }
+
+            return base.CanConvertFrom(fromType, toType, toNotNullable, level);
+        }
+
+        public override object Convert(object obj, Type toType)
+        {
+            if (obj is long)
+            {
+                long lobj = (long)obj;
+
+                if (toType == typeof(long))
+                    return obj;
+                else if (toType == typeof(int))
+                    return (int)lobj;
+                else if (toType == typeof(uint))
+                    return (uint)lobj;
+                else if (toType == typeof(short))
+                    return (uint)lobj;
+                else if (toType == typeof(byte))
+                    return (byte)lobj;
+                else if (toType == typeof(sbyte))
+                    return (sbyte)lobj;
+            }
+            else if (obj is double)
+            {
+                double d = (double)obj;
+                if (toType == typeof(float))
+                    return (float)d;
+            }
+
+            return base.Convert(obj, toType);
+        }
+
+    }
+
+    public class NumericConvertOverloadResolverFactory : OverloadResolverFactory
+    {
+        public static NumericConvertOverloadResolverFactory Instance = new NumericConvertOverloadResolverFactory(NumericConvertBinder.Instance);
+
+        private readonly DefaultBinder _binder;
+
+        public NumericConvertOverloadResolverFactory(DefaultBinder binder)
+        {
+            Assert.NotNull(binder);
+            _binder = binder;
+        }
+
+        public override DefaultOverloadResolver CreateOverloadResolver(IList<DynamicMetaObject> args, CallSignature signature, CallTypes callType)
+        {
+            return new DefaultOverloadResolver(_binder, args, signature, callType);
+        }
+    }
+
     public class DefaultInvokeMemberBinder : InvokeMemberBinder, IExpressionSerializable
     {
         #region Data
 
-        readonly DefaultBinder _binder = new DefaultBinder();
+        readonly DefaultBinder _binder = new NumericConvertBinder();
         readonly bool _isStatic;
 
         #endregion
@@ -62,7 +135,9 @@ namespace clojure.lang.CljCompiler.Ast
                             BindingRestrictions.GetInstanceRestriction(target.Expression, null));
 
 
-            OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            //OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            OverloadResolverFactory factory = NumericConvertOverloadResolverFactory.Instance;
+            
             Type typeToUse = _isStatic && target.Value is Type ? (Type)target.Value : target.LimitType;
 
 

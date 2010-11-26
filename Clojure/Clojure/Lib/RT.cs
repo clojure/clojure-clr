@@ -884,11 +884,17 @@ namespace clojure.lang
                 : ((IPersistentMap)coll).without(key);
         }
 
+        static public Object nth(object coll, long n)
+        {
+            return nth(coll, (int)n);
+        }
+
+
         static public Object nth(object coll, int n)
         {
             if (coll is Indexed)
-                return ((Indexed)coll).nth(n);
-            return NthFrom(Util.Ret1(coll,coll=null), n);
+                return ((Indexed)coll).nth((int)n);
+            return NthFrom(Util.Ret1(coll, coll = null), (int)n);
         }
 
         static object NthFrom(object coll, int n)
@@ -948,6 +954,11 @@ namespace clojure.lang
                 throw new InvalidOperationException("nth not supported on this type: " + Util.NameForType(coll.GetType()));
         }
 
+
+        static public Object nth(Object coll, long n, Object notFound)
+        {
+            return nth(coll, (int)n, notFound);
+        }
 
         static public Object nth(Object coll, int n, Object notFound)
         {
@@ -1626,6 +1637,11 @@ namespace clojure.lang
                 w.Write(x.ToString());
                 w.Write("M");
             }
+            else if (x is BigInteger && readably)
+            {
+                w.Write(x.ToString());
+                w.Write("N");
+            }
             else if (x is Var)
             {
                 Var v = x as Var;
@@ -1809,14 +1825,21 @@ namespace clojure.lang
 
 
 
-        // NOT SURE WHY WE NEED THIS.  THIS VERSION ADDED IN REV 1112  (But in Reflector)
+        // TODO: Check uses in Java code and replicate.  (This was a no-op until the num changes were made.)
         public static Object prepRet(Object x)
         {
             //	if(c == boolean.class)
             //		return ((Boolean) x).booleanValue() ? RT.T : null;
-            if (x is Boolean)
-                //return ((Boolean)x) ? RT.T : RT.F; // Java version has Boolean.TRUE and Boolean.FALSE
-                return ((Boolean)x); // Java version has Boolean.TRUE and Boolean.FALSE
+            //if (x is Boolean)
+            //    //return ((Boolean)x) ? RT.T : RT.F; // Java version has Boolean.TRUE and Boolean.FALSE
+            //    return ((Boolean)x); // Java version has Boolean.TRUE and Boolean.FALSE
+            //else 
+            if (x is long)
+            {
+                long val = (long)x;
+                if (val >= Int32.MinValue && val <= Int32.MaxValue)
+                    return (int)val;
+            }
             return x;
         }
 

@@ -257,7 +257,8 @@
 (defmethod print-dup Int32  [o w] (print-method o w))               ;;; java.lang.Integer
 (defmethod print-dup Double [o w] (print-method o w))                ;;; java.lang.Double
 (defmethod print-dup clojure.lang.Ratio [o w] (print-method o w))
-(defmethod print-dup clojure.lang.BigDecimal [o w] (print-method o w))  (defmethod print-dup clojure.lang.BigInteger [o w] (print-method o w))   ;java.math.BigDecimal 
+(defmethod print-dup clojure.lang.BigDecimal [o w] (print-method o w))    ;;; java.math.BigDecimal 
+(defmethod print-dup clojure.lang.BigInteger [o w] (print-method o w))    ;;; java.math.BigInteger
 (defmethod print-dup clojure.lang.PersistentHashMap [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentHashSet [o w] (print-method o w)) 
 (defmethod print-dup clojure.lang.PersistentVector [o w] (print-method o w))
@@ -298,9 +299,10 @@
 (defmethod print-method clojure.lang.BigDecimal [b, ^System.IO.TextWriter w]    ;;; java.math.BigDecimal
   (.Write w (str b))
   (.Write w "M"))
-  ;;; ADDED LINES
+
   (defmethod print-method clojure.lang.BigInteger [b, ^System.IO.TextWriter w]
-  (.Write w (str b)))
+  (.Write w (str b))
+  (.Write w "N"))
 
 (defmethod print-method System.Text.RegularExpressions.Regex [p ^System.IO.TextWriter w]         ;;; java.util.regex.Pattern =>
   (.Write w "#\"")

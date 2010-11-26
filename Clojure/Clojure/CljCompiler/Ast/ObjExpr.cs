@@ -752,10 +752,16 @@ namespace clojure.lang.CljCompiler.Ast
             else if (Util.IsPrimitive(value.GetType()))  // or just IsNumeric?
                 ret = Expression.Constant(value);
             else if (value is Type)
-                ret = Expression.Call(
-                    null,
-                    Compiler.Method_RT_classForName,
-                    Expression.Constant(Compiler.DestubClassName(((Type)value).FullName)));
+            {
+                Type t = (Type)value;
+                if (t.IsValueType)
+                    ret = Expression.Constant(t, typeof(Type));
+                else 
+                    ret = Expression.Call(
+                        null,
+                        Compiler.Method_RT_classForName,
+                        Expression.Constant(Compiler.DestubClassName(((Type)value).FullName)));
+            }
             else if (value is Symbol)
             {
                 Symbol sym = (Symbol)value;

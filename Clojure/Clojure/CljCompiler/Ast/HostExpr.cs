@@ -438,6 +438,18 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region Code gen helpers
+
+        public static Expression GenBoxReturn(Expression expr)
+        {
+            if (expr.Type.IsPrimitive)
+                return Expression.Convert(expr, typeof(Object));
+
+            return expr;
+        }
+
+        #endregion
+
         #region Tags and types
 
         internal static Type MaybeType(object form, bool stringOk)

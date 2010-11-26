@@ -68,6 +68,7 @@ namespace clojure.lang.CljCompiler.Ast
                 call = GenDlrForMethod(objx, context);
             else
                 call = GenerateComplexCall(objx, context);
+            call = HostExpr.GenBoxReturn(call);
             call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
             return call;
 
@@ -120,11 +121,11 @@ namespace clojure.lang.CljCompiler.Ast
                         t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
 #endif
                         refPositions.Add(i);
-                        argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(objx, context, argType, e), methodParms[i].ParameterType.GetElementType()), BindingRestrictions.Empty));
+                        argsPlus.Add(new DynamicMetaObject(GenConvertMaybePrim(GenTypedArg(objx, context, argType, e), methodParms[i].ParameterType.GetElementType()), BindingRestrictions.Empty));
                         break;
                     case HostArg.ParameterType.Standard:
                         t = argType;
-                        argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(objx, context, argType, e), methodParms[i].ParameterType), BindingRestrictions.Empty));
+                        argsPlus.Add(new DynamicMetaObject(GenConvertMaybePrim(GenTypedArg(objx, context, argType, e), methodParms[i].ParameterType), BindingRestrictions.Empty));
 
                         break;
                     default:
@@ -135,7 +136,8 @@ namespace clojure.lang.CljCompiler.Ast
                 //argsPlus.Add(new DynamicMetaObject(GenTypedArg(context, argType, e), BindingRestrictions.Empty));
             }
 
-            OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            //OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            OverloadResolverFactory factory = NumericConvertOverloadResolverFactory.Instance;
             DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), IsStaticCall ? CallTypes.None : CallTypes.ImplicitInstance);
 
             List<MethodBase> methods = new List<MethodBase>();
@@ -171,6 +173,80 @@ namespace clojure.lang.CljCompiler.Ast
             return call;
         }
 
+        static MethodInfo MI_Util_ConvertToByte = typeof(Util).GetMethod("ConvertToByte");
+        static MethodInfo MI_Util_ConvertToSByte = typeof(Util).GetMethod("ConvertToSByte");
+        static MethodInfo MI_Util_ConvertToChar = typeof(Util).GetMethod("ConvertToChar");
+        static MethodInfo MI_Util_ConvertToDecimal = typeof(Util).GetMethod("ConvertToDecimal");
+        static MethodInfo MI_Util_ConvertToShort = typeof(Util).GetMethod("ConvertToShort");
+        static MethodInfo MI_Util_ConvertToUShort = typeof(Util).GetMethod("ConvertToUShort");
+        static MethodInfo MI_Util_ConvertToInt = typeof(Util).GetMethod("ConvertToInt");
+        static MethodInfo MI_Util_ConvertToUInt = typeof(Util).GetMethod("ConvertToUInt");
+        static MethodInfo MI_Util_ConvertToLong = typeof(Util).GetMethod("ConvertToLong");
+        static MethodInfo MI_Util_ConvertToULong = typeof(Util).GetMethod("ConvertToULong");
+        static MethodInfo MI_Util_ConvertToFloat = typeof(Util).GetMethod("ConvertToFloat");
+        static MethodInfo MI_Util_ConvertToDouble = typeof(Util).GetMethod("ConvertToDouble");
+        static MethodInfo MI_RT_booleanCast = typeof(RT).GetMethod("booleanCast",BindingFlags.Static| BindingFlags.Public,null,new Type[] {typeof(Object)},null);
+
+        
+
+        public static Expression GenConvertMaybePrim(Expression expr, Type toType)
+        {
+            if ( expr.Type.IsPrimitive && toType.IsPrimitive)
+                return Expression.Convert(expr,toType);
+
+            if ( toType.IsPrimitive )
+            {
+                MethodInfo converter;
+                switch ( Type.GetTypeCode(toType) )
+                {
+                    case TypeCode.Boolean:
+                        converter = MI_RT_booleanCast;
+                        break;
+                    case TypeCode.Byte:
+                        converter = MI_Util_ConvertToByte;
+                        break;
+                    case TypeCode.Decimal:
+                        converter = MI_Util_ConvertToDecimal;
+                        break;
+                    case TypeCode.Char:
+                        converter = MI_Util_ConvertToChar;
+                        break;
+                    case TypeCode.Double:
+                        converter = MI_Util_ConvertToDouble;
+                        break;
+                    case TypeCode.Int16:
+                        converter = MI_Util_ConvertToShort;
+                        break;
+                    case TypeCode.Int32:
+                        converter = MI_Util_ConvertToInt;
+                        break;
+                    case TypeCode.Int64:
+                        converter = MI_Util_ConvertToLong;
+                        break;
+                    case TypeCode.SByte:
+                        converter = MI_Util_ConvertToSByte;
+                        break;
+                    case TypeCode.UInt16:
+                        converter = MI_Util_ConvertToUShort;
+                        break;
+                    case TypeCode.UInt32:
+                        converter = MI_Util_ConvertToUInt;
+                        break;
+                    case TypeCode.UInt64:
+                        converter = MI_Util_ConvertToULong;
+                        break;
+                    case TypeCode.Single:
+                        converter = MI_Util_ConvertToFloat;
+                        break;
+                    default:
+                        throw Util.UnreachableCode();
+                }
+                return Expression.Call(converter,expr);
+            }
+
+            return Expression.Convert(expr,toType);
+        }
+
         private MethodInfo FindEquivalentMethod(MethodInfo _method, Type baseType)
         {
             BindingFlags flags = BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic;
@@ -201,13 +277,19 @@ namespace clojure.lang.CljCompiler.Ast
             Type returnType = HasClrType ? ClrType : typeof(object);
 
             InvokeMemberBinder binder = new DefaultInvokeMemberBinder(_methodName, argExprs.Length, IsStaticCall);
-            DynamicExpression dyn = Expression.Dynamic(binder, returnType, argExprs);
+            //DynamicExpression dyn = Expression.Dynamic(binder, returnType, argExprs);
+            DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), argExprs);
 
             //if (context.Mode == CompilerMode.File)
             if ( context.DynInitHelper != null )
                 call = context.DynInitHelper.ReduceDyn(dyn);
             else
                 call = dyn;
+
+            if (returnType == typeof(void))
+                call = Expression.Block(call, Expression.Default(typeof(object)));
+            else
+                call = Expression.Convert(call, returnType);
 
             if (sbParams.Count > 0)
             {

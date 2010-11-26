@@ -79,6 +79,8 @@ namespace clojure.lang.CljCompiler.Ast
                 if (sym == null)
                     throw new Exception("First argument to def must be a Symbol.");
 
+                Console.WriteLine("Def {0}", sym.Name);
+
                 Var v = Compiler.LookupVar(sym, true);
 
                 if (v == null)

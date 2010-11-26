@@ -138,7 +138,6 @@ namespace clojure.lang
         interface BitOps
         {
             BitOps combine(BitOps y);
-            BitOps bitOpsWith(IntegerBitOps x);
             BitOps bitOpsWith(LongBitOps x);
             BitOps bitOpsWith(BigIntegerBitOps x);
             object not(object x);
@@ -214,38 +213,51 @@ namespace clojure.lang
         {
             if (isZero(y))
                 throw new ArithmeticException("Divide by zero");
-            return reduce(DoOp(x, y, BinaryOpCode.Quotient));
+            return DoOp(x, y, BinaryOpCode.Quotient);
         }
 
         public static object remainder(object x, object y)
         {
             if (isZero(y))
                 throw new ArithmeticException("Divide by zero");
-            return reduce(DoOp(x, y, BinaryOpCode.Remainder));
+            return DoOp(x, y, BinaryOpCode.Remainder);
         }
 
 
-        static object DQuotient(double n, double d)
+        static double DQuotient(double n, double d)
         {
             double q = n / d;
-            if (q <= Int32.MaxValue && q >= Int32.MinValue)
-                return (int)q;
+            if (q <= Int64.MaxValue && q >= Int64.MinValue)
+                return (double)((long)q);
             else
                 // bigint quotient
-                return reduce(BigDecimal.Create(q).ToBigInteger());
+                return BigDecimal.Create(q).ToBigInteger().ToDouble(null);
         }
 
-        static object DRemainder(double n, double d)
+        static double DRemainder(double n, double d)
         {
             double q = n / d;
-            if (q <= Int32.MaxValue && q >= Int32.MinValue)
-                return n - ((int)q) * d;
+            if (q <= Int64.MaxValue && q >= Int64.MinValue)
+                return n - ((long)q) * d;
             else
             {
                 // bigint quotient
-                object bq = reduce(BigDecimal.Create(q).ToBigInteger());
+                object bq = BigDecimal.Create(q).ToBigInteger();
                 return n - ((double)bq) * d;
             }
+        }
+
+        static Object box(int val)
+        {
+            return val;
+        }
+
+        static Object box(long val)
+        {
+            if (val >= Int32.MinValue && val <= Int32.MaxValue)
+                return (int)val;
+            else
+                return val;
         }
 
         public static bool equiv(object x, object y)
@@ -307,10 +319,6 @@ namespace clojure.lang
 
         public static object DoOp(object x, UnaryOpCode code)
         {
-            int ix;
-            if (TryAsInt(x, out ix))
-                return INTEGER_OPS.Do(ix, code);
-
             long lx;
             if (TryAsLong(x, out lx))
                 return LONG_OPS.Do(lx, code);
@@ -318,8 +326,12 @@ namespace clojure.lang
             if ( x is double )
                 return DOUBLE_OPS.Do((double)x, code);
 
+            int ix;
+            if (TryAsInt(x, out ix))
+                return LONG_OPS.Do((long)ix, code);
+
             if ( x is float )
-                return FLOAT_OPS.Do((float)x, code);
+                return DOUBLE_OPS.Do((double)(float)x, code);
 
             if (x is Ratio)
                 return RATIO_OPS.Do((Ratio)x, code);
@@ -335,14 +347,12 @@ namespace clojure.lang
             if (x is BigDecimal)
                 return BIGDECIMAL_OPS.Do((BigDecimal)x, code);
 
-            return INTEGER_OPS.Do(Util.ConvertToInt(x), code);
+            return LONG_OPS.Do(Util.ConvertToLong(x), code);
         }
 
         public static bool DoOp(object x, BoolUnaryOpCode code)
         {
             int ix;
-            if (TryAsInt(x, out ix))
-                return INTEGER_OPS.Do(ix, code);
 
             long lx;
             if (TryAsLong(x, out lx))
@@ -351,8 +361,11 @@ namespace clojure.lang
             if ( x is double )
                 return DOUBLE_OPS.Do((double)x, code);
 
+            if (TryAsInt(x, out ix))
+                return LONG_OPS.Do(ix, code);
+
             if ( x is float )
-                return FLOAT_OPS.Do((float)x, code);
+                return DOUBLE_OPS.Do((float)x, code);
 
             if (x is Ratio)
                 return RATIO_OPS.Do((Ratio)x, code);
@@ -368,7 +381,7 @@ namespace clojure.lang
             if (x is BigDecimal)
                 return BIGDECIMAL_OPS.Do((BigDecimal)x, code);
 
-            return INTEGER_OPS.Do(Util.ConvertToInt(x), code);
+            return LONG_OPS.Do(Util.ConvertToInt(x), code);
         }
 
 
@@ -381,10 +394,10 @@ namespace clojure.lang
                 return DOUBLE_OPS.Do(Util.ConvertToDouble(x), (double)y, code);
 
            if ( x is float )
-                return FLOAT_OPS.Do((float)x, Util.ConvertToFloat(y), code);
+               return DOUBLE_OPS.Do((double)(float)x, Util.ConvertToDouble(y), code);
 
             if ( y is float )
-                return FLOAT_OPS.Do(Util.ConvertToFloat(x), (float)y, code);
+                return DOUBLE_OPS.Do(Util.ConvertToDouble(x), (double)(float)y, code);
 
             if ( x is Ratio )
                 return RATIO_OPS.Do((Ratio)x,toRatio(y),code);
@@ -412,7 +425,7 @@ namespace clojure.lang
             if ( TryAsLong(y,out lval ) )
                 return LONG_OPS.Do(Util.ConvertToLong(x),lval,code);
 
-            return INTEGER_OPS.Do(Util.ConvertToInt(x),Util.ConvertToInt(y),code);
+            return LONG_OPS.Do(Util.ConvertToLong(x),Util.ConvertToLong(y),code);
         }
 
 
@@ -425,10 +438,10 @@ namespace clojure.lang
                 return DOUBLE_OPS.Do(Util.ConvertToDouble(x), (double)y, code);
 
             if (x is float)
-                return FLOAT_OPS.Do((float)x, Util.ConvertToFloat(y), code);
+                return DOUBLE_OPS.Do((double)(float)x, Util.ConvertToDouble(y), code);
 
             if (y is float)
-                return FLOAT_OPS.Do(Util.ConvertToFloat(x), (float)y, code);
+                return DOUBLE_OPS.Do(Util.ConvertToDouble(x), (double)(float)y, code);
 
             if (x is Ratio)
                 return RATIO_OPS.Do((Ratio)x, toRatio(y), code);
@@ -448,15 +461,15 @@ namespace clojure.lang
             if (y is BigInteger)
                 return BIGINTEGER_OPS.Do(toBigInteger(x), (BigInteger)y, code);
 
-            long lval;
+            int ival;
 
-            if (TryAsLong(x, out lval))
-                return LONG_OPS.Do(lval, Util.ConvertToLong(y), code);
+            if (TryAsInt(x, out ival))
+                return LONG_OPS.Do((long)ival, Util.ConvertToLong(y), code);
 
-            if (TryAsLong(y, out lval))
-                return LONG_OPS.Do(Util.ConvertToLong(x), lval, code);
+            if (TryAsInt(y, out ival))
+                return LONG_OPS.Do(Util.ConvertToLong(x), (long)ival, code);
 
-            return INTEGER_OPS.Do(Util.ConvertToInt(x), Util.ConvertToInt(y), code);
+            return LONG_OPS.Do(Util.ConvertToLong(x), Util.ConvertToLong(y), code);
         }
 
 
@@ -520,21 +533,29 @@ namespace clojure.lang
             if (x is BigInteger)
                 return (BigInteger)x;
             else
-                return BigInteger.Create(Util.ConvertToLong(x)); // convert fix
+                return BigInteger.Create(Util.ConvertToLong(x));
         }
 
         static BigDecimal toBigDecimal(object x)
         {
             if (x is BigDecimal)
                 return (BigDecimal)x;
-            else if ( x is BigInteger)
+            else if (x is BigInteger)
                 return BigDecimal.Create((BigInteger)x);
+            else if (x is double)
+                return BigDecimal.Create((double)x);
+            else if (x is float)
+                return BigDecimal.Create((double)(float)x);
+            else if (x is Ratio)
+            {
+                Ratio r = (Ratio)x;
+                return (BigDecimal)divide(BigDecimal.Create(r.numerator), r.denominator);
+            }
             else
-                return BigDecimal.Create(Util.ConvertToLong(x)); // convert fix
-
+                return BigDecimal.Create(Util.ConvertToLong(x));
         }
 
-        static Ratio toRatio(object x)
+        public static Ratio toRatio(object x)
         {
             if (x is Ratio)
                 return (Ratio)x;
@@ -552,9 +573,9 @@ namespace clojure.lang
 
         public static object rationalize(object x)
         {
-            if (x is float)                                     // convert fix
+            if (x is float)                              
                 return rationalize(BigDecimal.Create((float)x));   // convert fix
-            else if (x is double)                               // convert fix
+            else if (x is double)                        
                 return rationalize(BigDecimal.Create((double)x));  // convert fix
             else if (x is BigDecimal)
             {
@@ -569,21 +590,11 @@ namespace clojure.lang
             return x;
         }
 
-        public static object reduce(object val)
+        public static object reduceBigInteger(BigInteger val)
         {
-            if (val is long)
-                return reduce((long)val);
-            else if (val is BigInteger)
-                return reduce((BigInteger)val);
-            else
-                return val;
-        }
-
-        public static object reduce(BigInteger val)
-        {
-            int ival;
-            if (val.AsInt32(out ival))
-                return ival;
+            //int ival;
+            //if (val.AsInt32(out ival))
+            //    return ival;
 
             long lval;
             if (val.AsInt64(out lval))
@@ -592,28 +603,20 @@ namespace clojure.lang
             return val;
         }
 
-        public static object reduce(long val)
-        {
-            if (val >= Int32.MinValue && val <= Int32.MaxValue)
-                return (int)val;
-            else
-                return val;
-        }
-
         public static object BIDivide(BigInteger n, BigInteger d)
         {
             if (d.Equals(BigInteger.ZERO))
                 throw new ArithmeticException("Divide by zero");
             BigInteger gcd = n.Gcd(d);
             if (gcd.Equals(BigInteger.ZERO))
-                return 0;
+                return BigInteger.ZERO;
             n = n / gcd;
             d = d / gcd;
 
             if (d.Equals(BigInteger.ONE))
-                return reduce(n);
+                return n;
             else if (d.Equals(BigInteger.NEGATIVE_ONE))
-                return reduce(n.Negate());
+                return n.Negate();
 
             return new Ratio((d.Signum < 0 ? -n : n), d.Abs());
         }
@@ -681,34 +684,42 @@ namespace clojure.lang
             return bitOps(x).shiftLeft(x, Util.ConvertToInt(n));
         }
 
-        public static int shiftLeft(int x, int n)
+        public static int shiftLeftInt(int x, int n)
         {
-            return n >= 0 ? x << n : x >> Math.Abs(n);
+            return n >= 0 ? x << n : x >> -n;
         }
+
+        public static long shiftLeft(long x, int n)
+        {
+            return n >= 0 ? x << n : x >> -n;
+        }
+
 
         public static object shiftRight(object x, object n)
         {
             return bitOps(x).shiftRight(x, Util.ConvertToInt(n));
         }
 
-        public static int shiftRight(int x, int n)
+        public static int shiftRightInt(int x, int n)
         {
-            return n >= 0 ? x >> n : x << Math.Abs(n);
+            return n >= 0 ? x >> n : x << -n;
+        }
+
+        public static long shiftRight(long x, int n)
+        {
+            return n >= 0 ? x >> n : x << -n;
         }
 
         #endregion
 
         #region Ops/BitOps dispatching
 
-        static readonly IntegerOps INTEGER_OPS = new IntegerOps();
         static readonly LongOps LONG_OPS = new LongOps();
-        static readonly FloatOps FLOAT_OPS = new FloatOps();
         static readonly DoubleOps DOUBLE_OPS = new DoubleOps();
         static readonly RatioOps RATIO_OPS = new RatioOps();
         static readonly BigIntegerOps BIGINTEGER_OPS = new BigIntegerOps();
         static readonly BigDecimalOps BIGDECIMAL_OPS = new BigDecimalOps();
 
-        static readonly IntegerBitOps INTEGER_BITOPS = new IntegerBitOps();
         static readonly LongBitOps LONG_BITOPS = new LongBitOps();
         static readonly BigIntegerBitOps BIGINTEGER_BITOPS = new BigIntegerBitOps();
 
@@ -725,7 +736,7 @@ namespace clojure.lang
                 switch (Type.GetTypeCode(type))
                 {
                     case TypeCode.Int32:
-                        return INTEGER_BITOPS;
+                        return LONG_BITOPS;
                     case TypeCode.Int64:
                         return LONG_BITOPS;
                     default:
@@ -736,121 +747,10 @@ namespace clojure.lang
                         break;
                 }
             //}
-            return INTEGER_BITOPS;
+            return LONG_BITOPS;
         }
 
         #endregion
-
-        sealed class IntegerOps : Ops<int>
-        {
-            #region Ops Members
-
-
-            public override bool isZero(int x)
-            {
-                return x == 0;  // convert fix
-            }
-
-            public override bool isPos(int x)
-            {
-                return x > 0;  // convert fix
-            }
-
-            public override bool isNeg(int x)
-            {
-                return x < 0;  // convert fix
-            }
-
-            public override object add(int x, int y)
-            {
-                long ret = (long)x + (long)y;
-                if (ret <= Int32.MaxValue && ret >= Int32.MinValue)
-                    return (int)ret;
-                return ret;
-
-            }
-
-            public override object multiply(int x, int y)
-            {
-                long ret = (long)x * (long)y;
-                if (ret <= Int32.MaxValue && ret >= Int32.MinValue)
-                    return (int)ret;
-                return ret;
-            }
-
-            static int gcd(int u, int v)
-            {
-                while (v != 0)
-                {
-                    int r = u % v;
-                    u = v;
-                    v = r;
-                }
-                return u;
-            }
-
-            public override object divide(int n, int val)
-            {
-                 int gcd1 = gcd(n, val);
-                if (gcd1 == 0)
-                    return 0;
-
-                n = n / gcd1;
-                int d = val / gcd1;
-                if (d == 1)
-                    return n;
-                if (d < 0)
-                {
-                    n = -n;
-                    d = -d;
-                }
-                return new Ratio(BigInteger.Create(n), BigInteger.Create(d));
-            }
-
-            public override object quotient(int x, int y)
-            {
-                //return Convert.ToInt32(x) / Convert.ToInt32(y);
-                return x / y;
-            }
-
-            public override object remainder(int x, int y)
-            {
-                return x % y;     // convert fix
-            }
-
-            public override  bool equiv(int x, int y)
-            {
-                return x == y;     // convert fix
-            }
-
-            public override bool lt(int x, int y)
-            {
-                return x < y;     // convert fix
-            }
-
-            public override object negate(int x)
-            {
-                if (x > Int32.MinValue)
-                    return -x;
-                return -((long)x);
-            }
-
-            public override object inc(int x)
-            {
-                if (x < Int32.MaxValue)
-                    return x + 1;
-                return ((long)x) + 1;
-            }
-
-            public override object dec(int x)
-            {
-                if (x > Int32.MinValue)
-                    return x - 1;
-                return ((long)x) - 1;
-            }
-
-            #endregion
-        }
 
         sealed class LongOps : Ops<long>
         {
@@ -858,17 +758,17 @@ namespace clojure.lang
             
             public override bool isZero(long x)
             {
-                return x == 0;      // convert fix
+                return x == 0;
             }
 
             public override bool isPos(long x)
             {
-                return x > 0;      // convert fix
+                return x > 0;
             }
 
             public override bool isNeg(long x)
             {
-                return x < 0;      // convert fix
+                return x < 0;
             }
 
             public override object add(long x, long y)
@@ -918,22 +818,22 @@ namespace clojure.lang
 
             public override object quotient(long x, long y)
             {
-                return x / y;       // convert fix
+                return x / y;
             }
 
             public override object remainder(long x, long y)
             {
-                return x % y;       // convert fix
+                return x % y;
             }
 
             public override bool equiv(long x, long y)
             {
-                return x == y;       // convert fix
+                return x == y;
             }
 
             public override bool lt(long x, long y)
             {
-                return x < y;       // convert fix
+                return x < y;
             }
 
             public override object negate(long x)
@@ -960,77 +860,7 @@ namespace clojure.lang
             #endregion
         }
 
-        sealed class FloatOps : Ops<float>
-        {
-            #region Ops Members
- 
-            public override bool isZero(float x)
-            {
-                return x == 0;     // convert fix
-            }
 
-            public override bool isPos(float x)
-            {
-                return x > 0;     // convert fix
-            }
-
-            public override bool isNeg(float x)
-            {
-                return x < 0;     // convert fix
-            }
-
-            public override object add(float x, float y)
-            {
-                return x + y;     // convert fix
-            }
-
-            public override object multiply(float x, float y)
-            {
-                return x * y;     // convert fix
-            }
-
-            public override object divide(float x, float y)
-            {
-                return x / y;     // convert fix
-            }
-
-            public override object quotient(float x, float y)
-            {
-                return Numbers.DQuotient((double)x, (double)y);
-            }
-
-            public override object remainder(float x, float y)
-            {
-                return Numbers.DRemainder((double)x,(double)y);
-            }
-
-            public override bool equiv(float x, float y)
-            {
-                return x == y;        // convert fix
-            }
-
-            public override bool lt(float x, float y)
-            {
-                return x < y;
-            }
-
-            public override object negate(float x)
-            {
-                return -x;
-            }
-
-            public override object inc(float x)
-            {
-                return x + 1;    // convert fix
-            }
-
-            public override object dec(float x)
-            {
-                return x - 1;    // convert fix
-            }
-
-            #endregion
-        }
 
         sealed class DoubleOps : Ops<double>
         {
@@ -1038,22 +868,22 @@ namespace clojure.lang
 
             public override bool isZero(double x)
             {
-                return x == 0;        // convert fix
+                return x == 0; 
             }
 
             public override bool isPos(double x)
             {
-                return x > 0;        // convert fix
+                return x > 0; 
             }
 
             public override bool isNeg(double x)
             {
-                return x < 0;        // convert fix
+                return x < 0; 
             }
 
             public override object add(double x, double y)
             {
-                return x + y;       // convert fix
+                return x + y;
 
             }
 
@@ -1079,7 +909,7 @@ namespace clojure.lang
 
             public override bool equiv(double x, double y)
             {
-                return x == y;       // convert fix
+                return x == y;
             }
 
             public override bool lt(double x, double y)
@@ -1109,7 +939,12 @@ namespace clojure.lang
         {
             #region Ops Members
 
- 
+            static object NormalizeRet(object ret, object x, object y)
+            {
+                if ( ret is BigInteger && !(x is BigInteger || y is BigInteger ))
+                    return reduceBigInteger((BigInteger)ret);
+                return ret;
+            }
 
             public override bool isZero(Ratio r)
             {
@@ -1128,13 +963,15 @@ namespace clojure.lang
 
             public override object add(Ratio rx, Ratio ry)
             {
+                // add NormalizeRet
                 return Numbers.divide(
                     ry.numerator * rx.denominator + rx.numerator * ry.denominator,
                     ry.denominator * rx.denominator);
             }
 
             public override object multiply(Ratio rx, Ratio ry)
-            {
+            { 
+                // add NormalizeRet
                 return Numbers.divide(
                     ry.numerator * rx.numerator,
                     ry.denominator * rx.denominator);
@@ -1142,6 +979,7 @@ namespace clojure.lang
 
             public override object divide(Ratio rx, Ratio ry)
             {
+                // add NormalizeRet
                 return Numbers.divide(
                     ry.denominator * rx.numerator,
                     ry.numerator * rx.denominator);
@@ -1149,12 +987,14 @@ namespace clojure.lang
 
             public override object quotient(Ratio rx, Ratio ry)
             {
+                // add NormalizeRet
                 BigInteger q = (rx.numerator * ry.denominator) / (rx.denominator * ry.numerator);
-                return reduce(q);
+                return q;
             }
 
             public override object remainder(Ratio rx, Ratio ry)
             {
+                // add NormalizeRet
                 BigInteger q = (rx.numerator * ry.denominator) / (rx.denominator * ry.numerator);
                 return Numbers.minus(rx, Numbers.multiply(q, ry));
             }
@@ -1213,13 +1053,13 @@ namespace clojure.lang
             public override object add(BigInteger x, BigInteger y)
             {
                 //return reduce(toBigInteger(x).add(toBigInteger(y)));
-                return reduce(x+y);
+                return x+y;
             }
 
             public override object multiply(BigInteger x, BigInteger y)
             {
                 //return reduce(toBigInteger(x).multiply(toBigInteger(y)));
-                return reduce(x*y);
+                return x * y;
 
             }
 
@@ -1255,12 +1095,12 @@ namespace clojure.lang
 
             public override object inc(BigInteger bx)
             {
-                return reduce(bx + BigInteger.ONE);
+                return bx + BigInteger.ONE;
             }
 
             public override object dec(BigInteger bx)
             {
-                return reduce(bx - BigInteger.ONE);
+                return bx - BigInteger.ONE;
             }
 
             #endregion
@@ -1362,136 +1202,6 @@ namespace clojure.lang
             #endregion
         }
 
-        class IntegerBitOps : BitOps
-        {
-            #region BitOps Members
-
-            public BitOps combine(BitOps y)
-            {
-                return y.bitOpsWith(this); ;
-            }
-
-            public BitOps bitOpsWith(IntegerBitOps x)
-            {
-                return this;
-            }
-
-            public BitOps bitOpsWith(LongBitOps x)
-            {
-                return LONG_BITOPS;
-            }
-
-            public BitOps bitOpsWith(BigIntegerBitOps x)
-            {
-                return BIGINTEGER_BITOPS;
-            }
-
-            public object not(object x)
-            {
-                //return ~Convert.ToInt32(x);
-                return ~Util.ConvertToInt(x);   // convert fix
-            }
-
-            public object and(object x, object y)
-            {
-                //return Convert.ToInt32(x) & Convert.ToInt32(y);
-                return Util.ConvertToInt(x) & Util.ConvertToInt(y);     // convert fix
-            }
-
-            public object or(object x, object y)
-            {
-                //return Convert.ToInt32(x) | Convert.ToInt32(y);
-                return Util.ConvertToInt(x) | Util.ConvertToInt(y);     // convert fix
-            }
-
-            public object xor(object x, object y)
-            {
-                //return Convert.ToInt32(x) ^ Convert.ToInt32(y);
-                return Util.ConvertToInt(x) ^ Util.ConvertToInt(y);     // convert fix
-            }
-
-            public object andNot(object x, object y)
-            {
-                //return Convert.ToInt32(x) & ~Convert.ToInt32(y);
-                return Util.ConvertToInt(x) & ~Util.ConvertToInt(y);     // convert fix
-            }
-
-            public object clearBit(object x, int n)
-            {
-                if (n < 31)
-                    //return Convert.ToInt32(x) & ~(1 << n);
-                    return Util.ConvertToInt(x) & ~(1 << n);    // convert fix
-                else if (n < 63)
-                    //return Convert.ToInt64(x) & ~(1L << n);
-                    return Util.ConvertToLong(x) & ~(1L << n);    // convert fix
-                else
-                    //return toBigInteger(x).clearBit(n);
-                    return toBigInteger(x).ClearBit(n);
-            }
-
-            public object setBit(object x, int n)
-            {
-                if (n < 31)
-                    //return Convert.ToInt32(x) | (1 << n);
-                    return Util.ConvertToInt(x) | (1 << n);    // convert fix
-                else if (n < 63)
-                    //return Convert.ToInt64(x) | (1L << n);
-                    return Util.ConvertToLong(x) | (1L << n);    // convert fix
-                else
-                    //return toBigInteger(x).setBit(n);
-                    return toBigInteger(x).SetBit(n);
-            }
-
-            public object flipBit(object x, int n)
-            {
-                if (n < 31)
-                    //return Convert.ToInt32(x) ^ (1 << n);
-                    return Util.ConvertToInt(x) ^ (1 << n);    // convert fix
-
-                else if (n < 63)
-                    //return Convert.ToInt64(x) ^ (1L << n);
-                    return Util.ConvertToLong(x) ^ (1L << n);    // convert fix
-                else
-                    //return toBigInteger(x).flipBit(n);
-                    return toBigInteger(x).FlipBit(n);
-            }
-
-            public bool testBit(object x, int n)
-            {
-                if (n < 31)
-                    //return (Convert.ToInt32(x) & (1 << n)) != 0;
-                    return (Util.ConvertToInt(x) & (1 << n)) != 0;    // convert fix
-                else if (n < 63)
-                    //return (Convert.ToInt64(x) & (1L << n)) != 0;
-                    return (Util.ConvertToLong(x) & (1L << n)) != 0;    // convert fix
-                else
-                    //return toBigInteger(x).testBit(n);
-                    return toBigInteger(x).TestBit(n);
-            }
-
-            public object shiftLeft(object x, int n)
-            {
-                if (n < 32)
-                    return (n < 0)
-                        ? shiftRight(x, -n)
-                        //: reduce(Convert.ToInt64(x) << n);
-                        : reduce(Util.ConvertToLong(x) << n);       // convert fix
-                else
-                    //return reduce(toBigInteger(x).shiftLeft(n));
-                    return reduce(toBigInteger(x) << n);
-            }
-
-            public object shiftRight(object x, int n)
-            {
-                return (n < 0)
-                   ? shiftLeft(x, -n)
-                    //: Convert.ToInt32(x) >> n;
-                   : Util.ConvertToInt(x) >> n;
-            }
-
-            #endregion
-        }
-
         class LongBitOps : BitOps
         {
             #region BitOps Members
@@ -1499,11 +1209,6 @@ namespace clojure.lang
             public BitOps combine(BitOps y)
             {
                 return y.bitOpsWith(this);
-            }
-
-            public BitOps bitOpsWith(IntegerBitOps x)
-            {
-                return this;
             }
 
             public BitOps bitOpsWith(LongBitOps x)
@@ -1525,25 +1230,25 @@ namespace clojure.lang
             public object and(object x, object y)
             {
                 //return Convert.ToInt64(x) & Convert.ToInt64(y);
-                return Util.ConvertToLong(x) & Util.ConvertToLong(y);       // convert fix
+                return Util.ConvertToLong(x) & Util.ConvertToLong(y);
             }
 
             public object or(object x, object y)
             {
                 //return Convert.ToInt64(x) | Convert.ToInt64(y);
-                return Util.ConvertToLong(x) | Util.ConvertToLong(y);       // convert fix
+                return Util.ConvertToLong(x) | Util.ConvertToLong(y);
             }
 
             public object xor(object x, object y)
             {
                 //return Convert.ToInt64(x) ^ Convert.ToInt64(y);
-                return Util.ConvertToLong(x) ^ Util.ConvertToLong(y);       // convert fix
+                return Util.ConvertToLong(x) ^ Util.ConvertToLong(y);
             }
 
             public object andNot(object x, object y)
             {
                 //return Convert.ToInt64(x) & ~Convert.ToInt64(y);
-                return Util.ConvertToLong(x) & ~Util.ConvertToLong(y);       // convert fix
+                return Util.ConvertToLong(x) & ~Util.ConvertToLong(y);
             }
 
             public object clearBit(object x, int n)
@@ -1591,7 +1296,7 @@ namespace clojure.lang
                 return n < 0
                     ? shiftRight(x, -n)
                     //: reduce(toBigInteger(x).shiftLeft(n));
-                    : reduce(toBigInteger(x) << n);
+                    : Numbers.shiftLeft(Util.ConvertToLong(x), n);
             }
 
             public object shiftRight(object x, int n)
@@ -1612,11 +1317,6 @@ namespace clojure.lang
             public BitOps combine(BitOps y)
             {
                 return y.bitOpsWith(this);
-            }
-
-            public BitOps bitOpsWith(IntegerBitOps x)
-            {
-                return this;
             }
 
             public BitOps bitOpsWith(LongBitOps x)
@@ -2014,80 +1714,80 @@ namespace clojure.lang
 
         #region Float overloads for basic ops
 
-        static public float add(float x, float y)
-        {
-            return x + y;
-        }
+        //static public float add(float x, float y)
+        //{
+        //    return x + y;
+        //}
 
-        static public float minus(float x, float y)
-        {
-            return x - y;
-        }
+        //static public float minus(float x, float y)
+        //{
+        //    return x - y;
+        //}
 
-        static public float minus(float x)
-        {
-            return -x;
-        }
+        //static public float minus(float x)
+        //{
+        //    return -x;
+        //}
 
-        static public float inc(float x)
-        {
-            return x + 1;
-        }
+        //static public float inc(float x)
+        //{
+        //    return x + 1;
+        //}
 
-        static public float dec(float x)
-        {
-            return x - 1;
-        }
+        //static public float dec(float x)
+        //{
+        //    return x - 1;
+        //}
 
-        static public float multiply(float x, float y)
-        {
-            return x * y;
-        }
+        //static public float multiply(float x, float y)
+        //{
+        //    return x * y;
+        //}
 
-        static public float divide(float x, float y)
-        {
-            return x / y;
-        }
+        //static public float divide(float x, float y)
+        //{
+        //    return x / y;
+        //}
 
-        static public bool equiv(float x, float y)
-        {
-            return x == y;
-        }
+        //static public bool equiv(float x, float y)
+        //{
+        //    return x == y;
+        //}
 
-        static public bool lt(float x, float y)
-        {
-            return x < y;
-        }
+        //static public bool lt(float x, float y)
+        //{
+        //    return x < y;
+        //}
 
-        static public bool lte(float x, float y)
-        {
-            return x <= y;
-        }
+        //static public bool lte(float x, float y)
+        //{
+        //    return x <= y;
+        //}
 
-        static public bool gt(float x, float y)
-        {
-            return x > y;
-        }
+        //static public bool gt(float x, float y)
+        //{
+        //    return x > y;
+        //}
 
-        static public bool gte(float x, float y)
-        {
-            return x >= y;
-        }
+        //static public bool gte(float x, float y)
+        //{
+        //    return x >= y;
+        //}
 
-        static public bool isPos(float x)
-        {
-            return x > 0;
-        }
+        //static public bool isPos(float x)
+        //{
+        //    return x > 0;
+        //}
 
-        static public bool isNeg(float x)
-        {
-            return x < 0;
-        }
+        //static public bool isNeg(float x)
+        //{
+        //    return x < 0;
+        //}
 
-        static public bool isZero(float x)
-        {
-            return x == 0;
-        }
+        //static public bool isZero(float x)
+        //{
+        //    return x == 0;
+        //}
 
         #endregion
 
@@ -2177,181 +1877,181 @@ namespace clojure.lang
             throw new ArithmeticException("integer overflow");
         }
 
-        static public int unchecked_add(int x, int y)
+        static public int unchecked_int_add(int x, int y)
         {
             return x + y;
         }
 
-        static public int unchecked_subtract(int x, int y)
+        static public int unchecked_int_subtract(int x, int y)
         {
             return x - y;
         }
 
-        static public int unchecked_negate(int x)
+        static public int unchecked_int_negate(int x)
         {
             return -x;
         }
 
-        static public int unchecked_inc(int x)
+        static public int unchecked_int_inc(int x)
         {
             return x + 1;
         }
 
-        static public int unchecked_dec(int x)
+        static public int unchecked_int_dec(int x)
         {
             return x - 1;
         }
 
-        static public int unchecked_multiply(int x, int y)
+        static public int unchecked_int_multiply(int x, int y)
         {
             return x * y;
         }
 
-        static public int add(int x, int y)
-        {
-            int ret = x + y;
-            if ((ret ^ x) < 0 && (ret ^ y) < 0)
-                return throwIntOverflow();
-            return ret;
-        }
+        //static public int add(int x, int y)
+        //{
+        //    int ret = x + y;
+        //    if ((ret ^ x) < 0 && (ret ^ y) < 0)
+        //        return throwIntOverflow();
+        //    return ret;
+        //}
 
-        static public int not(int x)
-        {
-            return ~x;
-        }
+        //static public int not(int x)
+        //{
+        //    return ~x;
+        //}
 
-        static public int and(int x, int y)
-        {
-            return x & y;
-        }
+        //static public int and(int x, int y)
+        //{
+        //    return x & y;
+        //}
 
-        static public int or(int x, int y)
-        {
-            return x | y;
-        }
+        //static public int or(int x, int y)
+        //{
+        //    return x | y;
+        //}
 
-        static public int xor(int x, int y)
-        {
-            return x ^ y;
-        }
+        //static public int xor(int x, int y)
+        //{
+        //    return x ^ y;
+        //}
 
-        static public int minus(int x, int y)
-        {
-            int ret = x - y;
-            if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
-                return throwIntOverflow();
-            return ret;
-        }
+        //static public int minus(int x, int y)
+        //{
+        //    int ret = x - y;
+        //    if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
+        //        return throwIntOverflow();
+        //    return ret;
+        //}
 
-        static public int minus(int x)
-        {
-            if (x == Int32.MinValue)
-                return throwIntOverflow();
-            return -x;
-        }
+        //static public int minus(int x)
+        //{
+        //    if (x == Int32.MinValue)
+        //        return throwIntOverflow();
+        //    return -x;
+        //}
 
-        static public int inc(int x)
-        {
-            if (x == Int32.MaxValue)
-                return throwIntOverflow();
-            return x + 1;
-        }
+        //static public int inc(int x)
+        //{
+        //    if (x == Int32.MaxValue)
+        //        return throwIntOverflow();
+        //    return x + 1;
+        //}
 
-        static public int dec(int x)
-        {
-            if (x == Int32.MinValue)
-                return throwIntOverflow();
-            return x - 1;
-        }
+        //static public int dec(int x)
+        //{
+        //    if (x == Int32.MinValue)
+        //        return throwIntOverflow();
+        //    return x - 1;
+        //}
 
-        static public int multiply(int x, int y)
-        {
-            int ret = x * y;
-            if (y != 0 && ret / y != x)
-                return throwIntOverflow();
-            return ret;
-        }
+        //static public int multiply(int x, int y)
+        //{
+        //    int ret = x * y;
+        //    if (y != 0 && ret / y != x)
+        //        return throwIntOverflow();
+        //    return ret;
+        //}
 
-        static public int unchecked_divide(int x, int y)
+        static public int unchecked_int_divide(int x, int y)
         {
             return x / y;
         }
 
-        static public int unchecked_remainder(int x, int y)
+        static public int unchecked_int_remainder(int x, int y)
         {
             return x % y;
         }
 
-        static public bool equiv(int x, int y)
-        {
-            return x == y;
-        }
+        //static public bool equiv(int x, int y)
+        //{
+        //    return x == y;
+        //}
 
-        static public bool lt(int x, int y)
-        {
-            return x < y;
-        }
+        //static public bool lt(int x, int y)
+        //{
+        //    return x < y;
+        //}
 
-        static public bool lte(int x, int y)
-        {
-            return x <= y;
-        }
+        //static public bool lte(int x, int y)
+        //{
+        //    return x <= y;
+        //}
 
-        static public bool gt(int x, int y)
-        {
-            return x > y;
-        }
+        //static public bool gt(int x, int y)
+        //{
+        //    return x > y;
+        //}
 
-        static public bool gte(int x, int y)
-        {
-            return x >= y;
-        }
+        //static public bool gte(int x, int y)
+        //{
+        //    return x >= y;
+        //}
 
-        static public bool isPos(int x)
-        {
-            return x > 0;
-        }
+        //static public bool isPos(int x)
+        //{
+        //    return x > 0;
+        //}
 
-        static public bool isNeg(int x)
-        {
-            return x < 0;
-        }
+        //static public bool isNeg(int x)
+        //{
+        //    return x < 0;
+        //}
 
-        static public bool isZero(int x)
-        {
-            return x == 0;
-        }
+        //static public bool isZero(int x)
+        //{
+        //    return x == 0;
+        //}
 
         #endregion
 
         #region Long overloads for basic ops
 
-        static public long unchecked_add(long x, long y)
+        static public long unchecked_long_add(long x, long y)
         {
             return x + y;
         }
 
-        static public long unchecked_subtract(long x, long y)
+        static public long unchecked_long_subtract(long x, long y)
         {
             return x - y;
         }
 
-        static public long unchecked_negate(long x)
+        static public long unchecked_long_negate(long x)
         {
             return -x;
         }
 
-        static public long unchecked_inc(long x)
+        static public long unchecked_long_inc(long x)
         {
             return x + 1;
         }
 
-        static public long unchecked_dec(long x)
+        static public long unchecked_long_dec(long x)
         {
             return x - 1;
         }
 
-        static public long unchecked_multiply(long x, long y)
+        static public long unchecked_long_multiply(long x, long y)
         {
             return x * y;
         }
@@ -2401,12 +2101,12 @@ namespace clojure.lang
             return ret;
         }
 
-        static public long unchecked_divide(long x, long y)
+        static public long unchecked_long_divide(long x, long y)
         {
             return x / y;
         }
 
-        static public long unchecked_remainder(long x, long y)
+        static public long unchecked_long_remainder(long x, long y)
         {
             return x % y;
         }
@@ -2455,55 +2155,55 @@ namespace clojure.lang
 
         #region Overload resolution
 
-        static public object add(int x, Object y)
-        {
-            return add((Object)x, y);
-        }
+        //static public object add(int x, Object y)
+        //{
+        //    return add((Object)x, y);
+        //}
 
-        static public object add(Object x, int y)
-        {
-            return add(x, (Object)y);
-        }
+        //static public object add(Object x, int y)
+        //{
+        //    return add(x, (Object)y);
+        //}
 
-        static public object and(int x, Object y)
-        {
-            return and((Object)x, y);
-        }
+        //static public object and(int x, Object y)
+        //{
+        //    return and((Object)x, y);
+        //}
 
-        static public object and(Object x, int y)
-        {
-            return and(x, (Object)y);
-        }
+        //static public object and(Object x, int y)
+        //{
+        //    return and(x, (Object)y);
+        //}
 
-        static public object or(int x, Object y)
-        {
-            return or((Object)x, y);
-        }
+        //static public object or(int x, Object y)
+        //{
+        //    return or((Object)x, y);
+        //}
 
-        static public object or(Object x, int y)
-        {
-            return or(x, (Object)y);
-        }
+        //static public object or(Object x, int y)
+        //{
+        //    return or(x, (Object)y);
+        //}
 
-        static public object xor(int x, Object y)
-        {
-            return xor((Object)x, y);
-        }
+        //static public object xor(int x, Object y)
+        //{
+        //    return xor((Object)x, y);
+        //}
 
-        static public object xor(Object x, int y)
-        {
-            return xor(x, (Object)y);
-        }
+        //static public object xor(Object x, int y)
+        //{
+        //    return xor(x, (Object)y);
+        //}
 
-        static public object add(float x, Object y)
-        {
-            return add((Object)x, y);
-        }
+        //static public object add(float x, Object y)
+        //{
+        //    return add((Object)x, y);
+        //}
 
-        static public object add(Object x, float y)
-        {
-            return add(x, (Object)y);
-        }
+        //static public object add(Object x, float y)
+        //{
+        //    return add(x, (Object)y);
+        //}
 
         static public object add(long x, Object y)
         {
@@ -2525,25 +2225,25 @@ namespace clojure.lang
             return add(x, (Object)y);
         }
 
-        static public object minus(int x, Object y)
-        {
-            return minus((Object)x, y);
-        }
+        //static public object minus(int x, Object y)
+        //{
+        //    return minus((Object)x, y);
+        //}
 
-        static public object minus(Object x, int y)
-        {
-            return minus(x, (Object)y);
-        }
+        //static public object minus(Object x, int y)
+        //{
+        //    return minus(x, (Object)y);
+        //}
 
-        static public object minus(float x, Object y)
-        {
-            return minus((Object)x, y);
-        }
+        //static public object minus(float x, Object y)
+        //{
+        //    return minus((Object)x, y);
+        //}
 
-        static public object minus(Object x, float y)
-        {
-            return minus(x, (Object)y);
-        }
+        //static public object minus(Object x, float y)
+        //{
+        //    return minus(x, (Object)y);
+        //}
 
         static public object minus(long x, Object y)
         {
@@ -2565,25 +2265,25 @@ namespace clojure.lang
             return minus(x, (Object)y);
         }
 
-        static public object multiply(int x, Object y)
-        {
-            return multiply((Object)x, y);
-        }
+        //static public object multiply(int x, Object y)
+        //{
+        //    return multiply((Object)x, y);
+        //}
 
-        static public object multiply(Object x, int y)
-        {
-            return multiply(x, (Object)y);
-        }
+        //static public object multiply(Object x, int y)
+        //{
+        //    return multiply(x, (Object)y);
+        //}
 
-        static public object multiply(float x, Object y)
-        {
-            return multiply((Object)x, y);
-        }
+        //static public object multiply(float x, Object y)
+        //{
+        //    return multiply((Object)x, y);
+        //}
 
-        static public object multiply(Object x, float y)
-        {
-            return multiply(x, (Object)y);
-        }
+        //static public object multiply(Object x, float y)
+        //{
+        //    return multiply(x, (Object)y);
+        //}
 
         static public object multiply(long x, Object y)
         {
@@ -2605,25 +2305,25 @@ namespace clojure.lang
             return multiply(x, (Object)y);
         }
 
-        static public object divide(int x, Object y)
-        {
-            return divide((Object)x, y);
-        }
+        //static public object divide(int x, Object y)
+        //{
+        //    return divide((Object)x, y);
+        //}
 
-        static public object divide(Object x, int y)
-        {
-            return divide(x, (Object)y);
-        }
+        //static public object divide(Object x, int y)
+        //{
+        //    return divide(x, (Object)y);
+        //}
 
-        static public object divide(float x, Object y)
-        {
-            return divide((Object)x, y);
-        }
+        //static public object divide(float x, Object y)
+        //{
+        //    return divide((Object)x, y);
+        //}
 
-        static public object divide(Object x, float y)
-        {
-            return divide(x, (Object)y);
-        }
+        //static public object divide(Object x, float y)
+        //{
+        //    return divide(x, (Object)y);
+        //}
 
         static public object divide(long x, Object y)
         {
@@ -2645,25 +2345,25 @@ namespace clojure.lang
             return divide(x, (Object)y);
         }
 
-        static public bool lt(int x, Object y)
-        {
-            return lt((Object)x, y);
-        }
+        //static public bool lt(int x, Object y)
+        //{
+        //    return lt((Object)x, y);
+        //}
 
-        static public bool lt(Object x, int y)
-        {
-            return lt(x, (Object)y);
-        }
+        //static public bool lt(Object x, int y)
+        //{
+        //    return lt(x, (Object)y);
+        //}
 
-        static public bool lt(float x, Object y)
-        {
-            return lt((Object)x, y);
-        }
+        //static public bool lt(float x, Object y)
+        //{
+        //    return lt((Object)x, y);
+        //}
 
-        static public bool lt(Object x, float y)
-        {
-            return lt(x, (Object)y);
-        }
+        //static public bool lt(Object x, float y)
+        //{
+        //    return lt(x, (Object)y);
+        //}
 
         static public bool lt(long x, Object y)
         {
@@ -2685,25 +2385,25 @@ namespace clojure.lang
             return lt(x, (Object)y);
         }
 
-        static public bool lte(int x, Object y)
-        {
-            return lte((Object)x, y);
-        }
+        //static public bool lte(int x, Object y)
+        //{
+        //    return lte((Object)x, y);
+        //}
 
-        static public bool lte(Object x, int y)
-        {
-            return lte(x, (Object)y);
-        }
+        //static public bool lte(Object x, int y)
+        //{
+        //    return lte(x, (Object)y);
+        //}
 
-        static public bool lte(float x, Object y)
-        {
-            return lte((Object)x, y);
-        }
+        //static public bool lte(float x, Object y)
+        //{
+        //    return lte((Object)x, y);
+        //}
 
-        static public bool lte(Object x, float y)
-        {
-            return lte(x, (Object)y);
-        }
+        //static public bool lte(Object x, float y)
+        //{
+        //    return lte(x, (Object)y);
+        //}
 
         static public bool lte(long x, Object y)
         {
@@ -2725,25 +2425,25 @@ namespace clojure.lang
             return lte(x, (Object)y);
         }
 
-        static public bool gt(int x, Object y)
-        {
-            return gt((Object)x, y);
-        }
+        //static public bool gt(int x, Object y)
+        //{
+        //    return gt((Object)x, y);
+        //}
 
-        static public bool gt(Object x, int y)
-        {
-            return gt(x, (Object)y);
-        }
+        //static public bool gt(Object x, int y)
+        //{
+        //    return gt(x, (Object)y);
+        //}
 
-        static public bool gt(float x, Object y)
-        {
-            return gt((Object)x, y);
-        }
+        //static public bool gt(float x, Object y)
+        //{
+        //    return gt((Object)x, y);
+        //}
 
-        static public bool gt(Object x, float y)
-        {
-            return gt(x, (Object)y);
-        }
+        //static public bool gt(Object x, float y)
+        //{
+        //    return gt(x, (Object)y);
+        //}
 
         static public bool gt(long x, Object y)
         {
@@ -2765,25 +2465,25 @@ namespace clojure.lang
             return gt(x, (Object)y);
         }
 
-        static public bool gte(int x, Object y)
-        {
-            return gte((Object)x, y);
-        }
+        //static public bool gte(int x, Object y)
+        //{
+        //    return gte((Object)x, y);
+        //}
 
-        static public bool gte(Object x, int y)
-        {
-            return gte(x, (Object)y);
-        }
+        //static public bool gte(Object x, int y)
+        //{
+        //    return gte(x, (Object)y);
+        //}
 
-        static public bool gte(float x, Object y)
-        {
-            return gte((Object)x, y);
-        }
+        //static public bool gte(float x, Object y)
+        //{
+        //    return gte((Object)x, y);
+        //}
 
-        static public bool gte(Object x, float y)
-        {
-            return gte(x, (Object)y);
-        }
+        //static public bool gte(Object x, float y)
+        //{
+        //    return gte(x, (Object)y);
+        //}
 
         static public bool gte(long x, Object y)
         {
@@ -2806,29 +2506,29 @@ namespace clojure.lang
         }
 
 
-        static public bool equiv(int x, Object y)
-        {
-            //return equiv((Object)x, y);
-            return EquivArg1Numeric(x, y);  // still boxes
-        }
+        //static public bool equiv(int x, Object y)
+        //{
+        //    //return equiv((Object)x, y);
+        //    return EquivArg1Numeric(x, y);  // still boxes
+        //}
 
-        static public bool equiv(Object x, int y)
-        {
-            //return equiv(x, (Object)y);
-            return EquivArg2Numeric(x, y);
-        }
+        //static public bool equiv(Object x, int y)
+        //{
+        //    //return equiv(x, (Object)y);
+        //    return EquivArg2Numeric(x, y);
+        //}
 
-        static public bool equiv(float x, Object y)
-        {
-            //return equiv((Object)x, y);
-            return EquivArg1Numeric(x, y);  // still boxes
-        }
+        //static public bool equiv(float x, Object y)
+        //{
+        //    //return equiv((Object)x, y);
+        //    return EquivArg1Numeric(x, y);  // still boxes
+        //}
 
-        static public bool equiv(Object x, float y)
-        {
-            //return equiv(x, (Object)y);
-            return EquivArg2Numeric(x, y);
-        }
+        //static public bool equiv(Object x, float y)
+        //{
+        //    //return equiv(x, (Object)y);
+        //    return EquivArg2Numeric(x, y);
+        //}
 
         static public bool equiv(long x, Object y)
         {
@@ -2855,536 +2555,536 @@ namespace clojure.lang
         }
 
 
-        static public float add(int x, float y)
-        {
-            return add((float)x, y);
-        }
-
-        static public float add(float x, int y)
-        {
-            return add(x, (float)y);
-        }
-
-        static public double add(int x, double y)
-        {
-            return add((double)x, y);
-        }
-
-        static public double add(double x, int y)
-        {
-            return add(x, (double)y);
-        }
-
-        static public long add(int x, long y)
-        {
-            return add((long)x, y);
-        }
-
-        static public long add(long x, int y)
-        {
-            return add(x, (long)y);
-        }
-
-        static public float add(long x, float y)
-        {
-            return add((float)x, y);
-        }
-
-        static public float add(float x, long y)
-        {
-            return add(x, (float)y);
-        }
-
-        static public double add(long x, double y)
-        {
-            return add((double)x, y);
-        }
-
-        static public double add(double x, long y)
-        {
-            return add(x, (double)y);
-        }
-
-        static public double add(float x, double y)
-        {
-            return add((double)x, y);
-        }
-
-        static public double add(double x, float y)
-        {
-            return add(x, (double)y);
-        }
-
-        static public float minus(int x, float y)
-        {
-            return minus((float)x, y);
-        }
-
-        static public float minus(float x, int y)
-        {
-            return minus(x, (float)y);
-        }
-
-        static public double minus(int x, double y)
-        {
-            return minus((double)x, y);
-        }
-
-        static public double minus(double x, int y)
-        {
-            return minus(x, (double)y);
-        }
-
-        static public long minus(int x, long y)
-        {
-            return minus((long)x, y);
-        }
-
-        static public long minus(long x, int y)
-        {
-            return minus(x, (long)y);
-        }
-
-        static public float minus(long x, float y)
-        {
-            return minus((float)x, y);
-        }
-
-        static public float minus(float x, long y)
-        {
-            return minus(x, (float)y);
-        }
-
-        static public double minus(long x, double y)
-        {
-            return minus((double)x, y);
-        }
-
-        static public double minus(double x, long y)
-        {
-            return minus(x, (double)y);
-        }
-
-        static public double minus(float x, double y)
-        {
-            return minus((double)x, y);
-        }
-
-        static public double minus(double x, float y)
-        {
-            return minus(x, (double)y);
-        }
-
-        static public float multiply(int x, float y)
-        {
-            return multiply((float)x, y);
-        }
-
-        static public float multiply(float x, int y)
-        {
-            return multiply(x, (float)y);
-        }
-
-        static public double multiply(int x, double y)
-        {
-            return multiply((double)x, y);
-        }
-
-        static public double multiply(double x, int y)
-        {
-            return multiply(x, (double)y);
-        }
-
-        static public long multiply(int x, long y)
-        {
-            return multiply((long)x, y);
-        }
-
-        static public long multiply(long x, int y)
-        {
-            return multiply(x, (long)y);
-        }
-
-        static public float multiply(long x, float y)
-        {
-            return multiply((float)x, y);
-        }
-
-        static public float multiply(float x, long y)
-        {
-            return multiply(x, (float)y);
-        }
-
-        static public double multiply(long x, double y)
-        {
-            return multiply((double)x, y);
-        }
-
-        static public double multiply(double x, long y)
-        {
-            return multiply(x, (double)y);
-        }
-
-        static public double multiply(float x, double y)
-        {
-            return multiply((double)x, y);
-        }
-
-        static public double multiply(double x, float y)
-        {
-            return multiply(x, (double)y);
-        }
-
-        static public float divide(int x, float y)
-        {
-            return divide((float)x, y);
-        }
-
-        static public float divide(float x, int y)
-        {
-            return divide(x, (float)y);
-        }
-
-        static public double divide(int x, double y)
-        {
-            return divide((double)x, y);
-        }
-
-        static public double divide(double x, int y)
-        {
-            return divide(x, (double)y);
-        }
-
-        static public float divide(long x, float y)
-        {
-            return divide((float)x, y);
-        }
-
-        static public float divide(float x, long y)
-        {
-            return divide(x, (float)y);
-        }
-
-        static public double divide(long x, double y)
-        {
-            return divide((double)x, y);
-        }
-
-        static public double divide(double x, long y)
-        {
-            return divide(x, (double)y);
-        }
-
-        static public double divide(float x, double y)
-        {
-            return divide((double)x, y);
-        }
-
-        static public double divide(double x, float y)
-        {
-            return divide(x, (double)y);
-        }
-
-        static public bool lt(int x, float y)
-        {
-            return lt((float)x, y);
-        }
-
-        static public bool lt(float x, int y)
-        {
-            return lt(x, (float)y);
-        }
-
-        static public bool lt(int x, double y)
-        {
-            return lt((double)x, y);
-        }
-
-        static public bool lt(double x, int y)
-        {
-            return lt(x, (double)y);
-        }
-
-        static public bool lt(int x, long y)
-        {
-            return lt((long)x, y);
-        }
-
-        static public bool lt(long x, int y)
-        {
-            return lt(x, (long)y);
-        }
-
-        static public bool lt(long x, float y)
-        {
-            return lt((float)x, y);
-        }
-
-        static public bool lt(float x, long y)
-        {
-            return lt(x, (float)y);
-        }
-
-        static public bool lt(long x, double y)
-        {
-            return lt((double)x, y);
-        }
-
-        static public bool lt(double x, long y)
-        {
-            return lt(x, (double)y);
-        }
-
-        static public bool lt(float x, double y)
-        {
-            return lt((double)x, y);
-        }
-
-        static public bool lt(double x, float y)
-        {
-            return lt(x, (double)y);
-        }
-
-
-        static public bool lte(int x, float y)
-        {
-            return lte((float)x, y);
-        }
-
-        static public bool lte(float x, int y)
-        {
-            return lte(x, (float)y);
-        }
-
-        static public bool lte(int x, double y)
-        {
-            return lte((double)x, y);
-        }
-
-        static public bool lte(double x, int y)
-        {
-            return lte(x, (double)y);
-        }
-
-        static public bool lte(int x, long y)
-        {
-            return lte((long)x, y);
-        }
-
-        static public bool lte(long x, int y)
-        {
-            return lte(x, (long)y);
-        }
-
-        static public bool lte(long x, float y)
-        {
-            return lte((float)x, y);
-        }
-
-        static public bool lte(float x, long y)
-        {
-            return lte(x, (float)y);
-        }
-
-        static public bool lte(long x, double y)
-        {
-            return lte((double)x, y);
-        }
-
-        static public bool lte(double x, long y)
-        {
-            return lte(x, (double)y);
-        }
-
-        static public bool lte(float x, double y)
-        {
-            return lte((double)x, y);
-        }
-
-        static public bool lte(double x, float y)
-        {
-            return lte(x, (double)y);
-        }
-
-        static public bool gt(int x, float y)
-        {
-            return gt((float)x, y);
-        }
-
-        static public bool gt(float x, int y)
-        {
-            return gt(x, (float)y);
-        }
-
-        static public bool gt(int x, double y)
-        {
-            return gt((double)x, y);
-        }
-
-        static public bool gt(double x, int y)
-        {
-            return gt(x, (double)y);
-        }
-
-        static public bool gt(int x, long y)
-        {
-            return gt((long)x, y);
-        }
-
-        static public bool gt(long x, int y)
-        {
-            return gt(x, (long)y);
-        }
-
-        static public bool gt(long x, float y)
-        {
-            return gt((float)x, y);
-        }
-
-        static public bool gt(float x, long y)
-        {
-            return gt(x, (float)y);
-        }
-
-        static public bool gt(long x, double y)
-        {
-            return gt((double)x, y);
-        }
-
-        static public bool gt(double x, long y)
-        {
-            return gt(x, (double)y);
-        }
-
-        static public bool gt(float x, double y)
-        {
-            return gt((double)x, y);
-        }
-
-        static public bool gt(double x, float y)
-        {
-            return gt(x, (double)y);
-        }
-
-        static public bool gte(int x, float y)
-        {
-            return gte((float)x, y);
-        }
-
-        static public bool gte(float x, int y)
-        {
-            return gte(x, (float)y);
-        }
-
-        static public bool gte(int x, double y)
-        {
-            return gte((double)x, y);
-        }
-
-        static public bool gte(double x, int y)
-        {
-            return gte(x, (double)y);
-        }
-
-        static public bool gte(int x, long y)
-        {
-            return gte((long)x, y);
-        }
-
-        static public bool gte(long x, int y)
-        {
-            return gte(x, (long)y);
-        }
-
-        static public bool gte(long x, float y)
-        {
-            return gte((float)x, y);
-        }
-
-        static public bool gte(float x, long y)
-        {
-            return gte(x, (float)y);
-        }
-
-        static public bool gte(long x, double y)
-        {
-            return gte((double)x, y);
-        }
-
-        static public bool gte(double x, long y)
-        {
-            return gte(x, (double)y);
-        }
-
-        static public bool gte(float x, double y)
-        {
-            return gte((double)x, y);
-        }
-
-        static public bool gte(double x, float y)
-        {
-            return gte(x, (double)y);
-        }
-
-        static public bool equiv(int x, float y)
-        {
-            return equiv((float)x, y);
-        }
-
-        static public bool equiv(float x, int y)
-        {
-            return equiv(x, (float)y);
-        }
-
-        static public bool equiv(int x, double y)
-        {
-            return equiv((double)x, y);
-        }
-
-        static public bool equiv(double x, int y)
-        {
-            return equiv(x, (double)y);
-        }
-
-        static public bool equiv(int x, long y)
-        {
-            return equiv((long)x, y);
-        }
-
-        static public bool equiv(long x, int y)
-        {
-            return equiv(x, (long)y);
-        }
-
-        static public bool equiv(long x, float y)
-        {
-            return equiv((float)x, y);
-        }
-
-        static public bool equiv(float x, long y)
-        {
-            return equiv(x, (float)y);
-        }
-
-        static public bool equiv(long x, double y)
-        {
-            return equiv((double)x, y);
-        }
-
-        static public bool equiv(double x, long y)
-        {
-            return equiv(x, (double)y);
-        }
-
-        static public bool equiv(float x, double y)
-        {
-            return equiv((double)x, y);
-        }
-
-        static public bool equiv(double x, float y)
-        {
-            return equiv(x, (double)y);
-        }
+        //static public float add(int x, float y)
+        //{
+        //    return add((float)x, y);
+        //}
+
+        //static public float add(float x, int y)
+        //{
+        //    return add(x, (float)y);
+        //}
+
+        //static public double add(int x, double y)
+        //{
+        //    return add((double)x, y);
+        //}
+
+        //static public double add(double x, int y)
+        //{
+        //    return add(x, (double)y);
+        //}
+
+        //static public long add(int x, long y)
+        //{
+        //    return add((long)x, y);
+        //}
+
+        //static public long add(long x, int y)
+        //{
+        //    return add(x, (long)y);
+        //}
+
+        //static public float add(long x, float y)
+        //{
+        //    return add((float)x, y);
+        //}
+
+        //static public float add(float x, long y)
+        //{
+        //    return add(x, (float)y);
+        //}
+
+        //static public double add(long x, double y)
+        //{
+        //    return add((double)x, y);
+        //}
+
+        //static public double add(double x, long y)
+        //{
+        //    return add(x, (double)y);
+        //}
+
+        //static public double add(float x, double y)
+        //{
+        //    return add((double)x, y);
+        //}
+
+        //static public double add(double x, float y)
+        //{
+        //    return add(x, (double)y);
+        //}
+
+        //static public float minus(int x, float y)
+        //{
+        //    return minus((float)x, y);
+        //}
+
+        //static public float minus(float x, int y)
+        //{
+        //    return minus(x, (float)y);
+        //}
+
+        //static public double minus(int x, double y)
+        //{
+        //    return minus((double)x, y);
+        //}
+
+        //static public double minus(double x, int y)
+        //{
+        //    return minus(x, (double)y);
+        //}
+
+        //static public long minus(int x, long y)
+        //{
+        //    return minus((long)x, y);
+        //}
+
+        //static public long minus(long x, int y)
+        //{
+        //    return minus(x, (long)y);
+        //}
+
+        //static public float minus(long x, float y)
+        //{
+        //    return minus((float)x, y);
+        //}
+
+        //static public float minus(float x, long y)
+        //{
+        //    return minus(x, (float)y);
+        //}
+
+        //static public double minus(long x, double y)
+        //{
+        //    return minus((double)x, y);
+        //}
+
+        //static public double minus(double x, long y)
+        //{
+        //    return minus(x, (double)y);
+        //}
+
+        //static public double minus(float x, double y)
+        //{
+        //    return minus((double)x, y);
+        //}
+
+        //static public double minus(double x, float y)
+        //{
+        //    return minus(x, (double)y);
+        //}
+
+        //static public float multiply(int x, float y)
+        //{
+        //    return multiply((float)x, y);
+        //}
+
+        //static public float multiply(float x, int y)
+        //{
+        //    return multiply(x, (float)y);
+        //}
+
+        //static public double multiply(int x, double y)
+        //{
+        //    return multiply((double)x, y);
+        //}
+
+        //static public double multiply(double x, int y)
+        //{
+        //    return multiply(x, (double)y);
+        //}
+
+        //static public long multiply(int x, long y)
+        //{
+        //    return multiply((long)x, y);
+        //}
+
+        //static public long multiply(long x, int y)
+        //{
+        //    return multiply(x, (long)y);
+        //}
+
+        //static public float multiply(long x, float y)
+        //{
+        //    return multiply((float)x, y);
+        //}
+
+        //static public float multiply(float x, long y)
+        //{
+        //    return multiply(x, (float)y);
+        //}
+
+        //static public double multiply(long x, double y)
+        //{
+        //    return multiply((double)x, y);
+        //}
+
+        //static public double multiply(double x, long y)
+        //{
+        //    return multiply(x, (double)y);
+        //}
+
+        //static public double multiply(float x, double y)
+        //{
+        //    return multiply((double)x, y);
+        //}
+
+        //static public double multiply(double x, float y)
+        //{
+        //    return multiply(x, (double)y);
+        //}
+
+        //static public float divide(int x, float y)
+        //{
+        //    return divide((float)x, y);
+        //}
+
+        //static public float divide(float x, int y)
+        //{
+        //    return divide(x, (float)y);
+        //}
+
+        //static public double divide(int x, double y)
+        //{
+        //    return divide((double)x, y);
+        //}
+
+        //static public double divide(double x, int y)
+        //{
+        //    return divide(x, (double)y);
+        //}
+
+        //static public float divide(long x, float y)
+        //{
+        //    return divide((float)x, y);
+        //}
+
+        //static public float divide(float x, long y)
+        //{
+        //    return divide(x, (float)y);
+        //}
+
+        //static public double divide(long x, double y)
+        //{
+        //    return divide((double)x, y);
+        //}
+
+        //static public double divide(double x, long y)
+        //{
+        //    return divide(x, (double)y);
+        //}
+
+        //static public double divide(float x, double y)
+        //{
+        //    return divide((double)x, y);
+        //}
+
+        //static public double divide(double x, float y)
+        //{
+        //    return divide(x, (double)y);
+        //}
+
+        //static public bool lt(int x, float y)
+        //{
+        //    return lt((float)x, y);
+        //}
+
+        //static public bool lt(float x, int y)
+        //{
+        //    return lt(x, (float)y);
+        //}
+
+        //static public bool lt(int x, double y)
+        //{
+        //    return lt((double)x, y);
+        //}
+
+        //static public bool lt(double x, int y)
+        //{
+        //    return lt(x, (double)y);
+        //}
+
+        //static public bool lt(int x, long y)
+        //{
+        //    return lt((long)x, y);
+        //}
+
+        //static public bool lt(long x, int y)
+        //{
+        //    return lt(x, (long)y);
+        //}
+
+        //static public bool lt(long x, float y)
+        //{
+        //    return lt((float)x, y);
+        //}
+
+        //static public bool lt(float x, long y)
+        //{
+        //    return lt(x, (float)y);
+        //}
+
+        //static public bool lt(long x, double y)
+        //{
+        //    return lt((double)x, y);
+        //}
+
+        //static public bool lt(double x, long y)
+        //{
+        //    return lt(x, (double)y);
+        //}
+
+        //static public bool lt(float x, double y)
+        //{
+        //    return lt((double)x, y);
+        //}
+
+        //static public bool lt(double x, float y)
+        //{
+        //    return lt(x, (double)y);
+        //}
+
+
+        //static public bool lte(int x, float y)
+        //{
+        //    return lte((float)x, y);
+        //}
+
+        //static public bool lte(float x, int y)
+        //{
+        //    return lte(x, (float)y);
+        //}
+
+        //static public bool lte(int x, double y)
+        //{
+        //    return lte((double)x, y);
+        //}
+
+        //static public bool lte(double x, int y)
+        //{
+        //    return lte(x, (double)y);
+        //}
+
+        //static public bool lte(int x, long y)
+        //{
+        //    return lte((long)x, y);
+        //}
+
+        //static public bool lte(long x, int y)
+        //{
+        //    return lte(x, (long)y);
+        //}
+
+        //static public bool lte(long x, float y)
+        //{
+        //    return lte((float)x, y);
+        //}
+
+        //static public bool lte(float x, long y)
+        //{
+        //    return lte(x, (float)y);
+        //}
+
+        //static public bool lte(long x, double y)
+        //{
+        //    return lte((double)x, y);
+        //}
+
+        //static public bool lte(double x, long y)
+        //{
+        //    return lte(x, (double)y);
+        //}
+
+        //static public bool lte(float x, double y)
+        //{
+        //    return lte((double)x, y);
+        //}
+
+        //static public bool lte(double x, float y)
+        //{
+        //    return lte(x, (double)y);
+        //}
+
+        //static public bool gt(int x, float y)
+        //{
+        //    return gt((float)x, y);
+        //}
+
+        //static public bool gt(float x, int y)
+        //{
+        //    return gt(x, (float)y);
+        //}
+
+        //static public bool gt(int x, double y)
+        //{
+        //    return gt((double)x, y);
+        //}
+
+        //static public bool gt(double x, int y)
+        //{
+        //    return gt(x, (double)y);
+        //}
+
+        //static public bool gt(int x, long y)
+        //{
+        //    return gt((long)x, y);
+        //}
+
+        //static public bool gt(long x, int y)
+        //{
+        //    return gt(x, (long)y);
+        //}
+
+        //static public bool gt(long x, float y)
+        //{
+        //    return gt((float)x, y);
+        //}
+
+        //static public bool gt(float x, long y)
+        //{
+        //    return gt(x, (float)y);
+        //}
+
+        //static public bool gt(long x, double y)
+        //{
+        //    return gt((double)x, y);
+        //}
+
+        //static public bool gt(double x, long y)
+        //{
+        //    return gt(x, (double)y);
+        //}
+
+        //static public bool gt(float x, double y)
+        //{
+        //    return gt((double)x, y);
+        //}
+
+        //static public bool gt(double x, float y)
+        //{
+        //    return gt(x, (double)y);
+        //}
+
+        //static public bool gte(int x, float y)
+        //{
+        //    return gte((float)x, y);
+        //}
+
+        //static public bool gte(float x, int y)
+        //{
+        //    return gte(x, (float)y);
+        //}
+
+        //static public bool gte(int x, double y)
+        //{
+        //    return gte((double)x, y);
+        //}
+
+        //static public bool gte(double x, int y)
+        //{
+        //    return gte(x, (double)y);
+        //}
+
+        //static public bool gte(int x, long y)
+        //{
+        //    return gte((long)x, y);
+        //}
+
+        //static public bool gte(long x, int y)
+        //{
+        //    return gte(x, (long)y);
+        //}
+
+        //static public bool gte(long x, float y)
+        //{
+        //    return gte((float)x, y);
+        //}
+
+        //static public bool gte(float x, long y)
+        //{
+        //    return gte(x, (float)y);
+        //}
+
+        //static public bool gte(long x, double y)
+        //{
+        //    return gte((double)x, y);
+        //}
+
+        //static public bool gte(double x, long y)
+        //{
+        //    return gte(x, (double)y);
+        //}
+
+        //static public bool gte(float x, double y)
+        //{
+        //    return gte((double)x, y);
+        //}
+
+        //static public bool gte(double x, float y)
+        //{
+        //    return gte(x, (double)y);
+        //}
+
+        //static public bool equiv(int x, float y)
+        //{
+        //    return equiv((float)x, y);
+        //}
+
+        //static public bool equiv(float x, int y)
+        //{
+        //    return equiv(x, (float)y);
+        //}
+
+        //static public bool equiv(int x, double y)
+        //{
+        //    return equiv((double)x, y);
+        //}
+
+        //static public bool equiv(double x, int y)
+        //{
+        //    return equiv(x, (double)y);
+        //}
+
+        //static public bool equiv(int x, long y)
+        //{
+        //    return equiv((long)x, y);
+        //}
+
+        //static public bool equiv(long x, int y)
+        //{
+        //    return equiv(x, (long)y);
+        //}
+
+        //static public bool equiv(long x, float y)
+        //{
+        //    return equiv((float)x, y);
+        //}
+
+        //static public bool equiv(float x, long y)
+        //{
+        //    return equiv(x, (float)y);
+        //}
+
+        //static public bool equiv(long x, double y)
+        //{
+        //    return equiv((double)x, y);
+        //}
+
+        //static public bool equiv(double x, long y)
+        //{
+        //    return equiv(x, (double)y);
+        //}
+
+        //static public bool equiv(float x, double y)
+        //{
+        //    return equiv((double)x, y);
+        //}
+
+        //static public bool equiv(double x, float y)
+        //{
+        //    return equiv(x, (double)y);
+        //}
 
 
         #endregion
