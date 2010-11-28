@@ -93,12 +93,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
-            if (_n is int)
-                Expression.Constant((long)_n, typeof(long));
-            else if (_n is double)
-                Expression.Constant(_n, typeof(double));
-            else if ( _n is long )
-                return Expression.Constant(_n,typeof(long));
+            Type t = _n.GetType();
+
+            if (t == typeof(int))
+                return Expression.Constant((long)_n, typeof(long));
+            else if (t == typeof(double))
+                return Expression.Constant((double)_n, typeof(double));
+            else if ( t == typeof(long) )
+                return Expression.Constant((long)_n,typeof(long));
 
             throw new ArgumentException("Unsupported Number type: " + _n.GetType().Name);
         }

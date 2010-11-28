@@ -85,12 +85,11 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Expression convTarget = Expression.Convert(target, targetType);
                 Expression access = GenAccess(rhc, objx, convTarget);
-                call = Compiler.MaybeBox(access);
+                call = HostExpr.GenBoxReturn(access,FieldType,objx,context);
             }
             else
             {
                 call = Expression.Call(Compiler.Method_Reflector_GetInstanceFieldOrProperty, target, Expression.Constant(_fieldName));
-                call = Compiler.MaybeBox(call);
             }
             call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
             return call;
@@ -105,6 +104,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Expression convTarget = Expression.Convert(target, _targetType);
                 Expression access = GenAccess(rhc,objx, convTarget);
+                access = Compiler.MaybeAddDebugInfo(access, _spanMap, context.IsDebuggable);
                 return access;
             }
             else
@@ -124,7 +124,9 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Expression convTarget = Expression.Convert(target, _targetType);
                 Expression access = GenAccess(rhc, objx, convTarget);
-                call = Expression.Assign(access, Expression.Convert(valExpr,access.Type));
+                Expression unboxValExpr = HostExpr.GenUnboxArg(valExpr, FieldType);
+                //call = Expression.Assign(access, Expression.Convert(valExpr, access.Type));
+                call = Expression.Assign(access, unboxValExpr);  
             }
             else
             {
@@ -184,6 +186,11 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _targetType != null && _tinfo != null && Util.IsPrimitive(_tinfo.FieldType); }
         }
 
+        protected override Type FieldType
+        {
+            get { return _tinfo.FieldType; }
+        }
+
         #endregion
 
         #region AssignableExpr members
@@ -241,6 +248,10 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _targetType != null && _tinfo != null && Util.IsPrimitive(_tinfo.PropertyType); }
         }
 
+        protected override Type FieldType
+        {
+            get { return _tinfo.PropertyType; }
+        }
         #endregion
 
         #region AssignableExpr members

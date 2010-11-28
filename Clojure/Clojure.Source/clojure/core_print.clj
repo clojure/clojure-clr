@@ -114,6 +114,27 @@
 (defmethod print-method Single [o, ^System.IO.TextWriter w]
   (.Write w (fp-str o)))
 
+;;;We need to cover all the numerics, or we are hosed on print-dup.
+(defmethod print-method Int16 [o, ^System.IO.TextWriter w] (.Write w (str o)))
+(defmethod print-method Int32 [o, ^System.IO.TextWriter w] (.Write w (str o)))
+(defmethod print-method Int64 [o, ^System.IO.TextWriter w] (.Write w (str o)))
+(defmethod print-method UInt16 [o, ^System.IO.TextWriter w] (.Write w (str o)))
+(defmethod print-method UInt32 [o, ^System.IO.TextWriter w] (.Write w (str o)))
+(defmethod print-method UInt64 [o, ^System.IO.TextWriter w] (.Write w (str o)))
+(defmethod print-method Byte [o, ^System.IO.TextWriter w] (.Write w (str o)))
+(defmethod print-method SByte [o, ^System.IO.TextWriter w] (.Write w (str o)))
+
+(defmethod print-dup Int16 [o, ^System.IO.TextWriter w] (print-method o w))
+(defmethod print-dup Int32 [o, ^System.IO.TextWriter w] (print-method o w))
+(defmethod print-dup Int64 [o, ^System.IO.TextWriter w] (print-method o w))
+(defmethod print-dup UInt16 [o, ^System.IO.TextWriter w] (print-method o w))
+(defmethod print-dup UInt32 [o, ^System.IO.TextWriter w] (print-method o w))
+(defmethod print-dup UInt64 [o, ^System.IO.TextWriter w] (print-method o w))
+(defmethod print-dup Byte [o, ^System.IO.TextWriter w] (print-method o w))
+(defmethod print-dup SByte [o, ^System.IO.TextWriter w] (print-method o w))
+(defmethod print-dup Double [o, ^System.IO.TextWriter w] (print-method o w))
+(defmethod print-dup Single [o, ^System.IO.TextWriter w] (print-method o w))
+
 ;;;
 
 (defmethod print-dup ValueType [o, ^System.IO.TextWriter w]      ;;; Number => ValueType
@@ -254,8 +275,8 @@
   nil)
 
 (defmethod print-dup Char   [c w] (print-method c w))             ;;; java.lang.Character
-(defmethod print-dup Int32  [o w] (print-method o w))               ;;; java.lang.Integer
-(defmethod print-dup Double [o w] (print-method o w))                ;;; java.lang.Double
+;(defmethod print-dup Int32  [o w] (print-method o w))               ;;; java.lang.Integer
+;(defmethod print-dup Double [o w] (print-method o w))                ;;; java.lang.Double
 (defmethod print-dup clojure.lang.Ratio [o w] (print-method o w))
 (defmethod print-dup clojure.lang.BigDecimal [o w] (print-method o w))    ;;; java.math.BigDecimal 
 (defmethod print-dup clojure.lang.BigInteger [o w] (print-method o w))    ;;; java.math.BigInteger

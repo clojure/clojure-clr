@@ -63,9 +63,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public object Eval()
         {
-            if (_t.IsInstanceOfType(_expr.Eval()))
-                return true;
-            return false;
+            return _t.IsInstanceOfType(_expr.Eval());
         }
 
         #endregion
@@ -74,7 +72,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return Expression.Convert(GenCodeUnboxed(RHC.Expression, objx, context), typeof(Object));
+            return HostExpr.GenBoxReturn(GenCodeUnboxed(RHC.Expression, objx, context), typeof(bool), objx, context);
         }
 
         #endregion

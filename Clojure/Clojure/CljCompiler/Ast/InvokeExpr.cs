@@ -115,8 +115,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expr Parse(ParserContext pcon, ISeq form)
         {
+            pcon = pcon.EvEx();
+
             // TODO: DO we need the recur context here and below?
-            Expr fexpr = Compiler.Analyze(pcon.EvEx(),form.first());
+            Expr fexpr = Compiler.Analyze(pcon,form.first());
 
             if ( fexpr is VarExpr && ((VarExpr)fexpr).Var.Equals(Compiler.INSTANCE))
             {
@@ -138,13 +140,17 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KEYWORD_CALLSITES.isBound)
             {
-                Expr target = Compiler.Analyze(pcon.EvEx(), RT.second(form));
+                Expr target = Compiler.Analyze(pcon, RT.second(form));
                 return new KeywordInvokeExpr((string)Compiler.SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), Compiler.TagOf(form), (KeywordExpr)fexpr, target);
             }
 
             IPersistentVector args = PersistentVector.EMPTY;
             for ( ISeq s = RT.seq(form.next()); s != null; s = s.next())
-                args = args.cons(Compiler.Analyze(pcon.EvEx(),s.first()));
+                args = args.cons(Compiler.Analyze(pcon,s.first()));
+
+            //if (args.count() > Compiler.MAX_POSITIONAL_ARITY)
+            //    throw new ArgumentException(String.Format("No more than {0} args supported", Compiler.MAX_POSITIONAL_ARITY));
+
             return new InvokeExpr((string)Compiler.SOURCE.deref(),
                 (IPersistentMap)Compiler.SOURCE_SPAN.deref(), //Compiler.GetSourceSpanMap(form),
                 Compiler.TagOf(form),

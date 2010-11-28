@@ -65,13 +65,18 @@ namespace clojure.lang.CljCompiler.Ast
             Expression call;
 
             if (_method != null)
+            {
                 call = GenDlrForMethod(objx, context);
+                call = HostExpr.GenBoxReturn(call,_method.ReturnType,objx,context);
+            }
             else
+            {
                 call = GenerateComplexCall(objx, context);
-            call = HostExpr.GenBoxReturn(call);
+                call = HostExpr.GenBoxReturn(call,typeof(Object),objx,context);
+            }
+
             call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
             return call;
-
         }
 
         public override Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
@@ -173,6 +178,8 @@ namespace clojure.lang.CljCompiler.Ast
             return call;
         }
 
+
+        // RETYPE: TODO: Mostly same as HostExpr.GenMaybeUnboxedArg
         static MethodInfo MI_Util_ConvertToByte = typeof(Util).GetMethod("ConvertToByte");
         static MethodInfo MI_Util_ConvertToSByte = typeof(Util).GetMethod("ConvertToSByte");
         static MethodInfo MI_Util_ConvertToChar = typeof(Util).GetMethod("ConvertToChar");

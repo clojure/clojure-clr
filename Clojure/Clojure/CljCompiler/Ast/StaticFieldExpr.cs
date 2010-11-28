@@ -63,7 +63,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            return Compiler.MaybeBox(GenCodeUnboxed(rhc, objx, context));
+            return HostExpr.GenBoxReturn(GenCodeUnboxed(rhc, objx, context),FieldType,objx,context);
         }
 
         #endregion
@@ -74,7 +74,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Expression access = GenCodeUnboxed(RHC.Expression, objx, context);
             Expression valExpr = val.GenCode(RHC.Expression, objx, context);
-            Expression assign = Expression.Assign(access, valExpr);
+            Expression unboxValExpr = HostExpr.GenUnboxArg(valExpr, FieldType);
+            Expression assign = Expression.Assign(access, unboxValExpr);
             assign = Compiler.MaybeAddDebugInfo(assign, _spanMap, context.IsDebuggable);
             return assign;
         }
@@ -126,6 +127,10 @@ namespace clojure.lang.CljCompiler.Ast
             get { return Util.IsPrimitive(_tinfo.FieldType); }
         }
 
+        protected override Type FieldType
+        {
+            get { return _tinfo.FieldType; }
+        }
 
         #endregion
 
@@ -185,6 +190,10 @@ namespace clojure.lang.CljCompiler.Ast
             get { return Util.IsPrimitive(_tinfo.PropertyType); }
         }
 
+        protected override Type FieldType
+        {
+            get { return _tinfo.PropertyType; }
+        }
 
         #endregion
 

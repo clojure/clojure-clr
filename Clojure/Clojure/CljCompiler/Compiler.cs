@@ -230,6 +230,8 @@ namespace clojure.lang
 
         internal static readonly MethodInfo Method_Namespace_importClass1 = typeof(Namespace).GetMethod("importClass", new Type[] { typeof(Type) });
 
+        internal static readonly MethodInfo Method_Numbers_num_long = typeof(Numbers).GetMethod("num", new Type[] { typeof(long) });
+
         internal static readonly MethodInfo Method_PersistentList_create = typeof(PersistentList).GetMethod("create", new Type[] { typeof(System.Collections.IList) });
 
         internal static readonly MethodInfo Method_Reflector_CallInstanceMethod = typeof(Reflector).GetMethod("CallInstanceMethod");
@@ -240,6 +242,7 @@ namespace clojure.lang
 
         internal static readonly MethodInfo Method_RT_arrayToList = typeof(RT).GetMethod("arrayToList");
         internal static readonly MethodInfo Method_RT_classForName = typeof(RT).GetMethod("classForName");
+        internal static readonly MethodInfo Method_RT_intCast_long = typeof(RT).GetMethod("intCast", new Type[] { typeof(long) });
         internal static readonly MethodInfo Method_RT_IsTrue = typeof(RT).GetMethod("IsTrue");
         internal static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
         internal static readonly MethodInfo Method_RT_printToConsole = typeof(RT).GetMethod("printToConsole");

@@ -77,9 +77,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region LiteralExpr methods
+
         public override object Val
         {
             get { return _kw; }
         }
+
+        #endregion
     }
 }

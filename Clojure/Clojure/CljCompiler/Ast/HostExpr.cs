@@ -371,14 +371,43 @@ namespace clojure.lang.CljCompiler.Ast
             return exprs;
         }
 
-        internal static Expression GenTypedArg(ObjExpr objx, GenContext context, Type type, Expr arg)
+        internal static Expression GenTypedArg(ObjExpr objx, GenContext context, Type paramType, Expr arg)
         {
-            if (Compiler.MaybePrimitiveType(arg) == type)
-                return ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+            Type primt = Compiler.MaybePrimitiveType(arg);
+
+            if ( primt == paramType )
+            {
+                Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                return expr;
+            }
+            else if ( primt == typeof(int) && paramType == typeof(long) )
+            {
+                Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                expr = Expression.Convert(expr,typeof(long));
+                return expr;
+            }
+            else if ( primt == typeof(long) && paramType == typeof(int) )
+            {
+                Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                expr = Expression.Call(Compiler.Method_RT_intCast_long,expr);
+                return expr;
+            }
+            else if ( primt == typeof(float) && paramType == typeof(double) )
+            {
+                Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                expr = Expression.Convert(expr,typeof(double));
+                return expr;
+            }
+            else if ( primt == typeof(double) && paramType == typeof(float) )
+            {
+                Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                expr = Expression.Convert(expr,typeof(float));
+                return expr;
+            }
             else
             {
                 Expression argExpr = arg.GenCode(RHC.Expression, objx, context);
-                return GenMaybeUnboxedArg(type, argExpr);
+                return GenUnboxArg(argExpr, paramType);
             }
         }
 
@@ -395,55 +424,70 @@ namespace clojure.lang.CljCompiler.Ast
         internal static readonly MethodInfo Method_Util_ConvertToChar = typeof(Util).GetMethod("ConvertToChar");
         internal static readonly MethodInfo Method_Util_ConvertToDecimal = typeof(Util).GetMethod("ConvertToDecimal");
 
-        static Expression GenMaybeUnboxedArg(Type type, Expression argExpr)
+        internal static Expression GenUnboxArg(Expression argExpr, Type paramType)
         {
+
             Type argType = argExpr.Type;
 
-            if (argType == type)
+            if (argType == paramType)
                 return argExpr;
 
-            if (type.IsAssignableFrom(argType))
+            if (paramType.IsAssignableFrom(argType))
                 return argExpr;
 
-            if (Util.IsPrimitiveNumeric(argType) && Util.IsPrimitiveNumeric(type))
-                return argExpr;
 
-            if (type == typeof(sbyte))
-                return Expression.Call(null, Method_Util_ConvertToSByte, argExpr);
-            else if ( type == typeof(byte))
-                return Expression.Call(null, Method_Util_ConvertToByte, argExpr);
-            else if (type == typeof(short))
-                return Expression.Call(null, Method_Util_ConvertToShort, argExpr);
-            else if (type == typeof(ushort))
-                return Expression.Call(null, Method_Util_ConvertToUShort, argExpr);
-            else if (type == typeof(int))
-                return Expression.Call(null, Method_Util_ConvertToInt, argExpr);
-            else if (type == typeof(uint))
-                return Expression.Call(null, Method_Util_ConvertToUInt, argExpr);
-            else if (type == typeof(long))
-                return Expression.Call(null, Method_Util_ConvertToLong, argExpr);
-            else if (type == typeof(ulong))
-                return Expression.Call(null, Method_Util_ConvertToULong, argExpr);
-            else if (type == typeof(float))
-                return Expression.Call(null, Method_Util_ConvertToFloat, argExpr);
-            else if (type == typeof(double))
-                return Expression.Call(null, Method_Util_ConvertToDouble, argExpr);
-            else if (type == typeof(char))
-                return Expression.Call(null, Method_Util_ConvertToChar, argExpr);
-            else if (type == typeof(decimal))
-                return Expression.Call(null, Method_Util_ConvertToDecimal, argExpr);
+            if (paramType.IsPrimitive)
+            {
+                if (Util.IsPrimitiveNumeric(argType) && Util.IsPrimitiveNumeric(paramType))
+                    return Expression.Convert(argExpr,paramType);
+
+                if (paramType == typeof(sbyte))
+                    return Expression.Call(null, Method_Util_ConvertToSByte, argExpr);
+                else if (paramType == typeof(byte))
+                    return Expression.Call(null, Method_Util_ConvertToByte, argExpr);
+                else if (paramType == typeof(short))
+                    return Expression.Call(null, Method_Util_ConvertToShort, argExpr);
+                else if (paramType == typeof(ushort))
+                    return Expression.Call(null, Method_Util_ConvertToUShort, argExpr);
+                else if (paramType == typeof(int))
+                    return Expression.Call(null, Method_Util_ConvertToInt, argExpr);
+                else if (paramType == typeof(uint))
+                    return Expression.Call(null, Method_Util_ConvertToUInt, argExpr);
+                else if (paramType == typeof(long))
+                    return Expression.Call(null, Method_Util_ConvertToLong, argExpr);
+                else if (paramType == typeof(ulong))
+                    return Expression.Call(null, Method_Util_ConvertToULong, argExpr);
+                else if (paramType == typeof(float))
+                    return Expression.Call(null, Method_Util_ConvertToFloat, argExpr);
+                else if (paramType == typeof(double))
+                    return Expression.Call(null, Method_Util_ConvertToDouble, argExpr);
+                else if (paramType == typeof(char))
+                    return Expression.Call(null, Method_Util_ConvertToChar, argExpr);
+                else if (paramType == typeof(decimal))
+                    return Expression.Call(null, Method_Util_ConvertToDecimal, argExpr);
+            }
             
-            return argExpr;
+            return Expression.Convert(argExpr,paramType);
         }
 
         #endregion
 
         #region Code gen helpers
 
-        public static Expression GenBoxReturn(Expression expr)
+        public static Expression GenBoxReturn(Expression expr, Type returnType, ObjExpr objx, GenContext context)
         {
-            if (expr.Type.IsPrimitive)
+            if (returnType == typeof(void))
+                return Expression.Block(expr, Compiler.NIL_EXPR.GenCode(RHC.Expression,objx,context));
+
+            if (returnType.IsPrimitive)
+            {
+                if ( returnType == typeof(float) )
+                    return Expression.Convert(Expression.Convert(expr,typeof(double)),typeof(object));
+                else if ( returnType == typeof(long) )
+                    return Expression.Call(Compiler.Method_Numbers_num_long,expr);
+
                 return Expression.Convert(expr, typeof(Object));
+            }
 
             return expr;
         }
@@ -521,12 +565,12 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
             }
-            else if (tag is String)
-            {
-                // TODO: This is no longer in the Java version.  SHould we get rid of?
-                string strTag = (string)tag;
-                t = Type.GetType(strTag);
-            }
+            //else if (tag is String)
+            //{
+            //    // TODO: This is no longer in the Java version.  SHould we get rid of?
+            //    string strTag = (string)tag;
+            //    t = Type.GetType(strTag);
+            //}
 
             if (t != null)
                 return t;

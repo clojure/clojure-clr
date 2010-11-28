@@ -152,7 +152,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression unboxed = GenCodeUnboxed(rhc, objx, context);
             Expression e = unboxed;
             if (rhc != RHC.Statement)
-                e = Compiler.MaybeBox(e);
+                e = HostExpr.GenBoxReturn(e,_retType,objx,context);
             return e;
         }
 
@@ -182,9 +182,8 @@ namespace clojure.lang.CljCompiler.Ast
                     if (Compiler.MaybePrimitiveType(e) == _paramTypes[i])
                         argExprs[i + 1] = ((MaybePrimitiveExpr)e).GenCodeUnboxed(RHC.Expression, objx, context);
                     else
-                        argExprs[i + 1] = e.GenCode(RHC.Expression, objx, context);
+                        argExprs[i + 1] = HostExpr.GenUnboxArg(e.GenCode(RHC.Expression, objx, context),_paramTypes[i]);
                     argTypes[i + 1] = argExprs[i + 1].Type;
-
                 }
                 IPersistentVector restArgs = RT.subvec(_args, _paramTypes.Length - 1, _args.count());
                 Expression expr = Compiler.GenArgArray(RHC.Expression, objx, context, restArgs);

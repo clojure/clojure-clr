@@ -12,7 +12,7 @@
  *   Author: David Miller
  **/
 
-
+using System;
 #if CLR2
 using Microsoft.Scripting.Ast;
 #else
@@ -28,6 +28,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public abstract object EvalAssign(Expr val);
         public abstract Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val);
+
+        #endregion
+
+        #region Other
+
+        protected abstract Type FieldType { get; }
 
         #endregion
     }

@@ -242,11 +242,20 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 BindingInit bi = (BindingInit)_bindingInits.nth(i);
                 Type primType = Compiler.MaybePrimitiveType(bi.Init);
-                ParameterExpression parmExpr = Expression.Parameter(primType ?? typeof(object), bi.Binding.Name);
+                ParameterExpression parmExpr;
+                Expression initExpr;
+                if ( primType != null ) 
+                {
+                    parmExpr = Expression.Parameter(primType,bi.Binding.Name);
+                    initExpr =  ((MaybePrimitiveExpr)bi.Init).GenCodeUnboxed(RHC.Expression,objx,context);
+                }
+                else 
+                {
+                    parmExpr =  Expression.Parameter(typeof(object),bi.Binding.Name);
+                    initExpr = Compiler.MaybeBox(bi.Init.GenCode(RHC.Expression,objx,context));
+                }
                 bi.Binding.ParamExpression = parmExpr;
                 parms.Add(parmExpr);
-                //forms.Add(Expression.Assign(parmExpr, Compiler.MaybeBox(bi.Init.GenDlr(context))));
-                Expression initExpr = primType != null ? ((MaybePrimitiveExpr)bi.Init).GenCodeUnboxed(RHC.Expression,objx,context) : Compiler.MaybeBox(bi.Init.GenCode(RHC.Expression,objx,context));
                 forms.Add(Expression.Assign(parmExpr, initExpr));
             }
 
@@ -258,7 +267,9 @@ namespace clojure.lang.CljCompiler.Ast
                 if (_isLoop)
                     Var.pushThreadBindings(PersistentHashMap.create(Compiler.LOOP_LABEL, loopLabel));
 
-                Expression form = genUnboxed ? ((MaybePrimitiveExpr)_body).GenCodeUnboxed(rhc,objx,context) : _body.GenCode(rhc,objx,context);
+                Expression form = genUnboxed 
+                    ? ((MaybePrimitiveExpr)_body).GenCodeUnboxed(rhc,objx,context) 
+                    : _body.GenCode(rhc,objx,context);
 
                 forms.Add(form);
             }
@@ -271,8 +282,6 @@ namespace clojure.lang.CljCompiler.Ast
             Expression block = Expression.Block(parms, forms);
             return block;
         }
-
- 
 
         #endregion
 

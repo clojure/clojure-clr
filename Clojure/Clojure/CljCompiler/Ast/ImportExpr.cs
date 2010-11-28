@@ -48,7 +48,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Type ClrType
         {
-            get { throw new ArgumentException("ImportExpr has no Java class"); }
+            get { throw new ArgumentException("ImportExpr has no CLR type"); }
         }
 
         #endregion

@@ -56,7 +56,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { Type t = _v.GetType(); return t.IsPrimitive ? typeof(object) : t; }
+            get
+            {
+                // RETYPE:  Not sure why I did this:
+                // Type t = _v.GetType(); return t.IsPrimitive ? typeof(object) : t; }
+                // The following matches JVM:
+                return _v.GetType();
+            }
         }
 
         #endregion

@@ -79,8 +79,6 @@ namespace clojure.lang.CljCompiler.Ast
                 if (sym == null)
                     throw new Exception("First argument to def must be a Symbol.");
 
-                Console.WriteLine("Def {0}", sym.Name);
-
                 Var v = Compiler.LookupVar(sym, true);
 
                 if (v == null)
@@ -167,6 +165,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             if (_initProvided )
+                // RETYPE: get rid of Box? 
                 // Java doesn't Box here, but we have to deal with unboxed bool values
                 exprs.Add(Expression.Call(parm, Compiler.Method_Var_bindRoot, Compiler.MaybeBox(_init.GenCode(RHC.Expression,objx,context))));
 

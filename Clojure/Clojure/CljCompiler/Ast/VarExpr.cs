@@ -89,6 +89,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
         {
+            // RETYPE: Get rid of Box?
             Expression varExpr = objx.GenVar(context, _var);
             Expression valExpr = val.GenCode(RHC.Expression,objx,context);
             return Expression.Call(varExpr, Compiler.Method_Var_set, Compiler.MaybeBox(valExpr));
