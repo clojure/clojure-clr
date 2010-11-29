@@ -77,12 +77,12 @@
 (deftest test-instance?
   ; evaluation
   (are [x y] (= x y)
-      (instance? Int32 (+ 1 2)) true                   ;;; java.lang.Integer
-      (instance? Int64 (+ 1 2)) false )                   ;;; java.lang.Long
+      (instance? Int32 (+ 1 2)) false                   ;;; java.lang.Integer
+      (instance? Int64 (+ 1 2)) true )                   ;;; java.lang.Long
 
   ; different types
   (are [type literal] (instance? literal type)
-      1   Int32                                 ;;; java.lang.Integer
+      1   Int64                                 ;;; java.lang.Long
       1.0 Double                                ;;; java.lang.Double
       1M  BigDecimal                            ;;; java.math.BigDecimal
       \a  Char                                  ;;; java.lang.Character
@@ -90,8 +90,8 @@
 
   ; it is an int, nothing else
   (are [x y] (= (instance? x 42) y)
-      Int32 true                    ;;; java.lang.Integer
-      Int64 false                   ;;; java.lang.Long
+      Int32 false                    ;;; java.lang.Integer
+      Int64 true                   ;;; java.lang.Long
       Char false                    ;;; java.lang.Character
       String false ))               ;;; java.lang.String
 
@@ -272,8 +272,8 @@
   ; different kinds of collections
   (are [x] (and (= (alength (into-array x)) (count x))
                 (= (vec (into-array x)) (vec x))
-                (= (alength (into-array Int32 x)) (count x))          ;;; Integer/TYPE
-                (= (vec (into-array Int32 x)) (vec x)))               ;;; Integer/TYPE
+                (= (alength (into-array Int64 x)) (count x))          ;;; Long/TYPE
+                (= (vec (into-array Int64 x)) (vec x)))               ;;; Long/TYPE
       ()
       '(1 2)
       []

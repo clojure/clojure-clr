@@ -49,12 +49,12 @@
       :clojure-set
       ; :clojure-xml
       :clojure-zip
-      :protocols
+      :protocols 
       ; :genclass   -- TODO: We have some problems with classpaths -- this is a perfect example
       :main
-      :vectors
+     ; :vectors -- TODO: num prim introduced some major problems -- needs analysis
       ; :annotations
-      :pprint
+     ; :pprint
       :serialization
       :rt
       :repl

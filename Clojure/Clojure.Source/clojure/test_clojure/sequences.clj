@@ -27,7 +27,7 @@
         avec (into [] arange)
         alist (into () arange)
         obj-array (into-array arange)
-        int-array (into-array Int32 arange)                        ;;; Integer/TYPE
+        int-array (into-array Int32 (map int arange))                        ;;; Integer/TYPE -- added the map because of an Int64 0 at the beginning of the range
         long-array (into-array Int64 arange)                       ;;; Long/TYPE
         float-array (into-array Single arange)                     ;;; Float/TYPE
         char-array (into-array Char (map char arange))             ;;; Character/TYPE

@@ -53,14 +53,14 @@
 (deftest Numbers
 
   ; Read Integer
-  (is (instance? Int32 2147483647))            ;;; Integer
-  (is (instance? Int32 +1))
-  (is (instance? Int32 1))
-  (is (instance? Int32 +0))
-  (is (instance? Int32 0))
-  (is (instance? Int32 -0))
-  (is (instance? Int32 -1))
-  (is (instance? Int32 -2147483648))
+  (is (instance? Int64 2147483647))            ;;; Long
+  (is (instance? Int64 +1))
+  (is (instance? Int64 1))
+  (is (instance? Int64 +0))
+  (is (instance? Int64 0))
+  (is (instance? Int64 -0))
+  (is (instance? Int64 -1))
+  (is (instance? Int64 -2147483648))
 
   ; Read Long
   (is (instance? Int64 2147483648))              ;;; Long
@@ -77,7 +77,7 @@
                        (recur (inc i) (conj l i))
                        l))]
       (is (= [4 3 2 1 0] sequence))
-      (is (every? #(instance? Int32 %)              ;;; Long -- will be Int64 when I catch up to the proper commit on num branch.
+      (is (every? #(instance? Int64 %)              ;;; Long 
                   sequence))))
 
   ; Read BigInteger
