@@ -51,7 +51,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override DynamicMetaObject FallbackCreateInstance(DynamicMetaObject target, DynamicMetaObject[] args, DynamicMetaObject errorSuggestion)
         {
-            OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            //OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            OverloadResolverFactory factory = NumericConvertOverloadResolverFactory.Instance;
+
             Type typeToUse = target.Value is Type ? (Type)target.Value : target.LimitType;
 
 

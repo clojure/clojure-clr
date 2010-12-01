@@ -116,6 +116,17 @@ namespace clojure.lang.CljCompiler.Ast
             get { return typeof(object); }
         }
 
+        protected override Type StaticReturnType
+        {
+            get
+            {
+                if (Objx.IsStatic)
+                    return _retType;
+
+                return typeof(object);
+            }
+        }
+
         #endregion
 
         #region Parsing

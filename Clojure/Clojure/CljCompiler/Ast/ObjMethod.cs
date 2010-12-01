@@ -100,6 +100,7 @@ namespace clojure.lang.CljCompiler.Ast
         internal abstract string MethodName { get; }
         protected abstract string StaticMethodName { get; }
         protected abstract Type ReturnType { get; }
+        protected abstract Type StaticReturnType { get; }
         protected abstract Type[] ArgTypes { get; }
         protected abstract Type[] StaticMethodArgTypes { get; }
 
@@ -164,14 +165,15 @@ namespace clojure.lang.CljCompiler.Ast
                         Expression.Label(loopLabel),
                         _body.GenCode(RHC.Return,objx,context));
 
-                Expression convBody = Compiler.MaybeConvert(body, ReturnType);
+                //Expression convBody = Compiler.MaybeConvert(body, ReturnType);
+                Expression convBody = MethodExpr.GenConvertMaybePrim(body, ReturnType);
 
                 LambdaExpression lambda = Expression.Lambda(convBody, parms);
                 // JVM: Clears locals here.
 
 
                 // TODO: Cache all the CreateObjectTypeArray values
-                MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static|MethodAttributes.Public, ReturnType, parmTypes.ToArray());
+                MethodBuilder mb = tb.DefineMethod(methodName, MethodAttributes.Static|MethodAttributes.Public, StaticReturnType, parmTypes.ToArray());
 
                 //Console.Write("StMd: {0} {1}(", ReturnType.Name, methodName);
                 //foreach (Type t in parmTypes)
@@ -222,7 +224,9 @@ namespace clojure.lang.CljCompiler.Ast
             gen.EmitLoadArg(0);                             
             for (int i = 1; i <= _argLocals.count(); i++)
                 gen.EmitLoadArg(i);                         
-            gen.EmitCall(_staticMethodBuilder);                 
+            gen.EmitCall(_staticMethodBuilder);
+            if (ReturnType != StaticReturnType)
+                gen.Emit(OpCodes.Castclass, ReturnType);
             gen.Emit(OpCodes.Ret);
 
             if ( IsExplicit )

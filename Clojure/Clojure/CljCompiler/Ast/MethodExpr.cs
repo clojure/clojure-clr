@@ -198,6 +198,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expression GenConvertMaybePrim(Expression expr, Type toType)
         {
+            if ( expr.Type == toType )
+                return expr;
+
+            if (toType == typeof(void))
+                return Expression.Block(expr, Expression.Empty());
+
+            if (expr.Type == typeof(void))
+                return Expression.Block(expr, Expression.Default(toType));
+
             if ( expr.Type.IsPrimitive && toType.IsPrimitive)
                 return Expression.Convert(expr,toType);
 

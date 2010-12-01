@@ -81,6 +81,11 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _retType; }
         }
 
+        protected override Type StaticReturnType
+        {
+            get { return _retType; }
+        }
+
         #endregion
 
         #region C-tors

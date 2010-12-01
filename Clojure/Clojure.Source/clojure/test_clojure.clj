@@ -52,7 +52,7 @@
       :protocols 
       ; :genclass   -- TODO: We have some problems with classpaths -- this is a perfect example
       :main
-     ; :vectors -- TODO: num prim introduced some major problems -- needs analysis
+      :vectors
       ; :annotations
      ; :pprint
       :serialization
