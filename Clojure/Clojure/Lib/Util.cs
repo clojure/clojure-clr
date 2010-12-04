@@ -76,6 +76,36 @@ namespace clojure.lang
             return k1 != null && k1.Equals(k2);
         }
 
+        public static bool equals(long x, long y)
+        {
+            return x == y;
+        }
+
+        public static bool equals(double x, double y)
+        {
+            return x == y;
+        }
+
+        public static bool equals(long x, object y)
+        {
+            return equals((object)x, y);
+        }
+
+        public static bool equals(object x, long y)
+        {
+            return equals(x, (object)y);
+        }
+
+        public static bool equals(double x, object y)
+        {
+            return equals((object)x, y);
+        }
+
+        public static bool equals(object x, double y)
+        {
+            return equals(x, (object)y);
+        }
+
         public static bool identical(object k1, object k2)
         {
             // I would prefer simpler version below, but it can't handle simple true/false (boxed booleans)

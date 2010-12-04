@@ -254,7 +254,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Symbol_create2 = typeof(Symbol).GetMethod("create", new Type[] { typeof(string), typeof(string) });
 
         internal static readonly MethodInfo Method_Util_classOf = typeof(Util).GetMethod("classOf");
-        internal static readonly MethodInfo Method_Util_equals = typeof(Util).GetMethod("equals");
+        internal static readonly MethodInfo Method_Util_equals = typeof(Util).GetMethod("equals",new Type[] {typeof(object), typeof(object)});
         internal static readonly MethodInfo Method_Util_Hash = typeof(Util).GetMethod("Hash");
         
         internal static readonly MethodInfo Method_Var_bindRoot = typeof(Var).GetMethod("bindRoot");
