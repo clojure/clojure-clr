@@ -192,7 +192,7 @@
                (= (.nth this i) (nth o i)) (recur (inc i))
                :else false)))
      (or (instance? clojure.lang.Sequential o) (instance? System.Collections.IEnumerable o))                             ;;; java.util.List
-       (= (seq this) (seq o))
+       (clojure.lang.Util/equiv (seq this) (seq o))
      :else false))
 
   clojure.lang.IPersistentStack
