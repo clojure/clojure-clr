@@ -37,7 +37,7 @@ namespace clojure.lang
         {
             return (array == null || array.Length == 0)
                 ? null
-                : new TypedArraySeq<Object>(null,array, 0);
+                : new ArraySeq_object(null,array, 0);
         }
 
         // Not in the Java version, but I can really use this
@@ -45,7 +45,7 @@ namespace clojure.lang
         {
             return (array == null || array.Length <= firstIndex )
                 ? null
-                : new TypedArraySeq<Object>(null,array, firstIndex);
+                : new ArraySeq_object(null, array, firstIndex);
         }
 
         internal static IArraySeq createFromObject(Object array)
@@ -59,36 +59,33 @@ namespace clojure.lang
             switch (Type.GetTypeCode(elementType))
             {
                 case TypeCode.Boolean:
-                    return new TypedArraySeq<bool>(null, (bool[])aa, 0);
+                    return new ArraySeq_bool(null, (bool[])aa, 0);
                 case TypeCode.Byte:
-                    return new TypedArraySeq<byte>(null, (byte[])aa, 0);
+                    return new ArraySeq_byte(null, (byte[])aa, 0);
                 case TypeCode.Char:
-                    return new TypedArraySeq<char>(null, (char[])aa, 0);
+                    return new ArraySeq_char(null, (char[])aa, 0);
                 case TypeCode.Decimal:
-                    return new TypedArraySeq<decimal>(null, (decimal[])aa, 0);
+                    return new ArraySeq_decimal(null, (decimal[])aa, 0);
                 case TypeCode.Double:
-                    return new TypedArraySeq<double>(null, (double[])aa, 0);
+                    return new ArraySeq_double(null, (double[])aa, 0);
                 case TypeCode.Int16:
-                    return new TypedArraySeq<short>(null, (short[])aa, 0);
+                    return new ArraySeq_short(null, (short[])aa, 0);
                 case TypeCode.Int32:
-                    return new TypedArraySeq<int>(null, (int[])aa, 0);
+                    return new ArraySeq_int(null, (int[])aa, 0);
                 case TypeCode.Int64:
-                    return new TypedArraySeq<long>(null, (long[])aa, 0);
+                    return new ArraySeq_long(null, (long[])aa, 0);
                 case TypeCode.SByte:
-                    return new TypedArraySeq<sbyte>(null, (sbyte[])aa, 0);
+                    return new ArraySeq_sbyte(null, (sbyte[])aa, 0);
                 case TypeCode.Single:
-                    return new TypedArraySeq<float>(null, (float[])aa, 0);
+                    return new ArraySeq_float(null, (float[])aa, 0);
                 case TypeCode.UInt16:
-                    return new TypedArraySeq<ushort>(null, (ushort[])aa, 0);
+                    return new ArraySeq_ushort(null, (ushort[])aa, 0);
                 case TypeCode.UInt32:
-                    return new TypedArraySeq<uint>(null, (uint[])aa, 0);
+                    return new ArraySeq_uint(null, (uint[])aa, 0);
                 case TypeCode.UInt64:
-                    return new TypedArraySeq<ulong>(null, (ulong[])aa, 0);
+                    return new ArraySeq_ulong(null, (ulong[])aa, 0);
                 default:
-                    if (elementType == typeof(object))
-                        return new TypedArraySeq<Object>(null, (object[])aa, 0);
-                    else
-                        return new UntypedArraySeq(array, 0);
+                    return new UntypedArraySeq(array, 0);
             }
         }
 
@@ -222,12 +219,12 @@ namespace clojure.lang
     }
 
     [Serializable]
-    public class TypedArraySeq<T> : ASeq, IArraySeq
+    public abstract class TypedArraySeq<T> : ASeq, IArraySeq
     {
         #region Data
 
-        readonly T[] _array;
-        readonly int _i;
+        protected readonly T[] _array;
+        protected readonly int _i;
 
         #endregion
 
@@ -239,6 +236,16 @@ namespace clojure.lang
             _array = array;
             _i = i;
         }
+
+        #endregion
+
+        #region Abstract methods
+
+        protected abstract T ConvertNum(object x);
+        protected abstract ISeq NextOne();
+        protected abstract IObj DuplicateWithMeta(IPersistentMap meta);
+
+        // TODO: first/reduce do a Numbers.num(x) conversion  -- do we need that?
 
         #endregion
 
@@ -266,7 +273,7 @@ namespace clojure.lang
         public override ISeq next()
         {
             if (_i + 1 < _array.Length)
-                return new TypedArraySeq<T>(meta(), _array, _i + 1);
+                return NextOne();
             return null;
         }
 
@@ -276,7 +283,7 @@ namespace clojure.lang
 
         public override IObj withMeta(IPersistentMap meta)
         {
-            return new TypedArraySeq<T>(meta, _array, _i);
+            return DuplicateWithMeta(meta);
         }
 
         #endregion
@@ -314,9 +321,13 @@ namespace clojure.lang
 
         public override int IndexOf(object value)
         {
-            for (int j = _i; j < _array.Length; j++)
-                if (value.Equals(_array[j]))
-                    return j - _i;
+            if (Util.IsNumeric(value))
+            {
+                T v = ConvertNum(value);
+                for (int j = _i; j < _array.Length; j++)
+                    if (v.Equals(_array[j]))
+                        return j - _i;
+            }
 
             return -1;
         }
@@ -349,4 +360,348 @@ namespace clojure.lang
         #endregion
     }
 
+    [Serializable]
+    public class ArraySeq_byte : TypedArraySeq<byte>
+    {
+        public ArraySeq_byte(IPersistentMap meta, byte[] array, int i)
+            : base(meta,array,i)
+        {
+        }
+
+        protected override byte ConvertNum(object x)
+        {
+            return Util.ConvertToByte(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_byte(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_byte(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_sbyte : TypedArraySeq<sbyte>
+    {
+
+        public ArraySeq_sbyte(IPersistentMap meta, sbyte[] array, int i)
+            : base(meta,array,i)
+        {
+        }
+
+        protected override sbyte ConvertNum(object x)
+        {
+            return Util.ConvertToSByte(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_sbyte(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_sbyte(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_short : TypedArraySeq<short>
+    {
+        public ArraySeq_short(IPersistentMap meta, short[] array, int i)
+            : base(meta,array,i)
+        {
+        }
+
+        protected override short ConvertNum(object x)
+        {
+            return Util.ConvertToShort(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_short(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_short(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_ushort : TypedArraySeq<ushort>
+    {
+        public ArraySeq_ushort(IPersistentMap meta, ushort[] array, int i)
+            : base(meta,array,i)
+        {
+        }
+
+        protected override ushort ConvertNum(object x)
+        {
+            return Util.ConvertToUShort(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_ushort(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_ushort(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_int : TypedArraySeq<int>
+    {
+        public ArraySeq_int(IPersistentMap meta, int[] array, int i)
+            : base(meta,array,i)
+        {
+        }
+
+        protected override int ConvertNum(object x)
+        {
+            return Util.ConvertToInt(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_int(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_int(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_uint : TypedArraySeq<uint>
+    {
+        public ArraySeq_uint(IPersistentMap meta, uint[] array, int i)
+            : base(meta,array,i)
+        {
+        }
+
+        protected override uint ConvertNum(object x)
+        {
+            return Util.ConvertToUInt(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_uint(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_uint(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_long : TypedArraySeq<long>
+    {
+        public ArraySeq_long(IPersistentMap meta, long[] array, int i)
+            : base(meta,array,i)
+        {
+        }
+
+        protected override long ConvertNum(object x)
+        {
+            return Util.ConvertToLong(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_long(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_long(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_ulong : TypedArraySeq<ulong>
+    {
+        public ArraySeq_ulong(IPersistentMap meta, ulong[] array, int i)
+            : base(meta,array,i)
+        {
+        }
+
+        protected override ulong ConvertNum(object x)
+        {
+            return Util.ConvertToULong(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_ulong(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_ulong(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_float : TypedArraySeq<float>
+    {
+        public ArraySeq_float(IPersistentMap meta, float[] array, int i)
+            : base(meta,array,i)
+        {
+        }
+
+        protected override float ConvertNum(object x)
+        {
+            return Util.ConvertToFloat(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_float(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_float(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_double : TypedArraySeq<double>
+    {
+        public ArraySeq_double(IPersistentMap meta, double[] array, int i)
+            : base(meta,array,i)
+        {
+        }
+
+        protected override double ConvertNum(object x)
+        {
+            return Util.ConvertToDouble(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_double(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_double(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_char : TypedArraySeq<char>
+    {
+        public ArraySeq_char(IPersistentMap meta, char[] array, int i)
+            : base(meta,array,i)
+        {
+        }
+
+        protected override char ConvertNum(object x)
+        {
+            return Util.ConvertToChar(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_char(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_char(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_bool : TypedArraySeq<bool>
+    {
+        public ArraySeq_bool(IPersistentMap meta, bool[] array, int i)
+            : base(meta,array,i)
+        {
+        }
+
+        protected override bool ConvertNum(object x)
+        {
+            return RT.booleanCast(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_bool(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_bool(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_decimal : TypedArraySeq<decimal>
+    {
+        public ArraySeq_decimal(IPersistentMap meta, decimal[] array, int i)
+            : base(meta, array, i)
+        {
+        }
+
+        protected override decimal ConvertNum(object x)
+        {
+            return Util.ConvertToDecimal(x);
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_decimal(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_decimal(meta, _array, _i);
+        }
+    }
+
+    [Serializable]
+    public class ArraySeq_object : TypedArraySeq<object>
+    {
+        public ArraySeq_object(IPersistentMap meta, object[] array, int i)
+            : base(meta, array, i)
+        {
+        }
+
+        protected override object ConvertNum(object x)
+        {
+            return x;
+        }
+
+        public override int IndexOf(object value)
+        {
+                for (int j = _i; j < _array.Length; j++)
+                    if (value.Equals(_array[j]))
+                        return j - _i;
+            return -1;
+        }
+
+        protected override ISeq NextOne()
+        {
+            return new ArraySeq_object(_meta, _array, _i + 1);
+        }
+
+        protected override IObj DuplicateWithMeta(IPersistentMap meta)
+        {
+            return new ArraySeq_object(meta, _array, _i);
+        }
+    }
 }
