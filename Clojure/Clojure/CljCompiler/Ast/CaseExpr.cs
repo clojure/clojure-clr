@@ -84,7 +84,7 @@ namespace clojure.lang.CljCompiler.Ast
             
                 foreach ( IMapEntry e in ((IPersistentMap)args.nth(6)) )
                 {
-                    int minhash = (int)e.key();
+                    int minhash = Util.ConvertToInt(e.key());
                     IMapEntry me = (IMapEntry)e.val();
                     Expr testExpr = new ConstantExpr(me.key());
                     tests[minhash] = testExpr;

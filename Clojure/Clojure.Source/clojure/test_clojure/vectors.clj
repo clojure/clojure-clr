@@ -32,7 +32,7 @@
 
 (deftest test-vecseq
   (let [r (range 100)
-        vs (into (vector-of :int) r)
+        vs (into (vector-of :long) r)   ;; was :int
         vs-1 (next vs)
         vs-32 (.chunkedNext (seq vs))]
     (testing "="

@@ -1975,7 +1975,7 @@ namespace clojure.lang
 
             public int  Compare(object x, object y)
             {
- 	            return (int) _fn.invoke( x,y );
+ 	            return Util.ConvertToInt(_fn.invoke( x,y ));
             }
 
             #endregion

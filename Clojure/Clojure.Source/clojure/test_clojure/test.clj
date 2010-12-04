@@ -36,7 +36,7 @@
   (is (= 3 (+ 2 2)) "Should fail"))
 
 (deftest can-test-instance
-  (is (instance? Int32 (+ 2 2)) "Should pass")             ;;; Integer
+  (is (instance? Int64 (+ 2 2)) "Should pass")             ;;; Long 
   (is (instance? Single (+ 1 1)) "Should fail"))           ;;; Float
 
 (deftest can-test-thrown

@@ -481,12 +481,16 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (returnType.IsPrimitive)
             {
-                if ( returnType == typeof(float) )
-                    return Expression.Convert(Expression.Convert(expr,typeof(double)),typeof(object));
-                else if ( returnType == typeof(long) )
-                    return Expression.Call(Compiler.Method_Numbers_num_long,expr);
+                Expression toConv;
 
-                return Expression.Convert(expr, typeof(Object));
+                if (returnType == typeof(float))
+                    toConv = Expression.Convert(expr, typeof(double));
+                else if (returnType == typeof(int))
+                    toConv = Expression.Convert(expr, typeof(long));
+                else
+                    toConv = expr;
+
+                return Expression.Convert(toConv, typeof(Object));
             }
 
             return expr;

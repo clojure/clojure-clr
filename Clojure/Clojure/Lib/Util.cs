@@ -58,18 +58,19 @@ namespace clojure.lang
 
         public static bool equals(object k1, object k2)
         {
+            // Had to change this back when doing the new == vs = 
             // Changed in Rev 1215
-            //if(k1 == k2)
+            //if (k1 == k2)
             //    return true;
-	
-            //if(k1 != null)
+
+            //if (k1 != null)
             //{
-            //    if (IsNumeric(k1))
+            //    if (IsNumeric(k1) && IsNumeric(k2))
             //        return Numbers.equiv(k1, k2);
 
             //    return k1.Equals(k2);
             //}
-	    
+
             //return false;
             if (k1 == k2)
                 return true;
@@ -88,22 +89,22 @@ namespace clojure.lang
 
         public static bool equals(long x, object y)
         {
-            return equals((object)x, y);
+            return equals(Numbers.num(x), y);
         }
 
         public static bool equals(object x, long y)
         {
-            return equals(x, (object)y);
+            return equals(x, Numbers.num(y));
         }
 
         public static bool equals(double x, object y)
         {
-            return equals((object)x, y);
+            return equals(Numbers.num(x), y);
         }
 
         public static bool equals(object x, double y)
         {
-            return equals(x, (object)y);
+            return equals(x, Numbers.num(y));
         }
 
         public static bool identical(object k1, object k2)

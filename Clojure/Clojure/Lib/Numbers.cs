@@ -279,9 +279,10 @@ namespace clojure.lang
 
         static Object box(long val)
         {
-            if (val >= Int32.MinValue && val <= Int32.MaxValue)
-                return (int)val;
-            else
+            // JVM still has this
+            //if (val >= Int32.MinValue && val <= Int32.MaxValue)
+            //    return (int)val;
+            //else
                 return val;
         }
 

@@ -27,7 +27,7 @@
         avec (into [] arange)
         alist (into () arange)
         obj-array (into-array arange)
-        int-array (into-array Int32 (map int arange))                        ;;; Integer/TYPE -- added the map because of an Int64 0 at the beginning of the range
+        ;int-array (into-array Int32 arange)                        ;;; Integer/TYPE -- added the map because of an Int64 0 at the beginning of the range
         long-array (into-array Int64 arange)                       ;;; Long/TYPE
         float-array (into-array Single arange)                     ;;; Float/TYPE
         char-array (into-array Char (map char arange))             ;;; Character/TYPE
@@ -45,7 +45,7 @@
            (reduce + avec)
            (reduce + alist)
            (reduce + obj-array)
-           (reduce + int-array)
+           ;(reduce + int-array)
            (reduce + long-array)
            (reduce + float-array)
            (reduce int+ char-array)
@@ -62,7 +62,7 @@
            (reduce + 1 avec)
            (reduce + 1 alist)
            (reduce + 1 obj-array)
-           (reduce + 1 int-array)
+           ;(reduce + 1 int-array)
            (reduce + 1 long-array)
            (reduce + 1 float-array)
            (reduce int+ 1 char-array)

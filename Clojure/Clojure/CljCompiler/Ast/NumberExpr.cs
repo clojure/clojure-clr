@@ -96,7 +96,7 @@ namespace clojure.lang.CljCompiler.Ast
             Type t = _n.GetType();
 
             if (t == typeof(int))
-                return Expression.Constant((long)_n, typeof(long));
+                return Expression.Constant((long)(int)_n, typeof(long));
             else if (t == typeof(double))
                 return Expression.Constant((double)_n, typeof(double));
             else if ( t == typeof(long) )

@@ -718,11 +718,10 @@
 
 ;equals-based
 #_(defn =
-  "Equality. Returns true if x equals y, false if not. Same as
-  Java x.equals(y) except it also works for nil, and compares
-  numbers and collections in a type-independent manner.  Clojure's immutable data
-  structures define equals() (and thus =) as a value, not an identity,
-  comparison."
+  "Equality. Returns true if x equals y, false if not. Same as Java
+  x.equals(y) except it also works for nil. Boxed numbers must have
+  same type.  Clojure's immutable data structures define equals() (and
+  thus =) as a vlue, not an identity, comparison."
   {:inline (fn [x y] `(. clojure.lang.Util equals ~x ~y))
    :inline-arities #{2}
    :added "1.0"}
@@ -953,7 +952,8 @@
      false)))
 
 (defn ==
-  "Returns non-nil if nums all have the same value, otherwise false"
+  "Returns non-nil if nums all have the equivalent
+  value (type-independent), otherwise false"
   {:inline (fn [x y] `(. clojure.lang.Numbers (equiv ~x ~y)))
    :inline-arities #{2}
    :added "1.0"}
@@ -1571,7 +1571,7 @@
   [bindings & body]
   (assert-args when-let
      (vector? bindings) "a vector for its binding"
-     (= 2 (count bindings)) "exactly 2 forms in binding vector")
+     (== 2 (count bindings)) "exactly 2 forms in binding vector") ;; JVM has only =, I have a boxed type problem here.
    (let [form (bindings 0) tst (bindings 1)]
     `(let [temp# ~tst]
        (when temp#
