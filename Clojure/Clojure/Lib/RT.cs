@@ -1064,7 +1064,14 @@ namespace clojure.lang
 
         public static char charCast(object x)
         {
-            return Convert.ToChar(x);
+            if (x is char)
+                return (char)x;
+
+            long n = Util.ConvertToLong(x);
+            if (n < Char.MinValue || n > char.MaxValue)
+                throw new ArgumentException("Value out of range for char: " + x);
+
+            return (char)n;
         }
 
         static public bool booleanCast(object x)
@@ -1081,22 +1088,47 @@ namespace clojure.lang
 
         public static byte byteCast(object x)
         {
-            return (byte)Util.ConvertToInt(x); 
+            if (x is byte)
+                return (byte)x;
+
+            long n = Util.ConvertToLong(x);
+            if (n < Byte.MinValue || n > Byte.MaxValue)
+                throw new ArgumentException("Value out of range for byte: " + x);
+
+            return (byte)n; 
         }
 
         public static short shortCast(object x)
         {
-            return (short)Util.ConvertToInt(x); 
+            if (x is short)
+                return (short)x;
+            long n = Util.ConvertToLong(x);
+            if (n < short.MinValue || n > short.MaxValue)
+                throw new ArgumentException("Value out of range for short: " + x);
+
+            return (short)n; 
         }
 
         public static ushort ushortCast(object x)
         {
-            return Convert.ToUInt16(x);
+            if (x is ushort)
+                return (ushort)x;
+            long n = Util.ConvertToLong(x);
+            if (n < ushort.MinValue || n > ushort.MaxValue)
+                throw new ArgumentException("Value out of range for ushort: " + x);
+
+            return (ushort)n;
         }
 
         public static uint uintCast(object x)
         {
-            return Convert.ToUInt32(x);
+            if (x is uint)
+                return (uint)x;
+            long n = Util.ConvertToLong(x);
+            if (n < uint.MinValue || n > uint.MaxValue)
+                throw new ArgumentException("Value out of range for uint: " + x);
+
+            return (uint)n;
         }
 
         public static ulong ulongCast(object x)
@@ -1142,21 +1174,39 @@ namespace clojure.lang
 
         static public int intCast(float x)
         {
+            if (x < int.MinValue || x > int.MaxValue)
+                throw new ArgumentException("Value out of range for int: " + x);
+
             return (int)x;
         }
 
         static public int intCast(long x)
         {
+            if (x < int.MinValue || x > int.MaxValue)
+                throw new ArgumentException("Value out of range for int: " + x);
+
             return (int)x;
         }
 
         static public int intCast(double x)
         {
+            if (x < int.MinValue || x > int.MaxValue)
+                throw new ArgumentException("Value out of range for int: " + x);
+
             return (int)x;
         }
 
         public static long longCast(object x)
         {
+            if ( x is BigInteger )
+            {
+                BigInteger bi = (BigInteger)x;
+                long n;
+                if ( bi.AsInt64(out n) )
+                    return n;
+                else
+                    throw new ArgumentException("Value out of range for long: " + x);
+            }
             return Util.ConvertToLong(x);
         }
 
@@ -1167,6 +1217,9 @@ namespace clojure.lang
 
         static public long longCast(float x)
         {
+            if ( x < long.MinValue || x > long.MaxValue )
+                throw new ArgumentException("Value out of range for long: " + x);
+            
             return (long)x;
         }
 
@@ -1177,12 +1230,22 @@ namespace clojure.lang
 
         static public long longCast(double x)
         {
+            if (x < long.MinValue || x > long.MaxValue)
+                throw new ArgumentException("Value out of range for long: " + x);
+
             return (long)x;
         }
 
         public static float floatCast(object x)
         {
-            return Util.ConvertToFloat(x);
+            if (x is float)
+                return (float)x;
+
+            double n = Util.ConvertToDouble(x);
+            if (n < float.MinValue || n > float.MaxValue)
+                throw new ArgumentException("Value out of range for float: " + x);
+
+            return (float)n;
         }
 
         public static float floatCast(int x)
@@ -1202,6 +1265,8 @@ namespace clojure.lang
 
         public static float floatCast(double x)
         {
+            if (x < float.MinValue || x > float.MaxValue)
+                throw new ArgumentException("Valueout of range for float: " + x);
             return (float)x;
         }
 
