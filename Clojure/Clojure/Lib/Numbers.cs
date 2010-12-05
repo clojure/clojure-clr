@@ -257,6 +257,12 @@ namespace clojure.lang
             return ops(x).combine(ops(y)).equiv(x,y);
         }
 
+        public static bool equal(object x, object y)
+        {
+            return category(x) == category(y)
+                && ops(x).combine(ops(y)).equiv(x, y);
+        }
+
         public static bool lt(object x, object y)
         {
             return ops(x).combine(ops(y)).lt(x,y);
@@ -1390,6 +1396,8 @@ namespace clojure.lang
         static readonly LongBitOps LONG_BITOPS = new LongBitOps();
         static readonly BigIntegerBitOps BIGINTEGER_BITOPS = new BigIntegerBitOps();
 
+        public enum Category { Integer, Floating, Decimal, Ratio }
+
         static Ops ops(Object x)
         {
             Type xc = x.GetType();
@@ -1410,6 +1418,23 @@ namespace clojure.lang
                 return BIGDECIMAL_OPS;
             else
                 return LONG_OPS;
+        }
+
+        static Category category(object x)
+        {
+            Type xc = x.GetType();
+            if (xc == typeof(Int32) || xc == typeof(Int64))
+                return Category.Integer;
+            else if (xc == typeof(float) || xc == typeof(double))
+                return Category.Floating;
+            else if (xc == typeof(BigInteger))
+                return Category.Integer;
+            else if (xc == typeof(Ratio))
+                return Category.Ratio;
+            else if (xc == typeof(BigDecimal))
+                return Category.Decimal;
+            else
+                return Category.Integer;
         }
 
         static BitOps bitOps(object x)

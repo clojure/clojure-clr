@@ -202,10 +202,9 @@ namespace clojure.lang
         /// <remarks>Handles nulls properly.</remarks>
         static bool EqualKey(object k1, object k2)
         {
-            if (k1 == null)
-                return k2 == null;
-            return k1.Equals(k2);
+            return Util.equiv(k1, k2);
         }
+
         /// <summary>
         /// Test if the map contains a key.
         /// </summary>

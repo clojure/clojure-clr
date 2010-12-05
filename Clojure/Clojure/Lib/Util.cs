@@ -40,8 +40,8 @@ namespace clojure.lang
             if (k1 != null)
             {
                 if (IsNumeric(k1) && IsNumeric(k2))
-                    return Numbers.equiv(k1, k2);
-                //return Numbers.EquivArg1Numeric(k1,k2);
+                    return Numbers.equal(k1, k2);
+
                 else if (k1 is IPersistentCollection || k2 is IPersistentCollection)
                     return pcequiv(k1, k2);
                 return k1.Equals(k2);
@@ -49,35 +49,35 @@ namespace clojure.lang
             return false;
         }
 
-        public static bool equiv(long x, long y)
-        {
-            return x == y;
-        }
+        //public static bool equiv(long x, long y)
+        //{
+        //    return x == y;
+        //}
 
-        public static bool equiv(double x, double y)
-        {
-            return x == y;
-        }
+        //public static bool equiv(double x, double y)
+        //{
+        //    return x == y;
+        //}
         
-        public static bool equiv(long x, object y)
-        {
-            return equiv(Numbers.num(x),y);
-        }
+        //public static bool equiv(long x, object y)
+        //{
+        //    return equiv(Numbers.num(x),y);
+        //}
 
-        public static bool equiv(object x, long y)
-        {
-            return equiv(x, Numbers.num(y));
-        }
+        //public static bool equiv(object x, long y)
+        //{
+        //    return equiv(x, Numbers.num(y));
+        //}
 
-        public static bool equiv(double x, Object y)
-        {
-            return equiv((object)x, y);
-        }
+        //public static bool equiv(double x, Object y)
+        //{
+        //    return equiv((object)x, y);
+        //}
 
-        public static bool equiv(object x, double y)
-        {
-            return equiv(x, (object)y);
-        }
+        //public static bool equiv(object x, double y)
+        //{
+        //    return equiv(x, (object)y);
+        //}
 
 
         public static bool pcequiv(object k1, object k2)
@@ -108,35 +108,35 @@ namespace clojure.lang
             return k1 != null && k1.Equals(k2);
         }
 
-        public static bool equals(long x, long y)
-        {
-            return x == y;
-        }
+        //public static bool equals(long x, long y)
+        //{
+        //    return x == y;
+        //}
 
-        public static bool equals(double x, double y)
-        {
-            return x == y;
-        }
+        //public static bool equals(double x, double y)
+        //{
+        //    return x == y;
+        //}
 
-        public static bool equals(long x, object y)
-        {
-            return equals(Numbers.num(x), y);
-        }
+        //public static bool equals(long x, object y)
+        //{
+        //    return equals(Numbers.num(x), y);
+        //}
 
-        public static bool equals(object x, long y)
-        {
-            return equals(x, Numbers.num(y));
-        }
+        //public static bool equals(object x, long y)
+        //{
+        //    return equals(x, Numbers.num(y));
+        //}
 
-        public static bool equals(double x, object y)
-        {
-            return equals(Numbers.num(x), y);
-        }
+        //public static bool equals(double x, object y)
+        //{
+        //    return equals(Numbers.num(x), y);
+        //}
 
-        public static bool equals(object x, double y)
-        {
-            return equals(x, Numbers.num(y));
-        }
+        //public static bool equals(object x, double y)
+        //{
+        //    return equals(x, Numbers.num(y));
+        //}
 
         public static bool identical(object k1, object k2)
         {

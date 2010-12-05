@@ -1820,6 +1820,12 @@ namespace clojure.lang
 
         public override int GetHashCode()
         {
+            // require same as Int64 if in range
+            long n;
+            if (AsInt64(out n))
+                return n.GetHashCode();
+
+
             int hashCode = 0;
             for (int i = 0; i < _data.Length; i++)
                 hashCode = (int)(31 * hashCode + (_data[i] & 0xffffffffL));

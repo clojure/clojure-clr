@@ -963,7 +963,7 @@ namespace clojure.lang
                             return this;
                         return new BitmapIndexedNode(null, _bitmap, CloneAndSet(_array, 2 * idx + 1, n));
                     }
-                    if ( Util.equals(key,keyOrNull))
+                    if ( Util.equiv(key,keyOrNull))
                     {
                         if ( val == valOrNode)
                             return this;
@@ -1031,7 +1031,7 @@ namespace clojure.lang
                         return null;
                     return new BitmapIndexedNode(null,_bitmap^bit,RemovePair(_array,idx));
                 }
-                if ( Util.equals(key,keyOrNull))
+                if ( Util.equiv(key,keyOrNull))
                     // TODO: Collapse  (TODO in Java code)
                     return new BitmapIndexedNode(null,_bitmap^bit,RemovePair(_array,idx));
                 return this;
@@ -1047,7 +1047,7 @@ namespace clojure.lang
                 object valOrNode = _array[2 * idx + 1];
                 if ( keyOrNull == null )
                     return ((INode)valOrNode).find(shift+5,hash,key);
-                if ( Util.equals(key,keyOrNull))
+                if ( Util.equiv(key,keyOrNull))
                     return new MapEntry(keyOrNull,valOrNode);
                 return null;
             }
@@ -1063,7 +1063,7 @@ namespace clojure.lang
                 Object valOrNode = _array[2 * idx + 1];
                 if (keyOrNull == null)
                     return ((INode)valOrNode).find(shift + 5, hash, key, notFound);
-                if (Util.equals(key, keyOrNull))
+                if (Util.equiv(key, keyOrNull))
                     return valOrNode;
                 return notFound;
             }
@@ -1088,7 +1088,7 @@ namespace clojure.lang
                             return this;
                         return EditAndSet(edit, 2 * idx + 1, n);
                     }
-                    if (Util.equals(key, keyOrNull))
+                    if (Util.equiv(key, keyOrNull))
                     {
                         if (val == valOrNode)
                             return this;
@@ -1166,7 +1166,7 @@ namespace clojure.lang
                     removedLeaf.Val = removedLeaf;
                     return EditAndRemovePair(edit, bit, idx);
                 }
-                if (Util.equals(key, keyOrNull))
+                if (Util.equiv(key, keyOrNull))
                 {
                     removedLeaf.Val = removedLeaf;
                     // TODO: collapse
@@ -1253,7 +1253,7 @@ namespace clojure.lang
             {
                 for (int i = 0; i < 2 * _count; i += 2)
                 {
-                    if (Util.equals(key, _array[i]))
+                    if (Util.equiv(key, _array[i]))
                         return i;
                 }
                 return -1;
@@ -1301,7 +1301,7 @@ namespace clojure.lang
                 int idx = FindIndex(key);
                 if (idx < 0)
                     return null;
-                if (Util.equals(key, _array[idx]))
+                if (Util.equiv(key, _array[idx]))
                     return new MapEntry(_array[idx], _array[idx + 1]);
                 return null;
             }
@@ -1311,7 +1311,7 @@ namespace clojure.lang
                 int idx = FindIndex(key);
                 if (idx < 0)
                     return notFound;
-                if (Util.equals(key, _array[idx]))
+                if (Util.equiv(key, _array[idx]))
                     return _array[idx + 1];
                 return notFound;
             }
