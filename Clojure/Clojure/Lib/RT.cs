@@ -1198,7 +1198,15 @@ namespace clojure.lang
 
         public static long longCast(object x)
         {
-            if ( x is BigInteger )
+            if (x is BigInt)
+            {
+                BigInt bi = (BigInt)x;
+                if (bi.Bipart == null)
+                    return bi.Lpart;
+                else
+                    throw new ArgumentException("Value out of range for long: " + x);
+            }
+            if (x is BigInteger)
             {
                 BigInteger bi = (BigInteger)x;
                 long n;
@@ -1702,10 +1710,15 @@ namespace clojure.lang
                 w.Write(x.ToString());
                 w.Write("M");
             }
-            else if (x is BigInteger && readably)
+            else if (x is BigInt && readably)
             {
                 w.Write(x.ToString());
                 w.Write("N");
+            }
+            else if (x is BigInteger && readably)
+            {
+                w.Write(x.ToString());
+                w.Write("BIGINT");
             }
             else if (x is Var)
             {

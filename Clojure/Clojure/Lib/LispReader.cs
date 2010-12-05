@@ -629,7 +629,7 @@ namespace clojure.lang
                 {
                     // matched 0  or 0N only
                     if (m.Groups[8].Success)
-                        return BigInteger.ZERO;
+                        return BigInt.ZERO;
                     return 0L;
                 }
                 bool isNeg = m.Groups[1].Value == "-";
@@ -659,12 +659,19 @@ namespace clojure.lang
                     return null;
 
                 BigInteger bn = BigInteger.Parse(n, radix);
+                if (isNeg)
+                    bn = bn.Negate();
+
                 if (m.Groups[8].Success) // N suffix
-                    return isNeg ? bn.Negate() : bn;
+                    return BigInt.fromBigInteger(bn);
 
-                return Numbers.reduceBigInteger(isNeg ? bn.Negate() : bn);
+                long ln;
+                if (bn.AsInt64(out ln))
+                    return Numbers.num(ln);
 
+                return BigInt.fromBigInteger(bn);
             }
+
             m = floatRE.Match(s);
 
             if (m.Success)
@@ -689,8 +696,8 @@ namespace clojure.lang
                     numerString = numerString.Substring(1);
                 //return Numbers.BIDivide(new BigInteger(numerString), new BigInteger(denomString));
                 return Numbers.divide(
-                    Numbers.reduceBigInteger(BigInteger.Parse(numerString)), 
-                    Numbers.reduceBigInteger(BigInteger.Parse(denomString)));
+                    Numbers.reduceBigInt(BigInt.fromBigInteger(BigInteger.Parse(numerString))), 
+                    Numbers.reduceBigInt(BigInt.fromBigInteger(BigInteger.Parse(denomString))));
             }
             return null;
         }

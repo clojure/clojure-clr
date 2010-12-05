@@ -49,41 +49,41 @@ namespace Clojure.Tests.LibTests
 
         #region reduce tests
 
-        [Test]
-        public void ReduceOnBigIntReducesSmallerValues()
-        {
-            //BigInteger b1 = new BigInteger("123");
-            //BigInteger b2 = new BigInteger("0");
-            //BigInteger b3 = new BigInteger(Int32.MaxValue.ToString());
-            //BigInteger b4 = new BigInteger(Int32.MinValue.ToString()); BigInteger b1 = new BigInteger("123");
-            BigInteger b1 = BigInteger.Create(123);
-            BigInteger b2 = BigInteger.Create(0);
-            BigInteger b3 = BigInteger.Create(Int32.MaxValue);
-            BigInteger b4 = BigInteger.Create(Int32.MinValue);
+        //[Test]
+        //public void ReduceOnBigIntReducesSmallerValues()
+        //{
+        //    //BigInteger b1 = new BigInteger("123");
+        //    //BigInteger b2 = new BigInteger("0");
+        //    //BigInteger b3 = new BigInteger(Int32.MaxValue.ToString());
+        //    //BigInteger b4 = new BigInteger(Int32.MinValue.ToString()); BigInteger b1 = new BigInteger("123");
+        //    BigInteger b1 = BigInteger.Create(123);
+        //    BigInteger b2 = BigInteger.Create(0);
+        //    BigInteger b3 = BigInteger.Create(Int32.MaxValue);
+        //    BigInteger b4 = BigInteger.Create(Int32.MinValue);
                 
-            ExpectInt32(Numbers.reduceBigInteger(b1));
-            ExpectInt32(Numbers.reduceBigInteger(b2));
-            ExpectInt32(Numbers.reduceBigInteger(b3));
-            ExpectInt32(Numbers.reduceBigInteger(b4));
-        }
+        //    ExpectInt32(Numbers.reduceBigInt(b1));
+        //    ExpectInt32(Numbers.reduceBigIntege(b2));
+        //    ExpectInt32(Numbers.reduceBigInteger(b3));
+        //    ExpectInt32(Numbers.reduceBigInteger(b4));
+        //}
 
-        [Test]
-        public void ReduceOnBigIntReturnsLargerValues()
-        {
-            //BigInteger b1 = new BigInteger("100000000000000000000", 16);
-            //BigInteger b2 = b1.negate();
-            //BigInteger b3 = new BigInteger("123456789012345678901234567890");
-            //BigInteger b4 = b3.negate();
-            BigInteger b1 = BigInteger.Parse("100000000000000000000", 16);
-            BigInteger b2 = b1.Negate();
-            BigInteger b3 = BigInteger.Parse("123456789012345678901234567890");
-            BigInteger b4 = b3.Negate();
+        //[Test]
+        //public void ReduceOnBigIntReturnsLargerValues()
+        //{
+        //    //BigInteger b1 = new BigInteger("100000000000000000000", 16);
+        //    //BigInteger b2 = b1.negate();
+        //    //BigInteger b3 = new BigInteger("123456789012345678901234567890");
+        //    //BigInteger b4 = b3.negate();
+        //    BigInteger b1 = BigInteger.Parse("100000000000000000000", 16);
+        //    BigInteger b2 = b1.Negate();
+        //    BigInteger b3 = BigInteger.Parse("123456789012345678901234567890");
+        //    BigInteger b4 = b3.Negate();
 
-            ExpectSameObject(b1, Numbers.reduceBigInteger(b1));
-            ExpectSameObject(b2, Numbers.reduceBigInteger(b2));
-            ExpectSameObject(b3, Numbers.reduceBigInteger(b3));
-            ExpectSameObject(b4, Numbers.reduceBigInteger(b4));
-        }
+        //    ExpectSameObject(b1, Numbers.reduceBigInteger(b1));
+        //    ExpectSameObject(b2, Numbers.reduceBigInteger(b2));
+        //    ExpectSameObject(b3, Numbers.reduceBigInteger(b3));
+        //    ExpectSameObject(b4, Numbers.reduceBigInteger(b4));
+        //}
 
         //[Test]
         //public void ReduceOnLongReducesSmallerValues()

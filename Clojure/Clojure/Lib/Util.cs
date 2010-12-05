@@ -692,7 +692,7 @@ namespace clojure.lang
                     case TypeCode.UInt64:
                         return true;
                 }
-                if (type == typeof(BigInteger))
+                if (type == typeof(BigInt) || type == typeof(BigInteger))
                     return true;
             //}
             return false;
@@ -770,7 +770,7 @@ namespace clojure.lang
                     case TypeCode.UInt64:
                         return true;
                 }
-                if (type == typeof(BigInteger) || type == typeof(BigDecimal) || type == typeof(Ratio))
+                if (type == typeof(BigInt) || type == typeof(BigInteger) || type == typeof(BigDecimal) || type == typeof(Ratio))
                     return true;
             //}
             return false;

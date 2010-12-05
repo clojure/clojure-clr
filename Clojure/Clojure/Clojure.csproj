@@ -187,6 +187,7 @@
     <Compile Include="Lib\ArrayHelper.cs" />
     <Compile Include="Lib\ATransientMap.cs" />
     <Compile Include="Lib\ATransientSet.cs" />
+    <Compile Include="Lib\BigInt.cs" />
     <Compile Include="Lib\BigInteger.cs" />
     <Compile Include="Lib\ChunkBuffer.cs" />
     <Compile Include="Lib\ChunkedCons.cs" />

@@ -26,7 +26,7 @@ namespace clojure.lang
             Ops opsWith(LongOps x);
             Ops opsWith(DoubleOps x);
             Ops opsWith(RatioOps x);
-            Ops opsWith(BigIntegerOps x);
+            Ops opsWith(BigIntOps x);
             Ops opsWith(BigDecimalOps x);
 
             bool isZero(object x);
@@ -84,7 +84,7 @@ namespace clojure.lang
             public abstract Ops opsWith(LongOps x);
             public abstract Ops opsWith(DoubleOps x);
             public abstract Ops opsWith(RatioOps x);
-            public abstract Ops opsWith(BigIntegerOps x);
+            public abstract Ops opsWith(BigIntOps x);
             public abstract Ops opsWith(BigDecimalOps x);
             public abstract bool isZero(object x);
             public abstract bool isPos(object x);
@@ -109,7 +109,7 @@ namespace clojure.lang
         {
             BitOps combine(BitOps y);
             BitOps bitOpsWith(LongBitOps x);
-            BitOps bitOpsWith(BigIntegerBitOps x);
+            BitOps bitOpsWith(BigIntBitOps x);
             object not(object x);
             object and(object x, object y);
             object or(object x, object y);
@@ -299,10 +299,22 @@ namespace clojure.lang
 
         #region  utility methods
 
+        static BigInt toBigInt(Object x)
+        {
+            if (x is BigInt)
+                return (BigInt)x;
+            if (x is BigInteger)
+                return BigInt.fromBigInteger((BigInteger)x);
+            else
+                return BigInt.fromLong(Util.ConvertToLong(x));
+        }
+
         static BigInteger toBigInteger(object x)
         {
             if (x is BigInteger)
                 return (BigInteger)x;
+            else if (x is BigInt)
+                return ((BigInt)x).toBigInteger();
             else
                 return BigInteger.Create(Util.ConvertToLong(x));
         }
@@ -311,6 +323,14 @@ namespace clojure.lang
         {
             if (x is BigDecimal)
                 return (BigDecimal)x;
+            else if (x is BigInt)
+            {
+                BigInt bi = (BigInt)x;
+                if (bi.Bipart == null)
+                    return BigDecimal.Create(bi.Lpart);
+                else
+                    return BigDecimal.Create(bi.Bipart);
+            }
             else if (x is BigInteger)
                 return BigDecimal.Create((BigInteger)x);
             else if (x is double)
@@ -353,7 +373,7 @@ namespace clojure.lang
                 BigDecimal bx = (BigDecimal)x;
                 int exp = bx.Exponent;
                 if (exp >= 0)
-                    return bx.ToBigInteger();
+                    return BigInt.fromBigInteger(bx.ToBigInteger());
                 else
                     //return divide(bx.movePointRight(scale).toBigInteger(), BigIntegerTen.pow(scale));
                     return divide(bx.MovePointRight(-exp).ToBigInteger(), BigInteger.TEN.Power(-exp));
@@ -395,17 +415,11 @@ namespace clojure.lang
 
         #region More BigInteger support
 
-        public static object reduceBigInteger(BigInteger val)
+        public static object reduceBigInt(BigInt val)
         {
-            //int ival;
-            //if (val.AsInt32(out ival))
-            //    return ival;
-
-            long lval;
-            if (val.AsInt64(out lval))
-                return lval;
-
-            return val;
+            if (val.Bipart == null)
+                return num(val.Lpart);
+            return val.Bipart;
         }
 
         public static object BIDivide(BigInteger n, BigInteger d)
@@ -414,14 +428,14 @@ namespace clojure.lang
                 throw new ArithmeticException("Divide by zero");
             BigInteger gcd = n.Gcd(d);
             if (gcd.Equals(BigInteger.ZERO))
-                return 0;
+                return BigInt.ZERO;
             n = n / gcd;
             d = d / gcd;
 
             if (d.Equals(BigInteger.ONE))
-                return reduceBigInteger(n);
+                return BigInt.fromBigInteger(n);
             else if (d.Equals(BigInteger.NEGATIVE_ONE))
-                return reduceBigInteger(n.Negate());
+                return BigInt.fromBigInteger(n.Negate());
 
             return new Ratio((d.Signum < 0 ? -n : n), d.Abs());
         }
@@ -543,9 +557,9 @@ namespace clojure.lang
                 return RATIO_OPS;
             }
 
-            public Ops opsWith(BigIntegerOps x)
+            public Ops opsWith(BigIntOps x)
             {
-                return BIGINTEGER_OPS;
+                return BIGINT_OPS;
             }
 
             public Ops opsWith(BigDecimalOps x)
@@ -579,7 +593,7 @@ namespace clojure.lang
                 long ly = Util.ConvertToLong(y);
                 long ret = lx + ly;
                 if ((ret ^ lx) < 0 && (ret ^ ly) < 0)
-                    return BIGINTEGER_OPS.add(x, y);
+                    return BIGINT_OPS.add(x, y);
                 return num(ret);
             }
 
@@ -595,7 +609,7 @@ namespace clojure.lang
 
                 long ret = lx * ly;
                 if (ly != 0 && ret / ly != lx)
-                    return BIGINTEGER_OPS.multiply(x, y);
+                    return BIGINT_OPS.multiply(x, y);
                 return num(ret);
             }
 
@@ -662,7 +676,7 @@ namespace clojure.lang
 
                 if (val > Int64.MinValue)
                     return num(-val);
-                return -BigInteger.Create(val);
+                return BigInt.fromBigInteger(-BigInteger.Create(val));
             }
 
             public object inc(object x)
@@ -677,7 +691,7 @@ namespace clojure.lang
 
                 if (val < Int64.MaxValue)
                     return num(val + 1);
-                return BIGINTEGER_OPS.inc(x);
+                return BIGINT_OPS.inc(x);
             }
 
             public object dec(object x)
@@ -692,7 +706,7 @@ namespace clojure.lang
 
                 if (val > Int64.MinValue)
                     return num(val - 1);
-                return BIGINTEGER_OPS.dec(x);
+                return BIGINT_OPS.dec(x);
             }
 
             #endregion
@@ -726,7 +740,7 @@ namespace clojure.lang
                 return this;
             }
 
-            public override Ops opsWith(BigIntegerOps x)
+            public override Ops opsWith(BigIntOps x)
             {
                 return this;
             }
@@ -833,7 +847,7 @@ namespace clojure.lang
                 return this;
             }
 
-            public override Ops opsWith(BigIntegerOps x)
+            public override Ops opsWith(BigIntOps x)
             {
                 return this;
             }
@@ -962,9 +976,9 @@ namespace clojure.lang
 
         #endregion
 
-        #region BigIntegerOps
+        #region BigIntOps
 
-        class BigIntegerOps : OpsP
+        class BigIntOps : OpsP
         {
             #region Ops Members
 
@@ -988,7 +1002,7 @@ namespace clojure.lang
                 return RATIO_OPS;
             }
 
-            public override Ops opsWith(BigIntegerOps ops)
+            public override Ops opsWith(BigIntOps ops)
             {
                 return this;
             }
@@ -1000,30 +1014,36 @@ namespace clojure.lang
 
             public override bool isZero(object x)
             {
-                BigInteger bx = toBigInteger(x);
-                return bx.IsZero;
+                BigInt bx = toBigInt(x);
+                if (bx.Bipart == null)
+                    return bx.Lpart == 0;
+                return bx.Bipart.IsZero;
             }
 
             public override bool isPos(object x)
             {
-                BigInteger bx = toBigInteger(x);
-                return bx.IsPositive;
+                BigInt bx = toBigInt(x);
+                if (bx.Bipart == null)
+                    return bx.Lpart > 0;
+                return bx.Bipart.IsPositive;
             }
 
             public override bool isNeg(object x)
             {
-                BigInteger bx = toBigInteger(x);
-                return bx.IsNegative;
+                BigInt bx = toBigInt(x);
+                if (bx.Bipart == null)
+                    return bx.Lpart < 0;
+                return bx.Bipart.IsNegative;
             }
 
             public override object add(object x, object y)
             {
-                return reduceBigInteger(toBigInteger(x) + toBigInteger(y));
+                return BigInt.fromBigInteger(toBigInteger(x) + toBigInteger(y));
             }
 
             public override object multiply(object x, object y)
             {
-                return reduceBigInteger(toBigInteger(x) * toBigInteger(y));
+                return BigInt.fromBigInteger(toBigInteger(x) * toBigInteger(y));
             }
 
             public override object divide(object x, object y)
@@ -1033,17 +1053,17 @@ namespace clojure.lang
 
             public override object quotient(object x, object y)
             {
-                return reduceBigInteger(toBigInteger(x) / toBigInteger(y));
+                return BigInt.fromBigInteger(toBigInteger(x) / toBigInteger(y));
             }
 
             public override object remainder(object x, object y)
             {
-                return reduceBigInteger(toBigInteger(x) % toBigInteger(y));
+                return BigInt.fromBigInteger(toBigInteger(x) % toBigInteger(y));
             }
 
             public override bool equiv(object x, object y)
             {
-                return toBigInteger(x).Equals(toBigInteger(y));
+                return toBigInt(x).Equals(toBigInt(y));
             }
 
             public override bool lt(object x, object y)
@@ -1053,17 +1073,17 @@ namespace clojure.lang
 
             public override object negate(object x)
             {
-                return reduceBigInteger(-toBigInteger(x));
+                return BigInt.fromBigInteger(-toBigInteger(x));
             }
 
             public override object inc(object x)
             {
-                return reduceBigInteger(toBigInteger(x) + BigInteger.ONE);
+                return BigInt.fromBigInteger(toBigInteger(x) + BigInteger.ONE);
             }
 
             public override object dec(object x)
             {
-                return reduceBigInteger(toBigInteger(x) - BigInteger.ONE);
+                return BigInt.fromBigInteger(toBigInteger(x) - BigInteger.ONE);
             }
 
             #endregion
@@ -1097,7 +1117,7 @@ namespace clojure.lang
                 return this;
             }
 
-            public override Ops opsWith(BigIntegerOps x)
+            public override Ops opsWith(BigIntOps x)
             {
                 return this;
             }
@@ -1222,9 +1242,9 @@ namespace clojure.lang
                 return this;
             }
 
-            public BitOps bitOpsWith(BigIntegerBitOps x)
+            public BitOps bitOpsWith(BigIntBitOps x)
             {
-                return BIGINTEGER_BITOPS;
+                return BIGINT_BITOPS;
             }
 
             public object not(object x)
@@ -1257,7 +1277,7 @@ namespace clojure.lang
                 if (n < 63)
                     return num(Util.ConvertToLong(x) & ~(1L << n));
                 else
-                    return toBigInteger(x).ClearBit(n);
+                    return BigInt.fromBigInteger(toBigInteger(x).ClearBit(n));
             }
 
             public object setBit(object x, int n)
@@ -1265,7 +1285,7 @@ namespace clojure.lang
                 if (n < 63)
                     return num(Util.ConvertToLong(x) | (1L << n)); 
                 else
-                    return toBigInteger(x).SetBit(n);
+                    return BigInt.fromBigInteger(toBigInteger(x).SetBit(n));
             }
 
             public object flipBit(object x, int n)
@@ -1273,7 +1293,7 @@ namespace clojure.lang
                 if (n < 63)
                     return num(Util.ConvertToLong(x) ^ (1L << n));
                 else
-                    return toBigInteger(x).FlipBit(n);
+                    return BigInt.fromBigInteger(toBigInteger(x).FlipBit(n));
             }
 
             public bool testBit(object x, int n)
@@ -1303,9 +1323,9 @@ namespace clojure.lang
 
         #endregion
 
-        #region BigIntegerBitOps
+        #region BigIntBitOps
 
-        class BigIntegerBitOps : BitOps
+        class BigIntBitOps : BitOps
         {
             #region BitOps Members
 
@@ -1319,30 +1339,30 @@ namespace clojure.lang
                 return this;
             }
 
-            public BitOps bitOpsWith(BigIntegerBitOps x)
+            public BitOps bitOpsWith(BigIntBitOps x)
             {
                 return this;
             }
 
             public object not(object x)
             {
-                return ~toBigInteger(x);
+                return BigInt.fromBigInteger(~toBigInteger(x));
             }
 
             public object and(object x, object y)
             {
-                return toBigInteger(x) & toBigInteger(y);
+                return BigInt.fromBigInteger(toBigInteger(x) & toBigInteger(y));
             }
 
             public object or(object x, object y)
             {
-                return toBigInteger(x) | toBigInteger(y);
+                return BigInt.fromBigInteger(toBigInteger(x) | toBigInteger(y));
 
             }
 
             public object xor(object x, object y)
             {
-                return toBigInteger(x) ^ toBigInteger(y);
+                return BigInt.fromBigInteger(toBigInteger(x) ^ toBigInteger(y));
             }
 
             public object andNot(object x, object y)
@@ -1352,17 +1372,17 @@ namespace clojure.lang
 
             public object clearBit(object x, int n)
             {
-                return toBigInteger(x).ClearBit(n);
+                return BigInt.fromBigInteger(toBigInteger(x).ClearBit(n));
             }
 
             public object setBit(object x, int n)
             {
-                return toBigInteger(x).SetBit(n);
+                return BigInt.fromBigInteger(toBigInteger(x).SetBit(n));
             }
 
             public object flipBit(object x, int n)
             {
-                return toBigInteger(x).FlipBit(n);
+                return BigInt.fromBigInteger(toBigInteger(x).FlipBit(n));
             }
 
             public bool testBit(object x, int n)
@@ -1372,12 +1392,12 @@ namespace clojure.lang
 
             public object shiftLeft(object x, int n)
             {
-                return toBigInteger(x) << n;
+                return BigInt.fromBigInteger(toBigInteger(x) << n);
             }
 
             public object shiftRight(object x, int n)
             {
-                return toBigInteger(x) >> n;
+                return BigInt.fromBigInteger(toBigInteger(x) >> n);
             }
 
             #endregion
@@ -1390,11 +1410,11 @@ namespace clojure.lang
         static readonly LongOps LONG_OPS = new LongOps();
         static readonly DoubleOps DOUBLE_OPS = new DoubleOps();
         static readonly RatioOps RATIO_OPS = new RatioOps();
-        static readonly BigIntegerOps BIGINTEGER_OPS = new BigIntegerOps();
+        static readonly BigIntOps BIGINT_OPS = new BigIntOps();
         static readonly BigDecimalOps BIGDECIMAL_OPS = new BigDecimalOps();
 
         static readonly LongBitOps LONG_BITOPS = new LongBitOps();
-        static readonly BigIntegerBitOps BIGINTEGER_BITOPS = new BigIntegerBitOps();
+        static readonly BigIntBitOps BIGINT_BITOPS = new BigIntBitOps();
 
         public enum Category { Integer, Floating, Decimal, Ratio }
 
@@ -1410,8 +1430,10 @@ namespace clojure.lang
                 return LONG_OPS;
             else if (xc == typeof(float))
                 return DOUBLE_OPS;
+            else if (xc == typeof(BigInt))
+                return BIGINT_OPS;
             else if (xc == typeof(BigInteger))
-                return BIGINTEGER_OPS;
+                return BIGINT_OPS;
             else if (xc == typeof(Ratio))
                 return RATIO_OPS;
             else if (xc == typeof(BigDecimal))
@@ -1427,7 +1449,7 @@ namespace clojure.lang
                 return Category.Integer;
             else if (xc == typeof(float) || xc == typeof(double))
                 return Category.Floating;
-            else if (xc == typeof(BigInteger))
+            else if (xc == typeof(BigInt))
                 return Category.Integer;
             else if (xc == typeof(Ratio))
                 return Category.Ratio;
@@ -1452,8 +1474,8 @@ namespace clojure.lang
                     case TypeCode.Int64:
                         return LONG_BITOPS;
                     default:
-                        if (type == typeof(BigInteger))
-                            return BIGINTEGER_BITOPS;
+                        if (type == typeof(BigInt) || type == typeof(BigInteger))
+                            return BIGINT_BITOPS;
                         else if (Util.IsNumeric(x) || (type == typeof(BigDecimal)) || (type == typeof(Ratio)))
                             throw new ArithmeticException("bit operation on non integer type: " + type);
                         break;
@@ -2029,7 +2051,7 @@ namespace clojure.lang
         static public object minusP(long x)
         {
             if (x == Int64.MinValue)
-                return BigInteger.Create(x).Negate();
+                return BigInt.fromBigInteger(BigInteger.Create(x).Negate());
             return num(-x);
         }
 
@@ -2043,7 +2065,7 @@ namespace clojure.lang
         static public object incP(long x)
         {
             if (x == Int64.MaxValue)
-                return BIGINTEGER_OPS.inc((object)x);
+                return BIGINT_OPS.inc((object)x);
             return num(x + 1);
         }
 
@@ -2057,7 +2079,7 @@ namespace clojure.lang
         static public object decP(long x)
         {
             if (x == Int64.MinValue)
-                return BIGINTEGER_OPS.dec((object)x);
+                return BIGINT_OPS.dec((object)x);
             return num(x - 1);
         }
 

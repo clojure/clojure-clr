@@ -1820,12 +1820,6 @@ namespace clojure.lang
 
         public override int GetHashCode()
         {
-            // require same as Int64 if in range
-            long n;
-            if (AsInt64(out n))
-                return n.GetHashCode();
-
-
             int hashCode = 0;
             for (int i = 0; i < _data.Length; i++)
                 hashCode = (int)(31 * hashCode + (_data[i] & 0xffffffffL));
@@ -1846,6 +1840,15 @@ namespace clojure.lang
         /// <returns><value>-1</value> if the first is less than second; <value>0</value> if equal; <value>+1</value> if greater</returns>
         public static int Compare(BigInteger x, BigInteger y)
         {
+            if (ReferenceEquals(x,y))
+                return 0;
+
+            if (ReferenceEquals(x,null))
+                return -1;
+
+            if (ReferenceEquals(y,null))
+                return 1;
+
             return x._sign == y._sign 
                 ? x._sign * Compare(x._data,y._data)
                 : (x._sign < y._sign ? -1 : 1);
