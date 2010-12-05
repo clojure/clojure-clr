@@ -33,15 +33,72 @@ namespace clojure.lang
             bool isPos(object x);
             bool isNeg(object x);
             object add(object x, object y);
+            object addP(object x, object y);
             object multiply(object x, object y);
+            object multiplyP(object x, object y);
             object divide(object x, object y);
             object quotient(object x, object y);
             object remainder(object x, object y);
             bool equiv(object x, object y);
             bool lt(object x, object y);
             object negate(object x);
+            object negateP(object x);
             object inc(object x);
+            object incP(object x);
             object dec(object x);
+            object decP(object x);
+        }
+
+        #endregion
+
+        #region OpsP interface
+
+        abstract class OpsP : Ops
+        {
+            public object addP(object x, object y)
+            {
+                return add(x, y);
+            }
+
+            public object multiplyP(object x, object y)
+            {
+                return multiply(x, y);
+            }
+
+            public object negateP(object x)
+            {
+                return negate(x);
+            }
+
+            public object incP(object x)
+            {
+                return inc(x);
+            }
+
+            public object decP(object x)
+            {
+                return dec(x);
+            }
+
+            public abstract Ops combine(Ops y);
+            public abstract Ops opsWith(LongOps x);
+            public abstract Ops opsWith(DoubleOps x);
+            public abstract Ops opsWith(RatioOps x);
+            public abstract Ops opsWith(BigIntegerOps x);
+            public abstract Ops opsWith(BigDecimalOps x);
+            public abstract bool isZero(object x);
+            public abstract bool isPos(object x);
+            public abstract bool isNeg(object x);
+            public abstract object add(object x, object y);
+            public abstract object multiply(object x, object y);
+            public abstract object divide(object x, object y);
+            public abstract object quotient(object x, object y);
+            public abstract object remainder(object x, object y);
+            public abstract bool equiv(object x, object y);
+            public abstract bool lt(object x, object y);
+            public abstract object negate(object x);
+            public abstract object inc(object x);
+            public abstract object dec(object x);
         }
 
         #endregion
@@ -90,9 +147,19 @@ namespace clojure.lang
             return ops(x).negate(x);
         }
 
+        public static object minusP(object x)
+        {
+            return ops(x).negateP(x);
+        }
+
         public static object inc(object x)
         {
             return ops(x).inc(x);
+        }
+
+        public static object incP(object x)
+        {
+            return ops(x).incP(x);
         }
 
         public static object dec(object x)
@@ -100,9 +167,19 @@ namespace clojure.lang
             return ops(x).dec(x);
         }
 
+        public static object decP(object x)
+        {
+            return ops(x).decP(x);
+        }
+
         public static object add(object x, object y)
         {
             return ops(x).combine(ops(y)).add(x, y);
+        }
+
+        public static object addP(object x, object y)
+        {
+            return ops(x).combine(ops(y)).addP(x, y);
         }
 
         public static object minus(object x, object y)
@@ -111,9 +188,20 @@ namespace clojure.lang
             return ops(x).combine(yops).add(x, yops.negate(y));
         }
 
+        public static object minusP(object x, object y)
+        {
+            Ops yops = ops(y);
+            return ops(x).combine(yops).addP(x, yops.negateP(y));
+        }
+
         public static object multiply(object x, object y)
         {
             return ops(x).combine(ops(y)).multiply(x, y);
+        }
+
+        public static object multiplyP(object x, object y)
+        {
+            return ops(x).combine(ops(y)).multiplyP(x, y);
         }
 
         public static object divide(object x, object y)
@@ -320,14 +408,14 @@ namespace clojure.lang
                 throw new ArithmeticException("Divide by zero");
             BigInteger gcd = n.Gcd(d);
             if (gcd.Equals(BigInteger.ZERO))
-                return BigInteger.ZERO;
+                return 0;
             n = n / gcd;
             d = d / gcd;
 
             if (d.Equals(BigInteger.ONE))
-                return n;
+                return reduceBigInteger(n);
             else if (d.Equals(BigInteger.NEGATIVE_ONE))
-                return n.Negate();
+                return reduceBigInteger(n.Negate());
 
             return new Ratio((d.Signum < 0 ? -n : n), d.Abs());
         }
@@ -477,21 +565,32 @@ namespace clojure.lang
             public object add(object x, object y)
             {
                  return box(Numbers.add( Util.ConvertToLong(x), Util.ConvertToLong(y)));
-           
-                //long ret = x + y;
-                //if ((ret ^ x) < 0 && (ret ^ y) < 0)
-                //    return BIGINTEGER_OPS.add(x, y);
-                //return ret;
+            }
+
+            public object addP(object x, object y)
+            {
+                long lx = Util.ConvertToLong(x);
+                long ly = Util.ConvertToLong(y);
+                long ret = lx + ly;
+                if ((ret ^ lx) < 0 && (ret ^ ly) < 0)
+                    return BIGINTEGER_OPS.add(x, y);
+                return box(ret);
             }
 
             public object multiply(object x, object y)
             {
                 return box(Numbers.multiply(Util.ConvertToLong(x), Util.ConvertToLong(y)));
-                
-                //long ret = x * y;
-                //if (y != 0 && ret / y != x)
-                //    return BIGINTEGER_OPS.multiply(x, y);
-                //return ret;
+            }
+
+            public object multiplyP(object x, object y)
+            {
+                long lx = Util.ConvertToLong(x);
+                long ly = Util.ConvertToLong(y);
+
+                long ret = lx * ly;
+                if (ly != 0 && ret / ly != lx)
+                    return BIGINTEGER_OPS.multiply(x, y);
+                return box(ret);
             }
 
             static long gcd(long u, long v)
@@ -549,30 +648,45 @@ namespace clojure.lang
             {
                 long val = Util.ConvertToLong(x);
                 return box(Numbers.minus(val));
+            }
 
-                //if (x > Int64.MinValue)
-                //    return -x;
-                //return -BigInteger.Create(x);
+            public object negateP(object x)
+            {
+                long val = Util.ConvertToLong(x);
+
+                if (val > Int64.MinValue)
+                    return box(-val);
+                return -BigInteger.Create(val);
             }
 
             public object inc(object x)
             {
                 long val = Util.ConvertToLong(x);
                 return box(Numbers.inc(val));
+            }
 
-                //if (x < Int64.MaxValue)
-                //    return x + 1;
-                //return BIGINTEGER_OPS.inc(x);
+            public object incP(object x)
+            {
+                long val = Util.ConvertToLong(x);
+
+                if (val < Int64.MaxValue)
+                    return box(val + 1);
+                return BIGINTEGER_OPS.inc(x);
             }
 
             public object dec(object x)
             {
                 long val = Util.ConvertToLong(x);
                 return box(Numbers.dec(val));
+            }
 
-                //if (x > Int64.MinValue)
-                //    return x - 1;
-                //return BIGINTEGER_OPS.dec(x);
+            public object decP(object x)
+            {
+                long val = Util.ConvertToLong(x);
+
+                if (val > Int64.MinValue)
+                    return box(val - 1);
+                return BIGINTEGER_OPS.dec(x);
             }
 
             #endregion
@@ -582,102 +696,102 @@ namespace clojure.lang
 
         #region DoubleOps
 
-        sealed class DoubleOps : Ops
+        sealed class DoubleOps : OpsP
         {
             #region Ops Members
 
-            public Ops combine(Ops y)
+            public override Ops combine(Ops y)
             {
                 return y.opsWith(this);
             }
 
-            public Ops opsWith(LongOps x)
+            public override Ops opsWith(LongOps x)
             {
                 return this;
             }
 
-            public Ops opsWith(DoubleOps x)
+            public override Ops opsWith(DoubleOps x)
             {
                 return this;
             }
 
-            public Ops opsWith(RatioOps x)
+            public override Ops opsWith(RatioOps x)
             {
                 return this;
             }
 
-            public Ops opsWith(BigIntegerOps x)
+            public override Ops opsWith(BigIntegerOps x)
             {
                 return this;
             }
 
-            public Ops opsWith(BigDecimalOps x)
+            public override Ops opsWith(BigDecimalOps x)
             {
                 return this;
             }
 
-            public bool isZero(object x)
+            public override bool isZero(object x)
             {
                 return Util.ConvertToDouble(x) == 0;
             }
 
-            public bool isPos(object x)
+            public override bool isPos(object x)
             {
                 return Util.ConvertToDouble(x) > 0;
             }
 
-            public bool isNeg(object x)
+            public override bool isNeg(object x)
             {
                 return Util.ConvertToDouble(x) < 0;
             }
 
-            public object add(object x, object y)
+            public override object add(object x, object y)
             {
                 return Util.ConvertToDouble(x) + Util.ConvertToDouble(y);
 
             }
 
-            public object multiply(object x, object y)
+            public override object multiply(object x, object y)
             {
                 return Util.ConvertToDouble(x) * Util.ConvertToDouble(y);
             }
 
-            public object divide(object x, object y)
+            public override object divide(object x, object y)
             {
                 return Util.ConvertToDouble(x) / Util.ConvertToDouble(y);
             }
 
-            public object quotient(object x, object y)
+            public override object quotient(object x, object y)
             {
                 return Numbers.DQuotient(Util.ConvertToDouble(x), Util.ConvertToDouble(y));
             }
 
-            public object remainder(object x, object y)
+            public override object remainder(object x, object y)
             {
                 return Numbers.DRemainder(Util.ConvertToDouble(x), Util.ConvertToDouble(y));
             }
 
-            public bool equiv(object x, object y)
+            public override bool equiv(object x, object y)
             {
                 return Util.ConvertToDouble(x) == Util.ConvertToDouble(y);
             }
 
-            public bool lt(object x, object y)
+            public override bool lt(object x, object y)
             {
                 return Util.ConvertToDouble(x) < Util.ConvertToDouble(y);
             }
 
-            public object negate(object x)
+            public override object negate(object x)
             {
                 return -Util.ConvertToDouble(x);
             }
 
-            public object inc(object x)
+            public override object inc(object x)
             {
                 return Util.ConvertToDouble(x) + 1;
             }
 
-            public object dec(object x)
+            public override object dec(object x)
             {
                 return Util.ConvertToDouble(x) - 1;
             }
@@ -689,36 +803,36 @@ namespace clojure.lang
 
         #region RatioOps
 
-        sealed class RatioOps : Ops
+        sealed class RatioOps : OpsP
         {
             #region Ops Members
 
-            public Ops combine(Ops y)
+            public override Ops combine(Ops y)
             {
                 return y.opsWith(this);
             }
 
-            public Ops opsWith(LongOps x)
+            public override Ops opsWith(LongOps x)
             {
                 return this;
             }
 
-            public Ops opsWith(DoubleOps x)
+            public override Ops opsWith(DoubleOps x)
             {
                 return DOUBLE_OPS;
             }
 
-            public Ops opsWith(RatioOps x)
+            public override Ops opsWith(RatioOps x)
             {
                 return this;
             }
 
-            public Ops opsWith(BigIntegerOps x)
+            public override Ops opsWith(BigIntegerOps x)
             {
                 return this;
             }
 
-            public Ops opsWith(BigDecimalOps x)
+            public override Ops opsWith(BigDecimalOps x)
             {
                 return BIGDECIMAL_OPS;
             }
@@ -730,25 +844,25 @@ namespace clojure.lang
             //    return ret;
             //}
 
-            public bool isZero(object x)
+            public override bool isZero(object x)
             {
                 Ratio r = (Ratio)x;
                 return r.numerator.Signum == 0;
             }
 
-            public bool isPos(object x)
+            public override bool isPos(object x)
             {
                 Ratio r = (Ratio)x;
                 return r.numerator.Signum > 0;
             }
 
-            public bool isNeg(object x)
+            public override bool isNeg(object x)
             {
                 Ratio r = (Ratio)x;
                 return r.numerator.Signum < 0;
             }
 
-            public object add(object x, object y)
+            public override object add(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
@@ -759,7 +873,7 @@ namespace clojure.lang
                     ry.denominator * rx.denominator);
             }
 
-            public object multiply(object x, object y)
+            public override object multiply(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
@@ -770,7 +884,7 @@ namespace clojure.lang
                     ry.denominator * rx.denominator);
             }
 
-            public object divide(object x, object y)
+            public override object divide(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
@@ -781,7 +895,7 @@ namespace clojure.lang
                     ry.numerator * rx.denominator);
             }
 
-            public object quotient(object x, object y)
+            public override object quotient(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
@@ -791,7 +905,7 @@ namespace clojure.lang
                 return q;
             }
 
-            public object remainder(object x, object y)
+            public override object remainder(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
@@ -801,7 +915,7 @@ namespace clojure.lang
                 return Numbers.minus(rx, Numbers.multiply(q, ry));
             }
 
-            public bool equiv(object x, object y)
+            public override bool equiv(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
@@ -810,7 +924,7 @@ namespace clojure.lang
                     && rx.denominator.Equals(ry.denominator);
             }
 
-            public bool lt(object x, object y)
+            public override bool lt(object x, object y)
             {
                 Ratio rx = toRatio(x);
                 Ratio ry = toRatio(y);
@@ -818,7 +932,7 @@ namespace clojure.lang
                 return rx.numerator * ry.denominator < ry.numerator * rx.denominator;
             }
 
-            public object negate(object x)
+            public override object negate(object x)
             {
                 Ratio rx = (Ratio)x;    
                 return new Ratio(-rx.numerator, rx.denominator);
@@ -827,12 +941,12 @@ namespace clojure.lang
             //static readonly Ratio ONE = new Ratio(BigInteger.ONE, BigInteger.ONE);
             //static readonly Ratio MINUS_ONE = new Ratio(BigInteger.NEGATIVE_ONE, BigInteger.ONE);
 
-            public object inc(object x)
+            public override object inc(object x)
             {
                 return Numbers.add(x, 1);
             }
 
-            public object dec(object x)
+            public override object dec(object x)
             {
                 return Numbers.add(x, -1);
             }
@@ -844,106 +958,106 @@ namespace clojure.lang
 
         #region BigIntegerOps
 
-        class BigIntegerOps : Ops
+        class BigIntegerOps : OpsP
         {
             #region Ops Members
 
-            public Ops combine(Ops y)
+            public override Ops combine(Ops y)
             {
                 return y.opsWith(this);
             }
 
-            public Ops opsWith(LongOps x)
+            public override Ops opsWith(LongOps x)
             {
                 return this;
             }
 
-            public Ops opsWith(DoubleOps x)
+            public override Ops opsWith(DoubleOps x)
             {
                 return DOUBLE_OPS;
             }
 
-            public Ops opsWith(RatioOps x)
+            public override Ops opsWith(RatioOps x)
             {
                 return RATIO_OPS;
             }
 
-            public Ops opsWith(BigIntegerOps ops)
+            public override Ops opsWith(BigIntegerOps ops)
             {
                 return this;
             }
 
-            public Ops opsWith(BigDecimalOps ops)
+            public override Ops opsWith(BigDecimalOps ops)
             {
                 return BIGDECIMAL_OPS;
             }
 
-            public bool isZero(object x)
+            public override bool isZero(object x)
             {
                 BigInteger bx = toBigInteger(x);
                 return bx.IsZero;
             }
 
-            public bool isPos(object x)
+            public override bool isPos(object x)
             {
                 BigInteger bx = toBigInteger(x);
                 return bx.IsPositive;
             }
 
-            public bool isNeg(object x)
+            public override bool isNeg(object x)
             {
                 BigInteger bx = toBigInteger(x);
                 return bx.IsNegative;
             }
 
-            public object add(object x, object y)
+            public override object add(object x, object y)
             {
-                return toBigInteger(x) + toBigInteger(y);
+                return reduceBigInteger(toBigInteger(x) + toBigInteger(y));
             }
 
-            public object multiply(object x, object y)
+            public override object multiply(object x, object y)
             {
-                return toBigInteger(x) * toBigInteger(y);
+                return reduceBigInteger(toBigInteger(x) * toBigInteger(y));
             }
 
-            public object divide(object x, object y)
+            public override object divide(object x, object y)
             {
                 return BIDivide(toBigInteger(x),toBigInteger(y));
             }
 
-            public object quotient(object x, object y)
+            public override object quotient(object x, object y)
             {
-                return toBigInteger(x) / toBigInteger(y);
+                return reduceBigInteger(toBigInteger(x) / toBigInteger(y));
             }
 
-            public object remainder(object x, object y)
+            public override object remainder(object x, object y)
             {
-                return toBigInteger(x) % toBigInteger(y);
+                return reduceBigInteger(toBigInteger(x) % toBigInteger(y));
             }
 
-            public bool equiv(object x, object y)
+            public override bool equiv(object x, object y)
             {
                 return toBigInteger(x).Equals(toBigInteger(y));
             }
 
-            public bool lt(object x, object y)
+            public override bool lt(object x, object y)
             {
                 return toBigInteger(x) < toBigInteger(y);
             }
 
-            public object negate(object x)
+            public override object negate(object x)
             {
-                return -toBigInteger(x);
+                return reduceBigInteger(-toBigInteger(x));
             }
 
-            public object inc(object x)
+            public override object inc(object x)
             {
-                return toBigInteger(x) + BigInteger.ONE;
+                return reduceBigInteger(toBigInteger(x) + BigInteger.ONE);
             }
 
-            public object dec(object x)
+            public override object dec(object x)
             {
-                return toBigInteger(x) - BigInteger.ONE;
+                return reduceBigInteger(toBigInteger(x) - BigInteger.ONE);
             }
 
             #endregion
@@ -953,59 +1067,59 @@ namespace clojure.lang
 
         #region BigDecimalOps
 
-        class BigDecimalOps : Ops
+        class BigDecimalOps : OpsP
         {
             #region Ops Members
 
-            public Ops combine(Ops y)
+            public override Ops combine(Ops y)
             {
                 return y.opsWith(this);
             }
 
-            public Ops opsWith(LongOps x)
+            public override Ops opsWith(LongOps x)
             {
                 return this;
             }
 
-            public Ops opsWith(DoubleOps x)
+            public override Ops opsWith(DoubleOps x)
             {
                 return DOUBLE_OPS;
             }
 
-            public Ops opsWith(RatioOps x)
+            public override Ops opsWith(RatioOps x)
             {
                 return this;
             }
 
-            public Ops opsWith(BigIntegerOps x)
+            public override Ops opsWith(BigIntegerOps x)
             {
                 return this;
             }
 
-            public Ops opsWith(BigDecimalOps x)
+            public override Ops opsWith(BigDecimalOps x)
             {
                 return this;
             }
 
-            public bool isZero(object x)
+            public override bool isZero(object x)
             {
                 BigDecimal bx = (BigDecimal)x;
                 return bx.IsZero;
             }
 
-            public bool isPos(object x)
+            public override bool isPos(object x)
             {
                 BigDecimal bx = (BigDecimal)x;
                 return bx.IsPositive;
             }
 
-            public bool isNeg(object x)
+            public override bool isNeg(object x)
             {
                 BigDecimal bx = (BigDecimal)x;
                 return bx.IsNegative;
             }
 
-            public object add(object x, object y)
+            public override object add(object x, object y)
             {
                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
                 return c == null
@@ -1013,7 +1127,7 @@ namespace clojure.lang
                     : toBigDecimal(x).Add(toBigDecimal(y), c.Value);
             }
 
-            public object multiply(object x, object y)
+            public override object multiply(object x, object y)
             {
                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
                 return c == null
@@ -1021,7 +1135,7 @@ namespace clojure.lang
                    : toBigDecimal(x).Multiply(toBigDecimal(y), c.Value);
             }
 
-            public object divide(object x, object y)
+            public override object divide(object x, object y)
             {
                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
                 return c == null
@@ -1029,7 +1143,7 @@ namespace clojure.lang
                     : toBigDecimal(x).Divide(toBigDecimal(y), c.Value);
             }
 
-            public object quotient(object x, object y)
+            public override object quotient(object x, object y)
             {
                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
                 return c == null
@@ -1037,7 +1151,7 @@ namespace clojure.lang
                     : toBigDecimal(x).DivideInteger(toBigDecimal(y), c.Value);
             }
 
-            public object remainder(object x, object y)
+            public override object remainder(object x, object y)
             {
                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
                 return c == null
@@ -1045,17 +1159,17 @@ namespace clojure.lang
                     : toBigDecimal(x).Mod(toBigDecimal(y), c.Value);
             }
 
-            public bool equiv(object x, object y)
+            public override bool equiv(object x, object y)
             {
                 return toBigDecimal(x).Equals(toBigDecimal(y));
             }
 
-            public bool lt(object x, object y)
+            public override bool lt(object x, object y)
             {
                 return toBigDecimal(x).CompareTo(toBigDecimal(y)) < 0;
             }
 
-            public object negate(object x)
+            public override object negate(object x)
             {
                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
                 return c == null
@@ -1063,7 +1177,7 @@ namespace clojure.lang
                     : ((BigDecimal)x).Negate(c.Value);
             }
 
-            public object inc(object x)
+            public override object inc(object x)
             {
                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
                 BigDecimal bx = (BigDecimal)x;
@@ -1072,7 +1186,7 @@ namespace clojure.lang
                     : bx.Add(BigDecimal.ONE, c.Value);
             }
 
-            public object dec(object x)
+            public override object dec(object x)
             {
                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
                 BigDecimal bx = (BigDecimal)x;
@@ -1650,7 +1764,17 @@ namespace clojure.lang
             return x + y;
         }
 
+        static public double addP(double x, double y)
+        {
+            return x + y;
+        }
+
         static public double minus(double x, double y)
+        {
+            return x - y;
+        }
+
+        static public double minusP(double x, double y)
         {
             return x - y;
         }
@@ -1660,7 +1784,17 @@ namespace clojure.lang
             return -x;
         }
 
+        static public double minusP(double x)
+        {
+            return -x;
+        }
+
         static public double inc(double x)
+        {
+            return x + 1;
+        }
+
+        static public double incP(double x)
         {
             return x + 1;
         }
@@ -1670,7 +1804,17 @@ namespace clojure.lang
             return x - 1;
         }
 
+        static public double decP(double x)
+        {
+            return x - 1;
+        }
+
         static public double multiply(double x, double y)
+        {
+            return x * y;
+        }
+
+        static public double multiplyP(double x, double y)
         {
             return x * y;
         }
@@ -1821,12 +1965,28 @@ namespace clojure.lang
             return ret;
         }
 
+        static public object addP(long x, long y)
+        {
+            long ret = x + y;
+            if ((ret ^ x) < 0 && (ret ^ y) < 0)
+                return addP((object)x,(object)y);
+            return box(ret);
+        }
+
         static public long minus(long x, long y)
         {
             long ret = x - y;
             if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
                 return throwIntOverflow();
             return ret;
+        }
+
+        static public object minusP(long x, long y)
+        {
+            long ret = x - y;
+            if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
+                return minusP((object)x, (object)y);
+            return box(ret);
         }
 
         static public long minus(long x)
@@ -1836,11 +1996,25 @@ namespace clojure.lang
             return -x;
         }
 
+        static public object minusP(long x)
+        {
+            if (x == Int64.MinValue)
+                return BigInteger.Create(x).Negate();
+            return box(-x);
+        }
+
         static public long inc(long x)
         {
             if (x == Int64.MaxValue)
                 return throwIntOverflow();
             return x + 1;
+        }
+
+        static public object incP(long x)
+        {
+            if (x == Int64.MaxValue)
+                return BIGINTEGER_OPS.inc((object)x);
+            return box(x + 1);
         }
 
         static public long dec(long x)
@@ -1850,12 +2024,27 @@ namespace clojure.lang
             return x - 1;
         }
 
+        static public object decP(long x)
+        {
+            if (x == Int64.MinValue)
+                return BIGINTEGER_OPS.dec((object)x);
+            return box(x - 1);
+        }
+
         static public long multiply(long x, long y)
         {
             long ret = x * y;
             if (y != 0 && ret / y != x)
                 return throwIntOverflow();
             return ret;
+        }
+
+        static public object multiplyP(long x, long y)
+        {
+            long ret = x * y;
+            if (y != 0 && ret / y != x)
+                return multiplyP((object)x, (object)y);
+            return box(ret);
         }
 
         static public long unchecked_long_divide(long x, long y)
@@ -1922,14 +2111,54 @@ namespace clojure.lang
             return add(x, (Object)y);
         }
 
-        static public object add(double x, Object y)
+        static public object addP(long x, Object y)
         {
-            return add((Object)x, y);
+            return addP((Object)x, y);
         }
 
-        static public object add(Object x, double y)
+        static public object addP(Object x, long y)
         {
-            return add(x, (Object)y);
+            return addP(x, (Object)y);
+        }
+
+        static public double add(double x, Object y)
+        {
+            return add(x, Util.ConvertToDouble(y));
+        }
+
+        static public double add(Object x, double y)
+        {
+            return add(Util.ConvertToDouble(x), y);
+        }
+
+        static public double add(double x, long y)
+        {
+            return x + y;
+        }
+
+        static public double add(long x, double y)
+        {
+            return x + y;
+        }
+
+        static public double addP(double x, Object y)
+        {
+            return addP(x, Util.ConvertToDouble(y));
+        }
+
+        static public double addP(Object x, double y)
+        {
+            return addP(Util.ConvertToDouble(x), y);
+        }
+
+        static public double addP(double x, long y)
+        {
+            return x + y;
+        }
+
+        static public double addP(long x, double y)
+        {
+            return x + y;
         }
 
         static public object minus(long x, Object y)
@@ -1942,14 +2171,54 @@ namespace clojure.lang
             return minus(x, (Object)y);
         }
 
-        static public object minus(double x, Object y)
+        static public object minusP(long x, Object y)
         {
-            return minus((Object)x, y);
+            return minusP((Object)x, y);
         }
 
-        static public object minus(Object x, double y)
+        static public object minusP(Object x, long y)
         {
-            return minus(x, (Object)y);
+            return minusP(x, (Object)y);
+        }
+
+        static public double minus(double x, Object y)
+        {
+            return minus(x, Util.ConvertToDouble(y));
+        }
+
+        static public double minus(Object x, double y)
+        {
+            return minus(Util.ConvertToDouble(x), y);
+        }
+
+        static public double minus(double x, long y)
+        {
+            return x - y;
+        }
+
+        static public double minus(long x, double y)
+        {
+            return x - y;
+        }
+
+        static public double minusP(double x, Object y)
+        {
+            return minusP(x, Util.ConvertToDouble(y));
+        }
+
+        static public double minusP(Object x, double y)
+        {
+            return minusP(Util.ConvertToDouble(x), y);
+        }
+
+        static public double minusP(double x, long y)
+        {
+            return x - y;
+        }
+
+        static public double minusP(long x, double y)
+        {
+            return x - y;
         }
 
         static public object multiply(long x, Object y)
@@ -1962,14 +2231,54 @@ namespace clojure.lang
             return multiply(x, (Object)y);
         }
 
-        static public object multiply(double x, Object y)
+        static public object multiplyP(long x, Object y)
         {
-            return multiply((Object)x, y);
+            return multiplyP((Object)x, y);
         }
 
-        static public object multiply(Object x, double y)
+        static public object multiplyP(Object x, long y)
         {
-            return multiply(x, (Object)y);
+            return multiplyP(x, (Object)y);
+        }
+
+        static public double multiply(double x, Object y)
+        {
+            return multiply(x, Util.ConvertToDouble(y));
+        }
+
+        static public double multiply(Object x, double y)
+        {
+            return multiply(Util.ConvertToDouble(x), y);
+        }
+
+        static public double multiply(double x, long y)
+        {
+            return x * y;
+        }
+
+        static public double multiply(long x, double y)
+        {
+            return x*y;
+        }
+
+        static public double multiplyP(double x, Object y)
+        {
+            return multiplyP(x, Util.ConvertToDouble(y));
+        }
+
+        static public double multiplyP(Object x, double y)
+        {
+            return multiplyP(Util.ConvertToDouble(x), y);
+        }
+
+        static public double multiplyP(double x, long y)
+        {
+            return x * y;
+        }
+
+        static public double multiplyP(long x, double y)
+        {
+            return x * y;
         }
 
         static public object divide(long x, Object y)
@@ -1982,14 +2291,24 @@ namespace clojure.lang
             return divide(x, (Object)y);
         }
 
-        static public object divide(double x, Object y)
+        static public double divide(double x, Object y)
         {
-            return divide((Object)x, y);
+            return x / Util.ConvertToDouble(y);
         }
 
-        static public object divide(Object x, double y)
+        static public double divide(Object x, double y)
         {
-            return divide(x, (Object)y);
+            return Util.ConvertToDouble(x) / y;
+        }
+
+        static public double divide(double x, long y)
+        {
+            return x / y;
+        }
+
+        static public double divide(long x, double y)
+        {
+            return x / y;
         }
 
         static public bool lt(long x, Object y)
@@ -2004,12 +2323,22 @@ namespace clojure.lang
 
         static public bool lt(double x, Object y)
         {
-            return lt((Object)x, y);
+            return x < Util.ConvertToDouble(y);
         }
 
         static public bool lt(Object x, double y)
         {
-            return lt(x, (Object)y);
+            return Util.ConvertToDouble(x) < y;
+        }
+
+        static public bool lt(double x, long y)
+        {
+            return x < y;
+        }
+
+        static public bool lt(long x, double y)
+        {
+            return x < y;
         }
 
         static public bool lte(long x, Object y)
@@ -2024,14 +2353,24 @@ namespace clojure.lang
 
         static public bool lte(double x, Object y)
         {
-            return lte((Object)x, y);
+            return x <= Util.ConvertToDouble(y);
         }
 
         static public bool lte(Object x, double y)
         {
-            return lte(x, (Object)y);
+            return Util.ConvertToDouble(x) <= y;
         }
 
+        static public bool lte(double x, long y)
+        {
+            return x <= y;
+        }
+
+        static public bool lte(long x, double y)
+        {
+            return x <= y;
+        }
+        
         static public bool gt(long x, Object y)
         {
             return gt((Object)x, y);
@@ -2044,12 +2383,22 @@ namespace clojure.lang
 
         static public bool gt(double x, Object y)
         {
-            return gt((Object)x, y);
+            return x > Util.ConvertToDouble(y);
         }
 
         static public bool gt(Object x, double y)
         {
-            return gt(x, (Object)y);
+            return Util.ConvertToDouble(x) > y;
+        }
+
+        static public bool gt(double x, long y)
+        {
+            return x > y;
+        }
+
+        static public bool gt(long x, double y)
+        {
+            return x > y;
         }
 
         static public bool gte(long x, Object y)
@@ -2064,12 +2413,22 @@ namespace clojure.lang
 
         static public bool gte(double x, Object y)
         {
-            return gte((Object)x, y);
+            return x >= Util.ConvertToDouble(y);
         }
 
         static public bool gte(Object x, double y)
         {
-            return gte(x, (Object)y);
+            return Util.ConvertToDouble(x) >= y;
+        }
+
+        static public bool gte(double x, long y)
+        {
+            return x >= y;
+        }
+
+        static public bool gte(long x, double y)
+        {
+            return x >= y;
         }
 
         static public bool equiv(long x, Object y)
@@ -2084,12 +2443,22 @@ namespace clojure.lang
 
         static public bool equiv(double x, Object y)
         {
-            return equiv((Object)x, y);
+            return x == Util.ConvertToDouble(y);
         }
 
         static public bool equiv(Object x, double y)
         {
-            return equiv(x, (Object)y);
+            return Util.ConvertToDouble(x) == y;
+        }
+
+        static public bool equiv(double x, long y)
+        {
+            return x == y;
+        }
+
+        static public bool equiv(long x, double y)
+        {
+            return x == y;
         }
 
         #endregion
