@@ -400,6 +400,8 @@
             Char
             (p-write-char this (int x))
             Int32
+            (p-write-char this x)
+			Int64
             (p-write-char this x))))
 
       (Flush []

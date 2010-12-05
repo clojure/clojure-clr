@@ -90,4 +90,6 @@
                ;;(cc-write-char this x)
 
                Int32
-               (c-write-char this x))))))))
+               (c-write-char this x)
+			   Int64
+			   (c-write-char this x))))))))

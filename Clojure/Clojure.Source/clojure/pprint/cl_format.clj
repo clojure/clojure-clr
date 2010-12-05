@@ -1095,9 +1095,9 @@ Note this should only be used for the last one in the sequence"
 
             Int32
             (let [c (char x)]
-              (let [mod-c (if @last-was-whitespace? (Char/ToUpper ^Char (char x)) c)] 
+              (let [mod-c (if @last-was-whitespace? (Char/ToUpper (char x)) c)] 
                 (.Write writer (int mod-c))
-                (dosync (ref-set last-was-whitespace? (Char/IsWhiteSpace ^Char (char x))))))))))))
+                (dosync (ref-set last-was-whitespace? (Char/IsWhiteSpace (char x))))))))))))
 
 (defn- init-cap-writer
   "Returns a proxy that wraps writer, capitalizing the first word"

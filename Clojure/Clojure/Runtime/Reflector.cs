@@ -383,6 +383,10 @@ namespace clojure.lang
             if (x is Boolean)
                 //return ((Boolean)x) ? RT.T : RT.F;
                 return ((Boolean)x) ? true : false;
+            else if (x is Int32)
+                return (long)(int)x;
+            else if (x is Single)
+                return (double)(float)x;
             return x;
         }
 

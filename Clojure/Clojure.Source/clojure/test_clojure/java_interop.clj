@@ -88,7 +88,7 @@
       \a  Char                                  ;;; java.lang.Character
       "a" String)                               ;;; java.lang.String )
 
-  ; it is an int, nothing else
+  ; it is a Long, nothing else
   (are [x y] (= (instance? x 42) y)
       Int32 false                    ;;; java.lang.Integer
       Int64 true                   ;;; java.lang.Long
@@ -199,14 +199,14 @@
   (are [x] (= (alength (make-array Int32 x)) x)      ;;; Integer
       0 1 5 )
 
-  (let [a (make-array Int32 5)]      ;;; Integer
+  (let [a (make-array Int64 5)]      ;;; Long
     (aset a 3 42)
     (are [x y] (= x y)
         (aget a 3) 42
-        (class (aget a 3)) Int32 ))      ;;; Integer
+        (class (aget a 3)) Int64 ))      ;;; Long
       
   ; multi-dimensional
-  (let [a (make-array Int32 3 2 4)]      ;;; Integer
+  (let [a (make-array Int64 3 2 4)]      ;;; Long
     (aset a 0 1 2 987)
     (are [x y] (= x y)
         (alength a) 3
@@ -214,7 +214,7 @@
         (alength (first (first a))) 4
 
         (aget a 0 1 2) 987
-        (class (aget a 0 1 2)) Int32 )))      ;;; Integer
+        (class (aget a 0 1 2)) Int64 )))      ;;; Long
 
 
 (deftest test-to-array
@@ -264,8 +264,8 @@
         (class (first a)) (class (first v)) ))
 
   ; given type
-  (let [a (into-array Int32 [(byte 2) (short 3) (int 4)])]            ;;; Integer/TYPE
-    (are [x] (= x Int32)                                            ;;; Integer
+  #_(let [a (into-array Int32 [(byte 2) (short 3) (int 4)])]            ;;; Integer/TYPE
+    (are [x] (= x Int64)                                            ;;; Long
         (class (aget a 0))
         (class (aget a 1))
         (class (aget a 2)) ))

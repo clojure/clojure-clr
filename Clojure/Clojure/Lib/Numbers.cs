@@ -366,29 +366,29 @@ namespace clojure.lang
 
         #region Boxing
 
-        static Object box(int val)
-        {
-            return val;
-        }
+        //static Object box(int val)
+        //{
+        //    return val;
+        //}
 
-        static Object box(long val)
-        {
-            // JVM still has this
-            //if (val >= Int32.MinValue && val <= Int32.MaxValue)
-            //    return (int)val;
-            //else
-                return val;
-        }
+        //static Object box(long val)
+        //{
+        //    // JVM still has this
+        //    //if (val >= Int32.MinValue && val <= Int32.MaxValue)
+        //    //    return (int)val;
+        //    //else
+        //        return val;
+        //}
 
-        static Object box(double val)
-        {
-            return val;
-        }
+        //static Object box(double val)
+        //{
+        //    return val;
+        //}
 
-        static Object box(float val)
-        {
-            return (double)val;
-        }
+        //static Object box(float val)
+        //{
+        //    return (double)val;
+        //}
 
 
         #endregion
@@ -570,7 +570,7 @@ namespace clojure.lang
 
             public object add(object x, object y)
             {
-                 return box(Numbers.add( Util.ConvertToLong(x), Util.ConvertToLong(y)));
+                 return num(Numbers.add( Util.ConvertToLong(x), Util.ConvertToLong(y)));
             }
 
             public object addP(object x, object y)
@@ -580,12 +580,12 @@ namespace clojure.lang
                 long ret = lx + ly;
                 if ((ret ^ lx) < 0 && (ret ^ ly) < 0)
                     return BIGINTEGER_OPS.add(x, y);
-                return box(ret);
+                return num(ret);
             }
 
             public object multiply(object x, object y)
             {
-                return box(Numbers.multiply(Util.ConvertToLong(x), Util.ConvertToLong(y)));
+                return num(Numbers.multiply(Util.ConvertToLong(x), Util.ConvertToLong(y)));
             }
 
             public object multiplyP(object x, object y)
@@ -596,7 +596,7 @@ namespace clojure.lang
                 long ret = lx * ly;
                 if (ly != 0 && ret / ly != lx)
                     return BIGINTEGER_OPS.multiply(x, y);
-                return box(ret);
+                return num(ret);
             }
 
             static long gcd(long u, long v)
@@ -616,12 +616,12 @@ namespace clojure.lang
                 long val = Util.ConvertToLong(y);
                 long gcd1 = gcd(n, val);
                 if (gcd1 == 0)
-                    return 0;
+                    return num(0);
 
                 n = n / gcd1;
                 long d = val / gcd1;
                 if (d == 1)
-                    return box(n);
+                    return num(n);
                 if (d < 0)
                 {
                     n = -n;
@@ -632,12 +632,12 @@ namespace clojure.lang
 
             public object quotient(object x, object y)
             {
-                return box(Util.ConvertToLong(x) / Util.ConvertToLong(y));
+                return num(Util.ConvertToLong(x) / Util.ConvertToLong(y));
             }
 
             public object remainder(object x, object y)
             {
-                return box(Util.ConvertToLong(x) % Util.ConvertToLong(y));
+                return num(Util.ConvertToLong(x) % Util.ConvertToLong(y));
             }
 
             public bool equiv(object x, object y)
@@ -653,7 +653,7 @@ namespace clojure.lang
             public object negate(object x)
             {
                 long val = Util.ConvertToLong(x);
-                return box(Numbers.minus(val));
+                return num(Numbers.minus(val));
             }
 
             public object negateP(object x)
@@ -661,14 +661,14 @@ namespace clojure.lang
                 long val = Util.ConvertToLong(x);
 
                 if (val > Int64.MinValue)
-                    return box(-val);
+                    return num(-val);
                 return -BigInteger.Create(val);
             }
 
             public object inc(object x)
             {
                 long val = Util.ConvertToLong(x);
-                return box(Numbers.inc(val));
+                return num(Numbers.inc(val));
             }
 
             public object incP(object x)
@@ -676,14 +676,14 @@ namespace clojure.lang
                 long val = Util.ConvertToLong(x);
 
                 if (val < Int64.MaxValue)
-                    return box(val + 1);
+                    return num(val + 1);
                 return BIGINTEGER_OPS.inc(x);
             }
 
             public object dec(object x)
             {
                 long val = Util.ConvertToLong(x);
-                return box(Numbers.dec(val));
+                return num(Numbers.dec(val));
             }
 
             public object decP(object x)
@@ -691,7 +691,7 @@ namespace clojure.lang
                 long val = Util.ConvertToLong(x);
 
                 if (val > Int64.MinValue)
-                    return box(val - 1);
+                    return num(val - 1);
                 return BIGINTEGER_OPS.dec(x);
             }
 
@@ -1229,33 +1229,33 @@ namespace clojure.lang
 
             public object not(object x)
             {
-                 return box(~Util.ConvertToLong(x));
+                 return num(~Util.ConvertToLong(x));
             }
 
             public object and(object x, object y)
             {
-                return box(Util.ConvertToLong(x) & Util.ConvertToLong(y));
+                return num(Util.ConvertToLong(x) & Util.ConvertToLong(y));
             }
 
             public object or(object x, object y)
             {
-                return box(Util.ConvertToLong(x) | Util.ConvertToLong(y));
+                return num(Util.ConvertToLong(x) | Util.ConvertToLong(y));
             }
 
             public object xor(object x, object y)
             {
-                return box(Util.ConvertToLong(x) ^ Util.ConvertToLong(y));
+                return num(Util.ConvertToLong(x) ^ Util.ConvertToLong(y));
             }
 
             public object andNot(object x, object y)
             {
-                return box(Util.ConvertToLong(x) & ~Util.ConvertToLong(y));
+                return num(Util.ConvertToLong(x) & ~Util.ConvertToLong(y));
             }
 
             public object clearBit(object x, int n)
             {
                 if (n < 63)
-                    return box(Util.ConvertToLong(x) & ~(1L << n));
+                    return num(Util.ConvertToLong(x) & ~(1L << n));
                 else
                     return toBigInteger(x).ClearBit(n);
             }
@@ -1263,7 +1263,7 @@ namespace clojure.lang
             public object setBit(object x, int n)
             {
                 if (n < 63)
-                    return box(Util.ConvertToLong(x) | (1L << n)); 
+                    return num(Util.ConvertToLong(x) | (1L << n)); 
                 else
                     return toBigInteger(x).SetBit(n);
             }
@@ -1271,7 +1271,7 @@ namespace clojure.lang
             public object flipBit(object x, int n)
             {
                 if (n < 63)
-                    return box(Util.ConvertToLong(x) ^ (1L << n));
+                    return num(Util.ConvertToLong(x) ^ (1L << n));
                 else
                     return toBigInteger(x).FlipBit(n);
             }
@@ -1288,14 +1288,14 @@ namespace clojure.lang
             {
                 return n < 0
                     ? shiftRight(x, -n)
-                    : box(Numbers.shiftLeft(Util.ConvertToLong(x), n));
+                    : num(Numbers.shiftLeft(Util.ConvertToLong(x), n));
             }
 
             public object shiftRight(object x, int n)
             {
                 return n < 0
                      ? shiftLeft(x, -n)
-                     : box(Util.ConvertToLong(x) >> n);
+                     : num(Util.ConvertToLong(x) >> n);
             }
 
             #endregion
@@ -1903,10 +1903,10 @@ namespace clojure.lang
             throw new ArithmeticException("integer overflow");
         }
 
-        public static object num(int x)
-        {
-            return x;
-        }
+        //public static object num(int x)
+        //{
+        //    return x;
+        //}
 
         static public int unchecked_int_add(int x, int y)
         {
@@ -2000,7 +2000,7 @@ namespace clojure.lang
             long ret = x + y;
             if ((ret ^ x) < 0 && (ret ^ y) < 0)
                 return addP((object)x,(object)y);
-            return box(ret);
+            return num(ret);
         }
 
         static public long minus(long x, long y)
@@ -2016,7 +2016,7 @@ namespace clojure.lang
             long ret = x - y;
             if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
                 return minusP((object)x, (object)y);
-            return box(ret);
+            return num(ret);
         }
 
         static public long minus(long x)
@@ -2030,7 +2030,7 @@ namespace clojure.lang
         {
             if (x == Int64.MinValue)
                 return BigInteger.Create(x).Negate();
-            return box(-x);
+            return num(-x);
         }
 
         static public long inc(long x)
@@ -2044,7 +2044,7 @@ namespace clojure.lang
         {
             if (x == Int64.MaxValue)
                 return BIGINTEGER_OPS.inc((object)x);
-            return box(x + 1);
+            return num(x + 1);
         }
 
         static public long dec(long x)
@@ -2058,7 +2058,7 @@ namespace clojure.lang
         {
             if (x == Int64.MinValue)
                 return BIGINTEGER_OPS.dec((object)x);
-            return box(x - 1);
+            return num(x - 1);
         }
 
         static public long multiply(long x, long y)
@@ -2074,7 +2074,7 @@ namespace clojure.lang
             long ret = x * y;
             if (y != 0 && ret / y != x)
                 return multiplyP((object)x, (object)y);
-            return box(ret);
+            return num(ret);
         }
 
         static public long unchecked_long_divide(long x, long y)
@@ -2309,6 +2309,11 @@ namespace clojure.lang
         static public double multiplyP(long x, double y)
         {
             return x * y;
+        }
+
+        static public object divide(long x, long y)
+        {
+            return divide((object)x, (object)y);
         }
 
         static public object divide(long x, Object y)
