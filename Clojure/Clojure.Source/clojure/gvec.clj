@@ -295,7 +295,7 @@
           (if (zero? level)
             (.arr node)
             (recur (aget (.arr node) (bit-and (bit-shift-right i level) (int 0x1f)))               ;;; Got rid of ^objects tag on (.arr node)  TODO: Figure out why we don't compile properly with the tag.
-                   (- level (int 5))))))
+                   (long (- level (int 5)))))))                                          ;;; added long cast to deal with occur
       (throw (IndexOutOfRangeException.))))                                                        ;;; IndexOutOfBoundsException
 
   (pushTail [this level parent tailnode]

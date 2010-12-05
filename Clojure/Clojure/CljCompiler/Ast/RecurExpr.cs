@@ -189,11 +189,13 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                     else
                     {
-                        if (true) //RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-                            RT.errPrintWriter().WriteLine("{0}: {1} recur arg for primitive local: {2} must be matching primitive, had: {3}, needed {4}",
+                        //if (true) //RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                            //RT.errPrintWriter().WriteLine
+                        throw new ArgumentException(String.Format(
+                                "{0}: {1} recur arg for primitive local: {2} must be matching primitive, had: {3}, needed {4}",
                                 _source, _spanMap != null ? (int)_spanMap.valAt(RT.START_LINE_KEY, 0) : 0, 
-                                lb.Name, (arg.HasClrType ? arg.ClrType.Name : "Object"), primt.Name);
-                        valExpr = arg.GenCode(RHC.Expression, objx, context);
+                                lb.Name, (arg.HasClrType ? arg.ClrType.Name : "Object"), primt.Name));
+                        //valExpr = arg.GenCode(RHC.Expression, objx, context);
                        // valExpr = Expression.Convert(valExpr, primt);
                     }
 

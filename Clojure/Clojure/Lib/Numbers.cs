@@ -1754,6 +1754,11 @@ namespace clojure.lang
 
         #region Double overloads for basic ops
 
+        public static object num(object x)
+        {
+            return x;
+        }
+
         public static object num(double x)
         {
             return x;
