@@ -81,12 +81,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         bool _canBeCleared = true;
 
-        bool _recurMistmatch = false;
+        bool _recurMismatch = false;
 
-        public bool RecurMistmatch
+        public bool RecurMismatch
         {
-            get { return _recurMistmatch; }
-            set { _recurMistmatch = value; }
+            get { return _recurMismatch; }
+            set { _recurMismatch = value; }
         }
 
         #endregion
