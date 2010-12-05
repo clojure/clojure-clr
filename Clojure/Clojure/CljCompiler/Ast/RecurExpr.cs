@@ -30,15 +30,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         readonly IPersistentVector _args;
         readonly IPersistentVector _loopLocals;
+        readonly string _source;
+        readonly IPersistentMap _spanMap;
 
         #endregion
 
         #region Ctors
 
-        public RecurExpr(IPersistentVector loopLocals, IPersistentVector args)
+        public RecurExpr(string source, IPersistentMap spanMap, IPersistentVector loopLocals, IPersistentVector args)
         {
             _loopLocals = loopLocals;
             _args = args;
+            _source = source;
+            _spanMap = spanMap;
         }
 
         #endregion
@@ -110,7 +114,11 @@ namespace clojure.lang.CljCompiler.Ast
                 //        }
                 //    }
                 //}
-                return new RecurExpr(loopLocals, args);
+
+                string source = (string)Compiler.SOURCE.deref();
+                IPersistentMap spanMap = (IPersistentMap)Compiler.SOURCE_SPAN.deref();  // Compiler.GetSourceSpanMap(form);
+
+                return new RecurExpr(source, spanMap, loopLocals, args);
             }
         }
 
@@ -181,8 +189,9 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                     else
                     {
-                        if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-                            RT.errPrintWriter().WriteLine("recur arg for primitive local: {0} must be matching primitive, had: {1}, needed {2}",
+                        if (true) //RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                            RT.errPrintWriter().WriteLine("{0}: {1} recur arg for primitive local: {2} must be matching primitive, had: {3}, needed {4}",
+                                _source, _spanMap != null ? (int)_spanMap.valAt(RT.START_LINE_KEY, 0) : 0, 
                                 lb.Name, (arg.HasClrType ? arg.ClrType.Name : "Object"), primt.Name);
                         valExpr = arg.GenCode(RHC.Expression, objx, context);
                        // valExpr = Expression.Convert(valExpr, primt);
