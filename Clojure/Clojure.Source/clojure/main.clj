@@ -13,7 +13,8 @@
   clojure.main
   (:refer-clojure :exclude [with-bindings])
   (:import (clojure.lang Compiler Compiler+CompilerException             ;;;Compiler$CompilerException
-                         LineNumberingTextReader RT)))                   ;;; LineNumberingPushbackReader
+                         LineNumberingTextReader RT))                   ;;; LineNumberingPushbackReader
+  (:use [clojure.repl :only (demunge root-cause stack-element-str get-stack-trace)]))
 
 (declare main)
  
@@ -93,27 +94,19 @@
         (skip-if-eol *in*)
         input)))
 
-(defn- root-cause
-  "Returns the initial cause of an exception or error by peeling off all of
-  its wrappers"
-  [ ^Exception throwable]                     ;;; ^Throwable
-  (loop [cause throwable]
-    (if-let [cause (.InnerException cause)]    ;;; .getCause
-      (recur cause)
-      cause)))
-
 (defn repl-exception
-  "Returns CompilerExceptions in tact, but only the root cause of other
-  throwables"
+  "Returns the root cause of throwables"
   [throwable]
-  (if (instance? Compiler+CompilerException throwable)   ;;; Compiler$CompilerException
-    throwable
-    (root-cause throwable)))
+  (root-cause throwable))
 
 (defn repl-caught
   "Default :caught hook for repl"
   [e]
-  (.WriteLine *err* (repl-exception e)))      ;;; .println
+  (let [ex (repl-exception e)
+        el (aget (get-stack-trace ex) 0)]
+    (.WriteLine *err*                  ;;; .println
+                (str ex " "
+                     (stack-element-str el)))))
 
 (defn repl
   "Generic, reusable, read-eval-print loop. By default, reads from *in*,
@@ -194,7 +187,7 @@
       (catch Exception e                ;;; Throwable
         (caught e)
         (set! *e e)))
-     (use '[clojure.repl :only (source-fn apropos dir-fn dir)])
+     (use '[clojure.repl :only (source-fn apropos dir-fn dir pst)])
      (use '[clojure.pprint :only (pp pprint)])
      (prompt)
      (flush)

@@ -733,7 +733,7 @@ namespace clojure.lang
 
         #region Name munging
 
-        private static IPersistentMap CHAR_MAP = PersistentHashMap.create('-', "_",
+        public static IPersistentMap CHAR_MAP = PersistentHashMap.create('-', "_",
             //		                         '.', "_DOT_",
              ':', "_COLON_",
              '+', "_PLUS_",

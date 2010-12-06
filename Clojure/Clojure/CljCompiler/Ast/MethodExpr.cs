@@ -63,18 +63,20 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             Expression call;
+            Type retType;
 
             if (_method != null)
             {
                 call = GenDlrForMethod(objx, context);
-                call = HostExpr.GenBoxReturn(call,_method.ReturnType,objx,context);
+                retType = _method.ReturnType;
             }
             else
             {
                 call = GenerateComplexCall(objx, context);
-                call = HostExpr.GenBoxReturn(call,typeof(Object),objx,context);
+                retType = typeof(object);
             }
 
+            call = HostExpr.GenBoxReturn(call, retType, objx, context);         
             call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
             return call;
         }
