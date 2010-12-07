@@ -154,7 +154,7 @@ str-or-pattern."
      (when-let [e *e]
 	   (pst (root-cause e) depth)))
   ([^Exception e depth]                                            ;;; Throwable
-     (.WriteLine *err* (.Message e))                               ;;; .println                                 ;;; getMessage
+     (.WriteLine *err* (str (-> e class .Name) " " (.Message e)))  ;;; .getSimpleName .println                                 ;;; getMessage
      (let [st  (get-stack-trace e)                                 ;;; (.getStackTrace e)
 	       cause (.InnerException e)]                              ;;; .getCause
 	   (doseq [el (take depth
