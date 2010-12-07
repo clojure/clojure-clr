@@ -104,11 +104,14 @@ str-or-pattern."
 (defn root-cause
   "Returns the initial cause of an exception or error by peeling off all of
   its wrappers"
-  [ ^Exception throwable]                     ;;; ^Throwable
-  (loop [cause throwable]
-    (if-let [cause (.InnerException cause)]    ;;; .getCause
-      (recur cause)
-      cause)))
+  [ ^Exception t]                     ;;; ^Throwable
+  (loop [cause t]
+    (if (and (instance? clojure.lang.Compiler+CompilerException cause)
+	         (not= (.Source ^clojure.lang.Compiler+CompilerException cause) "NO_SOURCE_FILE"))  ;;; .source
+      cause
+	  (if-let [cause (.InnerException cause)]    ;;; .getCause
+        (recur cause)
+        cause))))
 
 ;;;  Added -DM
 
@@ -143,18 +146,24 @@ str-or-pattern."
          " (" (.GetFileName el) ":" (.GetFileLineNumber el) ")")))        ;;; getFileName  getLineNumber
 
 (defn pst
-  "Prints a stack trace of the exception. If none supplied, uses the root cause of the
-  most recent repl exception (*e)."
+  "Prints a stack trace of the exception, to the depth requsted. If none supplied, uses the root cause of the
+  most recent repl exception (*e), and a depth of 12."
   {:added "1.3"}
-  ([]
+  ([] (pst 12))
+  ([depth]
      (when-let [e *e]
-       (pst (root-cause e))))
-  ([e]
+	   (pst (root-cause e) depth)))
+  ([^Exception e depth]                                            ;;; Throwable
      (.WriteLine *err* (.Message e))                               ;;; .println                                 ;;; getMessage
-     (doseq [el (get-stack-trace e)]                                                          ;;; (.getStackTrace e)
-       (when-not (#{"clojure.lang.RestFn" "clojure.lang.AFn" "clojure.lang.AFnImpl" "clojure.lang.RestFnImpl"} (stack-element-classname el))   ;;;  (.getClassName el)
-         (.WriteLine *err* (str \tab (stack-element-str el)))))    ;;; .println
-     (when (.InnerException e)              ;;; .getCause
-       (.WriteLine *err* "Caused by:")                             ;;; .println
-       (pst (.InnerException e)))))         ;;; .getCause
+     (let [st  (get-stack-trace e)                                 ;;; (.getStackTrace e)
+	       cause (.InnerException e)]                              ;;; .getCause
+	   (doseq [el (take depth
+	                    (remove #(#{"clojure.lang.RestFn" "clojure.lang.AFn" "clojure.lang.AFnImpl" "clojure.lang.RestFnImpl"}	(stack-element-classname %))   ;;;  (.getClassName %)
+						        st))]
+         (.WriteLine *err* (str \tab (stack-element-str el))))     ;;; .println
+       (when cause
+         (.WriteLine *err* "Caused by:")                             ;;; .println
+         (pst cause (min depth
+	                     (+ 2 (- (count (get-stack-trace cause))    ;;; (.getStackTrace cause)
+			  		             (count st)))))))))
 

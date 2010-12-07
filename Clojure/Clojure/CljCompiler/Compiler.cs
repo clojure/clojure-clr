@@ -1506,9 +1506,11 @@ namespace clojure.lang
 
         public sealed class CompilerException : Exception
         {
+
             public CompilerException(string source, int line, Exception cause)
                 : base(ErrorMsg(source, line, cause.ToString()), cause)
             {
+                Source = source;
             }
 
             public override string ToString()
@@ -1518,7 +1520,7 @@ namespace clojure.lang
 
             static string ErrorMsg(string source, int line, string s)
             {
-                return string.Format("{0} ({1}:{2})", s, source, line);
+                return string.Format("{0}, compiling: ({1}:{2})", s, source, line);
             }
 
         }
