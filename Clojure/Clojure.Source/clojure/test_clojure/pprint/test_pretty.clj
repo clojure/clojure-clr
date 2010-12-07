@@ -214,7 +214,7 @@ Usage: *hello*
   []
   (let [a (agent "foo")]
     (send a +)
-    (try (await-for 100 failed-agent) (catch Exception re))   ;;; RuntimeException
+    (try (await-for 100 a) (catch Exception re))   ;;; RuntimeException
     a))
 (def basic-atom (atom '(first second third)))
 (def basic-ref (ref '(first second third)))
