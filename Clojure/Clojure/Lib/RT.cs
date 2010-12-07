@@ -541,9 +541,9 @@ namespace clojure.lang
         static void DoInit()
         {
             load("clojure/core");
-            load("clojure/zip", false);
-            //load("clojure/xml", false);
-            load("clojure/set", false);
+            //load("clojure/zip", false);
+            ////load("clojure/xml", false);
+            //load("clojure/set", false);
 
             PostBootstrapInit();
         }
