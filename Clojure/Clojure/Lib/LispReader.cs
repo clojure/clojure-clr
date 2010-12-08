@@ -280,6 +280,10 @@ namespace clojure.lang
         
         public static List<Object> readDelimitedList(char delim, PushbackTextReader r, bool isRecursive)
         {
+            int firstLine = (r is LineNumberingTextReader)
+                ? ((LineNumberingTextReader)r).LineNumber
+                : -1;
+
             List<Object> a = new List<object>();
 
             for (; ; )
@@ -290,7 +294,12 @@ namespace clojure.lang
                     ch = r.Read();
 
                 if (ch == -1)
-                    throw new EndOfStreamException("EOF while reading");
+                {
+                    if (firstLine < 0)
+                        throw new EndOfStreamException("EOF while reading");
+                    else
+                        throw new EndOfStreamException("EOF while reading, starting at line " + firstLine);
+                }
 
                 if (ch == delim)
                 {
