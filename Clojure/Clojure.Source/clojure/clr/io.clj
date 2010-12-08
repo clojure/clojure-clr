@@ -51,7 +51,7 @@
   (as-file [u] 
 	(if (.IsFile u)
 	  (as-file (.LocalPath u))
-      (throw (ArgumentException. "Not a file: " u)))))
+      (throw (ArgumentException. (str "Not a file: " u))))))
 
 (defprotocol ^{:added "1.2"} IOFactory
   "Factory functions that create ready-to-use, buffered versions of
