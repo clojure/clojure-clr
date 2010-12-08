@@ -1525,7 +1525,6 @@
                       options)
         dispatch-fn (first options)
         options     (next options)
-        ;m           (assoc m :tag 'clojure.lang.MultiFn)         ;;; ;;; ;;; Major change -- this tag is breaking my type inferencing
         m           (if docstring
                       (assoc m :doc docstring)
                       m)
