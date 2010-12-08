@@ -1212,7 +1212,7 @@ namespace clojure.lang
             }
             catch (LispReader.ReaderException e)
             {
-                throw new CompilerException(sourceName, e.Line, e.InnerException);
+                throw new CompilerException(sourcePath, e.Line, e.InnerException);
             }
             finally
             {
@@ -1341,7 +1341,7 @@ namespace clojure.lang
             }
             catch (LispReader.ReaderException e)
             {
-                throw new CompilerException(sourceName, e.Line, e.InnerException);
+                throw new CompilerException(sourcePath, e.Line, e.InnerException);
             }
             finally
             {
@@ -1366,39 +1366,49 @@ namespace clojure.lang
 
         public static Expr Analyze(ParserContext pcontext, object form, string name)
         {
-            if (form is LazySeq)
+            try
             {
-                form = RT.seq(form);
+                if (form is LazySeq)
+                {
+                    form = RT.seq(form);
+                    if (form == null)
+                        form = PersistentList.EMPTY;
+                }
                 if (form == null)
-                    form = PersistentList.EMPTY;
+                    return NIL_EXPR;
+                else if (form is Boolean)
+                    return ((bool)form) ? TRUE_EXPR : FALSE_EXPR;
+
+                Type type = form.GetType();
+
+                if (type == typeof(Symbol))
+                    return AnalyzeSymbol((Symbol)form);
+                else if (type == typeof(Keyword))
+                    return RegisterKeyword((Keyword)form);
+                else if (Util.IsNumeric(form))
+                    return NumberExpr.Parse(form);
+                else if (type == typeof(String))
+                    return new StringExpr(String.Intern((String)form));
+                else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
+                    return OptionallyGenerateMetaInit(pcontext, form, new EmptyExpr(form));
+                else if (form is ISeq)
+                    return AnalyzeSeq(pcontext, (ISeq)form, name);
+                else if (form is IPersistentVector)
+                    return VectorExpr.Parse(pcontext, (IPersistentVector)form);
+                else if (form is IPersistentMap)
+                    return MapExpr.Parse(pcontext, (IPersistentMap)form);
+                else if (form is IPersistentSet)
+                    return SetExpr.Parse(pcontext, (IPersistentSet)form);
+                else
+                    return new ConstantExpr(form);
             }
-            if (form == null)
-                return NIL_EXPR;
-            else if (form is Boolean)
-                return ((bool)form) ? TRUE_EXPR : FALSE_EXPR;
-
-            Type type = form.GetType();
-
-            if (type == typeof(Symbol))
-                return AnalyzeSymbol((Symbol)form);
-            else if (type == typeof(Keyword))
-                return RegisterKeyword((Keyword)form);
-            else if (Util.IsNumeric(form))
-                return NumberExpr.Parse(form);
-            else if (type == typeof(String))
-                return new StringExpr(String.Intern((String)form));
-            else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
-                return OptionallyGenerateMetaInit(pcontext, form, new EmptyExpr(form));
-            else if (form is ISeq)
-                return AnalyzeSeq(pcontext, (ISeq)form, name);
-            else if (form is IPersistentVector)
-                return VectorExpr.Parse(pcontext, (IPersistentVector)form);
-            else if (form is IPersistentMap)
-                return MapExpr.Parse(pcontext, (IPersistentMap)form);
-            else if (form is IPersistentSet)
-                return SetExpr.Parse(pcontext, (IPersistentSet)form);
-            else
-                return new ConstantExpr(form);
+            catch (Exception e)
+            {
+                if (!(e is CompilerException))
+                    throw new CompilerException((String)SOURCE_PATH.deref(), (int)LINE.deref(), e);
+                else
+                    throw e;
+            }
         }
 
         internal static Expr OptionallyGenerateMetaInit(ParserContext pcon, object form, Expr expr)
@@ -1492,6 +1502,13 @@ namespace clojure.lang
                     return p.Parse(pcon,form);
                 else
                     return InvokeExpr.Parse(pcon,form);
+            }
+            catch (Exception e)
+            {
+                if (!(e is CompilerException))
+                    throw new CompilerException((String)SOURCE_PATH.deref(), (int)LINE.deref(), e);
+                else
+                    throw e;
             }
             finally
             {
