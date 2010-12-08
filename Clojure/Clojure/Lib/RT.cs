@@ -505,7 +505,6 @@ namespace clojure.lang
 
             _versionProperties.LoadFromString(clojure.lang.Properties.Resources.version); 
 
-            Keyword dockw = Keyword.intern(null, "doc");
             Keyword arglistskw = Keyword.intern(null, "arglists");
             Symbol namesym = Symbol.create("name");
 
@@ -513,7 +512,7 @@ namespace clojure.lang
 
             CURRENT_NS.Tag = Symbol.create("clojure.lang.Namespace");
 
-            AGENT.setMeta(map(dockw, "The agent currently running an action on this thread, else nil."));
+            AGENT.setMeta(map(DOC_KEY, "The agent currently running an action on this thread, else nil."));
             AGENT.Tag = Symbol.create("clojure.lang.Agent");
 
             // We don't have MathContext (yet)
@@ -526,11 +525,11 @@ namespace clojure.lang
 
             Var v;
             v = Var.intern(CLOJURE_NS, IN_NAMESPACE, new InNamespaceFn());
-            v.setMeta(map(dockw, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
+            v.setMeta(map(DOC_KEY, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
                 arglistskw, list(vector(namesym))));
 
             v = Var.intern(CLOJURE_NS, LOAD_FILE, new LoadFileFn());
-            v.setMeta(map(dockw, "Sequentially read and evaluate the set of forms contained in the file.",
+            v.setMeta(map(DOC_KEY, "Sequentially read and evaluate the set of forms contained in the file.",
                 arglistskw, list(vector(namesym))));
 
             //v = Var.intern(CLOJURE_NS, IDENTICAL, new IdenticalFn());
