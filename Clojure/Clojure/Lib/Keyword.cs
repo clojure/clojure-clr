@@ -253,6 +253,29 @@ namespace clojure.lang
         }
 
         #endregion
+
+        #region other
+
+        public static Keyword find(Symbol sym)
+        {
+            WeakReference wr = _symKeyMap.Get(sym);
+            if (wr != null)
+                return (Keyword)wr.Target;
+            else
+                return null;
+        }
+
+        public static Keyword find(String ns, String name)
+        {
+            return find(Symbol.intern(ns, name));
+        }
+
+        public static Keyword find(String nsname)
+        {
+            return find(Symbol.intern(nsname));
+        }
+
+        #endregion
     }
 
     [Serializable]
