@@ -904,7 +904,7 @@ namespace clojure.lang
             else if (coll is String)
                 return ((string)coll)[n];
             else if (coll.GetType().IsArray)
-                return Reflector.prepRet(((Array)coll).GetValue(n));  // TODO: Java has Reflector.prepRet -- check all uses.
+                return Reflector.prepRet(coll.GetType().GetElementType(),((Array)coll).GetValue(n));  // TODO: Java has Reflector.prepRet -- check all uses.
             // Java has RandomAccess here.  CLR has no equiv.
             // Trying to replace it with IList caused some real problems,  See the fix in ASeq.
             else if (coll is IList)
@@ -987,7 +987,7 @@ namespace clojure.lang
             {
                 Array a = (Array)coll;
                 if (n < a.Length)
-                    return a.GetValue(n);  // Java: has call to Reflector.prepRet wrapped here.
+                    return Reflector.prepRet(a.GetType().GetElementType(),a.GetValue(n)); 
                 return notFound;
             }
             else if (coll is IList)   // Changed to RandomAccess in Java Rev 1218.  
@@ -1899,27 +1899,6 @@ namespace clojure.lang
         }
 
         static public readonly IComparer DEFAULT_COMPARER = new DefaultComparer();
-
-
-
-
-        // TODO: Check uses in Java code and replicate.  (This was a no-op until the num changes were made.)
-        public static Object prepRet(Object x)
-        {
-            //	if(c == boolean.class)
-            //		return ((Boolean) x).booleanValue() ? RT.T : null;
-            //if (x is Boolean)
-            //    //return ((Boolean)x) ? RT.T : RT.F; // Java version has Boolean.TRUE and Boolean.FALSE
-            //    return ((Boolean)x); // Java version has Boolean.TRUE and Boolean.FALSE
-            //else 
-            if (x is long)
-            {
-                long val = (long)x;
-                if (val >= Int32.MinValue && val <= Int32.MaxValue)
-                    return (int)val;
-            }
-            return x;
-        }
 
 
         // do we need this?

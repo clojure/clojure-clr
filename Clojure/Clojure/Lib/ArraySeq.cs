@@ -99,6 +99,7 @@ namespace clojure.lang
 
         private readonly Array _a;
         private readonly int _i;
+        private readonly Type _ct;
 
         #endregion
 
@@ -108,6 +109,7 @@ namespace clojure.lang
         {
             _a = (Array)array;
             _i = i;
+            _ct = array.GetType().GetElementType();
         }
 
         public UntypedArraySeq(IPersistentMap meta, object array, int i)
@@ -115,6 +117,7 @@ namespace clojure.lang
         {
             _a = (Array)array;
             _i = i;
+            _ct = array.GetType().GetElementType();
         }
 
         #endregion
@@ -123,7 +126,7 @@ namespace clojure.lang
 
         public override object first()
         {
-            return Reflector.prepRet(_a.GetValue(_i));
+            return Reflector.prepRet(_ct,_a.GetValue(_i));
         }
 
         public override ISeq next()
@@ -166,17 +169,17 @@ namespace clojure.lang
 
         public object reduce(IFn f)
         {
-            object ret = RT.prepRet(_a.GetValue(_i));
+            object ret = Reflector.prepRet(_ct,_a.GetValue(_i));
             for (int x = _i + 1; x < _a.Length; x++)
-                ret = f.invoke(ret, RT.prepRet(_a.GetValue(x)));
+                ret = f.invoke(ret, Reflector.prepRet(_ct,_a.GetValue(x)));
             return ret;
         }
 
         public object reduce(IFn f, object start)
         {
-            object ret = f.invoke(start, RT.prepRet(_a.GetValue(_i)));
+            object ret = f.invoke(start, Reflector.prepRet(_ct,_a.GetValue(_i)));
             for (int x = _i + 1; x < _a.Length; x++)
-                ret = f.invoke(ret, RT.prepRet(_a.GetValue(x)));
+                ret = f.invoke(ret, Reflector.prepRet(_ct,_a.GetValue(x)));
             return ret;
         }
 
@@ -188,7 +191,7 @@ namespace clojure.lang
         {
             int n = _a.Length;
             for (int j = _i; j < n; j++)
-                if (Util.equals(value, Reflector.prepRet(_a.GetValue(j))))
+                if (Util.equals(value, Reflector.prepRet(_ct,_a.GetValue(j))))
                     return j - _i;
             return -1;
         }
@@ -225,6 +228,7 @@ namespace clojure.lang
 
         protected readonly T[] _array;
         protected readonly int _i;
+        protected readonly Type _ct;
 
         #endregion
 
@@ -235,6 +239,7 @@ namespace clojure.lang
         {
             _array = array;
             _i = i;
+            _ct = array.GetType().GetElementType();
         }
 
         #endregion
@@ -267,7 +272,7 @@ namespace clojure.lang
 
         public override object first()
         {
-            return _array[_i];
+            return Reflector.prepRet(_ct,_array[_i]);
         }
 
         public override ISeq next()
@@ -301,17 +306,17 @@ namespace clojure.lang
 
         public object reduce(IFn f)
         {
-            object ret = _array[_i];
+            object ret = Reflector.prepRet(_ct,_array[_i]);
             for (int x = _i + 1; x < _array.Length; x++)
-                ret = f.invoke(ret, _array[x]);
+                ret = f.invoke(ret, Reflector.prepRet(_ct,_array[x]));
             return ret;
         }
 
         public object reduce(IFn f, object start)
         {
-            object ret = f.invoke(start,_array[_i]);
+            object ret = f.invoke(start, Reflector.prepRet(_ct, _array[_i]));
             for (int x = _i + 1; x < _array.Length; x++)
-                ret = f.invoke(ret, _array[x]);
+                ret = f.invoke(ret, Reflector.prepRet(_ct,_array[x]));
             return ret;
         }
 

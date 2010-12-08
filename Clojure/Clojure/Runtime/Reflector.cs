@@ -91,16 +91,16 @@ namespace clojure.lang
 
             FieldInfo field = GetField(t, fieldname, false);
             if (field != null)
-                return field.GetValue(target);
+                return Reflector.prepRet(field.FieldType,field.GetValue(target));
 
             PropertyInfo prop = GetProperty(t, fieldname, false);
             if (prop != null)
-                return prop.GetValue(target, new object[0]);
+                return Reflector.prepRet(prop.PropertyType,prop.GetValue(target, new object[0]));
 
             MethodInfo method = GetArityZeroMethod(t, fieldname, false);
 
             if (method != null)
-                return method.Invoke(target, new object[0]);
+                return Reflector.prepRet(method.ReturnType, method.Invoke(target, new object[0]));
 
             throw new ArgumentException(String.Format("No matching instance field/property found: {0} for {1}", fieldname, t));
         }
@@ -109,16 +109,16 @@ namespace clojure.lang
         {
             FieldInfo field = GetField(t, fieldname, true);
             if (field != null)
-                return field.GetValue(null);
+                return Reflector.prepRet(field.FieldType,field.GetValue(null));
 
             PropertyInfo prop = GetProperty(t, fieldname, true);
             if (prop != null)
-                return prop.GetValue(null, new object[0]);
+                return Reflector.prepRet(prop.PropertyType,prop.GetValue(null, new object[0]));
 
             MethodInfo method = GetArityZeroMethod(t, fieldname, true);
 
             if (method != null)
-                return method.Invoke(null, new object[0]);
+                return Reflector.prepRet(method.ReturnType,method.Invoke(null, new object[0]));
 
             throw new ArgumentException(String.Format("No matching static field/property found: {0} for {1}", fieldname, t));
         }
@@ -295,7 +295,7 @@ namespace clojure.lang
                 return null;
             }
             else
-                return info.Invoke(target, boxedArgs);
+                return prepRet(info.ReturnType,info.Invoke(target, boxedArgs));
         }
 
         #endregion
@@ -378,8 +378,11 @@ namespace clojure.lang
             return AreAssignable(paramType, argType);
         }
 
-        public static Object prepRet(Object x)
+        public static Object prepRet(Type t, Object x)
         {
+            if (!t.IsPrimitive)
+                return x;
+
             if (x is Boolean)
                 //return ((Boolean)x) ? RT.T : RT.F;
                 return ((Boolean)x) ? true : false;
