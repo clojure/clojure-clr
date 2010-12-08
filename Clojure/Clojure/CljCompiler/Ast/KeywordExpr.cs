@@ -59,15 +59,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region eval
-
-        public object Eval()
-        {
-            return _kw;
-        }
-
-        #endregion
-
         #region Code generation
 
         public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)

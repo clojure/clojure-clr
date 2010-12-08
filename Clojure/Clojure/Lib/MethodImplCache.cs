@@ -141,7 +141,7 @@ namespace clojure.lang
        IFn FindFnFor(Type t)
        {
             int idx = ((Util.hash(t) >> _shift) & _mask) << 1;
-            if (idx < _table.Length && _table[idx] == t)
+            if (idx < _table.Length && ((Type)_table[idx]) == t)
             {
                 Entry e = ((Entry)table[idx + 1]);
                 _mre = e;
