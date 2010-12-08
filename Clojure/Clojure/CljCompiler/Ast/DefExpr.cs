@@ -67,7 +67,14 @@ namespace clojure.lang.CljCompiler.Ast
         {
             public Expr Parse(ParserContext pcon, object form)
             {
-                // (def x) or (def x initexpr)
+                // (def x) or (def x initexpr) or (def x "docstring" initexpr)
+                string docstring = null;
+                if (RT.count(form) == 4 && (RT.third(form) is String))
+                {
+                    docstring = (String)RT.third(form);
+                    form = RT.list(RT.first(form), RT.second(form), RT.fourth(form));
+                }
+
                 if (RT.count(form) > 3)
                     throw new Exception("Too many arguments to def");
 
@@ -118,6 +125,8 @@ namespace clojure.lang.CljCompiler.Ast
                 mm = (IPersistentMap)RT.assoc(mm,RT.LINE_KEY, Compiler.LINE.deref())
                     .assoc(RT.FILE_KEY, source_path)
                     .assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
+                if (docstring != null)
+                    mm = (IPersistentMap)RT.assoc(mm, RT.DOC_KEY, docstring);
 
                 Expr meta =  mm == null ? null : Compiler.Analyze(pcon.EvEx(),mm);
                 Expr init = Compiler.Analyze(pcon.EvEx(),RT.third(form), v.Symbol.Name);

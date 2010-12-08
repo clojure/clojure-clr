@@ -340,6 +340,9 @@ namespace clojure.lang
         public static readonly Keyword DECLARED_KEY
             = Keyword.intern(null, "declared");
 
+        public static readonly Keyword DOC_KEY
+            = Keyword.intern(null, "doc");
+
         #endregion
 
         #region Vars (namespace-related)
