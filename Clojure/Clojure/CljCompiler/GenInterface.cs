@@ -71,7 +71,7 @@ namespace clojure.lang
         // value = { :key value ... }
         // Special key :__args indicates positional arguments
 
-        public static readonly Var EXTRACT_ATTRIBUTES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),Symbol.create("extract-attributes"));
+        public static readonly Var EXTRACT_ATTRIBUTES = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),Symbol.intern("extract-attributes"));
 
         public static IPersistentMap ExtractAttributes(IPersistentMap meta)
         {

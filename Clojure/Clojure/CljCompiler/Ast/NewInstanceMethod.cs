@@ -195,7 +195,7 @@ namespace clojure.lang.CljCompiler.Ast
                     if (tag != null)
                         hinted = true;
                     if (p.Namespace != null)
-                        p = Symbol.create(p.Name);
+                        p = Symbol.intern(p.Name);
                     Type pType = Compiler.TagType(tag);
                     if (isByRef)
                         pType = pType.MakeByRefType();

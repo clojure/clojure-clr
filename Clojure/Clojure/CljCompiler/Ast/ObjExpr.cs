@@ -767,7 +767,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Symbol sym = (Symbol)value;
                 ret = Expression.Call(
                     null,
-                    Compiler.Method_Symbol_create2,
+                    Compiler.Method_Symbol_intern2,
                     Expression.Convert(Expression.Constant(sym.Namespace), typeof(string)),  // can be null
                     Expression.Constant(sym.Name));
             }

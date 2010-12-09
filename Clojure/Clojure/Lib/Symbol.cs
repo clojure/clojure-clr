@@ -79,27 +79,6 @@ namespace clojure.lang
         }
 
         /// <summary>
-        /// Create a symbol, no namespace, from an interned string.
-        /// </summary>
-        /// <param name="name_interned">The name (interned string)</param>
-        /// <returns></returns>
-        static public Symbol create(string name_interned)
-        {
-            return new Symbol(null, name_interned);
-        }
-
-        /// <summary>
-        /// Create a symbol with given namespace name and name, both interned.
-        /// </summary>
-        /// <param name="ns_interned">Interned namespace name.</param>
-        /// <param name="name_interned">Interned symbol name.</param>
-        /// <returns></returns>
-        static public Symbol create(string ns_interned, string name_interned)
-        {
-            return new Symbol(ns_interned, name_interned);
-        }
-
-        /// <summary>
         /// Construct a symbol from interned namespace name and symbol name.
         /// </summary>
         /// <param name="ns_interned">The (interned) namespace name.</param>

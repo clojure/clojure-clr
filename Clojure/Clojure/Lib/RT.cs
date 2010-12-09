@@ -41,229 +41,229 @@ namespace clojure.lang
         //simple-symbol->class
         internal static readonly IPersistentMap DEFAULT_IMPORTS = map(
             //classes
-            Symbol.create("AccessViolationException"), typeof(AccessViolationException),
-            Symbol.create("ActivationContext"), typeof(ActivationContext),
-            Symbol.create("Activator"), typeof(Activator),
-            Symbol.create("AppDomain"), typeof(AppDomain),
-            Symbol.create("AppDomainManager"), typeof(AppDomainManager),
-            Symbol.create("AppDomainSetup"), typeof(AppDomainSetup),
-            Symbol.create("AppDomainUnloadedException"), typeof(AppDomainUnloadedException),
-            Symbol.create("ApplicationException"), typeof(ApplicationException),
-            Symbol.create("ApplicationId"), typeof(ApplicationId),
-            Symbol.create("ApplicationIdentity"), typeof(ApplicationIdentity),
-            Symbol.create("ArgumentException"), typeof(ArgumentException),
-            Symbol.create("ArgumentNullException"), typeof(ArgumentNullException),
-            Symbol.create("ArgumentOutOfRangeException"), typeof(ArgumentOutOfRangeException),
-            Symbol.create("ArithmeticException"), typeof(ArithmeticException),
-            Symbol.create("Array"), typeof(Array),
-            Symbol.create("ArrayTypeMismatchException"), typeof(ArrayTypeMismatchException),
-            Symbol.create("AssemblyLoadEventArgs"), typeof(AssemblyLoadEventArgs),
-            Symbol.create("Attribute"), typeof(Attribute),
-            Symbol.create("AttributeUsageAttribute"), typeof(AttributeUsageAttribute),
-            Symbol.create("BadImageFormatException"), typeof(BadImageFormatException),
-            Symbol.create("BitConverter"), typeof(BitConverter),
-            Symbol.create("Buffer"), typeof(Buffer),
-            Symbol.create("CannotUnloadAppDomainException"), typeof(CannotUnloadAppDomainException),
-            Symbol.create("CharEnumerator"), typeof(CharEnumerator),
-            Symbol.create("CLSCompliantAttribute"), typeof(CLSCompliantAttribute),
-            Symbol.create("Console"), typeof(Console),
-            Symbol.create("ConsoleCancelEventArgs"), typeof(ConsoleCancelEventArgs),
-            Symbol.create("ContextBoundObject"), typeof(ContextBoundObject),
-            //Symbol.create("ContextMarshalException"), typeof(ContextMarshalException), -- obsolete
-            Symbol.create("ContextStaticAttribute"), typeof(ContextStaticAttribute),
-            Symbol.create("Convert"), typeof(Convert),
-            Symbol.create("DataMisalignedException"), typeof(DataMisalignedException),
-            Symbol.create("DBNull"), typeof(DBNull),
-            Symbol.create("Delegate"), typeof(Delegate),
-            Symbol.create("DivideByZeroException"), typeof(DivideByZeroException),
-            Symbol.create("DllNotFoundException"), typeof(DllNotFoundException),
-            Symbol.create("DuplicateWaitObjectException"), typeof(DuplicateWaitObjectException),
-            Symbol.create("EntryPointNotFoundException"), typeof(EntryPointNotFoundException),
-            Symbol.create("Enum"), typeof(Enum),
-            Symbol.create("Environment"), typeof(Environment),
-            Symbol.create("EventArgs"), typeof(EventArgs),
-            Symbol.create("Exception"), typeof(Exception),
-            Symbol.create("ExecutionEngineException"), typeof(ExecutionEngineException),
-            Symbol.create("FieldAccessException"), typeof(FieldAccessException),
-            Symbol.create("FileStyleUriParser"), typeof(FileStyleUriParser),
-            Symbol.create("FlagsAttribute"), typeof(FlagsAttribute),
-            Symbol.create("FormatException"), typeof(FormatException),
-            Symbol.create("FtpStyleUriParser"), typeof(FtpStyleUriParser),
-            Symbol.create("GC"), typeof(GC),
-            Symbol.create("GenericUriParser"), typeof(GenericUriParser),
-            Symbol.create("GopherStyleUriParser"), typeof(GopherStyleUriParser),
-            Symbol.create("HttpStyleUriParser"), typeof(HttpStyleUriParser),
-            Symbol.create("IndexOutOfRangeException"), typeof(IndexOutOfRangeException),
-            Symbol.create("InsufficientMemoryException"), typeof(InsufficientMemoryException),
-            Symbol.create("InvalidCastException"), typeof(InvalidCastException),
-            Symbol.create("InvalidOperationException"), typeof(InvalidOperationException),
-            Symbol.create("InvalidProgramException"), typeof(InvalidProgramException),
-            Symbol.create("InvalidTimeZoneException"), typeof(InvalidTimeZoneException),
-            Symbol.create("LdapStyleUriParser"), typeof(LdapStyleUriParser),
-            Symbol.create("LoaderOptimizationAttribute"), typeof(LoaderOptimizationAttribute),
-            Symbol.create("LocalDataStoreSlot"), typeof(LocalDataStoreSlot),
-            Symbol.create("MarshalByRefObject"), typeof(MarshalByRefObject),
-            Symbol.create("Math"), typeof(Math),
-            Symbol.create("MemberAccessException"), typeof(MemberAccessException),
-            Symbol.create("MethodAccessException"), typeof(MethodAccessException),
-            Symbol.create("MissingFieldException"), typeof(MissingFieldException),
-            Symbol.create("MissingMemberException"), typeof(MissingMemberException),
-            Symbol.create("MTAThreadAttribute"), typeof(MTAThreadAttribute),
-            Symbol.create("MulticastDelegate"), typeof(MulticastDelegate),
-            Symbol.create("MulticastNotSupportedException"), typeof(MulticastNotSupportedException),
-            Symbol.create("NetPipeStyleUriParser"), typeof(NetPipeStyleUriParser),
-            Symbol.create("NetTcpStyleUriParser"), typeof(NetTcpStyleUriParser),
-            Symbol.create("NewsStyleUriParser"), typeof(NewsStyleUriParser),
-            Symbol.create("NonSerializedAttribute"), typeof(NonSerializedAttribute),
-            Symbol.create("NotFiniteNumberException"), typeof(NotFiniteNumberException),
-            Symbol.create("NotImplementedException"), typeof(NotImplementedException),
-            Symbol.create("NotSupportedException"), typeof(NotSupportedException),
-            Symbol.create("Nullable"), typeof(Nullable),
-            Symbol.create("NullReferenceException"), typeof(NullReferenceException),
-            Symbol.create("Object"), typeof(Object),
-            Symbol.create("ObjectDisposedException"), typeof(ObjectDisposedException),
-            Symbol.create("ObsoleteAttribute"), typeof(ObsoleteAttribute),
-            Symbol.create("OperatingSystem"), typeof(OperatingSystem),
-            Symbol.create("OperationCanceledException"), typeof(OperationCanceledException),
-            Symbol.create("OutOfMemoryException"), typeof(OutOfMemoryException),
-            Symbol.create("OverflowException"), typeof(OverflowException),
-            Symbol.create("ParamArrayAttribute"), typeof(ParamArrayAttribute),
-            Symbol.create("PlatformNotSupportedException"), typeof(PlatformNotSupportedException),
-            Symbol.create("Random"), typeof(Random),
-            Symbol.create("RankException"), typeof(RankException),
-            Symbol.create("ResolveEventArgs"), typeof(ResolveEventArgs),
-            Symbol.create("SerializableAttribute"), typeof(SerializableAttribute),
-            Symbol.create("StackOverflowException"), typeof(StackOverflowException),
-            Symbol.create("STAThreadAttribute"), typeof(STAThreadAttribute),
-            Symbol.create("String"), typeof(String),
-            Symbol.create("StringComparer"), typeof(StringComparer),
-            Symbol.create("SystemException"), typeof(SystemException),
-            Symbol.create("ThreadStaticAttribute"), typeof(ThreadStaticAttribute),
-            Symbol.create("TimeoutException"), typeof(TimeoutException),
-            Symbol.create("TimeZone"), typeof(TimeZone),
-            Symbol.create("TimeZoneInfo"), typeof(TimeZoneInfo),
-            Symbol.create("TimeZoneNotFoundException"), typeof(TimeZoneNotFoundException),
-            // Symbol.create("TimeZoneInfo.AdjustmentRule"),typeof(TimeZoneInfo.AdjustmentRule),
-            Symbol.create("Type"), typeof(Type),
-            Symbol.create("TypeInitializationException"), typeof(TypeInitializationException),
-            Symbol.create("TypeLoadException"), typeof(TypeLoadException),
-            Symbol.create("TypeUnloadedException"), typeof(TypeUnloadedException),
-            Symbol.create("UnauthorizedAccessException"), typeof(UnauthorizedAccessException),
-            Symbol.create("UnhandledExceptionEventArgs"), typeof(UnhandledExceptionEventArgs),
-            Symbol.create("Uri"), typeof(Uri),
-            Symbol.create("UriBuilder"), typeof(UriBuilder),
-            Symbol.create("UriFormatException"), typeof(UriFormatException),
-            Symbol.create("UriParser"), typeof(UriParser),
-            // Symbol.create(""),typeof(UriTemplate),
-            // Symbol.create(""),typeof(UriTemplateEquivalenceComparer),
-            // Symbol.create(""),typeof(UriTemplateMatch),
-            // Symbol.create(""),typeof(UriTemplateMatchException),
-            // Symbol.create(""),typeof(UriTemplateTable),
-            Symbol.create("UriTypeConverter"), typeof(UriTypeConverter),
-            Symbol.create("ValueType"), typeof(ValueType),
-            Symbol.create("Version"), typeof(Version),
-            Symbol.create("WeakReference"), typeof(WeakReference),
+            Symbol.intern("AccessViolationException"), typeof(AccessViolationException),
+            Symbol.intern("ActivationContext"), typeof(ActivationContext),
+            Symbol.intern("Activator"), typeof(Activator),
+            Symbol.intern("AppDomain"), typeof(AppDomain),
+            Symbol.intern("AppDomainManager"), typeof(AppDomainManager),
+            Symbol.intern("AppDomainSetup"), typeof(AppDomainSetup),
+            Symbol.intern("AppDomainUnloadedException"), typeof(AppDomainUnloadedException),
+            Symbol.intern("ApplicationException"), typeof(ApplicationException),
+            Symbol.intern("ApplicationId"), typeof(ApplicationId),
+            Symbol.intern("ApplicationIdentity"), typeof(ApplicationIdentity),
+            Symbol.intern("ArgumentException"), typeof(ArgumentException),
+            Symbol.intern("ArgumentNullException"), typeof(ArgumentNullException),
+            Symbol.intern("ArgumentOutOfRangeException"), typeof(ArgumentOutOfRangeException),
+            Symbol.intern("ArithmeticException"), typeof(ArithmeticException),
+            Symbol.intern("Array"), typeof(Array),
+            Symbol.intern("ArrayTypeMismatchException"), typeof(ArrayTypeMismatchException),
+            Symbol.intern("AssemblyLoadEventArgs"), typeof(AssemblyLoadEventArgs),
+            Symbol.intern("Attribute"), typeof(Attribute),
+            Symbol.intern("AttributeUsageAttribute"), typeof(AttributeUsageAttribute),
+            Symbol.intern("BadImageFormatException"), typeof(BadImageFormatException),
+            Symbol.intern("BitConverter"), typeof(BitConverter),
+            Symbol.intern("Buffer"), typeof(Buffer),
+            Symbol.intern("CannotUnloadAppDomainException"), typeof(CannotUnloadAppDomainException),
+            Symbol.intern("CharEnumerator"), typeof(CharEnumerator),
+            Symbol.intern("CLSCompliantAttribute"), typeof(CLSCompliantAttribute),
+            Symbol.intern("Console"), typeof(Console),
+            Symbol.intern("ConsoleCancelEventArgs"), typeof(ConsoleCancelEventArgs),
+            Symbol.intern("ContextBoundObject"), typeof(ContextBoundObject),
+            //Symbol.intern("ContextMarshalException"), typeof(ContextMarshalException), -- obsolete
+            Symbol.intern("ContextStaticAttribute"), typeof(ContextStaticAttribute),
+            Symbol.intern("Convert"), typeof(Convert),
+            Symbol.intern("DataMisalignedException"), typeof(DataMisalignedException),
+            Symbol.intern("DBNull"), typeof(DBNull),
+            Symbol.intern("Delegate"), typeof(Delegate),
+            Symbol.intern("DivideByZeroException"), typeof(DivideByZeroException),
+            Symbol.intern("DllNotFoundException"), typeof(DllNotFoundException),
+            Symbol.intern("DuplicateWaitObjectException"), typeof(DuplicateWaitObjectException),
+            Symbol.intern("EntryPointNotFoundException"), typeof(EntryPointNotFoundException),
+            Symbol.intern("Enum"), typeof(Enum),
+            Symbol.intern("Environment"), typeof(Environment),
+            Symbol.intern("EventArgs"), typeof(EventArgs),
+            Symbol.intern("Exception"), typeof(Exception),
+            Symbol.intern("ExecutionEngineException"), typeof(ExecutionEngineException),
+            Symbol.intern("FieldAccessException"), typeof(FieldAccessException),
+            Symbol.intern("FileStyleUriParser"), typeof(FileStyleUriParser),
+            Symbol.intern("FlagsAttribute"), typeof(FlagsAttribute),
+            Symbol.intern("FormatException"), typeof(FormatException),
+            Symbol.intern("FtpStyleUriParser"), typeof(FtpStyleUriParser),
+            Symbol.intern("GC"), typeof(GC),
+            Symbol.intern("GenericUriParser"), typeof(GenericUriParser),
+            Symbol.intern("GopherStyleUriParser"), typeof(GopherStyleUriParser),
+            Symbol.intern("HttpStyleUriParser"), typeof(HttpStyleUriParser),
+            Symbol.intern("IndexOutOfRangeException"), typeof(IndexOutOfRangeException),
+            Symbol.intern("InsufficientMemoryException"), typeof(InsufficientMemoryException),
+            Symbol.intern("InvalidCastException"), typeof(InvalidCastException),
+            Symbol.intern("InvalidOperationException"), typeof(InvalidOperationException),
+            Symbol.intern("InvalidProgramException"), typeof(InvalidProgramException),
+            Symbol.intern("InvalidTimeZoneException"), typeof(InvalidTimeZoneException),
+            Symbol.intern("LdapStyleUriParser"), typeof(LdapStyleUriParser),
+            Symbol.intern("LoaderOptimizationAttribute"), typeof(LoaderOptimizationAttribute),
+            Symbol.intern("LocalDataStoreSlot"), typeof(LocalDataStoreSlot),
+            Symbol.intern("MarshalByRefObject"), typeof(MarshalByRefObject),
+            Symbol.intern("Math"), typeof(Math),
+            Symbol.intern("MemberAccessException"), typeof(MemberAccessException),
+            Symbol.intern("MethodAccessException"), typeof(MethodAccessException),
+            Symbol.intern("MissingFieldException"), typeof(MissingFieldException),
+            Symbol.intern("MissingMemberException"), typeof(MissingMemberException),
+            Symbol.intern("MTAThreadAttribute"), typeof(MTAThreadAttribute),
+            Symbol.intern("MulticastDelegate"), typeof(MulticastDelegate),
+            Symbol.intern("MulticastNotSupportedException"), typeof(MulticastNotSupportedException),
+            Symbol.intern("NetPipeStyleUriParser"), typeof(NetPipeStyleUriParser),
+            Symbol.intern("NetTcpStyleUriParser"), typeof(NetTcpStyleUriParser),
+            Symbol.intern("NewsStyleUriParser"), typeof(NewsStyleUriParser),
+            Symbol.intern("NonSerializedAttribute"), typeof(NonSerializedAttribute),
+            Symbol.intern("NotFiniteNumberException"), typeof(NotFiniteNumberException),
+            Symbol.intern("NotImplementedException"), typeof(NotImplementedException),
+            Symbol.intern("NotSupportedException"), typeof(NotSupportedException),
+            Symbol.intern("Nullable"), typeof(Nullable),
+            Symbol.intern("NullReferenceException"), typeof(NullReferenceException),
+            Symbol.intern("Object"), typeof(Object),
+            Symbol.intern("ObjectDisposedException"), typeof(ObjectDisposedException),
+            Symbol.intern("ObsoleteAttribute"), typeof(ObsoleteAttribute),
+            Symbol.intern("OperatingSystem"), typeof(OperatingSystem),
+            Symbol.intern("OperationCanceledException"), typeof(OperationCanceledException),
+            Symbol.intern("OutOfMemoryException"), typeof(OutOfMemoryException),
+            Symbol.intern("OverflowException"), typeof(OverflowException),
+            Symbol.intern("ParamArrayAttribute"), typeof(ParamArrayAttribute),
+            Symbol.intern("PlatformNotSupportedException"), typeof(PlatformNotSupportedException),
+            Symbol.intern("Random"), typeof(Random),
+            Symbol.intern("RankException"), typeof(RankException),
+            Symbol.intern("ResolveEventArgs"), typeof(ResolveEventArgs),
+            Symbol.intern("SerializableAttribute"), typeof(SerializableAttribute),
+            Symbol.intern("StackOverflowException"), typeof(StackOverflowException),
+            Symbol.intern("STAThreadAttribute"), typeof(STAThreadAttribute),
+            Symbol.intern("String"), typeof(String),
+            Symbol.intern("StringComparer"), typeof(StringComparer),
+            Symbol.intern("SystemException"), typeof(SystemException),
+            Symbol.intern("ThreadStaticAttribute"), typeof(ThreadStaticAttribute),
+            Symbol.intern("TimeoutException"), typeof(TimeoutException),
+            Symbol.intern("TimeZone"), typeof(TimeZone),
+            Symbol.intern("TimeZoneInfo"), typeof(TimeZoneInfo),
+            Symbol.intern("TimeZoneNotFoundException"), typeof(TimeZoneNotFoundException),
+            // Symbol.intern("TimeZoneInfo.AdjustmentRule"),typeof(TimeZoneInfo.AdjustmentRule),
+            Symbol.intern("Type"), typeof(Type),
+            Symbol.intern("TypeInitializationException"), typeof(TypeInitializationException),
+            Symbol.intern("TypeLoadException"), typeof(TypeLoadException),
+            Symbol.intern("TypeUnloadedException"), typeof(TypeUnloadedException),
+            Symbol.intern("UnauthorizedAccessException"), typeof(UnauthorizedAccessException),
+            Symbol.intern("UnhandledExceptionEventArgs"), typeof(UnhandledExceptionEventArgs),
+            Symbol.intern("Uri"), typeof(Uri),
+            Symbol.intern("UriBuilder"), typeof(UriBuilder),
+            Symbol.intern("UriFormatException"), typeof(UriFormatException),
+            Symbol.intern("UriParser"), typeof(UriParser),
+            // Symbol.intern(""),typeof(UriTemplate),
+            // Symbol.intern(""),typeof(UriTemplateEquivalenceComparer),
+            // Symbol.intern(""),typeof(UriTemplateMatch),
+            // Symbol.intern(""),typeof(UriTemplateMatchException),
+            // Symbol.intern(""),typeof(UriTemplateTable),
+            Symbol.intern("UriTypeConverter"), typeof(UriTypeConverter),
+            Symbol.intern("ValueType"), typeof(ValueType),
+            Symbol.intern("Version"), typeof(Version),
+            Symbol.intern("WeakReference"), typeof(WeakReference),
             // structures/
-            Symbol.create("ArgIterator"), typeof(ArgIterator),
-            // Symbol.create(""),typeof(ArraySegment<T>),
-            Symbol.create("Boolean"), typeof(Boolean),
-            Symbol.create("Byte"), typeof(Byte),
-            Symbol.create("Char"), typeof(Char),
-            Symbol.create("ConsoleKeyInfo"), typeof(ConsoleKeyInfo),
-            Symbol.create("DateTime"), typeof(DateTime),
-            Symbol.create("DateTimeOffset"), typeof(DateTimeOffset),
-            Symbol.create("Decimal"), typeof(Decimal),
-            Symbol.create("Double"), typeof(Double),
-            Symbol.create("Guid"), typeof(Guid),
-            Symbol.create("Int16"), typeof(Int16),
-            Symbol.create("Int32"), typeof(Int32),
-            Symbol.create("Int64"), typeof(Int64),
-            Symbol.create("IntPtr"), typeof(IntPtr),
-            Symbol.create("ModuleHandle"), typeof(ModuleHandle),
-            // Symbol.create(""),typeof(Nullable<T>),
-            Symbol.create("RuntimeArgumentHandle"), typeof(RuntimeArgumentHandle),
-            Symbol.create("RuntimeFieldHandle"), typeof(RuntimeFieldHandle),
-            Symbol.create("RuntimeMethodHandle"), typeof(RuntimeMethodHandle),
-            Symbol.create("RuntimeTypeHandle"), typeof(RuntimeTypeHandle),
-            Symbol.create("SByte"), typeof(SByte),
-            Symbol.create("Single"), typeof(Single),
-            Symbol.create("TimeSpan"), typeof(TimeSpan),
-            Symbol.create("TimeZoneInfo.TransitionTime"), typeof(TimeZoneInfo.TransitionTime),
-            Symbol.create("TypedReference"), typeof(TypedReference),
-            Symbol.create("UInt16"), typeof(UInt16),
-            Symbol.create("UInt32"), typeof(UInt32),
-            Symbol.create("UInt64"), typeof(UInt64),
-            Symbol.create("UIntPtr"), typeof(UIntPtr),
-            // Symbol.create(""),typeof(Void),
+            Symbol.intern("ArgIterator"), typeof(ArgIterator),
+            // Symbol.intern(""),typeof(ArraySegment<T>),
+            Symbol.intern("Boolean"), typeof(Boolean),
+            Symbol.intern("Byte"), typeof(Byte),
+            Symbol.intern("Char"), typeof(Char),
+            Symbol.intern("ConsoleKeyInfo"), typeof(ConsoleKeyInfo),
+            Symbol.intern("DateTime"), typeof(DateTime),
+            Symbol.intern("DateTimeOffset"), typeof(DateTimeOffset),
+            Symbol.intern("Decimal"), typeof(Decimal),
+            Symbol.intern("Double"), typeof(Double),
+            Symbol.intern("Guid"), typeof(Guid),
+            Symbol.intern("Int16"), typeof(Int16),
+            Symbol.intern("Int32"), typeof(Int32),
+            Symbol.intern("Int64"), typeof(Int64),
+            Symbol.intern("IntPtr"), typeof(IntPtr),
+            Symbol.intern("ModuleHandle"), typeof(ModuleHandle),
+            // Symbol.intern(""),typeof(Nullable<T>),
+            Symbol.intern("RuntimeArgumentHandle"), typeof(RuntimeArgumentHandle),
+            Symbol.intern("RuntimeFieldHandle"), typeof(RuntimeFieldHandle),
+            Symbol.intern("RuntimeMethodHandle"), typeof(RuntimeMethodHandle),
+            Symbol.intern("RuntimeTypeHandle"), typeof(RuntimeTypeHandle),
+            Symbol.intern("SByte"), typeof(SByte),
+            Symbol.intern("Single"), typeof(Single),
+            Symbol.intern("TimeSpan"), typeof(TimeSpan),
+            Symbol.intern("TimeZoneInfo.TransitionTime"), typeof(TimeZoneInfo.TransitionTime),
+            Symbol.intern("TypedReference"), typeof(TypedReference),
+            Symbol.intern("UInt16"), typeof(UInt16),
+            Symbol.intern("UInt32"), typeof(UInt32),
+            Symbol.intern("UInt64"), typeof(UInt64),
+            Symbol.intern("UIntPtr"), typeof(UIntPtr),
+            // Symbol.intern(""),typeof(Void),
             // interfaces/
-            //Symbol.create("AppDomain"), typeof(AppDomain),
-            Symbol.create("IAppDomainSetup"), typeof(IAppDomainSetup),
-            Symbol.create("IAsyncResult"), typeof(IAsyncResult),
-            Symbol.create("ICloneable"), typeof(ICloneable),
-            Symbol.create("IComparable"), typeof(IComparable),
-            //Symbol.create(""),typeof(IComparable<T>),
-            Symbol.create("IConvertible"), typeof(IConvertible),
-            Symbol.create("ICustomFormatter"), typeof(ICustomFormatter),
-            Symbol.create("IDisposable"), typeof(IDisposable),
-            //Symbol.create(""),typeof(IEquatable<T>),
-            Symbol.create("IFormatProvider"), typeof(IFormatProvider),
-            Symbol.create("IFormattable"), typeof(IFormattable),
-            Symbol.create("IServiceProvider"), typeof(IServiceProvider),
+            //Symbol.intern("AppDomain"), typeof(AppDomain),
+            Symbol.intern("IAppDomainSetup"), typeof(IAppDomainSetup),
+            Symbol.intern("IAsyncResult"), typeof(IAsyncResult),
+            Symbol.intern("ICloneable"), typeof(ICloneable),
+            Symbol.intern("IComparable"), typeof(IComparable),
+            //Symbol.intern(""),typeof(IComparable<T>),
+            Symbol.intern("IConvertible"), typeof(IConvertible),
+            Symbol.intern("ICustomFormatter"), typeof(ICustomFormatter),
+            Symbol.intern("IDisposable"), typeof(IDisposable),
+            //Symbol.intern(""),typeof(IEquatable<T>),
+            Symbol.intern("IFormatProvider"), typeof(IFormatProvider),
+            Symbol.intern("IFormattable"), typeof(IFormattable),
+            Symbol.intern("IServiceProvider"), typeof(IServiceProvider),
             // delegates/
-            Symbol.create("Action"), typeof(Action),
-            // Symbol.create(""),typeof(Action<T>/
-            // Symbol.create(""),typeof(Action<T1,T2>/
-            // Symbol.create(""),typeof(Action<T1,T2,T3>/
-            // Symbol.create(""),typeof(Action<T1,T2,T3,T4>/
-            Symbol.create("AppDomainInitializer"), typeof(AppDomainInitializer),
-            Symbol.create("AssemblyLoadEventHandler"), typeof(AssemblyLoadEventHandler),
-            Symbol.create("AsyncCallback"), typeof(AsyncCallback),
-            // Symbol.create(""),typeof(Comparison<T>),
-            Symbol.create("ConsoleCancelEventHandler"), typeof(ConsoleCancelEventHandler),
-            //Symbol.create(""),typeof(Converter<TInput,TOutput>),
-            Symbol.create("CrossAppDomainDelegate"), typeof(CrossAppDomainDelegate),
-            Symbol.create("EventHandler"), typeof(EventHandler),
-            // Symbol.create(""),typeof(EventHandler<TEventArgs>),
-            // Symbol.create(""),typeof(Func<TResult>),
-            // Symbol.create(""),typeof(Func<T,TResult>/
-            // Symbol.create(""),typeof(Func<T1, T2, TResult>/
-            // Symbol.create(""),typeof(Func<T1, T2, T3, TResult>/
-            // FSymbol.create(""),typeof(Func<T1, T2, T3, T4, TResult>/
-            // Symbol.create(""),typeof(Predicate<T>),
-            Symbol.create("ResolveEventHandler"), typeof(ResolveEventHandler),
-            Symbol.create("UnhandledExceptionEventHandler"), typeof(UnhandledExceptionEventHandler),
+            Symbol.intern("Action"), typeof(Action),
+            // Symbol.intern(""),typeof(Action<T>/
+            // Symbol.intern(""),typeof(Action<T1,T2>/
+            // Symbol.intern(""),typeof(Action<T1,T2,T3>/
+            // Symbol.intern(""),typeof(Action<T1,T2,T3,T4>/
+            Symbol.intern("AppDomainInitializer"), typeof(AppDomainInitializer),
+            Symbol.intern("AssemblyLoadEventHandler"), typeof(AssemblyLoadEventHandler),
+            Symbol.intern("AsyncCallback"), typeof(AsyncCallback),
+            // Symbol.intern(""),typeof(Comparison<T>),
+            Symbol.intern("ConsoleCancelEventHandler"), typeof(ConsoleCancelEventHandler),
+            //Symbol.intern(""),typeof(Converter<TInput,TOutput>),
+            Symbol.intern("CrossAppDomainDelegate"), typeof(CrossAppDomainDelegate),
+            Symbol.intern("EventHandler"), typeof(EventHandler),
+            // Symbol.intern(""),typeof(EventHandler<TEventArgs>),
+            // Symbol.intern(""),typeof(Func<TResult>),
+            // Symbol.intern(""),typeof(Func<T,TResult>/
+            // Symbol.intern(""),typeof(Func<T1, T2, TResult>/
+            // Symbol.intern(""),typeof(Func<T1, T2, T3, TResult>/
+            // FSymbol.intern(""),typeof(Func<T1, T2, T3, T4, TResult>/
+            // Symbol.intern(""),typeof(Predicate<T>),
+            Symbol.intern("ResolveEventHandler"), typeof(ResolveEventHandler),
+            Symbol.intern("UnhandledExceptionEventHandler"), typeof(UnhandledExceptionEventHandler),
             // Enumerations/
-            Symbol.create("ActivationContext.ContextForm"), typeof(ActivationContext.ContextForm),
-            Symbol.create("AppDomainManagerInitializationOptions"), typeof(AppDomainManagerInitializationOptions),
-            Symbol.create("AttributeTargets"), typeof(AttributeTargets),
-            Symbol.create("Base64FormattingOptions"), typeof(Base64FormattingOptions),
-            Symbol.create("ConsoleColor"), typeof(ConsoleColor),
-            Symbol.create("ConsoleKey"), typeof(ConsoleKey),
-            Symbol.create("ConsoleModifiers"), typeof(ConsoleModifiers),
-            Symbol.create("ConsoleSpecialKey"), typeof(ConsoleSpecialKey),
-            Symbol.create("DateTimeKind"), typeof(DateTimeKind),
-            Symbol.create("DayOfWeek"), typeof(DayOfWeek),
-            Symbol.create("Environment.SpecialFolder"), typeof(Environment.SpecialFolder),
-            Symbol.create("EnvironmentVariableTarget"), typeof(EnvironmentVariableTarget),
-            Symbol.create("GCCollectionMode"), typeof(GCCollectionMode),
-            Symbol.create("GenericUriParserOptions"), typeof(GenericUriParserOptions),
-            Symbol.create("LoaderOptimization"), typeof(LoaderOptimization),
-            Symbol.create("MidpointRounding"), typeof(MidpointRounding),
-            Symbol.create("PlatformID"), typeof(PlatformID),
-            Symbol.create("StringComparison"), typeof(StringComparison),
-            Symbol.create("StringSplitOptions"), typeof(StringSplitOptions),
-            Symbol.create("TypeCode"), typeof(TypeCode),
-            Symbol.create("UriComponents"), typeof(UriComponents),
-            Symbol.create("UriFormat"), typeof(UriFormat),
-            Symbol.create("UriHostNameType"), typeof(UriHostNameType),
-            Symbol.create("UriIdnScope"), typeof(UriIdnScope),
-            Symbol.create("UriKind"), typeof(UriKind),
-            Symbol.create("UriPartial"), typeof(UriPartial),
+            Symbol.intern("ActivationContext.ContextForm"), typeof(ActivationContext.ContextForm),
+            Symbol.intern("AppDomainManagerInitializationOptions"), typeof(AppDomainManagerInitializationOptions),
+            Symbol.intern("AttributeTargets"), typeof(AttributeTargets),
+            Symbol.intern("Base64FormattingOptions"), typeof(Base64FormattingOptions),
+            Symbol.intern("ConsoleColor"), typeof(ConsoleColor),
+            Symbol.intern("ConsoleKey"), typeof(ConsoleKey),
+            Symbol.intern("ConsoleModifiers"), typeof(ConsoleModifiers),
+            Symbol.intern("ConsoleSpecialKey"), typeof(ConsoleSpecialKey),
+            Symbol.intern("DateTimeKind"), typeof(DateTimeKind),
+            Symbol.intern("DayOfWeek"), typeof(DayOfWeek),
+            Symbol.intern("Environment.SpecialFolder"), typeof(Environment.SpecialFolder),
+            Symbol.intern("EnvironmentVariableTarget"), typeof(EnvironmentVariableTarget),
+            Symbol.intern("GCCollectionMode"), typeof(GCCollectionMode),
+            Symbol.intern("GenericUriParserOptions"), typeof(GenericUriParserOptions),
+            Symbol.intern("LoaderOptimization"), typeof(LoaderOptimization),
+            Symbol.intern("MidpointRounding"), typeof(MidpointRounding),
+            Symbol.intern("PlatformID"), typeof(PlatformID),
+            Symbol.intern("StringComparison"), typeof(StringComparison),
+            Symbol.intern("StringSplitOptions"), typeof(StringSplitOptions),
+            Symbol.intern("TypeCode"), typeof(TypeCode),
+            Symbol.intern("UriComponents"), typeof(UriComponents),
+            Symbol.intern("UriFormat"), typeof(UriFormat),
+            Symbol.intern("UriHostNameType"), typeof(UriHostNameType),
+            Symbol.intern("UriIdnScope"), typeof(UriIdnScope),
+            Symbol.intern("UriKind"), typeof(UriKind),
+            Symbol.intern("UriPartial"), typeof(UriPartial),
             // ADDED THESE TO SUPPORT THE BOOTSTRAPPING IN THE JAVA CORE.CLJ
-            Symbol.create("StringBuilder"), typeof(StringBuilder),
-            Symbol.create("BigInteger"), typeof(clojure.lang.BigInteger),
-            Symbol.create("BigDecimal"), typeof(clojure.lang.BigDecimal)
-            //Symbol.create("Environment"), typeof(System.Environment)
+            Symbol.intern("StringBuilder"), typeof(StringBuilder),
+            Symbol.intern("BigInteger"), typeof(clojure.lang.BigInteger),
+            Symbol.intern("BigDecimal"), typeof(clojure.lang.BigDecimal)
+            //Symbol.intern("Environment"), typeof(System.Environment)
      );
 
         #endregion
@@ -288,8 +288,8 @@ namespace clojure.lang
         // However, getting rid of them entirely speeds up compilation by about 25%.
         // Thus, I'm thinking boxing bools is less expensive than a static field lookup.
 
-        //public static readonly Object T = true;//Keyword.intern(Symbol.create(null, "t"));
-        //public static readonly Object F = false;//Keyword.intern(Symbol.create(null, "t"));
+        //public static readonly Object T = true;//Keyword.intern(Symbol.intern(null, "t"));
+        //public static readonly Object F = false;//Keyword.intern(Symbol.intern(null, "t"));
 
         public static bool IsTrue(object o)
         {
@@ -307,7 +307,7 @@ namespace clojure.lang
 
         // We need this initialization to happen earlier than most of the Var inits.
         public static readonly Namespace CLOJURE_NS 
-            = Namespace.findOrCreate(Symbol.create("clojure.core"));
+            = Namespace.findOrCreate(Symbol.intern("clojure.core"));
 
         #endregion
 
@@ -348,103 +348,103 @@ namespace clojure.lang
         #region Vars (namespace-related)
 
         public static readonly Var CURRENT_NS 
-            = Var.intern(CLOJURE_NS, Symbol.create("*ns*"),CLOJURE_NS);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*ns*"),CLOJURE_NS);
 
 
         public static readonly Var IN_NS_VAR
-            //= Var.intern(CLOJURE_NS, Symbol.create("in-ns"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.create("in-ns"), false);
+            //= Var.intern(CLOJURE_NS, Symbol.intern("in-ns"), RT.F);
+            = Var.intern(CLOJURE_NS, Symbol.intern("in-ns"), false);
 
         public static readonly Var NS_VAR 
-            //= Var.intern(CLOJURE_NS, Symbol.create("ns"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.create("ns"), false);
+            //= Var.intern(CLOJURE_NS, Symbol.intern("ns"), RT.F);
+            = Var.intern(CLOJURE_NS, Symbol.intern("ns"), false);
 
         #endregion
 
         #region Vars (I/O-related)
 
         public static readonly Var OUT 
-            = Var.intern(CLOJURE_NS, Symbol.create("*out*"), System.Console.Out);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*out*"), System.Console.Out);
         
         public static readonly Var ERR
-            = Var.intern(CLOJURE_NS, Symbol.create("*err*"), System.Console.Error);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*err*"), System.Console.Error);
         
         public static readonly Var IN =
-            Var.intern(CLOJURE_NS, Symbol.create("*in*"),
+            Var.intern(CLOJURE_NS, Symbol.intern("*in*"),
             new clojure.lang.LineNumberingTextReader(System.Console.In));
 
         static readonly Var PRINT_READABLY
-            //= Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.create("*print-readably*"), true);
+            //= Var.intern(CLOJURE_NS, Symbol.intern("*print-readably*"), RT.T);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*print-readably*"), true);
         
         public static readonly Var PRINT_META 
-            //= Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.create("*print-meta*"), false);
+            //= Var.intern(CLOJURE_NS, Symbol.intern("*print-meta*"), RT.F);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*print-meta*"), false);
         
         public static readonly Var PRINT_DUP 
-            //= Var.intern(CLOJURE_NS, Symbol.create("*print-dup*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.create("*print-dup*"), false);
+            //= Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*"), RT.F);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*"), false);
         
         static readonly Var FLUSH_ON_NEWLINE 
-            //= Var.intern(CLOJURE_NS, Symbol.create("*flush-on-newline*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.create("*flush-on-newline*"), true);
+            //= Var.intern(CLOJURE_NS, Symbol.intern("*flush-on-newline*"), RT.T);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*flush-on-newline*"), true);
         
         static readonly Var PRINT_INITIALIZED 
-            = Var.intern(CLOJURE_NS, Symbol.create("print-initialized"));
+            = Var.intern(CLOJURE_NS, Symbol.intern("print-initialized"));
         
         static readonly Var PR_ON 
-            = Var.intern(CLOJURE_NS, Symbol.create("pr-on"));
+            = Var.intern(CLOJURE_NS, Symbol.intern("pr-on"));
 
         public static readonly Var PRINT_LENGTH
-            = Var.intern(CLOJURE_NS, Symbol.create("*print-length*"),null);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*print-length*"),null);
 
         public static readonly Var PRINT_LEVEL
-            = Var.intern(CLOJURE_NS, Symbol.create("*print-length*"),null);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*print-length*"),null);
 
         public static readonly Var ALLOW_SYMBOL_ESCAPE
-            = Var.intern(CLOJURE_NS, Symbol.create("*allow-symbol-escape*"),true);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*allow-symbol-escape*"),true);
 
         #endregion
 
         #region Vars (miscellaneous)
 
         public static readonly Var ALLOW_UNRESOLVED_VARS
-            //= Var.intern(CLOJURE_NS, Symbol.create("*allow-unresolved-vars*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.create("*allow-unresolved-vars*"), false);
+            //= Var.intern(CLOJURE_NS, Symbol.intern("*allow-unresolved-vars*"), RT.F);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*allow-unresolved-vars*"), false);
 
         public static readonly Var WARN_ON_REFLECTION
-            //= Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.create("*warn-on-reflection*"), false);
+            //= Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), RT.F);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), false);
  
         //public static readonly Var MACRO_META 
-        //    = Var.intern(CLOJURE_NS, Symbol.create("*macro-meta*"), null);
+        //    = Var.intern(CLOJURE_NS, Symbol.intern("*macro-meta*"), null);
 
         public static readonly Var MATH_CONTEXT 
-            = Var.intern(CLOJURE_NS, Symbol.create("*math-context*"), null);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*math-context*"), null);
         
         public static readonly Var AGENT 
-            = Var.intern(CLOJURE_NS, Symbol.create("*agent*"), null);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*agent*"), null);
 
         public static readonly Var READEVAL
-            //= Var.intern(CLOJURE_NS, Symbol.create("*read-eval*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.create("*read-eval*"), true);
+            //= Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), RT.T);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), true);
 
         public static readonly Var ASSERT
-            //= Var.intern(CLOJURE_NS, Symbol.create("*assert*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.create("*assert*"), true);
+            //= Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), RT.T);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), true);
 
         public static readonly Var CMD_LINE_ARGS 
-            = Var.intern(CLOJURE_NS, Symbol.create("*command-line-args*"), null);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*command-line-args*"), null);
 
         public static readonly Var USE_CONTEXT_CLASSLOADER
-            //= Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.create("*use-context-classloader*"), true);
+            //= Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), RT.T);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), true);
 
         #endregion
 
         #region  Clojure-environment IFns needing support
 
-        static readonly Symbol IN_NAMESPACE = Symbol.create("in-ns");
+        static readonly Symbol IN_NAMESPACE = Symbol.intern("in-ns");
 
         sealed class InNamespaceFn : AFn
         {
@@ -456,7 +456,7 @@ namespace clojure.lang
                 return ns;
             }
         }
-        static readonly Symbol NAMESPACE = Symbol.create("ns");
+        static readonly Symbol NAMESPACE = Symbol.intern("ns");
 
         sealed class BootNamespaceFN : AFn
         {
@@ -470,7 +470,7 @@ namespace clojure.lang
         }
 
 
-        //static readonly Symbol IDENTICAL = Symbol.create("identical?");
+        //static readonly Symbol IDENTICAL = Symbol.intern("identical?");
 
         //sealed class IdenticalFn : AFn
         //{
@@ -486,7 +486,7 @@ namespace clojure.lang
         //    }
         //}
 
-        static readonly Symbol LOAD_FILE = Symbol.create("load-file");
+        static readonly Symbol LOAD_FILE = Symbol.intern("load-file");
 
         sealed class LoadFileFn : AFn
         {
@@ -506,17 +506,17 @@ namespace clojure.lang
             _versionProperties.LoadFromString(clojure.lang.Properties.Resources.version); 
 
             Keyword arglistskw = Keyword.intern(null, "arglists");
-            Symbol namesym = Symbol.create("name");
+            Symbol namesym = Symbol.intern("name");
 
-            OUT.Tag = Symbol.create("System.IO.TextWriter");
+            OUT.Tag = Symbol.intern("System.IO.TextWriter");
 
-            CURRENT_NS.Tag = Symbol.create("clojure.lang.Namespace");
+            CURRENT_NS.Tag = Symbol.intern("clojure.lang.Namespace");
 
             AGENT.setMeta(map(DOC_KEY, "The agent currently running an action on this thread, else nil."));
-            AGENT.Tag = Symbol.create("clojure.lang.Agent");
+            AGENT.Tag = Symbol.intern("clojure.lang.Agent");
 
             // We don't have MathContext (yet)
-            //MATH_CONTEXT.Tag = Symbol.create("java.math.MathContext");
+            //MATH_CONTEXT.Tag = Symbol.intern("java.math.MathContext");
 
             //// during bootstrap, ns same as in-ns
             //Var nv = Var.intern(CLOJURE_NS, NAMESPACE, new InNamespaceFn());
@@ -534,7 +534,7 @@ namespace clojure.lang
 
             //v = Var.intern(CLOJURE_NS, IDENTICAL, new IdenticalFn());
             //v.setMeta(map(dockw, "tests if 2 arguments are the same object",
-            //    arglistskw, list(vector(Symbol.create("x"), Symbol.create("y")))));
+            //    arglistskw, list(vector(Symbol.intern("x"), Symbol.intern("y")))));
 
             if ( RT_Bootstrap_Flag._doRTBootstrap )
                 DoInit();
@@ -557,8 +557,8 @@ namespace clojure.lang
                 WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
             try
             {
-                Symbol USER = Symbol.create("user");
-                Symbol CLOJURE = Symbol.create("clojure.core");
+                Symbol USER = Symbol.intern("user");
+                Symbol CLOJURE = Symbol.intern("clojure.core");
 
                 Var in_ns = var("clojure.core", "in-ns");
                 Var refer = var("clojure.core", "refer");

@@ -29,23 +29,23 @@ namespace clojure.lang
     {
         #region Symbol definitions
 
-        static readonly Symbol QUOTE = Symbol.create("quote");
-        static readonly Symbol THE_VAR = Symbol.create("var");
-        static readonly Symbol UNQUOTE = Symbol.create("clojure.core", "unquote");
-        static readonly Symbol UNQUOTE_SPLICING = Symbol.create("clojure.core", "unquote-splicing");
-        static readonly Symbol DEREF = Symbol.create("clojure.core", "deref");
-        static readonly Symbol META = Symbol.create("clojure.core", "meta");
-        static readonly Symbol APPLY = Symbol.create("clojure.core", "apply");
-        static readonly Symbol CONCAT = Symbol.create("clojure.core", "concat");
-        static readonly Symbol HASHMAP = Symbol.create("clojure.core", "hash-map");
-        static readonly Symbol HASHSET = Symbol.create("clojure.core", "hash-set");
-        static readonly Symbol VECTOR = Symbol.create("clojure.core", "vector");
-        static readonly Symbol WITH_META = Symbol.create("clojure.core", "with-meta");
-        static readonly Symbol LIST = Symbol.create("clojure.core", "list");
-        static readonly Symbol SEQ = Symbol.create("clojure.core","seq");
+        static readonly Symbol QUOTE = Symbol.intern("quote");
+        static readonly Symbol THE_VAR = Symbol.intern("var");
+        static readonly Symbol UNQUOTE = Symbol.intern("clojure.core", "unquote");
+        static readonly Symbol UNQUOTE_SPLICING = Symbol.intern("clojure.core", "unquote-splicing");
+        static readonly Symbol DEREF = Symbol.intern("clojure.core", "deref");
+        static readonly Symbol META = Symbol.intern("clojure.core", "meta");
+        static readonly Symbol APPLY = Symbol.intern("clojure.core", "apply");
+        static readonly Symbol CONCAT = Symbol.intern("clojure.core", "concat");
+        static readonly Symbol HASHMAP = Symbol.intern("clojure.core", "hash-map");
+        static readonly Symbol HASHSET = Symbol.intern("clojure.core", "hash-set");
+        static readonly Symbol VECTOR = Symbol.intern("clojure.core", "vector");
+        static readonly Symbol WITH_META = Symbol.intern("clojure.core", "with-meta");
+        static readonly Symbol LIST = Symbol.intern("clojure.core", "list");
+        static readonly Symbol SEQ = Symbol.intern("clojure.core","seq");
 
-        static readonly Symbol SLASH = Symbol.create("/");
-        static readonly Symbol CLOJURE_SLASH = Symbol.create("clojure.core","/");
+        static readonly Symbol SLASH = Symbol.intern("/");
+        static readonly Symbol CLOJURE_SLASH = Symbol.intern("clojure.core","/");
 
         #endregion
 
@@ -535,7 +535,7 @@ namespace clojure.lang
             {
                 if (nsStr.StartsWith("::"))
                 {
-                    Symbol nsSym = Symbol.create(nsStr.Substring(2));
+                    Symbol nsSym = Symbol.intern(nsStr.Substring(2));
                     Namespace ns = Compiler.CurrentNamespace.LookupAlias(nsSym);
                     if (ns == null)
                         ns = Namespace.find(nsSym);

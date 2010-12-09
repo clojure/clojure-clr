@@ -811,10 +811,10 @@ namespace clojure.lang
         {
             if (nsQualifiedSym.Namespace == null)
                 throw new ArgumentException("Symbol must be namespace-qualified");
-            Namespace ns = Namespace.find(Symbol.create(nsQualifiedSym.Namespace));
+            Namespace ns = Namespace.find(Symbol.intern(nsQualifiedSym.Namespace));
             if (ns == null)
                 throw new ArgumentException("No such namespace: " + nsQualifiedSym.Namespace);
-            return ns.FindInternedVar(Symbol.create(nsQualifiedSym.Name));
+            return ns.FindInternedVar(Symbol.intern(nsQualifiedSym.Name));
         }
 
         /// <summary>

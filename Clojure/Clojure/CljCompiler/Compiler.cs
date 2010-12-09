@@ -41,42 +41,42 @@ namespace clojure.lang
 
         #region Symbols
 
-        public static readonly Symbol DEF = Symbol.create("def");
-        public static readonly Symbol LOOP = Symbol.create("loop*");
-        public static readonly Symbol RECUR = Symbol.create("recur");
-        public static readonly Symbol IF = Symbol.create("if");
-        public static readonly Symbol LET = Symbol.create("let*");
-        public static readonly Symbol LETFN = Symbol.create("letfn*");
-        public static readonly Symbol DO = Symbol.create("do");
-        public static readonly Symbol FN = Symbol.create("fn*");
-        public static readonly Symbol QUOTE = Symbol.create("quote");
-        public static readonly Symbol THE_VAR = Symbol.create("var");
-        public static readonly Symbol DOT = Symbol.create(".");
-        public static readonly Symbol ASSIGN = Symbol.create("set!");
-        public static readonly Symbol TRY = Symbol.create("try");
-        public static readonly Symbol CATCH = Symbol.create("catch");
-        public static readonly Symbol FINALLY = Symbol.create("finally");
-        public static readonly Symbol THROW = Symbol.create("throw");
-        public static readonly Symbol MONITOR_ENTER = Symbol.create("monitor-enter");
-        public static readonly Symbol MONITOR_EXIT = Symbol.create("monitor-exit");
-        public static readonly Symbol IMPORT = Symbol.create("clojure.core","import*");
-        public static readonly Symbol DEFTYPE = Symbol.create("deftype*");
-        public static readonly Symbol CASE = Symbol.create("case*");
-        public static readonly Symbol NEW = Symbol.create("new");
-        public static readonly Symbol THIS = Symbol.create("this");
-        public static readonly Symbol REIFY = Symbol.create("reify*");
-        public static readonly Symbol _AMP_ = Symbol.create("&");
+        public static readonly Symbol DEF = Symbol.intern("def");
+        public static readonly Symbol LOOP = Symbol.intern("loop*");
+        public static readonly Symbol RECUR = Symbol.intern("recur");
+        public static readonly Symbol IF = Symbol.intern("if");
+        public static readonly Symbol LET = Symbol.intern("let*");
+        public static readonly Symbol LETFN = Symbol.intern("letfn*");
+        public static readonly Symbol DO = Symbol.intern("do");
+        public static readonly Symbol FN = Symbol.intern("fn*");
+        public static readonly Symbol QUOTE = Symbol.intern("quote");
+        public static readonly Symbol THE_VAR = Symbol.intern("var");
+        public static readonly Symbol DOT = Symbol.intern(".");
+        public static readonly Symbol ASSIGN = Symbol.intern("set!");
+        public static readonly Symbol TRY = Symbol.intern("try");
+        public static readonly Symbol CATCH = Symbol.intern("catch");
+        public static readonly Symbol FINALLY = Symbol.intern("finally");
+        public static readonly Symbol THROW = Symbol.intern("throw");
+        public static readonly Symbol MONITOR_ENTER = Symbol.intern("monitor-enter");
+        public static readonly Symbol MONITOR_EXIT = Symbol.intern("monitor-exit");
+        public static readonly Symbol IMPORT = Symbol.intern("clojure.core","import*");
+        public static readonly Symbol DEFTYPE = Symbol.intern("deftype*");
+        public static readonly Symbol CASE = Symbol.intern("case*");
+        public static readonly Symbol NEW = Symbol.intern("new");
+        public static readonly Symbol THIS = Symbol.intern("this");
+        public static readonly Symbol REIFY = Symbol.intern("reify*");
+        public static readonly Symbol _AMP_ = Symbol.intern("&");
 
-        public static readonly Symbol IDENTITY = Symbol.create("clojure.core", "identity");
+        public static readonly Symbol IDENTITY = Symbol.intern("clojure.core", "identity");
 
-        static readonly Symbol NS = Symbol.create("ns");
-        static readonly Symbol IN_NS = Symbol.create("in-ns");
+        static readonly Symbol NS = Symbol.intern("ns");
+        static readonly Symbol IN_NS = Symbol.intern("in-ns");
 
-        internal static readonly Symbol ISEQ = Symbol.create("clojure.lang.ISeq");
+        internal static readonly Symbol ISEQ = Symbol.intern("clojure.lang.ISeq");
 
-        internal static readonly Symbol CLASS = Symbol.create("System.Type");
+        internal static readonly Symbol CLASS = Symbol.intern("System.Type");
 
-        internal static readonly Symbol INVOKE_STATIC = Symbol.create("invokeStatic");
+        internal static readonly Symbol INVOKE_STATIC = Symbol.intern("invokeStatic");
 
         #endregion
 
@@ -100,29 +100,29 @@ namespace clojure.lang
         #region Vars
 
         //boolean
-        internal static readonly Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                                 //Symbol.create("*compile-files*"), RT.F);
-                                                         Symbol.create("*compile-files*"), false);  
+        internal static readonly Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                                 //Symbol.intern("*compile-files*"), RT.F);
+                                                         Symbol.intern("*compile-files*"), false);  
         //JAVA: Boolean.FALSE -- changed from RT.F in rev 1108, not sure why
 
 
-        internal static readonly Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                                         Symbol.create("instance?"), false);  
+        internal static readonly Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                                         Symbol.intern("instance?"), false);  
 
 
         //String
-        public static readonly Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                                 Symbol.create("*compile-path*"), null);
+        public static readonly Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                                 Symbol.intern("*compile-path*"), null);
 
-        public static readonly Var COMPILE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                                Symbol.create("compile"));
+        public static readonly Var COMPILE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                                Symbol.intern("compile"));
 
         // String
-        internal static readonly Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-                                        Symbol.create("*source-path*"), "NO_SOURCE_FILE");
+        internal static readonly Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                                        Symbol.intern("*source-path*"), "NO_SOURCE_FILE");
         // String
-        internal static readonly Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.create("clojure.core")),
-            Symbol.create("*file*"), "NO_SOURCE_PATH");
+        internal static readonly Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+            Symbol.intern("*file*"), "NO_SOURCE_PATH");
 
         //Integer
         internal static readonly Var LINE = Var.create(0);          // From the JVM version
@@ -251,7 +251,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_RT_readString = typeof(RT).GetMethod("readString");
         internal static readonly MethodInfo Method_RT_var2 = typeof(RT).GetMethod("var", new Type[] { typeof(string), typeof(string) });
 
-        internal static readonly MethodInfo Method_Symbol_create2 = typeof(Symbol).GetMethod("create", new Type[] { typeof(string), typeof(string) });
+        internal static readonly MethodInfo Method_Symbol_intern2 = typeof(Symbol).GetMethod("intern", new Type[] { typeof(string), typeof(string) });
 
         internal static readonly MethodInfo Method_Util_classOf = typeof(Util).GetMethod("classOf");
         internal static readonly MethodInfo Method_Util_equals = typeof(Util).GetMethod("equals",new Type[] {typeof(object), typeof(object)});
@@ -313,7 +313,7 @@ namespace clojure.lang
                 Namespace ns = namespaceFor(sym);
                 if (ns == null || ns.Name.Name == sym.Namespace)
                     return sym;
-                return Symbol.create(ns.Name.Name, sym.Name);
+                return Symbol.intern(ns.Name.Name, sym.Name);
             }
             Object o = CurrentNamespace.GetMapping(sym);
             if (o == null)
@@ -323,7 +323,7 @@ namespace clojure.lang
             else if (o is Var)
             {
                 Var v = (Var)o;
-                return Symbol.create(v.Namespace.Name.Name, v.Symbol.Name);
+                return Symbol.intern(v.Namespace.Name.Name, v.Symbol.Name);
             }
             return null;
 
@@ -339,7 +339,7 @@ namespace clojure.lang
         {
             //note, presumes non-nil sym.ns
             // first check against currentNS' aliases...
-            Symbol nsSym = Symbol.create(sym.Namespace);
+            Symbol nsSym = Symbol.intern(sym.Namespace);
             Namespace ns = inns.LookupAlias(nsSym);
             if (ns == null)
             {
@@ -381,7 +381,7 @@ namespace clojure.lang
                 if (ns == null)
                     throw new Exception("No such namespace: " + symbol.Namespace);
 
-                Var v = ns.FindInternedVar(Symbol.create(symbol.Name));
+                Var v = ns.FindInternedVar(Symbol.intern(symbol.Name));
                 if (v == null)
                     throw new Exception("No such var: " + symbol);
                 else if (v.Namespace != CurrentNamespace && !v.IsPublic && !allowPrivate)
@@ -421,7 +421,7 @@ namespace clojure.lang
                 if (ns == null)
                     return null;
 
-                Var v = ns.FindInternedVar(Symbol.create(symbol.Name));
+                Var v = ns.FindInternedVar(Symbol.intern(symbol.Name));
                 if (v == null)
                     return null;
                 return v;
@@ -449,7 +449,7 @@ namespace clojure.lang
         {
             // Note: presumes non-nil sym.ns
             // first check against CurrentNamespace's aliases
-            Symbol nsSym = Symbol.create(symbol.Namespace);
+            Symbol nsSym = Symbol.intern(symbol.Namespace);
             Namespace ns = n.LookupAlias(nsSym);
             if (ns == null)
                 // otherwise, check the namespaces map
@@ -483,7 +483,7 @@ namespace clojure.lang
                 Namespace ns = Compiler.NamespaceFor(sym);
                 if (ns == null)
                     return null;
-                Symbol name = Symbol.create(sym.Name);
+                Symbol name = Symbol.intern(sym.Name);
                 if (internNew && ns == CurrentNamespace)
                     var = CurrentNamespace.intern(name);
                 else
@@ -501,7 +501,7 @@ namespace clojure.lang
                 {
                     // introduce a new var in the current ns
                     if (internNew)
-                        var = CurrentNamespace.intern(Symbol.create(sym.Name));
+                        var = CurrentNamespace.intern(Symbol.intern(sym.Name));
                 }
                 else if (o is Var)
                     var = (Var)o;
@@ -1259,8 +1259,8 @@ namespace clojure.lang
 
         public static void PushNS()
         {
-            Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.create("clojure.core"),
-                                                                       Symbol.create("*ns*")), null));
+            Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.intern("clojure.core"),
+                                                                       Symbol.intern("*ns*")), null));
         }
 
 
@@ -1435,7 +1435,7 @@ namespace clojure.lang
             {
                 if (namespaceFor(symbol) == null)
                 {
-                    Symbol nsSym = Symbol.create(symbol.Namespace);
+                    Symbol nsSym = Symbol.intern(symbol.Namespace);
                     Type t = HostExpr.MaybeType(nsSym, false);
                     if (t != null)
                     {
