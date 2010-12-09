@@ -224,12 +224,16 @@ namespace clojure.lang
                 DictionaryEntry de = (DictionaryEntry)o;
                 return assoc(de.Key, de.Value);
             }
-            Type t = o.GetType();
-            if (t.IsGenericType && t.Name == "KeyValuePair`2")
+
+            if (o != null)
             {
-                object key = t.InvokeMember("Key", BindingFlags.GetProperty, null, o, null);
-                object val = t.InvokeMember("Value", BindingFlags.GetProperty, null, o, null);
-                return assoc(key, val);
+                Type t = o.GetType();
+                if (t.IsGenericType && t.Name == "KeyValuePair`2")
+                {
+                    object key = t.InvokeMember("Key", BindingFlags.GetProperty, null, o, null);
+                    object val = t.InvokeMember("Value", BindingFlags.GetProperty, null, o, null);
+                    return assoc(key, val);
+                }
             }
 
             IPersistentVector v = o as IPersistentVector;
