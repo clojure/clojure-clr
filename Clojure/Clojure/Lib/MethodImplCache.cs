@@ -78,7 +78,7 @@ namespace clojure.lang
        public readonly int _mask;
        private readonly object[] _table;    //[class, entry. class, entry ...]
 
-       volatile Entry _mre = null;
+       Entry _mre = null;
 
         // core_deftype.clj compatibility
         public object[] table
