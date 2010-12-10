@@ -104,11 +104,11 @@
   [e]
   (let [ex (repl-exception e)
         el (aget (get-stack-trace ex) 0)]
-    (.WriteLine *err*                  ;;; .println
-                (str (-> ex class .Name)           ;;; .getSimpleName
-				     " " (.Message ex) " "         ;;;  .getMessage
-				     (when-not (instance? clojure.lang.Compiler+CompilerException ex)
-                      (str " " (stack-element-str el)))))))
+	(binding [*out* *err*]
+      (println (str (-> ex class .Name)           ;;; .getSimpleName
+				    " " (.Message ex) " "         ;;;  .getMessage
+				    (when-not (instance? clojure.lang.Compiler+CompilerException ex)
+                      (str " " (stack-element-str el))))))))
 
 (defn repl
   "Generic, reusable, read-eval-print loop. By default, reads from *in*,
