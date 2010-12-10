@@ -150,20 +150,23 @@ str-or-pattern."
   most recent repl exception (*e), and a depth of 12."
   {:added "1.3"}
   ([] (pst 12))
-  ([depth]
-     (when-let [e *e]
-	   (pst (root-cause e) depth)))
+  ([e-or-depth]
+     (if (instance? Exception e-or-depth)                         ;;; Throwable
+	   (pst e-or-depth 12)
+       (when-let [e *e]
+	     (pst (root-cause e) e-or-depth))))
   ([^Exception e depth]                                            ;;; Throwable
-     (.WriteLine *err* (str (-> e class .Name) " " (.Message e)))  ;;; .getSimpleName .println                                 ;;; getMessage
-     (let [st  (get-stack-trace e)                                 ;;; (.getStackTrace e)
-	       cause (.InnerException e)]                              ;;; .getCause
-	   (doseq [el (take depth
-	                    (remove #(#{"clojure.lang.RestFn" "clojure.lang.AFn" "clojure.lang.AFnImpl" "clojure.lang.RestFnImpl"}	(stack-element-classname %))   ;;;  (.getClassName %)
-						        st))]
-         (.WriteLine *err* (str \tab (stack-element-str el))))     ;;; .println
-       (when cause
-         (.WriteLine *err* "Caused by:")                             ;;; .println
-         (pst cause (min depth
-	                     (+ 2 (- (count (get-stack-trace cause))    ;;; (.getStackTrace cause)
-			  		             (count st)))))))))
+     (binding [*out* *err*]
+       (println (str (-> e class .Name) " " (.Message e)))           ;;; .getSimpleName                                 ;;; getMessage
+       (let [st  (get-stack-trace e)                                 ;;; (.getStackTrace e)
+	         cause (.InnerException e)]                              ;;; .getCause
+	     (doseq [el (take depth
+	                      (remove #(#{"clojure.lang.RestFn" "clojure.lang.AFn" "clojure.lang.AFnImpl" "clojure.lang.RestFnImpl"}	(stack-element-classname %))   ;;;  (.getClassName %)
+			  			        st))]
+           (println (str \tab (stack-element-str el))))
+         (when cause
+           (println "Caused by:")
+           (pst cause (min depth
+	                       (+ 2 (- (count (get-stack-trace cause))    ;;; (.getStackTrace cause)
+			    		           (count st))))))))))
 
