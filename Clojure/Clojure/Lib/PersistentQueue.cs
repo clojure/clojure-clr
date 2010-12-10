@@ -22,19 +22,24 @@ namespace clojure.lang
     /// </summary>
     /// <remarks>
     /// <para>See Okasaki's Batched Queues.</para>
-    /// <para>This differs in that it uses an <see cref="IPersistentList">IPersistentList</see>
+    /// <para>This differs in that it uses an <see cref="IPersistentList">PersistentVector</see>
     /// as the rear, which is in-order,
     /// so no reversing or suspensions required for persistent use.</para>
     /// </remarks>
     [Serializable]
-    public class PersistentQueue : Obj, IPersistentList, ICollection
+    public class PersistentQueue : Obj, IPersistentList, ICollection, Counted
     {
         #region Data
 
         /// <summary>
         /// An empty <see cref="PersistentQueue">PersistentQueue</see>.
         /// </summary>
-        public static readonly PersistentQueue EMPTY = new PersistentQueue(null, null, null);
+        public static readonly PersistentQueue EMPTY = new PersistentQueue(null, 0, null, null);
+
+        /// <summary>
+        /// The number of elements in the queue.
+        /// </summary>
+        protected readonly int _cnt;
 
         /// <summary>
         /// The front elements of the queue.
@@ -61,9 +66,10 @@ namespace clojure.lang
         /// <param name="meta"></param>
         /// <param name="f"></param>
         /// <param name="r"></param>
-        protected PersistentQueue(IPersistentMap meta, ISeq f, IPersistentVector r)
+        protected PersistentQueue(IPersistentMap meta, int cnt, ISeq f, IPersistentVector r)
             : base(meta)
         {
+            _cnt = cnt;
             _f = f;
             _r = r;
         }
@@ -117,10 +123,7 @@ namespace clojure.lang
         /// <returns>A copy of the object with new metadata attached.</returns>
         public override IObj withMeta(IPersistentMap meta)
         {
-            return (meta == _meta)
-                ? this
-                : new PersistentQueue(meta, _f, _r);
-            // Java does not follow the pattern: return new PersistentQueue(meta, _f, _r);
+            return new PersistentQueue(meta, _cnt, _f, _r);
         }
 
         #endregion
@@ -151,7 +154,7 @@ namespace clojure.lang
                 f1 = RT.seq(_r);
                 r1 = null;
             }
-            return new PersistentQueue(meta(), f1, r1);
+            return new PersistentQueue(meta(), _cnt-1, f1, r1);
         }
 
         #endregion
@@ -164,7 +167,7 @@ namespace clojure.lang
         /// <returns>The number of items in the collection.</returns>
         public int count()
         {
-            return RT.count(_f) + RT.count(_r);
+            return _cnt;
         }
 
         /// <summary>
@@ -187,8 +190,8 @@ namespace clojure.lang
         {
             // TODO: What if _f is null and _r is not?
             return _f == null // empty
-                ? new PersistentQueue(meta(), RT.list(o), null)
-                : new PersistentQueue(meta(), _f, (_r ?? PersistentVector.EMPTY).cons(o));
+                ? new PersistentQueue(meta(), _cnt+1, RT.list(o), null)
+                : new PersistentQueue(meta(), _cnt+1, _f, (_r ?? PersistentVector.EMPTY).cons(o));
         }
 
         public IPersistentCollection empty()
