@@ -49,35 +49,35 @@ namespace clojure.lang
             return false;
         }
 
-        //public static bool equiv(long x, long y)
-        //{
-        //    return x == y;
-        //}
+        public static bool equiv(long x, long y)
+        {
+            return x == y;
+        }
 
-        //public static bool equiv(double x, double y)
-        //{
-        //    return x == y;
-        //}
-        
-        //public static bool equiv(long x, object y)
-        //{
-        //    return equiv(Numbers.num(x),y);
-        //}
+        public static bool equiv(double x, double y)
+        {
+            return x == y;
+        }
 
-        //public static bool equiv(object x, long y)
-        //{
-        //    return equiv(x, Numbers.num(y));
-        //}
+        public static bool equiv(long x, object y)
+        {
+            return equiv((object)x, y);
+        }
 
-        //public static bool equiv(double x, Object y)
-        //{
-        //    return equiv((object)x, y);
-        //}
+        public static bool equiv(object x, long y)
+        {
+            return equiv(x, (object)y);
+        }
 
-        //public static bool equiv(object x, double y)
-        //{
-        //    return equiv(x, (object)y);
-        //}
+        public static bool equiv(double x, Object y)
+        {
+            return equiv((object)x, y);
+        }
+
+        public static bool equiv(object x, double y)
+        {
+            return equiv(x, (object)y);
+        }
 
 
         public static bool pcequiv(object k1, object k2)
