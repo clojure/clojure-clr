@@ -136,6 +136,17 @@ namespace clojure.lang
         #region Data
 
         /// <summary>
+        /// Revision counter
+        /// </summary>
+        static volatile int _rev = 0;
+
+        public static int Rev
+        {
+            get { return Var._rev; }
+            //set { Var._rev = value; }
+        }
+
+        /// <summary>
         /// The current frame.  Thread-local.
         /// </summary>
         [ThreadStatic]
@@ -168,6 +179,11 @@ namespace clojure.lang
         /// The root value.
         /// </summary>
         volatile object _root;
+
+        /// <summary>
+        /// If true, supports dynamic binding.
+        /// </summary>
+        volatile bool _dynamic = false;
 
         static Keyword _privateKey = Keyword.intern(null, "private");
         //static IPersistentMap _privateMeta = new PersistentArrayMap(new object[] { _privateKey, RT.T });
@@ -365,7 +381,28 @@ namespace clojure.lang
 
         #endregion
 
-        #region Flag management
+        #region Dynamic flag management
+
+        public Var setDynamic()
+        {
+            _dynamic = true;
+            return this;
+        }
+
+        public Var setDynamic(bool b)
+        {
+            _dynamic = b;
+            return this;
+        }
+
+        public bool isDynamic()
+        {
+            return _dynamic;
+        }
+
+        #endregion
+
+        #region Metadata management
 
         /// <summary>
         /// Set the metadata attached to this var.
@@ -491,6 +528,7 @@ namespace clojure.lang
             Validate(getValidator(), root);
             object oldroot = hasRoot() ? _root : null;
             _root = root;
+            ++_rev;
             alterMeta(_dissoc, RT.list(_macroKey));
             notifyWatches(oldroot, _root);
         }
@@ -505,6 +543,7 @@ namespace clojure.lang
             Validate(getValidator(), root);
             object oldroot = hasRoot() ? _root : null;
             _root = root;
+            ++_rev;
             notifyWatches(oldroot, root);
         }
 
@@ -515,6 +554,7 @@ namespace clojure.lang
         void unbindRoot()
         {
             _root = _rootUnboundValue;
+            ++_rev;
         }
 
         /// <summary>
@@ -528,6 +568,7 @@ namespace clojure.lang
             Validate(getValidator(), newRoot);
             object oldRoot = getRoot();
             _root = newRoot;
+            ++_rev;
             notifyWatches(oldRoot, newRoot);
         }
 
@@ -545,6 +586,7 @@ namespace clojure.lang
             Validate(getValidator(), newRoot);
             object oldroot = getRoot();
             _root = newRoot;
+            ++_rev;
             notifyWatches(oldroot,newRoot);
             return newRoot;
         }
@@ -567,6 +609,8 @@ namespace clojure.lang
             {
                 IMapEntry e = (IMapEntry)bs.first();
                 Var v = (Var)e.key();
+                if (!v._dynamic)
+                    throw new InvalidOperationException(String.Format("Can't dynamically bind non-dynamic var: {0}/{1}", v.Namespace, v.Symbol));
                 v.Validate(e.val());
                 v._threadBound.set(true);
                 bmap = bmap.assoc(v, new TBox(Thread.CurrentThread,e.val()));

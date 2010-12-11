@@ -41,7 +41,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         static readonly Keyword _onKey = Keyword.intern("on");
         static readonly Keyword _methodMapKey = Keyword.intern("method-map");
-        static readonly Keyword _dynamicKey = Keyword.intern("dynamic");
 
         #endregion
 

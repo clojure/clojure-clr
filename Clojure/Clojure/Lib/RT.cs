@@ -347,8 +347,8 @@ namespace clojure.lang
 
         #region Vars (namespace-related)
 
-        public static readonly Var CURRENT_NS 
-            = Var.intern(CLOJURE_NS, Symbol.intern("*ns*"),CLOJURE_NS);
+        public static readonly Var CURRENT_NS
+            = Var.intern(CLOJURE_NS, Symbol.intern("*ns*"), CLOJURE_NS).setDynamic();
 
 
         public static readonly Var IN_NS_VAR
@@ -364,30 +364,30 @@ namespace clojure.lang
         #region Vars (I/O-related)
 
         public static readonly Var OUT 
-            = Var.intern(CLOJURE_NS, Symbol.intern("*out*"), System.Console.Out);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*out*"), System.Console.Out).setDynamic();
         
         public static readonly Var ERR
-            = Var.intern(CLOJURE_NS, Symbol.intern("*err*"), System.Console.Error);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*err*"), System.Console.Error).setDynamic();
         
         public static readonly Var IN =
             Var.intern(CLOJURE_NS, Symbol.intern("*in*"),
-            new clojure.lang.LineNumberingTextReader(System.Console.In));
+            new clojure.lang.LineNumberingTextReader(System.Console.In)).setDynamic();
 
         static readonly Var PRINT_READABLY
             //= Var.intern(CLOJURE_NS, Symbol.intern("*print-readably*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*print-readably*"), true);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*print-readably*"), true).setDynamic();
         
         public static readonly Var PRINT_META 
             //= Var.intern(CLOJURE_NS, Symbol.intern("*print-meta*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*print-meta*"), false);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*print-meta*"), false).setDynamic();
         
         public static readonly Var PRINT_DUP 
             //= Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*"), false);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*"), false).setDynamic();
         
         static readonly Var FLUSH_ON_NEWLINE 
             //= Var.intern(CLOJURE_NS, Symbol.intern("*flush-on-newline*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*flush-on-newline*"), true);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*flush-on-newline*"), true).setDynamic();
         
         static readonly Var PRINT_INITIALIZED 
             = Var.intern(CLOJURE_NS, Symbol.intern("print-initialized"));
@@ -395,14 +395,8 @@ namespace clojure.lang
         static readonly Var PR_ON 
             = Var.intern(CLOJURE_NS, Symbol.intern("pr-on"));
 
-        public static readonly Var PRINT_LENGTH
-            = Var.intern(CLOJURE_NS, Symbol.intern("*print-length*"),null);
-
-        public static readonly Var PRINT_LEVEL
-            = Var.intern(CLOJURE_NS, Symbol.intern("*print-length*"),null);
-
         public static readonly Var ALLOW_SYMBOL_ESCAPE
-            = Var.intern(CLOJURE_NS, Symbol.intern("*allow-symbol-escape*"),true);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*allow-symbol-escape*"), true).setDynamic();
 
         #endregion
 
@@ -410,35 +404,35 @@ namespace clojure.lang
 
         public static readonly Var ALLOW_UNRESOLVED_VARS
             //= Var.intern(CLOJURE_NS, Symbol.intern("*allow-unresolved-vars*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*allow-unresolved-vars*"), false);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*allow-unresolved-vars*"), false).setDynamic();
 
         public static readonly Var WARN_ON_REFLECTION
             //= Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), false);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), false).setDynamic();
  
         //public static readonly Var MACRO_META 
         //    = Var.intern(CLOJURE_NS, Symbol.intern("*macro-meta*"), null);
 
-        public static readonly Var MATH_CONTEXT 
-            = Var.intern(CLOJURE_NS, Symbol.intern("*math-context*"), null);
+        public static readonly Var MATH_CONTEXT
+            = Var.intern(CLOJURE_NS, Symbol.intern("*math-context*"), null).setDynamic();
         
-        public static readonly Var AGENT 
-            = Var.intern(CLOJURE_NS, Symbol.intern("*agent*"), null);
+        public static readonly Var AGENT
+            = Var.intern(CLOJURE_NS, Symbol.intern("*agent*"), null).setDynamic();
 
         public static readonly Var READEVAL
             //= Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), true);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), true).setDynamic();
 
         public static readonly Var ASSERT
             //= Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), true);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), true).setDynamic();
 
-        public static readonly Var CMD_LINE_ARGS 
-            = Var.intern(CLOJURE_NS, Symbol.intern("*command-line-args*"), null);
+        public static readonly Var CMD_LINE_ARGS
+            = Var.intern(CLOJURE_NS, Symbol.intern("*command-line-args*"), null).setDynamic();
 
         public static readonly Var USE_CONTEXT_CLASSLOADER
             //= Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), true);
+            = Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), true).setDynamic();
 
         #endregion
 

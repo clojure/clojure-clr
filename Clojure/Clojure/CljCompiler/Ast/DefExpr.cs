@@ -32,16 +32,18 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Expr _init;
         readonly Expr _meta;
         readonly bool _initProvided;
+        readonly bool _isDynamic;
 
         #endregion
 
         #region Ctors
 
-        public DefExpr(Var var, Expr init, Expr meta, bool initProvided)
+        public DefExpr(Var var, Expr init, Expr meta, bool initProvided, bool isDyanamic)
         {
             _var = var;
             _init = init;
             _meta = meta;
+            _isDynamic = isDyanamic;
             _initProvided = initProvided;
         }
 
@@ -105,6 +107,14 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 IPersistentMap mm = sym.meta();
+                bool isDynamic = RT.booleanCast(RT.get(mm, Compiler.DYNAMIC_KEY));
+                if (!isDynamic && sym.Name.StartsWith("*") && sym.Name.EndsWith("*") && sym.Name.Length > 1)
+                {
+                    RT.errPrintWriter().WriteLine("Var {0} is not marked :dynamic true, setting to :dynamic. You should fix this before next release!", sym);
+                    isDynamic = true;
+                    mm = (IPersistentMap)RT.assoc(mm, Compiler.DYNAMIC_KEY, true);
+                }
+
                 if (RT.booleanCast(RT.get(mm, Compiler.STATIC_KEY)))
                 {
                     IPersistentMap vm = v.meta();
@@ -132,7 +142,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr init = Compiler.Analyze(pcon.EvEx(),RT.third(form), v.Symbol.Name);
                 bool initProvided = RT.count(form) == 3;
 
-                return new DefExpr(v, init, meta, initProvided);
+                return new DefExpr(v, init, meta, initProvided,isDynamic);
             }
         }
 
@@ -150,7 +160,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (_initProvided || true) // includesExplicitMetadata((MapExpr)_meta))
                     _var.setMeta((IPersistentMap)_meta.Eval());
             }
-            return _var;
+            return _var.setDynamic(_isDynamic);
         }
 
         #endregion
@@ -164,6 +174,9 @@ namespace clojure.lang.CljCompiler.Ast
             ParameterExpression parm = Expression.Parameter(typeof(Var), "v");
 
             Expression varExpr = objx.GenVar(context,_var);
+
+            if (_isDynamic)
+                varExpr = Expression.Call(varExpr, Compiler.Method_Var_setDynamic0);
 
             exprs.Add(Expression.Assign(parm, varExpr));
 

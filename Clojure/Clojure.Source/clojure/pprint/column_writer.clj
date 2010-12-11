@@ -20,7 +20,7 @@
 (import [clojure.lang IDeref]
         [System.IO TextWriter])                          ;;;  java.io Writer    All instances of Writer replaced by TextWriter
 
-(def ^{:private true} *default-page-width* 72)
+(def ^:dynamic ^{:private true} *default-page-width* 72)
 
 (defn- get-field [^TextWriter this sym]
   (sym @@this))

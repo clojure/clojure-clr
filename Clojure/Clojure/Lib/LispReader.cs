@@ -55,10 +55,10 @@ namespace clojure.lang
         /// <summary>
         /// Dynamically bound var to a map from <see cref="Symbol">Symbol</see>s to ...
         /// </summary>
-        static Var GENSYM_ENV = Var.create(null);
+        static Var GENSYM_ENV = Var.create(null).setDynamic();
 
         //sorted-map num->gensymbol
-        static Var ARG_ENV = Var.create(null);
+        static Var ARG_ENV = Var.create(null).setDynamic();
         
         #endregion
 

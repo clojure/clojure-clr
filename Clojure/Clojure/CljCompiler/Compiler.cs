@@ -92,6 +92,7 @@ namespace clojure.lang
         internal static readonly Keyword IMPLEMENTS_KEY = Keyword.intern(null,"implements");
         internal static readonly Keyword PROTOCOL_KEY = Keyword.intern(null,"protocol");
         static readonly Keyword ON_KEY = Keyword.intern(null, "on");
+        internal static readonly Keyword DYNAMIC_KEY = Keyword.intern("dynamic");
 
         internal const string COMPILE_STUB_PREFIX = "compile__stub";
 
@@ -102,60 +103,60 @@ namespace clojure.lang
         //boolean
         internal static readonly Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                                  //Symbol.intern("*compile-files*"), RT.F);
-                                                         Symbol.intern("*compile-files*"), false);  
+                                                         Symbol.intern("*compile-files*"), false).setDynamic();  
         //JAVA: Boolean.FALSE -- changed from RT.F in rev 1108, not sure why
 
 
         internal static readonly Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                                                         Symbol.intern("instance?"), false);  
+                                                         Symbol.intern("instance?"), false).setDynamic();  
 
 
         //String
         public static readonly Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                                                 Symbol.intern("*compile-path*"), null);
+                                                 Symbol.intern("*compile-path*"), null).setDynamic();
 
         public static readonly Var COMPILE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                                 Symbol.intern("compile"));
 
         // String
         internal static readonly Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                                        Symbol.intern("*source-path*"), "NO_SOURCE_FILE");
+                                        Symbol.intern("*source-path*"), "NO_SOURCE_FILE").setDynamic();
         // String
         internal static readonly Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-            Symbol.intern("*file*"), "NO_SOURCE_PATH");
+            Symbol.intern("*file*"), "NO_SOURCE_PATH").setDynamic();
 
         //Integer
-        internal static readonly Var LINE = Var.create(0);          // From the JVM version
-        //internal static readonly Var LINE_BEFORE = Var.create(0);   // From the JVM version
-        //internal static readonly Var LINE_AFTER = Var.create(0);    // From the JVM version
-        internal static readonly Var DOCUMENT_INFO = Var.create(null);  // Mine
-        internal static readonly Var SOURCE_SPAN = Var.create(null);    // Mine
+        internal static readonly Var LINE = Var.create(0).setDynamic();          // From the JVM version
+        //internal static readonly Var LINE_BEFORE = Var.create(0).setDynamic();   // From the JVM version
+        //internal static readonly Var LINE_AFTER = Var.create(0).setDynamic();    // From the JVM version
+        internal static readonly Var DOCUMENT_INFO = Var.create(null).setDynamic();  // Mine
+        internal static readonly Var SOURCE_SPAN = Var.create(null).setDynamic();    // Mine
 
-        internal static readonly Var METHOD = Var.create(null);
-        public static readonly Var LOCAL_ENV = Var.create(PersistentHashMap.EMPTY);
+        internal static readonly Var METHOD = Var.create(null).setDynamic();
+        public static readonly Var LOCAL_ENV = Var.create(PersistentHashMap.EMPTY).setDynamic();
         //Integer
-        internal static readonly Var NEXT_LOCAL_NUM = Var.create(0);
-        internal static readonly Var LOOP_LOCALS = Var.create(null);
+        internal static readonly Var NEXT_LOCAL_NUM = Var.create(0).setDynamic();
+        internal static readonly Var LOOP_LOCALS = Var.create(null).setDynamic();
         // Label
-        internal static readonly Var LOOP_LABEL = Var.create();
+        internal static readonly Var LOOP_LABEL = Var.create().setDynamic();
 
 
-        internal static readonly Var IN_CATCH_FINALLY = Var.create(null);          //null or not
+        internal static readonly Var IN_CATCH_FINALLY = Var.create(null).setDynamic();          //null or not
 
-        internal static readonly Var VARS = Var.create();           //var->constid
-        internal static readonly Var CONSTANTS = Var.create();      //vector<object>
-        internal static readonly Var CONSTANT_IDS = Var.create();   // IdentityHashMap
-        internal static readonly Var KEYWORDS = Var.create();       //keyword->constid
+        internal static readonly Var VARS = Var.create().setDynamic();           //var->constid
+        internal static readonly Var CONSTANTS = Var.create().setDynamic();      //vector<object>
+        internal static readonly Var CONSTANT_IDS = Var.create().setDynamic();   // IdentityHashMap
+        internal static readonly Var KEYWORDS = Var.create().setDynamic();       //keyword->constid
 
-        internal static readonly Var KEYWORD_CALLSITES = Var.create();  // vector<keyword>
-        internal static readonly Var PROTOCOL_CALLSITES = Var.create(); // vector<var>
-        internal static readonly Var VAR_CALLSITES = Var.create();      // vector<var>
+        internal static readonly Var KEYWORD_CALLSITES = Var.create().setDynamic();  // vector<keyword>
+        internal static readonly Var PROTOCOL_CALLSITES = Var.create().setDynamic(); // vector<var>
+        internal static readonly Var VAR_CALLSITES = Var.create().setDynamic();      // vector<var>
 
-        internal static readonly Var COMPILE_STUB_SYM = Var.create(null);
-        internal static readonly Var COMPILE_STUB_CLASS = Var.create(null);
-        internal static readonly Var COMPILE_STUB_ORIG_CLASS = Var.create(null);
+        internal static readonly Var COMPILE_STUB_SYM = Var.create(null).setDynamic();
+        internal static readonly Var COMPILE_STUB_CLASS = Var.create(null).setDynamic();
+        internal static readonly Var COMPILE_STUB_ORIG_CLASS = Var.create(null).setDynamic();
 
-        internal static readonly Var COMPILER_CONTEXT = Var.create(null);
+        internal static readonly Var COMPILER_CONTEXT = Var.create(null).setDynamic();
 
         #endregion
 
@@ -265,6 +266,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Var_hasRoot = typeof(Var).GetMethod("hasRoot");
         internal static readonly MethodInfo Method_Var_getRawRoot = typeof(Var).GetMethod("getRawRoot");
         internal static readonly MethodInfo Method_Var_getRoot = typeof(Var).GetMethod("getRoot");
+        internal static readonly MethodInfo Method_Var_setDynamic0 = typeof(Var).GetMethod("setDynamic", Type.EmptyTypes);
 
         internal static readonly ConstructorInfo Ctor_KeywordLookupSite_1 = typeof(KeywordLookupSite).GetConstructor(new Type[] { typeof(Keyword) });
         internal static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
@@ -1260,7 +1262,7 @@ namespace clojure.lang
         public static void PushNS()
         {
             Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.intern("clojure.core"),
-                                                                       Symbol.intern("*ns*")), null));
+                                                                       Symbol.intern("*ns*")).setDynamic(), null));
         }
 
 
