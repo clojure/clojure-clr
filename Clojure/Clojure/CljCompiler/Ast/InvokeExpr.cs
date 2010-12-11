@@ -129,13 +129,13 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            if (fexpr is VarExpr && pcon.Rhc != RHC.Eval)
-            {
-                Var v = ((VarExpr)fexpr).Var;
-                IPersistentMap meta = RT.meta(v);
-                if (RT.booleanCast(RT.get(meta, Compiler.STATIC_KEY)) && !RT.booleanCast(RT.get(meta,Compiler.NOLINK_KEY)))
-                    return StaticInvokeExpr.Parse(v, RT.next(form), Compiler.TagOf(form));
-            }
+            //if (fexpr is VarExpr && pcon.Rhc != RHC.Eval)
+            //{
+            //    Var v = ((VarExpr)fexpr).Var;
+            //    IPersistentMap meta = RT.meta(v);
+            //    if (RT.booleanCast(RT.get(meta, Compiler.STATIC_KEY)) && !RT.booleanCast(RT.get(meta,Compiler.NOLINK_KEY)))
+            //        return StaticInvokeExpr.Parse(v, RT.next(form), Compiler.TagOf(form));
+            //}
 
             if (fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KEYWORD_CALLSITES.isBound)
             {

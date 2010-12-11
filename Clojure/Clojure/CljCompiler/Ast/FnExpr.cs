@@ -128,7 +128,7 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     Symbol nm = (Symbol)RT.second(form);
                     fn._thisName = nm.Name;
-                    fn.IsStatic = RT.booleanCast(RT.get(nm.meta(), Compiler.STATIC_KEY));
+                    fn.IsStatic = false; // RT.booleanCast(RT.get(nm.meta(), Compiler.STATIC_KEY));
                     form = RT.cons(Compiler.FN, RT.next(RT.next(form)));
                 }
 

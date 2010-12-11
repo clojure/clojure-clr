@@ -185,7 +185,11 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         Type pt = Compiler.TagType(Compiler.TagOf(p));
                         if (pt.IsPrimitive && !isStatic)
-                            throw new Exception("Non-static fn can't have primitive parameter: " + p);
+                        {
+                            pt = typeof(object);
+                            p = (Symbol)((IObj)p).withMeta((IPersistentMap)RT.assoc(RT.meta(p), RT.TAG_KEY, null));
+                            //throw new Exception("Non-static fn can't have primitive parameter: " + p);
+                        }
                         if (pt.IsPrimitive && !(pt == typeof(double) || pt == typeof(long)))
                             throw new ArgumentException("Only long and double primitives are supported: " + p);
 
