@@ -376,7 +376,9 @@ namespace clojure.lang.CljCompiler.Ast
                     new ParameterExpression[] { targetParam, targetTypeParam, vpfnParam },
                     targetParamAssign,
                     targetTypeParamAssign,
-                    setCachedClass,
+                    Expression.IfThen(
+                        Expression.NotEqual(targetTypeParam,cachedTypeField),
+                        setCachedClass),
                     vpfnParamAssign,
                     GenerateArgsAndCall(rhc, objx, context, vpfnParam, targetParam));
             }
@@ -394,14 +396,16 @@ namespace clojure.lang.CljCompiler.Ast
                      targetParamAssign,
                      targetTypeParamAssign,
                      Expression.Condition(
-                        Expression.Or(
-                            Expression.Equal(targetTypeParam, cachedTypeField),
-                            Expression.Not(Expression.TypeIs(targetParam, _protocolOn))),
+                        Expression.And(
+                            Expression.NotEqual(targetTypeParam, cachedTypeField),
+                            Expression.TypeIs(targetParam, _protocolOn)),
+                        Compiler.MaybeBox(Expression.Call(Expression.Convert(targetParam, _protocolOn), _onMethod, args)),
                         Expression.Block(
-                            setCachedClass,
+                            Expression.IfThen(
+                                Expression.NotEqual(targetTypeParam, cachedTypeField),
+                                setCachedClass),
                             vpfnParamAssign,
-                            GenerateArgsAndCall(rhc, objx, context, vpfnParam, targetParam)),
-                         Compiler.MaybeBox(Expression.Call(Expression.Convert(targetParam, _protocolOn), _onMethod, args))));
+                            GenerateArgsAndCall(rhc, objx, context, vpfnParam, targetParam))));
             }
         }
 
