@@ -15,6 +15,7 @@
 using System;
 
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace clojure.lang
 {
@@ -31,39 +32,62 @@ namespace clojure.lang
     /// </remarks>
     public sealed class Var : ARef, IFn, IRef, Settable
     {
+        #region class TBox
+
+        public sealed class TBox
+        {
+            #region Data
+
+            volatile Object _val;
+
+            public Object Val
+            {
+                get { return _val; }
+                set { _val = value; }
+            }
+
+            readonly Thread _thread;
+
+            public Thread Thread
+            {
+                get { return _thread; }
+            }
+
+            #endregion
+
+            #region Ctors
+
+            public TBox(Thread t, Object val)
+            {
+                _thread = t;
+                _val = val;
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        #region Frame
+
         /// <summary>
         /// Represents a set of Var bindings established at a particular point in the call stack.
         /// </summary>
-        class Frame
+        sealed class Frame
         {
             #region Data
 
             /// <summary>
-            /// A mapping from <see cref="Var">Var</see>s to <see cref="Box">Box</see>es holding their values.
+            /// A mapping from <see cref="Var">Var</see>s to <see cref="TBox"/>es holding their values.
             /// </summary>
             readonly Associative _bindings;
 
             /// <summary>
-            /// Get mapping from <see cref="Var">Var</see>s to <see cref="Box">Box</see>es holding their values.
+            /// Get mapping from <see cref="Var">Var</see>s to <see cref="TBox"/>es holding their values.
             /// </summary>
             public Associative Bindings
             {
                 get { return _bindings; }
-            }
-
-            /// <summary>
-            /// The bindings of this frame only.
-            /// </summary>
-            /// <remarks>Used only to know which Vars to decrement the counts of 
-            /// during an unwind/pop, i.e., only the keys matter.</remarks>
-            readonly Associative _frameBindings;
-
-            /// <summary>
-            /// Get the bindings of this frame only.
-            /// </summary>
-            public Associative FrameBindings
-            {
-                get { return _frameBindings; }
             }
 
             /// <summary>
@@ -87,7 +111,7 @@ namespace clojure.lang
             /// Construct an empty frame.
             /// </summary>
             public Frame()
-                : this(PersistentHashMap.EMPTY, PersistentHashMap.EMPTY, null)
+                : this(PersistentHashMap.EMPTY, null)
             {
             }
 
@@ -97,15 +121,17 @@ namespace clojure.lang
             /// <param name="frameBindings">The bindings for this frame only.</param>
             /// <param name="bindings">Bindings all the way down the stack.</param>
             /// <param name="prev">The previous frame.</param>
-            public Frame(Associative frameBindings, Associative bindings, Frame prev)
+            public Frame( Associative bindings, Frame prev)
             {
-                _frameBindings = frameBindings;
+                //_frameBindings = frameBindings;
                 _bindings = bindings;
                 _prev = prev;
             }
 
             #endregion
         }
+
+        #endregion
 
         #region Data
 
@@ -154,7 +180,8 @@ namespace clojure.lang
         /// The number of bindings for this var on the binding stack.
         /// </summary>
         [NonSerialized]
-        AtomicInteger _count;        
+        //AtomicInteger _count;       
+        AtomicBoolean _threadBound;
         
         /// <summary>
         /// The symbol naming this var, if named.
@@ -286,7 +313,7 @@ namespace clojure.lang
         {
             _ns = ns;
             _sym = sym;
-            _count = new AtomicInteger();
+            _threadBound = new AtomicBoolean(false);
             _root = _rootUnboundValue;
             setMeta(PersistentHashMap.EMPTY);
         }
@@ -317,6 +344,23 @@ namespace clojure.lang
             return (_ns != null)
                 ? "#'" + _ns.Name + "/" + _sym
                 : "#<Var: " + (_sym != null ? _sym.ToString() : "--unnamed--") + ">";
+        }
+
+        #endregion
+
+        #region Frame management
+
+        public static Object getThreadBindingFrame()
+        {
+            Frame f = CurrentFrame;
+            if ( f != null )
+                return f;
+            return new Frame();
+        }
+
+        public static void resetThreadBindingFrame(Object frame)
+        {
+            CurrentFrame = (Frame)frame;
         }
 
         #endregion
@@ -380,7 +424,7 @@ namespace clojure.lang
         /// </summary>
         public bool isBound
         {
-            get { return hasRoot() || (_count.get() > 0 && CurrentFrame.Bindings.containsKey(this)); }
+            get { return hasRoot() || (_threadBound.get() && CurrentFrame.Bindings.containsKey(this)); }
         }
 
        
@@ -410,12 +454,11 @@ namespace clojure.lang
             return _root;
         }
 
-        // In the Java version, haven't missed it yet.
-        //public object alter(IFn fn, ISeq args)
-        //{
-        //    set(fn.applyTo(RT.cons(deref(), args)));
-        //    return this;
-        //}
+        public object alter(IFn fn, ISeq args)
+        {
+            set(fn.applyTo(RT.cons(deref(), args)));
+            return this;
+        }
 
         /// <summary>
         /// Set the value of the var.
@@ -426,9 +469,13 @@ namespace clojure.lang
         public object set(object val)
         {
             Validate(getValidator(), val);
-            Box b = getThreadBinding();
+            TBox b = getThreadBinding();
             if (b != null)
+            {
+                if (Thread.CurrentThread != b.Thread)
+                    throw new InvalidOperationException(String.Format("Can't set!: {0} from non-binding thread", sym));
                 return (b.Val = val);
+            }
             throw new InvalidOperationException(String.Format("Can't change/establish root binding of: {0} with set", _sym));
         }
 
@@ -444,47 +491,45 @@ namespace clojure.lang
             Validate(getValidator(), root);
             object oldroot = hasRoot() ? _root : null;
             _root = root;
-            //alterMeta(_assoc, RT.list(_macroKey, RT.F));
-            //alterMeta(_assoc, RT.list(_macroKey, false));
             alterMeta(_dissoc, RT.list(_macroKey));
             notifyWatches(oldroot, _root);
         }
 
+        /// <summary>
+        /// Change the root value.
+        /// </summary>
+        /// <param name="root">The new value.</param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        void swapRoot(object root)
+        {
+            Validate(getValidator(), root);
+            object oldroot = hasRoot() ? _root : null;
+            _root = root;
+            notifyWatches(oldroot, root);
+        }
 
-        ///// <summary>
-        ///// Change the root value.
-        ///// </summary>
-        ///// <param name="root">The new value.</param>
-        //[MethodImpl(MethodImplOptions.Synchronized)]
-        //void SwapRoot(object root)
-        //{
-        //    Validate(getValidator(), root);
-        //    object oldroot = hasRoot() ? _root : null;
-        //    notifyWatches(oldroot,root);
-        //}
+        /// <summary>
+        /// Unbind the var's root value.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        void unbindRoot()
+        {
+            _root = _rootUnboundValue;
+        }
 
-        ///// <summary>
-        ///// Unbind the var's root value.
-        ///// </summary>
-        //[MethodImpl(MethodImplOptions.Synchronized)]
-        //void UnbindRoot()
-        //{
-        //    _root = _rootUnboundValue;
-        //}
-
-        ///// <summary>
-        ///// Set var's root to a computed value.
-        ///// </summary>
-        ///// <param name="fn">The function to apply to the current value to get the new value.</param>
-        //[MethodImpl(MethodImplOptions.Synchronized)]
-        //void CommuteRoot(IFn fn)
-        //{
-        //    object newRoot = fn.invoke(_root);
-        //    Validate(getValidator(), newRoot);
-        //    object oldroot = getRoot();
-        //    _root = newRoot;
-        //    notifyWatches(oldRoot,newRoot);
-        //}
+        /// <summary>
+        /// Set var's root to a computed value.
+        /// </summary>
+        /// <param name="fn">The function to apply to the current value to get the new value.</param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        void commuteRoot(IFn fn)
+        {
+            object newRoot = fn.invoke(_root);
+            Validate(getValidator(), newRoot);
+            object oldRoot = getRoot();
+            _root = newRoot;
+            notifyWatches(oldRoot, newRoot);
+        }
 
         /// <summary>
         /// Change the var's root to a computed value (based on current value and supplied arguments).
@@ -523,10 +568,10 @@ namespace clojure.lang
                 IMapEntry e = (IMapEntry)bs.first();
                 Var v = (Var)e.key();
                 v.Validate(e.val());
-                v._count.incrementAndGet();
-                bmap = bmap.assoc(v, new Box(e.val()));
+                v._threadBound.set(true);
+                bmap = bmap.assoc(v, new TBox(Thread.CurrentThread,e.val()));
             }
-            CurrentFrame = new Frame(bindings, bmap, f);
+            CurrentFrame = new Frame(bmap, f);
         }
 
         /// <summary>
@@ -538,29 +583,7 @@ namespace clojure.lang
             Frame f = CurrentFrame;
             if (f.Prev == null)
                 throw new InvalidOperationException("Pop without matching push");
-            for (ISeq bs = RT.keys(f.FrameBindings); bs != null; bs = bs.next())
-            {
-                Var v = (Var)bs.first();
-                v._count.decrementAndGet();
-            }
             CurrentFrame = f.Prev;
-        }
-
-
-        /// <summary>
-        /// Pop all binding frames from teh stack.
-        /// </summary>
-        static void ReleaseThreadBindings()
-        {
-            Frame f = CurrentFrame;
-            if (f.Prev == null)
-                throw new InvalidOperationException("Release without full unwind");
-            for (ISeq bs = RT.keys(f.Bindings); bs != null; bs = bs.next())
-            {
-                Var v = (Var)bs.first();
-                v._count.decrementAndGet(); ;
-            }
-            CurrentFrame = null;
         }
 
         /// <summary>
@@ -576,7 +599,7 @@ namespace clojure.lang
             {
                 IMapEntry e = (IMapEntry)bs.first();
                 Var v = (Var)e.key();
-                Box b = (Box)e.val();
+                TBox b = (TBox)e.val();
                 ret = ret.assoc(v, b.Val);
             }
             return ret;
@@ -587,13 +610,13 @@ namespace clojure.lang
         /// Get the box of the current binding on the stack for this var, or null if no binding.
         /// </summary>
         /// <returns>The box of the current binding on the stack (or null if no binding).</returns>
-        public Box getThreadBinding()
+        public TBox getThreadBinding()
         {
-            if (_count.get() > 0)
+            if (_threadBound.get())
             {
                 IMapEntry e = CurrentFrame.Bindings.entryAt(this);
                 if (e != null)
-                    return (Box)e.val();
+                    return (TBox)e.val();
             }
             return null;
         }
@@ -767,7 +790,7 @@ namespace clojure.lang
         /// But then they rename all uses anyway.</remarks>
         public object get()
         {
-            if (_count.get() == 0 && _root != CurrentFrame)
+            if (!_threadBound.get() && _root != _rootUnboundValue )
                 return _root;
             return deref();
         }
@@ -778,7 +801,7 @@ namespace clojure.lang
         /// <returns>The value</returns>
         public override object deref()
         {
-            Box b = getThreadBinding();
+            TBox b = getThreadBinding();
             if (b != null)
                 return b.Val;
             if (hasRoot())
@@ -833,6 +856,16 @@ namespace clojure.lang
         public bool isPublic
         {
             get { return IsPublic; }
+        }
+
+        public object getTag()
+        {
+            return Tag;
+        }
+
+        public void setTag(Symbol tag)
+        {
+            Tag = tag;
         }
 
         #endregion
