@@ -121,7 +121,7 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.VARS, PersistentHashMap.EMPTY,
                     Compiler.KEYWORD_CALLSITES,PersistentVector.EMPTY,
                     Compiler.PROTOCOL_CALLSITES,PersistentVector.EMPTY,
-                    Compiler.VAR_CALLSITES,PersistentVector.EMPTY));
+                    Compiler.VAR_CALLSITES,Compiler.EmptyVarCallSites()));
 
                 //arglist might be preceded by symbol naming this fn
                 if (RT.second(form) is Symbol)
@@ -176,7 +176,7 @@ namespace clojure.lang.CljCompiler.Ast
                 fn.Constants = (PersistentVector)Compiler.CONSTANTS.deref();
                 fn.KeywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
                 fn.ProtocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
-                fn.VarCallsites = (IPersistentVector)Compiler.VAR_CALLSITES.deref();
+                fn.VarCallsites = (IPersistentSet)Compiler.VAR_CALLSITES.deref();
 
                 fn._constantsID = RT.nextID();
             }

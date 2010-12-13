@@ -79,8 +79,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            Expression varExpr = objx.GenVar(context,_var);
-            return Expression.Call(varExpr, Compiler.Method_Var_get);
+            return objx.GenVarValue(context, _var);
         }
 
         #endregion

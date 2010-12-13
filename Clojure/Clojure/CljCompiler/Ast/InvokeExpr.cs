@@ -81,14 +81,6 @@ namespace clojure.lang.CljCompiler.Ast
                         _onMethod = methods[0];
                     }
                 }
-                //else if (pvar == null && Compiler.VAR_CALLSITES.isBound
-                //    && fvar.Namespace.Name.Name.StartsWith("clojure")
-                //    && !RT.booleanCast(RT.get(RT.meta(fvar), _dynamicKey)))
-                //{
-                //    // Java TODO: more specific criteria for binding these
-                //    _isDirect = true;
-                //    _siteIndex = Compiler.RegisterVarCallsite(fvar);
-                //}
             }
 
             _tag = tag ?? (fexpr is VarExpr ? ((VarExpr)fexpr).Tag : null);
@@ -187,22 +179,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private Expression GenNonProto(RHC rhc, ObjExpr objx, GenContext context, Expression basicFn)
         {
-            Expression fn;
-
-            //if (_isDirect && context.Mode == CompilerMode.File)
-            if (_isDirect && objx.FnMode == FnMode.Full)
-                {
-                // TODO: Determine if this optimization is valid for Immediate mode
-                ParameterExpression v = Expression.Parameter(typeof(IFn));
-                Expression initV = Expression.Assign(v, Expression.Field(null, objx.BaseType, objx.VarCallsiteName(_siteIndex)));
-                Expression test = Expression.Condition(Expression.Equal(v, Expression.Constant(null, typeof(IFn))), basicFn, v);
-                Expression block = Expression.Block(typeof(IFn), new ParameterExpression[] { v }, initV, test);
-                fn = block;
-            }
-            else
-                fn = basicFn;
-
-            return GenerateArgsAndCall(rhc, objx, context, fn);
+            return GenerateArgsAndCall(rhc, objx, context, basicFn);
         }
 
 

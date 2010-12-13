@@ -71,7 +71,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private IPersistentVector _keywordCallsites;
         private IPersistentVector _protocolCallsites;
-        private IPersistentVector _varCallsites;
+        private IPersistentSet _varCallsites;
 
         protected bool _onceOnly = false;
 
@@ -94,6 +94,13 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         protected FieldBuilder _metaField;
+        private FieldBuilder _varRevField;
+
+        //internal FieldBuilder VarRevField
+        //{
+        //    get { return _varRevField; }
+        //    //set { _varRevField = value; }
+        //}
 
         protected List<FieldBuilder> _closedOverFields;
         private Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;        
@@ -102,6 +109,16 @@ namespace clojure.lang.CljCompiler.Ast
         protected List<FieldBuilder> _cachedTypeFields;
         protected List<FieldBuilder> _cachedProtoFnFields;
         protected List<FieldBuilder> _cachedProtoImplFields;
+        //protected Dictionary<int,FieldBuilder> _cachedVarFields;
+        protected Dictionary<int, FieldBuilder> _constantFields;
+
+        //private MethodBuilder _reloadVarsMethod = null;
+
+        //internal MethodBuilder ReloadVarsMethod
+        //{
+        //    get { return _reloadVarsMethod; }
+        //    //set { _reloadVarsMethod = value; }
+        //}
 
 
         protected IPersistentCollection _methods;
@@ -182,7 +199,7 @@ namespace clojure.lang.CljCompiler.Ast
             set { _protocolCallsites = value; }
         }
 
-        internal IPersistentVector VarCallsites
+        internal IPersistentSet VarCallsites
         {
             get { return _varCallsites; }
             set { _varCallsites = value; }
@@ -373,6 +390,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             GenerateClosedOverFields(baseTB);
             GenerateVarCallsites(baseTB);
+            //GenerateCachedVarFields(baseTB);
             GenerateKeywordCallsites(baseTB);
             GenerateSwapThunk(baseTB);
             GenerateProtocolCallsites(baseTB);
@@ -388,6 +406,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void GenerateConstantFields(TypeBuilder baseTB)
         {
+            _constantFields = new Dictionary<int, FieldBuilder>(_constants.count());
+
             for (int i = 0; i < _constants.count(); i++)
             {
                 string fieldName = ConstantName(i);
@@ -395,6 +415,8 @@ namespace clojure.lang.CljCompiler.Ast
                 if (!fieldType.IsPrimitive)
                 {
                     FieldBuilder fb = baseTB.DefineField(fieldName, fieldType, FieldAttributes.FamORAssem | FieldAttributes.Static);
+                    _constantFields[i] = fb;
+
                 }
             }
         }
@@ -469,12 +491,36 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void GenerateVarCallsites(TypeBuilder baseTB)
         {
-            for (int i = 0; i < _varCallsites.count(); i++)
-            {
-                string fieldName = VarCallsiteName(i);
-                FieldBuilder fb = baseTB.DefineField(fieldName, typeof(IFn), FieldAttributes.FamORAssem | FieldAttributes.Static);
-            }
+            //for (int i = 0; i < _varCallsites.count(); i++)
+            //{
+            //    string fieldName = VarCallsiteName(i);
+            //    FieldBuilder fb = baseTB.DefineField(fieldName, typeof(IFn), FieldAttributes.FamORAssem | FieldAttributes.Static);
+            //}
         }
+
+        //private void GenerateCachedVarFields(TypeBuilder baseTB)
+        //{
+        //    _cachedVarFields = new Dictionary<int, FieldBuilder>(_vars.count());
+
+        //    for (ISeq es = RT.seq(_vars); es != null; es = es.next())
+        //    {
+        //        IMapEntry e = (IMapEntry)es.first();
+        //        Var v = (Var)e.key();
+        //        int i = (int)e.val();
+        //        if (!v.isDynamic())
+        //        {
+        //            string fieldName = CachedVarName(i);
+        //            Type fieldType = _varCallsites.contains(v) ? typeof(IFn) : typeof(Object);
+        //            FieldBuilder fb = baseTB.DefineField(fieldName, fieldType, FieldAttributes.FamORAssem| FieldAttributes.Static);
+        //            _cachedVarFields[i] = fb;
+        //        }
+        //    }
+
+        //    if (_vars.count() > 0)
+        //        _varRevField = baseTB.DefineField("__varrev__", typeof(int), FieldAttributes.FamORAssem| FieldAttributes.Static);
+
+
+        //}
 
         public String VarCallsiteName(int n)
         {
@@ -522,6 +568,11 @@ namespace clojure.lang.CljCompiler.Ast
         public String ThunkNameStatic(int n)
         {
             return ThunkName(n) + "__";
+        }
+
+        string CachedVarName(int n)
+        {
+            return "__cached_var__" + n;
         }
 
 
@@ -641,7 +692,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected virtual void GenerateBaseClassMethods(TypeBuilder baseTB, GenContext context)
         {
-            // do nothing in the base case.
+            //GenerateReloadVarsMethod(baseTB, context);
         }
 
         #endregion
@@ -676,6 +727,8 @@ namespace clojure.lang.CljCompiler.Ast
                 GenerateMetaFunctions(_typeBuilder);
             }
 
+            //GenerateReloadVarsMethod(_typeBuilder, context);
+
             // The incoming context holds info on the containing function.
             // That is the one that holds the closed-over variable values.
 
@@ -704,6 +757,79 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+        //protected void GenerateReloadVarsMethod(TypeBuilder fnTB, GenContext context)
+        //{
+        //    if (_vars.count() == 0)
+        //        return;
+
+        //    Console.WriteLine("ReloadVars for {0}", fnTB.Name);
+
+        //    MethodBuilder mb = fnTB.DefineMethod("__reloadVars__", MethodAttributes.FamORAssem | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
+
+        //    Expression assignRevCount =
+        //        Expression.Assign(
+        //            Expression.Field(null, _varRevField),
+        //            Expression.Property(null, Compiler.Method_Var_Rev));
+
+        //    List<Expression> bodyExprs = new List<Expression>(_vars.count() + 1);
+        //    bodyExprs.Add(assignRevCount);
+
+
+        //    Expression write =
+        //       Expression.Call(typeof(Console).GetMethod("WriteLine", new Type[] { typeof(string) }), Expression.Constant(String.Format("Calling __reloadVars___ for {0}", fnTB.Name)));
+        //    bodyExprs.Add(write);
+
+
+        //    for (ISeq es = RT.seq(_vars); es != null; es = es.next())
+        //    {
+        //        IMapEntry e = (IMapEntry)es.first();
+        //        Var v = (Var)e.key();
+        //        int i = (int)e.val();
+        //        if (!v.isDynamic())
+        //        {
+        //            Console.WriteLine("Var {0}/{1}", v.Namespace.Name, v.Symbol.Name);
+
+        //            //Expression write = 
+        //            //   Expression.Call(typeof(Console).GetMethod("WriteLine",new Type[] {typeof(string)}),Expression.Constant(String.Format("RELOAD: Setting var {0}/{1}",v.Namespace.ToString(),v.Symbol.ToString())));
+        //            //bodyExprs.Add(write);
+
+        //            Type ft = _varCallsites.contains(v) ? typeof(IFn) : typeof(Object);
+        //            Expression assignVar =
+        //                Expression.Assign(
+        //                    Expression.Field(null, _cachedVarFields[i]),
+        //                    Expression.Convert(
+        //                        Expression.Call(
+        //                            //GenConstant(context, i, v),
+        //                            Expression.Field(null,_constantFields[i]),
+        //                            Compiler.Method_Var_get),
+        //                        ft));
+        //            bodyExprs.Add(assignVar);
+        //        }
+        //    }
+        //    LabelTarget label = Expression.Label();
+
+        //    Expression exitCondn =
+        //        Expression.IfThen(
+        //            Expression.Equal(
+        //                Expression.Field(null, _varRevField),
+        //                Expression.Property(null, Compiler.Method_Var_Rev)),
+        //            Expression.Break(label));
+
+        //    bodyExprs.Add(exitCondn);
+
+        //    Expression body =
+        //        Expression.Loop(
+        //           Expression.Block(bodyExprs),
+        //           label);
+
+        //    LambdaExpression lambda = Expression.Lambda(body);
+        //    lambda.CompileToMethod(mb);
+
+        //    _reloadVarsMethod = mb;
+        //}
+
+
+
         #region Generating constants
 
         private MethodBuilder GenerateConstants(TypeBuilder fnTB, Type baseType, bool isDebuggable)
@@ -718,6 +844,12 @@ namespace clojure.lang.CljCompiler.Ast
                     Expression expr = GenerateValue(_constants.nth(i));
                     if (!expr.Type.IsPrimitive)
                     {
+                        //if (ConstantType(i) == typeof(Var))
+                        //{
+                        //    Var v = (Var)_constants.nth(i);
+                        //    Expression write = Expression.Call(typeof(Console).GetMethod("WriteLine",new Type[] {typeof(string)}), Expression.Constant(String.Format("INIT: {0}/{1}", v.Namespace.ToString(), v.Symbol.ToString())));
+                        //    inits.Add(write);
+                        //}
                         Expression init =
                             Expression.Assign(
                                 Expression.Field(null, baseType, ConstantName(i)),
@@ -872,39 +1004,40 @@ namespace clojure.lang.CljCompiler.Ast
 
         private MethodBuilder GenerateVarCallsiteInits(TypeBuilder fnTB, Type baseType, bool isDebuggable)
         {
-            if (_varCallsites.count() == 0)
-                return null;
+            return null;
+            //if (_varCallsites.count() == 0)
+            //    return null;
 
-            List<Expression> inits = new List<Expression>();
-            for (int i = 0; i < _varCallsites.count(); i++)
-            {
-                Var v = (Var)_varCallsites.nth(i);
-                ParameterExpression varTemp = Expression.Parameter(typeof(Var), "varTemp");
-                ParameterExpression valTemp = Expression.Parameter(typeof(Object), "valTemp");
+            //List<Expression> inits = new List<Expression>();
+            //for (int i = 0; i < _varCallsites.count(); i++)
+            //{
+            //    Var v = (Var)_varCallsites.nth(i);
+            //    ParameterExpression varTemp = Expression.Parameter(typeof(Var), "varTemp");
+            //    ParameterExpression valTemp = Expression.Parameter(typeof(Object), "valTemp");
 
-                Expression block = Expression.Block(
-                    new ParameterExpression[] { varTemp },
-                     Expression.Assign(
-                        varTemp,
-                        Expression.Call(null, Compiler.Method_RT_var2, Expression.Constant(v.Namespace.Name.Name), Expression.Constant(v.Symbol.Name))),
-                    Expression.IfThen(
-                        Expression.Call(varTemp, Compiler.Method_Var_hasRoot),
-                        Expression.Block(
-                            new ParameterExpression[] { valTemp },
-                            Expression.Assign(valTemp, Expression.Call(varTemp, Compiler.Method_Var_getRoot)),
-                            Expression.IfThen(
-                                Expression.TypeIs(valTemp, typeof(AFunction)),
-                                Expression.Assign(
-                                    Expression.Field(null, _baseType, VarCallsiteName(i)),
-                                    Expression.Convert(valTemp, typeof(IFn)))))));
-                inits.Add(block);
-            }
+            //    Expression block = Expression.Block(
+            //        new ParameterExpression[] { varTemp },
+            //         Expression.Assign(
+            //            varTemp,
+            //            Expression.Call(null, Compiler.Method_RT_var2, Expression.Constant(v.Namespace.Name.Name), Expression.Constant(v.Symbol.Name))),
+            //        Expression.IfThen(
+            //            Expression.Call(varTemp, Compiler.Method_Var_hasRoot),
+            //            Expression.Block(
+            //                new ParameterExpression[] { valTemp },
+            //                Expression.Assign(valTemp, Expression.Call(varTemp, Compiler.Method_Var_getRoot)),
+            //                Expression.IfThen(
+            //                    Expression.TypeIs(valTemp, typeof(AFunction)),
+            //                    Expression.Assign(
+            //                        Expression.Field(null, _baseType, VarCallsiteName(i)),
+            //                        Expression.Convert(valTemp, typeof(IFn)))))));
+            //    inits.Add(block);
+            //}
 
-            Expression allInits = Expression.Block(inits);
-            LambdaExpression lambda = Expression.Lambda(allInits);
-            MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_callsites", MethodAttributes.Private | MethodAttributes.Static);
-            lambda.CompileToMethod(methodBuilder, isDebuggable);
-            return methodBuilder;
+            //Expression allInits = Expression.Block(inits);
+            //LambdaExpression lambda = Expression.Lambda(allInits);
+            //MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_callsites", MethodAttributes.Private | MethodAttributes.Static);
+            //lambda.CompileToMethod(methodBuilder, isDebuggable);
+            //return methodBuilder;
         }
 
 
@@ -978,6 +1111,16 @@ namespace clojure.lang.CljCompiler.Ast
             ConstructorInfo baseCtorInfo = baseType.GetConstructor(Type.EmptyTypes);
             gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
             gen.Emit(OpCodes.Call, baseCtorInfo);
+
+            //// Initialize __varrev__
+            //if (_vars.count() > 0)
+            //{
+            //    gen.EmitLoadArg(0);
+            //    gen.EmitPropertyGet(Compiler.Method_Var_Rev);
+            //    gen.EmitInt(-1);
+            //    gen.Emit(OpCodes.Add);
+            //    gen.EmitFieldSet(_varRevField);
+            //}
 
             // Store Meta
             if (!IsDefType)
@@ -1170,6 +1313,21 @@ namespace clojure.lang.CljCompiler.Ast
         {
             int i = (int)_vars.valAt(var);
             return GenConstant(context, i, var);
+        }
+
+        internal Expression GenVarValue(GenContext context, Var v)
+        {
+            int i = (int)_vars.valAt(v);
+            if (_fnMode == Ast.FnMode.Full && !v.isDynamic())
+            {
+                //Type ft = _varCallsites.contains(v) ? typeof(IFn) : typeof(Object);
+                //return Expression.Field(null, _cachedVarFields[i]);
+                return Expression.Call(GenConstant(context, i, v), Compiler.Method_Var_getRawRoot);
+            }
+            else
+            {
+                return Expression.Call(GenConstant(context, i, v), Compiler.Method_Var_get);
+            }
         }
 
         internal Expression GenKeyword(GenContext context, Keyword kw)

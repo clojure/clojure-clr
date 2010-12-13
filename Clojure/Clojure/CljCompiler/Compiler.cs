@@ -150,7 +150,7 @@ namespace clojure.lang
 
         internal static readonly Var KEYWORD_CALLSITES = Var.create().setDynamic();  // vector<keyword>
         internal static readonly Var PROTOCOL_CALLSITES = Var.create().setDynamic(); // vector<var>
-        internal static readonly Var VAR_CALLSITES = Var.create().setDynamic();      // vector<var>
+        internal static readonly Var VAR_CALLSITES = Var.create().setDynamic();      // set<var>
 
         internal static readonly Var COMPILE_STUB_SYM = Var.create(null).setDynamic();
         internal static readonly Var COMPILE_STUB_CLASS = Var.create(null).setDynamic();
@@ -267,6 +267,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Var_getRawRoot = typeof(Var).GetMethod("getRawRoot");
         internal static readonly MethodInfo Method_Var_getRoot = typeof(Var).GetMethod("getRoot");
         internal static readonly MethodInfo Method_Var_setDynamic0 = typeof(Var).GetMethod("setDynamic", Type.EmptyTypes);
+        //internal static readonly PropertyInfo Method_Var_Rev = typeof(Var).GetProperty("Rev");
 
         internal static readonly ConstructorInfo Ctor_KeywordLookupSite_1 = typeof(KeywordLookupSite).GetConstructor(new Type[] { typeof(Keyword) });
         internal static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
@@ -565,16 +566,21 @@ namespace clojure.lang
             return protocolCallsites.count() - 1;
         }
 
-        internal static int RegisterVarCallsite(Var v)
+        internal static void RegisterVarCallsite(Var v)
         {
             if (!VAR_CALLSITES.isBound)
                 throw new InvalidOperationException("VAR_CALLSITES is not bound");
 
-            IPersistentVector varCallsites = (IPersistentVector)VAR_CALLSITES.deref();
+            IPersistentCollection varCallsites = (IPersistentCollection)VAR_CALLSITES.deref();
             varCallsites = varCallsites.cons(v);
             VAR_CALLSITES.set(varCallsites);
-            return varCallsites.count() - 1;
+            //return varCallsites.count() - 1;
         }
+
+         internal static IPersistentCollection EmptyVarCallSites()
+         {
+             return PersistentHashSet.EMPTY;
+         }
 
         internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init, bool isArg)
         {
@@ -1144,9 +1150,9 @@ namespace clojure.lang
                 CONSTANT_IDS, new IdentityHashMap(),
                 KEYWORDS, PersistentHashMap.EMPTY,
                 VARS, PersistentHashMap.EMPTY,
-                KEYWORD_CALLSITES, PersistentVector.EMPTY,  // jvm doesn't do this, don't know why
-                VAR_CALLSITES, PersistentVector.EMPTY,      // jvm doesn't do this, don't know why
-                PROTOCOL_CALLSITES, PersistentVector.EMPTY, // jvm doesn't do this, don't know why
+                //KEYWORD_CALLSITES, PersistentVector.EMPTY,  // jvm doesn't do this, don't know why
+                //VAR_CALLSITES, EmptyVarCallSites(),      // jvm doesn't do this, don't know why
+                //PROTOCOL_CALLSITES, PersistentVector.EMPTY, // jvm doesn't do this, don't know why
                 COMPILER_CONTEXT, context
                 ));
 
@@ -1189,9 +1195,13 @@ namespace clojure.lang
                 objx.Keywords = (IPersistentMap)KEYWORDS.deref();
                 objx.Vars = (IPersistentMap)VARS.deref();
                 objx.Constants = (PersistentVector)CONSTANTS.deref();
-                objx.KeywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
-                objx.ProtocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
-                objx.VarCallsites = (IPersistentVector)VAR_CALLSITES.deref();
+                //objx.KeywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
+                //objx.ProtocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
+                //objx.VarCallsites = (IPersistentSet)VAR_CALLSITES.deref();
+
+                objx.KeywordCallsites = PersistentVector.EMPTY;
+                objx.ProtocolCallsites = PersistentVector.EMPTY;
+                objx.VarCallsites = (IPersistentSet)EmptyVarCallSites();
 
                 objx.Compile(typeof(AFunction), PersistentVector.EMPTY, false, context);
 

@@ -68,7 +68,31 @@ namespace clojure.lang
 
         #endregion
 
-        #region Frame
+        #region class Unbound
+
+        sealed class Unbound : AFn
+        {
+            readonly Var _v;
+
+            public Unbound(Var v)
+            {
+                _v = v;
+            }
+
+            public override string ToString()
+            {
+                return "Unbound: " + _v.ToString();
+            }
+
+            public Object throwArity(int n)
+            {
+                throw new InvalidOperationException("Attempting to call unbound fn: " + _v.ToString());
+            }
+        }
+
+        #endregion
+
+        #region class Frame
 
         /// <summary>
         /// Represents a set of Var bindings established at a particular point in the call stack.
@@ -169,11 +193,6 @@ namespace clojure.lang
                 _currentFrame = value;
             }
         }
-
-        /// <summary>
-        /// Special value for the root to indicate the root is unbound.
-        /// </summary>
-        static object _rootUnboundValue = new object();
 
         /// <summary>
         /// The root value.
@@ -330,7 +349,7 @@ namespace clojure.lang
             _ns = ns;
             _sym = sym;
             _threadBound = new AtomicBoolean(false);
-            _root = _rootUnboundValue;
+            _root = new Unbound(this);
             setMeta(PersistentHashMap.EMPTY);
         }
 
@@ -345,6 +364,7 @@ namespace clojure.lang
             : this(ns, sym)
         {
             _root = root;
+            ++_rev;
         }
 
         #endregion
@@ -472,18 +492,7 @@ namespace clojure.lang
         /// <remarks>core.clj compatibility (initial lowercase/ public /method-instead-of-property)</remarks>
         public bool hasRoot()
         {
-            return _root != _rootUnboundValue;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>The root value.</returns>
-        public object getRoot()
-        {
-            if ( hasRoot() )
-                return _root;
-            throw new InvalidOperationException(String.Format("Var {0}/{1} is unbound.", _ns, _sym));
+            return !(_root is Unbound);
         }
 
         public object getRawRoot()
@@ -526,7 +535,7 @@ namespace clojure.lang
         public void bindRoot(object root)
         {
             Validate(getValidator(), root);
-            object oldroot = hasRoot() ? _root : null;
+            object oldroot = _root;
             _root = root;
             ++_rev;
             alterMeta(_dissoc, RT.list(_macroKey));
@@ -541,7 +550,7 @@ namespace clojure.lang
         void swapRoot(object root)
         {
             Validate(getValidator(), root);
-            object oldroot = hasRoot() ? _root : null;
+            object oldroot = _root;
             _root = root;
             ++_rev;
             notifyWatches(oldroot, root);
@@ -553,7 +562,7 @@ namespace clojure.lang
         [MethodImpl(MethodImplOptions.Synchronized)]
         void unbindRoot()
         {
-            _root = _rootUnboundValue;
+            _root = new Unbound(this);
             ++_rev;
         }
 
@@ -566,7 +575,7 @@ namespace clojure.lang
         {
             object newRoot = fn.invoke(_root);
             Validate(getValidator(), newRoot);
-            object oldRoot = getRoot();
+            object oldRoot = _root;
             _root = newRoot;
             ++_rev;
             notifyWatches(oldRoot, newRoot);
@@ -584,7 +593,7 @@ namespace clojure.lang
         {
             object newRoot = fn.applyTo(RT.cons(_root, args));
             Validate(getValidator(), newRoot);
-            object oldroot = getRoot();
+            object oldroot = _root;
             _root = newRoot;
             ++_rev;
             notifyWatches(oldroot,newRoot);
@@ -834,7 +843,7 @@ namespace clojure.lang
         /// But then they rename all uses anyway.</remarks>
         public object get()
         {
-            if (!_threadBound.get() && _root != _rootUnboundValue )
+            if (!_threadBound.get())
                 return _root;
             return deref();
         }
@@ -848,9 +857,10 @@ namespace clojure.lang
             TBox b = getThreadBinding();
             if (b != null)
                 return b.Val;
-            if (hasRoot())
-                return _root;
-            throw new InvalidOperationException(String.Format("Var {0}/{1} is unbound.", _ns,_sym));
+            return _root;
+            //if (hasRoot())
+            //    return _root;
+            //throw new InvalidOperationException(String.Format("Var {0}/{1} is unbound.", _ns,_sym));
         }
 
 
@@ -861,7 +871,7 @@ namespace clojure.lang
         public override void setValidator(IFn vf)
         {
             if (hasRoot())
-                Validate(vf, getRoot());
+                Validate(vf, _root);
             _validator = vf;
         }
 

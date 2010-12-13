@@ -183,7 +183,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.VARS, PersistentHashMap.EMPTY,
                         Compiler.KEYWORD_CALLSITES, PersistentVector.EMPTY,
                         Compiler.PROTOCOL_CALLSITES, PersistentVector.EMPTY,
-                        Compiler.VAR_CALLSITES, PersistentVector.EMPTY,
+                        Compiler.VAR_CALLSITES, Compiler.EmptyVarCallSites(),
                         Compiler.COMPILER_CONTEXT, genC
                         ));
 
@@ -214,7 +214,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ret._constantsID = RT.nextID();
                 ret.KeywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
                 ret.ProtocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
-                ret.VarCallsites = (IPersistentVector)Compiler.VAR_CALLSITES.deref();
+                ret.VarCallsites = (IPersistentSet)Compiler.VAR_CALLSITES.deref();
             }
             finally
             {
