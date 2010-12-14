@@ -49,6 +49,17 @@ namespace clojure.lang
 
         #region C-tors & factory methods
 
+        // the create thunks preserve binary compatibility with code compiled
+        // against earlier version of Clojure and can be removed (at some point).
+        public static Symbol create(String ns, String name) {
+            return Symbol.intern(ns, name);
+        }
+
+        public static Symbol create(String nsname) {
+            return Symbol.intern(nsname);
+        }
+    
+
         /// <summary>
         /// Intern a symbol with the given name  and namespace-name.
         /// </summary>
