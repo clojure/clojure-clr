@@ -62,28 +62,30 @@
 
 ; doc find-doc test
 
+(def stub-me :original)
+
 (deftest test-with-redefs-fn
   (let [p (promise)]
-    (with-redefs-fn {#'nil? :temp}
+    (with-redefs-fn {#'stub-me :temp}
       (fn []
-        (.Start (System.Threading.Thread. (gen-delegate System.Threading.ThreadStart [] (deliver p nil?))))  ;;; (.start (Thread. #(deliver p nil?)))
+        (.Start (System.Threading.Thread. (gen-delegate System.Threading.ThreadStart [] (deliver p stub-me))))  ;;; (.start (Thread. #(deliver p nil?)))
         @p))
     (is (= :temp @p))
-    (is (not= @p nil?))))
+    (is (= :original stub-me))))
 
 (deftest test-with-redefs
   (let [p (promise)]
-    (with-redefs [nil? :temp]
-      (.Start (System.Threading.Thread. (gen-delegate System.Threading.ThreadStart [] (deliver p nil?))))  ;;; (.start (Thread. #(deliver p nil?)))
+    (with-redefs [stub-me :temp]
+      (.Start (System.Threading.Thread. (gen-delegate System.Threading.ThreadStart [] (deliver p stub-me))))  ;;; (.start (Thread. #(deliver p nil?)))
       @p)
     (is (= :temp @p))
-    (is (not= @p nil?))))
+    (is (= :original stub-me))))
 
 (deftest test-with-redefs-throw
   (let [p (promise)]
     (is (thrown? Exception
-      (with-redefs [nil? :temp]
-        (deliver p nil?)
+      (with-redefs [stub-me :temp]
+        (deliver p stub-me)
         (throw (Exception. "simulated failure in with-redefs")))))
     (is (= :temp @p))
-    (is (not= @p nil?))))
+    (is (= :original stub-me))))
