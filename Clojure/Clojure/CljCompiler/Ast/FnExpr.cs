@@ -111,6 +111,8 @@ namespace clojure.lang.CljCompiler.Ast
             fn.ComputeNames(form, name);
 
             // Java: fn.objtype = Type.getObjectType(fn.internalName) -- makes no sense for us, this is ASM only.
+            
+            List<string> prims = new List<string>();
 
             try
             {
@@ -155,6 +157,8 @@ namespace clojure.lang.CljCompiler.Ast
                         methods[f.RequiredArity] = f;
                     else
                         throw new Exception("Can't have 2 overloads with the same arity.");
+                    if (f.Prim != null)
+                        prims.Add(f.Prim);
                 }
 
                 if (variadicMethod != null && methods.Count > 0 && methods.Keys.Max() >= variadicMethod.NumParams)
@@ -185,12 +189,20 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.popThreadBindings();
             }
 
-            if (Compiler.IsCompiling)
+            if (Compiler.IsCompiling || prims.Count > 0)
             {
                 GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
                 GenContext genC = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
 
-                fn.Compile(fn.IsVariadic ? typeof(RestFn) : typeof(AFunction), PersistentVector.EMPTY, fn.OnceOnly, genC);
+                IPersistentVector primTypes = PersistentVector.EMPTY;
+                foreach (string typename in prims)
+                    primTypes = primTypes.cons(Type.GetType(typename));
+
+                fn.Compile(
+                    fn.IsVariadic ? typeof(RestFn) : typeof(AFunction), 
+                    primTypes,
+                    fn.OnceOnly, 
+                    genC);
             }
             else
             {

@@ -86,7 +86,6 @@ namespace clojure.lang
         static readonly Keyword INLINE_ARITIES_KEY = Keyword.intern(null, "inline-arities");
         internal static readonly Keyword STATIC_KEY = Keyword.intern(null, "static");
         internal static readonly Keyword ARGLISTS_KEY = Keyword.intern(null, "arglists");
-        internal static readonly Keyword NOLINK_KEY = Keyword.intern(null, "__nolink");
 
         static readonly Keyword VOLATILE_KEY = Keyword.intern(null,"volatile");
         internal static readonly Keyword IMPLEMENTS_KEY = Keyword.intern(null,"implements");
@@ -700,7 +699,7 @@ namespace clojure.lang
         }
 
 
-        static Type PrimType(Symbol sym)
+        public static Type PrimType(Symbol sym)
         {
             if (sym == null)
                 return null;
@@ -723,6 +722,11 @@ namespace clojure.lang
                 case "sbyte": t = typeof(sbyte); break;
             }
             return t;
+        }
+
+        public static Type PrimType(Type t)
+        {
+            return t.IsPrimitive ? t : typeof(object);
         }
 
         internal static Type TagType(Object tag)

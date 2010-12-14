@@ -90,6 +90,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected bool IsExplicit { get { return _explicitInterface != null; } }
 
+        public virtual string Prim { get { return null; } }
+
         #endregion
 
         #region abstract methods
@@ -149,7 +151,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHOD, this));
 
-                Type[] argTypes = ArgTypes;
+                Type[] argTypes = StaticMethodArgTypes;
 
                 for (int i = 0; i < _argLocals.count(); i++)
                 {
@@ -179,7 +181,7 @@ namespace clojure.lang.CljCompiler.Ast
                         _body.GenCode(RHC.Return,objx,context));
 
                 //Expression convBody = Compiler.MaybeConvert(body, ReturnType);
-                Expression convBody = MethodExpr.GenConvertMaybePrim(body, ReturnType);
+                Expression convBody = MethodExpr.GenConvertMaybePrim(body, StaticReturnType);
 
                 LambdaExpression lambda = Expression.Lambda(convBody, parms);
                 // JVM: Clears locals here.
@@ -208,6 +210,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         void GenerateMethod(ObjExpr objx, GenContext context)
         {
+            if (Prim != null)
+                GeneratePrimMethod(objx, context);
 
             TypeBuilder tb = objx.TypeBuilder;
 
@@ -244,6 +248,43 @@ namespace clojure.lang.CljCompiler.Ast
 
             if ( IsExplicit )
                 tb.DefineMethodOverride(mb, _explicitMethodInfo);            
+
+        }
+
+        void GeneratePrimMethod(ObjExpr objx, GenContext context)
+        {
+            TypeBuilder tb = objx.TypeBuilder;
+            MethodBuilder mb = tb.DefineMethod("invokePrim", MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, StaticReturnType, StaticMethodArgTypes);
+
+
+            //Console.Write("InMd: {0} {1}(", ReturnType.Name, "invokePrim");
+            //foreach (Type t in ArgTypes)
+            //    Console.Write("{0}", t.Name);
+            //Console.WriteLine(")");
+
+            GenInterface.SetCustomAttributes(mb, _methodMeta);
+            if (_parms != null)
+            {
+                for (int i = 0; i < _parms.count(); i++)
+                {
+                    IPersistentMap meta = GenInterface.ExtractAttributes(RT.meta(_parms.nth(i)));
+                    if (meta != null && meta.count() > 0)
+                    {
+                        ParameterBuilder pb = mb.DefineParameter(i + 1, ParameterAttributes.None, ((Symbol)_parms.nth(i)).Name);
+                        GenInterface.SetCustomAttributes(pb, meta);
+                    }
+                }
+            }
+
+            ILGen gen = new ILGen(mb.GetILGenerator());
+            gen.EmitLoadArg(0);
+            for (int i = 1; i <= _argLocals.count(); i++)
+                gen.EmitLoadArg(i);
+            gen.EmitCall(_staticMethodBuilder);
+            gen.Emit(OpCodes.Ret);
+
+            if (IsExplicit)
+                tb.DefineMethodOverride(mb, _explicitMethodInfo);
 
         }
 

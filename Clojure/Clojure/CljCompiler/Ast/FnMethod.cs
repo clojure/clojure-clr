@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
+using System.Text;
 #endif
 
 namespace clojure.lang.CljCompiler.Ast
@@ -31,6 +32,14 @@ namespace clojure.lang.CljCompiler.Ast
         protected LocalBinding _restParm = null;
         Type[] _argTypes;
         Type _retType;
+
+        string _prim;
+
+        public override string Prim
+        {
+            get { return _prim; }
+        }
+
 
         #endregion
 
@@ -80,7 +89,8 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 if (Objx.IsStatic && Compiler.IsCompiling)
                     return "InvokeStatic";
-                return String.Format("__invokeHelper_{0}{1}", RequiredArity, IsVariadic ? "v" : string.Empty);
+                else
+                    return String.Format("__invokeHelper_{0}{1}", RequiredArity, IsVariadic ? "v" : string.Empty);
             }
         }
 
@@ -120,7 +130,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                if (Objx.IsStatic)
+                if ( _prim != null ) // Objx.IsStatic)
                     return _retType;
 
                 return typeof(object);
@@ -149,6 +159,10 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
                     Compiler.LOOP_LOCALS, null,
                     Compiler.NEXT_LOCAL_NUM, 0));
+
+                method._prim = PrimInterface(parms);
+                //if (method._prim != null)
+                //    method._prim = method._prim.Replace('.', '/');
 
                 method._retType = Compiler.TagType(Compiler.TagOf(parms));
                 if (method._retType.IsPrimitive && !(method._retType == typeof(double) || method._retType == typeof(long)))
@@ -183,22 +197,24 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                     else
                     {
-                        Type pt = Compiler.TagType(Compiler.TagOf(p));
-                        if (pt.IsPrimitive && !isStatic)
-                        {
-                            pt = typeof(object);
-                            p = (Symbol)((IObj)p).withMeta((IPersistentMap)RT.assoc(RT.meta(p), RT.TAG_KEY, null));
-                            //throw new Exception("Non-static fn can't have primitive parameter: " + p);
-                        }
+                        Type pt = Compiler.PrimType(Compiler.TagType(Compiler.TagOf(p)));
+                        //if (pt.IsPrimitive && !isStatic)
+                        //{
+                        //    pt = typeof(object);
+                        //    p = (Symbol)((IObj)p).withMeta((IPersistentMap)RT.assoc(RT.meta(p), RT.TAG_KEY, null));
+                        //    //throw new Exception("Non-static fn can't have primitive parameter: " + p);
+                        //}
                         if (pt.IsPrimitive && !(pt == typeof(double) || pt == typeof(long)))
                             throw new ArgumentException("Only long and double primitives are supported: " + p);
 
                         if (paramState == ParamParseState.Rest && Compiler.TagOf(p) != null)
                             throw new Exception("& arg cannot have type hint");
+                        if (paramState == ParamParseState.Rest && method.Prim != null)
+                            throw new Exception("fns taking primitives cannot be variadic");
                         if (paramState == ParamParseState.Rest)
                             pt = typeof(ISeq);
                         argTypes.Add(pt);
-                        LocalBinding b = isStatic
+                        LocalBinding b = pt.IsPrimitive
                             ? Compiler.RegisterLocal(p,null, new MethodParamExpr(pt), true)
                             : Compiler.RegisterLocal(p,
                             paramState == ParamParseState.Rest ? Compiler.ISEQ : Compiler.TagOf(p),
@@ -224,7 +240,8 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new Exception(string.Format("Can't specify more than {0} parameters", Compiler.MAX_POSITIONAL_ARITY));
                 Compiler.LOOP_LOCALS.set(argLocals);
                 method._argLocals = argLocals;
-                if (isStatic)
+                //if (isStatic)
+                if ( method.Prim != null )
                     method._argTypes = argTypes.ToArray();
                 method._body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return),body);
                 return method;
@@ -288,5 +305,40 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region primitive interfaces support
+
+        public static char TypeChar(object x)
+        {
+            Type t = null;
+            if (x is Type)
+                t = (Type)x;
+            else if (x is Symbol)
+                t = Compiler.PrimType((Symbol)x);
+
+            if (t == null || !t.IsPrimitive)
+                return 'O';
+            if (t == typeof(long))
+                return 'L';
+            if (t == typeof(double))
+                return 'D';
+            throw new ArgumentException("Only long and double primitives are supported");
+        }
+
+        public static string PrimInterface(IPersistentVector arglist)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < arglist.count(); i++)
+                sb.Append(TypeChar(Compiler.TagOf(arglist.nth(i))));
+            sb.Append(TypeChar(Compiler.TagOf(arglist)));
+            string ret = sb.ToString();
+            bool prim = ret.Contains("L") || ret.Contains("D");
+            if (prim && arglist.count() > 4)
+                throw new ArgumentException("fns taking primitives support only 4 or fewer args");
+            if (prim)
+                return "clojure.lang.primifs." + ret;
+            return null;
+        }
+
+        #endregion
     }
 }
