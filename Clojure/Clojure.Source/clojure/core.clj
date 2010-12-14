@@ -2923,7 +2923,7 @@
        ret))))
 
 ;redef into with batch support
-(defn into
+(defn ^:private into1
   "Returns a new coll consisting of to-coll with all of the items of
   from-coll conjoined."
   {:added "1.0"
@@ -2948,7 +2948,7 @@
                           (if (symbol? spec)
                             (conj v (name spec))
                             (let [p (first spec) cs (rest spec)]
-                              (into v (map #(str p "." %) cs)))))
+                              (into1 v (map #(str p "." %) cs)))))
                         [] specs)))))
 
 (defn into-array
@@ -4824,7 +4824,7 @@
   (loop [ret (set (bases class)) cs ret]
     (if (seq cs)
       (let [c (first cs) bs (bases c)]
-        (recur (into ret bs) (into (disj cs c) bs)))
+        (recur (into1 ret bs) (into1 (disj cs c) bs)))
       (not-empty ret))))
 
 (defn isa?
@@ -4858,9 +4858,9 @@
   ([h tag] (not-empty
             (let [tp (get (:parents h) tag)]
               (if (class? tag)
-                (into (set (bases tag)) tp)
+                (into1 (set (bases tag)) tp)
                 tp)))))
-;;; NOT TESTED YET
+
 (defn ancestors
   "Returns the immediate and indirect parents of tag, either via a Java type
   inheritance relationship or a relationship established via derive. h
@@ -4872,7 +4872,7 @@
             (let [ta (get (:ancestors h) tag)]
               (if (class? tag)
                 (let [superclasses (set (supers tag))]
-                  (reduce into superclasses
+                  (reduce into1 superclasses
                     (cons ta
                           (map #(get (:ancestors h) %) superclasses))))
                 ta)))))
@@ -5708,6 +5708,7 @@
                              (map #(cons `fn %) fnspecs)))
            ~@body))
 
+
 ;;;;;;; case ;;;;;;;;;;;;;
 (defn- shift-mask [shift mask x]
   (-> x (bit-shift-right shift) (bit-and mask)))
@@ -5760,7 +5761,7 @@
         cases (partition 2 clauses)
         case-map (reduce (fn [m [test expr]]
                            (if (seq? test)
-                             (into m (zipmap test (repeat expr)))
+                             (into1 m (zipmap test (repeat expr)))
                              (assoc m test expr))) 
                            {} cases)
         [shift mask] (if (seq case-map) (min-hash (keys case-map)) [0 0])
@@ -5774,7 +5775,6 @@
           1 default
           `(case* ~ge ~shift ~mask ~(key (first hmap)) ~(key (last hmap)) ~default ~hmap 
                         ~(every? keyword? (keys case-map)))))))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helper files ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (alter-meta! (find-ns 'clojure.core) assoc :doc "Fundamental library of the Clojure language") (load "core_clr")  ;;; Added
@@ -5804,6 +5804,16 @@
   ([f val coll]
      (let [s (seq coll)]
        (clojure.core.protocols/internal-reduce s f val))))
+
+(defn into
+  "Returns a new coll consisting of to-coll with all of the items of
+  from-coll conjoined."
+  {:added "1.0"
+   :static true}
+  [to from]
+  (if (instance? clojure.lang.IEditableCollection to)
+    (persistent! (reduce conj! (transient to) from))
+    (reduce conj to from)))
 
 (require '[clojure.clr.io :as cio])                                              ;;; '[clojure.java.io :as jio])
 
@@ -5864,8 +5874,7 @@
   invoke the body in another thread, and will cache the result and
   return it on all subsequent calls to deref/@. If the computation has
   not yet finished, calls to deref/@ will block."  
-  {:added "1.1"
-   :static true}
+  {:added "1.1"}
   [& body] `(future-call (^{:once true} fn* [] ~@body)))
 
 
@@ -6184,3 +6193,38 @@
   [fdecl]
   (if-let [bad-args (seq (remove #(vector? %) (map first fdecl)))]
     (throw (ArgumentException. (str "Parameter declaration " (first bad-args) " should be a vector")))))  ;;; IllegalArgumentException
+
+(defn with-redefs-fn
+  "Temporarily redefines Vars during a call to func.  Each val of
+  binding-map will replace the root value of its key which must be
+  a Var.  After func is called with no args, the root values of all
+  the Vars will be set back to their old values.  These temporary
+  changes will be visible in all threads.  Useful for mocking out
+  functions during testing."
+  {:added "1.3"}
+  [binding-map func]
+  (let [root-bind (fn [m]
+                    (doseq [[a-var a-val] m]
+                      (.bindRoot ^clojure.lang.Var a-var a-val)))
+        old-vals (zipmap (keys binding-map)
+                         (map deref (keys binding-map)))]
+    (try
+      (root-bind binding-map)
+      (func)
+      (finally
+        (root-bind old-vals)))))
+
+(defmacro with-redefs
+  "binding => var-symbol temp-value-expr
+
+  Temporarily redefines Vars while executing the body.  The
+  temp-value-exprs will be evaluated and each resulting value will
+  replace in parallel the root value of its Var.  After the body is
+  executed, the root values of all the Vars will be set back to their
+  old values.  These temporary changes will be visible in all threads.
+  Useful for mocking out functions during testing."
+  {:added "1.3"}
+  [bindings & body]
+  `(with-redefs-fn ~(zipmap (map #(list `var %) (take-nth 2 bindings))
+                            (take-nth 2 (next bindings)))
+                    (fn [] ~@body)))

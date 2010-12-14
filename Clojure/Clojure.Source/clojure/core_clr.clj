@@ -123,7 +123,7 @@
 (defn- normalize-attribute-arg [arg]
   (cond
      (vector? arg) { :__args (map normalize-attribute-arg-value arg) }
-     (map? arg)    (into {} (map (fn [k v] [k (normalize-attribute-arg-value v)]) arg))
+     (map? arg)    (into1 {} (map (fn [k v] [k (normalize-attribute-arg-value v)]) arg))
      :else         { :__args [ (normalize-attribute-arg-value arg) ] }))
     
 (defn- resolve-attribute [v]
@@ -136,7 +136,7 @@
          
 
 (defn- extract-attributes [m]
-   (into {} 
+   (into1 {} 
      (remove nil? 
        (for [[k v] (seq m)]
          (when-let [c (resolve-attribute k)]

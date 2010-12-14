@@ -423,7 +423,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- expand-method-impl-cache [^clojure.lang.MethodImplCache cache c f]
-  (let [cs (into {} (remove (fn [[c e]] (nil? e)) (map vec (partition 2 (.table cache)))))
+  (let [cs (into1 {} (remove (fn [[c e]] (nil? e)) (map vec (partition 2 (.table cache)))))
         cs (assoc cs c (clojure.lang.MethodImplCache+Entry. c f))
         [shift mask] (min-hash (keys cs))
         table (make-array Object (* 2 (inc mask)))

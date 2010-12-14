@@ -62,3 +62,28 @@
 
 ; doc find-doc test
 
+(deftest test-with-redefs-fn
+  (let [p (promise)]
+    (with-redefs-fn {#'nil? :temp}
+      (fn []
+        (.Start (System.Threading.Thread. (gen-delegate System.Threading.ThreadStart [] (deliver p nil?))))  ;;; (.start (Thread. #(deliver p nil?)))
+        @p))
+    (is (= :temp @p))
+    (is (not= @p nil?))))
+
+(deftest test-with-redefs
+  (let [p (promise)]
+    (with-redefs [nil? :temp]
+      (.Start (System.Threading.Thread. (gen-delegate System.Threading.ThreadStart [] (deliver p nil?))))  ;;; (.start (Thread. #(deliver p nil?)))
+      @p)
+    (is (= :temp @p))
+    (is (not= @p nil?))))
+
+(deftest test-with-redefs-throw
+  (let [p (promise)]
+    (is (thrown? Exception
+      (with-redefs [nil? :temp]
+        (deliver p nil?)
+        (throw (Exception. "simulated failure in with-redefs")))))
+    (is (= :temp @p))
+    (is (not= @p nil?))))

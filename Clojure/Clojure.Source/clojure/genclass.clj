@@ -276,5 +276,5 @@
   {:added "1.0"}
 
   [& options]
-  (let [options-map (into {} (map vec (partition 2 options))) ]
+  (let [options-map (into1 {} (map vec (partition 2 options))) ]
           `'~(generate-interface options-map)))

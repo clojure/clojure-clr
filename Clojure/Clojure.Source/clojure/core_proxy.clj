@@ -43,7 +43,7 @@
 (defn proxy-name
  {:tag String} 
  [^Type super interfaces]                                                  ;;; Class
-  (let [inames (into (sorted-set) (map #(.Name ^Type %) interfaces))]      ;;;  .getName ^Class
+  (let [inames (into1 (sorted-set) (map #(.Name ^Type %) interfaces))]      ;;;  .getName ^Class
     (apply str (.Replace (str *ns*) \- \_) ".proxy"                         ;;; .replace
       (interleave (repeat "$")
         (concat
