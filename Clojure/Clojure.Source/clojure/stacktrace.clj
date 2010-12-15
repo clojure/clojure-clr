@@ -29,7 +29,7 @@
   [e]                   ;;; in CLR, e will be a StackFrame
   (let [class   (if-let [t (.. e  (GetMethod) ReflectedType)] (.FullName t) "")         ;;;  (.getClassName e)
 	method      (.. e (GetMethod)  Name)]                             ;;;  (.getMethodName e)] 
-    (let [match (re-matches #"^([A-Za-z0-9_.-]+)\$(\w+)__\d+$" class)]
+    (let [match (re-matches #"^([A-Za-z0-9_.-]+)\$(\w+)__\d+$" (str class))]
       (if (and match (= "invoke" method))
 	(print (str (nth match 1) "/" (nth match 2)))                       ;;;  use when we have printf:  (apply printf "%s/%s" (rest match))
 	(print (str class "." method)))))                                   ;;;  use when we have printf:  (printf "%s.%s" class method))))
