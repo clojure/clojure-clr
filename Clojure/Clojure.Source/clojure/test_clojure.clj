@@ -66,6 +66,8 @@
       :def
 	  :keywords
 	  :data
+	  ;:reflect -- TODO: go back and reflect code
+	  :errors
       ])
 
 (def test-namespaces

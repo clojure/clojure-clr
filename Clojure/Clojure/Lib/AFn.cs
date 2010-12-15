@@ -461,9 +461,9 @@ namespace clojure.lang
         {
             string name = Util.NameForType(GetType()); 
             int suffix = name.LastIndexOf("__");  // NOt sure if this is necessary
-            return new ArgumentException(String.Format("Wrong number of args ({0}) passed to: {1}",
+            return new ArityException(
                 i,
-                (suffix == -1 ? name : name.Substring(0, suffix)).Replace('_', '-')));
+                (suffix == -1 ? name : name.Substring(0, suffix)).Replace('_', '-'));
         }
 
         #endregion

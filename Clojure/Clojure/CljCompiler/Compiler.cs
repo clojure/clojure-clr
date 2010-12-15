@@ -897,8 +897,15 @@ namespace clojure.lang
             Var v = IsMacro(op);
             if (v != null)
             {
-                // TODO: Check this against current code
-                return v.applyTo(RT.cons(form, RT.cons(LOCAL_ENV.get(), form.next())));
+                try
+                {
+                    return v.applyTo(RT.cons(form, RT.cons(LOCAL_ENV.get(), form.next())));
+                }
+                catch (ArityException e)
+                {
+                    // hide the 2 extra params for a macro
+                    throw new ArityException(e.Actual - 2, e.Name, e);
+                }
             }
             else
             {
