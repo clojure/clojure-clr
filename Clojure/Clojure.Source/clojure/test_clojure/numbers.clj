@@ -31,6 +31,11 @@
      (decimal? v)
      (not (float? v)))))
 
+(deftest BigInteger-conversions
+  (are [x] (biginteger x)
+    Int64/MaxValue                  ;;; Long/MAX_VALUE
+    13178456923875639284562345789M
+    13178456923875639284562345789N))
 
 ;; *** Functions ***
 
