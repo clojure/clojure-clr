@@ -904,7 +904,7 @@ namespace clojure.lang
                 catch (ArityException e)
                 {
                     // hide the 2 extra params for a macro
-                    throw new ArityException(e.Actual - 2, e.Name, e);
+                    throw new ArityException(e.Actual - 2, e.Name);
                 }
             }
             else
