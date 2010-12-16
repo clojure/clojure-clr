@@ -12,7 +12,8 @@
 ;;
 
 (ns clojure.test-clojure.numbers
-  (:use clojure.test))
+  (:use clojure.test
+        clojure.template))
 
 
 ; TODO:
@@ -36,6 +37,91 @@
     Int64/MaxValue                  ;;; Long/MAX_VALUE
     13178456923875639284562345789M
     13178456923875639284562345789N))
+
+(deftest unchecked-cast-num-obj
+  (do-template [prim-array cast]
+    (are [n]
+      (let [a (prim-array 1)]
+        (aset a 0 (cast n)))
+      Byte/MaxValue           ;;; (Byte. Byte/MAX_VALUE)
+      Int16/MaxValue
+      Int32/MaxValue
+      Int64/MaxValue
+      Single/MaxValue
+      Double/MaxValue)
+    byte-array
+    unchecked-byte
+    short-array
+    unchecked-short
+    char-array
+    unchecked-char
+    int-array
+    unchecked-int
+    long-array
+    unchecked-long
+    float-array
+    unchecked-float
+    double-array
+    unchecked-double))
+
+(deftest unchecked-cast-num-prim
+  (do-template [prim-array cast]
+    (are [n]
+      (let [a (prim-array 1)]
+        (aset a 0 (cast n)))
+      Byte/MaxValue           ;;; MAX_VALUE
+      Int16/MaxValue
+      Int32/MaxValue
+      Int64/MaxValue
+      Single/MaxValue
+      Double/MaxValue)
+    byte-array
+    unchecked-byte
+    short-array
+    unchecked-short
+    char-array
+    unchecked-char
+    int-array
+    unchecked-int
+    long-array
+    unchecked-long
+    float-array
+    unchecked-float
+    double-array
+    unchecked-double))
+
+(deftest unchecked-cast-char
+  ; in keeping with the checked cast functions, char and Character can only be cast to int
+  (is (unchecked-int (char 0xFFFF)))
+  (is (let [c (char 0xFFFF)] (unchecked-int c)))) ; force primitive char
+
+(def expected-casts   ;; for byte 127 => 255  (not signed), and other differences
+  [
+   [:input [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue Int64/MaxValue Single/MaxValue Double/MaxValue]]
+   [char [:error (char 0) (char 1) (char 255) (char 32767) :error :error :error :error]]
+   [unchecked-char [(char 65535) (char 0) (char 1) (char 255) (char 32767) (char 65535) (char 65535) (char 0) (char 0)]]
+   [byte [:error 0 1 Byte/MaxValue :error :error :error :error :error]]
+   [unchecked-byte [255 0 1 Byte/MaxValue 255 255 255 0 0]]
+   [short [-1 0 1 Byte/MaxValue Int16/MaxValue :error :error :error :error]]
+   [unchecked-short [-1 0 1 Byte/MaxValue Int16/MaxValue -1 -1 0 0]]
+   [int [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue :error :error :error]]
+   [unchecked-int [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue -1 Int32/MinValue Int32/MinValue]]
+   [long [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue Int64/MaxValue Int64/MinValue Int64/MinValue]]
+   [unchecked-long [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue Int64/MaxValue Int64/MinValue Int64/MinValue]]
+                                                                                             ;; 2.14748365E9 if when float/double conversion is avoided...
+   [float [-1.0 0.0 1.0 255.0 32767.0 2.147483648E9 9.223372036854776E18 Single/MaxValue :error]]
+   [unchecked-float [-1.0 0.0 1.0 255.0 32767.0 2.147483648E9 9.223372036854776E18 Single/MaxValue Single/PositiveInfinity]]
+   [double [-1.0 0.0 1.0 255.0 32767.0 2.147483647E9 9.223372036854776E18 Single/MaxValue Double/MaxValue]]
+   [unchecked-double [-1.0 0.0 1.0 255.0 32767.0 2.147483647E9 9.223372036854776E18 Single/MaxValue Double/MaxValue]]])
+
+(deftest test-expected-casts
+  (let [[[_ inputs] & expectations] expected-casts]
+    (doseq [[f vals] expectations]
+      (let [wrapped (fn [x]
+                      (try
+                       (f x)
+                       (catch ArgumentException e :error)))]           ;;; IllegalArgumentException
+        (is (= vals (map wrapped inputs)))))))
 
 ;; *** Functions ***
 

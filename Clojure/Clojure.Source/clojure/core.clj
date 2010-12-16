@@ -3031,6 +3031,49 @@
    :added "1.0"}
   [x] (clojure.lang.RT/booleanCast x))
 
+(defn unchecked-byte
+  "Coerce to byte. Subject to rounding or truncation."
+  {:inline (fn [x] `(. clojure.lang.RT (uncheckedByteCast ~x)))
+   :added "1.3"}
+  [x] (clojure.lang.RT/uncheckedByteCast x))                    ;;; ^Number 
+
+(defn unchecked-short
+  "Coerce to short. Subject to rounding or truncation."
+  {:inline (fn [x] `(. clojure.lang.RT (uncheckedShortCast ~x)))
+   :added "1.3"}
+  [x] (clojure.lang.RT/uncheckedShortCast x))                    ;;; ^Number 
+
+(defn unchecked-char
+  "Coerce to char. Subject to rounding or truncation."
+  {:inline (fn [x] `(. clojure.lang.RT (uncheckedCharCast ~x)))
+   :added "1.3"}
+  [x] (. clojure.lang.RT (uncheckedCharCast x)))
+
+(defn unchecked-int
+  "Coerce to int. Subject to rounding or truncation."
+  {:inline (fn [x] `(. clojure.lang.RT (uncheckedIntCast ~x)))
+   :added "1.3"}
+  [x] (clojure.lang.RT/uncheckedIntCast x))                    ;;; ^Number 
+
+(defn unchecked-long
+  "Coerce to long. Subject to rounding or truncation."
+  {:inline (fn [x] `(. clojure.lang.RT (uncheckedLongCast ~x)))
+   :added "1.3"}
+  [x] (clojure.lang.RT/uncheckedLongCast x))                    ;;; ^Number 
+
+(defn unchecked-float
+  "Coerce to float. Subject to rounding."
+  {:inline (fn [x] `(. clojure.lang.RT (uncheckedFloatCast ~x)))
+   :added "1.3"}
+  [x] (clojure.lang.RT/uncheckedFloatCast x))                    ;;; ^Number 
+
+(defn unchecked-double
+  "Coerce to double. Subject to rounding."
+  {:inline (fn [x] `(. clojure.lang.RT (uncheckedDoubleCast ~x)))
+   :added "1.3"}
+  [x] (clojure.lang.RT/uncheckedDoubleCast x))                    ;;; ^Number 
+
+
 (defn number?
   "Returns true if x is a Number"
   {:added "1.0"
@@ -5832,14 +5875,11 @@
   {:added "1.0"}
   ([f & opts]
      (let [opts (normalize-slurp-opts opts)
-           sb (StringBuilder.)]
+           sb (StringBuilder.)
+		   sw (System.IO.StringWriter.)]                                      ;;; java.io.StringWriter
        (with-open [^System.IO.TextReader r (apply cio/text-reader f opts)]         ;;; java.io.Reader   jio/reader
-         (loop [c (.Read r)]                                                  ;;; .read
-           (if (neg? c)
-             (str sb)
-             (do
-               (.Append sb (char c))                                          ;;; .append
-               (recur (.Read r)))))))))                                       ;;; .read
+		 (cio/copy r sw)
+		 (str sw)))))
 
 (defn spit
   "Opposite of slurp.  Opens f with writer, writes content, then
