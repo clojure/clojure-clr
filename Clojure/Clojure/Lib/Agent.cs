@@ -430,7 +430,6 @@ namespace clojure.lang
             {
                 try
                 {
-                    Var.pushThreadBindings(RT.map(RT.AGENT, _agent));
                     Agent.Nested = PersistentVector.EMPTY;
 
                     Exception error = null;
@@ -482,7 +481,6 @@ namespace clojure.lang
                 finally
                 {
                     Nested = null;
-                    Var.popThreadBindings();
                 }
             }
 

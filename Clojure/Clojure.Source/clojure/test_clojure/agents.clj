@@ -10,7 +10,7 @@
 
 (ns clojure.test-clojure.agents
   (:use clojure.test))
-(comment  ;; await not implemented yet
+
 (deftest handle-all-throwables-during-agent-actions
   ;; Bug fixed in r1198; previously hung Clojure or didn't report agent errors
   ;; after OutOfMemoryError, yet wouldn't execute new actions.
@@ -29,7 +29,6 @@
     (send agt nil?)
     (is (true? (await-for 100 agt)))
     (is (true? @agt))))
-)
 
 (deftest default-modes
   (is (= :fail (error-mode (agent nil))))
@@ -108,6 +107,12 @@
     (is (true? (await-for 100 agt)))
     (is (= 10 @agt))
     (is (nil? (agent-error agt)))))
+
+(deftest earmuff-agent-bound
+  (let [a (agent 1)]
+    (send a (fn [_] *agent*))
+    (await a)
+    (is (= a @a))))
 
 ; http://clojure.org/agents
 
