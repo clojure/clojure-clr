@@ -287,7 +287,8 @@
   sets the proxy's fn map."
   {:added "1.0"}
   [^IProxy proxy mappings]
-    (. proxy (__initClojureFnMappings mappings)))
+    (. proxy (__initClojureFnMappings mappings))
+	proxy)
 
 (defn update-proxy
   "Takes a proxy instance and a map of strings (which must
@@ -300,7 +301,8 @@
   behavior of an existing instance without changing its identity."
   {:added "1.0"}
   [^IProxy proxy mappings]
-    (. proxy (__updateClojureFnMappings mappings)))
+    (. proxy (__updateClojureFnMappings mappings))
+	proxy)
 
 (defn proxy-mappings
   "Takes a proxy instance and returns the proxy's fn map."
