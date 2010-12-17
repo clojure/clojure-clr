@@ -450,7 +450,7 @@ namespace clojure.lang
                         releasePendingSends();
                     else
                     {
-                        Nested = PersistentVector.EMPTY;
+                        Nested = null;  // allow errorHandler to send
                         if (_agent._errorHandler != null)
                         {
                             try
