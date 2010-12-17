@@ -1751,7 +1751,9 @@ namespace clojure.lang
         {
             if (conversionType == typeof(BigInteger))
                 return this;
-            throw new NotImplementedException();
+            else if (conversionType == typeof(BigInt))
+                return BigInt.fromBigInteger(this);
+            throw new InvalidCastException();
         }
 
 
