@@ -184,6 +184,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.KEYWORD_CALLSITES, PersistentVector.EMPTY,
                         Compiler.PROTOCOL_CALLSITES, PersistentVector.EMPTY,
                         Compiler.VAR_CALLSITES, Compiler.EmptyVarCallSites(),
+                        Compiler.NO_RECUR, null,
                         Compiler.COMPILER_CONTEXT, genC
                         ));
 

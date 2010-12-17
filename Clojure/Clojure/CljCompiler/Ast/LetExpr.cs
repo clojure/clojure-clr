@@ -161,17 +161,18 @@ namespace clojure.lang.CljCompiler.Ast
                         Expr bodyExpr;
                         try
                         {
-                            //if (isLoop)
-                            //{
-                            //    // stuff with clear paths, including pushThreadBindings
-                            //}
+                            if (isLoop)
+                            {
+                                // stuff with clear paths,
+                                Var.pushThreadBindings(RT.map(Compiler.NO_RECUR, null));
+                            }
                             bodyExpr = new BodyExpr.Parser().Parse(isLoop ? pcon.SetRhc(RHC.Return) : pcon, body);
                         }
                         finally
                         {
                             if (isLoop)
                             {
-                                //Var.popThreadBindings();
+                                Var.popThreadBindings();
 
                                 recurMismatches = null;
                                 for (int i = 0; i < loopLocals.count(); i++)

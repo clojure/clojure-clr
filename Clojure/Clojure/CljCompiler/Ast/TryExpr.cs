@@ -132,7 +132,17 @@ namespace clojure.lang.CljCompiler.Ast
                     else
                     {
                         if (bodyExpr == null)
-                            bodyExpr = new BodyExpr.Parser().Parse(pcon.SetAssign(false),RT.seq(body));
+                        {
+                            try
+                            {
+                                Var.pushThreadBindings(RT.map(Compiler.NO_RECUR, true));
+                                bodyExpr = new BodyExpr.Parser().Parse(pcon.SetAssign(false), RT.seq(body));
+                            }
+                            finally
+                            {
+                                Var.popThreadBindings();
+                            }
+                        }
                         if (Util.equals(op, Compiler.CATCH))
                         {
                             Type t = HostExpr.MaybeType(RT.second(f), false);
@@ -182,8 +192,18 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
-                if ( bodyExpr == null )
-                    bodyExpr = (new BodyExpr.Parser()).Parse(pcon, RT.seq(body));
+                if (bodyExpr == null)
+                {
+                    try
+                    {
+                        Var.pushThreadBindings(RT.map(Compiler.NO_RECUR, true));
+                        bodyExpr = (new BodyExpr.Parser()).Parse(pcon, RT.seq(body));
+                    }
+                    finally
+                    {
+                        Var.popThreadBindings();
+                    }
+                }
                 return new TryExpr(bodyExpr, catches, finallyExpr, retLocal, finallyLocal);
               }
         }
@@ -215,10 +235,10 @@ namespace clojure.lang.CljCompiler.Ast
                 ParameterExpression parmExpr = Expression.Parameter(clause.Type, clause.Lb.Name);
                 clause.Lb.ParamExpression = parmExpr;
                 catches[i] = Expression.Catch(parmExpr, Expression.Convert(clause.Handler.GenCode(rhc, objx, context), typeof(object)));
-            }
+            }                
 
-            TryExpression tryStmt = _finallyExpr == null
-                ? Expression.TryCatch(tryBody, catches)
+            Expression tryStmt = _finallyExpr == null
+                ? catches.Length == 0 ? tryBody : Expression.TryCatch(tryBody, catches)
                 : Expression.TryCatchFinally(tryBody, _finallyExpr.GenCode(RHC.Statement, objx, context), catches);
 
             return tryStmt;

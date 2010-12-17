@@ -77,6 +77,9 @@ namespace clojure.lang.CljCompiler.Ast
                 if (Compiler.IN_CATCH_FINALLY.deref() != null)
                     throw new InvalidOperationException("Cannot recur from catch/finally.");
 
+                if (Compiler.NO_RECUR.deref() != null)
+                    throw new InvalidOperationException("Cannot recur across try");
+
                 IPersistentVector args = PersistentVector.EMPTY;
 
                 for (ISeq s = RT.seq(form.next()); s != null; s = s.next())

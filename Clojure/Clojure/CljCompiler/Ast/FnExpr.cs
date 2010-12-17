@@ -123,7 +123,8 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.VARS, PersistentHashMap.EMPTY,
                     Compiler.KEYWORD_CALLSITES,PersistentVector.EMPTY,
                     Compiler.PROTOCOL_CALLSITES,PersistentVector.EMPTY,
-                    Compiler.VAR_CALLSITES,Compiler.EmptyVarCallSites()));
+                    Compiler.VAR_CALLSITES,Compiler.EmptyVarCallSites(),
+                    Compiler.NO_RECUR,null));
 
                 //arglist might be preceded by symbol naming this fn
                 if (RT.second(form) is Symbol)

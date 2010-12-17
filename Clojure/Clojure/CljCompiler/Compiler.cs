@@ -146,6 +146,8 @@ namespace clojure.lang
 
         internal static readonly Var IN_CATCH_FINALLY = Var.create(null).setDynamic();          //null or not
 
+        internal static readonly Var NO_RECUR = Var.create(null).setDynamic();
+
         internal static readonly Var VARS = Var.create().setDynamic();           //var->constid
         internal static readonly Var CONSTANTS = Var.create().setDynamic();      //vector<object>
         internal static readonly Var CONSTANT_IDS = Var.create().setDynamic();   // IdentityHashMap
