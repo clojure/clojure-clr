@@ -5952,9 +5952,14 @@
   [] 
   (let [d (clojure.lang.CountDownLatch. 1)                       ;;; java.util.concurrent.CountDownLatch.
         v (atom nil)]
-    (proxy [clojure.lang.AFn clojure.lang.IDeref] []             ;;; TODO: Update this to reify after we have fixed the missing method problem.
-      (deref [] (.Await d) @v) ;;; await
-      (invoke [x]
+    (reify 
+	 clojure.lang.IDeref
+      (deref [_] (.Await d) @v) ;;; await
+	 clojure.lang.IPromiseImpl
+	  (hasValue [this]
+	    (= 0 (.Count d)))    ;;; .getCount
+	 clojure.lang.IFn
+      (invoke [this x]
         (locking d
           (if (pos? (.Count d)) ;;; getCount
             (do (reset! v x)
