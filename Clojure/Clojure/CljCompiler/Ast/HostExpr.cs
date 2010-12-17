@@ -389,7 +389,10 @@ namespace clojure.lang.CljCompiler.Ast
             else if ( primt == typeof(long) && paramType == typeof(int) )
             {
                 Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
-                expr = Expression.Call(Compiler.Method_RT_intCast_long,expr);
+                if (RT.booleanCast(Compiler.UNCHECKED_MATH.deref()))
+                    expr = Expression.Call(Compiler.Method_RT_uncheckedIntCast_long, expr);
+                else
+                    expr = Expression.Call(Compiler.Method_RT_intCast_long, expr);
                 return expr;
             }
             else if ( primt == typeof(float) && paramType == typeof(double) )
@@ -411,18 +414,45 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        internal static readonly MethodInfo Method_Util_ConvertToSByte = typeof(Util).GetMethod("ConvertToByte");
-        internal static readonly MethodInfo Method_Util_ConvertToByte = typeof(Util).GetMethod("ConvertToByte");
-        internal static readonly MethodInfo Method_Util_ConvertToShort = typeof(Util).GetMethod("ConvertToShort");
-        internal static readonly MethodInfo Method_Util_ConvertToUShort = typeof(Util).GetMethod("ConvertToUShort");
-        internal static readonly MethodInfo Method_Util_ConvertToInt = typeof(Util).GetMethod("ConvertToInt");
-        internal static readonly MethodInfo Method_Util_ConvertToUInt = typeof(Util).GetMethod("ConvertToUInt");
-        internal static readonly MethodInfo Method_Util_ConvertToLong = typeof(Util).GetMethod("ConvertToLong");
-        internal static readonly MethodInfo Method_Util_ConvertToULong = typeof(Util).GetMethod("ConvertToULong");
-        internal static readonly MethodInfo Method_Util_ConvertToFloat = typeof(Util).GetMethod("ConvertToFloat");
-        internal static readonly MethodInfo Method_Util_ConvertToDouble = typeof(Util).GetMethod("ConvertToDouble");
-        internal static readonly MethodInfo Method_Util_ConvertToChar = typeof(Util).GetMethod("ConvertToChar");
-        internal static readonly MethodInfo Method_Util_ConvertToDecimal = typeof(Util).GetMethod("ConvertToDecimal");
+        //internal static readonly MethodInfo Method_Util_ConvertToSByte = typeof(Util).GetMethod("ConvertToByte");
+        //internal static readonly MethodInfo Method_Util_ConvertToByte = typeof(Util).GetMethod("ConvertToByte");
+        //internal static readonly MethodInfo Method_Util_ConvertToShort = typeof(Util).GetMethod("ConvertToShort");
+        //internal static readonly MethodInfo Method_Util_ConvertToUShort = typeof(Util).GetMethod("ConvertToUShort");
+        //internal static readonly MethodInfo Method_Util_ConvertToInt = typeof(Util).GetMethod("ConvertToInt");
+        //internal static readonly MethodInfo Method_Util_ConvertToUInt = typeof(Util).GetMethod("ConvertToUInt");
+        //internal static readonly MethodInfo Method_Util_ConvertToLong = typeof(Util).GetMethod("ConvertToLong");
+        //internal static readonly MethodInfo Method_Util_ConvertToULong = typeof(Util).GetMethod("ConvertToULong");
+        //internal static readonly MethodInfo Method_Util_ConvertToFloat = typeof(Util).GetMethod("ConvertToFloat");
+        //internal static readonly MethodInfo Method_Util_ConvertToDouble = typeof(Util).GetMethod("ConvertToDouble");
+        //internal static readonly MethodInfo Method_Util_ConvertToChar = typeof(Util).GetMethod("ConvertToChar");
+        //internal static readonly MethodInfo Method_Util_ConvertToDecimal = typeof(Util).GetMethod("ConvertToDecimal");
+
+        internal static readonly MethodInfo Method_RT_sbyteCast = typeof(RT).GetMethod("sbyteCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_byteCast = typeof(RT).GetMethod("byteCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_shortCast = typeof(RT).GetMethod("shortCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_ushortCast = typeof(RT).GetMethod("ushortCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_intCast = typeof(RT).GetMethod("intCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_uintCast = typeof(RT).GetMethod("uintCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_longCast = typeof(RT).GetMethod("longCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_ulongCast = typeof(RT).GetMethod("ulongCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_floatCast = typeof(RT).GetMethod("floatCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_doubleCast = typeof(RT).GetMethod("doubleCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_charCast = typeof(RT).GetMethod("charCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_decimalCast = typeof(RT).GetMethod("decimalCast", new Type[] { typeof(object) });
+
+        internal static readonly MethodInfo Method_RT_uncheckedSbyteCast = typeof(RT).GetMethod("uncheckedSByteCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_uncheckedByteCast = typeof(RT).GetMethod("uncheckedByteCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_uncheckedShortCast = typeof(RT).GetMethod("uncheckedShortCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_uncheckedUshortCast = typeof(RT).GetMethod("uncheckedUShortCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_uncheckedIntCast = typeof(RT).GetMethod("uncheckedIntCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_uncheckedUintCast = typeof(RT).GetMethod("uncheckedUIntCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_uncheckedLongCast = typeof(RT).GetMethod("uncheckedLongCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_uncheckedUlongCast = typeof(RT).GetMethod("uncheckedULongCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_uncheckedFloatCast = typeof(RT).GetMethod("uncheckedFloatCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_uncheckedDoubleCast = typeof(RT).GetMethod("uncheckedDoubleCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_uncheckedCharCast = typeof(RT).GetMethod("uncheckedCharCast", new Type[] { typeof(object) });
+        internal static readonly MethodInfo Method_RT_uncheckedDecimalCast = typeof(RT).GetMethod("uncheckedDecimalCast", new Type[] { typeof(object) });
+
 
         internal static Expression GenUnboxArg(Expression argExpr, Type paramType)
         {
@@ -440,31 +470,60 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 if (Util.IsPrimitiveNumeric(argType) && Util.IsPrimitiveNumeric(paramType))
                     return Expression.Convert(argExpr,paramType);
-
-                if (paramType == typeof(sbyte))
-                    return Expression.Call(null, Method_Util_ConvertToSByte, argExpr);
-                else if (paramType == typeof(byte))
-                    return Expression.Call(null, Method_Util_ConvertToByte, argExpr);
-                else if (paramType == typeof(short))
-                    return Expression.Call(null, Method_Util_ConvertToShort, argExpr);
-                else if (paramType == typeof(ushort))
-                    return Expression.Call(null, Method_Util_ConvertToUShort, argExpr);
-                else if (paramType == typeof(int))
-                    return Expression.Call(null, Method_Util_ConvertToInt, argExpr);
-                else if (paramType == typeof(uint))
-                    return Expression.Call(null, Method_Util_ConvertToUInt, argExpr);
-                else if (paramType == typeof(long))
-                    return Expression.Call(null, Method_Util_ConvertToLong, argExpr);
-                else if (paramType == typeof(ulong))
-                    return Expression.Call(null, Method_Util_ConvertToULong, argExpr);
-                else if (paramType == typeof(float))
-                    return Expression.Call(null, Method_Util_ConvertToFloat, argExpr);
-                else if (paramType == typeof(double))
-                    return Expression.Call(null, Method_Util_ConvertToDouble, argExpr);
-                else if (paramType == typeof(char))
-                    return Expression.Call(null, Method_Util_ConvertToChar, argExpr);
-                else if (paramType == typeof(decimal))
-                    return Expression.Call(null, Method_Util_ConvertToDecimal, argExpr);
+                if (RT.booleanCast(Compiler.UNCHECKED_MATH.deref()))
+                {
+                    if (paramType == typeof(sbyte))
+                        return Expression.Call(null, Method_RT_uncheckedSbyteCast, argExpr);
+                    else if (paramType == typeof(byte))
+                        return Expression.Call(null, Method_RT_uncheckedByteCast, argExpr);
+                    else if (paramType == typeof(short))
+                        return Expression.Call(null, Method_RT_uncheckedShortCast, argExpr);
+                    else if (paramType == typeof(ushort))
+                        return Expression.Call(null, Method_RT_uncheckedUshortCast, argExpr);
+                    else if (paramType == typeof(int))
+                        return Expression.Call(null, Method_RT_uncheckedIntCast, argExpr);
+                    else if (paramType == typeof(uint))
+                        return Expression.Call(null, Method_RT_uncheckedUintCast, argExpr);
+                    else if (paramType == typeof(long))
+                        return Expression.Call(null, Method_RT_uncheckedLongCast, argExpr);
+                    else if (paramType == typeof(ulong))
+                        return Expression.Call(null, Method_RT_uncheckedUlongCast, argExpr);
+                    else if (paramType == typeof(float))
+                        return Expression.Call(null, Method_RT_uncheckedFloatCast, argExpr);
+                    else if (paramType == typeof(double))
+                        return Expression.Call(null, Method_RT_uncheckedDoubleCast, argExpr);
+                    else if (paramType == typeof(char))
+                        return Expression.Call(null, Method_RT_uncheckedCharCast, argExpr);
+                    else if (paramType == typeof(decimal))
+                        return Expression.Call(null, Method_RT_uncheckedDecimalCast, argExpr);
+                }
+                else
+                {
+                    if (paramType == typeof(sbyte))
+                        return Expression.Call(null, Method_RT_sbyteCast, argExpr);
+                    else if (paramType == typeof(byte))
+                        return Expression.Call(null, Method_RT_byteCast, argExpr);
+                    else if (paramType == typeof(short))
+                        return Expression.Call(null, Method_RT_shortCast, argExpr);
+                    else if (paramType == typeof(ushort))
+                        return Expression.Call(null, Method_RT_ushortCast, argExpr);
+                    else if (paramType == typeof(int))
+                        return Expression.Call(null, Method_RT_intCast, argExpr);
+                    else if (paramType == typeof(uint))
+                        return Expression.Call(null, Method_RT_uintCast, argExpr);
+                    else if (paramType == typeof(long))
+                        return Expression.Call(null, Method_RT_longCast, argExpr);
+                    else if (paramType == typeof(ulong))
+                        return Expression.Call(null, Method_RT_ulongCast, argExpr);
+                    else if (paramType == typeof(float))
+                        return Expression.Call(null, Method_RT_floatCast, argExpr);
+                    else if (paramType == typeof(double))
+                        return Expression.Call(null, Method_RT_doubleCast, argExpr);
+                    else if (paramType == typeof(char))
+                        return Expression.Call(null, Method_RT_charCast, argExpr);
+                    else if (paramType == typeof(decimal))
+                        return Expression.Call(null, Method_RT_decimalCast, argExpr);
+                }
             }
             
             return Expression.Convert(argExpr,paramType);

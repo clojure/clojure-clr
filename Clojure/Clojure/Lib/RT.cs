@@ -1054,9 +1054,7 @@ namespace clojure.lang
 
         #region boxing/casts
 
-        // Needs rethinking.  Need to benchmark the approaches in Util vs Convert.
-        // Which overloads do we need?
-
+        #region char casting
 
         public static char charCast(object x)
         {
@@ -1070,6 +1068,10 @@ namespace clojure.lang
             return (char)n;
         }
 
+        #endregion
+
+        #region bool casting
+
         static public bool booleanCast(object x)
         {
             if (x is Boolean)
@@ -1081,6 +1083,10 @@ namespace clojure.lang
         {
             return x;
         }
+
+        #endregion
+
+        #region casting misc numeric types from object
 
         public static byte byteCast(object x)
         {
@@ -1094,6 +1100,19 @@ namespace clojure.lang
             return (byte)n; 
         }
 
+        public static sbyte sbyteCast(object x)
+        {
+            if (x is sbyte)
+                return (sbyte)x;
+
+            long n = Util.ConvertToLong(x);
+            if (n < SByte.MinValue || n > SByte.MaxValue)
+                throw new ArgumentException("Value out of range for byte: " + x);
+
+            return (sbyte)n;
+        }
+
+        
         public static short shortCast(object x)
         {
             if (x is short)
@@ -1132,16 +1151,14 @@ namespace clojure.lang
             return Convert.ToUInt64(x);
         }
 
-
         public static decimal decimalCast(object x)
         {
             return Convert.ToDecimal(x);
         }
 
-        public static sbyte sbyteCast(object x)
-        {
-            return Convert.ToSByte(x);
-        }
+        #endregion
+
+        #region int casting
 
         public static int intCast(object x)
         {
@@ -1160,7 +1177,17 @@ namespace clojure.lang
             return x;
         }
 
+        static public int intCast(sbyte x)
+        {
+            return x;
+        }
+
         static public int intCast(short x)
+        {
+            return x;
+        }
+
+        static public int intCast(ushort x)
         {
             return x;
         }
@@ -1170,6 +1197,14 @@ namespace clojure.lang
             return x;
         }
 
+        static public int intCast(uint x)
+        {
+            if (x < int.MinValue || x > int.MaxValue)
+                throw new ArgumentException("Value out of range for int: " + x);
+
+            return (int)x;
+        }
+        
         static public int intCast(float x)
         {
             if (x < int.MinValue || x > int.MaxValue)
@@ -1188,6 +1223,14 @@ namespace clojure.lang
             return i;
         }
 
+        static public int intCast(ulong x)
+        {
+            if ( x > int.MaxValue)
+                throw new ArgumentException("Value out of range for int: " + x);
+
+            return (int)x;
+        }
+
         static public int intCast(double x)
         {
             if (x < int.MinValue || x > int.MaxValue)
@@ -1196,6 +1239,10 @@ namespace clojure.lang
             return (int)x;
         }
 
+        #endregion
+
+        #region long casting
+
         public static long longCast(object x)
         {
             if (x is long)
@@ -1203,7 +1250,7 @@ namespace clojure.lang
 
             else if (x is int)
                 return (long)(int)x;
-            
+
             else if (x is BigInt)
             {
                 BigInt bi = (BigInt)x;
@@ -1216,19 +1263,31 @@ namespace clojure.lang
             {
                 BigInteger bi = (BigInteger)x;
                 long n;
-                if ( bi.AsInt64(out n) )
+                if (bi.AsInt64(out n))
                     return n;
                 else
                     throw new ArgumentException("Value out of range for long: " + x);
             }
+            else if (x is ulong)
+            {
+                ulong ux = (ulong)x;
+                if (ux > long.MaxValue)
+                    throw new ArgumentException("Value out of range for long: " + x);
+                return (long)x;
+            }
             return Util.ConvertToLong(x);
         }
 
-        public static long longCast(int x)
-        {
-            return x;
-        }
 
+        public static long longCast(char x) { return x; }
+        public static long longCast(byte x) { return x; }
+        public static long longCast(sbyte x) { return x; }
+        public static long longCast(short x) { return x; }
+        public static long longCast(ushort x) { return x; }
+        public static long longCast(uint x) { return x; }
+
+        public static long longCast(int x) { return x; }
+        
         static public long longCast(float x)
         {
             if ( x < long.MinValue || x > long.MaxValue )
@@ -1242,6 +1301,14 @@ namespace clojure.lang
             return x;
         }
 
+        static public long longCast(ulong x)
+        {
+            if (x > long.MaxValue)
+                throw new ArgumentException("Value out of range for long: " + x);
+
+            return (long)x;
+        }
+
         static public long longCast(double x)
         {
             if (x < long.MinValue || x > long.MaxValue)
@@ -1249,6 +1316,10 @@ namespace clojure.lang
 
             return (long)x;
         }
+
+        #endregion
+
+        #region float casting
 
         public static float floatCast(object x)
         {
@@ -1262,19 +1333,21 @@ namespace clojure.lang
             return (float)n;
         }
 
-        public static float floatCast(int x)
-        {
-            return x;
-        }
+        public static float floatCast(char x) { return x; }
+        public static float floatCast(byte x) { return x; }
+        public static float floatCast(sbyte x) { return x; }
+        public static float floatCast(short x) { return x; }
+        public static float floatCast(ushort x) { return x; }
+        public static float floatCast(int x) { return x; }
+        public static float floatCast(uint x) { return x; }
+        public static float floatCast(long x) { return x; }
+        public static float floatCast(ulong x) { return x; }
+        public static float floatCast(float x) { return x; }
 
-        public static float floatCast(float x)
-        {
-            return x;
-        }
 
-        public static float floatCast(long x)
+        public static float floatCast(decimal x)
         {
-            return x;
+            return floatCast((double)x);
         }
 
         public static float floatCast(double x)
@@ -1284,100 +1357,273 @@ namespace clojure.lang
             return (float)x;
         }
 
+        #endregion
+
+        #region double casting
+
         public static double doubleCast(object x)
         {
             return Util.ConvertToDouble(x);
         }
 
-        public static double doubleCast(int x)
-        {
-            return x;
-        }
+        public static double doubleCast(char x) { return x; }
+        public static double doubleCast(byte x) { return x; }
+        public static double doubleCast(sbyte x) { return x; }
+        public static double doubleCast(short x) { return x; }
+        public static double doubleCast(ushort x) { return x; }
+        public static double doubleCast(int x) { return x; }
+        public static double doubleCast(uint x) { return x; }
+        public static double doubleCast(long x) { return x; }
+        public static double doubleCast(ulong x) { return x; }
+        public static double doubleCast(float x) { return x; }
+        public static double doubleCast(double x) { return x; }
+        public static double doubleCast(decimal x) { return (double)x; }
 
-        public static double doubleCast(float x)
-        {
-            return x;
-        }
+        #endregion
 
-        public static double doubleCast(long x)
-        {
-            return x;
-        }
-
-        public static double doubleCast(double x)
-        {
-            return x;
-        }
+        #region unchecked byte casting
 
         static public byte uncheckedByteCast(Object x)
         {
             return Util.ConvertToByte(x);
         }
 
-        static public byte uncheckedByteCast(byte x)
+        static public byte uncheckedByteCast(char x) { return (byte)x; }
+        static public byte uncheckedByteCast(byte x) { return (byte)x; }
+        static public byte uncheckedByteCast(sbyte x) { return (byte)x; }
+        static public byte uncheckedByteCast(short x) { return (byte)x; }
+        static public byte uncheckedByteCast(ushort x) { return (byte)x; }
+        static public byte uncheckedByteCast(int x) { return (byte)x; }
+        static public byte uncheckedByteCast(uint x) { return (byte)x; }
+        static public byte uncheckedByteCast(long x) { return (byte)x; }
+        static public byte uncheckedByteCast(ulong x) { return (byte)x; }
+        static public byte uncheckedByteCast(float x) { return (byte)x; }
+        static public byte uncheckedByteCast(double x) { return (byte)x; }
+        static public byte uncheckedByteCast(decimal x) { return (byte)x; }
+
+        #endregion
+
+        #region unchecked sbyte casting
+
+        static public sbyte uncheckedSByteCast(Object x)
         {
-            return x;
+            return Util.ConvertToSByte(x);
         }
 
-        static public byte uncheckedByteCast(short x)
-        {
-            return (byte)x;
-        }
+        static public sbyte uncheckedSByteCast(char x) { return (sbyte)x; }
+        static public sbyte uncheckedSByteCast(byte x) { return (sbyte)x; }
+        static public sbyte uncheckedSByteCast(sbyte x) { return (sbyte)x; }
+        static public sbyte uncheckedSByteCast(short x) { return (sbyte)x; }
+        static public sbyte uncheckedSByteCast(ushort x) { return (sbyte)x; }
+        static public sbyte uncheckedSByteCast(int x) { return (sbyte)x; }
+        static public sbyte uncheckedSByteCast(uint x) { return (sbyte)x; }
+        static public sbyte uncheckedSByteCast(long x) { return (sbyte)x; }
+        static public sbyte uncheckedSByteCast(ulong x) { return (sbyte)x; }
+        static public sbyte uncheckedSByteCast(float x) { return (sbyte)x; }
+        static public sbyte uncheckedSByteCast(double x) { return (sbyte)x; }
+        static public sbyte uncheckedSByteCast(decimal x) { return (sbyte)x; }
 
-        static public byte uncheckedByteCast(int x)
-        {
-            return (byte)x;
-        }
+        #endregion
 
-        static public byte uncheckedByteCast(long x)
-        {
-            return (byte)x;
-        }
-
-        static public byte uncheckedByteCast(float x)
-        {
-            return (byte)x;
-        }
-
-        static public byte uncheckedByteCast(double x)
-        {
-            return (byte)x;
-        }
+        #region unchecked short casting
 
         static public short uncheckedShortCast(Object x)
         {
             return Util.ConvertToShort(x);
         }
 
-        static public short uncheckedShortCast(byte x)
+        static public short uncheckedShortCast(char x) { return (short)x; }
+        static public short uncheckedShortCast(byte x) { return (short)x; }
+        static public short uncheckedShortCast(sbyte x) { return (short)x; }
+        static public short uncheckedShortCast(short x) { return (short)x; }
+        static public short uncheckedShortCast(ushort x) { return (short)x; }
+        static public short uncheckedShortCast(int x) { return (short)x; }
+        static public short uncheckedShortCast(uint x) { return (short)x; }
+        static public short uncheckedShortCast(long x) { return (short)x; }
+        static public short uncheckedShortCast(ulong x) { return (short)x; }
+        static public short uncheckedShortCast(float x) { return (short)x; }
+        static public short uncheckedShortCast(double x) { return (short)x; }
+        static public short uncheckedShortCast(decimal x) { return (short)x; }
+
+        #endregion
+
+        #region unchecked ushort casting
+
+        static public ushort uncheckedUShortCast(Object x)
         {
-            return x;
+            return Util.ConvertToUShort(x);
         }
 
-        static public short uncheckedShortCast(short x)
+        static public ushort uncheckedUShortCast(char x) { return (ushort)x; }
+        static public ushort uncheckedUShortCast(byte x) { return (ushort)x; }
+        static public ushort uncheckedUShortCast(sbyte x) { return (ushort)x; }
+        static public ushort uncheckedUShortCast(short x) { return (ushort)x; }
+        static public ushort uncheckedUShortCast(ushort x) { return (ushort)x; }
+        static public ushort uncheckedUShortCast(int x) { return (ushort)x; }
+        static public ushort uncheckedUShortCast(uint x) { return (ushort)x; }
+        static public ushort uncheckedUShortCast(long x) { return (ushort)x; }
+        static public ushort uncheckedUShortCast(ulong x) { return (ushort)x; }
+        static public ushort uncheckedUShortCast(float x) { return (ushort)x; }
+        static public ushort uncheckedUShortCast(double x) { return (ushort)x; }
+        static public ushort uncheckedUShortCast(decimal x) { return (ushort)x; }
+
+        #endregion
+
+        #region unchecked int casting
+
+        static public int uncheckedIntCast(Object x)
         {
-            return x;
+            return Util.ConvertToInt(x);
         }
 
-        static public short uncheckedShortCast(int x)
+        static public int uncheckedIntCast(char x) { return (int)x; }
+        static public int uncheckedIntCast(byte x) { return (int)x; }
+        static public int uncheckedIntCast(sbyte x) { return (int)x; }
+        static public int uncheckedIntCast(short x) { return (int)x; }
+        static public int uncheckedIntCast(ushort x) { return (int)x; }
+        static public int uncheckedIntCast(int x) { return (int)x; }
+        static public int uncheckedIntCast(uint x) { return (int)x; }
+        static public int uncheckedIntCast(long x) { return (int)x; }
+        static public int uncheckedIntCast(ulong x) { return (int)x; }
+        static public int uncheckedIntCast(float x) { return (int)x; }
+        static public int uncheckedIntCast(double x) { return (int)x; }
+        static public int uncheckedIntCast(decimal x) { return (int)x; }
+
+        #endregion
+
+        #region unchecked uint casting
+
+        static public uint uncheckedUIntCast(Object x)
         {
-            return (short)x;
+            return Util.ConvertToUInt(x);
         }
 
-        static public short uncheckedShortCast(long x)
+        static public uint uncheckedUIntCast(char x) { return (uint)x; }
+        static public uint uncheckedUIntCast(byte x) { return (uint)x; }
+        static public uint uncheckedUIntCast(sbyte x) { return (uint)x; }
+        static public uint uncheckedUIntCast(short x) { return (uint)x; }
+        static public uint uncheckedUIntCast(ushort x) { return (uint)x; }
+        static public uint uncheckedUIntCast(int x) { return (uint)x; }
+        static public uint uncheckedUIntCast(uint x) { return (uint)x; }
+        static public uint uncheckedUIntCast(long x) { return (uint)x; }
+        static public uint uncheckedUIntCast(ulong x) { return (uint)x; }
+        static public uint uncheckedUIntCast(float x) { return (uint)x; }
+        static public uint uncheckedUIntCast(double x) { return (uint)x; }
+        static public uint uncheckedUIntCast(decimal x) { return (uint)x; }
+
+        #endregion
+        
+        #region unchecked long casting
+
+        static public long uncheckedLongCast(Object x)
         {
-            return (short)x;
+            return Util.ConvertToLong(x);
         }
 
-        static public short uncheckedShortCast(float x)
+        static public long uncheckedLongCast(char x) { return (long)x; }
+        static public long uncheckedLongCast(byte x) { return (long)x; }
+        static public long uncheckedLongCast(sbyte x) { return (long)x; }
+        static public long uncheckedLongCast(short x) { return (long)x; }
+        static public long uncheckedLongCast(ushort x) { return (long)x; }
+        static public long uncheckedLongCast(int x) { return (long)x; }
+        static public long uncheckedLongCast(uint x) { return (long)x; }
+        static public long uncheckedLongCast(long x) { return (long)x; }
+        static public long uncheckedLongCast(ulong x) { return (long)x; }
+        static public long uncheckedLongCast(float x) { return (long)x; }
+        static public long uncheckedLongCast(double x) { return (long)x; }
+        static public long uncheckedLongCast(decimal x) { return (long)x; }
+
+        #endregion
+
+        #region unchecked ulong casting
+
+        static public ulong uncheckedULongCast(Object x)
         {
-            return (short)x;
+            return Util.ConvertToULong(x);
         }
 
-        static public short uncheckedShortCast(double x)
+        static public ulong uncheckedULongCast(char x) { return (ulong)x; }
+        static public ulong uncheckedULongCast(byte x) { return (ulong)x; }
+        static public ulong uncheckedULongCast(sbyte x) { return (ulong)x; }
+        static public ulong uncheckedULongCast(short x) { return (ulong)x; }
+        static public ulong uncheckedULongCast(ushort x) { return (ulong)x; }
+        static public ulong uncheckedULongCast(int x) { return (ulong)x; }
+        static public ulong uncheckedULongCast(uint x) { return (ulong)x; }
+        static public ulong uncheckedULongCast(long x) { return (ulong)x; }
+        static public ulong uncheckedULongCast(ulong x) { return (ulong)x; }
+        static public ulong uncheckedULongCast(float x) { return (ulong)x; }
+        static public ulong uncheckedULongCast(double x) { return (ulong)x; }
+        static public ulong uncheckedULongCast(decimal x) { return (ulong)x; }
+
+        #endregion
+
+        #region unchecked float casting
+
+        static public float uncheckedFloatCast(Object x)
         {
-            return (short)x;
+            return Util.ConvertToFloat(x);
         }
+
+        static public float uncheckedFloatCast(char x) { return (float)x; }
+        static public float uncheckedFloatCast(byte x) { return (float)x; }
+        static public float uncheckedFloatCast(sbyte x) { return (float)x; }
+        static public float uncheckedFloatCast(short x) { return (float)x; }
+        static public float uncheckedFloatCast(ushort x) { return (float)x; }
+        static public float uncheckedFloatCast(int x) { return (float)x; }
+        static public float uncheckedFloatCast(uint x) { return (float)x; }
+        static public float uncheckedFloatCast(long x) { return (float)x; }
+        static public float uncheckedFloatCast(ulong x) { return (float)x; }
+        static public float uncheckedFloatCast(float x) { return (float)x; }
+        static public float uncheckedFloatCast(double x) { return (float)x; }
+        static public float uncheckedFloatCast(decimal x) { return (float)x; }
+
+        #endregion
+
+        #region unchecked double casting
+
+        static public double uncheckedDoubleCast(Object x)
+        {
+            return Util.ConvertToDouble(x);
+        }
+
+        static public double uncheckedDoubleCast(char x) { return (double)x; }
+        static public double uncheckedDoubleCast(byte x) { return (double)x; }
+        static public double uncheckedDoubleCast(sbyte x) { return (double)x; }
+        static public double uncheckedDoubleCast(short x) { return (double)x; }
+        static public double uncheckedDoubleCast(ushort x) { return (double)x; }
+        static public double uncheckedDoubleCast(int x) { return (double)x; }
+        static public double uncheckedDoubleCast(uint x) { return (double)x; }
+        static public double uncheckedDoubleCast(long x) { return (double)x; }
+        static public double uncheckedDoubleCast(ulong x) { return (double)x; }
+        static public double uncheckedDoubleCast(float x) { return (double)x; }
+        static public double uncheckedDoubleCast(double x) { return (double)x; }
+        static public double uncheckedDoubleCast(decimal x) { return (double)x; }
+
+        #endregion
+
+        #region unchecked decimal casting
+
+        static public decimal uncheckedDecimalCast(Object x)
+        {
+            return Util.ConvertToDecimal(x);
+        }
+
+        static public decimal uncheckedDecimalCast(char x) { return (decimal)x; }
+        static public decimal uncheckedDecimalCast(byte x) { return (decimal)x; }
+        static public decimal uncheckedDecimalCast(sbyte x) { return (decimal)x; }
+        static public decimal uncheckedDecimalCast(short x) { return (decimal)x; }
+        static public decimal uncheckedDecimalCast(ushort x) { return (decimal)x; }
+        static public decimal uncheckedDecimalCast(int x) { return (decimal)x; }
+        static public decimal uncheckedDecimalCast(uint x) { return (decimal)x; }
+        static public decimal uncheckedDecimalCast(long x) { return (decimal)x; }
+        static public decimal uncheckedDecimalCast(ulong x) { return (decimal)x; }
+        static public decimal uncheckedDecimalCast(float x) { return (decimal)x; }
+        static public decimal uncheckedDecimalCast(double x) { return (decimal)x; }
+        static public decimal uncheckedDecimalCast(decimal x) { return (decimal)x; }
+
+        #endregion
+
+        #region unchecked char casting
 
         static public char uncheckedCharCast(Object x)
         {
@@ -1386,187 +1632,20 @@ namespace clojure.lang
             return (char)Util.ConvertToLong(x);
         }
 
-        static public char uncheckedCharCast(byte x)
-        {
-            return (char)x;
-        }
+        static public char uncheckedCharCast(char x) { return (char)x; }
+        static public char uncheckedCharCast(byte x) { return (char)x; }
+        static public char uncheckedCharCast(sbyte x) { return (char)x; }
+        static public char uncheckedCharCast(short x) { return (char)x; }
+        static public char uncheckedCharCast(ushort x) { return (char)x; }
+        static public char uncheckedCharCast(int x) { return (char)x; }
+        static public char uncheckedCharCast(uint x) { return (char)x; }
+        static public char uncheckedCharCast(long x) { return (char)x; }
+        static public char uncheckedCharCast(ulong x) { return (char)x; }
+        static public char uncheckedCharCast(float x) { return (char)x; }
+        static public char uncheckedCharCast(double x) { return (char)x; }
+        static public char uncheckedCharCast(decimal x) { return (char)x; }
 
-        static public char uncheckedCharCast(short x)
-        {
-            return (char)x;
-        }
-
-        static public char uncheckedCharCast(char x)
-        {
-            return x;
-        }
-
-        static public char uncheckedCharCast(int x)
-        {
-            return (char)x;
-        }
-
-        static public char uncheckedCharCast(long x)
-        {
-            return (char)x;
-        }
-
-        static public char uncheckedCharCast(float x)
-        {
-            return (char)x;
-        }
-
-        static public char uncheckedCharCast(double x)
-        {
-            return (char)x;
-        }
-
-        static public int uncheckedIntCast(Object x)
-        {
-            return Util.ConvertToInt(x);
-        }
-
-        static public int uncheckedIntCast(byte x)
-        {
-            return x;
-        }
-
-        static public int uncheckedIntCast(short x)
-        {
-            return x;
-        }
-
-        static public int uncheckedIntCast(char x)
-        {
-            return x;
-        }
-
-        static public int uncheckedIntCast(int x)
-        {
-            return x;
-        }
-
-        static public int uncheckedIntCast(long x)
-        {
-            return (int)x;
-        }
-
-        static public int uncheckedIntCast(float x)
-        {
-            return (int)x;
-        }
-
-        static public int uncheckedIntCast(double x)
-        {
-            return (int)x;
-        }
-
-        static public long uncheckedLongCast(Object x)
-        {
-            return Util.ConvertToLong(x);
-        }
-
-        static public long uncheckedLongCast(byte x)
-        {
-            return x;
-        }
-
-        static public long uncheckedLongCast(short x)
-        {
-            return x;
-        }
-
-        static public long uncheckedLongCast(int x)
-        {
-            return x;
-        }
-
-        static public long uncheckedLongCast(long x)
-        {
-            return x;
-        }
-
-        static public long uncheckedLongCast(float x)
-        {
-            return (long)x;
-        }
-
-        static public long uncheckedLongCast(double x)
-        {
-            return (long)x;
-        }
-
-        static public float uncheckedFloatCast(Object x)
-        {
-            return Util.ConvertToFloat(x);
-        }
-
-        static public float uncheckedFloatCast(byte x)
-        {
-            return x;
-        }
-
-        static public float uncheckedFloatCast(short x)
-        {
-            return x;
-        }
-
-        static public float uncheckedFloatCast(int x)
-        {
-            return x;
-        }
-
-        static public float uncheckedFloatCast(long x)
-        {
-            return x;
-        }
-
-        static public float uncheckedFloatCast(float x)
-        {
-            return x;
-        }
-
-        static public float uncheckedFloatCast(double x)
-        {
-            return (float)x;
-        }
-
-        static public double uncheckedDoubleCast(Object x)
-        {
-            return Util.ConvertToDouble(x);
-        }
-
-        static public double uncheckedDoubleCast(byte x)
-        {
-            return x;
-        }
-
-        static public double uncheckedDoubleCast(short x)
-        {
-            return x;
-        }
-
-        static public double uncheckedDoubleCast(int x)
-        {
-            return x;
-        }
-
-        static public double uncheckedDoubleCast(long x)
-        {
-            return x;
-        }
-
-        static public double uncheckedDoubleCast(float x)
-        {
-            return x;
-        }
-
-        static public double uncheckedDoubleCast(double x)
-        {
-            return x;
-        }
-
-
+        #endregion
 
         #endregion
 

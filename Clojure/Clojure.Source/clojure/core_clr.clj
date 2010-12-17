@@ -20,31 +20,31 @@
 
 (defn uint
   "Coerce to uint"
-  {:inline (fn  [x] `(. clojure.lang.RT (uintCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (~(if *unchecked-math* 'uncheckedUIntCast 'uintCast) ~x)))
    :added "1.0"}
   [x] (. clojure.lang.RT (uintCast x)))
   
 (defn ushort
   "Coerce to ushort"
-  {:inline (fn  [x] `(. clojure.lang.RT (ushortCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (~(if *unchecked-math* 'uncheckedUShortCast 'ushortCast) ~x)))
    :added "1.0"}
   [x] (. clojure.lang.RT (ushortCast x)))
   
 (defn ulong
   "Coerce to ulong"
-  {:inline (fn  [x] `(. clojure.lang.RT (ulongCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (~(if *unchecked-math* 'uncheckedULongCast 'ulongCast) ~x)))
    :added "1.0"}
   [x] (. clojure.lang.RT (ulongCast x)))
   
 (defn decimal
   "Coerce to decimal"
-  {:inline (fn  [x] `(. clojure.lang.RT (decimalCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (~(if *unchecked-math* 'uncheckedDecimalCast 'decimalCast) ~x)))
    :added "1.0"}
   [x] (. clojure.lang.RT (decimalCast x)))
   
 (defn sbyte
   "Coerce to sbyte"
-  {:inline (fn  [x] `(. clojure.lang.RT (sbyteCast ~x)))
+  {:inline (fn  [x] `(. clojure.lang.RT (~(if *unchecked-math* 'uncheckedSByteCast 'sbyteCast) ~x)))
    :added "1.0"}
   [x] (. clojure.lang.RT (sbyteCast x)))
 

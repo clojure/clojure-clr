@@ -124,6 +124,10 @@ namespace clojure.lang
         internal static readonly Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
             Symbol.intern("*file*"), "NO_SOURCE_PATH").setDynamic();
 
+        // boolean
+        internal static readonly Var UNCHECKED_MATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+            Symbol.intern("*unchecked-math*"), false).setDynamic();
+
         //Integer
         internal static readonly Var LINE = Var.create(0).setDynamic();          // From the JVM version
         //internal static readonly Var LINE_BEFORE = Var.create(0).setDynamic();   // From the JVM version
@@ -243,6 +247,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_RT_arrayToList = typeof(RT).GetMethod("arrayToList");
         internal static readonly MethodInfo Method_RT_classForName = typeof(RT).GetMethod("classForName");
         internal static readonly MethodInfo Method_RT_intCast_long = typeof(RT).GetMethod("intCast", new Type[] { typeof(long) });
+        internal static readonly MethodInfo Method_RT_uncheckedIntCast_long = typeof(RT).GetMethod("uncheckedIntCast", new Type[] { typeof(long) });
         internal static readonly MethodInfo Method_RT_IsTrue = typeof(RT).GetMethod("IsTrue");
         internal static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
         internal static readonly MethodInfo Method_RT_printToConsole = typeof(RT).GetMethod("printToConsole");
@@ -1161,6 +1166,8 @@ namespace clojure.lang
                 CONSTANT_IDS, new IdentityHashMap(),
                 KEYWORDS, PersistentHashMap.EMPTY,
                 VARS, PersistentHashMap.EMPTY,
+                UNCHECKED_MATH, UNCHECKED_MATH.deref(),
+
                 //KEYWORD_CALLSITES, PersistentVector.EMPTY,  // jvm doesn't do this, don't know why
                 //VAR_CALLSITES, EmptyVarCallSites(),      // jvm doesn't do this, don't know why
                 //PROTOCOL_CALLSITES, PersistentVector.EMPTY, // jvm doesn't do this, don't know why
@@ -1346,7 +1353,8 @@ namespace clojure.lang
                 SOURCE, sourceName,
                 DOCUMENT_INFO, Expression.SymbolDocument(sourceName),  // I hope this is enough
 
-                RT.CURRENT_NS, RT.CURRENT_NS.deref()
+                RT.CURRENT_NS, RT.CURRENT_NS.deref(),
+                UNCHECKED_MATH, UNCHECKED_MATH.deref()
                 //LINE_BEFORE, lntr.LineNumber,
                 //LINE_AFTER, lntr.LineNumber
                 ));
