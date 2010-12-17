@@ -229,8 +229,11 @@ namespace clojure.lang
         }
 
 
-        static double DQuotient(double n, double d)
+        public static double quotient(double n, double d)
         {
+            if (d == 0)
+                throw new ArithmeticException("Divide by zero");
+
             double q = n / d;
             if (q <= Int64.MaxValue && q >= Int64.MinValue)
                 return (double)((long)q);
@@ -239,8 +242,11 @@ namespace clojure.lang
                 return BigDecimal.Create(q).ToBigInteger().ToDouble(null);
         }
 
-        static double DRemainder(double n, double d)
+        public static double remainder(double n, double d)
         {
+            if (d == 0)
+                throw new ArithmeticException("Divide by zero");
+
             double q = n / d;
             if (q <= Int64.MaxValue && q >= Int64.MinValue)
                 return n - ((long)q) * d;
@@ -783,12 +789,12 @@ namespace clojure.lang
 
             public override object quotient(object x, object y)
             {
-                return Numbers.DQuotient(Util.ConvertToDouble(x), Util.ConvertToDouble(y));
+                return Numbers.quotient(Util.ConvertToDouble(x), Util.ConvertToDouble(y));
             }
 
             public override object remainder(object x, object y)
             {
-                return Numbers.DRemainder(Util.ConvertToDouble(x), Util.ConvertToDouble(y));
+                return Numbers.remainder(Util.ConvertToDouble(x), Util.ConvertToDouble(y));
             }
 
             public override bool equiv(object x, object y)
@@ -1979,35 +1985,61 @@ namespace clojure.lang
             return x;
         }
 
-        static public long unchecked_long_add(long x, long y)
-        {
-            return x + y;
-        }
+        static public long unchecked_add(long x, long y) { return x + y; }
+        static public long unchecked_minus(long x, long y) { return x - y; }
+        static public long unchecked_multiply(long x, long y) { return x * y; }
+        static public long unchecked_minus(long x) { return -x; }
+        static public long unchecked_inc(long x) { return x + 1; }
+        static public long unchecked_dec(long x) { return x - 1; }
 
-        static public long unchecked_long_subtract(long x, long y)
-        {
-            return x - y;
-        }
+        static public object unchecked_add(object x, object y) { return add(x, y); }
+        static public object unchecked_minus(object x, object y) { return minus(x, y); }
+        static public object unchecked_multiply(object x, object y) { return multiply(x, y); }
+        static public object unchecked_minus(object x) { return minus(x); }
+        static public object unchecked_inc(object x) { return inc(x); }
+        static public object unchecked_dec(object x) { return dec(x); }
 
-        static public long unchecked_long_negate(long x)
-        {
-            return -x;
-        }
+        static public double unchecked_add(double x, double y) { return add(x, y); }
+        static public double unchecked_minus(double x, double y) { return minus(x, y); }
+        static public double unchecked_multiply(double x, double y) { return multiply(x, y); }
+        static public double unchecked_minus(double x) { return minus(x); }
+        static public double unchecked_inc(double x) { return inc(x); }
+        static public double unchecked_dec(double x) { return dec(x); }
 
-        static public long unchecked_long_inc(long x)
-        {
-            return x + 1;
-        }
+        static public double unchecked_add(double x, object y) { return add(x, y); }
+        static public double unchecked_minus(double x, object y) { return minus(x, y); }
+        static public double unchecked_multiply(double x, object y) { return multiply(x, y); }
+        static public double unchecked_add(object x, double y) { return add(x, y); }
+        static public double unchecked_minus(object x, double y) { return minus(x, y); }
+        static public double unchecked_multiply(object x, double y) { return multiply(x, y); }
 
-        static public long unchecked_long_dec(long x)
-        {
-            return x - 1;
-        }
+        static public double unchecked_add(double x, long y) { return add(x, y); }
+        static public double unchecked_minus(double x, long y) { return minus(x, y); }
+        static public double unchecked_multiply(double x, long y) { return multiply(x, y); }
+        static public double unchecked_add(long x, double y) { return add(x, y); }
+        static public double unchecked_minus(long x, double y) { return minus(x, y); }
+        static public double unchecked_multiply(long x, double y) { return multiply(x, y); }
 
-        static public long unchecked_long_multiply(long x, long y)
-        {
-            return x * y;
-        }
+        static public object unchecked_add(long x, object y) { return add(x, y); }
+        static public object unchecked_minus(long x, object y) { return minus(x, y); }
+        static public object unchecked_multiply(long x, object y) { return multiply(x, y); }
+        static public object unchecked_add(object x, long y) { return add(x, y); }
+        static public object unchecked_minus(object x, long y) { return minus(x, y); }
+        static public object unchecked_multiply(object x, long y) { return multiply(x, y); }
+
+        static public object quotient(double x, Object y) { return quotient((Object)x, y); }
+        static public object quotient(Object x, double y) { return quotient(x, (Object)y); }
+        static public object quotient(long x, Object y) { return quotient((Object)x, y); }
+        static public object quotient(Object x, long y) { return quotient(x, (Object)y); }
+        static public double quotient(double x, long y){return quotient(x,(double)y);}
+        static public double quotient(long x, double y){return quotient((double)x,y);}
+
+        static public object remainder(double x, Object y) { return remainder((Object)x, y); }
+        static public object remainder(Object x, double y) { return remainder(x, (Object)y); }
+        static public object remainder(long x, Object y) { return remainder((Object)x, y); }
+        static public object remainder(Object x, long y) { return remainder(x, (Object)y); }
+        static public double remainder(double x, long y){return remainder(x,(double)y);}
+        static public double remainder(long x, double y){return remainder((double)x,y);}
 
         static public long add(long x, long y)
         {
@@ -2099,12 +2131,12 @@ namespace clojure.lang
             return num(ret);
         }
 
-        static public long unchecked_long_divide(long x, long y)
+        static public long quotient(long x, long y)
         {
             return x / y;
         }
 
-        static public long unchecked_long_remainder(long x, long y)
+        static public long remainder(long x, long y)
         {
             return x % y;
         }
