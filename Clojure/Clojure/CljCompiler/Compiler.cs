@@ -1167,6 +1167,7 @@ namespace clojure.lang
                 KEYWORDS, PersistentHashMap.EMPTY,
                 VARS, PersistentHashMap.EMPTY,
                 UNCHECKED_MATH, UNCHECKED_MATH.deref(),
+                RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref(),
 
                 //KEYWORD_CALLSITES, PersistentVector.EMPTY,  // jvm doesn't do this, don't know why
                 //VAR_CALLSITES, EmptyVarCallSites(),      // jvm doesn't do this, don't know why
@@ -1354,7 +1355,8 @@ namespace clojure.lang
                 DOCUMENT_INFO, Expression.SymbolDocument(sourceName),  // I hope this is enough
 
                 RT.CURRENT_NS, RT.CURRENT_NS.deref(),
-                UNCHECKED_MATH, UNCHECKED_MATH.deref()
+                UNCHECKED_MATH, UNCHECKED_MATH.deref(),
+                RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref()
                 //LINE_BEFORE, lntr.LineNumber,
                 //LINE_AFTER, lntr.LineNumber
                 ));
