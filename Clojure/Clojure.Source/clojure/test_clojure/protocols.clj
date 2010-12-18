@@ -12,7 +12,7 @@
   (:use clojure.test clojure.test-clojure.protocols.examples)
   (:require [clojure.test-clojure.protocols.more-examples :as other]
             [clojure.set :as set]
-            clojure.test-clojure.helpers)
+            clojure.test-helper)
   (:import [clojure.test-clojure.protocols.examples ExampleInterface]))           ;;; test_clojure
 
 ;; temporary hack until I decide how to cleanly reload protocol

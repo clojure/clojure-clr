@@ -9,7 +9,7 @@
 ; Author: Stuart Halloway
 
 (ns clojure.test-clojure.genclass
-  (:use clojure.test clojure.test-clojure.helpers)
+  (:use clojure.test clojure.test-helper)
   (:import clojure.test-clojure.genclass.examples.ExampleClass))
 
 (deftest arg-support
