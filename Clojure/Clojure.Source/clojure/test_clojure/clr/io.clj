@@ -9,7 +9,8 @@
 
 
 (ns clojure.test-clojure.clr.io
-  (:use clojure.test clojure.clr.io)
+  (:use clojure.test clojure.clr.io
+        [clojure.test-helper :only [platform-newlines]])
   (:import 
     (System.IO FileInfo FileMode FileStream StreamReader StreamWriter MemoryStream)
     (System.Text Encoding UTF8Encoding UnicodeEncoding)
@@ -43,7 +44,7 @@
     (is (= "foobar" (slurp f :encoding utf16)))
     (testing "deprecated arity"
       (is (=
-           "WARNING: (slurp f enc) is deprecated, use (slurp f :encoding enc).\n"
+           (platform-newlines "WARNING: (slurp f enc) is deprecated, use (slurp f :encoding enc).\n")
            (with-out-str
              (is (= "foobar" (slurp f utf16)))))))))
   
