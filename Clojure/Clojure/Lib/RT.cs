@@ -1845,9 +1845,37 @@ namespace clojure.lang
 
         static public object seqToTypedArray(Type type, ISeq seq)
         {
-            Array ret = Array.CreateInstance(type, seq == null ? 0 : seq.count());
-            for (int i = 0; seq != null; ++i, seq = seq.next())
-                ret.SetValue(seq.first(), i);
+            Array ret = Array.CreateInstance(type, Length(seq));
+            if (type == typeof(int))
+                for (int i = 0; seq != null; ++i, seq = seq.next())
+                    ret.SetValue(intCast(seq.first()), i);
+            else if (type == typeof(byte))
+                for (int i = 0; seq != null; ++i, seq = seq.next())
+                    ret.SetValue(byteCast(seq.first()), i);
+            else if (type == typeof(float))
+                for (int i = 0; seq != null; ++i, seq = seq.next())
+                    ret.SetValue(floatCast(seq.first()), i);
+            else if (type == typeof(short))
+                for (int i = 0; seq != null; ++i, seq = seq.next())
+                    ret.SetValue(shortCast(seq.first()), i);
+            else if (type == typeof(char))
+                for (int i = 0; seq != null; ++i, seq = seq.next())
+                    ret.SetValue(charCast(seq.first()), i);
+            else if (type == typeof(sbyte))
+                for (int i = 0; seq != null; ++i, seq = seq.next())
+                    ret.SetValue(sbyteCast(seq.first()), i);
+            else if (type == typeof(uint))
+                for (int i = 0; seq != null; ++i, seq = seq.next())
+                    ret.SetValue(uintCast(seq.first()), i);
+            else if (type == typeof(ushort))
+                for (int i = 0; seq != null; ++i, seq = seq.next())
+                    ret.SetValue(ushortCast(seq.first()), i);
+            else if (type == typeof(ulong))
+                for (int i = 0; seq != null; ++i, seq = seq.next())
+                    ret.SetValue(ulongCast(seq.first()), i);
+            else
+                for (int i = 0; seq != null; ++i, seq = seq.next())
+                    ret.SetValue(seq.first(), i);
             return ret;
         }
 

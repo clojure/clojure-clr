@@ -268,7 +268,8 @@
   ; compatible types only
   (is (thrown? InvalidCastException (into-array [1 "abc" :kw])))          ;;; IllegalArgumentException
   ;;;(is (thrown? InvalidCastException (into-array [1.2 4])))                ;;; IllegalArgumentException -- works okay for me
-  (is (thrown? ArgumentException (into-array [(byte 2) (short 3)])))   ;;; IllegalArgumentException
+  ;;;(is (thrown? ArgumentException (into-array [(byte 2) (short 3)])))   ;;; IllegalArgumentException -- works okay for me
+  (is (thrown? ArgumentException (into-array Byte [100000000000000])))   ;;; IllegalArgumentException  Byte/Type
 
   ; simple case
   (let [v [1 2 3 4 5]
@@ -277,14 +278,23 @@
         (alength a) (count v)
         (vec a) v
         (class (first a)) (class (first v)) ))
-
-  ; given type
-  #_(let [a (into-array Int32 [(byte 2) (short 3) (int 4)])]            ;;; Integer/TYPE
-    (are [x] (= x Int64)                                            ;;; Long
-        (class (aget a 0))
-        (class (aget a 1))
-        (class (aget a 2)) ))
-
+ 
+  (is (= \a (aget (into-array Char [\a \b \c]) 0)))                 ;;; Character/TYPE
+  
+  (let [types [Int32              ;;; Integer/TYPE
+               Byte               ;;; Byte/TYPE
+               Single             ;;; Float/TYPE
+               Int16              ;;; Short/TYPE
+               Double             ;;; Double/TYPE
+               Int64]             ;;; Long/TYPE]
+        values [(byte 2) (short 3) (int 4) 5]]
+    (for [t types]
+      (let [a (into-array t values)]
+        (is (== (aget a 0) 2))
+        (is (== (aget a 1) 3))
+        (is (== (aget a 2) 4))
+        (is (== (aget a 3) 5)))))
+   
   ; different kinds of collections
   (are [x] (and (= (alength (into-array x)) (count x))
                 (= (vec (into-array x)) (vec x))
