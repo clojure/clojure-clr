@@ -60,6 +60,8 @@ namespace clojure.lang
         /// <returns>A keyword</returns>
         public static Keyword intern(Symbol sym)
         {
+            if (sym.meta() != null)
+                sym = (Symbol)sym.withMeta(null);
             // TODO: Analyze this code for improvements
             Keyword k = new Keyword(sym);
             //Keyword existing = _symKeyMap.PutIfAbsent(sym, k);
