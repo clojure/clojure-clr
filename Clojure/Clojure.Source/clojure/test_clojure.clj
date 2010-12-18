@@ -54,7 +54,7 @@
       :main
       :vectors
       ; :annotations
-    ; :pprint
+      :pprint
       :serialization
       :rt
       :repl
