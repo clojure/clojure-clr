@@ -268,8 +268,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         void CreateStaticCtor()
         {
-            Console.WriteLine("Creating static ctor for {0}",
-                _typeBuilder.AssemblyQualifiedName);
+            //Console.WriteLine("Creating static ctor for {0}",
+            //    _typeBuilder.AssemblyQualifiedName);
             
             ConstructorBuilder ctorB = _typeBuilder.DefineConstructor(MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
             ILGen gen = new ILGen(ctorB.GetILGenerator());
