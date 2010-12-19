@@ -389,7 +389,7 @@
           (condp = (class x)
             String 
             (let [^String s0 (write-initial-lines this x)
-                  ^String s (.Replace #"\\s+$" s0 "" 1)                              ;;; (.replaceFirst s0 "\\s+$" "")
+                  ^String s (.Replace #"\s+$" s0 "" 1)                              ;;; (.replaceFirst s0 "\\s+$" "")
                   white-space (.Substring s0 (count s))
                   mode (getf :mode)]
               (dosync

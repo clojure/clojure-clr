@@ -880,10 +880,10 @@ namespace clojure.lang
                 : ((IPersistentMap)coll).without(key);
         }
 
-        static public Object nth(object coll, long n)
-        {
-            return nth(coll, (int)n);
-        }
+        //static public Object nth(object coll, long n)
+        //{
+        //    return nth(coll, (int)n);
+        //}
 
 
         static public Object nth(object coll, int n)
@@ -951,10 +951,10 @@ namespace clojure.lang
         }
 
 
-        static public Object nth(Object coll, long n, Object notFound)
-        {
-            return nth(coll, (int)n, notFound);
-        }
+        //static public Object nth(Object coll, long n, Object notFound)
+        //{
+        //    return nth(coll, (int)n, notFound);
+        //}
 
         static public Object nth(Object coll, int n, Object notFound)
         {

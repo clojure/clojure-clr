@@ -48,7 +48,7 @@
       (binding [*print-radix* true      ;print the integer 10 and 
             *print-base* pb]            ;the ratio 1/10 in bases 2, 
         (cl-format true "~&~S  ~S~%" 10 1/10))))        ;3, 8, 10, 16
-  "#b1010  #b1/1010\n#3r101  #3r1/101\n#o12  #o1/12\n10.  #10r1/10\n#xa  #x1/A")
+  "#b1010  #b1/1010\n#3r101  #3r1/101\n#o12  #o1/12\n10.  #10r1/10\n#xa  #x1/A\n")
 ;; TODO: Fix this, if anywone cares.  I changed   #x1/a  to  #x1/A in the last line to get this test to pass.
 
 

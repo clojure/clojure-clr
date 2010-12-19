@@ -103,6 +103,87 @@ namespace clojure.lang
 
         #endregion
 
+        #region Attempted conversion methods
+
+        /// <summary>
+        /// Try to convert to an Int32.
+        /// </summary>
+        /// <param name="ret">Set to the converted value</param>
+        /// <returns><value>true</value> if successful; <value>false</value> if the value cannot be represented.</returns>
+        public bool AsInt32(out int ret)
+        {
+            ret = 0;
+            if (_bipart != null)
+                return false;
+            if (_lpart < int.MinValue || _lpart > int.MaxValue)
+                return false;
+
+            ret = (int)_lpart;
+            return true;
+        }
+
+        /// <summary>
+        /// Try to convert to an Int64.
+        /// </summary>
+        /// <param name="ret">Set to the converted value</param>
+        /// <returns><value>true</value> if successful; <value>false</value> if the value cannot be represented.</returns>
+        public bool AsInt64(out long ret)
+        {
+            ret = 0;
+            if (_bipart != null)
+                return false;
+
+            ret = _lpart;
+            return true;
+        }
+
+        /// <summary>
+        /// Try to convert to an UInt32.
+        /// </summary>
+        /// <param name="ret">Set to the converted value</param>
+        /// <returns><value>true</value> if successful; <value>false</value> if the value cannot be represented.</returns>
+        public bool AsUInt32(out uint ret)
+        {
+            ret = 0;
+            if (_bipart != null)
+                return false;
+            if (_lpart < uint.MinValue || _lpart > uint.MaxValue)
+                return false;
+
+            ret = (uint)_lpart;
+            return true;
+        }
+
+        /// <summary>
+        /// Try to convert to an UInt64.
+        /// </summary>
+        /// <param name="ret">Set to the converted value</param>
+        /// <returns><value>true</value> if successful; <value>false</value> if the value cannot be represented.</returns>
+        public bool AsUInt64(out ulong ret)
+        {
+            ret = 0;
+            if (_bipart != null)
+                return _bipart.AsUInt64(out ret);
+            if (_lpart < 0 )
+                return false;
+
+            ret = (ulong)_lpart;
+            return true;
+        }
+
+        /// <summary>
+        /// Try to convert to a Decimal.
+        /// </summary>
+        /// <param name="ret">Set to the converted value</param>
+        /// <returns><value>true</value> if successful; <value>false</value> if the value cannot be represented.</returns>
+        public bool AsDecimal(out Decimal ret)
+        {
+            ret = ToDecimal(null);
+            return true;
+        }
+
+        #endregion
+
         #region Conversions
 
         public BigInteger toBigInteger()
@@ -162,6 +243,272 @@ namespace clojure.lang
         }
 
         #endregion
+
+        #region Conversion operators (to BigInt)
+
+        /// <summary>
+        /// Implicitly convert from byte to <see cref="BigInt"/>.
+        /// </summary>
+        /// <param name="v">The value to convert</param>
+        /// <returns>The equivalent <see cref="BigInt"/></returns>
+        public static implicit operator BigInt(byte v)
+        {
+            return fromLong(v);
+        }
+
+        /// <summary>
+        /// Implicitly convert from sbyte to <see cref="BigInt"/>.
+        /// </summary>
+        /// <param name="v">The value to convert</param>
+        /// <returns>The equivalent <see cref="BigInt"/></returns>
+        public static implicit operator BigInt(sbyte v)
+        {
+            return fromLong(v);
+        }
+
+        /// <summary>
+        /// Implicitly convert from short to <see cref="BigInt"/>.
+        /// </summary>
+        /// <param name="v">The value to convert</param>
+        /// <returns>The equivalent <see cref="BigInt"/></returns>
+        public static implicit operator BigInt(short v)
+        {
+            return fromLong(v);
+        }
+
+        /// <summary>
+        /// Implicitly convert from ushort to <see cref="BigInt"/>.
+        /// </summary>
+        /// <param name="v">The value to convert</param>
+        /// <returns>The equivalent <see cref="BigInt"/></returns>
+        public static implicit operator BigInt(ushort v)
+        {
+            return fromLong(v);
+        }
+
+        /// <summary>
+        /// Implicitly convert from uint to <see cref="BigInt"/>.
+        /// </summary>
+        /// <param name="v">The value to convert</param>
+        /// <returns>The equivalent <see cref="BigInt"/></returns>
+        public static implicit operator BigInt(uint v)
+        {
+            return fromLong(v);
+        }
+
+        /// <summary>
+        /// Implicitly convert from int to <see cref="BigInt"/>.
+        /// </summary>
+        /// <param name="v">The value to convert</param>
+        /// <returns>The equivalent <see cref="BigInt"/></returns>
+        public static implicit operator BigInt(int v)
+        {
+            return fromLong(v);
+        }
+
+        /// <summary>
+        /// Implicitly convert from ulong to <see cref="BigInt"/>.
+        /// </summary>
+        /// <param name="v">The value to convert</param>
+        /// <returns>The equivalent <see cref="BigInt"/></returns>
+        public static implicit operator BigInt(ulong v)
+        {
+            if (v > long.MaxValue)
+                return fromBigInteger(BigInteger.Create(v));
+            return fromLong((long)v);
+        }
+
+        /// <summary>
+        /// Implicitly convert from long to <see cref="BigInt"/>.
+        /// </summary>
+        /// <param name="v">The value to convert</param>
+        /// <returns>The equivalent <see cref="BigInt"/></returns>
+        public static implicit operator BigInt(long v)
+        {
+            return fromLong(v);
+        }
+
+        /// <summary>
+        /// Implicitly convert from decimal to <see cref="BigInt"/>.
+        /// </summary>
+        /// <param name="v">The value to convert</param>
+        /// <returns>The equivalent <see cref="BigInt"/></returns>
+        public static implicit operator BigInt(decimal v)
+        {
+            return fromBigInteger(BigInteger.Create(v));
+        }
+
+        /// <summary>
+        /// Explicitly convert from double to <see cref="BigInt"/>.
+        /// </summary>
+        /// <param name="v">The value to convert</param>
+        /// <returns>The equivalent <see cref="BigInt"/></returns>
+        public static explicit operator BigInt(double v)
+        {
+            return fromBigInteger(BigInteger.Create(v));
+        }
+
+        #endregion
+
+        #region Conversion operators (from BigInt)
+
+        /// <summary>
+        /// Implicitly convert from <see cref="BigInt"/> to double.
+        /// </summary>
+        /// <param name="i">The <see cref="BigInt"/> to convert</param>
+        /// <returns>The equivalent double</returns>
+        public static explicit operator double(BigInt i)
+        {
+            return i.ToDouble(null);
+        }
+
+        /// <summary>
+        /// Explicitly convert from <see cref="BigInt"/> to byte.
+        /// </summary>
+        /// <param name="i">The <see cref="BigInt"/> to convert</param>
+        /// <returns>The equivalent byte</returns>
+        public static explicit operator byte(BigInt self)
+        {
+            int tmp;
+            if (self.AsInt32(out tmp))
+            {
+                return checked((byte)tmp);
+            }
+            throw new OverflowException();
+        }
+
+        /// <summary>
+        /// Explicitly convert from <see cref="BigInt"/> to sbyte.
+        /// </summary>
+        /// <param name="i">The <see cref="BigInt"/> to convert</param>
+        /// <returns>The equivalent sbyte</returns>
+        public static explicit operator sbyte(BigInt self)
+        {
+            int tmp;
+            if (self.AsInt32(out tmp))
+            {
+                return checked((sbyte)tmp);
+            }
+            throw new OverflowException();
+        }
+
+        /// <summary>
+        /// Explicitly convert from <see cref="BigInt"/> to UInt16.
+        /// </summary>
+        /// <param name="i">The <see cref="BigInt"/> to convert</param>
+        /// <returns>The equivalent UInt16</returns>
+        public static explicit operator UInt16(BigInt self)
+        {
+            int tmp;
+            if (self.AsInt32(out tmp))
+            {
+                return checked((UInt16)tmp);
+            }
+            throw new OverflowException();
+        }
+
+        /// <summary>
+        /// Explicitly convert from <see cref="BigInt"/> to Int16.
+        /// </summary>
+        /// <param name="i">The <see cref="BigInt"/> to convert</param>
+        /// <returns>The equivalent Int16</returns>
+        public static explicit operator Int16(BigInt self)
+        {
+            int tmp;
+            if (self.AsInt32(out tmp))
+            {
+                return checked((Int16)tmp);
+            }
+            throw new OverflowException();
+        }
+
+        /// <summary>
+        /// Explicitly convert from <see cref="BigInt"/> to UInt32.
+        /// </summary>
+        /// <param name="i">The <see cref="BigInt"/> to convert</param>
+        /// <returns>The equivalent UInt32</returns>
+        public static explicit operator UInt32(BigInt self)
+        {
+            uint tmp;
+            if (self.AsUInt32(out tmp))
+            {
+                return tmp;
+            }
+            throw new OverflowException();
+        }
+
+        /// <summary>
+        /// Explicitly convert from <see cref="BigInt"/> to Int32.
+        /// </summary>
+        /// <param name="i">The <see cref="BigInt"/> to convert</param>
+        /// <returns>The equivalent Int32</returns>
+        public static explicit operator Int32(BigInt self)
+        {
+            int tmp;
+            if (self.AsInt32(out tmp))
+            {
+                return tmp;
+            }
+            throw new OverflowException();
+        }
+
+        /// <summary>
+        /// Explicitly convert from <see cref="BigInt"/> to Int64.
+        /// </summary>
+        /// <param name="i">The <see cref="BigInt"/> to convert</param>
+        /// <returns>The equivalent Int64</returns>
+        public static explicit operator Int64(BigInt self)
+        {
+            long tmp;
+            if (self.AsInt64(out tmp))
+            {
+                return tmp;
+            }
+            throw new OverflowException();
+        }
+
+        /// <summary>
+        /// Explicitly convert from <see cref="BigInt"/> to UInt64.
+        /// </summary>
+        /// <param name="i">The <see cref="BigInt"/> to convert</param>
+        /// <returns>The equivalent UInt64</returns>
+        public static explicit operator UInt64(BigInt self)
+        {
+            ulong tmp;
+            if (self.AsUInt64(out tmp))
+            {
+                return tmp;
+            }
+            throw new OverflowException();
+        }
+
+        /// <summary>
+        /// Explicitly convert from <see cref="BigInt"/> to float.
+        /// </summary>
+        /// <param name="i">The <see cref="BigInt"/> to convert</param>
+        /// <returns>The equivalent float</returns>
+        public static explicit operator float(BigInt self)
+        {
+            return checked((float)self.ToDouble(null));
+        }
+
+        /// <summary>
+        /// Explicitly convert from <see cref="BigInt"/> to double.
+        /// </summary>
+        /// <param name="i">The <see cref="BigInt"/> to convert</param>
+        /// <returns>The equivalent decimal</returns>
+        public static explicit operator decimal(BigInt self)
+        {
+            decimal res;
+            if (self.AsDecimal(out res))
+            {
+                return res;
+            }
+            throw new OverflowException();
+        }
+
+        #endregion
+
 
         #region IConvertible methods
 
