@@ -38,7 +38,7 @@
      (loop [i (.I str-seq)                           ;;; .i
             val val]
        (if (< i (.Length s))                         ;;; .length
-         (recur (inc i) (f val (.CharAt s i)))       ;;; .charAt
+         (recur (inc i) (f val (.get_Chars s i)))       ;;; .charAt
          val))))
   
   clojure.lang.UntypedArraySeq                             ;;; ArraySeq

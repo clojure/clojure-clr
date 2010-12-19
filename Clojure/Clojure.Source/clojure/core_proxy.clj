@@ -34,7 +34,7 @@
 
 (defn- group-by-sig [coll]
  "takes a collection of [msig meth] and returns a seq of maps from return-types to meths."
-  (vals (reduce (fn [m [msig meth]]
+  (vals (reduce1 (fn [m [msig meth]]
                   (let [rtype (peek msig)
                         argsig (pop msig)]
                     (assoc m argsig (assoc (m argsig {}) rtype meth))))
