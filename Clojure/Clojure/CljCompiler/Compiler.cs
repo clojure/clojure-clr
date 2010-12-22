@@ -1072,6 +1072,18 @@ namespace clojure.lang
             return (SymbolDocumentInfo)DOCUMENT_INFO.deref();
         }
 
+        public static int GetLineFromSpanMap(IPersistentMap spanMap)
+        {
+            if (spanMap == null )
+                return 0;
+
+            int line;
+            if (GetLocation(spanMap,RT.START_LINE_KEY,out line) )
+                return line;
+
+            return 0;
+        }
+
         static bool GetLocation(IPersistentMap spanMap, Keyword key, out int val)
         {
             object oval = spanMap.valAt(key);
@@ -1478,9 +1490,9 @@ namespace clojure.lang
                         PropertyInfo pinfo;
 
                         if ((finfo = Reflector.GetField(t, symbol.Name, true)) != null)
-                            return new StaticFieldExpr((string)SOURCE.deref(), null, tag, t, symbol.Name, finfo);
+                            return new StaticFieldExpr((string)SOURCE.deref(),(IPersistentMap)Compiler.SOURCE_SPAN.deref(), tag, t, symbol.Name, finfo);
                         else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) != null)
-                            return new StaticPropertyExpr((string)SOURCE.deref(), null, tag, t, symbol.Name, pinfo);
+                            return new StaticPropertyExpr((string)SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), tag, t, symbol.Name, pinfo);
                     }
                     throw new Exception(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
                 }

@@ -30,9 +30,9 @@ namespace clojure.lang.CljCompiler.Ast
         protected readonly Expr _target;
         protected readonly Type _targetType;
         protected readonly TInfo _tinfo;
-        readonly string _fieldName;
-        readonly string _source;
-        readonly IPersistentMap _spanMap;
+        protected readonly string _fieldName;
+        protected readonly string _source;
+        protected readonly IPersistentMap _spanMap;
         protected readonly Symbol _tag;
 
         #endregion
@@ -54,7 +54,7 @@ namespace clojure.lang.CljCompiler.Ast
             // However, this seems consistent with the checks in the generation code.
             if ( (_targetType == null || _tinfo == null) && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                 RT.errPrintWriter().WriteLine("Reflection warning {0}:{1} - reference to field/property {2} can't be resolved.", 
-                    Compiler.SOURCE_PATH.deref(), spanMap == null ? (int)spanMap.valAt(RT.START_LINE_KEY, 0) : 0,_fieldName);
+                    Compiler.SOURCE_PATH.deref(), Compiler.GetLineFromSpanMap(_spanMap),_fieldName);
         }
 
         #endregion

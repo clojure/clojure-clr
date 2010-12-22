@@ -33,13 +33,17 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Expr _meta;
         readonly bool _initProvided;
         readonly bool _isDynamic;
+        readonly string _source;
+        readonly int _line;
 
         #endregion
 
         #region Ctors
 
-        public DefExpr(Var var, Expr init, Expr meta, bool initProvided, bool isDyanamic)
+        public DefExpr(string source, int line, Var var, Expr init, Expr meta, bool initProvided, bool isDyanamic)
         {
+            _source = source;
+            _line = line;
             _var = var;
             _init = init;
             _meta = meta;
@@ -124,11 +128,11 @@ namespace clojure.lang.CljCompiler.Ast
                     v.setMeta(vm);
                 }
 
-                Object source_path = Compiler.SOURCE_PATH.deref();
+                Object source_path = Compiler.SOURCE_PATH.get();
                 source_path = source_path ?? "NO_SOURCE_FILE";
-                mm = (IPersistentMap)RT.assoc(mm,RT.LINE_KEY, Compiler.LINE.deref())
-                    .assoc(RT.FILE_KEY, source_path)
-                    .assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
+                mm = (IPersistentMap)RT.assoc(mm,RT.LINE_KEY, Compiler.LINE.get())
+                    .assoc(RT.FILE_KEY, source_path);
+                    //.assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
                 if (docstring != null)
                     mm = (IPersistentMap)RT.assoc(mm, RT.DOC_KEY, docstring);
 
@@ -136,7 +140,10 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr init = Compiler.Analyze(pcon.EvEx(),RT.third(form), v.Symbol.Name);
                 bool initProvided = RT.count(form) == 3;
 
-                return new DefExpr(v, init, meta, initProvided,isDynamic);
+                return new DefExpr(
+                    (string)Compiler.SOURCE.deref(),
+                    (int) Compiler.LINE.deref(),
+                    v, init, meta, initProvided,isDynamic);
             }
         }
 
@@ -146,15 +153,25 @@ namespace clojure.lang.CljCompiler.Ast
 
         public object Eval()
         {
-            if (_initProvided)
-                _var.bindRoot(_init.Eval());
-            if (_meta != null)
+            try
             {
-                IPersistentMap metaMap = (IPersistentMap)_meta.Eval();
-                if (_initProvided || true) // includesExplicitMetadata((MapExpr)_meta))
-                    _var.setMeta((IPersistentMap)_meta.Eval());
+                if (_initProvided)
+                    _var.bindRoot(_init.Eval());
+                if (_meta != null)
+                {
+                    IPersistentMap metaMap = (IPersistentMap)_meta.Eval();
+                    if (_initProvided || true) // includesExplicitMetadata((MapExpr)_meta))
+                        _var.setMeta((IPersistentMap)_meta.Eval());
+                }
+                return _var.setDynamic(_isDynamic);
             }
-            return _var.setDynamic(_isDynamic);
+            catch (Exception e)
+            {
+                if (!(e is Compiler.CompilerException))
+                    throw new Compiler.CompilerException(_source, _line, e);
+                else
+                    throw e;
+            }
         }
 
         #endregion

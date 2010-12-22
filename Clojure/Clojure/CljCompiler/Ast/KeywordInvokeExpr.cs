@@ -67,7 +67,17 @@ namespace clojure.lang.CljCompiler.Ast
 
         public object Eval()
         {
-            return _kw.Kw.invoke(_target.Eval());
+            try
+            {
+                return _kw.Kw.invoke(_target.Eval());
+            }
+            catch (Exception e)
+            {
+                if (!(e is Compiler.CompilerException))
+                    throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), e);
+                else
+                    throw e;
+            }
         }
 
         #endregion

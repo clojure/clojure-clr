@@ -168,11 +168,21 @@ namespace clojure.lang.CljCompiler.Ast
 
         public object Eval()
         {
-            IFn fn = (IFn)_fexpr.Eval();
-            IPersistentVector argvs = PersistentVector.EMPTY;
-            for (int i = 0; i < _args.count(); i++)
-                argvs = (IPersistentVector)argvs.cons(((Expr)_args.nth(i)).Eval());
-            return fn.applyTo(RT.seq(argvs));
+            try
+            {
+                IFn fn = (IFn)_fexpr.Eval();
+                IPersistentVector argvs = PersistentVector.EMPTY;
+                for (int i = 0; i < _args.count(); i++)
+                    argvs = (IPersistentVector)argvs.cons(((Expr)_args.nth(i)).Eval());
+                return fn.applyTo(RT.seq(argvs));
+            }
+            catch (Exception e)
+            {
+                if (!(e is Compiler.CompilerException))
+                    throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), e);
+                else
+                    throw e;
+            }
         }
 
         #endregion

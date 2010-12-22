@@ -351,7 +351,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if ( method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()) )
                 RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved.\n",
-                    Compiler.SOURCE_PATH.deref(), spanMap != null ? (int)spanMap.valAt(RT.START_LINE_KEY, 0) : 0, methodName));
+                    Compiler.SOURCE_PATH.deref(), Compiler.GetLineFromSpanMap(spanMap), methodName));
         }
 
 

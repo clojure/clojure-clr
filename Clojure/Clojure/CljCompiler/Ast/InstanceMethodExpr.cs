@@ -51,13 +51,24 @@ namespace clojure.lang.CljCompiler.Ast
         // TODO: handle by-ref
         public override object Eval()
         {
-            object targetVal = _target.Eval();
-            object[] argvals = new object[_args.Count];
-            for (int i = 0; i < _args.Count; i++)
-                argvals[i] = _args[i].ArgExpr.Eval();
-            if (_method != null)
-                return _method.Invoke(targetVal, argvals);
-            return Reflector.CallInstanceMethod(_methodName, targetVal, argvals);
+            try
+            {
+                object targetVal = _target.Eval();
+                object[] argvals = new object[_args.Count];
+                for (int i = 0; i < _args.Count; i++)
+                    argvals[i] = _args[i].ArgExpr.Eval();
+                if (_method != null)
+                    return _method.Invoke(targetVal, argvals);
+                return Reflector.CallInstanceMethod(_methodName, targetVal, argvals);
+            }
+            catch (Exception e)
+            {
+                if (!(e is Compiler.CompilerException))
+                    throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), e);
+                else
+                    throw e;
+            }
+                    
         }
 
         #endregion
