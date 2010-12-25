@@ -132,7 +132,11 @@ namespace clojure.lang.CljCompiler.Ast
                         break;
                     case HostArg.ParameterType.Standard:
                         t = argType;
-                        argsPlus.Add(new DynamicMetaObject(GenConvertMaybePrim(GenTypedArg(objx, context, argType, e), methodParms[i].ParameterType), BindingRestrictions.Empty));
+                        Expression typedArg = GenTypedArg(objx, context, argType, e);
+                        Type ptype = methodParms[i].ParameterType;
+                        if (!ptype.IsGenericParameter)
+                            typedArg = GenConvertMaybePrim(typedArg, methodParms[i].ParameterType);
+                        argsPlus.Add(new DynamicMetaObject(typedArg, BindingRestrictions.Empty));
 
                         break;
                     default:
