@@ -38,6 +38,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected readonly string _methodName;
         protected readonly List<HostArg> _args;
+        protected readonly List<Type> _typeArgs;
         protected MethodInfo _method;
         protected readonly string _source;
         protected readonly IPersistentMap _spanMap;
@@ -47,11 +48,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region C-tors
 
-        protected MethodExpr(string source, IPersistentMap spanMap, Symbol tag, string methodName, List<HostArg> args)
+        protected MethodExpr(string source, IPersistentMap spanMap, Symbol tag, string methodName, List<Type> typeArgs, List<HostArg> args)
         {
             _source = source;
             _spanMap = spanMap;
             _methodName = methodName;
+            _typeArgs = typeArgs;
             _args = args;
             _tag = tag;
         }

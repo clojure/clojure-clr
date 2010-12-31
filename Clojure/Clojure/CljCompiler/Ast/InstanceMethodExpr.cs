@@ -33,15 +33,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public InstanceMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string methodName, List<HostArg> args)
-            : base(source,spanMap,tag,methodName,args)
+        public InstanceMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string methodName, List<Type> typeArgs, List<HostArg> args)
+            : base(source,spanMap,tag,methodName,typeArgs,args)
         {
             _target = target;
 
             if (target.HasClrType && target.ClrType == null)
                 throw new ArgumentException(String.Format("Attempt to call instance method {0} on nil", methodName));
 
-            _method = GetMatchingMethod(spanMap, target, _args, _methodName);
+            _method = GetMatchingMethod(spanMap, target, _args, _methodName, _typeArgs);
         }
 
         #endregion

@@ -83,13 +83,34 @@
   
 ; Support for interop
 
-(defn by-ref [v]
+(defn by-ref
   "Signals that a by-ref parameter is desired at this position in an interop call or method signature.
   
   Should only be used in CLR interop code.  Throws an exception otherwise."
   {:added "1.2"}
-  (throw (ArgumentException. "by-ref not used at top-level in an interop call or method signature")))
+   [v] (throw (ArgumentException. "by-ref not used at top-level in an interop call or method signature")))
   
+(defn generic
+  "Signals that a generic method reference is desired for this interop call
+
+  Should only be used in CLR interop code.  Throws an exception otherwise."
+  {:added "1.3"}
+  [v] (throw (ArgumentException. "generic not used in interop call")))
+
+(defmacro sys-func
+   "Translates to a gen-delegate for a System.Func<,...> call"
+   [typesyms & body ]
+   (let [types (map (fn [tsym] (clojure.lang.CljCompiler.Ast.HostExpr/MaybeType tsym false)) typesyms)
+         join  ; clojure.string not yet loaded
+		       (fn [coll] 
+			      (loop [sb (StringBuilder. (str (first coll)))
+				         more (next coll)]
+				    (if more
+					    (recur (-> sb (.Append ",") (.Append (str (first more))))
+						       (next more))
+					    (str sb))))
+		ftype (symbol (str "System.Func`" (count types) "[" (join types) "]"))]
+	  `(gen-delegate ~ftype ~@body)))
 
 ; Attribute handling
 

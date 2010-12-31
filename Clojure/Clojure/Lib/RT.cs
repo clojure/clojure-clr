@@ -1199,7 +1199,7 @@ namespace clojure.lang
 
         static public int intCast(uint x)
         {
-            if (x < int.MinValue || x > int.MaxValue)
+            if (x > int.MaxValue)
                 throw new ArgumentException("Value out of range for int: " + x);
 
             return (int)x;

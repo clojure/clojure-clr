@@ -19,9 +19,9 @@ using System.Linq;
 using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
+using Microsoft.Scripting.Ast;
 #endif
 using System.Text;
-using Microsoft.Scripting.Ast;
 using System.Reflection;
 
 
@@ -206,7 +206,7 @@ namespace clojure.lang.CljCompiler.Ast
 
 
             //return Expression.Call(_target.GetMethod("InvokeStatic",argTypes),argExprs);
-            List<MethodBase> candidates = HostExpr.GetMethods(_target, argExprs.Length, "InvokeStatic", true);
+            List<MethodBase> candidates = HostExpr.GetMethods(_target, argExprs.Length, "InvokeStatic", null, true);
             if (candidates.Count != 1)
                 throw new Exception("No static method of correct arity");
             return Utils.ComplexCallHelper((MethodInfo)candidates[0], argExprs);

@@ -23,7 +23,7 @@ using System.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    sealed class LocalBinding
+    public sealed class LocalBinding
     {
         #region Data
 

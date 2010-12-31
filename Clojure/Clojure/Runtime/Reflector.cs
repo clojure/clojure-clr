@@ -287,6 +287,12 @@ namespace clojure.lang
             if (info == null)
                 throw new InvalidOperationException(string.Format("Cannot find static method named {0} for type: {1} with the correct argument type", methodName, t.Name));
 
+            return InvokeMethod(info,target,args);
+
+        }
+
+        internal static object InvokeMethod(MethodInfo info,object target,object[] args)
+        {
             object[] boxedArgs = BoxArgs(info.GetParameters(), args);
 
             if (info.ReturnType == typeof(void))

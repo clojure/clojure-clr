@@ -70,7 +70,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public GenContext(string assyName, string extension, string directory, bool createDynInitHelper)
         {
-            _isDebuggable = true;
+            _isDebuggable = false;
             AssemblyName aname = new AssemblyName(assyName);
             _assyGen = new AssemblyGen(aname, directory, extension, _isDebuggable);
             if ( createDynInitHelper )

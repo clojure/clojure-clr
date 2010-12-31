@@ -33,11 +33,12 @@ using Microsoft.Scripting.Runtime;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    abstract class HostExpr : Expr, MaybePrimitiveExpr
+    public abstract class HostExpr : Expr, MaybePrimitiveExpr
     {
         #region Symbols
 
         public static readonly Symbol BY_REF = Symbol.intern("by-ref");
+        public static readonly Symbol GENERIC = Symbol.intern("generic");
 
         #endregion
 
@@ -55,6 +56,7 @@ namespace clojure.lang.CljCompiler.Ast
                 //  (. x propertyname-sym)
                 //  (. x methodname-sym args)+
                 //  (. x (methodname-sym args?))
+                //  (. x (generic-m 
 
                 if (RT.Length(form) < 3)
                     throw new ArgumentException("Malformed member expression, expecting (. target member ... )");
@@ -95,7 +97,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if ((pinfo = Reflector.GetProperty(t, fieldName, true)) != null)
                             return new StaticPropertyExpr(source, spanMap, tag, t, fieldName, pinfo);
                         if ((minfo = Reflector.GetArityZeroMethod(t, fieldName, true)) != null)
-                            return new StaticMethodExpr(source, spanMap, tag, t, fieldName, new List<HostArg>());
+                            return new StaticMethodExpr(source, spanMap, tag, t, fieldName, null, new List<HostArg>());
                         throw new MissingMemberException(t.Name, fieldName);
                     }
                     else if (instance != null && instance.HasClrType && instance.ClrType != null)
@@ -106,7 +108,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if ((pinfo = Reflector.GetProperty(instanceType, fieldName, false)) != null)
                             return new InstancePropertyExpr(source, spanMap, tag, instance, fieldName, pinfo);
                         if ((minfo = Reflector.GetArityZeroMethod(instanceType, fieldName, false)) != null)
-                            return new InstanceMethodExpr(source, spanMap, tag, instance, fieldName, new List<HostArg>());
+                            return new InstanceMethodExpr(source, spanMap, tag, instance, fieldName, null, new List<HostArg>());
                         if (pcon.IsAssignContext)
                             return new InstanceFieldExpr(source, spanMap, tag, instance, fieldName, null); // same as InstancePropertyExpr when last arg is null
                         else
@@ -130,8 +132,22 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
  
+                //ISeq call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));
 
-                ISeq call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));
+                ISeq call;
+                List<Type> typeArgs = null;
+ 
+                object third = RT.third(form);
+
+                if (third is ISeq && RT.first(third) is Symbol && ((Symbol)RT.first(third)).Equals(GENERIC))
+                {
+                    // We have a generic method call
+                    // (. thing (generic methodname type1 ...) args...)
+                    typeArgs = ParseGenericMethodTypeArgs(RT.next(RT.next(third)));
+                    call = RT.listStar(RT.second(third), RT.next(RT.next(RT.next(form))));
+                }
+                else
+                    call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));
 
                 if (!(RT.first(call) is Symbol))
                     throw new ArgumentException("Malformed member exception");
@@ -141,11 +157,28 @@ namespace clojure.lang.CljCompiler.Ast
                 List<HostArg> args = ParseArgs(pcon, RT.next(call));
 
                 return t != null
-                    ? (MethodExpr)(new StaticMethodExpr(source, spanMap, tag, t, methodName, args))
-                    : (MethodExpr)(new InstanceMethodExpr(source, spanMap, tag, instance, methodName, args));
+                    ? (MethodExpr)(new StaticMethodExpr(source, spanMap, tag, t, methodName, typeArgs, args))
+                    : (MethodExpr)(new InstanceMethodExpr(source, spanMap, tag, instance, methodName, typeArgs, args));
             }
         }
 
+        static List<Type> ParseGenericMethodTypeArgs(ISeq targs)
+        {
+            List<Type> types = new List<Type>();
+
+            for (ISeq s = targs; s != null; s = s.next())
+            {
+                object arg = s.first();
+                if (!(arg is Symbol))
+                    throw new ArgumentException("Malformed generic method designator: type arg must be a Symbol");
+                Type t = HostExpr.MaybeType(arg, false);
+                if (t == null)
+                    throw new ArgumentException("Malformed generic method designator: invalid type arg");
+                types.Add(t);
+            }
+
+            return types;
+        }
 
         internal static List<HostArg> ParseArgs(ParserContext pcon, ISeq argSeq)
         {
@@ -205,22 +238,22 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Reflection helpers
 
-        protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, List<HostArg> args, string methodName)
+        protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, List<HostArg> args, string methodName, List<Type> typeArgs)
         {
-            List<MethodBase> methods = HostExpr.GetMethods(targetType, args.Count, methodName, true);
+            List<MethodBase> methods = HostExpr.GetMethods(targetType, args.Count, methodName, typeArgs, true);
 
             MethodBase method = GetMatchingMethodAux(targetType, args, methods, methodName, true);
             MaybeReflectionWarn(spanMap, method, methodName);
             return (MethodInfo) method;
         }
 
-        protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, List<HostArg> args, string methodName)
+        protected static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, List<HostArg> args, string methodName, List<Type> typeArgs)
         {
             MethodBase method = null;
             if (target.HasClrType)
             {
                 Type targetType = target.ClrType;
-                List<MethodBase> methods = HostExpr.GetMethods(targetType, args.Count, methodName, false);
+                List<MethodBase> methods = HostExpr.GetMethods(targetType, args.Count, methodName, typeArgs, false);
                 method = GetMatchingMethodAux(targetType, args, methods, methodName, false);
             }
 
@@ -303,7 +336,7 @@ namespace clojure.lang.CljCompiler.Ast
             return infos;
         }
 
-        internal static List<MethodBase> GetMethods(Type targetType, int arity, string methodName, bool getStatics)
+        internal static List<MethodBase> GetMethods(Type targetType, int arity, string methodName, List<Type> typeArgs, bool getStatics)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
             flags |= getStatics ? BindingFlags.Static : BindingFlags.Instance;
@@ -318,7 +351,10 @@ namespace clojure.lang.CljCompiler.Ast
                     = targetType.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
                 infos = new List<MethodBase>();
                 foreach (MethodInfo minfo in einfos)
-                    infos.Add(minfo);
+                    if (typeArgs == null && !minfo.ContainsGenericParameters)
+                        infos.Add(minfo);
+                    else if (typeArgs != null && minfo.ContainsGenericParameters)
+                        infos.Add(minfo.MakeGenericMethod(typeArgs.ToArray<Type>()));
             }
 
             return infos;
@@ -559,7 +595,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Tags and types
 
-        internal static Type MaybeType(object form, bool stringOk)
+        public static Type MaybeType(object form, bool stringOk)
         {
             if (form is Type)
                 return (Type)form;

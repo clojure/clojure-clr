@@ -1,7 +1,7 @@
 ﻿
 namespace clojure.lang.CljCompiler.Ast
 {
-    internal class HostArg
+    public class HostArg
     {
         #region Enum
 

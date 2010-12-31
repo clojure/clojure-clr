@@ -129,7 +129,7 @@ namespace clojure.lang.CljCompiler.Ast
                                     HostArg ha = new HostArg(HostArg.ParameterType.Standard, init, null);
                                     List<HostArg> has = new List<HostArg>(1);
                                     has.Add(ha);
-                                    init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "box", has);
+                                    init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "box", null, has);
                                     if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                                         RT.errPrintWriter().WriteLine("Auto-boxing loop arg: " + sym);
                                 }
@@ -137,13 +137,13 @@ namespace clojure.lang.CljCompiler.Ast
                                 {
                                     List<HostArg> args = new List<HostArg>();
                                     args.Add(new HostArg(HostArg.ParameterType.Standard, init, null));
-                                    init = new StaticMethodExpr("", null, null, typeof(RT), "longCast", args);
+                                    init = new StaticMethodExpr("", null, null, typeof(RT), "longCast", null, args);
                                 }
                                 else if (Compiler.MaybePrimitiveType(init) == typeof(float))
                                 {
                                     List<HostArg> args = new List<HostArg>();
                                     args.Add(new HostArg(HostArg.ParameterType.Standard, init, null));
-                                    init = new StaticMethodExpr("", null, null, typeof(RT), "doubleCast", args);
+                                    init = new StaticMethodExpr("", null, null, typeof(RT), "doubleCast", null, args);
                                 }
                             }
 
