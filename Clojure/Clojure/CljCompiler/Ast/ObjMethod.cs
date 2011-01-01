@@ -178,7 +178,7 @@ namespace clojure.lang.CljCompiler.Ast
                     Expression.Block(
                         //maybeLoadVarsExpr,
                         Expression.Label(loopLabel),
-                        _body.GenCode(RHC.Return,objx,context));
+                        GenBodyCode(StaticReturnType,objx,context));
 
                 //Expression convBody = Compiler.MaybeConvert(body, ReturnType);
                 Expression convBody = MethodExpr.GenConvertMaybePrim(body, StaticReturnType);
@@ -205,6 +205,34 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.popThreadBindings();
             }
 
+        }
+
+        private Expression GenBodyCode(Type retType, ObjExpr objx, GenContext context)
+        {
+            MaybePrimitiveExpr be = (MaybePrimitiveExpr)_body;
+            if (Util.IsPrimitive(retType) && be.CanEmitPrimitive)
+            {
+                Type bt = Compiler.MaybePrimitiveType(be);
+                if (bt == retType)
+                    return be.GenCodeUnboxed(RHC.Return, objx, context);
+                else if (retType == typeof(long) && bt == typeof(int))
+                    return Expression.Convert(be.GenCodeUnboxed(RHC.Return, objx, context), typeof(long));
+                else if (retType == typeof(double) && bt == typeof(float))
+                    return Expression.Convert(be.GenCodeUnboxed(RHC.Return, objx, context), typeof(double));
+                else if (retType == typeof(int) && bt == typeof(long))
+                    return Expression.Call(null, Compiler.Method_RT_intCast_long, be.GenCodeUnboxed(RHC.Return, objx, context));
+                else if (retType == typeof(float) && bt == typeof(double))
+                    return Expression.Convert(be.GenCodeUnboxed(RHC.Return, objx, context), typeof(float));
+                else
+                    throw new ArgumentException(String.Format("Mismatched primitive return, expected: {0}, had: {1}", retType, be.ClrType));
+
+            }
+            else
+            {
+                return _body.GenCode(RHC.Return, objx, context);
+                // Java code does: gen.unbox(Type.getType(retClass) here.
+                // I don't know how to do the equivalent.
+            }
         }
 
 

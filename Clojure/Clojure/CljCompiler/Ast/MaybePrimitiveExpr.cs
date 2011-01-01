@@ -21,7 +21,7 @@ using System.Linq.Expressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    interface MaybePrimitiveExpr
+    interface MaybePrimitiveExpr : Expr
     {
         bool CanEmitPrimitive { get; }
         Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context);
