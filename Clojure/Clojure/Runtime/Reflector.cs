@@ -12,19 +12,29 @@
  *   Author: David Miller
  **/
 
+#if CLR2
+extern alias MSC;
+#endif
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+#if CLR2
+using Microsoft.Scripting.Ast;
+#else
+using System.Linq.Expressions;
+#endif
+using Microsoft.Scripting.Actions;
+using System.Dynamic;
+using Microsoft.Scripting.Actions.Calls;
+using Microsoft.Scripting.Runtime;
+using clojure.lang.CljCompiler.Ast;
 
 namespace clojure.lang
 {
     public static class Reflector
     {
-
-
-        #region Old version (still in use during transition)
-
         #region Field/property lookup
 
         static public FieldInfo GetField(Type t, String name, bool getStatics)
@@ -67,6 +77,7 @@ namespace clojure.lang
 
         #region Field/property access
 
+        // Used in generated code
         public static object SetInstanceFieldOrProperty(object target, string fieldname, object val)
         {
             Type t = target.GetType();
@@ -85,6 +96,7 @@ namespace clojure.lang
             throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldname, t));
         }
 
+        // used in generated code
         public static object GetInstanceFieldOrProperty(object target, string fieldname)
         {
             Type t = target.GetType();
@@ -105,41 +117,231 @@ namespace clojure.lang
             throw new ArgumentException(String.Format("No matching instance field/property found: {0} for {1}", fieldname, t));
         }
 
-        public static object GetStaticFieldOrProperty(Type t, string fieldname)
-        {
-            FieldInfo field = GetField(t, fieldname, true);
-            if (field != null)
-                return Reflector.prepRet(field.FieldType,field.GetValue(null));
+        // Not used at the moment.
+        //public static object GetStaticFieldOrProperty(Type t, string fieldname)
+        //{
+        //    FieldInfo field = GetField(t, fieldname, true);
+        //    if (field != null)
+        //        return Reflector.prepRet(field.FieldType,field.GetValue(null));
 
-            PropertyInfo prop = GetProperty(t, fieldname, true);
-            if (prop != null)
-                return Reflector.prepRet(prop.PropertyType,prop.GetValue(null, new object[0]));
+        //    PropertyInfo prop = GetProperty(t, fieldname, true);
+        //    if (prop != null)
+        //        return Reflector.prepRet(prop.PropertyType,prop.GetValue(null, new object[0]));
 
-            MethodInfo method = GetArityZeroMethod(t, fieldname, true);
+        //    MethodInfo method = GetArityZeroMethod(t, fieldname, true);
 
-            if (method != null)
-                return Reflector.prepRet(method.ReturnType,method.Invoke(null, new object[0]));
+        //    if (method != null)
+        //        return Reflector.prepRet(method.ReturnType,method.Invoke(null, new object[0]));
 
-            throw new ArgumentException(String.Format("No matching static field/property found: {0} for {1}", fieldname, t));
-        }
+        //    throw new ArgumentException(String.Format("No matching static field/property found: {0} for {1}", fieldname, t));
+        //}
 
         #endregion
 
         #region Method lookup
 
-        public static List<MethodInfo> GetMethods(Type t, string name, int arity, bool getStatics)
-        {
-            BindingFlags flags = BindingFlags.Public | BindingFlags.InvokeMethod;
-            if (getStatics)
-                flags |= BindingFlags.Static | BindingFlags.FlattenHierarchy;
-            else
-                flags |= BindingFlags.Instance;
+        // old version, before generics, ByRef params, etc.
+        //public static List<MethodInfo> GetMethods(Type t, string name, int arity, bool getStatics)
+        //{
+        //    BindingFlags flags = BindingFlags.Public | BindingFlags.InvokeMethod;
+        //    if (getStatics)
+        //        flags |= BindingFlags.Static | BindingFlags.FlattenHierarchy;
+        //    else
+        //        flags |= BindingFlags.Instance;
 
-            IEnumerable<MethodInfo> einfo = t.GetMethods(flags).Where(mi => mi.Name == name && mi.GetParameters().Length == arity);
-            List<MethodInfo> infos = new List<MethodInfo>(einfo);
+        //    IEnumerable<MethodInfo> einfo = t.GetMethods(flags).Where(mi => mi.Name == name && mi.GetParameters().Length == arity);
+        //    List<MethodInfo> infos = new List<MethodInfo>(einfo);
+
+        //    return infos;
+        //}
+
+
+        public static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, List<HostArg> args, string methodName, List<Type> typeArgs)
+        {
+            List<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, true);
+
+            MethodBase method = GetMatchingMethodAux(targetType, args, methods, methodName, true);
+            MaybeReflectionWarn(spanMap, method, methodName);
+            return (MethodInfo)method;
+        }
+
+        public static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, List<HostArg> args, string methodName, List<Type> typeArgs)
+        {
+            MethodBase method = null;
+            if (target.HasClrType)
+            {
+                Type targetType = target.ClrType;
+                List<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, false);
+                method = GetMatchingMethodAux(targetType, args, methods, methodName, false);
+            }
+
+            MaybeReflectionWarn(spanMap, method, methodName);
+            return (MethodInfo)method;
+        }
+
+        internal static List<MethodBase> GetMethods(Type targetType, string methodName, List<Type> typeArgs, int arity, bool getStatics)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
+            flags |= getStatics ? BindingFlags.Static : BindingFlags.Instance;
+
+            List<MethodBase> infos;
+
+            if (targetType.IsInterface && !getStatics)
+                infos = GetInterfaceMethods(targetType, methodName, typeArgs, arity);
+            else
+            {
+                IEnumerable<MethodInfo> einfos
+                    = targetType.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
+                infos = new List<MethodBase>();
+                foreach (MethodInfo minfo in einfos)
+                    if (typeArgs == null && !minfo.ContainsGenericParameters)
+                        infos.Add(minfo);
+                    else if (typeArgs != null && minfo.ContainsGenericParameters)
+                        infos.Add(minfo.MakeGenericMethod(typeArgs.ToArray<Type>()));
+            }
 
             return infos;
         }
+
+
+        private static List<MethodBase> GetInterfaceMethods(Type targetType, string methodName, List<Type> typeArgs, int arity)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod;
+
+            List<Type> interfaces = new List<Type>();
+            interfaces.Add(targetType);
+            interfaces.AddRange(targetType.GetInterfaces());
+
+            List<MethodBase> infos = new List<MethodBase>();
+
+            foreach (Type type in interfaces)
+            {
+                MethodInfo[] methods = type.GetMethods();
+                IEnumerable<MethodInfo> einfo
+                     = type.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
+                foreach (MethodInfo minfo in einfo)
+                    if (typeArgs == null && !minfo.ContainsGenericParameters)
+                        infos.Add(minfo);
+                    else if (typeArgs != null && minfo.ContainsGenericParameters)
+                        infos.Add(minfo.MakeGenericMethod(typeArgs.ToArray<Type>()));
+            }
+
+            return infos;
+        }
+
+
+
+        internal static ConstructorInfo GetMatchingConstructor(IPersistentMap spanMap, Type targetType, List<HostArg> args, out int ctorCount)
+        {
+            List<MethodBase> methods = Reflector.GetConstructors(targetType, args.Count);
+            ctorCount = methods.Count;
+
+            MethodBase method = GetMatchingMethodAux(targetType, args, methods, "_ctor", true);
+            // Because no-arg c-tors for value types are handled elsewhere, we defer the warning to there.
+            return (ConstructorInfo)method;
+        }
+
+        private static MethodBase GetMatchingMethodAux(Type targetType, List<HostArg> args, List<MethodBase> methods, string methodName, bool isStatic)
+        {
+            int argCount = args.Count;
+
+            if (methods.Count == 0)
+                return null;
+
+            if (methods.Count == 1)
+                return methods[0];
+
+            IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(argCount + (isStatic ? 0 : 1));
+            if (!isStatic)
+                argsPlus.Add(new DynamicMetaObject(Expression.Default(targetType), BindingRestrictions.Empty));
+
+            foreach (HostArg ha in args)
+            {
+                Expr e = ha.ArgExpr;
+                Type argType = e.HasClrType ? (e.ClrType ?? typeof(object)) : typeof(Object);
+
+                Type t;
+
+                switch (ha.ParamType)
+                {
+                    case HostArg.ParameterType.ByRef:
+#if CLR2
+                        t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+#else
+                        t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+#endif
+
+                        break;
+                    case HostArg.ParameterType.Standard:
+                        t = argType;
+                        break;
+                    default:
+                        throw Util.UnreachableCode();
+                }
+                argsPlus.Add(new DynamicMetaObject(Expression.Default(t), BindingRestrictions.Empty));
+            }
+
+            OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), isStatic ? CallTypes.None : CallTypes.ImplicitInstance);
+
+            BindingTarget bt = res.ResolveOverload(methodName, methods, NarrowingLevel.None, NarrowingLevel.All);
+            if (bt.Success)
+                return bt.Overload.ReflectionInfo;
+
+            return null;
+        }
+
+
+        private static MethodBase GetMatchingMethodAux(Type targetType, object[] actualArgs, List<MethodBase> methods, string methodName, bool isStatic)
+        {
+            int argCount = actualArgs.Length;
+
+            if (methods.Count == 0)
+                return null;
+
+            if (methods.Count == 1)
+                return methods[0];
+
+            IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(argCount + (isStatic ? 0 : 1));
+            if (!isStatic)
+                argsPlus.Add(new DynamicMetaObject(Expression.Default(targetType), BindingRestrictions.Empty));
+
+            foreach (object arg in actualArgs)
+                argsPlus.Add(new DynamicMetaObject(Expression.Default(arg.GetType()), BindingRestrictions.Empty));
+
+            OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), isStatic ? CallTypes.None : CallTypes.ImplicitInstance);
+
+            BindingTarget bt = res.ResolveOverload(methodName, methods, NarrowingLevel.None, NarrowingLevel.All);
+            if (bt.Success)
+                return bt.Overload.ReflectionInfo;
+
+            return null;
+        }
+
+
+        private static List<MethodBase> GetConstructors(Type targetType, int arity)
+        {
+            IEnumerable<ConstructorInfo> cinfos
+                = targetType.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Where(info => info.GetParameters().Length == arity);
+
+            List<MethodBase> infos = new List<MethodBase>();
+
+            foreach (ConstructorInfo info in cinfos)
+                infos.Add(info);
+
+            return infos;
+        }
+
+
+
+        private static void MaybeReflectionWarn(IPersistentMap spanMap, MethodBase method, string methodName)
+        {
+            if (method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved.\n",
+                    Compiler.SOURCE_PATH.deref(), Compiler.GetLineFromSpanMap(spanMap), methodName));
+        }
+
 
         public static MethodInfo GetArityZeroMethod(Type t, string name, bool getStatics)
         {
@@ -163,7 +365,7 @@ namespace clojure.lang
 
         #region Method calling
 
-        public static object CallInstanceMethod(string methodName, object target, params object[] args)
+        public static object CallInstanceMethod(string methodName, List<Type> typeArgs, object target, params object[] args)
         {
             if (args.Length == 0)
             {
@@ -177,13 +379,25 @@ namespace clojure.lang
                 if (p != null)
                     return p.GetValue(target, null);
             }
-            
-            BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
 
-            return target.GetType().InvokeMember(methodName, flags, Type.DefaultBinder, target, args);
+            List<MethodBase> methods = GetMethods(target.GetType(), methodName, typeArgs, args.Length, false);
+            MethodBase method = GetMatchingMethodAux(target.GetType(), args, methods, methodName, false);
+
+            if (method == null)
+            {
+                if (methods.Count == 0)
+                    throw new ArgumentException(String.Format("Unable to find instance method named: {0} for type: {1} with arity {2}", methodName, target.GetType(), args.Length));
+                else
+                    throw new ArgumentException(String.Format("Cannot resolve instance method named: {0} for type: {1} with arity {2}", methodName, target.GetType(), args.Length));
+            }
+
+            return method.Invoke(target, args);
+            
+            //BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
+            //return target.GetType().InvokeMember(methodName, flags, Type.DefaultBinder, target, args);
         }
 
-        public static object CallStaticMethod(string methodName, Type t, params object[] args)
+        public static object CallStaticMethod(string methodName, List<Type> typeArgs, Type t, params object[] args)
         {
             if (args.Length == 0)
             {
@@ -196,13 +410,27 @@ namespace clojure.lang
                     return p.GetValue(t, null);
             }
 
-            BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod | BindingFlags.GetField | BindingFlags.GetProperty;
+            List<MethodBase> methods = GetMethods(t, methodName, typeArgs, args.Length, true);
+            MethodBase method = GetMatchingMethodAux(t, args, methods, methodName, true);
 
-            return t.InvokeMember(methodName, flags, Type.DefaultBinder, null, args);
+            if (method == null)
+            {
+                if (methods.Count == 0)
+                    throw new ArgumentException(String.Format("Unable to find static method named: {0} for type: {1} with arity {2}", methodName, t, args.Length));
+                else
+                    throw new ArgumentException(String.Format("Cannot resolve static method named: {0} for type: {1} with arity {2}", methodName, t, args.Length));
+            }
+
+            return method.Invoke(null, args);
+
+
+            //BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod | BindingFlags.GetField | BindingFlags.GetProperty;
+            //return t.InvokeMember(methodName, flags, Type.DefaultBinder, null, args);
         }
 
         public static object InvokeConstructor(Type t, object[] args)
         {
+            //  TODO: Replace with GetContructors/GetMatchingMethodAux
             IEnumerable<ConstructorInfo> einfos = t.GetConstructors().Where(ci => ci.GetParameters().Length == args.Length);
             List<ConstructorInfo> infos = new List<ConstructorInfo>(einfos);
 
@@ -253,10 +481,12 @@ namespace clojure.lang
         {
             if (methodName.Equals("new"))
                 return InvokeConstructor(t, args);
-            List<MethodInfo> methods = GetMethods(t, methodName, args.Length, true);
+            List<MethodBase> methods = GetMethods(t, methodName, null, args.Length, true);
             return InvokeMatchingMethod(methodName, methods, t, null, args);
         }
-        private static object InvokeMatchingMethod(string methodName, List<MethodInfo> infos, Type t, object target, object[] args)
+
+
+        private static object InvokeMatchingMethod(string methodName, List<MethodBase> infos, Type t, object target, object[] args)
         {
 
             Type targetType = t ?? target.GetType();
@@ -267,7 +497,7 @@ namespace clojure.lang
             MethodInfo info;
 
             if (infos.Count == 1)
-                info = infos[0];
+                info = (MethodInfo)infos[0];
             else
             {
                 // More than one with correct arity.  Find best match.
@@ -400,6 +630,8 @@ namespace clojure.lang
         }
 
         #endregion
+
+        #region Type assignment checks
 
         // Stolen from DLR TypeUtils
         internal static bool AreAssignable(Type dest, Type src)

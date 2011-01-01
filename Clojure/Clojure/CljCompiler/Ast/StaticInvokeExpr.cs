@@ -206,7 +206,7 @@ namespace clojure.lang.CljCompiler.Ast
 
 
             //return Expression.Call(_target.GetMethod("InvokeStatic",argTypes),argExprs);
-            List<MethodBase> candidates = HostExpr.GetMethods(_target, argExprs.Length, "InvokeStatic", null, true);
+            List<MethodBase> candidates = Reflector.GetMethods(_target, "InvokeStatic", null, argExprs.Length, true);
             if (candidates.Count != 1)
                 throw new Exception("No static method of correct arity");
             return Utils.ComplexCallHelper((MethodInfo)candidates[0], argExprs);

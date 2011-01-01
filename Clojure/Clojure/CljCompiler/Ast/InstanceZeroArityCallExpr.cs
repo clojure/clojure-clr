@@ -70,7 +70,7 @@ namespace clojure.lang.CljCompiler.Ast
         public override object Eval()
         {
             object target = _target.Eval();
-            return Reflector.CallInstanceMethod(_memberName, target, new object[0]);
+            return Reflector.CallInstanceMethod(_memberName, null, target, new object[0]);
         }
 
         #endregion

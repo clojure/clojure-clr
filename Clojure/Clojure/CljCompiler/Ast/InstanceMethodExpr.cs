@@ -41,7 +41,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (target.HasClrType && target.ClrType == null)
                 throw new ArgumentException(String.Format("Attempt to call instance method {0} on nil", methodName));
 
-            _method = GetMatchingMethod(spanMap, target, _args, _methodName, _typeArgs);
+            _method = Reflector.GetMatchingMethod(spanMap, target, _args, _methodName, _typeArgs);
         }
 
         #endregion
@@ -59,7 +59,7 @@ namespace clojure.lang.CljCompiler.Ast
                     argvals[i] = _args[i].ArgExpr.Eval();
                 if (_method != null)
                     return _method.Invoke(targetVal, argvals);
-                return Reflector.CallInstanceMethod(_methodName, targetVal, argvals);
+                return Reflector.CallInstanceMethod(_methodName, _typeArgs, targetVal, argvals);
             }
             catch (Exception e)
             {

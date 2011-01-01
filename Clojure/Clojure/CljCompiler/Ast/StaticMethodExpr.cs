@@ -38,7 +38,7 @@ namespace clojure.lang.CljCompiler.Ast
             : base(source,spanMap,tag,methodName,typeArgs, args)
         {
             _type = type;
-            _method  = GetMatchingMethod(spanMap, _type, _args, _methodName, typeArgs);
+            _method  = Reflector.GetMatchingMethod(spanMap, _type, _args, _methodName, typeArgs);
         }
 
         #endregion
@@ -69,7 +69,7 @@ namespace clojure.lang.CljCompiler.Ast
                     argvals[i] = _args[i].ArgExpr.Eval();
                 if (_method != null)
                     return Reflector.InvokeMethod( _method, null, argvals);
-                return Reflector.InvokeStaticMethod(_type, _methodName, argvals);
+                return Reflector.CallStaticMethod(_methodName, _typeArgs, _type, argvals);
             }
             catch (Exception e)
             {

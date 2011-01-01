@@ -99,6 +99,7 @@
 
 (defmacro sys-func
    "Translates to a gen-delegate for a System.Func<,...> call"
+   {:added "1.3"}
    [typesyms & body ]
    (let [types (map (fn [tsym] (clojure.lang.CljCompiler.Ast.HostExpr/MaybeType tsym false)) typesyms)
          join  ; clojure.string not yet loaded

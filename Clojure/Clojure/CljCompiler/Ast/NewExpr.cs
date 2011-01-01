@@ -55,7 +55,7 @@ namespace clojure.lang.CljCompiler.Ast
             int numArgs = _args.Count;
 
             int numCtors;
-            ConstructorInfo ctor = HostExpr.GetMatchingConstructor(_spanMap, _type, _args, out numCtors);
+            ConstructorInfo ctor = Reflector.GetMatchingConstructor(_spanMap, _type, _args, out numCtors);
 
             if (numCtors == 0)
             {
