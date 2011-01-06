@@ -2,17 +2,18 @@
 
 (def s (apply str (repeat 20 "This is a really long string"))) 
 
-(defn count-num-chars [^String s] 
-  (let [len (.Length s) 
-        space (int 32)] 
-    (loop [i (int 0), c (int 0)] 
-      (if (< i len) 
-        (recur 
-         (unchecked-inc i) 
-         (if (== (int (.get_Chars s i)) space) 
-           c 
-           (unchecked-inc c))) 
-        c)))) 
+(set! *unchecked-math* true)
+
+(defn count-num-chars ^long [^String s] 
+  (let [l (.Length s) 
+        c \space] 
+    (loop [i 0 acc 0] 
+      (if (< i l) 
+        (recur (inc i) 
+               (if (identical? (.get_Chars s i) c) acc 
+                   (inc acc))) 
+        acc)))) 
+
 
 (defn cnc [n]
   (dotimes [_ n] (count-num-chars s)))

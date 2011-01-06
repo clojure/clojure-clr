@@ -126,6 +126,7 @@
     <Compile Include="CljCompiler\Ast\NewInstanceExpr.cs" />
     <Compile Include="CljCompiler\Ast\NewInstanceMethod.cs" />
     <Compile Include="CljCompiler\Ast\NumberExpr.cs" />
+    <Compile Include="CljCompiler\Ast\NumericConvertBinder.cs" />
     <Compile Include="CljCompiler\Ast\ObjExpr.cs" />
     <Compile Include="CljCompiler\Ast\ObjMethod.cs" />
     <Compile Include="CljCompiler\Ast\ParserContext.cs" />

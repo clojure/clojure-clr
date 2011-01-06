@@ -957,8 +957,6 @@ namespace clojure.lang.CljCompiler.Ast
                 try
                 {
                     cs = RT.printString(value);
-                    if (cs.Contains("Int64"))
-                        Console.WriteLine("Found it!!!!!!!!");
                 }
                 catch (Exception)
                 {

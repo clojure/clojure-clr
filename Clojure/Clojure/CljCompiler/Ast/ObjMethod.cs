@@ -181,7 +181,7 @@ namespace clojure.lang.CljCompiler.Ast
                         GenBodyCode(StaticReturnType,objx,context));
 
                 //Expression convBody = Compiler.MaybeConvert(body, ReturnType);
-                Expression convBody = MethodExpr.GenConvertMaybePrim(body, StaticReturnType);
+                Expression convBody = HostExpr.GenUnboxArg(body, StaticReturnType);
 
                 LambdaExpression lambda = Expression.Lambda(convBody, parms);
                 // JVM: Clears locals here.

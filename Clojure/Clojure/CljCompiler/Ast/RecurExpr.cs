@@ -221,7 +221,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (valExpr.Type.IsPrimitive && !tempVar.Type.IsPrimitive)
                     tempAssigns.Add(Expression.Assign(tempVar, Compiler.MaybeBox(valExpr)));
                 else if (!valExpr.Type.IsPrimitive && tempVar.Type.IsPrimitive)
-                    tempAssigns.Add(Expression.Assign(tempVar, MethodExpr.GenConvertMaybePrim(valExpr, tempVar.Type)));
+                    tempAssigns.Add(Expression.Assign(tempVar, HostExpr.GenUnboxArg(valExpr, tempVar.Type)));
                 else
                     tempAssigns.Add(Expression.Assign(tempVar, valExpr));
 

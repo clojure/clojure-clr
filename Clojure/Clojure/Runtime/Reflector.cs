@@ -281,7 +281,8 @@ namespace clojure.lang
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(t), BindingRestrictions.Empty));
             }
 
-            OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            //OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            OverloadResolverFactory factory = NumericConvertOverloadResolverFactory.Instance;
             DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), isStatic ? CallTypes.None : CallTypes.ImplicitInstance);
 
             BindingTarget bt = res.ResolveOverload(methodName, methods, NarrowingLevel.None, NarrowingLevel.All);
