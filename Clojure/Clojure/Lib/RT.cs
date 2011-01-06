@@ -2497,7 +2497,9 @@ namespace clojure.lang
         {
             yield return Directory.GetCurrentDirectory();
 
-            yield return Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            Assembly assy = Assembly.GetEntryAssembly();
+            if ( assy != null )
+                yield return Path.GetDirectoryName(assy.Location);
 
             string rawpaths = (string)System.Environment.GetEnvironmentVariables()[CLOJURE_LOAD_PATH];
             if (rawpaths == null)
