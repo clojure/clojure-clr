@@ -119,25 +119,31 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr e = ha.ArgExpr;
                 Type argType = e.HasClrType ? (e.ClrType ?? typeof(object)) : typeof(Object);
 
-                Type t;
+                //Type t;
 
                 switch (ha.ParamType)
                 {
                     case HostArg.ParameterType.ByRef:
-#if CLR2
-                        t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
-#else
-                        t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
-#endif
+//#if CLR2
+//                        t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+//#else
+//                        t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+//#endif
                         refPositions.Add(i);
                         argsPlus.Add(new DynamicMetaObject(HostExpr.GenUnboxArg(GenTypedArg(objx, context, argType, e), methodParms[i].ParameterType.GetElementType()), BindingRestrictions.Empty));
                         break;
                     case HostArg.ParameterType.Standard:
-                        t = argType;
-                        Expression typedArg = GenTypedArg(objx, context, argType, e);
+                        //t = argType;
                         Type ptype = methodParms[i].ParameterType;
-                        if (!ptype.IsGenericParameter)
-                            typedArg = HostExpr.GenUnboxArg(typedArg, methodParms[i].ParameterType);
+                        if (ptype.IsGenericParameter)
+                            ptype = argType;
+
+                        Expression typedArg = GenTypedArg(objx, context, ptype, e);
+
+                        //Expression typedArg = GenTypedArg(objx, context, argType, e);
+                        //Type ptype = methodParms[i].ParameterType;
+                        //if (!ptype.IsGenericParameter)
+                        //    typedArg = HostExpr.GenUnboxArg(typedArg, methodParms[i].ParameterType);
                         argsPlus.Add(new DynamicMetaObject(typedArg, BindingRestrictions.Empty));
 
                         break;
