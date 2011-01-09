@@ -2220,6 +2220,107 @@ namespace clojure.lang
             return val;
         }
 
+        // overloads for array getters/setters
+
+        public static bool aget(bool[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        public static bool aset(bool[] xs, int i, bool v)
+        {
+            xs[i] = v;
+            return v;
+        }
+
+        public static char aget(char[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        public static char aset(char[] xs, int i, char v)
+        {
+            xs[i] = v;
+            return v;
+        }
+
+        public static byte aget(byte[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        public static byte aset(byte[] xs, int i, byte v)
+        {
+            xs[i] = v;
+            return v;
+        }
+ 
+        public static short aget(short[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        public static short aset(short[] xs, int i, short v)
+        {
+            xs[i] = v;
+            return v;
+        }
+
+        public static int aget(int[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        public static int aset(int[] xs, int i, int v)
+        {
+            xs[i] = v;
+            return v;
+        }
+
+        public static long aget(long[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        public static long aset(long[] xs, int i, long v)
+        {
+            xs[i] = v;
+            return v;
+        }
+
+        public static float aget(float[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        public static float aset(float[] xs, int i, float v)
+        {
+            xs[i] = v;
+            return v;
+        }
+
+        public static double aget(double[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        public static double aset(double[] xs, int i, double v)
+        {
+            xs[i] = v;
+            return v;
+        }
+
+        public static decimal aget(decimal[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        public static decimal aset(decimal[] xs, int i, decimal v)
+        {
+            xs[i] = v;
+            return v;
+        }
+
         #endregion
 
         #region Things not in the Java version
