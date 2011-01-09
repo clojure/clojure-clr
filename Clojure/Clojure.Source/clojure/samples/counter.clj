@@ -1,5 +1,7 @@
 (ns clojure.samples.counter)
 
+(defn tt [x y] (clojure.lang.Util/identical x y))
+
 (def s (apply str (repeat 20 "This is a really long string"))) 
 
 (set! *unchecked-math* true)

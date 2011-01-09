@@ -44,6 +44,8 @@ namespace clojure.lang.CljCompiler.Ast
         protected readonly IPersistentMap _spanMap;
         protected readonly Symbol _tag;
 
+        static readonly ArithmeticRewriter _arithmeticRewriter = new ArithmeticRewriter();
+
         #endregion
 
         #region C-tors
@@ -188,6 +190,8 @@ namespace clojure.lang.CljCompiler.Ast
                 stmts.Add(Expression.Convert(Expression.ArrayIndex(resultParm, Expression.Constant(0)), returnType));
                 call = Expression.Block(new ParameterExpression[] { resultParm }, stmts);
             }
+
+            call = _arithmeticRewriter.Visit(call);
 
             return call;
         }
