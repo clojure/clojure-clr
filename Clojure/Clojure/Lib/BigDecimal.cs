@@ -165,6 +165,11 @@ namespace clojure.lang
                 _roundingMode = mode;
             }
 
+            public Context(uint precision)
+                : this(precision, RoundingMode.HalfUp)
+            {
+            }
+
             #endregion
 
             #region Object overrides
@@ -522,9 +527,7 @@ namespace clojure.lang
                 return false;
 
             BigDecimal d = (BigDecimal)obj;
-            if (_exp != d._exp)
-                return false;
-            return _coeff.Equals(d._coeff);
+            return Equals(d);
         }
 
         public override int GetHashCode()
@@ -976,7 +979,9 @@ namespace clojure.lang
         {
             if ( Object.ReferenceEquals(other,null) )
                 return false;
-            return this == other;
+            if (_exp != other._exp)
+                return false;
+            return _coeff.Equals(other._coeff);
         }
 
         #endregion

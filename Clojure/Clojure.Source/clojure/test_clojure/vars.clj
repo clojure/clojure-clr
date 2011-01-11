@@ -38,25 +38,25 @@
                       @acc))]
     (is (= (factorial 5) 120))))
 
-;;;(deftest test-with-precision
-;;;  (are [x y] (= x y)
-;;;       (with-precision 4 (+ 3.5555555M 1)) 4.556M
-;;;       (with-precision 6 (+ 3.5555555M 1)) 4.55556M
-;;;       (with-precision 6 :rounding CEILING     (+ 3.5555555M 1)) 4.55556M
-;;;       (with-precision 6 :rounding FLOOR       (+ 3.5555555M 1)) 4.55555M
-;;;       (with-precision 6 :rounding HALF_UP     (+ 3.5555555M 1)) 4.55556M
-;;;       (with-precision 6 :rounding HALF_DOWN   (+ 3.5555555M 1)) 4.55556M
-;;;       (with-precision 6 :rounding HALF_EVEN   (+ 3.5555555M 1)) 4.55556M
-;;;       (with-precision 6 :rounding UP          (+ 3.5555555M 1)) 4.55556M
-;;;       (with-precision 6 :rounding DOWN        (+ 3.5555555M 1)) 4.55555M
-;;;       (with-precision 6 :rounding UNNECESSARY (+ 3.5555M 1))    4.5555M))
+(deftest test-with-precision
+  (are [x y] (= x y)
+       (with-precision 4 (+ 3.5555555M 1)) 4.556M
+       (with-precision 6 (+ 3.5555555M 1)) 4.55556M
+       (with-precision 6 :rounding Ceiling     (+ 3.5555555M 1)) 4.55556M        ;;; CEILING
+       (with-precision 6 :rounding Floor       (+ 3.5555555M 1)) 4.55555M        ;;; FLOOR
+       (with-precision 6 :rounding HalfUp      (+ 3.5555555M 1)) 4.55556M        ;;; HALF_UP
+       (with-precision 6 :rounding HalfDown    (+ 3.5555555M 1)) 4.55556M        ;;; HALF_DOWN
+       (with-precision 6 :rounding HalfEven    (+ 3.5555555M 1)) 4.55556M        ;;; HALF_EVEN
+       (with-precision 6 :rounding Up          (+ 3.5555555M 1)) 4.55556M        ;;; UP
+       (with-precision 6 :rounding Down        (+ 3.5555555M 1)) 4.55555M        ;;; DOWN
+       (with-precision 6 :rounding Unnecessary (+ 3.5555M 1))    4.5555M))       ;;; UNNECESSARY
 
-;;;(deftest test-settable-math-context
-;;;  (is (=
-;;;       (clojure.main/with-bindings
-;;;         (set! *math-context* (java.math.MathContext. 8))
-;;;         (+ 3.55555555555555M 1))
-;;;       4.5555556M)))
+(deftest test-settable-math-context
+  (is (=
+       (clojure.main/with-bindings
+         (set! *math-context* (clojure.lang.BigDecimal+Context. 8))               ;;;  java.math.MathContext
+         (+ 3.55555555555555M 1))
+       4.5555556M)))
 
 ; set-validator get-validator
 
