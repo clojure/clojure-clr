@@ -125,7 +125,7 @@ namespace clojure.lang
             Symbol.intern("*file*"), "NO_SOURCE_PATH").setDynamic();
 
         // boolean
-        internal static readonly Var UNCHECKED_MATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+        public static readonly Var UNCHECKED_MATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
             Symbol.intern("*unchecked-math*"), false).setDynamic();
 
         //Integer

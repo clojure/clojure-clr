@@ -28,6 +28,7 @@ namespace BootstrapCompile
 
         const string PATH_PROP = "clojure.compile.path";
         const string REFLECTION_WARNING_PROP = "clojure.compile.warn-on-reflection";
+        const string UNCHECKED_MATH_PROP = "clojure.compile.unchecked-math";
 
         static void Main(string[] args)
         {
@@ -48,12 +49,15 @@ namespace BootstrapCompile
 
             string warnVal =  Environment.GetEnvironmentVariable(REFLECTION_WARNING_PROP);
             bool warnOnReflection = warnVal == null ? false : warnVal.Equals(true);
+            string mathVal = Environment.GetEnvironmentVariable(UNCHECKED_MATH_PROP);
+            bool uncheckedMath = mathVal == null ? false : mathVal.Equals(true);
 
             try
             {
                 Var.pushThreadBindings(RT.map(
                     Compiler.COMPILE_PATH, path,
-                    RT.WARN_ON_REFLECTION, warnOnReflection
+                    RT.WARN_ON_REFLECTION, warnOnReflection,
+                    Compiler.UNCHECKED_MATH, uncheckedMath
                     ));
 
                 Stopwatch sw = new Stopwatch();
