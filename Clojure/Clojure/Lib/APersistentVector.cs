@@ -709,9 +709,7 @@ namespace clojure.lang
             /// <returns>The index associated with this sequence.</returns>
             public int index() 
             {
-                // Java original has the following.  I believe this is incorrect.
-                //return _i;
-                return _v.count() - _i - 1;
+                return _i;
             }
 
             #endregion

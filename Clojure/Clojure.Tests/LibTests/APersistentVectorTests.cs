@@ -631,7 +631,7 @@ namespace Clojure.Tests.LibTests
             ISeq s1 = s0.next();
             IndexedSeq i1 = s1 as IndexedSeq;
 
-            Expect(i0.index(), EqualTo(0));
+            Expect(i0.index(), EqualTo(2));
             Expect(i1.index(), EqualTo(1));
         }
 

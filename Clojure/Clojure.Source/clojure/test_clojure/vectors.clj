@@ -19,7 +19,7 @@
       (is (= clojure.lang.APersistentVector+RSeq (class reversed))))                ;;; clojure.lang.APersistentVector$RSeq 
     (testing "RSeq methods"
       (is (= [5 4 3 2 1 0] reversed))
-      ;;;(is (= 5 (.index reversed)))  I think I have the index reversed in RSeq
+      (is (= 5 (.index reversed)))
       (is (= 5 (.first reversed)))
       (is (= [4 3 2 1 0] (.next reversed)))
       (is (= [3 2 1 0] (.. reversed next next)))
