@@ -191,7 +191,9 @@ namespace clojure.lang
         public static object minusP(object x, object y)
         {
             Ops yops = ops(y);
-            return ops(x).combine(yops).addP(x, yops.negateP(y));
+            object negativeY = yops.negateP(y);
+            Ops negativeYOps = ops(negativeY);
+            return ops(x).combine(negativeYOps).addP(x, negativeY);
         }
 
         public static object multiply(object x, object y)

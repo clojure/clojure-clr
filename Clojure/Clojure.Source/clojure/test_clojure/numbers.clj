@@ -480,3 +480,9 @@ Math/pow overflows to Infinity."
   (is (== (numerator 1/2) 1))
   (is (= (bigint (/ 100000000000000000000 3)) 33333333333333333333))
   (is (= (long 10000000000000000000/3) 3333333333333333333)))
+
+  (deftest test-arbitrary-precision-subtract
+  (are [x y] (= x y)
+       9223372036854775808N (-' 0 -9223372036854775808)
+       clojure.lang.BigInt  (class (-' 0 -9223372036854775808))
+       Int64      (class (-' 0 -9223372036854775807))))              ;;; java.lang.Long 
