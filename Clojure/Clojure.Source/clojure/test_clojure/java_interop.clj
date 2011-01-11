@@ -134,20 +134,20 @@
         "chain chain chain")))
 
 
-;;;(deftest test-bases
-;;;  (are [x y] (= x y)
-;;;      (bases java.lang.Math)
-;;;        (list java.lang.Object)
-;;;      (bases java.lang.Integer)
-;;;        (list java.lang.Number java.lang.Comparable) ))
+(deftest test-bases
+  (are [x y] (= x y)
+      (bases  System.Math)                                      ;;; java.lang.Math)
+        (list System.Object)                                    ;;; java.lang.Object)
+      (bases System.Int32)                                      ;;; java.lang.Integer)
+        (list System.ValueType System.IComparable System.IFormattable System.IConvertible |System.IComparable`1[System.Int32]| |System.IEquatable`1[System.Int32]|) ))  ;;; (java.lang.Number java.lang.Comparable)
 
-;;;(deftest test-supers
-;;;  (are [x y] (= x y)
-;;;      (supers java.lang.Math)
-;;;        #{java.lang.Object}
-;;;      (supers java.lang.Integer)
-;;;        #{java.lang.Number java.lang.Object
-;;;          java.lang.Comparable java.io.Serializable} ))
+(deftest test-supers
+  (are [x y] (= x y)
+      (supers System.Math)                                      ;;; java.lang.Math)
+        #{System.Object}                                        ;;; java.lang.Object}
+      (supers System.Int32)                                     ;;; java.lang.Integer)
+        #{System.IFormattable System.IConvertible System.IComparable |System.IEquatable`1[System.Int32]| |System.IComparable`1[System.Int32]|     ;;; java.lang.Number java.lang.Object
+		System.Object System.ValueType}   ))                     ;;; java.lang.Comparable java.io.Serializable} ))
 
 
 ; Arrays: [alength] aget aset [make-array to-array into-array to-array-2d aclone]

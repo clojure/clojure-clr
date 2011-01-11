@@ -45,7 +45,7 @@
   ; ratios
   (is (== 1/2 0.5))
   (is (== 1/1000 0.001))
-   ;;;  Actually, this test works in Clojure CLR. (is (not= 2/3 0.6666666666666666))
+  (is (not= 2/3 0.6666666666666666))
 
   ; vectors equal other seqs by items equality
   (are [x y] (= x y)
