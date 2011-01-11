@@ -73,8 +73,7 @@
 				        (fn [_] (.CountDown latch))))           ;;; .countDown
         failing-agent (agent nil :error-handler handler)]
     (send failing-agent (fn [_] (throw (Exception.))))    ;;; RuntimeException
-    (await-for 2000 failing-agent)                        ;;; 1000
-    (is (.Await latch 10000))))          ;;; 10 TimeUnit/Seconds
+    (is (.Await latch 10000))))          ;;; .await 10 TimeUnit/Seconds
 
 (deftest restart-no-clear
   (let [p (promise)

@@ -75,7 +75,7 @@
        s/trimr [nil]
        s/trim-newline [nil]))
        
-;(deftest char-sequence-handling
+;(deftest char-sequence-handling                                              ;;; This tests StringBuffer : CharSequence -- irrelevant for ClojureCLR
 ;  (are [result f args] (let [[^String s & more] args]                        ;;; CharSequence
 ;                         (= result (apply f (StringBuffer. s) more)))
 ;       "paz" s/reverse ["zap"]

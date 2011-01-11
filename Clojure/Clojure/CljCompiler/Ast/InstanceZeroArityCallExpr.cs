@@ -46,6 +46,11 @@ namespace clojure.lang.CljCompiler.Ast
             _tag = tag;
 
             _targetType = target.HasClrType ? target.ClrType : null;
+
+            if ( RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1} - reference to field/property {2} can't be resolved.",
+                    Compiler.SOURCE_PATH.deref(), Compiler.GetLineFromSpanMap(_spanMap), memberName);
+ 
         }
 
         #endregion

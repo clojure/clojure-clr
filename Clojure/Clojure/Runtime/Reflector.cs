@@ -339,7 +339,7 @@ namespace clojure.lang
         private static void MaybeReflectionWarn(IPersistentMap spanMap, MethodBase method, string methodName)
         {
             if (method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-                RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved.\n",
+                RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved.",
                     Compiler.SOURCE_PATH.deref(), Compiler.GetLineFromSpanMap(spanMap), methodName));
         }
 
