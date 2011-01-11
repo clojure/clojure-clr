@@ -68,6 +68,7 @@
 	  :data
 	  ;:reflect -- TODO: go back and reflect code
 	  :errors
+	  :clojure-walk
       ])
 
 (def test-namespaces
