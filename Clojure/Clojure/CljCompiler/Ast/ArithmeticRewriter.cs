@@ -5,9 +5,8 @@ using System.Linq;
 using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
-using System.Reflection;
 #endif
-
+using System.Reflection;
 
 namespace clojure.lang.CljCompiler.Ast
 {

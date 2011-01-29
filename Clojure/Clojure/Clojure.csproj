@@ -91,13 +91,7 @@
       <HintPath>..\..\lib\DLR\2.0\Microsoft.Scripting.Core.dll</HintPath>
       <Aliases>global,MSC</Aliases>
     </Reference>
-    <Reference Include="Microsoft.Scripting.ExtensionAttribute" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
-      <HintPath>..\..\lib\DLR\2.0\Microsoft.Scripting.ExtensionAttribute.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
