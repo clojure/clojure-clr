@@ -15,6 +15,7 @@
 using System;
 
 using System.Collections;
+using System.Collections.Generic;
 
 namespace clojure.lang
 {
@@ -24,7 +25,7 @@ namespace clojure.lang
     /// Implements standard IEnumerator behavior over an <see cref="ISeq">ISeq</see>.
     /// </summary>
     /// <remarks>Equivalent to Java verion: SeqIterator</remarks>
-    public sealed class SeqEnumerator : IEnumerator
+    public sealed class SeqEnumerator : IEnumerator, IEnumerator<Object>
     {
         #region Data
        
@@ -41,7 +42,7 @@ namespace clojure.lang
         /// <summary>
         /// The original sequence (for resetting).
         /// </summary>
-        private readonly ISeq _origSeq;
+        private ISeq _origSeq;
 
         #endregion
 
@@ -100,6 +101,12 @@ namespace clojure.lang
         public void Reset()
         {
             _isAtEnd = _origSeq == null;
+            _seq = null;
+        }
+
+        public void Dispose()
+        {
+            _origSeq = null;
             _seq = null;
         }
 

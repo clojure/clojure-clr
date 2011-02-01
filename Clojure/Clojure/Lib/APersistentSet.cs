@@ -15,11 +15,12 @@
 using System;
 
 using System.Collections;
+using System.Collections.Generic;
 
 namespace clojure.lang
 {
     [Serializable]
-    public abstract class APersistentSet: AFn, IPersistentSet, ICollection  // , Set -- no equivalent
+    public abstract class APersistentSet : AFn, IPersistentSet, ICollection, ICollection<Object>  // , Set -- no equivalent,  Should we do ISet<Object>?
     {
         #region Data
 
@@ -99,14 +100,14 @@ namespace clojure.lang
             if (s == null)
                 return false;
 
-            if (s.count() != count() )   /// JVM has also: || s.GetHashCode() != GetHashCode()),, but I can't guarantee this
+            if (s.count() != count())   /// JVM has also: || s.GetHashCode() != GetHashCode()),, but I can't guarantee this
                 return false;
 
             for (ISeq seq = s.seq(); seq != null; seq = seq.next())
                 if (!contains(seq.first()))
                     return false;
 
-            return true;            
+            return true;
         }
 
         #endregion
@@ -190,6 +191,28 @@ namespace clojure.lang
 
         #region ICollection Members
 
+        public void Add(object item)
+        {
+            throw new InvalidOperationException("Cannot modify an immutable set");
+        }
+
+        public void Clear()
+        {
+            throw new InvalidOperationException("Cannot modify an immutable set");
+        }
+
+        public bool Contains(object item)
+        {
+            return contains(item);
+        }
+
+        public void CopyTo(object[] array, int arrayIndex)
+        {
+            ISeq s = seq();
+            if (s != null)
+                ((ICollection)s).CopyTo(array, arrayIndex);
+        }
+
         public void CopyTo(Array array, int index)
         {
             ISeq s = seq();
@@ -202,21 +225,36 @@ namespace clojure.lang
             get { return count(); }
         }
 
+        public bool IsReadOnly
+        {
+            get { return true; }
+        }
+
         public bool IsSynchronized
         {
             get { return true; }
         }
 
+        public bool Remove(object item)
+        {
+            throw new InvalidOperationException("Cannot modify an immutable set");
+        }
+
         public object SyncRoot
         {
-            get { throw new InvalidOperationException(); }
+            get { return this; }
         }
 
         #endregion
 
         #region IEnumerable Members
+        
+        public IEnumerator<object> GetEnumerator()
+        {
+            return new SeqEnumerator(seq());
+        }
 
-        public IEnumerator GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return new SeqEnumerator(seq());
         }

@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace clojure.lang
 {
@@ -21,7 +22,7 @@ namespace clojure.lang
     /// Provides a basic implementation of <see cref="IPersistentVector">IPersistentVector</see> functionality.
     /// </summary>
     [Serializable]
-    public abstract class APersistentVector: AFn, IPersistentVector, IList, IComparable
+    public abstract class APersistentVector: AFn, IPersistentVector, IList, IComparable, IList<Object>, IComparable<Object>
     {
         #region Data
 
@@ -337,57 +338,43 @@ namespace clojure.lang
 
         #endregion 
 
-        #region IList Members
+        #region IList<Object>, IList members
 
-        public int Add(object value)
+        public void Add(object item)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Cannot modify an immutable vector");
+        }
+
+
+        int IList.Add(object value)
+        {
+            throw new InvalidOperationException("Cannot modify an immutable vector");
         }
 
         public void Clear()
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Cannot modify an immutable vector");
         }
 
-        public bool Contains(object value)
+        public bool Contains(object item)
         {
             for (ISeq s = seq(); s != null; s = s.next())
-                if (Util.equals(s.first(), value))
+                if (Util.equals(s.first(), item))
                     return true;
             return false;
         }
 
-        public int IndexOf(object value)
+        public int IndexOf(object item)
         {
             for (int i = 0; i < count(); i++)
-                if (Util.equals(nth(i), value))
+                if (Util.equals(nth(i), item))
                     return i;
             return -1;
         }
 
-        public void Insert(int index, object value)
+        public void Insert(int index, object item)
         {
-            throw new NotImplementedException();
-        }
-
-        public bool IsFixedSize
-        {
-            get { return true; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return true; }
-        }
-
-        public void Remove(object value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveAt(int index)
-        {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Cannot modify an immutable vector");
         }
 
         public object this[int index]
@@ -398,23 +385,69 @@ namespace clojure.lang
             }
             set
             {
-                throw new NotImplementedException();
+                throw new InvalidOperationException("Cannot modify an immutable vector");
             }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return true; }
+        }
+
+        public bool IsFixedSize
+        {
+            get { return true; }
+        }
+
+        public bool Remove(object item)
+        {
+            throw new InvalidOperationException("Cannot modify an immutable vector");
+        }
+
+        void IList.Remove(object value)
+        {
+            throw new InvalidOperationException("Cannot modify an immutable vector");
+        }
+
+        public void RemoveAt(int index)
+        {
+            throw new InvalidOperationException("Cannot modify an immutable vector");
         }
 
         #endregion
 
         #region ICollection Members
 
-        public void CopyTo(Array array, int index)
+        public void CopyTo(object[] array, int arrayIndex)
         {
-            if ( array == null )
+            if (array == null)
                 throw new ArgumentNullException();
 
-            if ( index < 0 )
+            if (arrayIndex < 0)
                 throw new ArgumentOutOfRangeException();
 
-            if ( array.Rank > 1 )
+
+            int cnt = count();
+
+            if (cnt == 0)
+                return;
+
+            if (arrayIndex >= array.Length || array.Length - arrayIndex < cnt)
+                throw new ArgumentException();
+
+            for (int i = 0; i < cnt; i++)
+                array[i + arrayIndex] = nth(i);
+        }
+
+        public void CopyTo(Array array, int index)
+        {
+            if (array == null)
+                throw new ArgumentNullException();
+
+            if (index < 0)
+                throw new ArgumentOutOfRangeException();
+
+            if (array.Rank > 1)
                 throw new ArgumentException("array must be 1-dimensional");
 
             int cnt = count();
@@ -426,7 +459,7 @@ namespace clojure.lang
                 throw new ArgumentException();
 
             for (int i = 0; i < cnt; i++)
-                array.SetValue(nth(i), i+index);
+                array.SetValue(nth(i), i + index);
         }
 
         public int Count
@@ -441,27 +474,35 @@ namespace clojure.lang
 
         public object SyncRoot
         {
-            get { throw new NotImplementedException(); }
+            get { return this; }
         }
 
         #endregion
 
-        #region IEnumerable Members
+        #region IEnumerable<Object>, IEnumerable Members
 
-        public IEnumerator GetEnumerator()
+        public IEnumerator<object> GetEnumerator()
         {
             for (ISeq s = seq(); s != null; s = s.next())
                 yield return s.first();
         }
 
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            for (ISeq s = seq(); s != null; s = s.next())
+                yield return s.first();
+        }
 
         #endregion
 
         #region IComparable Members
 
-        public int CompareTo(object obj)
+        public int CompareTo(object other)
         {
-            IPersistentVector v = (IPersistentVector) obj;
+            IPersistentVector v =  (IPersistentVector)other;
+
+            if ( v == null )
+                return 1;
 
             if (count() < v.count())
                 return -1;
@@ -475,9 +516,15 @@ namespace clojure.lang
             }
             return 0;
         }
+        
+
+        int IComparable.CompareTo(object obj)
+        {
+            return CompareTo(obj);
+        }
 
         #endregion
-        
+
 
         /// <summary>
         /// Internal class providing <see cref="ISeq">ISeq</see> functionality for <see cref="APersistentVector">APersistentVector</see>.
