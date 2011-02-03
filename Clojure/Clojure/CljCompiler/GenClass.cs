@@ -30,8 +30,7 @@ namespace clojure.lang
         const string _mainName = "main";
       
         // For debugging purposes only: testing with no compile in process
-        //static GenContext _context = new GenContext("genclass", CompilerMode.Immediate);
-        static GenContext _context = new GenContext("genclass", false);
+        static GenContext _context = GenContext.CreateWithInternalAssembly("genclass", false);
 
         static readonly MethodInfo Method_RT_nth = typeof(RT).GetMethod("nth", new Type[] { typeof(object), typeof(Int32) });
         static readonly MethodInfo Method_RT_seq = typeof(RT).GetMethod("seq");
@@ -50,8 +49,7 @@ namespace clojure.lang
         public static void SaveContext()
         {
             _context.SaveAssembly();
-            //_context = new GenContext("genclass", CompilerMode.Immediate);
-            _context = new GenContext("genclass", false);
+            _context = GenContext.CreateWithInternalAssembly("genclass", false);
         }
          
 
@@ -83,8 +81,8 @@ namespace clojure.lang
 
             string extension = hasMain ? ".exe" : ".dll";
 
-            //GenContext context = new GenContext(className, extension, path, CompilerMode.File);
-            GenContext context = new GenContext(className, extension, path, true);
+            
+            GenContext context = GenContext.CreateWithExternalAssembly(Compiler.munge(path=="." ? className : path + "/" + className), extension, true);
 
             // define the class
             List<Type> interfaceTypes = new List<Type>();
@@ -93,7 +91,6 @@ namespace clojure.lang
                 interfaceTypes.Add((Type)s.first());
 
 
-            //TypeBuilder proxyTB = context.ModuleBldr.DefineType(
             TypeBuilder proxyTB = context.ModuleBuilder.DefineType(
                 className,
                 TypeAttributes.Class | TypeAttributes.Public,

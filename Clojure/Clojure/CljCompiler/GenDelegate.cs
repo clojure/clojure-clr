@@ -29,8 +29,7 @@ namespace clojure.lang
     {
         #region Data
 
-        //static GenContext _context = new GenContext("delegates", CompilerMode.Immediate);
-        static GenContext _context = new GenContext("delegates", false);
+        static GenContext _context = GenContext.CreateWithInternalAssembly("delegates", false);
 
         #endregion
 
@@ -40,8 +39,7 @@ namespace clojure.lang
         public static void SaveProxyContext()
         {
             _context.SaveAssembly();
-            //_context = new GenContext("delegates", CompilerMode.Immediate);
-            _context = new GenContext("delegates", false);
+            _context = GenContext.CreateWithInternalAssembly("delegates", false);
         }
 
         #endregion

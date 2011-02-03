@@ -1127,15 +1127,14 @@ namespace clojure.lang
             return expr;
         }
 
-        static GenContext _evalContext = new GenContext("eval", ".dll", null, false);
+        static GenContext _evalContext = GenContext.CreateWithInternalAssembly("eval", false);
         static public GenContext EvalContext { get { return _evalContext; } }
 
         static int _saveId = 0;
         public static void SaveEvalContext()
         {
             _evalContext.SaveAssembly();
-            //_evalContext = new GenContext("eval", CompilerMode.Immediate);
-            _evalContext = new GenContext("eval" + (_saveId++).ToString(), ".dll", null, false);
+            _evalContext = GenContext.CreateWithInternalAssembly("eval" + (_saveId++).ToString(), false);
         }
 
         public static bool IsCompiling
@@ -1163,8 +1162,8 @@ namespace clojure.lang
             LineNumberingTextReader lntr =
                 (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);
 
-            GenContext context = new GenContext(sourceName, ".dll", sourceDirectory, true);
-            GenContext evalContext = new GenContext("EvalForCompile", false);
+            GenContext context = GenContext.CreateWithExternalAssembly(relativePath, ".dll", true);
+            GenContext evalContext = GenContext.CreateWithInternalAssembly("EvalForCompile", false);
 
             Var.pushThreadBindings(RT.map(
                 SOURCE_PATH, sourcePath,

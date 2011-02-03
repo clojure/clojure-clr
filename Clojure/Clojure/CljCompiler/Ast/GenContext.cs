@@ -20,11 +20,12 @@ using System.Reflection;
 using System.Linq.Expressions;
 #endif
 using Microsoft.Scripting.Generation;
+using System;
 
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    public class GenContext
+    public sealed class GenContext
     {
         #region Data
 
@@ -63,12 +64,18 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region C-tors & factory methods
 
-        public GenContext(string assyName, bool createDynInitHelper)
-            : this(assyName, ".dll", null, createDynInitHelper)
+        public static GenContext CreateWithInternalAssembly(string assyName, bool createDynInitHelper)
         {
+            return new GenContext(assyName, ".dll", null, createDynInitHelper);
         }
 
-        public GenContext(string assyName, string extension, string directory, bool createDynInitHelper)
+        public static GenContext CreateWithExternalAssembly(string assyName, string extension, bool createDynInitHelper)
+        {
+            return new GenContext(assyName, extension, AppDomain.CurrentDomain.BaseDirectory,createDynInitHelper);
+        }
+
+
+        private GenContext(string assyName, string extension, string directory, bool createDynInitHelper)
         {
             // TODO: Make this settable from a *debug* flag
 #if DEBUG
@@ -76,6 +83,12 @@ namespace clojure.lang.CljCompiler.Ast
 #else
             _isDebuggable = false;
 #endif
+            if (directory != null)
+            {
+                if (directory.Length > 0 && directory != ".")
+                    assyName = assyName.Replace("/", ".");
+            }
+
             AssemblyName aname = new AssemblyName(assyName);
             _assyGen = new AssemblyGen(aname, directory, extension, _isDebuggable);
             if ( createDynInitHelper )

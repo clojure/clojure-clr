@@ -2515,11 +2515,17 @@ namespace clojure.lang
 
         public static void load(String relativePath, Boolean failIfNotFound)
         {
-            string assemblyname = relativePath + ".clj.dll";
-            string cljname = relativePath + ".clj";
+            //string assemblyname = relativePath + ".clj.dll";
+            //string cljname = relativePath + ".clj";
 
-            FileInfo assyInfo = FindFile(assemblyname);
+            //FileInfo assyInfo = FindFile(assemblyname);
+            //FileInfo cljInfo = FindFile(cljname);
+
+            string cljname = relativePath + ".clj";
             FileInfo cljInfo = FindFile(cljname);
+
+            string assemblyname = relativePath.Replace('/', '.') + ".clj.dll";
+            FileInfo assyInfo = FindFile(AppDomain.CurrentDomain.BaseDirectory, assemblyname);
 
             bool loaded = false;
 

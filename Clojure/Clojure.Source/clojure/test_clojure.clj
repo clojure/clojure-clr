@@ -50,7 +50,7 @@
       ; :clojure-xml
       :clojure-zip
       :protocols 
-      ; :genclass   -- TODO: We have some problems with classpaths -- this is a perfect example
+      :genclass
       :main
       :vectors
       ; :annotations

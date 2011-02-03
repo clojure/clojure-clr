@@ -67,8 +67,7 @@ namespace clojure.lang
                 _context = (GenContext)Compiler.COMPILER_CONTEXT.deref();
             }
             else
-                //_context = new GenContext("proxy" + (++_saveId).ToString(), CompilerMode.Immediate);
-                _context = new GenContext("proxy" + (++_saveId).ToString(), false);
+                _context = GenContext.CreateWithInternalAssembly("proxy" + (++_saveId).ToString(), false);
         }
 
 

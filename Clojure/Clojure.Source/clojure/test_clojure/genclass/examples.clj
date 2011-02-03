@@ -14,6 +14,6 @@
   [_ o1 o2]
   "foo with o, o")
 
-(defn -foo-Object-int
+(defn -foo-Object-Int32
   [_ o i]
   "foo with o, i")

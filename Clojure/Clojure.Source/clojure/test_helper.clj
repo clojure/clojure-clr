@@ -16,7 +16,8 @@
 ;;  Created 04 November 2010
 
 (ns clojure.test-helper
-    (:use clojure.test))
+    (:use clojure.test)
+	(:import (System.Reflection BindingFlags)))        ;;; added import
 
 (let [nl Environment/NewLine]                         ;;; (System/getProperty "line.separator")] 
   (defn platform-newlines [s] (.Replace s "\n" nl)))  ;;; .replace
@@ -67,7 +68,7 @@
   ([klass field-name]
      (get-field klass field-name nil))
   ([klass field-name inst]
-     (-> klass (.GetField (name field-name) System.Reflection.BindingFlags/NonPublic )                ;;; .getDeclaredField
+     (-> klass  (.GetField (name field-name) (enum-or BindingFlags/Public BindingFlags/NonPublic BindingFlags/DeclaredOnly BindingFlags/Instance BindingFlags/Static))  ;;; (.getDeclaredField (name field-name))
          ;;;(doto (.setAccessible true))
          (.GetValue inst))))                                       ;;; .get
          

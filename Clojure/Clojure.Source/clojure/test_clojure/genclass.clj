@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 ; Author: Stuart Halloway
-
+(assembly-load "clojure.test_clojure.genclass.examples.ExampleClass")(load "clojure/test_clojure/genclass/examples")               ;;; added because we do not have automatic class loading
 (ns clojure.test-clojure.genclass
   (:use clojure.test clojure.test-helper)
   (:import clojure.test-clojure.genclass.examples.ExampleClass))
@@ -17,15 +17,15 @@
         o (Object.)]
     (is (= "foo with o, o" (.foo example o o)))
     (is (= "foo with o, i" (.foo example o (int 1))))
-    (is (thrown? ArgumentException (.foo example o)))))         ;;; java.lang.UnsupportedOperationException
+    (is (thrown? NotImplementedException (.foo example o)))))         ;;; java.lang.UnsupportedOperationException
 
 (deftest name-munging
   (testing "mapping from Java fields to Clojure vars"
-    (is (= #'clojure.test-clojure.genclass.examples/-foo-Object-int
-           (get-field ExampleClass 'foo_Object_int__var)))
+    (is (= #'clojure.test-clojure.genclass.examples/-foo-Object-Int32        ;;; -foo-Object-int
+           (get-field ExampleClass 'foo_Object_Int32__var)))                 ;;; foo_Object_int__var
     ;;;(is (= #'clojure.test-clojure.genclass.examples/-toString   ------ TODO: Figure out why JVM can find this var, we can't.
     ;;;       (get-field ExampleClass 'toString__var))))
-           )
+           ))
 
 (deftest genclass-option-validation
   (is (fails-with-cause? ArgumentException #"Not a valid method name: has-hyphen"                            ;;; IllegalArgumentException

@@ -169,7 +169,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             // Needs its own GenContext so it has its own DynInitHelper
             // Can't reuse Compiler.EvalContext if it is a DefType because we have to use the given name and will get a conflict on redefinition
-            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? (ret.IsDefType ? new GenContext("deftype" + RT.nextID().ToString(),".dll",".",true) : Compiler.EvalContext);
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? (ret.IsDefType ? GenContext.CreateWithExternalAssembly("deftype" + RT.nextID().ToString(),".dll",true) : Compiler.EvalContext);
             GenContext genC = context.WithNewDynInitHelper(ret.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
             //genC.FnCompileMode = FnMode.Full;
 
@@ -251,7 +251,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
             //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", CompilerMode.Immediate);
-            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", false);
+            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? GenContext.CreateWithExternalAssembly("stub" + RT.nextID().ToString(), ".dll", false);
             TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.COMPILE_STUB_PREFIX + "." + ret.InternalName, TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
 
             tb.DefineDefaultConstructor(MethodAttributes.Public);

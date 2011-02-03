@@ -1,10 +1,12 @@
-﻿;   Copyright (c) David Miller. All rights reserved.
+﻿;   Copyright (c) Rich Hickey. All rights reserved.
 ;   The use and distribution terms for this software are covered by the
 ;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
 ;   which can be found in the file epl-v10.html at the root of this distribution.
 ;   By using this software in any fashion, you are agreeing to be bound by
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
+
+;   Author: David Miller
 
 (in-ns 'clojure.core)
 
@@ -74,13 +76,22 @@
   ^{:doc "Sets the value at the index/indices. Works on arrays of sbyte. Returns val."
     :added "1.0"}
   aset-sbyte setSByte sbyte)
+
+; Support for enums
   
 (defn enum-val [t n]
   "Gets a value from an enum from the name"
   {:added "1.0"}
   (let [s (if (string? n) n (name n))]
    (Enum/Parse t s)))
-  
+
+(defn enum-or 
+  "Combine via or several enum (flag values).  Coerced to type of first value."
+  {:added "1.3"}
+  [flag & flags]    
+  (Enum/ToObject (class flag) (reduce1 bit-or flag flags)))
+
+
 ; Support for interop
 
 (defn by-ref
@@ -163,4 +174,22 @@
        (for [[k v] (seq m)]
          (when-let [c (resolve-attribute k)]
            [ c (normalize-attribute-arg v) ])))))
-                
+
+
+(defn assembly-load 
+  "Load an assembly given its name"
+  {:added "1.3"}
+  [^String assembly-name]
+  (System.Reflection.Assembly/Load assembly-name))
+
+(defn assembly-load-from
+  "Load an assembly given its path"
+  {:added "1.3"}
+  [^String assembly-name]
+  (System.Reflection.Assembly/LoadFrom assembly-name))
+
+  (defn assembly-load-file
+  "Load an assembly given its name"
+  {:added "1.3"}
+  [^String assembly-name]
+  (System.Reflection.Assembly/LoadFile assembly-name))
