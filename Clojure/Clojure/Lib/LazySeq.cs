@@ -15,11 +15,12 @@
 using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 
 namespace clojure.lang
 {
     [Serializable]
-    public sealed class LazySeq : Obj, ISeq, ICollection, IList  // Should we do IList -- has index accessor
+    public sealed class LazySeq : Obj, ISeq, ICollection, IList, IList<Object>  // Should we do IList -- has index accessor
     {
         #region Data
 
@@ -174,14 +175,19 @@ namespace clojure.lang
 
         #region IList Members
 
-        public int Add(object value)
+        public void Add(object item)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot modify immutable sequence");
+        }
+
+        int IList.Add(object value)
+        {
+            throw new InvalidOperationException("Cannot modify immutable sequence");
         }
 
         public void Clear()
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot modify immutable sequence");
         }
 
         public bool Contains(object value)
@@ -195,7 +201,7 @@ namespace clojure.lang
         public int IndexOf(object value)
         {
             ISeq s = seq();
-            for (int i=0; s != null; s = s.next(), i++)
+            for (int i = 0; s != null; s = s.next(), i++)
                 if (Util.equiv(s.first(), value))
                     return i;
             return -1;
@@ -203,7 +209,7 @@ namespace clojure.lang
 
         public void Insert(int index, object value)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot modify immutable sequence");
         }
 
         public bool IsFixedSize
@@ -216,21 +222,26 @@ namespace clojure.lang
             get { return true; }
         }
 
-        public void Remove(object value)
+        public bool Remove(object value)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot modify immutable sequence");
+        }
+
+        void IList.Remove(object value)
+        {
+            throw new InvalidOperationException("Cannot modify immutable sequence");
         }
 
         public void RemoveAt(int index)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot modify immutable sequence");
         }
 
         public object this[int index]
         {
             get
             {
-                if ( index < 0 )
+                if (index < 0)
                     throw new ArgumentOutOfRangeException("Index must be non-negative.");
 
                 ISeq s = seq();
@@ -248,6 +259,24 @@ namespace clojure.lang
         #endregion
 
         #region ICollection Members
+
+        public void CopyTo(object[] array, int index)
+        {
+            if (array == null)
+                throw new ArgumentNullException("Array must not be null");
+            if (index < 0)
+                throw new ArgumentOutOfRangeException("Index must be non-negative.");
+            if (array.Rank > 1)
+                throw new ArgumentException("Array must not be multidimensional.");
+            if (index >= array.Length)
+                throw new ArgumentException("Index must be less than the length of the array.");
+            if (count() > array.Length - index)
+                throw new ArgumentException("Not enough available space from index to end of the array.");
+
+            ISeq s = seq();
+            for (int i = index; s != null; ++i, s = s.next())
+                array[i] = s.first();
+        }
 
         public void CopyTo(Array array, int index)
         {
@@ -286,7 +315,12 @@ namespace clojure.lang
 
         #region IEnumerable Members
 
-        public IEnumerator GetEnumerator()
+        public IEnumerator<object> GetEnumerator()
+        {
+            return new SeqEnumerator(seq());
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return new SeqEnumerator(seq());
         }

@@ -23,7 +23,7 @@ namespace clojure.lang
     /// Provides a basic impelmentation of <see cref="IPersistentMap">IPersistentMap</see> functionality.
     /// </summary>
     [Serializable]
-    public abstract class APersistentMap: AFn, IPersistentMap, IDictionary, IEnumerable<IMapEntry>, MapEquivalence
+    public abstract class APersistentMap: AFn, IPersistentMap, IDictionary, IEnumerable<IMapEntry>, MapEquivalence, IDictionary<Object,Object>
     {
         #region  Data
         
@@ -269,16 +269,38 @@ namespace clojure.lang
 
         #endregion
 
-        #region IDictionary Members
+        #region IDictionary<Object, Object>, IDictionary Members
+
+        public void Add(KeyValuePair<object, object> item)
+        {
+            throw new InvalidOperationException("Cannot modify an immutable map");
+        }
 
         public void Add(object key, object value)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Cannot modify an immutable map");
         }
 
         public void Clear()
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Cannot modify an immutable map");
+        }
+
+        public bool Contains(KeyValuePair<object, object> item)
+        {
+            object value;
+            if (!TryGetValue(item.Key, out value))
+                return false;
+
+            if (value == null)
+                return item.Value == null;
+
+            return value.Equals(item.Value);
+        }
+
+        public bool ContainsKey(object key)
+        {
+            return containsKey(key);
         }
 
         public bool Contains(object key)
@@ -286,7 +308,28 @@ namespace clojure.lang
             return this.containsKey(key);
         }
 
-        public virtual IDictionaryEnumerator GetEnumerator()
+
+        virtual public IEnumerator<KeyValuePair<object, object>> GetEnumerator()
+        {
+            for (ISeq s = seq(); s != null; s = s.next())
+            {
+                IMapEntry entry = (IMapEntry)s.first();
+                yield return new KeyValuePair<object, object>(entry.key(), entry.val());
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new MapEnumerator(this);
+        }
+
+        IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
+        {
+            for (ISeq s = seq(); s != null; s = s.next())
+                yield return (IMapEntry)s.first();
+        }
+
+        IDictionaryEnumerator IDictionary.GetEnumerator()
         {
             return new MapEnumerator(this);
         }
@@ -301,17 +344,39 @@ namespace clojure.lang
             get { return true; }
         }
 
-        public ICollection Keys
+
+        public ICollection<object> Keys
         {
             get { return KeySeq.create(seq()); }
         }
 
-        public void Remove(object key)
+        ICollection IDictionary.Keys
         {
-            throw new NotImplementedException();
+            get { return KeySeq.create(seq()); }
         }
 
-        public ICollection Values
+
+        public bool Remove(KeyValuePair<object, object> item)
+        {
+            throw new InvalidOperationException("Cannot modify an immutable map");
+        }
+
+        public bool Remove(object key)
+        {
+            throw new InvalidOperationException("Cannot modify an immutable map");
+        }
+
+        void IDictionary.Remove(object key)
+        {
+            throw new InvalidOperationException("Cannot modify an immutable map");
+        }
+
+        public ICollection<object> Values
+        {
+            get { return ValSeq.create(seq()); }
+        }
+
+        ICollection IDictionary.Values
         {
             get { return ValSeq.create(seq()); }
         }
@@ -324,18 +389,37 @@ namespace clojure.lang
             }
             set
             {
-                throw new NotImplementedException();
+                throw new InvalidOperationException("Cannot modify an immutable map");
             }
+        }
+
+        static readonly object _missingValue = new object();
+
+        public bool TryGetValue(object key, out object value)
+        {
+            object found = valAt(key, _missingValue);
+            if ( found == _missingValue)
+            {
+                value = null;
+                return false;
+            }
+
+            value = found;
+            return true;
         }
 
         #endregion
 
         #region ICollection Members
 
+        public void CopyTo(KeyValuePair<object, object>[] array, int arrayIndex)
+        {
+        }
+
         public void CopyTo(Array array, int index)
         {
             ISeq s = seq();
-            if ( s != null )
+            if (s != null)
                 ((ICollection)s).CopyTo(array, index);
         }
 
@@ -351,16 +435,7 @@ namespace clojure.lang
 
         public object SyncRoot
         {
-            get { throw new NotImplementedException(); }
-        }
-
-        #endregion
-
-        #region IEnumerable Members
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            get { return this; }
         }
 
         #endregion
@@ -490,18 +565,5 @@ namespace clojure.lang
 
             #endregion
         }
-
-
-        #region IEnumerable<IMapEntry> Members
-
-        IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
-        {
-            for (ISeq s = seq(); s != null; s = s.next())
-                yield return (IMapEntry)s.first();
-        }
-
-        #endregion
     }
-
-
 }

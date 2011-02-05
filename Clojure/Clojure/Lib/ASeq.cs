@@ -15,6 +15,7 @@
 using System;
 
 using System.Collections;
+using System.Collections.Generic;
 
 namespace clojure.lang
 {
@@ -22,7 +23,7 @@ namespace clojure.lang
     /// Provides basic implementation of <see cref="ISeq"/> functionality.
     /// </summary>
     [Serializable]
-    public abstract class ASeq: Obj, ISeq, IList
+    public abstract class ASeq: Obj, ISeq, IList, IList<Object>
     {
         #region Data
 
@@ -229,78 +230,21 @@ namespace clojure.lang
 
         #endregion
 
-        #region ICollection Members
+        #region IList<Object>, IList Members
 
-        /// <summary>
-        /// Copies the elements of the sequence to an Array, starting at a particular index.
-        /// </summary>
-        /// <param name="array">The Array that is the destination of the copy.</param>
-        /// <param name="index">The zero-based index in <paramref name="array"/>array</param> at which copying begins.
-        public void CopyTo(Array array, int index)
+        public void Add(object item)
         {
-            if (array == null)
-                throw new ArgumentException("Array cannot be null.");
-
-            if (array.Length - index < count())
-                throw new ArgumentException("The number of elements in source is greater than the available space in the array.)");
-
-            if ( array.Rank != 1 )
-                throw new ArgumentException("Array must be 1-dimensional.");
-
-            if (index < 0)
-                throw new ArgumentOutOfRangeException("Index cannot be negative.");
-
-            ISeq s = seq();
-            for (int i = index; i < array.Length && s != null; ++i, s = s.next())
-                array.SetValue(s.first(), i);
+            throw new InvalidOperationException("Cannot modify an immutable sequence");
         }
 
-        /// <summary>
-        /// Gets the number of elements in the sequence.
-        /// </summary>
-        public int Count
+        int IList.Add(object value)
         {
-            get { return count(); }
-        }
-        
-        /// <summary>
-        /// Gets a value indicating whether access to the collection is thread-safe.
-        /// </summary>
-        public bool IsSynchronized
-        {
-            get { return true; }
-        }
-
-        public object SyncRoot
-        {
-            get { throw new NotImplementedException("No need for explicit locking on immutable sequence."); }
-        }
-
-        #endregion
-
-        #region IEnumerable Members
-
-        /// <summary>
-        /// Returns an enumerator that iterates through a collection.
-        /// </summary>
-        /// <returns>A <see cref="SeqEnumerator">SeqEnumerator</see> that iterates through the sequence.</returns>
-        public IEnumerator GetEnumerator()
-        {
-            return new SeqEnumerator(seq());
-        }
-
-        #endregion
-
-        #region IList Members
-
-        public int Add(object value)
-        {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot modify an immutable sequence");
         }
 
         public void Clear()
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot modify an immutable sequence");
         }
 
         public bool Contains(object value)
@@ -315,7 +259,7 @@ namespace clojure.lang
         public virtual int IndexOf(object value)
         {
             int i = 0;
-            for (ISeq s = seq(); s != null; s = s.next(),i++)
+            for (ISeq s = seq(); s != null; s = s.next(), i++)
                 if (Util.equiv(s.first(), value))
                     return i;
 
@@ -324,12 +268,12 @@ namespace clojure.lang
 
         public void Insert(int index, object value)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot modify an immutable sequence");
         }
 
         public bool IsFixedSize
         {
-            get { throw new NotImplementedException(); }
+            get { return true; }
         }
 
         public bool IsReadOnly
@@ -337,15 +281,21 @@ namespace clojure.lang
             get { return true; }
         }
 
-        public void Remove(object value)
+        public bool Remove(object item)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot modify an immutable sequence");
+        }
+
+        void IList.Remove(object value)
+        {
+            throw new InvalidOperationException("Cannot modify an immutable sequence");
         }
 
         public void RemoveAt(int index)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Cannot modify an immutable sequence");
         }
+
 
         public object this[int index]
         {
@@ -366,8 +316,94 @@ namespace clojure.lang
             }
             set
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Cannot modify an immutable sequence");
             }
+        }
+
+        #endregion
+
+        #region ICollection Members
+
+        public void CopyTo(object[] array, int index)
+        {
+            if (array == null)
+                throw new ArgumentException("Array cannot be null.");
+
+            if (array.Length - index < count())
+                throw new ArgumentException("The number of elements in source is greater than the available space in the array.)");
+
+            if (array.Rank != 1)
+                throw new ArgumentException("Array must be 1-dimensional.");
+
+            if (index < 0)
+                throw new ArgumentOutOfRangeException("Index cannot be negative.");
+
+            ISeq s = seq();
+            for (int i = index; i < array.Length && s != null; ++i, s = s.next())
+                array[i] = s.first();
+        }
+
+        /// <summary>
+        /// Copies the elements of the sequence to an Array, starting at a particular index.
+        /// </summary>
+        /// <param name="array">The Array that is the destination of the copy.</param>
+        /// <param name="index">The zero-based index in <paramref name="array"/>array</param> at which copying begins.
+        public void CopyTo(Array array, int index)
+        {
+            if (array == null)
+                throw new ArgumentException("Array cannot be null.");
+
+            if (array.Length - index < count())
+                throw new ArgumentException("The number of elements in source is greater than the available space in the array.)");
+
+            if (array.Rank != 1)
+                throw new ArgumentException("Array must be 1-dimensional.");
+
+            if (index < 0)
+                throw new ArgumentOutOfRangeException("Index cannot be negative.");
+
+            ISeq s = seq();
+            for (int i = index; i < array.Length && s != null; ++i, s = s.next())
+                array.SetValue(s.first(), i);
+        }
+
+        /// <summary>
+        /// Gets the number of elements in the sequence.
+        /// </summary>
+        public int Count
+        {
+            get { return count(); }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether access to the collection is thread-safe.
+        /// </summary>
+        public bool IsSynchronized
+        {
+            get { return true; }
+        }
+
+        public object SyncRoot
+        {
+            get { return this; }
+        }
+
+        #endregion
+
+        #region IEnumerable Members
+
+        public IEnumerator<object> GetEnumerator()
+        {
+            return new SeqEnumerator(seq());
+        }
+
+        /// <summary>
+        /// Returns an enumerator that iterates through a collection.
+        /// </summary>
+        /// <returns>A <see cref="SeqEnumerator">SeqEnumerator</see> that iterates through the sequence.</returns>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new SeqEnumerator(seq());
         }
 
         #endregion

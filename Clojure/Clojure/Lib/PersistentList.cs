@@ -22,7 +22,7 @@ namespace clojure.lang
     /// Represents a persistent list.
     /// </summary>
     [Serializable]
-    public class PersistentList : ASeq, IPersistentList, IReduce, IList, Counted
+    public class PersistentList : ASeq, IPersistentList, IReduce, IList, IList<Object>, Counted
     {
 
         #region Data
@@ -275,7 +275,7 @@ namespace clojure.lang
         /// Represents an empty <see cref="IPersistentList">IPersistentList</see>.
         /// </summary>
         [Serializable]
-        public class EmptyList : Obj, IPersistentList, IList, ISeq, Counted
+        public class EmptyList : Obj, IPersistentList, IList, IList<Object>, ISeq, Counted
         {
             #region C-tors
 
@@ -443,6 +443,11 @@ namespace clojure.lang
 
             #region ICollection Members
 
+            public void CopyTo(object[] array, int arrayIndex)
+            {
+                // no-op: no items to copy.
+            }
+
             public void CopyTo(Array array, int index)
             {
                 // no-op: no items to copy.
@@ -460,14 +465,19 @@ namespace clojure.lang
 
             public object SyncRoot
             {
-                get { throw new NotImplementedException(); }
+                get { return this; }
             }
 
             #endregion
 
             #region IEnumerable Members
 
-            public IEnumerator GetEnumerator()
+            public IEnumerator<object> GetEnumerator()
+            {
+                yield break;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
             {
                 yield break;
             }
@@ -476,19 +486,24 @@ namespace clojure.lang
 
             #region IList Members
 
-            public int Add(object value)
+            public void Add(object value)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Cannot modify an immutable list");
+            }
+
+            int IList.Add(object value)
+            {
+                throw new InvalidOperationException("Cannot modify an immutable list");
             }
 
             public void Clear()
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Cannot modify an immutable list");
             }
 
             public bool Contains(object value)
             {
-                
+
                 for (ISeq s = seq(); s != null; s = s.next())
                     if (Util.equiv(s.first(), value))
                         return true;
@@ -506,7 +521,7 @@ namespace clojure.lang
 
             public void Insert(int index, object value)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Cannot modify an immutable list");
             }
 
             public bool IsFixedSize
@@ -519,14 +534,19 @@ namespace clojure.lang
                 get { return true; }
             }
 
-            public void Remove(object value)
+            public bool Remove(object value)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Cannot modify an immutable list");
+            }
+            
+            void IList.Remove(object value)
+            {
+                throw new InvalidOperationException("Cannot modify an immutable list");
             }
 
             public void RemoveAt(int index)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Cannot modify an immutable list");
             }
 
             public object this[int index]
@@ -537,7 +557,7 @@ namespace clojure.lang
                 }
                 set
                 {
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException("Cannot modify an immutable list");
                 }
             }
 

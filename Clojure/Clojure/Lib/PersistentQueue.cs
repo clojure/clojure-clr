@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace clojure.lang
 {
@@ -27,7 +28,7 @@ namespace clojure.lang
     /// so no reversing or suspensions required for persistent use.</para>
     /// </remarks>
     [Serializable]
-    public class PersistentQueue : Obj, IPersistentList, ICollection, Counted
+    public class PersistentQueue : Obj, IPersistentList, ICollection, ICollection<Object>, Counted
     {
         #region Data
 
@@ -216,20 +217,54 @@ namespace clojure.lang
 
         #region ICollection Members
 
+        public void Add(object item)
+        {
+            throw new InvalidOperationException("Cannot modify immutable queue");
+        }
+
+        public void Clear()
+        {
+            throw new InvalidOperationException("Cannot modify immutable queue");
+        }
+
+        public bool Contains(object item)
+        {
+            foreach (object element in this)
+                if (Util.Equals(element, item))
+                    return true;
+            return false;
+        }
+
+        public void CopyTo(object[] array, int arrayIndex)
+        {
+            int i = arrayIndex;
+            ISeq s;
+            for (s = _f; s != null; s = s.next(), i++)
+                array[i] = s.first();
+
+            for (s = _r.seq(); s != null; s = s.next(), i++)
+                array[i] = s.first();
+        }
+
         public void CopyTo(Array array, int index)
         {
             int i = index;
             ISeq s;
-            for ( s = _f; s != null; s = s.next(), i++)
+            for (s = _f; s != null; s = s.next(), i++)
                 array.SetValue(s.first(), i);
 
             for (s = _r.seq(); s != null; s = s.next(), i++)
-                array.SetValue(s.first(), i);    
+                array.SetValue(s.first(), i);
         }
 
         public int Count
         {
             get { return count(); }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return true; }
         }
 
         public bool IsSynchronized
@@ -239,14 +274,30 @@ namespace clojure.lang
 
         public object SyncRoot
         {
-            get { throw new NotImplementedException(); }
+            get { return true; }
+        }
+
+        public bool Remove(object item)
+        {
+            throw new InvalidOperationException("Cannot modify immutable queue");
         }
 
         #endregion
 
         #region IEnumerable Members
 
-        public IEnumerator GetEnumerator()
+        public IEnumerator<object> GetEnumerator()
+        {
+            ISeq s;
+            for (s = _f; s != null; s = s.next())
+                yield return s.first();
+
+            for (s = _r.seq(); s != null; s = s.next())
+                yield return s.first();
+        }
+
+
+        IEnumerator IEnumerable.GetEnumerator()
         {
             ISeq s;
             for (s = _f; s != null; s = s.next())
@@ -366,6 +417,5 @@ namespace clojure.lang
 
             #endregion
         }
-
     }
 }

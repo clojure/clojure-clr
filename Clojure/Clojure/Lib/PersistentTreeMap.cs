@@ -27,7 +27,7 @@ namespace clojure.lang
     /// <para>See Okasaki, Kahrs, Larsen et al</para>
     /// </remarks>
     [Serializable]
-    public class PersistentTreeMap : APersistentMap, IObj, Reversible, Sorted
+    public class PersistentTreeMap : APersistentMap, IObj, Reversible, Sorted, IEnumerable<IMapEntry>, IDictionary
     {
         #region Data
 
@@ -432,7 +432,22 @@ namespace clojure.lang
 
         #region IDictionary Members
 
-        public override IDictionaryEnumerator GetEnumerator()
+        public override IEnumerator<KeyValuePair<object, object>> GetEnumerator()
+        {
+            return new NodeEnumerator(_tree, true);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new NodeEnumerator(_tree, true);
+        }
+
+        IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
+        {
+            return new NodeEnumerator(_tree, true);
+        }
+
+        IDictionaryEnumerator IDictionary.GetEnumerator()
         {
             return new NodeEnumerator(_tree, true);
         }
@@ -1072,13 +1087,15 @@ namespace clojure.lang
 
         }
 
-        class NodeEnumerator : IDictionaryEnumerator
+        class NodeEnumerator : IDictionaryEnumerator, IEnumerator<KeyValuePair<object,object>>, IEnumerator<IMapEntry>
         {
             #region Data
 
             Stack<Node> _stack = new Stack<Node>();
             bool _asc;
             Node _startNode;
+
+            bool _beforeStart = true;
 
             #endregion
 
@@ -1088,14 +1105,14 @@ namespace clojure.lang
             {
                 _asc = asc;
                 _startNode = t;
-                push(t);
+                Push(t);
             }
 
             #endregion
 
             #region details
 
-            void push(Node t)
+            void Push(Node t)
             {
                 while (t != null)
                 {
@@ -1104,13 +1121,20 @@ namespace clojure.lang
                 }
             }
 
+            Node Peek()
+            {
+                if (_beforeStart)
+                    throw new InvalidOperationException("Enumerator before start of sequence");
+                return _stack.Peek();
+            }
+
             #endregion
 
             #region IDictionaryEnumerator Members
 
             public DictionaryEntry Entry
             {
-                get { return (DictionaryEntry)Current; }
+                get { Node n = Peek(); return new DictionaryEntry(n.Key, n.Val); }
             }
 
             public object Key
@@ -1128,24 +1152,44 @@ namespace clojure.lang
 
             #region IEnumerator Members
 
-            public object Current
+            public KeyValuePair<object, object> Current
             {
-                get { return _stack.Peek(); }
+                get { Node n = Peek(); return new KeyValuePair<object, object>(n.Key, n.Val); }
+            }
+
+            object IEnumerator.Current
+            {
+                get { return Peek(); }
+            }
+
+            IMapEntry IEnumerator<IMapEntry>.Current
+            {
+                get { return Peek(); }
             }
 
             public bool MoveNext()
             {
-                if (_stack.Count == 0)
-                    throw new InvalidOperationException("Enumerator at end.");
-                Node t = _stack.Pop();
-                push(_asc ? t.Right : t.Left);
+                if (_beforeStart)
+                {
+                    _beforeStart = false;
+                }
+                else
+                {
+                    Node t = _stack.Pop();
+                    Push(_asc ? t.Right : t.Left);
+                }
                 return _stack.Count > 0;
             }
 
             public void Reset()
             {
                 _stack.Clear();
-                push(_startNode);
+                Push(_startNode);
+                _beforeStart = true;
+            }
+
+            public void Dispose()
+            {
             }
 
             #endregion
