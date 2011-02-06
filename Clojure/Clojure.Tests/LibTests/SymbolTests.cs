@@ -238,7 +238,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArityException))]
         public void InvokeOnNoArgsFails()
         {
             Symbol sym1 = Symbol.intern("abc");
@@ -246,7 +246,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArityException))]
         public void InvokeOnTooManyArgsFails()
         {
             Symbol sym1 = Symbol.intern("abc");

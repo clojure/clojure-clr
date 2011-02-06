@@ -38,7 +38,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Symbols
 
         public static readonly Symbol BY_REF = Symbol.intern("by-ref");
-        public static readonly Symbol GENERIC = Symbol.intern("generic");
+        public static readonly Symbol TYPE_ARGS = Symbol.intern("type-arsg");
 
         #endregion
 
@@ -137,14 +137,25 @@ namespace clojure.lang.CljCompiler.Ast
                 ISeq call;
                 List<Type> typeArgs = null;
  
-                object third = RT.third(form);
+               //object third = RT.third(form);
 
-                if (third is ISeq && RT.first(third) is Symbol && ((Symbol)RT.first(third)).Equals(GENERIC))
-                {
-                    // We have a generic method call
-                    // (. thing (generic methodname type1 ...) args...)
-                    typeArgs = ParseGenericMethodTypeArgs(RT.next(RT.next(third)));
-                    call = RT.listStar(RT.second(third), RT.next(RT.next(RT.next(form))));
+                //if (third is ISeq && RT.first(third) is Symbol && ((Symbol)RT.first(third)).Equals(GENERIC))
+                //{
+                //    // We have a generic method call
+                //    // (. thing (generic methodname type1 ...) args...)
+                //    typeArgs = ParseGenericMethodTypeArgs(RT.next(RT.next(third)));
+                //    call = RT.listStar(RT.second(third), RT.next(RT.next(RT.next(form))));
+                //}
+                //else
+                //    call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));
+
+                object fourth = RT.fourth(form);
+                if (fourth is ISeq && RT.first(fourth) is Symbol && ((Symbol)RT.first(fourth)).Equals(TYPE_ARGS))
+                 {
+                    // We have a type args supplied for a generic method call
+                    // (. thing methodname (type-args type1 ... ) args ...)
+                    typeArgs = ParseGenericMethodTypeArgs(RT.next(fourth));
+                    call = RT.listStar(RT.third(form), RT.next(RT.next(RT.next(RT.next(form)))));
                 }
                 else
                     call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));

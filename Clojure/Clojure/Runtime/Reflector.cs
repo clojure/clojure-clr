@@ -140,22 +140,6 @@ namespace clojure.lang
 
         #region Method lookup
 
-        // old version, before generics, ByRef params, etc.
-        //public static List<MethodInfo> GetMethods(Type t, string name, int arity, bool getStatics)
-        //{
-        //    BindingFlags flags = BindingFlags.Public | BindingFlags.InvokeMethod;
-        //    if (getStatics)
-        //        flags |= BindingFlags.Static | BindingFlags.FlattenHierarchy;
-        //    else
-        //        flags |= BindingFlags.Instance;
-
-        //    IEnumerable<MethodInfo> einfo = t.GetMethods(flags).Where(mi => mi.Name == name && mi.GetParameters().Length == arity);
-        //    List<MethodInfo> infos = new List<MethodInfo>(einfo);
-
-        //    return infos;
-        //}
-
-
         public static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, List<HostArg> args, string methodName, List<Type> typeArgs)
         {
             List<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, true);
@@ -194,12 +178,11 @@ namespace clojure.lang
                     = targetType.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
                 infos = new List<MethodBase>();
                 foreach (MethodInfo minfo in einfos)
-                    if (typeArgs == null && !minfo.ContainsGenericParameters)
-                        infos.Add(minfo);
-                    else if (typeArgs != null && minfo.ContainsGenericParameters)
+                    if (typeArgs != null && minfo.ContainsGenericParameters)
                         infos.Add(minfo.MakeGenericMethod(typeArgs.ToArray<Type>()));
+                    else
+                        infos.Add(minfo);
             }
-
             return infos;
         }
 
@@ -308,7 +291,7 @@ namespace clojure.lang
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(targetType), BindingRestrictions.Empty));
 
             foreach (object arg in actualArgs)
-                argsPlus.Add(new DynamicMetaObject(Expression.Default(arg.GetType()), BindingRestrictions.Empty));
+                argsPlus.Add(new DynamicMetaObject(Expression.Default(arg.GetType()), BindingRestrictions.Empty,arg));
 
             OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
             DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), isStatic ? CallTypes.None : CallTypes.ImplicitInstance);

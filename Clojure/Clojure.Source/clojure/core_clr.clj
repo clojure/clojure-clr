@@ -101,28 +101,39 @@
   {:added "1.2"}
    [v] (throw (ArgumentException. "by-ref not used at top-level in an interop call or method signature")))
   
-(defn generic
-  "Signals that a generic method reference is desired for this interop call
+(defn type-args
+  "Supplies type arguments to a generic method interop call
 
   Should only be used in CLR interop code.  Throws an exception otherwise."
   {:added "1.3"}
-  [v] (throw (ArgumentException. "generic not used in interop call")))
+  [v] (throw (ArgumentException. "type-args not used in interop call")))
+
+(defn- str-join    ;; clojure.string not yet loaded
+  [coll]
+  (loop [sb (StringBuilder. (str (first coll)))
+	     more (next coll)]
+	(if more
+		(recur (-> sb (.Append ",") (.Append (str (first more))))
+			   (next more))
+		(str sb))))
+
+(defn- generate-generic-delegate 
+  [typename typesyms body]
+  (let [types (map (fn [tsym] (clojure.lang.CljCompiler.Ast.HostExpr/MaybeType tsym false)) typesyms)
+  		ftype (symbol (str typename "`" (count types) "[" (str-join types) "]"))]
+	  `(gen-delegate ~ftype ~@body)))
 
 (defmacro sys-func
-   "Translates to a gen-delegate for a System.Func<,...> call"
-   {:added "1.3"}
-   [typesyms & body ]
-   (let [types (map (fn [tsym] (clojure.lang.CljCompiler.Ast.HostExpr/MaybeType tsym false)) typesyms)
-         join  ; clojure.string not yet loaded
-		       (fn [coll] 
-			      (loop [sb (StringBuilder. (str (first coll)))
-				         more (next coll)]
-				    (if more
-					    (recur (-> sb (.Append ",") (.Append (str (first more))))
-						       (next more))
-					    (str sb))))
-		ftype (symbol (str "System.Func`" (count types) "[" (join types) "]"))]
-	  `(gen-delegate ~ftype ~@body)))
+  "Translates to a gen-delegate for a System.Func<,...> call"
+  {:added "1.3"}
+  [typesyms & body]
+  (generate-generic-delegate "System.Func" typesyms body))
+
+(defmacro sys-action
+  "Translates to a gen-delegate for a System.Action<,...> call"
+  {:added "1.3"}
+  [typesyms & body]
+  (generate-generic-delegate "System.Action" typesyms body))  
 
 ; Attribute handling
 
