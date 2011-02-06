@@ -38,7 +38,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Symbols
 
         public static readonly Symbol BY_REF = Symbol.intern("by-ref");
-        public static readonly Symbol TYPE_ARGS = Symbol.intern("type-arsg");
+        public static readonly Symbol TYPE_ARGS = Symbol.intern("type-args");
 
         #endregion
 
