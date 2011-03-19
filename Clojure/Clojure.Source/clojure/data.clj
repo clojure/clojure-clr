@@ -72,13 +72,19 @@
   System.Collections.IDictionary         ;;; java.util.Map
   (equality-partition [x] :map))
 
+(defn- as-set-value
+  [s]
+  (if (set? s) s (into #{} s)))
+
 (extend-protocol Diff
   clojure.lang.IPersistentSet            ;;; java.util.Set
-  (diff-similar [a b]
-    [(not-empty (set/difference a b))
-     (not-empty (set/difference b a))
-     (not-empty (set/intersection a b))])
-  
+  (diff-similar
+   [a b]
+   (let [aval (as-set-value a)
+         bval (as-set-value b)]
+     [(not-empty (set/difference aval bval))
+      (not-empty (set/difference bval aval))
+      (not-empty (set/intersection aval bval))]))  
   System.Collections.IList               ;;; java.util.List
   (diff-similar [a b]
     (vec (map vectorize (diff-associative
