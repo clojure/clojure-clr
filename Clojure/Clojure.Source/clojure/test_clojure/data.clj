@@ -24,6 +24,6 @@
        [#{:a} #{:b} #{:c :d}] #{:a :c :d} #{:b :c :d}
        [nil nil {:a 1}] {:a 1} {:a 1}
        [{:a #{2}} {:a #{4}} {:a #{3}}] {:a #{2 3}} {:a #{3 4}}
-	   [#{1} #{3} #{2}] (|System.Collections.Generic.List`1[System.Object]|. [1 2]) (|System.Collections.Generic.List`1[System.Object]|. [2 3])   ;;; HashSet
+	   ;;;[#{1} #{3} #{2}] (|System.Collections.Generic.List`1[System.Object]|. [1 2]) (|System.Collections.Generic.List`1[System.Object]|. [2 3])   ;;; HashSet
        [{:a {:c [1]}} {:a {:c [0]}} {:a {:c [nil 2] :b 1}}] {:a {:b 1 :c [1 2]}} {:a {:b 1 :c [0 2]}}))
 

@@ -77,7 +77,7 @@
   (if (set? s) s (into #{} s)))
 
 (extend-protocol Diff
-  clojure.lang.IPersistentSet            ;;; java.util.Set
+  clojure.lang.IPersistentSet            ;;; java.util.Set  -- we should be working with ISet here, but that 4.0 only. -- also can't handle generics in extend-protocol
   (diff-similar
    [a b]
    (let [aval (as-set-value a)
