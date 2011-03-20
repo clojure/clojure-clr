@@ -5928,14 +5928,14 @@
       (re-matches
        #"(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9_]+))?(?:-(SNAPSHOT))?"
        version-string)
-      clojure-version {:major       (Int32/Parse ^String major)         ;;; Integer/valueOf
-           :minor       (Int32/Parse ^String minor)                     ;;; Integer/valueOf
-           :incremental (Int32/Parse ^String incremental)               ;;; Integer/valueOf
-           :qualifier   (if (= qualifier "SNAPSHOT") nil qualifier)}]
+      clojure-version {:major       (Int32/Parse ^String major)                     ;;; Integer/valueOf
+                       :minor       (Int32/Parse ^String minor)                     ;;; Integer/valueOf
+                       :incremental (Int32/Parse ^String incremental)               ;;; Integer/valueOf
+                       :qualifier   (if (= qualifier "SNAPSHOT") nil qualifier)}]
   (def ^:dynamic *clojure-version*
-       (if (.Contains version-string "SNAPSHOT")                        ;;; .containts
-   (clojure.lang.RT/assoc clojure-version :interim true)
-   clojure-version)))
+     (if (.Contains version-string "SNAPSHOT")                        ;;; .contains
+       (clojure.lang.RT/assoc clojure-version :interim true)
+       clojure-version)))
       
 (add-doc-and-meta *clojure-version*
   "The version info for Clojure core, as a map containing :major :minor 
@@ -5957,7 +5957,7 @@
        (when-let [q (:qualifier *clojure-version*)]
          (when (pos? (count q)) (str "-" q)))
        (when (:interim *clojure-version*)
-   "-SNAPSHOT")))
+         "-SNAPSHOT")))
 
 (defn promise
   "Alpha - subject to change.
