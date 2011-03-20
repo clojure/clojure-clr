@@ -890,8 +890,10 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char leftbrace)
             {
-                //return PersistentHashMap.create(readDelimitedList('}', r, true));
-                return RT.map(readDelimitedList('}', r, true).ToArray());
+                Object[] a = readDelimitedList('}', r, true).ToArray();
+                if ((a.Length & 1) == 1)
+                    throw new Exception("Map literal must contain an even number of forms");
+                return RT.map(a);
             }
         }
 
