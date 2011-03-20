@@ -174,7 +174,7 @@ namespace clojure.lang.CljCompiler.Ast
                 IPersistentVector argvs = PersistentVector.EMPTY;
                 for (int i = 0; i < _args.count(); i++)
                     argvs = (IPersistentVector)argvs.cons(((Expr)_args.nth(i)).Eval());
-                return fn.applyTo(RT.seq(argvs));
+                return fn.applyTo(RT.seq(Util.Ret1(argvs, argvs = null)));
             }
             catch (Exception e)
             {
