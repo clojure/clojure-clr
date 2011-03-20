@@ -86,7 +86,7 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     int minhash = Util.ConvertToInt(e.key());
                     IMapEntry me = (IMapEntry)e.val();
-                    Expr testExpr = new ConstantExpr(me.key());
+                    Expr testExpr = me.key() == null ? Compiler.NIL_EXPR : new ConstantExpr(me.key());
                     tests[minhash] = testExpr;
                     Expr thenExpr;
                     //try 

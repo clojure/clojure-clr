@@ -2185,6 +2185,55 @@ namespace clojure.lang
 
         #endregion
 
+        #region Long overloads for bit ops
+
+        public static long and(long x, long y)
+        {
+            return x & y;
+        }
+
+        public static object and(Object x, long y)
+        {
+            return and(x, (Object)y);
+        }
+
+        public static object and(long x, Object y)
+        {
+            return and((Object)x, y);
+        }
+
+        static public long or(long x, long y)
+        {
+            return x | y;
+        }
+
+        static public object or(Object x, long y)
+        {
+            return or(x, (Object)y);
+        }
+
+        static public object or(long x, Object y)
+        {
+            return or((Object)x, y);
+        }
+
+        static public long xor(long x, long y)
+        {
+            return x ^ y;
+        }
+
+        static public object xor(Object x, long y)
+        {
+            return xor(x, (Object)y);
+        }
+
+        static public object xor(long x, Object y)
+        {
+            return xor((Object)x, y);
+        }
+
+        #endregion
+
         #region Overload resolution
 
         static public object add(long x, Object y)
