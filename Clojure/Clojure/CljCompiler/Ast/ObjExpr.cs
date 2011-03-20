@@ -429,8 +429,8 @@ namespace clojure.lang.CljCompiler.Ast
         private Type ConstantType(int i)
         {
             object o = _constants.nth(i);
-            Type t = o.GetType();
-            if (t.IsPublic)
+            Type t = o == null ? null : o.GetType();
+            if (t != null && t.IsPublic)
             {
                 // Java: can't emit derived fn types due to visibility
                 if (typeof(LazySeq).IsAssignableFrom(t))
