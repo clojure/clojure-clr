@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 ; Author: Stuart Halloway
-(assembly-load "clojure.test_clojure.genclass.examples.ExampleClass")(load "clojure/test_clojure/genclass/examples")               ;;; added because we do not have automatic class loading
+(assembly-load "clojure.test_clojure.genclass.examples.ExampleClass");;;(load "/clojure/test_clojure/genclass/examples")               ;;; added because we do not have automatic class loading
 (ns clojure.test-clojure.genclass
   (:use clojure.test clojure.test-helper)
   (:import clojure.test-clojure.genclass.examples.ExampleClass))

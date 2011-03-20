@@ -171,7 +171,7 @@
     <None Include="clojure\test\tap.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="clojure\test_clojure.clj">
+    <None Include="clojure\run_tests.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="clojure\test_clojure\agents.clj">

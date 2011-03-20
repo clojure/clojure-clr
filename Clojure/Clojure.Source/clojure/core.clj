@@ -5908,18 +5908,23 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; clojure version number ;;;;;;;;;;;;;;;;;;;;;;
 ;;; THIS EXPOSES WAY TOO MUCH JVM INTERNALS!
-(let [                                                                      ;;; version-stream (.getResourceAsStream (clojure.lang.RT/baseLoader) 
-                                                                            ;;;                                      "clojure/version.properties")
+(let [                                                                      ;;; version-stream (.getResourceAsStream 
+                                                                            ;;;        (clojure.lang.RT/baseLoader) 
+                                                                            ;;;        "clojure/version.properties")
       properties (. clojure.lang.RT GetVersionProperties)                   ;;; properties     (doto (new java.util.Properties) (.load version-stream))
-      prop (fn [k] (.getProperty properties (str "clojure.version." k)))
-      clojure-version {:major       (Int32/Parse ^String (prop "major"))            ;;;(Integer/valueOf (prop "major"))
-                       :minor       (Int32/Parse ^String (prop "minor"))            ;;;(Integer/valueOf (prop "minor"))
-                       :incremental (Int32/Parse ^String (prop "incremental"))      ;;;(Integer/valueOf (prop "incremental"))
-                       :qualifier   (prop "qualifier")}]
-  (def ^:dynamic *clojure-version* 
-    (if (not (= (prop "interim") "false"))
-      (clojure.lang.RT/assoc clojure-version :interim true)
-      clojure-version)))
+      version-string (.getProperty properties "version")
+      [_ major minor incremental qualifier snapshot]
+      (re-matches
+       #"(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9_]+))?(?:-(SNAPSHOT))?"
+       version-string)
+      clojure-version {:major       (Int32/Parse ^String major)         ;;; Integer/valueOf
+           :minor       (Int32/Parse ^String minor)                     ;;; Integer/valueOf
+           :incremental (Int32/Parse ^String incremental)               ;;; Integer/valueOf
+           :qualifier   (if (= qualifier "SNAPSHOT") nil qualifier)}]
+  (def ^:dynamic *clojure-version*
+       (if (.Contains version-string "SNAPSHOT")                        ;;; .containts
+   (clojure.lang.RT/assoc clojure-version :interim true)
+   clojure-version)))
       
 (add-doc-and-meta *clojure-version*
   "The version info for Clojure core, as a map containing :major :minor 
@@ -5941,7 +5946,7 @@
        (when-let [q (:qualifier *clojure-version*)]
          (when (pos? (count q)) (str "-" q)))
        (when (:interim *clojure-version*)
-         "-SNAPSHOT")))
+   "-SNAPSHOT")))
 
 (defn promise
   "Alpha - subject to change.
