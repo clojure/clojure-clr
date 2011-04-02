@@ -27,14 +27,30 @@
  
  (def ^{:private true} prim->class
      {'int Int32
+	  'ints (Type/GetType "System.Int32[]")
       'long Int64
+	  'longs (Type/GetType "System.Int64[]")
       'float Single
+	  'floats (Type/GetType "System.Single[]")
       'double Double
+	  'doubles (Type/GetType "System.Double[]")
       'void  System.Void
       'short Int16 
+	  'shorts (Type/GetType "System.Int16[]")
       'boolean Boolean
+	  'booleans (Type/GetType "System.Boolean[]")
       'byte Byte
-      'char Char})
+	  'bytes (Type/GetType "System.Byte[]")
+	  'sbyte SByte
+	  'sbytes (Type/GetType "System.SByte[]")
+	  'ushort UInt16
+	  'ushorts (Type/GetType "System.UInt16[]")
+	  'uint  UInt32
+	  'uints (Type/GetType "System.UInt32[]")
+	  'ulong UInt64
+	  'ulongs (Type/GetType "System.UInt64[]")
+      'char Char
+	  'chars (Type/GetType "System.Char[]")})
 
  
  (defn- ^Type the-class [x]					;;; ^Class
@@ -43,7 +59,7 @@
    (contains? prim->class x) (prim->class x)
    :else (let [strx (str x)]
            (clojure.lang.RT/classForName 
-            (if (some #{\. \[} strx)           ;;; Added in commit 493b8f to add type hints for arrays of primitives.  Prolly not needed for us.
+            (if (some #{\. \[} strx)           
               strx
               (str "System." strx))))))         ;;;(str "java.lang." strx))))))
  
