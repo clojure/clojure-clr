@@ -26,6 +26,8 @@ namespace clojure.lang
 
         public static Type GenerateInterface(string iName, IPersistentMap attributes, ISeq extends, ISeq methods)
         {
+            iName = iName.Replace('-', '_');
+
             GenContext context;
 
             if (Compiler.IsCompiling)

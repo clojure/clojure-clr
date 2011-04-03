@@ -75,6 +75,8 @@ namespace clojure.lang
             string implNamespace,
             bool loadImplNameSpace)
         {
+            className = className.Replace('-', '_');
+
             string path = (string)Compiler.COMPILE_PATH.deref();
             if ( path == null)
                 throw new Exception("*compile-path* not set");
