@@ -125,10 +125,6 @@ namespace clojure.lang
         internal static readonly Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
             Symbol.intern("*file*"), "NO_SOURCE_PATH").setDynamic();
 
-        // boolean
-        public static readonly Var UNCHECKED_MATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-            Symbol.intern("*unchecked-math*"), false).setDynamic();
-
         //Integer
         internal static readonly Var LINE = Var.create(0).setDynamic();          // From the JVM version
         //internal static readonly Var LINE_BEFORE = Var.create(0).setDynamic();   // From the JVM version
@@ -1185,7 +1181,7 @@ namespace clojure.lang
                 CONSTANT_IDS, new IdentityHashMap(),
                 KEYWORDS, PersistentHashMap.EMPTY,
                 VARS, PersistentHashMap.EMPTY,
-                UNCHECKED_MATH, UNCHECKED_MATH.deref(),
+                RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref(),
                 RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref(),
 
                 //KEYWORD_CALLSITES, PersistentVector.EMPTY,  // jvm doesn't do this, don't know why
@@ -1374,7 +1370,7 @@ namespace clojure.lang
                 DOCUMENT_INFO, Expression.SymbolDocument(sourceName),  // I hope this is enough
 
                 RT.CURRENT_NS, RT.CURRENT_NS.deref(),
-                UNCHECKED_MATH, UNCHECKED_MATH.deref(),
+                RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref(),
                 RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref()
                 //LINE_BEFORE, lntr.LineNumber,
                 //LINE_AFTER, lntr.LineNumber

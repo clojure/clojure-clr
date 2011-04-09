@@ -57,7 +57,7 @@ namespace BootstrapCompile
                 Var.pushThreadBindings(RT.map(
                     Compiler.COMPILE_PATH, path,
                     RT.WARN_ON_REFLECTION, warnOnReflection,
-                    Compiler.UNCHECKED_MATH, uncheckedMath
+                    RT.UNCHECKED_MATH, uncheckedMath
                     ));
 
                 Stopwatch sw = new Stopwatch();

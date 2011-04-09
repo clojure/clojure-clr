@@ -434,6 +434,10 @@ namespace clojure.lang
             //= Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), RT.T);
             = Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), true).setDynamic();
 
+        // boolean
+        public static readonly Var UNCHECKED_MATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+            Symbol.intern("*unchecked-math*"), false).setDynamic();
+
         #endregion
 
         #region  Clojure-environment IFns needing support
@@ -548,7 +552,8 @@ namespace clojure.lang
         {
             Var.pushThreadBindings(
                 RT.map(CURRENT_NS, CURRENT_NS.deref(),
-                WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
+                WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref(),
+                RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()));
             try
             {
                 Symbol USER = Symbol.intern("user");
@@ -2544,7 +2549,8 @@ namespace clojure.lang
                 try
                 {
                     Var.pushThreadBindings(RT.map(CURRENT_NS, CURRENT_NS.deref(),
-                        WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref()));
+                        WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref(),
+                        RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()));
                     loaded = Compiler.LoadAssembly(assyInfo);
                 }
                 finally

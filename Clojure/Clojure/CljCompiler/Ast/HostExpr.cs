@@ -285,7 +285,7 @@ namespace clojure.lang.CljCompiler.Ast
             else if ( primt == typeof(long) && paramType == typeof(int) )
             {
                 Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
-                if (RT.booleanCast(Compiler.UNCHECKED_MATH.deref()))
+                if (RT.booleanCast(RT.UNCHECKED_MATH.deref()))
                     expr = Expression.Call(Compiler.Method_RT_uncheckedIntCast_long, expr);
                 else
                     expr = Expression.Call(Compiler.Method_RT_intCast_long, expr);
@@ -376,7 +376,7 @@ namespace clojure.lang.CljCompiler.Ast
                     return Expression.Call(null, Method_RT_booleanCast, objArgExpr);
                 //if (Util.IsPrimitiveNumeric(argType) && Util.IsPrimitiveNumeric(paramType))
                 //    return Expression.Convert(argExpr,paramType);
-                if (RT.booleanCast(Compiler.UNCHECKED_MATH.deref()))
+                if (RT.booleanCast(RT.UNCHECKED_MATH.deref()))
                 {
                     if (paramType == typeof(sbyte))
                         return Expression.Call(null, Method_RT_uncheckedSbyteCast, objArgExpr);
