@@ -15,7 +15,7 @@
 
 namespace clojure.lang
 {
-    public interface IChunkedSeq : ISeq
+    public interface IChunkedSeq : ISeq, Sequential
     {
         IChunk chunkedFirst();
         ISeq chunkedNext();

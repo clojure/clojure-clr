@@ -28,7 +28,7 @@ namespace clojure.lang
     /// }
     /// </code>
     /// </remarks>
-    public interface ISeq: IPersistentCollection, Sequential
+    public interface ISeq: IPersistentCollection
     {
         /// <summary>
         /// Gets the first item.

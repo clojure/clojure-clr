@@ -20,7 +20,7 @@ using System.Collections.Generic;
 namespace clojure.lang
 {
     [Serializable]
-    public sealed class LazySeq : Obj, ISeq, ICollection, IList, IList<Object>  // Should we do IList -- has index accessor
+    public sealed class LazySeq : Obj, ISeq, Sequential, ICollection, IList, IList<Object>  // Should we do IList -- has index accessor
     {
         #region Data
 
