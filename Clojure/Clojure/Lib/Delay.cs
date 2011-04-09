@@ -19,7 +19,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements a delay of a function call.
     /// </summary>
-    public class Delay : IDeref
+    public class Delay : IDeref, IPending
     {
         #region Data
 
@@ -83,6 +83,15 @@ namespace clojure.lang
             return _val;
         }
 
+
+        #endregion
+
+        #region IPending members
+
+        public bool isRealized()
+        {
+            return _fn == null;
+        }
 
         #endregion
     }

@@ -20,7 +20,7 @@ using System.Collections.Generic;
 namespace clojure.lang
 {
     [Serializable]
-    public sealed class LazySeq : Obj, ISeq, Sequential, ICollection, IList, IList<Object>  // Should we do IList -- has index accessor
+    public sealed class LazySeq : Obj, ISeq, Sequential, ICollection, IList, IList<Object>, IPending  // Should we do IList -- has index accessor
     {
         #region Data
 
@@ -169,6 +169,15 @@ namespace clojure.lang
         public ISeq cons(object o)
         {
             return RT.cons(o, seq());
+        }
+
+        #endregion
+
+        #region IPending members
+
+        public bool isRealized()
+        {
+            return _fn == null;
         }
 
         #endregion
@@ -326,5 +335,6 @@ namespace clojure.lang
         }
 
         #endregion
+
     }
 }

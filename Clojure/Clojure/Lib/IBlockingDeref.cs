@@ -16,8 +16,8 @@ using System;
 
 namespace clojure.lang
 {
-    public interface IPromiseImpl
+    public interface IBlockingDeref
     {
-        bool hasValue();
+        object deref(long ms, Object timeoutValue);
     }
 }

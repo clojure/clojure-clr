@@ -10,6 +10,7 @@
 
 /**
  *   Author: Shawn Hoover
+ *   Edited: David Miller
  **/
 
 using System;
@@ -20,7 +21,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements IDeref and java.util.concurrent.Future, like the proxy in JVM clojure core.
     /// </summary>
-    public class Future : IDeref
+    public class Future : IDeref, IBlockingDeref, IPending
     {
         #region Data
 
@@ -120,6 +121,26 @@ namespace clojure.lang
                 throw new Exception("Future has an error", _error);
             }
             return _value;
+        }
+
+        #endregion
+
+        #region IPending members
+
+        public bool isRealized()
+        {
+            return isDone();
+        }
+
+        #endregion
+
+        #region  IBlockingDeref
+
+        public object deref(long ms, object timeoutValue)
+        {
+            if (_t.Join((int)ms))
+                return _value;
+            return timeoutValue;
         }
 
         #endregion
