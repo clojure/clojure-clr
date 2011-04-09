@@ -69,7 +69,10 @@ namespace clojure.lang
 
         #region IMeta Members
 
-        public abstract IPersistentMap meta();
+        public virtual IPersistentMap meta()
+        {
+            return null;
+        }
 
         #endregion
     }

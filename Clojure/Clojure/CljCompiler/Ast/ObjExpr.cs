@@ -271,6 +271,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected bool OnceOnly { get { return _onceOnly; } }
 
+        protected virtual bool SupportsMeta { get { return !IsDefType; } }
 
         #endregion
 
@@ -307,11 +308,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Type[] CtorTypes()
         {
-            int i = IsDefType ? 0 : 1;
+            int i = !SupportsMeta ? 0 : 1;
 
             Type[] ret = new Type[_closes.count() + i];
 
-            if (!IsDefType)
+            if (SupportsMeta)
                 ret[0] = typeof(IPersistentMap);
 
             for (ISeq s = RT.keys(_closes); s != null; s = s.next(), i++)
@@ -386,7 +387,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             GenerateConstantFields(baseTB);
 
-            if (!IsDefType)
+            if (SupportsMeta)
                 _metaField = baseTB.DefineField("__meta", typeof(IPersistentMap), FieldAttributes.Public | FieldAttributes.InitOnly);
 
             GenerateClosedOverFields(baseTB);
@@ -722,11 +723,11 @@ namespace clojure.lang.CljCompiler.Ast
             if (_altCtorDrops > 0)
                 GenerateFieldOnlyConstructor(_typeBuilder, _baseType);
 
-            if (!IsDefType)
+            if (SupportsMeta)
             {
                 _nonmetaCtorInfo = GenerateNonMetaConstructor(_typeBuilder, _baseType);
-                GenerateMetaFunctions(_typeBuilder);
             }
+            GenerateMetaFunctions(_typeBuilder);
 
             //GenerateReloadVarsMethod(_typeBuilder, context);
 
@@ -957,11 +958,17 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else if (value is PersistentHashSet)
             {
-                Expression expr = GenerateListAsObjectArray(RT.seq(value));
-                ret = Expression.Call(
-                    null,
-                    Compiler.Method_PersistentHashSet_create,
-                    expr);
+                ISeq vs = RT.seq(value);
+                if (vs == null)
+                    ret = Expression.Field(null, Compiler.Method_PersistentHashSet_EMPTY);
+                else
+                {
+                    Expression expr = GenerateListAsObjectArray(vs);
+                    ret = Expression.Call(
+                        null,
+                        Compiler.Method_PersistentHashSet_create,
+                        expr);
+                }
             }
             else if (value is ISeq || value is IPersistentList)
             {
@@ -1102,8 +1109,13 @@ namespace clojure.lang.CljCompiler.Ast
             // IPersistentMap meta()
             MethodBuilder metaMB = fnTB.DefineMethod("meta", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.ReuseSlot, typeof(IPersistentMap), Type.EmptyTypes);
             ILGen gen = new ILGen(metaMB.GetILGenerator());
-            gen.EmitLoadArg(0);
-            gen.EmitFieldGet(_metaField);
+            if (SupportsMeta)
+            {
+                gen.EmitLoadArg(0);
+                gen.EmitFieldGet(_metaField);
+            }
+            else
+                gen.EmitNull();
             gen.Emit(OpCodes.Ret);
 
 
@@ -1111,14 +1123,19 @@ namespace clojure.lang.CljCompiler.Ast
             MethodBuilder withMB = fnTB.DefineMethod("withMeta", MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.ReuseSlot, typeof(IObj), new Type[] { typeof(IPersistentMap) });
             gen = new ILGen(withMB.GetILGenerator());
 
-            gen.EmitLoadArg(1);   // meta arg
-            foreach (FieldBuilder fb in _closedOverFields)
+            if (SupportsMeta)
             {
-                gen.EmitLoadArg(0);
-                gen.EmitFieldGet(fb);
-            }
+                gen.EmitLoadArg(1);   // meta arg
+                foreach (FieldBuilder fb in _closedOverFields)
+                {
+                    gen.EmitLoadArg(0);
+                    gen.EmitFieldGet(fb);
+                }
 
-            gen.EmitNew(_ctorInfo);
+                gen.EmitNew(_ctorInfo);
+            }
+            else
+                gen.EmitLoadArg(0);  //this
             gen.Emit(OpCodes.Ret);
         }
 
@@ -1147,7 +1164,7 @@ namespace clojure.lang.CljCompiler.Ast
             //}
 
             // Store Meta
-            if (!IsDefType)
+            if (SupportsMeta)
             {
                 gen.EmitLoadArg(0);
                 gen.EmitLoadArg(1);
@@ -1157,7 +1174,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             // store closed-overs in their fields
             int a = 0;
-            int offset = IsDefType ? 1 : 2;
+            int offset = !SupportsMeta ? 1 : 2;
 
             for (ISeq s = RT.keys(_closes); s != null; s = s.next(), a++)
             {
@@ -1263,7 +1280,8 @@ namespace clojure.lang.CljCompiler.Ast
                 return Expression.Constant(null);
 
             List<Expression> args = new List<Expression>(_closes.count()+1);
-            args.Add(Expression.Constant(null,typeof(IPersistentMap))); // meta
+            if (SupportsMeta)
+                args.Add(Expression.Constant(null,typeof(IPersistentMap))); // meta
             for (ISeq s = RT.keys(_closes); s != null; s = s.next())
             {
                 LocalBinding lb = (LocalBinding)s.first();

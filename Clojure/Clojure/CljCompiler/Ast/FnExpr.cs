@@ -37,6 +37,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         bool IsVariadic { get { return _variadicMethod != null; } }
 
+        bool _hasMeta;
+
+        protected override bool SupportsMeta
+        {
+            get { return _hasMeta; }
+        }
+
         #endregion
 
         #region Ctors
@@ -190,6 +197,12 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.popThreadBindings();
             }
 
+
+            IPersistentMap fmeta = RT.meta(origForm);
+            if (fmeta != null)
+                fmeta = fmeta.without(RT.LINE_KEY).without(RT.FILE_KEY);
+            fn._hasMeta = RT.count(fmeta) > 0;
+
             if (Compiler.IsCompiling || prims.Count > 0)
             {
                 GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
@@ -211,8 +224,8 @@ namespace clojure.lang.CljCompiler.Ast
                 fn.FnMode = FnMode.Light;
             }
 
-            if (origForm is IObj && ((IObj)origForm).meta() != null)
-                return new MetaExpr(fn, MapExpr.Parse(pcon.EvEx(),((IObj)origForm).meta()));
+            if (fn.SupportsMeta)
+                return new MetaExpr(fn, MapExpr.Parse(pcon.EvEx(),fmeta));
             else
                 return fn;
         }

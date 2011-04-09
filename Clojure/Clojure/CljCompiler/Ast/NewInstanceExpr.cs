@@ -383,6 +383,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region ObjExpr methods
+
+        protected override bool SupportsMeta
+        {
+            get { return ! IsDefType; }
+        }
+
+        #endregion
+
         #region Code generation
 
         protected override void GenerateMethods(GenContext context)
