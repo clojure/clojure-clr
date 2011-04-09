@@ -181,9 +181,7 @@ namespace clojure.lang
                     arglist = null;
                     return ifn.invoke();
                 case 1:
-                    object a1 = arglist.first();
-                    arglist = null; 
-                    return ifn.invoke(a1);
+                    return ifn.invoke(Util.Ret1(arglist.first(),arglist=null));
                 case 2:
                     return ifn.invoke(arglist.first()
                             , Util.Ret1((arglist = arglist.next()).first(),arglist = null)

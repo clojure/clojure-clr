@@ -340,80 +340,164 @@ namespace clojure.lang
 
         public override object invoke(object arg1)
         {
-            return GetFn(_dispatchFn.invoke(arg1)).invoke(arg1);
+            return GetFn(_dispatchFn.invoke(arg1)).
+                    invoke(Util.Ret1(arg1, arg1 = null));
         }
 
         public override object invoke(object arg1, object arg2)
         {
-            return GetFn(_dispatchFn.invoke(arg1, arg2)).invoke(arg1, arg2);
+            return GetFn(_dispatchFn.invoke(arg1, arg2)).
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3)
         {
-            return GetFn(_dispatchFn.invoke(arg1, arg2, arg3)).invoke(arg1, arg2, arg3);
+            return GetFn(_dispatchFn.invoke(arg1, arg2, arg3)).
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4)
         {
-            return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4)).invoke(arg1, arg2, arg3, arg4);
+            return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4)).
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5)
         {
-            return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5)).invoke(arg1, arg2, arg3, arg4, arg5);
+            return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5)).
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6)
         {
-            return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6)).invoke(arg1, arg2, arg3, arg4, arg5, arg6);
+            return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6)).
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7)
         {
-            return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7))
-                    .invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+            return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7)).
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8)
         {
             return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)).
-                    invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9)
         {
             return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)).
-                    invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10)
         {
             return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)).
-                    invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null),
+                             Util.Ret1(arg10, arg10 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11)
         {
             return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)).
-                    invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null),
+                             Util.Ret1(arg10, arg10 = null),
+                             Util.Ret1(arg11, arg11 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12)
         {
             return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12)).
-                    invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null),
+                             Util.Ret1(arg10, arg10 = null),
+                             Util.Ret1(arg11, arg11 = null),
+                             Util.Ret1(arg12, arg12 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13)
         {
             return GetFn(_dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)).
-                    invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null),
+                             Util.Ret1(arg10, arg10 = null),
+                             Util.Ret1(arg11, arg11 = null),
+                             Util.Ret1(arg12, arg12 = null),
+                             Util.Ret1(arg13, arg13 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
@@ -421,7 +505,20 @@ namespace clojure.lang
         {
             return GetFn(
                     _dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)).
-                    invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null),
+                             Util.Ret1(arg10, arg10 = null),
+                             Util.Ret1(arg11, arg11 = null),
+                             Util.Ret1(arg12, arg12 = null),
+                             Util.Ret1(arg13, arg13 = null),
+                             Util.Ret1(arg14, arg14 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
@@ -430,8 +527,22 @@ namespace clojure.lang
         {
             return GetFn(
                     _dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                      arg15))
-                    .invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+                                      arg15)).
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null),
+                             Util.Ret1(arg10, arg10 = null),
+                             Util.Ret1(arg11, arg11 = null),
+                             Util.Ret1(arg12, arg12 = null),
+                             Util.Ret1(arg13, arg13 = null),
+                             Util.Ret1(arg14, arg14 = null),
+                             Util.Ret1(arg15, arg15 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
@@ -440,9 +551,23 @@ namespace clojure.lang
         {
             return GetFn(
                     _dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                      arg15, arg16))
-                    .invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                            arg15, arg16);
+                                      arg15, arg16)).
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null),
+                             Util.Ret1(arg10, arg10 = null),
+                             Util.Ret1(arg11, arg11 = null),
+                             Util.Ret1(arg12, arg12 = null),
+                             Util.Ret1(arg13, arg13 = null),
+                             Util.Ret1(arg14, arg14 = null),
+                             Util.Ret1(arg15, arg15 = null),
+                             Util.Ret1(arg16, arg16 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
@@ -451,9 +576,24 @@ namespace clojure.lang
         {
             return GetFn(
                     _dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                                      arg15, arg16, arg17))
-                    .invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                            arg15, arg16, arg17);
+                                      arg15, arg16, arg17)).
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null),
+                             Util.Ret1(arg10, arg10 = null),
+                             Util.Ret1(arg11, arg11 = null),
+                             Util.Ret1(arg12, arg12 = null),
+                             Util.Ret1(arg13, arg13 = null),
+                             Util.Ret1(arg14, arg14 = null),
+                             Util.Ret1(arg15, arg15 = null),
+                             Util.Ret1(arg16, arg16 = null),
+                             Util.Ret1(arg17, arg17 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
@@ -463,8 +603,24 @@ namespace clojure.lang
             return GetFn(
                     _dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
                                       arg15, arg16, arg17, arg18)).
-                    invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                           arg15, arg16, arg17, arg18);
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null),
+                             Util.Ret1(arg10, arg10 = null),
+                             Util.Ret1(arg11, arg11 = null),
+                             Util.Ret1(arg12, arg12 = null),
+                             Util.Ret1(arg13, arg13 = null),
+                             Util.Ret1(arg14, arg14 = null),
+                             Util.Ret1(arg15, arg15 = null),
+                             Util.Ret1(arg16, arg16 = null),
+                             Util.Ret1(arg17, arg17 = null),
+                             Util.Ret1(arg18, arg18 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
@@ -474,8 +630,25 @@ namespace clojure.lang
             return GetFn(
                     _dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
                                       arg15, arg16, arg17, arg18, arg19)).
-                    invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                           arg15, arg16, arg17, arg18, arg19);
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null),
+                             Util.Ret1(arg10, arg10 = null),
+                             Util.Ret1(arg11, arg11 = null),
+                             Util.Ret1(arg12, arg12 = null),
+                             Util.Ret1(arg13, arg13 = null),
+                             Util.Ret1(arg14, arg14 = null),
+                             Util.Ret1(arg15, arg15 = null),
+                             Util.Ret1(arg16, arg16 = null),
+                             Util.Ret1(arg17, arg17 = null),
+                             Util.Ret1(arg18, arg18 = null),
+                             Util.Ret1(arg19, arg19 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
@@ -485,8 +658,26 @@ namespace clojure.lang
             return GetFn(
                     _dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
                                       arg15, arg16, arg17, arg18, arg19, arg20)).
-                    invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                           arg15, arg16, arg17, arg18, arg19, arg20);
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null),
+                             Util.Ret1(arg10, arg10 = null),
+                             Util.Ret1(arg11, arg11 = null),
+                             Util.Ret1(arg12, arg12 = null),
+                             Util.Ret1(arg13, arg13 = null),
+                             Util.Ret1(arg14, arg14 = null),
+                             Util.Ret1(arg15, arg15 = null),
+                             Util.Ret1(arg16, arg16 = null),
+                             Util.Ret1(arg17, arg17 = null),
+                             Util.Ret1(arg18, arg18 = null),
+                             Util.Ret1(arg19, arg19 = null),
+                             Util.Ret1(arg20, arg20 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
@@ -496,8 +687,27 @@ namespace clojure.lang
             return GetFn(
                     _dispatchFn.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
                                       arg15, arg16, arg17, arg18, arg19, arg20, args)).
-                    invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14,
-                           arg15, arg16, arg17, arg18, arg19, arg20, args);
+                    invoke(Util.Ret1(arg1, arg1 = null),
+                            Util.Ret1(arg2, arg2 = null),
+                             Util.Ret1(arg3, arg3 = null),
+                             Util.Ret1(arg4, arg4 = null),
+                             Util.Ret1(arg5, arg5 = null),
+                             Util.Ret1(arg6, arg6 = null),
+                             Util.Ret1(arg7, arg7 = null),
+                             Util.Ret1(arg8, arg8 = null),
+                             Util.Ret1(arg9, arg9 = null),
+                             Util.Ret1(arg10, arg10 = null),
+                             Util.Ret1(arg11, arg11 = null),
+                             Util.Ret1(arg12, arg12 = null),
+                             Util.Ret1(arg13, arg13 = null),
+                             Util.Ret1(arg14, arg14 = null),
+                             Util.Ret1(arg15, arg15 = null),
+                             Util.Ret1(arg16, arg16 = null),
+                             Util.Ret1(arg17, arg17 = null),
+                             Util.Ret1(arg18, arg18 = null),
+                             Util.Ret1(arg19, arg19 = null),
+                             Util.Ret1(arg20, arg20 = null),
+                            args);
         }
 
 
