@@ -418,140 +418,350 @@ namespace clojure.lang
         {
             return (_fn1 == null)
                 ? base.invoke(arg1)
-                : _fn1(arg1);
+                : _fn1(
+                Util.Ret1(arg1, arg1 = null));
         }
 
         public override object invoke(object arg1, object arg2)
         {
             return (_fn2 == null)
                 ? base.invoke(arg1, arg2)
-                : _fn2(arg1, arg2);
+                : _fn2(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3)
         {
             return (_fn3 == null)
                 ? base.invoke(arg1, arg2, arg3)
-                : _fn3(arg1, arg2, arg3);
+                : _fn3(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4)
         {
             return (_fn4 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4)
-                : _fn4(arg1, arg2, arg3, arg4);
+                : _fn4(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5)
         {
             return (_fn5 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5)
-                : _fn5(arg1, arg2, arg3, arg4, arg5);
+                : _fn5(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6)
         {
             return (_fn6 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6)
-                : _fn6(arg1, arg2, arg3, arg4, arg5, arg6);
+                : _fn6(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7)
         {
             return (_fn7 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-                : _fn7(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+                : _fn7(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8)
         {
             return (_fn8 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-                : _fn8(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+                : _fn8(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9)
         {
             return (_fn9 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-                : _fn9(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+                : _fn9(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null),
+                Util.Ret1(arg9, arg9 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10)
         {
             return (_fn10 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
-                : _fn10(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+                : _fn10(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null),
+                Util.Ret1(arg9, arg9 = null),
+                Util.Ret1(arg10, arg10 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11)
         {
             return (_fn11 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
-                : _fn11(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+                : _fn11(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null),
+                Util.Ret1(arg9, arg9 = null),
+                Util.Ret1(arg10, arg10 = null),
+                Util.Ret1(arg11, arg11 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12)
         {
             return (_fn12 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12)
-                : _fn12(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+                : _fn12(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null),
+                Util.Ret1(arg9, arg9 = null),
+                Util.Ret1(arg10, arg10 = null),
+                Util.Ret1(arg11, arg11 = null),
+                Util.Ret1(arg12, arg12 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13)
         {
             return (_fn13 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
-                : _fn13(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+                : _fn13(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null),
+                Util.Ret1(arg9, arg9 = null),
+                Util.Ret1(arg10, arg10 = null),
+                Util.Ret1(arg11, arg11 = null),
+                Util.Ret1(arg12, arg12 = null),
+                Util.Ret1(arg13, arg13 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14)
         {
             return (_fn14 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
-                : _fn14(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+                : _fn14(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null),
+                Util.Ret1(arg9, arg9 = null),
+                Util.Ret1(arg10, arg10 = null),
+                Util.Ret1(arg11, arg11 = null),
+                Util.Ret1(arg12, arg12 = null),
+                Util.Ret1(arg13, arg13 = null),
+                Util.Ret1(arg14, arg14 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15)
         {
             return (_fn15 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15)
-                : _fn15(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+                : _fn15(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null),
+                Util.Ret1(arg9, arg9 = null),
+                Util.Ret1(arg10, arg10 = null),
+                Util.Ret1(arg11, arg11 = null),
+                Util.Ret1(arg12, arg12 = null),
+                Util.Ret1(arg13, arg13 = null),
+                Util.Ret1(arg14, arg14 = null),
+                Util.Ret1(arg15, arg15 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16)
         {
             return (_fn16 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16)
-                : _fn16(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
+                : _fn16(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null),
+                Util.Ret1(arg9, arg9 = null),
+                Util.Ret1(arg10, arg10 = null),
+                Util.Ret1(arg11, arg11 = null),
+                Util.Ret1(arg12, arg12 = null),
+                Util.Ret1(arg13, arg13 = null),
+                Util.Ret1(arg14, arg14 = null),
+                Util.Ret1(arg15, arg15 = null),
+                Util.Ret1(arg16, arg16 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17)
         {
             return (_fn17 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17)
-                : _fn17(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17);
+                : _fn17(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null),
+                Util.Ret1(arg9, arg9 = null),
+                Util.Ret1(arg10, arg10 = null),
+                Util.Ret1(arg11, arg11 = null),
+                Util.Ret1(arg12, arg12 = null),
+                Util.Ret1(arg13, arg13 = null),
+                Util.Ret1(arg14, arg14 = null),
+                Util.Ret1(arg15, arg15 = null),
+                Util.Ret1(arg16, arg16 = null),
+                Util.Ret1(arg17, arg17 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, object arg18)
         {
             return (_fn18 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18)
-                : _fn18(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18);
+                : _fn18(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null),
+                Util.Ret1(arg9, arg9 = null),
+                Util.Ret1(arg10, arg10 = null),
+                Util.Ret1(arg11, arg11 = null),
+                Util.Ret1(arg12, arg12 = null),
+                Util.Ret1(arg13, arg13 = null),
+                Util.Ret1(arg14, arg14 = null),
+                Util.Ret1(arg15, arg15 = null),
+                Util.Ret1(arg16, arg16 = null),
+                Util.Ret1(arg17, arg17 = null),
+                Util.Ret1(arg18, arg18 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, object arg18, object arg19)
         {
             return (_fn19 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19)
-                : _fn19(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19);
+                : _fn19(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null),
+                Util.Ret1(arg9, arg9 = null),
+                Util.Ret1(arg10, arg10 = null),
+                Util.Ret1(arg11, arg11 = null),
+                Util.Ret1(arg12, arg12 = null),
+                Util.Ret1(arg13, arg13 = null),
+                Util.Ret1(arg14, arg14 = null),
+                Util.Ret1(arg15, arg15 = null),
+                Util.Ret1(arg16, arg16 = null),
+                Util.Ret1(arg17, arg17 = null),
+                Util.Ret1(arg18, arg18 = null),
+                Util.Ret1(arg19, arg19 = null));
         }
 
         public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, object arg18, object arg19, object arg20)
         {
             return (_fn20 == null)
                 ? base.invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20)
-                : _fn20(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20);
+                : _fn20(
+                Util.Ret1(arg1, arg1 = null),
+                Util.Ret1(arg2, arg2 = null),
+                Util.Ret1(arg3, arg3 = null),
+                Util.Ret1(arg4, arg4 = null),
+                Util.Ret1(arg5, arg5 = null),
+                Util.Ret1(arg6, arg6 = null),
+                Util.Ret1(arg7, arg7 = null),
+                Util.Ret1(arg8, arg8 = null),
+                Util.Ret1(arg9, arg9 = null),
+                Util.Ret1(arg10, arg10 = null),
+                Util.Ret1(arg11, arg11 = null),
+                Util.Ret1(arg12, arg12 = null),
+                Util.Ret1(arg13, arg13 = null),
+                Util.Ret1(arg14, arg14 = null),
+                Util.Ret1(arg15, arg15 = null),
+                Util.Ret1(arg16, arg16 = null),
+                Util.Ret1(arg17, arg17 = null),
+                Util.Ret1(arg18, arg18 = null),
+                Util.Ret1(arg19, arg19 = null),
+                Util.Ret1(arg20, arg20 = null));
         }
 
         //public override object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7, object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14, object arg15, object arg16, object arg17, object arg18, object arg19, object arg20, params object[] args)
