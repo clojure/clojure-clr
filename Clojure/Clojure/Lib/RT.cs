@@ -582,6 +582,15 @@ namespace clojure.lang
 
         #endregion
 
+        #region Keyword support
+
+        public static Keyword keyword(string ns, string name)
+        {
+            return Keyword.intern((Symbol.intern(ns, name)));
+        }
+
+        #endregion
+
         #region Var support
 
         static public Var var(String ns, String name)

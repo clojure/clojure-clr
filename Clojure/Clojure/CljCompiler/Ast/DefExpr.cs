@@ -136,7 +136,16 @@ namespace clojure.lang.CljCompiler.Ast
                 if (docstring != null)
                     mm = (IPersistentMap)RT.assoc(mm, RT.DOC_KEY, docstring);
 
-                Expr meta =  mm == null ? null : Compiler.Analyze(pcon.EvEx(),mm);
+                //mm = mm.without(RT.DOC_KEY)
+                //            .without(Keyword.intern(null, "arglists"))
+                //            .without(RT.FILE_KEY)
+                //            .without(RT.LINE_KEY)
+                //            .without(Keyword.intern(null, "ns"))
+                //            .without(Keyword.intern(null, "name"))
+                //            .without(Keyword.intern(null, "added"))
+                //            .without(Keyword.intern(null, "static"));
+
+                Expr meta =  mm == null || mm.count() == 0 ? null : Compiler.Analyze(pcon.EvEx(),mm);
                 Expr init = Compiler.Analyze(pcon.EvEx(),RT.third(form), v.Symbol.Name);
                 bool initProvided = RT.count(form) == 3;
 

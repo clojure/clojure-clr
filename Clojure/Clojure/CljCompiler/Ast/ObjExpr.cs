@@ -26,6 +26,7 @@ using System.Reflection;
 using Microsoft.Scripting.Generation;
 using System.Collections;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -881,6 +882,8 @@ namespace clojure.lang.CljCompiler.Ast
 
             else if (value is String)
                 ret = Expression.Constant((String)value);
+            else if (value is Boolean)
+                ret = Expression.Constant((Boolean)value);
             else if (Util.IsPrimitive(value.GetType()))  // or just IsNumeric?
                 ret = Expression.Constant(value);
             else if (value is Type)
@@ -888,7 +891,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Type t = (Type)value;
                 if (t.IsValueType)
                     ret = Expression.Constant(t, typeof(Type));
-                else 
+                else
                     ret = Expression.Call(
                         null,
                         Compiler.Method_RT_classForName,
@@ -904,10 +907,19 @@ namespace clojure.lang.CljCompiler.Ast
                     Expression.Constant(sym.Name));
             }
             else if (value is Keyword)
+            {
+                Keyword keyword = (Keyword)value;
                 ret = Expression.Call(
                     null,
-                    Compiler.Method_Keyword_intern,
-                    GenerateValue(((Keyword)value).Symbol));
+                    Compiler.Method_RT_keyword,
+                    Expression.Convert(Expression.Constant(keyword.Namespace), typeof(string)),  // can be null
+                    Expression.Constant(keyword.Name));
+
+                //ret = Expression.Call(
+                //    null,
+                //    Compiler.Method_Keyword_intern,
+                //    GenerateValue(((Keyword)value).Symbol));
+            }
             //else if (value is KeywordCallSite)
             //{
             //}
@@ -943,6 +955,14 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.Method_RT_vector,
                     expr);
             }
+            else if (value is PersistentHashSet)
+            {
+                Expression expr = GenerateListAsObjectArray(RT.seq(value));
+                ret = Expression.Call(
+                    null,
+                    Compiler.Method_PersistentHashSet_create,
+                    expr);
+            }
             else if (value is ISeq || value is IPersistentList)
             {
                 Expression expr = GenerateListAsObjectArray(value);
@@ -950,6 +970,12 @@ namespace clojure.lang.CljCompiler.Ast
                     null,
                     Compiler.Method_PersistentList_create,
                     expr);
+            }
+            else if (value is Regex)
+            {
+                ret = Expression.New(
+                    Compiler.Ctor_Regex_1,
+                    Expression.Constant(((Regex)value).ToString()));
             }
             else
             {
