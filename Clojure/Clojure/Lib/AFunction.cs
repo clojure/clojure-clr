@@ -63,7 +63,42 @@ namespace clojure.lang
 
         #region IObj Members
 
-        public abstract IObj withMeta(IPersistentMap meta);
+        private class MetaWrapper : RestFn
+        {
+            AFunction _parent;
+            IPersistentMap _meta;
+
+            public MetaWrapper(AFunction parent, IPersistentMap meta)
+            {
+                _parent = parent;
+                _meta = meta;
+            }
+
+            public override int getRequiredArity()
+            {
+                return 0;
+            }
+
+            protected override object doInvoke(object args)
+            {
+                return _parent.applyTo((ISeq)args);
+            }
+
+            public override IPersistentMap meta()
+            {
+                return _meta;
+            }
+
+            public override IObj withMeta(IPersistentMap meta)
+            {
+                return _parent.withMeta(meta);
+            }
+        }
+
+        public virtual IObj withMeta(IPersistentMap meta)
+        {
+            return new MetaWrapper(this, meta);
+        }
 
         #endregion
 
