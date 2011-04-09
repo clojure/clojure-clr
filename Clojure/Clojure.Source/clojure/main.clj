@@ -14,10 +14,93 @@
   (:refer-clojure :exclude [with-bindings])
   (:import (clojure.lang Compiler Compiler+CompilerException             ;;;Compiler$CompilerException
                          LineNumberingTextReader RT))                   ;;; LineNumberingPushbackReader
-  (:use [clojure.repl :only (demunge root-cause stack-element-str get-stack-trace)]))
+  ;;(:use [clojure.repl :only (demunge root-cause stack-element-str get-stack-trace)])
+  )
 
 (declare main)
  
+;;;;;;;;;;;;;;;;;;; redundantly copied from clojure.repl to avoid dep ;;;;;;;;;;;;;;
+#_(defn root-cause [x] x)
+#_(defn stack-element-str
+  "Returns a (possibly unmunged) string representation of a StackTraceElement"
+  {:added "1.3"}
+  [^StackTraceElement el]
+  (.getClassName el))
+
+(def ^:private demunge-map
+  (into {"$" "/"} (map (fn [[k v]] [v k]) clojure.lang.Compiler/CHAR_MAP)))
+
+(def ^:private demunge-pattern
+  (re-pattern (apply str (interpose "|" (map #(.Replace % "_" "[_]")   ;;;     #(str "\\Q" % "\\E")
+                                             (keys demunge-map))))))
+
+(defn- re-replace [re s f]
+  (let [m (re-matcher re s)
+        mseq (take-while identity
+                         (repeatedly #(when (re-find m)
+                                        [(re-groups m) (.start m) (.end m)])))]
+    (apply str
+           (concat
+             (mapcat (fn [[_ _ start] [groups end]]
+                       (if end
+                         [(subs s start end) (f groups)]
+                         [(subs s start)]))
+                     (cons [0 0 0] mseq)
+                     (concat mseq [nil]))))))
+
+(defn demunge
+  "Given a string representation of a fn class,
+  as in a stack trace element, returns a readable version."
+  {:added "1.3"}
+  [fn-name]
+  (re-replace demunge-pattern fn-name demunge-map))
+
+(defn root-cause
+  "Returns the initial cause of an exception or error by peeling off all of
+  its wrappers"
+  [ ^Exception t]                     ;;; ^Throwable
+  (loop [cause t]
+    (if (and (instance? clojure.lang.Compiler+CompilerException cause)
+	         (not= (.Source ^clojure.lang.Compiler+CompilerException cause) "NO_SOURCE_FILE"))  ;;; .source
+      cause
+	  (if-let [cause (.InnerException cause)]    ;;; .getCause
+        (recur cause)
+        cause))))
+
+;;;  Added -DM
+
+(defn get-stack-trace 
+  "Gets the stack trace for an Exception"
+  [^Exception e]
+  (.GetFrames (System.Diagnostics.StackTrace. e true)))
+
+(defn stack-element-classname
+  [^System.Diagnostics.StackFrame el]
+  (if-let [t (.. el  (GetMethod) ReflectedType)] 
+    (.FullName t) 
+	""))
+
+(defn stack-element-methodname
+  [^System.Diagnostics.StackFrame el]
+  (.. el (GetMethod)  Name))
+
+;;;
+
+
+(defn stack-element-str
+  "Returns a (possibly unmunged) string representation of a StackTraceElement"
+  {:added "1.3"}
+  [^System.Diagnostics.StackFrame el]                                                   ;;; StackTraceElement
+  (let [file (.GetFileName el)                                       ;;; getFileName
+        clojure-fn? (and file (or (.EndsWith file ".clj")            ;;; endsWith
+                                  (= file "NO_SOURCE_FILE")))]
+    (str (if clojure-fn?
+           (demunge (stack-element-classname el))                              ;;; (.getClassName el))
+           (str (stack-element-classname el) "." (stack-element-methodname el)))   ;;; (.getClassName el)  (.getMethodName el)
+         " (" (.GetFileName el) ":" (.GetFileLineNumber el) ")")))        ;;; getFileName  getLineNumber
+;;;;;;;;;;;;;;;;;;; end of redundantly copied from clojure.repl to avoid dep ;;;;;;;;;;;;;;
+
+
 (defmacro with-bindings
   "Executes body in the context of thread-local bindings for several vars
   that often need to be set!: *ns* *warn-on-reflection* *math-context* 
