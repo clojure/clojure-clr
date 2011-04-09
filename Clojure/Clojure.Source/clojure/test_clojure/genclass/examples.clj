@@ -59,10 +59,12 @@
   (^"System.Int64[]"   returnsLongArray [])             ;;; "[J"
   (^"System.Single[]"  returnsFloatArray [])            ;;; "[F"
   (^"System.Double[]"  returnsDoubleArray [])           ;;; "[D"
-  (^"System.Boolean[]" returnsBooleanArray [])          ;;; "[Z"
-  ; Object arrays
-  (^void takesMapArray [^"System.Collections.Hashtable[]" a])       ;;; "[Ljava.util.Map;"
-  (^"System.Collections.Hashtable[][]" returnsMap2dArray []))
+  (^"System.Boolean[]" returnsBooleanArray []))         ;;; "[Z"
+
+(definterface UsesPreviousInterfaceFromThisFile
+  (^clojure.test_clojure.genclass.examples.ArrayDefInterface
+   identity
+   [^clojure.test_clojure.genclass.examples.ArrayDefInterface a]))
 
 (gen-interface
   :name clojure.test_clojure.genclass.examples.ArrayGenInterface
@@ -83,7 +85,4 @@
             [returnsLongArray [] "System.Int64[]"]              ;;; "[J"]
             [returnsFloatArray [] "System.Single[]"]            ;;; "[F"]
             [returnsDoubleArray [] "System.Double[]"]           ;;; "[D"]
-            [returnsBooleanArray [] "System.Boolean[]"]         ;;; "[Z"]
-            ; object arrays
-            [takesMapArray ["System.Collections.Hashtable[]"] void]                 ;;; "[Ljava.util.Map;"
-            [returnsMap2dArray [] "System.Collections.Hashtable[][]"]])             ;;; "[[Ljava.util.Map;"
+            [returnsBooleanArray [] "System.Boolean[]"]])         ;;; "[Z"]
