@@ -114,9 +114,9 @@ namespace clojure.lang.CljCompiler.Ast
                 bool isDynamic = RT.booleanCast(RT.get(mm, Compiler.DYNAMIC_KEY));
                 if (!isDynamic && sym.Name.StartsWith("*") && sym.Name.EndsWith("*") && sym.Name.Length > 1)
                 {
-                    RT.errPrintWriter().WriteLine("Var {0} is not marked :dynamic true, setting to :dynamic. You should fix this before next release!", sym);
-                    isDynamic = true;
-                    mm = (IPersistentMap)RT.assoc(mm, Compiler.DYNAMIC_KEY, true);
+                    RT.errPrintWriter().WriteLine("Warning: {0} not declared dynamic and thus is not dynamically rebindable, "
+                                          + "but its name suggests otherwise. Please either indicate ^:dynamic {0} or change the name.\n",
+                                           sym);
                 }
 
                 if (RT.booleanCast(RT.get(mm, Compiler.ARGLISTS_KEY)))
