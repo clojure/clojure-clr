@@ -315,7 +315,7 @@
          (vector-of :double)
          (vector-of :char))
     (testing "with invalid type argument"
-      (are [x] (thrown? InvalidCastException x)                           ;;; NullPointerException
+      (are [x] (thrown? NullReferenceException x)                           ;;; NullPointerException
            (vector-of nil)
            (vector-of Single)                                             ;;; Float/TYPE
            (vector-of 'int)
@@ -332,7 +332,7 @@
          (apply vector (range 1000)) (apply vector-of :int (range 1000))
          [1 2 3] (vector-of :int 1M 2.0 3.1)
          [97 98 99] (vector-of :int \a \b \c))
-    (testing "with null values"
+    #_(testing "with null values"
       (are [x] (thrown? InvalidCastException x)                           ;;; NullPointerException
         (vector-of :int nil)
         (vector-of :int 1 nil)
@@ -343,12 +343,12 @@
         (vector-of :int 1 2 3 4 5 6 nil)))
     (testing "with unsupported values"
       (are [x] (thrown? InvalidCastException x)                           ;;; ClassCastException
-           (vector-of :int true)
-           (vector-of :int 1 2 3 4 5 false)
+           ;;;(vector-of :int true)
+           ;;;(vector-of :int 1 2 3 4 5 false)
            (vector-of :int {:a 1 :b 2})
            (vector-of :int [1 2 3 4] [5 6])
            (vector-of :int '(1 2 3 4))
            (vector-of :int #{1 2 3 4})
            (vector-of :int (sorted-set 1 2 3 4))
-           (vector-of :int 1 2 "3")
-           (vector-of :int "1" "2" "3")))))
+           ;;;(vector-of :int 1 2 "3")
+           ))));;;(vector-of :int "1" "2" "3")))))
