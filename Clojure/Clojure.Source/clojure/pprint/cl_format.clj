@@ -1088,10 +1088,11 @@ Note this should only be used for the last one in the sequence"
             (let [s ^String x]
               (.Write writer 
                       ^String (capitalize-string (.ToLower s) @last-was-whitespace?))       ;;;   toLowerCase
-              (dosync 
-               (ref-set last-was-whitespace? 
-                        (Char/IsWhiteSpace 
-                         ^Char (nth s (dec (count s)))))))
+              (when (pos? (.Length s))                                                      ;;; .length
+                (dosync 
+                 (ref-set last-was-whitespace? 
+                          (Char/IsWhiteSpace                                                ;;; Character/isWhitespace 
+                           ^Char (nth s (dec (count s))))))))                               ;;; ^Character
 
             Int32
             (let [c (char x)]
