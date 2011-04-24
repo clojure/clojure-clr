@@ -224,7 +224,9 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.popThreadBindings();
             }
 
-            ret.Compile(stub, interfaces, false, genC);
+            // TOD:  Really, the first stub here should be 'superclass' but can't handle hostexprs nested in method bodies -- reify method compilation takes place before this sucker is compiled, so can't replace the call.
+            // Might be able to flag stub classes and not try to convert, leading to a dynsite.
+            ret.Compile(stub, stub, interfaces, false, genC);
             Compiler.RegisterDuplicateType(ret.CompiledType);
 
             return ret;
@@ -252,6 +254,7 @@ namespace clojure.lang.CljCompiler.Ast
             //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
             //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", CompilerMode.Immediate);
             GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? GenContext.CreateWithExternalAssembly("stub" + RT.nextID().ToString(), ".dll", false);
+            //GenContext context = GenContext.CreateWithInternalAssembly("stub" + RT.nextID().ToString(), false);
             TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.COMPILE_STUB_PREFIX + "." + ret.InternalName, TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
 
             tb.DefineDefaultConstructor(MethodAttributes.Public);

@@ -329,7 +329,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         //static int _saveId = 0;
 
-        public Type Compile(Type superType, IPersistentVector interfaces, bool oneTimeUse, GenContext context)
+        public Type Compile(Type superType, Type stubType, IPersistentVector interfaces, bool oneTimeUse, GenContext context)
         {
             if (_compiledType != null)
                 return _compiledType;
@@ -350,8 +350,10 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.RegisterDuplicateType(_baseType);
 
                     Var.pushThreadBindings(RT.map(
-                        Compiler.COMPILE_STUB_ORIG_CLASS, Compiler.COMPILE_STUB_CLASS.deref(),
-                        Compiler.COMPILE_STUB_CLASS, _baseType));
+                        Compiler.COMPILE_STUB_ORIG_CLASS, stubType
+                        ));
+                        //,
+                        //Compiler.COMPILE_STUB_CLASS, _baseType));
                 }
 
                 GenerateFnClass(interfaces, context);

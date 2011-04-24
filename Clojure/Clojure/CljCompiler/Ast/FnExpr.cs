@@ -214,6 +214,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 fn.Compile(
                     fn.IsVariadic ? typeof(RestFn) : typeof(AFunction), 
+                    null,
                     primTypes,
                     fn.OnceOnly, 
                     genC);

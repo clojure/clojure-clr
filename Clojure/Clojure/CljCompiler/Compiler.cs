@@ -1237,7 +1237,7 @@ namespace clojure.lang
                 objx.ProtocolCallsites = PersistentVector.EMPTY;
                 objx.VarCallsites = (IPersistentSet)EmptyVarCallSites();
 
-                objx.Compile(typeof(AFunction), PersistentVector.EMPTY, false, context);
+                objx.Compile(typeof(AFunction), null, PersistentVector.EMPTY, false, context);
 
                 Expression fnNew = objx.GenCode(RHC.Expression,objx,context);
                 Expression fnInvoke = Expression.Call(fnNew, fnNew.Type.GetMethod("invoke", System.Type.EmptyTypes));

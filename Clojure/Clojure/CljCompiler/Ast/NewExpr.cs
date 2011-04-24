@@ -155,7 +155,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Expression call;
 
-            Expression target = GenTargetExpression(context);
+            Expression target = GenTargetExpression(objx,context);
 
             List<Expression> exprs = new List<Expression>(_args.Count);
             List<ParameterExpression> sbParams = new List<ParameterExpression>();
@@ -167,6 +167,10 @@ namespace clojure.lang.CljCompiler.Ast
 
 
             Type returnType = this.ClrType;
+            Type stubType = Compiler.COMPILE_STUB_ORIG_CLASS.isBound ? (Type)Compiler.COMPILE_STUB_ORIG_CLASS.deref() : null;
+
+            if (returnType == stubType)
+                returnType = objx.BaseType;
 
             CreateInstanceBinder binder = new DefaultCreateInstanceBinder(_args.Count);
             DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), argExprs);
@@ -202,11 +206,18 @@ namespace clojure.lang.CljCompiler.Ast
             return call;    
         }
 
-        private Expression GenTargetExpression(GenContext context)
+        private Expression GenTargetExpression(ObjExpr objx, GenContext context)
         {
-            string name = Compiler.DestubClassName(_type.FullName);
-            return Expression.Call(null, Compiler.Method_RT_classForName, Expression.Constant(name));
-            //return Expression.Constant(_type, typeof(Type));
+            if (Compiler.COMPILE_STUB_ORIG_CLASS.isBound && Compiler.COMPILE_STUB_ORIG_CLASS.deref() != null && objx.TypeBuilder != null)
+                return Expression.Constant(objx.TypeBuilder, typeof(Type));
+
+            if (_type != null)
+                return Expression.Constant(_type, typeof(Type));
+
+            throw new ArgumentException("Cannot generate type for NewExpr. Serious!");
+
+            //string name = Compiler.DestubClassName(_type.FullName);
+            //return Expression.Call(null, Compiler.Method_RT_classForName, Expression.Constant(name));
         }
 
         Expression GenDlrForMethod(RHC rhc, ObjExpr objx, GenContext context)
