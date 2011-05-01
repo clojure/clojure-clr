@@ -6337,3 +6337,8 @@
   `(with-redefs-fn ~(zipmap (map #(list `var %) (take-nth 2 bindings))
                             (take-nth 2 (next bindings)))
                     (fn [] ~@body)))
+
+(defn realized?
+  "Returns true if a value has been produced for a promise, delay, future or lazy sequence."
+  {:added "1.3"}
+  [^clojure.lang.IPending x] (.isRealized x))
