@@ -76,6 +76,19 @@ namespace clojure.lang.CljCompiler.Ast
                 object v = RT.second(form);
                 if (v == null)
                     return Compiler.NIL_EXPR;
+                else if (v is Boolean)
+                {
+                    if ((bool)v)
+                        return Compiler.TRUE_EXPR;
+                    else
+                        return Compiler.FALSE_EXPR;
+                }
+                else if (Util.IsNumeric(v))
+                    return NumberExpr.Parse(v);
+                else if (v is string)
+                    return new StringExpr((String)v);
+                else if (v is IPersistentCollection && ((IPersistentCollection)v).count() == 0)
+                    return new EmptyExpr(v);
                 else
                     return new ConstantExpr(v);
             }

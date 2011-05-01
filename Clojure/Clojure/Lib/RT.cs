@@ -315,7 +315,10 @@ namespace clojure.lang
 
         public static readonly Keyword TAG_KEY 
             = Keyword.intern(null, "tag");
-        
+
+        public static readonly Keyword CONST_KEY
+            = Keyword.intern(null, "const");
+
         public static readonly Keyword LINE_KEY 
             = Keyword.intern(null, "line");
 

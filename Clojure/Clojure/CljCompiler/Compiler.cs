@@ -1404,8 +1404,8 @@ namespace clojure.lang
         #region Form analysis
 
         internal static LiteralExpr NIL_EXPR = new NilExpr();
-        static LiteralExpr TRUE_EXPR = new BooleanExpr(true);
-        static LiteralExpr FALSE_EXPR = new BooleanExpr(false);
+        internal static LiteralExpr TRUE_EXPR = new BooleanExpr(true);
+        internal static LiteralExpr FALSE_EXPR = new BooleanExpr(false);
 
         public static Expr Analyze(ParserContext pcontext, object form)
         {
@@ -1505,6 +1505,8 @@ namespace clojure.lang
                 Var v = (Var)o;
                 if (IsMacro(v) != null)
                     throw new Exception("Can't take the value of a macro: " + v);
+                if (RT.booleanCast(RT.get(v.meta(), RT.CONST_KEY)))
+                    return Analyze(new ParserContext(RHC.Expression), RT.list(QUOTE, v.get()));
                 RegisterVar(v);
                 return new VarExpr(v, tag);
             }
