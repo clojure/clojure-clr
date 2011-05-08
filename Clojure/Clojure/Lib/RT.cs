@@ -1085,6 +1085,86 @@ namespace clojure.lang
             return (char)n;
         }
 
+        // JVM version has the following, but they really seem to mess things up for me.
+
+        //public static char charCast(byte x)
+        //{
+        //    char i = (char)x;
+        //    if (i != x)
+        //        throw new ArgumentException("Value out of range for char: " + x);
+        //    return i;
+        //}
+
+        //public static char charCast(sbyte x)
+        //{
+        //    char i = (char)x;
+        //    if (i != x)
+        //        throw new ArgumentException("Value out of range for char: " + x);
+        //    return i;
+        //}
+
+        //public static char charCast(short x)
+        //{
+        //    char i = (char)x;
+        //    if (i != x)
+        //        throw new ArgumentException("Value out of range for char: " + x);
+        //    return i;
+        //}
+
+        //public static char charCast(ushort x)
+        //{
+        //    char i = (char)x;
+        //    if (i != x)
+        //        throw new ArgumentException("Value out of range for char: " + x);
+        //    return i;
+        //}
+
+        //public static char charCast(int x)
+        //{
+        //    char i = (char)x;
+        //    if (i != x)
+        //        throw new ArgumentException("Value out of range for char: " + x);
+        //    return i;
+        //}
+
+        //public static char charCast(uint x)
+        //{
+        //    char i = (char)x;
+        //    if (i != x)
+        //        throw new ArgumentException("Value out of range for char: " + x);
+        //    return i;
+        //}
+
+        public static char charCast(long x)
+        {
+            char i = (char)x;
+            if (i != x)
+                throw new ArgumentException("Value out of range for char: " + x);
+            return i;
+        }
+
+        //public static char charCast(ulong x)
+        //{
+        //    char i = (char)x;
+        //    if (i != x)
+        //        throw new ArgumentException("Value out of range for char: " + x);
+        //    return i;
+        //}
+
+        //public static char charCast(float x)
+        //{
+        //    if (x >= Char.MinValue && x <= char.MaxValue)
+        //        return (char)x;
+        //    throw new ArgumentException("Value out of range for char: " + x);
+        //}
+
+        public static char charCast(double x)
+        {
+            if (x >= Char.MinValue && x <= char.MaxValue)
+                return (char)x;
+            throw new ArgumentException("Value out of range for char: " + x);
+        }
+
         #endregion
 
         #region bool casting
