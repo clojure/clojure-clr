@@ -106,7 +106,7 @@
    [unchecked-short [-1 0 1 Byte/MaxValue Int16/MaxValue -1 -1 0 0]]
    [int [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue :error :error :error]]
    [unchecked-int [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue -1 Int32/MinValue Int32/MinValue]]
-   [long [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue Int64/MaxValue Int64/MinValue Int64/MinValue]]
+   [long [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue Int64/MaxValue :error :error]]
    [unchecked-long [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue Int64/MaxValue Int64/MinValue Int64/MinValue]]
                                                                                              ;; 2.14748365E9 if when float/double conversion is avoided...
    [float [-1.0 0.0 1.0 255.0 32767.0 2.147483648E9 9.223372036854776E18 Single/MaxValue :error]]

@@ -1292,7 +1292,12 @@ namespace clojure.lang
                     throw new ArgumentException("Value out of range for long: " + x);
                 return (long)x;
             }
-            return Util.ConvertToLong(x);
+            else if (x is byte || x is short || x is uint || x is sbyte || x is ushort)
+                return Util.ConvertToLong(x);
+            else if (x is Ratio)
+                return longCast(((Ratio)x).BigIntegerValue());
+
+            return longCast(Util.ConvertToDouble(x));
         }
 
 
