@@ -4178,12 +4178,17 @@
 
 (defmacro assert
   "Evaluates expr and throws an exception if it does not evaluate to
- logical true."
+  logical true."
   {:added "1.0"}
-  [x]
-  (when *assert*
-    `(when-not ~x
-       (throw (new Exception (str "Assert failed: " (pr-str '~x)))))))
+  ([x]
+     (when *assert*
+       `(when-not ~x
+          (throw (new Exception (str "Assert failed: " (pr-str '~x)))))))                        ;;; AssertionError
+  ([x message]
+     (when *assert*
+       `(when-not ~x
+          (throw (new Exception (str "Assert failed: " ~message "\n" (pr-str '~x))))))))          ;;; AssertionError
+
 
 (defn test
   "test [v] finds fn at key :test in var metadata and calls it,
