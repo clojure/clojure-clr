@@ -675,6 +675,11 @@ namespace clojure.lang
 
         }
 
+        public static bool IsNonCharNumeric(object o)
+        {
+            return o != null && !(o is Char) && IsIntegerType(o.GetType());
+        }
+
         internal static bool IsIntegerType(Type type)
         {
             //type = GetNonNullableType(type);
@@ -748,7 +753,6 @@ namespace clojure.lang
         {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
-
 
         internal static bool IsNumeric(Type type)
         {

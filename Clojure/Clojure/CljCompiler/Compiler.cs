@@ -261,8 +261,12 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Symbol_intern2 = typeof(Symbol).GetMethod("intern", new Type[] { typeof(string), typeof(string) });
 
         internal static readonly MethodInfo Method_Util_classOf = typeof(Util).GetMethod("classOf");
-        internal static readonly MethodInfo Method_Util_equals = typeof(Util).GetMethod("equals",new Type[] {typeof(object), typeof(object)});
+        internal static readonly MethodInfo Method_Util_ConvertToInt = typeof(Util).GetMethod("ConvertToInt");
+
+        internal static readonly MethodInfo Method_Util_equals = typeof(Util).GetMethod("equals", new Type[] { typeof(object), typeof(object) });
+        internal static readonly MethodInfo Method_Util_equiv = typeof(Util).GetMethod("equiv", new Type[] { typeof(object), typeof(object) });
         internal static readonly MethodInfo Method_Util_Hash = typeof(Util).GetMethod("Hash");
+        internal static readonly MethodInfo Method_Util_IsNonCharNumeric = typeof(Util).GetMethod("IsNonCharNumeric");
         
         internal static readonly MethodInfo Method_Var_bindRoot = typeof(Var).GetMethod("bindRoot");
         internal static readonly MethodInfo Method_Var_get = typeof(Var).GetMethod("deref");
@@ -676,6 +680,32 @@ namespace clojure.lang
             }
             return null;
         }
+
+        internal static Type MaybeClrType(ICollection<Expr> exprs)
+        {
+            Type match = null;
+            try
+            {
+                foreach (Expr e in exprs)
+                {
+                    if (e is ThrowExpr)
+                        continue;
+                    if (!e.HasClrType)
+                        return null;
+                    Type t = e.ClrType;
+                    if (match == null)
+                        match = t;
+                    else if (match != t)
+                        return null;
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            return match;
+        }
+
 
         internal static Expression GenArgArray(RHC rhc, ObjExpr objx, GenContext context, IPersistentVector args)
         {
