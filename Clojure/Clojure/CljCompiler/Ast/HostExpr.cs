@@ -449,7 +449,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Expression toConv;
 
                 if (returnType == typeof(float))
-                    toConv = Expression.Convert(expr, typeof(double));
+                    toConv = Expression.Convert(expr, typeof(float));
                 else if (returnType == typeof(int))
                     toConv = Expression.Convert(expr, typeof(long));
                 else

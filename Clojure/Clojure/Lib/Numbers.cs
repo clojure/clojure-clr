@@ -1814,6 +1814,11 @@ namespace clojure.lang
             return x;
         }
 
+        public static object num(float x)
+        {
+            return x;
+        } 
+
         public static object num(double x)
         {
             return x;
