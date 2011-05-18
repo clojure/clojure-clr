@@ -188,7 +188,7 @@ namespace clojure.lang
             catch (Exception e)
             {
                 if (isRecursive || !(r is LineNumberingTextReader))
-                    throw e;
+                    throw;
                 LineNumberingTextReader rdr = r as LineNumberingTextReader;
                 throw new ReaderException(rdr.LineNumber, e);
             }

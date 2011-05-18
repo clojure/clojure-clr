@@ -858,10 +858,10 @@ namespace clojure.lang
                 {
                     expToUse = CheckExponent(expToUse + exp, val.IsZero);
                 }
-                catch (ArithmeticException ex)
+                catch (ArithmeticException)
                 {
                     if ( throwOnError)
-                        throw ex;
+                        throw;
                     return false;
                 }
 

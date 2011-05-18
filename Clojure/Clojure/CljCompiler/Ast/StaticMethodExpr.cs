@@ -68,15 +68,16 @@ namespace clojure.lang.CljCompiler.Ast
                 for (int i = 0; i < _args.Count; i++)
                     argvals[i] = _args[i].ArgExpr.Eval();
                 if (_method != null)
-                    return Reflector.InvokeMethod( _method, null, argvals);
+                    return Reflector.InvokeMethod(_method, null, argvals);
                 return Reflector.CallStaticMethod(_methodName, _typeArgs, _type, argvals);
+            }
+            catch (Compiler.CompilerException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                if (!(e is Compiler.CompilerException))
-                    throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), e);
-                else
-                    throw e;
+                throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), e);
             }
         }
 

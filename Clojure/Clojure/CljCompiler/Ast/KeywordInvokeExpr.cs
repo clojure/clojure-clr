@@ -71,12 +71,13 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 return _kw.Kw.invoke(_target.Eval());
             }
+            catch (Compiler.CompilerException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
-                if (!(e is Compiler.CompilerException))
-                    throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), e);
-                else
-                    throw e;
+                throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), e);
             }
         }
 

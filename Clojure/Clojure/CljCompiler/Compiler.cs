@@ -1480,12 +1480,13 @@ namespace clojure.lang
                 else
                     return new ConstantExpr(form);
             }
+            catch (CompilerException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
-                if (!(e is CompilerException))
-                    throw new CompilerException((String)SOURCE_PATH.deref(), (int)LINE.deref(), e);
-                else
-                    throw e;
+                throw new CompilerException((String)SOURCE_PATH.deref(), (int)LINE.deref(), e);
             }
         }
 
@@ -1573,22 +1574,23 @@ namespace clojure.lang
                 IFn inline = IsInline(op, RT.count(RT.next(form)));
 
                 if (inline != null)
-                    return Analyze(pcon,MaybeTransferSourceInfo(PreserveTag(form, inline.applyTo(RT.next(form))), form));
+                    return Analyze(pcon, MaybeTransferSourceInfo(PreserveTag(form, inline.applyTo(RT.next(form))), form));
 
                 IParser p;
                 if (op.Equals(FN))
-                    return FnExpr.Parse(pcon,form, name);
+                    return FnExpr.Parse(pcon, form, name);
                 if ((p = GetSpecialFormParser(op)) != null)
-                    return p.Parse(pcon,form);
+                    return p.Parse(pcon, form);
                 else
-                    return InvokeExpr.Parse(pcon,form);
+                    return InvokeExpr.Parse(pcon, form);
+            }
+            catch (CompilerException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                if (!(e is CompilerException))
-                    throw new CompilerException((String)SOURCE_PATH.deref(), (int)LINE.deref(), e);
-                else
-                    throw e;
+                throw new CompilerException((String)SOURCE_PATH.deref(), (int)LINE.deref(), e);
             }
             finally
             {

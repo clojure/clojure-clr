@@ -61,12 +61,13 @@ namespace clojure.lang.CljCompiler.Ast
                     return _method.Invoke(targetVal, argvals);
                 return Reflector.CallInstanceMethod(_methodName, _typeArgs, targetVal, argvals);
             }
+            catch (Compiler.CompilerException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
-                if (!(e is Compiler.CompilerException))
-                    throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), e);
-                else
-                    throw e;
+                throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), e);
             }
                     
         }

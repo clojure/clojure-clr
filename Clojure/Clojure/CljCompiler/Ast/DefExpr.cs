@@ -174,12 +174,13 @@ namespace clojure.lang.CljCompiler.Ast
                 }
                 return _var.setDynamic(_isDynamic);
             }
+            catch (Compiler.CompilerException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
-                if (!(e is Compiler.CompilerException))
-                    throw new Compiler.CompilerException(_source, _line, e);
-                else
-                    throw e;
+                throw new Compiler.CompilerException(_source, _line, e);
             }
         }
 
