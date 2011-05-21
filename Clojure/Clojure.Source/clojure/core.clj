@@ -1268,11 +1268,25 @@
    :added "1.0"}
   [x n] (. clojure.lang.Numbers shiftRight x n))
 
+(defn integer?
+  "Returns true if n is an integer"
+  {:added "1.0"
+   :static true}
+  [n]
+  (or (instance? Int32 n)      (instance? UInt32 n)     ;;; Integer -> Int32, added UInt32
+      (instance? Int64 n)      (instance? UInt64 n)     ;;; Long -> Int64, added UInt64
+	  (instance? clojure.lang.BigInt n)
+      (instance? BigInteger n) (instance? Char n)       ;;; added Char test
+      (instance? Int16 n)      (instance? UInt16 n)     ;;; Short -> Int16, added UInt16
+      (instance? Byte n)  (instance? SByte n)))         ;;; Added SByte test
+
 (defn even?
   "Returns true if n is even, throws an exception if n is not an integer"
   {:added "1.0"
    :static true}
-  [n] (zero? (bit-and n 1)))
+   [n] (if (integer? n)
+        (zero? (bit-and (clojure.lang.RT/uncheckedLongCast n) 1))
+        (throw (ArgumentException. (str "Argument must be an integer: " n)))))            ;;; IllegalArgumentException.
 
 (defn odd?
   "Returns true if n is odd, throws an exception if n is not an integer"
@@ -3091,18 +3105,6 @@
   [x]
   (. clojure.lang.Util (IsNumeric x)))    ;;; (instance? Number x))
 
-(defn integer?
-  "Returns true if n is an integer"
-  {:added "1.0"
-   :static true}
-  [n]
-  (or (instance? Int32 n)      (instance? UInt32 n)     ;;; Integer -> Int32, added UInt32
-      (instance? Int64 n)      (instance? UInt64 n)     ;;; Long -> Int64, added UInt64
-	  (instance? clojure.lang.BigInt n)
-      (instance? BigInteger n) (instance? Char n)       ;;; added Char test
-      (instance? Int16 n)      (instance? UInt16 n)     ;;; Short -> Int16, added UInt16
-      (instance? Byte n)  (instance? SByte n)))         ;;; Added SByte test
-      
 (defn mod
   "Modulus of num and div. Truncates toward negative infinity."
   {:added "1.0"

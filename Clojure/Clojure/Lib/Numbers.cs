@@ -103,28 +103,6 @@ namespace clojure.lang
 
         #endregion
 
-        #region BitOps interface
-
-        interface BitOps
-        {
-            BitOps combine(BitOps y);
-            BitOps bitOpsWith(LongBitOps x);
-            BitOps bitOpsWith(BigIntBitOps x);
-            object not(object x);
-            object and(object x, object y);
-            object or(object x, object y);
-            object xor(object x, object y);
-            object andNot(object x, object y);
-            object clearBit(object x, int n);
-            object setBit(object x, int n);
-            object flipBit(object x, int n);
-            bool testBit(object x, int n);
-            object shiftLeft(object x, int n);
-            object shiftRight(object x, int n);
-        }
-
-        #endregion
-
         #region Basic Ops operations
 
         public static bool isZero(object x)
@@ -450,91 +428,72 @@ namespace clojure.lang
 
         #endregion
 
-        #region Basic BitOps operations
+        #region Basic bit operations
 
-        public static object not(object x)
+         public static int shiftLeftInt(int x, int n)
         {
-            return bitOps(x).not(x);
-        }
-
-        public static object and(object x, object y)
-        {
-            return bitOps(x).combine(bitOps(y)).and(x, y);
-        }
-
-        public static object or(object x, object y)
-        {
-            return bitOps(x).combine(bitOps(y)).or(x, y);
-        }
-
-        public static object xor(object x, object y)
-        {
-            return bitOps(x).combine(bitOps(y)).xor(x, y);
-        }
-
-        public static object andNot(object x, object y)
-        {
-            return bitOps(x).combine(bitOps(y)).andNot(x, y);
-        }
-
-
-        public static object clearBit(object x, int n)
-        {
-            if (n < 0)
-                throw new ArithmeticException("Negative bit index");
-            return bitOps(x).clearBit(x, n);
-        }
-
-        public static object setBit(object x, int n)
-        {
-            if (n < 0)
-                throw new ArithmeticException("Negative bit index");
-            return bitOps(x).setBit(x, n);
-        }
-
-        public static object flipBit(object x, int n)
-        {
-            if (n < 0)
-                throw new ArithmeticException("Negative bit index");
-            return bitOps(x).flipBit(x, n);
-        }
-
-        public static bool testBit(object x, int n)
-        {
-            if (n < 0)
-                throw new ArithmeticException("Negative bit index");
-            return bitOps(x).testBit(x, n);
+            //return n >= 0 ? x << n : x >> -n;
+            return x << n;
         }
 
         public static object shiftLeft(object x, object n)
         {
-            return bitOps(x).shiftLeft(x, Util.ConvertToInt(n));
+            return shiftLeft(bitOpsCast(x),bitOpsCast(n));
         }
 
-        public static int shiftLeftInt(int x, int n)
+        public static long shiftLeft(object x, long n)
         {
-            return n >= 0 ? x << n : x >> -n;
+            return shiftLeft(bitOpsCast(x), n);
+        }
+
+        public static long shiftLeft(long x, object n)
+        {
+            return shiftLeft(x, bitOpsCast(n));
+        }
+
+        public static long shiftLeft(long x, long n)
+        {
+            return shiftLeft(x, (int)n);
         }
 
         public static long shiftLeft(long x, int n)
         {
-            return n >= 0 ? x << n : x >> -n;
+            //return n >= 0 ? x << n : x >> -n;
+            return x << n;
         }
 
-
-        public static object shiftRight(object x, object n)
-        {
-            return bitOps(x).shiftRight(x, Util.ConvertToInt(n));
-        }
 
         public static int shiftRightInt(int x, int n)
         {
-            return n >= 0 ? x >> n : x << -n;
+            // return n >= 0 ? x >> n : x << -n;
+            return x >> n;
+        }
+
+        public static long shiftRight(object x, object n)
+        {
+            return shiftRight(bitOpsCast(x), bitOpsCast(n));
+        }
+
+
+        public static long shiftRight(object x, long n)
+        {
+            return shiftRight(bitOpsCast(x), n);
+        }
+
+        public static long shiftRight(long x, object n)
+        {
+            return shiftRight(x, bitOpsCast(n));
+        }
+
+        public static long shiftRight(long x, long n)
+        {
+            return shiftRight(x, (int)n);
         }
 
         public static long shiftRight(long x, int n)
         {
-            return n >= 0 ? x >> n : x << -n;
+            // return n >= 0 ? x >> n : x << -n;
+            return x >> n;
         }
 
         #endregion
@@ -1234,185 +1193,6 @@ namespace clojure.lang
 
         #endregion
 
-        #region LongBitOps
-
-        class LongBitOps : BitOps
-        {
-            #region BitOps Members
-
-            public BitOps combine(BitOps y)
-            {
-                return y.bitOpsWith(this);
-            }
-
-            public BitOps bitOpsWith(LongBitOps x)
-            {
-                return this;
-            }
-
-            public BitOps bitOpsWith(BigIntBitOps x)
-            {
-                return BIGINT_BITOPS;
-            }
-
-            public object not(object x)
-            {
-                 return num(~Util.ConvertToLong(x));
-            }
-
-            public object and(object x, object y)
-            {
-                return num(Util.ConvertToLong(x) & Util.ConvertToLong(y));
-            }
-
-            public object or(object x, object y)
-            {
-                return num(Util.ConvertToLong(x) | Util.ConvertToLong(y));
-            }
-
-            public object xor(object x, object y)
-            {
-                return num(Util.ConvertToLong(x) ^ Util.ConvertToLong(y));
-            }
-
-            public object andNot(object x, object y)
-            {
-                return num(Util.ConvertToLong(x) & ~Util.ConvertToLong(y));
-            }
-
-            public object clearBit(object x, int n)
-            {
-                if (n < 63)
-                    return num(Util.ConvertToLong(x) & ~(1L << n));
-                else
-                    return BigInt.fromBigInteger(toBigInteger(x).ClearBit(n));
-            }
-
-            public object setBit(object x, int n)
-            {
-                if (n < 63)
-                    return num(Util.ConvertToLong(x) | (1L << n)); 
-                else
-                    return BigInt.fromBigInteger(toBigInteger(x).SetBit(n));
-            }
-
-            public object flipBit(object x, int n)
-            {
-                if (n < 63)
-                    return num(Util.ConvertToLong(x) ^ (1L << n));
-                else
-                    return BigInt.fromBigInteger(toBigInteger(x).FlipBit(n));
-            }
-
-            public bool testBit(object x, int n)
-            {
-                if (n < 63)
-                    return (Util.ConvertToLong(x) & (1L << n)) != 0;
-                else
-                    return toBigInteger(x).TestBit(n);
-            }
-
-            public object shiftLeft(object x, int n)
-            {
-                return n < 0
-                    ? shiftRight(x, -n)
-                    : num(Numbers.shiftLeft(Util.ConvertToLong(x), n));
-            }
-
-            public object shiftRight(object x, int n)
-            {
-                return n < 0
-                     ? shiftLeft(x, -n)
-                     : num(Util.ConvertToLong(x) >> n);
-            }
-
-            #endregion
-        }
-
-        #endregion
-
-        #region BigIntBitOps
-
-        class BigIntBitOps : BitOps
-        {
-            #region BitOps Members
-
-            public BitOps combine(BitOps y)
-            {
-                return y.bitOpsWith(this);
-            }
-
-            public BitOps bitOpsWith(LongBitOps x)
-            {
-                return this;
-            }
-
-            public BitOps bitOpsWith(BigIntBitOps x)
-            {
-                return this;
-            }
-
-            public object not(object x)
-            {
-                return BigInt.fromBigInteger(~toBigInteger(x));
-            }
-
-            public object and(object x, object y)
-            {
-                return BigInt.fromBigInteger(toBigInteger(x) & toBigInteger(y));
-            }
-
-            public object or(object x, object y)
-            {
-                return BigInt.fromBigInteger(toBigInteger(x) | toBigInteger(y));
-
-            }
-
-            public object xor(object x, object y)
-            {
-                return BigInt.fromBigInteger(toBigInteger(x) ^ toBigInteger(y));
-            }
-
-            public object andNot(object x, object y)
-            {
-                return toBigInteger(x).BitwiseAndNot(toBigInteger(y));
-            }
-
-            public object clearBit(object x, int n)
-            {
-                return BigInt.fromBigInteger(toBigInteger(x).ClearBit(n));
-            }
-
-            public object setBit(object x, int n)
-            {
-                return BigInt.fromBigInteger(toBigInteger(x).SetBit(n));
-            }
-
-            public object flipBit(object x, int n)
-            {
-                return BigInt.fromBigInteger(toBigInteger(x).FlipBit(n));
-            }
-
-            public bool testBit(object x, int n)
-            {
-                return toBigInteger(x).TestBit(n);
-            }
-
-            public object shiftLeft(object x, int n)
-            {
-                return BigInt.fromBigInteger(toBigInteger(x) << n);
-            }
-
-            public object shiftRight(object x, int n)
-            {
-                return BigInt.fromBigInteger(toBigInteger(x) >> n);
-            }
-
-            #endregion
-        }
-
-        #endregion
-
         #region Ops/BitOps dispatching
 
         static readonly LongOps LONG_OPS = new LongOps();
@@ -1420,9 +1200,6 @@ namespace clojure.lang
         static readonly RatioOps RATIO_OPS = new RatioOps();
         static readonly BigIntOps BIGINT_OPS = new BigIntOps();
         static readonly BigDecimalOps BIGDECIMAL_OPS = new BigDecimalOps();
-
-        static readonly LongBitOps LONG_BITOPS = new LongBitOps();
-        static readonly BigIntBitOps BIGINT_BITOPS = new BigIntBitOps();
 
         public enum Category { Integer, Floating, Decimal, Ratio }
 
@@ -1467,29 +1244,14 @@ namespace clojure.lang
                 return Category.Integer;
         }
 
-        static BitOps bitOps(object x)
+        static long bitOpsCast(object x)
         {
-            //Type type = Util.GetNonNullableType(x.GetType());
-            Type type = x.GetType();
+            Type xt = x.GetType();
+            if (xt == typeof(long) || xt == typeof(int) || xt == typeof(short) || xt == typeof(byte) || xt == typeof(ulong) || xt == typeof(uint) || xt == typeof(ushort) || xt == typeof(sbyte))
+                return RT.longCast(x);
 
-            //if (!type.IsEnum)     // convert fix
-            //{
-
-                switch (Type.GetTypeCode(type))
-                {
-                    case TypeCode.Int32:
-                        return LONG_BITOPS;
-                    case TypeCode.Int64:
-                        return LONG_BITOPS;
-                    default:
-                        if (type == typeof(BigInt) || type == typeof(BigInteger))
-                            return BIGINT_BITOPS;
-                        else if (Util.IsNumeric(x) || (type == typeof(BigDecimal)) || (type == typeof(Ratio)))
-                            throw new ArithmeticException("bit operation on non integer type: " + type);
-                        break;
-                }
-            //}
-            return LONG_BITOPS;
+            // no bignums, no decimals
+            throw new ArgumentException("bit operations not supported for: " + xt);
         }
 
         #endregion
@@ -2190,21 +1952,47 @@ namespace clojure.lang
 
         #endregion
 
-        #region Long overloads for bit ops
+        #region Bit ops
+
+        #region and
+
+        public static long and(object x, object y)
+        {
+            return and(bitOpsCast(x), bitOpsCast(y));
+        }
+
+        public static long and(object x, long y)
+        {
+            return and(bitOpsCast(x), y);
+        }
+
+        public static long and(long x, object y)
+        {
+            return and(x, bitOpsCast(y));
+        }
 
         public static long and(long x, long y)
         {
             return x & y;
         }
 
-        public static object and(Object x, long y)
+        #endregion
+
+        #region or
+
+        static public long or(object x, object y)
         {
-            return and(x, (Object)y);
+            return or(bitOpsCast(x),bitOpsCast(y));
         }
 
-        public static object and(long x, Object y)
+        static public long or(object x, long y)
         {
-            return and((Object)x, y);
+            return or(bitOpsCast(x), y);
+        }
+
+        static public long or(long x, object y)
+        {
+            return or(x, bitOpsCast(y));
         }
 
         static public long or(long x, long y)
@@ -2212,30 +2000,171 @@ namespace clojure.lang
             return x | y;
         }
 
-        static public object or(Object x, long y)
+        #endregion
+
+        #region xor
+
+        public static long xor(object x, object y)
         {
-            return or(x, (Object)y);
+            return xor(bitOpsCast(x), bitOpsCast(y));
         }
 
-        static public object or(long x, Object y)
+        public static long xor(object x, long y)
         {
-            return or((Object)x, y);
+            return xor(bitOpsCast(x), y);
         }
 
-        static public long xor(long x, long y)
+        public static long xor(long x, object y)
+        {
+            return xor(x, bitOpsCast(y));
+        }
+
+        public static long xor(long x, long y)
         {
             return x ^ y;
         }
 
-        static public object xor(Object x, long y)
+        #endregion
+
+        #region andNot
+
+        public static long andNot(object x, object y)
         {
-            return xor(x, (Object)y);
+            return andNot(bitOpsCast(x), bitOpsCast(y));
         }
 
-        static public object xor(long x, Object y)
+        public static long andNot(object x, long y)
         {
-            return xor((Object)x, y);
+            return andNot(bitOpsCast(x), y);
         }
+
+        public static long andNot(long x, object y)
+        {
+            return andNot(x, bitOpsCast(y));
+        }
+
+        public static long andNot(long x, long y)
+        {
+            return x & ~y;
+        }
+
+        #endregion
+
+        #region clearBit
+
+        public static long clearBit(object x, object y)
+        {
+            return clearBit(bitOpsCast(x), bitOpsCast(y));
+        }
+
+        public static long clearBit(object x, long y)
+        {
+            return clearBit(bitOpsCast(x), y);
+        }
+
+        public static long clearBit(long x, object y)
+        {
+            return clearBit(x, bitOpsCast(y));
+        }
+
+        public static long clearBit(long x, long n)
+        {
+            return clearBit(x, (int)n);
+        }
+
+        public static long clearBit(long x, int n)
+        {
+            return x & (1L << n);
+        }
+
+        #endregion
+
+        #region setBit
+
+        public static long setBit(object x, object y)
+        {
+            return setBit(bitOpsCast(x), bitOpsCast(y));
+        }
+
+        public static long setBit(object x, long y)
+        {
+            return setBit(bitOpsCast(x), y);
+        }
+
+        public static long setBit(long x, object y)
+        {
+            return setBit(x, bitOpsCast(y));
+        }
+
+        public static long setBit(long x, long n)
+        {
+            return setBit(x, (int)n);
+        }
+
+        public static long setBit(long x, int n)
+        {
+            return x | (1L << n);
+        }
+
+        #endregion
+
+        #region flipBit
+
+        public static long flipBit(object x, object y)
+        {
+            return flipBit(bitOpsCast(x), bitOpsCast(y));
+        }
+
+        public static long flipBit(object x, long y)
+        {
+            return flipBit(bitOpsCast(x), y);
+        }
+
+        public static long flipBit(long x, object y)
+        {
+            return flipBit(x, bitOpsCast(y));
+        }
+
+        public static long flipBit(long x, long n)
+        {
+            return flipBit(x, (int)n);
+        }
+
+        public static long flipBit(long x, int n)
+        {
+            return x ^ (1L << n);
+        }
+
+        #endregion
+
+        #region testBit
+
+        public static bool testBit(object x, object y)
+        {
+            return testBit(bitOpsCast(x), bitOpsCast(y));
+        }
+
+        public static bool testBit(object x, long y)
+        {
+            return testBit(bitOpsCast(x), y);
+        }
+
+        public static bool testBit(long x, object y)
+        {
+            return testBit(x, bitOpsCast(y));
+        }
+
+        public static bool testBit(long x, long n)
+        {
+            return testBit(x, (int)n);
+        }
+
+        public static bool testBit(long x, int n)
+        {
+            return (x & (1L << n)) != 0;
+        }
+
+        #endregion
 
         #endregion
 

@@ -118,7 +118,7 @@
   [attributes flags]
   (reduce
     (fn [result fd]
-	  (if  (== (bit-and attributes (nth fd 1)) (nth fd 2))
+	  (if  (== (enum-and attributes (nth fd 1)) (nth fd 2))
 	    (conj result (nth fd 0))
 		result))
 	#{}
@@ -142,8 +142,7 @@
    (parse-attributes (.Attributes constructor) method-flags)))
 
 (def ^:private basic-binding-flags
-	(Enum/ToObject BindingFlags
-		   (reduce bit-or [BindingFlags/Public BindingFlags/NonPublic BindingFlags/DeclaredOnly BindingFlags/Instance BindingFlags/Static])))
+  (enum-or BindingFlags/Public BindingFlags/NonPublic BindingFlags/DeclaredOnly BindingFlags/Instance BindingFlags/Static))
 
 (defn- declared-constructors
   "Return a set of the declared constructors of class as a Clojure map."

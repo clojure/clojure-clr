@@ -89,8 +89,13 @@
   "Combine via or several enum (flag values).  Coerced to type of first value."
   {:added "1.3"}
   [flag & flags]    
-  (Enum/ToObject (class flag) (reduce1 bit-or flag flags)))
+  (Enum/ToObject (class flag) (reduce1 #(bit-or (long %1) (long %2)) flag flags)))
 
+(defn enum-and 
+  "Combine via and several enum (flag values).  Coerced to type of first value."
+  {:added "1.3"}
+  [flag & flags]    
+  (Enum/ToObject (class flag) (reduce1 #(bit-and (long %1) (long %2)) flag flags)))
 
 ; Support for interop
 
