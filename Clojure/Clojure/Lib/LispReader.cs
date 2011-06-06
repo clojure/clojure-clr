@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Reflection;
 //using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
@@ -59,6 +60,9 @@ namespace clojure.lang
 
         //sorted-map num->gensymbol
         static Var ARG_ENV = Var.create(null).setDynamic();
+
+
+        static IFn _ctorReader = new CtorReader();
         
         #endregion
 
@@ -1147,8 +1151,17 @@ namespace clojure.lang
                 if (ch == -1)
                     throw new EndOfStreamException("EOF while reading character");
                 IFn fn = _dispatchMacros[ch];
+                // Try the ctor reader first
                 if (fn == null)
-                    throw new Exception(String.Format("No dispatch macro for: {0}", (char)ch));
+                {
+                    Unread(r, ch);
+                    object result = _ctorReader.invoke(r,(char) ch);
+
+                    if (result != null)
+                        return result;
+                    else
+                        throw new Exception(String.Format("No dispatch macro for: {0}", (char)ch));
+                }
                 return fn.invoke(r, (char)ch);
             }
         }
@@ -1399,6 +1412,100 @@ namespace clojure.lang
                     throw new ArgumentException("Unsupported #= form");
             }
         }
+
+        public sealed class CtorReader : ReaderBase
+        {
+            protected override object Read(PushbackTextReader r, char c)
+            {
+                object recordName = read(r, true, null, false);
+                Type recordType = RT.classForName(recordName.ToString());
+
+                int ch = r.Read();
+                char endch;
+                bool shortForm = true;
+
+                // A defrecord ctor can take two forms.  Check for map->R version first.
+                if (ch == '{')
+                {
+                    endch = '}';
+                    shortForm = false;
+                }
+                else if (ch == '[')
+                    endch = ']';
+                else
+                    throw new Exception(String.Format("Unreadable constructor form starting with \"#{0}{1}\"", recordName, (char)ch));
+
+                object[] recordEntries = readDelimitedList(endch, r, true).ToArray();
+                object ret = null;
+                ConstructorInfo[] allCtors = recordType.GetConstructors();
+
+                if (shortForm)
+                {
+                    bool ctorFound = false;
+                    foreach ( ConstructorInfo cinfo in allCtors )
+                        if ( cinfo.GetParameters().Length == recordEntries.Length )
+                            ctorFound = true;
+
+                    if ( ! ctorFound )
+                        throw new Exception(String.Format("Unexpected number of constructor arguments to {0}: got {1}",recordType.ToString(),recordEntries.Length));
+
+                    ret = Reflector.InvokeConstructor(recordType,RT.SeqToArray<Object>(ResolveEach(recordEntries)));
+                }
+                else
+                {
+                    ret = Reflector.InvokeStaticMethod(recordType,"create",new Object[] { RT.map(RT.SeqToArray<object>(ResolveEach(recordEntries))) });
+                }
+
+                return ret;
+            }
+
+            public static ISeq ResolveEach(object[] a)
+            {
+                ISeq ret = null;
+                for (int i = a.Length - 1; i >= 0; --i)
+                    ret = (ISeq)RT.cons(Resolve(a[i]), ret);
+                return ret;
+            }
+
+            static object Resolve(object o)
+            {
+                if (o is Symbol)
+                {
+                    try
+                    {
+                        return RT.classForName(o.ToString());
+                    }
+                    catch (Exception)
+                    {
+                        throw new ArgumentException(String.Format("Constructor literal can only contain constants or statics. {0} does not name a known class.", o.ToString()));
+                    }
+                }
+                else if (o is ISeq)
+                {
+                    // THis make no sense!  Comes from the Java code.
+                    Symbol fs = (Symbol)RT.first(o);
+                    if (fs == null && o == PersistentList.EMPTY)
+                        return o;
+
+                    throw new ArgumentException(String.Format("Constructor literal can only contain constants or statics. ", o.ToString()));
+                }
+                else if (o == null
+                    || o is IPersistentCollection && ((IPersistentCollection)o).count() == 0
+                    || o is IPersistentCollection
+                    || Util.IsPrimitiveNumeric(o.GetType())
+                    || o is string
+                    || o is Keyword
+                    || o is Symbol
+                    || o is bool)
+                {
+                    return o;
+                }
+                else
+                    throw new ArgumentException("Constructor literal can only contain constants or statics. " + o.ToString());
+            }
+        }
+
+
 
         public sealed class UnreadableReader : ReaderBase
         {

@@ -147,7 +147,10 @@
       (throw (ArgumentException. ":volatile-mutable or :unsynchronized-mutable not supported for record fields")))   ;;; IllegalArgumentException
     (let [gs (gensym)]
     (letfn 
-     [(eqhash [[i m]] 
+     [(irecord [[i m]]
+        [(conj i 'clojure.lang.IRecord)
+         m])
+      (eqhash [[i m]] 
         [i
          (conj m 
                `(GetHashCode [this#] (clojure.lang.APersistentMap/mapHash this#))              ;;; hashCode
@@ -245,7 +248,7 @@
                                    [(keyword fld) (list* `new tagname (replace {fld gs} fields))])        ;;; ADDED
                                  base-fields)                                                             ;;; ADDED
                        (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap k# ~gs)))))])]      ;;; ADDED
-     (let [[i m] (-> [interfaces methods] eqhash iobj ilookup imap associative ipc dict)]                              ;;; Associative, ipc added
+     (let [[i m] (-> [interfaces methods] irecord eqhash iobj ilookup imap associative ipc dict)]                              ;;; Associative, ipc added
        `(deftype* ~tagname ~(vary-meta classname merge {System.SerializableAttribute {}}) ~(conj hinted-fields '__meta '__extmap) 
           :implements ~(vec i) 
           ~@m))))))
@@ -315,25 +318,19 @@
   [name [& fields] & opts+specs]
   (let [gname name
         [interfaces methods opts] (parse-opts+specs opts+specs)
-        classname (symbol (str (namespace-munge *ns*) "." gname))
+		ns-part (namespace-munge *ns*)
+        classname (symbol (str ns-part  "." gname))
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))]
-    `(do
+    `(let []
        ~(emit-defrecord name gname (vec hinted-fields) (vec interfaces) methods)
-       (defmethod print-method ~classname [o# w#]
-           ((var print-defrecord) o# w#))
        (import ~classname)
-       #_(defn ~name
+       (defn ~(symbol (str '-> name))
          ([~@fields] (new ~classname ~@fields nil nil))
-         ([~@fields meta# extmap#] (new ~classname ~@fields meta# extmap#))))))
-
-(defn- print-defrecord [o, ^System.IO.TextWriter w]           ;;; Writer
-  (print-meta o w)
-  (.Write w "#:")                                                ;;; write
-  (.Write w (.Name (class o)))                                   ;;; write, getName
-  (print-map
-    o
-    pr-on w))
+         ([~@fields meta# extmap#] (new ~classname ~@fields meta# extmap#)))
+       (defn ~(symbol (str 'map-> name))
+         ([m#] (~(symbol (str classname "/create")) m#)))
+       ~classname)))
 
 (defn- emit-deftype* 
   "Do not use this directly - use deftype"
@@ -406,15 +403,34 @@
   [name [& fields] & opts+specs]
   (let [gname name 
         [interfaces methods opts] (parse-opts+specs opts+specs)
-        classname (symbol (str (namespace-munge *ns*) "." gname))
+		ns-part (namespace-munge *ns*)
+        classname (symbol (str ns-part "." gname))
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))]
     `(do
        ~(emit-deftype* name gname (vec hinted-fields) (vec interfaces) methods)
-       (import ~classname))))
+       (import ~classname)
+       (defmethod print-method ~classname [o# w#]
+         ((var print-deftype) o# w#))
+       (defmethod print-dup ~classname [o# w#]
+         ((var printdup-deftype) o# w#))
+       (defn ~(symbol (str '-> name))
+         ([~@fields] (new ~classname ~@fields)))
+       ~classname)))
 
-
-
+(defn- print-deftype [o ^System.IO.TextWriter w]                    ;;; ^Writer
+  (.Write w "#")                                                    ;;; .write
+  (.Write w (.GetName (class o)))                                   ;;; .write  .getName
+  (let [basii (for [fld (map str (clojure.lang.Reflector/InvokeStaticMethod (class o) "getBasis" (to-array [])))]       ;;; invokeStaticMethod
+                (clojure.lang.Reflector/GetInstanceField o fld))]                                                       ;;; getInstanceField
+    (print-sequential "[" pr-on ", " "]" basii w)))
+ 
+(defn- printdup-deftype [o ^System.IO.TextWriter w]                 ;;; ^Writer
+  (.Write w "#")                                                    ;;; .write
+  (.Write w (.getName (class o)))                                   ;;; .write  .getName
+  (let [basii (for [fld (map str (clojure.lang.Reflector/InvokeStaticMethod (class o) "getBasis" (to-array [])))]        ;;; invokeStaticMethod
+                (clojure.lang.Reflector/GetInstanceField o fld))]                                                        ;;; getInstanceField
+    (print-sequential "[" pr-on ", " "]" basii w)))
 
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
 

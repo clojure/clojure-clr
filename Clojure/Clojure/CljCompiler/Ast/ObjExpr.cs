@@ -62,6 +62,7 @@ namespace clojure.lang.CljCompiler.Ast
         protected IPersistentVector _closesExprs = PersistentVector.EMPTY;  // localbinding exprs
         protected IPersistentSet _volatiles = PersistentHashSet.EMPTY;      // symbols
         protected IPersistentMap _fields = null;                            // symbol -> lb
+        protected IPersistentVector _hintedFields = PersistentVector.EMPTY; // hinted fields
         private IPersistentMap _keywords = PersistentHashMap.EMPTY;         // Keyword -> KeywordExpr
         private IPersistentMap _vars = PersistentHashMap.EMPTY;
         Type _compiledType;
@@ -738,6 +739,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             //GenContext newContext = CreateContext(context, _typeBuilder, _baseType);
             //GenerateMethods(newContext);
+            GenerateStatics(context);
             GenerateMethods(context);
         }
 
@@ -875,7 +877,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        private Expression GenerateValue(object value)
+        protected Expression GenerateValue(object value)
         {
             bool partial = true;
             Expression ret;
@@ -934,6 +936,22 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.Method_RT_var2,
                     Expression.Constant(var.Namespace.Name.ToString()),
                     Expression.Constant(var.Symbol.Name.ToString()));
+            }
+            else if (value is IRecord)
+            {
+                List<object> entries = new List<object>();
+                // TODO: Implement IDictionary.GetEnumerator in core_deftype for records and we can iterate through mapentries.
+                IDictionary idict = (IDictionary)value;
+                foreach (object key in idict.Keys)
+                {
+                    entries.Add(key);
+                    entries.Add(idict[key]);
+                }
+                ret = Expression.Call(
+                    value.GetType(),
+                    "create",
+                    new Type[] { typeof(IPersistentMap) },
+                    Expression.Call(null, Compiler.Method_RT_map, GenerateListAsObjectArray(entries)));
             }
             else if (value is IPersistentMap)
             {
@@ -1247,6 +1265,10 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         protected virtual void GenerateMethods(GenContext context)
+        {
+        }
+
+        protected virtual void GenerateStatics(GenContext context)
         {
         }
 

@@ -647,6 +647,11 @@ namespace clojure.lang
                 throw new ArgumentException("Don't know how to create ISeq from: " + coll.GetType().FullName);
         }
 
+        public static object seqOrElse(object o)
+        {
+            return seq(o) == null ? null : o;
+        }
+
         public static ISeq keys(object coll)
         {
             return APersistentMap.KeySeq.create(seq(coll));

@@ -217,9 +217,13 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_ILookupSite_fault = typeof(ILookupSite).GetMethod("fault");
         internal static readonly MethodInfo Method_ILookupThunk_get = typeof(ILookupThunk).GetMethod("get");
 
+        internal static readonly MethodInfo Method_IPersistentMap_valAt2 = typeof(ILookup).GetMethod("valAt", new Type[] { typeof(object), typeof(object) });
+        internal static readonly MethodInfo Method_IPersistentMap_without = typeof(IPersistentMap).GetMethod("without");
+
         internal static readonly MethodInfo Method_IObj_withMeta = typeof(IObj).GetMethod("withMeta");
 
-        internal static readonly MethodInfo Method_Keyword_intern = typeof(Keyword).GetMethod("intern", new Type[] { typeof(Symbol) });
+        internal static readonly MethodInfo Method_Keyword_intern_symbol = typeof(Keyword).GetMethod("intern", new Type[] { typeof(Symbol) });
+        internal static readonly MethodInfo Method_Keyword_intern_string = typeof(Keyword).GetMethod("intern", new Type[] { typeof(String) });
         
         internal static readonly MethodInfo Method_KeywordLookupSite_Get = typeof(KeywordLookupSite).GetMethod("Get");
 
@@ -253,6 +257,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_RT_keyword = typeof(RT).GetMethod("keyword");
         internal static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
         internal static readonly MethodInfo Method_RT_printToConsole = typeof(RT).GetMethod("printToConsole");
+        internal static readonly MethodInfo Method_RT_seqOrElse = typeof(RT).GetMethod("seqOrElse");
         internal static readonly MethodInfo Method_RT_set = typeof(RT).GetMethod("set");
         internal static readonly MethodInfo Method_RT_vector = typeof(RT).GetMethod("vector");
         internal static readonly MethodInfo Method_RT_readString = typeof(RT).GetMethod("readString");
@@ -1473,6 +1478,8 @@ namespace clojure.lang
                     return AnalyzeSeq(pcontext, (ISeq)form, name);
                 else if (form is IPersistentVector)
                     return VectorExpr.Parse(pcontext, (IPersistentVector)form);
+                else if (form is IRecord)
+                    return new ConstantExpr(form);
                 else if (form is IPersistentMap)
                     return MapExpr.Parse(pcontext, (IPersistentMap)form);
                 else if (form is IPersistentSet)

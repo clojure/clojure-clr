@@ -197,6 +197,7 @@ namespace clojure.lang.CljCompiler.Ast
                             Compiler.COMPILE_STUB_SYM, Symbol.intern(null, tagName),
                             Compiler.COMPILE_STUB_CLASS, stub
                             ));
+                    ret._hintedFields = RT.subvec(fieldSyms, 0, fieldSyms.count() - ret._altCtorDrops);
                 }
                 // now (methodname [args] body)*
                 // TODO: SourceLocation?
@@ -433,6 +434,65 @@ namespace clojure.lang.CljCompiler.Ast
         private string ExplicitMethodName(MethodInfo mi)
         {
             return mi.DeclaringType.Name + "." + mi.Name;
+        }
+
+
+        protected override void GenerateStatics(GenContext context)
+        {
+            if (IsDefType)
+            {
+                TypeBuilder tb = TypeBuilder;
+
+                // getBasis()
+                MethodBuilder mbg = tb.DefineMethod("getBasis", MethodAttributes.Public | MethodAttributes.Static, typeof(IPersistentVector), Type.EmptyTypes);
+                LambdaExpression lambda = Expression.Lambda(GenerateValue(_hintedFields));
+                lambda.CompileToMethod(mbg, context.IsDebuggable);
+
+                if (_fields.count() > _hintedFields.count())
+                {
+                    // create(IPersistentMap)
+                    MethodBuilder mbc = tb.DefineMethod("create", MethodAttributes.Public | MethodAttributes.Static, tb, new Type[] { typeof(IPersistentMap) });
+                    ILGen gen = new ILGen(mbc.GetILGenerator());
+
+                    LocalBuilder kwLocal = gen.DeclareLocal(typeof(Keyword));
+                    List<LocalBuilder> locals = new List<LocalBuilder>();
+                    for (ISeq s = RT.seq(_hintedFields); s != null; s = s.next())
+                    {
+                        string bName = ((Symbol)s.first()).Name;
+                        Type t = Compiler.TagType(Compiler.TagOf(s.first()));
+
+                        // local_kw = Keyword.intern(bname)
+                        // local_i = arg_0.valAt(kw,null)
+                        gen.EmitLoadArg(0);
+                        gen.EmitString(bName);
+                        gen.EmitCall(Compiler.Method_Keyword_intern_string);
+                        gen.Emit(OpCodes.Dup);
+                        gen.Emit(OpCodes.Stloc,kwLocal.LocalIndex);
+                        gen.EmitNull();
+                        gen.EmitCall(Compiler.Method_IPersistentMap_valAt2);
+                        LocalBuilder lb = gen.DeclareLocal(t);
+                        locals.Add(lb);
+                        if ( t.IsPrimitive )
+                            gen.EmitUnbox(t);
+                        gen.Emit(OpCodes.Stloc, lb.LocalIndex);
+
+                        // arg_0 = arg_0.without(local_kw);
+                        gen.EmitLoadArg(0);
+                        gen.Emit(OpCodes.Ldloc,kwLocal.LocalIndex);
+                        gen.EmitCall(Compiler.Method_IPersistentMap_without);
+                        gen.EmitStoreArg(0);
+                    }
+
+                    foreach (LocalBuilder lb in locals)
+                        gen.Emit(OpCodes.Ldloc, lb.LocalIndex);
+                    gen.EmitNull();
+                    gen.EmitLoadArg(0);
+                    gen.EmitCall(Compiler.Method_RT_seqOrElse);
+                    gen.EmitNew(_ctorInfo);
+
+                    gen.Emit(OpCodes.Ret);
+                }
+            }
         }
 
         #endregion

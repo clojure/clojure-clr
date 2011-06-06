@@ -203,6 +203,7 @@
     <Compile Include="Lib\ILookupThunk.cs" />
     <Compile Include="Lib\IBlockingDeref.cs" />
     <Compile Include="Lib\IPending.cs" />
+    <Compile Include="Lib\IRecord.cs" />
     <Compile Include="Lib\ITransientAssociative.cs" />
     <Compile Include="Lib\ITransientCollection.cs" />
     <Compile Include="Lib\ITransientMap.cs" />

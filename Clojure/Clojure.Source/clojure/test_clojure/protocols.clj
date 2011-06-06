@@ -34,6 +34,7 @@
      (map #(.Name %))                        ;;; getName
      (sort)))
 
+(defrecord EmptyRecord [])
 (defrecord TestRecord [a b])
 (defn r
   ([a b] (TestRecord. a b))
@@ -108,7 +109,6 @@
           (eval '(extend clojure.test_clojure.protocols.HasProtocolInline
                          clojure.test_clojure.protocols.examples.ExampleProtocol
                          {:foo (fn [_] :extended)}))))))
-
 
 (deftype ExtendsTestWidget []
   ExampleProtocol)
@@ -187,6 +187,11 @@
     (is (.Equals {:foo 1 :b 2} (set/rename-keys rec {:a :foo})))               ;;; .equals
     #_(is (.Equals {:a 11 :b 2 :c 10} (merge-with + rec {:a 10 :c 10})))))       ;;; .equals
 
+(deftest degenerate-defrecord-test
+  (let [empty (EmptyRecord.)]
+    (is (nil? (seq empty)))
+    (is (not (.containsKey empty :a)))))             ;;; containsValue
+
 (deftest defrecord-interfaces-test
   (testing "java.util.Map"
     (let [rec (r 1 2)]
@@ -225,6 +230,203 @@
     (is (= 3 (get rec :k)))
     (is (= (seq rec) '([:this 1] [:that 2] [:k 3] [:m 4] [:o 5])))
     (is (= (dissoc rec :k) {:this 1, :that 2, :m 4, :o 5}))))
+
+(defrecord RecordToTestStatics1 [a])
+(defrecord RecordToTestStatics2 [a b])
+(defrecord RecordToTestStatics3 [a b c])
+(defrecord RecordToTestBasis [a b c])
+(defrecord RecordToTestBasisHinted [^String a ^Int64 b c])               ;;; ^Long
+
+(deftest defrecord-statics
+  (testing "that a record has its generated static methods"
+    (let [r1 (RecordToTestStatics1. 1)
+          r2 (RecordToTestStatics2. 1 2)
+          r3 (RecordToTestStatics3. 1 2 3)
+          rn (RecordToTestStatics3. 1 nil nil)]
+      (testing "that a record created with the ctor equals one by the static factory method"
+        (is (= r1    (RecordToTestStatics1/create {:a 1})))
+        (is (= r2    (RecordToTestStatics2/create {:a 1 :b 2})))
+        (is (= r3    (RecordToTestStatics3/create {:a 1 :b 2 :c 3})))
+        (is (= rn    (RecordToTestStatics3/create {:a 1}))))
+      (testing "that a literal record equals one by the static factory method"
+        (is (= #clojure.test_clojure.protocols.RecordToTestStatics1{:a 1} (RecordToTestStatics1/create {:a 1})))
+        (is (= #clojure.test_clojure.protocols.RecordToTestStatics2{:a 1 :b 2} (RecordToTestStatics2/create {:a 1 :b 2})))
+        (is (= #clojure.test_clojure.protocols.RecordToTestStatics3{:a 1 :b 2 :c 3} (RecordToTestStatics3/create {:a 1 :b 2 :c 3})))
+        (is (= #clojure.test_clojure.protocols.RecordToTestStatics3{:a 1} (RecordToTestStatics3/create {:a 1})))
+        (is (= #clojure.test_clojure.protocols.RecordToTestStatics3{:a 1 :b nil :c nil} (RecordToTestStatics3/create {:a 1}))))))
+  (testing "that a record has a sane generated basis method"
+    (let [b  (clojure.test_clojure.protocols.RecordToTestBasis/getBasis)
+          bh (clojure.test_clojure.protocols.RecordToTestBasisHinted/getBasis)]
+      (is (= '[a b c] b))
+      (is (= (:tag (meta (bh 0))) 'String))
+      (is (= (:tag (meta (bh 1))) 'Int64))                        ;;; 'Long
+      (is (nil? (:tag (meta (bh 2))))))))
+
+(defrecord RecordToTestFactories [a b c])
+(deftest defrecord-factory-fns
+  (testing "if the definition of a defrecord generates the appropriate factory funcitons"
+    (let [r   (RecordToTestFactories. 1 2 3)
+          r-n (RecordToTestFactories. nil nil nil)]
+      (testing "that a record created with the ctor equals one by the positional factory fn"
+        (is (= r    (->RecordToTestFactories 1 2 3)))
+        (is (= r    (->RecordToTestFactories 1 2 3 nil nil)))
+        (is (= r    (->RecordToTestFactories 1 2 3 {:something true} nil)))
+        (is (not= r (->RecordToTestFactories 1 2 3 nil {:d 4}))))
+      (testing "that a record created with the ctor equals one by the map-> factory fn"
+        (is (= r    (map->RecordToTestFactories {:a 1 :b 2 :c 3})))
+        (is (= r-n  (map->RecordToTestFactories {}))))
+      (testing "that a literal record equals one by the positional factory fn"
+        (is (= #clojure.test_clojure.protocols.RecordToTestFactories{:a 1 :b 2 :c 3} (->RecordToTestFactories 1 2 3)))
+        (is (= #clojure.test_clojure.protocols.RecordToTestFactories{:a 1 :b nil :c nil} (->RecordToTestFactories 1 nil nil)))
+        (is (= #clojure.test_clojure.protocols.RecordToTestFactories{:a [] :b {} :c ()} (->RecordToTestFactories [] {} ()))))      
+      (testing "that a literal record equals one by the map-> factory fn"
+        (is (= #clojure.test_clojure.protocols.RecordToTestFactories{:a 1 :b 2 :c 3} (map->RecordToTestFactories {:a 1 :b 2 :c 3})))
+        (is (= #clojure.test_clojure.protocols.RecordToTestFactories{:a 1 :b nil :c nil} (map->RecordToTestFactories {:a 1})))
+        (is (= #clojure.test_clojure.protocols.RecordToTestFactories{:a nil :b nil :c nil} (map->RecordToTestFactories {})))))))
+
+(deftype TypeToTestFactory [a])
+(deftest deftype-factory-fn
+  (testing "that the ->T factory is gen'd for a deftype and that it works"
+    (is (= (.a (TypeToTestFactory. 42)) (.a (->TypeToTestFactory 42))))))
+
+(deftest ctor-literals
+  (testing "that constructor calls to print-dup'able classes are supported as literals"
+    ;;;(is (= "Hi" #System.String["Hi"]))                                                       ;;; #java.lang.String
+    ;;;(is (= 42 #java.lang.Long[42]))
+    ;;;(is (= 42 #java.lang.Long["42"]))
+    (is (= [:a 42] #clojure.lang.MapEntry[:a 42])))
+  ;;;(testing "that constructor literals are embeddable"
+  ;;;  (is (= 42 #java.lang.Long[#java.lang.String["42"]])))
+  (testing "that constructor literals work for deftypes too"
+    (is (= (.a (TypeToTestFactory. 42)) (.a (->TypeToTestFactory 42))))))
+
+(defrecord RecordToTestLiterals [a])
+(defrecord TestNode [v l r])
+(deftype TypeToTestLiterals [a])
+(def lang-str "en")
+(deftest exercise-literals
+  (testing "that ctor literals can be used in common 'places'"
+    (is (= (RecordToTestLiterals. ()) #clojure.test_clojure.protocols.RecordToTestLiterals[()]))
+    (is (= (.a (TypeToTestLiterals. ())) (.a #clojure.test_clojure.protocols.TypeToTestLiterals[()])))
+    (is (= (RecordToTestLiterals. 42) (into #clojure.test_clojure.protocols.RecordToTestLiterals[0] {:a 42})))
+    (is (= (RecordToTestLiterals. (RecordToTestLiterals. 42))  (RecordToTestLiterals. #clojure.test_clojure.protocols.RecordToTestLiterals[42])))
+    (is (= (RecordToTestLiterals. (RecordToTestLiterals. 42))  (->RecordToTestLiterals #clojure.test_clojure.protocols.RecordToTestLiterals[42])))
+    (is (= (RecordToTestLiterals. (RecordToTestLiterals. 42))
+           #clojure.test_clojure.protocols.RecordToTestLiterals[#clojure.test_clojure.protocols.RecordToTestLiterals[42]]))
+    (is (= (TestNode. 1
+                      (TestNode. 2
+                                 (TestNode. 3
+                                            nil
+                                            nil)
+                                 nil)
+                      (TestNode. 4
+                                 (TestNode. 5
+                                            (TestNode. 6
+                                                       nil
+                                                       nil)
+                                            nil)
+                                 (TestNode. 7
+                                            nil
+                                            nil)))
+           #clojure.test_clojure.protocols.TestNode{:v 1
+                                                    :l #clojure.test_clojure.protocols.TestNode{:v 2
+                                                                                                :l #clojure.test_clojure.protocols.TestNode{:v 3 :l nil :r nil}
+                                                                                                :r nil}
+                                                    :r #clojure.test_clojure.protocols.TestNode{:v 4
+                                                                                                :l #clojure.test_clojure.protocols.TestNode{:v 5
+                                                                                                                                            :l #clojure.test_clojure.protocols.TestNode{:v 6 :l nil :r nil}
+                                                                                                                                            :r nil}
+                                                                                                :r #clojure.test_clojure.protocols.TestNode{:v 7 :l nil :r nil}}})))
+
+  (testing "that records and types are evalable"
+    (is (= (RecordToTestLiterals. 42) (eval #clojure.test_clojure.protocols.RecordToTestLiterals[42])))
+    (is (= (RecordToTestLiterals. 42) (eval #clojure.test_clojure.protocols.RecordToTestLiterals{:a 42})))
+    (is (= (RecordToTestLiterals. 42) (eval (RecordToTestLiterals. 42))))
+    (is (= (RecordToTestLiterals. (RecordToTestLiterals. 42))
+           (eval #clojure.test_clojure.protocols.RecordToTestLiterals[#clojure.test_clojure.protocols.RecordToTestLiterals[42]])))
+    (is (= (RecordToTestLiterals. (RecordToTestLiterals. 42))
+           (eval #clojure.test_clojure.protocols.RecordToTestLiterals[#clojure.test_clojure.protocols.RecordToTestLiterals{:a 42}])))
+    (is (= (RecordToTestLiterals. (RecordToTestLiterals. 42))
+           (eval #clojure.test_clojure.protocols.RecordToTestLiterals{:a #clojure.test_clojure.protocols.RecordToTestLiterals[42]})))
+    (is (= 42 (.a (eval #clojure.test_clojure.protocols.TypeToTestLiterals[42])))))
+  
+;  (testing "that ctor literals only work with constants or statics"
+;    (is (thrown? Exception (read-string "#java.util.Locale[(str 'en)]")))
+;    (is (thrown? Exception (read-string "(let [s \"en\"] #java.util.Locale[(str 'en)])")))
+;    (is (thrown? Exception (read-string "#clojure.test_clojure.protocols.RecordToTestLiterals{(keyword \"a\") 42}"))))
+  
+;  (testing "that the correct errors are thrown with malformed literals"
+;    (is (thrown-with-msg?
+;          Exception
+;          #"Unreadable constructor form.*"
+;          (read-string "#java.util.Locale(\"en\")")))
+;    (is (thrown-with-msg?
+;          Exception
+;          #"Unexpected number of constructor arguments.*"
+;          (read-string "#java.util.Locale[\"\" \"\" \"\" \"\"]")))
+;    (is (thrown-with-msg?
+;          Exception
+;          #"Constructor literal can only contain constants or statics.*"
+;          (read-string "#clojure.lang.Ref[#clojure.lang.Ref[(+ 1 2)]]")))
+);    (is (thrown? Exception (read-string "#java.util.Nachos(\"en\")")))))
+
+(defrecord RecordToTestPrinting [a b])
+;(deftest defrecord-printing
+;  (testing "that the default printer gives the proper representation"
+;    (let [r   (RecordToTestPrinting. 1 2)]
+;      (is (= "#clojure.test_clojure.protocols.RecordToTestPrinting{:a 1, :b 2}"
+;             (pr-str r)))
+;      (is (= "#clojure.test_clojure.protocols.RecordToTestPrinting[#=(java.lang.Long. \"1\"), #=(java.lang.Long. \"2\")]"
+;             (binding [*print-dup* true] (pr-str r))))
+;      (is (= "#clojure.test_clojure.protocols.RecordToTestPrinting{:a #=(java.lang.Long. \"1\"), :b #=(java.lang.Long. \"2\")}"
+;             (binding [*print-dup* true *verbose-defrecords* true] (pr-str r))))
+;      (is (= "#clojure.test_clojure.protocols.TypeToTestLiterals[#=(java.lang.Long. \"42\")]"
+;             (binding [*print-dup* true] (pr-str (TypeToTestLiterals. 42))))))))
+
+(defrecord RecordToTestLongHint [^long a])
+(defrecord RecordToTestByteHint [^byte a])
+(defrecord RecordToTestBoolHint [^boolean a])
+(defrecord RecordToTestCovariantHint [^String a]) ;; same for arrays also
+
+(deftest defrecord-hinting
+  (testing "that primitive hinting requiring no coercion works as expected"
+    (is (= (RecordToTestLongHint. 42) #clojure.test_clojure.protocols.RecordToTestLongHint{:a 42}))
+    (is (= (RecordToTestLongHint. 42) #clojure.test_clojure.protocols.RecordToTestLongHint[42]))
+    (is (= (RecordToTestLongHint. 42) (clojure.test_clojure.protocols.RecordToTestLongHint/create {:a 42})))
+    (is (= (RecordToTestLongHint. 42) (map->RecordToTestLongHint {:a 42})))
+    (is (= (RecordToTestLongHint. 42) (->RecordToTestLongHint 42)))
+    (testing "that invalid primitive types on hinted defrecord fields fails"
+      (is (thrown-with-msg?
+            System.Reflection.TargetInvocationException                                         ;;; ClassCastException
+            #"Exception has been thrown by the target of an invocation.*"                       ;;; #"java.lang.String cannot be cast to java.lang.Long.*"
+            (read-string "#clojure.test_clojure.protocols.RecordToTestLongHint{:a \"\"}")))
+      (is (thrown-with-msg?
+            FormatException                                                                     ;;; IllegalArgumentException
+            #"Input string was not in a correct format.*"                                       ;;; #"Unexpected param type, expected: long, given: java.lang.String.*"
+            (read-string "#clojure.test_clojure.protocols.RecordToTestLongHint[\"\"]")))
+      (is (thrown-with-msg?
+             InvalidCastException                                                               ;;; ClassCastException
+            #"Specified cast is not valid.*"                                                    ;;; #"java.lang.String cannot be cast to java.lang.Long.*"
+            (clojure.test_clojure.protocols.RecordToTestLongHint/create {:a ""})))
+      (is (thrown-with-msg?
+            InvalidCastException                                                                ;;; ClassCastException
+            #"Specified cast is not valid.*"                                                    ;;; #"java.lang.String cannot be cast to java.lang.Long.*"
+            (map->RecordToTestLongHint {:a ""})))
+      (is (thrown-with-msg?
+            FormatException                                                                     ;;; ClassCastException
+            #"Input string was not in a correct format.*"                                       ;;; #"java.lang.String cannot be cast to java.lang.Number.*"
+            (->RecordToTestLongHint "")))))
+  (testing "that primitive hinting requiring coercion works as expected"
+    (is (= (RecordToTestByteHint. 42) (clojure.test_clojure.protocols.RecordToTestByteHint/create {:a (byte 42)})))
+    (is (= (RecordToTestByteHint. 42) (map->RecordToTestByteHint {:a (byte 42)})))
+    (is (= (RecordToTestByteHint. 42) (->RecordToTestByteHint (byte 42)))))
+  (testing "that primitive hinting for non-numerics works as expected"
+    (is (= (RecordToTestBoolHint. true) #clojure.test_clojure.protocols.RecordToTestBoolHint{:a true}))
+    (is (= (RecordToTestBoolHint. true) #clojure.test_clojure.protocols.RecordToTestBoolHint[true]))
+    (is (= (RecordToTestBoolHint. true) (clojure.test_clojure.protocols.RecordToTestBoolHint/create {:a true})))
+    (is (= (RecordToTestBoolHint. true) (map->RecordToTestBoolHint {:a true})))
+    (is (= (RecordToTestBoolHint. true) (->RecordToTestBoolHint true))))
+  (testing "covariant hints -- deferred"))
 
 (deftest reify-test
   (testing "of an interface"
