@@ -1258,7 +1258,7 @@ namespace clojure.lang
        
         #region Array c-tors
 
-        static public float[] float_array(int size, object init)
+        public static float[] float_array(int size, object init)
         {
             float[] ret = new float[size];
             if (Util.IsNumeric(init))
@@ -1276,7 +1276,7 @@ namespace clojure.lang
             return ret;
         }
 
-        static public float[] float_array(Object sizeOrSeq)
+        public static float[] float_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
                 return new float[Util.ConvertToInt(sizeOrSeq)];
@@ -1291,7 +1291,7 @@ namespace clojure.lang
             }
         }
 
-        static public double[] double_array(int size, Object init)
+        public static double[] double_array(int size, Object init)
         {
             double[] ret = new double[size];
             if (Util.IsNumeric(init))
@@ -1309,7 +1309,7 @@ namespace clojure.lang
             return ret;
         }
 
-        static public double[] double_array(Object sizeOrSeq)
+        public static double[] double_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
                 return new double[Util.ConvertToInt(sizeOrSeq)];
@@ -1324,7 +1324,7 @@ namespace clojure.lang
             }
         }
 
-        static public int[] int_array(int size, Object init)
+        public static int[] int_array(int size, Object init)
         {
             int[] ret = new int[size];
             if (Util.IsNumeric(init))
@@ -1342,7 +1342,7 @@ namespace clojure.lang
             return ret;
         }
 
-        static public int[] int_array(Object sizeOrSeq)
+        public static int[] int_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
                 return new int[Util.ConvertToInt(sizeOrSeq)];
@@ -1357,7 +1357,7 @@ namespace clojure.lang
             }
         }
 
-        static public long[] long_array(int size, Object init)
+        public static long[] long_array(int size, Object init)
         {
             long[] ret = new long[size];
             if (Util.IsNumeric(init))
@@ -1375,7 +1375,7 @@ namespace clojure.lang
             return ret;
         }
 
-        static public long[] long_array(Object sizeOrSeq)
+        public static long[] long_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
                 return new long[Util.ConvertToInt(sizeOrSeq)];
@@ -1391,7 +1391,7 @@ namespace clojure.lang
         }
 
 
-        static public short[] short_array(int size, Object init)
+        public static short[] short_array(int size, Object init)
         {
             short[] ret = new short[size];
             if (Util.IsNumeric(init))
@@ -1409,7 +1409,7 @@ namespace clojure.lang
             return ret;
         }
 
-        static public short[] short_array(Object sizeOrSeq)
+        public static short[] short_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
                 return new short[Util.ConvertToInt(sizeOrSeq)];
@@ -1425,7 +1425,7 @@ namespace clojure.lang
         }
 
 
-        static public char[] char_array(int size, Object init)
+        public static char[] char_array(int size, Object init)
         {
             char[] ret = new char[size];
             if (Util.IsNumeric(init))
@@ -1443,7 +1443,7 @@ namespace clojure.lang
             return ret;
         }
 
-        static public char[] char_array(Object sizeOrSeq)
+        public static char[] char_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
                 return new char[Util.ConvertToInt(sizeOrSeq)];
@@ -1459,7 +1459,7 @@ namespace clojure.lang
         }
 
 
-        static public byte[] byte_array(int size, Object init)
+        public static byte[] byte_array(int size, Object init)
         {
             byte[] ret = new byte[size];
             if (Util.IsNumeric(init))
@@ -1477,7 +1477,7 @@ namespace clojure.lang
             return ret;
         }
 
-        static public byte[] byte_array(Object sizeOrSeq)
+        public static byte[] byte_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
                 return new byte[Util.ConvertToInt(sizeOrSeq)];
@@ -1493,7 +1493,7 @@ namespace clojure.lang
         }
 
 
-        static public bool[] boolean_array(int size, Object init)
+        public static bool[] boolean_array(int size, Object init)
         {
             bool[] ret = new bool[size];
             if (init is bool)
@@ -1511,7 +1511,7 @@ namespace clojure.lang
             return ret;
         }
 
-        static public bool[] boolean_array(Object sizeOrSeq)
+        public static bool[] boolean_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
                 return new bool[Util.ConvertToInt(sizeOrSeq)];
@@ -1527,42 +1527,42 @@ namespace clojure.lang
         }
 
 
-        static public bool[] booleans(Object array)
+        public static bool[] booleans(Object array)
         {
             return (bool[])array;
         }
         
-        static public byte[] bytes(Object array)
+        public static byte[] bytes(Object array)
         {
             return (byte[])array;
         }
         
-        static public char[] chars(Object array)
+        public static char[] chars(Object array)
         {
             return (char[])array;
         }
         
-        static public short[] shorts(Object array)
+        public static short[] shorts(Object array)
         {
             return (short[])array;
         }
 
-        static public float[] floats(Object array)
+        public static float[] floats(Object array)
         {
             return (float[])array;
         }
 
-        static public double[] doubles(Object array)
+        public static double[] doubles(Object array)
         {
             return (double[])array;
         }
 
-        static public int[] ints(Object array)
+        public static int[] ints(Object array)
         {
             return (int[])array;
         }
 
-        static public long[] longs(Object array)
+        public static long[] longs(Object array)
         {
             return (long[])array;
         }
@@ -1586,107 +1586,107 @@ namespace clojure.lang
             return x;
         }
 
-        static public double add(double x, double y)
+        public static double add(double x, double y)
         {
             return x + y;
         }
 
-        static public double addP(double x, double y)
+        public static double addP(double x, double y)
         {
             return x + y;
         }
 
-        static public double minus(double x, double y)
+        public static double minus(double x, double y)
         {
             return x - y;
         }
 
-        static public double minusP(double x, double y)
+        public static double minusP(double x, double y)
         {
             return x - y;
         }
 
-        static public double minus(double x)
+        public static double minus(double x)
         {
             return -x;
         }
 
-        static public double minusP(double x)
+        public static double minusP(double x)
         {
             return -x;
         }
 
-        static public double inc(double x)
+        public static double inc(double x)
         {
             return x + 1;
         }
 
-        static public double incP(double x)
+        public static double incP(double x)
         {
             return x + 1;
         }
 
-        static public double dec(double x)
+        public static double dec(double x)
         {
             return x - 1;
         }
 
-        static public double decP(double x)
+        public static double decP(double x)
         {
             return x - 1;
         }
 
-        static public double multiply(double x, double y)
+        public static double multiply(double x, double y)
         {
             return x * y;
         }
 
-        static public double multiplyP(double x, double y)
+        public static double multiplyP(double x, double y)
         {
             return x * y;
         }
 
-        static public double divide(double x, double y)
+        public static double divide(double x, double y)
         {
             return x / y;
         }
 
-        static public bool equiv(double x, double y)
+        public static bool equiv(double x, double y)
         {
             return x == y;
         }
 
-        static public bool lt(double x, double y)
+        public static bool lt(double x, double y)
         {
             return x < y;
         }
 
-        static public bool lte(double x, double y)
+        public static bool lte(double x, double y)
         {
             return x <= y;
         }
 
-        static public bool gt(double x, double y)
+        public static bool gt(double x, double y)
         {
             return x > y;
         }
 
-        static public bool gte(double x, double y)
+        public static bool gte(double x, double y)
         {
             return x >= y;
         }
 
-        static public bool isPos(double x)
+        public static bool isPos(double x)
         {
             return x > 0;
         }
 
-        static public bool isNeg(double x)
+        public static bool isNeg(double x)
         {
             return x < 0;
         }
 
-        static public bool isZero(double x)
+        public static bool isZero(double x)
         {
             return x == 0;
         }
@@ -1705,42 +1705,42 @@ namespace clojure.lang
         //    return x;
         //}
 
-        static public int unchecked_int_add(int x, int y)
+        public static int unchecked_int_add(int x, int y)
         {
             return x + y;
         }
 
-        static public int unchecked_int_subtract(int x, int y)
+        public static int unchecked_int_subtract(int x, int y)
         {
             return x - y;
         }
 
-        static public int unchecked_int_negate(int x)
+        public static int unchecked_int_negate(int x)
         {
             return -x;
         }
 
-        static public int unchecked_int_inc(int x)
+        public static int unchecked_int_inc(int x)
         {
             return x + 1;
         }
 
-        static public int unchecked_int_dec(int x)
+        public static int unchecked_int_dec(int x)
         {
             return x - 1;
         }
 
-        static public int unchecked_int_multiply(int x, int y)
+        public static int unchecked_int_multiply(int x, int y)
         {
             return x * y;
         }
 
-        static public int unchecked_int_divide(int x, int y)
+        public static int unchecked_int_divide(int x, int y)
         {
             return x / y;
         }
 
-        static public int unchecked_int_remainder(int x, int y)
+        public static int unchecked_int_remainder(int x, int y)
         {
             return x % y;
         }
@@ -1754,63 +1754,63 @@ namespace clojure.lang
             return x;
         }
 
-        static public long unchecked_add(long x, long y) { return x + y; }
-        static public long unchecked_minus(long x, long y) { return x - y; }
-        static public long unchecked_multiply(long x, long y) { return x * y; }
-        static public long unchecked_minus(long x) { return -x; }
-        static public long unchecked_inc(long x) { return x + 1; }
-        static public long unchecked_dec(long x) { return x - 1; }
+        public static long unchecked_add(long x, long y) { return x + y; }
+        public static long unchecked_minus(long x, long y) { return x - y; }
+        public static long unchecked_multiply(long x, long y) { return x * y; }
+        public static long unchecked_minus(long x) { return -x; }
+        public static long unchecked_inc(long x) { return x + 1; }
+        public static long unchecked_dec(long x) { return x - 1; }
 
-        static public object unchecked_add(object x, object y) { return add(x, y); }
-        static public object unchecked_minus(object x, object y) { return minus(x, y); }
-        static public object unchecked_multiply(object x, object y) { return multiply(x, y); }
-        static public object unchecked_minus(object x) { return minus(x); }
-        static public object unchecked_inc(object x) { return inc(x); }
-        static public object unchecked_dec(object x) { return dec(x); }
+        public static object unchecked_add(object x, object y) { return add(x, y); }
+        public static object unchecked_minus(object x, object y) { return minus(x, y); }
+        public static object unchecked_multiply(object x, object y) { return multiply(x, y); }
+        public static object unchecked_minus(object x) { return minus(x); }
+        public static object unchecked_inc(object x) { return inc(x); }
+        public static object unchecked_dec(object x) { return dec(x); }
 
-        static public double unchecked_add(double x, double y) { return add(x, y); }
-        static public double unchecked_minus(double x, double y) { return minus(x, y); }
-        static public double unchecked_multiply(double x, double y) { return multiply(x, y); }
-        static public double unchecked_minus(double x) { return minus(x); }
-        static public double unchecked_inc(double x) { return inc(x); }
-        static public double unchecked_dec(double x) { return dec(x); }
+        public static double unchecked_add(double x, double y) { return add(x, y); }
+        public static double unchecked_minus(double x, double y) { return minus(x, y); }
+        public static double unchecked_multiply(double x, double y) { return multiply(x, y); }
+        public static double unchecked_minus(double x) { return minus(x); }
+        public static double unchecked_inc(double x) { return inc(x); }
+        public static double unchecked_dec(double x) { return dec(x); }
 
-        static public double unchecked_add(double x, object y) { return add(x, y); }
-        static public double unchecked_minus(double x, object y) { return minus(x, y); }
-        static public double unchecked_multiply(double x, object y) { return multiply(x, y); }
-        static public double unchecked_add(object x, double y) { return add(x, y); }
-        static public double unchecked_minus(object x, double y) { return minus(x, y); }
-        static public double unchecked_multiply(object x, double y) { return multiply(x, y); }
+        public static double unchecked_add(double x, object y) { return add(x, y); }
+        public static double unchecked_minus(double x, object y) { return minus(x, y); }
+        public static double unchecked_multiply(double x, object y) { return multiply(x, y); }
+        public static double unchecked_add(object x, double y) { return add(x, y); }
+        public static double unchecked_minus(object x, double y) { return minus(x, y); }
+        public static double unchecked_multiply(object x, double y) { return multiply(x, y); }
 
-        static public double unchecked_add(double x, long y) { return add(x, y); }
-        static public double unchecked_minus(double x, long y) { return minus(x, y); }
-        static public double unchecked_multiply(double x, long y) { return multiply(x, y); }
-        static public double unchecked_add(long x, double y) { return add(x, y); }
-        static public double unchecked_minus(long x, double y) { return minus(x, y); }
-        static public double unchecked_multiply(long x, double y) { return multiply(x, y); }
+        public static double unchecked_add(double x, long y) { return add(x, y); }
+        public static double unchecked_minus(double x, long y) { return minus(x, y); }
+        public static double unchecked_multiply(double x, long y) { return multiply(x, y); }
+        public static double unchecked_add(long x, double y) { return add(x, y); }
+        public static double unchecked_minus(long x, double y) { return minus(x, y); }
+        public static double unchecked_multiply(long x, double y) { return multiply(x, y); }
 
-        static public object unchecked_add(long x, object y) { return add(x, y); }
-        static public object unchecked_minus(long x, object y) { return minus(x, y); }
-        static public object unchecked_multiply(long x, object y) { return multiply(x, y); }
-        static public object unchecked_add(object x, long y) { return add(x, y); }
-        static public object unchecked_minus(object x, long y) { return minus(x, y); }
-        static public object unchecked_multiply(object x, long y) { return multiply(x, y); }
+        public static object unchecked_add(long x, object y) { return add(x, y); }
+        public static object unchecked_minus(long x, object y) { return minus(x, y); }
+        public static object unchecked_multiply(long x, object y) { return multiply(x, y); }
+        public static object unchecked_add(object x, long y) { return add(x, y); }
+        public static object unchecked_minus(object x, long y) { return minus(x, y); }
+        public static object unchecked_multiply(object x, long y) { return multiply(x, y); }
 
-        static public object quotient(double x, Object y) { return quotient((Object)x, y); }
-        static public object quotient(Object x, double y) { return quotient(x, (Object)y); }
-        static public object quotient(long x, Object y) { return quotient((Object)x, y); }
-        static public object quotient(Object x, long y) { return quotient(x, (Object)y); }
-        static public double quotient(double x, long y){return quotient(x,(double)y);}
-        static public double quotient(long x, double y){return quotient((double)x,y);}
+        public static object quotient(double x, Object y) { return quotient((Object)x, y); }
+        public static object quotient(Object x, double y) { return quotient(x, (Object)y); }
+        public static object quotient(long x, Object y) { return quotient((Object)x, y); }
+        public static object quotient(Object x, long y) { return quotient(x, (Object)y); }
+        public static double quotient(double x, long y){return quotient(x,(double)y);}
+        public static double quotient(long x, double y){return quotient((double)x,y);}
 
-        static public object remainder(double x, Object y) { return remainder((Object)x, y); }
-        static public object remainder(Object x, double y) { return remainder(x, (Object)y); }
-        static public object remainder(long x, Object y) { return remainder((Object)x, y); }
-        static public object remainder(Object x, long y) { return remainder(x, (Object)y); }
-        static public double remainder(double x, long y){return remainder(x,(double)y);}
-        static public double remainder(long x, double y){return remainder((double)x,y);}
+        public static object remainder(double x, Object y) { return remainder((Object)x, y); }
+        public static object remainder(Object x, double y) { return remainder(x, (Object)y); }
+        public static object remainder(long x, Object y) { return remainder((Object)x, y); }
+        public static object remainder(Object x, long y) { return remainder(x, (Object)y); }
+        public static double remainder(double x, long y){return remainder(x,(double)y);}
+        public static double remainder(long x, double y){return remainder((double)x,y);}
 
-        static public long add(long x, long y)
+        public static long add(long x, long y)
         {
             long ret = x + y;
             if ((ret ^ x) < 0 && (ret ^ y) < 0)
@@ -1818,7 +1818,7 @@ namespace clojure.lang
             return ret;
         }
 
-        static public object addP(long x, long y)
+        public static object addP(long x, long y)
         {
             long ret = x + y;
             if ((ret ^ x) < 0 && (ret ^ y) < 0)
@@ -1826,7 +1826,7 @@ namespace clojure.lang
             return num(ret);
         }
 
-        static public long minus(long x, long y)
+        public static long minus(long x, long y)
         {
             long ret = x - y;
             if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
@@ -1834,7 +1834,7 @@ namespace clojure.lang
             return ret;
         }
 
-        static public object minusP(long x, long y)
+        public static object minusP(long x, long y)
         {
             long ret = x - y;
             if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
@@ -1842,49 +1842,49 @@ namespace clojure.lang
             return num(ret);
         }
 
-        static public long minus(long x)
+        public static long minus(long x)
         {
             if (x == Int64.MinValue)
                 return throwIntOverflow();
             return -x;
         }
 
-        static public object minusP(long x)
+        public static object minusP(long x)
         {
             if (x == Int64.MinValue)
                 return BigInt.fromBigInteger(BigInteger.Create(x).Negate());
             return num(-x);
         }
 
-        static public long inc(long x)
+        public static long inc(long x)
         {
             if (x == Int64.MaxValue)
                 return throwIntOverflow();
             return x + 1;
         }
 
-        static public object incP(long x)
+        public static object incP(long x)
         {
             if (x == Int64.MaxValue)
                 return BIGINT_OPS.inc((object)x);
             return num(x + 1);
         }
 
-        static public long dec(long x)
+        public static long dec(long x)
         {
             if (x == Int64.MinValue)
                 return throwIntOverflow();
             return x - 1;
         }
 
-        static public object decP(long x)
+        public static object decP(long x)
         {
             if (x == Int64.MinValue)
                 return BIGINT_OPS.dec((object)x);
             return num(x - 1);
         }
 
-        static public long multiply(long x, long y)
+        public static long multiply(long x, long y)
         {
             long ret = x * y;
             if (y != 0 && ret / y != x)
@@ -1892,7 +1892,7 @@ namespace clojure.lang
             return ret;
         }
 
-        static public object multiplyP(long x, long y)
+        public static object multiplyP(long x, long y)
         {
             long ret = x * y;
             if (y != 0 && ret / y != x)
@@ -1900,52 +1900,52 @@ namespace clojure.lang
             return num(ret);
         }
 
-        static public long quotient(long x, long y)
+        public static long quotient(long x, long y)
         {
             return x / y;
         }
 
-        static public long remainder(long x, long y)
+        public static long remainder(long x, long y)
         {
             return x % y;
         }
 
-        static public bool equiv(long x, long y)
+        public static bool equiv(long x, long y)
         {
             return x == y;
         }
 
-        static public bool lt(long x, long y)
+        public static bool lt(long x, long y)
         {
             return x < y;
         }
 
-        static public bool lte(long x, long y)
+        public static bool lte(long x, long y)
         {
             return x <= y;
         }
 
-        static public bool gt(long x, long y)
+        public static bool gt(long x, long y)
         {
             return x > y;
         }
 
-        static public bool gte(long x, long y)
+        public static bool gte(long x, long y)
         {
             return x >= y;
         }
 
-        static public bool isPos(long x)
+        public static bool isPos(long x)
         {
             return x > 0;
         }
 
-        static public bool isNeg(long x)
+        public static bool isNeg(long x)
         {
             return x < 0;
         }
 
-        static public bool isZero(long x)
+        public static bool isZero(long x)
         {
             return x == 0;
         }
@@ -1980,22 +1980,22 @@ namespace clojure.lang
 
         #region or
 
-        static public long or(object x, object y)
+        public static long or(object x, object y)
         {
             return or(bitOpsCast(x),bitOpsCast(y));
         }
 
-        static public long or(object x, long y)
+        public static long or(object x, long y)
         {
             return or(bitOpsCast(x), y);
         }
 
-        static public long or(long x, object y)
+        public static long or(long x, object y)
         {
             return or(x, bitOpsCast(y));
         }
 
-        static public long or(long x, long y)
+        public static long or(long x, long y)
         {
             return x | y;
         }
@@ -2170,370 +2170,594 @@ namespace clojure.lang
 
         #region Overload resolution
 
-        static public object add(long x, Object y)
+        public static object add(long x, Object y)
         {
             return add((Object)x, y);
         }
 
-        static public object add(Object x, long y)
+        public static object add(Object x, long y)
         {
             return add(x, (Object)y);
         }
 
-        static public object addP(long x, Object y)
+        public static object addP(long x, Object y)
         {
             return addP((Object)x, y);
         }
 
-        static public object addP(Object x, long y)
+        public static object addP(Object x, long y)
         {
             return addP(x, (Object)y);
         }
 
-        static public double add(double x, Object y)
+        public static double add(double x, Object y)
         {
             return add(x, Util.ConvertToDouble(y));
         }
 
-        static public double add(Object x, double y)
+        public static double add(Object x, double y)
         {
             return add(Util.ConvertToDouble(x), y);
         }
 
-        static public double add(double x, long y)
+        public static double add(double x, long y)
         {
             return x + y;
         }
 
-        static public double add(long x, double y)
+        public static double add(long x, double y)
         {
             return x + y;
         }
 
-        static public double addP(double x, Object y)
+        public static double addP(double x, Object y)
         {
             return addP(x, Util.ConvertToDouble(y));
         }
 
-        static public double addP(Object x, double y)
+        public static double addP(Object x, double y)
         {
             return addP(Util.ConvertToDouble(x), y);
         }
 
-        static public double addP(double x, long y)
+        public static double addP(double x, long y)
         {
             return x + y;
         }
 
-        static public double addP(long x, double y)
+        public static double addP(long x, double y)
         {
             return x + y;
         }
 
-        static public object minus(long x, Object y)
+        public static object minus(long x, Object y)
         {
             return minus((Object)x, y);
         }
 
-        static public object minus(Object x, long y)
+        public static object minus(Object x, long y)
         {
             return minus(x, (Object)y);
         }
 
-        static public object minusP(long x, Object y)
+        public static object minusP(long x, Object y)
         {
             return minusP((Object)x, y);
         }
 
-        static public object minusP(Object x, long y)
+        public static object minusP(Object x, long y)
         {
             return minusP(x, (Object)y);
         }
 
-        static public double minus(double x, Object y)
+        public static double minus(double x, Object y)
         {
             return minus(x, Util.ConvertToDouble(y));
         }
 
-        static public double minus(Object x, double y)
+        public static double minus(Object x, double y)
         {
             return minus(Util.ConvertToDouble(x), y);
         }
 
-        static public double minus(double x, long y)
+        public static double minus(double x, long y)
         {
             return x - y;
         }
 
-        static public double minus(long x, double y)
+        public static double minus(long x, double y)
         {
             return x - y;
         }
 
-        static public double minusP(double x, Object y)
+        public static double minusP(double x, Object y)
         {
             return minusP(x, Util.ConvertToDouble(y));
         }
 
-        static public double minusP(Object x, double y)
+        public static double minusP(Object x, double y)
         {
             return minusP(Util.ConvertToDouble(x), y);
         }
 
-        static public double minusP(double x, long y)
+        public static double minusP(double x, long y)
         {
             return x - y;
         }
 
-        static public double minusP(long x, double y)
+        public static double minusP(long x, double y)
         {
             return x - y;
         }
 
-        static public object multiply(long x, Object y)
+        public static object multiply(long x, Object y)
         {
             return multiply((Object)x, y);
         }
 
-        static public object multiply(Object x, long y)
+        public static object multiply(Object x, long y)
         {
             return multiply(x, (Object)y);
         }
 
-        static public object multiplyP(long x, Object y)
+        public static object multiplyP(long x, Object y)
         {
             return multiplyP((Object)x, y);
         }
 
-        static public object multiplyP(Object x, long y)
+        public static object multiplyP(Object x, long y)
         {
             return multiplyP(x, (Object)y);
         }
 
-        static public double multiply(double x, Object y)
+        public static double multiply(double x, Object y)
         {
             return multiply(x, Util.ConvertToDouble(y));
         }
 
-        static public double multiply(Object x, double y)
+        public static double multiply(Object x, double y)
         {
             return multiply(Util.ConvertToDouble(x), y);
         }
 
-        static public double multiply(double x, long y)
+        public static double multiply(double x, long y)
         {
             return x * y;
         }
 
-        static public double multiply(long x, double y)
+        public static double multiply(long x, double y)
         {
             return x*y;
         }
 
-        static public double multiplyP(double x, Object y)
+        public static double multiplyP(double x, Object y)
         {
             return multiplyP(x, Util.ConvertToDouble(y));
         }
 
-        static public double multiplyP(Object x, double y)
+        public static double multiplyP(Object x, double y)
         {
             return multiplyP(Util.ConvertToDouble(x), y);
         }
 
-        static public double multiplyP(double x, long y)
+        public static double multiplyP(double x, long y)
         {
             return x * y;
         }
 
-        static public double multiplyP(long x, double y)
+        public static double multiplyP(long x, double y)
         {
             return x * y;
         }
 
-        static public object divide(long x, long y)
+        public static object divide(long x, long y)
         {
             return divide((object)x, (object)y);
         }
 
-        static public object divide(long x, Object y)
+        public static object divide(long x, Object y)
         {
             return divide((Object)x, y);
         }
 
-        static public object divide(Object x, long y)
+        public static object divide(Object x, long y)
         {
             return divide(x, (Object)y);
         }
 
-        static public double divide(double x, Object y)
+        public static double divide(double x, Object y)
         {
             return x / Util.ConvertToDouble(y);
         }
 
-        static public double divide(Object x, double y)
+        public static double divide(Object x, double y)
         {
             return Util.ConvertToDouble(x) / y;
         }
 
-        static public double divide(double x, long y)
+        public static double divide(double x, long y)
         {
             return x / y;
         }
 
-        static public double divide(long x, double y)
+        public static double divide(long x, double y)
         {
             return x / y;
         }
 
-        static public bool lt(long x, Object y)
+        public static bool lt(long x, Object y)
         {
             return lt((Object)x, y);
         }
 
-        static public bool lt(Object x, long y)
+        public static bool lt(Object x, long y)
         {
             return lt(x, (Object)y);
         }
 
-        static public bool lt(double x, Object y)
+        public static bool lt(double x, Object y)
         {
             return x < Util.ConvertToDouble(y);
         }
 
-        static public bool lt(Object x, double y)
+        public static bool lt(Object x, double y)
         {
             return Util.ConvertToDouble(x) < y;
         }
 
-        static public bool lt(double x, long y)
+        public static bool lt(double x, long y)
         {
             return x < y;
         }
 
-        static public bool lt(long x, double y)
+        public static bool lt(long x, double y)
         {
             return x < y;
         }
 
-        static public bool lte(long x, Object y)
+        public static bool lte(long x, Object y)
         {
             return lte((Object)x, y);
         }
 
-        static public bool lte(Object x, long y)
+        public static bool lte(Object x, long y)
         {
             return lte(x, (Object)y);
         }
 
-        static public bool lte(double x, Object y)
+        public static bool lte(double x, Object y)
         {
             return x <= Util.ConvertToDouble(y);
         }
 
-        static public bool lte(Object x, double y)
+        public static bool lte(Object x, double y)
         {
             return Util.ConvertToDouble(x) <= y;
         }
 
-        static public bool lte(double x, long y)
+        public static bool lte(double x, long y)
         {
             return x <= y;
         }
 
-        static public bool lte(long x, double y)
+        public static bool lte(long x, double y)
         {
             return x <= y;
         }
         
-        static public bool gt(long x, Object y)
+        public static bool gt(long x, Object y)
         {
             return gt((Object)x, y);
         }
 
-        static public bool gt(Object x, long y)
+        public static bool gt(Object x, long y)
         {
             return gt(x, (Object)y);
         }
 
-        static public bool gt(double x, Object y)
+        public static bool gt(double x, Object y)
         {
             return x > Util.ConvertToDouble(y);
         }
 
-        static public bool gt(Object x, double y)
+        public static bool gt(Object x, double y)
         {
             return Util.ConvertToDouble(x) > y;
         }
 
-        static public bool gt(double x, long y)
+        public static bool gt(double x, long y)
         {
             return x > y;
         }
 
-        static public bool gt(long x, double y)
+        public static bool gt(long x, double y)
         {
             return x > y;
         }
 
-        static public bool gte(long x, Object y)
+        public static bool gte(long x, Object y)
         {
             return gte((Object)x, y);
         }
 
-        static public bool gte(Object x, long y)
+        public static bool gte(Object x, long y)
         {
             return gte(x, (Object)y);
         }
 
-        static public bool gte(double x, Object y)
+        public static bool gte(double x, Object y)
         {
             return x >= Util.ConvertToDouble(y);
         }
 
-        static public bool gte(Object x, double y)
+        public static bool gte(Object x, double y)
         {
             return Util.ConvertToDouble(x) >= y;
         }
 
-        static public bool gte(double x, long y)
+        public static bool gte(double x, long y)
         {
             return x >= y;
         }
 
-        static public bool gte(long x, double y)
+        public static bool gte(long x, double y)
         {
             return x >= y;
         }
 
-        static public bool equiv(long x, Object y)
+        public static bool equiv(long x, Object y)
         {
             return equiv((Object)x, y);
         }
 
-        static public bool equiv(Object x, long y)
+        public static bool equiv(Object x, long y)
         {
             return equiv(x, (Object)y);
         }
 
-        static public bool equiv(double x, Object y)
+        public static bool equiv(double x, Object y)
         {
             return x == Util.ConvertToDouble(y);
         }
 
-        static public bool equiv(Object x, double y)
+        public static bool equiv(Object x, double y)
         {
             return Util.ConvertToDouble(x) == y;
         }
 
-        static public bool equiv(double x, long y)
+        public static bool equiv(double x, long y)
         {
             return x == y;
         }
 
-        static public bool equiv(long x, double y)
+        public static bool equiv(long x, double y)
         {
             return x == y;
         }
+
+        #endregion
+
+        #region min/max
+
+        public static double max(double x, double y)
+        {
+            if (x > y)
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object max(double x, long y)
+        {
+            if (x > y)
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object max(double x, Object y)
+        {
+            if (x > Util.ConvertToDouble(y))
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object max(long x, double y)
+        {
+            if (x > y)
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+
+        public static long max(long x, long y)
+        {
+            if (x > y)
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object max(long x, Object y)
+        {
+            if (gt(x, y))
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object max(Object x, long y)
+        {
+            if (gt(x, y))
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object max(Object x, double y)
+        {
+            if (Util.ConvertToDouble(x) > y)
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object max(Object x, Object y)
+        {
+            if (gt(x, y))
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+
+        public static double min(double x, double y)
+        {
+            if (x < y)
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object min(double x, long y)
+        {
+            if (x < y)
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object min(double x, Object y)
+        {
+            if (x < Util.ConvertToDouble(y))
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object min(long x, double y)
+        {
+            if (x < y)
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+
+        public static long min(long x, long y)
+        {
+            if (x < y)
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object min(long x, Object y)
+        {
+            if (lt(x, y))
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object min(Object x, long y)
+        {
+            if (lt(x, y))
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object min(Object x, double y)
+        {
+            if (Util.ConvertToDouble(x) < y)
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
+        public static Object min(Object x, Object y)
+        {
+            if (lt(x, y))
+            {
+                return x;
+            }
+            else
+            {
+                return y;
+            }
+        }
+
 
         #endregion
 
