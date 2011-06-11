@@ -189,7 +189,6 @@
  (print-ctor o #(print-sequential "[" print-method " " "]" %1 %2) w))
 
 (defmethod print-dup clojure.lang.IPersistentCollection [o, ^System.IO.TextWriter w]
-  (print " ipcdp ")
   (print-meta o w)
   (.Write w "#=(")
   (.Write w (.FullName ^Type (class o)))   ;; .getName => .FullName
@@ -303,7 +302,7 @@
 (defmethod print-dup clojure.lang.BigDecimal [o w] (print-method o w))    ;;; java.math.BigDecimal 
 (defmethod print-dup clojure.lang.BigInt [o w] (print-method o w))
 (defmethod print-dup clojure.lang.BigInteger [o w] (print-method o w))    ;;; java.math.BigInteger
-(defmethod print-dup clojure.lang.PersistentHashMap [o w] (print " phmpd ")(print-method o w))
+(defmethod print-dup clojure.lang.PersistentHashMap [o w] (print-method o w))
 (defmethod print-dup clojure.lang.PersistentHashSet [o w] (print-method o w)) 
 (defmethod print-dup clojure.lang.PersistentVector [o w] (print-method o w))
 (defmethod print-dup clojure.lang.LazilyPersistentVector [o w] (print-method o w))
