@@ -88,10 +88,14 @@ namespace clojure.lang.CljCompiler.Ast
                 ObjMethod method = (ObjMethod)Compiler.METHOD.deref();
                 IPersistentMap backupMethodLocals = method.Locals;
                 IPersistentMap backupMethodIndexLocals = method.IndexLocals;
-                IPersistentVector recurMismatches = null;
 
+                IPersistentVector recurMismatches = PersistentVector.EMPTY;
+                for (int i = 0; i < bindings.count() / 2; i++)
+                {
+                    recurMismatches = recurMismatches.cons(false);
+                }
 
-                // we might repeat once if a loop with a recurMismatch, return breaks
+                // may repeat once for each binding with a mismatch, return breaks
                 while (true)
                 {
 
@@ -124,7 +128,7 @@ namespace clojure.lang.CljCompiler.Ast
                             Expr init = Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), bindings.nth(i + 1), sym.Name);
                             if (isLoop)
                             {
-                                if (recurMismatches != null && ((LocalBinding)recurMismatches.nth(i / 2)).RecurMismatch)
+                                if (recurMismatches != null && RT.booleanCast(recurMismatches.nth(i / 2)) )
                                 {
                                     HostArg ha = new HostArg(HostArg.ParameterType.Standard, init, null);
                                     List<HostArg> has = new List<HostArg>(1);
@@ -159,6 +163,7 @@ namespace clojure.lang.CljCompiler.Ast
                             Compiler.LOOP_LOCALS.set(loopLocals);
 
                         Expr bodyExpr;
+                        bool moreMismatches = false;
                         try
                         {
                             if (isLoop)
@@ -174,17 +179,19 @@ namespace clojure.lang.CljCompiler.Ast
                             {
                                 Var.popThreadBindings();
 
-                                recurMismatches = null;
                                 for (int i = 0; i < loopLocals.count(); i++)
                                 {
                                     LocalBinding lb = (LocalBinding)loopLocals.nth(i);
                                     if (lb.RecurMismatch)
-                                        recurMismatches = loopLocals;
+                                    {
+                                        recurMismatches = (IPersistentVector)recurMismatches.assoc(i, true);
+                                        moreMismatches = true;
+                                    }
                                 }
                             }
                         }
 
-                        if (recurMismatches == null)
+                        if (!moreMismatches)
 
                             return new LetExpr(bindingInits, bodyExpr, isLoop);
 
