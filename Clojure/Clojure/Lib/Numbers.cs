@@ -2074,7 +2074,7 @@ namespace clojure.lang
 
         public static long clearBit(long x, int n)
         {
-            return x & (1L << n);
+            return x & ~(1L << n);
         }
 
         #endregion
