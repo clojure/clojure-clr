@@ -271,6 +271,10 @@
 (prefer-method print-dup clojure.lang.IPersistentMap System.Collections.IDictionary)    ;; java.util.Map  -> System.Collections.IDictionary
 (prefer-method print-dup clojure.lang.IRecord clojure.lang.IPersistentCollection)
 (prefer-method print-dup clojure.lang.IRecord System.Collections.IDictionary)    ;; java.util.Map  -> System.Collections.IDictionary
+(prefer-method print-dup clojure.lang.IRecord System.Collections.ICollection)
+(prefer-method print-method clojure.lang.IRecord System.Collections.ICollection)
+
+
 
 (defmethod print-method clojure.lang.IPersistentSet [s, ^System.IO.TextWriter w]
   (print-meta s w)

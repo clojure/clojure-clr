@@ -420,16 +420,16 @@
 
 (defn- print-deftype [o ^System.IO.TextWriter w]                    ;;; ^Writer
   (.Write w "#")                                                    ;;; .write
-  (.Write w (.GetName (class o)))                                   ;;; .write  .getName
+  (.Write w (.FullName (class o)))                                   ;;; .write  .getName
   (let [basii (for [fld (map str (clojure.lang.Reflector/InvokeStaticMethod (class o) "getBasis" (to-array [])))]       ;;; invokeStaticMethod
-                (clojure.lang.Reflector/GetInstanceField o fld))]                                                       ;;; getInstanceField
+                (clojure.lang.Reflector/GetInstanceFieldOrProperty o fld))]                                                       ;;; getInstanceField
     (print-sequential "[" pr-on ", " "]" basii w)))
  
 (defn- printdup-deftype [o ^System.IO.TextWriter w]                 ;;; ^Writer
   (.Write w "#")                                                    ;;; .write
-  (.Write w (.getName (class o)))                                   ;;; .write  .getName
+  (.Write w (.FullName (class o)))                                   ;;; .write  .getName
   (let [basii (for [fld (map str (clojure.lang.Reflector/InvokeStaticMethod (class o) "getBasis" (to-array [])))]        ;;; invokeStaticMethod
-                (clojure.lang.Reflector/GetInstanceField o fld))]                                                        ;;; getInstanceField
+                (clojure.lang.Reflector/GetInstanceFieldOrProperty o fld))]                                                        ;;; getInstanceField
     (print-sequential "[" pr-on ", " "]" basii w)))
 
 ;;;;;;;;;;;;;;;;;;;;;;; protocols ;;;;;;;;;;;;;;;;;;;;;;;;
