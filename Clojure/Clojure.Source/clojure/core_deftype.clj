@@ -191,7 +191,7 @@
                          (or (identical? this# ~gs)
                              (when (identical? (class this#) (class ~gs))
                                (let [~gs ~gs ]     ;;; ~(with-meta gs {:tag tagname})]    ----------------major loss of type hint here.  TODO: Figure out what the problem is
-                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~fld))) base-fields)
+                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~(keyword fld)))) base-fields)
                                        (= ~'__extmap (. ~gs ~'__extmap))))))))
                    `(containsKey [this# k#] (not (identical? this# (.valAt this# k# this#))))
                    `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
