@@ -1262,6 +1262,7 @@
   ([x y & more]
     (reduce1 bit-and-not (bit-and-not x y) more)))
 
+
 (defn bit-clear
   "Clear bit at index n"
   {:added "1.0"
@@ -3142,7 +3143,7 @@
    :static true}
   [num div] 
   (let [m (rem num div)] 
-    (if (or (zero? m) (pos? (* num div))) 
+    (if (or (zero? m) (= (pos? num) (pos? div)))
       m 
       (+ m div))))
 
