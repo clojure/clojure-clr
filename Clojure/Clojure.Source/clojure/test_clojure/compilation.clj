@@ -73,3 +73,17 @@
                         (recur (dec x))))
                     3)))
           (catch Exception _)))))
+
+#_(deftest test-numeric-dispatch
+  (is (= "(int, int)" (TestDispatch/someMethod (int 1) (int 1))))
+  (is (= "(int, long)" (TestDispatch/someMethod (int 1) (long 1))))
+  (is (= "(long, long)" (TestDispatch/someMethod (long 1) (long 1)))))
+
+(deftest test-CLJ-671-regression
+  (testing "that the presence of hints does not cause the compiler to infinitely loop"
+    (letfn [(gcd [x y]
+              (loop [x (long x) y (long y)]
+                (if (== y 0)
+                  x
+                  (recur y ^Int64 (rem x y)))))]            ;;; ^Long
+      (is (= 4 (gcd 8 100))))))
