@@ -1420,9 +1420,14 @@ namespace clojure.lang
                 object recordName = read(r, true, null, false);
                 Type recordType = RT.classForName(recordName.ToString());
 
-                int ch = r.Read();
                 char endch;
                 bool shortForm = true;
+
+                int ch = r.Read();
+
+                // flush whitespace
+                //while (isWhitespace(ch))
+                //    ch = r.Read();
 
                 // A defrecord ctor can take two forms.  Check for map->R version first.
                 if (ch == '{')
@@ -1449,62 +1454,25 @@ namespace clojure.lang
                     if ( ! ctorFound )
                         throw new Exception(String.Format("Unexpected number of constructor arguments to {0}: got {1}",recordType.ToString(),recordEntries.Length));
 
-                    ret = Reflector.InvokeConstructor(recordType,RT.SeqToArray<Object>(ResolveEach(recordEntries)));
+                    ret = Reflector.InvokeConstructor(recordType,recordEntries);
                 }
                 else
                 {
-                    ret = Reflector.InvokeStaticMethod(recordType,"create",new Object[] { RT.map(RT.SeqToArray<object>(ResolveEach(recordEntries))) });
+                    IPersistentMap vals = RT.map(recordEntries);
+                    for (ISeq s = RT.keys(vals); s != null; s = s.next())
+                    {
+                        if (!(s.first() is Keyword))
+                            throw new ArgumentException(String.Format("Unreadable defrecord form: key must be of type clojure.lang.Keyword, got {0}", s.first().ToString()));
+                    }
+
+
+                    ret = Reflector.InvokeStaticMethod(recordType, "create", new Object[] { vals });
                 }
 
                 return ret;
             }
 
-            public static ISeq ResolveEach(object[] a)
-            {
-                ISeq ret = null;
-                for (int i = a.Length - 1; i >= 0; --i)
-                    ret = (ISeq)RT.cons(Resolve(a[i]), ret);
-                return ret;
-            }
-
-            static object Resolve(object o)
-            {
-                if (o is Symbol)
-                {
-                    try
-                    {
-                        return RT.classForName(o.ToString());
-                    }
-                    catch (Exception)
-                    {
-                        throw new ArgumentException(String.Format("Constructor literal can only contain constants or statics. {0} does not name a known class.", o.ToString()));
-                    }
-                }
-                else if (o is ISeq)
-                {
-                    // THis make no sense!  Comes from the Java code.
-                    Symbol fs = (Symbol)RT.first(o);
-                    if (fs == null && o == PersistentList.EMPTY)
-                        return o;
-
-                    throw new ArgumentException(String.Format("Constructor literal can only contain constants or statics. ", o.ToString()));
-                }
-                else if (o == null
-                    || o is IPersistentCollection && ((IPersistentCollection)o).count() == 0
-                    || o is IPersistentCollection
-                    || Util.IsPrimitiveNumeric(o.GetType())
-                    || o is string
-                    || o is Keyword
-                    || o is Symbol
-                    || o is bool)
-                {
-                    return o;
-                }
-                else
-                    throw new ArgumentException("Constructor literal can only contain constants or statics. " + o.ToString());
-            }
         }
-
 
 
         public sealed class UnreadableReader : ReaderBase

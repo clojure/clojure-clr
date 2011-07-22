@@ -180,6 +180,7 @@ namespace clojure.lang.CljCompiler.Ast
             return true;
         }
 
+        static Type _internalModuleBuilderType = Type.GetType("System.Reflection.Emit.InternalModuleBuilder");
 
         // From Microsoft.Scripting.Generation.ToDiskRewriter
         private bool ShouldRewriteDelegate(Type delegateType)
@@ -192,7 +193,14 @@ namespace clojure.lang.CljCompiler.Ast
             // transient. If that option is turned on, always replace delegates
             // that live in another AssemblyBuilder
 
+            // DM: Added this test to detect the Snippets assembly/module
+            if (delegateType.Module.GetType() == _internalModuleBuilderType)
+            {
+                return true;
+            }
+
             var module = delegateType.Module as ModuleBuilder;
+ 
             if (module == null)
             {
                 return false;

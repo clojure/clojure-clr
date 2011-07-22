@@ -236,7 +236,7 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
-                if (method.NumParams > Compiler.MAX_POSITIONAL_ARITY)
+                if (method.RequiredArity > Compiler.MAX_POSITIONAL_ARITY)
                     throw new Exception(string.Format("Can't specify more than {0} parameters", Compiler.MAX_POSITIONAL_ARITY));
                 Compiler.LOOP_LOCALS.set(argLocals);
                 method._argLocals = argLocals;

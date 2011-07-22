@@ -937,21 +937,32 @@ namespace clojure.lang.CljCompiler.Ast
                     Expression.Constant(var.Namespace.Name.ToString()),
                     Expression.Constant(var.Symbol.Name.ToString()));
             }
+            else if (value is IType)
+            {
+                IPersistentVector fields = (IPersistentVector)Reflector.InvokeStaticMethod(value.GetType(), "getBasis", Type.EmptyTypes);
+                List<Expression> args = new List<Expression>();
+
+                for (ISeq s = RT.seq(fields); s != null; s = s.next())
+                {
+                    Symbol field = (Symbol)s.first();
+                    Type k = Compiler.TagType(Compiler.TagOf(field));
+                    object val = Reflector.GetInstanceFieldOrProperty(value,field.Name);
+                    Expression expr = GenerateValue(val);
+                    if (k.IsPrimitive)
+                        expr = Expression.Convert(expr, k);
+                    args.Add(expr);
+                }
+
+                ConstructorInfo cinfo = value.GetType().GetConstructors()[0];
+                ret = Expression.New(cinfo, args);
+            }
             else if (value is IRecord)
             {
-                List<object> entries = new List<object>();
-                // TODO: Implement IDictionary.GetEnumerator in core_deftype for records and we can iterate through mapentries.
-                IDictionary idict = (IDictionary)value;
-                foreach (object key in idict.Keys)
-                {
-                    entries.Add(key);
-                    entries.Add(idict[key]);
-                }
                 ret = Expression.Call(
                     value.GetType(),
                     "create",
                     new Type[] { typeof(IPersistentMap) },
-                    Expression.Call(null, Compiler.Method_RT_map, GenerateListAsObjectArray(entries)));
+                    GenerateValue(PersistentArrayMap.create((IDictionary)value)));
             }
             else if (value is IPersistentMap)
             {

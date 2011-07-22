@@ -882,7 +882,8 @@ namespace clojure.lang
                         eval(RT.first(s));
                     return eval(RT.first(s));
                 }
-                else if (form is IPersistentCollection && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def")))
+                else if ( (form is IType) ||
+                    (form is IPersistentCollection && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def"))) )
                 {
                     ObjExpr objx = (ObjExpr)Analyze(pconExpr, RT.list(FN, PersistentVector.EMPTY, form), "eval__" + RT.nextID());
                     IFn fn = (IFn)objx.Eval();
@@ -1479,6 +1480,8 @@ namespace clojure.lang
                 else if (form is IPersistentVector)
                     return VectorExpr.Parse(pcontext, (IPersistentVector)form);
                 else if (form is IRecord)
+                    return new ConstantExpr(form);
+                else if (form is IType)
                     return new ConstantExpr(form);
                 else if (form is IPersistentMap)
                     return MapExpr.Parse(pcontext, (IPersistentMap)form);

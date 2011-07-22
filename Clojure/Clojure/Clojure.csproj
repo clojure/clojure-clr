@@ -211,6 +211,7 @@
     <Compile Include="Lib\ITransientVector.cs" />
     <Compile Include="Lib\Indexed.cs" />
     <Compile Include="Lib\IProxy.cs" />
+    <Compile Include="Lib\IType.cs" />
     <Compile Include="Lib\JReMatcher.cs" />
     <Compile Include="Lib\KeywordLookupSite.cs" />
     <Compile Include="Lib\LazySeq.cs" />

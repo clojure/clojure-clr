@@ -92,7 +92,7 @@ namespace clojure.lang
                     case 19: return typeof(FFunc<object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object>);
                     case 20: return typeof(FFunc<object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object>);
     
-                    default: return typeof(FFunc<object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object[], object>);
+                    default: return typeof(FFunc<object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object, object>);
 ;
                 }
             }
