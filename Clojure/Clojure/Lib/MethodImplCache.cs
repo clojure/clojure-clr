@@ -13,6 +13,7 @@
  **/
 
 using System;
+using System.Collections;
 
 namespace clojure.lang
 {
@@ -77,6 +78,13 @@ namespace clojure.lang
        public readonly int _shift;
        public readonly int _mask;
        private readonly object[] _table;    //[class, entry. class, entry ...]
+       public readonly IDictionary _map;
+
+       // core_deftype.clj compatibility
+       public IDictionary map
+       {
+           get { return _map; }
+       }
 
        Entry _mre = null;
 
@@ -121,9 +129,19 @@ namespace clojure.lang
             _shift = shift;
             _mask = mask;
             _table = table;
-            //_lastType = this;
+            _map = null;
         }
 
+
+        public MethodImplCache(IPersistentMap protocol, Keyword methodk, IDictionary map)
+        {
+            _protocol = protocol;
+            _methodk = methodk;
+            _shift = 0;
+            _mask = 0;
+            _table = null;
+            _map = map;
+        }
        #endregion
 
 
@@ -140,14 +158,23 @@ namespace clojure.lang
 
        IFn FindFnFor(Type t)
        {
-            int idx = ((Util.hash(t) >> _shift) & _mask) << 1;
-            if (idx < _table.Length && ((Type)_table[idx]) == t)
-            {
-                Entry e = ((Entry)table[idx + 1]);
-                _mre = e;
-                return e != null ? e.Fn : null;
-            }
-            return null;
+           if (_map != null)
+           {
+               Entry e = (Entry)_map[t];
+               _mre = e;
+               return e != null ? e.Fn : null;
+           }
+           else
+           {
+               int idx = ((Util.hash(t) >> _shift) & _mask) << 1;
+               if (idx < _table.Length && ((Type)_table[idx]) == t)
+               {
+                   Entry e = ((Entry)table[idx + 1]);
+                   _mre = e;
+                   return e != null ? e.Fn : null;
+               }
+               return null;
+           }
         }
 
        #endregion

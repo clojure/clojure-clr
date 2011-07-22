@@ -4223,7 +4223,6 @@
        `(when-not ~x
           (throw (new Exception (str "Assert failed: " ~message "\n" (pr-str '~x))))))))          ;;; AssertionError
 
-
 (defn test
   "test [v] finds fn at key :test in var metadata and calls it,
   presuming failure will throw exception"
@@ -5795,15 +5794,6 @@
             (for [mask (map #(dec (bit-shift-left 1 %)) (range 1 (inc max-mask-bits)))
                   shift (range 0 31)]
               [shift mask]))))
-
-(defn- min-hash 
-  "takes a collection of keys and returns [shift mask]"
-  [keys]
-  (let [hashes (map hash keys)
-        _ (when-not (apply distinct? hashes)
-            (throw (ArgumentException. "Hashes must be distinct")))                  ;;; IllegalArgumentException
-        sm (maybe-min-hash hashes)]
-    (or sm (throw (ArgumentException. "No distinct mapping found")))))               ;;; IllegalArgumentException
 
 (defn- case-map
   "Transforms a sequence of test constants and a corresponding sequence of then
