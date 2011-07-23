@@ -30,6 +30,8 @@ namespace clojure.lang
         protected int _unreadChar;
         protected bool _hasUnread = false;
 
+        bool _disposed = false;
+
         #endregion
 
         #region C-tors
@@ -91,10 +93,19 @@ namespace clojure.lang
             base.Close();
         }
 
-        void IDisposable.Dispose()
+        protected override void Dispose(bool disposing)
         {
-            _baseReader.Dispose();
-            base.Dispose();
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    if (_baseReader != null)
+                        _baseReader.Dispose();
+                }
+                _baseReader = null;
+                _disposed = true;
+                base.Dispose(disposing);
+            }
         }
 
         #endregion
