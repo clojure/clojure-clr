@@ -21,6 +21,8 @@ namespace clojure.lang
     /// Implements countdown latch.
     /// </summary>
     /// <remarks>The interface that is implemented matches the one for java.util.concurrent.CountDownLatch.</remarks>
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "CountDown", Justification = "Compatibility with equivalent Java class")]
     public class CountDownLatch
     {
         #region Data
@@ -78,6 +80,8 @@ namespace clojure.lang
            
         }
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "CountDown", Justification="Compatibility with Java library name")]
         public void CountDown()
         {
             lock (_synch)

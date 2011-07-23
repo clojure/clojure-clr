@@ -42,7 +42,7 @@ namespace clojure.lang
         /// <summary>
         /// Initializes an <see cref="ARef">ARef</see> with null metadata.
         /// </summary>
-        public ARef()
+        protected ARef()
             : base()
         {
         }
@@ -51,7 +51,7 @@ namespace clojure.lang
         ///  Initializes an <see cref="ARef">ARef</see> with the given metadata.
         /// </summary>
         /// <param name="meta">The metadata to use</param>
-        public ARef(IPersistentMap meta)
+        protected ARef(IPersistentMap meta)
             : base(meta)
         {
         }

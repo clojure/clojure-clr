@@ -234,7 +234,7 @@ namespace clojure.lang
 
         #region C-tors
 
-        public TypedArraySeq(IPersistentMap meta, T[] array, int i)
+        protected TypedArraySeq(IPersistentMap meta, T[] array, int i)
             : base(meta)
         {
             _array = array;

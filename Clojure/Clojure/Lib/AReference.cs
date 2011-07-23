@@ -36,7 +36,7 @@ namespace clojure.lang
         /// <summary>
         /// Initializes a new instance of <see cref="AReference">AReference</see> that has null metadata.
         /// </summary>
-        public AReference()
+        protected AReference()
             : this(null)
         {
         }
@@ -46,12 +46,10 @@ namespace clojure.lang
         /// the given <see cref="IPersistentMap">IPersistentMap</see> as its metadata.
         /// </summary>
         /// <param name="meta">The map used to initialize the metadata.</param>
-        public AReference(IPersistentMap meta)
+        protected AReference(IPersistentMap meta)
         {
             _meta = meta;
         }
-
-
 
         #endregion
 

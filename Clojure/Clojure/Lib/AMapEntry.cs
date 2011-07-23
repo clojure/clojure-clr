@@ -28,7 +28,7 @@ namespace clojure.lang
         /// <summary>
         /// Initialize an <see cref="AMapEntry">AMapEntry</see> with null metadata.
         /// </summary>
-        public AMapEntry()
+        protected AMapEntry()
             : base()
         {
         }

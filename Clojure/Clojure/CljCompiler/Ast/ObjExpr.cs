@@ -330,7 +330,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         //static int _saveId = 0;
 
-        public Type Compile(Type superType, Type stubType, IPersistentVector interfaces, bool oneTimeUse, GenContext context)
+        public Type Compile(Type superType, Type stubType, IPersistentVector interfaces, bool onetimeUse, GenContext context)
         {
             if (_compiledType != null)
                 return _compiledType;

@@ -36,7 +36,7 @@ namespace clojure.lang
         /// <summary>
         /// Initializes a new instance of <see cref="Obj">Obj</see> that has null metadata.
         /// </summary>
-        public Obj() 
+        protected Obj() 
         {
             _meta = null;
         }
@@ -46,7 +46,7 @@ namespace clojure.lang
         /// the given <see cref="IPersistentMap">IPersistentMap</see> as its metadata.
         /// </summary>
         /// <param name="meta">The map used to initialize the metadata.</param>
-        public Obj(IPersistentMap meta)
+        protected Obj(IPersistentMap meta)
         {
             _meta = meta;
         }

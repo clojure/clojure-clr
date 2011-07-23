@@ -2726,12 +2726,12 @@ namespace clojure.lang
         }
 
 
-        public static FileInfo FindFile(string filename)
+        public static FileInfo FindFile(string fileName)
         {
             FileInfo fi;
 
             foreach (string path in GetFindFilePaths())
-                if ((fi = FindFile(path, filename)) != null)
+                if ((fi = FindFile(path, fileName)) != null)
                     return fi;
 
             return null;

@@ -73,7 +73,7 @@ namespace clojure.lang
             string postInitName,
             string implCname,
             string implNamespace,
-            bool loadImplNameSpace)
+            bool loadImplNamespace)
         {
             className = className.Replace('-', '_');
 
@@ -113,7 +113,7 @@ namespace clojure.lang
             Dictionary<string, FieldBuilder> varMap = DefineStaticFields(proxyTB, varNames);
 
             FieldBuilder stateFB = String.IsNullOrEmpty(stateName) ? null : DefineStateField(proxyTB, stateName);
-            DefineStaticCtor(proxyTB,prefix,varMap,loadImplNameSpace,implNamespace,implCname);
+            DefineStaticCtor(proxyTB,prefix,varMap,loadImplNamespace,implNamespace,implCname);
 
             FieldBuilder initFB = null;
             FieldBuilder postInitFB = null;

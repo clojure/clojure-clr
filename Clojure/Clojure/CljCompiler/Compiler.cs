@@ -1371,14 +1371,14 @@ namespace clojure.lang
 
         #region Loading
 
-        public static object loadFile(string filename)
+        public static object loadFile(string fileName)
         {
-            FileInfo finfo = new FileInfo(filename);
+            FileInfo finfo = new FileInfo(fileName);
             if (!finfo.Exists)
-                throw new FileNotFoundException("Cannot find file to load", filename);
+                throw new FileNotFoundException("Cannot find file to load", fileName);
 
             using (TextReader rdr = finfo.OpenText())
-                return load(rdr, finfo.FullName, finfo.Name, filename);
+                return load(rdr, finfo.FullName, finfo.Name, fileName);
         }
 
 

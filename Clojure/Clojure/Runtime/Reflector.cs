@@ -78,43 +78,43 @@ namespace clojure.lang
         #region Field/property access
 
         // Used in generated code
-        public static object SetInstanceFieldOrProperty(object target, string fieldname, object val)
+        public static object SetInstanceFieldOrProperty(object target, string fieldName, object val)
         {
             Type t = target.GetType();
-            FieldInfo field = GetField(t, fieldname, false);
+            FieldInfo field = GetField(t, fieldName, false);
             if (field != null)
             {
                 field.SetValue(target, val);
                 return val;
             }
-            PropertyInfo prop = GetProperty(t, fieldname, false);
+            PropertyInfo prop = GetProperty(t, fieldName, false);
             if (prop != null)
             {
                 prop.SetValue(target, val, new object[0]);
                 return val;
             }
-            throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldname, t));
+            throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldName, t));
         }
 
         // used in generated code
-        public static object GetInstanceFieldOrProperty(object target, string fieldname)
+        public static object GetInstanceFieldOrProperty(object target, string fieldName)
         {
             Type t = target.GetType();
 
-            FieldInfo field = GetField(t, fieldname, false);
+            FieldInfo field = GetField(t, fieldName, false);
             if (field != null)
                 return Reflector.prepRet(field.FieldType,field.GetValue(target));
 
-            PropertyInfo prop = GetProperty(t, fieldname, false);
+            PropertyInfo prop = GetProperty(t, fieldName, false);
             if (prop != null)
                 return Reflector.prepRet(prop.PropertyType,prop.GetValue(target, new object[0]));
 
-            MethodInfo method = GetArityZeroMethod(t, fieldname, false);
+            MethodInfo method = GetArityZeroMethod(t, fieldName, false);
 
             if (method != null)
                 return Reflector.prepRet(method.ReturnType, method.Invoke(target, new object[0]));
 
-            throw new ArgumentException(String.Format("No matching instance field/property found: {0} for {1}", fieldname, t));
+            throw new ArgumentException(String.Format("No matching instance field/property found: {0} for {1}", fieldName, t));
         }
 
         // Not used at the moment.
