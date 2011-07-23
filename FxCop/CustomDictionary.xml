@@ -21,6 +21,7 @@
     <Recognized>
       <Word>clojure</Word>
       <Word>primifs</Word>
+      <Word>idx</Word>
     </Recognized>
     <Deprecated>
       <!-- 
