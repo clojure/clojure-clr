@@ -67,7 +67,7 @@ namespace clojure.lang.CljCompiler.Ast
                     rform = rform.next().next();
                 }
 
-                ObjExpr ret = Build((IPersistentVector)RT.get(opts, Compiler.IMPLEMENTS_KEY, PersistentVector.EMPTY), fields, null, tagname, classname,
+                ObjExpr ret = Build((IPersistentVector)RT.get(opts, Compiler.ImplementsKeyword, PersistentVector.EMPTY), fields, null, tagname, classname,
                              (Symbol)RT.get(opts, RT.TAG_KEY), rform, frm);
 
                 return ret;
@@ -81,7 +81,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 // frm is:  (reify this-name? [interfaces] (method-name [args] body)* )
                 ISeq form = (ISeq)frm;
-                ObjMethod enclosingMethod = (ObjMethod)Compiler.METHOD.deref();
+                ObjMethod enclosingMethod = (ObjMethod)Compiler.MethodVar.deref();
                 string baseName = enclosingMethod != null
                     ? (ObjExpr.TrimGenId(enclosingMethod.Objx.Name) + "$")
                     : (Compiler.munge(Compiler.CurrentNamespace.Name.Name) + "$");
@@ -169,7 +169,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             // Needs its own GenContext so it has its own DynInitHelper
             // Can't reuse Compiler.EvalContext if it is a DefType because we have to use the given name and will get a conflict on redefinition
-            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? (ret.IsDefType ? GenContext.CreateWithExternalAssembly("deftype" + RT.nextID().ToString(),".dll",true) : Compiler.EvalContext);
+            GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? (ret.IsDefType ? GenContext.CreateWithExternalAssembly("deftype" + RT.nextID().ToString(),".dll",true) : Compiler.EvalContext);
             GenContext genC = context.WithNewDynInitHelper(ret.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
             //genC.FnCompileMode = FnMode.Full;
 
@@ -177,25 +177,25 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Var.pushThreadBindings(
                     RT.map(
-                        Compiler.CONSTANTS, PersistentVector.EMPTY,
-                        Compiler.CONSTANT_IDS, new IdentityHashMap(),
-                        Compiler.KEYWORDS, PersistentHashMap.EMPTY,
-                        Compiler.VARS, PersistentHashMap.EMPTY,
-                        Compiler.KEYWORD_CALLSITES, PersistentVector.EMPTY,
-                        Compiler.PROTOCOL_CALLSITES, PersistentVector.EMPTY,
-                        Compiler.VAR_CALLSITES, Compiler.EmptyVarCallSites(),
-                        Compiler.NO_RECUR, null,
-                        Compiler.COMPILER_CONTEXT, genC
+                        Compiler.ConstantsVar, PersistentVector.EMPTY,
+                        Compiler.ConstantIdsVar, new IdentityHashMap(),
+                        Compiler.KeywordsVar, PersistentHashMap.EMPTY,
+                        Compiler.VarsVar, PersistentHashMap.EMPTY,
+                        Compiler.KeywordCallsitesVar, PersistentVector.EMPTY,
+                        Compiler.ProtocolCallsitesVar, PersistentVector.EMPTY,
+                        Compiler.VarCallsitesVar, Compiler.EmptyVarCallSites(),
+                        Compiler.NoRecurVar, null,
+                        Compiler.CompilerContextVar, genC
                         ));
 
                 if (ret.IsDefType)
                 {
                     Var.pushThreadBindings(
                         RT.map(
-                            Compiler.METHOD, null,
-                            Compiler.LOCAL_ENV, ret._fields,
-                            Compiler.COMPILE_STUB_SYM, Symbol.intern(null, tagName),
-                            Compiler.COMPILE_STUB_CLASS, stub
+                            Compiler.MethodVar, null,
+                            Compiler.LocalEnvVar, ret._fields,
+                            Compiler.CompileStubSymVar, Symbol.intern(null, tagName),
+                            Compiler.CompileStubClassVar, stub
                             ));
                     ret._hintedFields = RT.subvec(fieldSyms, 0, fieldSyms.count() - ret._altCtorDrops);
                 }
@@ -210,13 +210,13 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 ret._methods = methods;
-                ret.Keywords = (IPersistentMap)Compiler.KEYWORDS.deref();
-                ret.Vars = (IPersistentMap)Compiler.VARS.deref();
-                ret.Constants = (PersistentVector)Compiler.CONSTANTS.deref();
+                ret.Keywords = (IPersistentMap)Compiler.KeywordsVar.deref();
+                ret.Vars = (IPersistentMap)Compiler.VarsVar.deref();
+                ret.Constants = (PersistentVector)Compiler.ConstantsVar.deref();
                 ret._constantsID = RT.nextID();
-                ret.KeywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
-                ret.ProtocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
-                ret.VarCallsites = (IPersistentSet)Compiler.VAR_CALLSITES.deref();
+                ret.KeywordCallsites = (IPersistentVector)Compiler.KeywordCallsitesVar.deref();
+                ret.ProtocolCallsites = (IPersistentVector)Compiler.ProtocolCallsitesVar.deref();
+                ret.VarCallsites = (IPersistentSet)Compiler.VarCallsitesVar.deref();
             }
             finally
             {
@@ -254,9 +254,9 @@ namespace clojure.lang.CljCompiler.Ast
 
             //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
             //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", CompilerMode.Immediate);
-            GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? GenContext.CreateWithExternalAssembly("stub" + RT.nextID().ToString(), ".dll", false);
+            GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? GenContext.CreateWithExternalAssembly("stub" + RT.nextID().ToString(), ".dll", false);
             //GenContext context = GenContext.CreateWithInternalAssembly("stub" + RT.nextID().ToString(), false);
-            TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.COMPILE_STUB_PREFIX + "." + ret.InternalName, TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
+            TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.CompileStubPrefix + "." + ret.InternalName, TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
 
             tb.DefineDefaultConstructor(MethodAttributes.Public);
 

@@ -104,7 +104,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ISeq form = (ISeq)frm;
 
                 if (pcon.Rhc != RHC.Return)
-                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)), "try__" + RT.nextID());
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnSym, PersistentVector.EMPTY, form)), "try__" + RT.nextID());
 
                 // (try try-expr* catch-expr* finally-expr?)
                 // catch-expr: (catch class sym expr*)
@@ -123,7 +123,7 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     object f = fs.first();
                     object op = (f is ISeq) ? ((ISeq)f).first() : null;
-                    if (!Util.equals(op, Compiler.CATCH) && !Util.equals(op, Compiler.FINALLY))
+                    if (!Util.equals(op, Compiler.CatchSym) && !Util.equals(op, Compiler.FinallySym))
                     {
                         if (caught)
                             throw new Exception("Only catch or finally clause can follow catch in try expression");
@@ -135,7 +135,7 @@ namespace clojure.lang.CljCompiler.Ast
                         {
                             try
                             {
-                                Var.pushThreadBindings(RT.map(Compiler.NO_RECUR, true));
+                                Var.pushThreadBindings(RT.map(Compiler.NoRecurVar, true));
                                 bodyExpr = new BodyExpr.Parser().Parse(pcon.SetAssign(false), RT.seq(body));
                             }
                             finally
@@ -143,7 +143,7 @@ namespace clojure.lang.CljCompiler.Ast
                                 Var.popThreadBindings();
                             }
                         }
-                        if (Util.equals(op, Compiler.CATCH))
+                        if (Util.equals(op, Compiler.CatchSym))
                         {
                             Type t = HostExpr.MaybeType(RT.second(f), false);
                             if (t == null)
@@ -155,9 +155,9 @@ namespace clojure.lang.CljCompiler.Ast
                                 throw new Exception("Can't bind qualified name: " + sym);
 
                             IPersistentMap dynamicBindings = RT.map(
-                                Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
-                                Compiler.NEXT_LOCAL_NUM, Compiler.NEXT_LOCAL_NUM.deref(),
-                                Compiler.IN_CATCH_FINALLY, true);
+                                Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
+                                Compiler.NextLocalNumVar, Compiler.NextLocalNumVar.deref(),
+                                Compiler.InCatchFinallyVar, true);
 
                             try
                             {
@@ -181,7 +181,7 @@ namespace clojure.lang.CljCompiler.Ast
                             try
                             {
                                 //Var.pushThreadBindings(RT.map(Compiler.IN_CATCH_FINALLY, RT.T));
-                                Var.pushThreadBindings(RT.map(Compiler.IN_CATCH_FINALLY, true));
+                                Var.pushThreadBindings(RT.map(Compiler.InCatchFinallyVar, true));
                                 finallyExpr = (new BodyExpr.Parser()).Parse(pcon.SetRhc(RHC.Statement).SetAssign(false), RT.next(f));
                             }
                             finally
@@ -196,7 +196,7 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     try
                     {
-                        Var.pushThreadBindings(RT.map(Compiler.NO_RECUR, true));
+                        Var.pushThreadBindings(RT.map(Compiler.NoRecurVar, true));
                         bodyExpr = (new BodyExpr.Parser()).Parse(pcon, RT.seq(body));
                     }
                     finally

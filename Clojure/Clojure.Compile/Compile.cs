@@ -55,7 +55,7 @@ namespace BootstrapCompile
             try
             {
                 Var.pushThreadBindings(RT.map(
-                    Compiler.COMPILE_PATH, path,
+                    Compiler.CompilePathVar, path,
                     RT.WARN_ON_REFLECTION, warnOnReflection,
                     RT.UNCHECKED_MATH, uncheckedMath
                     ));
@@ -68,7 +68,7 @@ namespace BootstrapCompile
                     sw.Start();
                     outTW.Write("Compiling {0} to {1}", lib, path);
                     outTW.Flush();
-                    Compiler.COMPILE.invoke(Symbol.intern(lib));
+                    Compiler.CompileVar.invoke(Symbol.intern(lib));
                     sw.Stop();
                     outTW.WriteLine(" -- {0} milliseconds.", sw.ElapsedMilliseconds);
                 }

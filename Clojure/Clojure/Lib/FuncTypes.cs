@@ -41,27 +41,27 @@ namespace clojure.lang
 
 
 
-        public delegate TResult VFunc<V, TResult>(params V[] argrest);
-        public delegate TResult VFunc<T1, V, TResult>(T1 arg1, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, V, TResult>(T1 arg1, T2 arg2, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, V, TResult>(T1 arg1, T2 arg2, T3 arg3, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, T18 arg18, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, params V[] argrest);
-        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, V, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, params V[] argrest);
+        public delegate TResult VFunc<TRest, TResult>(params TRest[] argrest);
+        public delegate TResult VFunc<T1, TRest, TResult>(T1 arg1, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, TRest, TResult>(T1 arg1, T2 arg2, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, T18 arg18, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, params TRest[] argrest);
+        public delegate TResult VFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, TRest, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, T17 arg17, T18 arg18, T19 arg19, T20 arg20, params TRest[] argrest);
 
 
         public sealed class FuncTypeHelpers

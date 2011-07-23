@@ -111,7 +111,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 IPersistentMap mm = sym.meta();
-                bool isDynamic = RT.booleanCast(RT.get(mm, Compiler.DYNAMIC_KEY));
+                bool isDynamic = RT.booleanCast(RT.get(mm, Compiler.DynamicKeyword));
                 if (!isDynamic && sym.Name.StartsWith("*") && sym.Name.EndsWith("*") && sym.Name.Length > 1)
                 {
                     RT.errPrintWriter().WriteLine("Warning: {0} not declared dynamic and thus is not dynamically rebindable, "
@@ -119,18 +119,18 @@ namespace clojure.lang.CljCompiler.Ast
                                            sym);
                 }
 
-                if (RT.booleanCast(RT.get(mm, Compiler.ARGLISTS_KEY)))
+                if (RT.booleanCast(RT.get(mm, Compiler.ArglistsKeyword)))
                 {
                     IPersistentMap vm = v.meta();
                     //vm = (IPersistentMap)RT.assoc(vm, Compiler.STATIC_KEY, true);
                     // drop quote
-                    vm = (IPersistentMap)RT.assoc(vm, Compiler.ARGLISTS_KEY, RT.second(mm.valAt(Compiler.ARGLISTS_KEY)));
+                    vm = (IPersistentMap)RT.assoc(vm, Compiler.ArglistsKeyword, RT.second(mm.valAt(Compiler.ArglistsKeyword)));
                     v.setMeta(vm);
                 }
 
-                Object source_path = Compiler.SOURCE_PATH.get();
+                Object source_path = Compiler.SourcePathVar.get();
                 source_path = source_path ?? "NO_SOURCE_FILE";
-                mm = (IPersistentMap)RT.assoc(mm,RT.LINE_KEY, Compiler.LINE.get())
+                mm = (IPersistentMap)RT.assoc(mm,RT.LINE_KEY, Compiler.LineVar.get())
                     .assoc(RT.FILE_KEY, source_path);
                     //.assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
                 if (docstring != null)
@@ -150,8 +150,8 @@ namespace clojure.lang.CljCompiler.Ast
                 bool initProvided = RT.count(form) == 3;
 
                 return new DefExpr(
-                    (string)Compiler.SOURCE.deref(),
-                    (int) Compiler.LINE.deref(),
+                    (string)Compiler.SourceVar.deref(),
+                    (int) Compiler.LineVar.deref(),
                     v, init, meta, initProvided,isDynamic);
             }
         }

@@ -149,7 +149,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 LabelTarget loopLabel = Expression.Label("top");
 
-                Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHOD, this));
+                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
 
                 Type[] argTypes = StaticMethodArgTypes;
 

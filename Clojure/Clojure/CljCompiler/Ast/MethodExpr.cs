@@ -100,7 +100,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected Expression GenDlrForMethod(ObjExpr objx, GenContext context)
         {
-            if (_method.DeclaringType == (Type)Compiler.COMPILE_STUB_ORIG_CLASS.deref())
+            if (_method.DeclaringType == (Type)Compiler.CompileStubOrigClassVar.deref())
                 _method = FindEquivalentMethod(_method, objx.BaseType);            
             
             int argCount = _args.Count;

@@ -36,159 +36,159 @@ namespace clojure.lang
     {
         #region other constants
 
-        internal const int MAX_POSITIONAL_ARITY = 20;
+        internal const int MaxPositionalArity = 20;
+        internal const string CompileStubPrefix = "compile__stub";
 
         #endregion
 
         #region Symbols
 
-        public static readonly Symbol DEF = Symbol.intern("def");
-        public static readonly Symbol LOOP = Symbol.intern("loop*");
-        public static readonly Symbol RECUR = Symbol.intern("recur");
-        public static readonly Symbol IF = Symbol.intern("if");
-        public static readonly Symbol LET = Symbol.intern("let*");
-        public static readonly Symbol LETFN = Symbol.intern("letfn*");
-        public static readonly Symbol DO = Symbol.intern("do");
-        public static readonly Symbol FN = Symbol.intern("fn*");
-        public static readonly Symbol QUOTE = Symbol.intern("quote");
-        public static readonly Symbol THE_VAR = Symbol.intern("var");
-        public static readonly Symbol DOT = Symbol.intern(".");
-        public static readonly Symbol ASSIGN = Symbol.intern("set!");
-        public static readonly Symbol TRY = Symbol.intern("try");
-        public static readonly Symbol CATCH = Symbol.intern("catch");
-        public static readonly Symbol FINALLY = Symbol.intern("finally");
-        public static readonly Symbol THROW = Symbol.intern("throw");
-        public static readonly Symbol MONITOR_ENTER = Symbol.intern("monitor-enter");
-        public static readonly Symbol MONITOR_EXIT = Symbol.intern("monitor-exit");
-        public static readonly Symbol IMPORT = Symbol.intern("clojure.core","import*");
-        public static readonly Symbol DEFTYPE = Symbol.intern("deftype*");
-        public static readonly Symbol CASE = Symbol.intern("case*");
-        public static readonly Symbol NEW = Symbol.intern("new");
-        public static readonly Symbol THIS = Symbol.intern("this");
-        public static readonly Symbol REIFY = Symbol.intern("reify*");
-        public static readonly Symbol _AMP_ = Symbol.intern("&");
+        public static readonly Symbol DefSym = Symbol.intern("def");
+        public static readonly Symbol LoopSym = Symbol.intern("loop*");
+        public static readonly Symbol RecurSym = Symbol.intern("recur");
+        public static readonly Symbol IfSym = Symbol.intern("if");
+        public static readonly Symbol LetSym = Symbol.intern("let*");
+        public static readonly Symbol LetfnSym = Symbol.intern("letfn*");
+        public static readonly Symbol DoSym = Symbol.intern("do");
+        public static readonly Symbol FnSym = Symbol.intern("fn*");
+        public static readonly Symbol QuoteSym = Symbol.intern("quote");
+        public static readonly Symbol TheVarSym = Symbol.intern("var");
+        public static readonly Symbol DotSym = Symbol.intern(".");
+        public static readonly Symbol AssignSym = Symbol.intern("set!");
+        public static readonly Symbol TrySym = Symbol.intern("try");
+        public static readonly Symbol CatchSym = Symbol.intern("catch");
+        public static readonly Symbol FinallySym = Symbol.intern("finally");
+        public static readonly Symbol ThrowSym = Symbol.intern("throw");
+        public static readonly Symbol MonitorEnterSym = Symbol.intern("monitor-enter");
+        public static readonly Symbol MonitorExitSym = Symbol.intern("monitor-exit");
+        public static readonly Symbol ImportSym = Symbol.intern("clojure.core","import*");
+        public static readonly Symbol DeftypeSym = Symbol.intern("deftype*");
+        public static readonly Symbol CaseSym = Symbol.intern("case*");
+        public static readonly Symbol NewSym = Symbol.intern("new");
+        public static readonly Symbol ThisSym = Symbol.intern("this");
+        public static readonly Symbol ReifySym = Symbol.intern("reify*");
+        public static readonly Symbol AmpersandSym = Symbol.intern("&");
 
-        public static readonly Symbol IDENTITY = Symbol.intern("clojure.core", "identity");
+        public static readonly Symbol IdentitySym = Symbol.intern("clojure.core", "identity");
 
-        static readonly Symbol NS = Symbol.intern("ns");
-        static readonly Symbol IN_NS = Symbol.intern("in-ns");
+        static readonly Symbol NsSym = Symbol.intern("ns");
+        static readonly Symbol InNsSym = Symbol.intern("in-ns");
 
-        internal static readonly Symbol ISEQ = Symbol.intern("clojure.lang.ISeq");
+        internal static readonly Symbol ISeqSym = Symbol.intern("clojure.lang.ISeq");
 
-        internal static readonly Symbol CLASS = Symbol.intern("System.Type");
+        internal static readonly Symbol ClassSym = Symbol.intern("System.Type");
 
-        internal static readonly Symbol INVOKE_STATIC = Symbol.intern("invokeStatic");
+        internal static readonly Symbol InvokeStaticSym = Symbol.intern("invokeStatic");
 
         #endregion
 
         #region Keywords
 
-        static readonly Keyword INLINE_KEY = Keyword.intern(null, "inline");
-        static readonly Keyword INLINE_ARITIES_KEY = Keyword.intern(null, "inline-arities");
-        internal static readonly Keyword STATIC_KEY = Keyword.intern(null, "static");
-        internal static readonly Keyword ARGLISTS_KEY = Keyword.intern(null, "arglists");
+        static readonly Keyword InlineKeyword = Keyword.intern(null, "inline");
+        static readonly Keyword InlineAritiesKeyword = Keyword.intern(null, "inline-arities");
+        internal static readonly Keyword StaticKeyword = Keyword.intern(null, "static");
+        internal static readonly Keyword ArglistsKeyword = Keyword.intern(null, "arglists");
 
-        static readonly Keyword VOLATILE_KEY = Keyword.intern(null,"volatile");
-        internal static readonly Keyword IMPLEMENTS_KEY = Keyword.intern(null,"implements");
-        internal static readonly Keyword PROTOCOL_KEY = Keyword.intern(null,"protocol");
-        static readonly Keyword ON_KEY = Keyword.intern(null, "on");
-        internal static readonly Keyword DYNAMIC_KEY = Keyword.intern("dynamic");
+        static readonly Keyword VolatileKeyword = Keyword.intern(null,"volatile");
+        internal static readonly Keyword ImplementsKeyword = Keyword.intern(null,"implements");
+        internal static readonly Keyword ProtocolKeyword = Keyword.intern(null,"protocol");
+        static readonly Keyword OnKeyword = Keyword.intern(null, "on");
+        internal static readonly Keyword DynamicKeyword = Keyword.intern("dynamic");
 
-        internal const string COMPILE_STUB_PREFIX = "compile__stub";
 
         #endregion
 
         #region Vars
 
         //boolean
-        internal static readonly Var COMPILE_FILES = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+        internal static readonly Var CompileFilesVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                                  //Symbol.intern("*compile-files*"), RT.F);
                                                          Symbol.intern("*compile-files*"), false).setDynamic();  
         //JAVA: Boolean.FALSE -- changed from RT.F in rev 1108, not sure why
 
 
-        internal static readonly Var INSTANCE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+        internal static readonly Var InstanceVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                                          Symbol.intern("instance?"), false).setDynamic();  
 
 
         //String
-        public static readonly Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+        public static readonly Var CompilePathVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                                  Symbol.intern("*compile-path*"), null).setDynamic();
 
-        public static readonly Var COMPILE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+        public static readonly Var CompileVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                                 Symbol.intern("compile"));
 
         // String
-        internal static readonly Var SOURCE = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+        internal static readonly Var SourceVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                         Symbol.intern("*source-path*"), "NO_SOURCE_FILE").setDynamic();
         // String
-        internal static readonly Var SOURCE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+        internal static readonly Var SourcePathVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
             Symbol.intern("*file*"), "NO_SOURCE_PATH").setDynamic();
 
         //Integer
-        internal static readonly Var LINE = Var.create(0).setDynamic();          // From the JVM version
+        internal static readonly Var LineVar = Var.create(0).setDynamic();          // From the JVM version
         //internal static readonly Var LINE_BEFORE = Var.create(0).setDynamic();   // From the JVM version
         //internal static readonly Var LINE_AFTER = Var.create(0).setDynamic();    // From the JVM version
-        internal static readonly Var DOCUMENT_INFO = Var.create(null).setDynamic();  // Mine
-        internal static readonly Var SOURCE_SPAN = Var.create(null).setDynamic();    // Mine
+        internal static readonly Var DocumentInfoVar = Var.create(null).setDynamic();  // Mine
+        internal static readonly Var SourceSpanVar = Var.create(null).setDynamic();    // Mine
 
-        internal static readonly Var METHOD = Var.create(null).setDynamic();
-        public static readonly Var LOCAL_ENV = Var.create(PersistentHashMap.EMPTY).setDynamic();
+        internal static readonly Var MethodVar = Var.create(null).setDynamic();
+        public static readonly Var LocalEnvVar = Var.create(PersistentHashMap.EMPTY).setDynamic();
         //Integer
-        internal static readonly Var NEXT_LOCAL_NUM = Var.create(0).setDynamic();
-        internal static readonly Var LOOP_LOCALS = Var.create(null).setDynamic();
+        internal static readonly Var NextLocalNumVar = Var.create(0).setDynamic();
+        internal static readonly Var LoopLocalsVar = Var.create(null).setDynamic();
         // Label
-        internal static readonly Var LOOP_LABEL = Var.create().setDynamic();
+        internal static readonly Var LoopLabelVar = Var.create().setDynamic();
 
 
-        internal static readonly Var IN_CATCH_FINALLY = Var.create(null).setDynamic();          //null or not
+        internal static readonly Var InCatchFinallyVar = Var.create(null).setDynamic();          //null or not
 
-        internal static readonly Var NO_RECUR = Var.create(null).setDynamic();
+        internal static readonly Var NoRecurVar = Var.create(null).setDynamic();
 
-        internal static readonly Var VARS = Var.create().setDynamic();           //var->constid
-        internal static readonly Var CONSTANTS = Var.create().setDynamic();      //vector<object>
-        internal static readonly Var CONSTANT_IDS = Var.create().setDynamic();   // IdentityHashMap
-        internal static readonly Var KEYWORDS = Var.create().setDynamic();       //keyword->constid
+        internal static readonly Var VarsVar = Var.create().setDynamic();           //var->constid
+        internal static readonly Var ConstantsVar = Var.create().setDynamic();      //vector<object>
+        internal static readonly Var ConstantIdsVar = Var.create().setDynamic();   // IdentityHashMap
+        internal static readonly Var KeywordsVar = Var.create().setDynamic();       //keyword->constid
 
-        internal static readonly Var KEYWORD_CALLSITES = Var.create().setDynamic();  // vector<keyword>
-        internal static readonly Var PROTOCOL_CALLSITES = Var.create().setDynamic(); // vector<var>
-        internal static readonly Var VAR_CALLSITES = Var.create().setDynamic();      // set<var>
+        internal static readonly Var KeywordCallsitesVar = Var.create().setDynamic();  // vector<keyword>
+        internal static readonly Var ProtocolCallsitesVar = Var.create().setDynamic(); // vector<var>
+        internal static readonly Var VarCallsitesVar = Var.create().setDynamic();      // set<var>
 
-        internal static readonly Var COMPILE_STUB_SYM = Var.create(null).setDynamic();
-        internal static readonly Var COMPILE_STUB_CLASS = Var.create(null).setDynamic();
-        internal static readonly Var COMPILE_STUB_ORIG_CLASS = Var.create(null).setDynamic();
+        internal static readonly Var CompileStubSymVar = Var.create(null).setDynamic();
+        internal static readonly Var CompileStubClassVar = Var.create(null).setDynamic();
+        internal static readonly Var CompileStubOrigClassVar = Var.create(null).setDynamic();
 
-        internal static readonly Var COMPILER_CONTEXT = Var.create(null).setDynamic();
+        internal static readonly Var CompilerContextVar = Var.create(null).setDynamic();
 
         #endregion
 
         #region Special forms
 
         public static readonly IPersistentMap _specials = PersistentHashMap.create(
-            DEF, new DefExpr.Parser(),
-            LOOP, new LetExpr.Parser(),
-            RECUR, new RecurExpr.Parser(),
-            IF, new IfExpr.Parser(),
-            CASE, new CaseExpr.Parser(),
-            LET, new LetExpr.Parser(),
-            LETFN, new LetFnExpr.Parser(),
-            DO, new BodyExpr.Parser(),
-            FN, null,
-            QUOTE, new ConstantExpr.Parser(),
-            THE_VAR, new TheVarExpr.Parser(),
-            IMPORT, new ImportExpr.Parser(),
-            DOT, new HostExpr.Parser(),
-            ASSIGN, new AssignExpr.Parser(),
-            DEFTYPE, new NewInstanceExpr.DefTypeParser(),
-            REIFY, new NewInstanceExpr.ReifyParser(),
-            TRY, new TryExpr.Parser(),
-            THROW, new ThrowExpr.Parser(),
-            MONITOR_ENTER, new MonitorEnterExpr.Parser(),
-            MONITOR_EXIT, new MonitorExitExpr.Parser(),
-            CATCH, null,
-            FINALLY, null,
-            NEW, new NewExpr.Parser(),
-            _AMP_, null
+            DefSym, new DefExpr.Parser(),
+            LoopSym, new LetExpr.Parser(),
+            RecurSym, new RecurExpr.Parser(),
+            IfSym, new IfExpr.Parser(),
+            CaseSym, new CaseExpr.Parser(),
+            LetSym, new LetExpr.Parser(),
+            LetfnSym, new LetFnExpr.Parser(),
+            DoSym, new BodyExpr.Parser(),
+            FnSym, null,
+            QuoteSym, new ConstantExpr.Parser(),
+            TheVarSym, new TheVarExpr.Parser(),
+            ImportSym, new ImportExpr.Parser(),
+            DotSym, new HostExpr.Parser(),
+            AssignSym, new AssignExpr.Parser(),
+            DeftypeSym, new NewInstanceExpr.DefTypeParser(),
+            ReifySym, new NewInstanceExpr.ReifyParser(),
+            TrySym, new TryExpr.Parser(),
+            ThrowSym, new ThrowExpr.Parser(),
+            MonitorEnterSym, new MonitorEnterExpr.Parser(),
+            MonitorExitSym, new MonitorExitExpr.Parser(),
+            CatchSym, null,
+            FinallySym, null,
+            NewSym, new NewExpr.Parser(),
+            AmpersandSym, null
         );
 
         public static bool IsSpecial(Object sym)
@@ -205,14 +205,14 @@ namespace clojure.lang
 
         #region MethodInfos, etc.
 
-        internal static readonly PropertyInfo Method_AFunction_MethodImplCache = typeof(AFunction).GetProperty("MethodImplCache");
+        //internal static readonly PropertyInfo Method_AFunction_MethodImplCache = typeof(AFunction).GetProperty("MethodImplCache");
 
-        internal static readonly MethodInfo Method_ArraySeq_create = typeof(ArraySeq).GetMethod("create", BindingFlags.Static | BindingFlags.Public,null, new Type[] { typeof(object[]) }, null);
+        //internal static readonly MethodInfo Method_ArraySeq_create = typeof(ArraySeq).GetMethod("create", BindingFlags.Static | BindingFlags.Public,null, new Type[] { typeof(object[]) }, null);
 
         internal static readonly PropertyInfo Method_Compiler_CurrentNamespace = typeof(Compiler).GetProperty("CurrentNamespace");
         internal static readonly MethodInfo Method_Compiler_PushNS = typeof(Compiler).GetMethod("PushNS");
 
-        internal static readonly MethodInfo Method_Delegate_CreateDelegate = typeof(Delegate).GetMethod("CreateDelegate", BindingFlags.Static | BindingFlags.Public,null,new Type[] {typeof(Type), typeof(Object), typeof(string)},null);
+        //internal static readonly MethodInfo Method_Delegate_CreateDelegate = typeof(Delegate).GetMethod("CreateDelegate", BindingFlags.Static | BindingFlags.Public,null,new Type[] {typeof(Type), typeof(Object), typeof(string)},null);
 
         internal static readonly MethodInfo Method_ILookupSite_fault = typeof(ILookupSite).GetMethod("fault");
         internal static readonly MethodInfo Method_ILookupThunk_get = typeof(ILookupThunk).GetMethod("get");
@@ -222,22 +222,22 @@ namespace clojure.lang
 
         internal static readonly MethodInfo Method_IObj_withMeta = typeof(IObj).GetMethod("withMeta");
 
-        internal static readonly MethodInfo Method_Keyword_intern_symbol = typeof(Keyword).GetMethod("intern", new Type[] { typeof(Symbol) });
+        //internal static readonly MethodInfo Method_Keyword_intern_symbol = typeof(Keyword).GetMethod("intern", new Type[] { typeof(Symbol) });
         internal static readonly MethodInfo Method_Keyword_intern_string = typeof(Keyword).GetMethod("intern", new Type[] { typeof(String) });
         
-        internal static readonly MethodInfo Method_KeywordLookupSite_Get = typeof(KeywordLookupSite).GetMethod("Get");
+        //internal static readonly MethodInfo Method_KeywordLookupSite_Get = typeof(KeywordLookupSite).GetMethod("Get");
 
-        internal static readonly MethodInfo Method_MethodImplCache_fnFor = typeof(MethodImplCache).GetMethod("fnFor");
+        //internal static readonly MethodInfo Method_MethodImplCache_fnFor = typeof(MethodImplCache).GetMethod("fnFor");
 
         internal static readonly MethodInfo Method_Monitor_Enter = typeof(Monitor).GetMethod("Enter", new Type[] { typeof(Object) });
         internal static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit", new Type[] { typeof(Object) });
 
-        internal static readonly MethodInfo Method_Object_ReferenceEquals = typeof(Object).GetMethod("ReferenceEquals");
-        internal static readonly MethodInfo Method_Object_MemberwiseClone = typeof(Object).GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod);
+        //internal static readonly MethodInfo Method_Object_ReferenceEquals = typeof(Object).GetMethod("ReferenceEquals");
+        //internal static readonly MethodInfo Method_Object_MemberwiseClone = typeof(Object).GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod);
 
         internal static readonly MethodInfo Method_Namespace_importClass1 = typeof(Namespace).GetMethod("importClass", new Type[] { typeof(Type) });
 
-        internal static readonly MethodInfo Method_Numbers_num_long = typeof(Numbers).GetMethod("num", new Type[] { typeof(long) });
+        //internal static readonly MethodInfo Method_Numbers_num_long = typeof(Numbers).GetMethod("num", new Type[] { typeof(long) });
 
         internal static readonly MethodInfo Method_PersistentList_create = typeof(PersistentList).GetMethod("create", new Type[] { typeof(System.Collections.IList) });
         internal static readonly MethodInfo Method_PersistentHashSet_create = typeof(PersistentHashSet).GetMethod("create", new Type[] { typeof(Object[]) });
@@ -249,14 +249,14 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Reflector_GetInstanceFieldOrProperty = typeof(Reflector).GetMethod("GetInstanceFieldOrProperty");
         internal static readonly MethodInfo Method_Reflector_SetInstanceFieldOrProperty = typeof(Reflector).GetMethod("SetInstanceFieldOrProperty");
 
-        internal static readonly MethodInfo Method_RT_arrayToList = typeof(RT).GetMethod("arrayToList");
+        //internal static readonly MethodInfo Method_RT_arrayToList = typeof(RT).GetMethod("arrayToList");
         internal static readonly MethodInfo Method_RT_classForName = typeof(RT).GetMethod("classForName");
         internal static readonly MethodInfo Method_RT_intCast_long = typeof(RT).GetMethod("intCast", new Type[] { typeof(long) });
         internal static readonly MethodInfo Method_RT_uncheckedIntCast_long = typeof(RT).GetMethod("uncheckedIntCast", new Type[] { typeof(long) });
-        internal static readonly MethodInfo Method_RT_IsTrue = typeof(RT).GetMethod("IsTrue");
+        //internal static readonly MethodInfo Method_RT_IsTrue = typeof(RT).GetMethod("IsTrue");
         internal static readonly MethodInfo Method_RT_keyword = typeof(RT).GetMethod("keyword");
         internal static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
-        internal static readonly MethodInfo Method_RT_printToConsole = typeof(RT).GetMethod("printToConsole");
+        //internal static readonly MethodInfo Method_RT_printToConsole = typeof(RT).GetMethod("printToConsole");
         internal static readonly MethodInfo Method_RT_seqOrElse = typeof(RT).GetMethod("seqOrElse");
         internal static readonly MethodInfo Method_RT_set = typeof(RT).GetMethod("set");
         internal static readonly MethodInfo Method_RT_vector = typeof(RT).GetMethod("vector");
@@ -268,7 +268,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Util_classOf = typeof(Util).GetMethod("classOf");
         internal static readonly MethodInfo Method_Util_ConvertToInt = typeof(Util).GetMethod("ConvertToInt");
 
-        internal static readonly MethodInfo Method_Util_equals = typeof(Util).GetMethod("equals", new Type[] { typeof(object), typeof(object) });
+        //internal static readonly MethodInfo Method_Util_equals = typeof(Util).GetMethod("equals", new Type[] { typeof(object), typeof(object) });
         internal static readonly MethodInfo Method_Util_equiv = typeof(Util).GetMethod("equiv", new Type[] { typeof(object), typeof(object) });
         internal static readonly MethodInfo Method_Util_Hash = typeof(Util).GetMethod("Hash");
         internal static readonly MethodInfo Method_Util_IsNonCharNumeric = typeof(Util).GetMethod("IsNonCharNumeric");
@@ -278,9 +278,9 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Var_set = typeof(Var).GetMethod("set");
         internal static readonly MethodInfo Method_Var_setMeta = typeof(Var).GetMethod("setMeta");
         internal static readonly MethodInfo Method_Var_popThreadBindings = typeof(Var).GetMethod("popThreadBindings");
-        internal static readonly MethodInfo Method_Var_hasRoot = typeof(Var).GetMethod("hasRoot");
+        //internal static readonly MethodInfo Method_Var_hasRoot = typeof(Var).GetMethod("hasRoot");
         internal static readonly MethodInfo Method_Var_getRawRoot = typeof(Var).GetMethod("getRawRoot");
-        internal static readonly MethodInfo Method_Var_getRoot = typeof(Var).GetMethod("getRoot");
+        //internal static readonly MethodInfo Method_Var_getRoot = typeof(Var).GetMethod("getRoot");
         internal static readonly MethodInfo Method_Var_setDynamic0 = typeof(Var).GetMethod("setDynamic", Type.EmptyTypes);
         //internal static readonly PropertyInfo Method_Var_Rev = typeof(Var).GetProperty("Rev");
 
@@ -290,7 +290,7 @@ namespace clojure.lang
 
         internal static readonly ConstructorInfo Ctor_Serializable = typeof(SerializableAttribute).GetConstructor(Type.EmptyTypes);
 
-        internal static readonly MethodInfo[] Methods_IFn_invoke = new MethodInfo[MAX_POSITIONAL_ARITY + 2];
+        internal static readonly MethodInfo[] Methods_IFn_invoke = new MethodInfo[MaxPositionalArity + 2];
 
         internal static Type[] CreateObjectTypeArray(int size)
         {
@@ -306,13 +306,13 @@ namespace clojure.lang
 
         static Compiler()
         {
-            for (int i = 0; i <= Compiler.MAX_POSITIONAL_ARITY; i++)
+            for (int i = 0; i <= Compiler.MaxPositionalArity; i++)
                 Methods_IFn_invoke[i] = typeof(IFn).GetMethod("invoke", CreateObjectTypeArray(i));
 
-            Type[] types = new Type[Compiler.MAX_POSITIONAL_ARITY + 1];
-            CreateObjectTypeArray(Compiler.MAX_POSITIONAL_ARITY).CopyTo(types, 0);
-            types[Compiler.MAX_POSITIONAL_ARITY] = typeof(object[]);
-            Methods_IFn_invoke[Compiler.MAX_POSITIONAL_ARITY + 1]
+            Type[] types = new Type[Compiler.MaxPositionalArity + 1];
+            CreateObjectTypeArray(Compiler.MaxPositionalArity).CopyTo(types, 0);
+            types[Compiler.MaxPositionalArity] = typeof(object[]);
+            Methods_IFn_invoke[Compiler.MaxPositionalArity + 1]
                 = typeof(IFn).GetMethod("invoke", types);
         }
 
@@ -376,8 +376,8 @@ namespace clojure.lang
         public static string DestubClassName(String className)
         {
             //skip over prefix + '.' or '/'
-            if (className.StartsWith(COMPILE_STUB_PREFIX))
-                return className.Substring(COMPILE_STUB_PREFIX.Length + 1);
+            if (className.StartsWith(CompileStubPrefix))
+                return className.Substring(CompileStubPrefix.Length + 1);
             return className;
         }
 
@@ -409,14 +409,14 @@ namespace clojure.lang
             }
             else if (symbol.Name.IndexOf('.') > 0 || symbol.Name[symbol.Name.Length - 1] == ']')
                 return RT.classForName(symbol.Name);
-            else if (symbol.Equals(NS))
+            else if (symbol.Equals(NsSym))
                 return RT.NS_VAR;
-            else if (symbol.Equals(IN_NS))
+            else if (symbol.Equals(InNsSym))
                 return RT.IN_NS_VAR;
             else
             {
-                if (Util.equals(symbol, COMPILE_STUB_SYM.get()))
-                    return COMPILE_STUB_CLASS.get();
+                if (Util.equals(symbol, CompileStubSymVar.get()))
+                    return CompileStubClassVar.get();
 
                 object o = n.GetMapping(symbol);
                 if (o == null)
@@ -448,9 +448,9 @@ namespace clojure.lang
             else if (symbol.Name.IndexOf('.') > 0 && !symbol.Name.EndsWith(".")
                 || symbol.Name[symbol.Name.Length - 1] == ']')              /// JAVA: symbol.Name[0] == '[')
                 return RT.classForName(symbol.Name);
-            else if (symbol.Equals(NS))
+            else if (symbol.Equals(NsSym))
                 return RT.NS_VAR;
-            else if (symbol.Equals(IN_NS))
+            else if (symbol.Equals(InNsSym))
                 return RT.IN_NS_VAR;
             else
             {
@@ -482,13 +482,13 @@ namespace clojure.lang
         
         private static void RegisterVar(Var v)
         {
-            if (!VARS.isBound)
+            if (!VarsVar.isBound)
                 return;
-            IPersistentMap varsMap = (IPersistentMap)VARS.deref();
+            IPersistentMap varsMap = (IPersistentMap)VarsVar.deref();
             Object id = RT.get(varsMap, v);
             if (id == null)
             {
-                VARS.set(RT.assoc(varsMap, v, RegisterConstant(v)));
+                VarsVar.set(RT.assoc(varsMap, v, RegisterConstant(v)));
             }
         }
 
@@ -508,9 +508,9 @@ namespace clojure.lang
                 else
                     var = ns.FindInternedVar(name);
             }
-            else if (sym.Equals(NS))
+            else if (sym.Equals(NsSym))
                 var = RT.NS_VAR;
-            else if (sym.Equals(IN_NS))
+            else if (sym.Equals(InNsSym))
                 var = RT.IN_NS_VAR;
             else
             {
@@ -536,60 +536,60 @@ namespace clojure.lang
 
         internal static int RegisterConstant(Object o)
         {
-            if (!CONSTANTS.isBound)
+            if (!ConstantsVar.isBound)
                 return -1;
-            PersistentVector v = (PersistentVector)CONSTANTS.deref();
-            IdentityHashMap ids = (IdentityHashMap)CONSTANT_IDS.deref();
+            PersistentVector v = (PersistentVector)ConstantsVar.deref();
+            IdentityHashMap ids = (IdentityHashMap)ConstantIdsVar.deref();
             int i;
             if (ids.TryGetValue(o, out i))
                 return i;
-            CONSTANTS.set(RT.conj(v, o));
+            ConstantsVar.set(RT.conj(v, o));
             ids[o] = v.count();
             return v.count();
         }
 
         internal static KeywordExpr RegisterKeyword(Keyword keyword)
         {
-            if (!KEYWORDS.isBound)
+            if (!KeywordsVar.isBound)
                 return new KeywordExpr(keyword);
 
-            IPersistentMap keywordsMap = (IPersistentMap)KEYWORDS.deref();
+            IPersistentMap keywordsMap = (IPersistentMap)KeywordsVar.deref();
             object id = RT.get(keywordsMap, keyword);
             if (id == null)
-                KEYWORDS.set(RT.assoc(keywordsMap, keyword, RegisterConstant(keyword)));
+                KeywordsVar.set(RT.assoc(keywordsMap, keyword, RegisterConstant(keyword)));
             return new KeywordExpr(keyword);
         }
 
         internal static int RegisterKeywordCallsite(Keyword keyword)
         {
-            if (!KEYWORD_CALLSITES.isBound)
+            if (!KeywordCallsitesVar.isBound)
                 throw new InvalidOperationException("KEYWORD_CALLSITES is not bound");
 
-            IPersistentVector keywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
+            IPersistentVector keywordCallsites = (IPersistentVector)KeywordCallsitesVar.deref();
             keywordCallsites = keywordCallsites.cons(keyword);
-            KEYWORD_CALLSITES.set(keywordCallsites);
+            KeywordCallsitesVar.set(keywordCallsites);
             return keywordCallsites.count() - 1;
         }
 
         internal static int RegisterProtocolCallsite(Var v)
         {
-            if (!PROTOCOL_CALLSITES.isBound)
+            if (!ProtocolCallsitesVar.isBound)
                 throw new InvalidOperationException("PROTOCOL_CALLSITES is not bound");
 
-            IPersistentVector protocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
+            IPersistentVector protocolCallsites = (IPersistentVector)ProtocolCallsitesVar.deref();
             protocolCallsites = protocolCallsites.cons(v);
-            PROTOCOL_CALLSITES.set(protocolCallsites);
+            ProtocolCallsitesVar.set(protocolCallsites);
             return protocolCallsites.count() - 1;
         }
 
         internal static void RegisterVarCallsite(Var v)
         {
-            if (!VAR_CALLSITES.isBound)
+            if (!VarCallsitesVar.isBound)
                 throw new InvalidOperationException("VAR_CALLSITES is not bound");
 
-            IPersistentCollection varCallsites = (IPersistentCollection)VAR_CALLSITES.deref();
+            IPersistentCollection varCallsites = (IPersistentCollection)VarCallsitesVar.deref();
             varCallsites = varCallsites.cons(v);
-            VAR_CALLSITES.set(varCallsites);
+            VarCallsitesVar.set(varCallsites);
             //return varCallsites.count() - 1;
         }
 
@@ -607,9 +607,9 @@ namespace clojure.lang
         {
             int num = GetAndIncLocalNum();
             LocalBinding b = new LocalBinding(num, sym, tag, init, isArg, isByRef);
-            IPersistentMap localsMap = (IPersistentMap)LOCAL_ENV.deref();
-            LOCAL_ENV.set(RT.assoc(localsMap, b.Symbol, b));
-            ObjMethod method = (ObjMethod)METHOD.deref();
+            IPersistentMap localsMap = (IPersistentMap)LocalEnvVar.deref();
+            LocalEnvVar.set(RT.assoc(localsMap, b.Symbol, b));
+            ObjMethod method = (ObjMethod)MethodVar.deref();
             method.Locals = (IPersistentMap)RT.assoc(method.Locals, b, b);
             method.IndexLocals = (IPersistentMap)RT.assoc(method.IndexLocals, num, b);
             return b;
@@ -617,23 +617,23 @@ namespace clojure.lang
 
         internal static int GetAndIncLocalNum()
         {
-            int num = (int)NEXT_LOCAL_NUM.deref();
-            ObjMethod m = (ObjMethod)METHOD.deref();
+            int num = (int)NextLocalNumVar.deref();
+            ObjMethod m = (ObjMethod)MethodVar.deref();
             if (num > m.MaxLocal)
                 m.MaxLocal = num;
-            NEXT_LOCAL_NUM.set(num + 1);
+            NextLocalNumVar.set(num + 1);
             return num;
         }
 
         internal static LocalBinding ReferenceLocal(Symbol symbol)
         {
-            if (!LOCAL_ENV.isBound)
+            if (!LocalEnvVar.isBound)
                 return null;
 
-            LocalBinding b = (LocalBinding)RT.get(LOCAL_ENV.deref(), symbol);
+            LocalBinding b = (LocalBinding)RT.get(LocalEnvVar.deref(), symbol);
             if (b != null)
             {
-                ObjMethod method = (ObjMethod)METHOD.deref();
+                ObjMethod method = (ObjMethod)MethodVar.deref();
                 CloseOver(b, method);
             }
 
@@ -649,7 +649,7 @@ namespace clojure.lang
                     method.Objx.Closes = (IPersistentMap)RT.assoc(method.Objx.Closes, b, b);
                     CloseOver(b, method.Parent);
                 }
-                else if (IN_CATCH_FINALLY.deref() != null)
+                else if (InCatchFinallyVar.deref() != null)
                 {
                     method.LocalsUsedInCatchFinally = (PersistentHashSet)method.LocalsUsedInCatchFinally.cons(b.Index);
                 }
@@ -861,21 +861,21 @@ namespace clojure.lang
         /// <remarks>Initial lowercase for core.clj compatibility</remarks>
         public static object eval(object form)
         {
-            int line = (int)LINE.deref();
+            int line = (int)LineVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
                 line = (int)RT.meta(form).valAt(RT.LINE_KEY);
-            IPersistentMap sourceSpan = (IPersistentMap)SOURCE_SPAN.deref();
+            IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SOURCE_SPAN_KEY))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SOURCE_SPAN_KEY);
 
             ParserContext pconExpr = new ParserContext(RHC.Expression);
             ParserContext pconEval = new ParserContext(RHC.Eval);
 
-            Var.pushThreadBindings(RT.map(LINE, line, SOURCE_SPAN, sourceSpan, COMPILER_CONTEXT, null));
+            Var.pushThreadBindings(RT.map(LineVar, line, SourceSpanVar, sourceSpan, CompilerContextVar, null));
             try
             {
                 form = Macroexpand(form);
-                if (form is IPersistentCollection && Util.equals(RT.first(form), DO))
+                if (form is IPersistentCollection && Util.equals(RT.first(form), DoSym))
                 {
                     ISeq s = RT.next(form);
                     for (; RT.next(s) != null; s = RT.next(s))
@@ -885,7 +885,7 @@ namespace clojure.lang
                 else if ( (form is IType) ||
                     (form is IPersistentCollection && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def"))) )
                 {
-                    ObjExpr objx = (ObjExpr)Analyze(pconExpr, RT.list(FN, PersistentVector.EMPTY, form), "eval__" + RT.nextID());
+                    ObjExpr objx = (ObjExpr)Analyze(pconExpr, RT.list(FnSym, PersistentVector.EMPTY, form), "eval__" + RT.nextID());
                     IFn fn = (IFn)objx.Eval();
                     return fn.invoke();
                     //Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, "eval" + RT.nextID().ToString(), false);
@@ -944,7 +944,7 @@ namespace clojure.lang
             {
                 try
                 {
-                    return v.applyTo(RT.cons(form, RT.cons(LOCAL_ENV.get(), form.next())));
+                    return v.applyTo(RT.cons(form, RT.cons(LocalEnvVar.get(), form.next())));
                 }
                 catch (ArityException e)
                 {
@@ -966,9 +966,9 @@ namespace clojure.lang
                         Symbol method = Symbol.intern(sname.Substring(1));
                         object target = RT.second(form);
                         if (HostExpr.MaybeType(target, false) != null)
-                            target = ((IObj)RT.list(IDENTITY, target)).withMeta(RT.map(RT.TAG_KEY, CLASS));
+                            target = ((IObj)RT.list(IdentitySym, target)).withMeta(RT.map(RT.TAG_KEY, ClassSym));
                         // We need to make sure source information gets transferred
-                        return MaybeTransferSourceInfo(PreserveTag(form, RT.listStar(DOT, target, method, form.next().next())), form);
+                        return MaybeTransferSourceInfo(PreserveTag(form, RT.listStar(DotSym, target, method, form.next().next())), form);
                     }
                     else if (NamesStaticMember(sym))
                     {
@@ -978,7 +978,7 @@ namespace clojure.lang
                         {
                             Symbol method = Symbol.intern(sym.Name);
                             // We need to make sure source information gets transferred
-                            return MaybeTransferSourceInfo(PreserveTag(form, RT.listStar(Compiler.DOT, target, method, form.next())), form);
+                            return MaybeTransferSourceInfo(PreserveTag(form, RT.listStar(Compiler.DotSym, target, method, form.next())), form);
                         }
                     }
                     else
@@ -988,7 +988,7 @@ namespace clojure.lang
                         int index = sname.LastIndexOf('.');
                         if (index == sname.Length - 1)
                             // We need to make sure source information gets transferred
-                            return MaybeTransferSourceInfo(RT.listStar(Compiler.NEW, Symbol.intern(sname.Substring(0, index)), form.next()), form);
+                            return MaybeTransferSourceInfo(RT.listStar(Compiler.NewSym, Symbol.intern(sname.Substring(0, index)), form.next()), form);
                     }
                 }
 
@@ -1026,10 +1026,10 @@ namespace clojure.lang
                 {
                     if (v.Namespace != CurrentNamespace && !v.isPublic)
                         throw new InvalidOperationException("var: " + v + " is not public");
-                    IFn ret = (IFn)RT.get(v.meta(), INLINE_KEY);
+                    IFn ret = (IFn)RT.get(v.meta(), InlineKeyword);
                     if (ret != null)
                     {
-                        IFn arityPred = (IFn)RT.get(v.meta(), INLINE_ARITIES_KEY);
+                        IFn arityPred = (IFn)RT.get(v.meta(), InlineAritiesKeyword);
                         if (arityPred == null || RT.booleanCast(arityPred.invoke(arity)))
                             return ret;
                     }
@@ -1107,7 +1107,7 @@ namespace clojure.lang
 
         internal static SymbolDocumentInfo DocInfo()
         {
-            return (SymbolDocumentInfo)DOCUMENT_INFO.deref();
+            return (SymbolDocumentInfo)DocumentInfoVar.deref();
         }
 
         public static int GetLineFromSpanMap(IPersistentMap spanMap)
@@ -1176,18 +1176,18 @@ namespace clojure.lang
 
         public static bool IsCompiling
         {
-            get { return COMPILER_CONTEXT.deref() != null; }
+            get { return CompilerContextVar.deref() != null; }
         }
 
         public static string IsCompilingSuffix()
         {
-            GenContext context = (GenContext)COMPILER_CONTEXT.deref();
+            GenContext context = (GenContext)CompilerContextVar.deref();
             return context == null ? "_INTERP" : "_COMP_" + (new AssemblyName(context.AssemblyBuilder.FullName)).Name;
         }
 
         internal static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
         {
-            if (COMPILE_PATH.deref() == null)
+            if (CompilePathVar.deref() == null)
                 throw new Exception("*compile-path* not set");
 
             object eofVal = new object();
@@ -1203,27 +1203,27 @@ namespace clojure.lang
             GenContext evalContext = GenContext.CreateWithInternalAssembly("EvalForCompile", false);
 
             Var.pushThreadBindings(RT.map(
-                SOURCE_PATH, sourcePath,
-                SOURCE, sourceName,
-                METHOD, null,
-                LOCAL_ENV, null,
-                LOOP_LOCALS, null,
-                NEXT_LOCAL_NUM, 0,
+                SourcePathVar, sourcePath,
+                SourceVar, sourceName,
+                MethodVar, null,
+                LocalEnvVar, null,
+                LoopLocalsVar, null,
+                NextLocalNumVar, 0,
                 RT.CURRENT_NS, RT.CURRENT_NS.deref(),
                     //LINE_BEFORE, lntr.LineNumber,
                     //LINE_AFTER, lntr.LineNumber,
-                DOCUMENT_INFO, Expression.SymbolDocument(sourceName),  // I hope this is enough
-                CONSTANTS, PersistentVector.EMPTY,
-                CONSTANT_IDS, new IdentityHashMap(),
-                KEYWORDS, PersistentHashMap.EMPTY,
-                VARS, PersistentHashMap.EMPTY,
+                DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
+                ConstantsVar, PersistentVector.EMPTY,
+                ConstantIdsVar, new IdentityHashMap(),
+                KeywordsVar, PersistentHashMap.EMPTY,
+                VarsVar, PersistentHashMap.EMPTY,
                 RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref(),
                 RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref(),
 
                 //KEYWORD_CALLSITES, PersistentVector.EMPTY,  // jvm doesn't do this, don't know why
                 //VAR_CALLSITES, EmptyVarCallSites(),      // jvm doesn't do this, don't know why
                 //PROTOCOL_CALLSITES, PersistentVector.EMPTY, // jvm doesn't do this, don't know why
-                COMPILER_CONTEXT, context
+                CompilerContextVar, context
                 ));
 
 
@@ -1262,9 +1262,9 @@ namespace clojure.lang
                 FnMethod method = new FnMethod(objx, null, bodyExpr);
                 objx.AddMethod(method);
 
-                objx.Keywords = (IPersistentMap)KEYWORDS.deref();
-                objx.Vars = (IPersistentMap)VARS.deref();
-                objx.Constants = (PersistentVector)CONSTANTS.deref();
+                objx.Keywords = (IPersistentMap)KeywordsVar.deref();
+                objx.Vars = (IPersistentMap)VarsVar.deref();
+                objx.Constants = (PersistentVector)ConstantsVar.deref();
                 //objx.KeywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
                 //objx.ProtocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
                 //objx.VarCallsites = (IPersistentSet)VAR_CALLSITES.deref();
@@ -1306,14 +1306,14 @@ namespace clojure.lang
         private static void Compile1(GenContext compileContext, GenContext evalContext, TypeBuilder exprTB, object form, List<Expr> exprs, ref int i)
         {
 
-            int line = (int)LINE.deref();
+            int line = (int)LineVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
                 line = (int)RT.meta(form).valAt(RT.LINE_KEY);
-            IPersistentMap sourceSpan = (IPersistentMap)SOURCE_SPAN.deref();
+            IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SOURCE_SPAN_KEY))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SOURCE_SPAN_KEY);
 
-            Var.pushThreadBindings(RT.map(LINE, line, SOURCE_SPAN, sourceSpan));
+            Var.pushThreadBindings(RT.map(LineVar, line, SourceSpanVar, sourceSpan));
 
             ParserContext pcontext = new ParserContext(RHC.Eval);
 
@@ -1321,7 +1321,7 @@ namespace clojure.lang
             {
 
                 form = Macroexpand(form);
-                if (form is IPersistentCollection && Util.Equals(RT.first(form), DO))
+                if (form is IPersistentCollection && Util.Equals(RT.first(form), DoSym))
                 {
                     for (ISeq s = RT.next(form); s != null; s = RT.next(s))
                         Compile1(compileContext, evalContext, exprTB, RT.first(s), exprs, ref i);
@@ -1401,9 +1401,9 @@ namespace clojure.lang
 
             Var.pushThreadBindings(RT.map(
                 //LOADER, RT.makeClassLoader(),
-                SOURCE_PATH, sourcePath,
-                SOURCE, sourceName,
-                DOCUMENT_INFO, Expression.SymbolDocument(sourceName),  // I hope this is enough
+                SourcePathVar, sourcePath,
+                SourceVar, sourceName,
+                DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
 
                 RT.CURRENT_NS, RT.CURRENT_NS.deref(),
                 RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref(),
@@ -1496,7 +1496,7 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                throw new CompilerException((String)SOURCE_PATH.deref(), (int)LINE.deref(), e);
+                throw new CompilerException((String)SourcePathVar.deref(), (int)LineVar.deref(), e);
             }
         }
 
@@ -1532,9 +1532,9 @@ namespace clojure.lang
                         PropertyInfo pinfo;
 
                         if ((finfo = Reflector.GetField(t, symbol.Name, true)) != null)
-                            return new StaticFieldExpr((string)SOURCE.deref(),(IPersistentMap)Compiler.SOURCE_SPAN.deref(), tag, t, symbol.Name, finfo);
+                            return new StaticFieldExpr((string)SourceVar.deref(),(IPersistentMap)Compiler.SourceSpanVar.deref(), tag, t, symbol.Name, finfo);
                         else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) != null)
-                            return new StaticPropertyExpr((string)SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), tag, t, symbol.Name, pinfo);
+                            return new StaticPropertyExpr((string)SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tag, t, symbol.Name, pinfo);
                     }
                     throw new Exception(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
                 }
@@ -1547,7 +1547,7 @@ namespace clojure.lang
                 if (IsMacro(v) != null)
                     throw new Exception("Can't take the value of a macro: " + v);
                 if (RT.booleanCast(RT.get(v.meta(), RT.CONST_KEY)))
-                    return Analyze(new ParserContext(RHC.Expression), RT.list(QUOTE, v.get()));
+                    return Analyze(new ParserContext(RHC.Expression), RT.list(QuoteSym, v.get()));
                 RegisterVar(v);
                 return new VarExpr(v, tag);
             }
@@ -1561,14 +1561,14 @@ namespace clojure.lang
 
         private static Expr AnalyzeSeq(ParserContext pcon, ISeq form, string name )
         {
-            int line = (int)LINE.deref();
+            int line = (int)LineVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
                 line = (int)RT.meta(form).valAt(RT.LINE_KEY);
-            IPersistentMap sourceSpan = (IPersistentMap)SOURCE_SPAN.deref();
+            IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SOURCE_SPAN_KEY))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SOURCE_SPAN_KEY);
 
-            Var.pushThreadBindings(RT.map(LINE, line, SOURCE_SPAN, sourceSpan));
+            Var.pushThreadBindings(RT.map(LineVar, line, SourceSpanVar, sourceSpan));
 
             try
             {
@@ -1587,7 +1587,7 @@ namespace clojure.lang
                     return Analyze(pcon, MaybeTransferSourceInfo(PreserveTag(form, inline.applyTo(RT.next(form))), form));
 
                 IParser p;
-                if (op.Equals(FN))
+                if (op.Equals(FnSym))
                     return FnExpr.Parse(pcon, form, name);
                 if ((p = GetSpecialFormParser(op)) != null)
                     return p.Parse(pcon, form);
@@ -1600,7 +1600,7 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                throw new CompilerException((String)SOURCE_PATH.deref(), (int)LINE.deref(), e);
+                throw new CompilerException((String)SourcePathVar.deref(), (int)LineVar.deref(), e);
             }
             finally
             {

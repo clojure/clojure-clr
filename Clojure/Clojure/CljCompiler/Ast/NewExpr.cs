@@ -49,7 +49,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private ConstructorInfo ComputeCtor()
         {
-            if (Compiler.COMPILE_STUB_CLASS.isBound && _type == (Type)Compiler.COMPILE_STUB_CLASS.deref())
+            if (Compiler.CompileStubClassVar.isBound && _type == (Type)Compiler.CompileStubClassVar.deref())
                 return null;
 
             int numArgs = _args.Count;
@@ -70,7 +70,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                 RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1} - call to {2} ctor can't be resolved.",
-                    Compiler.SOURCE_PATH.deref(), _spanMap != null ? (int)_spanMap.valAt(RT.START_LINE_KEY, 0) : 0, _type.FullName);
+                    Compiler.SourcePathVar.deref(), _spanMap != null ? (int)_spanMap.valAt(RT.START_LINE_KEY, 0) : 0, _type.FullName);
 
             return ctor;
         }
@@ -112,7 +112,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 List<HostArg> args = HostExpr.ParseArgs(pcon, RT.next(RT.next(form)));
 
-                return new NewExpr(t, args, (IPersistentMap)Compiler.SOURCE_SPAN.deref());
+                return new NewExpr(t, args, (IPersistentMap)Compiler.SourceSpanVar.deref());
             }
         }
 
@@ -167,7 +167,7 @@ namespace clojure.lang.CljCompiler.Ast
 
 
             Type returnType = this.ClrType;
-            Type stubType = Compiler.COMPILE_STUB_ORIG_CLASS.isBound ? (Type)Compiler.COMPILE_STUB_ORIG_CLASS.deref() : null;
+            Type stubType = Compiler.CompileStubOrigClassVar.isBound ? (Type)Compiler.CompileStubOrigClassVar.deref() : null;
 
             if (returnType == stubType)
                 returnType = objx.BaseType;
@@ -208,7 +208,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private Expression GenTargetExpression(ObjExpr objx, GenContext context)
         {
-            if (Compiler.COMPILE_STUB_ORIG_CLASS.isBound && Compiler.COMPILE_STUB_ORIG_CLASS.deref() != null && objx.TypeBuilder != null)
+            if (Compiler.CompileStubOrigClassVar.isBound && Compiler.CompileStubOrigClassVar.deref() != null && objx.TypeBuilder != null)
                 return Expression.Constant(objx.TypeBuilder, typeof(Type));
 
             if (_type != null)

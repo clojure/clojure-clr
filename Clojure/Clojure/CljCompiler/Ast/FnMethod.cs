@@ -109,10 +109,10 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                if (IsVariadic && _reqParms.count() == Compiler.MAX_POSITIONAL_ARITY)
+                if (IsVariadic && _reqParms.count() == Compiler.MaxPositionalArity)
                 {
-                    Type[] ret = new Type[Compiler.MAX_POSITIONAL_ARITY + 1];
-                    for (int i = 0; i < Compiler.MAX_POSITIONAL_ARITY + 1; i++)
+                    Type[] ret = new Type[Compiler.MaxPositionalArity + 1];
+                    for (int i = 0; i < Compiler.MaxPositionalArity + 1; i++)
                         ret[i] = typeof(Object);
                     return ret;
                 }
@@ -152,13 +152,13 @@ namespace clojure.lang.CljCompiler.Ast
 
             try
             {
-                FnMethod method = new FnMethod(fn, (ObjMethod)Compiler.METHOD.deref());
+                FnMethod method = new FnMethod(fn, (ObjMethod)Compiler.MethodVar.deref());
 
                 Var.pushThreadBindings(RT.map(
-                    Compiler.METHOD, method,
-                    Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
-                    Compiler.LOOP_LOCALS, null,
-                    Compiler.NEXT_LOCAL_NUM, 0));
+                    Compiler.MethodVar, method,
+                    Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
+                    Compiler.LoopLocalsVar, null,
+                    Compiler.NextLocalNumVar, 0));
 
                 method._prim = PrimInterface(parms);
                 //if (method._prim != null)
@@ -185,7 +185,7 @@ namespace clojure.lang.CljCompiler.Ast
                     Symbol p = (Symbol)parms.nth(i);
                     if (p.Namespace != null)
                         throw new Exception("Can't use qualified name as parameter: " + p);
-                    if (p.Equals(Compiler._AMP_))
+                    if (p.Equals(Compiler.AmpersandSym))
                     {
                         //if (isStatic)
                         //    throw new Exception("Variadic fns cannot be static");
@@ -217,7 +217,7 @@ namespace clojure.lang.CljCompiler.Ast
                         LocalBinding b = pt.IsPrimitive
                             ? Compiler.RegisterLocal(p,null, new MethodParamExpr(pt), true)
                             : Compiler.RegisterLocal(p,
-                            paramState == ParamParseState.Rest ? Compiler.ISEQ : Compiler.TagOf(p),
+                            paramState == ParamParseState.Rest ? Compiler.ISeqSym : Compiler.TagOf(p),
                             null,true);
 
                         argLocals = argLocals.cons(b);
@@ -236,9 +236,9 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
-                if (method.RequiredArity > Compiler.MAX_POSITIONAL_ARITY)
-                    throw new Exception(string.Format("Can't specify more than {0} parameters", Compiler.MAX_POSITIONAL_ARITY));
-                Compiler.LOOP_LOCALS.set(argLocals);
+                if (method.RequiredArity > Compiler.MaxPositionalArity)
+                    throw new Exception(string.Format("Can't specify more than {0} parameters", Compiler.MaxPositionalArity));
+                Compiler.LoopLocalsVar.set(argLocals);
                 method._argLocals = argLocals;
                 //if (isStatic)
                 if ( method.Prim != null )
@@ -268,7 +268,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 LabelTarget loopLabel = Expression.Label("top");
 
-                Var.pushThreadBindings(RT.map(Compiler.LOOP_LABEL, loopLabel, Compiler.METHOD, this));
+                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
 
                 for (int i = 0; i < _argLocals.count(); i++)
                 {

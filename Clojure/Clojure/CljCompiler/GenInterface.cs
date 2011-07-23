@@ -36,7 +36,7 @@ namespace clojure.lang
                 //if (path == null)
                 //    throw new Exception("*compile-path* not set");
                 //context = new GenContext(iName, ".dll", path, CompilerMode.File);
-                context = (GenContext)Compiler.COMPILER_CONTEXT.deref();
+                context = (GenContext)Compiler.CompilerContextVar.deref();
             }
             else
                 // TODO: In CLR4, should create a collectible type?

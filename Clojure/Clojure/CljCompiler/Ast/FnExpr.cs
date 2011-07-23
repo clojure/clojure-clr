@@ -60,7 +60,7 @@ namespace clojure.lang.CljCompiler.Ast
         // This naming convention drawn from the Java code.
         internal void ComputeNames(ISeq form, string name)
         {
-            ObjMethod enclosingMethod = (ObjMethod)Compiler.METHOD.deref();
+            ObjMethod enclosingMethod = (ObjMethod)Compiler.MethodVar.deref();
 
             string baseName = enclosingMethod != null
                 ? (enclosingMethod.Objx.Name + "$")
@@ -124,14 +124,14 @@ namespace clojure.lang.CljCompiler.Ast
             try
             {
                 Var.pushThreadBindings(RT.map(
-                    Compiler.CONSTANTS, PersistentVector.EMPTY,
-                    Compiler.CONSTANT_IDS, new IdentityHashMap(),
-                    Compiler.KEYWORDS, PersistentHashMap.EMPTY,
-                    Compiler.VARS, PersistentHashMap.EMPTY,
-                    Compiler.KEYWORD_CALLSITES,PersistentVector.EMPTY,
-                    Compiler.PROTOCOL_CALLSITES,PersistentVector.EMPTY,
-                    Compiler.VAR_CALLSITES,Compiler.EmptyVarCallSites(),
-                    Compiler.NO_RECUR,null));
+                    Compiler.ConstantsVar, PersistentVector.EMPTY,
+                    Compiler.ConstantIdsVar, new IdentityHashMap(),
+                    Compiler.KeywordsVar, PersistentHashMap.EMPTY,
+                    Compiler.VarsVar, PersistentHashMap.EMPTY,
+                    Compiler.KeywordCallsitesVar,PersistentVector.EMPTY,
+                    Compiler.ProtocolCallsitesVar,PersistentVector.EMPTY,
+                    Compiler.VarCallsitesVar,Compiler.EmptyVarCallSites(),
+                    Compiler.NoRecurVar,null));
 
                 //arglist might be preceded by symbol naming this fn
                 if (RT.second(form) is Symbol)
@@ -139,14 +139,14 @@ namespace clojure.lang.CljCompiler.Ast
                     Symbol nm = (Symbol)RT.second(form);
                     fn._thisName = nm.Name;
                     fn.IsStatic = false; // RT.booleanCast(RT.get(nm.meta(), Compiler.STATIC_KEY));
-                    form = RT.cons(Compiler.FN, RT.next(RT.next(form)));
+                    form = RT.cons(Compiler.FnSym, RT.next(RT.next(form)));
                 }
 
                 // Normalize body
 			    //now (fn [args] body...) or (fn ([args] body...) ([args2] body2...) ...)
 			    //turn former into latter
                 if (RT.second(form) is IPersistentVector)
-                    form = RT.list(Compiler.FN, RT.next(form));
+                    form = RT.list(Compiler.FnSym, RT.next(form));
 
                 SortedDictionary<int, FnMethod> methods = new SortedDictionary<int, FnMethod>();
                 FnMethod variadicMethod = null;
@@ -183,12 +183,12 @@ namespace clojure.lang.CljCompiler.Ast
 
                 fn._methods = allMethods;
                 fn._variadicMethod = variadicMethod;
-                fn.Keywords = (IPersistentMap)Compiler.KEYWORDS.deref();
-                fn.Vars = (IPersistentMap)Compiler.VARS.deref();
-                fn.Constants = (PersistentVector)Compiler.CONSTANTS.deref();
-                fn.KeywordCallsites = (IPersistentVector)Compiler.KEYWORD_CALLSITES.deref();
-                fn.ProtocolCallsites = (IPersistentVector)Compiler.PROTOCOL_CALLSITES.deref();
-                fn.VarCallsites = (IPersistentSet)Compiler.VAR_CALLSITES.deref();
+                fn.Keywords = (IPersistentMap)Compiler.KeywordsVar.deref();
+                fn.Vars = (IPersistentMap)Compiler.VarsVar.deref();
+                fn.Constants = (PersistentVector)Compiler.ConstantsVar.deref();
+                fn.KeywordCallsites = (IPersistentVector)Compiler.KeywordCallsitesVar.deref();
+                fn.ProtocolCallsites = (IPersistentVector)Compiler.ProtocolCallsitesVar.deref();
+                fn.VarCallsites = (IPersistentSet)Compiler.VarCallsitesVar.deref();
 
                 fn._constantsID = RT.nextID();
             }
@@ -205,7 +205,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (Compiler.IsCompiling || prims.Count > 0)
             {
-                GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
+                GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? Compiler.EvalContext;
                 GenContext genC = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
 
                 IPersistentVector primTypes = PersistentVector.EMPTY;

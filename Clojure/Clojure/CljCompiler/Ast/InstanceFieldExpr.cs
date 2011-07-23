@@ -54,7 +54,7 @@ namespace clojure.lang.CljCompiler.Ast
             // However, this seems consistent with the checks in the generation code.
             if ( (_targetType == null || _tinfo == null) && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                 RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1} - reference to field/property {2} can't be resolved.", 
-                    Compiler.SOURCE_PATH.deref(), Compiler.GetLineFromSpanMap(_spanMap),_fieldName);
+                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap),_fieldName);
         }
 
         #endregion
@@ -74,7 +74,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Type targetType = _targetType;
 
-            Type stubType = Compiler.COMPILE_STUB_ORIG_CLASS.isBound ? (Type)Compiler.COMPILE_STUB_ORIG_CLASS.deref() : null;
+            Type stubType = Compiler.CompileStubOrigClassVar.isBound ? (Type)Compiler.CompileStubOrigClassVar.deref() : null;
 
             if ( _targetType == stubType )
                 targetType = objx.BaseType;

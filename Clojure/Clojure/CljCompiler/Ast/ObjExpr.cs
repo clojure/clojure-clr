@@ -104,7 +104,7 @@ namespace clojure.lang.CljCompiler.Ast
         //    //set { _varRevField = value; }
         //}
 
-        protected List<FieldBuilder> _closedOverFields;
+        private List<FieldBuilder> _closedOverFields;
         private Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;        
         protected List<FieldBuilder> _keywordLookupSiteFields;
         protected List<FieldBuilder> _thunkFields;
@@ -351,7 +351,7 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.RegisterDuplicateType(_baseType);
 
                     Var.pushThreadBindings(RT.map(
-                        Compiler.COMPILE_STUB_ORIG_CLASS, stubType
+                        Compiler.CompileStubOrigClassVar, stubType
                         ));
                         //,
                         //Compiler.COMPILE_STUB_CLASS, _baseType));

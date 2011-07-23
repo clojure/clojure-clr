@@ -77,7 +77,7 @@ namespace clojure.lang
         {
             className = className.Replace('-', '_');
 
-            string path = (string)Compiler.COMPILE_PATH.deref();
+            string path = (string)Compiler.CompilePathVar.deref();
             if ( path == null)
                 throw new Exception("*compile-path* not set");
 

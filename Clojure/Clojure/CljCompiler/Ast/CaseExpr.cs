@@ -80,7 +80,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (RT.count(skipCheck) > 0 && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
             {
                 RT.errPrintWriter().WriteLine("Performance warning, {0}:{1} - hash collision of some case test constants; if selected, those entries will be tested sequentially.",
-                    Compiler.SOURCE_PATH.deref(),RT.get(sourceSpan,RT.START_LINE_KEY));
+                    Compiler.SourcePathVar.deref(),RT.get(sourceSpan,RT.START_LINE_KEY));
             }
         
         }
@@ -114,7 +114,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ISeq form = (ISeq) frm;
 
                 if (pcon.Rhc == RHC.Eval)
-                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)),"case__"+RT.nextID());
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnSym, PersistentVector.EMPTY, form)),"case__"+RT.nextID());
 
                 PersistentVector args = PersistentVector.create(form.next());
 
@@ -175,7 +175,7 @@ namespace clojure.lang.CljCompiler.Ast
                 //    Var.popThreadBindings();
                 //}
             return new CaseExpr(
-                (IPersistentMap) Compiler.SOURCE_SPAN.deref(),
+                (IPersistentMap) Compiler.SourceSpanVar.deref(),
                 testexpr,
                 shift,
                 mask,
@@ -299,7 +299,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                 {
                     RT.errPrintWriter().WriteLine("Performance warning, {0}:{1} - case has int tests, but tested expression is not primitive.",
-                        Compiler.SOURCE_PATH.deref(), RT.get(_sourceSpan, RT.START_LINE_KEY));
+                        Compiler.SourcePathVar.deref(), RT.get(_sourceSpan, RT.START_LINE_KEY));
                 }
                 
                 ParameterExpression parm = Expression.Parameter(typeof(object),"p");

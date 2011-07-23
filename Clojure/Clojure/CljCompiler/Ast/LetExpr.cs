@@ -69,7 +69,7 @@ namespace clojure.lang.CljCompiler.Ast
                 // form => (let  [var1 val1 var2 val2 ... ] body ... )
                 //      or (loop [var1 val1 var2 val2 ... ] body ... )
 
-                bool isLoop = RT.first(form).Equals(Compiler.LOOP);
+                bool isLoop = RT.first(form).Equals(Compiler.LoopSym);
 
                 IPersistentVector bindings = RT.second(form) as IPersistentVector;
 
@@ -83,9 +83,9 @@ namespace clojure.lang.CljCompiler.Ast
 
                 if (pcon.Rhc == RHC.Eval
                     || (pcon.Rhc == RHC.Expression && isLoop))
-                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)), "let__" + RT.nextID());
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnSym, PersistentVector.EMPTY, form)), "let__" + RT.nextID());
 
-                ObjMethod method = (ObjMethod)Compiler.METHOD.deref();
+                ObjMethod method = (ObjMethod)Compiler.MethodVar.deref();
                 IPersistentMap backupMethodLocals = method.Locals;
                 IPersistentMap backupMethodIndexLocals = method.IndexLocals;
 
@@ -100,14 +100,14 @@ namespace clojure.lang.CljCompiler.Ast
                 {
 
                     IPersistentMap dynamicBindings = RT.map(
-                        Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
-                        Compiler.NEXT_LOCAL_NUM, Compiler.NEXT_LOCAL_NUM.deref());
+                        Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
+                        Compiler.NextLocalNumVar, Compiler.NextLocalNumVar.deref());
                     method.Locals = backupMethodLocals;
                     method.IndexLocals = backupMethodIndexLocals;
 
 
                     if (isLoop)
-                        dynamicBindings = dynamicBindings.assoc(Compiler.LOOP_LOCALS, null);
+                        dynamicBindings = dynamicBindings.assoc(Compiler.LoopLocalsVar, null);
 
                     try
                     {
@@ -160,7 +160,7 @@ namespace clojure.lang.CljCompiler.Ast
                                 loopLocals = loopLocals.cons(b);
                         }
                         if (isLoop)
-                            Compiler.LOOP_LOCALS.set(loopLocals);
+                            Compiler.LoopLocalsVar.set(loopLocals);
 
                         Expr bodyExpr;
                         bool moreMismatches = false;
@@ -169,7 +169,7 @@ namespace clojure.lang.CljCompiler.Ast
                             if (isLoop)
                             {
                                 // stuff with clear paths,
-                                Var.pushThreadBindings(RT.map(Compiler.NO_RECUR, null));
+                                Var.pushThreadBindings(RT.map(Compiler.NoRecurVar, null));
                             }
                             bodyExpr = new BodyExpr.Parser().Parse(isLoop ? pcon.SetRhc(RHC.Return) : pcon, body);
                         }
@@ -256,7 +256,7 @@ namespace clojure.lang.CljCompiler.Ast
             try
             {
                 if (_isLoop)
-                    Var.pushThreadBindings(PersistentHashMap.create(Compiler.LOOP_LABEL, loopLabel));
+                    Var.pushThreadBindings(PersistentHashMap.create(Compiler.LoopLabelVar, loopLabel));
 
                 Expression form = genUnboxed 
                     ? ((MaybePrimitiveExpr)_body).GenCodeUnboxed(rhc,objx,context) 

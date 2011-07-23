@@ -323,7 +323,7 @@ namespace clojure.lang
         {
             if (method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                 RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved.",
-                    Compiler.SOURCE_PATH.deref(), Compiler.GetLineFromSpanMap(spanMap), methodName));
+                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), methodName));
         }
 
 

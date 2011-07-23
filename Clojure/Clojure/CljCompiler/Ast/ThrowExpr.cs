@@ -47,7 +47,7 @@ namespace clojure.lang.CljCompiler.Ast
             public Expr Parse(ParserContext pcon, object form)
             {
                 if (pcon.Rhc == RHC.Eval)
-                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FN, PersistentVector.EMPTY, form)), "throw__" + RT.nextID());
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnSym, PersistentVector.EMPTY, form)), "throw__" + RT.nextID());
 
                 return new ThrowExpr(Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), RT.second(form)));
             }

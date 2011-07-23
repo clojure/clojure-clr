@@ -64,7 +64,7 @@ namespace clojure.lang
                 ////string dir = (string)Compiler.SOURCE_PATH.deref();
 
                 //_context = new GenContext(className, ".dll", path, CompilerMode.File);
-                _context = (GenContext)Compiler.COMPILER_CONTEXT.deref();
+                _context = (GenContext)Compiler.CompilerContextVar.deref();
             }
             else
                 _context = GenContext.CreateWithInternalAssembly("proxy" + (++_saveId).ToString(), false);

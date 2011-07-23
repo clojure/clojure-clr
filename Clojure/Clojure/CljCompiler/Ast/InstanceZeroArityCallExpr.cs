@@ -49,7 +49,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             if ( RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                 RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1} - reference to field/property {2} can't be resolved.",
-                    Compiler.SOURCE_PATH.deref(), Compiler.GetLineFromSpanMap(_spanMap), memberName);
+                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap), memberName);
  
         }
 

@@ -2654,7 +2654,7 @@ namespace clojure.lang
 
             if (!loaded && cljInfo != null)
             {
-                if (booleanCast(Compiler.COMPILE_FILES.deref()))
+                if (booleanCast(Compiler.CompileFilesVar.deref()))
                     Compile(cljInfo,cljname);
                 else
                     LoadScript(cljInfo, cljname); ;

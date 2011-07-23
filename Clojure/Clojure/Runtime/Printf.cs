@@ -166,7 +166,7 @@ namespace clojure.lang
 
             #region implementation
 
-            void CheckText(string s)
+            static void CheckText(string s)
             {
                 // should be no bare naked %s
                 int index = s.IndexOf('%');
@@ -451,7 +451,7 @@ namespace clojure.lang
             private void CheckLeftJustifyWidth()
             {
                 if (_width == -1 && (_flags & FormatFlags.LeftJustify) != 0)
-                    throw new MissingFormatWidthException(ToString());
+                    throw new MissingFormatWidthException(ToStringAux());
             }
 
             private void CheckNoPrecision()
@@ -468,7 +468,7 @@ namespace clojure.lang
                         FailMismatch(f,_conversion);
             }
 
-            private void FailMismatch(FormatFlags flags,char conv)
+            private static void FailMismatch(FormatFlags flags,char conv)
             {
  	            throw new FormatFlagsConversionMismatchException(FormatFlagsToString(flags),conv);
             }
@@ -981,129 +981,129 @@ namespace clojure.lang
                 switch (_conversion)
                 {
 
-                    case DateTimeConv.HOUR_OF_DAY_0: // = 'H' (00 - 23)
+                    case DateTimeConv.HourOfDay0: // = 'H' (00 - 23)
                         format = "HH";
                         break;
 
-                    case DateTimeConv.HOUR_0: //  = 'I' (01 - 12)
+                    case DateTimeConv.Hour0: //  = 'I' (01 - 12)
                         format = "hh";
                         break;
 
-                    case DateTimeConv.HOUR_OF_DAY: //  = 'k' (0 - 23) -- like H
+                    case DateTimeConv.HourOfDay: //  = 'k' (0 - 23) -- like H
                        format = "%H";
                         break;
 
-                    case DateTimeConv.HOUR: //  = 'l' (1 - 12) -- like I
+                    case DateTimeConv.Hour: //  = 'l' (1 - 12) -- like I
                         format = "%h";
                         break;
 
-                    case DateTimeConv.MINUTE: //  = 'M' (00 - 59)
+                    case DateTimeConv.Minute: //  = 'M' (00 - 59)
                         format = "mm";
                         break;
 
-                    case DateTimeConv.NANOSECOND: //  = 'N' (000000000 - 999999999)
+                    case DateTimeConv.Nanosecond: //  = 'N' (000000000 - 999999999)
                         sb.Append(((dt - new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, dt.Millisecond)).Ticks * 100).ToString("D9"));
                         return;
 
-                    case DateTimeConv.MILLISECOND: //  = 'L' jdk, not in gnu (000 - 999)
+                    case DateTimeConv.Millisecond: //  = 'L' jdk, not in gnu (000 - 999)
                         format = "fff";
                         break;
 
-                    case DateTimeConv.MILLISECOND_SINCE_EPOCH: //  = 'Q' (0 - 99...?)
+                    case DateTimeConv.MillisecondSinceEpoch: //  = 'Q' (0 - 99...?)
                         TimeSpan ts = dt - Epoch;
                         sb.Append((long)ts.TotalMilliseconds);
                         return;
 
-                    case DateTimeConv.AM_PM: //  = 'p' (am or pm)
+                    case DateTimeConv.AmOrPm: //  = 'p' (am or pm)
                         format = "tt";
                         break;
 
-                    case DateTimeConv.SECONDS_SINCE_EPOCH: //  = 's' (0 - 99...?)
+                    case DateTimeConv.SecondsSinceEpoch: //  = 's' (0 - 99...?)
                         ts = dt - Epoch;
                         sb.Append((long)ts.TotalSeconds);
                         return;
 
-                    case DateTimeConv.SECOND: //  = 'S' (00 - 60 - leap second)
+                    case DateTimeConv.Second: //  = 'S' (00 - 60 - leap second)
                         format = "ss";
                         break;
 
-                    case DateTimeConv.TIME: //  = 'T' (24 hour hh:mm:ss)
+                    case DateTimeConv.Time: //  = 'T' (24 hour hh:mm:ss)
                         format = "HH:mm:ss";
                         break;
 
-                    case DateTimeConv.ZONE_NUMERIC: //  = 'z' (-1200 - +1200) - ls minus
+                    case DateTimeConv.ZoneNumeric: //  = 'z' (-1200 - +1200) - ls minus
                         // TODO: This is not exactly the same as the Java version
                         format = "%K";
                         break;
 
-                    case DateTimeConv.ZONE: //  = 'Z' (symbol)
+                    case DateTimeConv.Zone: //  = 'Z' (symbol)
                         // Can't do this directly from DateTime.
                         return;
 
                     // Date
-                    case DateTimeConv.NAME_OF_DAY_ABBREV: //  = 'a' 'a'
+                    case DateTimeConv.NameOfDayAbbrev: //  = 'a' 'a'
                         format = "ddd";
                         break;
 
-                    case DateTimeConv.NAME_OF_DAY: //  = 'A' 'A'
+                    case DateTimeConv.NameOfDay: //  = 'A' 'A'
                         format = "dddd";
                         break;
 
-                    case DateTimeConv.NAME_OF_MONTH_ABBREV: //  = 'b' 'b'
-                    case DateTimeConv.NAME_OF_MONTH_ABBREV_X: //  = 'h' -- same b
+                    case DateTimeConv.NameOfMonthAbbrev: //  = 'b' 'b'
+                    case DateTimeConv.NameOfMonthAbbrevX: //  = 'h' -- same b
                         format = "MMM";
                         break;
 
-                    case DateTimeConv.NAME_OF_MONTH: //  = 'B' 'B'
+                    case DateTimeConv.NameOfMonth: //  = 'B' 'B'
                         format = "MMMM";
                         break;
 
-                    case DateTimeConv.CENTURY: //  = 'C' (00 - 99)
+                    case DateTimeConv.Century: //  = 'C' (00 - 99)
                         sb.Append((dt.Year / 100).ToString("D2"));
                         return;
 
-                    case DateTimeConv.DAY_OF_MONTH_0: //  = 'd' (01 - 31)
+                    case DateTimeConv.DayOfMonth0: //  = 'd' (01 - 31)
                         format = "dd";
                         break;
 
-                    case DateTimeConv.DAY_OF_MONTH: //  = 'e' (1 - 31) -- like d
+                    case DateTimeConv.DayOfMonth: //  = 'e' (1 - 31) -- like d
                         format = "%d";
                         break;
 
-                    case DateTimeConv.DAY_OF_YEAR: //  = 'j' (001 - 366)
+                    case DateTimeConv.DayOfYear: //  = 'j' (001 - 366)
                         sb.Append(dt.DayOfYear.ToString("D3"));
                         return;
 
-                    case DateTimeConv.MONTH: //  = 'm' (01 - 12)
+                    case DateTimeConv.Month: //  = 'm' (01 - 12)
                         format = "MM";
                         break;
 
-                    case DateTimeConv.YEAR_2: //  = 'y' (00 - 99)
+                    case DateTimeConv.Year2: //  = 'y' (00 - 99)
                         format = "yy";
                         break;
 
-                    case DateTimeConv.YEAR_4: //  = 'Y' (0000 - 9999)
+                    case DateTimeConv.Year4: //  = 'Y' (0000 - 9999)
                         format = "yyyy";
                         break;
 
                     // Composites
-                    case DateTimeConv.TIME_12_HOUR: //  = 'r' (hh:mm:ss [AP]M)
+                    case DateTimeConv.Time12Hour: //  = 'r' (hh:mm:ss [AP]M)
                         format = "hh:mm:ss tt";
                         break;
 
-                    case DateTimeConv.TIME_24_HOUR: //  = 'R' (hh:mm same as %H:%M)
+                    case DateTimeConv.Time24Hour: //  = 'R' (hh:mm same as %H:%M)
                         format = "HH:mm";
                         break;
 
-                    case DateTimeConv.DATE_TIME: // 'c' (Sat Nov 04 12:02:33 EST 1999)
+                    case DateTimeConv.DateTime: // 'c' (Sat Nov 04 12:02:33 EST 1999)
                         format = "r";
                         break;
 
-                    case DateTimeConv.DATE: // 'D' (mm/dd/yy)
+                    case DateTimeConv.Date: // 'D' (mm/dd/yy)
                         format = "MM/dd/yy";
                         break;
 
-                    case DateTimeConv.ISO_STANDARD_DATE: //  'F' (%Y-%m-%d)
+                    case DateTimeConv.IsoStandardDate: //  'F' (%Y-%m-%d)
                         format = "yyyy-MM-dd";
                         break;
                 }
@@ -1142,7 +1142,7 @@ namespace clojure.lang
                     sb.Append(' ', padSpace);
             }
 
-            private void FailConversion(char conv, object arg)
+            private static void FailConversion(char conv, object arg)
             {
                 throw new IllegalFormatConversionException(conv, arg.GetType());
             }
@@ -1152,6 +1152,12 @@ namespace clojure.lang
             #region Object overrides
 
             public override string ToString()
+            {
+                return ToStringAux();
+            }
+
+            // Provide non-virtual to avoid warning from ctor=>CheckDateTime=>CheckLeftJustifyWidth
+            string ToStringAux()
             {
                 StringBuilder sb = new StringBuilder("%");
 
@@ -1372,80 +1378,80 @@ namespace clojure.lang
             }
         }
 
-        public static class DateTimeConv
+        static class DateTimeConv
         {
-            public const char HOUR_OF_DAY_0 = 'H'; // (00 - 23)
-            public const char HOUR_0 = 'I'; // (01 - 12)
-            public const char HOUR_OF_DAY = 'k'; // (0 - 23) -- like H
-            public const char HOUR = 'l'; // (1 - 12) -- like I
-            public const char MINUTE = 'M'; // (00 - 59)
-            public const char NANOSECOND = 'N'; // (000000000 - 999999999)
-            public const char MILLISECOND = 'L'; // jdk, not in gnu (000 - 999)
-            public const char MILLISECOND_SINCE_EPOCH = 'Q'; // (0 - 99...?)
-            public const char AM_PM = 'p'; // (am or pm)
-            public const char SECONDS_SINCE_EPOCH = 's'; // (0 - 99...?)
-            public const char SECOND = 'S'; // (00 - 60 - leap second)
-            public const char TIME = 'T'; // (24 hour hh:mm:ss)
-            public const char ZONE_NUMERIC = 'z'; // (-1200 - +1200) - ls minus?
-            public const char ZONE = 'Z'; // (symbol)
+            public const char HourOfDay0 = 'H'; // (00 - 23)
+            public const char Hour0 = 'I'; // (01 - 12)
+            public const char HourOfDay = 'k'; // (0 - 23) -- like H
+            public const char Hour = 'l'; // (1 - 12) -- like I
+            public const char Minute = 'M'; // (00 - 59)
+            public const char Nanosecond = 'N'; // (000000000 - 999999999)
+            public const char Millisecond = 'L'; // jdk, not in gnu (000 - 999)
+            public const char MillisecondSinceEpoch = 'Q'; // (0 - 99...?)
+            public const char AmOrPm = 'p'; // (am or pm)
+            public const char SecondsSinceEpoch = 's'; // (0 - 99...?)
+            public const char Second = 'S'; // (00 - 60 - leap second)
+            public const char Time = 'T'; // (24 hour hh:mm:ss)
+            public const char ZoneNumeric = 'z'; // (-1200 - +1200) - ls minus?
+            public const char Zone = 'Z'; // (symbol)
 
             // Date
-            public const char NAME_OF_DAY_ABBREV = 'a'; // 'a'
-            public const char NAME_OF_DAY = 'A'; // 'A'
-            public const char NAME_OF_MONTH_ABBREV = 'b'; // 'b'
-            public const char NAME_OF_MONTH = 'B'; // 'B'
-            public const char CENTURY = 'C'; // (00 - 99)
-            public const char DAY_OF_MONTH_0 = 'd'; // (01 - 31)
-            public const char DAY_OF_MONTH = 'e'; // (1 - 31) -- like d
-            public const char NAME_OF_MONTH_ABBREV_X = 'h'; // -- same b
-            public const char DAY_OF_YEAR = 'j'; // (001 - 366)
-            public const char MONTH = 'm'; // (01 - 12)
-            public const char YEAR_2 = 'y'; // (00 - 99)
-            public const char YEAR_4 = 'Y'; // (0000 - 9999)
+            public const char NameOfDayAbbrev = 'a'; // 'a'
+            public const char NameOfDay = 'A'; // 'A'
+            public const char NameOfMonthAbbrev = 'b'; // 'b'
+            public const char NameOfMonth = 'B'; // 'B'
+            public const char Century = 'C'; // (00 - 99)
+            public const char DayOfMonth0 = 'd'; // (01 - 31)
+            public const char DayOfMonth = 'e'; // (1 - 31) -- like d
+            public const char NameOfMonthAbbrevX = 'h'; // -- same b
+            public const char DayOfYear = 'j'; // (001 - 366)
+            public const char Month = 'm'; // (01 - 12)
+            public const char Year2 = 'y'; // (00 - 99)
+            public const char Year4 = 'Y'; // (0000 - 9999)
 
             // Composites
-            public const char TIME_12_HOUR = 'r'; // (hh:mm:ss [AP]M)
-            public const char TIME_24_HOUR = 'R'; // (hh:mm same as %H:%M)
-            public const char DATE_TIME = 'c'; // (Sat Nov 04 12:02:33 EST 1999)
-            public const char DATE = 'D'; // (mm/dd/yy)
-            public const char ISO_STANDARD_DATE = 'F'; // (%Y-%m-%d)
+            public const char Time12Hour = 'r'; // (hh:mm:ss [AP]M)
+            public const char Time24Hour = 'R'; // (hh:mm same as %H:%M)
+            public const char DateTime = 'c'; // (Sat Nov 04 12:02:33 EST 1999)
+            public const char Date = 'D'; // (mm/dd/yy)
+            public const char IsoStandardDate = 'F'; // (%Y-%m-%d)
 
 
-            public static bool IsValid(char c)
+            public static bool IsValid(char ch)
             {
-                switch (c)
+                switch (ch)
                 {
-                    case HOUR_OF_DAY_0:
-                    case HOUR_0:
-                    case HOUR_OF_DAY:
-                    case HOUR:
-                    case MINUTE:
-                    case NANOSECOND:
-                    case MILLISECOND:
-                    case MILLISECOND_SINCE_EPOCH:
-                    case AM_PM:
-                    case SECONDS_SINCE_EPOCH:
-                    case SECOND:
-                    case TIME:
-                    case ZONE_NUMERIC:
-                    case ZONE:
-                    case NAME_OF_DAY_ABBREV:
-                    case NAME_OF_DAY:
-                    case NAME_OF_MONTH_ABBREV:
-                    case NAME_OF_MONTH:
-                    case CENTURY:
-                    case DAY_OF_MONTH_0:
-                    case DAY_OF_MONTH:
-                    case NAME_OF_MONTH_ABBREV_X:
-                    case DAY_OF_YEAR:
-                    case MONTH:
-                    case YEAR_2:
-                    case YEAR_4:
-                    case TIME_12_HOUR:
-                    case TIME_24_HOUR:
-                    case DATE_TIME:
-                    case DATE:
-                    case ISO_STANDARD_DATE:
+                    case HourOfDay0:
+                    case Hour0:
+                    case HourOfDay:
+                    case Hour:
+                    case Minute:
+                    case Nanosecond:
+                    case Millisecond:
+                    case MillisecondSinceEpoch:
+                    case AmOrPm:
+                    case SecondsSinceEpoch:
+                    case Second:
+                    case Time:
+                    case ZoneNumeric:
+                    case Zone:
+                    case NameOfDayAbbrev:
+                    case NameOfDay:
+                    case NameOfMonthAbbrev:
+                    case NameOfMonth:
+                    case Century:
+                    case DayOfMonth0:
+                    case DayOfMonth:
+                    case NameOfMonthAbbrevX:
+                    case DayOfYear:
+                    case Month:
+                    case Year2:
+                    case Year4:
+                    case Time12Hour:
+                    case Time24Hour:
+                    case DateTime:
+                    case Date:
+                    case IsoStandardDate:
                         return true;
                     default:
                         return false;

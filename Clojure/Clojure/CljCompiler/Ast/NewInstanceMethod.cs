@@ -104,7 +104,7 @@ namespace clojure.lang.CljCompiler.Ast
             // (methodname [this-name args*] body...)
             // this-name might be nil
 
-            NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod)Compiler.METHOD.deref());
+            NewInstanceMethod method = new NewInstanceMethod(objx, (ObjMethod)Compiler.MethodVar.deref());
 
             Symbol dotName = (Symbol)RT.first(form);
             Symbol name;
@@ -146,10 +146,10 @@ namespace clojure.lang.CljCompiler.Ast
                 // PathNode pnade = new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
                 Var.pushThreadBindings(
                     RT.map(
-                        Compiler.METHOD, method,
-                        Compiler.LOCAL_ENV, Compiler.LOCAL_ENV.deref(),
-                        Compiler.LOOP_LOCALS, null,
-                        Compiler.NEXT_LOCAL_NUM, 0
+                        Compiler.MethodVar, method,
+                        Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
+                        Compiler.LoopLocalsVar, null,
+                        Compiler.NextLocalNumVar, 0
                     // CLEAR_PATH, pnode,
                     // CLEAR_ROOT, pnode,
                     // CLEAR_SITES, PersistentHashMap.EMPTY
@@ -273,7 +273,7 @@ namespace clojure.lang.CljCompiler.Ast
                     method._argTypes[i] = pTypes[i];
                 }
 
-                Compiler.LOOP_LOCALS.set(argLocals);
+                Compiler.LoopLocalsVar.set(argLocals);
                 method._name = name.Name;
                 method._methodMeta = GenInterface.ExtractAttributes(RT.meta(name));
                 method._parms = parms;

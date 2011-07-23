@@ -88,7 +88,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr thenExpr = Compiler.Analyze(pcon.SetAssign(false), RT.third(form));
                 Expr elseExpr = Compiler.Analyze(pcon.SetAssign(false), RT.fourth(form));
 
-                return new IfExpr((IPersistentMap)Compiler.SOURCE_SPAN.deref(), testExpr, thenExpr, elseExpr);
+                return new IfExpr((IPersistentMap)Compiler.SourceSpanVar.deref(), testExpr, thenExpr, elseExpr);
             }
         }
 

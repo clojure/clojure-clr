@@ -56,8 +56,8 @@ namespace clojure.lang.CljCompiler.Ast
             if (fexpr is VarExpr)
             {
                 Var fvar = ((VarExpr)fexpr).Var;
-                Var pvar = (Var)RT.get(fvar.meta(), Compiler.PROTOCOL_KEY);
-                if (pvar != null && Compiler.PROTOCOL_CALLSITES.isBound)
+                Var pvar = (Var)RT.get(fvar.meta(), Compiler.ProtocolKeyword);
+                if (pvar != null && Compiler.ProtocolCallsitesVar.isBound)
                 {
                     _isProtocol = true;
                     _siteIndex = Compiler.RegisterProtocolCallsite(fvar);
@@ -111,20 +111,20 @@ namespace clojure.lang.CljCompiler.Ast
             // TODO: DO we need the recur context here and below?
             Expr fexpr = Compiler.Analyze(pcon,form.first());
 
-            if ( fexpr is VarExpr && ((VarExpr)fexpr).Var.Equals(Compiler.INSTANCE))
+            if ( fexpr is VarExpr && ((VarExpr)fexpr).Var.Equals(Compiler.InstanceVar))
             {
                 if ( RT.second(form) is Symbol )
                 {
                     Type t = HostExpr.MaybeType(RT.second(form),false);
                     if ( t != null )
-                        return new InstanceOfExpr((string)Compiler.SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), t, Compiler.Analyze(pcon,RT.third(form)));
+                        return new InstanceOfExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), t, Compiler.Analyze(pcon,RT.third(form)));
                 }
             }
 
             if (fexpr is VarExpr && pcon.Rhc != RHC.Eval)
             {
                 Var v = ((VarExpr)fexpr).Var;
-                object arglists = RT.get(RT.meta(v), Compiler.ARGLISTS_KEY);
+                object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);
                 int arity = RT.count(form.next());
                 for (ISeq s = RT.seq(arglists); s != null; s = s.next())
                 {
@@ -142,10 +142,10 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            if (fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KEYWORD_CALLSITES.isBound)
+            if (fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KeywordCallsitesVar.isBound)
             {
                 Expr target = Compiler.Analyze(pcon, RT.second(form));
-                return new KeywordInvokeExpr((string)Compiler.SOURCE.deref(), (IPersistentMap)Compiler.SOURCE_SPAN.deref(), Compiler.TagOf(form), (KeywordExpr)fexpr, target);
+                return new KeywordInvokeExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), Compiler.TagOf(form), (KeywordExpr)fexpr, target);
             }
 
             IPersistentVector args = PersistentVector.EMPTY;
@@ -155,8 +155,8 @@ namespace clojure.lang.CljCompiler.Ast
             //if (args.count() > Compiler.MAX_POSITIONAL_ARITY)
             //    throw new ArgumentException(String.Format("No more than {0} args supported", Compiler.MAX_POSITIONAL_ARITY));
 
-            return new InvokeExpr((string)Compiler.SOURCE.deref(),
-                (IPersistentMap)Compiler.SOURCE_SPAN.deref(), //Compiler.GetSourceSpanMap(form),
+            return new InvokeExpr((string)Compiler.SourceVar.deref(),
+                (IPersistentMap)Compiler.SourceSpanVar.deref(), //Compiler.GetSourceSpanMap(form),
                 Compiler.TagOf(form),
                 fexpr,
                 args);
@@ -246,7 +246,7 @@ namespace clojure.lang.CljCompiler.Ast
             MethodInfo mi;
             Expression[] actualArgs;
 
-            if (args.Length <= Compiler.MAX_POSITIONAL_ARITY)
+            if (args.Length <= Compiler.MaxPositionalArity)
             {
                 mi = Compiler.Methods_IFn_invoke[args.Length];
                 actualArgs = args;
@@ -254,15 +254,15 @@ namespace clojure.lang.CljCompiler.Ast
             else
             {
                 // pick up the extended version.
-                mi = Compiler.Methods_IFn_invoke[Compiler.MAX_POSITIONAL_ARITY + 1];
-                Expression[] leftoverArgs = new Expression[args.Length - Compiler.MAX_POSITIONAL_ARITY];
-                Array.Copy(args, Compiler.MAX_POSITIONAL_ARITY, leftoverArgs, 0, args.Length - Compiler.MAX_POSITIONAL_ARITY);
+                mi = Compiler.Methods_IFn_invoke[Compiler.MaxPositionalArity + 1];
+                Expression[] leftoverArgs = new Expression[args.Length - Compiler.MaxPositionalArity];
+                Array.Copy(args, Compiler.MaxPositionalArity, leftoverArgs, 0, args.Length - Compiler.MaxPositionalArity);
 
                 Expression restArg = Expression.NewArrayInit(typeof(object), leftoverArgs);
 
-                actualArgs = new Expression[Compiler.MAX_POSITIONAL_ARITY + 1];
-                Array.Copy(args, 0, actualArgs, 0, Compiler.MAX_POSITIONAL_ARITY);
-                actualArgs[Compiler.MAX_POSITIONAL_ARITY] = restArg;
+                actualArgs = new Expression[Compiler.MaxPositionalArity + 1];
+                Array.Copy(args, 0, actualArgs, 0, Compiler.MaxPositionalArity);
+                actualArgs[Compiler.MaxPositionalArity] = restArg;
             }
 
             if (fn.Type != typeof(IFn))

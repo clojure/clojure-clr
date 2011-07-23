@@ -70,7 +70,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 ISeq forms = (ISeq)frms;
 
-                if (Util.equals(RT.first(forms), Compiler.DO))
+                if (Util.equals(RT.first(forms), Compiler.DoSym))
                     forms = RT.next(forms);
 
                 IPersistentVector exprs = PersistentVector.EMPTY;

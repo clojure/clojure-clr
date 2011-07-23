@@ -69,15 +69,15 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 ISeq form = (ISeq)frm;
 
-                IPersistentVector loopLocals = (IPersistentVector)Compiler.LOOP_LOCALS.deref();
+                IPersistentVector loopLocals = (IPersistentVector)Compiler.LoopLocalsVar.deref();
 
                 if (pcon.Rhc != RHC.Return || loopLocals == null)
                     throw new InvalidOperationException("Can only recur from tail position");
 
-                if (Compiler.IN_CATCH_FINALLY.deref() != null)
+                if (Compiler.InCatchFinallyVar.deref() != null)
                     throw new InvalidOperationException("Cannot recur from catch/finally.");
 
-                if (Compiler.NO_RECUR.deref() != null)
+                if (Compiler.NoRecurVar.deref() != null)
                     throw new InvalidOperationException("Cannot recur across try");
 
                 IPersistentVector args = PersistentVector.EMPTY;
@@ -118,8 +118,8 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
-                string source = (string)Compiler.SOURCE.deref();
-                IPersistentMap spanMap = (IPersistentMap)Compiler.SOURCE_SPAN.deref();  // Compiler.GetSourceSpanMap(form);
+                string source = (string)Compiler.SourceVar.deref();
+                IPersistentMap spanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();  // Compiler.GetSourceSpanMap(form);
 
                 return new RecurExpr(source, spanMap, loopLocals, args);
             }
@@ -140,7 +140,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
-            LabelTarget loopLabel = (LabelTarget)Compiler.LOOP_LABEL.deref();
+            LabelTarget loopLabel = (LabelTarget)Compiler.LoopLabelVar.deref();
             if (loopLabel == null)
                 throw new InvalidOperationException("Recur not in proper context.");
 

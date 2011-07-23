@@ -61,8 +61,8 @@ namespace clojure.lang.CljCompiler.Ast
                 if (RT.Length(sform) < 3)
                     throw new ArgumentException("Malformed member expression, expecting (. target member ... )");
 
-                string source = (string)Compiler.SOURCE.deref();
-                IPersistentMap spanMap = (IPersistentMap)Compiler.SOURCE_SPAN.deref();  // Compiler.GetSourceSpanMap(form);
+                string source = (string)Compiler.SourceVar.deref();
+                IPersistentMap spanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();  // Compiler.GetSourceSpanMap(form);
 
                 Symbol tag = Compiler.TagOf(sform);
 
@@ -476,8 +476,8 @@ namespace clojure.lang.CljCompiler.Ast
                 Symbol sym = (Symbol)form;
                 if (sym.Namespace == null) // if ns-qualified, can't be classname
                 {
-                    if (Util.equals(sym, Compiler.COMPILE_STUB_SYM.get()))
-                        return (Type)Compiler.COMPILE_STUB_CLASS.get();
+                    if (Util.equals(sym, Compiler.CompileStubSymVar.get()))
+                        return (Type)Compiler.CompileStubClassVar.get();
                     // TODO:  This uses Java  [whatever  notation.  Figure out what to do here.
                     if (sym.Name.IndexOf('.') > 0 || sym.Name[sym.Name.Length-1] == ']')
                         t = RT.classForName(sym.Name);

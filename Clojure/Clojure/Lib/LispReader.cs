@@ -977,7 +977,7 @@ namespace clojure.lang
             {
                 object ret;
                 if (Compiler.IsSpecial(form))
-                    ret = RT.list(Compiler.QUOTE, form);
+                    ret = RT.list(Compiler.QuoteSym, form);
                 else if (form is Symbol)
                 {
                     Symbol sym = (Symbol)form;
@@ -1018,7 +1018,7 @@ namespace clojure.lang
                         else
                             sym = Compiler.resolveSymbol(sym);
                     }             
-                    ret = RT.list(Compiler.QUOTE, sym);
+                    ret = RT.list(Compiler.QuoteSym, sym);
                 }
                 //else if (form is Unquote)  
                 //    return ((Unquote)form).Obj;
@@ -1059,7 +1059,7 @@ namespace clojure.lang
                         || form is String)
                     ret = form;
                 else
-                    ret = RT.list(Compiler.QUOTE, form);
+                    ret = RT.list(Compiler.QuoteSym, form);
 
                 if (form is IObj &&  RT.meta(form) != null)
                 {
@@ -1295,11 +1295,11 @@ namespace clojure.lang
                         object restsym = argsyms.valAt(-1);
                         if (restsym != null)
                         {
-                            args = args.cons(Compiler._AMP_);
+                            args = args.cons(Compiler.AmpersandSym);
                             args = args.cons(restsym);
                         }
                     }
-                    return RT.list(Compiler.FN, args, form);
+                    return RT.list(Compiler.FnSym, args, form);
                 }
                 finally
                 {
@@ -1334,7 +1334,7 @@ namespace clojure.lang
                 }
                 //object n = ReadAux(r, true, null, true);
                 object n = ReadAux(r);
-                if (n.Equals(Compiler._AMP_))
+                if (n.Equals(Compiler.AmpersandSym))
                     return registerArg(-1);
                 if (!Util.IsNumeric(n))
                     throw new ArgumentException("arg literal must be %, %& or %integer");
