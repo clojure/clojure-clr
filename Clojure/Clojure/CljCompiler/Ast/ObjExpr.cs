@@ -301,7 +301,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Misc support
 
-        public static string TrimGenID(string name)
+        public static string TrimGenId(string name)
         {
             int i = name.LastIndexOf("__");
             return i == -1 ? name : name.Substring(0, i);

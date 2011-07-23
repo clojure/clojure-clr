@@ -20,6 +20,7 @@
     -->
     <Recognized>
       <Word>clojure</Word>
+      <Word>primifs</Word>
     </Recognized>
     <Deprecated>
       <!-- 
@@ -61,6 +62,7 @@
   <Acronyms>
     <CasingExceptions>
       <!--<Acronym>Pv</Acronym>-->
+      <Acronym>Fn</Acronym>
     </CasingExceptions>
   </Acronyms>
 </Dictionary>

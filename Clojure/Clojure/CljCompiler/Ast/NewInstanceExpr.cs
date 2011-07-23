@@ -83,7 +83,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ISeq form = (ISeq)frm;
                 ObjMethod enclosingMethod = (ObjMethod)Compiler.METHOD.deref();
                 string baseName = enclosingMethod != null
-                    ? (ObjExpr.TrimGenID(enclosingMethod.Objx.Name) + "$")
+                    ? (ObjExpr.TrimGenId(enclosingMethod.Objx.Name) + "$")
                     : (Compiler.munge(Compiler.CurrentNamespace.Name.Name) + "$");
                 string simpleName = "reify__" + RT.nextID();
                 string className = baseName + simpleName;
