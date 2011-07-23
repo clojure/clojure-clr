@@ -46,9 +46,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            public Expr Parse(ParserContext pcon, object frm)
+            public Expr Parse(ParserContext pcon, object form)
             {
-                ISeq form = (ISeq)frm;
+                ISeq sform = (ISeq)form;
 
                 // form is one of:
                 //  (. x fieldname-sym)
@@ -58,25 +58,25 @@ namespace clojure.lang.CljCompiler.Ast
                 //  (. x (methodname-sym args?))
                 //  (. x (generic-m 
 
-                if (RT.Length(form) < 3)
+                if (RT.Length(sform) < 3)
                     throw new ArgumentException("Malformed member expression, expecting (. target member ... )");
 
                 string source = (string)Compiler.SOURCE.deref();
                 IPersistentMap spanMap = (IPersistentMap)Compiler.SOURCE_SPAN.deref();  // Compiler.GetSourceSpanMap(form);
 
-                Symbol tag = Compiler.TagOf(form);
+                Symbol tag = Compiler.TagOf(sform);
 
                 // determine static or instance
                 // static target must be symbol, either fully.qualified.Typename or Typename that has been imported
                  
-                Type t = HostExpr.MaybeType(RT.second(form), false);
+                Type t = HostExpr.MaybeType(RT.second(sform), false);
                 // at this point, t will be non-null if static
 
                 Expr instance = null;
                 if (t == null)
-                    instance = Compiler.Analyze(pcon.EvEx(),RT.second(form));
+                    instance = Compiler.Analyze(pcon.EvEx(),RT.second(sform));
 
-                bool isZeroArityCall = RT.Length(form) == 3 && (RT.third(form) is Symbol || RT.third(form) is Keyword);
+                bool isZeroArityCall = RT.Length(sform) == 3 && (RT.third(sform) is Symbol || RT.third(sform) is Keyword);
 
                 if (isZeroArityCall)
                 {
@@ -84,7 +84,7 @@ namespace clojure.lang.CljCompiler.Ast
                     FieldInfo finfo = null;
                     MethodInfo minfo = null;
 
-                    Symbol sym = (RT.third(form) is Keyword) ? ((Keyword)RT.third(form)).Symbol : (Symbol)RT.third(form);
+                    Symbol sym = (RT.third(sform) is Keyword) ? ((Keyword)RT.third(sform)).Symbol : (Symbol)RT.third(sform);
                     string fieldName = Compiler.munge(sym.Name);
                     // The JVM version does not have to worry about Properties.  It captures 0-arity methods under fields.
                     // We have to put in special checks here for this.
@@ -149,16 +149,16 @@ namespace clojure.lang.CljCompiler.Ast
                 //else
                 //    call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));
 
-                object fourth = RT.fourth(form);
+                object fourth = RT.fourth(sform);
                 if (fourth is ISeq && RT.first(fourth) is Symbol && ((Symbol)RT.first(fourth)).Equals(TYPE_ARGS))
                  {
                     // We have a type args supplied for a generic method call
                     // (. thing methodname (type-args type1 ... ) args ...)
                     typeArgs = ParseGenericMethodTypeArgs(RT.next(fourth));
-                    call = RT.listStar(RT.third(form), RT.next(RT.next(RT.next(RT.next(form)))));
+                    call = RT.listStar(RT.third(sform), RT.next(RT.next(RT.next(RT.next(sform)))));
                 }
                 else
-                    call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));
+                    call = RT.third(sform) is ISeq ? (ISeq)RT.third(sform) : RT.next(RT.next(sform));
 
                 if (!(RT.first(call) is Symbol))
                     throw new ArgumentException("Malformed member exception");

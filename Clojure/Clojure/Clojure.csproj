@@ -58,7 +58,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\4.0\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -129,6 +129,7 @@
     <Compile Include="CljCompiler\GenClass.cs" />
     <Compile Include="CljCompiler\GenInterface.cs" />
     <Compile Include="CljCompiler\MethodSignature.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Lib\ArityException.cs" />
     <Compile Include="Lib\AtomicBoolean.cs" />
     <Compile Include="Lib\BigDecimal.cs" />
