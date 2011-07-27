@@ -327,6 +327,7 @@ namespace clojure.lang
             //already qualified or classname?
             if (sym.Name.IndexOf('.') > 0)
                 return sym;
+
             if (sym.Namespace != null)
             {
                 Namespace ns = namespaceFor(sym);
@@ -334,18 +335,21 @@ namespace clojure.lang
                     return sym;
                 return Symbol.intern(ns.Name.Name, sym.Name);
             }
+
             Object o = CurrentNamespace.GetMapping(sym);
             if (o == null)
                 return Symbol.intern(CurrentNamespace.Name.Name, sym.Name);
-            else if (o is Type)
-                return Symbol.intern(null, Util.NameForType((Type)o));
-            else if (o is Var)
-            {
-                Var v = (Var)o;
-                return Symbol.intern(v.Namespace.Name.Name, v.Symbol.Name);
-            }
-            return null;
 
+            Type ot = o as Type;
+             if (ot != null)
+                return Symbol.intern(null, Util.NameForType(ot));
+
+             Var ov = o as Var;
+             if (ov != null)
+
+                return Symbol.intern(ov.Namespace.Name.Name, ov.Symbol.Name);
+
+            return null;
         }
 
 
@@ -522,10 +526,12 @@ namespace clojure.lang
                     if (internNew)
                         var = CurrentNamespace.intern(Symbol.intern(sym.Name));
                 }
-                else if (o is Var)
-                    var = (Var)o;
                 else
-                    throw new Exception(string.Format("Expecting var, but {0} is mapped to {1}", sym, o));
+                {
+                    var = o as Var;
+                    if (var == null)
+                        throw new Exception(string.Format("Expecting var, but {0} is mapped to {1}", sym, o));
+                }
             }
             if (var != null)
                 RegisterVar(var);
@@ -677,7 +683,9 @@ namespace clojure.lang
 
         internal static Type MaybePrimitiveType(Expr e)
         {
-            if (e is MaybePrimitiveExpr && e.HasClrType && ((MaybePrimitiveExpr)e).CanEmitPrimitive)
+            MaybePrimitiveExpr mpe = e as MaybePrimitiveExpr;
+
+            if (mpe != null && mpe.HasClrType && mpe.CanEmitPrimitive)
             {
                 Type t = e.ClrType;
                 if (Util.IsPrimitive(t))
@@ -776,11 +784,18 @@ namespace clojure.lang
         {
             if (tag == null)
                 return typeof(object);
+
             Type t = null;
-            if (tag is Symbol)
-                t = PrimType((Symbol)tag);
+
+            {
+                Symbol tagAsSym = tag as Symbol;
+                if (tagAsSym != null)
+                    t = PrimType(tagAsSym);
+            }
+
             if (t == null)
                 t = HostExpr.TagToType(tag);
+
             return t;
         }
 
@@ -875,7 +890,9 @@ namespace clojure.lang
             try
             {
                 form = Macroexpand(form);
-                if (form is IPersistentCollection && Util.equals(RT.first(form), DoSym))
+                bool formIsIpc = (form as IPersistentCollection) != null;
+
+                if (formIsIpc && Util.equals(RT.first(form), DoSym))
                 {
                     ISeq s = RT.next(form);
                     for (; RT.next(s) != null; s = RT.next(s))
@@ -883,21 +900,17 @@ namespace clojure.lang
                     return eval(RT.first(s));
                 }
                 else if ( (form is IType) ||
-                    (form is IPersistentCollection && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def"))) )
+                    (formIsIpc && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def"))))
                 {
                     ObjExpr objx = (ObjExpr)Analyze(pconExpr, RT.list(FnSym, PersistentVector.EMPTY, form), "eval__" + RT.nextID());
                     IFn fn = (IFn)objx.Eval();
                     return fn.invoke();
-                    //Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, "eval" + RT.nextID().ToString(), false);
-                    //return ast.Compile().Invoke();
                 }
                 else
                 {
                     Expr expr = Analyze(pconEval, form);
                     return expr.Eval();
-                    // In the Java version, one would actually eval.
-                    //Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
-                    //return ast.Compile().Invoke();
+
                 }
             }
             finally
@@ -918,8 +931,9 @@ namespace clojure.lang
         /// <remarks>Initial lowercase for core.clj compatibility</remarks>
         public static object macroexpand1(object form)
         {
-            return (form is ISeq)
-                ? MacroexpandSeq1((ISeq)form)
+            ISeq s = form as ISeq;
+            return s != null 
+                ? MacroexpandSeq1(s)
                 : form;
         }
 
@@ -954,9 +968,9 @@ namespace clojure.lang
             }
             else
             {
-                if (op is Symbol)
+                Symbol sym = op as Symbol;
+                if (sym != null)
                 {
-                    Symbol sym = (Symbol)op;
                     string sname = sym.Name;
                     // (.substring s 2 5) => (. x substring 2 5)
                     if (sname[0] == '.')
@@ -998,11 +1012,16 @@ namespace clojure.lang
 
         private static Var IsMacro(Object op)
         {
-            if (op is Symbol && ReferenceLocal((Symbol)op) != null)
+            Symbol opAsSym = op as Symbol;
+
+            if (opAsSym != null && ReferenceLocal(opAsSym) != null)
                 return null;
-            if (op is Symbol || op is Var)
+
+            Var opAsVar = op as Var;
+
+            if (opAsSym != null || opAsVar != null)
             {
-                Var v = (op is Var) ? (Var)op : LookupVar((Symbol)op, false);
+                Var v = opAsVar ??  LookupVar(opAsSym, false);
                 if (v != null && v.IsMacro)
                 {
                     if (v.Namespace != CurrentNamespace && !v.IsPublic)
@@ -1016,12 +1035,15 @@ namespace clojure.lang
         private static IFn IsInline(object op, int arity)
         {
             // Java:  	//no local inlines for now
-            if (op is Symbol && ReferenceLocal((Symbol)op) != null)
+
+            Symbol opAsSymbol = op as Symbol;
+            if (opAsSymbol != null && ReferenceLocal(opAsSymbol) != null)
                 return null;
 
-            if (op is Symbol || op is Var)
+            Var opAsVar = op as Var;
+            if (opAsSymbol != null || opAsVar != null)
             {
-                Var v = (op is Var) ? (Var)op : LookupVar((Symbol)op, false);
+                Var v = opAsVar ?? LookupVar(opAsSymbol, false);
                 if (v != null)
                 {
                     if (v.Namespace != CurrentNamespace && !v.isPublic)
@@ -1070,10 +1092,14 @@ namespace clojure.lang
         static object PreserveTag(ISeq src, object dst)
         {
             Symbol tag = TagOf(src);
-            if (tag != null && dst is IObj)
+            if (tag != null )
             {
-                IPersistentMap meta = RT.meta(dst);
-                return ((IObj)dst).withMeta((IPersistentMap)RT.assoc(meta, RT.TAG_KEY, tag));
+                IObj iobj = dst as IObj;
+                if (iobj != null)
+                {
+                    IPersistentMap meta = iobj.meta();
+                    return iobj.withMeta((IPersistentMap)RT.assoc(meta, RT.TAG_KEY, tag));
+                }
             }
             return dst;
         }
@@ -1089,10 +1115,19 @@ namespace clojure.lang
         internal static Symbol TagOf(object o)
         {
             object tag = RT.get(RT.meta(o), RT.TAG_KEY);
-            if (tag is Symbol)
-                return (Symbol)tag;
-            else if (tag is string)
-                return Symbol.intern(null, (String)tag);
+
+            {
+                Symbol sym = tag as Symbol;
+                if (sym != null)
+                    return sym;
+            }
+
+            {
+                string str = tag as String;
+                if (str != null)
+                    return Symbol.intern(null, str);
+            }
+
             return null;
         }
 
@@ -1196,8 +1231,7 @@ namespace clojure.lang
             //string sourcePath = sourceDirectory == null ? sourceName : sourceDirectory + "\\" + sourceName;
             string sourcePath = relativePath;
 
-            LineNumberingTextReader lntr =
-                (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);
+            LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
 
             GenContext context = GenContext.CreateWithExternalAssembly(relativePath, ".dll", true);
             GenContext evalContext = GenContext.CreateWithInternalAssembly("EvalForCompile", false);
@@ -1396,9 +1430,8 @@ namespace clojure.lang
             object eofVal = new object();
             object form;
 
-            LineNumberingTextReader lntr =
-                (rdr is LineNumberingTextReader) ? (LineNumberingTextReader)rdr : new LineNumberingTextReader(rdr);
-
+            LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
+ 
             Var.pushThreadBindings(RT.map(
                 //LOADER, RT.makeClassLoader(),
                 SourcePathVar, sourcePath,
@@ -1448,6 +1481,7 @@ namespace clojure.lang
             return Analyze(pcontext, form, null);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         public static Expr Analyze(ParserContext pcontext, object form, string name)
         {
             try
@@ -1541,20 +1575,23 @@ namespace clojure.lang
             }
 
             object o = Compiler.Resolve(symbol);
-            if (o is Var)
+
+           Symbol oAsSymbol;
+           Var oAsVar = o as Var;
+ 
+            if (oAsVar != null)
             {
-                Var v = (Var)o;
-                if (IsMacro(v) != null)
-                    throw new Exception("Can't take the value of a macro: " + v);
-                if (RT.booleanCast(RT.get(v.meta(), RT.CONST_KEY)))
-                    return Analyze(new ParserContext(RHC.Expression), RT.list(QuoteSym, v.get()));
-                RegisterVar(v);
-                return new VarExpr(v, tag);
+                if (IsMacro(oAsVar) != null)
+                    throw new Exception("Can't take the value of a macro: " + oAsVar);
+                if (RT.booleanCast(RT.get(oAsVar.meta(), RT.CONST_KEY)))
+                    return Analyze(new ParserContext(RHC.Expression), RT.list(QuoteSym, oAsVar.get()));
+                RegisterVar(oAsVar);
+                return new VarExpr(oAsVar, tag);
             }
             else if (o is Type)
                 return new ConstantExpr(o);
-            else if (o is Symbol)
-                return new UnresolvedVarExpr((Symbol)o);
+            else if ( (oAsSymbol = o as Symbol) != null)
+                return new UnresolvedVarExpr(oAsSymbol);
 
             throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));
         }

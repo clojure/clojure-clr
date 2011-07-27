@@ -523,10 +523,10 @@ namespace clojure.lang
 
         public override bool Equals(object obj)
         {
-            if (!(obj is BigDecimal))
+            BigDecimal d = obj as BigDecimal;
+            if (d == null)
                 return false;
 
-            BigDecimal d = (BigDecimal)obj;
             return Equals(d);
         }
 

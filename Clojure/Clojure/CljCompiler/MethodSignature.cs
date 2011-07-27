@@ -156,10 +156,11 @@ namespace clojure.lang.CljCompiler
 
         public int CompareTo(object obj)
         {
-            if (!(obj is MethodSignature))
+            MethodSignature sig = obj as MethodSignature;
+            if ( sig == null )
                 throw new ArgumentException("Must compare to a Sig");
 
-            return CompareTo((MethodSignature)obj);
+            return CompareTo(sig);
         }
 
         #endregion
@@ -168,9 +169,11 @@ namespace clojure.lang.CljCompiler
 
         public override bool Equals(object obj)
         {
-            if (!(obj is MethodSignature))
+            MethodSignature sig = obj as MethodSignature;
+            if (sig == null)
                 return false;
-            return CompareTo((MethodSignature)obj) == 0;
+
+            return CompareTo(sig) == 0;
         }
 
         public override int GetHashCode()

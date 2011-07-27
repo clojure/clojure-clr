@@ -70,7 +70,9 @@ namespace clojure.lang.CljCompiler.Ast
                     constant = false;
             }
             Expr ret = new SetExpr(keys);
-            if (form is IObj && ((IObj)form).meta() != null)
+            IObj iobjForm = form as IObj;
+
+            if (iobjForm != null  && iobjForm.meta() != null)
                 return Compiler.OptionallyGenerateMetaInit(pcon, form, ret);
             else if (constant)
             {

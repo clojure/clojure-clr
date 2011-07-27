@@ -287,64 +287,78 @@ namespace clojure.lang
 
         static BigInt toBigInt(Object x)
         {
-            if (x is BigInt)
-                return (BigInt)x;
-            if (x is BigInteger)
-                return BigInt.fromBigInteger((BigInteger)x);
-            else
-                return BigInt.fromLong(Util.ConvertToLong(x));
+            BigInt bigInt = x as BigInt;
+            if (bigInt != null)
+                return bigInt;
+
+            BigInteger bigInteger = x as BigInteger;
+            if (bigInteger != null)
+                return BigInt.fromBigInteger(bigInteger);
+
+            return BigInt.fromLong(Util.ConvertToLong(x));
         }
 
         static BigInteger toBigInteger(object x)
         {
-            if (x is BigInteger)
-                return (BigInteger)x;
-            else if (x is BigInt)
-                return ((BigInt)x).toBigInteger();
-            else
-                return BigInteger.Create(Util.ConvertToLong(x));
+            BigInteger bigInteger = x as BigInteger;
+            if (bigInteger != null)
+                return bigInteger;
+
+            BigInt bigInt = x as BigInt;
+            if ( bigInt != null )
+                return bigInt.toBigInteger();
+
+            return BigInteger.Create(Util.ConvertToLong(x));
         }
 
         static BigDecimal toBigDecimal(object x)
         {
-            if (x is BigDecimal)
-                return (BigDecimal)x;
-            else if (x is BigInt)
+            BigDecimal bigDec = x as BigDecimal;
+            if (bigDec != null)
+                return bigDec;
+
+            BigInt bigInt = x as BigInt;
+            if (bigInt != null)
             {
-                BigInt bi = (BigInt)x;
-                if (bi.Bipart == null)
-                    return BigDecimal.Create(bi.Lpart);
+                if (bigInt.Bipart == null)
+                    return BigDecimal.Create(bigInt.Lpart);
                 else
-                    return BigDecimal.Create(bi.Bipart);
+                    return BigDecimal.Create(bigInt.Bipart);
             }
-            else if (x is BigInteger)
-                return BigDecimal.Create((BigInteger)x);
-            else if (x is double)
+ 
+            BigInteger bigInteger = x as BigInteger;
+            if (bigInteger != null)
+                return BigDecimal.Create(bigInteger);
+
+            if (x is double)
                 return BigDecimal.Create((double)x);
-            else if (x is float)
+
+            if (x is float)
                 return BigDecimal.Create((double)(float)x);
-            else if (x is Ratio)
-            {
-                Ratio r = (Ratio)x;
+            
+            Ratio r = x as Ratio;
+            if ( r != null )
                 return (BigDecimal)divide(BigDecimal.Create(r.numerator), r.denominator);
-            }
-            else
-                return BigDecimal.Create(Util.ConvertToLong(x));
+           
+            return BigDecimal.Create(Util.ConvertToLong(x));
         }
 
         public static Ratio toRatio(object x)
         {
-            if (x is Ratio)
-                return (Ratio)x;
-            else if (x is BigDecimal)
+            Ratio r = x as Ratio;
+            if (r != null)
+                return r;
+
+            BigDecimal bx = x as BigDecimal;
+            if ( bx != null )
             {
-                BigDecimal bx = (BigDecimal)x;
                 int exp = bx.Exponent;
                 if (exp >= 0)
                     return new Ratio(bx.ToBigInteger(), BigInteger.ONE);
                 else
                     return new Ratio(bx.MovePointRight(-exp).ToBigInteger(), BigInteger.TEN.Power(-exp));
             }
+
             return new Ratio(toBigInteger(x), BigInteger.ONE);
         }
 
@@ -352,18 +366,20 @@ namespace clojure.lang
         {
             if (x is float)                              
                 return rationalize(BigDecimal.Create((float)x));
-            else if (x is double)                        
+
+            if (x is double)                        
                 return rationalize(BigDecimal.Create((double)x));
-            else if (x is BigDecimal)
+
+            BigDecimal bx = (BigDecimal)x;
+            if (bx != null)
             {
-                BigDecimal bx = (BigDecimal)x;
                 int exp = bx.Exponent;
                 if (exp >= 0)
                     return BigInt.fromBigInteger(bx.ToBigInteger());
                 else
-                    //return divide(bx.movePointRight(scale).toBigInteger(), BigIntegerTen.pow(scale));
                     return divide(bx.MovePointRight(-exp).ToBigInteger(), BigInteger.TEN.Power(-exp));
             }
+
             return x;
         }
 
@@ -1162,6 +1178,8 @@ namespace clojure.lang
                 return toBigDecimal(x).CompareTo(toBigDecimal(y)) < 0;
             }
 
+
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
             public override object negate(object x)
             {
                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();

@@ -76,13 +76,16 @@ namespace clojure.lang
         {
             if (this == obj)
                 return true;
-            if (obj is BigInt)
+
+            BigInt bi = obj as BigInt;
+
+            if (bi != null)
             {
-                BigInt o = (BigInt)obj;
                 if (_bipart == null)
-                    return o._bipart == null && _lpart == o._lpart;
-                return o._bipart != null && _bipart.Equals(o._bipart);
+                    return bi._bipart == null && _lpart == bi._lpart;
+                return bi._bipart != null && _bipart.Equals(bi._bipart);
             }
+
             return false;
         }
 

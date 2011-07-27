@@ -344,6 +344,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         private Expression GenTestForInts(ObjExpr objx, GenContext context, Type primExprType, Expr test, bool genUnboxed)
         {
             Expression condCode;
@@ -392,8 +393,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         private Expression GenResult(ObjExpr objx, GenContext context, Expr expr, bool genUnboxed, Type retType)
         {
-            Expression result = genUnboxed && expr is MaybePrimitiveExpr
-                ? ((MaybePrimitiveExpr)expr).GenCodeUnboxed(RHC.Expression, objx, context)
+            MaybePrimitiveExpr mbExpr = expr as MaybePrimitiveExpr;
+            Expression result = genUnboxed && mbExpr != null
+                ? mbExpr.GenCodeUnboxed(RHC.Expression, objx, context)
                 : expr.GenCode(RHC.Expression, objx, context);
 
             if (result.Type != retType)

@@ -58,8 +58,9 @@ namespace clojure.lang
         /// <returns>The computed valued (if a delay); the object itself (if not a delay).</returns>
         public static object force(object x)
         {
-            return (x is Delay)
-                ? ((Delay)x).deref()
+            Delay delay = x as Delay;
+            return delay != null
+                ? delay.deref()
                 : x;
         }
 

@@ -863,9 +863,9 @@ namespace clojure.lang
             {
                 _meta = meta;
 
-                if (v is SubVector)
+                SubVector sv = v as SubVector;
+                if (sv != null)
                 {
-                    SubVector sv = (SubVector)v;
                     start += sv._start;
                     end += sv._start;
                     v = sv._v;

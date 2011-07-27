@@ -95,8 +95,10 @@ namespace clojure.lang.CljCompiler.Ast
                 rform = RT.next(rform);
 
                 ObjExpr ret = Build(interfaces, null, null, className, Symbol.intern(className), null, rform,frm);
-                if (frm is IObj && ((IObj)frm).meta() != null)
-                    return new MetaExpr(ret, MapExpr.Parse(pcon.EvEx(),((IObj)frm).meta()));
+                IObj iobj = frm as IObj;
+
+                if (iobj != null && iobj.meta() != null)
+                    return new MetaExpr(ret, MapExpr.Parse(pcon.EvEx(),iobj.meta()));
                 else
                     return ret;
             }

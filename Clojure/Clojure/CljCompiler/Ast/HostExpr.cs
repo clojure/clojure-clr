@@ -202,17 +202,19 @@ namespace clojure.lang.CljCompiler.Ast
                 HostArg.ParameterType paramType = HostArg.ParameterType.Standard;
                 LocalBinding lb = null;
 
-                if (arg is ISeq)
+                ISeq argAsSeq = arg as ISeq;
+                if (argAsSeq != null)
                 {
-                    Symbol op = RT.first(arg) as Symbol;
+                    Symbol op = RT.first(argAsSeq) as Symbol;
                     if (op != null && op.Equals(BY_REF))
                     {
-                        if (RT.Length((ISeq)arg) != 2)
-                            throw new ArgumentException("Wrong number of arguments to {0}", ((Symbol)op).Name);
+                        if (RT.Length(argAsSeq) != 2)
+                            throw new ArgumentException("Wrong number of arguments to {0}", op.Name);
 
-                        object localArg = RT.second(arg);
-                        if (!(localArg is Symbol) || (lb = Compiler.ReferenceLocal((Symbol)localArg)) == null)
-                            throw new ArgumentException("Argument to {0} must be a local variable.", ((Symbol)op).Name);
+                        object localArg = RT.second(argAsSeq);
+                        Symbol symLocalArg = localArg as Symbol;
+                        if (symLocalArg == null || (lb = Compiler.ReferenceLocal(symLocalArg)) == null)
+                            throw new ArgumentException("Argument to {0} must be a local variable.", op.Name);
 
                         paramType = HostArg.ParameterType.ByRef;
 
@@ -249,8 +251,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Reflection helpers
 
-
-
         internal static Expression[] GenTypedArgs(ObjExpr objx, GenContext context, ParameterInfo[] parms, List<HostArg> args)
         {
             Expression[] exprs = new Expression[parms.Length];
@@ -267,6 +267,8 @@ namespace clojure.lang.CljCompiler.Ast
             return exprs;
         }
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         internal static Expression GenTypedArg(ObjExpr objx, GenContext context, Type paramType, Expr arg)
         {
             Type primt = Compiler.MaybePrimitiveType(arg);
@@ -465,6 +467,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Tags and types
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         public static Type MaybeType(object form, bool stringOk)
         {
             if (form is Type)
@@ -510,9 +513,10 @@ namespace clojure.lang.CljCompiler.Ast
         internal static Type TagToType(object tag)
         {
             Type t = MaybeType(tag, true);
-            if (tag is Symbol)
+
+            Symbol sym = tag as Symbol;
+            if (sym != null)
             {
-                Symbol sym = (Symbol)tag;
                 if (sym.Namespace == null) // if ns-qualified, can't be classname
                 {
                     switch (sym.Name)

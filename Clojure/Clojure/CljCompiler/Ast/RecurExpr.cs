@@ -164,30 +164,31 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     tempVar = Expression.Parameter(primt, "__local__" + i);
 
+                    MaybePrimitiveExpr mpeArg = arg as MaybePrimitiveExpr;
                     Type pt = Compiler.MaybePrimitiveType(arg);
                     if (pt == primt)
                     {
-                        valExpr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                        valExpr = mpeArg.GenCodeUnboxed(RHC.Expression, objx, context);
                         // do nothing
                     }
                     else if (primt == typeof(long) && pt == typeof(int))
                     {
-                        valExpr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                        valExpr = mpeArg.GenCodeUnboxed(RHC.Expression, objx, context);
                         valExpr = Expression.Convert(valExpr, primt);
                     }
                     else if (primt == typeof(double) && pt == typeof(float))
                     {
-                        valExpr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                        valExpr = mpeArg.GenCodeUnboxed(RHC.Expression, objx, context);
                         valExpr = Expression.Convert(valExpr, primt);
                     }
                     else if (primt == typeof(int) && pt == typeof(long))
                     {
-                        valExpr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                        valExpr = mpeArg.GenCodeUnboxed(RHC.Expression, objx, context);
                         valExpr = Expression.Convert(valExpr, primt);
                     }
                     else if (primt == typeof(float) && pt == typeof(double))
                     {
-                        valExpr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
+                        valExpr = mpeArg.GenCodeUnboxed(RHC.Expression, objx, context);
                         valExpr = Expression.Convert(valExpr, primt);
                     }
                     else

@@ -71,7 +71,8 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             Expr ret = new VectorExpr(args);
-            if ( form is IObj && ((IObj)form).meta() != null )
+            IObj iobjForm = form as IObj;
+            if (iobjForm != null && iobjForm.meta() != null)
                 return Compiler.OptionallyGenerateMetaInit(pcon,form, ret);
             else if ( constant )
             {

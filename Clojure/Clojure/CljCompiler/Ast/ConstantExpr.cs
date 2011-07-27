@@ -71,6 +71,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
+
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
             public Expr Parse(ParserContext pcon, object form)
             {
                 object v = RT.second(form);

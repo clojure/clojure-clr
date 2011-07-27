@@ -541,6 +541,8 @@ namespace clojure.lang
                 : MakeRed(t.Key, t.Val, t.Left, del);
         }
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         static Node Append(Node left, Node right)
         {
             if (left == null)
@@ -605,9 +607,10 @@ namespace clojure.lang
 
         static Node LeftBalance(object key, object val, Node ins, Node right)
         {
-            if (ins is Red && ins.Left is Red)
+            bool insIsRed = (ins as Red) != null;
+            if (insIsRed && ins.Left is Red)
                 return MakeRed(ins.Key, ins.Val, ins.Left.Blacken(), MakeBlack(key, val, ins.Right, right));
-            else if (ins is Red && ins.Right is Red)
+            else if (insIsRed && ins.Right is Red)
                 return MakeRed(ins.Right.Key, ins.Right.Val,
                             MakeBlack(ins.Key, ins.Val, ins.Left, ins.Right.Left),
                             MakeBlack(key, val, ins.Right.Right, right));
@@ -617,9 +620,10 @@ namespace clojure.lang
 
         static Node RightBalance(object key, object val, Node left, Node ins)
         {
-            if (ins is Red && ins.Right is Red)
+            bool insIsRed = (ins as Red) != null;
+            if (insIsRed && ins.Right is Red)
                 return MakeRed(ins.Key, ins.Val, MakeBlack(key, val, left, ins.Left), ins.Right.Blacken());
-            else if (ins is Red && ins.Left is Red)
+            else if (insIsRed && ins.Left is Red)
                 return MakeRed(ins.Left.Key, ins.Left.Val,
                            MakeBlack(key, val, left, ins.Left.Left),
                            MakeBlack(ins.Key, ins.Val, ins.Left.Right, ins.Right));

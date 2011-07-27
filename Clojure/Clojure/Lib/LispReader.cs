@@ -191,10 +191,14 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                if (isRecursive || !(r is LineNumberingTextReader))
+                if (isRecursive)
                     throw;
-                LineNumberingTextReader rdr = r as LineNumberingTextReader;
-                throw new ReaderException(rdr.LineNumber, e);
+
+                LineNumberingTextReader lntr = r as LineNumberingTextReader;
+                if (lntr == null)
+                    throw;
+
+                throw new ReaderException(lntr.LineNumber, e);
             }
         }
 
@@ -284,10 +288,9 @@ namespace clojure.lang
         
         public static List<Object> readDelimitedList(char delim, PushbackTextReader r, bool isRecursive)
         {
-            int firstLine = (r is LineNumberingTextReader)
-                ? ((LineNumberingTextReader)r).LineNumber
-                : -1;
-
+            LineNumberingTextReader lntr = r as LineNumberingTextReader;
+            int firstLine = lntr != null  ? lntr.LineNumber : -1;
+       
             List<Object> a = new List<object>();
 
             for (; ; )

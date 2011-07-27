@@ -110,9 +110,10 @@ namespace clojure.lang
             /// <returns>A new list.</returns>
             protected override object doInvoke(object args)
             {
-                if (args is IArraySeq)
+                IArraySeq ias = args as IArraySeq;
+                if (ias != null)
                 {
-                    object[] argsarray = (object[])((IArraySeq)args).ToArray();
+                    object[] argsarray = (object[])ias.ToArray();
                     IPersistentList ret = EMPTY;
                     for (int i = argsarray.Length - 1; i >= 0; i--)
                         ret = (IPersistentList)ret.cons(argsarray[i]);

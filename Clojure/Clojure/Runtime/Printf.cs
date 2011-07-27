@@ -543,11 +543,12 @@ namespace clojure.lang
 
             private void PrintString(StringBuilder sb, object arg)
             {
+                IFormattable f;
+
                 if (arg == null)
                     PrintString(sb, "null");
-                else if (arg is IFormattable)
+                else if ( (f = arg as IFormattable) != null)
                 {
-                    IFormattable f = (IFormattable)arg;
                     string s = f.ToString();
                     // TODO: figure out what formatting spec to use for strings)
                     PrintString(sb, s);
@@ -745,10 +746,13 @@ namespace clojure.lang
                         break;
 
                     default:
-                        if (arg is BigInteger)
-                            PrintInteger(sb, (BigInteger)arg);
-                        else
-                            FailConversion(_conversion, arg);
+                        {
+                            BigInteger bi = arg as BigInteger;
+                            if (bi != null)
+                                PrintInteger(sb, bi);
+                            else
+                                FailConversion(_conversion, arg);
+                        }
                         break;
                 }
             }

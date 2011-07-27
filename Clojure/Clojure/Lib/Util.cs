@@ -82,8 +82,10 @@ namespace clojure.lang
 
         public static bool pcequiv(object k1, object k2)
         {
-            if (k1 is IPersistentCollection)
-                return ((IPersistentCollection)k1).equiv(k2);
+            IPersistentCollection ipc1 = k1 as IPersistentCollection;
+
+            if (ipc1 != null)
+                return ipc1.equiv(k2);
             return ((IPersistentCollection)k2).equiv(k1);
         }
 
@@ -553,6 +555,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         public static char ConvertToChar(object o)
         {
             if (o is Char)

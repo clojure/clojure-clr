@@ -634,18 +634,22 @@ namespace clojure.lang
             for (ISeq s = seq == null ? null : seq.seq(); s != null; s = s.next())
             {
                 Object o = s.first();
-                if (o is Type)
-                    types.Add((Type)o);
+                Type oAsType = o as Type;
+                if (oAsType != null )
+                    types.Add(oAsType);
                 else if (o is ISeq)
                 {
                     object first = RT.first(o);
-                    object second = RT.second(o);
-                    if (!(first is Symbol) || !((Symbol)first).Equals(HostExpr.BY_REF))
+                   Symbol firstAsSymbol = first as Symbol;
+                    if (firstAsSymbol == null || !firstAsSymbol.Equals(HostExpr.BY_REF))
                         throw new ArgumentException("First element of parameter definition is not by-ref");
-                    if (!(second is Type))
+
+                    Type secondAsType = RT.second(o) as Type;
+ 
+                    if (secondAsType == null)
                         throw new ArgumentException("by-ref must be paired with a type");
-                    Type t = (Type)second;                    
-                    types.Add(t.MakeByRefType());
+                   
+                    types.Add(secondAsType.MakeByRefType());
                 }
                 else
                     throw new ArgumentException("Bad parameter definition");

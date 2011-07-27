@@ -22,6 +22,11 @@
       <Word>clojure</Word>
       <Word>primifs</Word>
       <Word>idx</Word>
+      <Word>arity</Word>
+      <Word>clj</Word>
+      <Word>dyn</Word>
+      <Word>assy</Word>
+      <Word>signum</Word>
     </Recognized>
     <Deprecated>
       <!-- 

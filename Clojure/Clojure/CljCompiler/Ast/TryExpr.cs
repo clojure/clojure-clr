@@ -122,7 +122,8 @@ namespace clojure.lang.CljCompiler.Ast
                 for (ISeq fs = form.next(); fs != null; fs = fs.next())
                 {
                     object f = fs.first();
-                    object op = (f is ISeq) ? ((ISeq)f).first() : null;
+                    ISeq fSeq = f as ISeq;
+                    object op = fSeq != null ? fSeq.first() : null;
                     if (!Util.equals(op, Compiler.CatchSym) && !Util.equals(op, Compiler.FinallySym))
                     {
                         if (caught)

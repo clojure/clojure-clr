@@ -48,24 +48,27 @@ namespace clojure.lang
         public ITransientMap conj(object val)
         {
             EnsureEditable();
-            if (val is IMapEntry)
-            {
-                IMapEntry e = (IMapEntry)val;
 
-                return assoc(e.key(), e.val());
+            {
+                IMapEntry e = val as IMapEntry;
+                if (e != null)
+                    return assoc(e.key(), e.val());
             }
-            else if (val is DictionaryEntry)
+
+            if (val is DictionaryEntry)
             {
                 DictionaryEntry de = (DictionaryEntry)val;
                 return assoc(de.Key, de.Value);
             }
 
-            else if (val is IPersistentVector)
             {
-                IPersistentVector v = (IPersistentVector)val;
-                if (v.count() != 2)
-                    throw new ArgumentException("Vector arg to map conj must be a pair");
-                return assoc(v.nth(0), v.nth(1));
+                IPersistentVector v = val as IPersistentVector;
+                if (v != null)
+                {
+                    if (v.count() != 2)
+                        throw new ArgumentException("Vector arg to map conj must be a pair");
+                    return assoc(v.nth(0), v.nth(1));
+                }
             }
 
             // TODO: also handle KeyValuePair?

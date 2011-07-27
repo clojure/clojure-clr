@@ -66,10 +66,12 @@ namespace clojure.lang.CljCompiler.Ast
                 if (RT.Length(form) != 3)
                     throw new ArgumentException("Malformed assignment, expecting (set! target val)");
                 Expr target = Compiler.Analyze(new ParserContext(RHC.Expression, true), RT.second(form));
-                if (!(target is AssignableExpr))
+
+                AssignableExpr ae = target as AssignableExpr;
+
+                if (ae == null)
                     throw new ArgumentException("Invalid assignment target");
-                return new AssignExpr((AssignableExpr)target,
-                    Compiler.Analyze(pcon.SetRhc(RHC.Expression),RT.third(form)));
+                return new AssignExpr(ae, Compiler.Analyze(pcon.SetRhc(RHC.Expression),RT.third(form)));
             }
         }
 

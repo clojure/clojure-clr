@@ -877,6 +877,8 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         protected Expression GenerateValue(object value)
         {
             bool partial = true;

@@ -53,9 +53,11 @@ namespace clojure.lang.CljCompiler.Ast
             _fexpr = fexpr;
             _args = args;
 
-            if (fexpr is VarExpr)
+            VarExpr varFexpr = fexpr as VarExpr;
+
+            if (varFexpr != null)
             {
-                Var fvar = ((VarExpr)fexpr).Var;
+                Var fvar = varFexpr.Var;
                 Var pvar = (Var)RT.get(fvar.meta(), Compiler.ProtocolKeyword);
                 if (pvar != null && Compiler.ProtocolCallsitesVar.isBound)
                 {
@@ -83,7 +85,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            _tag = tag ?? (fexpr is VarExpr ? ((VarExpr)fexpr).Tag : null);
+            _tag = tag ?? (varFexpr != null ? varFexpr.Tag : null);
         }
 
         #endregion
@@ -110,8 +112,9 @@ namespace clojure.lang.CljCompiler.Ast
 
             // TODO: DO we need the recur context here and below?
             Expr fexpr = Compiler.Analyze(pcon,form.first());
+            VarExpr varFexpr = fexpr as VarExpr;
 
-            if ( fexpr is VarExpr && ((VarExpr)fexpr).Var.Equals(Compiler.InstanceVar))
+            if (varFexpr != null && varFexpr.Var.Equals(Compiler.InstanceVar))
             {
                 if ( RT.second(form) is Symbol )
                 {
@@ -121,9 +124,9 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            if (fexpr is VarExpr && pcon.Rhc != RHC.Eval)
+            if (varFexpr != null && pcon.Rhc != RHC.Eval)
             {
-                Var v = ((VarExpr)fexpr).Var;
+                Var v = varFexpr.Var;
                 object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);
                 int arity = RT.count(form.next());
                 for (ISeq s = RT.seq(arglists); s != null; s = s.next())
@@ -142,10 +145,12 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            if (fexpr is KeywordExpr && RT.count(form) == 2 && Compiler.KeywordCallsitesVar.isBound)
+            KeywordExpr kwFexpr = fexpr as KeywordExpr;
+
+            if (kwFexpr != null && RT.count(form) == 2 && Compiler.KeywordCallsitesVar.isBound)
             {
                 Expr target = Compiler.Analyze(pcon, RT.second(form));
-                return new KeywordInvokeExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), Compiler.TagOf(form), (KeywordExpr)fexpr, target);
+                return new KeywordInvokeExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), Compiler.TagOf(form), kwFexpr, target);
             }
 
             IPersistentVector args = PersistentVector.EMPTY;

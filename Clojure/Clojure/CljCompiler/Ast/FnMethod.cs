@@ -309,11 +309,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static char TypeChar(object x)
         {
-            Type t = null;
-            if (x is Type)
-                t = (Type)x;
-            else if (x is Symbol)
-                t = Compiler.PrimType((Symbol)x);
+            //Type t = null;
+            //if (x is Type)
+            //    t = (Type)x;
+            //else if (x is Symbol)
+            //    t = Compiler.PrimType((Symbol)x);
+            Type t = x as Type ?? Compiler.PrimType(x as Symbol);
 
             if (t == null || !t.IsPrimitive)
                 return 'O';
