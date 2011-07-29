@@ -69,36 +69,49 @@ namespace clojure.lang
             if (v == obj)
                 return true;
 
-            if (obj is IList || obj is IPersistentVector)
-            {
-                IList ma = obj as IList;
+            IList ilist = obj as IList;
 
-                if (ma.Count != v.count() || ma.GetHashCode() != v.GetHashCode())
+            if (ilist != null)
+            {
+                if (ilist.Count != v.count())   // THis test in the JVM code can't be right:  || ma.GetHashCode() != v.GetHashCode())
                     return false;
 
                 for (int i = 0; i < v.count(); i++)
                 {
-                    if (!Util.equals(v.nth(i), ma[i]))
+                    if (!Util.equals(v.nth(i), ilist[i]))
                         return false;
                 }
                 return true;
             }
-            else
+
+            IPersistentVector ipv = obj as IPersistentVector;
+
+            if (ipv != null)
             {
-                if (!(obj is Sequential))
+                if (ipv.count() != v.count())   // THis test in the JVM code can't be right:  || ma.GetHashCode() != v.GetHashCode())
                     return false;
 
-                ISeq ms = RT.seq(obj);
-
-
-                for (int i = 0; i < v.count(); i++, ms = ms.next())
+                for (int i = 0; i < v.count(); i++)
                 {
-                    if (ms == null || !Util.equals(v.nth(i), ms.first()))
+                    if (!Util.equals(v.nth(i), ipv.nth(i)))
                         return false;
                 }
-                if (ms != null)
+                return true;
+            }
+
+            if (!(obj is Sequential))
+                return false;
+
+            ISeq ms = RT.seq(obj);
+
+            for (int i = 0; i < v.count(); i++, ms = ms.next())
+            {
+                if (ms == null || !Util.equals(v.nth(i), ms.first()))
                     return false;
             }
+            if (ms != null)
+                return false;
+
             return true;
         }
 

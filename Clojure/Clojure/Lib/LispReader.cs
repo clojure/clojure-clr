@@ -978,12 +978,36 @@ namespace clojure.lang
 
             static object syntaxQuote(object form)
             {
-                object ret;
-                if (Compiler.IsSpecial(form))
-                    ret = RT.list(Compiler.QuoteSym, form);
-                else if (form is Symbol)
+                bool checkMeta;
+                object ret = AnalyzeSyntaxQuote(form,out checkMeta);
+
+                if (checkMeta)
                 {
-                    Symbol sym = (Symbol)form;
+                    IObj formAsIobj = form as IObj;
+
+                    if (formAsIobj != null && formAsIobj.meta() != null)
+                    {
+                        //filter line numbers & source span info
+                        IPersistentMap newMeta = formAsIobj.meta().without(RT.LINE_KEY).without(RT.SOURCE_SPAN_KEY);
+                        if (newMeta.count() > 0)
+                            return RT.list(WITH_META, ret, syntaxQuote(formAsIobj.meta()));
+                    }
+                }
+
+                return ret;
+            }
+
+            private static object AnalyzeSyntaxQuote(object form,out bool checkMeta)
+            {
+                checkMeta = true;
+
+                if (Compiler.IsSpecial(form))
+                    return RT.list(Compiler.QuoteSym, form);
+
+                Symbol sym = form as Symbol;
+
+                if (sym != null)
+                {
                     if (sym.Namespace == null && sym.Name.EndsWith("#"))
                     {
                         IPersistentMap gmap = (IPersistentMap)GENSYM_ENV.deref();
@@ -1012,67 +1036,71 @@ namespace clojure.lang
                         if (sym.Namespace != null)
                             maybeClass = Compiler.CurrentNamespace.GetMapping(
                                 Symbol.intern(null, sym.Namespace));
-                        if (maybeClass is Type)
+                        Type t = maybeClass as Type;
+
+                        if (t != null)
                         {
                             // Classname/foo -> package.qualified.Classname/foo
-                            sym = Symbol.intern(
-                                ((Type)maybeClass).Name, sym.Name);
+                            sym = Symbol.intern(t.Name, sym.Name);
                         }
                         else
                             sym = Compiler.resolveSymbol(sym);
-                    }             
-                    ret = RT.list(Compiler.QuoteSym, sym);
+                    }
+                    return RT.list(Compiler.QuoteSym, sym);
                 }
-                //else if (form is Unquote)  
-                //    return ((Unquote)form).Obj;
-                // Rev 1184
-                else if (isUnquote(form))
+
+
+                if (isUnquote(form))
+                {
+                    checkMeta = false;
                     return RT.second(form);
-                else if (isUnquoteSplicing(form))
+                }
+
+                if (isUnquoteSplicing(form))
                     throw new ArgumentException("splice not in list");
-                else if (form is IPersistentCollection)
+                
+                if (form is IPersistentCollection)
                 {
                     if (form is IPersistentMap)
                     {
                         IPersistentVector keyvals = flattenMap(form);
-                        ret = RT.list(APPLY, HASHMAP, RT.list(SEQ,RT.cons(CONCAT, sqExpandList(keyvals.seq()))));
+                        return RT.list(APPLY, HASHMAP, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(keyvals.seq()))));
                     }
-                    else if (form is IPersistentVector)
+
+                    IPersistentVector v = form as IPersistentVector;
+                    if (v != null)
                     {
-                        ret = RT.list(APPLY, VECTOR, RT.list(SEQ,RT.cons(CONCAT, sqExpandList(((IPersistentVector)form).seq()))));
+                        return RT.list(APPLY, VECTOR, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(v.seq()))));
                     }
-                    else if (form is IPersistentSet)
+
+                    IPersistentSet s = form as IPersistentSet;
+                    if (s != null)
                     {
-                        ret = RT.list(APPLY, HASHSET,  RT.list(SEQ,RT.cons(CONCAT, sqExpandList(((IPersistentSet)form).seq()))));
+                        return RT.list(APPLY, HASHSET, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(s.seq()))));
                     }
-                    else if (form is ISeq || form is IPersistentList)
+                    
+                    
+                    if (form is ISeq || form is IPersistentList)
                     {
                         ISeq seq = RT.seq(form);
                         if (seq == null)
-                            ret = RT.cons(LIST, null);
+                            return RT.cons(LIST, null);
                         else
-                            ret =  RT.list(SEQ,RT.cons(CONCAT, sqExpandList(seq)));
+                            return RT.list(SEQ, RT.cons(CONCAT, sqExpandList(seq)));
                     }
                     else
                         throw new InvalidOperationException("Unknown Collection type");
                 }
-                else if (form is Keyword
+                
+                if (form is Keyword
                         || Util.IsNumeric(form)
                         || form is Char
                         || form is String)
-                    ret = form;
+                    return form;
                 else
-                    ret = RT.list(Compiler.QuoteSym, form);
-
-                if (form is IObj &&  RT.meta(form) != null)
-                {
-                    //filter line numbers & source span info
-                    IPersistentMap newMeta = ((IObj)form).meta().without(RT.LINE_KEY).without(RT.SOURCE_SPAN_KEY);
-                    if (newMeta.count() > 0)
-                        return RT.list(WITH_META, ret, syntaxQuote(((IObj)form).meta()));
-                }
-                return ret;
+                    return RT.list(Compiler.QuoteSym, form);
             }
+
 
             private static ISeq sqExpandList(ISeq seq)
             {
@@ -1171,6 +1199,7 @@ namespace clojure.lang
 
         public sealed class MetaReader : ReaderBase
         {
+
             protected override object Read(PushbackTextReader r, char caret)
             {
                 int startLine = -1;
@@ -1182,36 +1211,38 @@ namespace clojure.lang
                     startLine = lntr.LineNumber;
                     startCol = lntr.ColumnNumber;
                 }
-                //int line = -1;
-                //if (r is LineNumberingTextReader)
-                //    line = ((LineNumberingTextReader)r).LineNumber;
-                //object meta = read(r, true, null, true);
-                object meta = ReadAux(r);
-                if (meta is Symbol || meta is String)
-                    meta = RT.map(RT.TAG_KEY, meta);
-                else if (meta is Keyword)
-                    meta = RT.map(meta, true);
-                else if (!(meta is IPersistentMap))
-                    throw new ArgumentException("Metadata must be Symbol,Keyword,String or Map");
 
-                //object o = read(r, true, null, true);
+                IPersistentMap metaAsMap;
+                {
+                    object meta = ReadAux(r);
+
+                    if (meta is Symbol || meta is String)
+                        metaAsMap = RT.map(RT.TAG_KEY, meta);
+                    else if (meta is Keyword)
+                        metaAsMap = RT.map(meta, true);
+                    else if ((metaAsMap = meta as IPersistentMap) == null)
+                        throw new ArgumentException("Metadata must be Symbol,Keyword,String or Map");
+                }
+
                 object o = ReadAux(r);
                 if (o is IMeta)
                 {
                     if (startLine != -1 && o is ISeq)
-                        meta = ((IPersistentMap)meta).assoc(RT.LINE_KEY, startLine)
+                        metaAsMap = metaAsMap.assoc(RT.LINE_KEY, startLine)
                             .assoc(RT.SOURCE_SPAN_KEY, RT.map(
                                 RT.START_LINE_KEY, startLine,
                                 RT.START_COLUMN_KEY, startCol,
                                 RT.END_LINE_KEY, lntr.LineNumber,
                                 RT.END_COLUMN_KEY, lntr.ColumnNumber));
-                    if (o is IReference)
+
+                    IReference iref = o as IReference;
+                    if (iref != null)
                     {
-                        ((IReference)o).resetMeta((IPersistentMap)meta);
+                        iref.resetMeta(metaAsMap);
                         return o;
                     }
                     object ometa = RT.meta(o);
-                    for (ISeq s = RT.seq(meta); s != null; s = s.next())
+                    for (ISeq s = RT.seq(metaAsMap); s != null; s = s.next())
                     {
                         IMapEntry kv = (IMapEntry)s.first();
                         ometa = RT.assoc(ometa, kv.key(), kv.val());

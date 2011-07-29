@@ -221,8 +221,11 @@ namespace clojure.lang
                 _mappings.CompareAndSet(map, newMap);
                 map = Mappings;
             }
-            if ((o is Var) && ((Var)o).Namespace == this)
-                return (Var)o;
+
+            Var ovar = o as Var;
+
+            if (ovar != null && ovar.Namespace == this)
+                return ovar;
 
             if (v == null)
                 v = new Var(this, sym);
@@ -237,9 +240,11 @@ namespace clojure.lang
 
         private void WarnOrFailOnReplace(Symbol sym, object o, object v)
         {
-            if (o is Var)
+            Var ovar = o as Var;
+
+            if (ovar != null)
             {
-                Namespace ns = ((Var)o).Namespace;
+                Namespace ns = ovar.Namespace;
                 if (ns == this)
                     return;
                 if (ns != RT.CLOJURE_NS)

@@ -206,8 +206,11 @@ namespace clojure.lang
         /// <returns>The value mapped to the keyword.</returns>
         public sealed override object invoke(object obj)
         {
-            if (obj is ILookup)
-                return ((ILookup)obj).valAt(this);
+            ILookup ilu = obj as ILookup;
+
+            if (ilu != null) 
+                return ilu.valAt(this);
+            
             return RT.get(obj, this);
         }
 
@@ -220,8 +223,11 @@ namespace clojure.lang
         /// <returns></returns>
         public sealed override object invoke(object obj, object notFound)
         {
-            if (obj is ILookup)
-                return ((ILookup)obj).valAt(this,notFound);
+            ILookup ilu = obj as ILookup;
+
+            if (ilu != null )
+                return ilu.valAt(this,notFound);
+
             return RT.get(obj, this, notFound);
         }
 

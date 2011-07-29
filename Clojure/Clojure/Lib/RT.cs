@@ -714,23 +714,25 @@ namespace clojure.lang
 
         public static ISeq cons(object x, object coll)
         {
-            //ISeq y = seq(coll);
             if (coll == null)
                 return new PersistentList(x);
-            else if (coll is ISeq)
-                return new Cons(x, (ISeq)coll);
-            else
-                return new Cons(x, seq(coll));
+
+            ISeq s = coll as ISeq;
+
+            if (s != null)
+                return new Cons(x, s);
+
+            return new Cons(x, seq(coll));
         }
 
         public static object first(object x)
         {
-            if (x is ISeq)
-                return ((ISeq)x).first();
-            ISeq seq = RT.seq(x);
-            return (seq == null)
-                ? null
-                : seq.first();
+            ISeq seq = x as ISeq ?? RT.seq(x);
+
+            if (seq == null)
+                return null;
+
+            return seq.first();
         }
 
         public static object second(object x)
@@ -750,21 +752,21 @@ namespace clojure.lang
 
         public static ISeq next(object x)
         {
-            if (x is ISeq)
-                return ((ISeq)x).next();
-            ISeq seq = RT.seq(x);
+            ISeq seq = (x as ISeq) ?? RT.seq(x);
+
             if (seq == null)
                 return null;
+
             return seq.next();
         }
 
         public static ISeq more(object x)
         {
-            if (x is ISeq)
-                return ((ISeq)x).more();
-            ISeq seq = RT.seq(x);
+            ISeq seq = x as ISeq ?? RT.seq(x);
+
             if (seq == null)
                 return PersistentList.EMPTY;
+
             return seq.more();
         }
 
@@ -786,8 +788,11 @@ namespace clojure.lang
 
         static public Object get(Object coll, Object key)
         {
-            if (coll is ILookup)
-                return ((ILookup)coll).valAt(key);
+            ILookup ilu = coll as ILookup;
+
+            if (ilu != null)
+                return ilu.valAt(key);
+
             return GetFrom(coll, key);
         }
 
@@ -910,8 +915,11 @@ namespace clojure.lang
 
         static public Object nth(object coll, int n)
         {
-            if (coll is Indexed)
-                return ((Indexed)coll).nth((int)n);
+            Indexed indexed = coll as Indexed;
+
+            if (indexed != null)
+                return indexed.nth((int)n);
+
             return NthFrom(Util.Ret1(coll, coll = null), (int)n);
         }
 
@@ -980,11 +988,11 @@ namespace clojure.lang
 
         static public Object nth(Object coll, int n, Object notFound)
         {
-            if (coll is Indexed)
-            {
-                Indexed v = (Indexed)coll;
+            Indexed v = coll as Indexed;
+
+            if (v != null)
                 return v.nth(n,notFound);
-            }
+
             return NthFrom(coll, n, notFound);
         }
 
@@ -2029,6 +2037,8 @@ namespace clojure.lang
                 return LispReader.read(r, true, null, false);
         }
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         static public void print(Object x, TextWriter w)
         {
             //call multimethod
@@ -2747,16 +2757,18 @@ namespace clojure.lang
         public static TextWriter errPrintWriter()
         {
             object w = ERR.deref();
-            if (w is TextWriter)
-            {
+
+            TextWriter tw = w as TextWriter;
+
+            if (tw != null)
                 return (TextWriter)w;
-            }
-            else if (w is Stream)
-            {
-                return new StreamWriter((Stream)w);
-            }
-            else
-                throw new ArgumentException("Unknown type for *err*");
+
+            Stream s = w as Stream;
+
+            if (s != null)
+                return new StreamWriter(s);
+
+            throw new ArgumentException("Unknown type for *err*");
         }
 
 
