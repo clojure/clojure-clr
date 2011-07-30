@@ -65,7 +65,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return Expression.Block(
                 Expression.Call(Compiler.Method_Monitor_Enter, _target.GenCode(RHC.Expression, objx, context)),
-                Compiler.NIL_EXPR.GenCode(rhc, objx, context));
+                Compiler.NilExprInstance.GenCode(rhc, objx, context));
         }
 
         #endregion

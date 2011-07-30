@@ -120,6 +120,7 @@ namespace clojure.lang
         /// <param name="dispatchVal">The discriminator value for this method.</param>
         /// <param name="method">The method code.</param>
         /// <returns>This multifunction.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public MultiFn addMethod(object dispatchVal, IFn method)
         {
@@ -145,6 +146,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="dispatchVal">The dispatch value for the multimethod.</param>
         /// <returns>This multifunction.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remove")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public MultiFn removeMethod(object dispatchVal)
         {
@@ -159,6 +161,7 @@ namespace clojure.lang
         /// <param name="dispatchValX">The more preferred dispatch value.</param>
         /// <param name="dispatchValY">The less preferred dispatch value.</param>
         /// <returns>This multifunction.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "prefer")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public MultiFn preferMethod(object dispatchValX, object dispatchValY)
         {
@@ -235,6 +238,7 @@ namespace clojure.lang
         /// <param name="dispatchVal">The dispatch value.</param>
         /// <returns>The preferred method for the value.</returns>
         /// <remarks>lower initial letter for core.clj compatibility</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public IFn getMethod(object dispatchVal)
         {
@@ -305,6 +309,7 @@ namespace clojure.lang
         /// Get the map of dispatch values to dispatch fns.
         /// </summary>
         /// <returns>The map of dispatch values to dispatch fns.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public IPersistentMap getMethodTable()
         {
             return MethodTable;
@@ -315,11 +320,13 @@ namespace clojure.lang
         /// Get the map of preferred value to set of other values.
         /// </summary>
         /// <returns>The map of preferred value to set of other values.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public IPersistentMap getPreferTable()
         {
             return PreferTable;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "reset")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public MultiFn reset()
         {

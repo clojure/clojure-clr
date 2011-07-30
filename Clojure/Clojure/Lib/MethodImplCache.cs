@@ -59,7 +59,7 @@ namespace clojure.lang
 
        private readonly IPersistentMap _protocol;
 
-       // core_deftype.clj compatibility
+       [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "protocol")]
        public IPersistentMap protocol
        {
            get { return _protocol; }
@@ -67,7 +67,7 @@ namespace clojure.lang
 
        private readonly Keyword _methodk;
 
-       // core_deftype.clj compatibility
+       [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "methodk")]
        public Keyword methodk
        {
            get { return _methodk; }
@@ -80,7 +80,7 @@ namespace clojure.lang
        private readonly object[] _table;    //[class, entry. class, entry ...]
        public readonly IDictionary _map;
 
-       // core_deftype.clj compatibility
+       [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "map")]
        public IDictionary map
        {
            get { return _map; }
@@ -88,8 +88,8 @@ namespace clojure.lang
 
        Entry _mre = null;
 
-        // core_deftype.clj compatibility
-        public object[] table
+       [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "table")]
+       public object[] table
         {
             get { return _table; }
         } 
@@ -118,7 +118,7 @@ namespace clojure.lang
        #region C-tors
 
         public MethodImplCache(IPersistentMap protocol, Keyword methodk)
-            : this(protocol, methodk, 0, 0, RT.EMPTY_OBJECT_ARRAY)
+            : this(protocol, methodk, 0, 0, RT.EmptyObjectArray)
         {
         }
 
@@ -148,7 +148,8 @@ namespace clojure.lang
        #region Implementation
         
        // initial lowercase for core.clj compatibility
-       public IFn fnFor(Type t)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "fn")]
+        public IFn fnFor(Type t)
        {
            Entry last = _mre;
            if (last != null && last.T == t)

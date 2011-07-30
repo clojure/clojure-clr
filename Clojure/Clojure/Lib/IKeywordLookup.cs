@@ -17,6 +17,7 @@ namespace clojure.lang
 {
     public interface IKeywordLookup
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         ILookupThunk getLookupThunk(Keyword k);
     }
 }

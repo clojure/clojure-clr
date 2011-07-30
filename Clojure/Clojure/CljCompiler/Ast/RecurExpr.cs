@@ -111,7 +111,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if (mismatch)
                         {
                             lb.RecurMismatch = true;
-                            if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                            if (RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                                 RT.errPrintWriter().WriteLine("{0}:{1} recur arg for primitive local: {2} is not matching primitive, had: {3}, needed {4}",
                                     "Source", "Line", lb.Name, pt != null ? pt.Name : "Object", primt.Name);
                         }
@@ -197,7 +197,7 @@ namespace clojure.lang.CljCompiler.Ast
                             //RT.errPrintWriter().WriteLine
                         throw new ArgumentException(String.Format(
                                 "{0}: {1} recur arg for primitive local: {2} must be matching primitive, had: {3}, needed {4}",
-                                _source, _spanMap != null ? (int)_spanMap.valAt(RT.START_LINE_KEY, 0) : 0, 
+                                _source, _spanMap != null ? (int)_spanMap.valAt(RT.StartLineKey, 0) : 0, 
                                 lb.Name, (arg.HasClrType ? arg.ClrType.Name : "Object"), primt.Name));
                         //valExpr = arg.GenCode(RHC.Expression, objx, context);
                        // valExpr = Expression.Convert(valExpr, primt);

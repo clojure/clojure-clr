@@ -40,9 +40,9 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void MatchNumberMatchesZero()
         {
-            object o1 = LispReader.matchNumber("0");
-            object o2 = LispReader.matchNumber("-0");
-            object o3 = LispReader.matchNumber("+0");
+            object o1 = LispReader.MatchNumber("0");
+            object o2 = LispReader.MatchNumber("-0");
+            object o3 = LispReader.MatchNumber("+0");
 
             Expect(o1, EqualTo(0));
             Expect(o2, EqualTo(0));
@@ -52,10 +52,10 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void MatchNumberMatchesDecimal()
         {
-            object o1 = LispReader.matchNumber("123");
-            object o2 = LispReader.matchNumber("+123");
-            object o3 = LispReader.matchNumber("-123");
-            object o4 = LispReader.matchNumber("123456789123456789123456789");
+            object o1 = LispReader.MatchNumber("123");
+            object o2 = LispReader.MatchNumber("+123");
+            object o3 = LispReader.MatchNumber("-123");
+            object o4 = LispReader.MatchNumber("123456789123456789123456789");
 
             Expect(o1, EqualTo(123));
             Expect(o2, EqualTo(123));
@@ -67,9 +67,9 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void MatchNumberMatchesHexadecimal()
         {
-            object o1 = LispReader.matchNumber("0X12A");
-            object o2 = LispReader.matchNumber("0xFFF");
-            object o3 = LispReader.matchNumber("0xFFFFFFFFFFFFFFFFFFFFFFFF");
+            object o1 = LispReader.MatchNumber("0X12A");
+            object o2 = LispReader.MatchNumber("0xFFF");
+            object o3 = LispReader.MatchNumber("0xFFFFFFFFFFFFFFFFFFFFFFFF");
 
             Expect(o1, EqualTo(0x12A));
             Expect(o2, EqualTo(0xFFF));
@@ -81,10 +81,10 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void MatchNumberMatchesOctal()
         {
-            object o1 = LispReader.matchNumber("0123");
-            object o2 = LispReader.matchNumber("+0123");
-            object o3 = LispReader.matchNumber("-0123");
-            object o4 = LispReader.matchNumber("01234567012345670123456777");
+            object o1 = LispReader.MatchNumber("0123");
+            object o2 = LispReader.MatchNumber("+0123");
+            object o3 = LispReader.MatchNumber("-0123");
+            object o4 = LispReader.MatchNumber("01234567012345670123456777");
 
             Expect(o1, EqualTo(83));
             Expect(o2, EqualTo(83));
@@ -96,10 +96,10 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void MatchNumberMatchesSpecifiedRadix()
         {
-            object o1 = LispReader.matchNumber("2R1100");
-            object o2 = LispReader.matchNumber("4R123");
-            object o3 = LispReader.matchNumber("-4R123");
-            object o4 = LispReader.matchNumber("30R1234AQ");
+            object o1 = LispReader.MatchNumber("2R1100");
+            object o2 = LispReader.MatchNumber("4R123");
+            object o3 = LispReader.MatchNumber("-4R123");
+            object o4 = LispReader.MatchNumber("30R1234AQ");
 
             Expect(o1, EqualTo(12));
             Expect(o2, EqualTo(27));
@@ -111,13 +111,13 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void MatchNumberMatchesFloats()
         {
-            object o1 = LispReader.matchNumber("123.7");
-            object o2 = LispReader.matchNumber("-123.7E4");
-            object o3 = LispReader.matchNumber("+1.237e4");
-            object o4 = LispReader.matchNumber("+1.237e-4");
-            object o5 = LispReader.matchNumber("1.237e+4");
-            object o6 = LispReader.matchNumber("1.");
-            object o7 = LispReader.matchNumber("1.e3");
+            object o1 = LispReader.MatchNumber("123.7");
+            object o2 = LispReader.MatchNumber("-123.7E4");
+            object o3 = LispReader.MatchNumber("+1.237e4");
+            object o4 = LispReader.MatchNumber("+1.237e-4");
+            object o5 = LispReader.MatchNumber("1.237e+4");
+            object o6 = LispReader.MatchNumber("1.");
+            object o7 = LispReader.MatchNumber("1.e3");
 
             Expect(o1, EqualTo(123.7));
             Expect(o2, EqualTo(-1237000.0));
@@ -140,17 +140,17 @@ namespace Clojure.Tests.LibTests
 
         void TestDecimalMatch(string inStr,string bdStr)
         {
-            object o = LispReader.matchNumber(inStr);
+            object o = LispReader.MatchNumber(inStr);
             Expect(o, EqualTo(BigDecimal.Parse(bdStr)));
         }
 
         [Test]
         public void MatchNumberMatchesRatios()
         {
-            object o1 = LispReader.matchNumber("12/1");
-            object o2 = LispReader.matchNumber("12/4");
-            object o3 = LispReader.matchNumber("12/5");
-            object o4 = LispReader.matchNumber("12345678900000/123456789");
+            object o1 = LispReader.MatchNumber("12/1");
+            object o2 = LispReader.MatchNumber("12/4");
+            object o3 = LispReader.MatchNumber("12/5");
+            object o4 = LispReader.MatchNumber("12345678900000/123456789");
 
             Expect(o1, EqualTo(12));
             Expect(o2, EqualTo(3));
@@ -161,12 +161,12 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void MatchNumberReadsWholeString()
         {
-            object o1 = LispReader.matchNumber(" 123");
-            object o2 = LispReader.matchNumber("123 ");
-            object o3 = LispReader.matchNumber(" 12.3");
-            object o4 = LispReader.matchNumber("12.3 ");
-            object o5 = LispReader.matchNumber(" 1/23");
-            object o6 = LispReader.matchNumber("1/23 ");
+            object o1 = LispReader.MatchNumber(" 123");
+            object o2 = LispReader.MatchNumber("123 ");
+            object o3 = LispReader.MatchNumber(" 12.3");
+            object o4 = LispReader.MatchNumber("12.3 ");
+            object o5 = LispReader.MatchNumber(" 1/23");
+            object o6 = LispReader.MatchNumber("1/23 ");
 
             Expect(o1, Null);
             Expect(o2, Null);
@@ -179,10 +179,10 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void MatchNumberFailsToMatchWeirdThings()
         {
-            object o1 = LispReader.matchNumber("123a");
-            object o2 = LispReader.matchNumber("0x123Z");
-            object o4 = LispReader.matchNumber("12.4/24.2");
-            object o5 = LispReader.matchNumber("1.7M3");
+            object o1 = LispReader.MatchNumber("123a");
+            object o2 = LispReader.MatchNumber("0x123Z");
+            object o4 = LispReader.MatchNumber("12.4/24.2");
+            object o5 = LispReader.MatchNumber("1.7M3");
 
             Expect(o1, Null);
             Expect(o2, Null);
@@ -195,7 +195,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(FormatException))]
         public void MatchNumberFailsOnRadixSnafu()
         {
-            object o3 = LispReader.matchNumber("10RAA");
+            object o3 = LispReader.MatchNumber("10RAA");
         }
         #endregion
 
@@ -496,7 +496,7 @@ namespace Clojure.Tests.LibTests
         {
             object o1 = ReadFromString("::abc");
             Expect(o1, TypeOf(typeof(Keyword)));
-            Expect(((Keyword)o1).Namespace, EqualTo(((Namespace)RT.CURRENT_NS.deref()).Name.Name));
+            Expect(((Keyword)o1).Namespace, EqualTo(((Namespace)RT.CurrentNSVar.deref()).Name.Name));
             Expect(((Keyword)o1).Name, EqualTo("abc"));
         }
 
@@ -889,12 +889,12 @@ namespace Clojure.Tests.LibTests
             Object o1 = ReadFromStringNumbering("\n\n (a b \n1 2)");
             Expect(o1, InstanceOf(typeof(IObj)));
             IObj io = o1 as IObj;
-            Expect(io.meta().valAt(RT.LINE_KEY), EqualTo(3));
-            IPersistentMap sourceSpanMap = (IPersistentMap)io.meta().valAt(RT.SOURCE_SPAN_KEY);
-            Expect(sourceSpanMap.valAt(RT.START_LINE_KEY), EqualTo(3));
-            Expect(sourceSpanMap.valAt(RT.START_COLUMN_KEY), EqualTo(2));
-            Expect(sourceSpanMap.valAt(RT.END_LINE_KEY), EqualTo(4));
-            Expect(sourceSpanMap.valAt(RT.END_COLUMN_KEY),EqualTo(4));            
+            Expect(io.meta().valAt(RT.LineKey), EqualTo(3));
+            IPersistentMap sourceSpanMap = (IPersistentMap)io.meta().valAt(RT.SourceSpanKey);
+            Expect(sourceSpanMap.valAt(RT.StartLineKey), EqualTo(3));
+            Expect(sourceSpanMap.valAt(RT.StartColumnKey), EqualTo(2));
+            Expect(sourceSpanMap.valAt(RT.EndLineKey), EqualTo(4));
+            Expect(sourceSpanMap.valAt(RT.EndColumnKey),EqualTo(4));            
         }
 
         #endregion
@@ -1180,7 +1180,7 @@ namespace Clojure.Tests.LibTests
             Expect(s.first(), EqualTo(Symbol.intern("quote")));
             Expect(s.next().first(), InstanceOf(typeof(Symbol)));
             Symbol sym = s.next().first() as Symbol;
-            Expect(sym.Namespace, EqualTo(((Namespace)RT.CURRENT_NS.deref()).Name.Name));
+            Expect(sym.Namespace, EqualTo(((Namespace)RT.CurrentNSVar.deref()).Name.Name));
             Expect(sym.Name, EqualTo("abc"));
         }
 
@@ -1482,7 +1482,7 @@ namespace Clojure.Tests.LibTests
 
             Expect(s3.count(), EqualTo(2));
             Expect(s3.first(), EqualTo(Symbol.intern("quote")));
-            Expect(s3.next().first(), EqualTo(Symbol.intern(((Namespace)RT.CURRENT_NS.deref()).Name.Name,"a")));
+            Expect(s3.next().first(), EqualTo(Symbol.intern(((Namespace)RT.CurrentNSVar.deref()).Name.Name,"a")));
 
 
             s1 = s1.next();
@@ -1529,7 +1529,7 @@ namespace Clojure.Tests.LibTests
 
             Expect(s3.count(), EqualTo(2));
             Expect(s3.first(), EqualTo(Symbol.intern("quote")));
-            Expect(s3.next().first(), EqualTo(Symbol.intern(((Namespace)RT.CURRENT_NS.deref()).Name.Name, "a")));
+            Expect(s3.next().first(), EqualTo(Symbol.intern(((Namespace)RT.CurrentNSVar.deref()).Name.Name, "a")));
 
 
             s1 = s1.next();

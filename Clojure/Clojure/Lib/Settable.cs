@@ -26,6 +26,7 @@ namespace clojure.lang
         /// <param name="val">The new value</param>
         /// <returns>The new value.</returns>
         /// <remarks>Can only be called in a transaction or with a binding on the stack, else throws an exception.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         object doSet(object val);
 
         /// <summary>
@@ -33,6 +34,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="val">The new value</param>
         /// <returns>The new value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         object doReset(object val);
     }
 }

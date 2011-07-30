@@ -532,7 +532,7 @@ namespace clojure.lang
 
         public override int GetHashCode()
         {
-            return Util.HashCombine(_coeff.GetHashCode(),_exp.GetHashCode());
+            return Util.hashCombine(_coeff.GetHashCode(),_exp.GetHashCode());
         }
 
         #endregion

@@ -68,7 +68,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 ObjExpr ret = Build((IPersistentVector)RT.get(opts, Compiler.ImplementsKeyword, PersistentVector.EMPTY), fields, null, tagname, classname,
-                             (Symbol)RT.get(opts, RT.TAG_KEY), rform, frm);
+                             (Symbol)RT.get(opts, RT.TagKey), rform, frm);
 
                 return ret;
             }
@@ -98,7 +98,7 @@ namespace clojure.lang.CljCompiler.Ast
                 IObj iobj = frm as IObj;
 
                 if (iobj != null && iobj.meta() != null)
-                    return new MetaExpr(ret, MapExpr.Parse(pcon.EvEx(),iobj.meta()));
+                    return new MetaExpr(ret, MapExpr.Parse(pcon.EvalOrExpr(),iobj.meta()));
                 else
                     return ret;
             }
@@ -211,7 +211,7 @@ namespace clojure.lang.CljCompiler.Ast
                     methods = RT.conj(methods, m);
                 }
 
-                ret._methods = methods;
+                ret.Methods = methods;
                 ret.Keywords = (IPersistentMap)Compiler.KeywordsVar.deref();
                 ret.Vars = (IPersistentMap)Compiler.VarsVar.deref();
                 ret.Constants = (PersistentVector)Compiler.ConstantsVar.deref();
@@ -404,7 +404,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             HashSet<MethodInfo> implemented = new HashSet<MethodInfo>();
 
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+            for (ISeq s = RT.seq(Methods); s != null; s = s.next())
             {
                 NewInstanceMethod method = (NewInstanceMethod)s.first();
                 method.GenerateCode(this,context);
@@ -490,7 +490,7 @@ namespace clojure.lang.CljCompiler.Ast
                     gen.EmitNull();
                     gen.EmitLoadArg(0);
                     gen.EmitCall(Compiler.Method_RT_seqOrElse);
-                    gen.EmitNew(_ctorInfo);
+                    gen.EmitNew(CtorInfo);
 
                     gen.Emit(OpCodes.Ret);
                 }

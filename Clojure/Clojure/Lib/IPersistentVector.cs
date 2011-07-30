@@ -26,6 +26,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns>The number of items.</returns>
         /// <remarks>Not sure why you wouldn't use <c>count()</c> intead.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "length")]
         int length();
 
         /// <summary>
@@ -34,6 +35,7 @@ namespace clojure.lang
         /// <param name="i">The index of the item to set.</param>
         /// <param name="val">The new value</param>
         /// <returns>A new (immutable) vector v with v[i] == val.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "assoc")]
         IPersistentVector assocN(int i, object val);
 
         /// <summary>

@@ -55,7 +55,7 @@ Please use Clojure.Main for everyday chores."
             sw.Start();
 
             Var.pushThreadBindings(
-                RT.map(RT.CURRENT_NS, RT.CURRENT_NS.deref()));
+                RT.map(RT.CurrentNSVar, RT.CurrentNSVar.deref()));
             try
             {
 
@@ -110,9 +110,9 @@ Please use Clojure.Main for everyday chores."
         private void RunInteractiveLoop()
         {
             Var.pushThreadBindings(RT.map(
-                RT.CURRENT_NS, RT.CURRENT_NS.deref(),
-                RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref(),
-                RT.PRINT_META, RT.PRINT_META.deref(),
+                RT.CurrentNSVar, RT.CurrentNSVar.deref(),
+                RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
+                RT.PrintMetaVar, RT.PrintMetaVar.deref(),
                 //RT.PRINT_LENGTH, RT.PRINT_LENGTH.deref(),
                 //RT.PRINT_LEVEL, RT.PRINT_LEVEL.deref(),
                 Compiler.CompilePathVar, Environment.GetEnvironmentVariable("clojure.compile.path" ?? "classes")

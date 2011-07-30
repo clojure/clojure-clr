@@ -615,7 +615,7 @@ namespace Clojure.Tests.LibTests
         public void ToString_on_zero_works_for_all_radixes()
         {
             BigInteger i = new BigInteger(0, new uint[0]);
-            for (uint radix = BigInteger.MIN_RADIX; radix <= BigInteger.MAX_RADIX; radix++)
+            for (uint radix = BigInteger.MinRadix; radix <= BigInteger.MaxRadix; radix++)
                 Expect(i.ToString(radix),EqualTo("0"));
         }
 

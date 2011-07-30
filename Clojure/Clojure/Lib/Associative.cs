@@ -25,6 +25,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The key to test for membership</param>
         /// <returns>True if the key is in this map.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "contains")]
         bool containsKey(object key);
 
         /// <summary>
@@ -32,6 +33,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The key to retrieve</param>
         /// <returns>The key/value pair for the key, or null if the key is not in the map.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "entry")]
         IMapEntry entryAt(object key);
 
         /// <summary>
@@ -40,6 +42,7 @@ namespace clojure.lang
         /// <param name="key">The key</param>
         /// <param name="val">The value</param>
         /// <returns>A new map with the key/value added.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "assoc")]
         Associative assoc(object key, object val);
 
     }

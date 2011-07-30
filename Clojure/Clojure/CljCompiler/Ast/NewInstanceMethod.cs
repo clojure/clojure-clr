@@ -181,7 +181,7 @@ namespace clojure.lang.CljCompiler.Ast
                         ISeq pseq = (ISeq)pobj;
                         object first = RT.first(pseq);
                         object second = RT.second(pseq);
-                        if (!(first is Symbol && ((Symbol)first).Equals(HostExpr.BY_REF)))
+                        if (!(first is Symbol && ((Symbol)first).Equals(HostExpr.ByRefSym)))
                             throw new ArgumentException("First element in parameter pair must be by-ref");
                         if (!(second is Symbol))
                             throw new ArgumentException("Params must be Symbols");

@@ -25,6 +25,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="meta">The new metadata.</param>
         /// <returns>A copy of the object with new metadata attached.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "with")]
         IObj withMeta(IPersistentMap meta);
     }
 }

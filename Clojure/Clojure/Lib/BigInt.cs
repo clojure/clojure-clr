@@ -34,10 +34,13 @@ namespace clojure.lang
         public BigInteger Bipart
         {
             get { return _bipart; }
-        } 
+        }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ZERO")]
         public static readonly BigInt ZERO = new BigInt(0, null);
+        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ONE")]
         public static readonly BigInt ONE = new BigInt(1, null);
 
         #endregion
@@ -50,6 +53,7 @@ namespace clojure.lang
             _bipart = bipart;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "from")]
         public static BigInt fromBigInteger(BigInteger val)
         {
             long n;
@@ -58,11 +62,13 @@ namespace clojure.lang
             return new BigInt(0, val);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "from")]
         public static BigInt fromLong(long val)
         {
             return new BigInt(val, null);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
         public static BigInt valueOf(long val)
         {
             return new BigInt(val, null);
@@ -189,6 +195,7 @@ namespace clojure.lang
 
         #region Conversions
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "to")]
         public BigInteger toBigInteger()
         {
             if (_bipart == null)
@@ -197,6 +204,7 @@ namespace clojure.lang
                 return _bipart;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "int")]
         public int intValue()
         {
             if (_bipart == null)
@@ -204,7 +212,8 @@ namespace clojure.lang
             else
                 return _bipart.ToInt32();
         }
-        
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "long")]
         public long longValue()
         {
             if (_bipart == null)
@@ -213,6 +222,7 @@ namespace clojure.lang
                 return _bipart.ToInt64();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "float")]
         public float floatValue()
         {
             if (_bipart == null)
@@ -221,6 +231,7 @@ namespace clojure.lang
                 return _bipart.ToSingle(null);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "double")]
         public double doubleValue()
         {
             if (_bipart == null)
@@ -229,6 +240,7 @@ namespace clojure.lang
                 return _bipart.ToDouble(null);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "byte")]
         public byte byteValue()
         {
             if (_bipart == null)
@@ -237,6 +249,7 @@ namespace clojure.lang
                 return _bipart.ToByte(null);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "short")]
         public short shortValue()
         {
             if (_bipart == null)

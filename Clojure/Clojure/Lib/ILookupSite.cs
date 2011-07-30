@@ -13,6 +13,7 @@ namespace clojure.lang
 {
     public interface ILookupSite
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "fault")]
         ILookupThunk fault(object target);
     }
 }

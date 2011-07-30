@@ -213,6 +213,7 @@ namespace clojure.lang
             get { return _minHistory; }
             set { _minHistory = value; }
         }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public Ref setMinHistory(int minHistory)
         {
             _minHistory = minHistory;
@@ -226,6 +227,7 @@ namespace clojure.lang
             get { return _maxHistory; }
             set { _maxHistory = value; }
         }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public Ref setMaxHistory(int maxHistory)
         {
             _maxHistory = maxHistory;
@@ -305,6 +307,7 @@ namespace clojure.lang
 
         #region History counts
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public int getHistoryCount()
         {
             try
@@ -470,6 +473,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="val">The new value.</param>
         /// <returns>The new value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public object set(object val)
         {
             return LockingTransaction.GetEx().DoSet(this, val);
@@ -481,6 +485,7 @@ namespace clojure.lang
         /// <param name="fn">The function to apply to the current state and additional arguments.</param>
         /// <param name="args">Additional arguments.</param>
         /// <returns>The computed value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "commute")]
         public object commute(IFn fn, ISeq args)
         {
             return LockingTransaction.GetEx().DoCommute(this, fn, args);
@@ -492,6 +497,7 @@ namespace clojure.lang
         /// <param name="fn">The function to apply to the current state and additional arguments.</param>
         /// <param name="args">Additional arguments.</param>
         /// <returns>The computed value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "alter")]
         public object alter(IFn fn, ISeq args)
         {
             LockingTransaction t = LockingTransaction.GetEx();
@@ -501,6 +507,7 @@ namespace clojure.lang
         /// <summary>
         /// Touch the reference.  (Add to the tracking list in the current transaction.)
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "touch")]
         public void touch()
         {
             LockingTransaction.GetEx().DoEnsure(this);
@@ -511,6 +518,7 @@ namespace clojure.lang
         #region IFn Members
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "fn")]
         public IFn fn()
         {
             return (IFn)deref();

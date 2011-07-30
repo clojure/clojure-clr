@@ -105,67 +105,80 @@ namespace clojure.lang
 
         #region Basic Ops operations
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
         public static bool isZero(object x)
         {
             return  ops(x).isZero(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
         public static bool isPos(object x)
         {
             return ops(x).isPos(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
         public static bool isNeg(object x)
         {
             return ops(x).isNeg(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static object minus(object x)
         {
             return ops(x).negate(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static object minusP(object x)
         {
             return ops(x).negateP(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "inc")]
         public static object inc(object x)
         {
             return ops(x).inc(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "inc")]
         public static object incP(object x)
         {
             return ops(x).incP(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dec")]
         public static object dec(object x)
         {
             return ops(x).dec(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dec")]
         public static object decP(object x)
         {
             return ops(x).decP(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static object add(object x, object y)
         {
             return ops(x).combine(ops(y)).add(x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static object addP(object x, object y)
         {
             return ops(x).combine(ops(y)).addP(x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static object minus(object x, object y)
         {
             Ops yops = ops(y);
             return ops(x).combine(yops).add(x, yops.negate(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static object minusP(object x, object y)
         {
             Ops yops = ops(y);
@@ -174,16 +187,19 @@ namespace clojure.lang
             return ops(x).combine(negativeYOps).addP(x, negativeY);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static object multiply(object x, object y)
         {
             return ops(x).combine(ops(y)).multiply(x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static object multiplyP(object x, object y)
         {
             return ops(x).combine(ops(y)).multiplyP(x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "divide")]
         public static object divide(object x, object y)
         {
             Ops yops = ops(y);
@@ -192,6 +208,7 @@ namespace clojure.lang
             return ops(x).combine(yops).divide(x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
         public static object quotient(object x, object y)
         {
             Ops yops = ops(y);
@@ -200,6 +217,7 @@ namespace clojure.lang
             return ops(x).combine(yops).quotient(x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remainder")]
         public static object remainder(object x, object y)
         {
             Ops yops = ops(y);
@@ -208,7 +226,7 @@ namespace clojure.lang
             return ops(x).combine(yops).remainder(x, y);
         }
 
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
         public static double quotient(double n, double d)
         {
             if (d == 0)
@@ -222,6 +240,7 @@ namespace clojure.lang
                 return BigDecimal.Create(q).ToBigInteger().ToDouble(null);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remainder")]
         public static double remainder(double n, double d)
         {
             if (d == 0)
@@ -238,37 +257,44 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(object x, object y)
         {
             return ops(x).combine(ops(y)).equiv(x,y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equal")]
         public static bool equal(object x, object y)
         {
             return category(x) == category(y)
                 && ops(x).combine(ops(y)).equiv(x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lt")]
         public static bool lt(object x, object y)
         {
             return ops(x).combine(ops(y)).lt(x,y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lte")]
         public static bool lte(object x, object y)
         {
             return !ops(x).combine(ops(y)).lt(y,x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gt")]
         public static bool gt(object x, object y)
         {
             return ops(x).combine(ops(y)).lt(y,x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gte")]
         public static bool gte(object x, object y)
         {
             return !ops(x).combine(ops(y)).lt(x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "compare")]
         public static int compare(object x, object y)
         {
             Ops xyops = ops(x).combine(ops(y));
@@ -285,7 +311,7 @@ namespace clojure.lang
 
         #region  utility methods
 
-        static BigInt toBigInt(Object x)
+        static BigInt ToBigInt(Object x)
         {
             BigInt bigInt = x as BigInt;
             if (bigInt != null)
@@ -298,7 +324,7 @@ namespace clojure.lang
             return BigInt.fromLong(Util.ConvertToLong(x));
         }
 
-        static BigInteger toBigInteger(object x)
+        static BigInteger ToBigInteger(object x)
         {
             BigInteger bigInteger = x as BigInteger;
             if (bigInteger != null)
@@ -311,7 +337,7 @@ namespace clojure.lang
             return BigInteger.Create(Util.ConvertToLong(x));
         }
 
-        static BigDecimal toBigDecimal(object x)
+        static BigDecimal ToBigDecimal(object x)
         {
             BigDecimal bigDec = x as BigDecimal;
             if (bigDec != null)
@@ -343,7 +369,7 @@ namespace clojure.lang
             return BigDecimal.Create(Util.ConvertToLong(x));
         }
 
-        public static Ratio toRatio(object x)
+        public static Ratio ToRatio(object x)
         {
             Ratio r = x as Ratio;
             if (r != null)
@@ -359,9 +385,10 @@ namespace clojure.lang
                     return new Ratio(bx.MovePointRight(-exp).ToBigInteger(), BigInteger.TEN.Power(-exp));
             }
 
-            return new Ratio(toBigInteger(x), BigInteger.ONE);
+            return new Ratio(ToBigInteger(x), BigInteger.ONE);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object rationalize(object x)
         {
             if (x is float)                              
@@ -417,7 +444,7 @@ namespace clojure.lang
 
         #region More BigInteger support
 
-        public static object reduceBigInt(BigInt val)
+        public static object ReduceBigInt(BigInt val)
         {
             if (val.Bipart == null)
                 return num(val.Lpart);
@@ -446,32 +473,38 @@ namespace clojure.lang
 
         #region Basic bit operations
 
-         public static int shiftLeftInt(int x, int n)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int shiftLeftInt(int x, int n)
         {
             //return n >= 0 ? x << n : x >> -n;
             return x << n;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object shiftLeft(object x, object n)
         {
             return shiftLeft(bitOpsCast(x),bitOpsCast(n));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long shiftLeft(object x, long n)
         {
             return shiftLeft(bitOpsCast(x), n);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long shiftLeft(long x, object n)
         {
             return shiftLeft(x, bitOpsCast(n));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long shiftLeft(long x, long n)
         {
             return shiftLeft(x, (int)n);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long shiftLeft(long x, int n)
         {
             //return n >= 0 ? x << n : x >> -n;
@@ -479,33 +512,38 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int shiftRightInt(int x, int n)
         {
             // return n >= 0 ? x >> n : x << -n;
             return x >> n;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long shiftRight(object x, object n)
         {
             return shiftRight(bitOpsCast(x), bitOpsCast(n));
         }
 
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long shiftRight(object x, long n)
         {
             return shiftRight(bitOpsCast(x), n);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long shiftRight(long x, object n)
         {
             return shiftRight(x, bitOpsCast(n));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long shiftRight(long x, long n)
         {
             return shiftRight(x, (int)n);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long shiftRight(long x, int n)
         {
             // return n >= 0 ? x >> n : x << -n;
@@ -867,8 +905,8 @@ namespace clojure.lang
 
             public override object add(object x, object y)
             {
-                Ratio rx = toRatio(x);
-                Ratio ry = toRatio(y);
+                Ratio rx = ToRatio(x);
+                Ratio ry = ToRatio(y);
 
                 // add NormalizeRet
                 return Numbers.divide(
@@ -878,8 +916,8 @@ namespace clojure.lang
 
             public override object multiply(object x, object y)
             {
-                Ratio rx = toRatio(x);
-                Ratio ry = toRatio(y);
+                Ratio rx = ToRatio(x);
+                Ratio ry = ToRatio(y);
 
                 // add NormalizeRet
                 return Numbers.divide(
@@ -889,8 +927,8 @@ namespace clojure.lang
 
             public override object divide(object x, object y)
             {
-                Ratio rx = toRatio(x);
-                Ratio ry = toRatio(y);
+                Ratio rx = ToRatio(x);
+                Ratio ry = ToRatio(y);
 
                 // add NormalizeRet
                 return Numbers.divide(
@@ -900,8 +938,8 @@ namespace clojure.lang
 
             public override object quotient(object x, object y)
             {
-                Ratio rx = toRatio(x);
-                Ratio ry = toRatio(y);
+                Ratio rx = ToRatio(x);
+                Ratio ry = ToRatio(y);
 
                 // add NormalizeRet
                 BigInteger q = (rx.numerator * ry.denominator) / (rx.denominator * ry.numerator);
@@ -910,8 +948,8 @@ namespace clojure.lang
 
             public override object remainder(object x, object y)
             {
-                Ratio rx = toRatio(x);
-                Ratio ry = toRatio(y);
+                Ratio rx = ToRatio(x);
+                Ratio ry = ToRatio(y);
 
                 // add NormalizeRet
                 BigInteger q = (rx.numerator * ry.denominator) / (rx.denominator * ry.numerator);
@@ -920,8 +958,8 @@ namespace clojure.lang
 
             public override bool equiv(object x, object y)
             {
-                Ratio rx = toRatio(x);
-                Ratio ry = toRatio(y);
+                Ratio rx = ToRatio(x);
+                Ratio ry = ToRatio(y);
                 
                 return rx.numerator.Equals(ry.numerator)
                     && rx.denominator.Equals(ry.denominator);
@@ -929,8 +967,8 @@ namespace clojure.lang
 
             public override bool lt(object x, object y)
             {
-                Ratio rx = toRatio(x);
-                Ratio ry = toRatio(y);
+                Ratio rx = ToRatio(x);
+                Ratio ry = ToRatio(y);
 
                 return rx.numerator * ry.denominator < ry.numerator * rx.denominator;
             }
@@ -997,7 +1035,7 @@ namespace clojure.lang
 
             public override bool isZero(object x)
             {
-                BigInt bx = toBigInt(x);
+                BigInt bx = ToBigInt(x);
                 if (bx.Bipart == null)
                     return bx.Lpart == 0;
                 return bx.Bipart.IsZero;
@@ -1005,7 +1043,7 @@ namespace clojure.lang
 
             public override bool isPos(object x)
             {
-                BigInt bx = toBigInt(x);
+                BigInt bx = ToBigInt(x);
                 if (bx.Bipart == null)
                     return bx.Lpart > 0;
                 return bx.Bipart.IsPositive;
@@ -1013,7 +1051,7 @@ namespace clojure.lang
 
             public override bool isNeg(object x)
             {
-                BigInt bx = toBigInt(x);
+                BigInt bx = ToBigInt(x);
                 if (bx.Bipart == null)
                     return bx.Lpart < 0;
                 return bx.Bipart.IsNegative;
@@ -1021,52 +1059,52 @@ namespace clojure.lang
 
             public override object add(object x, object y)
             {
-                return BigInt.fromBigInteger(toBigInteger(x) + toBigInteger(y));
+                return BigInt.fromBigInteger(ToBigInteger(x) + ToBigInteger(y));
             }
 
             public override object multiply(object x, object y)
             {
-                return BigInt.fromBigInteger(toBigInteger(x) * toBigInteger(y));
+                return BigInt.fromBigInteger(ToBigInteger(x) * ToBigInteger(y));
             }
 
             public override object divide(object x, object y)
             {
-                return BIDivide(toBigInteger(x),toBigInteger(y));
+                return BIDivide(ToBigInteger(x),ToBigInteger(y));
             }
 
             public override object quotient(object x, object y)
             {
-                return BigInt.fromBigInteger(toBigInteger(x) / toBigInteger(y));
+                return BigInt.fromBigInteger(ToBigInteger(x) / ToBigInteger(y));
             }
 
             public override object remainder(object x, object y)
             {
-                return BigInt.fromBigInteger(toBigInteger(x) % toBigInteger(y));
+                return BigInt.fromBigInteger(ToBigInteger(x) % ToBigInteger(y));
             }
 
             public override bool equiv(object x, object y)
             {
-                return toBigInt(x).Equals(toBigInt(y));
+                return ToBigInt(x).Equals(ToBigInt(y));
             }
 
             public override bool lt(object x, object y)
             {
-                return toBigInteger(x) < toBigInteger(y);
+                return ToBigInteger(x) < ToBigInteger(y);
             }
 
             public override object negate(object x)
             {
-                return BigInt.fromBigInteger(-toBigInteger(x));
+                return BigInt.fromBigInteger(-ToBigInteger(x));
             }
 
             public override object inc(object x)
             {
-                return BigInt.fromBigInteger(toBigInteger(x) + BigInteger.ONE);
+                return BigInt.fromBigInteger(ToBigInteger(x) + BigInteger.ONE);
             }
 
             public override object dec(object x)
             {
-                return BigInt.fromBigInteger(toBigInteger(x) - BigInteger.ONE);
+                return BigInt.fromBigInteger(ToBigInteger(x) - BigInteger.ONE);
             }
 
             #endregion
@@ -1130,59 +1168,59 @@ namespace clojure.lang
 
             public override object add(object x, object y)
             {
-                BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                BigDecimal.Context? c = (BigDecimal.Context?)RT.MathContextVar.deref();
                 return c == null
-                    ? toBigDecimal(x).Add(toBigDecimal(y))
-                    : toBigDecimal(x).Add(toBigDecimal(y), c.Value);
+                    ? ToBigDecimal(x).Add(ToBigDecimal(y))
+                    : ToBigDecimal(x).Add(ToBigDecimal(y), c.Value);
             }
 
             public override object multiply(object x, object y)
             {
-                BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                BigDecimal.Context? c = (BigDecimal.Context?)RT.MathContextVar.deref();
                 return c == null
-                   ? toBigDecimal(x).Multiply(toBigDecimal(y))
-                   : toBigDecimal(x).Multiply(toBigDecimal(y), c.Value);
+                   ? ToBigDecimal(x).Multiply(ToBigDecimal(y))
+                   : ToBigDecimal(x).Multiply(ToBigDecimal(y), c.Value);
             }
 
             public override object divide(object x, object y)
             {
-                BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                BigDecimal.Context? c = (BigDecimal.Context?)RT.MathContextVar.deref();
                 return c == null
-                    ? toBigDecimal(x).Divide(toBigDecimal(y))
-                    : toBigDecimal(x).Divide(toBigDecimal(y), c.Value);
+                    ? ToBigDecimal(x).Divide(ToBigDecimal(y))
+                    : ToBigDecimal(x).Divide(ToBigDecimal(y), c.Value);
             }
 
             public override object quotient(object x, object y)
             {
-                BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                BigDecimal.Context? c = (BigDecimal.Context?)RT.MathContextVar.deref();
                 return c == null
-                    ? toBigDecimal(x).DivideInteger(toBigDecimal(y))
-                    : toBigDecimal(x).DivideInteger(toBigDecimal(y), c.Value);
+                    ? ToBigDecimal(x).DivideInteger(ToBigDecimal(y))
+                    : ToBigDecimal(x).DivideInteger(ToBigDecimal(y), c.Value);
             }
 
             public override object remainder(object x, object y)
             {
-                BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                BigDecimal.Context? c = (BigDecimal.Context?)RT.MathContextVar.deref();
                 return c == null
-                    ? toBigDecimal(x).Mod(toBigDecimal(y))
-                    : toBigDecimal(x).Mod(toBigDecimal(y), c.Value);
+                    ? ToBigDecimal(x).Mod(ToBigDecimal(y))
+                    : ToBigDecimal(x).Mod(ToBigDecimal(y), c.Value);
             }
 
             public override bool equiv(object x, object y)
             {
-                return toBigDecimal(x).Equals(toBigDecimal(y));
+                return ToBigDecimal(x).Equals(ToBigDecimal(y));
             }
 
             public override bool lt(object x, object y)
             {
-                return toBigDecimal(x).CompareTo(toBigDecimal(y)) < 0;
+                return ToBigDecimal(x).CompareTo(ToBigDecimal(y)) < 0;
             }
 
 
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
             public override object negate(object x)
             {
-                BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                BigDecimal.Context? c = (BigDecimal.Context?)RT.MathContextVar.deref();
                 return c == null
                     ? ((BigDecimal)x).Negate()
                     : ((BigDecimal)x).Negate(c.Value);
@@ -1190,7 +1228,7 @@ namespace clojure.lang
 
             public override object inc(object x)
             {
-                BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                BigDecimal.Context? c = (BigDecimal.Context?)RT.MathContextVar.deref();
                 BigDecimal bx = (BigDecimal)x;
                 return c == null
                     ? bx.Add(BigDecimal.ONE)
@@ -1199,7 +1237,7 @@ namespace clojure.lang
 
             public override object dec(object x)
             {
-                BigDecimal.Context? c = (BigDecimal.Context?)RT.MATH_CONTEXT.deref();
+                BigDecimal.Context? c = (BigDecimal.Context?)RT.MathContextVar.deref();
                 BigDecimal bx = (BigDecimal)x;
                 return c == null
                     ? bx.Subtract(BigDecimal.ONE)
@@ -1276,6 +1314,7 @@ namespace clojure.lang
        
         #region Array c-tors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float[] float_array(int size, object init)
         {
             float[] ret = new float[size];
@@ -1294,6 +1333,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float[] float_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
@@ -1309,6 +1349,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double[] double_array(int size, Object init)
         {
             double[] ret = new double[size];
@@ -1327,6 +1368,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double[] double_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
@@ -1342,6 +1384,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int[] int_array(int size, Object init)
         {
             int[] ret = new int[size];
@@ -1360,6 +1403,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int[] int_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
@@ -1375,6 +1419,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long[] long_array(int size, Object init)
         {
             long[] ret = new long[size];
@@ -1393,6 +1438,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long[] long_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
@@ -1409,6 +1455,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static short[] short_array(int size, Object init)
         {
             short[] ret = new short[size];
@@ -1427,6 +1474,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static short[] short_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
@@ -1443,6 +1491,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static char[] char_array(int size, Object init)
         {
             char[] ret = new char[size];
@@ -1461,6 +1510,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static char[] char_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
@@ -1477,6 +1527,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static byte[] byte_array(int size, Object init)
         {
             byte[] ret = new byte[size];
@@ -1495,6 +1546,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static byte[] byte_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
@@ -1511,6 +1563,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static bool[] boolean_array(int size, Object init)
         {
             bool[] ret = new bool[size];
@@ -1529,6 +1582,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static bool[] boolean_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
@@ -1545,41 +1599,49 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static bool[] booleans(Object array)
         {
             return (bool[])array;
         }
-        
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static byte[] bytes(Object array)
         {
             return (byte[])array;
         }
-        
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static char[] chars(Object array)
         {
             return (char[])array;
         }
-        
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static short[] shorts(Object array)
         {
             return (short[])array;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float[] floats(Object array)
         {
             return (float[])array;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double[] doubles(Object array)
         {
             return (double[])array;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int[] ints(Object array)
         {
             return (int[])array;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long[] longs(Object array)
         {
             return (long[])array;
@@ -1589,121 +1651,145 @@ namespace clojure.lang
 
         #region Double overloads for basic ops
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "num")]
         public static object num(object x)
         {
             return x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "num")]
         public static object num(float x)
         {
             return x;
-        } 
+        }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "num")]
         public static object num(double x)
         {
             return x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static double add(double x, double y)
         {
             return x + y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static double addP(double x, double y)
         {
             return x + y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static double minus(double x, double y)
         {
             return x - y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static double minusP(double x, double y)
         {
             return x - y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static double minus(double x)
         {
             return -x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static double minusP(double x)
         {
             return -x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "inc")]
         public static double inc(double x)
         {
             return x + 1;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "inc")]
         public static double incP(double x)
         {
             return x + 1;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dec")]
         public static double dec(double x)
         {
             return x - 1;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dec")]
         public static double decP(double x)
         {
             return x - 1;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static double multiply(double x, double y)
         {
             return x * y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static double multiplyP(double x, double y)
         {
             return x * y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "divide")]
         public static double divide(double x, double y)
         {
             return x / y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(double x, double y)
         {
             return x == y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lt")]
         public static bool lt(double x, double y)
         {
             return x < y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lte")]
         public static bool lte(double x, double y)
         {
             return x <= y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gt")]
         public static bool gt(double x, double y)
         {
             return x > y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gte")]
         public static bool gte(double x, double y)
         {
             return x >= y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
         public static bool isPos(double x)
         {
             return x > 0;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
         public static bool isNeg(double x)
         {
             return x < 0;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
         public static bool isZero(double x)
         {
             return x == 0;
@@ -1713,7 +1799,7 @@ namespace clojure.lang
 
         #region Int overloads for basic ops
 
-        static int throwIntOverflow()
+        static int ThrowIntOverflow()
         {
             throw new ArithmeticException("integer overflow");
         }
@@ -1723,119 +1809,178 @@ namespace clojure.lang
         //    return x;
         //}
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int unchecked_int_add(int x, int y)
         {
             return x + y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int unchecked_int_subtract(int x, int y)
         {
             return x - y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int unchecked_int_negate(int x)
         {
             return -x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int unchecked_int_inc(int x)
         {
             return x + 1;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int unchecked_int_dec(int x)
         {
             return x - 1;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int unchecked_int_multiply(int x, int y)
         {
             return x * y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int unchecked_int_divide(int x, int y)
         {
             return x / y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int unchecked_int_remainder(int x, int y)
         {
             return x % y;
         }
 
-        #endregion
+       #endregion
 
         #region Long overloads for basic ops
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "num")]
         public static object num(long x)
         {
             return x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long unchecked_add(long x, long y) { return x + y; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long unchecked_minus(long x, long y) { return x - y; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long unchecked_multiply(long x, long y) { return x * y; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long unchecked_minus(long x) { return -x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long unchecked_inc(long x) { return x + 1; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long unchecked_dec(long x) { return x - 1; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object unchecked_add(object x, object y) { return add(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object unchecked_minus(object x, object y) { return minus(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object unchecked_multiply(object x, object y) { return multiply(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object unchecked_minus(object x) { return minus(x); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object unchecked_inc(object x) { return inc(x); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object unchecked_dec(object x) { return dec(x); }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_add(double x, double y) { return add(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_minus(double x, double y) { return minus(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_multiply(double x, double y) { return multiply(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_minus(double x) { return minus(x); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_inc(double x) { return inc(x); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_dec(double x) { return dec(x); }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_add(double x, object y) { return add(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_minus(double x, object y) { return minus(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_multiply(double x, object y) { return multiply(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_add(object x, double y) { return add(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_minus(object x, double y) { return minus(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_multiply(object x, double y) { return multiply(x, y); }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_add(double x, long y) { return add(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_minus(double x, long y) { return minus(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_multiply(double x, long y) { return multiply(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_add(long x, double y) { return add(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_minus(long x, double y) { return minus(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double unchecked_multiply(long x, double y) { return multiply(x, y); }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object unchecked_add(long x, object y) { return add(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object unchecked_minus(long x, object y) { return minus(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object unchecked_multiply(long x, object y) { return multiply(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object unchecked_add(object x, long y) { return add(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object unchecked_minus(object x, long y) { return minus(x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object unchecked_multiply(object x, long y) { return multiply(x, y); }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
         public static object quotient(double x, Object y) { return quotient((Object)x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
         public static object quotient(Object x, double y) { return quotient(x, (Object)y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
         public static object quotient(long x, Object y) { return quotient((Object)x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
         public static object quotient(Object x, long y) { return quotient(x, (Object)y); }
-        public static double quotient(double x, long y){return quotient(x,(double)y);}
-        public static double quotient(long x, double y){return quotient((double)x,y);}
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
+        public static double quotient(double x, long y) { return quotient(x, (double)y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
+        public static double quotient(long x, double y) { return quotient((double)x, y); }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remainder")]
         public static object remainder(double x, Object y) { return remainder((Object)x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remainder")]
         public static object remainder(Object x, double y) { return remainder(x, (Object)y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remainder")]
         public static object remainder(long x, Object y) { return remainder((Object)x, y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remainder")]
         public static object remainder(Object x, long y) { return remainder(x, (Object)y); }
-        public static double remainder(double x, long y){return remainder(x,(double)y);}
-        public static double remainder(long x, double y){return remainder((double)x,y);}
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remainder")]
+        public static double remainder(double x, long y) { return remainder(x, (double)y); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remainder")]
+        public static double remainder(long x, double y) { return remainder((double)x, y); }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static long add(long x, long y)
         {
             long ret = x + y;
             if ((ret ^ x) < 0 && (ret ^ y) < 0)
-                return throwIntOverflow();
+                return ThrowIntOverflow();
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static object addP(long x, long y)
         {
             long ret = x + y;
@@ -1844,14 +1989,16 @@ namespace clojure.lang
             return num(ret);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static long minus(long x, long y)
         {
             long ret = x - y;
             if (((ret ^ x) < 0 && (ret ^ ~y) < 0))
-                return throwIntOverflow();
+                return ThrowIntOverflow();
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static object minusP(long x, long y)
         {
             long ret = x - y;
@@ -1860,13 +2007,15 @@ namespace clojure.lang
             return num(ret);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static long minus(long x)
         {
             if (x == Int64.MinValue)
-                return throwIntOverflow();
+                return ThrowIntOverflow();
             return -x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static object minusP(long x)
         {
             if (x == Int64.MinValue)
@@ -1874,13 +2023,15 @@ namespace clojure.lang
             return num(-x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "inc")]
         public static long inc(long x)
         {
             if (x == Int64.MaxValue)
-                return throwIntOverflow();
+                return ThrowIntOverflow();
             return x + 1;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "inc")]
         public static object incP(long x)
         {
             if (x == Int64.MaxValue)
@@ -1888,13 +2039,15 @@ namespace clojure.lang
             return num(x + 1);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dec")]
         public static long dec(long x)
         {
             if (x == Int64.MinValue)
-                return throwIntOverflow();
+                return ThrowIntOverflow();
             return x - 1;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dec")]
         public static object decP(long x)
         {
             if (x == Int64.MinValue)
@@ -1902,14 +2055,16 @@ namespace clojure.lang
             return num(x - 1);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static long multiply(long x, long y)
         {
             long ret = x * y;
             if (y != 0 && ret / y != x)
-                return throwIntOverflow();
+                return ThrowIntOverflow();
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static object multiplyP(long x, long y)
         {
             long ret = x * y;
@@ -1918,51 +2073,61 @@ namespace clojure.lang
             return num(ret);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
         public static long quotient(long x, long y)
         {
             return x / y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remainder")]
         public static long remainder(long x, long y)
         {
             return x % y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(long x, long y)
         {
             return x == y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lt")]
         public static bool lt(long x, long y)
         {
             return x < y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lte")]
         public static bool lte(long x, long y)
         {
             return x <= y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gt")]
         public static bool gt(long x, long y)
         {
             return x > y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gte")]
         public static bool gte(long x, long y)
         {
             return x >= y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
         public static bool isPos(long x)
         {
             return x > 0;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
         public static bool isNeg(long x)
         {
             return x < 0;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
         public static bool isZero(long x)
         {
             return x == 0;
@@ -1974,21 +2139,25 @@ namespace clojure.lang
 
         #region and
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "and")]
         public static long and(object x, object y)
         {
             return and(bitOpsCast(x), bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "and")]
         public static long and(object x, long y)
         {
             return and(bitOpsCast(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "and")]
         public static long and(long x, object y)
         {
             return and(x, bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "and")]
         public static long and(long x, long y)
         {
             return x & y;
@@ -1998,21 +2167,25 @@ namespace clojure.lang
 
         #region or
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "or")]
         public static long or(object x, object y)
         {
             return or(bitOpsCast(x),bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "or")]
         public static long or(object x, long y)
         {
             return or(bitOpsCast(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "or")]
         public static long or(long x, object y)
         {
             return or(x, bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "or")]
         public static long or(long x, long y)
         {
             return x | y;
@@ -2022,21 +2195,25 @@ namespace clojure.lang
 
         #region xor
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "xor")]
         public static long xor(object x, object y)
         {
             return xor(bitOpsCast(x), bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "xor")]
         public static long xor(object x, long y)
         {
             return xor(bitOpsCast(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "xor")]
         public static long xor(long x, object y)
         {
             return xor(x, bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "xor")]
         public static long xor(long x, long y)
         {
             return x ^ y;
@@ -2046,21 +2223,25 @@ namespace clojure.lang
 
         #region andNot
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "and")]
         public static long andNot(object x, object y)
         {
             return andNot(bitOpsCast(x), bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "and")]
         public static long andNot(object x, long y)
         {
             return andNot(bitOpsCast(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "and")]
         public static long andNot(long x, object y)
         {
             return andNot(x, bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "and")]
         public static long andNot(long x, long y)
         {
             return x & ~y;
@@ -2070,26 +2251,31 @@ namespace clojure.lang
 
         #region clearBit
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "clear")]
         public static long clearBit(object x, object y)
         {
             return clearBit(bitOpsCast(x), bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "clear")]
         public static long clearBit(object x, long y)
         {
             return clearBit(bitOpsCast(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "clear")]
         public static long clearBit(long x, object y)
         {
             return clearBit(x, bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "clear")]
         public static long clearBit(long x, long n)
         {
             return clearBit(x, (int)n);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "clear")]
         public static long clearBit(long x, int n)
         {
             return x & ~(1L << n);
@@ -2099,26 +2285,31 @@ namespace clojure.lang
 
         #region setBit
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public static long setBit(object x, object y)
         {
             return setBit(bitOpsCast(x), bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public static long setBit(object x, long y)
         {
             return setBit(bitOpsCast(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public static long setBit(long x, object y)
         {
             return setBit(x, bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public static long setBit(long x, long n)
         {
             return setBit(x, (int)n);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public static long setBit(long x, int n)
         {
             return x | (1L << n);
@@ -2128,26 +2319,31 @@ namespace clojure.lang
 
         #region flipBit
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "flip")]
         public static long flipBit(object x, object y)
         {
             return flipBit(bitOpsCast(x), bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "flip")]
         public static long flipBit(object x, long y)
         {
             return flipBit(bitOpsCast(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "flip")]
         public static long flipBit(long x, object y)
         {
             return flipBit(x, bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "flip")]
         public static long flipBit(long x, long n)
         {
             return flipBit(x, (int)n);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "flip")]
         public static long flipBit(long x, int n)
         {
             return x ^ (1L << n);
@@ -2157,26 +2353,31 @@ namespace clojure.lang
 
         #region testBit
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "test")]
         public static bool testBit(object x, object y)
         {
             return testBit(bitOpsCast(x), bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "test")]
         public static bool testBit(object x, long y)
         {
             return testBit(bitOpsCast(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "test")]
         public static bool testBit(long x, object y)
         {
             return testBit(x, bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "test")]
         public static bool testBit(long x, long n)
         {
             return testBit(x, (int)n);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "test")]
         public static bool testBit(long x, int n)
         {
             return (x & (1L << n)) != 0;
@@ -2188,366 +2389,439 @@ namespace clojure.lang
 
         #region Overload resolution
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static object add(long x, Object y)
         {
             return add((Object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static object add(Object x, long y)
         {
             return add(x, (Object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static object addP(long x, Object y)
         {
             return addP((Object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static object addP(Object x, long y)
         {
             return addP(x, (Object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static double add(double x, Object y)
         {
             return add(x, Util.ConvertToDouble(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static double add(Object x, double y)
         {
             return add(Util.ConvertToDouble(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static double add(double x, long y)
         {
             return x + y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static double add(long x, double y)
         {
             return x + y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static double addP(double x, Object y)
         {
             return addP(x, Util.ConvertToDouble(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static double addP(Object x, double y)
         {
             return addP(Util.ConvertToDouble(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static double addP(double x, long y)
         {
             return x + y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static double addP(long x, double y)
         {
             return x + y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static object minus(long x, Object y)
         {
             return minus((Object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static object minus(Object x, long y)
         {
             return minus(x, (Object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static object minusP(long x, Object y)
         {
             return minusP((Object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static object minusP(Object x, long y)
         {
             return minusP(x, (Object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static double minus(double x, Object y)
         {
             return minus(x, Util.ConvertToDouble(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static double minus(Object x, double y)
         {
             return minus(Util.ConvertToDouble(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static double minus(double x, long y)
         {
             return x - y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static double minus(long x, double y)
         {
             return x - y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static double minusP(double x, Object y)
         {
             return minusP(x, Util.ConvertToDouble(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static double minusP(Object x, double y)
         {
             return minusP(Util.ConvertToDouble(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static double minusP(double x, long y)
         {
             return x - y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
         public static double minusP(long x, double y)
         {
             return x - y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static object multiply(long x, Object y)
         {
             return multiply((Object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static object multiply(Object x, long y)
         {
             return multiply(x, (Object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static object multiplyP(long x, Object y)
         {
             return multiplyP((Object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static object multiplyP(Object x, long y)
         {
             return multiplyP(x, (Object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static double multiply(double x, Object y)
         {
             return multiply(x, Util.ConvertToDouble(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static double multiply(Object x, double y)
         {
             return multiply(Util.ConvertToDouble(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static double multiply(double x, long y)
         {
             return x * y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static double multiply(long x, double y)
         {
             return x*y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static double multiplyP(double x, Object y)
         {
             return multiplyP(x, Util.ConvertToDouble(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static double multiplyP(Object x, double y)
         {
             return multiplyP(Util.ConvertToDouble(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static double multiplyP(double x, long y)
         {
             return x * y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static double multiplyP(long x, double y)
         {
             return x * y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "divide")]
         public static object divide(long x, long y)
         {
             return divide((object)x, (object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "divide")]
         public static object divide(long x, Object y)
         {
             return divide((Object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "divide")]
         public static object divide(Object x, long y)
         {
             return divide(x, (Object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "divide")]
         public static double divide(double x, Object y)
         {
             return x / Util.ConvertToDouble(y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "divide")]
         public static double divide(Object x, double y)
         {
             return Util.ConvertToDouble(x) / y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "divide")]
         public static double divide(double x, long y)
         {
             return x / y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "divide")]
         public static double divide(long x, double y)
         {
             return x / y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lt")]
         public static bool lt(long x, Object y)
         {
             return lt((Object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lt")]
         public static bool lt(Object x, long y)
         {
             return lt(x, (Object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lt")]
         public static bool lt(double x, Object y)
         {
             return x < Util.ConvertToDouble(y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lt")]
         public static bool lt(Object x, double y)
         {
             return Util.ConvertToDouble(x) < y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lt")]
         public static bool lt(double x, long y)
         {
             return x < y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lt")]
         public static bool lt(long x, double y)
         {
             return x < y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lte")]
         public static bool lte(long x, Object y)
         {
             return lte((Object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lte")]
         public static bool lte(Object x, long y)
         {
             return lte(x, (Object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lte")]
         public static bool lte(double x, Object y)
         {
             return x <= Util.ConvertToDouble(y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lte")]
         public static bool lte(Object x, double y)
         {
             return Util.ConvertToDouble(x) <= y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lte")]
         public static bool lte(double x, long y)
         {
             return x <= y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lte")]
         public static bool lte(long x, double y)
         {
             return x <= y;
         }
-        
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gt")]
         public static bool gt(long x, Object y)
         {
             return gt((Object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gt")]
         public static bool gt(Object x, long y)
         {
             return gt(x, (Object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gt")]
         public static bool gt(double x, Object y)
         {
             return x > Util.ConvertToDouble(y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gt")]
         public static bool gt(Object x, double y)
         {
             return Util.ConvertToDouble(x) > y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gt")]
         public static bool gt(double x, long y)
         {
             return x > y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gt")]
         public static bool gt(long x, double y)
         {
             return x > y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gte")]
         public static bool gte(long x, Object y)
         {
             return gte((Object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gte")]
         public static bool gte(Object x, long y)
         {
             return gte(x, (Object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gte")]
         public static bool gte(double x, Object y)
         {
             return x >= Util.ConvertToDouble(y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gte")]
         public static bool gte(Object x, double y)
         {
             return Util.ConvertToDouble(x) >= y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gte")]
         public static bool gte(double x, long y)
         {
             return x >= y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gte")]
         public static bool gte(long x, double y)
         {
             return x >= y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(long x, Object y)
         {
             return equiv((Object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(Object x, long y)
         {
             return equiv(x, (Object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(double x, Object y)
         {
             return x == Util.ConvertToDouble(y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(Object x, double y)
         {
             return Util.ConvertToDouble(x) == y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(double x, long y)
         {
             return x == y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(long x, double y)
         {
             return x == y;
@@ -2557,6 +2831,7 @@ namespace clojure.lang
 
         #region min/max
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double max(double x, double y)
         {
             if (x > y)
@@ -2569,6 +2844,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(double x, long y)
         {
             if (x > y)
@@ -2581,6 +2857,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(double x, Object y)
         {
             if (x > Util.ConvertToDouble(y))
@@ -2593,6 +2870,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(long x, double y)
         {
             if (x > y)
@@ -2606,6 +2884,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long max(long x, long y)
         {
             if (x > y)
@@ -2618,6 +2897,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(long x, Object y)
         {
             if (gt(x, y))
@@ -2630,6 +2910,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(Object x, long y)
         {
             if (gt(x, y))
@@ -2642,6 +2923,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(Object x, double y)
         {
             if (Util.ConvertToDouble(x) > y)
@@ -2654,6 +2936,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(Object x, Object y)
         {
             if (gt(x, y))
@@ -2667,6 +2950,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double min(double x, double y)
         {
             if (x < y)
@@ -2679,6 +2963,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(double x, long y)
         {
             if (x < y)
@@ -2691,6 +2976,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(double x, Object y)
         {
             if (x < Util.ConvertToDouble(y))
@@ -2703,6 +2989,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(long x, double y)
         {
             if (x < y)
@@ -2716,6 +3003,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long min(long x, long y)
         {
             if (x < y)
@@ -2728,6 +3016,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(long x, Object y)
         {
             if (lt(x, y))
@@ -2740,6 +3029,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(Object x, long y)
         {
             if (lt(x, y))
@@ -2752,6 +3042,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(Object x, double y)
         {
             if (Util.ConvertToDouble(x) < y)
@@ -2764,6 +3055,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(Object x, Object y)
         {
             if (lt(x, y))

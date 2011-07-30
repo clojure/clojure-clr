@@ -37,8 +37,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Symbols
 
-        public static readonly Symbol BY_REF = Symbol.intern("by-ref");
-        public static readonly Symbol TYPE_ARGS = Symbol.intern("type-args");
+        public static readonly Symbol ByRefSym = Symbol.intern("by-ref");
+        public static readonly Symbol TypeArgsSym = Symbol.intern("type-args");
 
         #endregion
 
@@ -74,7 +74,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Expr instance = null;
                 if (t == null)
-                    instance = Compiler.Analyze(pcon.EvEx(),RT.second(sform));
+                    instance = Compiler.Analyze(pcon.EvalOrExpr(),RT.second(sform));
 
                 bool isZeroArityCall = RT.Length(sform) == 3 && (RT.third(sform) is Symbol || RT.third(sform) is Keyword);
 
@@ -150,7 +150,7 @@ namespace clojure.lang.CljCompiler.Ast
                 //    call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));
 
                 object fourth = RT.fourth(sform);
-                if (fourth is ISeq && RT.first(fourth) is Symbol && ((Symbol)RT.first(fourth)).Equals(TYPE_ARGS))
+                if (fourth is ISeq && RT.first(fourth) is Symbol && ((Symbol)RT.first(fourth)).Equals(TypeArgsSym))
                  {
                     // We have a type args supplied for a generic method call
                     // (. thing methodname (type-args type1 ... ) args ...)
@@ -206,7 +206,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (argAsSeq != null)
                 {
                     Symbol op = RT.first(argAsSeq) as Symbol;
-                    if (op != null && op.Equals(BY_REF))
+                    if (op != null && op.Equals(ByRefSym))
                     {
                         if (RT.Length(argAsSeq) != 2)
                             throw new ArgumentException("Wrong number of arguments to {0}", op.Name);
@@ -222,7 +222,7 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
-                Expr expr = Compiler.Analyze(pcon.EvEx(),arg);
+                Expr expr = Compiler.Analyze(pcon.EvalOrExpr(),arg);
 
                 args.Add(new HostArg(paramType, expr, lb));
             }
@@ -287,7 +287,7 @@ namespace clojure.lang.CljCompiler.Ast
             else if ( primt == typeof(long) && paramType == typeof(int) )
             {
                 Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
-                if (RT.booleanCast(RT.UNCHECKED_MATH.deref()))
+                if (RT.booleanCast(RT.UncheckedMathVar.deref()))
                     expr = Expression.Call(Compiler.Method_RT_uncheckedIntCast_long, expr);
                 else
                     expr = Expression.Call(Compiler.Method_RT_intCast_long, expr);
@@ -378,7 +378,7 @@ namespace clojure.lang.CljCompiler.Ast
                     return Expression.Call(null, Method_RT_booleanCast, objArgExpr);
                 //if (Util.IsPrimitiveNumeric(argType) && Util.IsPrimitiveNumeric(paramType))
                 //    return Expression.Convert(argExpr,paramType);
-                if (RT.booleanCast(RT.UNCHECKED_MATH.deref()))
+                if (RT.booleanCast(RT.UncheckedMathVar.deref()))
                 {
                     if (paramType == typeof(sbyte))
                         return Expression.Call(null, Method_RT_uncheckedSbyteCast, objArgExpr);
@@ -444,7 +444,7 @@ namespace clojure.lang.CljCompiler.Ast
         public static Expression GenBoxReturn(Expression expr, Type returnType, ObjExpr objx, GenContext context)
         {
             if (returnType == typeof(void))
-                return Expression.Block(expr, Compiler.NIL_EXPR.GenCode(RHC.Expression,objx,context));
+                return Expression.Block(expr, Compiler.NilExprInstance.GenCode(RHC.Expression,objx,context));
 
             if (returnType.IsPrimitive)
             {

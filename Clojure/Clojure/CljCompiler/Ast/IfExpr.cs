@@ -84,7 +84,7 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new Exception("Too few arguments to if");
 
 
-                Expr testExpr = Compiler.Analyze(pcon.EvEx().SetAssign(false),RT.second(form));
+                Expr testExpr = Compiler.Analyze(pcon.EvalOrExpr().SetAssign(false),RT.second(form));
                 Expr thenExpr = Compiler.Analyze(pcon.SetAssign(false), RT.third(form));
                 Expr elseExpr = Compiler.Analyze(pcon.SetAssign(false), RT.fourth(form));
 

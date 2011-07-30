@@ -83,7 +83,7 @@ namespace clojure.lang.CljCompiler.Ast
                     exprs = exprs.cons(e);
                 }
                 if (exprs.count() == 0)
-                    exprs = exprs.cons(Compiler.NIL_EXPR);
+                    exprs = exprs.cons(Compiler.NilExprInstance);
 
                 return new BodyExpr(exprs);
             }

@@ -108,7 +108,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expr Parse(ParserContext pcon, ISeq form)
         {
-            pcon = pcon.EvEx();
+            pcon = pcon.EvalOrExpr();
 
             // TODO: DO we need the recur context here and below?
             Expr fexpr = Compiler.Analyze(pcon,form.first());
@@ -138,7 +138,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if (primc != null)
                             return Compiler.Analyze(pcon,
                                 RT.listStar(Symbol.intern(".invokePrim"),
-                                            ((Symbol)form.first()).withMeta(RT.map(RT.TAG_KEY, Symbol.intern(primc))),
+                                            ((Symbol)form.first()).withMeta(RT.map(RT.TagKey, Symbol.intern(primc))),
                                             form.next()));
                         break;
                     }

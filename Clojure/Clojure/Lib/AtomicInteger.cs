@@ -59,6 +59,7 @@ namespace clojure.lang
         /// Gets the current value.
         /// </summary>
         /// <returns>The current value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public int get() 
         {
             return _val;
@@ -68,6 +69,7 @@ namespace clojure.lang
         /// Increments the value and returns the new value.
         /// </summary>
         /// <returns>The new value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "increment")]
         public int incrementAndGet()
         {
             return Interlocked.Increment(ref _val);
@@ -77,6 +79,7 @@ namespace clojure.lang
         /// Increments the value and returns the original value.
         /// </summary>
         /// <returns>The original value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public int getAndIncrement()
         {
             return Interlocked.Increment(ref _val)-1;
@@ -86,6 +89,7 @@ namespace clojure.lang
         /// Decrements the value and returns the new value.
         /// </summary>
         /// <returns>The new value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "decrement")]
         public int decrementAndGet()
         {
             return Interlocked.Decrement(ref _val);
@@ -95,6 +99,7 @@ namespace clojure.lang
         /// Decrements the value and returns the original value.
         /// </summary>
         /// <returns>The original value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public int getAndDecrement()
         {
             return Interlocked.Decrement(ref _val) - 1;
@@ -105,6 +110,7 @@ namespace clojure.lang
         /// <param name="oldVal">The expected value.</param>
         /// <param name="newVal">The new value.</param>
         /// <returns><value>true</value> if the value was set; <value>false</value> otherwise.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "compare")]
         public bool compareAndSet(int oldVal, int newVal)
         {
             int origVal = Interlocked.CompareExchange(ref _val, newVal, oldVal);
@@ -116,6 +122,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="newVal">The new value.</param>
         /// <returns>The new value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public int set(int newVal)
         {
             return Interlocked.Exchange(ref _val,newVal);

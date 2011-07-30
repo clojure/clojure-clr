@@ -25,12 +25,14 @@ namespace clojure.lang
         /// Gets the namespace name for the object.
         /// </summary>
         /// <returns>The namespace name.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         string getNamespace();
 
         /// <summary>
         /// Gets the name of the object
         /// </summary>
         /// <returns>The name.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         string getName();
     }
 }

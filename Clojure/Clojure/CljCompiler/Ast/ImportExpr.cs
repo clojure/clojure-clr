@@ -69,7 +69,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public object Eval()
         {
-            Namespace ns = (Namespace)RT.CURRENT_NS.deref();
+            Namespace ns = (Namespace)RT.CurrentNSVar.deref();
             ns.importClass(RT.classForName(_c));
             return null;
         }

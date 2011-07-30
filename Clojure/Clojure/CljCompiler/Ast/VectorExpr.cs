@@ -58,7 +58,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expr Parse(ParserContext pcon, IPersistentVector form)
         {
-            ParserContext pconToUse = pcon.EvEx();
+            ParserContext pconToUse = pcon.EvalOrExpr();
             bool constant = true;
 
             IPersistentVector args = PersistentVector.EMPTY;

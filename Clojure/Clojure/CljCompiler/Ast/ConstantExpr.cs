@@ -77,13 +77,13 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 object v = RT.second(form);
                 if (v == null)
-                    return Compiler.NIL_EXPR;
+                    return Compiler.NilExprInstance;
                 else if (v is Boolean)
                 {
                     if ((bool)v)
-                        return Compiler.TRUE_EXPR;
+                        return Compiler.TrueExprInstance;
                     else
-                        return Compiler.FALSE_EXPR;
+                        return Compiler.FalseExprInstance;
                 }
                 else if (Util.IsNumeric(v))
                     return NumberExpr.Parse(v);

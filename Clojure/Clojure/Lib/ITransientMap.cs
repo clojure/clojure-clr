@@ -31,6 +31,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The key to remove</param>
         /// <returns>A new map with the key removed (or the same map if the key is not contained).</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         ITransientMap without(object key);
 
         new IPersistentMap persistent();

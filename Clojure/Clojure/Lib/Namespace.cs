@@ -89,6 +89,7 @@ namespace clojure.lang
         /// <summary>
         /// Get all namespaces.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "all")]
         public static ISeq all
         {
             get
@@ -104,6 +105,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="name">The symbol naming the namespace.</param>
         /// <returns>An existing or new namespace</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "find")]
         public static Namespace findOrCreate(Symbol name)
         {
             Namespace ns = _namespaces.Get(name);
@@ -120,9 +122,10 @@ namespace clojure.lang
         /// <param name="name">The (Symbol) name of the namespace to remove.</param>
         /// <returns>The namespace that was removed.</returns>
         /// <remarks>Trying to remove the clomure namespace throws an exception.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remove")]
         public static Namespace remove(Symbol name)
         {
-            if (name.Equals(RT.CLOJURE_NS.Name))
+            if (name.Equals(RT.ClojureNamespace.Name))
                 throw new ArgumentException("Cannot remove clojure namespace");
             return _namespaces.Remove(name);
         }
@@ -132,6 +135,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="name">The name of the namespace to find.</param>
         /// <returns>The namespace with the given name, or <value>null</value> if no such namespace exists.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "find")]
         public static Namespace find(Symbol name)
         {
             return _namespaces.Get(name);
@@ -204,6 +208,7 @@ namespace clojure.lang
         /// <para>It is an error to intern a symbol with a namespace.</para>
         /// <para>This has to deal with other threads also interning.</para>
         /// </remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "intern")]
         public Var intern(Symbol sym)
         {
             if (sym.Namespace != null)
@@ -247,7 +252,7 @@ namespace clojure.lang
                 Namespace ns = ovar.Namespace;
                 if (ns == this)
                     return;
-                if (ns != RT.CLOJURE_NS)
+                if (ns != RT.ClojureNamespace)
                     throw new InvalidOperationException(sym + " already refers to: " + o + " in namespace: " + _name);
             }
             RT.errPrintWriter().WriteLine("WARNING: {0} already refers to: {1} in namespace: {2}, being replaced by: {3}",
@@ -291,6 +296,7 @@ namespace clojure.lang
         /// Remove a symbol mapping from the namespace.
         /// </summary>
         /// <param name="sym">The symbol to remove.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "unmap")]
         public void unmap(Symbol sym)
         {
             if (sym.Namespace != null)
@@ -312,6 +318,7 @@ namespace clojure.lang
         /// <param name="t">The type to associate with the symbol.</param>
         /// <returns>The Type.</returns>
         /// <remarks>Named importClass instead of ImportType for core.clj compatibility.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "import")]
         public Type importClass(Symbol sym, Type t)
         {
             return ReferenceClass(sym, t);
@@ -324,6 +331,7 @@ namespace clojure.lang
         /// <param name="t">The type to associate with the symbol</param>
         /// <returns>The Type.</returns>
         /// <remarks>Named importClass instead of ImportType for core.clj compatibility.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "import")]
         public Type importClass(Type t)
         {
             string n = Util.NameForType(t);   
@@ -336,6 +344,7 @@ namespace clojure.lang
         /// <param name="sym"></param>
         /// <param name="var"></param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "refer")]
         public Var refer(Symbol sym, Var var)
         {
             return (Var)reference(sym, var);
@@ -386,6 +395,7 @@ namespace clojure.lang
         /// <param name="alias">The alias for the namespace.</param>
         /// <param name="ns">The namespace being aliased.</param>
         /// <remarks>Lowercase name for core.clj compatibility</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public void addAlias(Symbol alias, Namespace ns)
         {
             if (alias == null || ns == null)
@@ -411,6 +421,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="alias">The alias name</param>
         /// <remarks>Lowercase name for core.clj compatibility</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remove")]
         public void removeAlias(Symbol alias)
         {
             IPersistentMap map = Aliases;
@@ -431,6 +442,7 @@ namespace clojure.lang
         /// Get the namespace name.
         /// </summary>
         /// <returns>The <see cref="Symbol">Symbol</see> naming the namespace.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public Symbol getName()
         {
             return Name;
@@ -440,6 +452,7 @@ namespace clojure.lang
         /// Get the mappings of the namespace.
         /// </summary>
         /// <returns>The mappings.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public IPersistentMap getMappings()
         {
             return Mappings;
@@ -449,6 +462,7 @@ namespace clojure.lang
         /// Get the aliases.
         /// </summary>
         /// <returns>A map of aliases.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public IPersistentMap getAliases()
         {
             return Aliases;

@@ -43,8 +43,8 @@ namespace clojure.lang
             }
         }
         
-        static readonly Keyword CONTINUE = Keyword.intern(null, "continue");
-        static readonly Keyword FAIL = Keyword.intern(null, "fail");
+        static readonly Keyword ContinueKeyword = Keyword.intern(null, "continue");
+        static readonly Keyword FailKeyword = Keyword.intern(null, "fail");
 
         #endregion
 
@@ -83,12 +83,13 @@ namespace clojure.lang
         /// Number of items in the queue.  For core.clj compatibility.
         /// </summary>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public int getQueueCount()
         {
             return QueueCount;
         }
 
-        volatile Keyword _errorMode = CONTINUE;
+        volatile Keyword _errorMode = ContinueKeyword;
         volatile IFn _errorHandler = null;
 
         ///// <summary>
@@ -175,6 +176,7 @@ namespace clojure.lang
 
         #region Agent methods
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public Exception getError()
         {
             return _aq.Get()._error;
@@ -189,26 +191,31 @@ namespace clojure.lang
         //    _errors = null;
         //}
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public void setErrorMode(Keyword k)
         {
             _errorMode = k;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public Keyword getErrorMode()
         {
             return _errorMode;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public void setErrorHandler(IFn f)
         {
             _errorHandler = f;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public IFn getErrorHandler()
         {
             return _errorHandler;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "restart")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public object restart(object newState, bool clearActions)
         {
@@ -247,6 +254,7 @@ namespace clojure.lang
         /// <param name="solo"><value>true</value> means execute on its own thread (send-off); 
         /// <value>false</value> means use a thread pool thread (send).</param>
         /// <returns>This agent.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dispatch")]
         public object dispatch(IFn fn, ISeq args, Boolean solo)
         {
             Exception error = getError();
@@ -321,6 +329,7 @@ namespace clojure.lang
         /// Shutdown all threads executing.
         /// </summary>
         /// <remarks>We need to work on this.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "shutdown")]
         public static void shutdown()
         {
             // JAVA: soloExecutor.shutdown();
@@ -439,7 +448,7 @@ namespace clojure.lang
                         object oldval = _agent.State;
                         object newval = _fn.applyTo(RT.cons(_agent.State, _args));
                         _agent.SetState(newval);
-                        _agent.notifyWatches(oldval,newval);
+                        _agent.NotifyWatches(oldval,newval);
                     }
                     catch (Exception e)
                     {
@@ -462,7 +471,7 @@ namespace clojure.lang
                                 // ignore error handler errors
                             }
                         }
-                        if (_agent._errorMode == CONTINUE)
+                        if (_agent._errorMode == ContinueKeyword)
                             error = null;
                     }
 
@@ -492,6 +501,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns></returns>
         /// <remarks>lowercase for core.clj compatibility</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "release")]
         public static int releasePendingSends()
         {
             IPersistentVector sends = Agent.Nested;

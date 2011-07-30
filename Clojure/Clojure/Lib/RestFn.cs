@@ -21,89 +21,105 @@ namespace clojure.lang
     {
         #region Interface
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public abstract int getRequiredArity();
 
         #endregion
 
         #region Invokes with explicit rest arg
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object arg9, object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object arg9, object arg10, object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object arg9, object arg10, object arg11, object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object arg9, object arg10, object arg11, object arg12, object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object args)
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object arg9, object arg10, object arg11, object arg12, object arg13,
                                   object arg14, object args)
@@ -111,6 +127,7 @@ namespace clojure.lang
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object arg9, object arg10, object arg11, object arg12, object arg13,
                                   object arg14, object arg15, object args)
@@ -118,6 +135,7 @@ namespace clojure.lang
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object arg9, object arg10, object arg11, object arg12, object arg13,
                                   object arg14, object arg15, object arg16, object args)
@@ -125,6 +143,7 @@ namespace clojure.lang
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object arg9, object arg10, object arg11, object arg12, object arg13,
                                   object arg14, object arg15, object arg16, object arg17, object args)
@@ -132,6 +151,7 @@ namespace clojure.lang
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object arg9, object arg10, object arg11, object arg12, object arg13,
                                   object arg14, object arg15, object arg16, object arg17, object arg18, object args)
@@ -139,6 +159,7 @@ namespace clojure.lang
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object arg9, object arg10, object arg11, object arg12, object arg13,
                                   object arg14, object arg15, object arg16, object arg17, object arg18, object arg19,
@@ -147,6 +168,7 @@ namespace clojure.lang
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
         protected virtual object doInvoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                                   object arg8, object arg9, object arg10, object arg11, object arg12, object arg13,
                                   object arg14, object arg15, object arg16, object arg17, object arg18, object arg19,

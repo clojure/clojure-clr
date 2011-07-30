@@ -22,8 +22,10 @@ namespace clojure.lang
         /// </summary>
         /// <param name="i">Index of the item to access</param>
         /// <returns>The item at the given index</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "nth")]
         object nth(int i);
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "nth")]
         object nth(int i, object notFound);
     }
 }

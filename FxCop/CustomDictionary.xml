@@ -27,6 +27,12 @@
       <Word>dyn</Word>
       <Word>assy</Word>
       <Word>signum</Word>
+      <Word>expr</Word>
+      <Word>exprs</Word>
+      <Word>ctor</Word>
+      <Word>param</Word>
+      <Word>mpl</Word>
+      <Word>src</Word>
     </Recognized>
     <Deprecated>
       <!-- 

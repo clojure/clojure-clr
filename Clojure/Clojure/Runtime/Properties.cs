@@ -23,6 +23,8 @@ namespace clojure.runtime
     public class Properties : Dictionary<string,string>
     {
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public string getProperty(string key)
         {
             string value = null;

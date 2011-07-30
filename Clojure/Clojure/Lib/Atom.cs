@@ -76,7 +76,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="f">The function to apply to the current state.</param>
         /// <returns>The new value.</returns>
-        /// <remarks>Lowercase name for core.clj compatability.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public object swap(IFn f)
         {
             for (; ; )
@@ -86,7 +86,7 @@ namespace clojure.lang
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
                 {
-                    notifyWatches(v,newv);
+                    NotifyWatches(v,newv);
                     return newv;
                 }
             }
@@ -98,7 +98,7 @@ namespace clojure.lang
         /// <param name="f">The function to apply to current state and one additional argument.</param>
         /// <param name="arg">Additional argument.</param>
         /// <returns>The new value.</returns>
-        /// <remarks>Lowercase name for core.clj compatability.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public object swap(IFn f, Object arg)
         {
             for (; ; )
@@ -108,7 +108,7 @@ namespace clojure.lang
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
                 {
-                    notifyWatches(v,newv);
+                    NotifyWatches(v,newv);
                     return newv;
                 }
             }
@@ -121,7 +121,7 @@ namespace clojure.lang
         /// <param name="arg1">First additional argument.</param>
         /// <param name="arg2">Second additional argument.</param>
         /// <returns>The new value.</returns>
-        /// <remarks>Lowercase name for core.clj compatability.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public object swap(IFn f, Object arg1, Object arg2)
         {
             for (; ; )
@@ -131,7 +131,7 @@ namespace clojure.lang
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
                 {
-                    notifyWatches(v, newv);
+                    NotifyWatches(v, newv);
                     return newv;
                 }
             }
@@ -145,7 +145,7 @@ namespace clojure.lang
         /// <param name="y">Second additional argument.</param>
         /// <param name="args">Sequence of additional arguments.</param>
         /// <returns>The new value.</returns>
-        /// <remarks>Lowercase name for core.clj compatability.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public object swap(IFn f, Object x, Object y, ISeq args)
         {
             for (; ; )
@@ -155,7 +155,7 @@ namespace clojure.lang
                 Validate(newv);
                 if (_state.CompareAndSet(v, newv))
                 {
-                    notifyWatches(v, newv);
+                    NotifyWatches(v, newv);
                     return newv;
                 }
             }
@@ -167,12 +167,13 @@ namespace clojure.lang
         /// <param name="oldv">The expected value.</param>
         /// <param name="newv">The new value.</param>
         /// <returns><value>true</value> if the value was set; <value>false</value> otherwise.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public bool compareAndSet(object oldv, object newv)
         {
             Validate(newv);
             bool ret =  _state.CompareAndSet(oldv, newv);
             if (ret )
-                notifyWatches(oldv, newv);
+                NotifyWatches(oldv, newv);
             return ret;
         }
 
@@ -182,12 +183,13 @@ namespace clojure.lang
         /// </summary>
         /// <param name="newv">The new value.</param>
         /// <returns>The new value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public object reset(object newv)
         {
             object oldv = _state.Get();
             Validate(newv);
             _state.Set(newv);
-            notifyWatches(oldv, newv);
+            NotifyWatches(oldv, newv);
             return newv;
         }
 

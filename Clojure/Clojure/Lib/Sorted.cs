@@ -30,6 +30,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns>The <c>IComparer</c> used to sort the items.</returns>
         /// <remarks>Would be called <c>Comparer</c> except we need to match the JVM name.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "comparator")]
         IComparer comparator();
 
         /// <summary>
@@ -37,6 +38,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="entry">An element in the collection.</param>
         /// <returns>The key used to sort the element.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "entry")]
         object entryKey(object entry);
 
         /// <summary>
@@ -44,6 +46,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="ascending">A flag indicating if the iteration is ascending or descending.</param>
         /// <returns>A sequence for first/rest iteration.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "seq")]
         ISeq seq(bool ascending);
 
         /// <summary>
@@ -54,6 +57,7 @@ namespace clojure.lang
         /// <returns>A sequence for first/rest iteration.</returns>
         /// <remarks>The key need not be in the collection.  If not present, the iteration will start with 
         /// the first element with a key greater than (if asscending) or less than (if descending) the given key.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "seq")]
         ISeq seqFrom(object key, bool ascending);
     }
 }

@@ -27,6 +27,7 @@ namespace clojure.lang
         /// Gets the number of items in the collection.
         /// </summary>
         /// <returns>The number of items in the collection.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "count")]
         int count();
 
         /// <summary>
@@ -34,12 +35,14 @@ namespace clojure.lang
         /// </summary>
         /// <param name="o">An item to put at the front of the collection.</param>
         /// <returns>A new immutable collection with the item added.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "cons")]
         IPersistentCollection cons(object o);
 
         /// <summary>
         /// Gets an empty collection of the same type.
         /// </summary>
         /// <returns>An emtpy collection.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "empty")]
         IPersistentCollection empty();
 
         /// <summary>
@@ -47,6 +50,8 @@ namespace clojure.lang
         /// </summary>
         /// <param name="o">The object to compare.</param>
         /// <returns><c>true</c> if the object is equivalent; <c>false</c> otherwise.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
+
         bool equiv(object o);
     }
 }

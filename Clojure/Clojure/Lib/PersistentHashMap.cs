@@ -63,8 +63,11 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentHashMap">PersistentHashMap</see>.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "EMPTY")]
         public static readonly PersistentHashMap EMPTY = new PersistentHashMap(0, null, false, null);
-        static readonly object NOT_FOUND = new object();
+
+
+        static readonly object NotFoundValue = new object();
 
         #endregion
 
@@ -75,6 +78,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="other">The dictionary to copy from.</param>
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static IPersistentMap create(IDictionary other)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -88,6 +92,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="init">An array of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static PersistentHashMap create(params object[] init)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -97,6 +102,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static PersistentHashMap createWithCheck(params object[] init)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -114,6 +120,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="init">An IList of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static PersistentHashMap create1(IList init)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -128,6 +135,7 @@ namespace clojure.lang
             return (PersistentHashMap)ret.persistent();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         static public PersistentHashMap createWithCheck(ISeq items)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -148,6 +156,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items">An <see cref="ISeq">ISeq</see> of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static PersistentHashMap create(ISeq items)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -167,6 +176,7 @@ namespace clojure.lang
         /// <param name="meta">The metadata to attach.</param>
         /// <param name="init">An array of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static PersistentHashMap create(IPersistentMap meta, params object[] init)
         {
             return (PersistentHashMap)create(init).withMeta(meta);
@@ -242,7 +252,7 @@ namespace clojure.lang
             if (key == null)
                 return _hasNull;
             return (_root != null) 
-                ? _root.find(0, Util.hash(key), key, NOT_FOUND) != NOT_FOUND 
+                ? _root.Find(0, Util.hash(key), key, NotFoundValue) != NotFoundValue 
                 : false;
         }
 
@@ -256,7 +266,7 @@ namespace clojure.lang
             if (key == null)
                 return _hasNull ? new MapEntry(null, _nullValue) : null;
             return (_root != null)
-                ? _root.find(0,Util.Hash(key),key)
+                ? _root.Find(0,Util.hash(key),key)
                 : null;
         }
 
@@ -282,7 +292,7 @@ namespace clojure.lang
                 return _hasNull ? _nullValue : notFound;
 
             return (_root != null)
-                ? _root.find(0, Util.Hash(key), key, notFound)
+                ? _root.Find(0, Util.hash(key), key, notFound)
                 : notFound;
         }
 
@@ -307,7 +317,7 @@ namespace clojure.lang
             }
             Box addedLeaf = new Box(null);
             INode newroot = (_root == null ? BitmapIndexedNode.EMPTY : _root)
-                .assoc(0, Util.Hash(key), key, val, addedLeaf);
+                .Assoc(0, Util.hash(key), key, val, addedLeaf);
             return newroot == _root
                 ? this
                 : new PersistentHashMap(meta(), addedLeaf.Val == null ? _count : _count + 1, newroot, _hasNull, _nullValue);
@@ -340,7 +350,7 @@ namespace clojure.lang
                 return _hasNull ? new PersistentHashMap(meta(), _count - 1, _root, false, null) : this;
             if (_root == null)
                 return this;
-            INode newroot = _root.without(0, Util.hash(key), key);
+            INode newroot = _root.Without(0, Util.hash(key), key);
             if (newroot == _root)
                 return this;
             return new PersistentHashMap(meta(), _count - 1, newroot, _hasNull, _nullValue); 
@@ -365,7 +375,7 @@ namespace clojure.lang
         /// <returns>An ISeq for iteration.</returns>
         public override ISeq seq()
         {
-            ISeq s = _root != null ? _root.nodeSeq() : null;
+            ISeq s = _root != null ? _root.GetNodeSeq() : null;
             return _hasNull ? new Cons(new MapEntry(null, _nullValue), s) : s;
         }
 
@@ -439,7 +449,7 @@ namespace clojure.lang
                 }
                 _leafFlag.Val = null;
                 INode n = (_root == null ? BitmapIndexedNode.EMPTY : _root)
-                    .assoc(_edit, 0, Util.hash(key), key, val, _leafFlag);
+                    .Assoc(_edit, 0, Util.hash(key), key, val, _leafFlag);
                 if (n != _root)
                     _root = n;
                 if (_leafFlag.Val != null)
@@ -463,7 +473,7 @@ namespace clojure.lang
                     return this;
 
                 _leafFlag.Val = null;
-                INode n = _root.without(_edit, 0, Util.hash(key), key, _leafFlag);
+                INode n = _root.Without(_edit, 0, Util.hash(key), key, _leafFlag);
                 if (n != _root)
                     _root = n;
                if (_leafFlag.Val != null) 
@@ -490,7 +500,7 @@ namespace clojure.lang
                         return notFound;
                 if (_root == null)
                     return null;
-                return _root.find(0, Util.hash(key), key, notFound);                
+                return _root.Find(0, Util.hash(key), key, notFound);                
             }
 
             //// not part of this interface, but I don't know a better place for it
@@ -543,7 +553,7 @@ namespace clojure.lang
             /// <param name="val"></param>
             /// <param name="addedLeaf"></param>
             /// <returns></returns>
-            INode assoc(int shift, int hash, object key, object val, Box addedLeaf);
+            INode Assoc(int shift, int hash, object key, object val, Box addedLeaf);
 
             /// <summary>
             /// Return a trie with the given key removed.
@@ -552,7 +562,7 @@ namespace clojure.lang
             /// <param name="hash"></param>
             /// <param name="key"></param>
             /// <returns></returns>
-            INode without(int shift, int hash, object key);
+            INode Without(int shift, int hash, object key);
 
             /// <summary>
             /// Gets the entry containing a given key and its value.
@@ -561,7 +571,7 @@ namespace clojure.lang
             /// <param name="hash"></param>
             /// <param name="key"></param>
             /// <returns></returns>
-            IMapEntry find(int shift, int hash, object key);
+            IMapEntry Find(int shift, int hash, object key);
 
             /// <summary>
             /// Gets the value associated with a given key, or return a default value if not found.
@@ -571,13 +581,13 @@ namespace clojure.lang
             /// <param name="key"></param>
             /// <param name="notFound"></param>
             /// <returns></returns>
-            object find(int shift, int hash, object key, object notFound);
+            object Find(int shift, int hash, object key, object notFound);
 
             /// <summary>
             /// Return an <see cref="ISeq">ISeq</see> with iterating the tree defined by the current node.
             /// </summary>
             /// <returns>An <see cref="ISeq">ISeq</see> </returns>
-            ISeq nodeSeq();
+            ISeq GetNodeSeq();
 
             ///// <summary>
             ///// Get the hash for the current ndoe.
@@ -595,7 +605,7 @@ namespace clojure.lang
             /// <param name="val"></param>
             /// <param name="addedLeaf"></param>
             /// <returns></returns>
-            INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf);
+            INode Assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf);
 
             /// <summary>
             /// Return a trie with the given key removed.
@@ -606,7 +616,7 @@ namespace clojure.lang
             /// <param name="key"></param>
             /// <param name="removedLeaf"></param>
             /// <returns></returns>
-            INode without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf);
+            INode Without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf);
         }
 
         #endregion
@@ -657,8 +667,8 @@ namespace clojure.lang
             Box _ = new Box(null);
             AtomicReference<Thread> edit = new AtomicReference<Thread>();
             return BitmapIndexedNode.EMPTY
-                .assoc(edit, shift, key1hash, key1, val1, _)
-                .assoc(edit, shift, key2hash, key2, val2, _);
+                .Assoc(edit, shift, key1hash, key1, val1, _)
+                .Assoc(edit, shift, key2hash, key2, val2, _);
         }
 
         private static INode CreateNode(AtomicReference<Thread> edit, int shift, Object key1, Object val1, int key2hash, Object key2, Object val2)
@@ -668,8 +678,8 @@ namespace clojure.lang
                 return new HashCollisionNode(null, key1hash, 2, new Object[] { key1, val1, key2, val2 });
             Box _ = new Box(null);
             return BitmapIndexedNode.EMPTY
-                .assoc(edit, shift, key1hash, key1, val1, _)
-                .assoc(edit, shift, key2hash, key2, val2, _);
+                .Assoc(edit, shift, key1hash, key1, val1, _)
+                .Assoc(edit, shift, key2hash, key2, val2, _);
         }
 
         #endregion
@@ -707,25 +717,25 @@ namespace clojure.lang
 
             #region INode Members
 
-            public INode assoc(int shift, int hash, object key, object val, Box addedLeaf)
+            public INode Assoc(int shift, int hash, object key, object val, Box addedLeaf)
             {
                 int idx = Util.Mask(hash, shift);
                 INode node = _array[idx];
                 if (node == null)
-                    return new ArrayNode(null, _count + 1, CloneAndSet(_array, idx, BitmapIndexedNode.EMPTY.assoc(shift + 5, hash, key, val, addedLeaf)));
-                INode n = node.assoc(shift + 5, hash, key, val, addedLeaf);
+                    return new ArrayNode(null, _count + 1, CloneAndSet(_array, idx, BitmapIndexedNode.EMPTY.Assoc(shift + 5, hash, key, val, addedLeaf)));
+                INode n = node.Assoc(shift + 5, hash, key, val, addedLeaf);
                 if (n == node)
                     return this;
                 return new ArrayNode(null, _count, CloneAndSet(_array, idx, n));
             }
 
-            public INode without(int shift, int hash, object key)
+            public INode Without(int shift, int hash, object key)
             {
                 int idx = Util.Mask(hash, shift);
                 INode node = _array[idx];
                 if (node == null)
                     return this;
-                INode n = node.without(shift + 5, hash, key);
+                INode n = node.Without(shift + 5, hash, key);
                 if (n == node)
                     return this;
                 if (n == null)
@@ -738,52 +748,52 @@ namespace clojure.lang
                     return new ArrayNode(null, _count, CloneAndSet(_array, idx, n));
             }
 
-            public IMapEntry find(int shift, int hash, object key)
+            public IMapEntry Find(int shift, int hash, object key)
             {
                 int idx = Util.Mask(hash, shift);
                 INode node = _array[idx];
                 if (node == null)
                     return null;
-                return node.find(shift + 5, hash, key);
+                return node.Find(shift + 5, hash, key);
             }
 
-            public object find(int shift, int hash, object key, object notFound)
+            public object Find(int shift, int hash, object key, object notFound)
             {
                 int idx = Util.Mask(hash, shift);
                 INode node = _array[idx];
                 if (node == null)
                     return notFound;
-                return node.find(shift + 5, hash, key, notFound);
+                return node.Find(shift + 5, hash, key, notFound);
             }
 
-            public ISeq nodeSeq()
+            public ISeq GetNodeSeq()
             {
                 return Seq.create(_array);
             }
 
-            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
+            public INode Assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
             {
                 int idx = Util.Mask(hash, shift);
                 INode node = _array[idx];
                 if (node == null)
                 {
-                    ArrayNode editable = EditAndSet(edit, idx, BitmapIndexedNode.EMPTY.assoc(edit, shift + 5, hash, key, val, addedLeaf));
+                    ArrayNode editable = EditAndSet(edit, idx, BitmapIndexedNode.EMPTY.Assoc(edit, shift + 5, hash, key, val, addedLeaf));
                     editable._count++;
                     return editable;
                 }
-                INode n = node.assoc(edit, shift + 5, hash, key, val, addedLeaf);
+                INode n = node.Assoc(edit, shift + 5, hash, key, val, addedLeaf);
                 if (n == node)
                     return this;
                 return EditAndSet(edit, idx, n);
             }
 
-            public INode without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf)
+            public INode Without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf)
             {
                 int idx = Util.Mask(hash, shift);
                 INode node = _array[idx];
                 if (node == null)
                     return this;
-                INode n = node.without(edit, shift + 5, hash, key, removedLeaf);
+                INode n = node.Without(edit, shift + 5, hash, key, removedLeaf);
                 if (n == node)
                     return this;
                 if (n == null)
@@ -866,7 +876,7 @@ namespace clojure.lang
                     for (int j = i; j < nodes.Length; j++)
                         if (nodes[j] != null)
                         {
-                            ISeq ns = nodes[j].nodeSeq();
+                            ISeq ns = nodes[j].GetNodeSeq();
                             if (ns != null)
                                 return new Seq(meta, nodes, j + 1, ns);
                         }
@@ -948,7 +958,7 @@ namespace clojure.lang
 
             #region INode Members
 
-            public INode assoc(int shift, int hash, object key, object val, Box addedLeaf)
+            public INode Assoc(int shift, int hash, object key, object val, Box addedLeaf)
             {
                 int bit = Bitpos(hash, shift);
                 int idx = Index(bit);
@@ -958,7 +968,7 @@ namespace clojure.lang
                     object valOrNode = _array[2 * idx + 1];
                     if (keyOrNull == null)
                     {
-                        INode n = ((INode)valOrNode).assoc(shift + 5, hash, key, val, addedLeaf);
+                        INode n = ((INode)valOrNode).Assoc(shift + 5, hash, key, val, addedLeaf);
                         if (n == valOrNode)
                             return this;
                         return new BitmapIndexedNode(null, _bitmap, CloneAndSet(_array, 2 * idx + 1, n));
@@ -984,7 +994,7 @@ namespace clojure.lang
                     {
                         INode [] nodes = new INode[32];
                         int jdx = Util.Mask(hash,shift);
-                        nodes[jdx] = EMPTY.assoc(shift+5,hash,key,val,addedLeaf);
+                        nodes[jdx] = EMPTY.Assoc(shift+5,hash,key,val,addedLeaf);
                         int j=0;
                         for ( int i=0; i < 32; i++ )
                             if ( ( (_bitmap >>i) & 1) != 0 )
@@ -992,7 +1002,7 @@ namespace clojure.lang
                                 if ( _array[j] ==  null )
                                    nodes[i] = (INode) _array[j+1];
                                 else
-                                    nodes[i] = EMPTY.assoc(shift+5,Util.hash(_array[j]),_array[j],_array[j+1], addedLeaf);
+                                    nodes[i] = EMPTY.Assoc(shift+5,Util.hash(_array[j]),_array[j],_array[j+1], addedLeaf);
                                 j += 2;
                             }
                         return new ArrayNode(null,n+1,nodes);
@@ -1011,7 +1021,7 @@ namespace clojure.lang
             }
 
 
-            public INode without(int shift, int hash, object key)
+            public INode Without(int shift, int hash, object key)
             {
                 int bit = Bitpos(hash, shift);
                 if ((_bitmap & bit) == 0)
@@ -1022,7 +1032,7 @@ namespace clojure.lang
                 object valOrNode = _array[2 * idx + 1];
                 if ( keyOrNull == null )
                 {
-                    INode n = ((INode)valOrNode).without(shift+5,hash,key);
+                    INode n = ((INode)valOrNode).Without(shift+5,hash,key);
                     if ( n == valOrNode)
                         return this;
                     if ( n != null )
@@ -1037,7 +1047,7 @@ namespace clojure.lang
                 return this;
             }
 
-            public IMapEntry find(int shift, int hash, object key)
+            public IMapEntry Find(int shift, int hash, object key)
             {
                 int bit = Bitpos(hash, shift);
                 if ((_bitmap & bit) == 0)
@@ -1046,14 +1056,14 @@ namespace clojure.lang
                  object keyOrNull = _array[2 * idx];
                 object valOrNode = _array[2 * idx + 1];
                 if ( keyOrNull == null )
-                    return ((INode)valOrNode).find(shift+5,hash,key);
+                    return ((INode)valOrNode).Find(shift+5,hash,key);
                 if ( Util.equiv(key,keyOrNull))
                     return new MapEntry(keyOrNull,valOrNode);
                 return null;
             }
 
 
-            public Object find(int shift, int hash, Object key, Object notFound)
+            public Object Find(int shift, int hash, Object key, Object notFound)
             {
                 int bit = Bitpos(hash, shift);
                 if ((_bitmap & bit) == 0)
@@ -1062,18 +1072,18 @@ namespace clojure.lang
                 Object keyOrNull = _array[2 * idx];
                 Object valOrNode = _array[2 * idx + 1];
                 if (keyOrNull == null)
-                    return ((INode)valOrNode).find(shift + 5, hash, key, notFound);
+                    return ((INode)valOrNode).Find(shift + 5, hash, key, notFound);
                 if (Util.equiv(key, keyOrNull))
                     return valOrNode;
                 return notFound;
             }
 
-            public ISeq nodeSeq()
+            public ISeq GetNodeSeq()
             {
                 return NodeSeq.Create(_array);
             }
 
-            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
+            public INode Assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
             {
                 int bit = Bitpos(hash, shift);
                 int idx = Index(bit);
@@ -1083,7 +1093,7 @@ namespace clojure.lang
                     object valOrNode = _array[2 * idx + 1];
                     if (keyOrNull == null)
                     {
-                        INode n = ((INode)valOrNode).assoc(edit, shift + 5, hash, key, val, addedLeaf);
+                        INode n = ((INode)valOrNode).Assoc(edit, shift + 5, hash, key, val, addedLeaf);
                         if (n == valOrNode)
                             return this;
                         return EditAndSet(edit, 2 * idx + 1, n);
@@ -1115,7 +1125,7 @@ namespace clojure.lang
                     {
                         INode[] nodes = new INode[32];
                         int jdx = Util.Mask(hash,shift);
-                        nodes[jdx] = EMPTY.assoc(edit,shift+5,hash,key,val,addedLeaf);
+                        nodes[jdx] = EMPTY.Assoc(edit,shift+5,hash,key,val,addedLeaf);
                         int j=0;
                         for ( int i=0; i<32; i++ )
                             if (((_bitmap>>i) & 1) != 0 )
@@ -1123,7 +1133,7 @@ namespace clojure.lang
                                 if ( _array[j] == null )
                                     nodes[i] = (INode)_array[j+1];
                                 else
-                                    nodes[i] = EMPTY.assoc(edit,shift+5,Util.hash(_array[j]), _array[j], _array[j+1], addedLeaf);
+                                    nodes[i] = EMPTY.Assoc(edit,shift+5,Util.hash(_array[j]), _array[j], _array[j+1], addedLeaf);
                                 j += 2;
                             }
                         return new ArrayNode(edit,n+1,nodes);
@@ -1146,7 +1156,7 @@ namespace clojure.lang
 
 
 
-            public INode without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf)
+            public INode Without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf)
             {
                 int bit = Bitpos(hash, shift);
                 if ((_bitmap & bit) == 0)
@@ -1156,7 +1166,7 @@ namespace clojure.lang
                 Object valOrNode = _array[2 * idx + 1];
                 if (keyOrNull == null)
                 {
-                    INode n = ((INode)valOrNode).without(edit, shift + 5, hash, key, removedLeaf);
+                    INode n = ((INode)valOrNode).Without(edit, shift + 5, hash, key, removedLeaf);
                     if (n == valOrNode)
                         return this;
                     if (n != null)
@@ -1263,7 +1273,7 @@ namespace clojure.lang
 
             #region INode Members
 
-            public INode assoc(int shift, int hash, object key, object val, Box addedLeaf)
+            public INode Assoc(int shift, int hash, object key, object val, Box addedLeaf)
             {
                 if (_hash == hash)
                 {
@@ -1283,10 +1293,10 @@ namespace clojure.lang
                 }
                 // nest it in a bitmap node
                 return new BitmapIndexedNode(null, Bitpos(_hash, shift), new object[] { null, this })
-                    .assoc(shift, hash, key, val, addedLeaf);
+                    .Assoc(shift, hash, key, val, addedLeaf);
             }
 
-            public INode without(int shift, int hash, object key)
+            public INode Without(int shift, int hash, object key)
             {
                 int idx = FindIndex(key);
                 if (idx == -1)
@@ -1296,7 +1306,7 @@ namespace clojure.lang
                 return new HashCollisionNode(null, hash, _count - 1, RemovePair(_array, idx / 2));
             }
 
-            public IMapEntry find(int shift, int hash, object key)
+            public IMapEntry Find(int shift, int hash, object key)
             {
                 int idx = FindIndex(key);
                 if (idx < 0)
@@ -1306,7 +1316,7 @@ namespace clojure.lang
                 return null;
             }
 
-            public Object find(int shift, int hash, Object key, Object notFound)
+            public Object Find(int shift, int hash, Object key, Object notFound)
             {
                 int idx = FindIndex(key);
                 if (idx < 0)
@@ -1316,12 +1326,12 @@ namespace clojure.lang
                 return notFound;
             }
 
-            public ISeq nodeSeq()
+            public ISeq GetNodeSeq()
             {
                 return NodeSeq.Create(_array);
             }
 
-            public INode assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf)
+            public INode Assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf)
             {
                 if (hash == _hash)
                 {
@@ -1348,10 +1358,10 @@ namespace clojure.lang
                 }
                 // nest it in a bitmap node
                 return new BitmapIndexedNode(edit, Bitpos(_hash, shift), new object[] { null, this, null, null })
-                    .assoc(edit, shift, hash, key, val, addedLeaf);
+                    .Assoc(edit, shift, hash, key, val, addedLeaf);
             }
 
-            public INode without(AtomicReference<Thread> edit, int shift, int hash, Object key, Box removedLeaf)
+            public INode Without(AtomicReference<Thread> edit, int shift, int hash, Object key, Box removedLeaf)
             {
                 int idx = FindIndex(key);
                 if (idx == -1)
@@ -1443,7 +1453,7 @@ namespace clojure.lang
                     INode node = (INode)array[j + 1];
                     if (node != null)
                     {
-                        ISeq nodeSeq = node.nodeSeq();
+                        ISeq nodeSeq = node.GetNodeSeq();
                         if (nodeSeq != null)
                             return new NodeSeq(null, array, j + 2, nodeSeq);
                     }

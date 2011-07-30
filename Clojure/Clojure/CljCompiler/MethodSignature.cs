@@ -180,7 +180,7 @@ namespace clojure.lang.CljCompiler
         {
             int h = _name.GetHashCode();
             foreach (Type t in _paramTypes)
-                h = Util.HashCombine(h, t.GetHashCode());
+                h = Util.hashCombine(h, t.GetHashCode());
             return h;
         }
 

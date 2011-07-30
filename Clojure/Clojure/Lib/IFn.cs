@@ -24,56 +24,95 @@ namespace clojure.lang
     {
         #region Invoke methods
 
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke();
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")] 
         object invoke(object arg1, object arg2);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                       object arg8);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                       object arg8, object arg9);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                       object arg8, object arg9, object arg10);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                       object arg8, object arg9, object arg10, object arg11);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                       object arg8, object arg9, object arg10, object arg11, object arg12);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                       object arg8, object arg9, object arg10, object arg11, object arg12, object arg13);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                       object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                       object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                       object arg15);
 
-        // I'm not sure how far down the list we should go.  There may be some DLR limits.
-        // Also the Microsoft.Func<...> delegate types only go so far.
-
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17, object arg18);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17, object arg18, object arg19);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17, object arg18, object arg19, object arg20);
 
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
         object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17, object arg18, object arg19, object arg20,
                              params object[] args);
 
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "apply")]
         object applyTo(ISeq arglist);
 
         #endregion

@@ -172,7 +172,7 @@ namespace clojure.lang
          /// <summary>
          /// Notify all watchers.
          /// </summary>
-         public void notifyWatches(object oldval, object newval)
+         public void NotifyWatches(object oldval, object newval)
          {
              IPersistentMap ws = _watches;
              if (ws.count() > 0)

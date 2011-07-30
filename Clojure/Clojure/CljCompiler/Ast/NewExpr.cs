@@ -68,9 +68,9 @@ namespace clojure.lang.CljCompiler.Ast
                 throw new InvalidOperationException(string.Format("No constructor in type: {0} with {1} arguments", _type.Name, numArgs));
             }
 
-            if (ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+            if (ctor == null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                 RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1} - call to {2} ctor can't be resolved.",
-                    Compiler.SourcePathVar.deref(), _spanMap != null ? (int)_spanMap.valAt(RT.START_LINE_KEY, 0) : 0, _type.FullName);
+                    Compiler.SourcePathVar.deref(), _spanMap != null ? (int)_spanMap.valAt(RT.StartLineKey, 0) : 0, _type.FullName);
 
             return ctor;
         }

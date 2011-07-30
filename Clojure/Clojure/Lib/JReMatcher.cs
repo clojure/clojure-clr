@@ -20,6 +20,7 @@ namespace clojure.lang
     /// <summary>
     /// Shim class to provide java.util.regex.Matcher capabilities for the re-* functions in core.clj.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Re")]
     public class JReMatcher
     {
         #region Data
@@ -66,6 +67,7 @@ namespace clojure.lang
 
         // Careful analysis of the re-* methods in core.clj reveal that exactly these are needed.
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "find")]
         public bool find()
         {
             Match nextMatch;
@@ -96,6 +98,7 @@ namespace clojure.lang
         // I don't implement the full functionality. 
         // This needs to be called on the first attempt to make a match
         //  because we have to rewrite the regex pattern to match the whole string
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "matches")]
         public bool matches()
         {
             if (_regex == null)
@@ -114,6 +117,7 @@ namespace clojure.lang
             return find();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "group")]
         public int groupCount()
         {
             if (_match == null)
@@ -123,6 +127,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "group")]
         public string group()
         {
             if (_match == null)
@@ -132,6 +137,7 @@ namespace clojure.lang
 
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "group")]
         public string group(int group)
         {
             if (_match == null)
@@ -144,11 +150,13 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "start")]
         public int start()
         {
             return _match.Index;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "end")]
         public int end()
         {
             return _match.Index + _match.Length;

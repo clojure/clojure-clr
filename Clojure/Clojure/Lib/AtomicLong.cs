@@ -59,6 +59,7 @@ namespace clojure.lang
         /// Gets the current value.
         /// </summary>
         /// <returns>The current value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public long get() 
         {
             return _val;
@@ -68,6 +69,7 @@ namespace clojure.lang
         /// Increments the value and returns the new value.
         /// </summary>
         /// <returns>The new value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public long incrementAndGet()
         {
             return Interlocked.Increment(ref _val);
@@ -77,6 +79,7 @@ namespace clojure.lang
         /// Increments the value and returns the original value.
         /// </summary>
         /// <returns>The original value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public long getAndIncrement()
         {
             return Interlocked.Increment(ref _val)-1;
@@ -88,6 +91,7 @@ namespace clojure.lang
         /// <param name="oldVal">The expected value.</param>
         /// <param name="newVal">The new value.</param>
         /// <returns><value>true</value> if the value was set; <value>false</value> otherwise.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public bool compareAndSet(long oldVal, long newVal)
         {
             long origVal = Interlocked.CompareExchange(ref _val, newVal, oldVal);
@@ -99,6 +103,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="newVal">The new value.</param>
         /// <returns>The new value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public long set(long newVal)
         {
             return Interlocked.Exchange(ref _val,newVal);

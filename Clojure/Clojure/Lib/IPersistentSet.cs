@@ -25,6 +25,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The item to remove.</param>
         /// <returns>A new set with the item removed.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "disjoin")]
         IPersistentSet disjoin(object key);
 
         /// <summary>
@@ -32,6 +33,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The value to test for membership in the set.</param>
         /// <returns>True if the item is in the collection; false, otherwise.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "contains")]
         bool contains(object key);
 
         /// <summary>
@@ -39,6 +41,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The value to test for membership in the set.</param>
         /// <returns>the key if the key is in the set, else null.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         object get(object key);
 
         /// <summary>
@@ -47,6 +50,7 @@ namespace clojure.lang
         /// <returns>The number of items in the collection.</returns>
         /// <remarks>Overrides <c>count()</c> in both <see cref="IPersistentCollection">IPersistentCollection</see> 
         /// and <see cref="Counted">Counted</see> to resolve ambiguity for callers.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "count")]
         new int count();
     }
 }

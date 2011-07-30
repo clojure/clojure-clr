@@ -124,6 +124,7 @@ namespace clojure.lang
 
         // There is really no reason for the main entry point to have an isRecursive flag, is there?
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object read(PushbackTextReader r,
             bool eofIsError,
             object eofValue,
@@ -186,7 +187,7 @@ namespace clojure.lang
                             throw new EndOfStreamException("EOF while reading");
                         return eofValue;
                     }
-                    return RT.suppressRead() ? null : interpretToken(token,lastSlashIndex);
+                    return RT.suppressRead() ? null : InterpretToken(token,lastSlashIndex);
                 }
             }
             catch (Exception e)
@@ -286,7 +287,7 @@ namespace clojure.lang
 
         #region  Other 
         
-        public static List<Object> readDelimitedList(char delim, PushbackTextReader r, bool isRecursive)
+        public static List<Object> ReadDelimitedList(char delim, PushbackTextReader r, bool isRecursive)
         {
             LineNumberingTextReader lntr = r as LineNumberingTextReader;
             int firstLine = lntr != null  ? lntr.LineNumber : -1;
@@ -364,7 +365,7 @@ namespace clojure.lang
         {
             bool oddVertBarMode = false;
             lastSlashIndex = -1;
-            bool allowSymEscape = RT.booleanCast(RT.ALLOW_SYMBOL_ESCAPE.deref());
+            bool allowSymEscape = RT.booleanCast(RT.AllowSymbolEscapeVar.deref());
 
             StringBuilder sb = new StringBuilder();
 
@@ -453,7 +454,7 @@ namespace clojure.lang
         //    throw new Exception("Invalid token: " + s);
         //}
 
-        public static object interpretToken(string token, int lastSlashIndex)
+        public static object InterpretToken(string token, int lastSlashIndex)
         {
             if (token.Equals("nil"))
                 {
@@ -630,13 +631,13 @@ namespace clojure.lang
             }
 
             string s = sb.ToString();
-            object n = matchNumber(s);
+            object n = MatchNumber(s);
             if (n == null)
                 throw new FormatException("Invalid number: " + s);
             return n;
         }
 
-        public static object matchNumber(string s)
+        public static object MatchNumber(string s)
         {
             Match m = intRE.Match(s);
             if ( m.Success )
@@ -712,8 +713,8 @@ namespace clojure.lang
                     numerString = numerString.Substring(1);
                 //return Numbers.BIDivide(new BigInteger(numerString), new BigInteger(denomString));
                 return Numbers.divide(
-                    Numbers.reduceBigInt(BigInt.fromBigInteger(BigInteger.Parse(numerString))), 
-                    Numbers.reduceBigInt(BigInt.fromBigInteger(BigInteger.Parse(denomString))));
+                    Numbers.ReduceBigInt(BigInt.fromBigInteger(BigInteger.Parse(numerString))), 
+                    Numbers.ReduceBigInt(BigInt.fromBigInteger(BigInteger.Parse(denomString))));
             }
             return null;
         }
@@ -864,21 +865,21 @@ namespace clojure.lang
                     startLine = lntr.LineNumber;
                     startCol = lntr.ColumnNumber;
                 }
-                IList<Object> list = readDelimitedList(')', r, true);
+                IList<Object> list = ReadDelimitedList(')', r, true);
                 if (list.Count == 0)
                     return PersistentList.EMPTY;
                 IObj s = (IObj)PersistentList.create((IList)list);
                 if (startLine != -1)
                 {
                     return s.withMeta(RT.map(
-                        RT.LINE_KEY, startLine, // This is what is supported by the JVM version
+                        RT.LineKey, startLine, // This is what is supported by the JVM version
                         // We add a :source-span key, value is map with the other values.
                         // A map is used here so that we are print-dup--serializable.
-                        RT.SOURCE_SPAN_KEY, RT.map(
-                            RT.START_LINE_KEY, startLine,
-                            RT.START_COLUMN_KEY, startCol,
-                            RT.END_LINE_KEY, lntr.LineNumber,
-                            RT.END_COLUMN_KEY, lntr.ColumnNumber)));
+                        RT.SourceSpanKey, RT.map(
+                            RT.StartLineKey, startLine,
+                            RT.StartColumnKey, startCol,
+                            RT.EndLineKey, lntr.LineNumber,
+                            RT.EndColumnKey, lntr.ColumnNumber)));
                 }
                 else
                     return s;
@@ -889,7 +890,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char leftparen)
             {
-                return LazilyPersistentVector.create(readDelimitedList(']', r, true));
+                return LazilyPersistentVector.create(ReadDelimitedList(']', r, true));
             }
         }
 
@@ -897,7 +898,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char leftbrace)
             {
-                Object[] a = readDelimitedList('}', r, true).ToArray();
+                Object[] a = ReadDelimitedList('}', r, true).ToArray();
                 if ((a.Length & 1) == 1)
                     throw new Exception("Map literal must contain an even number of forms");
                 return RT.map(a);
@@ -988,7 +989,7 @@ namespace clojure.lang
                     if (formAsIobj != null && formAsIobj.meta() != null)
                     {
                         //filter line numbers & source span info
-                        IPersistentMap newMeta = formAsIobj.meta().without(RT.LINE_KEY).without(RT.SOURCE_SPAN_KEY);
+                        IPersistentMap newMeta = formAsIobj.meta().without(RT.LineKey).without(RT.SourceSpanKey);
                         if (newMeta.count() > 0)
                             return RT.list(WITH_META, ret, syntaxQuote(formAsIobj.meta()));
                     }
@@ -1217,7 +1218,7 @@ namespace clojure.lang
                     object meta = ReadAux(r);
 
                     if (meta is Symbol || meta is String)
-                        metaAsMap = RT.map(RT.TAG_KEY, meta);
+                        metaAsMap = RT.map(RT.TagKey, meta);
                     else if (meta is Keyword)
                         metaAsMap = RT.map(meta, true);
                     else if ((metaAsMap = meta as IPersistentMap) == null)
@@ -1228,12 +1229,12 @@ namespace clojure.lang
                 if (o is IMeta)
                 {
                     if (startLine != -1 && o is ISeq)
-                        metaAsMap = metaAsMap.assoc(RT.LINE_KEY, startLine)
-                            .assoc(RT.SOURCE_SPAN_KEY, RT.map(
-                                RT.START_LINE_KEY, startLine,
-                                RT.START_COLUMN_KEY, startCol,
-                                RT.END_LINE_KEY, lntr.LineNumber,
-                                RT.END_COLUMN_KEY, lntr.ColumnNumber));
+                        metaAsMap = metaAsMap.assoc(RT.LineKey, startLine)
+                            .assoc(RT.SourceSpanKey, RT.map(
+                                RT.StartLineKey, startLine,
+                                RT.StartColumnKey, startCol,
+                                RT.EndLineKey, lntr.LineNumber,
+                                RT.EndColumnKey, lntr.ColumnNumber));
 
                     IReference iref = o as IReference;
                     if (iref != null)
@@ -1355,7 +1356,7 @@ namespace clojure.lang
                     if (readToken(r, '%', out token, out lastSlashIndex))
                         throw new EndOfStreamException("EOF while reading %-token");
                     else
-                        return interpretToken(token, lastSlashIndex);
+                        return InterpretToken(token, lastSlashIndex);
                 }
 
 
@@ -1396,7 +1397,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char leftbracket)
             {
-                return PersistentHashSet.createWithCheck(readDelimitedList('}', r, true));
+                return PersistentHashSet.createWithCheck(ReadDelimitedList('}', r, true));
             }
         }
 
@@ -1405,7 +1406,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char eq)
             {
-                if (!RT.booleanCast(RT.READEVAL.deref()))
+                if (!RT.booleanCast(RT.ReadEvalVar.deref()))
                 {
                     throw new Exception("EvalReader not allowed when *read-eval* is false.");
                 }
@@ -1474,7 +1475,7 @@ namespace clojure.lang
                 else
                     throw new Exception(String.Format("Unreadable constructor form starting with \"#{0}{1}\"", recordName, (char)ch));
 
-                object[] recordEntries = readDelimitedList(endch, r, true).ToArray();
+                object[] recordEntries = ReadDelimitedList(endch, r, true).ToArray();
                 object ret = null;
                 ConstructorInfo[] allCtors = recordType.GetConstructors();
 

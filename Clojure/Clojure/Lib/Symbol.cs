@@ -51,11 +51,15 @@ namespace clojure.lang
 
         // the create thunks preserve binary compatibility with code compiled
         // against earlier version of Clojure and can be removed (at some point).
-        public static Symbol create(String ns, String name) {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        public static Symbol create(String ns, String name)
+        {
             return Symbol.intern(ns, name);
         }
 
-        public static Symbol create(String nsname) {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        public static Symbol create(String nsname)
+        {
             return Symbol.intern(nsname);
         }
     
@@ -70,6 +74,7 @@ namespace clojure.lang
         /// Interning here does not imply uniquifying.  
         /// The strings for the namespace-name and the symbol-name are uniquified.
         /// </remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "intern")]
         static public Symbol intern(string ns, string name)
         {
             return new Symbol(ns == null ? null : String.Intern(ns), String.Intern(name));
@@ -80,6 +85,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="nsname">The (possibly qualified) name</param>
         /// <returns>A new symbol.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "intern")]
         static public Symbol intern(string nsname)
         {
             int i = nsname.LastIndexOf('/');
@@ -123,7 +129,7 @@ namespace clojure.lang
         /// <returns>The hash code.</returns>
         private int ComputeHashCode()
         {
-            return Util.HashCombine(_name.GetHashCode(), Util.Hash(_ns));
+            return Util.hashCombine(_name.GetHashCode(), Util.hash(_ns));
         }
 
 

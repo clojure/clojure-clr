@@ -24,6 +24,7 @@ namespace clojure.lang
         /// Gets the index associated with this sequence.
         /// </summary>
         /// <returns>The index associated with this sequence.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "index")]
         int index();
     }
 }

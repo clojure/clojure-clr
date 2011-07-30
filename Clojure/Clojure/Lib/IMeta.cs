@@ -24,6 +24,7 @@ namespace clojure.lang
         /// Gets the metadata attached to the object.
         /// </summary>
         /// <returns>An immutable map representing the object's metadata.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         IPersistentMap meta();
     }
 }

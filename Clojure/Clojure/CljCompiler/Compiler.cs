@@ -164,7 +164,8 @@ namespace clojure.lang
 
         #region Special forms
 
-        public static readonly IPersistentMap _specials = PersistentHashMap.create(
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "specials")]
+        public static readonly IPersistentMap specials = PersistentHashMap.create(
             DefSym, new DefExpr.Parser(),
             LoopSym, new LetExpr.Parser(),
             RecurSym, new RecurExpr.Parser(),
@@ -193,12 +194,12 @@ namespace clojure.lang
 
         public static bool IsSpecial(Object sym)
         {
-            return _specials.containsKey(sym);
+            return specials.containsKey(sym);
         }
 
         static IParser GetSpecialFormParser(object op)
         {
-            return (IParser)_specials.valAt(op);
+            return (IParser)specials.valAt(op);
         }
 
         #endregion
@@ -256,7 +257,6 @@ namespace clojure.lang
         //internal static readonly MethodInfo Method_RT_IsTrue = typeof(RT).GetMethod("IsTrue");
         internal static readonly MethodInfo Method_RT_keyword = typeof(RT).GetMethod("keyword");
         internal static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
-        //internal static readonly MethodInfo Method_RT_printToConsole = typeof(RT).GetMethod("printToConsole");
         internal static readonly MethodInfo Method_RT_seqOrElse = typeof(RT).GetMethod("seqOrElse");
         internal static readonly MethodInfo Method_RT_set = typeof(RT).GetMethod("set");
         internal static readonly MethodInfo Method_RT_vector = typeof(RT).GetMethod("vector");
@@ -270,7 +270,7 @@ namespace clojure.lang
 
         //internal static readonly MethodInfo Method_Util_equals = typeof(Util).GetMethod("equals", new Type[] { typeof(object), typeof(object) });
         internal static readonly MethodInfo Method_Util_equiv = typeof(Util).GetMethod("equiv", new Type[] { typeof(object), typeof(object) });
-        internal static readonly MethodInfo Method_Util_Hash = typeof(Util).GetMethod("Hash");
+        internal static readonly MethodInfo Method_Util_hash = typeof(Util).GetMethod("hash");
         internal static readonly MethodInfo Method_Util_IsNonCharNumeric = typeof(Util).GetMethod("IsNonCharNumeric");
         
         internal static readonly MethodInfo Method_Var_bindRoot = typeof(Var).GetMethod("bindRoot");
@@ -322,6 +322,7 @@ namespace clojure.lang
 
         // TODO: we have duplicate code below.
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "resolve")]
         public static Symbol resolveSymbol(Symbol sym)
         {
             //already qualified or classname?
@@ -353,11 +354,13 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "namespace")]
         public static Namespace namespaceFor(Symbol sym)
         {
             return namespaceFor(CurrentNamespace, sym);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "namespace")]
         public static Namespace namespaceFor(Namespace inns, Symbol sym)
         {
             //note, presumes non-nil sym.ns
@@ -374,7 +377,7 @@ namespace clojure.lang
 
         public static Namespace CurrentNamespace
         {
-            get { return (Namespace)RT.CURRENT_NS.deref(); }
+            get { return (Namespace)RT.CurrentNSVar.deref(); }
         }
 
         public static string DestubClassName(String className)
@@ -414,9 +417,9 @@ namespace clojure.lang
             else if (symbol.Name.IndexOf('.') > 0 || symbol.Name[symbol.Name.Length - 1] == ']')
                 return RT.classForName(symbol.Name);
             else if (symbol.Equals(NsSym))
-                return RT.NS_VAR;
+                return RT.NSVar;
             else if (symbol.Equals(InNsSym))
-                return RT.IN_NS_VAR;
+                return RT.InNSVar;
             else
             {
                 if (Util.equals(symbol, CompileStubSymVar.get()))
@@ -425,7 +428,7 @@ namespace clojure.lang
                 object o = n.GetMapping(symbol);
                 if (o == null)
                 {
-                    if (RT.booleanCast(RT.ALLOW_UNRESOLVED_VARS.deref()))
+                    if (RT.booleanCast(RT.AllowUnresolvedVarsVar.deref()))
                         return symbol;
                     else
                         throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));
@@ -434,7 +437,7 @@ namespace clojure.lang
             }
         }
 
-        // core.clj compatibility
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "maybe")]
         public static object maybeResolveIn(Namespace n, Symbol symbol)
         {
             // note: ns-qualified vars must already exist
@@ -453,9 +456,9 @@ namespace clojure.lang
                 || symbol.Name[symbol.Name.Length - 1] == ']')              /// JAVA: symbol.Name[0] == '[')
                 return RT.classForName(symbol.Name);
             else if (symbol.Equals(NsSym))
-                return RT.NS_VAR;
+                return RT.NSVar;
             else if (symbol.Equals(InNsSym))
-                return RT.IN_NS_VAR;
+                return RT.InNSVar;
             else
             {
                 object o = n.GetMapping(symbol);
@@ -513,9 +516,9 @@ namespace clojure.lang
                     var = ns.FindInternedVar(name);
             }
             else if (sym.Equals(NsSym))
-                var = RT.NS_VAR;
+                var = RT.NSVar;
             else if (sym.Equals(InNsSym))
-                var = RT.IN_NS_VAR;
+                var = RT.InNSVar;
             else
             {
                 // is it mapped?
@@ -831,7 +834,7 @@ namespace clojure.lang
              );
 
 
-        // Used in core_deftype, so initial lowercase required for compatibility
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "munge")]
         public static string munge(string name)
         {
             StringBuilder sb = new StringBuilder();
@@ -874,14 +877,15 @@ namespace clojure.lang
         /// <param name="form"></param>
         /// <returns></returns>
         /// <remarks>Initial lowercase for core.clj compatibility</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "eval")]
         public static object eval(object form)
         {
             int line = (int)LineVar.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
-                line = (int)RT.meta(form).valAt(RT.LINE_KEY);
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
+                line = (int)RT.meta(form).valAt(RT.LineKey);
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SOURCE_SPAN_KEY))
-                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SOURCE_SPAN_KEY);
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
+                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
 
             ParserContext pconExpr = new ParserContext(RHC.Expression);
             ParserContext pconEval = new ParserContext(RHC.Eval);
@@ -929,6 +933,7 @@ namespace clojure.lang
         /// <param name="form"></param>
         /// <returns></returns>
         /// <remarks>Initial lowercase for core.clj compatibility</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "macroexpand")]
         public static object macroexpand1(object form)
         {
             ISeq s = form as ISeq;
@@ -980,7 +985,7 @@ namespace clojure.lang
                         Symbol method = Symbol.intern(sname.Substring(1));
                         object target = RT.second(form);
                         if (HostExpr.MaybeType(target, false) != null)
-                            target = ((IObj)RT.list(IdentitySym, target)).withMeta(RT.map(RT.TAG_KEY, ClassSym));
+                            target = ((IObj)RT.list(IdentitySym, target)).withMeta(RT.map(RT.TagKey, ClassSym));
                         // We need to make sure source information gets transferred
                         return MaybeTransferSourceInfo(PreserveTag(form, RT.listStar(DotSym, target, method, form.next().next())), form);
                     }
@@ -1074,14 +1079,14 @@ namespace clojure.lang
             if (oldMeta == null)
                 return newForm;
 
-            IPersistentMap spanMap = (IPersistentMap)oldMeta.valAt(RT.SOURCE_SPAN_KEY);
+            IPersistentMap spanMap = (IPersistentMap)oldMeta.valAt(RT.SourceSpanKey);
             if (spanMap != null)
             {
                 IPersistentMap newMeta = newObj.meta();
                 if (newMeta == null)
                     newMeta = RT.map();
 
-                newMeta = newMeta.assoc(RT.SOURCE_SPAN_KEY, spanMap);
+                newMeta = newMeta.assoc(RT.SourceSpanKey, spanMap);
 
                 return newObj.withMeta(newMeta);
             }
@@ -1098,7 +1103,7 @@ namespace clojure.lang
                 if (iobj != null)
                 {
                     IPersistentMap meta = iobj.meta();
-                    return iobj.withMeta((IPersistentMap)RT.assoc(meta, RT.TAG_KEY, tag));
+                    return iobj.withMeta((IPersistentMap)RT.assoc(meta, RT.TagKey, tag));
                 }
             }
             return dst;
@@ -1114,7 +1119,7 @@ namespace clojure.lang
 
         internal static Symbol TagOf(object o)
         {
-            object tag = RT.get(RT.meta(o), RT.TAG_KEY);
+            object tag = RT.get(RT.meta(o), RT.TagKey);
 
             {
                 Symbol sym = tag as Symbol;
@@ -1151,7 +1156,7 @@ namespace clojure.lang
                 return 0;
 
             int line;
-            if (GetLocation(spanMap,RT.START_LINE_KEY,out line) )
+            if (GetLocation(spanMap,RT.StartLineKey,out line) )
                 return line;
 
             return 0;
@@ -1176,10 +1181,10 @@ namespace clojure.lang
             finishLine = -1;
             finishCol = -1;
 
-            return GetLocation(spanMap, RT.START_LINE_KEY, out startLine)
-                && GetLocation(spanMap, RT.START_COLUMN_KEY, out startCol)
-                && GetLocation(spanMap, RT.END_LINE_KEY, out finishLine)
-                && GetLocation(spanMap, RT.END_COLUMN_KEY, out finishCol);
+            return GetLocation(spanMap, RT.StartLineKey, out startLine)
+                && GetLocation(spanMap, RT.StartColumnKey, out startCol)
+                && GetLocation(spanMap, RT.EndLineKey, out finishLine)
+                && GetLocation(spanMap, RT.EndColumnKey, out finishCol);
         }
 
         internal static Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap, bool isDebuggable)
@@ -1193,8 +1198,8 @@ namespace clojure.lang
                 if (GetLocations(spanMap, out startLine, out startCol, out finishLine, out finishCol))
                     return AstUtils.AddDebugInfo(expr,
                         Compiler.DocInfo(),
-                        new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.START_LINE_KEY), (int)spanMap.valAt(RT.START_COLUMN_KEY)),
-                        new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.END_LINE_KEY), (int)spanMap.valAt(RT.END_COLUMN_KEY)));
+                        new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.StartLineKey), (int)spanMap.valAt(RT.StartColumnKey)),
+                        new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.EndLineKey), (int)spanMap.valAt(RT.EndColumnKey)));
             }
             return expr;
         }
@@ -1243,7 +1248,7 @@ namespace clojure.lang
                 LocalEnvVar, null,
                 LoopLocalsVar, null,
                 NextLocalNumVar, 0,
-                RT.CURRENT_NS, RT.CURRENT_NS.deref(),
+                RT.CurrentNSVar, RT.CurrentNSVar.deref(),
                     //LINE_BEFORE, lntr.LineNumber,
                     //LINE_AFTER, lntr.LineNumber,
                 DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
@@ -1251,8 +1256,8 @@ namespace clojure.lang
                 ConstantIdsVar, new IdentityHashMap(),
                 KeywordsVar, PersistentHashMap.EMPTY,
                 VarsVar, PersistentHashMap.EMPTY,
-                RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref(),
-                RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref(),
+                RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
+                RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
 
                 //KEYWORD_CALLSITES, PersistentVector.EMPTY,  // jvm doesn't do this, don't know why
                 //VAR_CALLSITES, EmptyVarCallSites(),      // jvm doesn't do this, don't know why
@@ -1341,11 +1346,11 @@ namespace clojure.lang
         {
 
             int line = (int)LineVar.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
-                line = (int)RT.meta(form).valAt(RT.LINE_KEY);
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
+                line = (int)RT.meta(form).valAt(RT.LineKey);
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SOURCE_SPAN_KEY))
-                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SOURCE_SPAN_KEY);
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
+                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
 
             Var.pushThreadBindings(RT.map(LineVar, line, SourceSpanVar, sourceSpan));
 
@@ -1405,6 +1410,7 @@ namespace clojure.lang
 
         #region Loading
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
         public static object loadFile(string fileName)
         {
             FileInfo finfo = new FileInfo(fileName);
@@ -1416,6 +1422,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
         public static object load(TextReader rdr, string relativePath)
         {
             return load(rdr, null, "NO_SOURCE_FILE", relativePath);  // ?
@@ -1424,6 +1431,7 @@ namespace clojure.lang
         public delegate object ReplDelegate();
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
         public static object load(TextReader rdr, string sourcePath, string sourceName, string relativePath)
         {
             object ret = null;
@@ -1438,9 +1446,9 @@ namespace clojure.lang
                 SourceVar, sourceName,
                 DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
 
-                RT.CURRENT_NS, RT.CURRENT_NS.deref(),
-                RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref(),
-                RT.WARN_ON_REFLECTION, RT.WARN_ON_REFLECTION.deref()
+                RT.CurrentNSVar, RT.CurrentNSVar.deref(),
+                RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
+                RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref()
                 //LINE_BEFORE, lntr.LineNumber,
                 //LINE_AFTER, lntr.LineNumber
                 ));
@@ -1472,9 +1480,9 @@ namespace clojure.lang
 
         #region Form analysis
 
-        internal static LiteralExpr NIL_EXPR = new NilExpr();
-        internal static LiteralExpr TRUE_EXPR = new BooleanExpr(true);
-        internal static LiteralExpr FALSE_EXPR = new BooleanExpr(false);
+        internal static LiteralExpr NilExprInstance = new NilExpr();
+        internal static LiteralExpr TrueExprInstance = new BooleanExpr(true);
+        internal static LiteralExpr FalseExprInstance = new BooleanExpr(false);
 
         public static Expr Analyze(ParserContext pcontext, object form)
         {
@@ -1493,9 +1501,9 @@ namespace clojure.lang
                         form = PersistentList.EMPTY;
                 }
                 if (form == null)
-                    return NIL_EXPR;
+                    return NilExprInstance;
                 else if (form is Boolean)
-                    return ((bool)form) ? TRUE_EXPR : FALSE_EXPR;
+                    return ((bool)form) ? TrueExprInstance : FalseExprInstance;
 
                 Type type = form.GetType();
 
@@ -1539,7 +1547,7 @@ namespace clojure.lang
             Expr ret = expr;
 
             if ( RT.meta(form) != null )
-                ret = new MetaExpr(ret, (MapExpr)MapExpr.Parse(pcon.EvEx(),((IObj)form).meta()));
+                ret = new MetaExpr(ret, (MapExpr)MapExpr.Parse(pcon.EvalOrExpr(),((IObj)form).meta()));
 
             return ret;
         }
@@ -1583,7 +1591,7 @@ namespace clojure.lang
             {
                 if (IsMacro(oAsVar) != null)
                     throw new Exception("Can't take the value of a macro: " + oAsVar);
-                if (RT.booleanCast(RT.get(oAsVar.meta(), RT.CONST_KEY)))
+                if (RT.booleanCast(RT.get(oAsVar.meta(), RT.ConstKey)))
                     return Analyze(new ParserContext(RHC.Expression), RT.list(QuoteSym, oAsVar.get()));
                 RegisterVar(oAsVar);
                 return new VarExpr(oAsVar, tag);
@@ -1599,11 +1607,11 @@ namespace clojure.lang
         private static Expr AnalyzeSeq(ParserContext pcon, ISeq form, string name )
         {
             int line = (int)LineVar.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LINE_KEY))
-                line = (int)RT.meta(form).valAt(RT.LINE_KEY);
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
+                line = (int)RT.meta(form).valAt(RT.LineKey);
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SOURCE_SPAN_KEY))
-                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SOURCE_SPAN_KEY);
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
+                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
 
             Var.pushThreadBindings(RT.map(LineVar, line, SourceSpanVar, sourceSpan));
 

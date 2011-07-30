@@ -134,7 +134,7 @@ namespace clojure.lang.CljCompiler.Ast
                                     List<HostArg> has = new List<HostArg>(1);
                                     has.Add(ha);
                                     init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "box", null, has);
-                                    if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                                    if (RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                                         RT.errPrintWriter().WriteLine("Auto-boxing loop arg: " + sym);
                                 }
                                 else if (Compiler.MaybePrimitiveType(init) == typeof(int))

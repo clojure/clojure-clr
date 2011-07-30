@@ -181,7 +181,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (variadicMethod != null)
                     allMethods = RT.conj(allMethods, variadicMethod);
 
-                fn._methods = allMethods;
+                fn.Methods = allMethods;
                 fn._variadicMethod = variadicMethod;
                 fn.Keywords = (IPersistentMap)Compiler.KeywordsVar.deref();
                 fn.Vars = (IPersistentMap)Compiler.VarsVar.deref();
@@ -200,7 +200,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             IPersistentMap fmeta = RT.meta(origForm);
             if (fmeta != null)
-                fmeta = fmeta.without(RT.LINE_KEY).without(RT.FILE_KEY);
+                fmeta = fmeta.without(RT.LineKey).without(RT.FileKey);
             fn._hasMeta = RT.count(fmeta) > 0;
 
             if (Compiler.IsCompiling || prims.Count > 0)
@@ -226,14 +226,14 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             if (fn.SupportsMeta)
-                return new MetaExpr(fn, MapExpr.Parse(pcon.EvEx(),fmeta));
+                return new MetaExpr(fn, MapExpr.Parse(pcon.EvalOrExpr(),fmeta));
             else
                 return fn;
         }
 
         internal void AddMethod(FnMethod method)
         {
-            _methods = RT.conj(_methods,method);
+            Methods = RT.conj(Methods,method);
         }
 
         #endregion
@@ -265,7 +265,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override void GenerateMethods(GenContext context)
         {
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+            for (ISeq s = RT.seq(Methods); s != null; s = s.next())
             {
                 FnMethod method = (FnMethod)s.first();
                 method.GenerateCode(this,context);
@@ -312,7 +312,7 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 exprs.Add(Expression.Assign(p1, Expression.New(p1.Type)));
 
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+            for (ISeq s = RT.seq(Methods); s != null; s = s.next())
             {
                 FnMethod method = (FnMethod)s.first();
                 LambdaExpression lambda = method.GenerateImmediateLambda(rhc,this,context);

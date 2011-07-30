@@ -17,7 +17,10 @@ namespace clojure.lang
 {
     public interface ITransientCollection
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "conj")]
         ITransientCollection conj(object val);
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "persistent")]
         IPersistentCollection persistent();
     }
 }

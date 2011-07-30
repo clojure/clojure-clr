@@ -24,7 +24,7 @@ namespace clojure.lang
     {
         #region Factory
 
-        public static Type GenerateInterface(string iName, IPersistentMap attributes, ISeq extends, ISeq methods)
+        public static Type GenerateInterface(string iName, IPersistentMap attributes, Seqable extends, ISeq methods)
         {
             iName = iName.Replace('-', '_');
 
@@ -72,12 +72,12 @@ namespace clojure.lang
         // value = { :key value ... }
         // Special key :__args indicates positional arguments
 
-        public static readonly Var EXTRACT_ATTRIBUTES = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),Symbol.intern("extract-attributes"));
+        public static readonly Var ExtractAttributesVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),Symbol.intern("extract-attributes"));
 
         public static IPersistentMap ExtractAttributes(IPersistentMap meta)
         {
-            if (meta != null && EXTRACT_ATTRIBUTES.isBound)
-                return (IPersistentMap)EXTRACT_ATTRIBUTES.invoke(meta);
+            if (meta != null && ExtractAttributesVar.isBound)
+                return (IPersistentMap)ExtractAttributesVar.invoke(meta);
 
             return PersistentArrayMap.EMPTY;
         }

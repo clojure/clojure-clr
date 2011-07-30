@@ -28,12 +28,12 @@ namespace clojure.lang
         /// <summary>
         /// The number of times to retry a transaction in case of a conflict.
         /// </summary>
-        public const int RETRY_LIMIT = 10000;
+        public const int RetryLimit = 10000;
 
         /// <summary>
         /// How long to wait for a lock.
         /// </summary>
-        public const int LOCK_WAIT_MSECS = 100;
+        public const int LockWaitMsecs = 100;
 
         /// <summary>
         /// How old another transaction must be before we 'barge' it.
@@ -43,7 +43,7 @@ namespace clojure.lang
         /// If I'm thinking correctly tonight, that's 10 milliseconds.
         /// Ticks here are 100 nanos, so we should have  10 * 1000000/100 = 100000.
         /// </remarks>
-        public const long BARGE_WAIT_TICKS = 100000;
+        public const long BargeWaitTicks = 100000;
 
 
         // State constants
@@ -351,7 +351,7 @@ namespace clojure.lang
         {
             try
             {
-                if (!r.TryEnterWriteLock(LOCK_WAIT_MSECS))
+                if (!r.TryEnterWriteLock(LockWaitMsecs))
                     throw _retryex;
             }
             catch (ThreadInterruptedException )
@@ -376,7 +376,7 @@ namespace clojure.lang
             Stop(RETRY);
             try
             {
-                refinfo.Latch.Await(LOCK_WAIT_MSECS);
+                refinfo.Latch.Await(LockWaitMsecs);
             }
             catch (ThreadInterruptedException)
             {
@@ -445,7 +445,7 @@ namespace clojure.lang
         /// <returns><value>true</value> if enough time has elapsed; <value>false</value> otherwise.</returns>
         private bool BargeTimeElapsed()
         {
-            return Environment.TickCount - _startTime > BARGE_WAIT_TICKS;
+            return Environment.TickCount - _startTime > BargeWaitTicks;
         }
 
         /// <summary>
@@ -496,6 +496,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns><value>true</value> if there is a transaction running on this thread; <value>false</value> otherwise.</returns>
         /// <remarks>Initial lowercase in name for core.clj compatibility.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static bool isRunning()
         {
             return GetRunning() != null;
@@ -507,6 +508,7 @@ namespace clojure.lang
         /// <param name="fn">The function to invoke.</param>
         /// <returns>The value computed by the function.</returns>
         /// <remarks>Initial lowercase in name for core.clj compatibility.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object runInTransaction(IFn fn)
         {
             // TODO: This can be called on something more general than  an IFn.
@@ -551,7 +553,7 @@ namespace clojure.lang
             List<Ref> locked = new List<Ref>();
             List<Notify> notify = new List<Notify>();
 
-            for (int i = 0; !done && i < RETRY_LIMIT; i++)
+            for (int i = 0; !done && i < RetryLimit; i++)
             {
                 try
                 {
@@ -660,7 +662,7 @@ namespace clojure.lang
                         {
                             foreach (Notify n in notify)
                             {
-                                n._ref.notifyWatches(n._oldval, n._newval);
+                                n._ref.NotifyWatches(n._oldval, n._newval);
                             }
                             foreach (Agent.Action action in _actions)
                             {

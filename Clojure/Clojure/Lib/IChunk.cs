@@ -17,7 +17,10 @@ namespace clojure.lang
 {
     public interface IChunk : Indexed
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "drop")]
         IChunk dropFirst();
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "reduce")]
         object reduce(IFn f, object start);
     }
 }

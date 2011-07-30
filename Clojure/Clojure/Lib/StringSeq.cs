@@ -57,6 +57,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         static public StringSeq create(string s)
         {
             return s.Length == 0

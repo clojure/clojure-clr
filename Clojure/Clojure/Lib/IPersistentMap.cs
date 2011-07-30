@@ -28,6 +28,7 @@ namespace clojure.lang
         /// <param name="val">The value</param>
         /// <returns>A new map with key+value added.</returns>
         /// <remarks>Overwrites an exising value for the <paramref name="key"/>, if present.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "assoc")]
         new IPersistentMap assoc(object key, object val);
 
         /// <summary>
@@ -37,6 +38,7 @@ namespace clojure.lang
         /// <param name="val">The value</param>
         /// <returns>A new map with key+value added.</returns>
         /// <remarks>Throws an exception if <paramref name="key"/> has a value already.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "assoc")]
         IPersistentMap assocEx(object key, object val);   
 
         /// <summary>
@@ -44,6 +46,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The key to remove</param>
         /// <returns>A new map with the key removed (or the same map if the key is not contained).</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "without")]
         IPersistentMap without(object key);
 
         /// <summary>
@@ -56,6 +59,7 @@ namespace clojure.lang
         /// <para>The object can be many things representing a key/value pair, including <c>DictionaryEntry</c>s,
         /// <c>KeyValuePair&lt;,&gt;</c>, an <see cref="IMapEntry">IMapEntry</see>, an <see cref="IPersistentVector">IPersistentVector</see>
         /// of two elements, etc.</para></remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "cons")]
         new IPersistentMap cons(object obj);
 
         /// <summary>
@@ -64,6 +68,7 @@ namespace clojure.lang
         /// <returns>The number of items in the collection.</returns>
         /// <remarks>Overrides <c>count()</c> in both <see cref="IPersistentCollection">IPersistentCollection</see> 
         /// and <see cref="Counted">Counted</see> to resolve ambiguity for callers.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "count")]
         new int count();
     }
 }

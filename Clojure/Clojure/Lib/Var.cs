@@ -231,7 +231,7 @@ namespace clojure.lang
             get { return _sym; }
         }
 
-        // core.clj compatibility
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public Symbol sym
         {
             get { return _sym; }
@@ -261,6 +261,7 @@ namespace clojure.lang
         /// <param name="sym">The name.</param>
         /// <param name="root">The root value.</param>
         /// <returns>The var that was found or created.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Var intern(Namespace ns, Symbol sym, object root)
         {
             return intern(ns, sym, root, true);
@@ -274,6 +275,7 @@ namespace clojure.lang
         /// <param name="root">The root value.</param>
         /// <param name="replaceRoot">Replace an existing root value if <value>true</value>.</param>
         /// <returns>The var that was found or created.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Var intern(Namespace ns, Symbol sym, object root, bool replaceRoot)
         {
             Var dvout = ns.intern(sym);
@@ -288,6 +290,7 @@ namespace clojure.lang
         /// <param name="nsName">The name of the namespace.  (A namespace with this name will be created if not existing already.)</param>
         /// <param name="sym">The name of the var.</param>
         /// <returns>The var that was found or created.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Var intern(Symbol nsName, Symbol sym)
         {
             Namespace ns = Namespace.findOrCreate(nsName);
@@ -301,6 +304,7 @@ namespace clojure.lang
         /// <param name="sym">The name of the var.</param>
         /// <returns>The var that was found or created.</returns>
         /// <remarks>Added in Java Rev 1110.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Var internPrivate(string nsName, String sym)
         {
             Namespace ns = Namespace.findOrCreate(Symbol.intern(nsName));
@@ -315,6 +319,7 @@ namespace clojure.lang
         /// <param name="ns">The namespace.</param>
         /// <param name="sym">The name.</param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Var intern(Namespace ns, Symbol sym)
         {
             return ns.intern(sym);
@@ -324,6 +329,7 @@ namespace clojure.lang
         /// Create an uninterned var.
         /// </summary>
         /// <returns>An uninterned var.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Var create()
         {
             return new Var(null, null);
@@ -334,6 +340,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="root">The root value.</param>
         /// <returns>An uninterned var.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Var create(object root)
         {
             return new Var(null, null, root);
@@ -386,6 +393,7 @@ namespace clojure.lang
 
         #region Frame management
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object getThreadBindingFrame()
         {
             Frame f = CurrentFrame;
@@ -394,6 +402,7 @@ namespace clojure.lang
             return new Frame();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static void resetThreadBindingFrame(Object frame)
         {
             CurrentFrame = (Frame)frame;
@@ -403,18 +412,21 @@ namespace clojure.lang
 
         #region Dynamic flag management
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public Var setDynamic()
         {
             _dynamic = true;
             return this;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public Var setDynamic(bool b)
         {
             _dynamic = b;
             return this;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public bool isDynamic()
         {
             return _dynamic;
@@ -430,6 +442,7 @@ namespace clojure.lang
         /// <param name="m">The metadata to attach.</param>
         /// <remarks>The metadata must contain entries for the namespace and name.
         /// <para>Lowercase name for core.clj compatability.</para></remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public void setMeta(IPersistentMap m)
         { 
             // ensure these basis keys
@@ -440,6 +453,7 @@ namespace clojure.lang
         /// Add a macro=true flag to the metadata.
         /// </summary>
         /// <remarks>Lowercase name for core.clj compatability.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public void setMacro()
         {
             //alterMeta(_assoc, RT.list(_macroKey, RT.T));
@@ -468,8 +482,8 @@ namespace clojure.lang
         /// <remarks>In Java code, setTag takes only Symbols.  Don't know why.  I ran into a problem when I changed the type to Symbol.</remarks>
         public object Tag
         {
-            get { return meta().valAt(RT.TAG_KEY); }
-            set { alterMeta(_assoc,RT.list(RT.TAG_KEY, value)); }
+            get { return meta().valAt(RT.TagKey); }
+            set { alterMeta(_assoc,RT.list(RT.TagKey, value)); }
         }
 
         #endregion
@@ -479,6 +493,7 @@ namespace clojure.lang
         /// <summary>
         /// Does the var have value?
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public bool isBound
         {
             get { return hasRoot() || (_threadBound.get() && CurrentFrame.Bindings.containsKey(this)); }
@@ -489,17 +504,19 @@ namespace clojure.lang
         /// Does the var have a root value?
         /// </summary>
         /// <returns></returns>
-        /// <remarks>core.clj compatibility (initial lowercase/ public /method-instead-of-property)</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public bool hasRoot()
         {
             return !(_root is Unbound);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public object getRawRoot()
         {
             return _root;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public object alter(IFn fn, ISeq args)
         {
             set(fn.applyTo(RT.cons(deref(), args)));
@@ -512,6 +529,7 @@ namespace clojure.lang
         /// <param name="val">The new value.</param>
         /// <returns>the new value.</returns>
         /// <remarks>It is an error to set the root binding with this method.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public object set(object val)
         {
             Validate(getValidator(), val);
@@ -530,7 +548,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="root">The new value.</param>
         /// <remarks>binding root clears macro flag
-        /// <para>Initial lowercase for core.clj compatibility</para></remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void bindRoot(object root)
         {
@@ -539,7 +557,7 @@ namespace clojure.lang
             _root = root;
             ++_rev;
             alterMeta(_dissoc, RT.list(_macroKey));
-            notifyWatches(oldroot, _root);
+            NotifyWatches(oldroot, _root);
         }
 
         /// <summary>
@@ -553,14 +571,14 @@ namespace clojure.lang
             object oldroot = _root;
             _root = root;
             ++_rev;
-            notifyWatches(oldroot, root);
+            NotifyWatches(oldroot, root);
         }
 
         /// <summary>
         /// Unbind the var's root value.
         /// </summary>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        void unbindRoot()
+        void UnbindRoot()
         {
             _root = new Unbound(this);
             ++_rev;
@@ -571,14 +589,14 @@ namespace clojure.lang
         /// </summary>
         /// <param name="fn">The function to apply to the current value to get the new value.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        void commuteRoot(IFn fn)
+        void CommuteRoot(IFn fn)
         {
             object newRoot = fn.invoke(_root);
             Validate(getValidator(), newRoot);
             object oldRoot = _root;
             _root = newRoot;
             ++_rev;
-            notifyWatches(oldRoot, newRoot);
+            NotifyWatches(oldRoot, newRoot);
         }
 
         /// <summary>
@@ -588,6 +606,7 @@ namespace clojure.lang
         /// <param name="args">Additional arguments.</param>
         /// <returns>The new value.</returns>
         /// <remarks> initial lowercase in name needed for core.clj</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public object alterRoot(IFn fn, ISeq args)
         {
@@ -596,7 +615,7 @@ namespace clojure.lang
             object oldroot = _root;
             _root = newRoot;
             ++_rev;
-            notifyWatches(oldroot,newRoot);
+            NotifyWatches(oldroot,newRoot);
             return newRoot;
         }
 
@@ -610,6 +629,8 @@ namespace clojure.lang
         /// </summary>
         /// <param name="bindings">The new bindings.</param>
         /// <remarks>Lowercase name for core.clj compatability.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
         public static void pushThreadBindings(Associative bindings)
         {
             Frame f = CurrentFrame;
@@ -631,6 +652,7 @@ namespace clojure.lang
         /// Pop the topmost binding frame from the stack.
         /// </summary>
         /// <remarks>Lowercase name for core.clj compatability.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static void popThreadBindings()
         {
             Frame f = CurrentFrame;
@@ -644,6 +666,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns></returns>
         /// <remarks>Lowercase name for core.clj compatability.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Associative getThreadBindings()
         {
             Frame f = CurrentFrame;
@@ -663,6 +686,7 @@ namespace clojure.lang
         /// Get the box of the current binding on the stack for this var, or null if no binding.
         /// </summary>
         /// <returns>The box of the current binding on the stack (or null if no binding).</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public TBox getThreadBinding()
         {
             if (_threadBound.get())
@@ -680,7 +704,7 @@ namespace clojure.lang
 
         #region IFn Members
 
-        public IFn fn()
+        IFn GetFn()
         {
             return (IFn)deref();
         }
@@ -688,98 +712,98 @@ namespace clojure.lang
 
         public object invoke()
         {
-            return fn().invoke();
+            return GetFn().invoke();
         }
 
         public object invoke(object arg1)
         {
-            return fn().invoke(arg1);
+            return GetFn().invoke(arg1);
         }
 
         public object invoke(object arg1, object arg2)
         {
-            return fn().invoke(arg1, arg2);
+            return GetFn().invoke(arg1, arg2);
         }
 
         public object invoke(object arg1, object arg2, object arg3)
         {
-            return fn().invoke(arg1, arg2, arg3);
+            return GetFn().invoke(arg1, arg2, arg3);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4);
+            return GetFn().invoke(arg1, arg2, arg3, arg4);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5);
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6);
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
                                arg16);
         }
 
@@ -787,7 +811,7 @@ namespace clojure.lang
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
                                arg16, arg17);
         }
 
@@ -795,7 +819,7 @@ namespace clojure.lang
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17, object arg18)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
                                arg16, arg17, arg18);
         }
 
@@ -803,7 +827,7 @@ namespace clojure.lang
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17, object arg18, object arg19)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
                                arg16, arg17, arg18, arg19);
         }
 
@@ -811,7 +835,7 @@ namespace clojure.lang
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17, object arg18, object arg19, object arg20)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
                                arg16, arg17, arg18, arg19, arg20);
         }
 
@@ -820,7 +844,7 @@ namespace clojure.lang
                              object arg15, object arg16, object arg17, object arg18, object arg19, object arg20,
                              params object[] args)
         {
-            return fn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
+            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
                                arg16, arg17, arg18, arg19, arg20, args);
         }
 
@@ -841,6 +865,7 @@ namespace clojure.lang
         /// Why?  Perhaps to avoid having to change Var.get() references all over.  
         /// For example, core.clj still has var-get calling this.
         /// But then they rename all uses anyway.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public object get()
         {
             if (!_threadBound.get())
@@ -884,6 +909,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="nsQualifiedSym">A namespace-qualified symbol.</param>
         /// <returns>The var, if found.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Var find(Symbol nsQualifiedSym)
         {
             if (nsQualifiedSym.Namespace == null)
@@ -898,6 +924,7 @@ namespace clojure.lang
         /// The namespace this var is interned in.
         /// </summary>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public Namespace ns
         {
             get { return Namespace; }
@@ -907,16 +934,19 @@ namespace clojure.lang
         /// Is this var public?
         /// </summary>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public bool isPublic
         {
             get { return IsPublic; }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public object getTag()
         {
             return Tag;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public void setTag(Symbol tag)
         {
             Tag = tag;

@@ -17,7 +17,10 @@ namespace clojure.lang
 {
     public interface ITransientVector : ITransientAssociative, Indexed
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "assoc")]
         ITransientVector assocN(int i, object val);
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "pop")]
         ITransientVector pop();
     }
 }

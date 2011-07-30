@@ -95,8 +95,8 @@ namespace clojure.lang.CljCompiler.Ast
             set { _fnMode = value; }
         }
 
-        protected FieldBuilder _metaField;
-        private FieldBuilder _varRevField;
+        FieldBuilder _metaField;
+        FieldBuilder _varRevField;
 
         //internal FieldBuilder VarRevField
         //{
@@ -104,15 +104,15 @@ namespace clojure.lang.CljCompiler.Ast
         //    //set { _varRevField = value; }
         //}
 
-        private List<FieldBuilder> _closedOverFields;
-        private Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;        
-        protected List<FieldBuilder> _keywordLookupSiteFields;
-        protected List<FieldBuilder> _thunkFields;
-        protected List<FieldBuilder> _cachedTypeFields;
-        protected List<FieldBuilder> _cachedProtoFnFields;
-        protected List<FieldBuilder> _cachedProtoImplFields;
+        List<FieldBuilder> _closedOverFields;
+        Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;        
+        List<FieldBuilder> _keywordLookupSiteFields;
+        List<FieldBuilder> _thunkFields;
+        List<FieldBuilder> _cachedTypeFields;
+        List<FieldBuilder> _cachedProtoFnFields;
+        List<FieldBuilder> _cachedProtoImplFields;
         //protected Dictionary<int,FieldBuilder> _cachedVarFields;
-        protected Dictionary<int, FieldBuilder> _constantFields;
+        Dictionary<int, FieldBuilder> _constantFields;
 
         //private MethodBuilder _reloadVarsMethod = null;
 
@@ -123,9 +123,21 @@ namespace clojure.lang.CljCompiler.Ast
         //}
 
 
-        protected IPersistentCollection _methods;
-        protected ConstructorInfo _ctorInfo;
-        protected ConstructorInfo _nonmetaCtorInfo;
+        IPersistentCollection _methods;
+        public IPersistentCollection Methods
+        {
+            get { return _methods; }
+            set { _methods = value; }
+        }
+
+        ConstructorInfo _ctorInfo;
+        public ConstructorInfo CtorInfo
+        {
+            get { return _ctorInfo; }
+            set { _ctorInfo = value; }
+        }
+        
+        ConstructorInfo _nonMetaCtorInfo;
 
         #endregion
 
@@ -728,7 +740,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (SupportsMeta)
             {
-                _nonmetaCtorInfo = GenerateNonMetaConstructor(_typeBuilder, _baseType);
+                _nonMetaCtorInfo = GenerateNonMetaConstructor(_typeBuilder, _baseType);
             }
             GenerateMetaFunctions(_typeBuilder);
 
@@ -842,7 +854,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             try
             {
-                Var.pushThreadBindings(RT.map(RT.PRINT_DUP, true));
+                Var.pushThreadBindings(RT.map(RT.PrintDupVar, true));
 
                 List<Expression> inits = new List<Expression>();
                 for (int i = 0; i < _constants.count(); i++)

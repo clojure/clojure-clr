@@ -56,6 +56,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="x">The object to force.</param>
         /// <returns>The computed valued (if a delay); the object itself (if not a delay).</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "force")]
         public static object force(object x)
         {
             Delay delay = x as Delay;

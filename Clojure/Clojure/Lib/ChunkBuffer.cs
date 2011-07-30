@@ -36,11 +36,13 @@ namespace clojure.lang
 
         #region Other
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public void add(object o)
         {
             _buffer[_end++] = o;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public IChunk chunk()
         {
             ArrayChunk ret = new ArrayChunk(_buffer, 0, _end);

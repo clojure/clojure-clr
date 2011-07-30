@@ -77,10 +77,10 @@ namespace clojure.lang.CljCompiler.Ast
             ICollection<Expr> returns = new List<Expr>(thens.Values);
             returns.Add(defaultExpr);
             _returnType = Compiler.MaybeClrType(returns);
-            if (RT.count(skipCheck) > 0 && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+            if (RT.count(skipCheck) > 0 && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
             {
                 RT.errPrintWriter().WriteLine("Performance warning, {0}:{1} - hash collision of some case test constants; if selected, those entries will be tested sequentially.",
-                    Compiler.SourcePathVar.deref(),RT.get(sourceSpan,RT.START_LINE_KEY));
+                    Compiler.SourcePathVar.deref(),RT.get(sourceSpan,RT.StartLineKey));
             }
         
         }
@@ -146,7 +146,7 @@ namespace clojure.lang.CljCompiler.Ast
                     object first = RT.first(pair);
                     Expr testExpr = testType == _intKey
                         ? NumberExpr.Parse(Util.ConvertToInt(first))
-                        : (first == null ? Compiler.NIL_EXPR : new ConstantExpr(first));
+                        : (first == null ? Compiler.NilExprInstance : new ConstantExpr(first));
                         
                     tests[minhash] = testExpr;
                     Expr thenExpr;
@@ -296,10 +296,10 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if (exprType == null)
             {
-                if (RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+                if (RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                 {
                     RT.errPrintWriter().WriteLine("Performance warning, {0}:{1} - case has int tests, but tested expression is not primitive.",
-                        Compiler.SourcePathVar.deref(), RT.get(_sourceSpan, RT.START_LINE_KEY));
+                        Compiler.SourcePathVar.deref(), RT.get(_sourceSpan, RT.StartLineKey));
                 }
                 
                 ParameterExpression parm = Expression.Parameter(typeof(object),"p");
@@ -325,7 +325,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private Expression GenTestExprForHashes(ObjExpr objx,GenContext context)
         {
-            Expression expr = Expression.Call(null, Compiler.Method_Util_Hash, Expression.Convert(_expr.GenCode(RHC.Expression, objx, context), typeof(Object)));
+            Expression expr = Expression.Call(null, Compiler.Method_Util_hash, Expression.Convert(_expr.GenCode(RHC.Expression, objx, context), typeof(Object)));
             return GenShiftMask(expr);
         }
 

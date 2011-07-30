@@ -270,13 +270,13 @@ namespace clojure.lang
 
         #region Some misc. goodies
 
-        public static readonly object[] EMPTY_OBJECT_ARRAY = new Object[] { };
+        public static readonly object[] EmptyObjectArray = new Object[] { };
 
         static RTProperties _versionProperties = new RTProperties();
 
         public static RTProperties GetVersionProperties() { return _versionProperties; }
 
-        public const string CLOJURE_LOAD_PATH = "clojure.load.path";
+        public const string ClojureLoadPathString = "clojure.load.path";
 
         #endregion
 
@@ -306,146 +306,147 @@ namespace clojure.lang
         #region Predefined namespaces
 
         // We need this initialization to happen earlier than most of the Var inits.
-        public static readonly Namespace CLOJURE_NS 
+        public static readonly Namespace ClojureNamespace 
             = Namespace.findOrCreate(Symbol.intern("clojure.core"));
 
         #endregion
 
         #region Useful Keywords
 
-        public static readonly Keyword TAG_KEY 
+        public static readonly Keyword TagKey 
             = Keyword.intern(null, "tag");
 
-        public static readonly Keyword CONST_KEY
+        public static readonly Keyword ConstKey
             = Keyword.intern(null, "const");
 
-        public static readonly Keyword LINE_KEY 
+        public static readonly Keyword LineKey 
             = Keyword.intern(null, "line");
 
-        public static readonly Keyword FILE_KEY
+        public static readonly Keyword FileKey
             = Keyword.intern(null, "file");
 
-        public static readonly Keyword SOURCE_SPAN_KEY
+        public static readonly Keyword SourceSpanKey
             = Keyword.intern(null, "source-span");
 
-        public static readonly Keyword START_LINE_KEY
+        public static readonly Keyword StartLineKey
             = Keyword.intern(null, "start-line");
 
-        public static readonly Keyword START_COLUMN_KEY
+        public static readonly Keyword StartColumnKey
             = Keyword.intern(null, "start-column");
 
-        public static readonly Keyword END_LINE_KEY
+        public static readonly Keyword EndLineKey
             = Keyword.intern(null, "end-line");
         
-        public static readonly Keyword END_COLUMN_KEY
+        public static readonly Keyword EndColumnKey
             = Keyword.intern(null, "end-column");
 
-        public static readonly Keyword DECLARED_KEY
+        public static readonly Keyword DeclaredKey
             = Keyword.intern(null, "declared");
 
-        public static readonly Keyword DOC_KEY
+        public static readonly Keyword DocKey
             = Keyword.intern(null, "doc");
 
         #endregion
 
         #region Vars (namespace-related)
 
-        public static readonly Var CURRENT_NS
-            = Var.intern(CLOJURE_NS, Symbol.intern("*ns*"), CLOJURE_NS).setDynamic();
+        public static readonly Var CurrentNSVar
+            = Var.intern(ClojureNamespace, Symbol.intern("*ns*"), ClojureNamespace).setDynamic();
 
 
-        public static readonly Var IN_NS_VAR
+        public static readonly Var InNSVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("in-ns"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.intern("in-ns"), false);
+            = Var.intern(ClojureNamespace, Symbol.intern("in-ns"), false);
 
-        public static readonly Var NS_VAR 
+        public static readonly Var NSVar 
             //= Var.intern(CLOJURE_NS, Symbol.intern("ns"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.intern("ns"), false);
+            = Var.intern(ClojureNamespace, Symbol.intern("ns"), false);
 
         #endregion
 
         #region Vars (I/O-related)
 
-        public static readonly Var OUT 
-            = Var.intern(CLOJURE_NS, Symbol.intern("*out*"), System.Console.Out).setDynamic();
+        public static readonly Var OutVar 
+            = Var.intern(ClojureNamespace, Symbol.intern("*out*"), System.Console.Out).setDynamic();
         
-        public static readonly Var ERR
-            = Var.intern(CLOJURE_NS, Symbol.intern("*err*"), System.Console.Error).setDynamic();
-        
-        public static readonly Var IN =
-            Var.intern(CLOJURE_NS, Symbol.intern("*in*"),
+        public static readonly Var ErrVar
+            = Var.intern(ClojureNamespace, Symbol.intern("*err*"), System.Console.Error).setDynamic();
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly")]
+        public static readonly Var InVar =
+            Var.intern(ClojureNamespace, Symbol.intern("*in*"),
             new clojure.lang.LineNumberingTextReader(System.Console.In)).setDynamic();
 
-        static readonly Var PRINT_READABLY
+        static readonly Var PrintReadablyVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*print-readably*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*print-readably*"), true).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*print-readably*"), true).setDynamic();
         
-        public static readonly Var PRINT_META 
+        public static readonly Var PrintMetaVar 
             //= Var.intern(CLOJURE_NS, Symbol.intern("*print-meta*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*print-meta*"), false).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*print-meta*"), false).setDynamic();
         
-        public static readonly Var PRINT_DUP 
+        public static readonly Var PrintDupVar 
             //= Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*"), false).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*print-dup*"), false).setDynamic();
         
-        static readonly Var FLUSH_ON_NEWLINE 
+        static readonly Var FlushOnNewlineVar 
             //= Var.intern(CLOJURE_NS, Symbol.intern("*flush-on-newline*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*flush-on-newline*"), true).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*flush-on-newline*"), true).setDynamic();
         
-        static readonly Var PRINT_INITIALIZED 
-            = Var.intern(CLOJURE_NS, Symbol.intern("print-initialized"));
+        static readonly Var PrintInitializedVar 
+            = Var.intern(ClojureNamespace, Symbol.intern("print-initialized"));
         
-        static readonly Var PR_ON 
-            = Var.intern(CLOJURE_NS, Symbol.intern("pr-on"));
+        static readonly Var PrOnVar 
+            = Var.intern(ClojureNamespace, Symbol.intern("pr-on"));
 
-        public static readonly Var ALLOW_SYMBOL_ESCAPE
-            = Var.intern(CLOJURE_NS, Symbol.intern("*allow-symbol-escape*"), true).setDynamic();
+        public static readonly Var AllowSymbolEscapeVar
+            = Var.intern(ClojureNamespace, Symbol.intern("*allow-symbol-escape*"), true).setDynamic();
 
         #endregion
 
         #region Vars (miscellaneous)
 
-        public static readonly Var ALLOW_UNRESOLVED_VARS
+        public static readonly Var AllowUnresolvedVarsVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*allow-unresolved-vars*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*allow-unresolved-vars*"), false).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*allow-unresolved-vars*"), false).setDynamic();
 
-        public static readonly Var WARN_ON_REFLECTION
+        public static readonly Var WarnOnReflectionVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), RT.F);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), false).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*warn-on-reflection*"), false).setDynamic();
  
         //public static readonly Var MACRO_META 
         //    = Var.intern(CLOJURE_NS, Symbol.intern("*macro-meta*"), null);
 
-        public static readonly Var MATH_CONTEXT
-            = Var.intern(CLOJURE_NS, Symbol.intern("*math-context*"), null).setDynamic();
+        public static readonly Var MathContextVar
+            = Var.intern(ClojureNamespace, Symbol.intern("*math-context*"), null).setDynamic();
         
-        public static readonly Var AGENT
-            = Var.intern(CLOJURE_NS, Symbol.intern("*agent*"), null).setDynamic();
+        public static readonly Var AgentVar
+            = Var.intern(ClojureNamespace, Symbol.intern("*agent*"), null).setDynamic();
 
-        public static readonly Var READEVAL
+        public static readonly Var ReadEvalVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), true).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*read-eval*"), true).setDynamic();
 
-        public static readonly Var ASSERT
+        public static readonly Var AssertVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), true).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*assert*"), true).setDynamic();
 
-        public static readonly Var CMD_LINE_ARGS
-            = Var.intern(CLOJURE_NS, Symbol.intern("*command-line-args*"), null).setDynamic();
+        public static readonly Var CmdLineArgsVar
+            = Var.intern(ClojureNamespace, Symbol.intern("*command-line-args*"), null).setDynamic();
 
-        public static readonly Var USE_CONTEXT_CLASSLOADER
+        public static readonly Var UseContextClassloaderVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), RT.T);
-            = Var.intern(CLOJURE_NS, Symbol.intern("*use-context-classloader*"), true).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*use-context-classloader*"), true).setDynamic();
 
         // boolean
-        public static readonly Var UNCHECKED_MATH = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+        public static readonly Var UncheckedMathVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
             Symbol.intern("*unchecked-math*"), false).setDynamic();
 
         #endregion
 
         #region  Clojure-environment IFns needing support
 
-        static readonly Symbol IN_NAMESPACE = Symbol.intern("in-ns");
+        static readonly Symbol InNsSymbol = Symbol.intern("in-ns");
 
         sealed class InNamespaceFn : AFn
         {
@@ -453,11 +454,11 @@ namespace clojure.lang
             {
                 Symbol nsname = (Symbol)arg1;
                 Namespace ns = Namespace.findOrCreate(nsname);
-                CURRENT_NS.set(ns);
+                CurrentNSVar.set(ns);
                 return ns;
             }
         }
-        static readonly Symbol NAMESPACE = Symbol.intern("ns");
+        static readonly Symbol NsSymbol = Symbol.intern("ns");
 
         sealed class BootNamespaceFN : AFn
         {
@@ -465,7 +466,7 @@ namespace clojure.lang
             {
                 Symbol nsname = (Symbol)arg1;
                 Namespace ns = Namespace.findOrCreate(nsname);
-                CURRENT_NS.set(ns);
+                CurrentNSVar.set(ns);
                 return ns;
             }
         }
@@ -487,7 +488,7 @@ namespace clojure.lang
         //    }
         //}
 
-        static readonly Symbol LOAD_FILE = Symbol.intern("load-file");
+        static readonly Symbol LoadFileSymbol = Symbol.intern("load-file");
 
         sealed class LoadFileFn : AFn
         {
@@ -509,28 +510,28 @@ namespace clojure.lang
             Keyword arglistskw = Keyword.intern(null, "arglists");
             Symbol namesym = Symbol.intern("name");
 
-            OUT.Tag = Symbol.intern("System.IO.TextWriter");
+            OutVar.Tag = Symbol.intern("System.IO.TextWriter");
 
-            CURRENT_NS.Tag = Symbol.intern("clojure.lang.Namespace");
+            CurrentNSVar.Tag = Symbol.intern("clojure.lang.Namespace");
 
-            AGENT.setMeta(map(DOC_KEY, "The agent currently running an action on this thread, else nil."));
-            AGENT.Tag = Symbol.intern("clojure.lang.Agent");
+            AgentVar.setMeta(map(DocKey, "The agent currently running an action on this thread, else nil."));
+            AgentVar.Tag = Symbol.intern("clojure.lang.Agent");
 
             // We don't have MathContext (yet)
             //MATH_CONTEXT.Tag = Symbol.intern("java.math.MathContext");
 
             //// during bootstrap, ns same as in-ns
             //Var nv = Var.intern(CLOJURE_NS, NAMESPACE, new InNamespaceFn());
-            Var nv = Var.intern(CLOJURE_NS, NAMESPACE, new BootNamespaceFN());
+            Var nv = Var.intern(ClojureNamespace, NsSymbol, new BootNamespaceFN());
             nv.setMacro();
 
             Var v;
-            v = Var.intern(CLOJURE_NS, IN_NAMESPACE, new InNamespaceFn());
-            v.setMeta(map(DOC_KEY, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
+            v = Var.intern(ClojureNamespace, InNsSymbol, new InNamespaceFn());
+            v.setMeta(map(DocKey, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
                 arglistskw, list(vector(namesym))));
 
-            v = Var.intern(CLOJURE_NS, LOAD_FILE, new LoadFileFn());
-            v.setMeta(map(DOC_KEY, "Sequentially read and evaluate the set of forms contained in the file.",
+            v = Var.intern(ClojureNamespace, LoadFileSymbol, new LoadFileFn());
+            v.setMeta(map(DocKey, "Sequentially read and evaluate the set of forms contained in the file.",
                 arglistskw, list(vector(namesym))));
 
             //v = Var.intern(CLOJURE_NS, IDENTICAL, new IdenticalFn());
@@ -554,9 +555,9 @@ namespace clojure.lang
         public static void PostBootstrapInit()
         {
             Var.pushThreadBindings(
-                RT.map(CURRENT_NS, CURRENT_NS.deref(),
-                WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref(),
-                RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()));
+                RT.map(CurrentNSVar, CurrentNSVar.deref(),
+                WarnOnReflectionVar, WarnOnReflectionVar.deref(),
+                RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
             try
             {
                 Symbol USER = Symbol.intern("user");
@@ -583,6 +584,7 @@ namespace clojure.lang
         private static int _id;
 
         // initial-lowercase name, used in core.clj
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int nextID()
         {
             return Interlocked.Increment(ref _id);
@@ -592,6 +594,7 @@ namespace clojure.lang
 
         #region Keyword support
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Keyword keyword(string ns, string name)
         {
             return Keyword.intern((Symbol.intern(ns, name)));
@@ -601,11 +604,13 @@ namespace clojure.lang
 
         #region Var support
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Var var(String ns, String name)
         {
             return Var.intern(Namespace.findOrCreate(Symbol.intern(null, ns)), Symbol.intern(null, name));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Var var(String ns, String name, Object init)
         {
             return Var.intern(Namespace.findOrCreate(Symbol.intern(null, ns)), Symbol.intern(null, name), init);
@@ -615,72 +620,89 @@ namespace clojure.lang
 
         #region Collections support
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq seq(object coll)
         {
-            if (coll is ASeq)
-                return (ASeq)coll;
-            else if (coll is LazySeq)
-                return ((LazySeq)coll).seq();
+            ASeq aseq = coll as ASeq;
+            if (aseq != null)
+                return aseq;
+
+            LazySeq lseq = coll as LazySeq;
+            if (lseq != null)
+                return lseq.seq();
             else
                 return seqFrom(coll);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         private static ISeq seqFrom(object coll)
         {
-            if (coll is Seqable)
-                return ((Seqable)coll).seq();
-            else if (coll == null)
+            if (coll == null)
                 return null;
-            else if (coll.GetType().IsArray)
+
+            Seqable seq = coll as Seqable;
+            if (seq != null)
+                return seq.seq();
+
+            if (coll.GetType().IsArray)
                 return ArraySeq.createFromObject(coll);
-            else if (coll is string)
-                return StringSeq.create((string)coll);
-            else if (coll is IEnumerable)  // java: Iterable  -- reordered clauses so others take precedence.
-                return EnumeratorSeq.create(((IEnumerable)coll).GetEnumerator());  // IteratorSeq
+
+            String str = coll as String;
+            if (str != null)
+                return StringSeq.create(str);
+
+            IEnumerable ie = coll as IEnumerable;
+            if (ie != null)  // java: Iterable  -- reordered clauses so others take precedence.
+                return EnumeratorSeq.create(ie.GetEnumerator());  // IteratorSeq
+
             // The equivalent for Java:Map is IDictionary.  IDictionary is IEnumerable, so is handled above.
             //else if(coll isntanceof Map)  
             //     return seq(((Map) coll).entrySet());
             // Used to be in the java version:
             //else if (coll is IEnumerator)  // java: Iterator
             //    return EnumeratorSeq.create((IEnumerator)coll);
-            else
-                throw new ArgumentException("Don't know how to create ISeq from: " + coll.GetType().FullName);
+
+            throw new ArgumentException("Don't know how to create ISeq from: " + coll.GetType().FullName);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object seqOrElse(object o)
         {
             return seq(o) == null ? null : o;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq keys(object coll)
         {
             return APersistentMap.KeySeq.create(seq(coll));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq vals(object coll)
         {
             return APersistentMap.ValSeq.create(seq(coll));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IPersistentMap meta(object x)
         {
-            return x is IMeta
-                ? ((IMeta)x).meta()
-                : null;
+            IMeta m = x as IMeta;
+            return m != null ? m.meta() : null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int count(object o)
         {
-            if (o is Counted)
-                return ((Counted)o).count();
-            return CountFrom(Util.Ret1(o,o=null));
+            Counted c = o as Counted;
+            return c != null ? c.count() : CountFrom(Util.Ret1(o,o=null));
         }
 
         static int CountFrom(object o)
         {
             if (o == null)
                 return 0;
-            else if (o is IPersistentCollection)
+
+            if (o is IPersistentCollection)
             {
                 ISeq s = seq(o);
                 o = null;
@@ -693,18 +715,27 @@ namespace clojure.lang
                 }
                 return i;
             }
-            else if (o is String)
-                return ((String)o).Length;
-            else if (o is ICollection)
-                return ((ICollection)o).Count;
-            else if (o is IDictionary)
-                return ((IDictionary)o).Count;
-            else if (o is Array)
-                return ((Array)o).GetLength(0);
+
+            String str = o as string;
+            if (str != null)
+                return str.Length;
+
+            ICollection c = o as ICollection;
+            if (c != null)
+                return c.Count;
+
+            IDictionary d = o as IDictionary;
+            if (d != null)
+                return d.Count;
+
+            Array a = o as Array;
+            if (a != null)
+                return a.GetLength(0);
 
             throw new InvalidOperationException("count not supported on this type: " + Util.NameForType(o.GetType()));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IPersistentCollection conj(IPersistentCollection coll, Object x)
         {
             if (coll == null)
@@ -712,6 +743,7 @@ namespace clojure.lang
             return coll.cons(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq cons(object x, object coll)
         {
             if (coll == null)
@@ -725,6 +757,7 @@ namespace clojure.lang
             return new Cons(x, seq(coll));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object first(object x)
         {
             ISeq seq = x as ISeq ?? RT.seq(x);
@@ -735,21 +768,25 @@ namespace clojure.lang
             return seq.first();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object second(object x)
         {
             return first(next(x));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object third(object x)
         {
             return first(next(next(x)));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object fourth(object x)
         {
             return first(next(next(next(x))));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq next(object x)
         {
             ISeq seq = (x as ISeq) ?? RT.seq(x);
@@ -760,6 +797,7 @@ namespace clojure.lang
             return seq.next();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq more(object x)
         {
             ISeq seq = x as ISeq ?? RT.seq(x);
@@ -772,6 +810,7 @@ namespace clojure.lang
 
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object peek(object x)
         {
             return x == null
@@ -779,6 +818,7 @@ namespace clojure.lang
                 : ((IPersistentStack)x).peek();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object pop(object x)
         {
             return x == null
@@ -786,6 +826,7 @@ namespace clojure.lang
                 : ((IPersistentStack)x).pop();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object get(Object coll, Object key)
         {
             ILookup ilu = coll as ILookup;
@@ -800,29 +841,34 @@ namespace clojure.lang
         {
             if (coll == null)
                 return null;
-            else if (coll is IDictionary)
-            {
-                IDictionary m = (IDictionary)coll;
-                return m[key];
-            }
-            else if (coll is IPersistentSet)
-            {
-                IPersistentSet set = (IPersistentSet)coll;
-                return set.get(key);
 
-            }
-            else if (Util.IsNumeric(key) && (coll is string || coll.GetType().IsArray))
+            IDictionary m = coll as IDictionary;
+            if (m != null)
+                return m[key];
+
+
+            IPersistentSet set = coll as IPersistentSet;
+            if (set != null)
+                return set.get(key);
+            
+
+            if (Util.IsNumeric(key) && (coll is string || coll.GetType().IsArray))
             {
                 int n = Util.ConvertToInt(key);
                 return n >= 0 && n < count(coll) ? nth(coll, n) : null;
             }
+            
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object get(Object coll, Object key, Object notFound)
         {
-             if (coll is ILookup)
-                return ((ILookup)coll).valAt(key,notFound);
+            ILookup ilu = coll as ILookup;
+
+             if (ilu != null)
+                return ilu.valAt(key,notFound);
+
             return GetFrom(coll, key, notFound);
         }
 
@@ -830,28 +876,34 @@ namespace clojure.lang
         {
            if (coll == null)
                 return notFound;
-            else if (coll is IDictionary)
+
+                IDictionary m = coll as IDictionary;
+
+            if (m != null)
             {
-                IDictionary m = (IDictionary)coll;
                 if (m.Contains(key))
                     return m[key];
                 return notFound;
             }
-            else if (coll is IPersistentSet)
+
+            IPersistentSet set = coll as IPersistentSet;
+            if (set != null)
             {
-                IPersistentSet set = (IPersistentSet)coll;
                 if (set.contains(key))
                     return set.get(key);
                 return notFound;
             }
-            else if (Util.IsNumeric(key) && (coll is string || coll.GetType().IsArray))
+            
+            if (Util.IsNumeric(key) && (coll is string || coll.GetType().IsArray))
             {
                 int n = Util.ConvertToInt(key);
                 return n >= 0 && n < count(coll) ? nth(coll, n) : notFound;
             }
+            
             return notFound;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Associative assoc(object coll, object key, Object val)
         {
             if (coll == null)
@@ -859,47 +911,59 @@ namespace clojure.lang
             return ((Associative)coll).assoc(key, val);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object contains(object coll, object key)
         {
             if (coll == null)
                 //return RT.F;
                 return false;
-            else if (coll is Associative)
+
+            Associative assoc = coll as Associative;
+            if (assoc != null)
                 //return ((Associative)coll).containsKey(key) ? RT.T : RT.F;
-                return ((Associative)coll).containsKey(key);
-            else if (coll is IPersistentSet)
+                return assoc.containsKey(key);
+
+            IPersistentSet set = coll as IPersistentSet;
+            if (set != null)
                 //return ((IPersistentSet)coll).contains(key) ? RT.T : RT.F;
-                return ((IPersistentSet)coll).contains(key);
-            else if (coll is IDictionary)
+                return set.contains(key);
+
+
+            IDictionary m = coll as IDictionary;
+            if (m != null)
             {
-                IDictionary m = (IDictionary)coll;
                 //return m.Contains(key) ? RT.T : RT.F;
                 return m.Contains(key);
             }
-            else if (Util.IsNumeric(key) && (coll is String || coll.GetType().IsArray))
+            
+            if (Util.IsNumeric(key) && (coll is String || coll.GetType().IsArray))
             {
                 int n = Util.ConvertToInt(key);
                 return n >= 0 && n < count(coll);
             }
+            
             //return RT.F;
             return false;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object find(object coll, object key)
         {
             if (coll == null)
                 return null;
-            else if (coll is Associative)
-                return ((Associative)coll).entryAt(key);
-            else
-            {
-                IDictionary m = (IDictionary)coll;
-                if (m.Contains(key))
-                    return new MapEntry(key, m[key]);
-                return null;
-            }
+
+            Associative assoc = coll as Associative;
+            if (assoc != null)
+                return assoc.entryAt(key);
+
+            IDictionary m = (IDictionary)coll;
+            if (m.Contains(key))
+                return new MapEntry(key, m[key]);
+
+            return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object dissoc(object coll, object key)
         {
             return coll == null
@@ -913,6 +977,7 @@ namespace clojure.lang
         //}
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object nth(object coll, int n)
         {
             Indexed indexed = coll as Indexed;
@@ -927,19 +992,30 @@ namespace clojure.lang
         {
             if (coll == null)
                 return null;
-            else if (coll is String)
-                return ((string)coll)[n];
-            else if (coll.GetType().IsArray)
-                return Reflector.prepRet(coll.GetType().GetElementType(),((Array)coll).GetValue(n));  // TODO: Java has Reflector.prepRet -- check all uses.
+
+            String str = coll as String; 
+            if (str != null)
+                return str[n];
+
+            if (coll.GetType().IsArray)
+                return Reflector.prepRet(coll.GetType().GetElementType(),((Array)coll).GetValue(n));
+
             // Java has RandomAccess here.  CLR has no equiv.
             // Trying to replace it with IList caused some real problems,  See the fix in ASeq.
-            else if (coll is IList)
-                return ((IList)coll)[n];
-            else if (coll is JReMatcher)
-                return ((JReMatcher)coll).group(n);
-            else if (coll is Match)
-                return ((Match)coll).Groups[n];
-            else if (coll is DictionaryEntry)
+
+            IList ilist = coll as IList;
+            if (ilist != null)
+                return ilist[n];
+
+            JReMatcher jrem = coll as JReMatcher;
+            if (jrem != null)
+                return jrem.group(n);
+
+            Match match = coll as Match;
+            if (match != null)
+                return match.Groups[n];
+            
+            if (coll is DictionaryEntry)
             {
                 DictionaryEntry e = (DictionaryEntry)coll;
                 if (n == 0)
@@ -948,7 +1024,8 @@ namespace clojure.lang
                     return e.Value;
                 throw new IndexOutOfRangeException();
             }
-            else if (coll.GetType().IsGenericType && coll.GetType().Name == "KeyValuePair`2")
+            
+            if (coll.GetType().IsGenericType && coll.GetType().Name == "KeyValuePair`2")
             {
                 if (n == 0)
                     return coll.GetType().InvokeMember("Key", BindingFlags.GetProperty, null, coll, null);
@@ -956,16 +1033,18 @@ namespace clojure.lang
                     return coll.GetType().InvokeMember("Value", BindingFlags.GetProperty, null, coll, null);
                 throw new IndexOutOfRangeException();
             }
-            else if (coll is IMapEntry)
+
+            IMapEntry me = coll as IMapEntry;
+            if (me != null)
             {
-                IMapEntry e = (IMapEntry)coll;
                 if (n == 0)
-                    return e.key();
+                    return me.key();
                 else if (n == 1)
-                    return e.val();
+                    return me.val();
                 throw new IndexOutOfRangeException();
             }
-            else if (coll is Sequential)
+
+            if (coll is Sequential)
             {
                 ISeq seq = RT.seq(coll);
                 coll = null;
@@ -976,8 +1055,8 @@ namespace clojure.lang
                 }
                 throw new IndexOutOfRangeException();
             }
-            else
-                throw new InvalidOperationException("nth not supported on this type: " + Util.NameForType(coll.GetType()));
+            
+            throw new InvalidOperationException("nth not supported on this type: " + Util.NameForType(coll.GetType()));
         }
 
 
@@ -986,6 +1065,7 @@ namespace clojure.lang
         //    return nth(coll, (int)n, notFound);
         //}
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object nth(Object coll, int n, Object notFound)
         {
             Indexed v = coll as Indexed;
@@ -1000,46 +1080,55 @@ namespace clojure.lang
         {
             if (coll == null)
                 return notFound;
-            else if (n < 0)
+ 
+            if (n < 0)
                 return notFound;
-            else if (coll is String)
+
+            String s = coll as String;
+
+            if (s != null)
             {
-                String s = (String)coll;
                 if (n < s.Length)
                     return s[n];
                 return notFound;
             }
-            else if (coll.GetType().IsArray)
+
+            if (coll.GetType().IsArray)
             {
                 Array a = (Array)coll;
                 if (n < a.Length)
                     return Reflector.prepRet(a.GetType().GetElementType(),a.GetValue(n)); 
                 return notFound;
             }
-            else if (coll is IList)   // Changed to RandomAccess in Java Rev 1218.  
+
+            IList list = coll as IList;
+            if (list != null)   // Changed to RandomAccess in Java Rev 1218.  
             {
-                IList list = (IList)coll;
                 if (n < list.Count)
                     return list[n];
                 return notFound;
             }
-            else if (coll is JReMatcher)
+
+            JReMatcher jrem = coll as JReMatcher;
+            if (jrem != null)
             {
-                JReMatcher m = (JReMatcher)coll;
-                if (m.IsUnrealizedOrFailed)
+                if (jrem.IsUnrealizedOrFailed)
                     return notFound;
-                if (n < m.groupCount())
-                    return m.group(n);
+                if (n < jrem.groupCount())
+                    return jrem.group(n);
                 return notFound;
             }
-            else if (coll is Match)
+
+            Match m = coll as Match;
+            if ( m != null)
             {
-                Match m = (Match)coll;
                 if (n < m.Groups.Count)
                     return m.Groups[n];
                 return notFound;
             }
-            else if (coll is DictionaryEntry)
+            
+            
+            if (coll is DictionaryEntry)
             {
                 DictionaryEntry e = (DictionaryEntry)coll;
                 if (n == 0)
@@ -1048,7 +1137,8 @@ namespace clojure.lang
                     return e.Value;
                 return notFound;
             }
-            else if (coll.GetType().IsGenericType && coll.GetType().Name == "KeyValuePair`2")
+            
+            if (coll.GetType().IsGenericType && coll.GetType().Name == "KeyValuePair`2")
             {
                 if (n == 0)
                     return coll.GetType().InvokeMember("Key", BindingFlags.GetProperty, null, coll, null);
@@ -1056,16 +1146,18 @@ namespace clojure.lang
                     return coll.GetType().InvokeMember("Value", BindingFlags.GetProperty, null, coll, null);
                 return notFound;
             }
-            else if (coll is IMapEntry)
+
+            IMapEntry me = coll as IMapEntry;
+            if (me != null)
             {
-                IMapEntry e = (IMapEntry)coll;
                 if (n == 0)
-                    return e.key();
+                    return me.key();
                 else if (n == 1)
-                    return e.val();
+                    return me.val();
                 return notFound;
             }
-            else if (coll is Sequential)
+
+            if (coll is Sequential)
             {
                 ISeq seq = RT.seq(coll);
                 coll = null;  // release in case GC
@@ -1076,8 +1168,8 @@ namespace clojure.lang
                 }
                 return notFound;
             }
-            else
-                throw new InvalidOperationException("nth not supported on this type: " + Util.NameForType(coll.GetType()));
+
+            throw new InvalidOperationException("nth not supported on this type: " + Util.NameForType(coll.GetType()));
         }
 
         #endregion
@@ -1086,6 +1178,7 @@ namespace clojure.lang
 
         #region char casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static char charCast(object x)
         {
             if (x is char)
@@ -1148,6 +1241,7 @@ namespace clojure.lang
         //    return i;
         //}
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static char charCast(long x)
         {
             char i = (char)x;
@@ -1171,6 +1265,7 @@ namespace clojure.lang
         //    throw new ArgumentException("Value out of range for char: " + x);
         //}
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static char charCast(double x)
         {
             if (x >= Char.MinValue && x <= char.MaxValue)
@@ -1182,6 +1277,7 @@ namespace clojure.lang
 
         #region bool casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public bool booleanCast(object x)
         {
             if (x is Boolean)
@@ -1189,6 +1285,7 @@ namespace clojure.lang
             return x != null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public bool booleanCast(bool x)
         {
             return x;
@@ -1198,6 +1295,7 @@ namespace clojure.lang
 
         #region casting misc numeric types from object
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static byte byteCast(object x)
         {
             if (x is byte)
@@ -1210,6 +1308,7 @@ namespace clojure.lang
             return (byte)n; 
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static sbyte sbyteCast(object x)
         {
             if (x is sbyte)
@@ -1222,7 +1321,8 @@ namespace clojure.lang
             return (sbyte)n;
         }
 
-        
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static short shortCast(object x)
         {
             if (x is short)
@@ -1234,6 +1334,7 @@ namespace clojure.lang
             return (short)n; 
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ushort ushortCast(object x)
         {
             if (x is ushort)
@@ -1245,6 +1346,7 @@ namespace clojure.lang
             return (ushort)n;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static uint uintCast(object x)
         {
             if (x is uint)
@@ -1256,11 +1358,13 @@ namespace clojure.lang
             return (uint)n;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ulong ulongCast(object x)
         {
             return Convert.ToUInt64(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static decimal decimalCast(object x)
         {
             return Convert.ToDecimal(x);
@@ -1270,6 +1374,7 @@ namespace clojure.lang
 
         #region int casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int intCast(object x)
         {
             if (x is int)
@@ -1277,36 +1382,43 @@ namespace clojure.lang
             return intCast(longCast(x));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int intCast(char x)
         {
             return x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int intCast(byte x)
         {
             return x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int intCast(sbyte x)
         {
             return x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int intCast(short x)
         {
             return x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int intCast(ushort x)
         {
             return x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int intCast(int x)
         {
             return x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int intCast(uint x)
         {
             if (x > int.MaxValue)
@@ -1314,7 +1426,8 @@ namespace clojure.lang
 
             return (int)x;
         }
-        
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int intCast(float x)
         {
             if (x < int.MinValue || x > int.MaxValue)
@@ -1323,6 +1436,7 @@ namespace clojure.lang
             return (int)x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int intCast(long x)
         {
             int i = (int)x;
@@ -1333,6 +1447,7 @@ namespace clojure.lang
             return i;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int intCast(ulong x)
         {
             if ( x > int.MaxValue)
@@ -1341,6 +1456,7 @@ namespace clojure.lang
             return (int)x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int intCast(double x)
         {
             if (x < int.MinValue || x > int.MaxValue)
@@ -1353,56 +1469,70 @@ namespace clojure.lang
 
         #region long casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long longCast(object x)
         {
             if (x is long)
                 return (long)x;
 
-            else if (x is int)
+            if (x is int)
                 return (long)(int)x;
 
-            else if (x is BigInt)
+            BigInt bi = x as BigInt;
+            if (bi != null)
             {
-                BigInt bi = (BigInt)x;
                 if (bi.Bipart == null)
                     return bi.Lpart;
                 else
                     throw new ArgumentException("Value out of range for long: " + x);
             }
-            else if (x is BigInteger)
+
+            BigInteger big = x as BigInteger;
+            if (big != null)
             {
-                BigInteger bi = (BigInteger)x;
                 long n;
-                if (bi.AsInt64(out n))
+                if (big.AsInt64(out n))
                     return n;
                 else
                     throw new ArgumentException("Value out of range for long: " + x);
             }
-            else if (x is ulong)
+            
+            if (x is ulong)
             {
                 ulong ux = (ulong)x;
                 if (ux > long.MaxValue)
                     throw new ArgumentException("Value out of range for long: " + x);
                 return (long)x;
             }
-            else if (x is byte || x is short || x is uint || x is sbyte || x is ushort)
+            
+            if (x is byte || x is short || x is uint || x is sbyte || x is ushort)
                 return Util.ConvertToLong(x);
-            else if (x is Ratio)
-                return longCast(((Ratio)x).BigIntegerValue());
+
+            Ratio r = x as Ratio;
+            if (r != null)
+                return longCast(r.BigIntegerValue());
 
             return longCast(Util.ConvertToDouble(x));
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long longCast(char x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long longCast(byte x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long longCast(sbyte x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long longCast(short x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long longCast(ushort x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long longCast(uint x) { return x; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long longCast(int x) { return x; }
-        
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long longCast(float x)
         {
             if ( x < long.MinValue || x > long.MaxValue )
@@ -1411,11 +1541,13 @@ namespace clojure.lang
             return (long)x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long longCast(long x)
         {
             return x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long longCast(ulong x)
         {
             if (x > long.MaxValue)
@@ -1424,6 +1556,7 @@ namespace clojure.lang
             return (long)x;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long longCast(double x)
         {
             if (x < long.MinValue || x > long.MaxValue)
@@ -1436,6 +1569,7 @@ namespace clojure.lang
 
         #region float casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(object x)
         {
             if (x is float)
@@ -1448,23 +1582,35 @@ namespace clojure.lang
             return (float)n;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(char x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(byte x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(sbyte x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(short x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(ushort x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(int x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(uint x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(long x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(ulong x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(float x) { return x; }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(decimal x)
         {
             return floatCast((double)x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float floatCast(double x)
         {
             if (x < float.MinValue || x > float.MaxValue)
@@ -1476,270 +1622,428 @@ namespace clojure.lang
 
         #region double casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(object x)
         {
             return Util.ConvertToDouble(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(char x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(byte x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(sbyte x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(short x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(ushort x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(int x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(uint x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(long x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(ulong x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(float x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(double x) { return x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double doubleCast(decimal x) { return (double)x; }
 
         #endregion
 
         #region unchecked byte casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(Object x)
         {
             return Util.ConvertToByte(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(char x) { return (byte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(byte x) { return (byte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(sbyte x) { return (byte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(short x) { return (byte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(ushort x) { return (byte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(int x) { return (byte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(uint x) { return (byte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(long x) { return (byte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(ulong x) { return (byte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(float x) { return (byte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(double x) { return (byte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public byte uncheckedByteCast(decimal x) { return (byte)x; }
 
         #endregion
 
         #region unchecked sbyte casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(Object x)
         {
             return Util.ConvertToSByte(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(char x) { return (sbyte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(byte x) { return (sbyte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(sbyte x) { return (sbyte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(short x) { return (sbyte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(ushort x) { return (sbyte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(int x) { return (sbyte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(uint x) { return (sbyte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(long x) { return (sbyte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(ulong x) { return (sbyte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(float x) { return (sbyte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(double x) { return (sbyte)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public sbyte uncheckedSByteCast(decimal x) { return (sbyte)x; }
 
         #endregion
 
         #region unchecked short casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(Object x)
         {
             return Util.ConvertToShort(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(char x) { return (short)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(byte x) { return (short)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(sbyte x) { return (short)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(short x) { return (short)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(ushort x) { return (short)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(int x) { return (short)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(uint x) { return (short)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(long x) { return (short)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(ulong x) { return (short)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(float x) { return (short)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(double x) { return (short)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public short uncheckedShortCast(decimal x) { return (short)x; }
 
         #endregion
 
         #region unchecked ushort casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(Object x)
         {
             return Util.ConvertToUShort(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(char x) { return (ushort)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(byte x) { return (ushort)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(sbyte x) { return (ushort)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(short x) { return (ushort)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(ushort x) { return (ushort)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(int x) { return (ushort)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(uint x) { return (ushort)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(long x) { return (ushort)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(ulong x) { return (ushort)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(float x) { return (ushort)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(double x) { return (ushort)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ushort uncheckedUShortCast(decimal x) { return (ushort)x; }
 
         #endregion
 
         #region unchecked int casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(Object x)
         {
             return Util.ConvertToInt(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(char x) { return (int)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(byte x) { return (int)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(sbyte x) { return (int)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(short x) { return (int)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(ushort x) { return (int)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(int x) { return (int)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(uint x) { return (int)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(long x) { return (int)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(ulong x) { return (int)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(float x) { return (int)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(double x) { return (int)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public int uncheckedIntCast(decimal x) { return (int)x; }
 
         #endregion
 
         #region unchecked uint casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(Object x)
         {
             return Util.ConvertToUInt(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(char x) { return (uint)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(byte x) { return (uint)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(sbyte x) { return (uint)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(short x) { return (uint)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(ushort x) { return (uint)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(int x) { return (uint)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(uint x) { return (uint)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(long x) { return (uint)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(ulong x) { return (uint)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(float x) { return (uint)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(double x) { return (uint)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public uint uncheckedUIntCast(decimal x) { return (uint)x; }
 
         #endregion
         
         #region unchecked long casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(Object x)
         {
             return Util.ConvertToLong(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(char x) { return (long)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(byte x) { return (long)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(sbyte x) { return (long)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(short x) { return (long)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(ushort x) { return (long)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(int x) { return (long)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(uint x) { return (long)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(long x) { return (long)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(ulong x) { return (long)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(float x) { return (long)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(double x) { return (long)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public long uncheckedLongCast(decimal x) { return (long)x; }
 
         #endregion
 
         #region unchecked ulong casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(Object x)
         {
             return Util.ConvertToULong(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(char x) { return (ulong)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(byte x) { return (ulong)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(sbyte x) { return (ulong)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(short x) { return (ulong)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(ushort x) { return (ulong)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(int x) { return (ulong)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(uint x) { return (ulong)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(long x) { return (ulong)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(ulong x) { return (ulong)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(float x) { return (ulong)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(double x) { return (ulong)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public ulong uncheckedULongCast(decimal x) { return (ulong)x; }
 
         #endregion
 
         #region unchecked float casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(Object x)
         {
             return Util.ConvertToFloat(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(char x) { return (float)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(byte x) { return (float)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(sbyte x) { return (float)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(short x) { return (float)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(ushort x) { return (float)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(int x) { return (float)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(uint x) { return (float)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(long x) { return (float)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(ulong x) { return (float)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(float x) { return (float)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(double x) { return (float)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public float uncheckedFloatCast(decimal x) { return (float)x; }
 
         #endregion
 
         #region unchecked double casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(Object x)
         {
             return Util.ConvertToDouble(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(char x) { return (double)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(byte x) { return (double)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(sbyte x) { return (double)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(short x) { return (double)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(ushort x) { return (double)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(int x) { return (double)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(uint x) { return (double)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(long x) { return (double)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(ulong x) { return (double)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(float x) { return (double)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(double x) { return (double)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public double uncheckedDoubleCast(decimal x) { return (double)x; }
 
         #endregion
 
         #region unchecked decimal casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(Object x)
         {
             return Util.ConvertToDecimal(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(char x) { return (decimal)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(byte x) { return (decimal)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(sbyte x) { return (decimal)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(short x) { return (decimal)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(ushort x) { return (decimal)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(int x) { return (decimal)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(uint x) { return (decimal)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(long x) { return (decimal)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(ulong x) { return (decimal)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(float x) { return (decimal)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(double x) { return (decimal)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public decimal uncheckedDecimalCast(decimal x) { return (decimal)x; }
 
         #endregion
 
         #region unchecked char casting
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(Object x)
         {
             if (x is char)
@@ -1747,17 +2051,29 @@ namespace clojure.lang
             return (char)Util.ConvertToLong(x);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(char x) { return (char)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(byte x) { return (char)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(sbyte x) { return (char)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(short x) { return (char)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(ushort x) { return (char)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(int x) { return (char)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(uint x) { return (char)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(long x) { return (char)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(ulong x) { return (char)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(float x) { return (char)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(double x) { return (char)x; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public char uncheckedCharCast(decimal x) { return (char)x; }
 
         #endregion
@@ -1766,26 +2082,30 @@ namespace clojure.lang
 
         #region  More collection support
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IPersistentMap map(params object[] init)
         {
             if (init == null)
                 return PersistentArrayMap.EMPTY;
-            else if (init.Length <= PersistentArrayMap.HASHTABLE_THRESHOLD)
+            else if (init.Length <= PersistentArrayMap.HashtableThreshold)
                 return PersistentArrayMap.createWithCheck(init);
             else 
                 return PersistentHashMap.createWithCheck(init);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IPersistentSet set(params object[] init)
         {
             return PersistentHashSet.createWithCheck(init);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IPersistentVector vector(params object[] init)
         {
             return LazilyPersistentVector.createOwning(init);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IPersistentVector subvec(IPersistentVector v, int start, int end)
         {
             if (end < start || start < 0 || end > v.count())
@@ -1800,31 +2120,37 @@ namespace clojure.lang
 
         #region List support
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq list()
         {
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq list(object arg1)
         {
             return new PersistentList(arg1);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq list(object arg1, object arg2)
         {
             return listStar(arg1, arg2, null);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq list(object arg1, object arg2, object arg3)
         {
             return listStar(arg1, arg2, arg3, null);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq list(object arg1, object arg2, object arg3, object arg4)
         {
             return listStar(arg1, arg2, arg3, arg4, null);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq list(object arg1, object arg2, object arg3, object arg4, object arg5)
         {
             return listStar(arg1, arg2, arg3, arg4, arg5, null);
@@ -1832,31 +2158,37 @@ namespace clojure.lang
 
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq listStar(object arg1, ISeq rest)
         {
             return cons(arg1, rest);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq listStar(object arg1, object arg2, ISeq rest)
         {
             return cons(arg1, cons(arg2, rest));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq listStar(object arg1, object arg2, object arg3, ISeq rest)
         {
             return cons(arg1, cons(arg2, cons(arg3, rest)));
         }
 
-        public static ISeq listStar(object arg1, object arg2, object arg3, object arg4,  ISeq rest)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ISeq listStar(object arg1, object arg2, object arg3, object arg4, ISeq rest)
         {
             return cons(arg1, cons(arg2, cons(arg3, cons(arg4, rest))));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq listStar(object arg1, object arg2, object arg3, object arg4, object arg5, ISeq rest)
         {
             return cons(arg1, cons(arg2, cons(arg3, cons(arg4, cons(arg5, rest)))));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq arrayToList(object[] items)
         {
             ISeq ret = null;
@@ -1865,6 +2197,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object[] object_array(Object sizeOrSeq)
         {
             if (Util.IsNumeric(sizeOrSeq))
@@ -1880,44 +2213,55 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object[] toArray(object coll)
         {
             if (coll == null)
-                return EMPTY_OBJECT_ARRAY;
-            else if (coll is object[])
-                return (object[])coll;
+                return EmptyObjectArray;
+
+            object[] objArray = coll as object[];
+            if (objArray != null)
+                return objArray;
+
             // In CLR, ICollection does not have a toArray.  
             // ICollection derives from IEnumerable, so the IEnumerable clause will take care of it.
             //if (coll instanceof Collection)
             //  return ((Collection)coll).toArray();
             //  TODO: List has a toArray -- generic -- need type. 
-            else if (coll is IEnumerable)
-                return IEnumToArray((IEnumerable)coll);
+
+            IEnumerable ie = coll as IEnumerable;
+            if (ie != null)
+                return IEnumToArray(ie);
+
             // Java has Map here, but IDictionary is IEnumerable, so it will be handled by previous clause.
-            else if (coll is String)
+
+            String s = coll as string;
+            if (s != null)
             {
-                char[] chars = ((String)coll).ToCharArray();
+                char[] chars = s.ToCharArray();
                 // TODO: Determine if we need to make a copy (Java version does, not sure if CLR requires it)
                 object[] ret = new object[chars.Length];
                 for (int i = 0; i < chars.Length; i++)
                     ret[i] = chars[i];
                 return ret;
             }
+
             // This used to be in the java version.  No longer.  Do we need?
             //else if (coll is ISeq)
             //    return toArray((ISeq)coll);
             //else if (coll is IPersistentCollection)
             //    return toArray(((IPersistentCollection)coll).seq());
-            else if (coll.GetType().IsArray)
+            
+            if (coll.GetType().IsArray)
             {
-                ISeq s = (seq(coll));
-                object[] ret = new object[count(s)];
-                for (int i = 0; i < ret.Length; i++, s = s.next())
-                    ret[i] = s.first();
+                ISeq iseq = (seq(coll));
+                object[] ret = new object[count(iseq)];
+                for (int i = 0; i < ret.Length; i++, iseq = iseq.next())
+                    ret[i] = iseq.first();
                 return ret;
             }
-            else
-                throw new Exception("Unable to convert: " + coll.GetType() + " to Object[]");
+            
+            throw new Exception("Unable to convert: " + coll.GetType() + " to Object[]");
         }
 
         private static object[] IEnumToArray(IEnumerable e)
@@ -1950,6 +2294,8 @@ namespace clojure.lang
             return array;
         }
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public object seqToTypedArray(ISeq seq)
         {
             Type type = (seq != null)
@@ -1958,6 +2304,7 @@ namespace clojure.lang
             return seqToTypedArray(type, seq);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public object seqToTypedArray(Type type, ISeq seq)
         {
             Array ret = Array.CreateInstance(type, Length(seq));
@@ -2016,12 +2363,14 @@ namespace clojure.lang
 
         #region Reader support
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static bool suppressRead()
         {
             // TODO: look up in suppress-read var  (java todo)
             return false;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public string printString(object x)
         {
             using (StringWriter sw = new StringWriter())
@@ -2031,6 +2380,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object readString(String s)
         {
             using (PushbackTextReader r = new PushbackTextReader(new StringReader(s)))
@@ -2038,30 +2388,31 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         static public void print(Object x, TextWriter w)
         {
             //call multimethod
-            if (PRINT_INITIALIZED.isBound && RT.booleanCast(PRINT_INITIALIZED.deref()))
+            if (PrintInitializedVar.isBound && RT.booleanCast(PrintInitializedVar.deref()))
             {
-                PR_ON.invoke(x, w);
+                PrOnVar.invoke(x, w);
                 return;
             }
 
-            bool readably = booleanCast(PRINT_READABLY.deref());
+            bool readably = booleanCast(PrintReadablyVar.deref());
 
             // Print meta, if exists & should be printed
             if (x is Obj)
             {
                 Obj o = x as Obj;
                 if (RT.count(o.meta()) > 0 && 
-                     ((readably && booleanCast(PRINT_META.deref()))
-                    || booleanCast(PRINT_DUP.deref())))
+                     ((readably && booleanCast(PrintMetaVar.deref()))
+                    || booleanCast(PrintDupVar.deref())))
                 {
                     IPersistentMap meta = o.meta();
                     w.Write("#^");
-                    if (meta.count() == 1 && meta.containsKey(TAG_KEY))
-                        print(meta.valAt(TAG_KEY), w);
+                    if (meta.count() == 1 && meta.containsKey(TagKey))
+                        print(meta.valAt(TagKey), w);
                     else
                         print(meta, w);
                     w.Write(' ');
@@ -2250,7 +2601,7 @@ namespace clojure.lang
             }
         }
 
-        public static string printToConsole(object x)
+        public static string PrintToConsole(object x)
         {
             string ret = printString(x);
             Console.WriteLine(ret);
@@ -2263,6 +2614,7 @@ namespace clojure.lang
 
         #region Locating types
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Type classForName(string p)
         {
             // TODO: We're really going to have to work on this.
@@ -2316,21 +2668,25 @@ namespace clojure.lang
 
         #region Array interface
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int alength(Array a)
         {
             return a.Length;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Array aclone(Array a)
         {
             return (Array)a.Clone();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object aget(Array a, int idx)
         {
             return a.GetValue(idx);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object aset(Array a, int idx, object val)
         {
             a.SetValue(val, idx);
@@ -2339,99 +2695,117 @@ namespace clojure.lang
 
         // overloads for array getters/setters
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static bool aget(bool[] xs, int i)
         {
             return xs[i];
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static bool aset(bool[] xs, int i, bool v)
         {
             xs[i] = v;
             return v;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static char aget(char[] xs, int i)
         {
             return xs[i];
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static char aset(char[] xs, int i, char v)
         {
             xs[i] = v;
             return v;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static byte aget(byte[] xs, int i)
         {
             return xs[i];
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static byte aset(byte[] xs, int i, byte v)
         {
             xs[i] = v;
             return v;
         }
- 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static short aget(short[] xs, int i)
         {
             return xs[i];
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static short aset(short[] xs, int i, short v)
         {
             xs[i] = v;
             return v;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int aget(int[] xs, int i)
         {
             return xs[i];
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int aset(int[] xs, int i, int v)
         {
             xs[i] = v;
             return v;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long aget(long[] xs, int i)
         {
             return xs[i];
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long aset(long[] xs, int i, long v)
         {
             xs[i] = v;
             return v;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float aget(float[] xs, int i)
         {
             return xs[i];
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static float aset(float[] xs, int i, float v)
         {
             xs[i] = v;
             return v;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double aget(double[] xs, int i)
         {
             return xs[i];
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double aset(double[] xs, int i, double v)
         {
             xs[i] = v;
             return v;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static decimal aget(decimal[] xs, int i)
         {
             return xs[i];
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static decimal aset(decimal[] xs, int i, decimal v)
         {
             xs[i] = v;
@@ -2478,7 +2852,7 @@ namespace clojure.lang
 
                 public object GetRealObject(StreamingContext context)
                 {
-                    return DEFAULT_COMPARER;
+                    return DefaultComparerInstance;
                 }
 
                 #endregion
@@ -2488,7 +2862,7 @@ namespace clojure.lang
             #endregion
         }
 
-        static public readonly IComparer DEFAULT_COMPARER = new DefaultComparer();
+        static public readonly IComparer DefaultComparerInstance = new DefaultComparer();
 
 
         // do we need this?
@@ -2497,6 +2871,7 @@ namespace clojure.lang
         //    return Util.equals(tag,,RT.get(RT.meta(o),TAG_KEY);
         //}
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long nanoTime()
         {
             return DateTime.Now.Ticks * 100;
@@ -2572,6 +2947,7 @@ namespace clojure.lang
 
         static readonly Random _random = new Random();
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double random()
         {
             lock (_random)
@@ -2625,11 +3001,13 @@ namespace clojure.lang
 
         #region Loading/compiling
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static void load(String relativePath)
         {
             load(relativePath, true);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static void load(String relativePath, Boolean failIfNotFound)
         {
             //string assemblyname = relativePath + ".clj.dll";
@@ -2651,9 +3029,9 @@ namespace clojure.lang
             {
                 try
                 {
-                    Var.pushThreadBindings(RT.map(CURRENT_NS, CURRENT_NS.deref(),
-                        WARN_ON_REFLECTION, WARN_ON_REFLECTION.deref(),
-                        RT.UNCHECKED_MATH, RT.UNCHECKED_MATH.deref()));
+                    Var.pushThreadBindings(RT.map(CurrentNSVar, CurrentNSVar.deref(),
+                        WarnOnReflectionVar, WarnOnReflectionVar.deref(),
+                        RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
                     loaded = Compiler.LoadAssembly(assyInfo);
                 }
                 finally
@@ -2691,7 +3069,7 @@ namespace clojure.lang
             if (cljInfo != null)
                 LoadScript(cljInfo,cljname);
             else if (failIfNotFound)
-                throw new FileNotFoundException(String.Format("Could not locate Clojure resource on {0}", CLOJURE_LOAD_PATH));
+                throw new FileNotFoundException(String.Format("Could not locate Clojure resource on {0}", ClojureLoadPathString));
         }
 
 
@@ -2726,7 +3104,7 @@ namespace clojure.lang
             if ( assy != null )
                 yield return Path.GetDirectoryName(assy.Location);
 
-            string rawpaths = (string)System.Environment.GetEnvironmentVariables()[CLOJURE_LOAD_PATH];
+            string rawpaths = (string)System.Environment.GetEnvironmentVariables()[ClojureLoadPathString];
             if (rawpaths == null)
                 yield break;
 
@@ -2754,14 +3132,15 @@ namespace clojure.lang
 
 
         // duck typing stderr plays nice with e.g. swank 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static TextWriter errPrintWriter()
         {
-            object w = ERR.deref();
+            object w = ErrVar.deref();
 
             TextWriter tw = w as TextWriter;
 
             if (tw != null)
-                return (TextWriter)w;
+                return tw;
 
             Stream s = w as Stream;
 

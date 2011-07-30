@@ -45,6 +45,7 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="IPersistentList">IPersistentList</see>.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "EMPTY")]
         public static readonly EmptyList EMPTY = new EmptyList(null);
 
         #endregion
@@ -67,6 +68,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="init">The list to initialize from.</param>
         /// <returns>A list.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static IPersistentList create(IList init)
         {
             IPersistentList ret = EMPTY;

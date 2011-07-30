@@ -48,6 +48,7 @@ namespace clojure.lang
         // Okay, try this:  access Current.  If it blows, assume we are not initialized.
         // Okay, that takes a _long_ time.  Lots of Exceptions thrown/caught.
         // Maybe the new lazy version will solve this.
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static EnumeratorSeq create(IEnumerator enumerator)
         {
             //bool hasElement = true;

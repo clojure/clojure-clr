@@ -306,12 +306,12 @@ namespace clojure.lang
         /// <summary>
         /// The minimum radix allowed in parsing.
         /// </summary>
-        public const int MIN_RADIX = 2;
+        public const int MinRadix = 2;
 
         /// <summary>
         /// The maximum radix allowed in parsing.
         /// </summary>
-        public const int MAX_RADIX = 36;
+        public const int MaxRadix = 36;
 
         /// <summary>
         /// Try to create a <see cref="BigInteger"/> from a string representation in the given radix)
@@ -333,7 +333,7 @@ namespace clojure.lang
         /// </remarks>
         public static bool TryParse(string s, int radix, out BigInteger v)
         {
-            if (radix < MIN_RADIX || radix > MAX_RADIX)
+            if (radix < MinRadix || radix > MaxRadix)
             {
                 v = null;
                 return false;
@@ -442,9 +442,9 @@ namespace clojure.lang
         /// </remarks>
         public string ToString(uint radix)
         {
-            if ( radix < MIN_RADIX || radix > MAX_RADIX )
+            if ( radix < MinRadix || radix > MaxRadix )
                 throw new ArgumentOutOfRangeException(
-                    String.Format("Radix {0} out of range [{1},{2}]",radix, MIN_RADIX, MAX_RADIX));
+                    String.Format("Radix {0} out of range [{1},{2}]",radix, MinRadix, MaxRadix));
 
             if ( _sign == 0 )
                 return "0";

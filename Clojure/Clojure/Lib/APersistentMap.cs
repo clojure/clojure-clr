@@ -57,6 +57,8 @@ namespace clojure.lang
             return mapEquals(this, obj);
         }
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "map")]
         public static bool mapEquals(IPersistentMap m1, Object obj)
         {
             if (m1 == obj)
@@ -102,6 +104,7 @@ namespace clojure.lang
             return _hash;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "map")]
         public static int mapHash(IPersistentMap m)
         {
             int hash = 0;
@@ -198,6 +201,7 @@ namespace clojure.lang
 
         #region IObj members
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "with")]
         abstract public IObj withMeta(IPersistentMap meta);
 
         #endregion
@@ -454,6 +458,7 @@ namespace clojure.lang
 
             #region C-tors & factory methods
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
             static public KeySeq create(ISeq seq)
             {
                 if (seq == null)
@@ -519,6 +524,7 @@ namespace clojure.lang
 
             #region C-tors & factory methods
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
             static public ValSeq create(ISeq seq)
             {
                 if (seq == null)

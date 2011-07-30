@@ -17,22 +17,24 @@ using System;
 
 namespace clojure.lang
 {
-    public class Util
+    public static class Util
     {
 
-        static public int Hash(object o)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hash")]
+        static public int hash(object o)
         {
             return o == null ? 0 : o.GetHashCode();
         }
 
-        static public int HashCombine(int seed, int hash)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hash")]
+        static public int hashCombine(int seed, int hash)
         {
             //a la boost
             return (int)(seed ^ (hash + 0x9e3779b9 + (seed << 6) + (seed >> 2)));
 
         }
 
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         static public bool equiv(object k1, object k2)
         {
             if (k1 == k2)
@@ -49,37 +51,44 @@ namespace clojure.lang
             return false;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(long x, long y)
         {
             return x == y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(double x, double y)
         {
             return x == y;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(long x, object y)
         {
             return equiv((object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(object x, long y)
         {
             return equiv(x, (object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(double x, Object y)
         {
             return equiv((object)x, y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
         public static bool equiv(object x, double y)
         {
             return equiv(x, (object)y);
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "pcequiv")]
         public static bool pcequiv(object k1, object k2)
         {
             IPersistentCollection ipc1 = k1 as IPersistentCollection;
@@ -89,6 +98,7 @@ namespace clojure.lang
             return ((IPersistentCollection)k2).equiv(k1);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equals")]
         public static bool equals(object k1, object k2)
         {
             // Had to change this back when doing the new == vs = 
@@ -140,6 +150,7 @@ namespace clojure.lang
         //    return equals(x, Numbers.num(y));
         //}
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "identical")]
         public static bool identical(object k1, object k2)
         {
             // I would prefer simpler version below, but it can't handle simple true/false (boxed booleans)
@@ -152,6 +163,7 @@ namespace clojure.lang
             //return k1 == k2;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "class")]
         public static Type classOf(object x)
         {
             if (x != null)
@@ -159,6 +171,7 @@ namespace clojure.lang
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "compare")]
         public static int compare(object k1, object k2)
         {
             if (k1 == k2)
@@ -705,22 +718,6 @@ namespace clojure.lang
             //}
             return false;
         }
-
-
-        #region core.clj compatibility
-
-        public static int hash(object o)
-        {
-            return Hash(o);
-        }
-
-        static public int hashCombine(int seed, int hash)
-        {
-            return HashCombine(seed, hash);
-        }
-
-
-        #endregion
 
         #region Stolen code
         // The following code is from Microsoft's DLR..

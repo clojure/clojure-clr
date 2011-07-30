@@ -32,6 +32,7 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentHashSet">PersistentHashSet</see>.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static readonly PersistentHashSet EMPTY = new PersistentHashSet(null, PersistentHashMap.EMPTY);
 
         #endregion
@@ -43,6 +44,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="init">An array of items.</param>
         /// <returns>A <see cref="PersistentHashSet">PersistentHashSet</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static PersistentHashSet create(params object[] init)
         {
             PersistentHashSet ret = EMPTY;
@@ -58,6 +60,7 @@ namespace clojure.lang
         /// <returns>A <see cref="PersistentHashSet">PersistentHashSet</see>.</returns>
         /// <remarks>This is called just 'create' in the Java version.  CLR can't handle this overload when called on something that is 
         /// both an IList and an ISeq, such as any ASeq.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static PersistentHashSet create(IList init)
         {
             PersistentHashSet ret = EMPTY;
@@ -71,6 +74,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items">An <see cref="ISeq">ISeq</see> of items</param>
         /// <returns>A <see cref="PersistentHashSet">PersistentHashSet</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static PersistentHashSet create(ISeq items)
         {
             PersistentHashSet ret = EMPTY;
@@ -79,6 +83,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static PersistentHashSet createWithCheck(params object[] init)
         {
             PersistentHashSet ret = EMPTY;
@@ -91,6 +96,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static PersistentHashSet createWithCheck(IList init)
         {
             PersistentHashSet ret = EMPTY;
@@ -105,6 +111,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static PersistentHashSet createWithCheck(ISeq items)
         {
             PersistentHashSet ret = EMPTY;

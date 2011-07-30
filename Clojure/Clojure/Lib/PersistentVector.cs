@@ -70,8 +70,8 @@ namespace clojure.lang
 
         #region Data
 
-        static readonly AtomicReference<Thread> NOEDIT = new AtomicReference<Thread>(null);
-        internal static readonly Node EMPTY_NODE = new Node(NOEDIT, new object[32]);
+        static readonly AtomicReference<Thread> NoEdit = new AtomicReference<Thread>(null);
+        internal static readonly Node EmptyNode = new Node(NoEdit, new object[32]);
 
         readonly int _cnt;
         readonly int _shift;
@@ -83,7 +83,8 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentVector">PersistentVector</see>.
         /// </summary>
-        static public readonly PersistentVector EMPTY = new PersistentVector(0,5,EMPTY_NODE, new object[0]);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "EMPTY")]
+        static public readonly PersistentVector EMPTY = new PersistentVector(0,5,EmptyNode, new object[0]);
 
         #endregion
 
@@ -94,6 +95,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items">A sequence of items.</param>
         /// <returns>An initialized vector.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         static public PersistentVector create(ISeq items)
         {
             ITransientCollection ret = EMPTY.asTransient();
@@ -107,6 +109,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         static public PersistentVector create(params object[] items)
         {
             ITransientCollection ret = EMPTY.asTransient();
@@ -120,6 +123,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         static public PersistentVector create1(ICollection items)
         {
             ITransientCollection ret = EMPTY.asTransient();
@@ -285,6 +289,8 @@ namespace clojure.lang
         /// <param name="o">The item to add to the vector.</param>
         /// <returns>A new (immutable) vector with the objected added at the end.</returns>
         /// <remarks>Overrides <c>cons</c> in <see cref="IPersistentCollection">IPersistentCollection</see> to specialize the return value.</remarks>
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "cons")]
         public override IPersistentVector cons(object val)
         {
             //if (_tail.Length < 32)
@@ -357,6 +363,7 @@ namespace clojure.lang
         /// Gets the number of items in the collection.
         /// </summary>
         /// <returns>The number of items in the collection.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "count")]
         public override int count()
         {
             return _cnt;
@@ -397,7 +404,7 @@ namespace clojure.lang
             Node newroot = popTail(_shift,_root);
             int newshift = _shift;
             if ( newroot == null )
-                newroot = EMPTY_NODE;
+                newroot = EmptyNode;
             if ( _shift > 5 && newroot.Array[1] == null )
             {
                 newroot = (Node)newroot.Array[0];
@@ -451,6 +458,7 @@ namespace clojure.lang
 
         #region ChunkedSeq
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "chunked")]
         public IChunkedSeq chunkedSeq()
         {
             if (count() == 0)

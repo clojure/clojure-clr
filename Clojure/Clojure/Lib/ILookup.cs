@@ -25,6 +25,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The key to look up.</param>
         /// <returns>The associated value. (Throws an exception if key is not present.)</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         object valAt(object key);
 
         /// <summary>
@@ -33,6 +34,7 @@ namespace clojure.lang
         /// <param name="key">The key to look up.</param>
         /// <param name="notFound">The value to return if the key is not present.</param>
         /// <returns>The associated value (or <c>notFound</c> if the key is not present.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         object valAt(object key, object notFound);
     }
 }

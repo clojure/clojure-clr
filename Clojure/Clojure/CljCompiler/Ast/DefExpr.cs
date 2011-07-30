@@ -130,11 +130,11 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Object source_path = Compiler.SourcePathVar.get();
                 source_path = source_path ?? "NO_SOURCE_FILE";
-                mm = (IPersistentMap)RT.assoc(mm,RT.LINE_KEY, Compiler.LineVar.get())
-                    .assoc(RT.FILE_KEY, source_path);
+                mm = (IPersistentMap)RT.assoc(mm,RT.LineKey, Compiler.LineVar.get())
+                    .assoc(RT.FileKey, source_path);
                     //.assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
                 if (docstring != null)
-                    mm = (IPersistentMap)RT.assoc(mm, RT.DOC_KEY, docstring);
+                    mm = (IPersistentMap)RT.assoc(mm, RT.DocKey, docstring);
 
                 //mm = mm.without(RT.DOC_KEY)
                 //            .without(Keyword.intern(null, "arglists"))
@@ -145,8 +145,8 @@ namespace clojure.lang.CljCompiler.Ast
                 //            .without(Keyword.intern(null, "added"))
                 //            .without(Keyword.intern(null, "static"));
 
-                Expr meta =  mm == null || mm.count() == 0 ? null : Compiler.Analyze(pcon.EvEx(),mm);
-                Expr init = Compiler.Analyze(pcon.EvEx(),RT.third(form), v.Symbol.Name);
+                Expr meta =  mm == null || mm.count() == 0 ? null : Compiler.Analyze(pcon.EvalOrExpr(),mm);
+                Expr init = Compiler.Analyze(pcon.EvalOrExpr(),RT.third(form), v.Symbol.Name);
                 bool initProvided = RT.count(form) == 3;
 
                 return new DefExpr(
@@ -227,10 +227,10 @@ namespace clojure.lang.CljCompiler.Ast
         for(int i=0; i < expr.KeyVals.count(); i += 2)
             {
                 Keyword k = ((KeywordExpr)expr.KeyVals.nth(i)).Kw;
-                if ((k != RT.FILE_KEY) &&
-                    (k != RT.DECLARED_KEY) &&
-                    (k != RT.SOURCE_SPAN_KEY ) &&
-                    (k != RT.LINE_KEY))
+                if ((k != RT.FileKey) &&
+                    (k != RT.DeclaredKey) &&
+                    (k != RT.SourceSpanKey ) &&
+                    (k != RT.LineKey))
                     return true;
             }
         return false;

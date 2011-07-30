@@ -17,8 +17,13 @@ namespace clojure.lang
 {
     public interface IChunkedSeq : ISeq, Sequential
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "chunked")]
         IChunk chunkedFirst();
+        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "chunked")]
         ISeq chunkedNext();
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "chunked")]
         ISeq chunkedMore();
     }
 }

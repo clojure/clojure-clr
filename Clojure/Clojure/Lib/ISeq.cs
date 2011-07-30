@@ -34,6 +34,7 @@ namespace clojure.lang
         /// Gets the first item.
         /// </summary>
         /// <returns>The first item.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "first")]
         object first();
 
         ///// <summary>
@@ -46,8 +47,10 @@ namespace clojure.lang
         /// Return a seq of the items after the first.  Calls <c>seq</c> on its argument.  If there are no more items, returns nil."
         /// </summary>
         /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "next")]
         ISeq next();
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "more")]
         ISeq more();
 
         /// <summary>
@@ -57,6 +60,7 @@ namespace clojure.lang
         /// <returns>A new sequence containing the new item in front of the items already in the sequence.</returns>
         /// <remarks>This overrides the <c>cons</c> method in <see cref="IPersistentCollection">IPersistentCollection</see>
         /// by giving an <see cref="ISeq">ISeq</see> in return.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "cons")]
         new ISeq cons(object o);
     }
 }

@@ -34,7 +34,7 @@ namespace clojure.lang
         /// <summary>
         /// Get the numerator.
         /// </summary>
-        /// <remarks>Initial lowercase for core.clj compatibility.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "numerator")]
         public BigInteger numerator
         {
             get { return _numerator; }
@@ -48,7 +48,7 @@ namespace clojure.lang
         /// <summary>
         /// Get the denominator.
         /// </summary>
-        /// <remarks>Initial lowercase for core.clj compatibility.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "denominator")]
         public BigInteger denominator
         {
             get { return _denominator; }

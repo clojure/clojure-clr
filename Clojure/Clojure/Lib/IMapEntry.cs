@@ -30,12 +30,14 @@ namespace clojure.lang
         /// Get the key in a key/value pair.
         /// </summary>
         /// <returns>The key.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         object key();
 
         /// <summary>
         /// Get the value in a key/value pair.
         /// </summary>
         /// <returns>The value.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         object val();
     }
 }

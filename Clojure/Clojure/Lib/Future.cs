@@ -76,6 +76,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns>True if the task completed due to normal completion, cancellation,
         /// or an exception.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
         public bool isDone()
         {
             return _t.Join(0);
@@ -86,6 +87,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns>True if the attempt succeeds. False if the task already completed
         /// or was cancelled previously.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "cancel")]
         public bool cancel()
         {
             // Already completed or cancelled.
@@ -100,6 +102,7 @@ namespace clojure.lang
             return _cancelled;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
         public bool isCancelled()
         {
             return _cancelled;

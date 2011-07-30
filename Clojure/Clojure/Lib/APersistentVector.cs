@@ -64,6 +64,7 @@ namespace clojure.lang
         /// <returns><value>true</value> if the specified Object is equal to the current Object; 
         /// otherwise, <value>false</value>.
         /// </returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public bool doEquals(IPersistentVector v, object obj)
         {
             if (v == obj)

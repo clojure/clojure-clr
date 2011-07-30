@@ -58,6 +58,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="sym">The symbol giving the keyword's namespace/name.</param>
         /// <returns>A keyword</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Keyword intern(Symbol sym)
         {
             if (sym.meta() != null)
@@ -86,6 +87,7 @@ namespace clojure.lang
         /// <param name="ns">The keyword's namespace name.</param>
         /// <param name="name">The keyword's name.</param>
         /// <returns>A keyword</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Keyword intern(string ns, string name)
         {
             return intern(Symbol.intern(ns, name));
@@ -96,6 +98,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="nsname">The keyword's name</param>
         /// <returns>A keyword</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Keyword intern(String nsname)
         {
             return intern(Symbol.intern(nsname));
@@ -264,6 +267,7 @@ namespace clojure.lang
 
         #region other
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Keyword find(Symbol sym)
         {
             WeakReference wr = _symKeyMap.Get(sym);
@@ -273,11 +277,13 @@ namespace clojure.lang
                 return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Keyword find(String ns, String name)
         {
             return find(Symbol.intern(ns, name));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Keyword find(String nsname)
         {
             return find(Symbol.intern(nsname));

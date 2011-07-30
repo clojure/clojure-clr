@@ -35,6 +35,7 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentQueue">PersistentQueue</see>.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "EMPTY")]
         public static readonly PersistentQueue EMPTY = new PersistentQueue(null, 0, null, null);
 
         /// <summary>
@@ -107,7 +108,7 @@ namespace clojure.lang
             {
                 int hash = 0;
                 for (ISeq s = seq(); s != null; s = s.next())
-                    hash = Util.HashCombine(hash, Util.Hash(s.first()));
+                    hash = Util.hashCombine(hash, Util.hash(s.first()));
                 _hash = hash;
             }
             return _hash;

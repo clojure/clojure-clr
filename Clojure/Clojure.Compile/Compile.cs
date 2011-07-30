@@ -32,7 +32,7 @@ namespace BootstrapCompile
 
         static void Main(string[] args)
         {
-            TextWriter outTW = (TextWriter)RT.OUT.deref();
+            TextWriter outTW = (TextWriter)RT.OutVar.deref();
             TextWriter errTW = RT.errPrintWriter();
 
             string path = Environment.GetEnvironmentVariable(PATH_PROP);
@@ -43,7 +43,7 @@ namespace BootstrapCompile
             {
                 errTW.WriteLine("ERROR: Must set system property {0}",PATH_PROP);
                 errTW.WriteLine("to the location for the compiled .class files.");
-                errTW.WriteLine("This directory must also be on your {0}.",RT.CLOJURE_LOAD_PATH);
+                errTW.WriteLine("This directory must also be on your {0}.",RT.ClojureLoadPathString);
                 Environment.Exit(1);
             }
 
@@ -56,8 +56,8 @@ namespace BootstrapCompile
             {
                 Var.pushThreadBindings(RT.map(
                     Compiler.CompilePathVar, path,
-                    RT.WARN_ON_REFLECTION, warnOnReflection,
-                    RT.UNCHECKED_MATH, uncheckedMath
+                    RT.WarnOnReflectionVar, warnOnReflection,
+                    RT.UncheckedMathVar, uncheckedMath
                     ));
 
                 Stopwatch sw = new Stopwatch();

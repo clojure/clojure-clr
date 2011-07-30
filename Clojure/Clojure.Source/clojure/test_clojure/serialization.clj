@@ -126,7 +126,7 @@
 
 (deftest interned-serializations
   (are [v] (identical? v (-> v serialize deserialize))
-    clojure.lang.RT/DEFAULT_COMPARER                                       ;;; clojure.lang.RT/DEFAULT_COMPARATOR
+    clojure.lang.RT/DefaultComparerInstance                                       ;;; clojure.lang.RT/DEFAULT_COMPARATOR
     
     ; namespaces just get deserialized back into the same-named ns in the present runtime
     ; (they're referred to by defrecord instances)

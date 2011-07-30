@@ -74,7 +74,7 @@ namespace clojure.lang
                 for (ISeq s = seq(); s != null; s = s.next())
                 {
                     object e = s.first();
-                    hash += Util.Hash(e);
+                    hash += Util.hash(e);
                 }
                 _hash = hash;
             }

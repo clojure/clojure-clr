@@ -45,12 +45,13 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items">An array of items</param>
         /// <returns>A <see cref="LazilyPersistentVector">LazilyPersistentVector</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         static public IPersistentVector createOwning(params object[] items)
         {
             if  (items.Length == 0)
                 return (IPersistentVector)PersistentVector.EMPTY;
             else if ( items.Length <= 32 )
-                return new PersistentVector(items.Length,5,PersistentVector.EMPTY_NODE,items);
+                return new PersistentVector(items.Length,5,PersistentVector.EmptyNode,items);
             return PersistentVector.create(items);
 
                 //: new LazilyPersistentVector(null, items, null);
@@ -61,6 +62,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="coll">The collection of items.</param>
         /// <returns>A <see cref="LazilyPersistentVector">LazilyPersistentVector</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         static public IPersistentVector create(System.Collections.ICollection coll)
         {
             if (!(coll is ISeq) && coll.Count <= 32)

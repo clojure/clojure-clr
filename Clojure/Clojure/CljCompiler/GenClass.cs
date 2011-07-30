@@ -641,7 +641,7 @@ namespace clojure.lang
                 {
                     object first = RT.first(o);
                    Symbol firstAsSymbol = first as Symbol;
-                    if (firstAsSymbol == null || !firstAsSymbol.Equals(HostExpr.BY_REF))
+                    if (firstAsSymbol == null || !firstAsSymbol.Equals(HostExpr.ByRefSym))
                         throw new ArgumentException("First element of parameter definition is not by-ref");
 
                     Type secondAsType = RT.second(o) as Type;

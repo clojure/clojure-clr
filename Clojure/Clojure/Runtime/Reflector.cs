@@ -321,7 +321,7 @@ namespace clojure.lang
 
         private static void MaybeReflectionWarn(IPersistentMap spanMap, MethodBase method, string methodName)
         {
-            if (method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
+            if (method == null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                 RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved.",
                     Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), methodName));
         }
@@ -598,6 +598,7 @@ namespace clojure.lang
             return AreAssignable(paramType, argType);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "prep")]
         public static Object prepRet(Type t, Object x)
         {
             if (!t.IsPrimitive)

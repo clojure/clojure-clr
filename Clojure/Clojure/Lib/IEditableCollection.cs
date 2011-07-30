@@ -17,6 +17,7 @@ namespace clojure.lang
 {
     public interface IEditableCollection
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         ITransientCollection asTransient();
     }
 }

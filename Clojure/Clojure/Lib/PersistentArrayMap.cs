@@ -33,8 +33,6 @@ namespace clojure.lang
     [Serializable]
     public class PersistentArrayMap : APersistentMap, IObj, IEditableCollection
     {
-        // any reason not to seal this class?
-
         #region Data
 
         /// <summary>
@@ -45,7 +43,7 @@ namespace clojure.lang
         /// <para>The value was changed from 8 to 16 in Java Rev 1159 to improve proxy perf -- we don't have proxy yet,
         /// but I changed it here anyway.</para>
         /// </remarks>
-        internal const int HASHTABLE_THRESHOLD = 16;
+        internal const int HashtableThreshold = 16;
 
         /// <summary>
         /// The array holding the key/value pairs.
@@ -56,6 +54,7 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentArrayMap">PersistentArrayMap</see>. Constant.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "EMPTY")]
         public static readonly PersistentArrayMap EMPTY = new PersistentArrayMap();
 
 
@@ -70,6 +69,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="other">The BCL map to initialize from</param>
         /// <returns>A new persistent map.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static IPersistentMap create(IDictionary other)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -85,12 +85,14 @@ namespace clojure.lang
         /// <param name="init">The new key/value array</param>
         /// <returns>A new <see cref="PersistentArrayMap">PersistentArrayMap</see>.</returns>
         /// <remarks>The array is used directly.  Do not modify externally or immutability is sacrificed.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         PersistentArrayMap create(params object[] init)
         {
             return new PersistentArrayMap(meta(), init);
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static PersistentArrayMap createWithCheck(Object[] init)
         {
             for (int i = 0; i < init.Length; i += 2)
@@ -311,7 +313,7 @@ namespace clojure.lang
             else
             {
                 // new key, grow
-                if (_array.Length > HASHTABLE_THRESHOLD)
+                if (_array.Length > HashtableThreshold)
                     return createHT(_array).assoc(key, val);
                 newArray = new object[_array.Length + 2];
                 if (_array.Length > 0)
@@ -508,7 +510,7 @@ namespace clojure.lang
             public TransientArrayMap(object[] array)
             {
                 _owner = Thread.CurrentThread;
-                _array = new object[Math.Max(HASHTABLE_THRESHOLD, array.Length)];
+                _array = new object[Math.Max(HashtableThreshold, array.Length)];
                 Array.Copy(array, _array, array.Length);
                 _len = array.Length;
             }

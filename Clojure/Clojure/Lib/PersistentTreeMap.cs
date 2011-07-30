@@ -51,6 +51,7 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentTreeMap">PersistentTreeMap</see>.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "EMPTY")]
         public static readonly PersistentTreeMap EMPTY = new PersistentTreeMap();
 
         #endregion
@@ -62,6 +63,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="other">The dictionary to initialize from.</param>
         /// <returns>A <see cref="PersistentTreeMap">PersistentTreeMap</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static IPersistentMap create(IDictionary other)
         {
             IPersistentMap ret = EMPTY;
@@ -76,6 +78,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items">The <see cref="ISeq">ISeq</see>  of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentTreeMap">PersistentTreeMap</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static PersistentTreeMap create(ISeq items)
         {
             IPersistentMap ret = EMPTY;
@@ -95,6 +98,7 @@ namespace clojure.lang
         /// <param name="comp">A comparison method.</param>
         /// <param name="items">The <see cref="ISeq">ISeq</see>  of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentTreeMap">PersistentTreeMap</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static PersistentTreeMap create(IComparer comp, ISeq items)
         {
             IPersistentMap ret = new PersistentTreeMap(comp);
@@ -111,7 +115,7 @@ namespace clojure.lang
         /// Initialize a <see cref="PersistentTreeMap">PersistentTreeMap</see> using a default comparer.
         /// </summary>
         public PersistentTreeMap()
-            : this(RT.DEFAULT_COMPARER)
+            : this(RT.DefaultComparerInstance)
         {
         }
 

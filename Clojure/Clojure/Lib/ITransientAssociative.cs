@@ -17,6 +17,7 @@ namespace clojure.lang
 {
     public interface ITransientAssociative : ITransientCollection, ILookup
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         ITransientAssociative assoc(object key, object val);
     }
 }

@@ -24,6 +24,7 @@ namespace clojure.lang
         /// Gets an <see cref="ISeq"/>to allow first/rest/next iteration through the collection.
         /// </summary>
         /// <returns>An <see cref="ISeq"/> for iteration.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         ISeq seq();
     }
 }

@@ -16,6 +16,8 @@
 namespace clojure.lang.CljCompiler.Ast
 {
     // RHC = Rich Hickey Context -- same enum as Compiler.C in the Java version
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "RHC")]
     public enum RHC
     {
         Statement, // value ignored
@@ -88,7 +90,7 @@ namespace clojure.lang.CljCompiler.Ast
             return new ParserContext(_rhc, value);
         }
 
-        public ParserContext EvEx()
+        public ParserContext EvalOrExpr()
         {
             if (_rhc == RHC.Eval)
                 return this;
@@ -110,7 +112,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override int GetHashCode()
         {
-            return Util.HashCombine(_isAssignContext.GetHashCode(), _rhc.GetHashCode());
+            return Util.hashCombine(_isAssignContext.GetHashCode(), _rhc.GetHashCode());
         }
 
         #endregion

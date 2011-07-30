@@ -39,12 +39,14 @@ namespace clojure.lang
         /// Sets the validator.
         /// </summary>
         /// <param name="vf">The new validtor</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         void setValidator(IFn vf);
 
         /// <summary>
         /// Gets the validator.
         /// </summary>
         /// <returns>The current validator.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         IFn getValidator();
 
 
@@ -52,6 +54,7 @@ namespace clojure.lang
         /// Gets a map of watchers (key=Agent, value=IFn).
         /// </summary>
         /// <returns>A (immutable) map of watchers (key=Agent, value=IFn). </returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         IPersistentMap getWatches();
 
         /// <summary>
@@ -60,6 +63,7 @@ namespace clojure.lang
         /// <param name="key">A key for referring to the watcher.</param>
         /// <param name="callback">The 'message' to send when the value changes.</param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         IRef addWatch(object key, IFn callback);
 
         /// <summary>
@@ -67,6 +71,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The key for the watcher to be removed.</param>
         /// <returns>This IRef (for chaining).</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remove")]
         IRef removeWatch(object key);
     }
 }

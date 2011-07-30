@@ -26,6 +26,7 @@ namespace clojure.lang
         /// <param name="f">The function to apply.</param>
         /// <returns>The reduced value</returns>
         /// <remarks>Computes f(...f(f(f(i0,i1),i2),i3),...).</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "reduce")]
         object reduce(IFn f);
 
 
@@ -36,6 +37,7 @@ namespace clojure.lang
         /// <param name="start">An initial value to get started.</param>
         /// <returns>The reduced value</returns>
         /// <remarks>Computes f(...f(f(f(start,i0),i1),i2),...).</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "reduce")]
         object reduce(IFn f, object start);
     }
 }

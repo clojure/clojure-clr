@@ -24,6 +24,7 @@ namespace clojure.lang
         /// Gets an <see cref="ISeq">ISeq</see> to travers the sequence in reverse.
         /// </summary>
         /// <returns>An <see cref="ISeq">ISeq</see> .</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "rseq")]
         ISeq rseq();
     }
 }
