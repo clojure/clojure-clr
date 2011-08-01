@@ -125,6 +125,7 @@
     <Compile Include="CljCompiler\Ast\ObjExpr.cs" />
     <Compile Include="CljCompiler\Ast\ObjMethod.cs" />
     <Compile Include="CljCompiler\Ast\ParserContext.cs" />
+    <Compile Include="CljCompiler\Ast\ParseException.cs" />
     <Compile Include="CljCompiler\Ast\StaticInvokeExpr.cs" />
     <Compile Include="CljCompiler\GenClass.cs" />
     <Compile Include="CljCompiler\GenInterface.cs" />

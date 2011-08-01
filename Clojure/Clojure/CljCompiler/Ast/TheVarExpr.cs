@@ -64,7 +64,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Var v = Compiler.LookupVar(sym, false);
                 if (v != null)
                     return new TheVarExpr(v);
-                throw new Exception(string.Format("Unable to resolve var: {0} in this context", sym));
+                throw new ParseException(string.Format("Unable to resolve var: {0} in this context", sym));
             }
         }
 

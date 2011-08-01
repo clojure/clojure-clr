@@ -347,7 +347,7 @@ namespace clojure.lang
         {
             int i = IndexOfKey(key);
             if (i >= 0)
-                throw new Exception("Key already present.");
+                throw new InvalidOperationException("Key already present.");
             return assoc(key, val);
         }
 

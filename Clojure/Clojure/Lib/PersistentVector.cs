@@ -241,7 +241,7 @@ namespace clojure.lang
                     node = (Node)node.Array[(i >> level) & 0x01f];
                 return node.Array;
             }
-            throw new IndexOutOfRangeException();
+            throw new ArgumentOutOfRangeException("i");
         }
 
 
@@ -268,7 +268,7 @@ namespace clojure.lang
             }
             if (i == _cnt)
                 return cons(val);
-            throw new IndexOutOfRangeException();
+            throw new ArgumentOutOfRangeException("i");
         }
 
         static private Node doAssoc(int level, Node node, int i, object val)
@@ -708,7 +708,7 @@ namespace clojure.lang
                         node = (Node)node.Array[(i >> level) & 0x01f];
                     return node.Array;
                 }
-                throw new IndexOutOfRangeException();
+                throw new ArgumentOutOfRangeException("i");
             }
 
             #endregion
@@ -745,7 +745,7 @@ namespace clojure.lang
                 }
                 if (i == _cnt)
                     return (ITransientVector)conj(val);
-                throw new IndexOutOfRangeException();
+                throw new ArgumentOutOfRangeException("i");
             }
 
             Node doAssoc(int level, Node node, int i, Object val)

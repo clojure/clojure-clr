@@ -220,7 +220,7 @@ namespace clojure.lang
         public object restart(object newState, bool clearActions)
         {
             if (getError() == null)
-                throw new Exception("Agent does not need a restart");
+                throw new InvalidOperationException("Agent does not need a restart");
 
             Validate(newState);
             _state = newState;
@@ -259,7 +259,7 @@ namespace clojure.lang
         {
             Exception error = getError();
             if (error != null)
-                throw new Exception("Agent is failed, needs restart", error);
+                throw new InvalidOperationException("Agent is failed, needs restart", error);
             Action action = new Action(this,fn,args,solo);
             DispatchAction(action);
 

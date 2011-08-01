@@ -166,7 +166,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 method._retType = Compiler.TagType(Compiler.TagOf(parms));
                 if (method._retType.IsPrimitive && !(method._retType == typeof(double) || method._retType == typeof(long)))
-                    throw new ArgumentException("Only long and double primitives are supported");
+                    throw new ParseException("Only long and double primitives are supported");
 
                 // register 'this' as local 0  
                 if ( !isStatic )
@@ -181,10 +181,10 @@ namespace clojure.lang.CljCompiler.Ast
                 for (int i = 0; i < parmsCount; i++)
                 {
                     if (!(parms.nth(i) is Symbol))
-                        throw new ArgumentException("fn params must be Symbols");
+                        throw new ParseException("fn params must be Symbols");
                     Symbol p = (Symbol)parms.nth(i);
                     if (p.Namespace != null)
-                        throw new Exception("Can't use qualified name as parameter: " + p);
+                        throw new ParseException("Can't use qualified name as parameter: " + p);
                     if (p.Equals(Compiler.AmpersandSym))
                     {
                         //if (isStatic)
@@ -193,7 +193,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if (paramState == ParamParseState.Required)
                             paramState = ParamParseState.Rest;
                         else
-                            throw new Exception("Invalid parameter list");
+                            throw new ParseException("Invalid parameter list");
                     }
                     else
                     {
@@ -205,12 +205,12 @@ namespace clojure.lang.CljCompiler.Ast
                         //    //throw new Exception("Non-static fn can't have primitive parameter: " + p);
                         //}
                         if (pt.IsPrimitive && !(pt == typeof(double) || pt == typeof(long)))
-                            throw new ArgumentException("Only long and double primitives are supported: " + p);
+                            throw new ParseException("Only long and double primitives are supported: " + p);
 
                         if (paramState == ParamParseState.Rest && Compiler.TagOf(p) != null)
-                            throw new Exception("& arg cannot have type hint");
+                            throw new ParseException("& arg cannot have type hint");
                         if (paramState == ParamParseState.Rest && method.Prim != null)
-                            throw new Exception("fns taking primitives cannot be variadic");
+                            throw new ParseException("fns taking primitives cannot be variadic");
                         if (paramState == ParamParseState.Rest)
                             pt = typeof(ISeq);
                         argTypes.Add(pt);
@@ -231,13 +231,13 @@ namespace clojure.lang.CljCompiler.Ast
                                 paramState = ParamParseState.Done;
                                 break;
                             default:
-                                throw new Exception("Unexpected parameter");
+                                throw new ParseException("Unexpected parameter");
                         }
                     }
                 }
 
                 if (method.RequiredArity > Compiler.MaxPositionalArity)
-                    throw new Exception(string.Format("Can't specify more than {0} parameters", Compiler.MaxPositionalArity));
+                    throw new ParseException(string.Format("Can't specify more than {0} parameters", Compiler.MaxPositionalArity));
                 Compiler.LoopLocalsVar.set(argLocals);
                 method._argLocals = argLocals;
                 //if (isStatic)

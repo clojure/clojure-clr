@@ -311,7 +311,7 @@ namespace clojure.lang
             Box found = new Box(null);
             Node t = Add(_tree, key, val, found);
             if (t == null)
-                throw new Exception("Key already present");
+                throw new InvalidOperationException("Key already present");
             return new PersistentTreeMap(_comp, t.Blacken(), _count + 1, meta());
         }
 

@@ -72,20 +72,20 @@ namespace clojure.lang.CljCompiler.Ast
                 IPersistentVector loopLocals = (IPersistentVector)Compiler.LoopLocalsVar.deref();
 
                 if (pcon.Rhc != RHC.Return || loopLocals == null)
-                    throw new InvalidOperationException("Can only recur from tail position");
+                    throw new ParseException("Can only recur from tail position");
 
                 if (Compiler.InCatchFinallyVar.deref() != null)
-                    throw new InvalidOperationException("Cannot recur from catch/finally.");
+                    throw new ParseException("Cannot recur from catch/finally.");
 
                 if (Compiler.NoRecurVar.deref() != null)
-                    throw new InvalidOperationException("Cannot recur across try");
+                    throw new ParseException("Cannot recur across try");
 
                 IPersistentVector args = PersistentVector.EMPTY;
 
                 for (ISeq s = RT.seq(form.next()); s != null; s = s.next())
                     args = args.cons(Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), s.first()));
                 if (args.count() != loopLocals.count())
-                    throw new ArgumentException(string.Format("Mismatched argument count to recur, expected: {0} args, got {1}",
+                    throw new ParseException(string.Format("Mismatched argument count to recur, expected: {0} args, got {1}",
                         loopLocals.count(), args.count()));
 
                 for (int i = 0; i < loopLocals.count(); i++)

@@ -406,11 +406,11 @@ namespace clojure.lang
             {
                 Namespace ns = namespaceFor(n, symbol);
                 if (ns == null)
-                    throw new Exception("No such namespace: " + symbol.Namespace);
+                    throw new InvalidOperationException("No such namespace: " + symbol.Namespace);
 
                 Var v = ns.FindInternedVar(Symbol.intern(symbol.Name));
                 if (v == null)
-                    throw new Exception("No such var: " + symbol);
+                    throw new InvalidOperationException("No such var: " + symbol);
                 else if (v.Namespace != CurrentNamespace && !v.isPublic && !allowPrivate)
                     throw new InvalidOperationException(string.Format("var: {0} is not public", symbol));
                 return v;
@@ -432,7 +432,7 @@ namespace clojure.lang
                     if (RT.booleanCast(RT.AllowUnresolvedVarsVar.deref()))
                         return symbol;
                     else
-                        throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));
+                        throw new InvalidOperationException(string.Format("Unable to resolve symbol: {0} in this context", symbol));
                 }
                 return o;
             }
@@ -534,7 +534,7 @@ namespace clojure.lang
                 {
                     var = o as Var;
                     if (var == null)
-                        throw new Exception(string.Format("Expecting var, but {0} is mapped to {1}", sym, o));
+                        throw new InvalidOperationException(string.Format("Expecting var, but {0} is mapped to {1}", sym, o));
                 }
             }
             if (var != null)
@@ -1230,7 +1230,7 @@ namespace clojure.lang
         internal static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
         {
             if (CompilePathVar.deref() == null)
-                throw new Exception("*compile-path* not set");
+                throw new InvalidOperationException("*compile-path* not set");
 
             object eofVal = new object();
             object form;
@@ -1581,7 +1581,7 @@ namespace clojure.lang
                         else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) != null)
                             return new StaticPropertyExpr((string)SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tag, t, symbol.Name, pinfo);
                     }
-                    throw new Exception(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
+                    throw new InvalidOperationException(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
                 }
             }
 
@@ -1593,7 +1593,7 @@ namespace clojure.lang
             if (oAsVar != null)
             {
                 if (IsMacro(oAsVar) != null)
-                    throw new Exception("Can't take the value of a macro: " + oAsVar);
+                    throw new InvalidOperationException("Can't take the value of a macro: " + oAsVar);
                 if (RT.booleanCast(RT.get(oAsVar.meta(), RT.ConstKey)))
                     return Analyze(new ParserContext(RHC.Expression), RT.list(QuoteSym, oAsVar.get()));
                 RegisterVar(oAsVar);
@@ -1604,7 +1604,7 @@ namespace clojure.lang
             else if ( (oAsSymbol = o as Symbol) != null)
                 return new UnresolvedVarExpr(oAsSymbol);
 
-            throw new Exception(string.Format("Unable to resolve symbol: {0} in this context", symbol));
+            throw new InvalidOperationException(string.Format("Unable to resolve symbol: {0} in this context", symbol));
         }
 
         private static Expr AnalyzeSeq(ParserContext pcon, ISeq form, string name )

@@ -61,7 +61,7 @@ namespace clojure.lang
             /// <summary>
             /// The clock time. (not used?)
             /// </summary>
-            int _msecs;
+            //int _msecs;
 
             /// <summary>
             /// The prior <see cref="TVal">TVal</see>.
@@ -106,11 +106,12 @@ namespace clojure.lang
             /// <param name="point"></param>
             /// <param name="msecs"></param>
             /// <param name="prior"></param>
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "msecs")]
             public TVal(object val, long point, int msecs, TVal prior)
             {
                 _val = val;
                 _point = point;
-                _msecs = msecs;
+                //_msecs = msecs;
                 _prior = prior;
                 _next = _prior._next;
                 _prior._next = this;
@@ -123,11 +124,13 @@ namespace clojure.lang
             /// <param name="val"></param>
             /// <param name="point"></param>
             /// <param name="msecs"></param>
+            /// 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "msecs")]
             public TVal(object val, long point, int msecs)
             {
                 _val = val;
                 _point = point;
-                _msecs = msecs;
+                //_msecs = msecs;
                 _prior = this;
                 _next = this;
             }
@@ -142,11 +145,12 @@ namespace clojure.lang
             /// <param name="val"></param>
             /// <param name="point"></param>
             /// <param name="msecs"></param>
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "msecs")]
             public void SetValue(object val, long point, int msecs)
             {
                 _val = val;
                 _point = point;
-                _msecs = msecs;
+                //_msecs = msecs;
             }
 
             #endregion

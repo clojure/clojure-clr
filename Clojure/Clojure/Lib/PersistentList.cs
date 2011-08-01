@@ -557,7 +557,7 @@ namespace clojure.lang
             {
                 get
                 {
-                    throw new IndexOutOfRangeException();
+                    throw new ArgumentOutOfRangeException("index", "Cannot access elements in an empty list");
                 }
                 set
                 {

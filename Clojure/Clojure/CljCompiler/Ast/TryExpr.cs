@@ -127,7 +127,7 @@ namespace clojure.lang.CljCompiler.Ast
                     if (!Util.equals(op, Compiler.CatchSym) && !Util.equals(op, Compiler.FinallySym))
                     {
                         if (caught)
-                            throw new Exception("Only catch or finally clause can follow catch in try expression");
+                            throw new ParseException("Only catch or finally clause can follow catch in try expression");
                         body = body.cons(f);
                     }
                     else
@@ -148,12 +148,12 @@ namespace clojure.lang.CljCompiler.Ast
                         {
                             Type t = HostExpr.MaybeType(RT.second(f), false);
                             if (t == null)
-                                throw new ArgumentException("Unable to resolve classname: " + RT.second(f));
+                                throw new ParseException("Unable to resolve classname: " + RT.second(f));
                             if (!(RT.third(f) is Symbol))
-                                throw new ArgumentException("Bad binding form, expected symbol, got: " + RT.third(f));
+                                throw new ParseException("Bad binding form, expected symbol, got: " + RT.third(f));
                             Symbol sym = (Symbol)RT.third(f);
                             if (sym.Namespace != null)
-                                throw new Exception("Can't bind qualified name: " + sym);
+                                throw new ParseException("Can't bind qualified name: " + sym);
 
                             IPersistentMap dynamicBindings = RT.map(
                                 Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
@@ -178,7 +178,7 @@ namespace clojure.lang.CljCompiler.Ast
                         else // finally
                         {
                             if (fs.next() != null)
-                                throw new Exception("finally clause must be last in try expression");
+                                throw new InvalidOperationException("finally clause must be last in try expression");
                             try
                             {
                                 //Var.pushThreadBindings(RT.map(Compiler.IN_CATCH_FINALLY, RT.T));

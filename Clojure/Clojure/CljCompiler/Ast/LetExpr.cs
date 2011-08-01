@@ -74,10 +74,10 @@ namespace clojure.lang.CljCompiler.Ast
                 IPersistentVector bindings = RT.second(form) as IPersistentVector;
 
                 if (bindings == null)
-                    throw new ArgumentException("Bad binding form, expected vector");
+                    throw new ParseException("Bad binding form, expected vector");
 
                 if ((bindings.count() % 2) != 0)
-                    throw new ArgumentException("Bad binding form, expected matched symbol/value pairs.");
+                    throw new ParseException("Bad binding form, expected matched symbol/value pairs.");
 
                 ISeq body = RT.next(RT.next(form));
 
@@ -119,11 +119,11 @@ namespace clojure.lang.CljCompiler.Ast
                         for (int i = 0; i < bindings.count(); i += 2)
                         {
                             if (!(bindings.nth(i) is Symbol))
-                                throw new ArgumentException("Bad binding form, expected symbol, got " + bindings.nth(i));
+                                throw new ParseException("Bad binding form, expected symbol, got " + bindings.nth(i));
 
                             Symbol sym = (Symbol)bindings.nth(i);
                             if (sym.Namespace != null)
-                                throw new Exception("Can't let qualified name: " + sym);
+                                throw new ParseException("Can't let qualified name: " + sym);
 
                             Expr init = Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), bindings.nth(i + 1), sym.Name);
                             if (isLoop)

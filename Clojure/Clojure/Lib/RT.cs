@@ -1019,7 +1019,7 @@ namespace clojure.lang
                     return e.Key;
                 else if (n == 1)
                     return e.Value;
-                throw new IndexOutOfRangeException();
+                throw new ArgumentOutOfRangeException("n");
             }
             
             if (coll.GetType().IsGenericType && coll.GetType().Name == "KeyValuePair`2")
@@ -1028,7 +1028,7 @@ namespace clojure.lang
                     return coll.GetType().InvokeMember("Key", BindingFlags.GetProperty, null, coll, null);
                 else if (n == 1)
                     return coll.GetType().InvokeMember("Value", BindingFlags.GetProperty, null, coll, null);
-                throw new IndexOutOfRangeException();
+                throw new ArgumentOutOfRangeException("n");
             }
 
             IMapEntry me = coll as IMapEntry;
@@ -1038,7 +1038,7 @@ namespace clojure.lang
                     return me.key();
                 else if (n == 1)
                     return me.val();
-                throw new IndexOutOfRangeException();
+                throw new ArgumentOutOfRangeException("n");
             }
 
             if (coll is Sequential)
@@ -1050,7 +1050,7 @@ namespace clojure.lang
                     if (i == n)
                         return seq.first();
                 }
-                throw new IndexOutOfRangeException();
+                throw new ArgumentOutOfRangeException("n");
             }
             
             throw new InvalidOperationException("nth not supported on this type: " + Util.NameForType(coll.GetType()));
@@ -2105,8 +2105,15 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IPersistentVector subvec(IPersistentVector v, int start, int end)
         {
-            if (end < start || start < 0 || end > v.count())
-                throw new IndexOutOfRangeException();
+            if ( start < 0 )
+                throw new ArgumentOutOfRangeException("start","cannot be less than zero");
+
+            if (end < start )
+                throw new ArgumentOutOfRangeException("end","cannot be less than start");
+
+            if ( end > v.count())
+                throw new ArgumentOutOfRangeException("end","cannot be past the end of the vector");
+
             if (start == end)
                 return PersistentVector.EMPTY;
             return new APersistentVector.SubVector(null, v, start, end);
@@ -2259,7 +2266,7 @@ namespace clojure.lang
                 return ret;
             }
             
-            throw new Exception("Unable to convert: " + coll.GetType() + " to Object[]");
+            throw new InvalidOperationException("Unable to convert: " + coll.GetType() + " to Object[]");
         }
 
         private static object[] IEnumToArray(IEnumerable e)

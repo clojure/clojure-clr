@@ -250,7 +250,7 @@ namespace clojure.lang
             {
                 PersistentStructMap m = (PersistentStructMap)arg1;
                 if (m._def != _def)
-                    throw new Exception("Accessor/struct mismatch");
+                    throw new InvalidOperationException("Accessor/struct mismatch");
                 return m._vals[_index];
             }
 
@@ -421,7 +421,7 @@ namespace clojure.lang
         public override IPersistentMap assocEx(object key, object val)
         {
             if (containsKey(key))
-                throw new Exception("Key already present");
+                throw new InvalidOperationException("Key already present");
             return assoc(key, val);
         }
 
@@ -434,7 +434,7 @@ namespace clojure.lang
         {
             IMapEntry me = _def.Keyslots.entryAt(key);
             if (me != null)
-                throw new Exception("Can't remove struct key");
+                throw new InvalidOperationException("Can't remove struct key");
             IPersistentMap newExt = _ext.without(key);
             return newExt == _ext
                 ? this

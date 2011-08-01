@@ -269,7 +269,7 @@ namespace clojure.lang.CljCompiler.Ast
                     // can't do much
                     // Java will get the loader and define the clas from the stored bytecodes
                     // Not sure what the equivalent would be.
-                    throw new Exception("ObjExpr type not compiled");
+                    throw new InvalidOperationException("ObjExpr type not compiled");
                 return _compiledType;
             }
             set { _compiledType = value; }
@@ -1031,12 +1031,12 @@ namespace clojure.lang.CljCompiler.Ast
                 }
                 catch (Exception)
                 {
-                    throw new Exception(String.Format("Can't embed object in code, maybe print-dup not defined: {0}", value));
+                    throw new InvalidOperationException(String.Format("Can't embed object in code, maybe print-dup not defined: {0}", value));
                 }
                 if (cs.Length == 0)
-                    throw new Exception(String.Format("Can't embed unreadable object in code: " + value));
+                    throw new InvalidOperationException(String.Format("Can't embed unreadable object in code: " + value));
                 if (cs.StartsWith("#<"))
-                    throw new Exception(String.Format("Can't embed unreadable object in code: " + cs));
+                    throw new InvalidOperationException(String.Format("Can't embed unreadable object in code: " + cs));
 
                 ret = Expression.Call(Compiler.Method_RT_readString, Expression.Constant(cs));
                 partial = false;

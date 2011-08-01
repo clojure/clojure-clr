@@ -335,7 +335,7 @@ namespace clojure.lang
         public override IPersistentMap assocEx(object key, object val)
         {
             if (containsKey(key))
-                throw new Exception("Key already present");
+                throw new InvalidOperationException("Key already present");
             return assoc(key, val);
         }
 

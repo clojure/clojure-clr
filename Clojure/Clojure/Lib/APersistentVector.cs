@@ -970,7 +970,7 @@ namespace clojure.lang
             public override object nth(int i)
             {
                 if (_start + i >= _end)
-                    throw new IndexOutOfRangeException();
+                    throw new ArgumentOutOfRangeException("i");
                 return _v.nth(_start + i);
             }
 
@@ -983,7 +983,7 @@ namespace clojure.lang
             public override IPersistentVector assocN(int i, object val)
             {
                 if (_start + i > _end)
-                    throw new IndexOutOfRangeException();
+                    throw new ArgumentOutOfRangeException("i");
                 else if (_start + i == _end)
                     return cons(val);
                 else

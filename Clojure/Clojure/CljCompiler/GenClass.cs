@@ -79,7 +79,7 @@ namespace clojure.lang
 
             string path = (string)Compiler.CompilePathVar.deref();
             if ( path == null)
-                throw new Exception("*compile-path* not set");
+                throw new InvalidOperationException("*compile-path* not set");
 
             string extension = hasMain ? ".exe" : ".dll";
 
@@ -228,7 +228,7 @@ namespace clojure.lang
                 ConstructorInfo superCtor = superClass.GetConstructor(flags,null,baseParamTypes,null);
 
                 if (superCtor == null || superCtor.IsPrivate)
-                    throw new Exception("Base class constructor missing or private");
+                    throw new InvalidOperationException("Base class constructor missing or private");
 
                 ConstructorBuilder cb = proxyTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, thisParamTypes);
                 ILGen gen = new ILGen(cb.GetILGenerator());
@@ -311,7 +311,7 @@ namespace clojure.lang
                     for (int i = 0; ok && i < thisParamTypes.Length; i++)
                         ok = baseParamTypes[i].IsAssignableFrom(thisParamTypes[i]);
                     if (!ok)
-                        throw new Exception(":init not specified, but ctor and super ctor args differ");
+                        throw new InvalidOperationException(":init not specified, but ctor and super ctor args differ");
                     gen.EmitLoadArg(0);                                 // gen.Emit(OpCodes.Ldarg_0);
                     for ( int i=0; i< thisParamTypes.Length; i++ )
                     {

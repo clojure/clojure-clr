@@ -726,7 +726,7 @@ namespace clojure.lang
                 }
             }
             if (!done)
-                throw new Exception("Transaction failed after reaching retry limit");
+                throw new InvalidOperationException("Transaction failed after reaching retry limit");
             return ret;
         }
 

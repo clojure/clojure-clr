@@ -78,10 +78,10 @@ namespace clojure.lang.CljCompiler.Ast
                 // (if test then) or (if test then else)
 
                 if (form.count() > 4)
-                    throw new Exception("Too many arguments to if");
+                    throw new ParseException("Too many arguments to if");
 
                 if (form.count() < 3)
-                    throw new Exception("Too few arguments to if");
+                    throw new ParseException("Too few arguments to if");
 
 
                 Expr testExpr = Compiler.Analyze(pcon.EvalOrExpr().SetAssign(false),RT.second(form));

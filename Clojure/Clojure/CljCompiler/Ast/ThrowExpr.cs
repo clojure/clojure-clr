@@ -59,7 +59,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override object Eval()
         {
-            throw new Exception("Can't eval throw");
+            throw new InvalidOperationException("Can't eval throw");
         }
 
         #endregion

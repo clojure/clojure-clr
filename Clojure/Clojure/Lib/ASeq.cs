@@ -312,7 +312,7 @@ namespace clojure.lang
                     if (i == index)
                         return seq.first();
                 }
-                throw new IndexOutOfRangeException();
+                throw new ArgumentOutOfRangeException("Index out of ranges");
             }
             set
             {

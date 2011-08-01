@@ -130,7 +130,7 @@ namespace clojure.lang
                 case 1:
                     return val();
                 default:
-                    throw new IndexOutOfRangeException();
+                    throw new ArgumentOutOfRangeException("i");
             }
         }
 

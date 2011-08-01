@@ -400,8 +400,10 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public void addAlias(Symbol alias, Namespace ns)
         {
-            if (alias == null || ns == null)
-                throw new NullReferenceException("Expecting Symbol + Namespace");
+            if (alias == null)
+                throw new ArgumentNullException("alias","Expecting Symbol + Namespace");
+            if ( ns == null )
+                throw new ArgumentNullException("ns", "Expecting Symbol + Namespace");
 
             IPersistentMap map = Aliases;
 

@@ -144,7 +144,7 @@ namespace clojure.lang
                 throw new InvalidOperationException("Attempt to call group on a non-realized or failed match.");
 
             if ( group < 0 || group >= _match.Groups.Count)
-                throw new IndexOutOfRangeException("Attempt to call group with an index out of bounds.");
+                throw new ArgumentOutOfRangeException("Group","Attempt to call group with an index out of bounds.");
 
             return _match.Groups[group].Value;
         }

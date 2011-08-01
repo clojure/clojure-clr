@@ -104,11 +104,11 @@ namespace clojure.lang.CljCompiler.Ast
                 // form => (new Typename args ... )
 
                 if (form.count() < 2)
-                    throw new Exception("wrong number of arguments, expecting: (new Typename args ...)");
+                    throw new ParseException("wrong number of arguments, expecting: (new Typename args ...)");
 
                 Type t = HostExpr.MaybeType(RT.second(form), false);
                 if (t == null)
-                    throw new ArgumentException("Unable to resolve classname: " + RT.second(form));
+                    throw new ParseException("Unable to resolve classname: " + RT.second(form));
 
                 List<HostArg> args = HostExpr.ParseArgs(pcon, RT.next(RT.next(form)));
 

@@ -123,7 +123,7 @@ namespace clojure.lang
             }
             if (_error != null)
             {
-                throw new Exception("Future has an error", _error);
+                throw new InvalidOperationException("Future has an error", _error);
             }
             return _value;
         }

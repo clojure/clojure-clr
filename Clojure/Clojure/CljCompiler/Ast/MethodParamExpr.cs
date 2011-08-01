@@ -58,7 +58,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public object Eval()
         {
-            throw new Exception("Can't eval");
+            throw new InvalidOperationException("Can't eval");
         }
 
         #endregion

@@ -159,21 +159,21 @@ namespace clojure.lang.CljCompiler.Ast
                         if (variadicMethod == null)
                             variadicMethod = f;
                         else
-                            throw new Exception("Can't have more than 1 variadic overload");
+                            throw new ParseException("Can't have more than 1 variadic overload");
                     }
                     else if (!methods.ContainsKey(f.RequiredArity))
                         methods[f.RequiredArity] = f;
                     else
-                        throw new Exception("Can't have 2 overloads with the same arity.");
+                        throw new ParseException("Can't have 2 overloads with the same arity.");
                     if (f.Prim != null)
                         prims.Add(f.Prim);
                 }
 
                 if (variadicMethod != null && methods.Count > 0 && methods.Keys.Max() >= variadicMethod.NumParams)
-                    throw new Exception("Can't have fixed arity methods with more params than the variadic method.");
+                    throw new ParseException("Can't have fixed arity methods with more params than the variadic method.");
 
                 if ( fn.IsStatic && fn.Closes.count() > 0 )
-                    throw new ArgumentException("static fns can't be closures");
+                    throw new ParseException("static fns can't be closures");
 
                 IPersistentCollection allMethods = null;
                 foreach (FnMethod method in methods.Values)

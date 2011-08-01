@@ -82,22 +82,22 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 if (RT.count(form) > 3)
-                    throw new Exception("Too many arguments to def");
+                    throw new ParseException("Too many arguments to def");
 
                 if (RT.count(form) < 2)
-                    throw new Exception("Too few arguments to def");
+                    throw new ParseException("Too few arguments to def");
 
                 Symbol sym = RT.second(form) as Symbol;
 
                 if (sym == null)
-                    throw new Exception("First argument to def must be a Symbol.");
+                    throw new ParseException("First argument to def must be a Symbol.");
 
                 //Console.WriteLine("Def {0}", sym.Name);
                 
                 Var v = Compiler.LookupVar(sym, true);
 
                 if (v == null)
-                    throw new Exception("Can't refer to qualified var that doesn't exist");
+                    throw new ParseException("Can't refer to qualified var that doesn't exist");
 
                 if (!v.Namespace.Equals(Compiler.CurrentNamespace))
                 {
@@ -107,7 +107,7 @@ namespace clojure.lang.CljCompiler.Ast
                     //throw new Exception(string.Format("Name conflict, can't def {0} because namespace: {1} refers to: {2}",
                     //            sym, Compiler.CurrentNamespace.Name, v));
                     else
-                        throw new Exception("Can't create defs outside of current namespace");
+                        throw new ParseException("Can't create defs outside of current namespace");
                 }
 
                 IPersistentMap mm = sym.meta();

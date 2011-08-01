@@ -486,7 +486,7 @@ namespace clojure.lang
             if (ret != null)
                 return ret;
 
-            throw new Exception("Invalid token: " + token);
+            throw new ArgumentException("Invalid token: " + token);
         }
 
 
@@ -761,7 +761,7 @@ namespace clojure.lang
                 {
                     char c = (char)readUnicodeChar(token, 1, 4, 16);
                     if (c >= '\uD800' && c <= '\uDFFF') // surrogate code unit?
-                        throw new Exception("Invalid character constant: \\u" + ((int)c).ToString("X"));
+                        throw new ArgumentException("Invalid character constant: \\u" + ((int)c).ToString("X"));
                     return c;
                 }
                 else if (token.StartsWith("o"))
@@ -817,7 +817,7 @@ namespace clojure.lang
                             case 'u':
                                 ch = r.Read();
                                 if (CharValueInRadix(ch, 16) == -1)
-                                    throw new Exception("Invalid unicode escape: \\u" + (char)ch);
+                                    throw new ArgumentOutOfRangeException("ch","Invalid unicode escape: \\u" + (char)ch);
                                 ch = readUnicodeChar((PushbackTextReader)r, ch, 16, 4, true);
                                 break;
                             default:
@@ -826,10 +826,10 @@ namespace clojure.lang
                                     {
                                         ch = readUnicodeChar((PushbackTextReader)r, ch, 8, 3, false);
                                         if (ch > 255) //octal377
-                                            throw new Exception("Octal escape sequence must be in range [0, 377].");
+                                            throw new ArgumentOutOfRangeException("ch","Octal escape sequence must be in range [0, 377].");
                                     }
                                     else
-                                        throw new Exception("Unsupported escape character: \\" + (char)ch);
+                                        throw new ArgumentException("Unsupported escape character: \\" + (char)ch);
                                 }
                                 break;
                         }
@@ -901,7 +901,7 @@ namespace clojure.lang
             {
                 Object[] a = ReadDelimitedList('}', r, true).ToArray();
                 if ((a.Length & 1) == 1)
-                    throw new Exception("Map literal must contain an even number of forms");
+                    throw new ArgumentException("Map literal must contain an even number of forms");
                 return RT.map(a);
             }
         }
@@ -910,7 +910,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader reader, char rightdelim)
             {
-                throw new Exception("Unmatched delimiter: " + rightdelim);
+                throw new ArgumentException("Unmatched delimiter: " + rightdelim);
             }
         }
 
@@ -1193,7 +1193,7 @@ namespace clojure.lang
                     if (result != null)
                         return result;
                     else
-                        throw new Exception(String.Format("No dispatch macro for: {0}", (char)ch));
+                        throw new InvalidOperationException(String.Format("No dispatch macro for: {0}", (char)ch));
                 }
                 return fn.invoke(r, (char)ch);
             }
@@ -1407,7 +1407,7 @@ namespace clojure.lang
             {
                 if (!RT.booleanCast(RT.ReadEvalVar.deref()))
                 {
-                    throw new Exception("EvalReader not allowed when *read-eval* is false.");
+                    throw new InvalidOperationException("EvalReader not allowed when *read-eval* is false.");
                 }
                 Object o = read(r, true, null, true);
                 if (o is Symbol)
@@ -1472,7 +1472,7 @@ namespace clojure.lang
                 else if (ch == '[')
                     endch = ']';
                 else
-                    throw new Exception(String.Format("Unreadable constructor form starting with \"#{0}{1}\"", recordName, (char)ch));
+                    throw new ArgumentException(String.Format("Unreadable constructor form starting with \"#{0}{1}\"", recordName, (char)ch));
 
                 object[] recordEntries = ReadDelimitedList(endch, r, true).ToArray();
                 object ret = null;
@@ -1486,7 +1486,7 @@ namespace clojure.lang
                             ctorFound = true;
 
                     if ( ! ctorFound )
-                        throw new Exception(String.Format("Unexpected number of constructor arguments to {0}: got {1}",recordType.ToString(),recordEntries.Length));
+                        throw new ArgumentException(String.Format("Unexpected number of constructor arguments to {0}: got {1}", recordType.ToString(), recordEntries.Length));
 
                     ret = Reflector.InvokeConstructor(recordType,recordEntries);
                 }
@@ -1513,7 +1513,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader reader, char leftangle)
             {
-                throw new Exception("Unreadable form");
+                throw new ArgumentException("Unreadable form");
             }
         }
 

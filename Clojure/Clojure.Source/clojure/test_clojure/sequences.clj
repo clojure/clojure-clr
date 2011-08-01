@@ -541,15 +541,15 @@
   (is (thrown? InvalidOperationException (nth #{1 2 3} 0)))         ;;; UnsupportedOperationException
 
   ; out of bounds
-  (is (thrown? IndexOutOfRangeException (nth '() 0)))                   ;;; IndexOutOfBoundsException
-  (is (thrown? IndexOutOfRangeException (nth '(1 2 3) 5)))              ;;; IndexOutOfBoundsException
-  (is (thrown? IndexOutOfRangeException (nth '() -1)))                  ;;; IndexOutOfBoundsException
-  (is (thrown? IndexOutOfRangeException (nth '(1 2 3) -1)))             ;;; IndexOutOfBoundsException
+  (is (thrown? ArgumentOutOfRangeException (nth '() 0)))                   ;;; IndexOutOfBoundsException
+  (is (thrown? ArgumentOutOfRangeException (nth '(1 2 3) 5)))              ;;; IndexOutOfBoundsException
+  (is (thrown? ArgumentOutOfRangeException (nth '() -1)))                  ;;; IndexOutOfBoundsException
+  (is (thrown? ArgumentOutOfRangeException (nth '(1 2 3) -1)))             ;;; IndexOutOfBoundsException
 
-  (is (thrown? IndexOutOfRangeException (nth [] 0)))                    ;;; IndexOutOfBoundsException
-  (is (thrown? IndexOutOfRangeException (nth [1 2 3] 5)))               ;;; IndexOutOfBoundsException
-  (is (thrown? IndexOutOfRangeException (nth [] -1)))                   ;;; IndexOutOfBoundsException
-  (is (thrown? IndexOutOfRangeException (nth [1 2 3] -1)))  ; ???               ;;; ArrayIndexOutOfBoundsException
+  (is (thrown? ArgumentOutOfRangeException (nth [] 0)))                    ;;; IndexOutOfBoundsException
+  (is (thrown? ArgumentOutOfRangeException (nth [1 2 3] 5)))               ;;; IndexOutOfBoundsException
+  (is (thrown? ArgumentOutOfRangeException (nth [] -1)))                   ;;; IndexOutOfBoundsException
+  (is (thrown? ArgumentOutOfRangeException (nth [1 2 3] -1)))  ; ???               ;;; ArrayIndexOutOfBoundsException
 
   (is (thrown? IndexOutOfRangeException (nth (into-array []) 0)))             ;;; ArrayIndexOutOfBoundsException
   (is (thrown? IndexOutOfRangeException (nth (into-array [1 2 3]) 5)))             ;;; ArrayIndexOutOfBoundsException
@@ -607,8 +607,8 @@
         (nth m 2) "b"
         (nth m 3 :not-found) :not-found
         (nth m -1 :not-found) :not-found )
-    (is (thrown? IndexOutOfRangeException (nth m 3)))               ;;; IndexOutOfBoundsException
-    (is (thrown? IndexOutOfRangeException (nth m -1))))             ;;; IndexOutOfBoundsException
+    (is (thrown? ArgumentOutOfRangeException (nth m 3)))               ;;; IndexOutOfBoundsException
+    (is (thrown? ArgumentOutOfRangeException (nth m -1))))             ;;; IndexOutOfBoundsException
 
   (let [m (re-matcher #"c" "ababaa")]
     (re-find m) ; => nil

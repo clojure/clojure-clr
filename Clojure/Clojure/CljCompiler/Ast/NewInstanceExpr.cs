@@ -152,7 +152,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Type t = (Type)Compiler.Resolve((Symbol)s.first());
                 if (!t.IsInterface)
-                    throw new ArgumentException("only interfaces are supported, had: " + t.Name);
+                    throw new ParseException("only interfaces are supported, had: " + t.Name);
                 interfaces = interfaces.cons(t);
             }
             Type superClass = typeof(Object);

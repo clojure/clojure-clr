@@ -120,7 +120,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 method._explicitInterface = RT.classForName(interfaceName);
                 if (method._explicitInterface == null)
-                    throw new ArgumentException(String.Format("Unable to find interface {0} for explicit method implemntation: {1}", interfaceName, dotNameStr));
+                    throw new ParseException(String.Format("Unable to find interface {0} for explicit method implemntation: {1}", interfaceName, dotNameStr));
 
                 methodName = dotNameStr.Substring(idx + 1);
                 name = (Symbol)Symbol.intern(null, Compiler.munge(dotName.Name)).withMeta(RT.meta(dotName));
@@ -133,7 +133,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             IPersistentVector parms = (IPersistentVector)RT.second(form);
             if (parms.count() == 0 || !(parms.nth(0) is Symbol))
-                throw new ArgumentException("Must supply at least one argument for 'this' in: " + dotName);
+                throw new ParseException("Must supply at least one argument for 'this' in: " + dotName);
 
             Symbol thisName = (Symbol)parms.nth(0);
             parms = RT.subvec(parms, 1, parms.count());
@@ -182,15 +182,15 @@ namespace clojure.lang.CljCompiler.Ast
                         object first = RT.first(pseq);
                         object second = RT.second(pseq);
                         if (!(first is Symbol && ((Symbol)first).Equals(HostExpr.ByRefSym)))
-                            throw new ArgumentException("First element in parameter pair must be by-ref");
+                            throw new ParseException("First element in parameter pair must be by-ref");
                         if (!(second is Symbol))
-                            throw new ArgumentException("Params must be Symbols");
+                            throw new ParseException("Params must be Symbols");
                         isByRef = true;
                         p = (Symbol)second;
                         hinted = true;
                     }
-                    else 
-                        throw new ArgumentException("Params must be Symbols or of the form (by-ref Symbol)");
+                    else
+                        throw new ParseException("Params must be Symbols or of the form (by-ref Symbol)");
 
                     object tag = Compiler.TagOf(p);
                     if (tag != null)
@@ -220,9 +220,9 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         // must be hinted and match one method
                         if (!hinted)
-                            throw new ArgumentException("Must hint overloaded method: " + name.Name);
+                            throw new ParseException("Must hint overloaded method: " + name.Name);
                         if (! matches.TryGetValue(mk,out ms) )
-                            throw new ArgumentException("Can't find matching overloaded method: " + name.Name);
+                            throw new ParseException("Can't find matching overloaded method: " + name.Name);
 
                         method._minfos = ms;
 
@@ -236,7 +236,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if (hinted)
                         {
                             if (!matches.TryGetValue(mk, out ms))
-                                throw new ArgumentException("Can't find matching method: " + name.Name + ", leave off hints for auto match.");
+                                throw new ParseException("Can't find matching method: " + name.Name + ", leave off hints for auto match.");
 
                             method._minfos = ms;
 
@@ -260,7 +260,7 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
                 else
-                    throw new ArgumentException("Can't define method not in interfaces: " + name.Name);
+                    throw new ParseException("Can't define method not in interfaces: " + name.Name);
 
                 if (method.IsExplicit)
                     method._explicitMethodInfo = ms[0];

@@ -59,7 +59,7 @@ namespace clojure.lang.CljCompiler.Ast
                 //  (. x (generic-m 
 
                 if (RT.Length(sform) < 3)
-                    throw new ArgumentException("Malformed member expression, expecting (. target member ... )");
+                    throw new ParseException("Malformed member expression, expecting (. target member ... )");
 
                 string source = (string)Compiler.SourceVar.deref();
                 IPersistentMap spanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();  // Compiler.GetSourceSpanMap(form);
@@ -161,7 +161,7 @@ namespace clojure.lang.CljCompiler.Ast
                     call = RT.third(sform) is ISeq ? (ISeq)RT.third(sform) : RT.next(RT.next(sform));
 
                 if (!(RT.first(call) is Symbol))
-                    throw new ArgumentException("Malformed member exception");
+                    throw new ParseException("Malformed member exception");
 
                 string methodName = Compiler.munge(((Symbol)RT.first(call)).Name);
 
