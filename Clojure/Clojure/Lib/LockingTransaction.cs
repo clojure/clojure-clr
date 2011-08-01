@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
@@ -81,15 +82,62 @@ namespace clojure.lang
         /// <summary>
         /// Exception thrown when a retry is necessary.
         /// </summary>
+        [Serializable]
         public class RetryEx : Exception
         {
+            #region C-tors
+
+            public RetryEx()
+            {
+            }
+
+            public RetryEx(String message)
+                : base(message)
+            {
+            }
+
+            public RetryEx(String message, Exception innerException)
+                : base(message, innerException)
+            {
+            }
+
+            protected RetryEx(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+            }
+
+            #endregion
+
         }
 
         /// <summary>
         /// Exception thrown when a transaction has been aborted.
         /// </summary>
+        [Serializable]
         public class AbortException : Exception
         {
+            #region C-tors
+
+            public AbortException()
+            {
+            }
+
+            public AbortException(String message)
+                : base(message)
+            {
+            }
+
+            public AbortException(String message, Exception innerException)
+                : base(message, innerException)
+            {
+            }
+
+            protected AbortException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+            }
+
+            #endregion
         }
 
         /// <summary>

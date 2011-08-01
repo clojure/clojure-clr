@@ -466,7 +466,8 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
 
         #region Tags and types
-
+        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         public static Type MaybeType(object form, bool stringOk)
         {

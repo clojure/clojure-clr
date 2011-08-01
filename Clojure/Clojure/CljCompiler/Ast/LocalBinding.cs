@@ -79,7 +79,7 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _isByRef; }
         }
 
-        bool _canBeCleared = true;
+        //bool _canBeCleared = true;  //JVM-only -- we do not do clearing
 
         bool _recurMismatch = false;
 

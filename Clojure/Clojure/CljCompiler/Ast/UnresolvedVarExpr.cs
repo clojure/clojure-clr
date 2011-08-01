@@ -29,6 +29,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         readonly Symbol _symbol;
 
+        public Symbol Symbol
+        {
+            get { return _symbol; }
+        } 
+
         #endregion
 
         #region Ctors

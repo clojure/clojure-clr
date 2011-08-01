@@ -20,6 +20,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements an persistent, ordered set.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentTreeSet : APersistentSet, IObj, Reversible, Sorted
     {

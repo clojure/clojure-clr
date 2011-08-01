@@ -81,8 +81,8 @@ namespace clojure.lang
         /// </summary>
         object _cachedHierarchy;
 
-        static readonly Var _assoc = RT.var("clojure.core", "assoc");
-        static readonly Var _dissoc = RT.var("clojure.core", "dissoc");
+        //static readonly Var _assoc = RT.var("clojure.core", "assoc");
+        //static readonly Var _dissoc = RT.var("clojure.core", "dissoc");
         //static readonly Var _isa = RT.var("clojure.core", "isa?", null);  -- loading order dependent. bad.
         static readonly Var _isa = RT.var("clojure.core", "isa?");
         static readonly Var _parents = RT.var("clojure.core", "parents");

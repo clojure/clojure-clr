@@ -44,7 +44,7 @@ namespace clojure.lang
         }
         
         static readonly Keyword ContinueKeyword = Keyword.intern(null, "continue");
-        static readonly Keyword FailKeyword = Keyword.intern(null, "fail");
+        //static readonly Keyword FailKeyword = Keyword.intern(null, "fail");
 
         #endregion
 
@@ -400,6 +400,7 @@ namespace clojure.lang
             /// <summary>
             /// Send the message.
             /// </summary>
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
             public void execute()
             {
                 try
@@ -435,6 +436,7 @@ namespace clojure.lang
             /// </summary>
             /// <param name="state">(not used)</param>
             /// <remarks>corresponds to doRun in Java version</remarks>
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
             void ExecuteAction(object state)
             {
                 try

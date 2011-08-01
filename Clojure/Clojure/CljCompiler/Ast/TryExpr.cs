@@ -63,20 +63,20 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Expr _tryExpr;
         readonly Expr _finallyExpr;
         readonly IPersistentVector _catchExprs;
-        readonly int _retLocal;
-        readonly int _finallyLocal;
+        //readonly int _retLocal;      Not needed
+        //readonly int _finallyLocal;  Not needed
 
         #endregion
 
         #region Ctors
 
-        public TryExpr(Expr tryExpr, IPersistentVector catchExprs, Expr finallyExpr, int retLocal, int finallyLocal)
+        public TryExpr(Expr tryExpr, IPersistentVector catchExprs, Expr finallyExpr /*, int retLocal, int finallyLocal */)
         {
             _tryExpr = tryExpr;
             _catchExprs = catchExprs;
             _finallyExpr = finallyExpr;
-            _retLocal = retLocal;
-            _finallyLocal = finallyLocal;
+            //_retLocal = retLocal;
+            //_finallyLocal = finallyLocal;
         }
 
         #endregion
@@ -117,7 +117,7 @@ namespace clojure.lang.CljCompiler.Ast
                 bool caught = false;
 
                 int retLocal = Compiler.GetAndIncLocalNum();
-                int finallyLocal = Compiler.GetAndIncLocalNum();
+                //int finallyLocal = Compiler.GetAndIncLocalNum();
 
                 for (ISeq fs = form.next(); fs != null; fs = fs.next())
                 {
@@ -205,7 +205,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Var.popThreadBindings();
                     }
                 }
-                return new TryExpr(bodyExpr, catches, finallyExpr, retLocal, finallyLocal);
+                return new TryExpr(bodyExpr, catches, finallyExpr /*, retLocal, finallyLocal*/ );
               }
         }
 

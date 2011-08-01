@@ -28,12 +28,6 @@ using RTProperties = clojure.runtime.Properties;
 
 namespace clojure.lang
 {
-    public static class RT_Bootstrap_Flag
-    {
-        public static bool _doRTBootstrap = true;
-
-    }
-
     public static class RT
     {
         #region Default symbol-to-class map
@@ -388,8 +382,11 @@ namespace clojure.lang
         public static readonly Var PrintDupVar 
             //= Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*"), RT.F);
             = Var.intern(ClojureNamespace, Symbol.intern("*print-dup*"), false).setDynamic();
-        
-        static readonly Var FlushOnNewlineVar 
+
+
+        // We need this Var initializaed early on, I'm willing to waste the local init overhead to keep the code here with the others.
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
+        static readonly Var FlushOnNewlineVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*flush-on-newline*"), RT.T);
             = Var.intern(ClojureNamespace, Symbol.intern("*flush-on-newline*"), true).setDynamic();
         
@@ -538,7 +535,7 @@ namespace clojure.lang
             //v.setMeta(map(dockw, "tests if 2 arguments are the same object",
             //    arglistskw, list(vector(Symbol.intern("x"), Symbol.intern("y")))));
 
-            if ( RT_Bootstrap_Flag._doRTBootstrap )
+            if ( RuntimeBootstrapFlag._doRTBootstrap )
                 DoInit();
         }
 
@@ -2197,6 +2194,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object[] object_array(Object sizeOrSeq)
         {
@@ -2840,6 +2838,7 @@ namespace clojure.lang
 
             #region ISerializable Members
 
+            [System.Security.SecurityCritical]
             public void GetObjectData(SerializationInfo info, StreamingContext context)
             {
                 info.SetType(typeof(DefaultComparerSerializationHelper));
@@ -3153,4 +3152,11 @@ namespace clojure.lang
 
         #endregion
     }
+
+    public static class RuntimeBootstrapFlag
+    {
+        public static bool _doRTBootstrap = true;
+
+    }
+
 }

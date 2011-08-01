@@ -96,13 +96,6 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         FieldBuilder _metaField;
-        FieldBuilder _varRevField;
-
-        //internal FieldBuilder VarRevField
-        //{
-        //    get { return _varRevField; }
-        //    //set { _varRevField = value; }
-        //}
 
         List<FieldBuilder> _closedOverFields;
         Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;        
@@ -137,7 +130,7 @@ namespace clojure.lang.CljCompiler.Ast
             set { _ctorInfo = value; }
         }
         
-        ConstructorInfo _nonMetaCtorInfo;
+        //ConstructorInfo _nonMetaCtorInfo;
 
         #endregion
 
@@ -740,7 +733,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (SupportsMeta)
             {
-                _nonMetaCtorInfo = GenerateNonMetaConstructor(_typeBuilder, _baseType);
+               /*_nonMetaCtorInfo = */ GenerateNonMetaConstructor(_typeBuilder, _baseType);
             }
             GenerateMetaFunctions(_typeBuilder);
 

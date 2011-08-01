@@ -317,7 +317,8 @@ namespace clojure.lang
 
         #region ISerializable Members
 
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        [System.Security.SecurityCritical]
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("_name",_name);
             info.AddValue("_ns", _ns);

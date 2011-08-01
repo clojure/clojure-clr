@@ -27,7 +27,7 @@ using clojure.lang;
         [SetUp]
         public void Setup()
         {
-            RT_Bootstrap_Flag._doRTBootstrap = false;
+            RuntimeBootstrapFlag._doRTBootstrap = false;
         }
     }
 

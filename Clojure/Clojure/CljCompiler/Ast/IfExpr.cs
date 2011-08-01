@@ -194,6 +194,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public bool CanEmitPrimitive
         {
+
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
             get 
             {
                 try

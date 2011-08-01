@@ -85,6 +85,17 @@ namespace clojure.lang
             _state = state;
         }
 
+        /// <summary>
+        /// Construct an EnumeratorSeq during deserialization.
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="context"></param>
+        protected EnumeratorSeq (SerializationInfo info, StreamingContext context)
+        {
+            throw new SerializationException("Serialization not supported for EnumeratorSeq"); 
+        }
+
+
         #endregion
 
         #region ISeq members
@@ -132,7 +143,8 @@ namespace clojure.lang
 
         #region ISerializable Members
 
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        [System.Security.SecurityCritical]
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             throw new SerializationException("Serialization not supported for EnumeratorSeq");
         }

@@ -26,6 +26,7 @@ namespace clojure.lang
     /// i.e., add/remove etc return new values.</para
     /// <para>See Okasaki, Kahrs, Larsen et al</para>
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentTreeMap : APersistentMap, IObj, Reversible, Sorted, IEnumerable<IMapEntry>, IDictionary
     {

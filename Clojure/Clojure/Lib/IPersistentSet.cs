@@ -41,6 +41,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The value to test for membership in the set.</param>
         /// <returns>the key if the key is in the set, else null.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Get")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         object get(object key);
 

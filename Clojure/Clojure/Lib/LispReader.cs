@@ -19,6 +19,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using System.Runtime.Serialization;
 //using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
@@ -35,7 +36,7 @@ namespace clojure.lang
         static readonly Symbol UNQUOTE = Symbol.intern("clojure.core", "unquote");
         static readonly Symbol UNQUOTE_SPLICING = Symbol.intern("clojure.core", "unquote-splicing");
         static readonly Symbol DEREF = Symbol.intern("clojure.core", "deref");
-        static readonly Symbol META = Symbol.intern("clojure.core", "meta");
+        //static readonly Symbol META = Symbol.intern("clojure.core", "meta");
         static readonly Symbol APPLY = Symbol.intern("clojure.core", "apply");
         static readonly Symbol CONCAT = Symbol.intern("clojure.core", "concat");
         static readonly Symbol HASHMAP = Symbol.intern("clojure.core", "hash-map");
@@ -1273,8 +1274,6 @@ namespace clojure.lang
 
         public sealed class RegexReader : ReaderBase
         {
-            static readonly StringReader stringrdr = new StringReader();
-
             protected override object Read(PushbackTextReader r, char doublequote)
             {
                 StringBuilder sb = new StringBuilder();
@@ -1525,13 +1524,51 @@ namespace clojure.lang
             public int Line
             {
                 get { return _line; }
-            } 
+            }
 
             public ReaderException(int line, Exception e)
                 : base(null, e)
             {
                 _line = line;
             }
+
+            public ReaderException()
+            {
+                _line = -1;
+            }
+
+            public ReaderException(string msg)
+                : base(msg)
+            {
+                _line = -1;
+            }
+
+            public ReaderException(string msg, Exception innerException)
+                : base(msg, innerException)
+            {
+                _line = -1;
+            }
+
+            private ReaderException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+                _line = info.GetInt32("Line");
+            }
+
+            [System.Security.SecurityCritical]
+            public override void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                if (info == null)
+                {
+                    throw new ArgumentNullException("info");
+                }
+                base.GetObjectData(info, context);
+                info.AddValue("Line", this._line, typeof(int));
+            }
+
+ 
+
+
         }
     }
 }

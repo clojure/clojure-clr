@@ -21,6 +21,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements a persistent vector using a specialized form of array-mapped hash trie.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentVector: APersistentVector, IObj, IEditableCollection
     {
@@ -373,6 +374,7 @@ namespace clojure.lang
         /// Gets an empty collection of the same type.
         /// </summary>
         /// <returns>An emtpy collection.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
         public override IPersistentCollection empty()
         {
             return (IPersistentCollection)EMPTY.withMeta(meta());

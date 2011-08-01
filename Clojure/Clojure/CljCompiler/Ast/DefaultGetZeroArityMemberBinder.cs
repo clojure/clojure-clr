@@ -31,7 +31,19 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly DefaultBinder _binder = new DefaultBinder();
+
+        public DefaultBinder Binder
+        {
+            get { return _binder; }
+        }
+
         readonly bool _isStatic;
+
+        public bool IsStatic
+        {
+            get { return _isStatic; }
+        } 
+
 
         #endregion
 

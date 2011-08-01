@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
@@ -254,6 +255,8 @@ namespace clojure.lang
 
             #region C-tors
 
+
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
             public FormatSpecificierChunk(GroupCollection groups)
             {
                 ComputeIndex(groups[(int)FormatGroup.Index]);
@@ -1468,25 +1471,61 @@ namespace clojure.lang
 
     #region Exceptions
 
+    [Serializable]
     public class UnknownFormatFlagsException : ArgumentException
     {
+        public UnknownFormatFlagsException()
+        {
+        }
+
         public UnknownFormatFlagsException(string message)
             : base(message)
         {
         }
+
+        public UnknownFormatFlagsException(String message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        protected UnknownFormatFlagsException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 
+    [Serializable]
     public class IllegalFormatFlagsException : ArgumentException
     {
+        public IllegalFormatFlagsException()
+        {
+        }
+        
         public IllegalFormatFlagsException(string message)
             : base(message)
+        {
+        }
+
+        public IllegalFormatFlagsException(String message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        protected IllegalFormatFlagsException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }
 
 
+    [Serializable]
     public class IllegalFormatConversionException : ArgumentException
     {
+
+        public IllegalFormatConversionException()
+        {
+        }
+
         public IllegalFormatConversionException(string message)
             : base(message)
         {
@@ -1496,10 +1535,25 @@ namespace clojure.lang
             : base(String.Format("Type {0} invalid for conversion {1}",type,c))
         {
         }
+
+        public IllegalFormatConversionException(String message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        protected IllegalFormatConversionException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 
+    [Serializable]
     public class FormatFlagsConversionMismatchException : ArgumentException
     {
+        public FormatFlagsConversionMismatchException()
+        {
+        }
+
         public FormatFlagsConversionMismatchException(string message)
             : base(message)
         {
@@ -1509,27 +1563,72 @@ namespace clojure.lang
             : base(String.Format("Mismatch between flags {0} and conversion character {1}",flags,c))
         {
         }
+    
+        public FormatFlagsConversionMismatchException(String message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        protected FormatFlagsConversionMismatchException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 
 
+    [Serializable]
     public class DuplicateFormatFlagsException : ArgumentException
     {
+        public DuplicateFormatFlagsException()
+        {
+        }
+        
         public DuplicateFormatFlagsException(string message)
             : base(message)
         {
         }
-    }
+    
+        public DuplicateFormatFlagsException(String message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
 
-    public class UnknownFormatConversionException : ArgumentException
-    {
-        public UnknownFormatConversionException(string message)
-            : base(message)
+        protected DuplicateFormatFlagsException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }
 
+    [Serializable]
+    public class UnknownFormatConversionException : ArgumentException
+    {
+        public UnknownFormatConversionException()
+        {
+        }
+        
+        public UnknownFormatConversionException(string message)
+            : base(message)
+        {
+        }
+    
+        public UnknownFormatConversionException(String message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        protected UnknownFormatConversionException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+    }
+
+    [Serializable]
     public class IllegalFormatWidthException : ArgumentException
     {
+        public IllegalFormatWidthException()
+        {
+        }
+
         public IllegalFormatWidthException(string message)
             : base(message)
         {
@@ -1539,18 +1638,48 @@ namespace clojure.lang
             : this (String.Format("Bad format width: {0}",width))
         {
         }
-    }     
     
-    public class MissingFormatWidthException : ArgumentException
-    {
-        public MissingFormatWidthException(string message)
-            : base(message)
+        public IllegalFormatWidthException(String message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        protected IllegalFormatWidthException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }
 
+    [Serializable]
+    public class MissingFormatWidthException : ArgumentException
+    {
+        public MissingFormatWidthException()
+        {
+        }
+
+        public MissingFormatWidthException(string message)
+            : base(message)
+        {
+        }
+    
+        public MissingFormatWidthException(String message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        protected MissingFormatWidthException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+    }
+
+    [Serializable]
     public class IllegalFormatPrecisionException : ArgumentException
     {
+        public IllegalFormatPrecisionException()
+        {
+        }
+
         public IllegalFormatPrecisionException(string message)
             : base(message)
         {
@@ -1560,14 +1689,37 @@ namespace clojure.lang
             : this (String.Format("Bad format precision: {0}",precision))
         {
         }
+    
+        public IllegalFormatPrecisionException(String message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        protected IllegalFormatPrecisionException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 
-
-        public class MissingFormatArgumentException : ArgumentException
+    [Serializable]
+    public class MissingFormatArgumentException : ArgumentException
     {
- 
+        public MissingFormatArgumentException()
+        {
+        }
+
         public MissingFormatArgumentException(string format)
             : base (String.Format("Missing argument for formation specificer: {0}",format))
+        {
+        }
+    
+        public MissingFormatArgumentException(String message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        protected MissingFormatArgumentException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }

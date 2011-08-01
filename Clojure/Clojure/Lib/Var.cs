@@ -471,7 +471,8 @@ namespace clojure.lang
         /// <summary>
         /// Is the var public?
         /// </summary>
-        public bool IsPublic
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public bool isPublic
         {
             get { return !RT.booleanCast(meta().valAt(_privateKey)); }
         }
@@ -928,16 +929,6 @@ namespace clojure.lang
         public Namespace ns
         {
             get { return Namespace; }
-        }
-
-        /// <summary>
-        /// Is this var public?
-        /// </summary>
-        /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public bool isPublic
-        {
-            get { return IsPublic; }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]

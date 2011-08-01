@@ -31,6 +31,8 @@ namespace clojure.lang
     /// </para>
     /// <para>One namespace can also refer to another namespace by an alias.</para>
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229:ImplementSerializationConstructors",Justification="Not needed")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Namespace")]
     [Serializable]
     public class Namespace : AReference, ISerializable
     {
@@ -473,7 +475,8 @@ namespace clojure.lang
 
         #region ISerializable Members
 
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        [System.Security.SecurityCritical]
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.SetType(typeof(NamespaceSerializationHelper));
             info.AddValue("_name",_name);

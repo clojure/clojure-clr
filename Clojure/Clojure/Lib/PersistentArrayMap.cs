@@ -30,6 +30,7 @@ namespace clojure.lang
     /// but you won't be able to distinguish a <value>null</value> value via <see cref="valAt">valAt</see> --
     /// use <see cref="contains">contains</see> or <see cref="entryAt">entryAt</see>.</para>
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentArrayMap : APersistentMap, IObj, IEditableCollection
     {

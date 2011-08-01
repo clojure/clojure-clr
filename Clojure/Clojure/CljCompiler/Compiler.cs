@@ -29,6 +29,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.Scripting.Generation;
 using AstUtils = Microsoft.Scripting.Ast.Utils;
 using System.Text.RegularExpressions;
+using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
@@ -78,7 +79,7 @@ namespace clojure.lang
 
         internal static readonly Symbol ClassSym = Symbol.intern("System.Type");
 
-        internal static readonly Symbol InvokeStaticSym = Symbol.intern("invokeStatic");
+        //internal static readonly Symbol InvokeStaticSym = Symbol.intern("invokeStatic");
 
         #endregion
 
@@ -86,13 +87,13 @@ namespace clojure.lang
 
         static readonly Keyword InlineKeyword = Keyword.intern(null, "inline");
         static readonly Keyword InlineAritiesKeyword = Keyword.intern(null, "inline-arities");
-        internal static readonly Keyword StaticKeyword = Keyword.intern(null, "static");
+        //internal static readonly Keyword StaticKeyword = Keyword.intern(null, "static");
         internal static readonly Keyword ArglistsKeyword = Keyword.intern(null, "arglists");
 
-        static readonly Keyword VolatileKeyword = Keyword.intern(null,"volatile");
+        //static readonly Keyword VolatileKeyword = Keyword.intern(null,"volatile");
         internal static readonly Keyword ImplementsKeyword = Keyword.intern(null,"implements");
         internal static readonly Keyword ProtocolKeyword = Keyword.intern(null,"protocol");
-        static readonly Keyword OnKeyword = Keyword.intern(null, "on");
+        //static readonly Keyword OnKeyword = Keyword.intern(null, "on");
         internal static readonly Keyword DynamicKeyword = Keyword.intern("dynamic");
 
 
@@ -403,14 +404,14 @@ namespace clojure.lang
             // note: ns-qualified vars must already exist
             if (symbol.Namespace != null)
             {
-                Namespace ns = NamespaceFor(n, symbol);
+                Namespace ns = namespaceFor(n, symbol);
                 if (ns == null)
                     throw new Exception("No such namespace: " + symbol.Namespace);
 
                 Var v = ns.FindInternedVar(Symbol.intern(symbol.Name));
                 if (v == null)
                     throw new Exception("No such var: " + symbol);
-                else if (v.Namespace != CurrentNamespace && !v.IsPublic && !allowPrivate)
+                else if (v.Namespace != CurrentNamespace && !v.isPublic && !allowPrivate)
                     throw new InvalidOperationException(string.Format("var: {0} is not public", symbol));
                 return v;
             }
@@ -443,7 +444,7 @@ namespace clojure.lang
             // note: ns-qualified vars must already exist
             if (symbol.Namespace != null)
             {
-                Namespace ns = NamespaceFor(n, symbol);
+                Namespace ns = namespaceFor(n, symbol);
                 if (ns == null)
                     return null;
 
@@ -466,22 +467,22 @@ namespace clojure.lang
             }
         }
 
-        public static Namespace NamespaceFor(Symbol symbol)
-        {
-            return NamespaceFor(CurrentNamespace, symbol);
-        }
+        //public static Namespace NamespaceFor(Symbol symbol)
+        //{
+        //    return NamespaceFor(CurrentNamespace, symbol);
+        //}
 
-        public static Namespace NamespaceFor(Namespace n, Symbol symbol)
-        {
-            // Note: presumes non-nil sym.ns
-            // first check against CurrentNamespace's aliases
-            Symbol nsSym = Symbol.intern(symbol.Namespace);
-            Namespace ns = n.LookupAlias(nsSym);
-            if (ns == null)
-                // otherwise, check the namespaces map
-                ns = Namespace.find(nsSym);
-            return ns;
-        }
+        //public static Namespace NamespaceFor(Namespace n, Symbol symbol)
+        //{
+        //    // Note: presumes non-nil sym.ns
+        //    // first check against CurrentNamespace's aliases
+        //    Symbol nsSym = Symbol.intern(symbol.Namespace);
+        //    Namespace ns = n.LookupAlias(nsSym);
+        //    if (ns == null)
+        //        // otherwise, check the namespaces map
+        //        ns = Namespace.find(nsSym);
+        //    return ns;
+        //}
 
         #endregion
 
@@ -506,7 +507,7 @@ namespace clojure.lang
             // Note: ns-qualified vars in other namespaces must exist already
             if (sym.Namespace != null)
             {
-                Namespace ns = Compiler.NamespaceFor(sym);
+                Namespace ns = Compiler.namespaceFor(sym);
                 if (ns == null)
                     return null;
                 Symbol name = Symbol.intern(sym.Name);
@@ -697,6 +698,7 @@ namespace clojure.lang
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         internal static Type MaybeClrType(ICollection<Expr> exprs)
         {
             Type match = null;
@@ -1029,7 +1031,7 @@ namespace clojure.lang
                 Var v = opAsVar ??  LookupVar(opAsSym, false);
                 if (v != null && v.IsMacro)
                 {
-                    if (v.Namespace != CurrentNamespace && !v.IsPublic)
+                    if (v.Namespace != CurrentNamespace && !v.isPublic)
                         throw new InvalidOperationException(string.Format("Var: {0} is not public", v));
                     return v;
                 }
@@ -1138,7 +1140,7 @@ namespace clojure.lang
 
         internal static bool NamesStaticMember(Symbol sym)
         {
-            return sym.Namespace != null && NamespaceFor(sym) == null;
+            return sym.Namespace != null && namespaceFor(sym) == null;
         }
 
         #endregion
@@ -1385,6 +1387,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         internal static bool LoadAssembly(FileInfo assyInfo)
         {
             Assembly assy = Assembly.LoadFrom(assyInfo.FullName);
@@ -1658,14 +1661,39 @@ namespace clojure.lang
 
         #region CompilerException
 
+        [Serializable]
         public sealed class CompilerException : Exception
         {
+            #region C-tors
+
+            public CompilerException()
+            {
+            }
+
+            public CompilerException(string message)
+                : base(message)
+            {
+            }
+
+            public CompilerException(string message, Exception innerException)
+                :base(message,innerException)
+            {
+            }
 
             public CompilerException(string source, int line, Exception cause)
                 : base(ErrorMsg(source, line, cause.ToString()), cause)
             {
                 Source = source;
             }
+
+            private CompilerException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+            }
+
+            #endregion
+
+            #region Support
 
             public override string ToString()
             {
@@ -1677,6 +1705,7 @@ namespace clojure.lang
                 return string.Format("{0}, compiling: ({1}:{2})", s, source, line);
             }
 
+            #endregion
         }
 
         #endregion

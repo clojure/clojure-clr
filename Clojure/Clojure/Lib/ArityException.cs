@@ -13,10 +13,11 @@
  **/
 
 using System;
+using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
-    public class ArityException : ArgumentException
+    public sealed class ArityException : ArgumentException
     {
         #region Data
 
@@ -32,14 +33,14 @@ namespace clojure.lang
         public string Name
         {
             get { return _name; }
-        } 
+        }
 
         #endregion
 
         #region C-tors
 
         public ArityException(int actual, string name)
-            : this(actual,name,null)
+            : this(actual, name, null)
         {
         }
 
@@ -48,6 +49,45 @@ namespace clojure.lang
         {
             _actual = actual;
             _name = name;
+        }
+
+        public ArityException()
+        {
+            _actual = -1;
+            _name = "<Unknown>";
+        }
+
+        public ArityException(string msg)
+            : base(msg)
+        {
+            _actual = -1;
+            _name = "<Unknown>";
+        }
+
+        public ArityException(string msg, Exception innerException)
+            : base(msg, innerException)
+        {
+            _actual = -1;
+            _name = "<Unknown>";
+        }
+
+        private ArityException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+            _actual = info.GetInt32("Actual");
+            _name = info.GetString("Name");
+        }
+
+        [System.Security.SecurityCritical]
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null)
+            {
+                throw new ArgumentNullException("info");
+            }
+            base.GetObjectData(info, context);
+            info.AddValue("Actual", this._actual, typeof(int));
+            info.AddValue("Name", this._name, typeof(int));
         }
 
         #endregion

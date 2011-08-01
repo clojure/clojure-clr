@@ -15,6 +15,7 @@
 
 using System;
 using System.Threading;
+using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
@@ -48,6 +49,7 @@ namespace clojure.lang
         #region Implementation
 
         // Worker method to execute the task.
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void ComputeFuture(object state)
         {
             try
@@ -149,13 +151,23 @@ namespace clojure.lang
         #endregion
     }
 
+    [Serializable]
     public class FutureAbortedException : Exception
     {
+        #region C-tors
+
         public FutureAbortedException() { }
 
         public FutureAbortedException(string msg) : base(msg) { }
 
         public FutureAbortedException(string msg, Exception inner) : base(msg, inner) { }
+
+        protected FutureAbortedException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        #endregion
     }
 }
 

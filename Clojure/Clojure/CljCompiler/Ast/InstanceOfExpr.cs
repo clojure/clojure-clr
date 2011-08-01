@@ -28,7 +28,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         readonly Expr _expr;
         readonly Type _t;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         readonly string _source;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         readonly IPersistentMap _spanMap;
 
         #endregion

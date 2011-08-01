@@ -34,7 +34,6 @@ namespace clojure.lang.CljCompiler.Ast
         readonly string _source;
         readonly IPersistentMap _spanMap;
         bool _isProtocol = false;
-        bool _isDirect = false;
         int _siteIndex = -1;
         Type _protocolOn;
         MethodInfo _onMethod;

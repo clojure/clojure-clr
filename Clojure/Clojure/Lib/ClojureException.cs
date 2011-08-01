@@ -13,9 +13,11 @@
  **/
 
 using System;
+using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
+    [Serializable]
     public class ClojureException : Exception
     {
         public ClojureException()
@@ -29,6 +31,11 @@ namespace clojure.lang
 
         public ClojureException(string msg, Exception innerException)
             : base(msg, innerException)
+        {
+        }
+
+        protected ClojureException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }

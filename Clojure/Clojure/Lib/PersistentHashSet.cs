@@ -22,6 +22,7 @@ namespace clojure.lang
     /// <summary>
     /// A persistent set built on a <see cref="IPersistentMap">IPersistentMap</see>.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentHashSet: APersistentSet, IObj, IEditableCollection
     {

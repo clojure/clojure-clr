@@ -27,6 +27,7 @@ namespace clojure.lang
     /// as the rear, which is in-order,
     /// so no reversing or suspensions required for persistent use.</para>
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentQueue : Obj, IPersistentList, ICollection, ICollection<Object>, Counted
     {

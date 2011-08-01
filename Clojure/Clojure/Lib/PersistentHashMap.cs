@@ -33,6 +33,7 @@ namespace clojure.lang
     /// <para>No sub-tree pools or root-resizing</para>
     /// <para>Any errors are Rich Hickey's (so he says), except those that I introduced.</para>
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentHashMap: APersistentMap, IEditableCollection, IObj
     {

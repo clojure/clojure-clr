@@ -31,7 +31,10 @@ namespace clojure.lang.CljCompiler.Ast
         protected readonly Type _targetType;
         protected readonly TInfo _tinfo;
         protected readonly string _fieldName;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         protected readonly string _source;
+        
         protected readonly IPersistentMap _spanMap;
         protected readonly Symbol _tag;
 

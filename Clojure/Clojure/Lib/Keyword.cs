@@ -21,6 +21,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents a keyword
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229:ImplementSerializationConstructors", Justification = "Not needed")]
     [Serializable]
     public sealed class Keyword: AFn, Named, IComparable, ISerializable // ??JAVA only used IFn, not AFn.  NOt sure why.
     {
@@ -253,8 +254,8 @@ namespace clojure.lang
 
         #region ISerializable Members
 
-        [SecurityPermissionAttribute(SecurityAction.LinkDemand,
-            Flags = SecurityPermissionFlag.SerializationFormatter)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2135:SecurityRuleSetLevel2MethodsShouldNotBeProtectedWithLinkDemandsFxCopRule")]
+        [System.Security.SecurityCritical]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             // Instead of serializing the keyword,
