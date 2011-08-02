@@ -14,14 +14,26 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System;
+using System.Runtime.Serialization;
 
 namespace clojure.runtime
 {
     /// <summary>
     /// Implements part of the functionaligy of java.util.Properties.
     /// </summary>
+    [Serializable]
     public class Properties : Dictionary<string,string>
     {
+
+        public Properties()
+        {
+        }
+
+        public Properties(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]

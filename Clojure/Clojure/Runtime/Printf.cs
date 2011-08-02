@@ -535,7 +535,7 @@ namespace clojure.lang
                 PrintWithJustification(sb, "%");
             }
 
-            private void PrintLineSeparator(StringBuilder sb, object arg)
+            private static void PrintLineSeparator(StringBuilder sb, object arg)
             {
                 sb.Append('\n');
             }
@@ -645,6 +645,7 @@ namespace clojure.lang
 
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
             private void PrintDecimal(StringBuilder sb, decimal p)
             {
                 throw new NotImplementedException();

@@ -365,7 +365,7 @@ namespace clojure.lang
         /// Get a commit point value.
         /// </summary>
         /// <returns></returns>
-        long GetCommitPoint()
+        static long GetCommitPoint()
         {
             return _lastPoint.incrementAndGet();
         }

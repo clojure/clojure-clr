@@ -312,7 +312,7 @@ namespace clojure.lang
                     if (i == index)
                         return seq.first();
                 }
-                throw new ArgumentOutOfRangeException("Index out of ranges");
+                throw new ArgumentOutOfRangeException("index");
             }
             set
             {
@@ -327,16 +327,16 @@ namespace clojure.lang
         public void CopyTo(object[] array, int index)
         {
             if (array == null)
-                throw new ArgumentException("Array cannot be null.");
-
-            if (array.Length - index < count())
-                throw new ArgumentException("The number of elements in source is greater than the available space in the array.)");
+                throw new ArgumentNullException("array");
 
             if (array.Rank != 1)
-                throw new ArgumentException("Array must be 1-dimensional.");
+                throw new ArgumentException("Array must be 1-dimensional");
 
             if (index < 0)
-                throw new ArgumentOutOfRangeException("Index cannot be negative.");
+                throw new ArgumentOutOfRangeException("index", "must be non-egative");
+
+            if (array.Length - index < count())
+                throw new InvalidOperationException("The number of elements in source is greater than the available space in the array)");
 
             ISeq s = seq();
             for (int i = index; i < array.Length && s != null; ++i, s = s.next())
@@ -351,16 +351,16 @@ namespace clojure.lang
         public void CopyTo(Array array, int index)
         {
             if (array == null)
-                throw new ArgumentException("Array cannot be null.");
-
-            if (array.Length - index < count())
-                throw new ArgumentException("The number of elements in source is greater than the available space in the array.)");
-
-            if (array.Rank != 1)
-                throw new ArgumentException("Array must be 1-dimensional.");
+                throw new ArgumentNullException("array");
 
             if (index < 0)
-                throw new ArgumentOutOfRangeException("Index cannot be negative.");
+                throw new ArgumentOutOfRangeException("index", "Must be non-negative");
+
+            if (array.Rank != 1)
+                throw new ArgumentException("must be 1-dimensional","array");
+
+            if (array.Length - index < count())
+                throw new InvalidOperationException("The number of elements in source is greater than the available space in the array");
 
             ISeq s = seq();
             for (int i = index; i < array.Length && s != null; ++i, s = s.next())

@@ -16,7 +16,7 @@ using System;
 
 namespace clojure.lang
 {
-    public class Numbers
+    public static class Numbers
     {
         #region Ops interface
 

@@ -490,7 +490,7 @@ namespace clojure.lang
         /// representation of <paramref name="rem"/></param>
         /// <param name="leadingZeros">Whether or not to pad with the leading zeros if the value is not large enough to fill the buffer</param>
         /// <remarks>Pretty much identical to DLR BigInteger.AppendRadix</remarks>
-        private void AppendDigit(StringBuilder sb, uint rem, uint radix, char[] charBuf, bool leadingZeros)
+        private static void AppendDigit(StringBuilder sb, uint rem, uint radix, char[] charBuf, bool leadingZeros)
         {
             const string symbols = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -1146,7 +1146,7 @@ namespace clojure.lang
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns>The greatest common divisor</returns>
-        private BigInteger Gcd(BigInteger x, BigInteger y)
+        private static BigInteger Gcd(BigInteger x, BigInteger y)
         {
             return x.Gcd(y);
         }
@@ -2030,7 +2030,7 @@ namespace clojure.lang
         public BigInteger Power(int exp)
         {
             if (exp < 0)
-                throw new ArgumentOutOfRangeException("Exponent must be non-negative");
+                throw new ArgumentOutOfRangeException("exp","Exponent must be non-negative");
 
             if (exp == 0)
                 return ONE;
@@ -2064,7 +2064,7 @@ namespace clojure.lang
         {
             // TODO: Look at Java implementation for a more efficient version
             if (power < 0)
-                throw new ArgumentOutOfRangeException("Power must be non-negative");
+                throw new ArgumentOutOfRangeException("power","must be non-negative");
 
             if (power._sign == 0)
                 return ONE;
@@ -2987,7 +2987,7 @@ namespace clojure.lang
         /// <param name="xs"></param>
         /// <param name="ys"></param>
         /// <returns></returns>
-        private uint[] Multiply(uint[] xs, uint[] ys)
+        private static uint[] Multiply(uint[] xs, uint[] ys)
         {
             int xlen = xs.Length;
             int ylen = ys.Length;

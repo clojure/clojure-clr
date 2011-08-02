@@ -246,7 +246,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Numeric conversion calculations
 
 
-        internal bool WideningIntegerConversion(Type fromType, Type toType)
+        internal static bool WideningIntegerConversion(Type fromType, Type toType)
         {
             TypeCode fromTC = Type.GetTypeCode(fromType);
             TypeCode toTC = Type.GetTypeCode(toType);

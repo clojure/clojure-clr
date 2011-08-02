@@ -149,9 +149,9 @@ namespace clojure.lang
             public static readonly Context Decimal128 = new Context(34, RoundingMode.HalfEven);
             public static readonly Context Unlimited = new Context(0,RoundingMode.HalfUp);
 
-            public Context BasicDefault() { return BASIC_DEFAULT; }
+            public static Context BasicDefault() { return BASIC_DEFAULT; }
 
-            public Context ExtendedDefault(uint precision)
+            public static Context ExtendedDefault(uint precision)
             {
                 return new Context(precision, RoundingMode.HalfEven);
             }
@@ -196,6 +196,7 @@ namespace clojure.lang
 
             #endregion
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
             public bool RoundingNeeded(BigInteger bi)
             {
                 // TODO: Really

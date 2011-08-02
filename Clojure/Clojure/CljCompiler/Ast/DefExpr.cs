@@ -223,7 +223,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Misc
 
-        private bool IncludesExplicitMetadata(MapExpr expr) {
+        private static bool IncludesExplicitMetadata(MapExpr expr) {
         for(int i=0; i < expr.KeyVals.count(); i += 2)
             {
                 Keyword k = ((KeywordExpr)expr.KeyVals.nth(i)).Kw;

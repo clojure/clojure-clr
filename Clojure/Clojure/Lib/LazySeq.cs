@@ -251,13 +251,13 @@ namespace clojure.lang
             get
             {
                 if (index < 0)
-                    throw new ArgumentOutOfRangeException("Index must be non-negative.");
+                    throw new ArgumentOutOfRangeException("index","Index must be non-negative.");
 
                 ISeq s = seq();
                 for (int i = 0; s != null; s = s.next(), i++)
                     if (i == index)
                         return s.first();
-                throw new ArgumentOutOfRangeException("Index past end of sequence.");
+                throw new ArgumentOutOfRangeException("index", "Index past end of sequence.");
             }
             set
             {
@@ -272,15 +272,15 @@ namespace clojure.lang
         public void CopyTo(object[] array, int index)
         {
             if (array == null)
-                throw new ArgumentNullException("Array must not be null");
+                throw new ArgumentNullException("array");
             if (index < 0)
-                throw new ArgumentOutOfRangeException("Index must be non-negative.");
+                throw new ArgumentOutOfRangeException("index", "must be non-negative.");
             if (array.Rank > 1)
-                throw new ArgumentException("Array must not be multidimensional.");
+                throw new ArgumentException("must not be multidimensional","array" );
             if (index >= array.Length)
-                throw new ArgumentException("Index must be less than the length of the array.");
+                throw new ArgumentException("must be less than the length", "index");
             if (count() > array.Length - index)
-                throw new ArgumentException("Not enough available space from index to end of the array.");
+                throw new InvalidOperationException("Not enough available space from index to end of the array.");
 
             ISeq s = seq();
             for (int i = index; s != null; ++i, s = s.next())
@@ -290,15 +290,15 @@ namespace clojure.lang
         public void CopyTo(Array array, int index)
         {
             if (array == null)
-                throw new ArgumentNullException("Array must not be null");
+                throw new ArgumentNullException("array");
             if (index < 0)
-                throw new ArgumentOutOfRangeException("Index must be non-negative.");
+                throw new ArgumentOutOfRangeException("index","must be non-negative.");
             if (array.Rank > 1)
-                throw new ArgumentException("Array must not be multidimensional.");
+                throw new ArgumentException("must not be multidimensional.", "array");
             if (index >= array.Length)
-                throw new ArgumentException("Index must be less than the length of the array.");
+                throw new ArgumentException("must be less than the length", "index");
             if (count() > array.Length - index)
-                throw new ArgumentException("Not enough available space from index to end of the array.");
+                throw new InvalidOperationException("Not enough available space from index to end of the array.");
 
             ISeq s = seq();
             for (int i = index; s != null; ++i, s = s.next())

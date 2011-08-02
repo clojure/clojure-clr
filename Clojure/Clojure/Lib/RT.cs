@@ -499,6 +499,7 @@ namespace clojure.lang
 
         #region Initialization
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static RT()
         {
 
@@ -2836,6 +2837,7 @@ namespace clojure.lang
             #region core.clj compatibility
 
             //  Somewhere, there is an explicit call to compare
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
             public int compare(object x, object y)
             {
                 return Util.compare(x, y);  // was ((IComparable)x).CompareTo(y);-- changed in Java rev 1145

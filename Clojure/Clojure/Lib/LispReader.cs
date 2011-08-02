@@ -27,7 +27,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements the Lisp reader, a marvel to behold.
     /// </summary>
-    public class LispReader
+    public static class LispReader
     {
         #region Symbol definitions
 
@@ -72,6 +72,7 @@ namespace clojure.lang
         static IFn[] _macros = new IFn[256];
         static IFn[] _dispatchMacros = new IFn[256];
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static LispReader()
         {
             _macros['"'] = new StringReader();
@@ -761,20 +762,20 @@ namespace clojure.lang
                 {
                     char c = (char)readUnicodeChar(token, 1, 4, 16);
                     if (c >= '\uD800' && c <= '\uDFFF') // surrogate code unit?
-                        throw new ArgumentException("Invalid character constant: \\u" + ((int)c).ToString("X"));
+                        throw new InvalidOperationException("Invalid character constant: \\u" + ((int)c).ToString("X"));
                     return c;
                 }
                 else if (token.StartsWith("o"))
                 {
                     int len = token.Length - 1;
                     if (len > 3)
-                        throw new Exception("Invalid octal escape sequence length: " + len);
+                        throw new InvalidOperationException("Invalid octal escape sequence length: " + len);
                     int uc = readUnicodeChar(token, 1, len, 8);
                     if (uc > 255) //octal377
-                        throw new Exception("Octal escape sequence must be in range [0, 377].");
+                        throw new InvalidOperationException("Octal escape sequence must be in range [0, 377].");
                     return (char)uc;
                 }
-                throw new Exception("Unsupported character: \\" + token);
+                throw new InvalidOperationException("Unsupported character: \\" + token);
             }
         }
 
@@ -817,7 +818,7 @@ namespace clojure.lang
                             case 'u':
                                 ch = r.Read();
                                 if (CharValueInRadix(ch, 16) == -1)
-                                    throw new ArgumentOutOfRangeException("ch","Invalid unicode escape: \\u" + (char)ch);
+                                    throw new InvalidOperationException("Invalid unicode escape: \\u" + (char)ch);
                                 ch = readUnicodeChar((PushbackTextReader)r, ch, 16, 4, true);
                                 break;
                             default:
@@ -826,10 +827,10 @@ namespace clojure.lang
                                     {
                                         ch = readUnicodeChar((PushbackTextReader)r, ch, 8, 3, false);
                                         if (ch > 255) //octal377
-                                            throw new ArgumentOutOfRangeException("ch","Octal escape sequence must be in range [0, 377].");
+                                            throw new InvalidOperationException("Octal escape sequence must be in range [0, 377].");
                                     }
                                     else
-                                        throw new ArgumentException("Unsupported escape character: \\" + (char)ch);
+                                        throw new InvalidOperationException("Unsupported escape character: \\" + (char)ch);
                                 }
                                 break;
                         }
@@ -1440,10 +1441,10 @@ namespace clojure.lang
                     {
                         return ((IFn)v).applyTo(RT.next(o));
                     }
-                    throw new Exception("Can't resolve " + fs);
+                    throw new InvalidOperationException("Can't resolve " + fs);
                 }
                 else
-                    throw new ArgumentException("Unsupported #= form");
+                    throw new InvalidOperationException("Unsupported #= form");
             }
         }
 
@@ -1517,6 +1518,7 @@ namespace clojure.lang
             }
         }
 
+        [Serializable]
         public sealed class ReaderException : Exception
         {
             readonly int _line;

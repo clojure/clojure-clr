@@ -436,10 +436,10 @@ namespace clojure.lang
         public void CopyTo(object[] array, int arrayIndex)
         {
             if (array == null)
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("array");
 
             if (arrayIndex < 0)
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException("arrayIndex","must be non-negative");
 
 
             int cnt = count();
@@ -447,8 +447,11 @@ namespace clojure.lang
             if (cnt == 0)
                 return;
 
-            if (arrayIndex >= array.Length || array.Length - arrayIndex < cnt)
-                throw new ArgumentException();
+            if (arrayIndex >= array.Length)
+                throw new ArgumentOutOfRangeException("arrayIndex", "is past the end");
+
+            if (arrayIndex >= array.Length )
+                throw new InvalidOperationException("Not enough room in array");
 
             for (int i = 0; i < cnt; i++)
                 array[i + arrayIndex] = nth(i);
@@ -457,21 +460,24 @@ namespace clojure.lang
         public void CopyTo(Array array, int index)
         {
             if (array == null)
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("array");
 
             if (index < 0)
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException("index","Must be non-negative");
 
             if (array.Rank > 1)
-                throw new ArgumentException("array must be 1-dimensional");
+                throw new ArgumentException("must be 1-dimensional","array" );
 
             int cnt = count();
 
             if (cnt == 0)
                 return;
 
-            if (index >= array.Length || array.Length - index < cnt)
-                throw new ArgumentException();
+            if (index >= array.Length)
+                throw new ArgumentOutOfRangeException("index","must be in array");
+
+            if ( array.Length - index < cnt)
+                throw new InvalidOperationException("Not enough room in array");
 
             for (int i = 0; i < cnt; i++)
                 array.SetValue(nth(i), i + index);

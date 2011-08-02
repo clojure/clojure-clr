@@ -392,7 +392,7 @@ namespace clojure.lang.CljCompiler.Ast
             return condCode;
         }
 
-        private Expression GenResult(ObjExpr objx, GenContext context, Expr expr, bool genUnboxed, Type retType)
+        private static Expression GenResult(ObjExpr objx, GenContext context, Expr expr, bool genUnboxed, Type retType)
         {
             MaybePrimitiveExpr mbExpr = expr as MaybePrimitiveExpr;
             Expression result = genUnboxed && mbExpr != null

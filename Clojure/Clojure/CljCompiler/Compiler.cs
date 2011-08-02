@@ -305,6 +305,7 @@ namespace clojure.lang
 
         #region C-tors & factory methods
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static Compiler()
         {
             for (int i = 0; i <= Compiler.MaxPositionalArity; i++)
@@ -1627,7 +1628,7 @@ namespace clojure.lang
 
                 object op = RT.first(form);
                 if (op == null)
-                    throw new ArgumentNullException("Can't call nil");
+                    throw new ArgumentNullException("form","Can't call nil");
 
                 IFn inline = IsInline(op, RT.count(RT.next(form)));
 

@@ -433,7 +433,7 @@ namespace clojure.lang.CljCompiler.Ast
             tb.DefineMethodOverride(mb, mi);            
         }
 
-        private string ExplicitMethodName(MethodInfo mi)
+        private static string ExplicitMethodName(MethodInfo mi)
         {
             return mi.DeclaringType.Name + "." + mi.Name;
         }

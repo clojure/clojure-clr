@@ -399,7 +399,7 @@ namespace clojure.lang.CljCompiler.Ast
                 _metaField = baseTB.DefineField("__meta", typeof(IPersistentMap), FieldAttributes.Public | FieldAttributes.InitOnly);
 
             GenerateClosedOverFields(baseTB);
-            GenerateVarCallsites(baseTB);
+            //GenerateVarCallsites(baseTB);
             //GenerateCachedVarFields(baseTB);
             GenerateKeywordCallsites(baseTB);
             GenerateSwapThunk(baseTB);
@@ -431,7 +431,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        private string ConstantName(int i)
+        private static string ConstantName(int i)
         {
             return CONST_PREFIX + i;
         }
@@ -499,14 +499,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Generating VarCallSites
 
-        private void GenerateVarCallsites(TypeBuilder baseTB)
-        {
-            //for (int i = 0; i < _varCallsites.count(); i++)
-            //{
-            //    string fieldName = VarCallsiteName(i);
-            //    FieldBuilder fb = baseTB.DefineField(fieldName, typeof(IFn), FieldAttributes.FamORAssem | FieldAttributes.Static);
-            //}
-        }
+        //private void GenerateVarCallsites(TypeBuilder baseTB)
+        //{
+        //    //for (int i = 0; i < _varCallsites.count(); i++)
+        //    //{
+        //    //    string fieldName = VarCallsiteName(i);
+        //    //    FieldBuilder fb = baseTB.DefineField(fieldName, typeof(IFn), FieldAttributes.FamORAssem | FieldAttributes.Static);
+        //    //}
+        //}
 
         //private void GenerateCachedVarFields(TypeBuilder baseTB)
         //{
@@ -532,7 +532,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         //}
 
-        public String VarCallsiteName(int n)
+        public static String VarCallsiteName(int n)
         {
             return "__var__callsite__" + n;
         }
@@ -560,27 +560,27 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        String SiteName(int n)
+        static String SiteName(int n)
         {
             return "__site__" + n;
         }
 
-        public String SiteNameStatic(int n)
+        public static String SiteNameStatic(int n)
         {
             return SiteName(n) + "__";
         }
 
-        String ThunkName(int n)
+        static String ThunkName(int n)
         {
             return "__thunk__" + n;
         }
 
-        public String ThunkNameStatic(int n)
+        public static String ThunkNameStatic(int n)
         {
             return ThunkName(n) + "__";
         }
 
-        string CachedVarName(int n)
+        static string CachedVarName(int n)
         {
             return "__cached_var__" + n;
         }
@@ -660,7 +660,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Generating base class c-tor
 
-        private void GenerateBaseClassConstructor(Type superType, TypeBuilder baseTB)
+        private static void GenerateBaseClassConstructor(Type superType, TypeBuilder baseTB)
         {
             ConstructorInfo ci = superType.GetConstructor(Type.EmptyTypes);
 
@@ -755,12 +755,12 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
                 MethodBuilder method1 = GenerateConstants(fnTB, baseType, isDebuggable);
-                MethodBuilder method2 = GenerateVarCallsiteInits(fnTB, baseType, isDebuggable);
+                //MethodBuilder method2 = GenerateVarCallsiteInits(fnTB, baseType, isDebuggable);
                 MethodBuilder method3 = GenerateKeywordCallsiteInit(fnTB, baseType, isDebuggable);
                 ILGen gen = new ILGen(cb.GetILGenerator());
                 gen.EmitCall(method1);       // gen.Emit(OpCodes.Call, method1);
-                if (method2 != null)
-                    gen.EmitCall(method2);
+                //if (method2 != null)
+                //    gen.EmitCall(method2);
                 if (method3 != null)
                     gen.EmitCall(method3);
                 gen.Emit(OpCodes.Ret);
@@ -1071,43 +1071,43 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region  Generating other initializers
 
-        private MethodBuilder GenerateVarCallsiteInits(TypeBuilder fnTB, Type baseType, bool isDebuggable)
-        {
-            return null;
-            //if (_varCallsites.count() == 0)
-            //    return null;
+        //private MethodBuilder GenerateVarCallsiteInits(TypeBuilder fnTB, Type baseType, bool isDebuggable)
+        //{
+        //    return null;
+        //    //if (_varCallsites.count() == 0)
+        //    //    return null;
 
-            //List<Expression> inits = new List<Expression>();
-            //for (int i = 0; i < _varCallsites.count(); i++)
-            //{
-            //    Var v = (Var)_varCallsites.nth(i);
-            //    ParameterExpression varTemp = Expression.Parameter(typeof(Var), "varTemp");
-            //    ParameterExpression valTemp = Expression.Parameter(typeof(Object), "valTemp");
+        //    //List<Expression> inits = new List<Expression>();
+        //    //for (int i = 0; i < _varCallsites.count(); i++)
+        //    //{
+        //    //    Var v = (Var)_varCallsites.nth(i);
+        //    //    ParameterExpression varTemp = Expression.Parameter(typeof(Var), "varTemp");
+        //    //    ParameterExpression valTemp = Expression.Parameter(typeof(Object), "valTemp");
 
-            //    Expression block = Expression.Block(
-            //        new ParameterExpression[] { varTemp },
-            //         Expression.Assign(
-            //            varTemp,
-            //            Expression.Call(null, Compiler.Method_RT_var2, Expression.Constant(v.Namespace.Name.Name), Expression.Constant(v.Symbol.Name))),
-            //        Expression.IfThen(
-            //            Expression.Call(varTemp, Compiler.Method_Var_hasRoot),
-            //            Expression.Block(
-            //                new ParameterExpression[] { valTemp },
-            //                Expression.Assign(valTemp, Expression.Call(varTemp, Compiler.Method_Var_getRoot)),
-            //                Expression.IfThen(
-            //                    Expression.TypeIs(valTemp, typeof(AFunction)),
-            //                    Expression.Assign(
-            //                        Expression.Field(null, _baseType, VarCallsiteName(i)),
-            //                        Expression.Convert(valTemp, typeof(IFn)))))));
-            //    inits.Add(block);
-            //}
+        //    //    Expression block = Expression.Block(
+        //    //        new ParameterExpression[] { varTemp },
+        //    //         Expression.Assign(
+        //    //            varTemp,
+        //    //            Expression.Call(null, Compiler.Method_RT_var2, Expression.Constant(v.Namespace.Name.Name), Expression.Constant(v.Symbol.Name))),
+        //    //        Expression.IfThen(
+        //    //            Expression.Call(varTemp, Compiler.Method_Var_hasRoot),
+        //    //            Expression.Block(
+        //    //                new ParameterExpression[] { valTemp },
+        //    //                Expression.Assign(valTemp, Expression.Call(varTemp, Compiler.Method_Var_getRoot)),
+        //    //                Expression.IfThen(
+        //    //                    Expression.TypeIs(valTemp, typeof(AFunction)),
+        //    //                    Expression.Assign(
+        //    //                        Expression.Field(null, _baseType, VarCallsiteName(i)),
+        //    //                        Expression.Convert(valTemp, typeof(IFn)))))));
+        //    //    inits.Add(block);
+        //    //}
 
-            //Expression allInits = Expression.Block(inits);
-            //LambdaExpression lambda = Expression.Lambda(allInits);
-            //MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_callsites", MethodAttributes.Private | MethodAttributes.Static);
-            //lambda.CompileToMethod(methodBuilder, isDebuggable);
-            //return methodBuilder;
-        }
+        //    //Expression allInits = Expression.Block(inits);
+        //    //LambdaExpression lambda = Expression.Lambda(allInits);
+        //    //MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_callsites", MethodAttributes.Private | MethodAttributes.Static);
+        //    //lambda.CompileToMethod(methodBuilder, isDebuggable);
+        //    //return methodBuilder;
+        //}
 
 
         private MethodBuilder GenerateKeywordCallsiteInit(TypeBuilder fnTB, Type baseType, bool isDebuggable)
@@ -1420,7 +1420,7 @@ namespace clojure.lang.CljCompiler.Ast
             return GenConstant(context, i, kw);
         }
 
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         internal Expression GenLetFnInits(GenContext context, ParameterExpression parm, FnExpr fn, IPersistentSet leFnLocals)
         {
             // TODO: Implement this!!!!!!!!!!!!!!!!

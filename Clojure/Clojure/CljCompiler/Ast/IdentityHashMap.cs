@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace clojure.lang.CljCompiler.Ast
 {
+    [Serializable]
     public class IdentityHashMap : Dictionary<Object,int>
     {
         class RefCmp : IEqualityComparer<Object>
@@ -24,6 +26,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         public IdentityHashMap()
             : base(new RefCmp())
+        {
+        }
+
+        public IdentityHashMap(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }

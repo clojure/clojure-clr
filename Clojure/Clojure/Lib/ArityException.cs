@@ -17,6 +17,7 @@ using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
+    [Serializable]
     public sealed class ArityException : ArgumentException
     {
         #region Data
