@@ -14,6 +14,7 @@
 
 using System;
 using System.Text;
+using System.Globalization;
 
 
 namespace clojure.lang
@@ -29,10 +30,10 @@ namespace clojure.lang
     /// of functionality for ClojureCLR.</para>
     /// <para>Because of this, as in j.m.BigDecimal, the implementation is closest to the X3.274 subset described in Appendix A
     /// of the GDAS: infinite values, NaNs, subnormal values and negative zero are not represented, and most conditions throw exceptions. 
-    /// Exponent limits in the context are not implemented, except a limit to the range of an Int3w. 
+    /// Exponent limits in the context are not implemented, except a limit to the range of an Int32. 
     /// However, we do not do "conversion to shorter" for arith ops.</para>
     /// <para>It is our long term intention to convert this to a complete implementation of the standard.</para>
-    /// <para>The representation is an arbitrary precision integer (the signed coefficient,also called the unscaled value) 
+    /// <para>The representation is an arbitrary precision integer (the signed coefficient, also called the unscaled value) 
     /// and an exponent.  The exponent is limited to the range of an Int32. 
     /// The value of a BigDecimal representation is <c>coefficient * 10^exponent</c>. </para>
     /// <para> Note: the representation in the GDAS is
@@ -108,7 +109,7 @@ namespace clojure.lang
         #region Context
 
         [Serializable]
-        public struct Context
+        public struct Context : IEquatable<Context>
         {
             #region Data
 
@@ -143,11 +144,11 @@ namespace clojure.lang
 
             #region C-tors and factory methods
 
-            static readonly Context BASIC_DEFAULT = new Context(9,RoundingMode.HalfUp);
+            static readonly Context BASIC_DEFAULT = new Context(9, RoundingMode.HalfUp);
             public static readonly Context Decimal32 = new Context(7, RoundingMode.HalfEven);
             public static readonly Context Decimal64 = new Context(16, RoundingMode.HalfEven);
             public static readonly Context Decimal128 = new Context(34, RoundingMode.HalfEven);
-            public static readonly Context Unlimited = new Context(0,RoundingMode.HalfUp);
+            public static readonly Context Unlimited = new Context(0, RoundingMode.HalfUp);
 
             public static Context BasicDefault() { return BASIC_DEFAULT; }
 
@@ -155,7 +156,7 @@ namespace clojure.lang
             {
                 return new Context(precision, RoundingMode.HalfEven);
             }
-            
+
             public Context(uint precision, RoundingMode mode)
             {
                 if (precision < 0)
@@ -176,12 +177,26 @@ namespace clojure.lang
 
             public override bool Equals(object obj)
             {
-                Context c;
                 if (!(obj is Context))
                     return false;
 
-                c = (Context)obj;
-                return c._precision == _precision && c._roundingMode == _roundingMode;
+                return Equals((Context)obj);
+            }
+
+            public static bool operator ==(Context c1, Context c2)
+            {
+                if ( ReferenceEquals(c1,c2) )
+                    return true;
+
+                if (((object)c1 == null) || ((object)c2 == null))
+                    return false;
+
+                return c1.Equals(c2);
+            }
+
+            public static bool operator !=(Context c1, Context c2)
+            {
+                return !(c1 == c2);
             }
 
             public override int GetHashCode()
@@ -191,10 +206,12 @@ namespace clojure.lang
 
             public override string ToString()
             {
-                return String.Format("precision={0} roundingMode={1}", _precision, _roundingMode);
+                return String.Format(CultureInfo.CurrentCulture,"precision={0} roundingMode={1}", _precision, _roundingMode);
             }
 
             #endregion
+
+            #region other
 
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
             public bool RoundingNeeded(BigInteger bi)
@@ -202,6 +219,18 @@ namespace clojure.lang
                 // TODO: Really
                 return true;
             }
+
+            #endregion
+
+            #region IEquatable<Context> methods
+
+            public bool Equals(Context other)
+            {
+                return other._precision == _precision && other._roundingMode == _roundingMode;
+
+            }
+
+            #endregion
         }
 
         #endregion
@@ -256,20 +285,25 @@ namespace clojure.lang
                 return _precision; 
         }
 
+
+        private static readonly BigDecimal _zero = new BigDecimal(BigInteger.Zero, 0, 1);
+        private static readonly BigDecimal _one = new BigDecimal(BigInteger.One, 0, 1);
+        private static readonly BigDecimal _ten = new BigDecimal(BigInteger.Ten, 0, 2);
+
         /// <summary>
         /// A BigDecimal representation of zero with precision 1.
         /// </summary>
-        public static BigDecimal ZERO = new BigDecimal(BigInteger.ZERO,0,1);
+        public static BigDecimal Zero { get { return _zero; } }
 
         /// <summary>
         /// A BigDecimal representation of one.
         /// </summary>
-        public static BigDecimal ONE = new BigDecimal(BigInteger.ONE,0,1);
+        public static BigDecimal One { get { return _one; } }
 
         /// <summary>
         /// A BigDecimal representation of ten.
         /// </summary>
-        public static BigDecimal TEN = new BigDecimal(BigInteger.TEN,0,2);
+        public static BigDecimal Ten { get { return _ten; } }
 
         #endregion
 
@@ -303,9 +337,9 @@ namespace clojure.lang
             if (significand == 0)
             {
                 if (biasedExp == 0)
-                    return new BigDecimal(BigInteger.ZERO, 0, 1);
+                    return new BigDecimal(BigInteger.Zero, 0, 1);
 
-                coeff = v < 0.0 ? BigInteger.NEGATIVE_ONE : BigInteger.ONE;
+                coeff = v < 0.0 ? BigInteger.NegativeOne : BigInteger.One;
                 leftShift = biasedExp - BigInteger.DoubleExponentBias;
             }
             else
@@ -323,7 +357,7 @@ namespace clojure.lang
             int expToUse = 0;
             if (leftShift < 0)
             {
-                coeff = coeff.Multiply(BigInteger.FIVE.Power(-leftShift));
+                coeff = coeff.Multiply(BigInteger.Five.Power(-leftShift));
                 expToUse = leftShift;
             }
             else if (leftShift > 0)
@@ -436,7 +470,7 @@ namespace clojure.lang
 
             bool isZero = data[0] == 0U && data[1] == 0U && data[2] == 0U;
 
-            BigInteger coeff = isZero ? BigInteger.ZERO : new BigInteger(sign, data);
+            BigInteger coeff = isZero ? BigInteger.Zero : new BigInteger(sign, data);
 
             return new BigDecimal(coeff, -exp);
         }
@@ -718,6 +752,7 @@ namespace clojure.lang
         /// <remarks> Ugly. We could use a RegEx, but trying to avoid unnecessary allocation, I guess.
         /// [+-]?\d*(\.\d*)?([Ee][+-]?\d+)?  with additional constraint that one of the two d* must have at least one char.
         ///</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.Int32.Parse(System.String)")]
         private static bool DoParse(char[] buf, int offset, int len, bool throwOnError, out BigDecimal v)
         {
             v = null;
@@ -882,6 +917,7 @@ namespace clojure.lang
         /// Create the canonical string representation for a BigDecimal.
         /// </summary>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.Int64.ToString")]
         public string ToScientificString()
         {
             StringBuilder sb = new StringBuilder(_coeff.ToString());
@@ -1059,7 +1095,7 @@ namespace clojure.lang
 
         public object ToType(Type conversionType, IFormatProvider provider)
         {
-            return Convert.ChangeType(ToDouble(provider), conversionType);
+            return Convert.ChangeType(ToDouble(provider), conversionType, provider);
         }
 
         public ushort ToUInt16(IFormatProvider provider)
@@ -1085,6 +1121,33 @@ namespace clojure.lang
         #endregion
 
         #region Arithmetic operators
+
+        public static bool operator ==(BigDecimal x, BigDecimal y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+
+            if (((object)x == null) || ((object)y == null))
+                return false; 
+
+            return x.Equals(y);
+        }
+
+        public static bool operator !=(BigDecimal x, BigDecimal y)
+        {
+            return !(x == y);
+        }
+
+        public static bool operator <(BigDecimal x, BigDecimal y)
+        {
+            return x.CompareTo(y) < 0;
+        }
+
+        public static bool operator >(BigDecimal x, BigDecimal y)
+        {
+            return x.CompareTo(y) > 0;
+        }
+
 
         /// <summary>
         /// Compute <paramref name="x"/> + <paramref name="y"/>.
@@ -1207,7 +1270,7 @@ namespace clojure.lang
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns>The negation</returns>
-        private static BigDecimal Negate(BigDecimal x)
+        public static BigDecimal Negate(BigDecimal x)
         {
             return x.Negate();
         }
@@ -1218,7 +1281,7 @@ namespace clojure.lang
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns>The negation</returns>
-        private static BigDecimal Negate(BigDecimal x, Context c)
+        public static BigDecimal Negate(BigDecimal x, Context c)
         {
             return x.Negate(c);
         }
@@ -1554,7 +1617,7 @@ namespace clojure.lang
                               Int32.MinValue);
 
             if ( dividend._coeff.IsZero )  // 0/y
-                return new BigDecimal(BigInteger.ZERO,preferredExp);
+                return new BigDecimal(BigInteger.Zero,preferredExp);
 
 
 
@@ -1655,7 +1718,7 @@ namespace clojure.lang
                 throw new ArithmeticException("Division by zero");  // Inf
             }
             if (lhs._coeff.IsZero)        // 0/y
-                return new BigDecimal(BigInteger.ZERO,
+                return new BigDecimal(BigInteger.Zero,
                                       (int)Math.Max(Math.Min(preferredExp,
                                                              Int32.MaxValue),
                                                     Int32.MinValue));
@@ -1677,7 +1740,7 @@ namespace clojure.lang
             int adjust = 0;
             if (ytest < xtest)
             {
-                y = y.Multiply(BigInteger.TEN);
+                y = y.Multiply(BigInteger.Ten);
                 adjust = 1;
             }
 
@@ -1847,9 +1910,9 @@ namespace clojure.lang
             }
             // else resultExp == 0;
 
-            int precisionDiff;
+            //int precisionDiff;
             if ((preferredExp < resultExp) &&
-                (precisionDiff = (int)(c.Precision - result.GetPrecision())) > 0)
+                (/*precisionDiff = */(int)(c.Precision - result.GetPrecision())) > 0)
             {
                 //return Rescale(result, resultExp + Math.Max(precisionDiff, preferredExp - resultExp), RoundingMode.Unnecessary);
                 return Rescale(result, 0, RoundingMode.Unnecessary);
@@ -1879,7 +1942,7 @@ namespace clojure.lang
 
             if (Abs().CompareTo(y.Abs()) < 0)
             {
-                return new BigDecimal(BigInteger.ZERO, preferredExp);
+                return new BigDecimal(BigInteger.Zero, preferredExp);
             }
 
             if (this._coeff.IsZero && !y._coeff.IsZero)
@@ -1988,7 +2051,7 @@ namespace clojure.lang
             if (n < -999999999 || n > 999999999)
                 throw new ArithmeticException("Invalid operation");
             if (n == 0)
-                return ONE;                      
+                return One;                      
             BigDecimal lhs = this;
             Context workc = c;           
             int mag = Math.Abs(n);               
@@ -2000,7 +2063,7 @@ namespace clojure.lang
                 workc = new Context((uint)(c.Precision + elength + 1),c.RoundingMode);
             }
 
-            BigDecimal acc = ONE;           
+            BigDecimal acc = One;           
             bool seenbit = false;        
             for (int i = 1; ; i++)
             {            
@@ -2018,7 +2081,7 @@ namespace clojure.lang
             }
             // if negative n, calculate the reciprocal using working precision
             if (n < 0)                          // [hence mc.precision>0]
-                acc = ONE.Divide(acc, workc);
+                acc = One.Divide(acc, workc);
             // round to final precision and strip zeros
             return acc.Round(c);
         }
@@ -2177,8 +2240,8 @@ namespace clojure.lang
             if ( n < 0 )
                 throw new ArgumentException("Power of ten must be non-negative");
 
-            if (n < MAX_CACHED_POWER_OF_TEN)
-                return BI_POWERS_OF_TEN[n];
+            if (n < _maxCachedPowerOfTen)
+                return _biPowersOfTen[n];
 
             char[] buf = new char[n + 1];
             buf[0] = '1';
@@ -2187,9 +2250,9 @@ namespace clojure.lang
             return BigInteger.Parse(new String(buf));
         }
 
-        static BigInteger[] BI_POWERS_OF_TEN = new BigInteger[] {
-            BigInteger.ONE,
-            BigInteger.TEN,
+        static BigInteger[] _biPowersOfTen = new BigInteger[] {
+            BigInteger.One,
+            BigInteger.Ten,
             BigInteger.Create(100),
             BigInteger.Create(1000),
             BigInteger.Create(10000),
@@ -2202,7 +2265,7 @@ namespace clojure.lang
             BigInteger.Create(100000000000)
         };
         
-        static readonly int MAX_CACHED_POWER_OF_TEN = BI_POWERS_OF_TEN.Length;
+        static readonly int _maxCachedPowerOfTen = _biPowersOfTen.Length;
 
         /// <summary>
         /// Remove insignificant trailing zeros from this BigDecimal until the 
@@ -2216,12 +2279,12 @@ namespace clojure.lang
         /// </remarks>
         private BigDecimal StripZerosToMatchExponent(long preferredExp)
         {
-            while (_coeff.Abs().CompareTo(BigInteger.TEN) >= 0 && _exp < preferredExp)
+            while (_coeff.Abs().CompareTo(BigInteger.Ten) >= 0 && _exp < preferredExp)
             {
                 if (_coeff.IsOdd)
                     break;                  // odd number.  cannot end in 0
                 BigInteger rem;
-                BigInteger quo = _coeff.DivRem(BigInteger.TEN, out rem);
+                BigInteger quo = _coeff.DivRem(BigInteger.Ten, out rem);
                 if (!rem.IsZero)
                     break;   // non-0 remainder
                 _coeff = quo;
@@ -2349,9 +2412,9 @@ namespace clojure.lang
 
                 if (increment)
                     if (q.IsNegative || (q.IsZero && x.IsNegative))
-                        q = q - BigInteger.ONE;
+                        q = q - BigInteger.One;
                     else
-                        q = q + BigInteger.ONE;
+                        q = q + BigInteger.One;
             }
 
             return q;
@@ -2380,7 +2443,7 @@ namespace clojure.lang
                 return lhs;
 
             if ( lhs._coeff.IsZero )
-                return new BigDecimal(BigInteger.ZERO,newExponent);  // Not clear on the precision
+                return new BigDecimal(BigInteger.Zero,newExponent);  // Not clear on the precision
 
             if (delta < 0)
             {
@@ -2390,7 +2453,7 @@ namespace clojure.lang
                 uint p = lhs.GetPrecision();
                 
                 if  ( p < decrease )
-                    return new BigDecimal(BigInteger.ZERO,newExponent);
+                    return new BigDecimal(BigInteger.Zero,newExponent);
 
                 uint newPrecision = (uint)(p - decrease);
 

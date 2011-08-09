@@ -123,7 +123,7 @@ namespace clojure.lang
 
         public bool ToBoolean(IFormatProvider provider)
         {
-            return ! _numerator.Equals(BigInteger.ZERO);
+            return ! _numerator.Equals(BigInteger.Zero);
         }
 
         public byte ToByte(IFormatProvider provider)

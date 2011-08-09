@@ -380,12 +380,12 @@ namespace clojure.lang
             {
                 int exp = bx.Exponent;
                 if (exp >= 0)
-                    return new Ratio(bx.ToBigInteger(), BigInteger.ONE);
+                    return new Ratio(bx.ToBigInteger(), BigInteger.One);
                 else
-                    return new Ratio(bx.MovePointRight(-exp).ToBigInteger(), BigInteger.TEN.Power(-exp));
+                    return new Ratio(bx.MovePointRight(-exp).ToBigInteger(), BigInteger.Ten.Power(-exp));
             }
 
-            return new Ratio(ToBigInteger(x), BigInteger.ONE);
+            return new Ratio(ToBigInteger(x), BigInteger.One);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
@@ -404,7 +404,7 @@ namespace clojure.lang
                 if (exp >= 0)
                     return BigInt.fromBigInteger(bx.ToBigInteger());
                 else
-                    return divide(bx.MovePointRight(-exp).ToBigInteger(), BigInteger.TEN.Power(-exp));
+                    return divide(bx.MovePointRight(-exp).ToBigInteger(), BigInteger.Ten.Power(-exp));
             }
 
             return x;
@@ -453,17 +453,17 @@ namespace clojure.lang
 
         public static object BIDivide(BigInteger n, BigInteger d)
         {
-            if (d.Equals(BigInteger.ZERO))
+            if (d.Equals(BigInteger.Zero))
                 throw new ArithmeticException("Divide by zero");
             BigInteger gcd = n.Gcd(d);
-            if (gcd.Equals(BigInteger.ZERO))
+            if (gcd.Equals(BigInteger.Zero))
                 return BigInt.ZERO;
             n = n / gcd;
             d = d / gcd;
 
-            if (d.Equals(BigInteger.ONE))
+            if (d.Equals(BigInteger.One))
                 return BigInt.fromBigInteger(n);
-            else if (d.Equals(BigInteger.NEGATIVE_ONE))
+            else if (d.Equals(BigInteger.NegativeOne))
                 return BigInt.fromBigInteger(n.Negate());
 
             return new Ratio((d.Signum < 0 ? -n : n), d.Abs());
@@ -1099,12 +1099,12 @@ namespace clojure.lang
 
             public override object inc(object x)
             {
-                return BigInt.fromBigInteger(ToBigInteger(x) + BigInteger.ONE);
+                return BigInt.fromBigInteger(ToBigInteger(x) + BigInteger.One);
             }
 
             public override object dec(object x)
             {
-                return BigInt.fromBigInteger(ToBigInteger(x) - BigInteger.ONE);
+                return BigInt.fromBigInteger(ToBigInteger(x) - BigInteger.One);
             }
 
             #endregion
@@ -1231,8 +1231,8 @@ namespace clojure.lang
                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MathContextVar.deref();
                 BigDecimal bx = (BigDecimal)x;
                 return c == null
-                    ? bx.Add(BigDecimal.ONE)
-                    : bx.Add(BigDecimal.ONE, c.Value);
+                    ? bx.Add(BigDecimal.One)
+                    : bx.Add(BigDecimal.One, c.Value);
             }
 
             public override object dec(object x)
@@ -1240,8 +1240,8 @@ namespace clojure.lang
                 BigDecimal.Context? c = (BigDecimal.Context?)RT.MathContextVar.deref();
                 BigDecimal bx = (BigDecimal)x;
                 return c == null
-                    ? bx.Subtract(BigDecimal.ONE)
-                    : bx.Subtract(BigDecimal.ONE, c.Value);
+                    ? bx.Subtract(BigDecimal.One)
+                    : bx.Subtract(BigDecimal.One, c.Value);
             }
 
             #endregion

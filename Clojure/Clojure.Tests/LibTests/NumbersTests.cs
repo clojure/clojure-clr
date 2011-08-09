@@ -122,7 +122,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArithmeticException))]
         public void DivideByZeroFails()
         {
-            object o = Numbers.BIDivide(BigInteger.ONE, BigInteger.ZERO);
+            object o = Numbers.BIDivide(BigInteger.One, BigInteger.Zero);
         }
 
         [Test]

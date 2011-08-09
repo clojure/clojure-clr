@@ -643,17 +643,17 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void NamedConstantsHaveCorrectValues()
         {
-            Expect(BigDecimal.ZERO.Coefficient, EqualTo(BigInteger.ZERO));
-            Expect(BigDecimal.ZERO.Exponent, EqualTo(0));
-            Expect(BigDecimal.ZERO.GetPrecision(), EqualTo(1));
+            Expect(BigDecimal.Zero.Coefficient, EqualTo(BigInteger.Zero));
+            Expect(BigDecimal.Zero.Exponent, EqualTo(0));
+            Expect(BigDecimal.Zero.GetPrecision(), EqualTo(1));
 
-            Expect(BigDecimal.ONE.Coefficient, EqualTo(BigInteger.ONE));
-            Expect(BigDecimal.ONE.Exponent, EqualTo(0));
-            Expect(BigDecimal.ONE.GetPrecision(), EqualTo(1));
+            Expect(BigDecimal.One.Coefficient, EqualTo(BigInteger.One));
+            Expect(BigDecimal.One.Exponent, EqualTo(0));
+            Expect(BigDecimal.One.GetPrecision(), EqualTo(1));
 
-            Expect(BigDecimal.TEN.Coefficient, EqualTo(BigInteger.TEN));
-            Expect(BigDecimal.TEN.Exponent, EqualTo(0));
-            Expect(BigDecimal.TEN.GetPrecision(), EqualTo(2));
+            Expect(BigDecimal.Ten.Coefficient, EqualTo(BigInteger.Ten));
+            Expect(BigDecimal.Ten.Exponent, EqualTo(0));
+            Expect(BigDecimal.Ten.GetPrecision(), EqualTo(2));
         }
 
         #endregion

@@ -269,7 +269,7 @@ namespace Clojure.Tests.LibTests
             for (int i = 0; i < Math.Log(Double.MaxValue, 2); i++)
             {
                 BigInteger b = BigInteger.Create(Math.Pow(2.0, i));
-                Expect(b == BigInteger.ONE << i);
+                Expect(b == BigInteger.One << i);
             }
         }
 
@@ -1675,7 +1675,7 @@ namespace Clojure.Tests.LibTests
 
         BigInteger CreateFromPrimePowers(int[] primes, int[] powers)
         {
-            BigInteger a = BigInteger.ONE;
+            BigInteger a = BigInteger.One;
 
             for (int i = 0; i < primes.Length; i++)
                 if (powers[i] > 0)
@@ -2029,7 +2029,7 @@ namespace Clojure.Tests.LibTests
             uint d2 = 1;
 
             BigInteger z = new BigInteger(-1, new uint[] { d0, d1, d2 });
-            BigInteger w = x.BitwiseNot();
+            BigInteger w = x.OnesComplement();
 
             Expect(w == z);
         }
@@ -2046,7 +2046,7 @@ namespace Clojure.Tests.LibTests
             uint d2 = 0xFFFFFFFF;
 
             BigInteger z = new BigInteger(1, new uint[] { d0, d1, d2 });
-            BigInteger w = x.BitwiseNot();
+            BigInteger w = x.OnesComplement();
 
             Expect(w == z);
         }

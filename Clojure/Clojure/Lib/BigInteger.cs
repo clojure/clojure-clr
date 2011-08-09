@@ -60,35 +60,42 @@ namespace clojure.lang
         /// </remarks>
         private readonly uint[] _data;
 
+        private static readonly BigInteger _zero = new BigInteger(0, new uint[] { });
+        private static readonly BigInteger _one = new BigInteger(1, new uint[] { 1 });
+        private static readonly BigInteger _two = new BigInteger(1, new uint[] { 2 });
+        private static readonly BigInteger _five = new BigInteger(1, new uint[] { 5 });
+        private static readonly BigInteger _ten = new BigInteger(1, new uint[] { 10 });
+        private static readonly BigInteger _negativeOne = new BigInteger(-1, new uint[] { 1 });
+
         /// <summary>
         /// Zero
         /// </summary>
-        public static BigInteger ZERO = new BigInteger(0, new uint[] { });
+        public static BigInteger Zero { get {return _zero;} }
 
         /// <summary>
         /// One
         /// </summary>
-        public static BigInteger ONE = new BigInteger(1, new uint[] { 1 });
+        public static BigInteger One { get { return _one; } }
 
         /// <summary>
         /// Two
         /// </summary>
-        public static BigInteger TWO = new BigInteger(1, new uint[] { 2 });
+        public static BigInteger Two { get { return _two; } }
 
         /// <summary>
         /// Five
         /// </summary>
-        public static BigInteger FIVE = new BigInteger(1, new uint[] { 5 });
+        public static BigInteger Five { get { return _five; } }
 
         /// <summary>
         /// Ten
         /// </summary>
-        public static BigInteger TEN = new BigInteger(1, new uint[] { 10 });
+        public static BigInteger Ten { get { return _ten; } }
 
         /// <summary>
         /// -1
         /// </summary>
-        public static BigInteger NEGATIVE_ONE = new BigInteger(-1, new uint[] { 1 });
+        public static BigInteger NegativeOne { get { return _negativeOne; } }
      
         #endregion
 
@@ -102,7 +109,7 @@ namespace clojure.lang
         public static BigInteger Create(ulong v)
         {
             if (v == 0)
-                return ZERO;
+                return Zero;
 
             uint most = (uint)(v >> BitsPerDigit);
             if (most == 0)
@@ -119,7 +126,7 @@ namespace clojure.lang
         public static BigInteger Create(uint v)
         {
             if (v == 0)
-                return ZERO;
+                return Zero;
             else return new BigInteger(1, v);
         }
 
@@ -131,7 +138,7 @@ namespace clojure.lang
         public static BigInteger Create(long v)
         {
             if (v == 0)
-                return ZERO;
+                return Zero;
             else
             {
                 short sign = 1;
@@ -167,7 +174,7 @@ namespace clojure.lang
         public static BigInteger Create(decimal v)
         {
             if ( v == 0 )
-                return ZERO;
+                return Zero;
 
             decimal t = Decimal.Truncate(v);
             int[] bits = Decimal.GetBits(t);
@@ -201,9 +208,9 @@ namespace clojure.lang
             if (significand == 0)
             {
                 if (exp == 0)
-                    return ZERO;
+                    return Zero;
 
-                BigInteger result = v < 0.0 ? NEGATIVE_ONE : ONE;
+                BigInteger result = v < 0.0 ? NegativeOne : One;
                 // TODO: Avoid extra allocation
                 result = result.LeftShift(exp - DoubleExponentBias);
                 return result;
@@ -373,7 +380,7 @@ namespace clojure.lang
 
             if (index == len)
             {
-                v = new BigInteger(ZERO);
+                v = new BigInteger(Zero);
                 return true;
             }
 
@@ -440,6 +447,7 @@ namespace clojure.lang
         /// </para>
         /// <para>The Java and the DLR code are very similar.</para>
         /// </remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object,System.Object)")]
         public string ToString(uint radix)
         {
             if ( radix < MinRadix || radix > MaxRadix )
@@ -1057,7 +1065,7 @@ namespace clojure.lang
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns>The negation</returns>
-        private static BigInteger Negate(BigInteger x)
+        public static BigInteger Negate(BigInteger x)
         {
             return x.Negate();
         }
@@ -1184,7 +1192,7 @@ namespace clojure.lang
         /// <returns></returns>
         public static BigInteger operator ~(BigInteger x)
         {
-            return x.BitwiseNot();
+            return x.OnesComplement();
         }
 
 
@@ -1196,7 +1204,7 @@ namespace clojure.lang
         /// <returns></returns>
         public static BigInteger operator ^(BigInteger x, BigInteger y)
         {
-            return x.BitwiseXor(y);
+            return x.Xor(y);
         }
 
 
@@ -1256,7 +1264,7 @@ namespace clojure.lang
         /// <returns></returns>
         public static BigInteger BitwiseXor(BigInteger x, BigInteger y)
         {
-            return x.BitwiseXor(y);
+            return x.Xor(y);
         }
 
         /// <summary>
@@ -1266,7 +1274,7 @@ namespace clojure.lang
         /// <returns></returns>
         public static BigInteger BitwiseNot(BigInteger x)
         {
-            return x.BitwiseNot();
+            return x.OnesComplement();
         }
 
         /// <summary>
@@ -1612,7 +1620,7 @@ namespace clojure.lang
         /// <returns><value>true</value> if the value is not zero; <value>false</value> otherwise</returns>
         public bool ToBoolean(IFormatProvider provider)
         {
-            return this != ZERO;
+            return this != Zero;
         }
 
         /// <summary>
@@ -1654,6 +1662,7 @@ namespace clojure.lang
         /// <param name="provider">(Ignored)</param>
         /// <returns>The converted value</returns>
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a Decimal.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "clojure.lang.BigInteger.ToDecimal")]
         public decimal ToDecimal(IFormatProvider provider)
         {
             return ToDecimal();
@@ -1690,6 +1699,7 @@ namespace clojure.lang
         /// <param name="provider">(Ignored)</param>
         /// <returns>The converted value</returns>
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a Int32.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "clojure.lang.BigInteger.ToInt32")]
         public int ToInt32(IFormatProvider provider)
         {
             return ToInt32();
@@ -1701,6 +1711,7 @@ namespace clojure.lang
         /// <param name="provider">(Ignored)</param>
         /// <returns>The converted value</returns>
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a Int64.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "clojure.lang.BigInteger.ToInt64")]
         public long ToInt64(IFormatProvider provider)
         {
             return ToInt64();
@@ -1778,6 +1789,7 @@ namespace clojure.lang
         /// <param name="provider">(Ignored)</param>
         /// <returns>The converted value</returns>
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a UInt32.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "clojure.lang.BigInteger.ToUInt32")]
         public uint ToUInt32(IFormatProvider provider)
         {
             return ToUInt32();
@@ -1789,7 +1801,7 @@ namespace clojure.lang
         /// <param name="provider">(Ignored)</param>
         /// <returns>The converted value</returns>
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a UInt64.</exception>
-       
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "clojure.lang.BigInteger.ToUInt64")]      
         public ulong ToUInt64(IFormatProvider provider)
         {
             return ToUInt64();
@@ -1912,7 +1924,7 @@ namespace clojure.lang
                         return new BigInteger(-this._sign, Subtract(y._data, this._data));
 
                     case 0:
-                    return new BigInteger(BigInteger.ZERO);
+                    return new BigInteger(BigInteger.Zero);
 
                     case 1:
                     return new BigInteger(this._sign, Subtract(this._data, y._data));
@@ -1942,7 +1954,7 @@ namespace clojure.lang
             int cmp = Compare(this._data, y._data);
 
             if (cmp == 0)
-                return ZERO;
+                return Zero;
 
             uint[] mag = (cmp > 0 ? Subtract(this._data, y._data) : Subtract(y._data, this._data));
             return new BigInteger(cmp * _sign, mag);           
@@ -1965,9 +1977,9 @@ namespace clojure.lang
         public BigInteger Multiply(BigInteger y)
         {
             if (this._sign == 0)
-                return ZERO;
+                return Zero;
             if (y._sign == 0)
-                return ZERO;
+                return Zero;
 
             uint[] mag = Multiply(this._data, y._data);
             return new BigInteger(this._sign * y._sign, mag);
@@ -2033,14 +2045,14 @@ namespace clojure.lang
                 throw new ArgumentOutOfRangeException("exp","Exponent must be non-negative");
 
             if (exp == 0)
-                return ONE;
+                return One;
 
             if (_sign == 0)
                 return this;
 
             // Exponentiation by repeated squaring
             BigInteger mult = this;
-            BigInteger result = ONE;
+            BigInteger result = One;
             while (exp != 0)
             {
                 if ((exp & 1) != 0)
@@ -2067,22 +2079,22 @@ namespace clojure.lang
                 throw new ArgumentOutOfRangeException("power","must be non-negative");
 
             if (power._sign == 0)
-                return ONE;
+                return One;
 
             if (_sign == 0)
                 return this;
 
             // Exponentiation by repeated squaring
             BigInteger mult = this;
-            BigInteger result = ONE;
-            while (power != ZERO)
+            BigInteger result = One;
+            while (power != Zero)
             {
                 if (power.IsOdd)
                 {
                     result = result * mult;
                     result = result % mod;
                 }
-                if (power == ONE)
+                if (power == One)
                     break;
                 mult = mult * mult;
                 mult = mult % mod;
@@ -2124,7 +2136,7 @@ namespace clojure.lang
                 if ( Math.Abs(a._data.Length - b._data.Length ) < 2 )
                     return BinaryGcd(a,b);
                 BigInteger r;
-                BigInteger q = a.DivRem(b, out r);
+                a.DivRem(b, out r);
                 a = b;
                 b = r;
             }
@@ -2395,7 +2407,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="y">The value to XOR to this instance.</param>
         /// <returns>The bitwise-XOR</returns>
-        public BigInteger BitwiseXor(BigInteger y)
+        public BigInteger Xor(BigInteger y)
         {
             int rlen = Math.Max(_data.Length, y._data.Length);
             uint[] result = new uint[rlen];
@@ -2421,7 +2433,7 @@ namespace clojure.lang
         /// Returns the bitwise complement of this instance.
         /// </summary>
         /// <returns>The bitwise complement</returns>
-        public BigInteger BitwiseNot()
+        public BigInteger OnesComplement()
         {
             int len = _data.Length;
             uint[] result = new uint[len];
@@ -2657,7 +2669,7 @@ namespace clojure.lang
             int xlen = _data.Length;
 
             if (digitShift >= xlen)
-                return _sign >= 0 ? ZERO : NEGATIVE_ONE;
+                return _sign >= 0 ? Zero : NegativeOne;
 
             uint[] result;
 
