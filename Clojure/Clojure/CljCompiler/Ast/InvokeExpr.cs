@@ -302,7 +302,7 @@ namespace clojure.lang.CljCompiler.Ast
             ParameterExpression targetParam = Expression.Parameter(typeof(Object), "target");
             ParameterExpression targetTypeParam = Expression.Parameter(typeof(Type), "targetType");
             ParameterExpression vpfnParam = Expression.Parameter(typeof(AFunction), "vpfn");
-            ParameterExpression thisParam = objx.ThisParam;
+            //ParameterExpression thisParam = objx.ThisParam;
 
             Expression targetParamAssign = Expression.Assign(targetParam, Compiler.MaybeBox(e.GenCode(RHC.Expression,objx,context)));
             Expression targetTypeParamAssign =

@@ -136,12 +136,12 @@ namespace clojure.lang
         /// <returns><value>true</value> if equal; <value>false</value> otherwise.</returns>
         public override bool Equals(object obj)
         {
-            if ( obj == this ) 
+            if ( ReferenceEquals(this,obj) ) 
                 return true;
 
             Keyword keyword = obj as Keyword;
 
-            if (keyword == null)
+            if (ReferenceEquals(keyword,null))
                 return false;
 
             return _sym.Equals(keyword.Symbol);
@@ -248,7 +248,59 @@ namespace clojure.lang
         /// <returns>neg,zero,pos for &lt; = &gt;</returns>
         public int CompareTo(object obj)
         {
-            return _sym.CompareTo(((Keyword)obj)._sym);
+            Keyword k = obj as Keyword;
+            if (ReferenceEquals(k,null))
+                throw new ArgumentException("Cannot compare to null or non-Keyword", "obj");
+
+            return _sym.CompareTo(k._sym);
+        }
+
+        #endregion
+
+        #region Operator overloads
+
+        public static bool operator ==(Keyword k1, Keyword k2)
+        {
+            if (ReferenceEquals(k1, k2))
+                return true;
+
+            if (ReferenceEquals(k1, null)||ReferenceEquals(k2,null))
+                return false;
+
+            return k1.CompareTo(k2) == 0;
+        }
+
+        public static bool operator !=(Keyword k1, Keyword k2)
+        {
+            if (ReferenceEquals(k1, k2))
+                return false;
+
+            if (ReferenceEquals(k1, null) || ReferenceEquals(k2,null))
+                return true;
+
+            return k1.CompareTo(k2) != 0;
+        }
+
+        public static bool operator <(Keyword k1, Keyword k2)
+        {
+            if (ReferenceEquals(k1, k2))
+                return false;
+
+            if (ReferenceEquals(k1, null))
+                throw new ArgumentNullException("k1");
+
+            return k1.CompareTo(k2) < 0;
+        }
+
+        public static bool operator >(Keyword k1, Keyword k2)
+        {
+            if (ReferenceEquals(k1, k2))
+                return false;
+
+            if (ReferenceEquals(k1, null))
+                throw new ArgumentNullException("k1");
+
+            return k1.CompareTo(k2) > 0;
         }
 
         #endregion

@@ -42,6 +42,7 @@ namespace clojure.lang
 
             readonly object[] _array;
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
             public object[] Array
             {
                 get { return _array; }

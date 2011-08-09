@@ -21,6 +21,7 @@ namespace clojure.lang
     /// <summary>
     /// Provides a basic implementation of <see cref="IPersistentVector">IPersistentVector</see> functionality.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public abstract class APersistentVector: AFn, IPersistentVector, IList, IComparable, IList<Object>, IComparable<Object>

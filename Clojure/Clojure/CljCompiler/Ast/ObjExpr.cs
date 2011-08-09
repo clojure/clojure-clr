@@ -550,7 +550,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             for (int i = 0; i < _keywordCallsites.count(); i++)
             {
-                Keyword k = (Keyword)_keywordCallsites.nth(i);
+                //Keyword k = (Keyword)_keywordCallsites.nth(i);
                 string siteName = SiteNameStatic(i);
                 string thunkName = ThunkNameStatic(i);
                 FieldBuilder fb1 = baseTB.DefineField(siteName, typeof(KeywordLookupSite), FieldAttributes.FamORAssem | FieldAttributes.Static);
@@ -1216,7 +1216,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             for (ISeq s = RT.keys(_closes); s != null; s = s.next(), a++)
             {
-                LocalBinding lb = (LocalBinding)s.first();
+                //LocalBinding lb = (LocalBinding)s.first();
                 FieldBuilder fb = _closedOverFields[a];
 
                 gen.EmitLoadArg(0);             // gen.Emit(OpCodes.Ldarg_0);

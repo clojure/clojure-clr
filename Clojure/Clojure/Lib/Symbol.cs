@@ -169,12 +169,12 @@ namespace clojure.lang
         /// <remarks>Uses value semantics, value determined by namespace name and symbol name.</remarks>
         public override bool Equals(object obj)
         {
-            if (this == obj)
+            if (ReferenceEquals(this,obj))
                 return true;
 
             Symbol sym = obj as Symbol;
 
-            if (sym == null)
+            if (ReferenceEquals(sym,null))
                 return false;
 
             // interned strings, use identity compare
@@ -285,7 +285,10 @@ namespace clojure.lang
         /// <returns>neg,zero,pos semantics.</returns>
         public int CompareTo(object obj)
         {
-            Symbol s = (Symbol)obj;
+            Symbol s = obj as Symbol;
+            if ( ReferenceEquals(s,null) )
+                throw new ArgumentException("Must compare to non-null Symbol","obj");
+
             if (Equals(s))
                 return 0;
             if (_ns == null && s._ns != null)
@@ -299,6 +302,54 @@ namespace clojure.lang
                     return nsc;
             }
             return _name.CompareTo(s._name);
+        }
+
+        #endregion
+
+        #region operator overloads
+
+        public static bool operator ==(Symbol x, Symbol y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+
+            if (((object)x == null) || ((object)y == null))
+                return false;
+
+            return x.CompareTo(y) == 0;
+        }
+
+        public static bool operator !=(Symbol x, Symbol y)
+        {
+            if (ReferenceEquals(x,y))
+                return false;
+
+            if (((object)x == null) || ((object)y == null))
+                return true;
+
+            return x.CompareTo(y) != 0;
+        }
+
+        public static bool operator <(Symbol x, Symbol y)
+        {
+            if (ReferenceEquals(x, y))
+                return false; 
+            
+            if (ReferenceEquals(x, null))
+                throw new ArgumentNullException("x");
+
+            return x.CompareTo(y) < 0;
+        }
+
+        public static bool operator >(Symbol x, Symbol y)
+        {
+            if (ReferenceEquals(x, y))
+                return false;
+
+            if (ReferenceEquals(x, null))
+                throw new ArgumentNullException("x");
+
+            return x.CompareTo(y) > 0;
         }
 
         #endregion

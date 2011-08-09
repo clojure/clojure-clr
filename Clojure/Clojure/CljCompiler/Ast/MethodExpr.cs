@@ -377,7 +377,7 @@ namespace clojure.lang.CljCompiler.Ast
 #endif
 
                             ParameterExpression sbParam = Expression.Parameter(sbType, String.Format("__sb_{0}", sbParams.Count));
-                            ConstructorInfo[] cinfos = sbType.GetConstructors();
+                            //ConstructorInfo[] cinfos = sbType.GetConstructors();
                             Expression sbInit1 =
                                 Expression.Assign(
                                     sbParam,

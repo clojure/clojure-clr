@@ -687,5 +687,66 @@ namespace clojure.lang
 
         #endregion
 
+        #region object overrides
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            Ref r = obj as Ref;
+            if (r == null)
+                return false;
+
+            return _id == r._id;
+        }
+
+        public override int GetHashCode()
+        {
+            return _id.GetHashCode();
+        }
+        #endregion
+
+        #region operator overrides
+
+        public static bool operator ==(Ref x, Ref y)
+        {
+            if (ReferenceEquals(x, y))
+                return true;
+
+            if ((object)x == null)
+                return false;
+
+            return x.CompareTo(y) == 0;
+        }
+
+        public static bool operator !=(Ref x, Ref y)
+        {
+            return !(x == y);
+        }
+
+        public static bool operator <(Ref x, Ref y)
+        {
+            if (ReferenceEquals(x, y))
+                return false;
+
+            if ( ReferenceEquals(x,null) )
+                throw new ArgumentException("Cannot compare null","x");
+
+            return x.CompareTo(y) < 0;
+        }
+
+        public static bool operator >(Ref x, Ref y)
+        {
+            if (ReferenceEquals(x, y))
+                return false;
+
+            if ( ReferenceEquals(x,null) )
+                throw new ArgumentException("Cannot compare null","x");
+
+            return x.CompareTo(y) > 0;
+        }
+
+        #endregion
     }
 }

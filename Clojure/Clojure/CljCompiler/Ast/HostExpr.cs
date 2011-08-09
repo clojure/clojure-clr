@@ -82,7 +82,6 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     PropertyInfo pinfo = null;
                     FieldInfo finfo = null;
-                    MethodInfo minfo = null;
 
                     Symbol sym = (RT.third(sform) is Keyword) ? ((Keyword)RT.third(sform)).Symbol : (Symbol)RT.third(sform);
                     string fieldName = Compiler.munge(sym.Name);
@@ -96,7 +95,7 @@ namespace clojure.lang.CljCompiler.Ast
                             return new StaticFieldExpr(source, spanMap, tag, t, fieldName, finfo);
                         if ((pinfo = Reflector.GetProperty(t, fieldName, true)) != null)
                             return new StaticPropertyExpr(source, spanMap, tag, t, fieldName, pinfo);
-                        if ((minfo = Reflector.GetArityZeroMethod(t, fieldName, true)) != null)
+                        if (Reflector.GetArityZeroMethod(t, fieldName, true) != null)
                             return new StaticMethodExpr(source, spanMap, tag, t, fieldName, null, new List<HostArg>());
                         throw new MissingMemberException(t.Name, fieldName);
                     }
@@ -107,7 +106,7 @@ namespace clojure.lang.CljCompiler.Ast
                             return new InstanceFieldExpr(source, spanMap, tag, instance, fieldName, finfo);
                         if ((pinfo = Reflector.GetProperty(instanceType, fieldName, false)) != null)
                             return new InstancePropertyExpr(source, spanMap, tag, instance, fieldName, pinfo);
-                        if ((minfo = Reflector.GetArityZeroMethod(instanceType, fieldName, false)) != null)
+                        if (Reflector.GetArityZeroMethod(instanceType, fieldName, false) != null)
                             return new InstanceMethodExpr(source, spanMap, tag, instance, fieldName, null, new List<HostArg>());
                         if (pcon.IsAssignContext)
                             return new InstanceFieldExpr(source, spanMap, tag, instance, fieldName, null); // same as InstancePropertyExpr when last arg is null
@@ -244,7 +243,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region MaybePrimitiveExpr 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2119:SealMethodsThatSatisfyPrivateInterfaces")]
         public abstract bool CanEmitPrimitive { get; }
+        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2119:SealMethodsThatSatisfyPrivateInterfaces")]
         public abstract Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context);
 
         #endregion

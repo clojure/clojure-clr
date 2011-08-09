@@ -116,7 +116,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr finallyExpr = null;
                 bool caught = false;
 
-                int retLocal = Compiler.GetAndIncLocalNum();
+                //int retLocal = Compiler.GetAndIncLocalNum();
                 //int finallyLocal = Compiler.GetAndIncLocalNum();
 
                 for (ISeq fs = form.next(); fs != null; fs = fs.next())

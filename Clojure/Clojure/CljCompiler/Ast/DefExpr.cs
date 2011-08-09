@@ -168,7 +168,6 @@ namespace clojure.lang.CljCompiler.Ast
                     _var.bindRoot(_init.Eval());
                 if (_meta != null)
                 {
-                    IPersistentMap metaMap = (IPersistentMap)_meta.Eval();
                     if (_initProvided || true) // includesExplicitMetadata((MapExpr)_meta))
                         _var.setMeta((IPersistentMap)_meta.Eval());
                 }

@@ -62,6 +62,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
         public TValue[] Values
         {
             get

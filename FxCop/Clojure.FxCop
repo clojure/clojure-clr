@@ -217,28 +217,6 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="APersistentVector">
-          <Messages>
-           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-08-09 14:41:34Z">
-            <Issue Name="Operator">
-             <Item>'APersistentVector'</Item>
-             <Item>!=</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'APersistentVector'</Item>
-             <Item>&lt;</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'APersistentVector'</Item>
-             <Item>==</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'APersistentVector'</Item>
-             <Item>&gt;</Item>
-            </Issue>
-           </Message>
-          </Messages>
-         </Type>
          <Type Name="BigInt">
           <Members>
            <Member Name="#intValue()">
@@ -302,17 +280,6 @@
                <Item>'string.Format(IFormatProvider, string, params object[])'</Item>
                <Item>'CultureInfo.CurrentCulture'</Item>
                <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Compile(System.IO.TextReader,System.String,System.String,System.String)">
-            <Messages>
-             <Message Id="exprType" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'Compiler.Compile(TextReader, string, string, string)'</Item>
-               <Item>'exprType'</Item>
-               <Item>'Type'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -483,21 +450,6 @@
            </Message>
           </Messages>
          </Type>
-         <Type Name="GenClass">
-          <Members>
-           <Member Name="#ComputeOverloads(System.Collections.Generic.List`1&lt;clojure.lang.CljCompiler.MethodSignature&gt;)">
-            <Messages>
-             <Message Id="overloadNames" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'GenClass.ComputeOverloads(List&lt;MethodSignature&gt;)'</Item>
-               <Item>'overloadNames'</Item>
-               <Item>'HashSet&lt;string&gt;'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="GenInterface">
           <Members>
            <Member Name="#CreateCustomAttributeBuilder(clojure.lang.IMapEntry)">
@@ -604,41 +556,6 @@
             </Messages>
            </Member>
           </Members>
-         </Type>
-         <Type Name="JavaConcurrentDictionary`2">
-          <Members>
-           <Member Name="#Values">
-            <Messages>
-             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'JavaConcurrentDictionary&lt;TKey, TValue&gt;.Values'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="Keyword">
-          <Messages>
-           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-08-09 14:41:34Z">
-            <Issue Name="Operator">
-             <Item>'Keyword'</Item>
-             <Item>!=</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Keyword'</Item>
-             <Item>&lt;</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Keyword'</Item>
-             <Item>==</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Keyword'</Item>
-             <Item>&gt;</Item>
-            </Issue>
-           </Message>
-          </Messages>
          </Type>
          <Type Name="LispReader">
           <Members>
@@ -835,19 +752,6 @@
            </Message>
           </Messages>
          </Type>
-         <Type Name="MethodImplCache">
-          <Members>
-           <Member Name="#table">
-            <Messages>
-             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'MethodImplCache.table'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="MissingFormatArgumentException">
           <Members>
            <Member Name="#.ctor(System.String)">
@@ -919,21 +823,6 @@
                <Item>'string.Format(IFormatProvider, string, params object[])'</Item>
                <Item>'CultureInfo.CurrentCulture'</Item>
                <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="Namespace+NamespaceSerializationHelper">
-          <Members>
-           <Member Name="#GetRealObject(System.Runtime.Serialization.StreamingContext)">
-            <Messages>
-             <Message Id="name" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'Namespace.NamespaceSerializationHelper.GetRealObject(StreamingContext)'</Item>
-               <Item>'name'</Item>
-               <Item>'string'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -1024,19 +913,6 @@
                <Item>'string.Format(IFormatProvider, string, params object[])'</Item>
                <Item>'CultureInfo.CurrentCulture'</Item>
                <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="PersistentVector+Node">
-          <Members>
-           <Member Name="#Array">
-            <Messages>
-             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'PersistentVector.Node.Array'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -1224,26 +1100,6 @@
           </Members>
          </Type>
          <Type Name="Ratio">
-          <Messages>
-           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-08-09 14:41:34Z">
-            <Issue Name="Operator">
-             <Item>'Ratio'</Item>
-             <Item>!=</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Ratio'</Item>
-             <Item>&lt;</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Ratio'</Item>
-             <Item>==</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Ratio'</Item>
-             <Item>&gt;</Item>
-            </Issue>
-           </Message>
-          </Messages>
           <Members>
            <Member Name="#ToInt64(System.IFormatProvider)">
             <Messages>
@@ -1275,27 +1131,6 @@
          </Type>
          <Type Name="Ref">
           <Messages>
-           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-08-09 14:41:34Z">
-            <Issue Name="Equals">
-             <Item>'Ref'</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Ref'</Item>
-             <Item>!=</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Ref'</Item>
-             <Item>&lt;</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Ref'</Item>
-             <Item>==</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Ref'</Item>
-             <Item>&gt;</Item>
-            </Issue>
-           </Message>
            <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Created="2011-08-09 14:41:34Z" FixCategory="DependsOnFix">
             <Issue Name="DependsOnFix">
              <Item>'Ref'</Item>
@@ -1323,13 +1158,6 @@
           <Members>
            <Member Name="#BoxArg(System.Reflection.ParameterInfo,System.Object)">
             <Messages>
-             <Message Id="argType" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'Reflector.BoxArg(ParameterInfo, object)'</Item>
-               <Item>'argType'</Item>
-               <Item>'Type'</Item>
-              </Issue>
-             </Message>
              <Message Id="System.Convert.ChangeType(System.Object,System.Type)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ChangeType(object, Type)'</Item>
@@ -1393,17 +1221,6 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#GetArityZeroMethod(System.Type,System.String,System.Boolean)">
-            <Messages>
-             <Message Id="all" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'Reflector.GetArityZeroMethod(Type, string, bool)'</Item>
-               <Item>'all'</Item>
-               <Item>'MethodInfo[]'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#GetInstanceFieldOrProperty(System.Object,System.String)">
             <Messages>
              <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
@@ -1413,17 +1230,6 @@
                <Item>'string.Format(IFormatProvider, string, params object[])'</Item>
                <Item>'CultureInfo.CurrentCulture'</Item>
                <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#GetInterfaceMethods(System.Type,System.String,System.Collections.Generic.List`1&lt;System.Type&gt;,System.Int32)">
-            <Messages>
-             <Message Id="methods" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'Reflector.GetInterfaceMethods(Type, string, List&lt;Type&gt;, int)'</Item>
-               <Item>'methods'</Item>
-               <Item>'MethodInfo[]'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -1630,26 +1436,6 @@
           </Members>
          </Type>
          <Type Name="Symbol">
-          <Messages>
-           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-08-09 14:41:34Z">
-            <Issue Name="Operator">
-             <Item>'Symbol'</Item>
-             <Item>!=</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Symbol'</Item>
-             <Item>&lt;</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Symbol'</Item>
-             <Item>==</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'Symbol'</Item>
-             <Item>&gt;</Item>
-            </Issue>
-           </Message>
-          </Messages>
           <Members>
            <Member Name="#CompareTo(System.Object)">
             <Messages>
@@ -1966,21 +1752,6 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="DefExpr">
-          <Members>
-           <Member Name="#Eval()">
-            <Messages>
-             <Message Id="metaMap" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'DefExpr.Eval()'</Item>
-               <Item>'metaMap'</Item>
-               <Item>'IPersistentMap'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="DefExpr+Parser">
           <Members>
            <Member Name="#Parse(clojure.lang.CljCompiler.Ast.ParserContext,System.Object)">
@@ -2020,13 +1791,6 @@
            </Member>
            <Member Name="#RewriteCallSite(System.Runtime.CompilerServices.CallSite,Microsoft.Scripting.Generation.TypeGen)">
             <Messages>
-             <Message Id="p" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'DynInitHelper.RewriteCallSite(CallSite, TypeGen)'</Item>
-               <Item>'p'</Item>
-               <Item>'Type'</Item>
-              </Issue>
-             </Message>
              <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'int.ToString()'</Item>
@@ -2108,51 +1872,6 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="HostExpr">
-          <Members>
-           <Member Name="#CanEmitPrimitive">
-            <Accessors>
-             <Accessor Name="#get_CanEmitPrimitive()">
-              <Messages>
-               <Message TypeName="SealMethodsThatSatisfyPrivateInterfaces" Category="Microsoft.Security" CheckId="CA2119" Created="2011-08-09 14:41:34Z">
-                <Issue>
-                 <Item>'HostExpr.CanEmitPrimitive.get()'</Item>
-                 <Item>MaybePrimitiveExpr</Item>
-                 <Item>'HostExpr'</Item>
-                </Issue>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-           <Member Name="#GenCodeUnboxed(clojure.lang.CljCompiler.Ast.RHC,clojure.lang.CljCompiler.Ast.ObjExpr,clojure.lang.CljCompiler.Ast.GenContext)">
-            <Messages>
-             <Message TypeName="SealMethodsThatSatisfyPrivateInterfaces" Category="Microsoft.Security" CheckId="CA2119" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'HostExpr.GenCodeUnboxed(RHC, ObjExpr, GenContext)'</Item>
-               <Item>MaybePrimitiveExpr</Item>
-               <Item>'HostExpr'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="HostExpr+Parser">
-          <Members>
-           <Member Name="#Parse(clojure.lang.CljCompiler.Ast.ParserContext,System.Object)">
-            <Messages>
-             <Message Id="minfo" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'HostExpr.Parser.Parse(ParserContext, object)'</Item>
-               <Item>'minfo'</Item>
-               <Item>'MethodInfo'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="InstanceMethodExpr">
           <Members>
            <Member Name="#.ctor(System.String,clojure.lang.IPersistentMap,clojure.lang.Symbol,clojure.lang.CljCompiler.Ast.Expr,System.String,System.Collections.Generic.List`1&lt;System.Type&gt;,System.Collections.Generic.List`1&lt;clojure.lang.CljCompiler.Ast.HostArg&gt;)">
@@ -2194,30 +1913,12 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#GenProtoLight(clojure.lang.CljCompiler.Ast.RHC,clojure.lang.CljCompiler.Ast.ObjExpr,clojure.lang.CljCompiler.Ast.GenContext,System.Linq.Expressions.Expression)">
-            <Messages>
-             <Message Id="thisParam" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'InvokeExpr.GenProtoLight(RHC, ObjExpr, GenContext, Expression)'</Item>
-               <Item>'thisParam'</Item>
-               <Item>'ParameterExpression'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
           </Members>
          </Type>
          <Type Name="MethodExpr">
           <Members>
            <Member Name="#GenerateComplexArgList(clojure.lang.CljCompiler.Ast.ObjExpr,clojure.lang.CljCompiler.Ast.GenContext,System.Collections.Generic.List`1&lt;clojure.lang.CljCompiler.Ast.HostArg&gt;,System.Collections.Generic.List`1&lt;System.Linq.Expressions.Expression&gt;&amp;,System.Collections.Generic.List`1&lt;System.Linq.Expressions.ParameterExpression&gt;&amp;,System.Collections.Generic.List`1&lt;System.Linq.Expressions.Expression&gt;&amp;,System.Collections.Generic.List`1&lt;System.Linq.Expressions.Expression&gt;&amp;)">
             <Messages>
-             <Message Id="cinfos" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'MethodExpr.GenerateComplexArgList(ObjExpr, GenContext, List&lt;HostArg&gt;, out List&lt;Expression&gt;, out List&lt;ParameterExpression&gt;, out List&lt;Expression&gt;, out List&lt;Expression&gt;)'</Item>
-               <Item>'cinfos'</Item>
-               <Item>'ConstructorInfo[]'</Item>
-              </Issue>
-             </Message>
              <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
@@ -2318,17 +2019,6 @@
          </Type>
          <Type Name="ObjExpr">
           <Members>
-           <Member Name="#GenerateConstructor(System.Reflection.Emit.TypeBuilder,System.Type)">
-            <Messages>
-             <Message Id="lb" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'ObjExpr.GenerateConstructor(TypeBuilder, Type)'</Item>
-               <Item>'lb'</Item>
-               <Item>'LocalBinding'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#GenerateFnBaseClass(System.Type,clojure.lang.CljCompiler.Ast.GenContext)">
             <Messages>
              <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
@@ -2338,17 +2028,6 @@
                <Item>'int.ToString(IFormatProvider)'</Item>
                <Item>'CultureInfo.CurrentCulture'</Item>
                <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#GenerateKeywordCallsites(System.Reflection.Emit.TypeBuilder)">
-            <Messages>
-             <Message Id="k" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'ObjExpr.GenerateKeywordCallsites(TypeBuilder)'</Item>
-               <Item>'k'</Item>
-               <Item>'Keyword'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -2470,21 +2149,6 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="TryExpr+Parser">
-          <Members>
-           <Member Name="#Parse(clojure.lang.CljCompiler.Ast.ParserContext,System.Object)">
-            <Messages>
-             <Message Id="retLocal" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
-              <Issue>
-               <Item>'TryExpr.Parser.Parse(ParserContext, object)'</Item>
-               <Item>'retLocal'</Item>
-               <Item>'int'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
         </Types>
        </Namespace>
        <Namespace Name="clojure.runtime">
@@ -2552,19 +2216,6 @@
    </Rule>
    <Rule TypeName="EnumeratorsShouldBeStronglyTyped" Category="Microsoft.Design" CheckId="CA1038">
     <Resolution Name="Default">{0} should provide a strongly typed implementation of IEnumerator.Current.</Resolution>
-   </Rule>
-   <Rule TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036">
-    <Resolution Name="Equals">{0} should override Equals since it implements IComparable.</Resolution>
-    <Resolution Name="Operator">{0} should define operator '{1}' since it implements IComparable.</Resolution>
-   </Rule>
-   <Rule TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819">
-    <Resolution Name="Default">Change {0} to return a collection or make it a method.</Resolution>
-   </Rule>
-   <Rule TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804">
-    <Resolution Name="Default">{0} declares a variable, {1}, of type {2}, which is never used or is only assigned to. Use this variable or remove it.</Resolution>
-   </Rule>
-   <Rule TypeName="SealMethodsThatSatisfyPrivateInterfaces" Category="Microsoft.Security" CheckId="CA2119">
-    <Resolution Name="Default">{0} is an overridable method that satisfies a member on the private interface '{1}'. Mark the method as final, implement it explicitly or seal its declaring type {2}.</Resolution>
    </Rule>
    <Rule TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304">
     <Resolution Name="Default">Because the behavior of {0} could vary based on the current user's locale settings, replace this call in {1} with a call to {2}. If the result of {2} will be displayed to the user, specify 'CultureInfo.CurrentCulture' as the 'CultureInfo' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify 'CultureInfo.InvariantCulture'.</Resolution>

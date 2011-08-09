@@ -1293,7 +1293,7 @@ namespace clojure.lang
                     //Java version: LINE_BEFORE.set(lntr.LineNumber);
                 }
 
-                Type exprType = exprTB.CreateType();
+                exprTB.CreateType();
 
                 // Need to put the loader init in its own type because we can't generate calls on the MethodBuilders
                 //  until after their types have been closed.

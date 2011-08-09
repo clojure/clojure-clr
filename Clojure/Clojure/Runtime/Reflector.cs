@@ -199,7 +199,6 @@ namespace clojure.lang
 
             foreach (Type type in interfaces)
             {
-                MethodInfo[] methods = type.GetMethods();
                 IEnumerable<MethodInfo> einfo
                      = type.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
                 foreach (MethodInfo minfo in einfo)
@@ -335,7 +334,7 @@ namespace clojure.lang
             else
                 flags |= BindingFlags.Instance;
 
-            MethodInfo[] all = t.GetMethods();
+            //MethodInfo[] all = t.GetMethods();
 
             IEnumerable<MethodInfo> einfo = t.GetMethods(flags).Where(mi => mi.Name == name && mi.GetParameters().Length == 0);
             List<MethodInfo> infos = new List<MethodInfo>(einfo);
@@ -563,7 +562,7 @@ namespace clojure.lang
                 return arg;
 
             Type paramType = pinfo.ParameterType;
-            Type argType = arg.GetType();
+            //Type argType = arg.GetType();
 
             if (!paramType.IsPrimitive)
                 return arg;

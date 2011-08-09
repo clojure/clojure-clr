@@ -21,6 +21,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents a rational number.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes")]
     [Serializable]
     public sealed class Ratio: IComparable, IConvertible
     {

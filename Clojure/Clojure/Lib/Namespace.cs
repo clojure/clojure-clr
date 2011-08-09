@@ -494,8 +494,7 @@ namespace clojure.lang
 
             public object GetRealObject(StreamingContext context)
             {
-                string name = (String)context.Context;
-                return Namespace.findOrCreate(_name);
+               return Namespace.findOrCreate(_name);
             }
 
             #endregion

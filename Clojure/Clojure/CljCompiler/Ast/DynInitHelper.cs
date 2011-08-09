@@ -126,18 +126,18 @@ namespace clojure.lang.CljCompiler.Ast
             _fieldInits.Add(init);
 
 
-            Type t = init.Type;
-            if (t.IsGenericType)
-            {
-                Type[] args = t.GetGenericArguments()[0].GetGenericArguments(); ;
-                // skip the first one, it is the site.
-                for (int k = 1; k < args.Length; k++)
-                {
-                    Type p = args[k];
-                    //if (!p.Assembly.GetName().Name.Equals("mscorlib") && !p.Assembly.GetName().Name.Equals("Clojure"))
-                    //    Console.WriteLine("Found {0}", p.ToString());
-                }
-            }
+            //Type t = init.Type;
+            //if (t.IsGenericType)
+            //{
+            //    Type[] args = t.GetGenericArguments()[0].GetGenericArguments(); ;
+            //    // skip the first one, it is the site.
+            //    for (int k = 1; k < args.Length; k++)
+            //    {
+            //        Type p = args[k];
+            //        //if (!p.Assembly.GetName().Name.Equals("mscorlib") && !p.Assembly.GetName().Name.Equals("Clojure"))
+            //        //    Console.WriteLine("Found {0}", p.ToString());
+            //    }
+            //}
 
             // rewrite the node...
             return Expression.Field(null, fb);

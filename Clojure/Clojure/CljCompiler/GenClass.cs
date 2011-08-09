@@ -742,7 +742,7 @@ namespace clojure.lang
 
         static Dictionary<string,List<MethodSignature>> ComputeOverloads(List<MethodSignature> sigs)
         {
-            HashSet<String> overloadNames = new HashSet<string>();
+            //HashSet<String> overloadNames = new HashSet<string>();
             Dictionary<string,List<MethodSignature>> name2SigMap = new Dictionary<string,List<MethodSignature>>();
 
             foreach (MethodSignature sig in sigs)
