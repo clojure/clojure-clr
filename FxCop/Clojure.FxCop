@@ -21,7 +21,9 @@
   <IgnoreGeneratedCode>False</IgnoreGeneratedCode>
  </ProjectOptions>
  <Targets>
+  <Target Name="$(ProjectDir)/../bin/4.0/Debug/Clojure.Compile.exe" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/../bin/4.0/Debug/Clojure.dll" Analyze="True" AnalyzeAllChildren="True" />
+  <Target Name="$(ProjectDir)/../bin/4.0/Debug/Clojure.Main.exe" Analyze="True" AnalyzeAllChildren="True" />
  </Targets>
  <Rules>
   <RuleFiles>
@@ -197,5 +199,39 @@
   <Groups />
   <Settings />
  </Rules>
- <FxCopReport Version="10.0" />
+ <FxCopReport Version="10.0">
+  <Targets>
+   <Target Name="$(ProjectDir)/../bin/4.0/Debug/Clojure.Compile.exe">
+    <Modules>
+     <Module Name="clojure.compile.exe">
+      <Messages>
+       <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Created="2011-08-09 17:56:38Z">
+        <Issue Name="NoStrongName">
+         <Item>'Clojure.Compile.exe'</Item>
+        </Issue>
+       </Message>
+      </Messages>
+     </Module>
+    </Modules>
+   </Target>
+   <Target Name="$(ProjectDir)/../bin/4.0/Debug/Clojure.Main.exe">
+    <Modules>
+     <Module Name="clojure.main.exe">
+      <Messages>
+       <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Created="2011-08-09 17:56:38Z">
+        <Issue Name="NoStrongName">
+         <Item>'Clojure.Main.exe'</Item>
+        </Issue>
+       </Message>
+      </Messages>
+     </Module>
+    </Modules>
+   </Target>
+  </Targets>
+  <Rules>
+   <Rule TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210">
+    <Resolution Name="NoStrongName">Sign {0} with a strong name key.</Resolution>
+   </Rule>
+  </Rules>
+ </FxCopReport>
 </FxCopProject>

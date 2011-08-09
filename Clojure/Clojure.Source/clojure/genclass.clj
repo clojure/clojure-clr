@@ -247,7 +247,7 @@
   [& options]
     (let [x *compile-files*]
       (when *compile-files*
-        (let [options-map (apply hash-map options)]
+        (let [options-map (into1 {} (map vec (partition 2 options)))]
           `'~(generate-class options-map)))))
           
           

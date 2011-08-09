@@ -478,11 +478,21 @@ namespace clojure.lang
             MethodSignature sig,
             ElseGenDelegate elseGen)
         {
-            MethodAttributes attribs = MethodAttributes.Public;
-            if (isStatic)
-                attribs |= MethodAttributes.Static;
+            MethodAttributes attributes;
+            CallingConventions conventions;
 
-            MethodBuilder mb = proxyTB.DefineMethod(sig.Name, MethodAttributes.Public| MethodAttributes.Virtual, CallingConventions.HasThis, sig.ReturnType, sig.ParamTypes);
+            if (isStatic)
+            {
+                attributes = MethodAttributes.Public | MethodAttributes.Static;
+                conventions = CallingConventions.Standard;
+            }
+            else
+            {
+                attributes = MethodAttributes.Public | MethodAttributes.Virtual;
+                conventions = CallingConventions.HasThis;
+            }
+
+            MethodBuilder mb = proxyTB.DefineMethod(sig.Name, attributes, conventions, sig.ReturnType, sig.ParamTypes);
             ILGen gen = new ILGen(mb.GetILGenerator());
 
             Label foundLabel = gen.DefineLabel();
