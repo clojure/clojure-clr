@@ -201,7 +201,7 @@
           <Members>
            <Member Name="#cons(System.Object)">
             <Messages>
-             <Message Id="System.Type.InvokeMember(System.String,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object,System.Object[])" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Type.InvokeMember(System.String,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object,System.Object[])" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'Type.InvokeMember(string, BindingFlags, Binder, object, object[])'</Item>
                <Item>'APersistentMap.cons(object)'</Item>
@@ -211,18 +211,6 @@
                <Item>'Type.InvokeMember(string, BindingFlags, Binder, object, object[])'</Item>
                <Item>'APersistentMap.cons(object)'</Item>
                <Item>'Type.InvokeMember(string, BindingFlags, Binder, object, object[], CultureInfo)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#equiv(System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'APersistentMap.equiv(object)'</Item>
-               <Item>'obj'</Item>
-               <Item>'o'</Item>
-               <Item>'IPersistentCollection.equiv(object)'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -231,7 +219,7 @@
          </Type>
          <Type Name="APersistentVector">
           <Messages>
-           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-07-31 21:54:45Z">
+           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-08-09 14:41:34Z">
             <Issue Name="Operator">
              <Item>'APersistentVector'</Item>
              <Item>!=</Item>
@@ -250,254 +238,12 @@
             </Issue>
            </Message>
           </Messages>
-          <Members>
-           <Member Name="#equiv(System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'APersistentVector.equiv(object)'</Item>
-               <Item>'obj'</Item>
-               <Item>'o'</Item>
-               <Item>'IPersistentCollection.equiv(object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="ASeq">
-          <Members>
-           <Member Name="#CopyTo(System.Object[],System.Int32)">
-            <Messages>
-             <Message Id="1#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'ASeq.CopyTo(object[], int)'</Item>
-               <Item>'index'</Item>
-               <Item>'arrayIndex'</Item>
-               <Item>'ICollection&lt;object&gt;.CopyTo(object[], int)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#equiv(System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'ASeq.equiv(object)'</Item>
-               <Item>'obj'</Item>
-               <Item>'o'</Item>
-               <Item>'IPersistentCollection.equiv(object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="ATransientSet">
-          <Members>
-           <Member Name="#invoke(System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'ATransientSet.invoke(object)'</Item>
-               <Item>'key'</Item>
-               <Item>'arg1'</Item>
-               <Item>'AFn.invoke(object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#invoke(System.Object,System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'ATransientSet.invoke(object, object)'</Item>
-               <Item>'key'</Item>
-               <Item>'arg1'</Item>
-               <Item>'AFn.invoke(object, object)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="1#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'ATransientSet.invoke(object, object)'</Item>
-               <Item>'notFound'</Item>
-               <Item>'arg2'</Item>
-               <Item>'AFn.invoke(object, object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="BigDecimal">
-          <Messages>
-           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-07-31 21:54:45Z">
-            <Issue Name="Operator">
-             <Item>'BigDecimal'</Item>
-             <Item>!=</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'BigDecimal'</Item>
-             <Item>&lt;</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'BigDecimal'</Item>
-             <Item>==</Item>
-            </Issue>
-            <Issue Name="Operator">
-             <Item>'BigDecimal'</Item>
-             <Item>&gt;</Item>
-            </Issue>
-           </Message>
-          </Messages>
-          <Members>
-           <Member Name="#DivideInteger(clojure.lang.BigDecimal,clojure.lang.BigDecimal+Context)">
-            <Messages>
-             <Message Id="precisionDiff" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigDecimal.DivideInteger(BigDecimal, BigDecimal.Context)'</Item>
-               <Item>'precisionDiff'</Item>
-               <Item>'int'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#DoParse(System.Char[],System.Int32,System.Int32,System.Boolean,clojure.lang.BigDecimal&amp;)">
-            <Messages>
-             <Message Id="System.Int32.Parse(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
-              <Issue Name="IFormatProviderAlternate">
-               <Item>'int.Parse(string)'</Item>
-               <Item>'BigDecimal.DoParse(char[], int, int, bool, out BigDecimal)'</Item>
-               <Item>'int.Parse(string, IFormatProvider)'</Item>
-               <Item>'CultureInfo.CurrentCulture'</Item>
-               <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ONE">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigDecimal.ONE'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#op_Addition(clojure.lang.BigDecimal,clojure.lang.BigDecimal)">
-            <Messages>
-             <Message TypeName="OverloadOperatorEqualsOnOverloadingAddAndSubtract" Category="Microsoft.Design" CheckId="CA1013" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigDecimal'</Item>
-               <Item>'BigDecimal.operator +(BigDecimal, BigDecimal)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#op_Subtraction(clojure.lang.BigDecimal,clojure.lang.BigDecimal)">
-            <Messages>
-             <Message TypeName="OverloadOperatorEqualsOnOverloadingAddAndSubtract" Category="Microsoft.Design" CheckId="CA1013" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigDecimal'</Item>
-               <Item>'BigDecimal.operator -(BigDecimal, BigDecimal)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#op_UnaryNegation(clojure.lang.BigDecimal)">
-            <Messages>
-             <Message TypeName="OperatorOverloadsHaveNamedAlternates" Category="Microsoft.Usage" CheckId="CA2225" Created="2011-07-31 21:54:45Z">
-              <Issue Name="Visibility">
-               <Item>'BigDecimal.Negate(BigDecimal)'</Item>
-               <Item>'BigDecimal.operator -(BigDecimal)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#TEN">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigDecimal.TEN'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ToScientificString()">
-            <Messages>
-             <Message Id="System.Int64.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
-              <Issue Name="IFormatProviderAlternateString">
-               <Item>'long.ToString()'</Item>
-               <Item>'BigDecimal.ToScientificString()'</Item>
-               <Item>'long.ToString(IFormatProvider)'</Item>
-               <Item>'CultureInfo.CurrentCulture'</Item>
-               <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ToType(System.Type,System.IFormatProvider)">
-            <Messages>
-             <Message Id="System.Convert.ChangeType(System.Object,System.Type)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
-              <Issue Name="IFormatProviderAlternate">
-               <Item>'Convert.ChangeType(object, Type)'</Item>
-               <Item>'BigDecimal.ToType(Type, IFormatProvider)'</Item>
-               <Item>'Convert.ChangeType(object, Type, IFormatProvider)'</Item>
-               <Item>'CultureInfo.CurrentCulture'</Item>
-               <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ZERO">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigDecimal.ZERO'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="BigDecimal+Context">
-          <Messages>
-           <Message TypeName="OverrideEqualsAndOperatorEqualsOnValueTypes" Category="Microsoft.Performance" CheckId="CA1815" Created="2011-07-31 21:54:45Z">
-            <Issue Name="op_Equality">
-             <Item>'BigDecimal.Context'</Item>
-            </Issue>
-           </Message>
-          </Messages>
-          <Members>
-           <Member Name="#Equals(System.Object)">
-            <Messages>
-             <Message TypeName="OverloadOperatorEqualsOnOverridingValueTypeEquals" Category="Microsoft.Usage" CheckId="CA2231" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigDecimal.Context'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ToString()">
-            <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
-              <Issue Name="IFormatProviderAlternateString">
-               <Item>'string.Format(string, object, object)'</Item>
-               <Item>'BigDecimal.Context.ToString()'</Item>
-               <Item>'string.Format(IFormatProvider, string, params object[])'</Item>
-               <Item>'CultureInfo.CurrentCulture'</Item>
-               <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
          </Type>
          <Type Name="BigInt">
           <Members>
            <Member Name="#intValue()">
             <Messages>
-             <Message Id="clojure.lang.BigInteger.ToInt32" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="clojure.lang.BigInteger.ToInt32" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'BigInteger.ToInt32()'</Item>
                <Item>'BigInt.intValue()'</Item>
@@ -510,7 +256,7 @@
            </Member>
            <Member Name="#longValue()">
             <Messages>
-             <Message Id="clojure.lang.BigInteger.ToInt64" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="clojure.lang.BigInteger.ToInt64" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'BigInteger.ToInt64()'</Item>
                <Item>'BigInt.longValue()'</Item>
@@ -523,7 +269,7 @@
            </Member>
            <Member Name="#ToString()">
             <Messages>
-             <Message Id="System.Int64.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int64.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'long.ToString()'</Item>
                <Item>'BigInt.ToString()'</Item>
@@ -536,188 +282,11 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="BigInteger">
-          <Members>
-           <Member Name="#FIVE">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigInteger.FIVE'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#HybridGcd(clojure.lang.BigInteger,clojure.lang.BigInteger)">
-            <Messages>
-             <Message Id="q" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigInteger.HybridGcd(BigInteger, BigInteger)'</Item>
-               <Item>'q'</Item>
-               <Item>'BigInteger'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#NEGATIVE_ONE">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigInteger.NEGATIVE_ONE'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ONE">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigInteger.ONE'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#op_ExclusiveOr(clojure.lang.BigInteger,clojure.lang.BigInteger)">
-            <Messages>
-             <Message TypeName="OperatorOverloadsHaveNamedAlternates" Category="Microsoft.Usage" CheckId="CA2225" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>Xor</Item>
-               <Item>'BigInteger.operator ^(BigInteger, BigInteger)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#op_OnesComplement(clojure.lang.BigInteger)">
-            <Messages>
-             <Message TypeName="OperatorOverloadsHaveNamedAlternates" Category="Microsoft.Usage" CheckId="CA2225" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>OnesComplement</Item>
-               <Item>'BigInteger.operator ~(BigInteger)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#op_UnaryNegation(clojure.lang.BigInteger)">
-            <Messages>
-             <Message TypeName="OperatorOverloadsHaveNamedAlternates" Category="Microsoft.Usage" CheckId="CA2225" Created="2011-07-31 21:54:45Z">
-              <Issue Name="Visibility">
-               <Item>'BigInteger.Negate(BigInteger)'</Item>
-               <Item>'BigInteger.operator -(BigInteger)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#TEN">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigInteger.TEN'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ToDecimal(System.IFormatProvider)">
-            <Messages>
-             <Message Id="clojure.lang.BigInteger.ToDecimal" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
-              <Issue Name="IFormatProviderAlternate">
-               <Item>'BigInteger.ToDecimal()'</Item>
-               <Item>'BigInteger.ToDecimal(IFormatProvider)'</Item>
-               <Item>'BigInteger.ToDecimal(IFormatProvider)'</Item>
-               <Item>'CultureInfo.CurrentCulture'</Item>
-               <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ToInt32(System.IFormatProvider)">
-            <Messages>
-             <Message Id="clojure.lang.BigInteger.ToInt32" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
-              <Issue Name="IFormatProviderAlternate">
-               <Item>'BigInteger.ToInt32()'</Item>
-               <Item>'BigInteger.ToInt32(IFormatProvider)'</Item>
-               <Item>'BigInteger.ToInt32(IFormatProvider)'</Item>
-               <Item>'CultureInfo.CurrentCulture'</Item>
-               <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ToInt64(System.IFormatProvider)">
-            <Messages>
-             <Message Id="clojure.lang.BigInteger.ToInt64" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
-              <Issue Name="IFormatProviderAlternate">
-               <Item>'BigInteger.ToInt64()'</Item>
-               <Item>'BigInteger.ToInt64(IFormatProvider)'</Item>
-               <Item>'BigInteger.ToInt64(IFormatProvider)'</Item>
-               <Item>'CultureInfo.CurrentCulture'</Item>
-               <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ToString(System.UInt32)">
-            <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
-              <Issue Name="IFormatProviderAlternateString">
-               <Item>'string.Format(string, object, object, object)'</Item>
-               <Item>'BigInteger.ToString(uint)'</Item>
-               <Item>'string.Format(IFormatProvider, string, params object[])'</Item>
-               <Item>'CultureInfo.CurrentCulture'</Item>
-               <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ToUInt32(System.IFormatProvider)">
-            <Messages>
-             <Message Id="clojure.lang.BigInteger.ToUInt32" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
-              <Issue Name="IFormatProviderAlternate">
-               <Item>'BigInteger.ToUInt32()'</Item>
-               <Item>'BigInteger.ToUInt32(IFormatProvider)'</Item>
-               <Item>'BigInteger.ToUInt32(IFormatProvider)'</Item>
-               <Item>'CultureInfo.CurrentCulture'</Item>
-               <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ToUInt64(System.IFormatProvider)">
-            <Messages>
-             <Message Id="clojure.lang.BigInteger.ToUInt64" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
-              <Issue Name="IFormatProviderAlternate">
-               <Item>'BigInteger.ToUInt64()'</Item>
-               <Item>'BigInteger.ToUInt64(IFormatProvider)'</Item>
-               <Item>'BigInteger.ToUInt64(IFormatProvider)'</Item>
-               <Item>'CultureInfo.CurrentCulture'</Item>
-               <Item>'CultureInfo.InvariantCulture'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#TWO">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigInteger.TWO'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ZERO">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'BigInteger.ZERO'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="Compiler">
           <Members>
            <Member Name="#AnalyzeSymbol(clojure.lang.Symbol)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'Compiler.AnalyzeSymbol(Symbol)'</Item>
@@ -726,7 +295,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'Compiler.AnalyzeSymbol(Symbol)'</Item>
@@ -737,18 +306,9 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#CHAR_MAP">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'Compiler.CHAR_MAP'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#Compile(System.IO.TextReader,System.String,System.String,System.String)">
             <Messages>
-             <Message Id="exprType" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="exprType" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'Compiler.Compile(TextReader, string, string, string)'</Item>
                <Item>'exprType'</Item>
@@ -759,7 +319,7 @@
            </Member>
            <Member Name="#DestubClassName(System.String)">
             <Messages>
-             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.StartsWith(string)'</Item>
                <Item>'Compiler.DestubClassName(string)'</Item>
@@ -770,7 +330,7 @@
            </Member>
            <Member Name="#eval(System.Object)">
             <Messages>
-             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.StartsWith(string)'</Item>
                <Item>'Compiler.eval(object)'</Item>
@@ -781,7 +341,7 @@
            </Member>
            <Member Name="#IsMacro(System.Object)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'Compiler.IsMacro(object)'</Item>
@@ -794,7 +354,7 @@
            </Member>
            <Member Name="#LoadAssembly(System.IO.FileInfo)">
             <Messages>
-             <Message Id="System.Type.InvokeMember(System.String,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object,System.Object[])" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Type.InvokeMember(System.String,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object,System.Object[])" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'Type.InvokeMember(string, BindingFlags, Binder, object, object[])'</Item>
                <Item>'Compiler.LoadAssembly(FileInfo)'</Item>
@@ -805,7 +365,7 @@
            </Member>
            <Member Name="#LookupVar(clojure.lang.Symbol,System.Boolean)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'Compiler.LookupVar(Symbol, bool)'</Item>
@@ -818,7 +378,7 @@
            </Member>
            <Member Name="#maybeResolveIn(clojure.lang.Namespace,clojure.lang.Symbol)">
             <Messages>
-             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.EndsWith(string)'</Item>
                <Item>'Compiler.maybeResolveIn(Namespace, Symbol)'</Item>
@@ -829,7 +389,7 @@
            </Member>
            <Member Name="#ResolveIn(clojure.lang.Namespace,clojure.lang.Symbol,System.Boolean)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'Compiler.ResolveIn(Namespace, Symbol, bool)'</Item>
@@ -849,7 +409,7 @@
            </Member>
            <Member Name="#SaveEvalContext()">
             <Messages>
-             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'int.ToString()'</Item>
                <Item>'Compiler.SaveEvalContext()'</Item>
@@ -866,7 +426,7 @@
           <Members>
            <Member Name="#ErrorMsg(System.String,System.Int32,System.String)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object, object)'</Item>
                <Item>'Compiler.CompilerException.ErrorMsg(string, int, string)'</Item>
@@ -883,7 +443,7 @@
           <Members>
            <Member Name="#ToString()">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'CountDownLatch.ToString()'</Item>
@@ -900,7 +460,7 @@
           <Members>
            <Member Name="#.ctor(System.String,System.Char)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'FormatFlagsConversionMismatchException.FormatFlagsConversionMismatchException(string, char)'</Item>
@@ -915,7 +475,7 @@
          </Type>
          <Type Name="Future">
           <Messages>
-           <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Created="2011-07-31 21:54:45Z" FixCategory="DependsOnFix">
+           <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Created="2011-08-09 14:41:34Z" FixCategory="DependsOnFix">
             <Issue Name="DependsOnFix">
              <Item>'Future'</Item>
              <Item>'ManualResetEvent'</Item>
@@ -927,7 +487,7 @@
           <Members>
            <Member Name="#ComputeOverloads(System.Collections.Generic.List`1&lt;clojure.lang.CljCompiler.MethodSignature&gt;)">
             <Messages>
-             <Message Id="overloadNames" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="overloadNames" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'GenClass.ComputeOverloads(List&lt;MethodSignature&gt;)'</Item>
                <Item>'overloadNames'</Item>
@@ -942,7 +502,7 @@
           <Members>
            <Member Name="#CreateCustomAttributeBuilder(clojure.lang.IMapEntry)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'GenInterface.CreateCustomAttributeBuilder(IMapEntry)'</Item>
@@ -951,7 +511,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'GenInterface.CreateCustomAttributeBuilder(IMapEntry)'</Item>
@@ -964,7 +524,7 @@
            </Member>
            <Member Name="#DefineMethod(System.Reflection.Emit.TypeBuilder,clojure.lang.IPersistentVector)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'GenInterface.DefineMethod(TypeBuilder, IPersistentVector)'</Item>
@@ -981,7 +541,7 @@
           <Members>
            <Member Name="#.ctor(System.String)">
             <Messages>
-             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'int.ToString()'</Item>
                <Item>'GenProxy.GenProxy(string)'</Item>
@@ -998,7 +558,7 @@
           <Members>
            <Member Name="#.ctor(System.Char,System.Type)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'IllegalFormatConversionException.IllegalFormatConversionException(char, Type)'</Item>
@@ -1015,7 +575,7 @@
           <Members>
            <Member Name="#.ctor(System.Int32)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'IllegalFormatPrecisionException.IllegalFormatPrecisionException(int)'</Item>
@@ -1032,7 +592,7 @@
           <Members>
            <Member Name="#.ctor(System.Int32)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'IllegalFormatWidthException.IllegalFormatWidthException(int)'</Item>
@@ -1045,27 +605,11 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="IPersistentMap">
-          <Members>
-           <Member Name="#cons(System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'IPersistentMap.cons(object)'</Item>
-               <Item>'obj'</Item>
-               <Item>'o'</Item>
-               <Item>'IPersistentCollection.cons(object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="JavaConcurrentDictionary`2">
           <Members>
            <Member Name="#Values">
             <Messages>
-             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2011-07-31 21:54:45Z">
+             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'JavaConcurrentDictionary&lt;TKey, TValue&gt;.Values'</Item>
               </Issue>
@@ -1074,22 +618,9 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="JReMatcher">
-          <Members>
-           <Member Name="#group(System.Int32)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldNotMatchMemberNames" Category="Microsoft.Naming" CheckId="CA1719" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'group'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="Keyword">
           <Messages>
-           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-07-31 21:54:45Z">
+           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-08-09 14:41:34Z">
             <Issue Name="Operator">
              <Item>'Keyword'</Item>
              <Item>!=</Item>
@@ -1108,74 +639,12 @@
             </Issue>
            </Message>
           </Messages>
-          <Members>
-           <Member Name="#invoke(System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'Keyword.invoke(object)'</Item>
-               <Item>'obj'</Item>
-               <Item>'arg1'</Item>
-               <Item>'AFn.invoke(object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#invoke(System.Object,System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'Keyword.invoke(object, object)'</Item>
-               <Item>'obj'</Item>
-               <Item>'arg1'</Item>
-               <Item>'AFn.invoke(object, object)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="1#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'Keyword.invoke(object, object)'</Item>
-               <Item>'notFound'</Item>
-               <Item>'arg2'</Item>
-               <Item>'AFn.invoke(object, object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="LazySeq">
-          <Members>
-           <Member Name="#CopyTo(System.Object[],System.Int32)">
-            <Messages>
-             <Message Id="1#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'LazySeq.CopyTo(object[], int)'</Item>
-               <Item>'index'</Item>
-               <Item>'arrayIndex'</Item>
-               <Item>'ICollection&lt;object&gt;.CopyTo(object[], int)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Remove(System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'LazySeq.Remove(object)'</Item>
-               <Item>'value'</Item>
-               <Item>'item'</Item>
-               <Item>'ICollection&lt;object&gt;.Remove(object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
          </Type>
          <Type Name="LispReader">
           <Members>
            <Member Name="#matchSymbol(System.String,System.Int32)">
             <Messages>
-             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.EndsWith(string)'</Item>
                <Item>'LispReader.matchSymbol(string, int)'</Item>
@@ -1187,14 +656,14 @@
                <Item>'string.EndsWith(string, StringComparison)'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.IndexOf(System.String,System.Int32)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.IndexOf(System.String,System.Int32)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.IndexOf(string, int)'</Item>
                <Item>'LispReader.matchSymbol(string, int)'</Item>
                <Item>'string.IndexOf(string, int, StringComparison)'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.StartsWith(string)'</Item>
                <Item>'LispReader.matchSymbol(string, int)'</Item>
@@ -1220,7 +689,7 @@
            </Member>
            <Member Name="#ReadDelimitedList(System.Char,clojure.lang.PushbackTextReader,System.Boolean)">
             <Messages>
-             <Message TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002" Created="2011-07-31 21:54:45Z">
+             <Message TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'List&lt;object&gt;'</Item>
                <Item>'LispReader.ReadDelimitedList(char, PushbackTextReader, bool)'</Item>
@@ -1234,7 +703,7 @@
           <Members>
            <Member Name="#Read(clojure.lang.PushbackTextReader,System.Char)">
             <Messages>
-             <Message Id="System.Int32.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'int.ToString(string)'</Item>
                <Item>'LispReader.CharacterReader.Read(PushbackTextReader, char)'</Item>
@@ -1243,7 +712,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.StartsWith(string)'</Item>
                <Item>'LispReader.CharacterReader.Read(PushbackTextReader, char)'</Item>
@@ -1263,7 +732,7 @@
           <Members>
            <Member Name="#Read(clojure.lang.PushbackTextReader,System.Char)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'LispReader.CtorReader.Read(PushbackTextReader, char)'</Item>
@@ -1272,7 +741,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'LispReader.CtorReader.Read(PushbackTextReader, char)'</Item>
@@ -1296,7 +765,7 @@
           <Members>
            <Member Name="#Read(clojure.lang.PushbackTextReader,System.Char)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'LispReader.DispatchReader.Read(PushbackTextReader, char)'</Item>
@@ -1313,7 +782,7 @@
           <Members>
            <Member Name="#Read(clojure.lang.PushbackTextReader,System.Char)">
             <Messages>
-             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.EndsWith(string)'</Item>
                <Item>'LispReader.EvalReader.Read(PushbackTextReader, char)'</Item>
@@ -1328,7 +797,7 @@
           <Members>
            <Member Name="#AnalyzeSyntaxQuote(System.Object,System.Boolean&amp;)">
             <Messages>
-             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.EndsWith(string)'</Item>
                <Item>'LispReader.SyntaxQuoteReader.AnalyzeSyntaxQuote(object, out bool)'</Item>
@@ -1340,7 +809,7 @@
                <Item>'string.EndsWith(string, StringComparison)'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.StartsWith(string)'</Item>
                <Item>'LispReader.SyntaxQuoteReader.AnalyzeSyntaxQuote(object, out bool)'</Item>
@@ -1353,12 +822,12 @@
          </Type>
          <Type Name="MapEnumerator">
           <Messages>
-           <Message TypeName="EnumeratorsShouldBeStronglyTyped" Category="Microsoft.Design" CheckId="CA1038" Created="2011-07-31 21:54:45Z">
+           <Message TypeName="EnumeratorsShouldBeStronglyTyped" Category="Microsoft.Design" CheckId="CA1038" Created="2011-08-09 14:41:34Z">
             <Issue>
              <Item>'MapEnumerator'</Item>
             </Issue>
            </Message>
-           <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Created="2011-07-31 21:54:45Z" FixCategory="DependsOnFix">
+           <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Created="2011-08-09 14:41:34Z" FixCategory="DependsOnFix">
             <Issue Name="DependsOnFix">
              <Item>'MapEnumerator'</Item>
              <Item>'SeqEnumerator'</Item>
@@ -1370,7 +839,7 @@
           <Members>
            <Member Name="#table">
             <Messages>
-             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2011-07-31 21:54:45Z">
+             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'MethodImplCache.table'</Item>
               </Issue>
@@ -1383,7 +852,7 @@
           <Members>
            <Member Name="#.ctor(System.String)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'MissingFormatArgumentException.MissingFormatArgumentException(string)'</Item>
@@ -1400,7 +869,7 @@
           <Members>
            <Member Name="#FindAndCacheBestMethod(System.Object)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object[])" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object[])" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, params object[])'</Item>
                <Item>'MultiFn.FindAndCacheBestMethod(object)'</Item>
@@ -1413,7 +882,7 @@
            </Member>
            <Member Name="#GetFn(System.Object)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'MultiFn.GetFn(object)'</Item>
@@ -1426,7 +895,7 @@
            </Member>
            <Member Name="#preferMethod(System.Object,System.Object)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object, object)'</Item>
                <Item>'MultiFn.preferMethod(object, object)'</Item>
@@ -1443,7 +912,7 @@
           <Members>
            <Member Name="#addAlias(clojure.lang.Symbol,clojure.lang.Namespace)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object, object)'</Item>
                <Item>'Namespace.addAlias(Symbol, Namespace)'</Item>
@@ -1460,7 +929,7 @@
           <Members>
            <Member Name="#GetRealObject(System.Runtime.Serialization.StreamingContext)">
             <Messages>
-             <Message Id="name" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="name" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'Namespace.NamespaceSerializationHelper.GetRealObject(StreamingContext)'</Item>
                <Item>'name'</Item>
@@ -1471,35 +940,11 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="Numbers">
-          <Members>
-           <Member Name="#unchecked_int_dec(System.Int32)">
-            <Messages>
-             <Message Id="x-1" TypeName="OperationsShouldNotOverflow" Category="Microsoft.Usage" CheckId="CA2233" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>x-1</Item>
-               <Item>'Numbers.unchecked_int_dec(int)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#unchecked_int_inc(System.Int32)">
-            <Messages>
-             <Message Id="x+1" TypeName="OperationsShouldNotOverflow" Category="Microsoft.Usage" CheckId="CA2233" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>x+1</Item>
-               <Item>'Numbers.unchecked_int_inc(int)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="PersistentHashMap">
           <Members>
            <Member Name="#create(clojure.lang.ISeq)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'PersistentHashMap.create(ISeq)'</Item>
@@ -1512,7 +957,7 @@
            </Member>
            <Member Name="#create1(System.Collections.IList)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'PersistentHashMap.create1(IList)'</Item>
@@ -1525,7 +970,7 @@
            </Member>
            <Member Name="#createWithCheck(clojure.lang.ISeq)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'PersistentHashMap.createWithCheck(ISeq)'</Item>
@@ -1538,52 +983,11 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="PersistentList">
-          <Members>
-           <Member Name="#creator">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'PersistentList.creator'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="PersistentList+EmptyList">
-          <Members>
-           <Member Name="#Add(System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'PersistentList.EmptyList.Add(object)'</Item>
-               <Item>'value'</Item>
-               <Item>'item'</Item>
-               <Item>'ICollection&lt;object&gt;.Add(object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Remove(System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'PersistentList.EmptyList.Remove(object)'</Item>
-               <Item>'value'</Item>
-               <Item>'item'</Item>
-               <Item>'ICollection&lt;object&gt;.Remove(object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="PersistentStructMap">
           <Members>
            <Member Name="#create(clojure.lang.PersistentStructMap+Def,clojure.lang.ISeq)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'PersistentStructMap.create(PersistentStructMap.Def, ISeq)'</Item>
@@ -1600,7 +1004,7 @@
           <Members>
            <Member Name="#create(clojure.lang.ISeq)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'PersistentTreeMap.create(ISeq)'</Item>
@@ -1613,7 +1017,7 @@
            </Member>
            <Member Name="#create(System.Collections.IComparer,clojure.lang.ISeq)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'PersistentTreeMap.create(IComparer, ISeq)'</Item>
@@ -1626,42 +1030,13 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="PersistentVector">
-          <Members>
-           <Member Name="#cons(System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'PersistentVector.cons(object)'</Item>
-               <Item>'val'</Item>
-               <Item>'o'</Item>
-               <Item>'APersistentVector.cons(object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="PersistentVector+Node">
           <Members>
            <Member Name="#Array">
             <Messages>
-             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2011-07-31 21:54:45Z">
+             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'PersistentVector.Node.Array'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="Printf">
-          <Members>
-           <Member Name="#Format(System.String,System.Object[])">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldNotMatchMemberNames" Category="Microsoft.Naming" CheckId="CA1719" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'format'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -1672,7 +1047,7 @@
           <Members>
            <Member Name="#ComputeConversion(System.Text.RegularExpressions.Group)">
             <Messages>
-             <Message Id="System.Char.ToLower(System.Char)" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Char.ToLower(System.Char)" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'char.ToLower(char)'</Item>
                <Item>'Printf.FormatSpecificierChunk.ComputeConversion(Group)'</Item>
@@ -1683,7 +1058,7 @@
            </Member>
            <Member Name="#ComputeIndex(System.Text.RegularExpressions.Group)">
             <Messages>
-             <Message Id="System.Int32.Parse(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.Parse(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'int.Parse(string)'</Item>
                <Item>'Printf.FormatSpecificierChunk.ComputeIndex(Group)'</Item>
@@ -1696,7 +1071,7 @@
            </Member>
            <Member Name="#ComputePrecision(System.Text.RegularExpressions.Group)">
             <Messages>
-             <Message Id="System.Int32.Parse(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.Parse(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'int.Parse(string)'</Item>
                <Item>'Printf.FormatSpecificierChunk.ComputePrecision(Group)'</Item>
@@ -1709,7 +1084,7 @@
            </Member>
            <Member Name="#ComputeWidth(System.Text.RegularExpressions.Group)">
             <Messages>
-             <Message Id="System.Int32.Parse(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.Parse(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'int.Parse(string)'</Item>
                <Item>'Printf.FormatSpecificierChunk.ComputeWidth(Group)'</Item>
@@ -1722,7 +1097,7 @@
            </Member>
            <Member Name="#PrintDateTime(System.Text.StringBuilder,System.DateTime)">
             <Messages>
-             <Message Id="System.DateTime.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.DateTime.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'DateTime.ToString(string)'</Item>
                <Item>'Printf.FormatSpecificierChunk.PrintDateTime(StringBuilder, DateTime)'</Item>
@@ -1731,7 +1106,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.Int32.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'int.ToString(string)'</Item>
                <Item>'Printf.FormatSpecificierChunk.PrintDateTime(StringBuilder, DateTime)'</Item>
@@ -1747,7 +1122,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.Int64.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int64.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'long.ToString(string)'</Item>
                <Item>'Printf.FormatSpecificierChunk.PrintDateTime(StringBuilder, DateTime)'</Item>
@@ -1760,14 +1135,14 @@
            </Member>
            <Member Name="#PrintDouble(System.Text.StringBuilder,System.Double)">
             <Messages>
-             <Message Id="System.Char.ToUpper(System.Char)" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Char.ToUpper(System.Char)" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'char.ToUpper(char)'</Item>
                <Item>'Printf.FormatSpecificierChunk.PrintDouble(StringBuilder, double)'</Item>
                <Item>'char.ToUpper(char, CultureInfo)'</Item>
               </Issue>
              </Message>
-             <Message Id="System.Double.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Double.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'double.ToString(string)'</Item>
                <Item>'Printf.FormatSpecificierChunk.PrintDouble(StringBuilder, double)'</Item>
@@ -1776,7 +1151,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'Printf.FormatSpecificierChunk.PrintDouble(StringBuilder, double)'</Item>
@@ -1789,7 +1164,7 @@
            </Member>
            <Member Name="#PrintInteger(System.Text.StringBuilder,System.Int64)">
             <Messages>
-             <Message Id="System.Int64.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int64.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'long.ToString(string)'</Item>
                <Item>'Printf.FormatSpecificierChunk.PrintInteger(StringBuilder, long)'</Item>
@@ -1802,7 +1177,7 @@
            </Member>
            <Member Name="#PrintInteger(System.Text.StringBuilder,System.UInt64)">
             <Messages>
-             <Message Id="System.UInt64.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.UInt64.ToString(System.String)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'ulong.ToString(string)'</Item>
                <Item>'Printf.FormatSpecificierChunk.PrintInteger(StringBuilder, ulong)'</Item>
@@ -1815,7 +1190,7 @@
            </Member>
            <Member Name="#PrintIntOctHex(System.Text.StringBuilder,System.String,System.Boolean,System.Boolean)">
             <Messages>
-             <Message Id="System.String.ToUpper" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.ToUpper" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.ToUpper()'</Item>
                <Item>'Printf.FormatSpecificierChunk.PrintIntOctHex(StringBuilder, string, bool, bool)'</Item>
@@ -1826,7 +1201,7 @@
            </Member>
            <Member Name="#PrintString(System.Text.StringBuilder,System.String)">
             <Messages>
-             <Message Id="System.String.ToUpper" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.ToUpper" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.ToUpper()'</Item>
                <Item>'Printf.FormatSpecificierChunk.PrintString(StringBuilder, string)'</Item>
@@ -1837,7 +1212,7 @@
            </Member>
            <Member Name="#ToStringAux()">
             <Messages>
-             <Message Id="System.Char.ToUpper(System.Char)" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Char.ToUpper(System.Char)" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'char.ToUpper(char)'</Item>
                <Item>'Printf.FormatSpecificierChunk.ToStringAux()'</Item>
@@ -1850,7 +1225,7 @@
          </Type>
          <Type Name="Ratio">
           <Messages>
-           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-07-31 21:54:45Z">
+           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-08-09 14:41:34Z">
             <Issue Name="Operator">
              <Item>'Ratio'</Item>
              <Item>!=</Item>
@@ -1872,7 +1247,7 @@
           <Members>
            <Member Name="#ToInt64(System.IFormatProvider)">
             <Messages>
-             <Message Id="System.Convert.ToInt64(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToInt64(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToInt64(object)'</Item>
                <Item>'Ratio.ToInt64(IFormatProvider)'</Item>
@@ -1885,7 +1260,7 @@
            </Member>
            <Member Name="#ToType(System.Type,System.IFormatProvider)">
             <Messages>
-             <Message Id="System.Convert.ChangeType(System.Object,System.Type)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ChangeType(System.Object,System.Type)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ChangeType(object, Type)'</Item>
                <Item>'Ratio.ToType(Type, IFormatProvider)'</Item>
@@ -1900,7 +1275,7 @@
          </Type>
          <Type Name="Ref">
           <Messages>
-           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-07-31 21:54:45Z">
+           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-08-09 14:41:34Z">
             <Issue Name="Equals">
              <Item>'Ref'</Item>
             </Issue>
@@ -1921,7 +1296,7 @@
              <Item>&gt;</Item>
             </Issue>
            </Message>
-           <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Created="2011-07-31 21:54:45Z" FixCategory="DependsOnFix">
+           <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Created="2011-08-09 14:41:34Z" FixCategory="DependsOnFix">
             <Issue Name="DependsOnFix">
              <Item>'Ref'</Item>
              <Item>'ReaderWriterLockSlim'</Item>
@@ -1931,7 +1306,7 @@
           <Members>
            <Member Name="#currentVal()">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'Ref.currentVal()'</Item>
@@ -1948,14 +1323,14 @@
           <Members>
            <Member Name="#BoxArg(System.Reflection.ParameterInfo,System.Object)">
             <Messages>
-             <Message Id="argType" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="argType" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'Reflector.BoxArg(ParameterInfo, object)'</Item>
                <Item>'argType'</Item>
                <Item>'Type'</Item>
               </Issue>
              </Message>
-             <Message Id="System.Convert.ChangeType(System.Object,System.Type)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ChangeType(System.Object,System.Type)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ChangeType(object, Type)'</Item>
                <Item>'Reflector.BoxArg(ParameterInfo, object)'</Item>
@@ -1968,13 +1343,13 @@
            </Member>
            <Member Name="#CallInstanceMethod(System.String,System.Collections.Generic.List`1&lt;System.Type&gt;,System.Object,System.Object[])">
             <Messages>
-             <Message TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002" Created="2011-07-31 21:54:45Z">
+             <Message TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'List&lt;Type&gt;'</Item>
                <Item>'Reflector.CallInstanceMethod(string, List&lt;Type&gt;, object, params object[])'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object, object)'</Item>
                <Item>'Reflector.CallInstanceMethod(string, List&lt;Type&gt;, object, params object[])'</Item>
@@ -1994,13 +1369,13 @@
            </Member>
            <Member Name="#CallStaticMethod(System.String,System.Collections.Generic.List`1&lt;System.Type&gt;,System.Type,System.Object[])">
             <Messages>
-             <Message TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002" Created="2011-07-31 21:54:45Z">
+             <Message TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'List&lt;Type&gt;'</Item>
                <Item>'Reflector.CallStaticMethod(string, List&lt;Type&gt;, Type, params object[])'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object, object)'</Item>
                <Item>'Reflector.CallStaticMethod(string, List&lt;Type&gt;, Type, params object[])'</Item>
@@ -2020,7 +1395,7 @@
            </Member>
            <Member Name="#GetArityZeroMethod(System.Type,System.String,System.Boolean)">
             <Messages>
-             <Message Id="all" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="all" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'Reflector.GetArityZeroMethod(Type, string, bool)'</Item>
                <Item>'all'</Item>
@@ -2031,7 +1406,7 @@
            </Member>
            <Member Name="#GetInstanceFieldOrProperty(System.Object,System.String)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'Reflector.GetInstanceFieldOrProperty(object, string)'</Item>
@@ -2044,7 +1419,7 @@
            </Member>
            <Member Name="#GetInterfaceMethods(System.Type,System.String,System.Collections.Generic.List`1&lt;System.Type&gt;,System.Int32)">
             <Messages>
-             <Message Id="methods" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="methods" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'Reflector.GetInterfaceMethods(Type, string, List&lt;Type&gt;, int)'</Item>
                <Item>'methods'</Item>
@@ -2055,7 +1430,7 @@
            </Member>
            <Member Name="#GetMatchingMethod(clojure.lang.IPersistentMap,clojure.lang.CljCompiler.Ast.Expr,System.Collections.Generic.List`1&lt;clojure.lang.CljCompiler.Ast.HostArg&gt;,System.String,System.Collections.Generic.List`1&lt;System.Type&gt;)">
             <Messages>
-             <Message TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002" Created="2011-07-31 21:54:45Z">
+             <Message TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'List&lt;HostArg&gt;'</Item>
                <Item>'Reflector.GetMatchingMethod(IPersistentMap, Expr, List&lt;HostArg&gt;, string, List&lt;Type&gt;)'</Item>
@@ -2069,7 +1444,7 @@
            </Member>
            <Member Name="#GetMatchingMethod(clojure.lang.IPersistentMap,System.Type,System.Collections.Generic.List`1&lt;clojure.lang.CljCompiler.Ast.HostArg&gt;,System.String,System.Collections.Generic.List`1&lt;System.Type&gt;)">
             <Messages>
-             <Message TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002" Created="2011-07-31 21:54:45Z">
+             <Message TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'List&lt;HostArg&gt;'</Item>
                <Item>'Reflector.GetMatchingMethod(IPersistentMap, Type, List&lt;HostArg&gt;, string, List&lt;Type&gt;)'</Item>
@@ -2083,7 +1458,7 @@
            </Member>
            <Member Name="#InvokeConstructor(System.Type,System.Object[])">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'Reflector.InvokeConstructor(Type, object[])'</Item>
@@ -2096,7 +1471,7 @@
            </Member>
            <Member Name="#InvokeMatchingMethod(System.String,System.Collections.Generic.List`1&lt;System.Reflection.MethodBase&gt;,System.Type,System.Object,System.Object[])">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'Reflector.InvokeMatchingMethod(string, List&lt;MethodBase&gt;, Type, object, object[])'</Item>
@@ -2105,7 +1480,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.Format(System.String,System.Object[])" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object[])" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, params object[])'</Item>
                <Item>'Reflector.InvokeMatchingMethod(string, List&lt;MethodBase&gt;, Type, object, object[])'</Item>
@@ -2118,7 +1493,7 @@
            </Member>
            <Member Name="#MaybeReflectionWarn(clojure.lang.IPersistentMap,System.Reflection.MethodBase,System.String)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object, object)'</Item>
                <Item>'Reflector.MaybeReflectionWarn(IPersistentMap, MethodBase, string)'</Item>
@@ -2131,7 +1506,7 @@
            </Member>
            <Member Name="#SetInstanceFieldOrProperty(System.Object,System.String,System.Object)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'Reflector.SetInstanceFieldOrProperty(object, string, object)'</Item>
@@ -2144,27 +1519,11 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="RestFn">
-          <Members>
-           <Member Name="#applyTo(clojure.lang.ISeq)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'RestFn.applyTo(ISeq)'</Item>
-               <Item>'args'</Item>
-               <Item>'arglist'</Item>
-               <Item>'AFn.applyTo(ISeq)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="RT">
           <Members>
            <Member Name="#decimalCast(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToDecimal(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToDecimal(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToDecimal(object)'</Item>
                <Item>'RT.decimalCast(object)'</Item>
@@ -2177,7 +1536,7 @@
            </Member>
            <Member Name="#EmptyObjectArray">
             <Messages>
-             <Message TypeName="ArrayFieldsShouldNotBeReadOnly" Category="Microsoft.Security" CheckId="CA2105" Created="2011-07-31 21:54:45Z">
+             <Message TypeName="ArrayFieldsShouldNotBeReadOnly" Category="Microsoft.Security" CheckId="CA2105" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'RT.EmptyObjectArray'</Item>
               </Issue>
@@ -2186,7 +1545,7 @@
            </Member>
            <Member Name="#load(System.String,System.Boolean)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'RT.load(string, bool)'</Item>
@@ -2199,7 +1558,7 @@
            </Member>
            <Member Name="#LoadCljScript(System.String,System.Boolean)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'RT.LoadCljScript(string, bool)'</Item>
@@ -2212,7 +1571,7 @@
            </Member>
            <Member Name="#NthFrom(System.Object,System.Int32)">
             <Messages>
-             <Message Id="System.Type.InvokeMember(System.String,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object,System.Object[])" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Type.InvokeMember(System.String,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object,System.Object[])" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'Type.InvokeMember(string, BindingFlags, Binder, object, object[])'</Item>
                <Item>'RT.NthFrom(object, int)'</Item>
@@ -2228,7 +1587,7 @@
            </Member>
            <Member Name="#NthFrom(System.Object,System.Int32,System.Object)">
             <Messages>
-             <Message Id="System.Type.InvokeMember(System.String,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object,System.Object[])" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Type.InvokeMember(System.String,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object,System.Object[])" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'Type.InvokeMember(string, BindingFlags, Binder, object, object[])'</Item>
                <Item>'RT.NthFrom(object, int, object)'</Item>
@@ -2244,7 +1603,7 @@
            </Member>
            <Member Name="#printString(System.Object)">
             <Messages>
-             <Message Id="System.IO.StringWriter.#ctor" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.IO.StringWriter.#ctor" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'StringWriter.StringWriter()'</Item>
                <Item>'RT.printString(object)'</Item>
@@ -2257,7 +1616,7 @@
            </Member>
            <Member Name="#ulongCast(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToUInt64(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToUInt64(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToUInt64(object)'</Item>
                <Item>'RT.ulongCast(object)'</Item>
@@ -2270,22 +1629,9 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="RuntimeBootstrapFlag">
-          <Members>
-           <Member Name="#_doRTBootstrap">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'RuntimeBootstrapFlag._doRTBootstrap'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="Symbol">
           <Messages>
-           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-07-31 21:54:45Z">
+           <Message TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036" Created="2011-08-09 14:41:34Z">
             <Issue Name="Operator">
              <Item>'Symbol'</Item>
              <Item>!=</Item>
@@ -2307,7 +1653,7 @@
           <Members>
            <Member Name="#CompareTo(System.Object)">
             <Messages>
-             <Message Id="System.String.CompareTo(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.CompareTo(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.CompareTo(string)'</Item>
                <Item>'Symbol.CompareTo(object)'</Item>
@@ -2317,38 +1663,6 @@
                <Item>'string.CompareTo(string)'</Item>
                <Item>'Symbol.CompareTo(object)'</Item>
                <Item>'string.Compare(string, string, StringComparison)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#invoke(System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'Symbol.invoke(object)'</Item>
-               <Item>'obj'</Item>
-               <Item>'arg1'</Item>
-               <Item>'AFn.invoke(object)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#invoke(System.Object,System.Object)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'Symbol.invoke(object, object)'</Item>
-               <Item>'obj'</Item>
-               <Item>'arg1'</Item>
-               <Item>'AFn.invoke(object, object)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="1#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'Symbol.invoke(object, object)'</Item>
-               <Item>'notFound'</Item>
-               <Item>'arg2'</Item>
-               <Item>'AFn.invoke(object, object)'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -2357,19 +1671,9 @@
          </Type>
          <Type Name="Util">
           <Members>
-           <Member Name="#BitCount(System.Int32)">
-            <Messages>
-             <Message Id="x*16843009" TypeName="OperationsShouldNotOverflow" Category="Microsoft.Usage" CheckId="CA2233" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>x*16843009</Item>
-               <Item>'Util.BitCount(int)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#ConvertToByte(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToByte(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToByte(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToByte(object)'</Item>
                <Item>'Util.ConvertToByte(object)'</Item>
@@ -2382,7 +1686,7 @@
            </Member>
            <Member Name="#ConvertToChar(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToChar(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToChar(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToChar(object)'</Item>
                <Item>'Util.ConvertToChar(object)'</Item>
@@ -2395,7 +1699,7 @@
            </Member>
            <Member Name="#ConvertToDecimal(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToDecimal(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToDecimal(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToDecimal(object)'</Item>
                <Item>'Util.ConvertToDecimal(object)'</Item>
@@ -2408,7 +1712,7 @@
            </Member>
            <Member Name="#ConvertToDouble(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToDouble(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToDouble(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToDouble(object)'</Item>
                <Item>'Util.ConvertToDouble(object)'</Item>
@@ -2421,7 +1725,7 @@
            </Member>
            <Member Name="#ConvertToFloat(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToSingle(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToSingle(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToSingle(object)'</Item>
                <Item>'Util.ConvertToFloat(object)'</Item>
@@ -2434,7 +1738,7 @@
            </Member>
            <Member Name="#ConvertToInt(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToInt32(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToInt32(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToInt32(object)'</Item>
                <Item>'Util.ConvertToInt(object)'</Item>
@@ -2447,7 +1751,7 @@
            </Member>
            <Member Name="#ConvertToLong(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToInt64(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToInt64(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToInt64(object)'</Item>
                <Item>'Util.ConvertToLong(object)'</Item>
@@ -2460,7 +1764,7 @@
            </Member>
            <Member Name="#ConvertToSByte(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToSByte(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToSByte(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToSByte(object)'</Item>
                <Item>'Util.ConvertToSByte(object)'</Item>
@@ -2473,7 +1777,7 @@
            </Member>
            <Member Name="#ConvertToShort(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToInt16(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToInt16(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToInt16(object)'</Item>
                <Item>'Util.ConvertToShort(object)'</Item>
@@ -2486,7 +1790,7 @@
            </Member>
            <Member Name="#ConvertToUInt(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToUInt32(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToUInt32(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToUInt32(object)'</Item>
                <Item>'Util.ConvertToUInt(object)'</Item>
@@ -2499,7 +1803,7 @@
            </Member>
            <Member Name="#ConvertToULong(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToUInt64(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToUInt64(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToUInt64(object)'</Item>
                <Item>'Util.ConvertToULong(object)'</Item>
@@ -2512,7 +1816,7 @@
            </Member>
            <Member Name="#ConvertToUShort(System.Object)">
             <Messages>
-             <Message Id="System.Convert.ToUInt16(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Convert.ToUInt16(System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternate">
                <Item>'Convert.ToUInt16(object)'</Item>
                <Item>'Util.ConvertToUShort(object)'</Item>
@@ -2529,7 +1833,7 @@
           <Members>
            <Member Name="#pushThreadBindings(clojure.lang.Associative)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'Var.pushThreadBindings(Associative)'</Item>
@@ -2542,7 +1846,7 @@
            </Member>
            <Member Name="#set(System.Object)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'Var.set(object)'</Item>
@@ -2570,7 +1874,7 @@
           <Members>
            <Member Name="#CompareTo(clojure.lang.CljCompiler.MethodSignature)">
             <Messages>
-             <Message Id="System.String.CompareTo(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.CompareTo(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.CompareTo(string)'</Item>
                <Item>'MethodSignature.CompareTo(MethodSignature)'</Item>
@@ -2594,14 +1898,14 @@
           <Members>
            <Member Name="#TryUncheckedCast(System.Linq.Expressions.MethodCallExpression,System.Linq.Expressions.Expression&amp;)">
             <Messages>
-             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.EndsWith(string)'</Item>
                <Item>'ArithmeticRewriter.TryUncheckedCast(MethodCallExpression, ref Expression)'</Item>
                <Item>'string.EndsWith(string, StringComparison)'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.StartsWith(string)'</Item>
                <Item>'ArithmeticRewriter.TryUncheckedCast(MethodCallExpression, ref Expression)'</Item>
@@ -2616,7 +1920,7 @@
           <Members>
            <Member Name="#FallbackGetMember(System.Dynamic.DynamicMetaObject,System.Dynamic.DynamicMetaObject)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'DefaultGetZeroArityMemberBinder.FallbackGetMember(DynamicMetaObject, DynamicMetaObject)'</Item>
@@ -2640,7 +1944,7 @@
           <Members>
            <Member Name="#FallbackInvokeMember(System.Dynamic.DynamicMetaObject,System.Dynamic.DynamicMetaObject[],System.Dynamic.DynamicMetaObject)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'DefaultInvokeMemberBinder.FallbackInvokeMember(DynamicMetaObject, DynamicMetaObject[], DynamicMetaObject)'</Item>
@@ -2649,7 +1953,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'DefaultInvokeMemberBinder.FallbackInvokeMember(DynamicMetaObject, DynamicMetaObject[], DynamicMetaObject)'</Item>
@@ -2666,7 +1970,7 @@
           <Members>
            <Member Name="#Eval()">
             <Messages>
-             <Message Id="metaMap" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="metaMap" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'DefExpr.Eval()'</Item>
                <Item>'metaMap'</Item>
@@ -2681,14 +1985,14 @@
           <Members>
            <Member Name="#Parse(clojure.lang.CljCompiler.Ast.ParserContext,System.Object)">
             <Messages>
-             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.EndsWith(string)'</Item>
                <Item>'DefExpr.Parser.Parse(ParserContext, object)'</Item>
                <Item>'string.EndsWith(string, StringComparison)'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.StartsWith(string)'</Item>
                <Item>'DefExpr.Parser.Parse(ParserContext, object)'</Item>
@@ -2703,7 +2007,7 @@
           <Members>
            <Member Name="#CreateStaticCtor()">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'DynInitHelper.CreateStaticCtor()'</Item>
@@ -2716,14 +2020,14 @@
            </Member>
            <Member Name="#RewriteCallSite(System.Runtime.CompilerServices.CallSite,Microsoft.Scripting.Generation.TypeGen)">
             <Messages>
-             <Message Id="p" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="p" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'DynInitHelper.RewriteCallSite(CallSite, TypeGen)'</Item>
                <Item>'p'</Item>
                <Item>'Type'</Item>
               </Issue>
              </Message>
-             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'int.ToString()'</Item>
                <Item>'DynInitHelper.RewriteCallSite(CallSite, TypeGen)'</Item>
@@ -2740,7 +2044,7 @@
           <Members>
            <Member Name="#CreateArgNames(System.Int32)">
             <Messages>
-             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'int.ToString()'</Item>
                <Item>'DynUtils.CreateArgNames(int)'</Item>
@@ -2757,7 +2061,7 @@
           <Members>
            <Member Name="#Parse(clojure.lang.CljCompiler.Ast.ParserContext,clojure.lang.ISeq,System.String)">
             <Messages>
-             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'int.ToString()'</Item>
                <Item>'FnExpr.Parse(ParserContext, ISeq, string)'</Item>
@@ -2774,7 +2078,7 @@
           <Members>
            <Member Name="#Parse(clojure.lang.CljCompiler.Ast.FnExpr,clojure.lang.ISeq,System.Boolean)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'FnMethod.Parse(FnExpr, ISeq, bool)'</Item>
@@ -2789,7 +2093,7 @@
             <Accessors>
              <Accessor Name="#get_StaticMethodName()">
               <Messages>
-               <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+               <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
                 <Issue Name="IFormatProviderAlternateString">
                  <Item>'string.Format(string, object, object)'</Item>
                  <Item>'FnMethod.StaticMethodName.get()'</Item>
@@ -2810,7 +2114,7 @@
             <Accessors>
              <Accessor Name="#get_CanEmitPrimitive()">
               <Messages>
-               <Message TypeName="SealMethodsThatSatisfyPrivateInterfaces" Category="Microsoft.Security" CheckId="CA2119" Created="2011-07-31 21:54:45Z">
+               <Message TypeName="SealMethodsThatSatisfyPrivateInterfaces" Category="Microsoft.Security" CheckId="CA2119" Created="2011-08-09 14:41:34Z">
                 <Issue>
                  <Item>'HostExpr.CanEmitPrimitive.get()'</Item>
                  <Item>MaybePrimitiveExpr</Item>
@@ -2823,7 +2127,7 @@
            </Member>
            <Member Name="#GenCodeUnboxed(clojure.lang.CljCompiler.Ast.RHC,clojure.lang.CljCompiler.Ast.ObjExpr,clojure.lang.CljCompiler.Ast.GenContext)">
             <Messages>
-             <Message TypeName="SealMethodsThatSatisfyPrivateInterfaces" Category="Microsoft.Security" CheckId="CA2119" Created="2011-07-31 21:54:45Z">
+             <Message TypeName="SealMethodsThatSatisfyPrivateInterfaces" Category="Microsoft.Security" CheckId="CA2119" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'HostExpr.GenCodeUnboxed(RHC, ObjExpr, GenContext)'</Item>
                <Item>MaybePrimitiveExpr</Item>
@@ -2838,7 +2142,7 @@
           <Members>
            <Member Name="#Parse(clojure.lang.CljCompiler.Ast.ParserContext,System.Object)">
             <Messages>
-             <Message Id="minfo" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="minfo" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'HostExpr.Parser.Parse(ParserContext, object)'</Item>
                <Item>'minfo'</Item>
@@ -2849,20 +2153,11 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="IdentityHashMap">
-          <Messages>
-           <Message TypeName="ImplementSerializationConstructors" Category="Microsoft.Usage" CheckId="CA2229" Created="2011-08-02 02:35:39Z">
-            <Issue Name="MakeUnsealedMagicConstructorFamily">
-             <Item>'IdentityHashMap'</Item>
-            </Issue>
-           </Message>
-          </Messages>
-         </Type>
          <Type Name="InstanceMethodExpr">
           <Members>
            <Member Name="#.ctor(System.String,clojure.lang.IPersistentMap,clojure.lang.Symbol,clojure.lang.CljCompiler.Ast.Expr,System.String,System.Collections.Generic.List`1&lt;System.Type&gt;,System.Collections.Generic.List`1&lt;clojure.lang.CljCompiler.Ast.HostArg&gt;)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'InstanceMethodExpr.InstanceMethodExpr(string, IPersistentMap, Symbol, Expr, string, List&lt;Type&gt;, List&lt;HostArg&gt;)'</Item>
@@ -2879,7 +2174,7 @@
           <Members>
            <Member Name="#.ctor(System.String,clojure.lang.IPersistentMap,clojure.lang.Symbol,clojure.lang.CljCompiler.Ast.Expr,clojure.lang.IPersistentVector)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object, object)'</Item>
                <Item>'InvokeExpr.InvokeExpr(string, IPersistentMap, Symbol, Expr, IPersistentVector)'</Item>
@@ -2888,7 +2183,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.Format(System.String,System.Object[])" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object[])" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, params object[])'</Item>
                <Item>'InvokeExpr.InvokeExpr(string, IPersistentMap, Symbol, Expr, IPersistentVector)'</Item>
@@ -2901,7 +2196,7 @@
            </Member>
            <Member Name="#GenProtoLight(clojure.lang.CljCompiler.Ast.RHC,clojure.lang.CljCompiler.Ast.ObjExpr,clojure.lang.CljCompiler.Ast.GenContext,System.Linq.Expressions.Expression)">
             <Messages>
-             <Message Id="thisParam" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="thisParam" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'InvokeExpr.GenProtoLight(RHC, ObjExpr, GenContext, Expression)'</Item>
                <Item>'thisParam'</Item>
@@ -2916,14 +2211,14 @@
           <Members>
            <Member Name="#GenerateComplexArgList(clojure.lang.CljCompiler.Ast.ObjExpr,clojure.lang.CljCompiler.Ast.GenContext,System.Collections.Generic.List`1&lt;clojure.lang.CljCompiler.Ast.HostArg&gt;,System.Collections.Generic.List`1&lt;System.Linq.Expressions.Expression&gt;&amp;,System.Collections.Generic.List`1&lt;System.Linq.Expressions.ParameterExpression&gt;&amp;,System.Collections.Generic.List`1&lt;System.Linq.Expressions.Expression&gt;&amp;,System.Collections.Generic.List`1&lt;System.Linq.Expressions.Expression&gt;&amp;)">
             <Messages>
-             <Message Id="cinfos" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="cinfos" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'MethodExpr.GenerateComplexArgList(ObjExpr, GenContext, List&lt;HostArg&gt;, out List&lt;Expression&gt;, out List&lt;ParameterExpression&gt;, out List&lt;Expression&gt;, out List&lt;Expression&gt;)'</Item>
                <Item>'cinfos'</Item>
                <Item>'ConstructorInfo[]'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'MethodExpr.GenerateComplexArgList(ObjExpr, GenContext, List&lt;HostArg&gt;, out List&lt;Expression&gt;, out List&lt;ParameterExpression&gt;, out List&lt;Expression&gt;, out List&lt;Expression&gt;)'</Item>
@@ -2940,7 +2235,7 @@
           <Members>
            <Member Name="#ComputeCtor()">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'NewExpr.ComputeCtor()'</Item>
@@ -2957,7 +2252,7 @@
           <Members>
            <Member Name="#Build(clojure.lang.IPersistentVector,clojure.lang.IPersistentVector,clojure.lang.Symbol,System.String,clojure.lang.Symbol,clojure.lang.Symbol,clojure.lang.ISeq,System.Object)">
             <Messages>
-             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'int.ToString()'</Item>
                <Item>'NewInstanceExpr.Build(IPersistentVector, IPersistentVector, Symbol, string, Symbol, Symbol, ISeq, object)'</Item>
@@ -2973,7 +2268,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.StartsWith(string)'</Item>
                <Item>'NewInstanceExpr.Build(IPersistentVector, IPersistentVector, Symbol, string, Symbol, Symbol, ISeq, object)'</Item>
@@ -2984,7 +2279,7 @@
            </Member>
            <Member Name="#CompileStub(System.Type,clojure.lang.CljCompiler.Ast.NewInstanceExpr,System.Type[],System.Object)">
             <Messages>
-             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'int.ToString()'</Item>
                <Item>'NewInstanceExpr.CompileStub(Type, NewInstanceExpr, Type[], object)'</Item>
@@ -3001,7 +2296,7 @@
           <Members>
            <Member Name="#Parse(clojure.lang.CljCompiler.Ast.ObjExpr,clojure.lang.ISeq,clojure.lang.Symbol,System.Collections.Generic.Dictionary`2&lt;clojure.lang.IPersistentVector,System.Collections.Generic.List`1&lt;System.Reflection.MethodInfo&gt;&gt;)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'NewInstanceMethod.Parse(ObjExpr, ISeq, Symbol, Dictionary&lt;IPersistentVector, List&lt;MethodInfo&gt;&gt;)'</Item>
@@ -3010,7 +2305,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.LastIndexOf(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.LastIndexOf(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.LastIndexOf(string)'</Item>
                <Item>'NewInstanceMethod.Parse(ObjExpr, ISeq, Symbol, Dictionary&lt;IPersistentVector, List&lt;MethodInfo&gt;&gt;)'</Item>
@@ -3021,37 +2316,11 @@
            </Member>
           </Members>
          </Type>
-         <Type Name="NumericConvertBinder">
-          <Members>
-           <Member Name="#Instance">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'NumericConvertBinder.Instance'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="NumericConvertOverloadResolverFactory">
-          <Members>
-           <Member Name="#Instance">
-            <Messages>
-             <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Created="2011-07-31 21:54:45Z">
-              <Issue>
-               <Item>'NumericConvertOverloadResolverFactory.Instance'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="ObjExpr">
           <Members>
            <Member Name="#GenerateConstructor(System.Reflection.Emit.TypeBuilder,System.Type)">
             <Messages>
-             <Message Id="lb" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="lb" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'ObjExpr.GenerateConstructor(TypeBuilder, Type)'</Item>
                <Item>'lb'</Item>
@@ -3062,7 +2331,7 @@
            </Member>
            <Member Name="#GenerateFnBaseClass(System.Type,clojure.lang.CljCompiler.Ast.GenContext)">
             <Messages>
-             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.Int32.ToString" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'int.ToString()'</Item>
                <Item>'ObjExpr.GenerateFnBaseClass(Type, GenContext)'</Item>
@@ -3075,7 +2344,7 @@
            </Member>
            <Member Name="#GenerateKeywordCallsites(System.Reflection.Emit.TypeBuilder)">
             <Messages>
-             <Message Id="k" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="k" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'ObjExpr.GenerateKeywordCallsites(TypeBuilder)'</Item>
                <Item>'k'</Item>
@@ -3086,7 +2355,7 @@
            </Member>
            <Member Name="#GenerateValue(System.Object)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'ObjExpr.GenerateValue(object)'</Item>
@@ -3095,7 +2364,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.Format(System.String,System.Object[])" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object[])" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, params object[])'</Item>
                <Item>'ObjExpr.GenerateValue(object)'</Item>
@@ -3111,7 +2380,7 @@
                <Item>'CultureInfo.InvariantCulture'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.StartsWith(string)'</Item>
                <Item>'ObjExpr.GenerateValue(object)'</Item>
@@ -3122,7 +2391,7 @@
            </Member>
            <Member Name="#TrimGenId(System.String)">
             <Messages>
-             <Message Id="System.String.LastIndexOf(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.LastIndexOf(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.LastIndexOf(string)'</Item>
                <Item>'ObjExpr.TrimGenId(string)'</Item>
@@ -3137,7 +2406,7 @@
           <Members>
            <Member Name="#GenBodyCode(System.Type,clojure.lang.CljCompiler.Ast.ObjExpr,clojure.lang.CljCompiler.Ast.GenContext)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'ObjMethod.GenBodyCode(Type, ObjExpr, GenContext)'</Item>
@@ -3154,7 +2423,7 @@
           <Members>
            <Member Name="#GenCode(clojure.lang.CljCompiler.Ast.RHC,clojure.lang.CljCompiler.Ast.ObjExpr,clojure.lang.CljCompiler.Ast.GenContext)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object[])" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object[])" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, params object[])'</Item>
                <Item>'RecurExpr.GenCode(RHC, ObjExpr, GenContext)'</Item>
@@ -3171,7 +2440,7 @@
           <Members>
            <Member Name="#Parse(clojure.lang.CljCompiler.Ast.ParserContext,System.Object)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object, object)'</Item>
                <Item>'RecurExpr.Parser.Parse(ParserContext, object)'</Item>
@@ -3188,7 +2457,7 @@
           <Members>
            <Member Name="#Parse(clojure.lang.CljCompiler.Ast.ParserContext,System.Object)">
             <Messages>
-             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.Format(System.String,System.Object)" TypeName="SpecifyIFormatProvider" Category="Microsoft.Globalization" CheckId="CA1305" Created="2011-08-09 14:41:34Z">
               <Issue Name="IFormatProviderAlternateString">
                <Item>'string.Format(string, object)'</Item>
                <Item>'TheVarExpr.Parser.Parse(ParserContext, object)'</Item>
@@ -3205,7 +2474,7 @@
           <Members>
            <Member Name="#Parse(clojure.lang.CljCompiler.Ast.ParserContext,System.Object)">
             <Messages>
-             <Message Id="retLocal" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-07-31 21:54:45Z">
+             <Message Id="retLocal" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'TryExpr.Parser.Parse(ParserContext, object)'</Item>
                <Item>'retLocal'</Item>
@@ -3221,17 +2490,10 @@
        <Namespace Name="clojure.runtime">
         <Types>
          <Type Name="Properties">
-          <Messages>
-           <Message TypeName="ImplementSerializationConstructors" Category="Microsoft.Usage" CheckId="CA2229" Created="2011-08-02 02:35:39Z">
-            <Issue Name="MakeUnsealedMagicConstructorFamily">
-             <Item>'Properties'</Item>
-            </Issue>
-           </Message>
-          </Messages>
           <Members>
            <Member Name="#Load(System.IO.TextReader)">
             <Messages>
-             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.EndsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.EndsWith(string)'</Item>
                <Item>'Properties.Load(TextReader)'</Item>
@@ -3243,7 +2505,7 @@
                <Item>'string.EndsWith(string, StringComparison)'</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-07-31 21:54:45Z">
+             <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2011-08-09 14:41:34Z">
               <Issue>
                <Item>'string.StartsWith(string)'</Item>
                <Item>'Properties.Load(TextReader)'</Item>
@@ -3291,38 +2553,9 @@
    <Rule TypeName="EnumeratorsShouldBeStronglyTyped" Category="Microsoft.Design" CheckId="CA1038">
     <Resolution Name="Default">{0} should provide a strongly typed implementation of IEnumerator.Current.</Resolution>
    </Rule>
-   <Rule TypeName="ImplementSerializationConstructors" Category="Microsoft.Usage" CheckId="CA2229">
-    <Resolution Name="CreateMagicConstructor">Add a constructor to {0} with the following signature: 'protected {0}(SerializationInfo info, StreamingContext context)'.</Resolution>
-    <Resolution Name="MakeUnsealedMagicConstructorFamily">Declare the serialization constructor of {0}, an unsealed type, as protected.</Resolution>
-   </Rule>
-   <Rule TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211">
-    <Resolution Name="Default">Consider making {0} non-public or a constant.</Resolution>
-   </Rule>
-   <Rule TypeName="OperationsShouldNotOverflow" Category="Microsoft.Usage" CheckId="CA2233">
-    <Resolution Name="Default">Correct the potential overflow in the operation '{0}' in {1}.</Resolution>
-   </Rule>
-   <Rule TypeName="OperatorOverloadsHaveNamedAlternates" Category="Microsoft.Usage" CheckId="CA2225">
-    <Resolution Name="Default">Provide a method named '{0}' as a friendly alternate for operator {1}.</Resolution>
-    <Resolution Name="Visibility">Mark {0} as public because it is a friendly alternate for operator {1}.</Resolution>
-   </Rule>
-   <Rule TypeName="OverloadOperatorEqualsOnOverloadingAddAndSubtract" Category="Microsoft.Design" CheckId="CA1013">
-    <Resolution Name="Default">Consider adding an overload of the equality operator for {0} that takes the same parameters as {1}.</Resolution>
-   </Rule>
-   <Rule TypeName="OverloadOperatorEqualsOnOverridingValueTypeEquals" Category="Microsoft.Usage" CheckId="CA2231">
-    <Resolution Name="Default">Because {0} is a value type that overrides ValueType.Equals, it should also overload the equality and inequality operators (== and !=).</Resolution>
-   </Rule>
-   <Rule TypeName="OverrideEqualsAndOperatorEqualsOnValueTypes" Category="Microsoft.Performance" CheckId="CA1815">
-    <Resolution Name="op_Equality">{0} should override the equality (==) and inequality (!=) operators.</Resolution>
-   </Rule>
    <Rule TypeName="OverrideMethodsOnComparableTypes" Category="Microsoft.Design" CheckId="CA1036">
     <Resolution Name="Equals">{0} should override Equals since it implements IComparable.</Resolution>
     <Resolution Name="Operator">{0} should define operator '{1}' since it implements IComparable.</Resolution>
-   </Rule>
-   <Rule TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725">
-    <Resolution Name="Default">In member {0}, change parameter name {1} to {2} in order to match the identifier as it has been declared in {3}.</Resolution>
-   </Rule>
-   <Rule TypeName="ParameterNamesShouldNotMatchMemberNames" Category="Microsoft.Naming" CheckId="CA1719">
-    <Resolution Name="Default">Change either member or parameter name {0} so that one differs from the other.</Resolution>
    </Rule>
    <Rule TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819">
     <Resolution Name="Default">Change {0} to return a collection or make it a method.</Resolution>

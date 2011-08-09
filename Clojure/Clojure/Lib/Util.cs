@@ -608,12 +608,16 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2233:OperationsShouldNotOverflow", MessageId = "x*16843009")]
         public static int BitCount(int x)
         { 
             x -= ((x >> 1) & 0x55555555);
             x = (((x >> 2) & 0x33333333) + (x & 0x33333333));
             x = (((x >> 4) + x) & 0x0f0f0f0f);
-            return ((x * 0x01010101) >> 24);
+            unchecked
+            {
+                return ((x * 0x01010101) >> 24);
+            }
         }
 
         // A variant of the above that avoids multiplying

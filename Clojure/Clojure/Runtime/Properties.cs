@@ -23,14 +23,14 @@ namespace clojure.runtime
     /// Implements part of the functionaligy of java.util.Properties.
     /// </summary>
     [Serializable]
-    public class Properties : Dictionary<string,string>
+    public sealed class Properties : Dictionary<string,string>
     {
 
         public Properties()
         {
         }
 
-        public Properties(SerializationInfo info, StreamingContext context)
+        private Properties(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

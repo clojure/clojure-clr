@@ -34,7 +34,10 @@ namespace clojure.lang.CljCompiler.Ast
     {
         // Inspired by the Converter class in IronRuby
         // Inspired == close to ripped-off
-        public static NumericConvertBinder Instance = new NumericConvertBinder();
+ 
+        static readonly NumericConvertBinder _instance =  new NumericConvertBinder();
+
+        public static NumericConvertBinder Instance { get { return _instance; } }
 
 
         public override bool CanConvertFrom(Type fromType, Type toType, bool toNotNullable, NarrowingLevel level)
@@ -430,7 +433,9 @@ namespace clojure.lang.CljCompiler.Ast
 
     public class NumericConvertOverloadResolverFactory : OverloadResolverFactory
     {
-        public static NumericConvertOverloadResolverFactory Instance = new NumericConvertOverloadResolverFactory(NumericConvertBinder.Instance);
+        static readonly NumericConvertOverloadResolverFactory _instance = new NumericConvertOverloadResolverFactory(NumericConvertBinder.Instance);
+
+        public static NumericConvertOverloadResolverFactory Instance { get { return _instance; } }
 
         private readonly DefaultBinder _binder;
 

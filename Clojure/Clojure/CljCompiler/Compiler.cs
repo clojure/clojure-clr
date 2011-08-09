@@ -809,7 +809,7 @@ namespace clojure.lang
 
         #region Name munging
 
-        public static IPersistentMap CHAR_MAP = PersistentHashMap.create('-', "_",
+        static readonly IPersistentMap _charMap = PersistentHashMap.create('-', "_",
             //		                         '.', "_DOT_",
              ':', "_COLON_",
              '+', "_PLUS_",
@@ -836,6 +836,9 @@ namespace clojure.lang
              '?', "_QMARK_"
              );
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        public static IPersistentMap CHAR_MAP { get { return _charMap; } }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "munge")]
         public static string munge(string name)
@@ -843,7 +846,7 @@ namespace clojure.lang
             StringBuilder sb = new StringBuilder();
             foreach (char c in name)
             {
-                string sub = (string)CHAR_MAP.valAt(c);
+                string sub = (string)_charMap.valAt(c);
                 if (sub == null)
                     sb.Append(c);
                 else

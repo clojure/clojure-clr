@@ -262,12 +262,13 @@ namespace clojure.lang
 
         #region IFn members
 
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#")]
         public override object invoke(Object obj)
         {
             return RT.get(obj, this);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration")]
         public override object invoke(Object obj, Object notFound)
         {
             return RT.get(obj, this, notFound);

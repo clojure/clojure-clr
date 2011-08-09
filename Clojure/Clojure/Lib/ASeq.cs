@@ -212,12 +212,12 @@ namespace clojure.lang
         /// </summary>
         /// <param name="o">The object to compare.</param>
         /// <returns><c>true</c> if the object is equivalent; <c>false</c> otherwise.</returns>
-        public bool equiv(object obj)
+        public bool equiv(object o)
         {
-            if (!(obj is Sequential || obj is IList))
+            if (!(o is Sequential || o is IList))
                 return false;
 
-            ISeq ms = RT.seq(obj);
+            ISeq ms = RT.seq(o);
 
             for (ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
             {
@@ -324,7 +324,7 @@ namespace clojure.lang
 
         #region ICollection Members
 
-        public void CopyTo(object[] array, int index)
+        public void CopyTo(object[] array, int arrayIndex)
         {
             if (array == null)
                 throw new ArgumentNullException("array");
@@ -332,14 +332,14 @@ namespace clojure.lang
             if (array.Rank != 1)
                 throw new ArgumentException("Array must be 1-dimensional");
 
-            if (index < 0)
-                throw new ArgumentOutOfRangeException("index", "must be non-egative");
+            if (arrayIndex < 0)
+                throw new ArgumentOutOfRangeException("arrayIndex", "must be non-egative");
 
-            if (array.Length - index < count())
+            if (array.Length - arrayIndex < count())
                 throw new InvalidOperationException("The number of elements in source is greater than the available space in the array)");
 
             ISeq s = seq();
-            for (int i = index; i < array.Length && s != null; ++i, s = s.next())
+            for (int i = arrayIndex; i < array.Length && s != null; ++i, s = s.next())
                 array[i] = s.first();
         }
 

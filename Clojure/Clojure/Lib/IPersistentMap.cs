@@ -60,7 +60,7 @@ namespace clojure.lang
         /// <c>KeyValuePair&lt;,&gt;</c>, an <see cref="IMapEntry">IMapEntry</see>, an <see cref="IPersistentVector">IPersistentVector</see>
         /// of two elements, etc.</para></remarks>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "cons")]
-        new IPersistentMap cons(object obj);
+        new IPersistentMap cons(object o);
 
         /// <summary>
         /// Gets the number of items in the collection.

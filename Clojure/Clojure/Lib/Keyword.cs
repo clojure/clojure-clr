@@ -208,14 +208,14 @@ namespace clojure.lang
         /// </summary>
         /// <param name="arg1">The object to access.</param>
         /// <returns>The value mapped to the keyword.</returns>
-        public sealed override object invoke(object obj)
+        public sealed override object invoke(object arg1)
         {
-            ILookup ilu = obj as ILookup;
+            ILookup ilu = arg1 as ILookup;
 
             if (ilu != null) 
                 return ilu.valAt(this);
             
-            return RT.get(obj, this);
+            return RT.get(arg1, this);
         }
 
 
@@ -225,14 +225,15 @@ namespace clojure.lang
         /// <param name="arg1">The object to access.</param>
         /// <param name="arg2">Default value if not found.</param>
         /// <returns></returns>
-        public sealed override object invoke(object obj, object notFound)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration")]
+        public sealed override object invoke(object arg1, object notFound)
         {
-            ILookup ilu = obj as ILookup;
+            ILookup ilu = arg1 as ILookup;
 
             if (ilu != null )
                 return ilu.valAt(this,notFound);
 
-            return RT.get(obj, this, notFound);
+            return RT.get(arg1, this, notFound);
         }
 
 

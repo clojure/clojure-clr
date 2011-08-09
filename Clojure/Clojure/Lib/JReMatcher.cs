@@ -138,15 +138,15 @@ namespace clojure.lang
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "group")]
-        public string group(int group)
+        public string group(int groupIndex)
         {
             if (_match == null)
                 throw new InvalidOperationException("Attempt to call group on a non-realized or failed match.");
 
-            if ( group < 0 || group >= _match.Groups.Count)
-                throw new ArgumentOutOfRangeException("group","Attempt to call group with an index out of bounds.");
+            if ( groupIndex < 0 || groupIndex >= _match.Groups.Count)
+                throw new ArgumentOutOfRangeException("groupIndex", "Attempt to call group with an index out of bounds.");
 
-            return _match.Groups[group].Value;
+            return _match.Groups[groupIndex].Value;
         }
 
 

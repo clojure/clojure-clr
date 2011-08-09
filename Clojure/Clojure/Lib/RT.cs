@@ -3164,6 +3164,7 @@ namespace clojure.lang
 
     public static class RuntimeBootstrapFlag
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible")]
         public static bool _doRTBootstrap = true;
 
     }

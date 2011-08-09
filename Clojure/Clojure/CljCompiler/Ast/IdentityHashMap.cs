@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace clojure.lang.CljCompiler.Ast
 {
     [Serializable]
-    public class IdentityHashMap : Dictionary<Object,int>
+    public sealed class IdentityHashMap : Dictionary<Object,int>
     {
         class RefCmp : IEqualityComparer<Object>
         {
@@ -29,7 +29,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
         }
 
-        public IdentityHashMap(SerializationInfo info, StreamingContext context)
+        private IdentityHashMap(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

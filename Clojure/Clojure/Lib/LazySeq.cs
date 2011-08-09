@@ -231,7 +231,7 @@ namespace clojure.lang
             get { return true; }
         }
 
-        public bool Remove(object value)
+        public bool Remove(object item)
         {
             throw new InvalidOperationException("Cannot modify immutable sequence");
         }
@@ -269,21 +269,21 @@ namespace clojure.lang
 
         #region ICollection Members
 
-        public void CopyTo(object[] array, int index)
+        public void CopyTo(object[] array, int arrayIndex)
         {
             if (array == null)
                 throw new ArgumentNullException("array");
-            if (index < 0)
-                throw new ArgumentOutOfRangeException("index", "must be non-negative.");
+            if (arrayIndex < 0)
+                throw new ArgumentOutOfRangeException("arrayIndex", "must be non-negative.");
             if (array.Rank > 1)
                 throw new ArgumentException("must not be multidimensional","array" );
-            if (index >= array.Length)
-                throw new ArgumentException("must be less than the length", "index");
-            if (count() > array.Length - index)
+            if (arrayIndex >= array.Length)
+                throw new ArgumentException("must be less than the length", "arrayIndex");
+            if (count() > array.Length - arrayIndex)
                 throw new InvalidOperationException("Not enough available space from index to end of the array.");
 
             ISeq s = seq();
-            for (int i = index; s != null; ++i, s = s.next())
+            for (int i = arrayIndex; s != null; ++i, s = s.next())
                 array[i] = s.first();
         }
 

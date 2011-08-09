@@ -142,12 +142,14 @@ namespace clojure.lang
             }
         }
 
+        static readonly IFn _creator = new PLCreator();
 
         /// <summary>
         /// An <see cref="IFn">IFn</see> to create a list from a sequence of items.
         /// </summary>
         /// <remarks>The name is without our usual leading underscore for compatiblity with core.clj.</remarks>
-        public static IFn creator = new PLCreator();
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "creator")]
+        public static IFn creator { get { return _creator; } }
 
 
         #endregion
@@ -490,7 +492,7 @@ namespace clojure.lang
 
             #region IList Members
 
-            public void Add(object value)
+            public void Add(object item)
             {
                 throw new InvalidOperationException("Cannot modify an immutable list");
             }
@@ -538,7 +540,7 @@ namespace clojure.lang
                 get { return true; }
             }
 
-            public bool Remove(object value)
+            public bool Remove(object item)
             {
                 throw new InvalidOperationException("Cannot modify an immutable list");
             }

@@ -182,9 +182,9 @@ namespace clojure.lang
         /// </summary>
         /// <param name="o">The object to compare.</param>
         /// <returns><c>true</c> if the object is equivalent; <c>false</c> otherwise.</returns>
-        public bool equiv(object obj)
+        public bool equiv(object o)
         {
-            return doEquiv(this, obj);
+            return doEquiv(this, o);
         }
 
 

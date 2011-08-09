@@ -49,9 +49,9 @@ namespace clojure.lang
 
         #region Entry point
 
-        public static string Format(string format, params object[] args)
+        public static string Format(string formatStr, params object[] args)
         {
-            List<FormatChunk> chunks = Parse(format);
+            List<FormatChunk> chunks = Parse(formatStr);
             StringBuilder sb = new StringBuilder();
 
             int lastIndex =-1;

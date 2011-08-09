@@ -292,14 +292,14 @@ namespace clojure.lang
         /// <remarks>Overrides <c>cons</c> in <see cref="IPersistentCollection">IPersistentCollection</see> to specialize the return value.</remarks>
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "cons")]
-        public override IPersistentVector cons(object val)
+        public override IPersistentVector cons(object o)
         {
             //if (_tail.Length < 32)
             if ( _cnt - tailoff() < 32 )
             {
                 object[] newTail = new object[_tail.Length + 1];
                 Array.Copy(_tail, newTail, _tail.Length);
-                newTail[_tail.Length] = val;
+                newTail[_tail.Length] = o;
                 return new PersistentVector(meta(), _cnt + 1, _shift, _root, newTail);
             }
 
@@ -320,7 +320,7 @@ namespace clojure.lang
                 newroot = pushTail(_shift, _root, tailnode);
 
 
-            return new PersistentVector(meta(), _cnt + 1, newshift, newroot, new object[] { val });
+            return new PersistentVector(meta(), _cnt + 1, newshift, newroot, new object[] { o });
         }
 
         private Node pushTail(int level, Node parent, Node tailnode)
