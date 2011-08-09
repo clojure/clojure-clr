@@ -487,8 +487,9 @@ namespace clojure.lang
         [Serializable]
         class NamespaceSerializationHelper : IObjectReference
         {
-
+#pragma warning disable 649
             Symbol _name;
+#pragma warning restore 649
 
             #region IObjectReference Members
 

@@ -77,7 +77,9 @@ namespace clojure.lang
             Symbol.intern("Environment"), typeof(Environment),
             Symbol.intern("EventArgs"), typeof(EventArgs),
             Symbol.intern("Exception"), typeof(Exception),
+#pragma warning disable 618
             Symbol.intern("ExecutionEngineException"), typeof(ExecutionEngineException),
+#pragma warning restore 618
             Symbol.intern("FieldAccessException"), typeof(FieldAccessException),
             Symbol.intern("FileStyleUriParser"), typeof(FileStyleUriParser),
             Symbol.intern("FlagsAttribute"), typeof(FlagsAttribute),
