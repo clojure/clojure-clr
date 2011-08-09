@@ -75,7 +75,7 @@ namespace clojure.lang.CljCompiler.Ast
                         }
                         String mname = Compiler.munge(mmapVal.Symbol.ToString());
                        
-                        List<MethodBase> methods = Reflector.GetMethods(_protocolOn, mname, null, args.count() - 1,  false);
+                        IList<MethodBase> methods = Reflector.GetMethods(_protocolOn, mname, null, args.count() - 1,  false);
                         if (methods.Count != 1)
                             throw new ArgumentException(String.Format("No single method: {0} of interface: {1} found for function: {2} of protocol: {3}",
                                 mname, _protocolOn.FullName, fvar.Symbol, pvar.Symbol));

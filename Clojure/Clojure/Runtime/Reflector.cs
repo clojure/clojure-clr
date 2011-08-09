@@ -140,22 +140,22 @@ namespace clojure.lang
 
         #region Method lookup
 
-        public static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, List<HostArg> args, string methodName, List<Type> typeArgs)
+        public static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, IList<HostArg> args, string methodName, IList<Type> typeArgs)
         {
-            List<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, true);
+            IList<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, true);
 
             MethodBase method = GetMatchingMethodAux(targetType, args, methods, methodName, true);
             MaybeReflectionWarn(spanMap, method, methodName);
             return (MethodInfo)method;
         }
 
-        public static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, List<HostArg> args, string methodName, List<Type> typeArgs)
+        public static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, IList<HostArg> args, string methodName, IList<Type> typeArgs)
         {
             MethodBase method = null;
             if (target.HasClrType)
             {
                 Type targetType = target.ClrType;
-                List<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, false);
+                IList<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, false);
                 method = GetMatchingMethodAux(targetType, args, methods, methodName, false);
             }
 
@@ -163,7 +163,7 @@ namespace clojure.lang
             return (MethodInfo)method;
         }
 
-        internal static List<MethodBase> GetMethods(Type targetType, string methodName, List<Type> typeArgs, int arity, bool getStatics)
+        internal static IList<MethodBase> GetMethods(Type targetType, string methodName, IList<Type> typeArgs, int arity, bool getStatics)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
             flags |= getStatics ? BindingFlags.Static : BindingFlags.Instance;
@@ -187,7 +187,7 @@ namespace clojure.lang
         }
 
 
-        private static List<MethodBase> GetInterfaceMethods(Type targetType, string methodName, List<Type> typeArgs, int arity)
+        private static List<MethodBase> GetInterfaceMethods(Type targetType, string methodName, IList<Type> typeArgs, int arity)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod;
 
@@ -213,9 +213,9 @@ namespace clojure.lang
 
 
 
-        internal static ConstructorInfo GetMatchingConstructor(IPersistentMap spanMap, Type targetType, List<HostArg> args, out int ctorCount)
+        internal static ConstructorInfo GetMatchingConstructor(IPersistentMap spanMap, Type targetType, IList<HostArg> args, out int ctorCount)
         {
-            List<MethodBase> methods = Reflector.GetConstructors(targetType, args.Count);
+            IList<MethodBase> methods = Reflector.GetConstructors(targetType, args.Count);
             ctorCount = methods.Count;
 
             MethodBase method = GetMatchingMethodAux(targetType, args, methods, "_ctor", true);
@@ -223,7 +223,7 @@ namespace clojure.lang
             return (ConstructorInfo)method;
         }
 
-        private static MethodBase GetMatchingMethodAux(Type targetType, List<HostArg> args, List<MethodBase> methods, string methodName, bool isStatic)
+        private static MethodBase GetMatchingMethodAux(Type targetType, IList<HostArg> args, IList<MethodBase> methods, string methodName, bool isStatic)
         {
             int argCount = args.Count;
 
@@ -275,7 +275,7 @@ namespace clojure.lang
         }
 
 
-        private static MethodBase GetMatchingMethodAux(Type targetType, object[] actualArgs, List<MethodBase> methods, string methodName, bool isStatic)
+        private static MethodBase GetMatchingMethodAux(Type targetType, object[] actualArgs, IList<MethodBase> methods, string methodName, bool isStatic)
         {
             int argCount = actualArgs.Length;
 
@@ -303,7 +303,7 @@ namespace clojure.lang
         }
 
 
-        private static List<MethodBase> GetConstructors(Type targetType, int arity)
+        private static IList<MethodBase> GetConstructors(Type targetType, int arity)
         {
             IEnumerable<ConstructorInfo> cinfos
                 = targetType.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Where(info => info.GetParameters().Length == arity);
@@ -348,7 +348,7 @@ namespace clojure.lang
 
         #region Method calling
 
-        public static object CallInstanceMethod(string methodName, List<Type> typeArgs, object target, params object[] args)
+        public static object CallInstanceMethod(string methodName, IList<Type> typeArgs, object target, params object[] args)
         {
             if (args.Length == 0)
             {
@@ -363,7 +363,7 @@ namespace clojure.lang
                     return p.GetValue(target, null);
             }
 
-            List<MethodBase> methods = GetMethods(target.GetType(), methodName, typeArgs, args.Length, false);
+            IList<MethodBase> methods = GetMethods(target.GetType(), methodName, typeArgs, args.Length, false);
             MethodBase method = GetMatchingMethodAux(target.GetType(), args, methods, methodName, false);
 
             if (method == null)
@@ -380,7 +380,7 @@ namespace clojure.lang
             //return target.GetType().InvokeMember(methodName, flags, Type.DefaultBinder, target, args);
         }
 
-        public static object CallStaticMethod(string methodName, List<Type> typeArgs, Type t, params object[] args)
+        public static object CallStaticMethod(string methodName, IList<Type> typeArgs, Type t, params object[] args)
         {
             if (args.Length == 0)
             {
@@ -393,7 +393,7 @@ namespace clojure.lang
                     return p.GetValue(t, null);
             }
 
-            List<MethodBase> methods = GetMethods(t, methodName, typeArgs, args.Length, true);
+            IList<MethodBase> methods = GetMethods(t, methodName, typeArgs, args.Length, true);
             MethodBase method = GetMatchingMethodAux(t, args, methods, methodName, true);
 
             if (method == null)
@@ -464,12 +464,12 @@ namespace clojure.lang
         {
             if (methodName.Equals("new"))
                 return InvokeConstructor(t, args);
-            List<MethodBase> methods = GetMethods(t, methodName, null, args.Length, true);
+            IList<MethodBase> methods = GetMethods(t, methodName, null, args.Length, true);
             return InvokeMatchingMethod(methodName, methods, t, null, args);
         }
 
 
-        private static object InvokeMatchingMethod(string methodName, List<MethodBase> infos, Type t, object target, object[] args)
+        private static object InvokeMatchingMethod(string methodName, IList<MethodBase> infos, Type t, object target, object[] args)
         {
 
             Type targetType = t ?? target.GetType();

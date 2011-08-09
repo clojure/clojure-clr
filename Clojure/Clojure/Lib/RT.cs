@@ -264,6 +264,7 @@ namespace clojure.lang
 
         #region Some misc. goodies
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly")]
         public static readonly object[] EmptyObjectArray = new Object[] { };
 
         static RTProperties _versionProperties = new RTProperties();

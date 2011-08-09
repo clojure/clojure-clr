@@ -20,7 +20,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents a reference.
     /// </summary>
-    public class Ref : ARef, IFn, IComparable<Ref>, IRef
+    public class Ref : ARef, IFn, IComparable<Ref>, IRef, IDisposable
     {
         #region Nested classes
 
@@ -243,6 +243,8 @@ namespace clojure.lang
         /// Used to generate unique ids.
         /// </summary>
         static readonly AtomicLong _ids = new AtomicLong();
+
+        bool _disposed = false;
 
         #endregion
 
@@ -745,6 +747,30 @@ namespace clojure.lang
                 throw new ArgumentException("Cannot compare null","x");
 
             return x.CompareTo(y) > 0;
+        }
+
+        #endregion
+
+        #region IDisposable
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    if ( _lock != null )
+                        _lock.Dispose();
+                }
+
+                _disposed = true;
+            }
         }
 
         #endregion

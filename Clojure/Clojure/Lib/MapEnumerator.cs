@@ -13,6 +13,8 @@
  **/
 
 using System.Collections;
+using System;
+using System.Collections.Generic;
 
 namespace clojure.lang
 {
@@ -27,7 +29,7 @@ namespace clojure.lang
     /// This converts an <see cref="IMapEntry">IMapEntry</see> to a DictionaryEntry.
     /// </para>
     /// </remarks>
-    public sealed class MapEnumerator : IDictionaryEnumerator
+    public sealed class MapEnumerator : IDictionaryEnumerator, IDisposable, IEnumerator, IEnumerator<IMapEntry>
     {
         #region Data
 
@@ -51,6 +53,8 @@ namespace clojure.lang
         {
             get { return ((IMapEntry)_seqEnum.Current).val(); }
         }
+
+        bool _disposed = false;
 
         #endregion
 
@@ -97,12 +101,17 @@ namespace clojure.lang
 
         #region IEnumerator Members
 
+        public IMapEntry Current
+        {
+            get { return (IMapEntry)_seqEnum.Current; }
+        }
+
         /// <summary>
         /// The current entry.
         /// </summary>
-        public object Current
+        object IEnumerator.Current
         {
-            get { return Entry; }
+            get { return _seqEnum.Current; }
         }
 
         /// <summary>
@@ -120,6 +129,30 @@ namespace clojure.lang
         public void Reset()
         {
             _seqEnum.Reset();
+        }
+
+        #endregion
+
+        #region IDisposable
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    if ( _seqEnum != null )
+                        _seqEnum.Dispose();
+                }
+
+                _disposed = true;
+            }
         }
 
         #endregion

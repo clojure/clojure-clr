@@ -289,7 +289,7 @@ namespace clojure.lang
 
         #region  Other 
         
-        public static List<Object> ReadDelimitedList(char delim, PushbackTextReader r, bool isRecursive)
+        static List<Object> ReadDelimitedList(char delim, PushbackTextReader r, bool isRecursive)
         {
             LineNumberingTextReader lntr = r as LineNumberingTextReader;
             int firstLine = lntr != null  ? lntr.LineNumber : -1;

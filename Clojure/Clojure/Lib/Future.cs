@@ -22,7 +22,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements IDeref and java.util.concurrent.Future, like the proxy in JVM clojure core.
     /// </summary>
-    public class Future : IDeref, IBlockingDeref, IPending
+    public class Future : IDeref, IBlockingDeref, IPending, IDisposable
     {
         #region Data
 
@@ -31,6 +31,7 @@ namespace clojure.lang
         object _value;
         Exception _error;
         bool _cancelled;
+        bool _disposed = false;
 
         #endregion
 
@@ -146,6 +147,29 @@ namespace clojure.lang
             if (_t.Join((int)ms))
                 return _value;
             return timeoutValue;
+        }
+
+        #endregion
+
+        #region IDisposable
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _started.Dispose();
+                }
+
+                _disposed = true;
+            }
         }
 
         #endregion
