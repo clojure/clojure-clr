@@ -87,6 +87,27 @@ namespace clojure.lang
             return equiv(x, (object)y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
+        public static bool equiv(bool x, bool y)
+        {
+            return x == y;
+        }
+
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
+        public static bool equiv(object x, bool y)
+        {
+            return equiv(x, (object)y);
+        }
+
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
+        public static bool equiv(bool x, object y)
+        {
+            return equiv((object)x, y);
+        }
+
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "pcequiv")]
         public static bool pcequiv(object k1, object k2)
