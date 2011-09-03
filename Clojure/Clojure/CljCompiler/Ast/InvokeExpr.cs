@@ -21,6 +21,7 @@ using Microsoft.Scripting.Ast;
 using System.Linq.Expressions;
 #endif
 using System.Reflection;
+using clojure.lang;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -84,7 +85,28 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            _tag = tag ?? (varFexpr != null ? varFexpr.Tag : null);
+            //_tag = tag ?? (varFexpr != null ? varFexpr.Tag : null);
+            if (tag != null)
+                _tag = tag;
+            else if (varFexpr != null)
+            {
+                object arglists = RT.get(RT.meta(varFexpr.Var), Compiler.ArglistsKeyword);
+                object sigTag = null;
+                for (ISeq s = RT.seq(arglists); s != null; s = s.next())
+                {
+                    APersistentVector sig = (APersistentVector)s.first();
+                    int restOffset = sig.IndexOf(Compiler.AmpersandSym);
+                    if (args.count() == sig.count() || (restOffset > -1 && args.count() >= restOffset))
+                    {
+                        sigTag = Compiler.TagOf(sig);
+                        break;
+                    }
+                }
+                _tag = sigTag ?? varFexpr.Tag;
+            }
+            else
+                _tag = null;
+
         }
 
         #endregion

@@ -56,7 +56,21 @@ namespace clojure.lang
             else
                 flags |= BindingFlags.Instance;
 
-            List<PropertyInfo> pinfos = new List<PropertyInfo>(t.GetProperties(flags).Where(pi => pi.Name == name && pi.GetIndexParameters().Length == 0));
+            List<Type> typesToCheck = new List<Type>();
+            typesToCheck.Add(t);
+
+            if (t.IsInterface && !getStatics)
+                typesToCheck.AddRange(t.GetInterfaces());
+
+            List<PropertyInfo> pinfos = new List<PropertyInfo>();
+
+            foreach (Type type in typesToCheck)
+            {
+                IEnumerable<PropertyInfo> einfo
+                     = type.GetProperties(flags).Where(info => info.Name == name && info.GetIndexParameters().Length == 0);
+                pinfos.AddRange(einfo);
+            }
+
 
             if (pinfos.Count == 0)
                 return null;

@@ -10,7 +10,8 @@
 
 
 (ns clojure.test-clojure.compilation
-  (:use clojure.test))
+  (:use clojure.test
+        [clojure.test-helper :only (should-not-reflect should-print-err-message)]))
 
 ; http://clojure.org/compilation
 
@@ -74,6 +75,7 @@
                     3)))
           (catch Exception _)))))
 
+;; disabled until build box can call java from mvn
 #_(deftest test-numeric-dispatch
   (is (= "(int, int)" (TestDispatch/someMethod (int 1) (int 1))))
   (is (= "(int, long)" (TestDispatch/someMethod (int 1) (long 1))))
@@ -87,3 +89,53 @@
                   x
                   (recur y ^Int64 (rem x y)))))]            ;;; ^Long
       (is (= 4 (gcd 8 100))))))
+
+;; ensure proper use of hints / type decls
+
+(defn hinted
+  (^String [])
+  (^Exception [a])                                                ;;; ^Integer
+  (^System.Collections.IList [a & args]))                         ;;; ^java.util.List
+
+;; fn names need to be fully-qualified because should-not-reflect evals its arg in a throwaway namespace
+
+(deftest recognize-hinted-arg-vector
+  (should-not-reflect #(.Substring (clojure.test-clojure.compilation/hinted) 0))                                  ;;; .substring
+  (should-not-reflect #(.Data (clojure.test-clojure.compilation/hinted "arg")))                                   ;;; .floatValue
+  (should-not-reflect #(.Count (clojure.test-clojure.compilation/hinted :many :rest :args :here))))               ;;; .size
+
+(defn ^String hinting-conflict ^Exception [])                                                                     ;;; ^Integer
+
+(deftest calls-use-arg-vector-hint
+  (should-not-reflect #(.Data (clojure.test-clojure.compilation/hinting-conflict)))                               ;;; .floatValue
+  (should-print-err-message #"(?s)Reflection warning.*"
+    #(.Substring (clojure.test-clojure.compilation/hinting-conflict) 0)))                                         ;;; .substring
+
+(deftest deref-uses-var-tag
+  (should-not-reflect #(.Substring clojure.test-clojure.compilation/hinting-conflict 0))                          ;;; .substring
+  (should-print-err-message #"(?s)Reflection warning.*"
+    #(.Data clojure.test-clojure.compilation/hinting-conflict)))                                                  ;;; .floatValue
+
+(defn ^String legacy-hinting [])
+
+(deftest legacy-call-hint
+  (should-not-reflect #(.Substring (clojure.test-clojure.compilation/legacy-hinting) 0)))                          ;;; .substring
+
+(defprotocol HintedProtocol
+  (hintedp ^String [a]
+           ^Exception [a b]))                                                                                      ;;; ^Integer
+
+(deftest hinted-protocol-arg-vector
+  (should-not-reflect #(.Substring (clojure.test-clojure.compilation/hintedp "") 0))                              ;;; .substring
+  (should-not-reflect #(.Data (clojure.test-clojure.compilation/hintedp :a :b))))                                 ;;; .floatValue
+   
+(defn primfn
+  (^long [])
+  (^double [a]))
+
+(deftest primitive-return-decl
+  (should-not-reflect #(loop [k 5] (recur (clojure.test-clojure.compilation/primfn))))
+  (should-not-reflect #(loop [k 5.0] (recur (clojure.test-clojure.compilation/primfn 0))))
+  
+  (should-print-err-message #"(?s).*k is not matching primitive.*"
+    #(loop [k (clojure.test-clojure.compilation/primfn)] (recur :foo))))

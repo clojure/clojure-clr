@@ -67,6 +67,9 @@ namespace clojure.lang.CljCompiler.Ast
         {
             public Expr Parse(ParserContext pcon, object frm)
             {
+                string source = (string)Compiler.SourceVar.deref();
+                IPersistentMap spanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();  // Compiler.GetSourceSpanMap(form);
+                
                 ISeq form = (ISeq)frm;
 
                 IPersistentVector loopLocals = (IPersistentVector)Compiler.LoopLocalsVar.deref();
@@ -96,13 +99,13 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         bool mismatch = false;
                         Type pt = Compiler.MaybePrimitiveType((Expr)args.nth(i));
-                        if (pt == typeof(long))
+                        if (primt == typeof(long))
                         {
                             if (!(pt == typeof(long) || pt == typeof(int) || pt == typeof(short) || pt == typeof(uint) || pt == typeof(ushort) || pt == typeof(ulong)
                                 || pt == typeof(char) || pt == typeof(byte) || pt == typeof(sbyte)))
                                 mismatch = true;
                         }
-                        else if (pt == typeof(double))
+                        else if (primt == typeof(double))
                         {
                             if (!(pt == typeof(double) || pt == typeof(float)))
                                 mismatch = true;
@@ -113,14 +116,13 @@ namespace clojure.lang.CljCompiler.Ast
                             lb.RecurMismatch = true;
                             if (RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                                 RT.errPrintWriter().WriteLine("{0}:{1} recur arg for primitive local: {2} is not matching primitive, had: {3}, needed {4}",
-                                    "Source", "Line", lb.Name, pt != null ? pt.Name : "Object", primt.Name);
+                                    source, spanMap != null ? (int)spanMap.valAt(RT.StartLineKey, 0) : 0,
+                                    lb.Name, pt != null ? pt.Name : "Object", primt.Name);
                         }
                     }
                 }
 
-                string source = (string)Compiler.SourceVar.deref();
-                IPersistentMap spanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();  // Compiler.GetSourceSpanMap(form);
-
+ 
                 return new RecurExpr(source, spanMap, loopLocals, args);
             }
         }
@@ -196,7 +198,7 @@ namespace clojure.lang.CljCompiler.Ast
                         //if (true) //RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
                             //RT.errPrintWriter().WriteLine
                         throw new ArgumentException(String.Format(
-                                "{0}: {1} recur arg for primitive local: {2} must be matching primitive, had: {3}, needed {4}",
+                                "{0}:{1} recur arg for primitive local: {2} is not matching primitive, had: {3}, needed {4}",
                                 _source, _spanMap != null ? (int)_spanMap.valAt(RT.StartLineKey, 0) : 0, 
                                 lb.Name, (arg.HasClrType ? arg.ClrType.Name : "Object"), primt.Name));
                         //valExpr = arg.GenCode(RHC.Expression, objx, context);
