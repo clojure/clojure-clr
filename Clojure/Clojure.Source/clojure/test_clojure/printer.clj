@@ -87,6 +87,7 @@
        1 "1"
        1.0 "1.0"
        1N "1N"
+	   (clojure.lang.BigInteger/Parse "1") "#=(clojure.lang.BigInteger/Parse \"1\")"             ;;; (java.math.BigInteger. "1") "#=(java.math.BigInteger. \"1\")"
        1M "1M"
        "hi" "\"hi\""))
 
