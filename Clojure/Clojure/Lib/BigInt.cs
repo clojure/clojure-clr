@@ -39,7 +39,7 @@ namespace clojure.lang
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ZERO")]
         public static readonly BigInt ZERO = new BigInt(0, null);
-        
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ONE")]
         public static readonly BigInt ONE = new BigInt(1, null);
 
@@ -105,7 +105,7 @@ namespace clojure.lang
 
         public override string ToString()
         {
-            if ( _bipart == null )
+            if (_bipart == null)
                 return _lpart.ToString();
             return _bipart.ToString();
         }
@@ -173,7 +173,7 @@ namespace clojure.lang
             ret = 0;
             if (_bipart != null)
                 return _bipart.AsUInt64(out ret);
-            if (_lpart < 0 )
+            if (_lpart < 0)
                 return false;
 
             ret = (ulong)_lpart;
@@ -525,7 +525,6 @@ namespace clojure.lang
 
         #endregion
 
-
         #region IConvertible methods
 
         public TypeCode GetTypeCode()
@@ -619,5 +618,62 @@ namespace clojure.lang
 
         #endregion
 
+        #region Arithmetic operations
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
+        public object add(BigInt y)
+        {
+            if ((_bipart == null) && (y._bipart == null))
+            {
+                long ret = _lpart + y._lpart;
+                if ((ret ^ _lpart) >= 0 || (ret ^ y._lpart) >= 0)
+                    return ret;
+            }
+            return BigInt.fromBigInteger(this.toBigInteger().Add(y.toBigInteger()));
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
+        public object multiply(BigInt y)
+        {
+            if ((_bipart == null) && (y._bipart == null))
+            {
+                long ret = _lpart * y._lpart;
+                if (y._lpart == 0 || ret / y._lpart == _lpart)
+                    return ret;
+            }
+            return BigInt.fromBigInteger(this.toBigInteger().Multiply(y.toBigInteger()));
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
+        public object quotient(BigInt y)
+        {
+            if ((_bipart == null) && (y._bipart == null))
+            {
+                return _lpart / y._lpart;
+            }
+            return BigInt.fromBigInteger(this.toBigInteger().Divide(y.toBigInteger()));
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
+        public object remainder(BigInt y)
+        {
+            if ((_bipart == null) && (y._bipart == null))
+            {
+                return _lpart % y._lpart;
+            }
+            return BigInt.fromBigInteger(this.toBigInteger().Mod(y.toBigInteger()));
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
+        public bool lt(BigInt y)
+        {
+            if ((_bipart == null) && (y._bipart == null))
+            {
+                return _lpart < y._lpart;
+            }
+            return this.toBigInteger().CompareTo(y.toBigInteger()) < 0;
+        }
+
+        #endregion
     }
 }

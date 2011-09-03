@@ -1059,12 +1059,12 @@ namespace clojure.lang
 
             public override object add(object x, object y)
             {
-                return BigInt.fromBigInteger(ToBigInteger(x) + ToBigInteger(y));
+                return ToBigInt(x).add(ToBigInt(y));
             }
 
             public override object multiply(object x, object y)
             {
-                return BigInt.fromBigInteger(ToBigInteger(x) * ToBigInteger(y));
+                return ToBigInt(x).multiply(ToBigInt(y));
             }
 
             public override object divide(object x, object y)
@@ -1074,12 +1074,12 @@ namespace clojure.lang
 
             public override object quotient(object x, object y)
             {
-                return BigInt.fromBigInteger(ToBigInteger(x) / ToBigInteger(y));
+                return ToBigInt(x).quotient(ToBigInt(y));
             }
 
             public override object remainder(object x, object y)
             {
-                return BigInt.fromBigInteger(ToBigInteger(x) % ToBigInteger(y));
+                return ToBigInt(x).remainder(ToBigInt(y));
             }
 
             public override bool equiv(object x, object y)
@@ -1089,7 +1089,7 @@ namespace clojure.lang
 
             public override bool lt(object x, object y)
             {
-                return ToBigInteger(x) < ToBigInteger(y);
+                return ToBigInt(x).lt(ToBigInt(y));
             }
 
             public override object negate(object x)
