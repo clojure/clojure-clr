@@ -273,7 +273,10 @@ namespace clojure.lang
 
         public static RTProperties GetVersionProperties() { return _versionProperties; }
 
-        public const string ClojureLoadPathString = "clojure.load.path";
+        // Note that we name the environment variable such that it can be
+        // directly manipulated as a POSIX shell identifier, which is useful
+        // for folks using Cygwin and its ilk.
+        public const string ClojureLoadPathString = "CLOJURE_LOAD_PATH";
 
         #endregion
 
