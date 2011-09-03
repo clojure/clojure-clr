@@ -712,6 +712,20 @@ namespace clojure.lang
                 throw new ArgumentOutOfRangeException("i");
             }
 
+            object[] EditableArrayFor(int i)
+            {
+                if (i >= 0 && i < _cnt)
+                {
+                    if (i >= Tailoff())
+                        return _tail;
+                    Node node = _root;
+                    for (int level = _shift; level > 0; level -= 5)
+                        node = EnsureEditable((Node)node.Array[(i >> level) & 0x01f]);
+                    return node.Array;
+                }
+                throw new ArgumentOutOfRangeException("i");
+            }
+
             #endregion
 
             #region ITransientVector Members
@@ -782,7 +796,7 @@ namespace clojure.lang
                     --_cnt;
                     return this;
                 }
-                object[] newtail = ArrayFor(_cnt - 2);
+                object[] newtail = EditableArrayFor(_cnt - 2);
 
                 Node newroot = PopTail(_shift, _root);
                 int newshift = _shift;
