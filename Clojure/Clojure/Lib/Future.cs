@@ -165,7 +165,7 @@ namespace clojure.lang
             {
                 if (disposing)
                 {
-                    _started.Dispose();
+                    ((IDisposable)_started).Dispose(); 
                 }
 
                 _disposed = true;
