@@ -162,18 +162,6 @@ namespace clojure.lang.CljCompiler.Ast
                     parmTypes.Add(argTypes[i]);
                 }
 
-                //Expression maybeLoadVarsExpr;
-                //if (objx.Vars.count() > 0)
-                //    maybeLoadVarsExpr =
-                //        Expression.IfThen(
-                //            Expression.NotEqual(
-                //                Expression.Field(null, objx.VarRevField),
-                //                Expression.Property(null, Compiler.Method_Var_Rev)),
-                //        //Expression.Call(null, objx.ReloadVarsMethod));
-                //            Expression.Call(objx.BaseType, "__reloadVars__", Type.EmptyTypes));
-                //else
-                //    maybeLoadVarsExpr = Expression.Empty();
-
                 Expression body =
                     Expression.Block(
                         //maybeLoadVarsExpr,

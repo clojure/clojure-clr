@@ -198,12 +198,7 @@ namespace clojure.lang.CljCompiler.Ast
                     else
                     {
                         Type pt = Compiler.PrimType(Compiler.TagType(Compiler.TagOf(p)));
-                        //if (pt.IsPrimitive && !isStatic)
-                        //{
-                        //    pt = typeof(object);
-                        //    p = (Symbol)((IObj)p).withMeta((IPersistentMap)RT.assoc(RT.meta(p), RT.TAG_KEY, null));
-                        //    //throw new Exception("Non-static fn can't have primitive parameter: " + p);
-                        //}
+
                         if (pt.IsPrimitive && !(pt == typeof(double) || pt == typeof(long)))
                             throw new ParseException("Only long and double primitives are supported: " + p);
 
@@ -325,6 +320,17 @@ namespace clojure.lang.CljCompiler.Ast
             throw new ArgumentException("Only long and double primitives are supported");
         }
 
+        public static bool IsPrimType(object x)
+        {
+            Type t = x as Type ?? Compiler.PrimType(x as Symbol);
+
+            if (t == typeof(long) || t == typeof(double))
+                return true;
+
+            return false;
+        }
+       
+
         public static string PrimInterface(IPersistentVector arglist)
         {
             StringBuilder sb = new StringBuilder();
@@ -340,6 +346,28 @@ namespace clojure.lang.CljCompiler.Ast
             return null;
         }
 
+        public static bool IsPrimInterface(IPersistentVector arglist)
+        {
+            if (arglist.count() > 4)
+                return false;
+
+            for (int i = 0; i < arglist.count(); i++)
+                if (IsPrimType(Compiler.TagOf(arglist.nth(i))))
+                    return true;
+
+            if (IsPrimType(Compiler.TagOf(arglist)))
+                return true;
+
+            return false;
+        }
+
+        public static bool HasPrimInterface(ISeq form)
+        {
+            IPersistentVector parms = RT.first(form) as IPersistentVector;
+
+            return parms != null && IsPrimInterface(parms);
+        }
+         
         #endregion
     }
 }

@@ -254,10 +254,7 @@ namespace clojure.lang.CljCompiler.Ast
         static Type CompileStub(Type super, NewInstanceExpr ret, Type[] interfaces, Object frm)
         {
 
-            //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? Compiler.EvalContext;
-            //GenContext context = Compiler.COMPILER_CONTEXT.get() as GenContext ?? new GenContext("stub" + RT.nextID().ToString(), ".dll", ".", CompilerMode.Immediate);
             GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? GenContext.CreateWithExternalAssembly("stub" + RT.nextID().ToString(), ".dll", false);
-            //GenContext context = GenContext.CreateWithInternalAssembly("stub" + RT.nextID().ToString(), false);
             TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.CompileStubPrefix + "." + ret.InternalName, TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
 
             tb.DefineDefaultConstructor(MethodAttributes.Public);
