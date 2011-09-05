@@ -230,8 +230,8 @@
                   `(Clear [this#] (throw (NotSupportedException.)))
                   `(Contains [this# k#] (.containsKey this# k#))
                   `(CopyTo [this# a# i#]  (throw (InvalidOperationException.)))   ;;; TODO: implement this.  Got lazy.
-                  `(System.Collections.IDictionary.GetEnumerator [this#]  (throw (NotSupportedException.)))   ;;; TODO: implement this.  Got lazy.
-                  `(System.Collections.IEnumerable.GetEnumerator [this#]  (throw (NotSupportedException.)))   ;;; TODO: implement this.  Got lazy.
+                  `(System.Collections.IDictionary.GetEnumerator [this#]  (clojure.lang.Runtime.ImmutableDictionaryEnumerator. this#))
+                  `(System.Collections.IEnumerable.GetEnumerator [this#]  (clojure.lang.Runtime.ImmutableDictionaryEnumerator. this#))
                   )])                 
       (ipc [[i m]]
            [(conj i 'clojure.lang.IPersistentCollection)
