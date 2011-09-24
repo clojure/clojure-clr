@@ -105,7 +105,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CljCompiler\Ast\ArithmeticRewriter.cs" />
+    <Compile Include="CljCompiler\Ast\IntrinsicsRewriter.cs" />
     <Compile Include="CljCompiler\Ast\CaseExpr.cs" />
     <Compile Include="CljCompiler\Ast\DefaultCreateInstanceBinder.cs" />
     <Compile Include="CljCompiler\Ast\DefaultGetZeroArityMemberBinder.cs" />

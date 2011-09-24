@@ -44,7 +44,7 @@ namespace clojure.lang.CljCompiler.Ast
         protected readonly IPersistentMap _spanMap;
         protected readonly Symbol _tag;
 
-        static readonly ArithmeticRewriter _arithmeticRewriter = new ArithmeticRewriter();
+        static readonly IntrinsicsRewriter _arithmeticRewriter = new IntrinsicsRewriter();
 
         #endregion
 
@@ -126,38 +126,24 @@ namespace clojure.lang.CljCompiler.Ast
                 switch (ha.ParamType)
                 {
                     case HostArg.ParameterType.ByRef:
-//#if CLR2
-//                        t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
-//#else
-//                        t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
-//#endif
                         refPositions.Add(i);
                         argsPlus.Add(new DynamicMetaObject(HostExpr.GenUnboxArg(GenTypedArg(objx, context, argType, e), methodParms[i].ParameterType.GetElementType()), BindingRestrictions.Empty));
                         break;
                     case HostArg.ParameterType.Standard:
-                        //t = argType;
                         Type ptype = methodParms[i].ParameterType;
                         if (ptype.IsGenericParameter)
                             ptype = argType;
 
                         Expression typedArg = GenTypedArg(objx, context, ptype, e);
 
-                        //Expression typedArg = GenTypedArg(objx, context, argType, e);
-                        //Type ptype = methodParms[i].ParameterType;
-                        //if (!ptype.IsGenericParameter)
-                        //    typedArg = HostExpr.GenUnboxArg(typedArg, methodParms[i].ParameterType);
                         argsPlus.Add(new DynamicMetaObject(typedArg, BindingRestrictions.Empty));
 
                         break;
                     default:
                         throw Util.UnreachableCode();
                 }
-                // TODO: Rethink how we are getting typing done.
-                //argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTypedArg(context, argType, e), argType), BindingRestrictions.Empty));
-                //argsPlus.Add(new DynamicMetaObject(GenTypedArg(context, argType, e), BindingRestrictions.Empty));
             }
 
-            //OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
             OverloadResolverFactory factory = NumericConvertOverloadResolverFactory.Instance;
             DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), IsStaticCall ? CallTypes.None : CallTypes.ImplicitInstance);
 
@@ -196,90 +182,6 @@ namespace clojure.lang.CljCompiler.Ast
             return call;
         }
 
-
-        // RETYPE: TODO: Mostly same as HostExpr.GenMaybeUnboxedArg
-        //static MethodInfo MI_Util_ConvertToByte = typeof(Util).GetMethod("ConvertToByte");
-        //static MethodInfo MI_Util_ConvertToSByte = typeof(Util).GetMethod("ConvertToSByte");
-        //static MethodInfo MI_Util_ConvertToChar = typeof(Util).GetMethod("ConvertToChar");
-        //static MethodInfo MI_Util_ConvertToDecimal = typeof(Util).GetMethod("ConvertToDecimal");
-        //static MethodInfo MI_Util_ConvertToShort = typeof(Util).GetMethod("ConvertToShort");
-        //static MethodInfo MI_Util_ConvertToUShort = typeof(Util).GetMethod("ConvertToUShort");
-        //static MethodInfo MI_Util_ConvertToInt = typeof(Util).GetMethod("ConvertToInt");
-        //static MethodInfo MI_Util_ConvertToUInt = typeof(Util).GetMethod("ConvertToUInt");
-        //static MethodInfo MI_Util_ConvertToLong = typeof(Util).GetMethod("ConvertToLong");
-        //static MethodInfo MI_Util_ConvertToULong = typeof(Util).GetMethod("ConvertToULong");
-        //static MethodInfo MI_Util_ConvertToFloat = typeof(Util).GetMethod("ConvertToFloat");
-        //static MethodInfo MI_Util_ConvertToDouble = typeof(Util).GetMethod("ConvertToDouble");
-        //static MethodInfo MI_RT_booleanCast = typeof(RT).GetMethod("booleanCast", BindingFlags.Static | BindingFlags.Public, null, new Type[] { typeof(Object) }, null);
-
-
-
-        //public static Expression GenConvertMaybePrim(Expression expr, Type toType)
-        //{
-        //    if (expr.Type == toType)
-        //        return expr;
-
-        //    if (toType == typeof(void))
-        //        return Expression.Block(expr, Expression.Empty());
-
-        //    if (expr.Type == typeof(void))
-        //        return Expression.Block(expr, Expression.Default(toType));
-
-        //    if (expr.Type.IsPrimitive && toType.IsPrimitive)
-        //        return Expression.Convert(expr, toType);
-
-        //    if (toType.IsPrimitive)
-        //    {
-        //        MethodInfo converter;
-        //        switch (Type.GetTypeCode(toType))
-        //        {
-        //            case TypeCode.Boolean:
-        //                converter = MI_RT_booleanCast;
-        //                break;
-        //            case TypeCode.Byte:
-        //                converter = HostExpr.Method_RT_byteCast;
-        //                break;
-        //            case TypeCode.Decimal:
-        //                converter = HostExpr.Method_RT_decimalCast;
-        //                break;
-        //            case TypeCode.Char:
-        //                converter = HostExpr.Method_RT_charCast;
-        //                break;
-        //            case TypeCode.Double:
-        //                converter = HostExpr.Method_RT_doubleCast;
-        //                break;
-        //            case TypeCode.Int16:
-        //                converter = HostExpr.Method_RT_shortCast;
-        //                break;
-        //            case TypeCode.Int32:
-        //                converter = HostExpr.Method_RT_intCast;
-        //                break;
-        //            case TypeCode.Int64:
-        //                converter = HostExpr.Method_RT_longCast;
-        //                break;
-        //            case TypeCode.SByte:
-        //                converter = HostExpr.Method_RT_sbyteCast;
-        //                break;
-        //            case TypeCode.UInt16:
-        //                converter = HostExpr.Method_RT_ushortCast;
-        //                break;
-        //            case TypeCode.UInt32:
-        //                converter = HostExpr.Method_RT_uintCast;
-        //                break;
-        //            case TypeCode.UInt64:
-        //                converter = HostExpr.Method_RT_ulongCast;
-        //                break;
-        //            case TypeCode.Single:
-        //                converter = HostExpr.Method_RT_floatCast;
-        //                break;
-        //            default:
-        //                throw Util.UnreachableCode();
-        //        }
-        //        return Expression.Call(converter, expr);
-        //    }
-
-        //    return Expression.Convert(expr, toType);
-        //}
 
         private MethodInfo FindEquivalentMethod(MethodInfo _method, Type baseType)
         {
