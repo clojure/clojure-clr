@@ -621,45 +621,45 @@ namespace clojure.lang
         #region Arithmetic operations
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
-        public object add(BigInt y)
+        public BigInt add(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))
             {
                 long ret = _lpart + y._lpart;
                 if ((ret ^ _lpart) >= 0 || (ret ^ y._lpart) >= 0)
-                    return ret;
+                    return BigInt.valueOf(ret);
             }
             return BigInt.fromBigInteger(this.toBigInteger().Add(y.toBigInteger()));
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
-        public object multiply(BigInt y)
+        public BigInt multiply(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))
             {
                 long ret = _lpart * y._lpart;
                 if (y._lpart == 0 || ret / y._lpart == _lpart)
-                    return ret;
+                    return BigInt.valueOf(ret);
             }
             return BigInt.fromBigInteger(this.toBigInteger().Multiply(y.toBigInteger()));
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
-        public object quotient(BigInt y)
+        public BigInt quotient(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))
             {
-                return _lpart / y._lpart;
+                return BigInt.valueOf(_lpart / y._lpart);
             }
             return BigInt.fromBigInteger(this.toBigInteger().Divide(y.toBigInteger()));
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
-        public object remainder(BigInt y)
+        public BigInt remainder(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))
             {
-                return _lpart % y._lpart;
+                return BigInt.valueOf(_lpart % y._lpart);
             }
             return BigInt.fromBigInteger(this.toBigInteger().Mod(y.toBigInteger()));
         }
