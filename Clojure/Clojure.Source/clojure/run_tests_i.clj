@@ -57,4 +57,4 @@ clojure.test-clojure.vectors
 (apply require test-namespaces)
 
 (let [results (apply clojure.test/run-tests test-namespaces)]
-  (Environment/Exit (+ (:error results) (:fail results))))                              ;;; System/exit 
+  (print (+ (:error results) (:fail results))))                         ;;;(Environment/Exit (+ (:error results) (:fail results))))                              ;;; System/exit 0

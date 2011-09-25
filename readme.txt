@@ -15,13 +15,15 @@ Goals:
 
 --------------------------------------------------------------------------------------
 
-For more information on Clojure:  http://clojure.org
+Docs: http://clojure.org
+Feedback: http://groups.google.com/group/clojure
+Getting Started (general): http://dev.clojure.org/display/doc/Getting+Started
 
-For more information on ClojureCLR: The wiki on the github site 
-   (http://github.com/richhickey/clojure-clr/wiki) has the most up-to-date information.
+
+For more information on ClojureCLR: http://github.com/richhickey/clojure-clr/wiki
 
 
-Installing: The wiki contains information on getting started.  Specifically:
+Installing ClojureCLR: 
 
 To just run ClojureCLR, use the binary distribution:
 
