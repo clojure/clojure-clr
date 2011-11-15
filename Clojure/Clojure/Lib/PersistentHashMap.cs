@@ -1174,7 +1174,6 @@ namespace clojure.lang
                         return EditAndSet(edit, 2 * idx + 1, n);
                     if (_bitmap == bit)
                         return null;
-                    removedLeaf.Val = removedLeaf;
                     return EditAndRemovePair(edit, bit, idx);
                 }
                 if (Util.equiv(key, keyOrNull))
@@ -1367,6 +1366,7 @@ namespace clojure.lang
                 int idx = FindIndex(key);
                 if (idx == -1)
                     return this;
+                removedLeaf.Val = removedLeaf;
                 if (_count == 1)
                     return null;
                 HashCollisionNode editable = EnsureEditable(edit);
@@ -1385,7 +1385,9 @@ namespace clojure.lang
             {
                 if (_edit == edit)
                     return this;
-                return new HashCollisionNode(edit, _hash, _count, _array);
+                object[] newArray = new Object[2 * (_count + 1)];  // make room for next assoc
+                System.Array.Copy(_array, 0, newArray, 0, 2 * _count);
+                return new HashCollisionNode(edit, _hash, _count, newArray);
             }
 
             HashCollisionNode EnsureEditable(AtomicReference<Thread> edit, int count, Object[] array)
