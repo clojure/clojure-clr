@@ -99,7 +99,9 @@
     <None Include="clojure\reflect\clr.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="clojure\run_tests_i.clj" />
+    <None Include="clojure\run_tests_i.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="clojure\samples\ants.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
