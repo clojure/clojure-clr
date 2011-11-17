@@ -356,7 +356,9 @@ namespace clojure.lang
 
         private static string ExpandArrayTypename(Type t)
         {
-            if (t.IsArray)
+            if (t == null)
+                return "nil";
+            else if (t.IsArray)
                 return ExpandArrayTypename(t.GetElementType()) + "[]";
             else
                 return t.FullName;
