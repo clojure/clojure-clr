@@ -199,6 +199,7 @@
     <Compile Include="Lib\IChunkedSeq.cs" />
     <Compile Include="Lib\IDeref.cs" />
     <Compile Include="Lib\IEditableCollection.cs" />
+    <Compile Include="Lib\IHashEq.cs" />
     <Compile Include="Lib\IKeywordLookup.cs" />
     <Compile Include="Lib\ILookup.cs" />
     <Compile Include="Lib\ILookupSite.cs" />

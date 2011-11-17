@@ -20,7 +20,7 @@ using System.Collections.Generic;
 namespace clojure.lang
 {
     [Serializable]
-    public abstract class APersistentSet : AFn, IPersistentSet, ICollection, ICollection<Object>  // , Set -- no equivalent,  Should we do ISet<Object>?
+    public abstract class APersistentSet : AFn, IPersistentSet, ICollection, ICollection<Object>, IHashEq  // , Set -- no equivalent,  Should we do ISet<Object>?
     {
         #region Data
 
@@ -257,6 +257,21 @@ namespace clojure.lang
         IEnumerator IEnumerable.GetEnumerator()
         {
             return new SeqEnumerator(seq());
+        }
+
+        #endregion
+
+        #region IHashEq members
+
+        public int hasheq()
+        {
+            int hash = 0;
+            for (ISeq s = seq(); s != null; s = s.next())
+            {
+                object e = s.first();
+                hash += Util.hasheq(e);
+            }
+            return hash;
         }
 
         #endregion

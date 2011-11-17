@@ -1283,6 +1283,25 @@ namespace clojure.lang
                 return LONG_OPS;
         }
 
+        public static int hasheq(object x)
+        {
+            Type xc = x.GetType();
+
+            if (xc == typeof(long)
+                || xc == typeof(int)
+                || xc == typeof(short)
+                || xc == typeof(byte)
+                || xc == typeof(ulong)
+                || xc == typeof(uint)
+                || xc == typeof(ushort)
+                || xc == typeof(sbyte))
+            {
+                long lpart = Util.ConvertToLong(x);
+                return (int)(lpart ^ (lpart >> 32));
+            }
+            return x.GetHashCode();
+        }
+
         static Category category(object x)
         {
             Type xc = x.GetType();

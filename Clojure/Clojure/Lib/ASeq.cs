@@ -23,7 +23,7 @@ namespace clojure.lang
     /// Provides basic implementation of <see cref="ISeq"/> functionality.
     /// </summary>
     [Serializable]
-    public abstract class ASeq: Obj, ISeq, Sequential, IList, IList<Object>
+    public abstract class ASeq: Obj, ISeq, Sequential, IList, IList<Object>, IHashEq
     {
         #region Data
 
@@ -407,5 +407,19 @@ namespace clojure.lang
         }
 
         #endregion
+
+        #region IHashEq
+
+        public int hasheq()
+        {
+            int hash = 1;
+            for (ISeq s = seq(); s != null; s = s.next())
+                hash = 31 * hash + Util.hasheq(s.first());
+
+            return hash;
+        }
+
+        #endregion
+
     }
 }

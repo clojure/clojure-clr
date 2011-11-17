@@ -23,7 +23,7 @@ namespace clojure.lang
     /// Provides a basic impelmentation of <see cref="IPersistentMap">IPersistentMap</see> functionality.
     /// </summary>
     [Serializable]
-    public abstract class APersistentMap: AFn, IPersistentMap, IDictionary, IEnumerable<IMapEntry>, MapEquivalence, IDictionary<Object,Object>
+    public abstract class APersistentMap: AFn, IPersistentMap, IDictionary, IEnumerable<IMapEntry>, MapEquivalence, IDictionary<Object,Object>, IHashEq
     {
         #region  Data
         
@@ -443,6 +443,22 @@ namespace clojure.lang
         }
 
         #endregion
+
+        #region IHashEq
+
+        public int hasheq()
+        {
+            int hash = 0;
+            for (ISeq s = this.seq(); s != null; s = s.next())
+            {
+                IMapEntry e = (IMapEntry)s.first();
+                hash += Util.hasheq(e.key()) ^ Util.hasheq(e.val());
+            }
+            return hash;
+        }
+
+        #endregion
+
 
         /// <summary>
         /// Implements a sequence across the keys of map.

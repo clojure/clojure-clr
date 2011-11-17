@@ -218,6 +218,15 @@ namespace clojure.lang
 
         #endregion
 
+        #region hashing
+
+        static int Hash(object k)
+        {
+            return Util.hasheq(k);
+        }
+
+        #endregion
+
         #region IObj members
 
         /// <summary>
@@ -253,7 +262,7 @@ namespace clojure.lang
             if (key == null)
                 return _hasNull;
             return (_root != null) 
-                ? _root.Find(0, Util.hash(key), key, NotFoundValue) != NotFoundValue 
+                ? _root.Find(0, Hash(key), key, NotFoundValue) != NotFoundValue 
                 : false;
         }
 
@@ -267,7 +276,7 @@ namespace clojure.lang
             if (key == null)
                 return _hasNull ? new MapEntry(null, _nullValue) : null;
             return (_root != null)
-                ? _root.Find(0,Util.hash(key),key)
+                ? _root.Find(0,Hash(key),key)
                 : null;
         }
 
@@ -293,7 +302,7 @@ namespace clojure.lang
                 return _hasNull ? _nullValue : notFound;
 
             return (_root != null)
-                ? _root.Find(0, Util.hash(key), key, notFound)
+                ? _root.Find(0, Hash(key), key, notFound)
                 : notFound;
         }
 
@@ -318,7 +327,7 @@ namespace clojure.lang
             }
             Box addedLeaf = new Box(null);
             INode newroot = (_root == null ? BitmapIndexedNode.EMPTY : _root)
-                .Assoc(0, Util.hash(key), key, val, addedLeaf);
+                .Assoc(0, Hash(key), key, val, addedLeaf);
             return newroot == _root
                 ? this
                 : new PersistentHashMap(meta(), addedLeaf.Val == null ? _count : _count + 1, newroot, _hasNull, _nullValue);
@@ -351,7 +360,7 @@ namespace clojure.lang
                 return _hasNull ? new PersistentHashMap(meta(), _count - 1, _root, false, null) : this;
             if (_root == null)
                 return this;
-            INode newroot = _root.Without(0, Util.hash(key), key);
+            INode newroot = _root.Without(0, Hash(key), key);
             if (newroot == _root)
                 return this;
             return new PersistentHashMap(meta(), _count - 1, newroot, _hasNull, _nullValue); 
@@ -450,7 +459,7 @@ namespace clojure.lang
                 }
                 _leafFlag.Val = null;
                 INode n = (_root == null ? BitmapIndexedNode.EMPTY : _root)
-                    .Assoc(_edit, 0, Util.hash(key), key, val, _leafFlag);
+                    .Assoc(_edit, 0, Hash(key), key, val, _leafFlag);
                 if (n != _root)
                     _root = n;
                 if (_leafFlag.Val != null)
@@ -474,7 +483,7 @@ namespace clojure.lang
                     return this;
 
                 _leafFlag.Val = null;
-                INode n = _root.Without(_edit, 0, Util.hash(key), key, _leafFlag);
+                INode n = _root.Without(_edit, 0, Hash(key), key, _leafFlag);
                 if (n != _root)
                     _root = n;
                if (_leafFlag.Val != null) 
@@ -501,13 +510,13 @@ namespace clojure.lang
                         return notFound;
                 if (_root == null)
                     return null;
-                return _root.Find(0, Util.hash(key), key, notFound);                
+                return _root.Find(0, Hash(key), key, notFound);                
             }
 
             //// not part of this interface, but I don't know a better place for it
             //IMapEntry entryAt(Object key)
             //{
-            //    return (IMapEntry)_root.find(Util.hash(key), key);
+            //    return (IMapEntry)_root.find(Hash(key), key);
             //}
 
             #endregion
@@ -662,7 +671,7 @@ namespace clojure.lang
 
         private static INode CreateNode(int shift, object key1, object val1, int key2hash, object key2, object val2)
         {
-            int key1hash = Util.hash(key1);
+            int key1hash = Hash(key1);
             if (key1hash == key2hash)
                 return new HashCollisionNode(null, key1hash, 2, new object[] { key1, val1, key2, val2 });
             Box _ = new Box(null);
@@ -674,7 +683,7 @@ namespace clojure.lang
 
         private static INode CreateNode(AtomicReference<Thread> edit, int shift, Object key1, Object val1, int key2hash, Object key2, Object val2)
         {
-            int key1hash = Util.hash(key1);
+            int key1hash = Hash(key1);
             if (key1hash == key2hash)
                 return new HashCollisionNode(null, key1hash, 2, new Object[] { key1, val1, key2, val2 });
             Box _ = new Box(null);
@@ -1003,7 +1012,7 @@ namespace clojure.lang
                                 if ( _array[j] ==  null )
                                    nodes[i] = (INode) _array[j+1];
                                 else
-                                    nodes[i] = EMPTY.Assoc(shift+5,Util.hash(_array[j]),_array[j],_array[j+1], addedLeaf);
+                                    nodes[i] = EMPTY.Assoc(shift+5,Hash(_array[j]),_array[j],_array[j+1], addedLeaf);
                                 j += 2;
                             }
                         return new ArrayNode(null,n+1,nodes);
@@ -1134,7 +1143,7 @@ namespace clojure.lang
                                 if ( _array[j] == null )
                                     nodes[i] = (INode)_array[j+1];
                                 else
-                                    nodes[i] = EMPTY.Assoc(edit,shift+5,Util.hash(_array[j]), _array[j], _array[j+1], addedLeaf);
+                                    nodes[i] = EMPTY.Assoc(edit,shift+5,Hash(_array[j]), _array[j], _array[j+1], addedLeaf);
                                 j += 2;
                             }
                         return new ArrayNode(edit,n+1,nodes);

@@ -27,6 +27,20 @@ namespace clojure.lang
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hash")]
+        public static int hasheq(object o)
+        {
+            if (o == null)
+                return 0;
+
+            if (Util.IsNumeric(o))
+                return Numbers.hasheq(o);
+            else if (o is IHashEq)
+                return ((IHashEq)o).hasheq();
+            return o.GetHashCode();
+        }
+
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hashCombine")]
         static public int hashCombine(int seed, int hash)
         {
             //a la boost

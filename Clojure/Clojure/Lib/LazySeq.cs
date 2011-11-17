@@ -20,7 +20,7 @@ using System.Collections.Generic;
 namespace clojure.lang
 {
     [Serializable]
-    public sealed class LazySeq : Obj, ISeq, Sequential, ICollection, IList, IList<Object>, IPending  // Should we do IList -- has index accessor
+    public sealed class LazySeq : Obj, ISeq, Sequential, ICollection, IList, IList<Object>, IPending, IHashEq  // Should we do IList -- has index accessor
     {
         #region Data
 
@@ -332,6 +332,18 @@ namespace clojure.lang
         IEnumerator IEnumerable.GetEnumerator()
         {
             return new SeqEnumerator(seq());
+        }
+
+        #endregion
+
+        #region IHashEq members
+
+        public int hasheq()
+        {
+            ISeq s = seq();
+            if (s == null)
+                return 1;
+            return Util.hasheq(s);
         }
 
         #endregion

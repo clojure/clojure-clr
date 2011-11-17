@@ -24,7 +24,7 @@ namespace clojure.lang
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
-    public abstract class APersistentVector: AFn, IPersistentVector, IList, IComparable, IList<Object>, IComparable<Object>
+    public abstract class APersistentVector: AFn, IPersistentVector, IList, IComparable, IList<Object>, IComparable<Object>, IHashEq
     {
         #region Data
 
@@ -547,6 +547,18 @@ namespace clojure.lang
 
         #endregion
 
+        #region IHashEq
+
+        public int hasheq()
+        {
+            int hash = 1;
+            foreach (object o in this)
+                hash = 31 * hash + Util.hasheq(o);
+            return hash;
+        }
+
+        #endregion
+
 
         /// <summary>
         /// Internal class providing <see cref="ISeq">ISeq</see> functionality for <see cref="APersistentVector">APersistentVector</see>.
@@ -1024,6 +1036,7 @@ namespace clojure.lang
 
             #endregion
         }
+
     }
 }
 
