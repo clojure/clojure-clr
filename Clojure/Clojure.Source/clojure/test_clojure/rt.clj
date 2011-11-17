@@ -38,6 +38,10 @@
   ;  (should-print-err-message
   ;   #"Reflection warning, .*:\d+ - call to zap can't be resolved with arguments of type (System.Int64).\r?\n"              ;;; long
   ;   (defn foo [x] (.zap x 1))))
+  (testing "reflection cannot resolve instance method, with nil literal"
+    (should-print-err-message
+     #"Reflection warning, .*:\d+ - call to zap can't be resolved with arguments of type \(nil\)\.\r?\n"
+     (defn foo [x] (.zap x nil))))
   ;(testing "reflection cannot resolve static method"
   ;  (should-print-err-message
   ;   #"Reflection warning, .*:\d+ - call to Format can't be resolved with arguments of type (System.Text.RegularExpressions.Regex).\r?\n"              ;;; valueOf => Format  (long,long)
