@@ -648,16 +648,16 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "prep")]
         public static Object prepRet(Type t, Object x)
         {
-            if (!t.IsPrimitive)
-                return x;
+            //if (!t.IsPrimitive)
+            //    return x;
 
-            if (x is Boolean)
-                //return ((Boolean)x) ? RT.T : RT.F;
-                return ((Boolean)x) ? true : false;
-            else if (x is Int32)
-                return (long)(int)x;
-            //else if (x is Single)
-            //    return (double)(float)x;
+            //if (x is Boolean)
+            //    //return ((Boolean)x) ? RT.T : RT.F;
+            //    return ((Boolean)x) ? true : false;
+            //else if (x is Int32)
+            //    return (long)(int)x;
+            ////else if (x is Single)
+            ////    return (double)(float)x;
             return x;
         }
 

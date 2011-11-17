@@ -452,6 +452,8 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Expression toConv;
 
+                if (returnType == typeof(int))
+                    toConv = Expression.Convert(expr, typeof(int));
                 if (returnType == typeof(float))
                     toConv = Expression.Convert(expr, typeof(float));
                 else if (returnType == typeof(int))
