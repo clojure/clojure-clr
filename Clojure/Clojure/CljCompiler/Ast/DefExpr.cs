@@ -112,6 +112,8 @@ namespace clojure.lang.CljCompiler.Ast
 
                 IPersistentMap mm = sym.meta();
                 bool isDynamic = RT.booleanCast(RT.get(mm, Compiler.DynamicKeyword));
+                if (isDynamic)
+                    v.setDynamic();
                 if (!isDynamic && sym.Name.StartsWith("*") && sym.Name.EndsWith("*") && sym.Name.Length > 1)
                 {
                     RT.errPrintWriter().WriteLine("Warning: {0} not declared dynamic and thus is not dynamically rebindable, "
