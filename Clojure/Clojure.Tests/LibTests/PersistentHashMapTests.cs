@@ -16,15 +16,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using System.Collections;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
-
-using RMExpect = Rhino.Mocks.Expect;
-using System.Collections;
 
 
 namespace Clojure.Tests.LibTests
@@ -32,7 +28,6 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class PersistentHashMapTests : AssertionHelper
     {
-
         #region C-tor tests
 
         [Test]
@@ -128,27 +123,21 @@ namespace Clojure.Tests.LibTests
             Expect(m.meta(), Null);
         }
 
-
         [Test]
         public void CreateOnMetaNoArgsReturnsEmptyMap()
         {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             PersistentHashMap m = PersistentHashMap.create(meta);
 
             Expect(m.count(), EqualTo(0));
             Expect(m.meta(), SameAs(meta));
-            mocks.VerifyAll();
         }
 
         [Test]
         public void CreateOnMetaNoArgsReturnsMap()
         {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             PersistentHashMap m = PersistentHashMap.create(meta,1, "a", 2, "b");
 
@@ -157,7 +146,6 @@ namespace Clojure.Tests.LibTests
             Expect(m.valAt(2), EqualTo("b"));
             Expect(m.containsKey(3), False);
             Expect(m.meta(), SameAs(meta));
-            mocks.VerifyAll();
         }
 
         #endregion
@@ -218,14 +206,10 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class PersistentHashMap_IObj_Tests : IObjTests
     {
-        MockRepository _mocks;
-
         [SetUp]
         public void Setup()
         {
-            _mocks = new MockRepository();
-            IPersistentMap meta = _mocks.StrictMock<IPersistentMap>();
-            _mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             PersistentHashMap m = PersistentHashMap.create(1, "a", 2, "b");
 
@@ -234,13 +218,5 @@ namespace Clojure.Tests.LibTests
             _obj = _objWithNullMeta.withMeta(meta);
             _expectedType = typeof(PersistentHashMap);
         }
-
-        [TearDown]
-        public void Teardown()
-        {
-            _mocks.VerifyAll();
-        }
-
     }
-
 }

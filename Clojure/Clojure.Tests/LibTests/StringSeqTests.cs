@@ -17,13 +17,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
-
-using RMExpect = Rhino.Mocks.Expect;
 
 
 namespace Clojure.Tests.LibTests
@@ -84,12 +80,13 @@ namespace Clojure.Tests.LibTests
         }
 
         #endregion
-
     }
 
     [TestFixture]
     public class StringSeq_ISeq_Tests : ISeqTestHelper
     {
+        #region setup
+
         StringSeq _s;
         StringSeq _sWithMeta;
         object[] _values;
@@ -103,6 +100,10 @@ namespace Clojure.Tests.LibTests
             _sWithMeta = (StringSeq)((IObj)StringSeq.create("abcde")).withMeta(meta);
             _values = new object[] { 'a', 'b', 'c', 'd', 'e' };
         }
+
+        #endregion
+
+        #region ISeq tests
 
         [Test]
         public void StringSeq_has_correct_ISeq_values()
@@ -134,34 +135,22 @@ namespace Clojure.Tests.LibTests
             VerifyISeqCons(_s, 12, _values);
         }
 
+        #endregion
     }
 
     [TestFixture]
     public class StringSeq_IObj_Tests : IObjTests
     {
-        MockRepository _mocks;
-
         [SetUp]
         public void Setup()
         {
-            _mocks = new MockRepository();
-            IPersistentMap meta = _mocks.StrictMock<IPersistentMap>();
-            _mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             StringSeq s = StringSeq.create("abcde");
-
 
             _objWithNullMeta = (IObj)s;
             _obj = _objWithNullMeta.withMeta(meta);
             _expectedType = typeof(StringSeq);
         }
-
-        [TearDown]
-        public void Teardown()
-        {
-            _mocks.VerifyAll();
-        }
-
     }
-
 }

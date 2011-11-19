@@ -18,12 +18,8 @@ using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
-
-using RMExpect = Rhino.Mocks.Expect;
-
 
 namespace Clojure.Tests.LibTests
 {
@@ -83,7 +79,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void NthOutOfRangeLowFails()
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
@@ -92,7 +88,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void NthOutOfRangeHighFails()
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
@@ -136,7 +132,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void AssocNOutOfRangeLowFails()
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
@@ -144,7 +140,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void AssocNOutOfRangeHighFails()
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);

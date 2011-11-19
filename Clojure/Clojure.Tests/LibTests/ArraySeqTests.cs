@@ -18,11 +18,9 @@ using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
 
-using RMExpect = Rhino.Mocks.Expect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -117,52 +115,39 @@ namespace Clojure.Tests.LibTests
 
         #endregion
 
-
         #region IReduce tests
 
         [Test]
         public void ReduceWithNoStartIterates()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(2, 3)).Return(5);
-            RMExpect.Call(fn.invoke(5, 4)).Return(7);
-            mocks.ReplayAll();
+            IFn fn = DummyFn.CreateForReduce();
 
             object[] array = new object[] { 2, 3, 4 };
             IArraySeq a = ArraySeq.create(array);
             object ret = a.reduce(fn);
 
-            Expect(ret, EqualTo(7));
-
-            mocks.VerifyAll();
+            Expect(ret, EqualTo(9));
         }
 
         [Test]
         public void ReduceWithStartIterates()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(20, 2)).Return(10);
-            RMExpect.Call(fn.invoke(10, 3)).Return(5);
-            RMExpect.Call(fn.invoke(5, 4)).Return(7);
-            mocks.ReplayAll();
+            IFn fn = DummyFn.CreateForReduce();
 
             object[] array = new object[] { 2, 3, 4 };
             IArraySeq a = ArraySeq.create(array);
             object ret = a.reduce(fn, 20);
 
-            Expect(ret, EqualTo(7));
-
-            mocks.VerifyAll();
+            Expect(ret, EqualTo(29));
         }
         #endregion
-
     }
 
     [TestFixture]
     public class ArraySeq_ISeq_Tests : ISeqTestHelper
     {
+        #region setup
+
         object[] _array0;
         object[] _array1;
         IArraySeq _a0;
@@ -176,6 +161,10 @@ namespace Clojure.Tests.LibTests
             _a0 = ArraySeq.create(_array0);
             _a1 = ArraySeq.create(_array0, 1);
         }
+
+        #endregion
+
+        #region ISeq tests
 
         [Test]
         public void ArraySeq_ISeq_std_ctor_has_correct_elements()
@@ -201,7 +190,7 @@ namespace Clojure.Tests.LibTests
             VerifyISeqCons(_a1, 4, _array1);
         }
 
-
+        #endregion
     }
 
     [TestFixture]
@@ -212,7 +201,7 @@ namespace Clojure.Tests.LibTests
         {
             object[] array = new object[] { 1, 2, 3 };
             _objWithNullMeta = _obj = ArraySeq.create(array, 0);
-            _expectedType = typeof(TypedArraySeq<Object>);
+            _expectedType = typeof(ArraySeq_object);
             _testNoChange = false;
         }
     }

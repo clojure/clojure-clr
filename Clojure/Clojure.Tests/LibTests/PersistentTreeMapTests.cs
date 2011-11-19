@@ -16,15 +16,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using System.Collections;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
-
-using RMExpect = Rhino.Mocks.Expect;
-using System.Collections;
 
 
 namespace Clojure.Tests.LibTests
@@ -205,14 +201,10 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class PersistentTreeMap_IObj_Tests : IObjTests
     {
-        MockRepository _mocks;
-
         [SetUp]
         public void Setup()
         {
-            _mocks = new MockRepository();
-            IPersistentMap meta = _mocks.StrictMock<IPersistentMap>();
-            _mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             Dictionary<int, string> d = new Dictionary<int, string>();
             d[1] = "a";
@@ -225,13 +217,5 @@ namespace Clojure.Tests.LibTests
             _obj = _objWithNullMeta.withMeta(meta);
             _expectedType = typeof(PersistentTreeMap);
         }
-
-        [TearDown]
-        public void Teardown()
-        {
-            _mocks.VerifyAll();
-        }
-
     }
-
 }

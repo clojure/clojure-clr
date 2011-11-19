@@ -19,9 +19,6 @@ using System.Text;
 
 using NUnit.Framework;
 
-using Rhino.Mocks;
-using RMExpect = Rhino.Mocks.Expect;
-
 using clojure.lang;
 using System.Reflection;
 using System.Reflection.Emit;

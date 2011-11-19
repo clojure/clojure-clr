@@ -18,7 +18,6 @@ using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
 
@@ -48,25 +47,17 @@ namespace Clojure.Tests.LibTests
             }
         }
 
-        MockRepository _mocks;
 
         [SetUp]
         public void Setup()
         {
-            _mocks = new MockRepository();
-            IPersistentMap meta = _mocks.StrictMock<IPersistentMap>();
-            _mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             _objWithNullMeta = new MockObj();
             _obj = new MockObj(meta);
             _expectedType = typeof(MockObj);
         }
-        
-        [TearDown]
-        public void Teardown()
-        {
-            _mocks.VerifyAll();
-        }
+
     }
 }
 

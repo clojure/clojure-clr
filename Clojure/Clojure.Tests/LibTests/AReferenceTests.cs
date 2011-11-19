@@ -18,11 +18,9 @@ using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
 
-using RMExpect = Rhino.Mocks.Expect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -30,6 +28,8 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class AReferenceTests : AssertionHelper
     {
+        #region Concrete AReference
+
         // AReference is abstract.  We need a class to instantiate.
 
         class ConcreteAReference : AReference
@@ -38,6 +38,7 @@ namespace Clojure.Tests.LibTests
             public ConcreteAReference(IPersistentMap meta) : base(meta) { }
         }
 
+        #endregion
 
         #region C-tor tests
 
@@ -51,49 +52,37 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void Map_ctor_creates_with_given_metadata()
         {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             ConcreteAReference c = new ConcreteAReference(meta);
-            Expect(c.meta(), EqualTo(meta));
-
-            mocks.VerifyAll();
+            Expect(c.meta(), SameAs(meta));
         }
 
         #endregion
-
 
         #region IReference tests
 
         [Test]
         public void AlterMeta_changes_meta()
         {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.applyTo(null)).IgnoreArguments().Return(meta);
-            mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
+            IFn fn = DummyFn.CreateForMetaAlter(meta);
 
             ConcreteAReference c = new ConcreteAReference();
             c.alterMeta(fn, null);
 
-            Expect(c.meta(), EqualTo(meta));
-            mocks.VerifyAll();
+            Expect(c.meta(), SameAs(meta));
         }
 
         [Test]
         public void ResetMeta_sets_meta()
         {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             ConcreteAReference c = new ConcreteAReference();
             c.resetMeta(meta);
 
             Expect(c.meta(), EqualTo(meta));
-            mocks.VerifyAll();
         }
 
 

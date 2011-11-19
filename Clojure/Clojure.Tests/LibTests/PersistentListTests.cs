@@ -18,11 +18,8 @@ using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
-
-using RMExpect = Rhino.Mocks.Expect;
 
 
 namespace Clojure.Tests.LibTests
@@ -113,15 +110,12 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void EmptyPreservesMeta()
         {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             IPersistentCollection p = (IPersistentCollection)new PersistentList("abc").withMeta(meta);
             IObj obj = (IObj) p.empty();
 
             Expect(obj.meta(), SameAs(meta));
-            mocks.VerifyAll();
         }
 
         #endregion
@@ -131,46 +125,34 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ReduceWithNoStartIterates()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(1, 2)).Return(5);
-            RMExpect.Call(fn.invoke(5, 3)).Return(7);
-            mocks.ReplayAll();
+            IFn fn = DummyFn.CreateForReduce();
 
             PersistentList p = (PersistentList)PersistentList.create(new object[] { 1, 2, 3 });
             object ret = p.reduce(fn);
 
-            Expect(ret, EqualTo(7));
-
-            mocks.VerifyAll();
+            Expect(ret, EqualTo(6));
         }
 
         [Test]
         public void ReduceWithStartIterates()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(20, 1)).Return(10);
-            RMExpect.Call(fn.invoke(10, 2)).Return(5);
-            RMExpect.Call(fn.invoke(5, 3)).Return(7);
-            mocks.ReplayAll();
+            IFn fn = DummyFn.CreateForReduce();
 
             PersistentList p = (PersistentList)PersistentList.create(new object[] { 1, 2, 3 });
             object ret = p.reduce(fn, 20);
 
-            Expect(ret, EqualTo(7));
-
-            mocks.VerifyAll();
+            Expect(ret, EqualTo(26));
         }
 
 
         #endregion
-
     }
 
     [TestFixture]
     public class PersistentList_ISeq_Tests : ISeqTestHelper
     {
+        #region setup
+
         PersistentList _pl;
         PersistentList _plWithMeta;
         object[] _values;
@@ -185,6 +167,10 @@ namespace Clojure.Tests.LibTests
             _values = new object[] { 7, "def", "abc" };
             _plWithMeta = (PersistentList)_pl.withMeta(PersistentHashMap.create("a", 1));
         }
+
+        #endregion
+
+        #region ISeq tests
 
         [Test]
         public void ISeq_has_correct_valuess()
@@ -216,34 +202,24 @@ namespace Clojure.Tests.LibTests
             PersistentList p2 = (PersistentList)_plWithMeta.cons("def");
             Expect(p2.meta(), SameAs(_plWithMeta.meta()));
         }
+
+        #endregion
     }
 
 
     [TestFixture]
     public class PersistentList_IObj_Tests : IObjTests
     {
-        MockRepository _mocks;
-
         [SetUp]
         public void Setup()
         {
-            _mocks = new MockRepository();
-            IPersistentMap meta = _mocks.StrictMock<IPersistentMap>();
-            _mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             PersistentList p1 = (PersistentList)PersistentList.create(new object[] { "abc", "def" });
-
 
             _objWithNullMeta = (IObj)p1;
             _obj = _objWithNullMeta.withMeta(meta);
             _expectedType = typeof(PersistentList);
         }
-
-        [TearDown]
-        public void Teardown()
-        {
-            _mocks.VerifyAll();
-        }
-
     }
 }

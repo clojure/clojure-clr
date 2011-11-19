@@ -16,15 +16,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using System.Threading;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
-
-using RMExpect = Rhino.Mocks.Expect;
-using System.Threading;
 
 namespace Clojure.Tests.LibTests
 {
@@ -32,8 +28,6 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class LockingTransactionTests : AssertionHelper
     {
-
-
         //// TODO: Make this work.
 
         //// This test is taken from the Java code.

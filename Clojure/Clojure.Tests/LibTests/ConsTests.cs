@@ -16,12 +16,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
-using System.Collections;
+
 
 namespace Clojure.Tests.LibTests
 {
@@ -40,14 +40,9 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void MetaCtorHasMeta()
         {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
-
+            IPersistentMap meta = new DummyMeta();
             Cons c = new Cons(meta, "abc", null);
-
             Expect(c.meta(), SameAs(meta));
-            mocks.VerifyAll();
         }
 
         #endregion
@@ -144,7 +139,7 @@ namespace Clojure.Tests.LibTests
         #region ASeq.ICollection tests
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentNullException))]
         public void ASeqICollCopyToFailsOnNullArray()
         {
             ICollection ic = new Cons(1, null);
@@ -152,7 +147,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void ASeqICollCopyToFailsOnInsufficientSpace()
         {
             ICollection ic = new Cons(1, new Cons(2, new Cons(3,null)));
@@ -161,7 +156,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void ASeqICollCopyToFailsOnInsufficientSpace2()
         {
             ICollection ic = new Cons(1, new Cons(2, new Cons(3, null)));
@@ -229,11 +224,11 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(NotImplementedException))]
-        public void ASeqICollHasDoesntImplementSyncRoot()
+        public void ASeqICollImplementsSyncRoot()
         {
             ICollection ic = new Cons(1, new Cons(2, new Cons(3, null)));
             Object o = ic.SyncRoot;
+            Expect(o, SameAs(ic));
         }
 
         [Test]
@@ -376,6 +371,7 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class Cons_ISeq_Tests : ISeqTestHelper
     {
+        #region ISeq tests
 
         [Test]
         public void Cons_ISeq_has_correct_values()
@@ -389,29 +385,24 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void Cons_ISeq_with_meta_has_correct_values()
         {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             Cons c1 = new Cons("def", null);
             Cons c2 = new Cons(meta,"abc", c1);
 
             VerifyISeqContents(c2, new object[] { "abc", "def" });
-            mocks.VerifyAll();
         }
 
         [Test]
         public void Cons_ISeq_conses()
         {
-
             Cons c1 = new Cons("def", null);
             Cons c2 = new Cons("abc", c1);
 
             VerifyISeqCons(c2, "ghi", new object[] { "abc", "def" });
         }
 
-
-
+        #endregion
     }
 
 
@@ -421,7 +412,7 @@ namespace Clojure.Tests.LibTests
         [SetUp]
         public void Setup()
         {
-            IPersistentMap meta = PersistentHashMap.create("a", 1, "b", 2);
+            IPersistentMap meta = new DummyMeta();
 
             Cons c1 = new Cons("abc", null);
             Cons c2 = new Cons(meta,"def", c1);

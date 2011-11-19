@@ -16,15 +16,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using System.Collections;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
 
-using RMExpect = Rhino.Mocks.Expect;
-using System.Collections;
 
 namespace Clojure.Tests.LibTests
 {
@@ -164,14 +161,10 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class PersistentHashSet_IObj_Tests : IObjTests
     {
-        MockRepository _mocks;
-
         [SetUp]
         public void Setup()
         {
-            _mocks = new MockRepository();
-            IPersistentMap meta = _mocks.StrictMock<IPersistentMap>();
-            _mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             PersistentHashSet m = PersistentHashSet.create(1, "a", 2, "b");
 
@@ -180,13 +173,5 @@ namespace Clojure.Tests.LibTests
             _obj = _objWithNullMeta.withMeta(meta);
             _expectedType = typeof(PersistentHashSet);
         }
-
-        [TearDown]
-        public void Teardown()
-        {
-            _mocks.VerifyAll();
-        }
-
     }
-
 }

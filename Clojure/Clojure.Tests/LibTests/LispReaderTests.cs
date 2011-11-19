@@ -20,14 +20,9 @@ using System.IO;
 
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
 //using BigDecimal = java.math.BigDecimal;
-
-using RMExpect = Rhino.Mocks.Expect;
-
-
 
 
 namespace Clojure.Tests.LibTests
@@ -61,7 +56,7 @@ namespace Clojure.Tests.LibTests
             Expect(o2, EqualTo(123));
             Expect(o3, EqualTo(-123));
             //Expect(o4, EqualTo(new BigInteger("123456789123456789123456789")));
-            Expect(o4,EqualTo(BigInteger.Parse("123456789123456789123456789")));
+            Expect(o4,EqualTo(BigInt.fromBigInteger(BigInteger.Parse("123456789123456789123456789"))));
         }
 
         [Test]
@@ -74,7 +69,7 @@ namespace Clojure.Tests.LibTests
             Expect(o1, EqualTo(0x12A));
             Expect(o2, EqualTo(0xFFF));
             //Expect(o3, EqualTo(new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFF", 16)));
-            Expect(o3,EqualTo(BigInteger.Parse("FFFFFFFFFFFFFFFFFFFFFFFF", 16)));
+            Expect(o3,EqualTo(BigInt.fromBigInteger(BigInteger.Parse("FFFFFFFFFFFFFFFFFFFFFFFF", 16))));
         }
 
 
@@ -90,7 +85,7 @@ namespace Clojure.Tests.LibTests
             Expect(o2, EqualTo(83));
             Expect(o3, EqualTo(-83));
             //Expect(o4, EqualTo(new BigInteger("1234567012345670123456777", 8)));
-            Expect(o4,EqualTo(BigInteger.Parse("1234567012345670123456777", 8)));
+            Expect(o4,EqualTo(BigInt.fromBigInteger(BigInteger.Parse("1234567012345670123456777", 8))));
         }
 
         [Test]
@@ -256,7 +251,7 @@ namespace Clojure.Tests.LibTests
             Expect(o2, EqualTo(-123));
             Expect(o3, EqualTo(123));
             //Expect(o4, EqualTo(new BigInteger("123456789123456789123456789")));
-            Expect(o4,EqualTo(BigInteger.Parse("123456789123456789123456789")));
+            Expect(o4,EqualTo(BigInt.fromBigInteger(BigInteger.Parse("123456789123456789123456789"))));
         }
 
         [Test]
@@ -365,21 +360,21 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(ArgumentException))]
         public void NamespaceEndingWithColonSlashIsBad()
         {
             object o1 = ReadFromString("ab:/cd");
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(ArgumentException))]
         public void NameEndingWithColonIsBad()
         {
             object o1 = ReadFromString("ab/cd:");
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(ArgumentException))]
         public void NameEndingWithColonIsBad2()
         {
             object o1 = ReadFromString("cd:");
@@ -393,14 +388,14 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(ArgumentException))]
         public void NameContainingDoubleColonNotAtBeginningIsBad()
         {
             object o1 = ReadFromString("ab::cd");
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(ArgumentException))]
         public void NamespaceContainingDoubleColonNotAtBeginningIsBad()
         {
             object o1 = ReadFromString("ab::cd/ef");
@@ -736,7 +731,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void BackslashUnicodeInBadRangeFails()
         {
             object o1 = ReadFromString("\\uDAAA");
@@ -764,7 +759,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void BackslashOctalInBadRangeFails()
         {
             object o1 = ReadFromString("\\o444");
@@ -778,14 +773,14 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void BackslashOctalWithTooManyDigitsFails()
         {
             object o1 = ReadFromString("\\o0012 aa");
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void BackslashWithOtherFails()
         {
             object o1 = ReadFromString("\\aa");
@@ -830,7 +825,7 @@ namespace Clojure.Tests.LibTests
             Expect(pl.first(), TypeOf(typeof(Symbol)));
             Expect(((Symbol)pl.first()).Name, EqualTo("abc"));
             Expect(((Symbol)pl.first()).Namespace, Null);
-            Expect(pl.next().first(), TypeOf(typeof(int)));
+            Expect(pl.next().first(), TypeOf(typeof(long)));
             Expect(pl.next().first(), EqualTo(12));
             Expect(pl.next().next(), Null);
         }
@@ -849,7 +844,7 @@ namespace Clojure.Tests.LibTests
             Expect(pl.first(), TypeOf(typeof(Symbol)));
             Expect(((Symbol)pl.first()).Name, EqualTo("abc"));
             Expect(((Symbol)pl.first()).Namespace, Null);
-            Expect(pl.next().first(), TypeOf(typeof(int)));
+            Expect(pl.next().first(), TypeOf(typeof(long)));
             Expect(pl.next().first(), EqualTo(12));
             Expect(pl.next().next(), Null);
         }
@@ -911,7 +906,7 @@ namespace Clojure.Tests.LibTests
             Expect(pl.nth(0), TypeOf(typeof(Symbol)));
             Expect(((Symbol)pl.nth(0)).Name, EqualTo("abc"));
             Expect(((Symbol)pl.nth(0)).Namespace, Null);
-            Expect(pl.nth(1), TypeOf(typeof(int)));
+            Expect(pl.nth(1), TypeOf(typeof(long)));
             Expect(pl.nth(1), EqualTo(12));
         }
 
@@ -1032,14 +1027,14 @@ namespace Clojure.Tests.LibTests
         #region Unmatched delimiter tests
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(ArgumentException))]
         public void NakedRightParenIsBad()
         {
             Object o1 = ReadFromString("}");
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(ArgumentException))]
         public void NakedRightBracketIsBad()
         {
             Object o1 = ReadFromString("]");
@@ -1047,14 +1042,14 @@ namespace Clojure.Tests.LibTests
 
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(ArgumentException))]
         public void NakedRightBraceIsBad()
         {
             Object o1 = ReadFromString("}");
         }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(ArgumentException))]
         public void MismatchedDelimiterIsBad()
         {
             Object o1 = ReadFromString("( a b c }");
@@ -1083,30 +1078,6 @@ namespace Clojure.Tests.LibTests
             ISeq s = o1 as ISeq;
             Expect(s.count(), EqualTo(2));
             Expect(s.first(), EqualTo(Symbol.intern("quote")));
-            Expect(s.next().first(), InstanceOf(typeof(IPersistentList)));
-            Expect(((IPersistentList)s.next().first()).count(), EqualTo(3));
-        }
-
-
-        [Test]
-        public void MetaWraps()
-        {
-            object o1 = ReadFromString("^a");
-            Expect(o1, InstanceOf(typeof(ISeq)));
-            ISeq s = o1 as ISeq;
-            Expect(s.count(), EqualTo(2));
-            Expect(s.first(), EqualTo(Symbol.intern("clojure.core","meta")));
-            Expect(s.next().first(), TypeOf(typeof(Symbol)));
-        }
-
-        [Test]
-        public void MetaWraps2()
-        {
-            object o1 = ReadFromString("^(a b c)");
-            Expect(o1, InstanceOf(typeof(ISeq)));
-            ISeq s = o1 as ISeq;
-            Expect(s.count(), EqualTo(2));
-            Expect(s.first(), EqualTo(Symbol.intern("clojure.core", "meta")));
             Expect(s.next().first(), InstanceOf(typeof(IPersistentList)));
             Expect(((IPersistentList)s.next().first()).count(), EqualTo(3));
         }
@@ -1148,7 +1119,7 @@ namespace Clojure.Tests.LibTests
 
             Expect(o1, TypeOf(typeof(Keyword)));
             Expect(o1, EqualTo(Keyword.intern(null, "abc")));
-            Expect(o2, TypeOf(typeof(int)));
+            Expect(o2, TypeOf(typeof(long)));
             Expect(o2, EqualTo(222));
             Expect(o3, TypeOf(typeof(char)));
             Expect(o3, EqualTo('a'));
@@ -1554,7 +1525,7 @@ namespace Clojure.Tests.LibTests
         #region #-dispatch tests
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(ArgumentException))]
         public void SharpDispatchOnInvalidCharFails()
         {
             object o1 = ReadFromString("#a(1 2)");
@@ -1568,20 +1539,20 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArgumentException))]
         public void MetaOnImproperMetadataFails()
         {
-            object o1 = ReadFromString("#^1 (a b c");
+            object o1 = ReadFromString("^1 (a b c");
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void MetaOnAppliedToNonIObjFails()
         {
-            object o1 = ReadFromString("#^{:a 1} 7");
+            object o1 = ReadFromString("^{:a 1} 7");
         }
 
         [Test]
         public void MetaAppliesHashMetaDataToObject()
         {
-            object o1 = ReadFromString("#^{a 1} (a b)");
+            object o1 = ReadFromString("^{a 1} (a b)");
 
             Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
@@ -1603,7 +1574,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void MetaAppliesSymbolAsTagMetaDataToObject()
         {
-            object o1 = ReadFromString("#^c (a b)");
+            object o1 = ReadFromString("^c (a b)");
 
             Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
@@ -1622,9 +1593,9 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        public void MetaAppliesKeywordAsTagMetaDataToObject()
+        public void MetaAppliesKeywordWithTrueToObject()
         {
-            object o1 = ReadFromString("#^:c (a b)");
+            object o1 = ReadFromString("^:c (a b)");
 
             Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
@@ -1639,13 +1610,13 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m = o.meta() as IPersistentMap;
 
             Expect(m.count(), EqualTo(1));
-            Expect(m.valAt(Keyword.intern(null, "tag")), EqualTo(Keyword.intern(null,"c")));
+            Expect(m.valAt(Keyword.intern(null, "c")), EqualTo(true));
         }
 
         [Test]
         public void MetaAppliesStringAsTagMetaDataToObject()
         {
-            object o1 = ReadFromString("#^\"help\" (a b)");
+            object o1 = ReadFromString("^\"help\" (a b)");
 
             Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
@@ -1666,7 +1637,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void MetaAddsLineupNumberAsMetaDataIfAvailable()
         {
-            object o1 = ReadFromStringNumbering("\n\n#^:c (a b)");
+            object o1 = ReadFromStringNumbering("\n\n^c (a b)");
 
             Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
@@ -1680,8 +1651,8 @@ namespace Clojure.Tests.LibTests
             Expect(o.meta(), InstanceOf(typeof(IPersistentMap)));
             IPersistentMap m = o.meta() as IPersistentMap;
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(Keyword.intern(null, "tag")), EqualTo(Keyword.intern(null,"c")));
+            Expect(m.count(), EqualTo(3));
+            Expect(m.valAt(Keyword.intern(null, "tag")), EqualTo(Symbol.intern(null,"c")));
             Expect(m.valAt(Keyword.intern(null, "line")), EqualTo(3));
         }
 

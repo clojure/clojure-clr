@@ -14,3 +14,5 @@ lib/*/*.pdb
 lib/*/*/*.dll
 lib/*/*/*.xml
 lib/*/*/*.pdb
+# NuGet packages
+*/packages/*

@@ -18,7 +18,6 @@ using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
 
@@ -129,7 +128,7 @@ namespace Clojure.Tests.LibTests
         public void DivideReducesToIntOnDenomOne()
         {
             object o = Numbers.BIDivide(BigInteger.Create(75), BigInteger.Create(25));
-            Expect(o, EqualTo(3));
+            Expect(o, EqualTo(BigInt.fromLong(3)));
         }
 
         [Test]
@@ -153,9 +152,9 @@ namespace Clojure.Tests.LibTests
         {
             BigDecimal bd = BigDecimal.Parse("12345");
             object r = Numbers.rationalize(bd);
-            Expect(r,InstanceOf(typeof(BigInteger)));
-            BigInteger bi = (BigInteger) r;
-            Expect(bi,EqualTo(BigInteger.Parse("12345")));
+            Expect(r,InstanceOf(typeof(BigInt)));
+            BigInt bi = (BigInt)r;
+            Expect(bi,EqualTo(BigInt.fromBigInteger(BigInteger.Parse("12345"))));
         }
 
         [Test]

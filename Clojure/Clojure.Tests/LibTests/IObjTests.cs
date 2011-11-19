@@ -18,7 +18,7 @@ using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
-using Rhino.Mocks;
+
 using clojure.lang;
 
 namespace Clojure.Tests.LibTests
@@ -50,14 +50,11 @@ namespace Clojure.Tests.LibTests
         protected bool _testNoChange = true;
 
 
-        MockRepository _mocks = null;
         IPersistentMap _meta = null;
 
         void InitMocks()
         {
-            _mocks = new MockRepository();
-            _meta = _mocks.StrictMock<IPersistentMap>();
-            _mocks.ReplayAll();
+            _meta = new DummyMeta();
         }
             
 
@@ -67,7 +64,6 @@ namespace Clojure.Tests.LibTests
             InitMocks();
             IObj obj2 = _obj.withMeta(_meta);
             Expect(obj2.meta(), SameAs(_meta));
-            _mocks.VerifyAll();
         }
 
         [Test]
@@ -79,7 +75,6 @@ namespace Clojure.Tests.LibTests
             InitMocks();
             IObj obj2 = _obj.withMeta(_meta);
             Expect(obj2, TypeOf(_expectedType));
-            _mocks.VerifyAll();
         }
 
         [Test]

@@ -16,17 +16,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
-using NUnit.Framework;
-using Rhino.Mocks;
-
-using clojure.lang;
-
-using RMExpect = Rhino.Mocks.Expect;
 using System.Collections;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
+using NUnit.Framework;
+
+using clojure.lang;
 
 
 namespace Clojure.Tests.LibTests
@@ -262,7 +258,7 @@ namespace Clojure.Tests.LibTests
         #region IComparable tests
 
         [Test]
-        [ExpectedException(typeof(InvalidCastException))]
+        [ExpectedException(typeof(ArgumentException))]
         public void CompareToNonSymbolFails()
         {
             Symbol sym1 = Symbol.intern("abc");
@@ -341,14 +337,10 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class Symbol_IObj_Tests : IObjTests
     {
-        MockRepository _mocks;
-
         [SetUp]
         public void Setup()
         {
-            _mocks = new MockRepository();
-            IPersistentMap meta = _mocks.StrictMock<IPersistentMap>();
-            _mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             Symbol sym1 = Symbol.intern("def", "abc");
 
@@ -356,13 +348,5 @@ namespace Clojure.Tests.LibTests
             _obj = _objWithNullMeta.withMeta(meta);
             _expectedType = typeof(Symbol);
         }
-
-        [TearDown]
-        public void Teardown()
-       { 
-            _mocks.VerifyAll();
-        }
-
     }
-
 }

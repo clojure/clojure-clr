@@ -16,15 +16,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using System.Collections;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
 
-using RMExpect = Rhino.Mocks.Expect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -284,7 +281,7 @@ namespace Clojure.Tests.LibTests
 
 
         [Test]
-        [ExpectedException(typeof(Exception))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void AssocExFailsOnExistingKey()
         {
             Dictionary<int, string> d = new Dictionary<int, string>();
@@ -668,7 +665,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(NotImplementedException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void IDictionary_Add_fails()
         {
             Dictionary<int, string> d = new Dictionary<int, string>();
@@ -680,7 +677,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(NotImplementedException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void IDictionary_Clear_fails()
         {
             Dictionary<int, string> d = new Dictionary<int, string>();
@@ -692,7 +689,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(NotImplementedException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void IDictionary_Remove_fails()
         {
             Dictionary<int, string> d = new Dictionary<int, string>();
@@ -814,15 +811,15 @@ namespace Clojure.Tests.LibTests
             IDictionaryEnumerator e = id.GetEnumerator();
 
             Expect(e.MoveNext());
-            DictionaryEntry de1 = (DictionaryEntry)e.Current;
+            IMapEntry de1 = (IMapEntry)e.Current;
             Expect(e.MoveNext());
-            DictionaryEntry de2 = (DictionaryEntry)e.Current;
+            IMapEntry de2 = (IMapEntry)e.Current;
             Expect(e.MoveNext(), False);
 
-            Expect(de1.Key, EqualTo(1) | EqualTo(2));
-            Expect(de2.Key, EqualTo(1) | EqualTo(2));
-            Expect(de1.Value, EqualTo(((int)de1.Key) == 1 ? "a" : "b"));
-            Expect(de2.Value, EqualTo(((int)de2.Key) == 1 ? "a" : "b"));
+            Expect(de1.key(), EqualTo(1) | EqualTo(2));
+            Expect(de2.key(), EqualTo(1) | EqualTo(2));
+            Expect(de1.val(), EqualTo(((int)de1.key()) == 1 ? "a" : "b"));
+            Expect(de2.val(), EqualTo(((int)de2.key()) == 1 ? "a" : "b"));
         }
 
         [Test]
@@ -874,7 +871,6 @@ namespace Clojure.Tests.LibTests
 
 
         [Test]
-        [ExpectedException(typeof(NotImplementedException))]
         public void ICollection_SyncRoot_fails()
         {
             Dictionary<int, string> d = new Dictionary<int, string>();
@@ -884,6 +880,7 @@ namespace Clojure.Tests.LibTests
             ICollection c = (ICollection)PersistentArrayMap.create(d);
 
             object s = c.SyncRoot;
+            Expect(s, SameAs(c));
         }
 
 
@@ -893,14 +890,10 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class PersistentArrayMap_IObj_Tests : IObjTests
     {
-        MockRepository _mocks;
-
         [SetUp]
         public void Setup()
         {
-            _mocks = new MockRepository();
-            IPersistentMap meta = _mocks.StrictMock<IPersistentMap>();
-            _mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             Dictionary<int, string> d = new Dictionary<int, string>();
             d[1] = "abc";
@@ -909,13 +902,5 @@ namespace Clojure.Tests.LibTests
             _obj = _objWithNullMeta.withMeta(meta);
             _expectedType = typeof(PersistentArrayMap);
         }
-
-        [TearDown]
-        public void Teardown()
-        {
-            _mocks.VerifyAll();
-        }
-
     }
-
 }

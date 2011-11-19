@@ -18,11 +18,8 @@ using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
-
-using RMExpect = Rhino.Mocks.Expect;
 
 
 namespace Clojure.Tests.LibTests
@@ -34,6 +31,7 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class APersistentVectorTests : AssertionHelper
     {
+        #region Concrete persistent vector
 
         // Usually, we test the abstract classes via the simplest concrete class that derives from it.
         // For APersistentVector, all the concrete classes are fairly complicated.
@@ -118,6 +116,8 @@ namespace Clojure.Tests.LibTests
                 return _values.Length;
             }
         }
+
+        #endregion
 
         #region C-tor tests
 
@@ -556,51 +556,37 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void SeqWithMetaHasMeta()
         {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             CPV v = new CPV(new object[] { 4, 5, 6 });
             IObj s = (IObj)v.seq();
             IObj obj = s.withMeta(meta);
 
             Expect(obj.meta(), SameAs(meta));
-            mocks.VerifyAll();
         }
 
         [Test]
         public void SeqReduceWithNoStartIterates()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(1, 2)).Return(5);
-            RMExpect.Call(fn.invoke(5, 3)).Return(7);
-            mocks.ReplayAll();
+            IFn fn = DummyFn.CreateForReduce();
 
             CPV v = new CPV(new object[] { 1, 2, 3 });
             IReduce r = (IReduce)v.seq();
             object ret = r.reduce(fn);
 
-            Expect(ret, EqualTo(7));
-            mocks.VerifyAll();
+            Expect(ret, EqualTo(6));
         }
 
         [Test]
         public void SeqReduceWithStartIterates()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(20, 1)).Return(10);
-            RMExpect.Call(fn.invoke(10, 2)).Return(5);
-            RMExpect.Call(fn.invoke(5, 3)).Return(7);
-            mocks.ReplayAll();
+            IFn fn = DummyFn.CreateForReduce();
 
             CPV v = new CPV(new object[] { 1, 2, 3 });
             IReduce r = (IReduce)v.seq();
             object ret = r.reduce(fn, 20);
 
-            Expect(ret, EqualTo(7));
-            mocks.VerifyAll();
+            Expect(ret, EqualTo(26));
         }
 
         #endregion
@@ -649,54 +635,39 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void RSeqWithMetaHasMeta()
         {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             CPV v = new CPV(new object[] { 4, 5, 6 });
             IObj s = (IObj)v.rseq();
             IObj obj = s.withMeta(meta);
 
             Expect(obj.meta(), SameAs(meta));
-            mocks.VerifyAll();
         }
 
         [Test]
         public void RSeqReduceWithNoStartIterates()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(3, 2)).Return(5);
-            RMExpect.Call(fn.invoke(5, 1)).Return(7);
-            mocks.ReplayAll();
+            IFn fn = DummyFn.CreateForReduce();
 
             CPV v = new CPV(new object[] { 1, 2, 3 });
             IReduce r = (IReduce)v.rseq();
             object ret = r.reduce(fn);
 
-            Expect(ret, EqualTo(7));
-            mocks.VerifyAll();
+            Expect(ret, EqualTo(6));
         }
 
         [Test]
         public void RSeqReduceWithStartIterates()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(20, 3)).Return(10);
-            RMExpect.Call(fn.invoke(10, 2)).Return(5);
-            RMExpect.Call(fn.invoke(5, 1)).Return(7);
-            mocks.ReplayAll();
+            IFn fn = DummyFn.CreateForReduce();
 
             CPV v = new CPV(new object[] { 1, 2, 3 });
             IReduce r = (IReduce)v.rseq();
             object ret = r.reduce(fn, 20);
 
-            Expect(ret, EqualTo(7));
-            mocks.VerifyAll();
+            Expect(ret, EqualTo(26));
         }
 
         #endregion
-
     }
 }

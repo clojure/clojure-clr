@@ -18,11 +18,9 @@ using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
 
-using RMExpect = Rhino.Mocks.Expect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -108,7 +106,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void NthOutOfRangeLowFails()
         {
             MapEntry me = new MapEntry(1, "abc");
@@ -116,7 +114,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void NthOutOfRangeHighFails()
         {
             MapEntry me = new MapEntry(1, "abc");
@@ -150,7 +148,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void AssocNOutOfRangeLowThrows()
         {
             MapEntry me = new MapEntry(1, "abc");
@@ -158,7 +156,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void AssocNOutOfRangeHighThrows()
         {
             MapEntry me = new MapEntry(1, "abc");

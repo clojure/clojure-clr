@@ -16,17 +16,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
-
-using NUnit.Framework;
-using Rhino.Mocks;
-
-using clojure.lang;
-
-using RMExpect = Rhino.Mocks.Expect;
 using System.Collections;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+
+using NUnit.Framework;
+
+using clojure.lang;
 
 
 namespace Clojure.Tests.LibTests
@@ -181,7 +177,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArityException))]
         public void InvokeOnNoArgsFails()
         {
             Keyword k1 = Keyword.intern(Symbol.intern("abc"));
@@ -189,7 +185,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArityException))]
         public void InvokeOnTooManyArgsFails()
         {
             Keyword k1 = Keyword.intern(Symbol.intern("abc"));
@@ -205,7 +201,7 @@ namespace Clojure.Tests.LibTests
         #region IComparable tests
 
         [Test]
-        [ExpectedException(typeof(InvalidCastException))]
+        [ExpectedException(typeof(ArgumentException))]
         public void CompareToNonKeywordFails()
         {
             Symbol s1 = Symbol.intern("abc");

@@ -18,11 +18,9 @@ using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
 
-using RMExpect = Rhino.Mocks.Expect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -106,7 +104,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void NthOutOfRangeLowFails()
         {
             PersistentVector v = PersistentVector.create(1, 2, 3);
@@ -114,7 +112,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void NthOutOfRangeHighFails()
         {
             PersistentVector v = PersistentVector.create(1, 2, 3);
@@ -157,7 +155,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void AssocNOutOfRangeLowThrowsException()
         {
             Range r = new Range(2, 5);
@@ -166,7 +164,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(IndexOutOfRangeException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void AssocNOutOfRangeHighThrowsException()
         {
             Range r = new Range(2, 5);
@@ -234,9 +232,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void EmptyCopiesMeta()
         {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             PersistentVector v1 = PersistentVector.create(1, 2, 3);
             IPersistentCollection e1 = v1.empty();
@@ -246,8 +242,6 @@ namespace Clojure.Tests.LibTests
 
             Expect(((IObj)e1).meta(), Null);
             Expect(((IObj)e2).meta(), SameAs(meta));
-
-            mocks.VerifyAll();
         }
 
 
@@ -307,14 +301,10 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class PersistentVector_IObj_Tests : IObjTests
     {
-        MockRepository _mocks;
-
         [SetUp]
         public void Setup()
         {
-            _mocks = new MockRepository();
-            IPersistentMap meta = _mocks.StrictMock<IPersistentMap>();
-            _mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             PersistentVector v = PersistentVector.create(2, 3, 4);
 
@@ -323,13 +313,5 @@ namespace Clojure.Tests.LibTests
             _obj = _objWithNullMeta.withMeta(meta);
             _expectedType = typeof(PersistentVector);
         }
-
-        [TearDown]
-        public void Teardown()
-        {
-            _mocks.VerifyAll();
-        }
-
     }
-
 }

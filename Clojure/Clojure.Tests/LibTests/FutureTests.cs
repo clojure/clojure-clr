@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
 

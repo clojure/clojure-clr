@@ -18,11 +18,9 @@ using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
-using Rhino.Mocks;
 
 using clojure.lang;
 
-using RMExpect = Rhino.Mocks.Expect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -41,15 +39,9 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void Meta_ctor_has_meta()
         {
-            MockRepository mocks = new MockRepository();
-            IPersistentMap meta = mocks.StrictMock<IPersistentMap>();
-            mocks.ReplayAll();
-
+            IPersistentMap meta = new DummyMeta();
             Range r = new Range(meta, 2, 5);
-
             Expect(r.meta(), EqualTo(meta));
-
-            mocks.VerifyAll();
         }
 
         #endregion
@@ -72,46 +64,33 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ReduceWithNoStartIterates()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(2, 3)).Return(5);
-            RMExpect.Call(fn.invoke(5, 4)).Return(7);
-            mocks.ReplayAll();
+            IFn fn = DummyFn.CreateForReduce();
 
             Range r = new Range(2, 5);
             object ret = r.reduce(fn);
 
-            Expect(ret, EqualTo(7));
-
-            mocks.VerifyAll();
+            Expect(ret, EqualTo(9));
         }
 
         [Test]
         public void ReduceWithStartIterates()
         {
-            MockRepository mocks = new MockRepository();
-            IFn fn = mocks.StrictMock<IFn>();
-            RMExpect.Call(fn.invoke(20, 2)).Return(10);
-            RMExpect.Call(fn.invoke(10, 3)).Return(5);
-            RMExpect.Call(fn.invoke(5, 4)).Return(7);
-            mocks.ReplayAll();
+            IFn fn = DummyFn.CreateForReduce();
 
             Range r = new Range(2, 5);
             object ret = r.reduce(fn, 20);
 
-            Expect(ret, EqualTo(7));
-
-            mocks.VerifyAll();
+            Expect(ret, EqualTo(29));
         }
 
         #endregion
-
-        // TODO: test stream capability of Range        
     }
 
     [TestFixture]
     public class Range_ISeq_Tests : ISeqTestHelper
     {
+        #region Setup
+
         Range _r;
         Range _rWithMeta;
         object[] _values;
@@ -125,6 +104,10 @@ namespace Clojure.Tests.LibTests
             _rWithMeta = new Range(meta, 2, 5);
             _values = new object[] { 2, 3, 4 };
         }
+
+        #endregion
+
+        #region tests
 
         [Test]
         public void Range_has_correct_values()
@@ -155,19 +138,17 @@ namespace Clojure.Tests.LibTests
         {
             VerifyISeqCons(_r, 12, _values);
         }
+
+        #endregion
     }
 
     [TestFixture]
     public class Range_IObj_Tests : IObjTests
     {
-        MockRepository _mocks;
-
         [SetUp]
         public void Setup()
         {
-            _mocks = new MockRepository();
-            IPersistentMap meta = _mocks.StrictMock<IPersistentMap>();
-            _mocks.ReplayAll();
+            IPersistentMap meta = new DummyMeta();
 
             Range r = new Range(2, 5);
 
@@ -175,12 +156,5 @@ namespace Clojure.Tests.LibTests
             _obj = _objWithNullMeta.withMeta(meta);
             _expectedType = typeof(Range);
         }
-
-        [TearDown]
-        public void Teardown()
-        {
-            _mocks.VerifyAll();
-        }
-
     }
 }
