@@ -71,7 +71,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static GenContext CreateWithExternalAssembly(string assyName, string extension, bool createDynInitHelper)
         {
-            return new GenContext(assyName, extension, AppDomain.CurrentDomain.BaseDirectory,createDynInitHelper);
+            return new GenContext(assyName, extension, System.IO.Directory.GetCurrentDirectory(),createDynInitHelper);
         }
 
 
