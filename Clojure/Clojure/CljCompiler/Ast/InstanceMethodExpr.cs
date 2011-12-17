@@ -48,7 +48,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        // TODO: handle by-ref
         public override object Eval()
         {
             try
@@ -58,7 +57,7 @@ namespace clojure.lang.CljCompiler.Ast
                 for (int i = 0; i < _args.Count; i++)
                     argvals[i] = _args[i].ArgExpr.Eval();
                 if (_method != null)
-                    return _method.Invoke(targetVal, argvals);
+                    return Reflector.InvokeMethod(_method,targetVal, argvals);
                 return Reflector.CallInstanceMethod(_methodName, _typeArgs, targetVal, argvals);
             }
             catch (Compiler.CompilerException)
@@ -98,8 +97,8 @@ namespace clojure.lang.CljCompiler.Ast
         protected override Expression GenTargetExpression(ObjExpr objx, GenContext context)
         {
             Expression expr = _target.GenCode(RHC.Expression, objx, context);
-            if ( _target.HasClrType )
-                expr =  Expression.Convert(expr,_target.ClrType);
+            //if ( _target.HasClrType )
+            //    expr =  Expression.Convert(expr,_target.ClrType);
 
             return expr;
         }

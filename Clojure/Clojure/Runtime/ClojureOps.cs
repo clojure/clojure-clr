@@ -16,13 +16,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Scripting;
 
-namespace clojure.lang
+namespace clojure.lang.Runtime
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Eq")]
-    public interface IHashEq
+    /// <summary>
+    /// Contains functions that are called directly from
+    /// generated code to perform low-level runtime functionality.
+    /// </summary>
+    public static class ClojureOps
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hasheq")]
-        int hasheq();
+        // TODO: Scour gen code to find things to move here.
     }
 }

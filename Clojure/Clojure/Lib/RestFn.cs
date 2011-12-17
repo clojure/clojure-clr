@@ -4950,22 +4950,5 @@ namespace clojure.lang
         }
 
         #endregion
-
-        #region Misc
-
-        // do we need this?
-        protected static ISeq FindKey(object key, ISeq args)
-        {
-            while (args != null)
-            {
-                if (key == args.first())
-                    return args.next();
-                args = RT.next(args);
-                args = RT.next(args);
-            }
-            return null;
-        }
-
-        #endregion
     }
 }

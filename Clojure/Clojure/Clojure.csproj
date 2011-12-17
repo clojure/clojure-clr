@@ -91,6 +91,15 @@
       <HintPath>..\..\lib\DLR\2.0\Microsoft.Scripting.Core.dll</HintPath>
       <Aliases>global,MSC</Aliases>
     </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.mocks">
+      <HintPath>..\packages\NUnit.2.5.10.11092\lib\nunit.mocks.dll</HintPath>
+    </Reference>
+    <Reference Include="pnunit.framework">
+      <HintPath>..\packages\NUnit.2.5.10.11092\lib\pnunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
@@ -107,11 +116,15 @@
   <ItemGroup>
     <Compile Include="CljCompiler\Ast\IntrinsicsRewriter.cs" />
     <Compile Include="CljCompiler\Ast\CaseExpr.cs" />
-    <Compile Include="CljCompiler\Ast\DefaultCreateInstanceBinder.cs" />
-    <Compile Include="CljCompiler\Ast\DefaultGetZeroArityMemberBinder.cs" />
-    <Compile Include="CljCompiler\Ast\DefaultInvokeMemberBinder.cs" />
+    <Compile Include="Lib\IFnArity.cs" />
+    <Compile Include="Runtime\Binding\BindingHelpers.cs" />
+    <Compile Include="Runtime\Binding\ClojureConversionBinder.cs" />
+    <Compile Include="Runtime\Binding\ClojureOverloadResolver.cs" />
+    <Compile Include="Runtime\Binding\ClojureCreateInstanceBinder.cs" />
+    <Compile Include="Runtime\Binding\ClojureGetZeroArityMemberBinder.cs" />
+    <Compile Include="Runtime\Binding\ClojureInvokeMemberBinder.cs" />
     <Compile Include="CljCompiler\Ast\DynInitHelper.cs" />
-    <Compile Include="CljCompiler\Ast\DynUtils.cs" />
+    <Compile Include="Runtime\Binding\DynUtils.cs" />
     <Compile Include="CljCompiler\Ast\HostArg.cs" />
     <Compile Include="CljCompiler\Ast\IdentityHashMap.cs" />
     <Compile Include="CljCompiler\Ast\InstanceOfExpr.cs" />
@@ -121,7 +134,7 @@
     <Compile Include="CljCompiler\Ast\NewInstanceExpr.cs" />
     <Compile Include="CljCompiler\Ast\NewInstanceMethod.cs" />
     <Compile Include="CljCompiler\Ast\NumberExpr.cs" />
-    <Compile Include="CljCompiler\Ast\NumericConvertBinder.cs" />
+    <Compile Include="Runtime\Binding\ClojureBinder.cs" />
     <Compile Include="CljCompiler\Ast\ObjExpr.cs" />
     <Compile Include="CljCompiler\Ast\ObjMethod.cs" />
     <Compile Include="CljCompiler\Ast\ParserContext.cs" />
@@ -304,6 +317,13 @@
     <Compile Include="Lib\Symbol.cs" />
     <Compile Include="Lib\Util.cs" />
     <Compile Include="Lib\Var.cs" />
+    <Compile Include="Runtime\Binding\IClojureConvertible.cs" />
+    <Compile Include="Runtime\Binding\IClojureSite.cs" />
+    <Compile Include="Runtime\Binding\MetaAFn.cs" />
+    <Compile Include="Runtime\ClojureContext.cs" />
+    <Compile Include="Runtime\ClojureOps.cs" />
+    <Compile Include="Runtime\ClojureOptions.cs" />
+    <Compile Include="Runtime\Converter.cs" />
     <Compile Include="Runtime\ImmutableDictionaryEnumerator.cs" />
     <Compile Include="Runtime\Printf.cs" />
     <Compile Include="Runtime\Properties.cs" />
@@ -321,6 +341,7 @@
     <None Include="Bootstrap\version.properties" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Resources\version.txt" />
   </ItemGroup>
   <ItemGroup>

@@ -792,7 +792,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else if (value is IRecord)
             {
-                MethodInfo[] minfos = value.GetType().GetMethods(BindingFlags.Static | BindingFlags.Public);
+                //MethodInfo[] minfos = value.GetType().GetMethods(BindingFlags.Static | BindingFlags.Public);
                 ret = Expression.Call(
                     value.GetType(),
                     "create",
@@ -1115,6 +1115,48 @@ namespace clojure.lang.CljCompiler.Ast
             Expression newExpr = Expression.New(_ctorInfo, args);
 
             return newExpr;
+        }
+
+
+        protected static MethodBuilder GenerateHasArityMethod(TypeBuilder tb, IList<int> arities, bool isVariadic, int reqArity)
+        {
+            MethodBuilder mb = tb.DefineMethod(
+                "HasArity",
+                MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual,
+                typeof(bool),
+                new Type[] { typeof(int) });
+
+            ILGen gen = new ILGen(mb.GetILGenerator());
+
+            Label falseLabel = gen.DefineLabel();
+            Label trueLabel = gen.DefineLabel();
+
+            if (isVariadic)
+            {
+                gen.EmitLoadArg(1);
+                gen.EmitInt(reqArity);
+                gen.Emit(OpCodes.Bge,trueLabel);
+            }
+
+            if (arities != null)
+            {
+                foreach (int i in arities)
+                {
+                    gen.EmitLoadArg(1);
+                    gen.EmitInt(i);
+                    gen.Emit(OpCodes.Beq, trueLabel);
+                }
+            }
+
+            gen.MarkLabel(falseLabel);
+            gen.EmitBoolean(false);
+            gen.Emit(OpCodes.Ret);
+
+            gen.MarkLabel(trueLabel);
+            gen.EmitBoolean(true);
+            gen.Emit(OpCodes.Ret);
+
+            return mb;
         }
 
         #endregion

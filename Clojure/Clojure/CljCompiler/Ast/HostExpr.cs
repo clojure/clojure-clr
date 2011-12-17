@@ -135,18 +135,6 @@ namespace clojure.lang.CljCompiler.Ast
 
                 ISeq call;
                 List<Type> typeArgs = null;
- 
-               //object third = RT.third(form);
-
-                //if (third is ISeq && RT.first(third) is Symbol && ((Symbol)RT.first(third)).Equals(GENERIC))
-                //{
-                //    // We have a generic method call
-                //    // (. thing (generic methodname type1 ...) args...)
-                //    typeArgs = ParseGenericMethodTypeArgs(RT.next(RT.next(third)));
-                //    call = RT.listStar(RT.second(third), RT.next(RT.next(RT.next(form))));
-                //}
-                //else
-                //    call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));
 
                 object fourth = RT.fourth(sform);
                 if (fourth is ISeq && RT.first(fourth) is Symbol && ((Symbol)RT.first(fourth)).Equals(TypeArgsSym))
@@ -486,8 +474,8 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     if (Util.equals(sym, Compiler.CompileStubSymVar.get()))
                         return (Type)Compiler.CompileStubClassVar.get();
-                    // TODO:  This uses Java  [whatever  notation.  Figure out what to do here.
-                    if (sym.Name.IndexOf('.') > 0 || sym.Name[sym.Name.Length-1] == ']')
+                    if (sym.Name.IndexOf('.') > 0 || sym.Name[sym.Name.Length - 1] == ']')  // Array.  JVM version detects [whatever  notation.
+
                         t = RT.classForName(sym.Name);
                     else
                     {
@@ -543,12 +531,6 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
             }
-            //else if (tag is String)
-            //{
-            //    // TODO: This is no longer in the Java version.  SHould we get rid of?
-            //    string strTag = (string)tag;
-            //    t = Type.GetType(strTag);
-            //}
 
             if (t != null)
                 return t;

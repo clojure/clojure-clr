@@ -24,6 +24,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using RTProperties = clojure.runtime.Properties;
+using Microsoft.Scripting.Hosting;
+using clojure.lang.Runtime;
 //using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
@@ -508,6 +510,20 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static RT()
         {
+            // TODO: Check for existence of ClojureContext.Default before doing this?
+
+            ScriptRuntimeSetup setup = new ScriptRuntimeSetup();
+            LanguageSetup lsetup = new LanguageSetup(
+                typeof(ClojureContext).AssemblyQualifiedName,
+                ClojureContext.ClojureDisplayName,
+                ClojureContext.ClojureNames.Split(new Char[] { ';' }),
+                ClojureContext.ClojureFileExtensions.Split(new Char[] { ';' }));
+
+
+            setup.LanguageSetups.Add(lsetup);
+            ScriptRuntime env = new ScriptRuntime(setup);
+            env.GetEngine("clj");
+
 
             _versionProperties.LoadFromString(clojure.lang.Properties.Resources.version); 
 

@@ -12,17 +12,14 @@
  *   Author: David Miller
  **/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace clojure.lang
+namespace clojure.lang.Runtime.Binding
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Eq")]
-    public interface IHashEq
+    /// <summary>
+    /// Gets the ClojureContext that the call site binder is associated with.
+    /// </summary>
+    interface IClojureSite
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hasheq")]
-        int hasheq();
+        ClojureContext Context { get; }
     }
 }

@@ -620,7 +620,7 @@ namespace clojure.lang
 
         #region Arithmetic operations
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public BigInt add(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))
@@ -632,7 +632,7 @@ namespace clojure.lang
             return BigInt.fromBigInteger(this.toBigInteger().Add(y.toBigInteger()));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public BigInt multiply(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))
@@ -644,7 +644,7 @@ namespace clojure.lang
             return BigInt.fromBigInteger(this.toBigInteger().Multiply(y.toBigInteger()));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
         public BigInt quotient(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))
@@ -654,7 +654,7 @@ namespace clojure.lang
             return BigInt.fromBigInteger(this.toBigInteger().Divide(y.toBigInteger()));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remainder")]
         public BigInt remainder(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))
@@ -664,7 +664,7 @@ namespace clojure.lang
             return BigInt.fromBigInteger(this.toBigInteger().Mod(y.toBigInteger()));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lt")]
         public bool lt(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))

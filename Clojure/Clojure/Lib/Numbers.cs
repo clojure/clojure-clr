@@ -1283,6 +1283,7 @@ namespace clojure.lang
                 return LONG_OPS;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hasheq")]
         public static int hasheq(object x)
         {
             Type xc = x.GetType();

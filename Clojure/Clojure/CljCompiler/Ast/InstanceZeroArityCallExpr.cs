@@ -19,6 +19,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using clojure.lang.Runtime.Binding;
+using clojure.lang.Runtime;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -99,7 +101,8 @@ namespace clojure.lang.CljCompiler.Ast
 
             Type returnType = HasClrType ? ClrType : typeof(object);
 
-            GetMemberBinder binder = new DefaultGetZeroArityMemberBinder(_memberName, false);
+            // TODO: Get rid of Default
+            GetMemberBinder binder = new ClojureGetZeroArityMemberBinder(ClojureContext.Default, _memberName, false);
             DynamicExpression dyn = Expression.Dynamic(binder, returnType, new Expression[] { target });
 
             Expression call = dyn;

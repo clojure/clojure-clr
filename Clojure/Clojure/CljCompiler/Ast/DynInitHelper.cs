@@ -92,7 +92,7 @@ namespace clojure.lang.CljCompiler.Ast
                         cs.GetType().GetField("Target")
                     ),
                     node.DelegateType.GetMethod("Invoke"),
-                    DynUtils.ArrayInsert(site, node.Arguments)
+                    ClrExtensions.ArrayInsert(site, node.Arguments)
                 )
             );
         }
@@ -302,6 +302,46 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             gen.Emit(OpCodes.Ret);
+        }
+
+        #endregion
+
+ 
+    }
+
+    static class ClrExtensions
+    {
+        #region Misc
+
+        public static T[] ArrayInsert<T>(T item, IList<T> list)
+        {
+            T[] res = new T[list.Count + 1];
+            res[0] = item;
+            list.CopyTo(res, 1);
+            return res;
+        }
+
+        #endregion
+
+        #region Stolen from the DLR
+
+        // From Microsoft.Scripting.Utils.CollectionExtensions
+        // Name needs to be different so it doesn't conflict with Enumerable.Select
+#if CLR2
+        internal static U[] Map<T, U>(this ICollection<T> collection, Microsoft.Scripting.Utils.Func<T, U> select)
+#else
+        internal static U[] Map<T, U>(this ICollection<T> collection, System.Func<T, U> select)
+#endif
+
+        {
+            int count = collection.Count;
+            U[] result = new U[count];
+            count = 0;
+            foreach (T t in collection)
+            {
+                result[count++] = select(t);
+            }
+            return result;
         }
 
         #endregion

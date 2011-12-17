@@ -13,6 +13,13 @@
  **/
 
 using System;
+#if CLR2
+using Microsoft.Scripting.Ast;
+#else
+using System.Linq.Expressions;
+#endif
+using clojure.lang.Runtime.Binding;
+using System.Dynamic;
 
 namespace clojure.lang
 {
@@ -20,7 +27,7 @@ namespace clojure.lang
     /// Provides a basic implementation of <see cref="IFn">IFn</see> interface methods.
     /// </summary>
     [Serializable]
-    public abstract class AFn : IFn
+    public abstract class AFn : IFn, IDynamicMetaObjectProvider, IFnArity
     {
         #region IFn Members
 
@@ -465,5 +472,24 @@ namespace clojure.lang
         }
 
         #endregion
+
+        #region IDynamicMetaObjectProvider methods
+
+        public DynamicMetaObject GetMetaObject(Expression parameter)
+        {
+            return new MetaAFn(parameter, this);
+        }
+
+        #endregion
+
+        #region IFnArity methods
+
+        public virtual bool HasArity(int arity)
+        {
+            return false;
+        }
+
+        #endregion
     }
+
 }

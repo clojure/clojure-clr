@@ -9,6 +9,7 @@ namespace clojure.lang.Runtime
     /// <summary>
     /// Enumerator for IDictionary objects that are immutable.  (No caching, not explicitly made thread-safe.)
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1038:EnumeratorsShouldBeStronglyTyped")]
     public class ImmutableDictionaryEnumerator : IDictionaryEnumerator
     {
         #region Data

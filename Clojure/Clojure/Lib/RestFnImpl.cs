@@ -24,16 +24,17 @@ namespace clojure.lang
     // Overloading is not possible at the moment do to a bug in LambdaExpression.CompileToMethod
 
     [Serializable]
-    public class RestFnImpl : RestFn, Fn
-    // Per Java Rev 1122, need to make all true functions implement this marker interface, 
-    // In java version this is done by making the per-funcion generated class implement the interface.  
-    // We can do that, too, once we start generating per-function classes.
-    // And then it goes away again in Rev 1161.  Sigh.  (RestFn implements AFunction, which apparently suffices.)
+    public class RestFnImpl : RestFn
     {
+        #region Data
 
         IPersistentMap _meta;
 
         protected readonly int _reqArity;
+
+        #endregion
+
+        #region C-tor
 
         public RestFnImpl(int reqArity)
         {
@@ -41,12 +42,71 @@ namespace clojure.lang
             _reqArity = reqArity;
         }
 
+        #endregion
+
+        #region arity
 
         public override int getRequiredArity()
         {
             return _reqArity;
         }
 
+        public override bool HasArity(int arity)
+        {
+            if (arity >= getRequiredArity())
+                return true;
+
+            switch (arity)
+            {
+                case 0:
+                    return _fn0 != null;
+                case 1:
+                    return _fn1 != null;
+                case 2:
+                    return _fn2 != null;
+                case 3:
+                    return _fn3 != null;
+                case 4:
+                    return _fn4 != null;
+                case 5:
+                    return _fn5 != null;
+                case 6:
+                    return _fn6 != null;
+                case 7:
+                    return _fn7 != null;
+                case 8:
+                    return _fn8 != null;
+                case 9:
+                    return _fn9 != null;
+                case 10:
+                    return _fn10 != null;
+                case 11:
+                    return _fn11 != null;
+                case 12:
+                    return _fn12 != null;
+                case 13:
+                    return _fn13 != null;
+                case 14:
+                    return _fn14 != null;
+                case 15:
+                    return _fn15 != null;
+                case 16:
+                    return _fn16 != null;
+                case 17:
+                    return _fn17 != null;
+                case 18:
+                    return _fn18 != null;
+                case 19:
+                    return _fn19 != null;
+                case 20:
+                    return _fn20 != null;
+            }
+            return false;
+        }
+
+        #endregion
+
+        #region Method slots
 
         public FFunc<
             object> _fn0;
@@ -282,6 +342,9 @@ namespace clojure.lang
             object, object, object, object, object,
             object, object> _fnDo20;
 
+        #endregion
+
+        #region doInvoke implementations
 
         protected override object doInvoke(object args)
         {
@@ -407,6 +470,10 @@ namespace clojure.lang
             if (_fnDo20 == null) throw WrongArityException(20);
             return _fnDo20(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, args);
         }
+
+        #endregion
+
+        #region  invoke implementations
 
         public override object invoke()
         {
@@ -770,6 +837,10 @@ namespace clojure.lang
         //    : _fnRest(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, args);
         //}
 
+        #endregion
+
+        #region Meta members
+
         public override IObj withMeta(IPersistentMap meta)
         {
             RestFnImpl copy = (RestFnImpl) MemberwiseClone();
@@ -781,5 +852,7 @@ namespace clojure.lang
         {
             return _meta;
         }
+
+        #endregion
     }
 }

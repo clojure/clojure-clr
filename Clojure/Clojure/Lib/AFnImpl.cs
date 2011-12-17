@@ -21,14 +21,12 @@ namespace clojure.lang
     /// </summary>
     /// <remarks>
     /// <para>We need this at the moment as a workaround to DLR not being able to generate instance methods from lambdas.</para>
-    /// <para>Per Java Rev 1122, need to make all true functions implement the marker interface <see cref="AFunction">AFunction</see>.
-    /// In the Java version this is done by making the per-funcion generated class implement the interface.  
-    /// We can do that, too, once we start generating per-function classes.
-    /// And then it goes away again in Rev 1161.  Sigh.</para>
     /// </remarks>
     [Serializable]
-    public class AFnImpl : /*AFn*/ AFunction /* per rev 1161*/ , Fn 
+    public class AFnImpl :  AFunction, Fn
     {
+        #region Data
+
         IPersistentMap _meta;
 
         public FFunc<
@@ -151,10 +149,17 @@ namespace clojure.lang
             object, object, object, object, object,
             object, object> _fnRest;
 
+        #endregion
+
+        #region C-tors
 
         public AFnImpl()
         {
         }
+
+        #endregion
+
+        #region invoke implementations
 
         public override object invoke()
         {
@@ -518,6 +523,9 @@ namespace clojure.lang
                 Util.Ret1(args,args=null));
         }
 
+        #endregion
+
+        #region Meta 
 
         public override IObj withMeta(IPersistentMap meta)
         {
@@ -530,6 +538,62 @@ namespace clojure.lang
         {
             return _meta;
         }
-    }
 
+        #endregion
+
+        #region Arity
+
+        public override bool HasArity(int arity)
+        {
+            switch (arity)
+            {
+                case 0:
+                    return _fn0 != null;
+                case 1:
+                    return _fn1 != null;
+                case 2:
+                    return _fn2 != null;
+                case 3:
+                    return _fn3 != null;
+                case 4:
+                    return _fn4 != null;
+                case 5:
+                    return _fn5 != null;
+                case 6:
+                    return _fn6 != null;
+                case 7:
+                    return _fn7 != null;
+                case 8:
+                    return _fn8 != null;
+                case 9:
+                    return _fn9 != null;
+                case 10:
+                    return _fn10 != null;
+                case 11:
+                    return _fn11 != null;
+                case 12:
+                    return _fn12 != null;
+                case 13:
+                    return _fn13 != null;
+                case 14:
+                    return _fn14 != null;
+                case 15:
+                    return _fn15 != null;
+                case 16:
+                    return _fn16 != null;
+                case 17:
+                    return _fn17 != null;
+                case 18:
+                    return _fn18 != null;
+                case 19:
+                    return _fn19 != null;
+                case 20:
+                    return _fn20 != null;
+                default:
+                    return arity >= 21 && _fnRest != null;
+            }
+        }
+
+        #endregion
+    }
 }

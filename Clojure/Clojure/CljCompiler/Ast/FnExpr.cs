@@ -307,6 +307,15 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (IsVariadic)
                 GenerateGetRequiredArityMethod(TypeBuilder, _variadicMethod.RequiredArity);
+
+            List<int> supportedArities = new List<int>();
+            for (ISeq s = RT.seq(Methods); s != null; s = s.next())
+            {
+                FnMethod method = (FnMethod)s.first();
+                supportedArities.Add(method.NumParams);
+            }
+
+            GenerateHasArityMethod(TypeBuilder,supportedArities,IsVariadic,IsVariadic ? _variadicMethod.RequiredArity : 0);
         }
 
         static MethodBuilder GenerateGetRequiredArityMethod(TypeBuilder tb, int requiredArity)

@@ -92,6 +92,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else
             {
+                // TODO: Convert to Dynamic call site
                 call = Expression.Call(Compiler.Method_Reflector_GetInstanceFieldOrProperty, target, Expression.Constant(_fieldName));
             }
             call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
@@ -133,6 +134,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else
             {
+                // TODO: Convert to a dynamic call site
                 call = Expression.Call(
                     Compiler.Method_Reflector_SetInstanceFieldOrProperty,
                     target,

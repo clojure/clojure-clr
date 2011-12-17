@@ -31,6 +31,8 @@ using Microsoft.Scripting.Actions.Calls;
 using Microsoft.Scripting.Runtime;
 using clojure.lang.CljCompiler.Ast;
 using System.Text;
+using clojure.lang.Runtime.Binding;
+using clojure.lang.Runtime;
 
 namespace clojure.lang
 {
@@ -132,29 +134,19 @@ namespace clojure.lang
             throw new ArgumentException(String.Format("No matching instance field/property found: {0} for {1}", fieldName, t));
         }
 
-        // Not used at the moment.
-        //public static object GetStaticFieldOrProperty(Type t, string fieldname)
-        //{
-        //    FieldInfo field = GetField(t, fieldname, true);
-        //    if (field != null)
-        //        return Reflector.prepRet(field.FieldType,field.GetValue(null));
-
-        //    PropertyInfo prop = GetProperty(t, fieldname, true);
-        //    if (prop != null)
-        //        return Reflector.prepRet(prop.PropertyType,prop.GetValue(null, new object[0]));
-
-        //    MethodInfo method = GetArityZeroMethod(t, fieldname, true);
-
-        //    if (method != null)
-        //        return Reflector.prepRet(method.ReturnType,method.Invoke(null, new object[0]));
-
-        //    throw new ArgumentException(String.Format("No matching static field/property found: {0} for {1}", fieldname, t));
-        //}
-
         #endregion
 
         #region Method lookup
 
+        /// <summary>
+        /// Parse-time lookup of static method
+        /// </summary>
+        /// <param name="spanMap"></param>
+        /// <param name="targetType"></param>
+        /// <param name="args"></param>
+        /// <param name="methodName"></param>
+        /// <param name="typeArgs"></param>
+        /// <returns></returns>
         public static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, IList<HostArg> args, string methodName, IList<Type> typeArgs)
         {
             IList<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, true);
@@ -164,6 +156,15 @@ namespace clojure.lang
             return (MethodInfo)method;
         }
 
+        /// <summary>
+        /// Parse-time lookup of instance method
+        /// </summary>
+        /// <param name="spanMap"></param>
+        /// <param name="target"></param>
+        /// <param name="args"></param>
+        /// <param name="methodName"></param>
+        /// <param name="typeArgs"></param>
+        /// <returns></returns>
         public static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, IList<HostArg> args, string methodName, IList<Type> typeArgs)
         {
             MethodBase method = null;
@@ -178,6 +179,16 @@ namespace clojure.lang
             return (MethodInfo)method;
         }
 
+
+        /// <summary>
+        /// Get methods of fixed name and arity.
+        /// </summary>
+        /// <param name="targetType"></param>
+        /// <param name="methodName"></param>
+        /// <param name="typeArgs"></param>
+        /// <param name="arity"></param>
+        /// <param name="getStatics"></param>
+        /// <returns></returns>
         internal static IList<MethodBase> GetMethods(Type targetType, string methodName, IList<Type> typeArgs, int arity, bool getStatics)
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
@@ -227,7 +238,14 @@ namespace clojure.lang
         }
 
 
-
+        /// <summary>
+        /// Get constructor matching args for type.
+        /// </summary>
+        /// <param name="spanMap"></param>
+        /// <param name="targetType"></param>
+        /// <param name="args"></param>
+        /// <param name="ctorCount"></param>
+        /// <returns></returns>
         internal static ConstructorInfo GetMatchingConstructor(IPersistentMap spanMap, Type targetType, IList<HostArg> args, out int ctorCount)
         {
             IList<MethodBase> methods = Reflector.GetConstructors(targetType, args.Count);
@@ -238,6 +256,15 @@ namespace clojure.lang
             return (ConstructorInfo)method;
         }
 
+        /// <summary>
+        /// Select matching method from list based on args.
+        /// </summary>
+        /// <param name="targetType"></param>
+        /// <param name="args"></param>
+        /// <param name="methods"></param>
+        /// <param name="methodName"></param>
+        /// <param name="isStatic"></param>
+        /// <returns></returns>
         private static MethodBase GetMatchingMethodAux(Type targetType, IList<HostArg> args, IList<MethodBase> methods, string methodName, bool isStatic)
         {
             int argCount = args.Count;
@@ -278,8 +305,8 @@ namespace clojure.lang
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(t), BindingRestrictions.Empty));
             }
 
-            //OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
-            OverloadResolverFactory factory = NumericConvertOverloadResolverFactory.Instance;
+            // TODO: See if we can get rid of .Default
+            OverloadResolverFactory factory = ClojureContext.Default.SharedOverloadResolverFactory;
             DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), isStatic ? CallTypes.None : CallTypes.ImplicitInstance);
 
             BindingTarget bt = res.ResolveOverload(methodName, methods, NarrowingLevel.None, NarrowingLevel.All);
@@ -307,7 +334,7 @@ namespace clojure.lang
             foreach (object arg in actualArgs)
                 argsPlus.Add(new DynamicMetaObject(Expression.Default(arg.GetType()), BindingRestrictions.Empty,arg));
 
-            OverloadResolverFactory factory = DefaultOverloadResolver.Factory;
+            OverloadResolverFactory factory = ClojureContext.Default.SharedOverloadResolverFactory;
             DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), isStatic ? CallTypes.None : CallTypes.ImplicitInstance);
 
             BindingTarget bt = res.ResolveOverload(methodName, methods, NarrowingLevel.None, NarrowingLevel.All);
@@ -394,70 +421,40 @@ namespace clojure.lang
 
         #endregion
 
-        #region Method calling
+        #region Method calling during eval
+
 
         public static object CallInstanceMethod(string methodName, IList<Type> typeArgs, object target, params object[] args)
         {
-            if (args.Length == 0)
-            {
-                Type t = target.GetType();
-
-                FieldInfo f = GetField(t,methodName, false);
-                if (f != null)
-                    return f.GetValue(target);
-
-                PropertyInfo p = GetProperty(t,methodName, false);
-                if (p != null)
-                    return p.GetValue(target, null);
-            }
-
-            IList<MethodBase> methods = GetMethods(target.GetType(), methodName, typeArgs, args.Length, false);
-            MethodBase method = GetMatchingMethodAux(target.GetType(), args, methods, methodName, false);
-
-            if (method == null)
-            {
-                if (methods.Count == 0)
-                    throw new ArgumentException(String.Format("Unable to find instance method named: {0} for type: {1} with arity {2}", methodName, target.GetType(), args.Length));
-                else
-                    throw new ArgumentException(String.Format("Cannot resolve instance method named: {0} for type: {1} with arity {2}", methodName, target.GetType(), args.Length));
-            }
-
-            return method.Invoke(target, args);
-            
-            //BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
-            //return target.GetType().InvokeMember(methodName, flags, Type.DefaultBinder, target, args);
+            Type t = target.GetType();
+            return CallMethod(methodName, typeArgs, false, t, target, args);
         }
 
+  
         public static object CallStaticMethod(string methodName, IList<Type> typeArgs, Type t, params object[] args)
         {
-            if (args.Length == 0)
-            {
-                FieldInfo f = GetField(t,methodName, true);
-                if (f != null)
-                    return f.GetValue(t);
-
-                PropertyInfo p = GetProperty(t, methodName, true);
-                if (p != null)
-                    return p.GetValue(t, null);
-            }
-
-            IList<MethodBase> methods = GetMethods(t, methodName, typeArgs, args.Length, true);
-            MethodBase method = GetMatchingMethodAux(t, args, methods, methodName, true);
-
-            if (method == null)
-            {
-                if (methods.Count == 0)
-                    throw new ArgumentException(String.Format("Unable to find static method named: {0} for type: {1} with arity {2}", methodName, t, args.Length));
-                else
-                    throw new ArgumentException(String.Format("Cannot resolve static method named: {0} for type: {1} with arity {2}", methodName, t, args.Length));
-            }
-
-            return method.Invoke(null, args);
-
-
-            //BindingFlags flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod | BindingFlags.GetField | BindingFlags.GetProperty;
-            //return t.InvokeMember(methodName, flags, Type.DefaultBinder, null, args);
+            return CallMethod(methodName, typeArgs, true, t, null, args);
         }
+
+        public static object CallMethod(string methodName, IList<Type> typeArgs, bool isStatic, Type t, object target, params object[] args)
+        {
+            Expression targetExpr = isStatic ? Expression.Constant(t, typeof(Type)) : Expression.Constant(target);
+            List<Expression> exprs = new List<Expression>();
+            foreach (object arg in args)
+                exprs.Add(Expression.Constant(arg));
+
+            Expression[] argExprs = ClrExtensions.ArrayInsert<Expression>(targetExpr, exprs);
+
+            // TODO: Get rid of Default
+            InvokeMemberBinder binder = new ClojureInvokeMemberBinder(ClojureContext.Default, methodName, argExprs.Length, isStatic);
+
+            Expression dyn = Expression.Dynamic(binder, typeof(object), argExprs);
+
+            LambdaExpression lambda = Expression.Lambda<clojure.lang.Compiler.ReplDelegate>(dyn);
+            return lambda.Compile().DynamicInvoke();
+        }
+
+
 
         public static object InvokeConstructor(Type t, object[] args)
         {

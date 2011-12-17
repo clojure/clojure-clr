@@ -26,7 +26,7 @@ namespace clojure.lang
             return o == null ? 0 : o.GetHashCode();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hash")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hasheq")]
         public static int hasheq(object o)
         {
             if (o == null)
@@ -34,13 +34,16 @@ namespace clojure.lang
 
             if (Util.IsNumeric(o))
                 return Numbers.hasheq(o);
-            else if (o is IHashEq)
-                return ((IHashEq)o).hasheq();
+
+            IHashEq ihe = o as IHashEq;
+            if (ihe != null)
+                return ihe.hasheq();
+
             return o.GetHashCode();
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hashCombine")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hash")]
         static public int hashCombine(int seed, int hash)
         {
             //a la boost

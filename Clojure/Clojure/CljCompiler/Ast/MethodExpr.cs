@@ -29,6 +29,8 @@ using System.Reflection;
 using Microsoft.Scripting.Actions.Calls;
 using Microsoft.Scripting.Actions;
 using Microsoft.Scripting.Runtime;
+using clojure.lang.Runtime.Binding;
+using clojure.lang.Runtime;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -108,7 +110,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(argCount + (IsStaticCall ? 0 : 1));
             if (!IsStaticCall)
-                argsPlus.Add(new DynamicMetaObject(GenTargetExpression(objx, context), BindingRestrictions.Empty));
+                argsPlus.Add(new DynamicMetaObject(Expression.Convert(GenTargetExpression(objx, context),_method.DeclaringType), BindingRestrictions.Empty));
 
             List<int> refPositions = new List<int>();
 
@@ -144,7 +146,8 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            OverloadResolverFactory factory = NumericConvertOverloadResolverFactory.Instance;
+            // TODO: get rid of use of Default
+            OverloadResolverFactory factory = ClojureContext.Default.SharedOverloadResolverFactory;
             DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(argCount), IsStaticCall ? CallTypes.None : CallTypes.ImplicitInstance);
 
             List<MethodBase> methods = new List<MethodBase>();
@@ -208,11 +211,12 @@ namespace clojure.lang.CljCompiler.Ast
             List<Expression> sbTransfers = new List<Expression>();
             GenerateComplexArgList(objx, context, _args, out exprs, out sbParams, out sbInits, out sbTransfers);
 
-            Expression[] argExprs = DynUtils.ArrayInsert<Expression>(target, exprs);
+            Expression[] argExprs = ClrExtensions.ArrayInsert<Expression>(target, exprs);
 
             Type returnType = HasClrType ? ClrType : typeof(object);
 
-            InvokeMemberBinder binder = new DefaultInvokeMemberBinder(_methodName, argExprs.Length, IsStaticCall);
+            // TODO: Get rid of Default
+            InvokeMemberBinder binder = new ClojureInvokeMemberBinder(ClojureContext.Default,_methodName, argExprs.Length, IsStaticCall);
             //DynamicExpression dyn = Expression.Dynamic(binder, returnType, argExprs);
             DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), argExprs);
 
@@ -233,7 +237,7 @@ namespace clojure.lang.CljCompiler.Ast
                 // We have ref/out params.  Construct the complicated call;
 
                 ParameterExpression callValParam = Expression.Parameter(returnType, "__callVal");
-                ParameterExpression[] allParams = DynUtils.ArrayInsert<ParameterExpression>(callValParam, sbParams);
+                ParameterExpression[] allParams = ClrExtensions.ArrayInsert<ParameterExpression>(callValParam, sbParams);
 
                 call = Expression.Block(
                     returnType,

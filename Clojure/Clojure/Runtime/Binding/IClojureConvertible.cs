@@ -12,17 +12,21 @@
  *   Author: David Miller
  **/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace clojure.lang
+using System.Dynamic;
+
+namespace clojure.lang.Runtime.Binding
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Eq")]
-    public interface IHashEq
+    // Ripped off from IPy
+    // Though it is pretty inevitable.
+    // Many metaobject classes implement this in IronPython.
+    // Because Clojure runs mostly on naked CLR objects,
+    //   the only metaobject class that needs this is above IFn, 
+    //   primarily to support generic type inferencing,
+    //   or more generally conversion to delegate types.
+
+    interface IClojureConvertible
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hasheq")]
-        int hasheq();
+        //DynamicMetaObject BindConvert(ClojureConversionBinder binder);
     }
 }

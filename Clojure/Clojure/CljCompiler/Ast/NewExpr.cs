@@ -22,6 +22,8 @@ using System.Linq.Expressions;
 using Microsoft.Scripting.Ast; //for Utils in GenDlrForMethod
 #endif
 using System.Dynamic;
+using clojure.lang.Runtime.Binding;
+using clojure.lang.Runtime;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -163,7 +165,7 @@ namespace clojure.lang.CljCompiler.Ast
             List<Expression> sbTransfers = new List<Expression>();
             MethodExpr.GenerateComplexArgList(objx, context, _args, out exprs, out sbParams, out sbInits, out sbTransfers);
 
-            Expression[] argExprs = DynUtils.ArrayInsert<Expression>(target, exprs);
+            Expression[] argExprs = ClrExtensions.ArrayInsert<Expression>(target, exprs);
 
 
             Type returnType = this.ClrType;
@@ -172,7 +174,8 @@ namespace clojure.lang.CljCompiler.Ast
             if (returnType == stubType)
                 returnType = objx.BaseType;
 
-            CreateInstanceBinder binder = new DefaultCreateInstanceBinder(_args.Count);
+            // TODO: get rid of Default
+            CreateInstanceBinder binder = new ClojureCreateInstanceBinder(ClojureContext.Default,_args.Count);
             DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), argExprs);
             // I'd like to use returnType in place of typeof(object) in the previous, 
             // But I can't override ReturnType in DefaultCreateInstanceBinder and this causes an error.
@@ -192,7 +195,7 @@ namespace clojure.lang.CljCompiler.Ast
                 // We have ref/out params.  Construct the complicated call;
 
                 ParameterExpression callValParam = Expression.Parameter(returnType, "__callVal");
-                ParameterExpression[] allParams = DynUtils.ArrayInsert<ParameterExpression>(callValParam, sbParams);
+                ParameterExpression[] allParams = ClrExtensions.ArrayInsert<ParameterExpression>(callValParam, sbParams);
 
                 call = Expression.Block(
                     returnType,

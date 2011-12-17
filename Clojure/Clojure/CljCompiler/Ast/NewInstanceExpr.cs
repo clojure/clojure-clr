@@ -412,6 +412,9 @@ namespace clojure.lang.CljCompiler.Ast
                 foreach (MethodInfo mi in ms)
                     if (NeedsDummy(mi,implemented))
                         GenerateDummyMethod(context,mi);
+
+            GenerateHasArityMethod(TypeBuilder, null, false, 0);
+
         }
 
         private bool NeedsDummy(MethodInfo mi, HashSet<MethodInfo> implemented)

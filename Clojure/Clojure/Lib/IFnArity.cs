@@ -19,10 +19,11 @@ using System.Text;
 
 namespace clojure.lang
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Eq")]
-    public interface IHashEq
+    /// <summary>
+    /// Interface supporting an IFn reporting what arities is supports
+    /// </summary>
+    public interface IFnArity
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hasheq")]
-        int hasheq();
+        bool HasArity(int arity);
     }
 }
