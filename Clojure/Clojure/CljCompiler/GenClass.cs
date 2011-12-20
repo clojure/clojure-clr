@@ -524,7 +524,7 @@ namespace clojure.lang
 
                 for (int i = 0; i < sig.ParamTypes.Length; i++)
                 {
-                    gen.EmitLoadArg(i + 1);                 // gen.Emit(OpCodes.Ldarg, i + 1);
+                    gen.EmitLoadArg(isStatic ? i : i + 1);                 // gen.Emit(OpCodes.Ldarg, i + 1);
                     if (sig.ParamTypes[i].IsValueType)
                         gen.Emit(OpCodes.Box, sig.ParamTypes[i]);
 
