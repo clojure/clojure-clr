@@ -16,7 +16,7 @@ namespace clojure.lang.Runtime.Binding
     using Microsoft.Scripting.Runtime;
     using System.Runtime.CompilerServices;
 
-    class MetaAFn : DynamicMetaObject, IInferableInvokable, IClojureConvertible
+    class MetaAFn : DynamicMetaObject, IInferableInvokable
     {
 
         public MetaAFn(Expression expression, AFn aFn)

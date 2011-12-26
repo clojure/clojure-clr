@@ -121,6 +121,15 @@ namespace clojure.lang.Runtime
                 return true;
             }
 
+            // Handle conversions of IEnumerable<Object> or IEnumerable to IEnumerable<T> for any T
+            // Similar to code in IPy's IronPython.Runtime.Converter.HasNarrowingConversion
+            if (toType.IsGenericType)
+            {
+                Type genTo = toType.GetGenericTypeDefinition();
+                if (genTo == typeof(IEnumerable<>))
+                    return typeof(IEnumerable<Object>).IsAssignableFrom(fromType) || typeof(IEnumerable).IsAssignableFrom(fromType);
+            }
+
             if (level == NarrowingLevel.Three)
                 return false;
 
@@ -140,6 +149,28 @@ namespace clojure.lang.Runtime
 
             // TODO: Rethink.  IPy has the following, but we get overload problems on Numbers ops
             //return HasNarrowingConversion(fromType, toType, level);
+
+            // Handle conversions of IEnumerable<Object> or IEnumerable to IEnumerable<T> for any T
+            // Similar to code in IPy's IronPython.Runtime.Converter.HasNarrowingConversion
+            if (toType.IsGenericType)
+            {
+                Type genTo = toType.GetGenericTypeDefinition();
+                if (genTo == typeof(IList<>) )
+                {
+                    return typeof(IList<object>).IsAssignableFrom(fromType);
+                }
+                else if (genTo == typeof(Nullable<>))
+                {
+                    if (fromType == typeof(DynamicNull) || CanConvertFrom(fromType, toType.GetGenericArguments()[0], level))
+                    {
+                        return true;
+                    }
+                }
+                else if (genTo == typeof(IDictionary<,>) )
+                {
+                    return typeof(IDictionary<object,object>).IsAssignableFrom(fromType);
+                }
+            }
 
             return false;
         }

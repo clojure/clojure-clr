@@ -118,7 +118,6 @@
     <Compile Include="CljCompiler\Ast\CaseExpr.cs" />
     <Compile Include="Lib\IFnArity.cs" />
     <Compile Include="Runtime\Binding\BindingHelpers.cs" />
-    <Compile Include="Runtime\Binding\ClojureConversionBinder.cs" />
     <Compile Include="Runtime\Binding\ClojureOverloadResolver.cs" />
     <Compile Include="Runtime\Binding\ClojureCreateInstanceBinder.cs" />
     <Compile Include="Runtime\Binding\ClojureGetZeroArityMemberBinder.cs" />
@@ -317,12 +316,12 @@
     <Compile Include="Lib\Symbol.cs" />
     <Compile Include="Lib\Util.cs" />
     <Compile Include="Lib\Var.cs" />
-    <Compile Include="Runtime\Binding\IClojureConvertible.cs" />
     <Compile Include="Runtime\Binding\IClojureSite.cs" />
     <Compile Include="Runtime\Binding\MetaAFn.cs" />
     <Compile Include="Runtime\ClojureContext.cs" />
     <Compile Include="Runtime\ClojureOps.cs" />
     <Compile Include="Runtime\ClojureOptions.cs" />
+    <Compile Include="Runtime\ConversionWrappers.cs" />
     <Compile Include="Runtime\Converter.cs" />
     <Compile Include="Runtime\ImmutableDictionaryEnumerator.cs" />
     <Compile Include="Runtime\Printf.cs" />
