@@ -204,8 +204,14 @@
   [^String assembly-name]
   (System.Reflection.Assembly/LoadFrom assembly-name))
 
-  (defn assembly-load-file
+(defn assembly-load-file
   "Load an assembly given its name"
   {:added "1.3"}
   [^String assembly-name]
   (System.Reflection.Assembly/LoadFile assembly-name))
+
+(defn assembly-load-with-partial-name
+  "Load an assembly given a partial name"
+  {:added "1.4"}
+  [^String assembly-name]
+  (System.Reflection.Assembly/LoadWithPartialName assembly-name))
