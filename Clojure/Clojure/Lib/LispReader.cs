@@ -422,60 +422,26 @@ namespace clojure.lang
             }
         }
 
-        //public static object interpretToken(string s)
-        //{
-        //    if (s.Equals("nil"))
-        //    {
-        //        return null;
-        //    }
-        //    else if (s.Equals("true"))
-        //    {
-        //        //return RT.T;
-        //        return true;
-        //    }
-        //    else if (s.Equals("false"))
-        //    {
-        //        //return RT.F;
-        //        return false;
-        //    }
-        //    else if (s.Equals("/"))
-        //    {
-        //        return SLASH;
-        //    }
-        //    else if (s.Equals("clojure.core//"))
-        //    {
-        //        return CLOJURE_SLASH;
-        //    }
-
-        //    object ret = null;
-
-        //    ret = matchSymbol(s);
-        //    if (ret != null)
-        //        return ret;
-
-        //    throw new Exception("Invalid token: " + s);
-        //}
-
         public static object InterpretToken(string token, int lastSlashIndex)
         {
             if (token.Equals("nil"))
-                {
-                    return null;
-                }
-                else if (token.Equals("true"))
-                {
-                    //return RT.T;
-                    return true;
-                }
-                else if (token.Equals("false"))
-                {
-                    //return RT.F;
-                    return false;
-                }
-                else if (token.Equals("/"))
-                {
-                    return SLASH;
-                }
+            {
+                return null;
+            }
+            else if (token.Equals("true"))
+            {
+                //return RT.T;
+                return true;
+            }
+            else if (token.Equals("false"))
+            {
+                //return RT.F;
+                return false;
+            }
+            else if (token.Equals("/"))
+            {
+                return SLASH;
+            }
             else if (token.Equals("clojure.core//"))
             {
                 return CLOJURE_SLASH;
@@ -483,7 +449,7 @@ namespace clojure.lang
 
             object ret = null;
 
-            ret = matchSymbol(token,lastSlashIndex);
+            ret = matchSymbol(token, lastSlashIndex);
             if (ret != null)
                 return ret;
 
@@ -570,43 +536,55 @@ namespace clojure.lang
             }
         }
 
+        #endregion
 
-        //static Regex symbolPat = new Regex("^[:]?([\\D-[/]].*/)?([\\D-[/]][^/]*)$");
+        #region Symbol printing helpers
 
-        //static object matchSymbol(string s)
-        //{
-        //    Match m = symbolPat.Match(s);
-        //    if (m.Success)
-        //    {
-        //        int gc = m.Groups.Count;
-        //        string ns = m.Groups[1].Value;
-        //        string name = m.Groups[2].Value;
-        //        if (ns != null && ns.EndsWith(":/")
-        //           || name.EndsWith(":")
-        //           || s.IndexOf("::", 1) != -1)
-        //            return null;
-        //        // Maybe resolveSymbol should move here or into Namespace:  resolveSymbol is not used in the compiler.
-        //        if (s.StartsWith("::"))
-        //        {
-        //            Symbol ks = Symbol.intern(s.Substring(2));
-        //            Namespace kns;
-        //            if (ks.Namespace != null)
-        //                kns = Compiler.NamespaceFor(ks);
-        //            else
-        //                kns = Compiler.CurrentNamespace;
-        //            //auto-resolving keyword
-        //            return Keyword.intern(kns.Name.Name, ks.Name);
-        //        }
-        //        bool isKeyword = s[0] == ':';
-        //        Symbol sym = Symbol.intern(s.Substring(isKeyword ? 1 : 0));
-        //        if (isKeyword)
-        //            return Keyword.intern(sym);
-        //        return sym;
-        //    }
-        //    return null;
-        //}
+        public static bool NameRequiresEscaping(string s)
+        {
+            if (String.IsNullOrEmpty(s))
+                return true;
 
+            // Contains bad character
+            foreach (char c in s)
+                if (c == '|' ||
+                    c == '/' ||
+                    isWhitespace(c) ||
+                    isTerminatingMacro(c))
+                    return true;
 
+            char firstChar = s[0];
+            if (firstChar == ':' || isMacro(firstChar) || Char.IsDigit(firstChar))
+                return true;
+
+            // contains a :: anywhere
+            if (s.Contains("::"))
+                return true;
+
+            // Begins with +/- and a digit
+            
+            if ((firstChar == '+' || firstChar == '-') && s.Length >= 2 && Char.IsDigit(s[1]))
+                return true;
+
+            return false;
+        }
+
+        static Regex _vbarPat = new Regex("|");
+
+        public static string VbarEscape(string s)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("|");
+
+            foreach (char c in s)
+            {
+                sb.Append(c);
+                if ( c == '|')
+                    sb.Append('|');
+            }
+            sb.Append("|");
+            return sb.ToString();
+        }
 
         #endregion
 
@@ -723,8 +701,7 @@ namespace clojure.lang
 
         #endregion
 
-
-        // Reader classes made public according to Java rev 1121
+        #region Readers
 
         public abstract class ReaderBase : AFn
         {
@@ -735,6 +712,8 @@ namespace clojure.lang
 
            protected abstract object Read(PushbackTextReader r, char c);
         }
+
+        #region CharacterReader
 
         public sealed class CharacterReader : ReaderBase
         {
@@ -778,6 +757,10 @@ namespace clojure.lang
                 throw new InvalidOperationException("Unsupported character: \\" + token);
             }
         }
+
+        #endregion
+
+        #region String Reader
 
         public sealed class StringReader : ReaderBase
         {
@@ -841,6 +824,10 @@ namespace clojure.lang
             }
         }
 
+        #endregion
+
+        #region Discard/Comment readers
+
         public sealed class CommentReader : ReaderBase
         {
             protected override object Read(PushbackTextReader r, char semicolon)
@@ -853,6 +840,19 @@ namespace clojure.lang
                 return r;
             }
         }
+
+        public sealed class DiscardReader : ReaderBase
+        {
+            protected override object Read(PushbackTextReader r, char underscore)
+            {
+                ReadAux(r);
+                return r;
+            }
+        }
+
+        #endregion
+
+        #region Collection readers
 
         public sealed class ListReader : ReaderBase
         {
@@ -907,6 +907,14 @@ namespace clojure.lang
             }
         }
 
+        public sealed class SetReader : ReaderBase
+        {
+            protected override object Read(PushbackTextReader r, char leftbracket)
+            {
+                return PersistentHashSet.createWithCheck(ReadDelimitedList('}', r, true));
+            }
+        }
+
         public sealed class UnmatchedDelimiterReader : ReaderBase
         {
             protected override object Read(PushbackTextReader reader, char rightdelim)
@@ -915,14 +923,9 @@ namespace clojure.lang
             }
         }
 
-        public sealed class DiscardReader : ReaderBase
-        {
-            protected override object Read(PushbackTextReader r, char underscore)
-            {
-                ReadAux(r);
-                return r;
-            }
-        }
+        #endregion
+
+        #region Wrapping readers
 
         public sealed class WrappingReader : ReaderBase
         {
@@ -940,7 +943,6 @@ namespace clojure.lang
                 return RT.list(_sym, o);
             }
         }
-
 
         public sealed class DeprecatedWrappingReader : ReaderBase
         {
@@ -961,6 +963,10 @@ namespace clojure.lang
                 return RT.list(_sym, o);
             }
         }
+
+        #endregion
+
+        #region Syntax quote
 
         public sealed class SyntaxQuoteReader : ReaderBase
         {
@@ -1177,6 +1183,10 @@ namespace clojure.lang
 
         #endregion
 
+        #endregion
+
+        #region DispatchReader
+
         public sealed class DispatchReader : ReaderBase
         {
             protected override object Read(PushbackTextReader r, char hash)
@@ -1199,6 +1209,10 @@ namespace clojure.lang
                 return fn.invoke(r, (char)ch);
             }
         }
+
+        #endregion
+
+        #region MetaReader
 
         public sealed class MetaReader : ReaderBase
         {
@@ -1257,6 +1271,10 @@ namespace clojure.lang
             }
         }
 
+        #endregion
+
+        #region VarReader
+
         public sealed class VarReader : ReaderBase
         {
             protected override object Read(PushbackTextReader r, char quote)
@@ -1272,6 +1290,10 @@ namespace clojure.lang
                 return RT.list(THE_VAR, o);
             }
         }
+
+        #endregion
+
+        #region RegexReader
 
         public sealed class RegexReader : ReaderBase
         {
@@ -1294,6 +1316,10 @@ namespace clojure.lang
                 return new Regex(sb.ToString());
             }
         }
+
+        #endregion
+
+        #region Fn and Arg readers
 
         public sealed class FnReader : ReaderBase
         {
@@ -1393,13 +1419,9 @@ namespace clojure.lang
             }
         }
 
-        public sealed class SetReader : ReaderBase
-        {
-            protected override object Read(PushbackTextReader r, char leftbracket)
-            {
-                return PersistentHashSet.createWithCheck(ReadDelimitedList('}', r, true));
-            }
-        }
+        #endregion
+
+        #region EvalREader
 
         //TODO: Need to figure out who to deal with typenames in the context of multiple loaded assemblies.
         public sealed class EvalReader : ReaderBase
@@ -1447,6 +1469,10 @@ namespace clojure.lang
                     throw new InvalidOperationException("Unsupported #= form");
             }
         }
+
+        #endregion
+
+        #region CtorReader
 
         public sealed class CtorReader : ReaderBase
         {
@@ -1509,6 +1535,9 @@ namespace clojure.lang
 
         }
 
+        #endregion
+
+        #region UnreadableReader
 
         public sealed class UnreadableReader : ReaderBase
         {
@@ -1517,6 +1546,12 @@ namespace clojure.lang
                 throw new ArgumentException("Unreadable form");
             }
         }
+
+        #endregion
+
+        #endregion
+
+        #region ReaderException
 
         [Serializable]
         public sealed class ReaderException : Exception
@@ -1567,10 +1602,8 @@ namespace clojure.lang
                 base.GetObjectData(info, context);
                 info.AddValue("Line", this._line, typeof(int));
             }
-
- 
-
-
         }
+
+        #endregion
     }
 }

@@ -161,6 +161,16 @@ namespace clojure.lang
             return _ns == null ? _name : _ns + "/" + _name;
         }
 
+        private static string NameMaybeEscaped(string s)
+        {
+            return LispReader.NameRequiresEscaping(s) ? LispReader.VbarEscape(s) : s;
+        }
+
+        public string ToStringEscaped()
+        {
+            return _ns == null ? NameMaybeEscaped(_name) : NameMaybeEscaped(_ns) + "/" + NameMaybeEscaped(_name);
+        }
+
         /// <summary>
         /// Determine if an object is equal to this symbol.
         /// </summary>

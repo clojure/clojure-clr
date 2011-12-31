@@ -164,7 +164,12 @@
 (defmethod print-method clojure.lang.Symbol [o, ^System.IO.TextWriter w]
   (print-simple o w))
 
-(defmethod print-dup clojure.lang.Symbol [o w] (print-method o w))
+(defmethod print-dup clojure.lang.Symbol [^clojure.lang.Symbol o, ^System.IO.TextWriter w]                                       ;;; (print-method o w)), Added hints
+  (if (or *print-dup* *print-readably*)
+	(do 
+		(print-meta o w)
+		(.Write w (.ToStringEscaped o)))
+	(print-method o w)))
 
 (defmethod print-method clojure.lang.Var [o, ^System.IO.TextWriter w]
   (print-simple o w))
