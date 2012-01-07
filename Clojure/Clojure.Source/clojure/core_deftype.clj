@@ -284,6 +284,13 @@
              (throw (clojure.lang.ArityException. (+ ~arg-count (count ~'overage)) (name '~fn-name))))
           `(new ~classname ~@field-args)))))
 
+(defn- validate-fields
+  ""
+  [fields]
+  (let [specials #{'__meta '__extmap}]
+    (when (some specials fields)
+      (throw (Exception. (str "The names in " specials " cannot be used as field names for types or records."))))))             ;;; AssertionError.
+
 (defmacro defrecord
   "Alpha - subject to change
   
@@ -344,7 +351,9 @@
   Two constructors will be defined, one taking the designated fields
   followed by a metadata map (nil for none) and an extension field
   map (nil for none), and one taking only the fields (using nil for
-  meta and extension fields)."
+  meta and extension fields). Note that the field names __meta
+  and __extmap are currently reserved and should not be used when
+  defining your own records."
   {:added "1.2"} 
 
   [name [& fields] & opts+specs]
@@ -430,10 +439,13 @@
   given name (a symbol), prepends the current ns as the package, and
   writes the .class file to the *compile-path* directory.
 
-  One constructors will be defined, taking the designated fields."
+  One constructor will be defined, taking the designated fields.  Note
+  that the field names __meta and __extmap are currently reserved and
+  should not be used when defining your own types."
   {:added "1.2"} 
 
   [name [& fields] & opts+specs]
+  (validate-fields fields)
   (let [gname name 
         [interfaces methods opts] (parse-opts+specs opts+specs)
 		ns-part (namespace-munge *ns*)

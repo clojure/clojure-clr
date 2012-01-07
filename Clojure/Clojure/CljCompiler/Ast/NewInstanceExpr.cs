@@ -140,7 +140,7 @@ namespace clojure.lang.CljCompiler.Ast
                 // use array map to preserve ctor order
                 ret._closes = new PersistentArrayMap(closesvec);
                 ret._fields = fmap;
-                for (int i = fieldSyms.count() - 1; i >= 0 && ((Symbol)fieldSyms.nth(i)).Name.StartsWith("__"); --i)
+                for (int i = fieldSyms.count() - 1; i >= 0 && (((Symbol)fieldSyms.nth(i)).Name.Equals("__meta") || ((Symbol)fieldSyms.nth(i)).Name.Equals("__extmap")); --i)
                     ret._altCtorDrops++;
             }
 
