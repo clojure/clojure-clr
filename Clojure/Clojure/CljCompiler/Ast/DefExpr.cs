@@ -117,8 +117,8 @@ namespace clojure.lang.CljCompiler.Ast
                 if (!isDynamic && sym.Name.StartsWith("*") && sym.Name.EndsWith("*") && sym.Name.Length > 1)
                 {
                     RT.errPrintWriter().WriteLine("Warning: {0} not declared dynamic and thus is not dynamically rebindable, "
-                                          + "but its name suggests otherwise. Please either indicate ^:dynamic {0} or change the name.\n",
-                                           sym);
+                                          + "but its name suggests otherwise. Please either indicate ^:dynamic {0} or change the name. ({1}:{2}\n",
+                                           sym,Compiler.SourcePathVar.get(),Compiler.LineVar.get());
                 }
 
                 if (RT.booleanCast(RT.get(mm, Compiler.ArglistsKeyword)))
