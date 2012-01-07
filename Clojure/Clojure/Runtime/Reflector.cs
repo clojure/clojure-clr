@@ -363,41 +363,9 @@ namespace clojure.lang
         private static void MaybeReflectionWarn(IPersistentMap spanMap, MethodBase method, string methodName, IList<HostArg> args)
         {
             if (method == null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
-                RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved with arguments of type {3}.",
-                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), methodName, SignatureString(ExprsTypes(args))));
+                RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved.",
+                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), methodName));
         }
-
-        // TODO: Deal with generics, etc.
-        private static string SignatureString(List<Type> classes)
-        {
-            StringBuilder sb = new StringBuilder("(");
-            for (int i = 0, len = classes.Count; i < len; i++)
-            {
-                sb.Append(ExpandArrayTypename(classes[i]));
-                if (i < len - 1)
-                    sb.Append(", ");
-            }
-            return sb.Append(")").ToString();
-        }
-
-
-        private static string ExpandArrayTypename(Type t)
-        {
-            if (t.IsArray)
-                return ExpandArrayTypename(t.GetElementType()) + "[]";
-            else
-                return t.FullName;
-        }
-
-
-        private static List<Type> ExprsTypes(IList<HostArg> args)
-        {
-            List<Type> types = new List<Type>(args.Count);
-            foreach (HostArg ha in args)
-                types.Add(ha.ArgExpr.ClrType);
-            return types;
-        }
-        
 
         public static MethodInfo GetArityZeroMethod(Type t, string name, bool getStatics)
         {
