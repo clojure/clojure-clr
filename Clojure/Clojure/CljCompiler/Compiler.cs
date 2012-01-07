@@ -501,7 +501,7 @@ namespace clojure.lang
             }
         }
 
-        internal static Var LookupVar(Symbol sym, bool internNew)
+        internal static Var LookupVar(Symbol sym, bool internNew, Boolean registerMacro)
         {
             Var var = null;
 
@@ -538,11 +538,15 @@ namespace clojure.lang
                         throw new InvalidOperationException(string.Format("Expecting var, but {0} is mapped to {1}", sym, o));
                 }
             }
-            if (var != null)
+            if (var != null && (!var.IsMacro || registerMacro))
                 RegisterVar(var);
             return var;
         }
 
+        internal static Var LookupVar(Symbol sym, bool internNew)
+        {
+            return LookupVar(sym, internNew, true);
+        }
 
 
         internal static int RegisterConstant(Object o)
@@ -1032,7 +1036,7 @@ namespace clojure.lang
 
             if (opAsSym != null || opAsVar != null)
             {
-                Var v = opAsVar ??  LookupVar(opAsSym, false);
+                Var v = opAsVar ??  LookupVar(opAsSym, false,false);
                 if (v != null && v.IsMacro)
                 {
                     if (v.Namespace != CurrentNamespace && !v.isPublic)
