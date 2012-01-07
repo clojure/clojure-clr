@@ -104,7 +104,7 @@
 
 ;;; DM ADDED
 
-(defn- fp-str [x]
+(defn fp-str [x]
    (let [s (str x)]
      (if (or (.Contains s ".") (.Contains s "E"))
        s
