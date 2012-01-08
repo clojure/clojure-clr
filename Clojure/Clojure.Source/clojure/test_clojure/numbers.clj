@@ -506,3 +506,44 @@ Math/pow overflows to Infinity."
        9223372036854775808N (-' 0 -9223372036854775808)
        clojure.lang.BigInt  (class (-' 0 -9223372036854775808))
        Int64      (class (-' 0 -9223372036854775807))))              ;;; java.lang.Long 
+
+(deftest test-min-max
+  (testing "min/max on different numbers of floats and doubles"
+    (are [xmin xmax a]
+         (and (= (float xmin) (min (float a)))                          ;;; Float.
+              (= (float xmax) (max (float a)))                          ;;; Float.
+              (= xmin (min a))
+              (= xmax (max a)))
+         0.0 0.0 0.0)
+    (are [xmin xmax a b]
+         (and (= (float xmin) (min (float a) (float b)))            ;;; Float.
+              (= (float xmax) (max (float a) (float b)))            ;;; Float.
+              (= xmin (min a b))
+              (= xmax (max a b)))
+         -1.0  0.0  0.0 -1.0
+         -1.0  0.0 -1.0  0.0
+         0.0  1.0  0.0  1.0
+         0.0  1.0  1.0  0.0)
+    (are [xmin xmax a b c]
+         (and (= (float xmin) (min (float a) (float b) (float c)))            ;;; Float.
+              (= (float xmax) (max (float a) (float b) (float c)))            ;;; Float.
+              (= xmin (min a b c))
+              (= xmax (max a b c)))
+         -1.0  1.0  0.0  1.0 -1.0
+         -1.0  1.0  0.0 -1.0  1.0
+         -1.0  1.0 -1.0  1.0  0.0))
+  (testing "min/max preserves type of winner"
+    (is (= Int64 (class (max 10))))                                 ;;; java.lang.Long
+    (is (= Int64 (class (max 1.0 10))))                             ;;; java.lang.Long
+    (is (= Int64 (class (max 10 1.0))))                             ;;; java.lang.Long
+    (is (= Int64 (class (max 10 1.0 2.0))))                         ;;; java.lang.Long
+    (is (= Int64 (class (max 1.0 10 2.0))))                         ;;; java.lang.Long
+    (is (= Int64 (class (max 1.0 2.0 10))))                         ;;; java.lang.Long
+    (is (= Double (class (max 1 2 10.0 3 4 5))))                    ;;; java.lang.Double
+    (is (= Int64 (class (min 10))))                                 ;;; java.lang.Long
+    (is (= Int64 (class (min 1.0 -10))))                            ;;; java.lang.Long
+    (is (= Int64 (class (min -10 1.0))))                            ;;; java.lang.Long
+    (is (= Int64 (class (min -10 1.0 2.0))))                        ;;; java.lang.Long
+    (is (= Int64 (class (min 1.0 -10 2.0))))                        ;;; java.lang.Long
+    (is (= Int64 (class (min 1.0 2.0 -10))))                        ;;; java.lang.Long
+    (is (= Double (class (min 1 2 -10.0 3 4 5))))))                 ;;; java.lang.Double
