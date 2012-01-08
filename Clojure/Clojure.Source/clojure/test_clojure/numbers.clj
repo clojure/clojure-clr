@@ -547,3 +547,18 @@ Math/pow overflows to Infinity."
     (is (= Int64 (class (min 1.0 -10 2.0))))                        ;;; java.lang.Long
     (is (= Int64 (class (min 1.0 2.0 -10))))                        ;;; java.lang.Long
     (is (= Double (class (min 1 2 -10.0 3 4 5))))))                 ;;; java.lang.Double
+
+(deftest clj-868
+  (testing "min/max: NaN is contagious"
+    (letfn [(fnan? [x] (Single/IsNaN x))                           ;;; ^Float  Float/isNaN                   
+            (dnan? [^double x] (Double/IsNaN x))]                          ;;; Double/isNaN
+      (are [minmax]
+           (are [nan? nan zero]
+                (every? nan? (map minmax
+                                  [ nan zero zero]
+                                  [zero  nan zero]
+                                  [zero zero  nan]))
+;;;                fnan?  Single/NaN  (float 0.0)                              ;;;  Float/NaN (Float.   TODO: How important is this?  I don't have a way to do the equivalent of (Float. 0.0).  Even using (System.Single/Parse "0.0") gives a boxed Single which will still match to a double arg on min, not an object arg.
+                dnan? Double/NaN          0.0)
+           min
+         max))))
