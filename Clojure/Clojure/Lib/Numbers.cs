@@ -2920,22 +2920,26 @@ namespace clojure.lang
 
         #region min/max
 
+        static bool IsNaN(object x)
+        {
+            return (x is double && Double.IsNaN((double)x))
+                || (x is float && float.IsNaN((float)x));
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double max(double x, double y)
         {
-            if (x > y)
-            {
-                return x;
-            }
-            else
-            {
-                return y;
-            }
+            return Math.Max(x, y);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(double x, long y)
         {
+            if (Double.IsNaN(x))
+            {
+                return x;
+            }
+
             if (x > y)
             {
                 return x;
@@ -2949,6 +2953,15 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(double x, Object y)
         {
+            if (Double.IsNaN(x))
+            {
+                return x;
+            }
+            else if (IsNaN(y))
+            {
+                return y;
+            }
+
             if (x > Util.ConvertToDouble(y))
             {
                 return x;
@@ -2962,6 +2975,11 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(long x, double y)
         {
+            if (Double.IsNaN(y))
+            {
+                return y;
+            }
+
             if (x > y)
             {
                 return x;
@@ -2971,7 +2989,6 @@ namespace clojure.lang
                 return y;
             }
         }
-
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long max(long x, long y)
@@ -2989,6 +3006,11 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(long x, Object y)
         {
+            if (IsNaN(y))
+            {
+                return y;
+            }
+
             if (gt(x, y))
             {
                 return x;
@@ -3002,6 +3024,11 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(Object x, long y)
         {
+            if (IsNaN(x))
+            {
+                return x;
+            }
+
             if (gt(x, y))
             {
                 return x;
@@ -3015,6 +3042,15 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(Object x, double y)
         {
+            if (IsNaN(x))
+            {
+                return x;
+            }
+            else if (Double.IsNaN(y))
+            {
+                return y;
+            }
+
             if (Util.ConvertToDouble(x) > y)
             {
                 return x;
@@ -3028,6 +3064,15 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object max(Object x, Object y)
         {
+            if (IsNaN(x))
+            {
+                return x;
+            }
+            else if (IsNaN(y))
+            {
+                return y;
+            }
+
             if (gt(x, y))
             {
                 return x;
@@ -3042,19 +3087,17 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static double min(double x, double y)
         {
-            if (x < y)
-            {
-                return x;
-            }
-            else
-            {
-                return y;
-            }
+            return Math.Min(x, y);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(double x, long y)
         {
+            if (Double.IsNaN(x))
+            {
+                return x;
+            }
+
             if (x < y)
             {
                 return x;
@@ -3068,6 +3111,15 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(double x, Object y)
         {
+            if (Double.IsNaN(x))
+            {
+                return x;
+            }
+            else if (IsNaN(y))
+            {
+                return y;
+            }
+
             if (x < Util.ConvertToDouble(y))
             {
                 return x;
@@ -3081,6 +3133,11 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(long x, double y)
         {
+            if (Double.IsNaN(y))
+            {
+                return y;
+            }
+
             if (x < y)
             {
                 return x;
@@ -3108,6 +3165,11 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(long x, Object y)
         {
+            if (IsNaN(y))
+            {
+                return y;
+            }
+
             if (lt(x, y))
             {
                 return x;
@@ -3121,6 +3183,11 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(Object x, long y)
         {
+            if (IsNaN(x))
+            {
+                return x;
+            }
+
             if (lt(x, y))
             {
                 return x;
@@ -3134,6 +3201,15 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(Object x, double y)
         {
+            if (IsNaN(x))
+            {
+                return x;
+            }
+            else if (double.IsNaN(y))
+            {
+                return y;
+            }
+
             if (Util.ConvertToDouble(x) < y)
             {
                 return x;
@@ -3147,6 +3223,15 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object min(Object x, Object y)
         {
+            if (IsNaN(x))
+            {
+                return x;
+            }
+            else if (IsNaN(y))
+            {
+                return y;
+            }
+
             if (lt(x, y))
             {
                 return x;

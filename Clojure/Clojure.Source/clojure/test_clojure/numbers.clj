@@ -558,7 +558,7 @@ Math/pow overflows to Infinity."
                                   [ nan zero zero]
                                   [zero  nan zero]
                                   [zero zero  nan]))
-;;;                fnan?  Single/NaN  (float 0.0)                              ;;;  Float/NaN (Float.   TODO: How important is this?  I don't have a way to do the equivalent of (Float. 0.0).  Even using (System.Single/Parse "0.0") gives a boxed Single which will still match to a double arg on min, not an object arg.
+                fnan?  Single/NaN  (float 0.0)                              ;;;  Float/NaN (Float.   
                 dnan? Double/NaN          0.0)
            min
          max))))
