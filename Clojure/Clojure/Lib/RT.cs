@@ -950,7 +950,7 @@ namespace clojure.lang
 
 
             IDictionary m = coll as IDictionary;
-            if (m != null)
+            if (m != null && key != null)
             {
                 //return m.Contains(key) ? RT.T : RT.F;
                 return m.Contains(key);
@@ -958,7 +958,7 @@ namespace clojure.lang
             
             // TODO: Make this work for ISet<T> no matter the T
             ISet<Object> iso = coll as ISet<Object>;
-            if (iso != null)
+            if (iso != null )
             {
                 // return  iso.Contains(key) ? RT.T : RT.F;
                 return iso.Contains(key);

@@ -398,6 +398,33 @@
       (contains? #{1 2 3} 10) false
       (contains? #{1 2 3} nil) false)
 
+  ; contains? also works on java.util.Map and java.util.Set.
+  (are [x y] (= x y)
+      (contains? (System.Collections.Hashtable. {}) :a) false                    ;;; java.util.HashMap.
+      (contains? (System.Collections.Hashtable. {}) nil) false                   ;;; java.util.HashMap.
+
+      (contains? (System.Collections.Hashtable. {:a 1}) :a) true                 ;;; java.util.HashMap.
+      (contains? (System.Collections.Hashtable. {:a 1}) :b) false                ;;; java.util.HashMap.
+      (contains? (System.Collections.Hashtable. {:a 1}) nil) false               ;;; java.util.HashMap.
+
+      (contains? (System.Collections.Hashtable. {:a 1 :b 2}) :a) true            ;;; java.util.HashMap.
+      (contains? (System.Collections.Hashtable. {:a 1 :b 2}) :b) true            ;;; java.util.HashMap.
+      (contains? (System.Collections.Hashtable. {:a 1 :b 2}) :c) false           ;;; java.util.HashMap.
+      (contains? (System.Collections.Hashtable. {:a 1 :b 2}) nil) false          ;;; java.util.HashMap.
+
+      ; sets
+      (contains? (|System.Collections.Generic.HashSet`1[System.Object]|. #{}) 1) false                        ;;; java.util.HashSet.
+      (contains? (|System.Collections.Generic.HashSet`1[System.Object]|. #{}) nil) false                      ;;; java.util.HashSet.
+
+      (contains? (|System.Collections.Generic.HashSet`1[System.Object]|. #{1}) 1) true                        ;;; java.util.HashSet.
+      (contains? (|System.Collections.Generic.HashSet`1[System.Object]|. #{1}) 2) false                       ;;; java.util.HashSet.
+      (contains? (|System.Collections.Generic.HashSet`1[System.Object]|. #{1}) nil) false                     ;;; java.util.HashSet.
+
+      (contains? (|System.Collections.Generic.HashSet`1[System.Object]|. #{1 2 3}) 1) true                    ;;; java.util.HashSet.
+      (contains? (|System.Collections.Generic.HashSet`1[System.Object]|. #{1 2 3}) 3) true                    ;;; java.util.HashSet.
+      (contains? (|System.Collections.Generic.HashSet`1[System.Object]|. #{1 2 3}) 10) false                  ;;; java.util.HashSet.
+      (contains? (|System.Collections.Generic.HashSet`1[System.Object]|. #{1 2 3}) nil) false)                ;;; java.util.HashSet.
+
   ; numerically indexed collections (e.g. vectors and Java arrays)
   ; => test if the numeric key is WITHIN THE RANGE OF INDEXES
   (are [x y] (= x y)
