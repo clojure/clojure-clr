@@ -26,3 +26,14 @@
                (defmacro my-macro [] :b)
                (defn do-macro [] (my-macro))
                (do-macro)))))))
+
+(deftest nested-dynamic-declaration
+  (testing "vars :dynamic meta data is applied immediately to vars declared anywhere"
+    (is (= 10
+          (eval
+            '(do
+               (list
+                 (declare ^:dynamic p)
+                 (defn q [] @p))
+               (binding [p (atom 10)]
+                 (q))))))))
