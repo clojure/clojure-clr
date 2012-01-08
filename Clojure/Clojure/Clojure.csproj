@@ -116,6 +116,7 @@
   <ItemGroup>
     <Compile Include="CljCompiler\Ast\IntrinsicsRewriter.cs" />
     <Compile Include="CljCompiler\Ast\CaseExpr.cs" />
+    <Compile Include="Lib\ClrTypeSpec.cs" />
     <Compile Include="Lib\IFnArity.cs" />
     <Compile Include="Runtime\Binding\BindingHelpers.cs" />
     <Compile Include="Runtime\Binding\ClojureOverloadResolver.cs" />

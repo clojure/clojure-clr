@@ -956,6 +956,14 @@ namespace clojure.lang
                 return m.Contains(key);
             }
             
+            // TODO: Make this work for ISet<T> no matter the T
+            ISet<Object> iso = coll as ISet<Object>;
+            if (iso != null)
+            {
+                // return  iso.Contains(key) ? RT.T : RT.F;
+                return iso.Contains(key);
+            }
+
             if (Util.IsNumeric(key) && (coll is String || coll.GetType().IsArray))
             {
                 int n = Util.ConvertToInt(key);
@@ -2642,10 +2650,11 @@ namespace clojure.lang
 
         #region Locating types
 
+        static readonly char[] _triggerTypeChars = new char[] { '`', ','};
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Type classForName(string p)
         {
-            // TODO: We're really going to have to work on this.
             Type t = null;
 
             t = Type.GetType(p, false);
@@ -2675,19 +2684,8 @@ namespace clojure.lang
             else // multiple, ambiguous
                 t = null;
 
-
-
-            //    IEnumerable<Type> types1 = assy.GetTypes();
-            //    List<Type> typeList1 = new List<Type>(types1);
-
-            //    IEnumerable<Type> types = assy.GetTypes().Where(t1 => t1.FullName == p);
-            //    List<Type> typeList = new List<Type>(types);
-            //    if (typeList.Count == 1)
-            //        t = typeList[0];
-            //}
-            //catch
-            //{
-            //}
+            if (t == null && p.IndexOfAny(_triggerTypeChars) != -1)
+                t = ClrTypeSpec.GetTypeFromName(p);
 
             return t;
         }
