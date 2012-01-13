@@ -154,12 +154,25 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             // Then initialize
+
+      		IPersistentSet lbset = PersistentHashSet.EMPTY;
+
             for (int i = 0; i < n; i++)
             {
                 BindingInit bi = (BindingInit)_bindingInits.nth(i);
+                lbset = (IPersistentSet)lbset.cons(bi.Binding);
                 ParameterExpression parmExpr = (ParameterExpression)bi.Binding.ParamExpression;
                 forms.Add(Expression.Assign(parmExpr, bi.Init.GenCode(RHC.Expression,objx,context)));
             }
+
+            for (int i = 0; i < n; i++)
+            {
+                BindingInit bi = (BindingInit)_bindingInits.nth(i);
+                ObjExpr fe = (ObjExpr)bi.Init;
+                ParameterExpression parmExpr = (ParameterExpression)bi.Binding.ParamExpression;
+                forms.Add(fe.GenLetFnInits(context, parmExpr, objx, lbset));
+            }
+
 
             // The work
             forms.Add(_body.GenCode(rhc,objx,context));

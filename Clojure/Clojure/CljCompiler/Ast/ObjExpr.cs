@@ -1241,12 +1241,30 @@ namespace clojure.lang.CljCompiler.Ast
             return GenConstant(context, i, kw);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        internal Expression GenLetFnInits(GenContext context, ParameterExpression parm, FnExpr fn, IPersistentSet leFnLocals)
+        internal Expression GenLetFnInits(GenContext context, ParameterExpression parm, ObjExpr objx, IPersistentSet letFnLocals)
         {
-            // TODO: Implement this!!!!!!!!!!!!!!!!
-            // fn is the enclosing IFn, not this.
-            throw new NotImplementedException();
+            ParameterExpression cvtParm = Expression.Parameter(_compiledType,"cvt");
+            Expression initExpr = Expression.Assign(cvtParm,Expression.Convert(parm, _compiledType));
+
+            List<Expression> exprs = new List<Expression>();
+            exprs.Add(initExpr);
+
+            for (ISeq s = RT.keys(_closes); s != null; s = s.next())
+            {
+                LocalBinding lb = (LocalBinding)s.first();
+                if (letFnLocals.contains(lb))
+                {
+                    FieldBuilder fb;
+                    _closedOverFieldsMap.TryGetValue(lb,out fb);
+
+                    Type primt = lb.PrimitiveType;
+                    Expression init = primt != null ? objx.GenUnboxedLocal(context, lb) : objx.GenLocal(context,lb);
+
+                    exprs.Add(Expression.Assign(Expression.Field(_thisParam,fb), init));
+                }
+            }
+
+            return Expression.Block(new ParameterExpression[] { cvtParm }, exprs);           
         }
 
 

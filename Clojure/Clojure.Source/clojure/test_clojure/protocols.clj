@@ -543,7 +543,7 @@
              (get_Item [_ index]                                     ;;; get
                   (if (zero? index)
                     :done
-                    (recur (int (dec index))))))]           ;;; int cast added
+                    (recur (dec index)))))]           ;;; int cast added
       (is (= :done (.get_Item r 0)))                                    ;;; .get
       (is (= :done (.get_Item r 1)))))                                  ;;; .get
   (testing "disambiguating with type hints"
