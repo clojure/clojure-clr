@@ -50,6 +50,9 @@ namespace clojure.lang
           get { return _sym; }
         }
 
+        // cache ToString if called
+        string _str;
+
         #endregion
 
         #region C-tors and factory methods
@@ -126,7 +129,9 @@ namespace clojure.lang
         /// <returns>A string representing the keyword.</returns>
         public override string ToString()
         {
-            return ":" + _sym.ToString();
+            if (_str == null)
+                _str = String.Intern(":" + _sym.ToString());
+            return _str;
         }
 
         /// <summary>

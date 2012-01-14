@@ -45,6 +45,10 @@ namespace clojure.lang
 
         readonly IPersistentMap _meta;
 
+        // cache ToString/ToStringEscaped if called
+        string _str;
+        string _strEsc;
+
         #endregion
 
         #region C-tors & factory methods
@@ -158,7 +162,14 @@ namespace clojure.lang
         /// <returns>A string representing the symbol.</returns>
         public override string ToString()
         {
-            return _ns == null ? _name : _ns + "/" + _name;
+            if (_str == null)
+            {
+                if (_ns != null)
+                    _str = String.Intern(_ns + "/" + _name);
+                else
+                    _str = _name;
+            }
+            return _str;
         }
 
         private static string NameMaybeEscaped(string s)
@@ -168,7 +179,15 @@ namespace clojure.lang
 
         public string ToStringEscaped()
         {
-            return _ns == null ? NameMaybeEscaped(_name) : NameMaybeEscaped(_ns) + "/" + NameMaybeEscaped(_name);
+            if (_strEsc == null)
+            {
+                if (_ns != null)
+                    _strEsc = String.Intern(NameMaybeEscaped(_ns) + "/" + NameMaybeEscaped(_name));
+                else
+                    _strEsc = NameMaybeEscaped(_name);
+
+            }
+            return _strEsc;
         }
 
         /// <summary>
