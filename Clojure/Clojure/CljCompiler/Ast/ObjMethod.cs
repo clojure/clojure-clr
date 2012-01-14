@@ -270,7 +270,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         }
 
-        void EmitUnboxArg(ILGen gen, Type argType, Type paramType)
+        static void EmitUnboxArg(ILGen gen, Type argType, Type paramType)
         {
 
              if (argType == paramType)

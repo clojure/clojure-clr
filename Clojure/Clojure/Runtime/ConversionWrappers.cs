@@ -270,6 +270,8 @@ namespace clojure.lang.Runtime
     public class IEnumeratorOfTWrapper<T> : IEnumerator<T>
     {
         IEnumerator _enumerable;
+        bool _disposed = false;
+
 
         public IEnumeratorOfTWrapper(IEnumerator enumerable)
         {
@@ -285,10 +287,25 @@ namespace clojure.lang.Runtime
 
         #endregion
 
-        #region IDisposable Members
+        #region IDisposable
 
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    ((IDisposable)_enumerable).Dispose();
+                }
+
+                _disposed = true;
+            }
         }
 
         #endregion
@@ -313,9 +330,10 @@ namespace clojure.lang.Runtime
         #endregion
     }
 
-    public class IEnumerableOfTWrapper<T> : IEnumerable<T>, IEnumerable
+    public class IEnumerableOfTWrapper<T> : IEnumerable<T>, IEnumerable, IDisposable
     {
         IEnumerable _enumerable;
+        bool _disposed = false;
 
         public IEnumerableOfTWrapper(IEnumerable enumerable)
         {
@@ -327,6 +345,29 @@ namespace clojure.lang.Runtime
         public IEnumerator<T> GetEnumerator()
         {
             return new IEnumeratorOfTWrapper<T>(_enumerable.GetEnumerator());
+        }
+
+        #endregion
+
+        #region IDisposable
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    ((IDisposable)_enumerable).Dispose();
+                }
+
+                _disposed = true;
+            }
         }
 
         #endregion

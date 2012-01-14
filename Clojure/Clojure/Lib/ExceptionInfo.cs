@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
@@ -25,14 +26,23 @@ namespace clojure.lang
     /// <remarks> Clojure programs that need
     /// richer semantics for exceptions should use this in lieu of defining project-specific
     /// exception classes.</remarks>
+    [Serializable]
     public class ExceptionInfo : Exception
     {
+        #region Data
+
         protected readonly IPersistentMap data;
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
         public IPersistentMap getData()
         {
             return data;
         }
+
+        #endregion
+
+        #region C-tors
 
         public ExceptionInfo(String s, IPersistentMap data)
             : base(s)
@@ -46,11 +56,51 @@ namespace clojure.lang
             this.data = data;
         }
 
+        public ExceptionInfo()
+            : base()
+        {
+            this.data = PersistentHashMap.EMPTY;
+        }
+
+        public ExceptionInfo(string message)
+            : base(message)
+        {
+            this.data = PersistentHashMap.EMPTY;
+        }
+
+        public ExceptionInfo(string message, Exception innerException)
+            : base(message, innerException)
+        {
+            this.data = PersistentHashMap.EMPTY;
+        }
+
+        protected ExceptionInfo(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+            this.data = (IPersistentMap)info.GetValue("data", typeof(IPersistentMap));
+        }
+
+        [System.Security.SecurityCritical]
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null)
+            {
+                throw new ArgumentNullException("info");
+            }
+            base.GetObjectData(info, context);
+            info.AddValue("data", this.data, typeof(IPersistentMap));
+        }
+
+
+        #endregion
+
+        #region Object methods
+
         public override string ToString()
         {
-
             return "clojure.lang.ExceptionInfo: " + Message + " " + data.ToString();
-
         }
+
+        #endregion
     }
 }

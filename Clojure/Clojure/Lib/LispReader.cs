@@ -569,8 +569,6 @@ namespace clojure.lang
             return false;
         }
 
-        static Regex _vbarPat = new Regex("|");
-
         public static string VbarEscape(string s)
         {
             StringBuilder sb = new StringBuilder();
