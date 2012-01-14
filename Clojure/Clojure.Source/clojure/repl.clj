@@ -264,15 +264,17 @@ str-or-pattern."
   {:added "1.3"}
   ([] (pst 12))
   ([e-or-depth]
-     (if (instance? Exception e-or-depth)                         ;;; Throwable
+     (if (instance? Exception e-or-depth)                                         ;;; Throwable
 	   (pst e-or-depth 12)
        (when-let [e *e]
 	     (pst (root-cause e) e-or-depth))))
-  ([^Exception e depth]                                            ;;; Throwable
+  ([^Exception e depth]                                                            ;;; Throwable
      (binding [*out* *err*]
-       (println (str (-> e class .Name) " " (.Message e)))           ;;; .getSimpleName                                 ;;; getMessage
-       (let [st  (get-stack-trace e)                                 ;;; (.getStackTrace e)
-	         cause (.InnerException e)]                              ;;; .getCause
+       (println (str (-> e class .Name) " "                                        ;;; .getSimpleName 
+	                  (.Message e)                                                 ;;; getMessage
+					  (when-let [info (ex-data e)] (str " " (pr-str info)))))
+       (let [st  (get-stack-trace e)                                               ;;; (.getStackTrace e)
+	         cause (.InnerException e)]                                            ;;; .getCause
 	     (doseq [el (take depth
 	                      (remove #(#{"clojure.lang.RestFn" "clojure.lang.AFn" "clojure.lang.AFnImpl" "clojure.lang.RestFnImpl"}	(stack-element-classname %))   ;;;  (.getClassName %)
 			  			        st))]
