@@ -97,14 +97,14 @@ namespace clojure.lang
         /// <summary>
         /// Represents a set of Var bindings established at a particular point in the call stack.
         /// </summary>
-        sealed class Frame
+        sealed class Frame: ICloneable
         {
             #region Data
 
             /// <summary>
             /// A mapping from <see cref="Var">Var</see>s to <see cref="TBox"/>es holding their values.
             /// </summary>
-            readonly Associative _bindings;
+            Associative _bindings;
 
             /// <summary>
             /// Get mapping from <see cref="Var">Var</see>s to <see cref="TBox"/>es holding their values.
@@ -150,6 +150,17 @@ namespace clojure.lang
                 //_frameBindings = frameBindings;
                 _bindings = bindings;
                 _prev = prev;
+            }
+
+            #endregion
+
+            #region ICloneable members
+
+            public object Clone()
+            {
+                Frame f = new Frame();
+                f._bindings = this._bindings;
+                return f;
             }
 
             #endregion
@@ -399,6 +410,15 @@ namespace clojure.lang
             Frame f = CurrentFrame;
             if ( f != null )
                 return f;
+            return new Frame();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static Object cloneThreadBindingFrame()
+        {
+            Frame f = CurrentFrame;
+            if (f != null)
+                return f.Clone();
             return new Frame();
         }
 
