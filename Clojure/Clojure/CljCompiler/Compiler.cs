@@ -1268,7 +1268,7 @@ namespace clojure.lang
                 VarsVar, PersistentHashMap.EMPTY,
                 RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
                 RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
-
+                RT.DataReadersVar, RT.DataReadersVar.deref(),
                 //KEYWORD_CALLSITES, PersistentVector.EMPTY,  // jvm doesn't do this, don't know why
                 //VAR_CALLSITES, EmptyVarCallSites(),      // jvm doesn't do this, don't know why
                 //PROTOCOL_CALLSITES, PersistentVector.EMPTY, // jvm doesn't do this, don't know why
@@ -1459,7 +1459,8 @@ namespace clojure.lang
 
                 RT.CurrentNSVar, RT.CurrentNSVar.deref(),
                 RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
-                RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref()
+                RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
+                RT.DataReadersVar, RT.DataReadersVar.deref()
                 //LINE_BEFORE, lntr.LineNumber,
                 //LINE_AFTER, lntr.LineNumber
                 ));

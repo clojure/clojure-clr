@@ -1476,7 +1476,28 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char c)
             {
-                object recordName = read(r, true, null, false);
+                Object name = read(r, true, null, false);
+                Symbol sym = name as Symbol;
+                if (sym == null)
+                    throw new Exception("Reader tag must be a symbol");
+                return sym.Name.Contains(".") ? ReadRecord(r, sym) : ReadTagged(r, sym);
+            }
+
+
+            object ReadTagged(PushbackTextReader r, Symbol tag)
+            {
+                object o = read(r, true, null, true);
+
+                ILookup dataReaders = (ILookup)RT.DataReadersVar.deref();
+                IFn dataReader = (IFn)RT.get(dataReaders, tag);
+                if ( dataReader == null )
+                    throw new Exception("No reader function for tag " + tag.ToString());
+
+                return dataReader.invoke(o);
+            }
+
+            object ReadRecord(PushbackTextReader r, Symbol recordName)
+            {
                 Type recordType = RT.classForName(recordName.ToString());
 
                 char endch;

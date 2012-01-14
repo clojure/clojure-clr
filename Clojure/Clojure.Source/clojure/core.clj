@@ -6557,3 +6557,47 @@
   "Returns true if a value has been produced for a promise, delay, future or lazy sequence."
   {:added "1.3"}
   [^clojure.lang.IPending x] (.isRealized x))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; data readers ;;;;;;;;;;;;;;;;;;
+
+(defn- data-reader-urls []                                      ;;; Actually, we will return a sequence of FileInfo instances
+  (enumeration-seq
+    (clojure.lang.RT/FindFiles "data_readers.clj")))               ;;;    (.. Thread currentThread getContextClassLoader
+                                                                ;;;        (getResources "data_readers.clj"))))
+
+(defn- assert-symbol [^clojure.lang.LineNumberingTextReader reader x]             ;;; LineNumberingPushbackReader
+  (when-not (symbol? x)
+    (throw (ex-info "non-symbol in data-reader file"
+                    {:file *file*
+                     :line (.LineNumber reader)                                   ;;; .getLineNumber
+                     :value x}))))
+
+(defn- data-reader-var [sym]
+  (intern (create-ns (symbol (namespace sym)))
+          (symbol (name sym))))
+
+(defn- load-data-reader-file [mappings  ^System.IO.FileInfo url]                                        ;;; ^java.net.URL
+  (with-open [rdr (clojure.lang.LineNumberingTextReader.                                                ;;; LineNumberingPushbackReader
+                    (.OpenText url)  )]                                                                 ;;; (java.io.InputStreamReader.
+                                                                                                        ;;;        (.openStream url) "UTF-8"))]
+    (binding [*file* (.Name url)]                                                                       ;;; .getFile
+     (loop [mappings mappings]
+       (if-let [tag (read rdr false nil)]
+         (do (assert-symbol rdr tag)
+             (when (contains? mappings tag)
+               (throw (ex-info "Conflicting data-reader mapping"
+                               {:file *file*
+                                :line (.LineNumber rdr)                                                 ;;; .getLineNumber
+                                :symbol tag})))
+             (let [target (read rdr true nil)]
+               (assert-symbol rdr target)
+               (recur (assoc mappings tag (data-reader-var target)))))
+         mappings)))))
+
+(defn- load-data-readers []
+  (alter-var-root #'*data-readers*
+                  (fn [mappings]
+                    (reduce load-data-reader-file
+                            mappings (data-reader-urls)))))
+
+(load-data-readers)

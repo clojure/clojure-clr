@@ -432,6 +432,9 @@ namespace clojure.lang
             //= Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), RT.T);
             = Var.intern(ClojureNamespace, Symbol.intern("*read-eval*"), true).setDynamic();
 
+        public static readonly Var DataReadersVar
+            = Var.intern(ClojureNamespace, Symbol.intern("*data-readers*"), RT.map()).setDynamic();
+
         public static readonly Var AssertVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), RT.T);
             = Var.intern(ClojureNamespace, Symbol.intern("*assert*"), true).setDynamic();
@@ -3151,6 +3154,15 @@ namespace clojure.lang
                     return fi;
 
             return null;
+        }
+
+        public static IEnumerable<FileInfo> FindFiles(string fileName)
+        {
+            FileInfo fi;
+
+            foreach (string path in GetFindFilePaths())
+                if ((fi = FindFile(path, fileName)) != null)
+                    yield return fi;
         }
 
         static string ConvertPath(string path)
