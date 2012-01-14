@@ -465,7 +465,7 @@ namespace clojure.lang
         public Exception WrongArityException(int reqArity)
         {
             string name = Util.NameForType(GetType()); 
-            int suffix = name.LastIndexOf("__",StringComparison.InvariantCulture);  // NOt sure if this is necessary
+            int suffix = name.LastIndexOf("__",StringComparison.Ordinal);  // NOt sure if this is necessary
             return new ArityException(
                 reqArity,
                 (suffix == -1 ? name : name.Substring(0, suffix)).Replace('_', '-'));

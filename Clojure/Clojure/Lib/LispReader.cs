@@ -1479,24 +1479,24 @@ namespace clojure.lang
                 Object name = read(r, true, null, false);
                 Symbol sym = name as Symbol;
                 if (sym == null)
-                    throw new Exception("Reader tag must be a symbol");
+                    throw new ArgumentException("Reader tag must be a symbol");
                 return sym.Name.Contains(".") ? ReadRecord(r, sym) : ReadTagged(r, sym);
             }
 
 
-            object ReadTagged(PushbackTextReader r, Symbol tag)
+            static object ReadTagged(PushbackTextReader r, Symbol tag)
             {
                 object o = read(r, true, null, true);
 
                 ILookup dataReaders = (ILookup)RT.DataReadersVar.deref();
                 IFn dataReader = (IFn)RT.get(dataReaders, tag);
                 if ( dataReader == null )
-                    throw new Exception("No reader function for tag " + tag.ToString());
+                    throw new ArgumentException("No reader function for tag " + tag.ToString());
 
                 return dataReader.invoke(o);
             }
 
-            object ReadRecord(PushbackTextReader r, Symbol recordName)
+            static object ReadRecord(PushbackTextReader r, Symbol recordName)
             {
                 Type recordType = RT.classForName(recordName.ToString());
 
