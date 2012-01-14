@@ -206,7 +206,7 @@ namespace clojure.lang
 
             public override string ToString()
             {
-                return String.Format(CultureInfo.CurrentCulture,"precision={0} roundingMode={1}", _precision, _roundingMode);
+                return String.Format(CultureInfo.InvariantCulture,"precision={0} roundingMode={1}", _precision, _roundingMode);
             }
 
             #endregion
@@ -752,7 +752,6 @@ namespace clojure.lang
         /// <remarks> Ugly. We could use a RegEx, but trying to avoid unnecessary allocation, I guess.
         /// [+-]?\d*(\.\d*)?([Ee][+-]?\d+)?  with additional constraint that one of the two d* must have at least one char.
         ///</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.Int32.Parse(System.String)")]
         private static bool DoParse(char[] buf, int offset, int len, bool throwOnError, out BigDecimal v)
         {
             v = null;
@@ -880,10 +879,10 @@ namespace clojure.lang
                 char[] expDigits = new char[expLen];
                 Array.Copy(buf, expOffset, expDigits, 0, expLen);
                 if (throwOnError)
-                    exp = Int32.Parse(new String(expDigits));
+                    exp = Int32.Parse(new String(expDigits), System.Globalization.CultureInfo.InvariantCulture);
                 else
                 {
-                    if (!Int32.TryParse(new String(expDigits), out exp))
+                    if (!Int32.TryParse(new String(expDigits), System.Globalization.NumberStyles.AllowLeadingSign, System.Globalization.CultureInfo.InvariantCulture, out exp))
                         return false;
                 }
             }

@@ -1525,7 +1525,7 @@ namespace Clojure.Tests.LibTests
         #region #-dispatch tests
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(Exception))]
         public void SharpDispatchOnInvalidCharFails()
         {
             object o1 = ReadFromString("#a(1 2)");

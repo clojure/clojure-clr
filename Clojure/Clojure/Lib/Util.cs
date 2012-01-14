@@ -13,6 +13,7 @@
  **/
 
 using System;
+using System.Globalization;
 //using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
@@ -300,7 +301,7 @@ namespace clojure.lang
             else if (o is UInt64)
                 return (int)(ulong)o;
             else
-                return Convert.ToInt32(o);
+                return Convert.ToInt32(o, CultureInfo.InvariantCulture);
         }
 
         public static uint ConvertToUInt(object o)
@@ -330,7 +331,7 @@ namespace clojure.lang
             else if (o is UInt64)
                 return (uint)(ulong)o;
             else
-                return Convert.ToUInt32(o);
+                return Convert.ToUInt32(o, CultureInfo.InvariantCulture);
         }
 
         public static long ConvertToLong(object o)
@@ -360,7 +361,7 @@ namespace clojure.lang
             else if (o is UInt64)
                 return (long)(ulong)o;
             else
-                return Convert.ToInt64(o);
+                return Convert.ToInt64(o, CultureInfo.InvariantCulture);
         }
 
         public static ulong ConvertToULong(object o)
@@ -390,7 +391,7 @@ namespace clojure.lang
             else if (o is UInt32)
                 return (ulong)(uint)o;
             else
-                return Convert.ToUInt64(o);
+                return Convert.ToUInt64(o, CultureInfo.InvariantCulture);
         }
 
         //
@@ -422,7 +423,7 @@ namespace clojure.lang
             else if (o is Int64)
                 return (short)(long)o;
             else
-                return Convert.ToInt16(o);
+                return Convert.ToInt16(o, CultureInfo.InvariantCulture);
         }
 
         public static ushort ConvertToUShort(object o)
@@ -452,7 +453,7 @@ namespace clojure.lang
             else if (o is UInt64)
                 return (ushort)(ushort)o;
             else
-                return Convert.ToUInt16(o);
+                return Convert.ToUInt16(o, CultureInfo.InvariantCulture);
         }
 
         //
@@ -484,7 +485,7 @@ namespace clojure.lang
             else if (o is Int64)
                 return (sbyte)(long)o;
             else
-                return Convert.ToSByte(o);
+                return Convert.ToSByte(o, CultureInfo.InvariantCulture);
         }
 
         public static byte ConvertToByte(object o)
@@ -514,7 +515,7 @@ namespace clojure.lang
             else if (o is UInt64)
                 return (byte)(ushort)o;
             else
-                return Convert.ToByte(o);
+                return Convert.ToByte(o, CultureInfo.InvariantCulture);
         }
 
         //
@@ -546,7 +547,7 @@ namespace clojure.lang
             else if (o is UInt64)
                 return (float)(ulong)o;
             else
-                return Convert.ToSingle(o);
+                return Convert.ToSingle(o, CultureInfo.InvariantCulture);
         }
 
         public static double ConvertToDouble(object o)
@@ -576,7 +577,7 @@ namespace clojure.lang
             else if (o is UInt64)
                 return (double)(ulong)o;
             else
-                return Convert.ToDouble(o);
+                return Convert.ToDouble(o, CultureInfo.InvariantCulture);
         }
 
 
@@ -607,7 +608,7 @@ namespace clojure.lang
             else if (o is UInt64)
                 return (decimal)(ulong)o;
             else
-                return Convert.ToDecimal(o);
+                return Convert.ToDecimal(o, CultureInfo.InvariantCulture);
         }
 
 
@@ -641,7 +642,7 @@ namespace clojure.lang
             else if (o is UInt64)
                 return (char)(ulong)o;
             else
-                return Convert.ToChar(o);
+                return Convert.ToChar(o, CultureInfo.InvariantCulture);
         }
 
 
