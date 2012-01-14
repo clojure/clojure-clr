@@ -76,14 +76,23 @@ namespace clojure.lang.CljCompiler.Ast
                 if (t == null)
                     instance = Compiler.Analyze(pcon.EvalOrExpr(),RT.second(sform));
 
-                bool isZeroArityCall = RT.Length(sform) == 3 && (RT.third(sform) is Symbol || RT.third(sform) is Keyword);
+                bool isZeroArityCall = RT.Length(sform) == 3 && RT.third(sform) is Symbol;
 
                 if (isZeroArityCall)
                 {
                     PropertyInfo pinfo = null;
                     FieldInfo finfo = null;
 
-                    Symbol sym = (RT.third(sform) is Keyword) ? ((Keyword)RT.third(sform)).Symbol : (Symbol)RT.third(sform);
+                    // TODO: Figure out if we want to handle the -propname otherwise.
+
+                    bool isPropName = false;
+                    Symbol sym = (Symbol)RT.third(sform);
+                    if (sym.Name[0] == '-')
+                    {
+                        isPropName = true;
+                        sym = Symbol.intern(sym.Name.Substring(1));
+                    }
+
                     string fieldName = Compiler.munge(sym.Name);
                     // The JVM version does not have to worry about Properties.  It captures 0-arity methods under fields.
                     // We have to put in special checks here for this.
@@ -95,7 +104,7 @@ namespace clojure.lang.CljCompiler.Ast
                             return new StaticFieldExpr(source, spanMap, tag, t, fieldName, finfo);
                         if ((pinfo = Reflector.GetProperty(t, fieldName, true)) != null)
                             return new StaticPropertyExpr(source, spanMap, tag, t, fieldName, pinfo);
-                        if (Reflector.GetArityZeroMethod(t, fieldName, true) != null)
+                        if (!isPropName && Reflector.GetArityZeroMethod(t, fieldName, true) != null)
                             return new StaticMethodExpr(source, spanMap, tag, t, fieldName, null, new List<HostArg>());
                         throw new MissingMemberException(t.Name, fieldName);
                     }
@@ -106,7 +115,7 @@ namespace clojure.lang.CljCompiler.Ast
                             return new InstanceFieldExpr(source, spanMap, tag, instance, fieldName, finfo);
                         if ((pinfo = Reflector.GetProperty(instanceType, fieldName, false)) != null)
                             return new InstancePropertyExpr(source, spanMap, tag, instance, fieldName, pinfo);
-                        if (Reflector.GetArityZeroMethod(instanceType, fieldName, false) != null)
+                        if (!isPropName && Reflector.GetArityZeroMethod(instanceType, fieldName, false) != null)
                             return new InstanceMethodExpr(source, spanMap, tag, instance, fieldName, null, new List<HostArg>());
                         if (pcon.IsAssignContext)
                             return new InstanceFieldExpr(source, spanMap, tag, instance, fieldName, null); // same as InstancePropertyExpr when last arg is null

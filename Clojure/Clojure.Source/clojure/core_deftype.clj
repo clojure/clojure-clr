@@ -182,7 +182,7 @@
                                    `(reify clojure.lang.ILookupThunk 
                                            (get [~'thunk ~'gtarget] 
                                                 (if (identical? (class ~'gtarget) ~'gclass) 
-                                                  (. ~hinted-target ~(keyword fld))
+                                                  (. ~hinted-target ~(symbol (str "-" fld)))
                                                   ~'thunk)))])
                                 base-fields))
                            nil))))])      
@@ -197,7 +197,7 @@
                          (or (identical? this# ~gs)
                              (when (identical? (class this#) (class ~gs))
                                (let [~gs ~gs ]     ;;; ~(with-meta gs {:tag tagname})]    ----------------major loss of type hint here.  TODO: Figure out what the problem is
-                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~(keyword fld)))) base-fields)
+                                 (and  ~@(map (fn [fld] `(= ~fld (. ~gs ~(symbol (str "-" fld))))) base-fields)
                                        (= ~'__extmap (. ~gs ~'__extmap))))))))
                    `(containsKey [this# k#] (not (identical? this# (.valAt this# k# this#))))
                    `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
