@@ -71,7 +71,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static GenContext CreateWithExternalAssembly(string assyName, string extension, bool createDynInitHelper)
         {
-            return new GenContext(assyName, extension, System.IO.Directory.GetCurrentDirectory(),createDynInitHelper);
+            string path = Compiler.CompilePathVar.deref() as string;
+            return new GenContext(assyName, extension, path ?? System.IO.Directory.GetCurrentDirectory(),createDynInitHelper);
         }
 
 
@@ -85,7 +86,7 @@ namespace clojure.lang.CljCompiler.Ast
 #endif
             if (directory != null)
             {
-                if (directory.Length > 0 && directory != ".")
+                if (directory.Length > 0 ) //&& directory != ".")
                     assyName = assyName.Replace("/", ".");
             }
 
