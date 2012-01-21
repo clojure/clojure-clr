@@ -26,9 +26,9 @@ namespace BootstrapCompile
     static class Compile
     {
 
-        const string PATH_PROP = "clojure.compile.path";
-        const string REFLECTION_WARNING_PROP = "clojure.compile.warn-on-reflection";
-        const string UNCHECKED_MATH_PROP = "clojure.compile.unchecked-math";
+        const string PATH_PROP = "CLOJURE_COMPILE_PATH";
+        const string REFLECTION_WARNING_PROP = "CLOJURE_COMPILE_WARN_ON_REFLECTION";
+        const string UNCHECKED_MATH_PROP = "CLOJURE_COMPILE_UNCHECKED_MATH";
 
         static void Main(string[] args)
         {
@@ -36,21 +36,23 @@ namespace BootstrapCompile
             TextWriter errTW = RT.errPrintWriter();
 
             string path = Environment.GetEnvironmentVariable(PATH_PROP);
+
             // TODO: get rid of this when we have the full build process set up
+            //if ( path == null )
+            //{
+            //    errTW.WriteLine("ERROR: Must set system property {0}",PATH_PROP);
+            //    errTW.WriteLine("to the location for the compiled .class files.");
+            //    errTW.WriteLine("This directory must also be on your {0}.",RT.ClojureLoadPathString);
+            //    Environment.Exit(1);
+            //}
+
             path = path ?? ".";
 
-            if ( path == null )
-            {
-                errTW.WriteLine("ERROR: Must set system property {0}",PATH_PROP);
-                errTW.WriteLine("to the location for the compiled .class files.");
-                errTW.WriteLine("This directory must also be on your {0}.",RT.ClojureLoadPathString);
-                Environment.Exit(1);
-            }
 
             string warnVal =  Environment.GetEnvironmentVariable(REFLECTION_WARNING_PROP);
-            bool warnOnReflection = warnVal == null ? false : warnVal.Equals(true);
+            bool warnOnReflection = warnVal == null ? false : warnVal.Equals("true");
             string mathVal = Environment.GetEnvironmentVariable(UNCHECKED_MATH_PROP);
-            bool uncheckedMath = mathVal == null ? false : mathVal.Equals(true);
+            bool uncheckedMath = mathVal == null ? false : mathVal.Equals("true");
 
             try
             {
