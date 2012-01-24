@@ -20,18 +20,19 @@ Feedback: http://groups.google.com/group/clojure
 Getting Started (general): http://dev.clojure.org/display/doc/Getting+Started
 
 
-For more information on ClojureCLR: http://github.com/richhickey/clojure-clr/wiki
+For more information on ClojureCLR: https://github.com/clojure/clojure-clr/wiki
 
 
 Installing ClojureCLR: 
 
 To just run ClojureCLR, use the binary distribution:
 
-  http://github.com/richhickey/clojure-clr/wiki/Getting-started-binary-distribution
+  https://github.com/clojure/clojure-clr/wiki/Getting-binaries
 
 For a deeper look, get a source distribution:
 
-  http://github.com/richhickey/clojure-clr/wiki/Getting-started-source-distribution
+  https://github.com/clojure/clojure-clr/wiki/Getting-source
+
 
  
 --------------------------------------------------------------------------------------
