@@ -1135,7 +1135,7 @@ namespace clojure.lang
                         sb.Append(dto.ToString("%K"));
                         break;
                     default:
-                        PrintDateTime(sb, dto.UtcDateTime);
+                        PrintDateTime(sb, dto.DateTime);
                         break;
                 }                    
             }
