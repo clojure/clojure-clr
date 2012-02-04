@@ -35,7 +35,7 @@
 ;;; parser implementation
 
 (defn- parse-int [^String s]
-  (Int64/Parse s))                                              ;;; (Long/parseLong s))
+  (if (String/IsNullOrEmpty s) 0 (Int64/Parse s)))                                              ;;; (Long/parseLong s))
 
 (defn- zero-fill-right [^String s width]
   (cond (= width (count s)) s
@@ -156,33 +156,33 @@ with invalid arguments."
 
 
 ;;; ------------------------------------------------------------------------
-;;; print integeration
+;;; print integration
 
 ;;;(defn- fixup-offset
 ;;;  [^String s]
-;;;  (let [x (- (count s) 2)]
+;;;  (let [x (- (count s) 3)]
 ;;;    (str (.Substring s 0 x) ":" (.Substring s x))))                       ;;; .substring
 
 (defn- caldate->rfc3339
-  "format java.util.Date or java.util.Calendar as RFC3339 timestamp."     ;;; only handling System.DateTime for now
+  "format System.DateTime or System.DateTimeOffset as RFC3339 timestamp."     ;;; java.util.Date or java.util.Calendar
   [d]
-  (format "#@%1$tFT%1$tT.%1$tL%1$tz" d))                                  ;;; took out fixup-offset wrapper call
+  (format "#inst \"%1$tFT%1$tT.%1$tL%1$tz\"" d))                                  ;;; took out fixup-offset wrapper call
 
 (defmethod print-method System.DateTime                                   ;;; java.util.Date
-  [^System.DateTime d, ^System.IO.TextWriter w]                           ;;; .write ^java.util.Date ^java.io.Writer
-  (.Write w (caldate->rfc3339 d)))
+  [^System.DateTime d, ^System.IO.TextWriter w]                           ;;; ^java.util.Date ^java.io.Writer
+  (.Write w (caldate->rfc3339 d)))                                        ;;; .write
 
 (defmethod print-dup System.DateTime                                      ;;; java.util.Date
-  [^System.DateTime d, ^System.IO.TextWriter w]                           ;;; .write ^java.util.Date ^java.io.Writer
-  (.Write w (caldate->rfc3339 d)))
+  [^System.DateTime d, ^System.IO.TextWriter w]                           ;;; ^java.util.Date ^java.io.Writer
+  (.Write w (caldate->rfc3339 d)))                                        ;;; .write
 
-;;;(defmethod print-method java.util.Calendar
-;;;  [^java.util.Calendar c, ^java.io.Writer w]
-;;;  (.write w (caldate->rfc3339 c)))
+(defmethod print-method System.DateTimeOffset                             ;;; java.util.Calendar
+  [^System.DateTimeOffset c, ^System.IO.TextWriter w]                     ;;; ^java.util.Calendar ^java.io.Writer
+  (.Write w (caldate->rfc3339 c)))                                        ;;; .write
 
-;;;(defmethod print-dup java.util.Calendar
-;;;  [^java.util.Calendar c, ^java.io.Writer w]
-;;;  (.write w (caldate->rfc3339 c)))
+(defmethod print-dup System.DateTimeOffset                                ;;; java.util.Calendar
+  [^System.DateTimeOffset c, ^System.IO.TextWriter w]                     ;;; ^java.util.Calendar ^java.io.Writer
+  (.Write w (caldate->rfc3339 c)))                                        ;;; .write
 
 (defn- fixup-nanos                   ; 0123456789012345678901234567890123456
   [^long nanos ^String s]            ; #@2011-01-01T01:00:00.000000000+01:00
@@ -193,9 +193,9 @@ with invalid arguments."
 ;;;(defn- timestamp->rfc3339
 ;;;  [^java.sql.Timestamp ts]
 ;;;  (->> ts
-;;;       (format "#@%1$tFT%1$tT.%1$tN%1$tz") ; %1$tN prints 9 digits for frac.
-;;;       fixup-offset                        ; second, but last 6 are always
-;;;       (fixup-nanos (.getNanos ts))))      ; 0 though timestamp has getNanos
+;;;       (format "#inst \"%1$tFT%1$tT.%1$tN%1$tz\"") ; %1$tN prints 9 digits for frac.
+;;;       fixup-offset                                ; second, but last 6 are always
+;;;       (fixup-nanos (.getNanos ts))))              ; 0 though timestamp has getNanos
 
 ;;;(defmethod print-method java.sql.Timestamp
 ;;;  [^java.sql.Timestamp t, ^java.io.Writer w]
@@ -252,7 +252,7 @@ but truncating the subsecond fraction to milliseconds."
 milliseconds since the epoch, GMT."
   [years months days hours minutes seconds nanoseconds
    offset-sign offset-hours offset-minutes]
-   (.UtcDateTime (construct-datetimeoffset years months days
+   (.LocalDateTime (construct-datetimeoffset years months days
                                 hours minutes seconds nanoseconds
                                 offset-sign offset-hours offset-minutes)))
 ;;;
@@ -291,5 +291,7 @@ milliseconds since the epoch, GMT."
 ;;;nanosecond precision."
 ;;;     (partial parse-timestamp (validated construct-timestamp)))
 
-;;;(alter-var-root #'clojure.core/*instant-reader*
-;;;                (constantly read-instant-datetime))                                                 ;;; read-instant-date
+(alter-var-root #'clojure.core/*data-readers*
+                assoc
+                'inst
+                read-instant-datetime)                                                              ;;; read-instant-date
