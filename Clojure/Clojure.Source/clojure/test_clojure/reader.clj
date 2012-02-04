@@ -353,3 +353,15 @@
   ;;;      ;; bad ATM
   ;;;      #_(is (= 123456789 (-> s read-string pr-str read-string .getNanos)))))))
   )
+  ;; UUID Literals
+;; #uuid "550e8400-e29b-41d4-a716-446655440000"
+
+(deftest UUID
+  (is (= System.Guid (class #uuid "550e8400-e29b-41d4-a716-446655440000")))             ;;; java.util.UUID
+  (is (.Equals #uuid "550e8400-e29b-41d4-a716-446655440000"                             ;;; .equals
+               #uuid "550e8400-e29b-41d4-a716-446655440000"))
+  #_(is (not (identical? #uuid "550e8400-e29b-41d4-a716-446655440000"
+                       #uuid "550e8400-e29b-41d4-a716-446655440000")))
+  #_(is (= 4 (.version #uuid "550e8400-e29b-41d4-a716-446655440000")))
+  (is (= (print-str #uuid "550e8400-e29b-41d4-a716-446655440000")
+         "#uuid \"550e8400-e29b-41d4-a716-446655440000\"")))
