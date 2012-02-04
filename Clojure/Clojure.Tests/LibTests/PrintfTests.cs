@@ -1068,8 +1068,6 @@ namespace Clojure.Tests.LibTests
 
         #region DateTime
 
-        // TODO: Datetime tests
-
         [Test]
         public void DateTimeBasics()
         {
@@ -1139,6 +1137,16 @@ namespace Clojure.Tests.LibTests
             Test("1998-11-25", "%tF", new DateTime(1998, 11, 25, 1, 2, 3));
 
         }
+
+
+        [Test]
+        public void DateTimeOffsetBasics()
+        {
+            Test("-05:12", "%tz", new DateTimeOffset(2009, 7, 1, 1, 10, 20,new TimeSpan(-5,-12,0)));
+            Test("+05:12", "%tz", new DateTimeOffset(2009, 7, 1, 1, 10, 20, new TimeSpan(5, 12, 0)));
+            Test("", "%tZ", new DateTimeOffset(2009, 7, 1, 1, 10, 20, new TimeSpan(-5, 12, 0)));
+        }
+
 
         #endregion
 

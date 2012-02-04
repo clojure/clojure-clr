@@ -966,19 +966,25 @@ namespace clojure.lang
                 {
                     PrintString(sb, "null");
                     return;
-                } 
-                
-                DateTime dt = DateTime.Now;
+                }
 
-                if (arg is long)
-                    dt = DateTime.FromBinary((long)arg);
-                else if (arg is DateTime)
-                    dt = (DateTime)arg;
+                if (arg is DateTimeOffset)
+                    PrintDateTimeOffset(sb, (DateTimeOffset)arg);
                 else
-                    FailConversion(_conversion, arg);
-             
-                PrintDateTime(sb, dt);
+                {
+
+                    DateTime dt = DateTime.Now;
+                    if (arg is long)
+                        dt = DateTime.FromBinary((long)arg);
+                    else if (arg is DateTime)
+                        dt = (DateTime)arg;
+                     else
+                        FailConversion(_conversion, arg);
+
+                    PrintDateTime(sb, dt);
+                }
             }
+
 
             static readonly DateTime Epoch = new DateTime(1970,1,1);
 
@@ -1118,6 +1124,21 @@ namespace clojure.lang
                 sb.Append(dt.ToString(format));
             }
 
+
+            private void PrintDateTimeOffset(StringBuilder sb, DateTimeOffset dto)
+            {
+                switch (_conversion)
+                {
+
+                    case DateTimeConv.ZoneNumeric: //  = 'z' (-1200 - +1200) - ls minus
+                        // TODO: This is not exactly the same as the Java version -- has : inserted.
+                        sb.Append(dto.ToString("%K"));
+                        break;
+                    default:
+                        PrintDateTime(sb, dto.UtcDateTime);
+                        break;
+                }                    
+            }
 
 
             #endregion
