@@ -435,6 +435,9 @@ namespace clojure.lang
         public static readonly Var DataReadersVar
             = Var.intern(ClojureNamespace, Symbol.intern("*data-readers*"), RT.map()).setDynamic();
 
+        public static readonly Var DefaultDataReadersVar
+           = Var.intern(ClojureNamespace, Symbol.intern("default-data-readers"), RT.map());
+        
         public static readonly Var AssertVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), RT.T);
             = Var.intern(ClojureNamespace, Symbol.intern("*assert*"), true).setDynamic();
