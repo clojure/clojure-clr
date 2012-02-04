@@ -18,6 +18,9 @@
 
 (ns clojure.test-clojure.reader
   (:use clojure.test)
+  (:use [clojure.instant :only [read-instant-datetime                        ;;; read-instant-date
+                                read-instant-datetimeoffset                  ;;; read-instant-calendar
+                                ]])                                          ;;; read-instant-timestamp
   (:import clojure.lang.BigInt))
 
 ;; Symbols
@@ -315,3 +318,37 @@
 ;; (read stream eof-is-error eof-value is-recursive)
 
 (deftest t-read)
+
+
+(deftest Instants
+  (testing "Instants are read as System.DateTime by default"                       ;;; java.util.Date
+    (is (= System.DateTime (class #@2010-11-12T13:14:15.666))))                    ;;; java.util.Date
+  (let [s "#@2010-11-12T13:14:15.666-06:00"]
+    (binding [*instant-reader* read-instant-datetime]                              ;;; read-instant-date
+      (testing "read-instant-datetime produces System.DateTime"                    ;;; "read-instant-date produces java.util.Date"
+        (is (= System.DateTime (class (read-string s)))))                          ;;; java.util.Date
+      (testing "System.DateTime instants round-trips"                              ;;; java.util.Date
+        (is (= (-> s read-string)
+               (-> s read-string pr-str read-string)))))
+    (binding [*instant-reader* read-instant-datetimeoffset]                        ;;; read-instant-calendar
+      (testing "read-instant-calendar produces System.DateTimeOffset"              ;;; java.util.Calendar
+        (is (instance? System.DateTimeOffset (read-string s))))                    ;;; java.util.Calendar
+      (testing "System.DateTimeOffset round-trips"                                 ;;; java.util.Calendar
+        (is (= (-> s read-string)
+               (-> s read-string pr-str read-string))))
+      (testing "System.DateTimeOffset remembers timezone in literal"               ;;; java.util.Calendar
+        (is (= "#@2010-11-12T13:14:15.666-06:00"
+               (-> s read-string pr-str)))
+        (is (= (-> s read-string)
+               (-> s read-string pr-str read-string))))
+      (testing "System.DateTimeOffset preserves milliseconds"                       ;;; java.util.Calendar
+        (is (= 666 (-> s read-string
+                       (.Millisecond)))))))                                         ;;; (.get java.util.Calendar/MILLISECOND)))))))
+  ;;;(let [s "#@2010-11-12T13:14:15.123456789"]
+  ;;;  (binding [*instant-reader* read-instant-timestamp]
+  ;;;    (testing "read-instant-timestamp produces java.sql.Timestamp"
+  ;;;      (is (= java.sql.Timestamp (class (read-string s)))))
+  ;;;    (testing "java.sql.Timestamp preserves nanoseconds"
+  ;;;      (is (= 123456789 (-> s read-string .getNanos)))
+  ;;;      (is (= 123456789 (-> s read-string pr-str read-string .getNanos)))))))
+  )
