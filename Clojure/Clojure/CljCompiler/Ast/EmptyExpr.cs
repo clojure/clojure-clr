@@ -19,7 +19,9 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-
+using System.Reflection;
+using System.Reflection.Emit;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -92,6 +94,28 @@ namespace clojure.lang.CljCompiler.Ast
                 throw new InvalidOperationException("Unknown collection type.");
 
             return Expression.Field(null, collType, "EMPTY");
+        }
+
+        static readonly FieldInfo HashMapEmptyFI = typeof(PersistentArrayMap).GetField("EMPTY");
+        static readonly FieldInfo HashSetEmptyFI = typeof(PersistentHashSet).GetField("EMPTY");
+        static readonly FieldInfo ListEmptyFI = typeof(PersistentList.EmptyList).GetField("EMPTY");
+        static readonly FieldInfo VectorEmptyFI = typeof(PersistentVector).GetField("EMPTY");
+
+        void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGen ilg = context.GetILGen();
+            if (_coll is IPersistentList)
+                ilg.EmitFieldGet(ListEmptyFI);
+            else if (_coll is IPersistentVector)
+                ilg.EmitFieldGet(VectorEmptyFI);
+            else if (_coll is IPersistentMap)
+                ilg.EmitFieldGet(HashMapEmptyFI);
+            else if (_coll is IPersistentSet)
+                ilg.EmitFieldGet(HashSetEmptyFI);
+            else
+                throw new InvalidOperationException("Unknown collection type.");
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
         }
 
         #endregion

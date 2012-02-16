@@ -19,7 +19,7 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -58,9 +58,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                // RETYPE:  Not sure why I did this:
-                // Type t = _v.GetType(); return t.IsPrimitive ? typeof(object) : t; }
-                // The following matches JVM:
                 return _v.GetType();
             }
         }
@@ -105,6 +102,13 @@ namespace clojure.lang.CljCompiler.Ast
             // Java: fn.emitConstant(gen,id)
             //return Expression.Constant(_v);
             return objx.GenConstant(context,_id,_v);
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            objx.EmitConstant(context, _id);
+            if (rhc == RHC.Statement)
+                context.GetILGenerator().Emit(OpCodes.Pop);
         }
 
         #endregion

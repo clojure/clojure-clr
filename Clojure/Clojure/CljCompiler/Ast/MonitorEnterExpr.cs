@@ -18,6 +18,7 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -66,6 +67,13 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Block(
                 Expression.Call(Compiler.Method_Monitor_Enter, _target.GenCode(RHC.Expression, objx, context)),
                 Compiler.NilExprInstance.GenCode(rhc, objx, context));
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            _target.Emit(RHC.Expression, objx, context);
+            context.GetILGen().EmitCall(Compiler.Method_Monitor_Enter);
+            Compiler.NilExprInstance.Emit(rhc, objx, context);
         }
 
         #endregion

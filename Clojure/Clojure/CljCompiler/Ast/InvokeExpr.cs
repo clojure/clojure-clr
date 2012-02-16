@@ -22,6 +22,8 @@ using System.Linq.Expressions;
 #endif
 using System.Reflection;
 using clojure.lang;
+using System.Reflection.Emit;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -85,7 +87,6 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            //_tag = tag ?? (varFexpr != null ? varFexpr.Tag : null);
             if (tag != null)
                 _tag = tag;
             else if (varFexpr != null)
@@ -131,7 +132,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             pcon = pcon.EvalOrExpr();
 
-            // TODO: DO we need the recur context here and below?
             Expr fexpr = Compiler.Analyze(pcon,form.first());
             VarExpr varFexpr = fexpr as VarExpr;
 
@@ -434,6 +434,109 @@ namespace clojure.lang.CljCompiler.Ast
                             vpfnParamAssign,
                             GenerateArgsAndCall(rhc, objx, context, vpfnParam, targetParam))));
             }
+        }
+
+
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            // TODO: Debug info
+            if (_isProtocol)
+                EmitProto(rhc, objx, context);
+            else
+            {
+                _fexpr.Emit(RHC.Expression, objx, context);
+                context.GetILGenerator().Emit(OpCodes.Castclass, typeof(IFn));
+                EmitArgsAndCall(0, rhc, objx, context);
+            }
+            if (rhc == RHC.Statement)
+                context.GetILGenerator().Emit(OpCodes.Pop);
+        }
+
+        void EmitProto(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGen ilg = context.GetILGen();
+            Label onLabel = ilg.DefineLabel();
+            Label callLabel = ilg.DefineLabel();
+            Label endLabel = ilg.DefineLabel();
+
+            Var v = ((VarExpr)_fexpr).Var;
+
+            Expr e = (Expr)_args.nth(0);
+            e.Emit(RHC.Expression, objx, context);               // target
+            ilg.Emit(OpCodes.Dup);                               // target, target
+
+            LocalBuilder targetTemp = ilg.DeclareLocal(typeof(Object));
+            ilg.Emit(OpCodes.Stloc,targetTemp);                  // target
+
+            ilg.EmitCall(Compiler.Method_Util_classOf);          // class
+            ilg.EmitLoadArg(0);
+            ilg.EmitFieldGet(objx.CachedTypeField(_siteIndex));  // class, cached-class
+            ilg.Emit(OpCodes.Beq, callLabel);                    // 
+            if (_protocolOn != null)
+            {
+                ilg.Emit(OpCodes.Ldloc,targetTemp);              // target
+                ilg.Emit(OpCodes.Isinst, _protocolOn);
+                ilg.Emit(OpCodes.Brtrue, onLabel);
+            }
+            ilg.Emit(OpCodes.Ldloc,targetTemp);                  // target
+            ilg.EmitCall(Compiler.Method_Util_classOf);          // class
+            
+            LocalBuilder typeTemp = ilg.DeclareLocal(typeof(Type));
+            ilg.Emit(OpCodes.Stloc,typeTemp);                    //    (typeType <= class)
+            
+            ilg.EmitLoadArg(0);                                  // this
+            
+            ilg.Emit(OpCodes.Ldloc,typeTemp);                    // this, class
+            ilg.EmitFieldSet(objx.CachedTypeField(_siteIndex));  // 
+
+            ilg.MarkLabel(callLabel);                       
+    
+            objx.EmitVar(context,v);                              // var
+            ilg.EmitCall(Compiler.Method_Var_getRawRoot);         // proto-fn
+                       
+            ilg.Emit(OpCodes.Ldloc,targetTemp);                  // proto-fn, target
+            EmitArgsAndCall(1,rhc,objx,context);
+            ilg.Emit(OpCodes.Br,endLabel);
+
+            ilg.MarkLabel(onLabel);
+            ilg.Emit(OpCodes.Ldloc,targetTemp);                  // target
+            if ( _protocolOn != null )
+            {
+                MethodExpr.EmitTypedArgs(objx, context, _onMethod.GetParameters(), RT.subvec(_args, 1, _args.count()));
+                //if (rhc == RHC.Return)
+                //{
+                //    ObjMethod2 method = (ObjMethod)Compiler.MethodVar.deref();
+                //    method.EmitClearLocals(context);
+                //}
+                ilg.EmitCall(_onMethod);
+                HostExpr.EmitBoxReturn(objx, context, _onMethod.ReturnType);                
+            }
+            ilg.MarkLabel(endLabel);
+        }
+
+        void EmitArgsAndCall(int firstArgToEmit, RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            for ( int i=firstArgToEmit; i< Math.Min(Compiler.MaxPositionalArity,_args.count(); i++ )
+            {
+                Expr e = (Expr) _args.nth(i);
+                e.Emit(RHC.Expression,objx,context);
+            }
+            if ( _args.count() > Compiler.MaxPositionalArity )
+            {
+                PersistentVector restArgs = PersistentVector.EMPTY;
+                for (int i=Compiler.MaxPositionalArity; i<_args.count(); i++ )
+                    restArgs = restArgs.cons(_args.nth(i));
+                MethodExpr.EmitArgsAsArray(restArgs,objx,context);
+            }
+
+            //if ( rhc == RHC.Return )
+            //{
+            //    ObjMethod2 method = (ObjMethod2)Compiler.MethodVar.deref();
+            //    method.EmitClearLocals(context);
+            //}
+
+            context.GetILGenerator().Emit(OpCodes.Call,Compiler.Methods_IFn_invoke[Math.Min(Compiler.MaxPositionalArity+1,_args.count())]);
         }
 
         #endregion

@@ -70,6 +70,10 @@ namespace clojure.lang.CljCompiler.Ast
             throw new InvalidOperationException("Can't emit");
         }
 
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            throw new InvalidOperationException("Can't emit");
+        }
         #endregion
 
         #region MaybePrimitiveExpr Members
@@ -83,6 +87,12 @@ namespace clojure.lang.CljCompiler.Ast
         {
             throw new InvalidOperationException("Can't emit");
         }
+
+        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            throw new InvalidOperationException("Can't emit");
+        }
+
 
         #endregion
     }

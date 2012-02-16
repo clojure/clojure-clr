@@ -7,6 +7,7 @@ using Microsoft.Scripting.Ast;
 using System.Linq.Expressions;
 #endif
 using System.Text;
+using System.Reflection.Emit;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -82,6 +83,12 @@ namespace clojure.lang.CljCompiler.Ast
             return objx.GenConstant(context, _id, _n);
         }
 
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            if (rhc != RHC.Statement)
+                objx.EmitConstant(context, _id, _n);
+        }
+
         #endregion
 
         #region MaybePrimitiveExpr Members
@@ -104,6 +111,24 @@ namespace clojure.lang.CljCompiler.Ast
 
             throw new ArgumentException("Unsupported Number type: " + _n.GetType().Name);
         }
+
+        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+
+            Type t = _n.GetType();
+
+            if (t == typeof(int))
+                ilg.Emit(OpCodes.Ldc_I8, (long)(int)_n);
+            else if (t == typeof(double))
+                ilg.Emit(OpCodes.Ldc_R8, (double)_n);
+            else if (t == typeof(long))
+                ilg.Emit(OpCodes.Ldc_I8, (long)_n);
+            else
+                throw new ArgumentException("Unsupported Number type: " + _n.GetType().Name);
+        }
+
+
 
         #endregion
     }

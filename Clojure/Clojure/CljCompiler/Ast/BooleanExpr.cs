@@ -19,7 +19,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-
+using Microsoft.Scripting.Generation;
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -64,6 +65,15 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             return Expression.Constant(_val);
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGen ilg = context.GetILGen();
+            ilg.EmitBoolean(_val);
+            ilg.EmitBoxing(typeof(Boolean));
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
         }
 
         #endregion

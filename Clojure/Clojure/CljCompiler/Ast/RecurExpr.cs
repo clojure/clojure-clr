@@ -20,6 +20,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using System.Reflection.Emit;
+using Microsoft.Scripting.Generation;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -56,7 +58,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Type ClrType
         {
-            get { return typeof(void); }  // Java: returns null.
+            get { return null; }
         }
 
         #endregion
@@ -237,6 +239,81 @@ namespace clojure.lang.CljCompiler.Ast
             // need to do this to get a return value in the type inferencing -- else can't use this in a then or else clause.
             exprs.Add(Expression.Constant(null));
             return Expression.Block(tempVars, exprs);
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGen ilg = context.GetILGen();
+
+            Label loopLabel = (Label)Compiler.LoopLabelVar.deref();
+            if (loopLabel == null)
+                throw new InvalidOperationException("Recur not in proper context.");
+
+            {
+                for (int i = 0; i < _loopLocals.count(); i++)
+                {
+                    LocalBinding lb = (LocalBinding)_loopLocals.nth(i);
+                    Expr arg = (Expr)_args.nth(i);
+
+                    Type primt = lb.PrimitiveType;
+                    if (primt != null)
+                    {
+                        MaybePrimitiveExpr mpeArg = arg as MaybePrimitiveExpr;
+                        Type pt = Compiler.MaybePrimitiveType(arg);
+                        if (pt == primt)
+                        {
+                            mpeArg.EmitUnboxed(RHC.Expression, objx, context);
+                        }
+                        else if (primt == typeof(long) && pt == typeof(int))
+                        {
+                            mpeArg.EmitUnboxed(RHC.Expression, objx, context);
+                            ilg.EmitNumericCast(typeof(int), typeof(long), true);
+                        }
+                        else if (primt == typeof(double) && pt == typeof(float))
+                        {
+                            mpeArg.EmitUnboxed(RHC.Expression, objx, context);
+                            ilg.EmitNumericCast(typeof(float), typeof(double), true);
+                        }
+                        else if (primt == typeof(int) && pt == typeof(long))
+                        {
+                            mpeArg.EmitUnboxed(RHC.Expression, objx, context);
+                            ilg.EmitCall(Compiler.Method_RT_intCast_long);
+
+                        }
+                        else if (primt == typeof(float) && pt == typeof(double))
+                        {
+                            mpeArg.EmitUnboxed(RHC.Expression, objx, context);
+                            ilg.EmitNumericCast(typeof(double), typeof(float), false);
+                        }
+                        else
+                        {
+                            throw new ArgumentException(String.Format(
+                                    "{0}:{1} recur arg for primitive local: {2} is not matching primitive, had: {3}, needed {4}",
+                                    _source, _spanMap != null ? (int)_spanMap.valAt(RT.StartLineKey, 0) : 0,
+                                    lb.Name, (arg.HasClrType ? arg.ClrType.Name : "Object"), primt.Name));
+                        }
+
+                    }
+                    else
+                    {
+                        arg.Emit(RHC.Expression, objx, context);
+                    }
+
+                }
+            }
+            for (int i = _loopLocals.count() - 1; i >= 0; i--)
+            {
+                LocalBinding lb = (LocalBinding)_loopLocals.nth(i);
+                Type primt = lb.PrimitiveType;
+                if (lb.IsArg)
+                    ilg.Emit(OpCodes.Starg, lb.Index - (objx.IsStatic ? 0 : 1));
+                else
+                {
+                    ilg.Emit(OpCodes.Stloc, lb.LocalVar);
+                }
+            }
+
+            ilg.Emit(OpCodes.Br, loopLabel);
         }
 
         #endregion

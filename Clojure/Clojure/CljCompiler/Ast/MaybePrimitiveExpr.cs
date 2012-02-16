@@ -25,5 +25,6 @@ namespace clojure.lang.CljCompiler.Ast
     {
         bool CanEmitPrimitive { get; }
         Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context);
+        void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context);
     }
 }

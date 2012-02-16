@@ -19,7 +19,7 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -72,6 +72,15 @@ namespace clojure.lang.CljCompiler.Ast
             Expression exc2 = Expression.Convert(exc, typeof(Exception));
 
             return Expression.Throw(exc2,typeof(object));
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+
+            _excExpr.Emit(RHC.Expression, objx, context);
+            ilg.Emit(OpCodes.Castclass, typeof(Exception));
+            ilg.ThrowException(typeof(Exception));
         }
 
         #endregion

@@ -68,9 +68,9 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr target = Compiler.Analyze(new ParserContext(RHC.Expression, true), RT.second(form));
 
                 AssignableExpr ae = target as AssignableExpr;
-
                 if (ae == null)
                     throw new ParseException("Invalid assignment target");
+
                 return new AssignExpr(ae, Compiler.Analyze(pcon.SetRhc(RHC.Expression),RT.third(form)));
             }
         }
@@ -91,6 +91,11 @@ namespace clojure.lang.CljCompiler.Ast
         public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             return _target.GenAssign(rhc,objx,context,_val);
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            _target.EmitAssign(rhc, objx, context, _val);
         }
 
         #endregion

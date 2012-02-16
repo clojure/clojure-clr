@@ -120,6 +120,16 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Block(exprs);
         }
 
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            for (int i = 0; i < _exprs.count() - 1; i++)
+            {
+                Expr e = (Expr)_exprs.nth(i);
+                e.Emit(RHC.Statement, objx, context);
+            }
+            LastExpr.Emit(rhc, objx, context);
+        }
+
         #endregion
 
         #region MaybePrimitiveExpr Members
@@ -144,6 +154,18 @@ namespace clojure.lang.CljCompiler.Ast
 
             return Expression.Block(exprs);
         }
+
+        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            for (int i = 0; i < _exprs.count() - 1; i++)
+            {
+                Expr e = (Expr)_exprs.nth(i);
+                e.Emit(RHC.Statement, objx, context);
+            }
+            MaybePrimitiveExpr mbe = (MaybePrimitiveExpr)LastExpr;
+            mbe.EmitUnboxed(rhc, objx, context);
+        }
+
 
         #endregion
     }

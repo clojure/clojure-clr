@@ -19,6 +19,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using System.Reflection.Emit;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -140,9 +142,69 @@ namespace clojure.lang.CljCompiler.Ast
                 block = Compiler.MaybeAddDebugInfo(block, _spanMap, context.IsDebuggable);
                 return block;
             }
-        } 
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGen ilg = context.GetILGen();
+            Label endLabel = ilg.DefineLabel();
+            Label faultLabel = ilg.DefineLabel();
+
+            LocalBuilder thunkLoc = ilg.DeclareLocal(typeof(ILookupThunk));
+            LocalBuilder targetLoc = ilg.DeclareLocal(typeof(Object));
+            LocalBuilder resultLoc = ilg.DeclareLocal(typeof(Object));
+            thunkLoc.SetLocalSymInfo("thunk");
+            targetLoc.SetLocalSymInfo("target");
+            resultLoc.SetLocalSymInfo("result");
+
+            // TODO: Debug info
+
+            // pseudo-code:
+            //  ILookupThunk thunk = objclass.ThunkField(i)
+            //  object target = ...code...
+            //  object val = thunk.get(target)
+            //  if ( val != thunk )
+            //     return val
+            //  else
+            //     KeywordLookupSite site = objclass.SiteField(i)
+            //     thunk = site.fault(target)
+            //     objclass.ThunkField(i) = thunk
+            //     val = thunk.get(target)
+            //     return val
+
+            ilg.EmitFieldGet(objx.ThunkField(_siteIndex));                     // thunk
+            ilg.Emit(OpCodes.Stloc,thunkLoc);                                  //  (thunkLoc <= thunk)
+
+            _target.Emit(RHC.Expression,objx,context);                         // target
+            ilg.Emit(OpCode.Stloc,targetLoc);                                  //   (targetLoc <= target)
+
+            ilg.Emit(OpCodes.Ldloc,thunkLoc);
+            ilg.Emit(OpCodes.Ldloc,targetLoc);
+            ilg.EmitCall(Compiler.Method_ILookupThunk_get);                    // result
+            ilg.Emit(OpCodes.Stloc,resultLoc);                                 //    (resultLoc <= result)
+
+            ilg.Emit(OpCodes.Ldloc,thunkLoc);
+            ilg.Emit(OpCodes.Ldloc,resultLoc);
+            ilg.Emit(OpCodes.Beq,faultLabel);
+
+            ilg.Emit(OpCodes.Ldloc,resultLoc);                                  // result
+            ilg.Emit(OpCodes.Br,endLabel);
+
+            ilg.EmitFieldGet(objx.KeywordLookupSiteField(_siteIndex));           // site
+            ilg.Emit(OpCodes.Ldloc,targetLoc);                                  // site, target
+            ilg.EmitCall(Compiler.Method_ILookupSite_fault);                    // new-thunk
+            ilg.Emit(OpCodes.Dup);                                              // new-thunk, new-thunk
+            ilg.EmitFieldSet(objx.ThunkField(_siteIndex));                      // new-thunk
+
+            ilg.Emit(OpCodes.Ldloc, targetLoc);                                 // new-thunk, target
+            ilg.EmitCall(Compiler.Method_ILookupThunk_get);                    // result
+
+            ilg.MarkLabel(endLabel);                                           // result
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
+        }
+
 
         #endregion
-
     }
 }

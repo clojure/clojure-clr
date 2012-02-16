@@ -65,6 +65,12 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Constant(String.Intern(_str));
         }
 
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            if (rhc != RHC.Statement)
+                context.GetILGen().EmitString(_str);
+        }
+
         #endregion
 
     }

@@ -30,5 +30,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         object Eval();
         Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
+
+        void Emit(RHC rhc, ObjExpr2 objx, GenContext context);
     }
 }

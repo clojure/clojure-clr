@@ -19,6 +19,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using System.Reflection.Emit;
+
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -79,6 +81,14 @@ namespace clojure.lang.CljCompiler.Ast
             return HostExpr.GenBoxReturn(GenCodeUnboxed(RHC.Expression, objx, context), typeof(bool), objx, context);
         }
 
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            EmitUnboxed(rhc, objx, context);
+            HostExpr.EmitBoxReturn(objx, context, typeof(bool));
+            if (rhc == RHC.Statement)
+                context.GetILGenerator().Emit(OpCodes.Pop);
+        }
+
         #endregion
 
         #region MaybePrimitiveExpr Members
@@ -92,6 +102,13 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return Expression.TypeIs(_expr.GenCode(RHC.Expression, objx, context), _t); ;
         }
+
+        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            _expr.Emit(RHC.Expression, objx, context);
+            context.GetILGenerator().Emit(OpCodes.Isinst, _t);
+        }
+
 
         #endregion
     }

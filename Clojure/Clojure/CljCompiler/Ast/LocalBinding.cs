@@ -19,7 +19,7 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -65,6 +65,8 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _paramExpression; }
             set { _paramExpression = value; }
         }
+
+        public LocalBuilder LocalVar { get; set; }
 
         readonly bool _isArg;
         public bool IsArg

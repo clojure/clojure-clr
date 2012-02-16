@@ -19,7 +19,7 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -163,29 +163,65 @@ namespace clojure.lang.CljCompiler.Ast
                 }
                 else
                 {
-                    //if (thenCode.Type == typeof(void))
-                    //{
-                    //    thenCode = Expression.Block(thenCode, Expression.Default(elseCode.Type));
-                    //    targetType = elseCode.Type;
-                    //}
-                    //else if (elseCode.Type == typeof(void))
-                    //{
-                    //    elseCode = Expression.Block(elseCode, Expression.Default(thenCode.Type));
-                    //    targetType = thenCode.Type;
-                    //}
-                    //else
-                    //{
                     // TODO: Can we find a common ancestor?  probably not.
                     thenCode = Expression.Convert(thenCode, typeof(object));
                     elseCode = Expression.Convert(elseCode, typeof(object));
                     targetType = typeof(object);
-                    //}
                 }
             }
 
             Expression cond = Expression.Condition(testCode, thenCode, elseCode, targetType);
             cond = Compiler.MaybeAddDebugInfo(cond, _sourceSpan, context.IsDebuggable);
             return cond;
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            DoEmit(rhc, objx, context, false);
+        }
+
+        void DoEmit(RHC rhc, ObjExpr2 objx, GenContext context, bool emitUnboxed)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+            Label nullLabel = ilg.DefineLabel();
+            Label falseLabel = ilg.DefineLabel();
+            Label endLabel = ilg.DefineLabel();
+
+            //  TODO: DEBUG INFO
+
+            //  TODO: What about properties and fields?
+            StaticMethodExpr sme = _testExpr as StaticMethodExpr;
+            if (sme != null && sme.CanEmitIntrinsicPredicate())
+                sme.EmitIntrinsicPredicate(RHC.Expression, objx, context, falseLabel);
+            else if (Compiler.MaybePrimitiveType(_testExpr) == typeof(bool))
+            {
+                ((MaybePrimitiveExpr)_testExpr).EmitUnboxed(RHC.Expression, objx, context);
+                ilg.Emit(OpCodes.Brfalse, falseLabel);
+            }
+            else
+            {
+                _testExpr.Emit(RHC.Expression, objx, context);
+                ilg.Emit(OpCodes.Dup);
+                ilg.Emit(OpCodes.Brfalse, nullLabel);
+                ilg.Emit(OpCodes.Castclass, typeof(bool));
+                ilg.Emit(OpCodes.Brfalse, falseLabel);
+            }
+
+            if (emitUnboxed)
+                ((MaybePrimitiveExpr)_thenExpr).EmitUnboxed(rhc, objx, context);
+            else
+                _thenExpr.Emit(rhc, objx, context);
+
+            ilg.Emit(OpCodes.Br, endLabel);
+            ilg.MarkLabel(nullLabel);
+            ilg.Emit(OpCodes.Pop);
+            ilg.MarkLabel(falseLabel);
+
+            if (emitUnboxed)
+                ((MaybePrimitiveExpr)_elseExpr).EmitUnboxed(rhc, objx, context);
+            else
+                _elseExpr.Emit(rhc, objx, context);
+            ilg.MarkLabel(endLabel);
         }
 
         #endregion
@@ -217,6 +253,12 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return GenCode(rhc, objx, context, true);
         }
+
+        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            DoEmit(rhc, objx, context, true);
+        }
+
 
         #endregion
     }

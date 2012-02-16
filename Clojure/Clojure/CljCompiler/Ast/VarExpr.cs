@@ -19,6 +19,7 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -82,6 +83,13 @@ namespace clojure.lang.CljCompiler.Ast
             return objx.GenVarValue(context, _var);
         }
 
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            objx.EmitVarValue(context, _var);
+            if (rhc == RHC.Statement)
+                context.GetILGenerator().Emit(OpCodes.Pop);
+        }
+
         #endregion
 
         #region AssignableExpr Members
@@ -97,6 +105,18 @@ namespace clojure.lang.CljCompiler.Ast
         public object EvalAssign(Expr val)
         {
             return _var.set(val.Eval());
+        }
+
+
+        public void EmitAssign(RHC rhc, ObjExpr2 objx, GenContext context, Expr val)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+
+            objx.EmitVar(context, _var);
+            val.Emit(RHC.Expression, objx, context);
+            ilg.Emit(OpCodes.Call, Compiler.Method_Var_set);
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
         }
 
         #endregion

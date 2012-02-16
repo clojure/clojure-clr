@@ -1235,7 +1235,7 @@ namespace clojure.lang
             return context == null ? "_INTERP" : "_COMP_" + (new AssemblyName(context.AssemblyBuilder.FullName)).Name;
         }
 
-        internal static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
+        public static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
         {
             if (CompilePathVar.deref() == null)
                 throw new InvalidOperationException("*compile-path* not set");
@@ -1419,6 +1419,133 @@ namespace clojure.lang
 
         #endregion
 
+        #region Compile - no DLR
+
+        public static object CompileNoDlr(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
+        {
+            if (CompilePathVar.deref() == null)
+                throw new InvalidOperationException("*compile-path* not set");
+
+            object eofVal = new object();
+            object form;
+
+            string sourcePath = relativePath;
+
+            LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
+
+            Var.pushThreadBindings(RT.map(
+                SourcePathVar, sourcePath,
+                SourceVar, sourceName,
+                MethodVar, null,
+                LocalEnvVar, null,
+                LoopLocalsVar, null,
+                NextLocalNumVar, 0,
+                RT.CurrentNSVar, RT.CurrentNSVar.deref(),
+                ConstantsVar, PersistentVector.EMPTY,
+                ConstantIdsVar, new IdentityHashMap(),
+                KeywordsVar, PersistentHashMap.EMPTY,
+                VarsVar, PersistentHashMap.EMPTY,
+                RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
+                RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
+                RT.DataReadersVar, RT.DataReadersVar.deref()
+                ));
+
+            try
+            {
+                // generate loader class
+                ObjExpr2 objx = new ObjExpr2(null);
+                objx.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.')) + "__init";
+
+                GenContext context = GenContext.CreateWithExternalAssembly(sourcePath, ".dll", true);
+                TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
+
+                // static load method
+                MethodBuilder initMB = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
+                context = context.WithBuilders(initTB, initMB);
+
+                while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
+                {
+                    Compile1NoDlr(context, objx, form);
+                }
+
+                initMB.GetILGenerator().Emit(OpCodes.Ret);
+
+                objx.EmitConstantFieldDefs(initTB);
+                MethodBuilder constInitsMB = objx.GenerateConstants(initTB);
+
+                // Static init for constants, keywords, vars
+                ConstructorBuilder cb = initTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
+                ILGenerator cbGen = cb.GetILGenerator();
+
+                cbGen.Emit(OpCodes.Call,constInitsMB);
+
+                Label exBlock = cbGen.BeginExceptionBlock();
+
+                cbGen.Emit(OpCodes.Call,Method_Compiler_PushNS);
+                cbGen.Emit(OpCodes.Call,initMB);
+
+                cbGen.BeginFinallyBlock();
+                cbGen.Emit(OpCodes.Call, Method_Var_popThreadBindings);
+
+                cbGen.EndExceptionBlock();
+                cbGen.Emit(OpCodes.Ret);
+
+                initTB.CreateType();
+
+                context.SaveAssembly();
+            }
+            catch (LispReader.ReaderException e)
+            {
+                throw new CompilerException(sourcePath, e.Line, e.InnerException);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+            return null;
+        }
+
+
+        private static void Compile1NoDlr(GenContext context,  ObjExpr2 objx, object form)
+        {
+            int line = (int)LineVar.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
+                line = (int)RT.meta(form).valAt(RT.LineKey);
+            IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
+                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
+
+            ParserContext evPC = new ParserContext(RHC.Eval);
+ 
+            Var.pushThreadBindings(RT.map(LineVar, line, SourceSpanVar, sourceSpan));
+
+            try
+            {
+                form = Macroexpand(form);
+                if (form is IPersistentCollection && Util.Equals(RT.first(form), DoSym))
+                {
+                    for (ISeq s = RT.next(form); s != null; s = RT.next(s))
+                        Compile1NoDlr(context, objx, RT.first(s));
+                }
+                else
+                {
+                    Expr expr = Analyze(evPC, form);
+                    objx.Keywords = (IPersistentMap)KeywordsVar.deref();
+                    objx.Vars = (IPersistentMap)VarsVar.deref();
+                    objx.Constants = (PersistentVector)ConstantsVar.deref();
+                    expr.Emit(RHC.Expression,objx,context);
+                    expr.Eval();
+                }
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+        }
+
+        #endregion
+        
+        
         #region Loading
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]

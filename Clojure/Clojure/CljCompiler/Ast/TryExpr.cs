@@ -19,7 +19,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-
+using Microsoft.Scripting.Generation;
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -63,20 +64,20 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Expr _tryExpr;
         readonly Expr _finallyExpr;
         readonly IPersistentVector _catchExprs;
-        //readonly int _retLocal;      Not needed
-        //readonly int _finallyLocal;  Not needed
+        readonly int _retLocal;
+        readonly int _finallyLocal;
 
         #endregion
 
         #region Ctors
 
-        public TryExpr(Expr tryExpr, IPersistentVector catchExprs, Expr finallyExpr /*, int retLocal, int finallyLocal */)
+        public TryExpr(Expr tryExpr, IPersistentVector catchExprs, Expr finallyExpr, int retLocal, int finallyLocal)
         {
             _tryExpr = tryExpr;
             _catchExprs = catchExprs;
             _finallyExpr = finallyExpr;
-            //_retLocal = retLocal;
-            //_finallyLocal = finallyLocal;
+            _retLocal = retLocal;
+            _finallyLocal = finallyLocal;
         }
 
         #endregion
@@ -116,8 +117,8 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr finallyExpr = null;
                 bool caught = false;
 
-                //int retLocal = Compiler.GetAndIncLocalNum();
-                //int finallyLocal = Compiler.GetAndIncLocalNum();
+                int retLocal = Compiler.GetAndIncLocalNum();
+                int finallyLocal = Compiler.GetAndIncLocalNum();
 
                 for (ISeq fs = form.next(); fs != null; fs = fs.next())
                 {
@@ -205,7 +206,7 @@ namespace clojure.lang.CljCompiler.Ast
                         Var.popThreadBindings();
                     }
                 }
-                return new TryExpr(bodyExpr, catches, finallyExpr /*, retLocal, finallyLocal*/ );
+                return new TryExpr(bodyExpr, catches, finallyExpr, retLocal, finallyLocal);
               }
         }
 
@@ -243,6 +244,39 @@ namespace clojure.lang.CljCompiler.Ast
                 : Expression.TryCatchFinally(tryBody, _finallyExpr.GenCode(RHC.Statement, objx, context), catches);
 
             return tryStmt;
+        }
+
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGen ilg = context.GetILGen();
+
+            Label beginLabel = ilg.BeginExceptionBlock();
+            _tryExpr.Emit(rhc, objx, context);
+            if (rhc != RHC.Statement)
+                ilg.Emit(OpCodes.Stloc, _retLocal);
+            ilg.Emit(OpCodes.Leave,beginLabel);
+
+            for (int i = 0; i < _catchExprs.count(); i++)
+            {
+                CatchClause clause = (CatchClause)_catchExprs.nth(i);
+                ilg.BeginCatchBlock(clause.Type);
+                // Exception should be on the stack.  Put in clause local
+                ilg.Emit(OpCodes.Stloc, clause.Lb.Index);
+                clause.Handler.Emit(rhc, objx, context);
+                if (rhc != RHC.Statement)
+                    ilg.Emit(OpCodes.Stloc, _retLocal);
+            }
+
+            if ( _finallyExpr != null )
+            {
+                ilg.BeginFinallyBlock();
+                _finallyExpr.Emit(RHC.Statement, objx, context);
+            }
+
+            ilg.EndExceptionBlock();
+            if (rhc != RHC.Statement)
+                ilg.Emit(OpCodes.Ldloc, _retLocal);
         }
 
         #endregion

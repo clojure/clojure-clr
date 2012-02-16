@@ -20,7 +20,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
-
+using System.Reflection.Emit;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -39,7 +40,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             _bindingInits = bindingInits;
             _body = body;
-
         }
 
         #endregion
@@ -177,6 +177,44 @@ namespace clojure.lang.CljCompiler.Ast
             // The work
             forms.Add(_body.GenCode(rhc,objx,context));
             return Expression.Block(parms,forms);
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            int n = _bindingInits.count();
+            ILGen ilg = context.GetILGen();
+            List<LocalBuilder> locals = new List<LocalBuilder>();
+
+            // Define our locals
+            for (int i = 0; i < n; i++)
+            {
+                BindingInit bi = (BindingInit)_bindingInits.nth(i);
+                LocalBuilder local = ilg.DeclareLocal(typeof(IFn));
+                bi.Binding.LocalVar = local;
+            }
+
+            // Then initialize
+
+            IPersistentSet lbset = PersistentHashSet.EMPTY;
+
+            for (int i = 0; i < n; i++)
+            {
+                BindingInit bi = (BindingInit)_bindingInits.nth(i);
+                lbset = (IPersistentSet)lbset.cons(bi.Binding);
+
+                bi.Init.Emit(RHC.Expression, objx, context);
+                ilg.Emit(OpCodes.Stloc,bi.Binding.LocalVar);
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                BindingInit bi = (BindingInit)_bindingInits.nth(i);
+                ObjExpr2 fe = (ObjExpr2)bi.Init;
+    
+                fe.EmitLetFnInits(context, bi.Binding.LocalVar, objx, lbset);
+            }
+
+            _body.Emit(rhc, objx, context));
         }
 
         #endregion

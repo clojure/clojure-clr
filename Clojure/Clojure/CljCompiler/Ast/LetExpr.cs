@@ -20,6 +20,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using Microsoft.Scripting.Generation;
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -133,6 +135,7 @@ namespace clojure.lang.CljCompiler.Ast
                                     HostArg ha = new HostArg(HostArg.ParameterType.Standard, init, null);
                                     List<HostArg> has = new List<HostArg>(1);
                                     has.Add(ha);
+                                    // TODO: We need to define RT.box !!!
                                     init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "box", null, has);
                                     if (RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                                         RT.errPrintWriter().WriteLine("Auto-boxing loop arg: " + sym);
@@ -274,6 +277,67 @@ namespace clojure.lang.CljCompiler.Ast
             return block;
         }
 
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            DoEmit(rhc, objx, context, false);
+        }
+
+
+        void DoEmit(RHC rhc, ObjExpr2 objx, GenContext context, bool emitUnboxed)
+        {
+            ILGen ilg = context.GetILGen();
+
+            List<LocalBuilder> locals = new List<LocalBuilder>();
+            
+            for (int i = 0; i < _bindingInits.count(); i++)
+            {
+                BindingInit bi = (BindingInit)_bindingInits.nth(i);
+                Type primType = Compiler.MaybePrimitiveType(bi.Init);
+                if (primType != null)
+                {
+                    LocalBuilder local = ilg.DeclareLocal(primType);
+                    locals.Add(local);
+                    local.SetLocalSymInfo(bi.Binding.Name);
+                    bi.Binding.LocalVar = local;
+                    
+                    ((MaybePrimitiveExpr)bi.Init).EmitUnboxed(RHC.Expression, objx, context);
+                    ilg.Emit(OpCodes.Stloc, local);
+                }
+                else
+                {
+                    LocalBuilder local = ilg.DeclareLocal(typeof(Object));
+                    locals.Add(local);
+                    local.SetLocalSymInfo(bi.Binding.Name);
+                    bi.Binding.LocalVar = local;
+
+                    bi.Init.Emit(RHC.Expression, objx, context);
+                    // TODO: DO we need to MaybeBox here?
+                    ilg.Emit(OpCodes.Stloc, local);
+                }
+             }
+
+            Label loopLabel = ilg.DefineLabel();
+            ilg.MarkLabel(loopLabel);
+
+            try
+            {
+                if (_isLoop)
+                    Var.pushThreadBindings(PersistentHashMap.create(Compiler.LoopLabelVar, loopLabel));
+
+                if (emitUnboxed)
+                    ((MaybePrimitiveExpr)_body).EmitUnboxed(rhc, objx, context);
+                else
+                    _body.Emit(rhc, objx, context);
+            }
+            finally
+            {
+                if (_isLoop)
+                    Var.popThreadBindings();
+            }
+        }
+
+
         #endregion
 
         #region MaybePrimitiveExpr Members
@@ -287,6 +351,12 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return GenCode(rhc, objx, context, true);
         }
+
+        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            DoEmit(rhc, objx, context, true);
+        }
+
 
         #endregion
     }

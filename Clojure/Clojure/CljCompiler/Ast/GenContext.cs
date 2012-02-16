@@ -58,7 +58,15 @@ namespace clojure.lang.CljCompiler.Ast
         public bool IsDebuggable
         {
             get { return _isDebuggable; }
-        } 
+        }
+
+        MethodBuilder _mb;
+        public MethodBuilder MB { get { return _mb; } }
+        public ILGen GetILGen() { return new ILGen(_mb.GetILGenerator()); }
+        public ILGenerator GetILGenerator() { return _mb.GetILGenerator() }
+
+        TypeBuilder _tb;
+        public TypeBuilder TB { get { return _tb; } }
 
         #endregion
 

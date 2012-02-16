@@ -20,6 +20,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using Microsoft.Scripting.Generation;
+using System.Reflection.Emit;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -218,6 +220,37 @@ namespace clojure.lang.CljCompiler.Ast
             exprs.Add(parm);
 
             return Expression.Block(new ParameterExpression[] { parm }, exprs);
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            objx.EmitVar(context, _var);
+            ILGen ilg = context.GetILGen();
+            if (_isDynamic)
+            {
+                ilg.EmitCall(Compiler.Method_Var_setDynamic0);
+            }
+            if (_meta != null)
+            {
+                if (_initProvided || true) //IncludesExplicitMetadata((MapExpr)_meta))
+                {
+                    ilg.Emit(OpCodes.Dup);
+                    _meta.Emit(RHC.Expression, objx, context);
+                    ilg.Emit(OpCodes.Castclass, typeof(IPersistentMap));
+                    ilg.EmitCall(Compiler.Method_Var_setMeta);
+                }
+            }
+            if (_initProvided)
+            {
+                ilg.Emit(OpCodes.Dup);
+                if (_init is FnExpr2)
+                    ((FnExpr2)_init).EmitForDefn(objx, context);
+                else
+                    _init.Emit(RHC.Expression, objx, context);
+                ilg.EmitCall(Compiler.Method_Var_bindRoot);
+            }
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
         }
 
         #endregion

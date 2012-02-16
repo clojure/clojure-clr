@@ -19,6 +19,7 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -109,6 +110,16 @@ namespace clojure.lang.CljCompiler.Ast
             Expression argArray = Compiler.GenArgArray(rhc,objx, context, _keys);
             Expression ret = Expression.Call(Compiler.Method_RT_set, argArray);
             return ret;
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+
+            MethodExpr.EmitArgsAsArray(_keys, objx, context);
+            ilg.Emit(OpCodes.Call, Compiler.Method_RT_set);
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
         }
 
         #endregion

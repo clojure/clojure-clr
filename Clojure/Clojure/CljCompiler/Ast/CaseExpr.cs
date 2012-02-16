@@ -30,14 +30,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         readonly LocalBindingExpr _expr;
         readonly int _shift, _mask;
-        //readonly int _low, _high;  // JVM use only
+        readonly int _low, _high;  // JVM use only
         readonly Expr _defaultExpr;
         readonly SortedDictionary<int, Expr> _tests;
         readonly Dictionary<int, Expr> _thens;
 
         readonly IPersistentMap _sourceSpan;
 
-        //readonly Keyword _switchType;
+        readonly Keyword _switchType;
         readonly Keyword _testType;
         readonly IPersistentSet _skipCheck;
         readonly Type _returnType;
@@ -63,14 +63,14 @@ namespace clojure.lang.CljCompiler.Ast
             _expr = expr;
             _shift = shift;
             _mask = mask;
-            //_low = low;
-            //_high = high;
+            _low = low;
+            _high = high;
             _defaultExpr = defaultExpr;
             _tests = tests;
             _thens = thens;
             if (switchType != _compactKey && switchType != _sparseKey)
                 throw new ArgumentException("Unexpected switch type: " + switchType);
-            //_switchType = switchType;
+            _switchType = switchType;
             if (testType != _intKey && testType != _hashEquivKey && testType != _hashIdentityKey)
                 throw new ArgumentException("Unexpected test type: " + testType);
             _testType = testType;

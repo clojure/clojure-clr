@@ -19,6 +19,7 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -83,6 +84,17 @@ namespace clojure.lang.CljCompiler.Ast
             Expression getTypeExpr = Expression.Call(null, Compiler.Method_RT_classForName, Expression.Constant(_c));
             Expression getNsExpr = Expression.Property(null, Compiler.Method_Compiler_CurrentNamespace);
             return Expression.Call(getNsExpr, Compiler.Method_Namespace_importClass1, getTypeExpr);   
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+            ilg.Emit(OpCodes.Call,Compiler.Method_Compiler_CurrentNamespace.GetGetMethod());
+            ilg.Emit(OpCodes.Ldstr, _c);
+            ilg.Emit(OpCodes.Call, Compiler.Method_RT_classForName);
+            ilg.Emit(OpCodes.Call, Compiler.Method_Namespace_importClass1);
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
         }
 
         #endregion
