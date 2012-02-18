@@ -20,6 +20,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using System.Reflection.Emit;
+
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -101,6 +103,16 @@ namespace clojure.lang.CljCompiler.Ast
             //    expr =  Expression.Convert(expr,_target.ClrType);
 
             return expr;
+        }
+
+        protected override void EmitTargetExpression(ObjExpr2 objx, GenContext context)
+        {
+            _target.Emit(RHC.Expression, objx, context);
+        }
+
+        protected override Type GetTargetType()
+        {
+            return _target.HasClrType ? _target.ClrType : typeof(object);
         }
 
         #endregion

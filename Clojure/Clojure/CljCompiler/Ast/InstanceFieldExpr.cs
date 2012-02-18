@@ -20,6 +20,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using Microsoft.Scripting.Generation;
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -115,6 +117,64 @@ namespace clojure.lang.CljCompiler.Ast
                 throw new InvalidOperationException("Unboxed emit of unknown member.");
         }
 
+        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGen ilg = context.GetILGen();
+
+            Type targetType = _targetType;
+
+            // DO WE NEED THIS?
+            //Type stubType = Compiler.CompileStubOrigClassVar.isBound ? (Type)Compiler.CompileStubOrigClassVar.deref() : null;
+
+            //if (_targetType == stubType)
+            //    targetType = objx.BaseType;
+
+            if (targetType != null && _tinfo != null)
+            {
+                _target.Emit(RHC.Expression, objx, context);
+                ilg.Emit(OpCodes.Isinst, targetType);
+                EmitGet(ilg);
+                HostExpr.EmitBoxReturn(objx, context, FieldType);
+            }
+            else
+            {
+                // TODO: convert to dynamic?
+                _target.Emit(RHC.Expression, objx, context);
+                ilg.Emit(OpCodes.Ldstr, _fieldName);
+                ilg.Emit(OpCodes.Call, Compiler.Method_Reflector_GetInstanceFieldOrProperty);
+            }
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
+        }
+
+
+        public override void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGen ilg = context.GetILGen();
+
+            Type targetType = _targetType;
+
+            // DO WE NEED THIS?
+            //Type stubType = Compiler.CompileStubOrigClassVar.isBound ? (Type)Compiler.CompileStubOrigClassVar.deref() : null;
+
+            //if (_targetType == stubType)
+            //    targetType = objx.BaseType;
+
+            if (targetType != null && _tinfo != null)
+            {
+                _target.Emit(RHC.Expression, objx, context);
+                ilg.Emit(OpCodes.Isinst, targetType);
+                EmitGet(ilg);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unboxed emit of unknown member.");
+            }
+        }
+
+        protected abstract void EmitGet(ILGen ilg);
+        protected abstract void EmitSet(ILGen ilg);
+
         #endregion
 
         #region AssignableExpr Members
@@ -144,6 +204,36 @@ namespace clojure.lang.CljCompiler.Ast
 
             call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
             return call;
+        }
+
+        public override void EmitAssign(RHC rhc, ObjExpr2 objx, GenContext context, Expr val)
+        {
+            ILGen ilg = context.GetILGen();
+
+            // TODO: Debug info
+            if (_targetType != null && _tinfo != null)
+            {
+                _target.Emit(RHC.Expression, objx, context);
+                ilg.Emit(OpCodes.Isinst, FieldType);
+                val.Emit(RHC.Expression, objx, context);
+                LocalBuilder tmp = ilg.DeclareLocal(typeof(object));
+                tmp.SetLocalSymInfo("valTemp");
+                ilg.Emit(OpCodes.Dup);
+                ilg.Emit(OpCodes.Stloc, tmp);
+                HostExpr.EmitUnboxArg(objx, context, FieldType);
+                EmitSet(ilg);
+                ilg.Emit(OpCodes.Ldloc, tmp);
+            }
+            else
+            {
+                _target.Emit(RHC.Expression, objx, context);
+                ilg.Emit(OpCodes.Ldstr, _fieldName);
+                val.Emit(RHC.Expression, objx, context);
+                ilg.Emit(OpCodes.Call, Compiler.Method_Reflector_SetInstanceFieldOrProperty); 
+            }
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
+
         }
 
         #endregion
@@ -194,6 +284,16 @@ namespace clojure.lang.CljCompiler.Ast
         protected override Type FieldType
         {
             get { return _tinfo.FieldType; }
+        }
+
+        protected override void EmitGet(ILGen ilg)
+        {
+            ilg.EmitFieldGet(_tinfo);
+        }
+
+        protected override void EmitSet(ILGen ilg)
+        {
+            ilg.EmitFieldSet(_tinfo);
         }
 
         #endregion
@@ -257,6 +357,17 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get { return _tinfo.PropertyType; }
         }
+
+        protected override void EmitGet(ILGen ilg)
+        {
+            ilg.EmitPropertyGet(_tinfo);
+        }
+
+        protected override void EmitSet(ILGen ilg)
+        {
+            ilg.EmitPropertySet(_tinfo);
+        }
+
         #endregion
 
         #region AssignableExpr members

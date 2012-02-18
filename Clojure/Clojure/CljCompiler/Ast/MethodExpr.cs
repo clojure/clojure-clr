@@ -31,6 +31,7 @@ using Microsoft.Scripting.Actions;
 using Microsoft.Scripting.Runtime;
 using clojure.lang.Runtime.Binding;
 using clojure.lang.Runtime;
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -315,6 +316,127 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _method != null && Util.IsPrimitive(_method.ReturnType); }
         }
 
+        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            Type retType;
+
+            if (_method != null)
+            {
+                EmitForMethod(objx, context);
+                retType = _method.ReturnType;
+            }
+            else
+            {
+                EmitComplexCall(objx, context);
+                retType = typeof(object);
+            }
+            HostExpr.EmitBoxReturn(objx, context, retType);
+
+            if (rhc == RHC.Statement)
+                context.GetILGenerator().Emit(OpCodes.Pop);
+        }
+
+        public override void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            if (_method != null)
+            {
+                EmitForMethod(objx, context);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unboxed emit of unknown member.");
+            }
+
+            if (rhc == RHC.Statement)
+                context.GetILGenerator().Emit(OpCodes.Pop);
+        }
+
+        private void EmitForMethod(ObjExpr2 objx, GenContext context)
+        {
+            // TODO: Do we still need this?
+            if (_method.DeclaringType == (Type)Compiler.CompileStubOrigClassVar.deref())
+                _method = FindEquivalentMethod(_method, objx.BaseType);
+
+            if (_args.Exists((x) => x.ParamType == HostArg.ParameterType.ByRef)
+                || Array.Exists(_method.GetParameters(),(x)=> x.IsOut)
+                || _method.IsGenericMethodDefinition)
+            {
+                EmitComplexCall(objx, context);
+                return;
+            }
+
+            // No by-ref args, not a generic method, so we can generate straight arg converts and call
+            if (!IsStaticCall)
+            {
+                EmitTargetExpression(objx, context);
+                context.GetILGenerator().Emit(OpCodes.Castclass, _method.DeclaringType);
+            }
+
+            MethodExpr.EmitTypedArgs(objx, context, _method.GetParameters(), _args);
+            if (IsStaticCall)
+            {
+                if (IsIntrinsic(_method))
+                    EmitIntrinsicCall(objx, context);
+                else
+                    context.GetILGenerator().Emit(OpCodes.Call, _method);
+            }
+            else
+                context.GetILGenerator().Emit(OpCodes.Callvirt, _method); 
+        }
+
+        protected abstract void EmitTargetExpression(ObjExpr2 objx, GenContext context);
+        protected abstract Type GetTargetType();
+
+
+        private void EmitComplexCall(ObjExpr2 objx, GenContext context)
+        {
+            List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count+1);
+            paramExprs.Add(Expression.Parameter(GetTargetType()));
+            EmitTargetExpression(objx,context);
+
+            foreach ( HostArg ha in _args )
+            {
+                Expr e = ha.ArgExpr;
+                Type argType = e.HasClrType ? (e.ClrType ?? typeof(Object)) : typeof(Object);
+
+                switch (ha.ParamType)
+                {
+                    case HostArg.ParameterType.ByRef:
+                        paramExprs.Add(Expression.Parameter(argType.MakeByRefType(),ha.LocalBinding.Name));
+                        context.GetILGenerator().Emit(OpCodes.Ldloca,ha.LocalBinding.LocalVar);
+                        break;
+
+                    case HostArg.ParameterType.Standard:
+                        paramExprs.Add(Expression.Parameter(argType,ha.LocalBinding.Name));
+                        ha.ArgExpr.Emit(RHC.Expression,objx,context);
+                        break;
+
+                    default:
+                        throw Util.UnreachableCode();
+                }
+               
+                Type returnType = HasClrType ? ClrType : typeof(object);
+                InvokeMemberBinder binder = new ClojureInvokeMemberBinder(ClojureContext.Default,_methodName, paramExprs.Count, IsStaticCall);
+                DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
+                Expression call = dyn;
+                if ( context.DynInitHelper != null )
+                    call = context.DynInitHelper.ReduceDyn(dyn);
+                
+                if ( returnType == typeof(void) )
+                {
+                    call = Expression.Block(call,Expression.Default(typeof(object)));
+                    returnType = typeof(object);
+                }
+                call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
+
+                Type[] paramTypes = paramExprs.Map((x) => x.Type);
+                MethodBuilder mbLambda = context.TB.DefineMethod("__interop_"+_methodName+RT.nextID(),MethodAttributes.Static|MethodAttributes.Public,CallingConventions.Standard,returnType,paramTypes);
+                LambdaExpression lambda = Expression.Lambda(call,paramExprs);
+                lambda.CompileToMethod(mbLambda);
+
+                context.GetILGenerator().Emit(OpCodes.Call,mbLambda);
+            }
+        }
         #endregion
     }
 }

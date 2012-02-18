@@ -266,6 +266,8 @@ namespace clojure.lang
 
         internal static readonly MethodInfo Method_Symbol_intern2 = typeof(Symbol).GetMethod("intern", new Type[] { typeof(string), typeof(string) });
 
+        internal static readonly MethodInfo Method_Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle");
+
         internal static readonly MethodInfo Method_Util_classOf = typeof(Util).GetMethod("classOf");
         internal static readonly MethodInfo Method_Util_ConvertToInt = typeof(Util).GetMethod("ConvertToInt");
 

@@ -68,7 +68,7 @@ namespace clojure.lang.CljCompiler.Ast
             return objx.GenKeyword(context,_kw);
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
         {
             objx.EmitKeyword(context, _kw);
             if (rhc == RHC.Statement)

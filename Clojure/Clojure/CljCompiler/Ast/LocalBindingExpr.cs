@@ -105,7 +105,7 @@ namespace clojure.lang.CljCompiler.Ast
             return objx.GenUnboxedLocal(context, _b);
         }
 
-        void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
         {
             objx.EmitUnboxedLocal(context, _b);
         }
@@ -127,7 +127,7 @@ namespace clojure.lang.CljCompiler.Ast
                 objx.GenLocal(context,_b));
         }
 
-        void EmitAssign(RHC rhc, ObjExpr2 objx, GenContext context, Expr val)
+        public void EmitAssign(RHC rhc, ObjExpr2 objx, GenContext context, Expr val)
         {
             objx.EmitAssignLocal(context, _b, val);
             if (rhc != RHC.Statement)

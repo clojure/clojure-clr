@@ -67,7 +67,7 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Constant(_val);
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
         {
             ILGen ilg = context.GetILGen();
             ilg.EmitBoolean(_val);

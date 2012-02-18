@@ -21,6 +21,8 @@ using System.Linq.Expressions;
 #endif
 using clojure.lang.Runtime.Binding;
 using clojure.lang.Runtime;
+using System.Reflection.Emit;
+using System.Reflection;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -117,6 +119,39 @@ namespace clojure.lang.CljCompiler.Ast
         public override bool CanEmitPrimitive
         {
             get { return HasClrType && Util.IsPrimitive(ClrType); }
+        }
+
+
+        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            EmitUnboxed(rhc, objx, context);
+            HostExpr.EmitBoxReturn(objx, context, typeof(Object)); 
+        }
+
+
+        public override void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ParameterExpression param = Expression.Parameter(_target.HasClrType ? _target.ClrType : typeof(object));
+
+            Type returnType = HasClrType ? ClrType : typeof(object);
+
+            // TODO: Get rid of Default
+            GetMemberBinder binder = new ClojureGetZeroArityMemberBinder(ClojureContext.Default, _memberName, false);
+            DynamicExpression dyn = Expression.Dynamic(binder, returnType, new Expression[] { param });
+
+            Expression call = dyn;
+
+            if (context.DynInitHelper != null)
+                call = context.DynInitHelper.ReduceDyn(dyn);
+
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
+
+            MethodBuilder mbLambda = context.TB.DefineMethod("__interop_" + _memberName + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, new Type[] {param.Type});
+            LambdaExpression lambda = Expression.Lambda(call, new ParameterExpression[] {param});
+            lambda.CompileToMethod(mbLambda);
+
+            _target.Emit(RHC.Expression, objx, context);
+            context.GetILGenerator().Emit(OpCodes.Call, mbLambda);
         }
 
         #endregion

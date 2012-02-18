@@ -74,7 +74,7 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Throw(exc2,typeof(object));
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
         {
             ILGenerator ilg = context.GetILGenerator();
 

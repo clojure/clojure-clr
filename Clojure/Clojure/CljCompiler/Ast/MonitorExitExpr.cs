@@ -69,7 +69,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Compiler.NilExprInstance.GenCode(rhc, objx, context));
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
         {
             _target.Emit(RHC.Expression, objx, context);
             context.GetILGen().EmitCall(Compiler.Method_Monitor_Exit);

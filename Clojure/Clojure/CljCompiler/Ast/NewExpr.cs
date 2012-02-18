@@ -24,6 +24,7 @@ using Microsoft.Scripting.Ast; //for Utils in GenDlrForMethod
 using System.Dynamic;
 using clojure.lang.Runtime.Binding;
 using clojure.lang.Runtime;
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -231,6 +232,141 @@ namespace clojure.lang.CljCompiler.Ast
             return Utils.SimpleNewHelper(_ctor, args);
 
             // JAVA: emitClearLocals
+        }
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            if (_ctor != null)
+                EmitForMethod(rhc, objx, context);
+            else if (_isNoArgValueTypeCtor)
+                EmitForNoArgValueTypeCtor(rhc, objx, context);
+            else
+                EmitComplexCall(rhc, objx, context);
+
+            if (rhc == RHC.Statement)
+                context.GetILGenerator().Emit(OpCodes.Pop);
+        }
+
+        private void EmitForMethod(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            EmitParamsForMethod(objx,context);
+            context.GetILGenerator().Emit(OpCodes.Newobj,_ctor);
+        }
+
+        private void EmitParamsForMethod(ObjExpr2 objx, GenContext context)
+        {
+            ParameterInfo[] pis = _ctor.GetParameters();
+
+            for( int i =0; i< pis.Length; i++ ) 
+            {
+                HostArg arg = _args[i];
+                ParameterInfo pi = pis[i];
+                Type argType = arg.ArgExpr.HasClrType ? arg.ArgExpr.ClrType : typeof(object);
+                Type paramType = pi.ParameterType;
+
+                arg.ArgExpr.Emit(RHC.Expression,objx,context);
+            
+                if (!CompatibleParameterTypes(paramType,argType)) 
+                {
+                    if ( paramType != argType )
+                        if ( paramType.IsByRef)
+                            paramType = paramType.GetElementType();
+                    if ( paramType != argType )
+                        context.GetILGenerator().Emit(OpCodes.Castclass,paramType);
+                }
+            }
+        }
+
+        // Straight from the  DLR code.
+        private static bool CompatibleParameterTypes(Type parameter, Type argument)
+        {
+            if (parameter == argument ||
+                (!parameter.IsValueType && !argument.IsValueType && parameter.IsAssignableFrom(argument)))
+                return true;
+
+            if (parameter.IsByRef && parameter.GetElementType() == argument)
+                return true;
+
+            return false;
+        }
+        
+
+        private void EmitForNoArgValueTypeCtor(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+            LocalBuilder loc = ilg.DeclareLocal(_type);
+            ilg.Emit(OpCodes.Ldloca, loc);
+            ilg.Emit(OpCodes.Initobj, _type);
+            ilg.Emit(OpCodes.Box, _type);
+        }
+
+        // TODO: See if it is worth removing the code duplication with MethodExp.GenDlr.
+
+
+        private void EmitComplexCall(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count+1);
+            paramExprs.Add(Expression.Parameter(_type));
+            EmitTargetExpression(objx,context);
+
+            foreach ( HostArg ha in _args )
+            {
+                Expr e = ha.ArgExpr;
+                Type argType = e.HasClrType ? (e.ClrType ?? typeof(Object)) : typeof(Object);
+
+                switch (ha.ParamType)
+                {
+                    case HostArg.ParameterType.ByRef:
+                        paramExprs.Add(Expression.Parameter(argType.MakeByRefType(),ha.LocalBinding.Name));
+                        context.GetILGenerator().Emit(OpCodes.Ldloca,ha.LocalBinding.LocalVar);
+                        break;
+
+                        case HostArg.ParameterType.Standard
+                        paramExprs.Add(Expression.Parameter(argType,ha.LocalBinding.Name));
+                        ha.ArgExpr.Emit(RHC.Expression,objx,context);
+                        break;
+
+                    default:
+                        throw Util.UnreachableCode();
+                }
+               
+                Type returnType = HasClrType ? ClrType : typeof(object);
+                CreateInstanceBinder binder = new ClojureCreateInstanceBinder(ClojureContext.Default,_args.Count);
+                DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
+                Expression call = dyn;
+                if ( context.DynInitHelper != null )
+                    call = context.DynInitHelper.ReduceDyn(dyn);
+                
+                if ( returnType == typeof(void) )
+                {
+                    call = Expression.Block(call,Expression.Default(typeof(object)));
+                    returnType = typeof(object);
+                }
+                call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
+
+                Type[] paramTypes = paramExprs.Map((x) => x.Type);
+                MethodBuilder mbLambda = context.TB.DefineMethod("__interop_ctor_"+RT.nextID(),MethodAttributes.Static|MethodAttributes.Public,CallingConventions.Standard,returnType,paramTypes);
+                LambdaExpression lambda = Expression.Lambda(call,paramExprs);
+                lambda.CompileToMethod(mbLambda);
+
+                context.GetILGenerator().Emit(OpCodes.Call,mbLambda);
+            }       
+        }
+
+        static readonly MethodInfo Method_Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle");
+
+        private void EmitTargetExpression(ObjExpr2 objx, GenContext context)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+
+            if (Compiler.CompileStubOrigClassVar.isBound && Compiler.CompileStubOrigClassVar.deref() != null && objx.TypeBuilder != null)
+                ilg.Emit(OpCodes.Ldtoken, objx.TypeBuilder);
+            else if (_type != null)
+                ilg.Emit(OpCodes.Ldtoken, typeof(Object));
+            else
+                throw new ArgumentException("Cannot generate type for NewExpr. Serious!");
+
+            ilg.Emit(OpCodes.Call,Compiler.Method_Type_GetTypeFromHandle);
         }
 
         #endregion

@@ -20,6 +20,7 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using System.Reflection.Emit;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -92,6 +93,13 @@ namespace clojure.lang.CljCompiler.Ast
         protected override Expression GenTargetExpression(ObjExpr objx, GenContext context)
         {
             return Expression.Constant(_type, typeof(Type));
+        }
+
+        protected override void EmitTargetExpression(ObjExpr2 objx, GenContext context)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+            ilg.Emit(OpCodes.Ldtoken, _type);
+            ilg.Emit(OpCodes.Call, Compiler.Method_Type_GetTypeFromHandle);
         }
 
         #endregion

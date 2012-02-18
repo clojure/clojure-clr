@@ -235,6 +235,7 @@ namespace clojure.lang.CljCompiler.Ast
         public abstract Type ClrType { get; }
         public abstract object Eval();
         public abstract Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
+        public abstract void Emit(RHC rhc, ObjExpr2 objx, GenContext context);
 
         #endregion
 
@@ -245,6 +246,8 @@ namespace clojure.lang.CljCompiler.Ast
         
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2119:SealMethodsThatSatisfyPrivateInterfaces")]
         public abstract Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context);
+
+        public abstract void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context);
 
         #endregion
 

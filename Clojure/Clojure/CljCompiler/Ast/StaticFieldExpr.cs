@@ -19,6 +19,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using System.Reflection.Emit;
+using Microsoft.Scripting.Generation;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -71,6 +73,13 @@ namespace clojure.lang.CljCompiler.Ast
         public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
         {
             return HostExpr.GenBoxReturn(GenCodeUnboxed(rhc, objx, context),FieldType,objx,context);
+        }
+
+        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            HostExpr.EmitBoxReturn(objx, context, FieldType);
+            if (rhc == RHC.Statement)
+                context.GetILGenerator().Emit(OpCodes.Pop);
         }
 
         #endregion
@@ -139,6 +148,12 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _tinfo.FieldType; }
         }
 
+        public override void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            // TODO: Debug info
+            context.GetILGen().EmitFieldGet(_tinfo);
+        }
+
         #endregion
 
         #region AssignableExpr members
@@ -150,6 +165,18 @@ namespace clojure.lang.CljCompiler.Ast
             return e;
         }
 
+        public override void EmitAssign(RHC rhc, ObjExpr2 objx, GenContext context, Expr val)
+        {
+            ILGen ilg = context.GetILGen();
+
+            // TODO: Debug info
+            val.Emit(RHC.Expression, objx, context);
+            ilg.Emit(OpCodes.Dup);
+            HostExpr.EmitUnboxArg(objx, context, FieldType);
+            ilg.EmitFieldSet(_tinfo);
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
+        }
         #endregion
     }
 
@@ -202,6 +229,12 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _tinfo.PropertyType; }
         }
 
+        public override void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            // TODO: Debug info
+            context.GetILGen().EmitPropertyGet(_tinfo);
+        }
+
         #endregion
 
         #region AssignableExpr members
@@ -211,6 +244,19 @@ namespace clojure.lang.CljCompiler.Ast
             object e = val.Eval();
             _tinfo.SetValue(null, e, new object[0]);
             return e;
+        }
+
+        public override void EmitAssign(RHC rhc, ObjExpr2 objx, GenContext context, Expr val)
+        {
+            ILGen ilg = context.GetILGen();
+
+            // TODO: Debug info
+            val.Emit(RHC.Expression, objx, context);
+            ilg.Emit(OpCodes.Dup);
+            HostExpr.EmitUnboxArg(objx, context, FieldType);
+            ilg.EmitPropertySet(_tinfo);
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
         }
 
         #endregion

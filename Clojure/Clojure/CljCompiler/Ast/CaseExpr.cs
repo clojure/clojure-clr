@@ -21,6 +21,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using System.Reflection.Emit;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -30,7 +32,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         readonly LocalBindingExpr _expr;
         readonly int _shift, _mask;
-        readonly int _low, _high;  // JVM use only
+        readonly int _low, _high;
         readonly Expr _defaultExpr;
         readonly SortedDictionary<int, Expr> _tests;
         readonly Dictionary<int, Expr> _thens;
@@ -413,6 +415,202 @@ namespace clojure.lang.CljCompiler.Ast
            return result;
         }
 
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            DoEmit(rhc, objx, context, false);
+        }
+
+        public void DoEmit(RHC rhc, ObjExpr2 objx, GenContext context, bool emitUnboxed)
+        {
+            ILGen ilg = context.GetILGen();
+
+            Label defaultLabel = ilg.DefineLabel();
+            Label endLabel = ilg.DefineLabel();
+
+            SortedDictionary<int, Label> labels = new SortedDictionary<int, Label>();
+            foreach (int i in _tests.Keys)
+                labels[i] = ilg.DefineLabel();
+
+            // TODO: debug info
+
+            Type primExprType = Compiler.MaybePrimitiveType(_expr);
+
+
+            if (_testType == _intKey)
+                EmitExprForInts(objx, context, primExprType, defaultLabel);
+            else
+                EmitExprForHashes(objx, context);
+
+            if (_switchType == _sparseKey)
+            {
+                Label[] la = labels.Values.ToArray<Label>();
+                ilg.Emit(OpCodes.Switch, la);
+                ilg.Emit(OpCodes.Br, defaultLabel);
+            }
+            else
+            {
+                Label[] la = new Label[(_high - _low) + 1];
+                for (int i = _low; i <= _high; i++)
+                    la[i - _low] = labels.ContainsKey(i) ? labels[i] : defaultLabel;
+                ilg.Emit(OpCodes.Switch, la);
+                ilg.Emit(OpCodes.Br, defaultLabel);
+             }
+
+            foreach (int i in labels.Keys)
+            {
+                ilg.MarkLabel(labels[i]);
+                if (_testType == _intKey)
+                    EmitThenForInts(objx, context, primExprType, _tests[i], _thens[i], defaultLabel, emitUnboxed);
+                else if ((bool)RT.contains(_skipCheck, i))
+                    EmitExpr(objx, context, _thens[i], emitUnboxed);
+                else
+                    EmitThenForHashes(objx, context, _tests[i], _thens[i], defaultLabel, emitUnboxed);
+                ilg.Emit(OpCodes.Br, endLabel);
+            }
+            ilg.MarkLabel(defaultLabel);
+            EmitExpr(objx, context, _defaultExpr, emitUnboxed);
+            ilg.MarkLabel(endLabel);
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
+        }
+
+        //bool IsShiftMasked { get { return _mask != 0; } }
+
+        void EmitShiftMask(ILGenerator ilg)
+        {
+            if (IsShiftMasked)
+            {
+                ilg.Emit(OpCodes.Ldc_I4, _shift);
+                ilg.Emit(OpCodes.Shr);
+                ilg.Emit(OpCodes.Ldc_I4, _mask);
+                ilg.Emit(OpCodes.And);
+            }
+        }
+
+        private void EmitExprForInts(ObjExpr2 objx, GenContext context, Type exprType, Label defaultLabel)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+
+            if (exprType == null)
+            {
+                if ( RT.booleanCast(RT.WarnOnReflectionVar.deref()))
+                {
+                    RT.errPrintWriter().WriteLine("Performance warning, {0}:{1} - case has int tests, but tested expression is not primitive.",
+                        Compiler.SourcePathVar.deref(),Compiler.GetLineFromSpanMap(_sourceSpan));
+                }
+                _expr.Emit(RHC.Expression,objx,context);
+                ilg.Emit(OpCodes.Call,Compiler.Method_Util_IsNonCharNumeric);
+                ilg.Emit(OpCodes.Brfalse,defaultLabel);
+                _expr.Emit(RHC.Expression,objx,context);
+                ilg.Emit(OpCodes.Call,Compiler.Method_Util_ConvertToInt);
+                EmitShiftMask(ilg);
+            }
+            else if (exprType == typeof(long)
+                || exprType == typeof(int)
+                || exprType == typeof(short)
+                || exprType == typeof(byte)
+                || exprType == typeof(ulong)
+                || exprType == typeof(uint)
+                || exprType == typeof(ushort)
+                || exprType == typeof(sbyte))
+            {
+                _expr.EmitUnboxed(RHC.Expression,objx,context);
+                ilg.Emit(OpCodes.Conv_I4);
+                EmitShiftMask(ilg);
+
+            }
+            else
+            {
+                ilg.Emit(OpCodes.Br,defaultLabel);
+            }
+        }
+
+        private void EmitThenForInts(ObjExpr2 objx, GenContext context, Type exprType, Expr test, Expr then, Label defaultLabel, bool emitUnboxed)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+
+            if (exprType == null)
+            {
+                _expr.Emit(RHC.Expression, objx, context);
+                test.Emit(RHC.Expression, objx, context);
+                ilg.Emit(OpCodes.Call, Compiler.Method_Util_equiv);
+                ilg.Emit(OpCodes.Brfalse, defaultLabel);
+                EmitExpr(objx, context, then, emitUnboxed);                
+            }
+            else if (exprType == typeof(long))
+            {
+                ((NumberExpr)test).EmitUnboxed(RHC.Expression, objx, context);
+                _expr.EmitUnboxed(RHC.Expression, objx, context);
+                ilg.Emit(OpCodes.Ceq);
+                ilg.Emit(OpCodes.Brfalse, defaultLabel);
+                EmitExpr(objx, context, then, emitUnboxed);                
+              
+            }
+            else if (exprType == typeof(int)
+                || exprType == typeof(short)
+                || exprType == typeof(byte)
+                || exprType == typeof(ulong)
+                || exprType == typeof(uint)
+                || exprType == typeof(ushort)
+                || exprType == typeof(sbyte))
+            {
+                if (IsShiftMasked)
+                {
+                    ((NumberExpr)test).EmitUnboxed(RHC.Expression, objx, context);
+                    _expr.EmitUnboxed(RHC.Expression, objx, context);
+                    ilg.Emit(OpCodes.Conv_I8);
+                    ilg.Emit(OpCodes.Ceq);
+                    ilg.Emit(OpCodes.Brfalse, defaultLabel);
+                    EmitExpr(objx, context, then, emitUnboxed);
+                }
+                // else direct match
+                EmitExpr(objx, context, then, emitUnboxed);  
+            }
+            else
+            {
+                ilg.Emit(OpCodes.Br, defaultLabel);
+            }
+        }
+
+        void EmitExprForHashes(ObjExpr2 objx, GenContext context)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+
+            _expr.Emit(RHC.Expression, objx, context);
+            ilg.Emit(OpCodes.Call, Compiler.Method_Util_hash);
+            EmitShiftMask(ilg);
+        }
+
+        void EmitThenForHashes(ObjExpr2 objx, GenContext context, Expr test, Expr then, Label defaultLabel, bool emitUnboxed)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+
+            _expr.Emit(RHC.Expression, objx, context);
+            test.Emit(RHC.Expression, objx, context);
+            if (_testType == _hashIdentityKey)
+            {
+                ilg.Emit(OpCodes.Ceq);
+                ilg.Emit(OpCodes.Brfalse, defaultLabel);
+            }
+            else
+            {
+                ilg.Emit(OpCodes.Call, Compiler.Method_Util_equiv);
+                ilg.Emit(OpCodes.Brfalse, defaultLabel);
+            }
+            EmitExpr(objx, context, then, emitUnboxed);  
+        }
+
+        private void EmitExpr(ObjExpr2 objx, GenContext context, Expr expr, bool emitUnboxed)
+        {
+            MaybePrimitiveExpr mbe = expr as MaybePrimitiveExpr;
+            if (emitUnboxed && mbe != null)
+                mbe.EmitUnboxed(RHC.Expression, objx, context);
+            else
+                expr.Emit(RHC.Expression, objx, context);
+        }   
+
+
         #endregion
 
         #region Primitive code generation
@@ -425,6 +623,11 @@ namespace clojure.lang.CljCompiler.Ast
         public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             return GenCode(rhc, objx, context, true);
+        }
+
+        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            DoEmit(rhc, objx, context, true);
         }
 
         #endregion
