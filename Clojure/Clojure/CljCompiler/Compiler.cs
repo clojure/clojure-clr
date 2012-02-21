@@ -1473,7 +1473,7 @@ namespace clojure.lang
                 initMB.GetILGenerator().Emit(OpCodes.Ret);
 
                 objx.EmitConstantFieldDefs(initTB);
-                MethodBuilder constInitsMB = objx.GenerateConstants(initTB);
+                MethodBuilder constInitsMB = objx.EmitConstants(initTB);
 
                 // Static init for constants, keywords, vars
                 ConstructorBuilder cb = initTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);

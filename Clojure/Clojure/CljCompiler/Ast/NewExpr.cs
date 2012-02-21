@@ -321,7 +321,7 @@ namespace clojure.lang.CljCompiler.Ast
                         context.GetILGenerator().Emit(OpCodes.Ldloca,ha.LocalBinding.LocalVar);
                         break;
 
-                        case HostArg.ParameterType.Standard
+                    case HostArg.ParameterType.Standard:
                         paramExprs.Add(Expression.Parameter(argType,ha.LocalBinding.Name));
                         ha.ArgExpr.Emit(RHC.Expression,objx,context);
                         break;

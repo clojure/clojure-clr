@@ -108,11 +108,11 @@ namespace clojure.lang.CljCompiler.Ast
             ISeq origForm = form;
 
             FnExpr fn = new FnExpr(Compiler.TagOf(form));
-            fn._src = form;
+            fn.Src = form;
 
             if (((IMeta)form.first()).meta() != null)
             {
-                fn._onceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), KW_ONCE));
+                fn.OnceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), KW_ONCE));
             }
 
             fn.ComputeNames(form, name);

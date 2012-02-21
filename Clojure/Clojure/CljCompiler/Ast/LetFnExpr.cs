@@ -214,7 +214,7 @@ namespace clojure.lang.CljCompiler.Ast
                 fe.EmitLetFnInits(context, bi.Binding.LocalVar, objx, lbset);
             }
 
-            _body.Emit(rhc, objx, context));
+            _body.Emit(rhc, objx, context);
         }
 
         #endregion

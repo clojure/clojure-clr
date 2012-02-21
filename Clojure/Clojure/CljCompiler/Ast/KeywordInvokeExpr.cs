@@ -176,7 +176,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Stloc,thunkLoc);                                  //  (thunkLoc <= thunk)
 
             _target.Emit(RHC.Expression,objx,context);                         // target
-            ilg.Emit(OpCode.Stloc,targetLoc);                                  //   (targetLoc <= target)
+            ilg.Emit(OpCodes.Stloc,targetLoc);                                  //   (targetLoc <= target)
 
             ilg.Emit(OpCodes.Ldloc,thunkLoc);
             ilg.Emit(OpCodes.Ldloc,targetLoc);

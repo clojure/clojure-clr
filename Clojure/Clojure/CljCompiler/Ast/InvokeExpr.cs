@@ -517,14 +517,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         void EmitArgsAndCall(int firstArgToEmit, RHC rhc, ObjExpr2 objx, GenContext context)
         {
-            for ( int i=firstArgToEmit; i< Math.Min(Compiler.MaxPositionalArity,_args.count(); i++ )
+            for ( int i=firstArgToEmit; i< Math.Min(Compiler.MaxPositionalArity,_args.count()); i++ )
             {
                 Expr e = (Expr) _args.nth(i);
                 e.Emit(RHC.Expression,objx,context);
             }
             if ( _args.count() > Compiler.MaxPositionalArity )
             {
-                PersistentVector restArgs = PersistentVector.EMPTY;
+                IPersistentVector restArgs = PersistentVector.EMPTY;
                 for (int i=Compiler.MaxPositionalArity; i<_args.count(); i++ )
                     restArgs = restArgs.cons(_args.nth(i));
                 MethodExpr.EmitArgsAsArray(restArgs,objx,context);

@@ -102,6 +102,21 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Call, Compiler.Method_Type_GetTypeFromHandle);
         }
 
+        protected override Type GetTargetType()
+        {
+            return typeof(Type);
+        }
+
         #endregion
+
+        internal bool CanEmitIntrinsicPredicate()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void EmitIntrinsicPredicate(RHC rHC, ObjExpr2 objx, GenContext context, Label falseLabel)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

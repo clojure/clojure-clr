@@ -106,7 +106,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
         {
-            objx.EmitConstant(context, _id);
+            objx.EmitConstant(context, _id, _v);
             if (rhc == RHC.Statement)
                 context.GetILGenerator().Emit(OpCodes.Pop);
         }

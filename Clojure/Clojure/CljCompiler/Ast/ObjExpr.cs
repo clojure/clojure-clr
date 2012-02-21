@@ -55,40 +55,174 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        const string CONST_PREFIX = "const__";
-        const string STATIC_CTOR_HELPER_NAME = "__static_ctor_helper";
+        const string ConstPrefix = "const__";
+        const string StaticCtorHelperName = "__static_ctor_helper";
 
-        protected string _name;
-        private string _internalName;
-        protected string _thisName;
+        protected string InternalName { get; set; }
+        protected string Name { get; set; }
         protected readonly object _tag;
-        protected IPersistentMap _closes = PersistentHashMap.EMPTY;         // localbinding -> itself
-        protected IPersistentVector _closesExprs = PersistentVector.EMPTY;  // localbinding exprs
-        protected IPersistentSet _volatiles = PersistentHashSet.EMPTY;      // symbols
-        protected IPersistentMap _fields = null;                            // symbol -> lb
-        protected IPersistentVector _hintedFields = PersistentVector.EMPTY; // hinted fields
-        private IPersistentMap _keywords = PersistentHashMap.EMPTY;         // Keyword -> KeywordExpr
-        private IPersistentMap _vars = PersistentHashMap.EMPTY;
+        protected object Tag { get { return _tag; } }
+
+        protected IPersistentMap Closes { get; set; }
+        protected IPersistentMap Keywords { get; set; }
+        protected IPersistentMap Vars { get; set; }
+
+        protected PersistentVector Constants { get; set; }
+        Dictionary<int, FieldBuilder> ConstantFields { get; set; }
+        protected IPersistentMap Fields { get; set; }            // symbol -> lb
+
         Type _compiledType;
-        // int line;
-        private PersistentVector _constants;
-        protected int _constantsID;
+        protected Type CompiledType
+        {
+            get
+            {
+                if (_compiledType == null)
+                    // can't do much
+                    // Java will get the loader and define the clas from the stored bytecodes
+                    // Not sure what the equivalent would be.
+                    throw new InvalidOperationException("ObjExpr type not compiled");
+                return _compiledType;
+            }
+            set { _compiledType = value; }
+        }
+
+        protected IPersistentMap ClassMeta { get; set; }
+
+        protected TypeBuilder TypeBuilder { get; set; }
+        public ConstructorInfo CtorInfo { get; set; }
+
+        private IPersistentVector KeywordCallsites { get; set; }
+        List<FieldBuilder> _keywordLookupSiteFields;
+        List<FieldBuilder> _thunkFields;
+
+        private IPersistentVector ProtocolCallsites { get; set; }
+        List<FieldBuilder> _cachedTypeFields;
+        List<FieldBuilder> _cachedProtoFnFields;
+        List<FieldBuilder> _cachedProtoImplFields;
+
+        FieldBuilder _metaField;
+        List<FieldBuilder> _closedOverFields;
+        Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;        
+
         protected int _altCtorDrops = 0;
 
-        private IPersistentVector _keywordCallsites;
-        private IPersistentVector _protocolCallsites;
-        private IPersistentSet _varCallsites;
+        IPersistentCollection Methods { get; set; }
 
-        protected bool _onceOnly = false;
+        protected int _constantsID;
+        protected bool OnceOnly { get; set; }
+        protected Object Src { get; set; }
+        protected bool IsStatic { get; set; }
 
-        protected Object _src;
-        protected IPersistentMap _classMeta;
-        private bool _isStatic;
+ 
 
+        protected bool IsDefType { get { return Fields != null; } }
+        protected virtual bool SupportsMeta { get { return !IsDefType; } }
+
+        internal bool IsVolatile(LocalBinding lb)
+        {
+            return RT.booleanCast(RT.contains(Fields, lb.Symbol)) &&
+                RT.booleanCast(RT.get(lb.Symbol.meta(), Keyword.intern("volatile-mutable")));
+        }
+
+        bool IsMutable(LocalBinding lb)
+        {
+            return IsVolatile(lb)
+                ||
+                RT.booleanCast(RT.contains(Fields, lb.Symbol)) &&
+                   RT.booleanCast(RT.get(lb.Symbol.meta(), Keyword.intern("unsynchronized-mutable")))
+                ||
+                lb.IsByRef;
+        }
+
+        static String SiteName(int n)
+        {
+            return "__site__" + n;
+        }
+
+        public static String SiteNameStatic(int n)
+        {
+            return SiteName(n) + "__";
+        }
+
+        static String ThunkName(int n)
+        {
+            return "__thunk__" + n;
+        }
+
+        public static String ThunkNameStatic(int n)
+        {
+            return ThunkName(n) + "__";
+        }
+
+        internal static String CachedClassName(int n)
+        {
+            return "__cached_class__" + n;
+        }
+
+        internal static String CachedProtoFnName(int n)
+        {
+            return "__cached_proto_fn__" + n;
+        }
+
+        internal static String CachedProtoImplName(int n)
+        {
+            return "__cached_proto_impl__" + n;
+        }
+
+
+        private static string ConstantName(int i)
+        {
+            return ConstPrefix + i;
+        }
+
+        private Type ConstantType(int i)
+        {
+            object o = Constants.nth(i);
+            Type t = o == null ? null : o.GetType();
+            if (t != null && t.IsPublic)
+            {
+                // Java: can't emit derived fn types due to visibility
+                if (typeof(LazySeq).IsAssignableFrom(t))
+                    return typeof(ISeq);
+                else if (t == typeof(Keyword))
+                    return t;
+                else if (typeof(RestFn).IsAssignableFrom(t))
+                    return typeof(RestFn);
+                else if (typeof(AFn).IsAssignableFrom(t))
+                    return typeof(AFn);
+                else if (t == typeof(Var))
+                    return t;
+                else if (t == typeof(String))
+                    return t;
+            }
+            return typeof(object);
+        }
+
+        internal FieldBuilder KeywordLookupSiteField(int i)
+        {
+            return _keywordLookupSiteFields[i];
+        }
+
+        internal FieldBuilder CachedTypeField(int i)
+        {
+            return _cachedTypeFields[i];
+        }
+        
+
+
+
+        // OLD ONLY
+
+        
+        protected string _thisName;
+        protected IPersistentVector _closesExprs = PersistentVector.EMPTY;  // localbinding exprs
+        protected IPersistentSet _volatiles = PersistentHashSet.EMPTY;      // symbols
+        protected IPersistentVector _hintedFields = PersistentVector.EMPTY; // hinted fields
+        // int line;
+ 
         protected Type _baseType = null;
 
         
-        protected TypeBuilder _typeBuilder = null;
         protected ParameterExpression _thisParam = null;
 
         private FnMode _fnMode = FnMode.Full;
@@ -99,103 +233,22 @@ namespace clojure.lang.CljCompiler.Ast
             set { _fnMode = value; }
         }
 
-        FieldBuilder _metaField;
+ 
 
-        List<FieldBuilder> _closedOverFields;
-        Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;        
-        List<FieldBuilder> _keywordLookupSiteFields;
-        List<FieldBuilder> _thunkFields;
-        List<FieldBuilder> _cachedTypeFields;
-        List<FieldBuilder> _cachedProtoFnFields;
-        List<FieldBuilder> _cachedProtoImplFields;
-        Dictionary<int, FieldBuilder> _constantFields;
+        private IPersistentSet _varCallsites;
 
-        IPersistentCollection _methods;
-        public IPersistentCollection Methods
-        {
-            get { return _methods; }
-            set { _methods = value; }
-        }
 
-        ConstructorInfo _ctorInfo;
-        public ConstructorInfo CtorInfo
-        {
-            get { return _ctorInfo; }
-            set { _ctorInfo = value; }
-        }
+
+
         
         #endregion
 
         #region Data accessors
 
-        public string Name
-        {
-            get { return _name; }
-            set { _name = value; }
-        }
-
-        internal string InternalName
-        {
-            get { return _internalName; }
-            set { _internalName = value; }
-        }
-
         public string ThisName
         {
             get { return _thisName; }
             //set { _thisName = value; }
-        }
-
-        public IPersistentMap Closes
-        {
-            get { return _closes; }
-            set { _closes = value; }
-        }
-
-        internal IPersistentMap Keywords
-        {
-            get { return _keywords; }
-            set { _keywords = value; }
-        }
-
-        internal IPersistentMap Vars
-        {
-            get { return _vars; }
-            set { _vars = value; }
-        }
-
-        internal bool IsVolatile(LocalBinding lb)
-        {
-            return RT.booleanCast(RT.contains(_fields, lb.Symbol)) &&
-                RT.booleanCast(RT.get(lb.Symbol.meta(), Keyword.intern("volatile-mutable")));
-        }
-
-        bool IsMutable(LocalBinding lb)
-        {
-            return IsVolatile(lb)
-                ||
-                RT.booleanCast(RT.contains(_fields, lb.Symbol)) &&
-                   RT.booleanCast(RT.get(lb.Symbol.meta(), Keyword.intern("unsynchronized-mutable")))
-                ||
-                lb.IsByRef;
-        }
-
-        internal PersistentVector Constants
-        {
-            get { return _constants; }
-            set { _constants = value; }
-        }
-           
-        internal IPersistentVector KeywordCallsites
-        {
-            get { return _keywordCallsites; }
-            set { _keywordCallsites = value; }
-        }
-
-        internal IPersistentVector ProtocolCallsites
-        {
-            get { return _protocolCallsites; }
-            set { _protocolCallsites = value; }
         }
 
         internal IPersistentSet VarCallsites
@@ -204,20 +257,9 @@ namespace clojure.lang.CljCompiler.Ast
             set { _varCallsites = value; }
         }
 
-        public bool IsStatic
-        {
-            get { return _isStatic; }
-            set { _isStatic = value; }
-        }
-
         public Type BaseType
         {
             get { return _baseType; }
-        }
-
-        public TypeBuilder TypeBuilder
-        {
-            get { return _typeBuilder; }
         }
 
         public ParameterExpression ThisParam
@@ -231,16 +273,6 @@ namespace clojure.lang.CljCompiler.Ast
             return _thunkFields[i];
         }
 
-        internal FieldBuilder KeywordLookupSiteField(int i)
-        {
-            return _keywordLookupSiteFields[i];
-        }
-
-        internal FieldBuilder CachedTypeField(int i)
-        {
-            return _cachedTypeFields[i];
-        }
-
         internal FieldBuilder CachedProtoFnField(int i)
         {
             return _cachedProtoFnFields[i];
@@ -251,25 +283,10 @@ namespace clojure.lang.CljCompiler.Ast
             return _cachedProtoImplFields[i];
         }
 
-        protected bool IsDefType { get { return _fields != null; } }
 
-        protected Type CompiledType 
-        { 
-            get 
-            {
-                if (_compiledType == null)
-                    // can't do much
-                    // Java will get the loader and define the clas from the stored bytecodes
-                    // Not sure what the equivalent would be.
-                    throw new InvalidOperationException("ObjExpr type not compiled");
-                return _compiledType;
-            }
-            set { _compiledType = value; }
-        }
 
-        protected bool OnceOnly { get { return _onceOnly; } }
 
-        protected virtual bool SupportsMeta { get { return !IsDefType; } }
+
 
         #endregion
 
@@ -278,6 +295,9 @@ namespace clojure.lang.CljCompiler.Ast
         public ObjExpr(object tag)
         {
             _tag = tag;
+            Keywords = PersistentHashMap.EMPTY;
+            Vars = PersistentHashMap.EMPTY;
+            Closes = PersistentHashMap.EMPTY;
         }
 
         #endregion
@@ -291,7 +311,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public virtual Type ClrType
         {
-            get { return _compiledType ?? (_tag != null ? HostExpr.TagToType(_tag) : typeof(IFn)); }
+            get { return _compiledType ?? (Tag != null ? HostExpr.TagToType(Tag) : typeof(IFn)); }
         }
 
         #endregion
@@ -308,12 +328,12 @@ namespace clojure.lang.CljCompiler.Ast
         {
             int i = !SupportsMeta ? 0 : 1;
 
-            Type[] ret = new Type[_closes.count() + i];
+            Type[] ret = new Type[Closes.count() + i];
 
             if (SupportsMeta)
                 ret[0] = typeof(IPersistentMap);
 
-            for (ISeq s = RT.keys(_closes); s != null; s = s.next(), i++)
+            for (ISeq s = RT.keys(Closes); s != null; s = s.next(), i++)
             {
                 LocalBinding lb = (LocalBinding)s.first();
                 ret[i] = lb.PrimitiveType ?? typeof(object);
@@ -349,12 +369,12 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 GenerateFnClass(interfaces, context);
-                _compiledType = _typeBuilder.CreateType();
+                _compiledType = TypeBuilder.CreateType();
 
                 if (context.DynInitHelper != null)
                     context.DynInitHelper.FinalizeType();
 
-                _ctorInfo = _compiledType.GetConstructors()[0];  // TODO: When we have more than one c-tor, we'll have to fix this.
+                CtorInfo = _compiledType.GetConstructors()[0];  // TODO: When we have more than one c-tor, we'll have to fix this.
                 return _compiledType;
             }
             finally
@@ -369,7 +389,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private TypeBuilder GenerateFnBaseClass(Type superType, GenContext context)
         {
-            string baseClassName = _internalName + "__base" + (IsDefType || (IsStatic && Compiler.IsCompiling) ? "" : "__" + RT.nextID().ToString());
+            string baseClassName = InternalName + "__base" + (IsDefType || (IsStatic && Compiler.IsCompiling) ? "" : "__" + RT.nextID().ToString());
 
             //Console.WriteLine("DefStaticFn {0}, {1}", baseClassName, context.AssemblyBuilder.GetName().Name);
 
@@ -377,7 +397,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             TypeBuilder baseTB = context.ModuleBuilder.DefineType(baseClassName, TypeAttributes.Public | TypeAttributes.Abstract, superType, interfaces);
             MarkAsSerializable(baseTB);
-            GenInterface.SetCustomAttributes(baseTB, _classMeta);
+            GenInterface.SetCustomAttributes(baseTB, ClassMeta);
 
             GenerateConstantFields(baseTB);
 
@@ -400,49 +420,21 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Generating constant fields
 
-        private void GenerateConstantFields(TypeBuilder baseTB)
+        internal void GenerateConstantFields(TypeBuilder baseTB)
         {
-            _constantFields = new Dictionary<int, FieldBuilder>(_constants.count());
+            ConstantFields = new Dictionary<int, FieldBuilder>(Constants.count());
 
-            for (int i = 0; i < _constants.count(); i++)
+            for (int i = 0; i < Constants.count(); i++)
             {
                 string fieldName = ConstantName(i);
                 Type fieldType = ConstantType(i);
                 if (!fieldType.IsPrimitive)
                 {
                     FieldBuilder fb = baseTB.DefineField(fieldName, fieldType, FieldAttributes.FamORAssem | FieldAttributes.Static);
-                    _constantFields[i] = fb;
+                    ConstantFields[i] = fb;
 
                 }
             }
-        }
-
-        private static string ConstantName(int i)
-        {
-            return CONST_PREFIX + i;
-        }
-
-        private Type ConstantType(int i)
-        {
-            object o = _constants.nth(i);
-            Type t = o == null ? null : o.GetType();
-            if (t != null && t.IsPublic)
-            {
-                // Java: can't emit derived fn types due to visibility
-                if (typeof(LazySeq).IsAssignableFrom(t))
-                    return typeof(ISeq);
-                else if (t == typeof(Keyword))
-                    return t;
-                else if (typeof(RestFn).IsAssignableFrom(t))
-                    return typeof(RestFn);
-                else if (typeof(AFn).IsAssignableFrom(t))
-                    return typeof(AFn);
-                else if (t == typeof(Var))
-                    return t;
-                else if (t == typeof(String))
-                    return t;
-            }
-            return typeof(object);
         }
 
         #endregion
@@ -451,11 +443,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void GenerateClosedOverFields(TypeBuilder baseTB)
         {
-            _closedOverFields = new List<FieldBuilder>(_closes.count());
-            _closedOverFieldsMap = new Dictionary<LocalBinding, FieldBuilder>(_closes.count());
+            _closedOverFields = new List<FieldBuilder>(Closes.count());
+            _closedOverFieldsMap = new Dictionary<LocalBinding, FieldBuilder>(Closes.count());
 
             // closed-overs map to instance fields.
-            for (ISeq s = RT.keys(_closes); s != null; s = s.next())
+            for (ISeq s = RT.keys(Closes); s != null; s = s.next())
             {
                 LocalBinding lb = (LocalBinding)s.first();
 
@@ -487,12 +479,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void GenerateKeywordCallsites(TypeBuilder baseTB)
         {
-            int count = _keywordCallsites.count();
+            int count = KeywordCallsites.count();
 
             _keywordLookupSiteFields = new List<FieldBuilder>(count);
             _thunkFields = new List<FieldBuilder>(count);
 
-            for (int i = 0; i < _keywordCallsites.count(); i++)
+            for (int i = 0; i < KeywordCallsites.count(); i++)
             {
                 //Keyword k = (Keyword)_keywordCallsites.nth(i);
                 string siteName = SiteNameStatic(i);
@@ -504,25 +496,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        static String SiteName(int n)
-        {
-            return "__site__" + n;
-        }
 
-        public static String SiteNameStatic(int n)
-        {
-            return SiteName(n) + "__";
-        }
-
-        static String ThunkName(int n)
-        {
-            return "__thunk__" + n;
-        }
-
-        public static String ThunkNameStatic(int n)
-        {
-            return ThunkName(n) + "__";
-        }
 
         static string CachedVarName(int n)
         {
@@ -533,7 +507,7 @@ namespace clojure.lang.CljCompiler.Ast
         // TODO: Avoid going through the static, i.e., define the interface method directly.
         void GenerateSwapThunk(TypeBuilder tb)
         {
-            if (_keywordCallsites.count() == 0)
+            if (KeywordCallsites.count() == 0)
                 return;
 
             MethodBuilder mbs = tb.DefineMethod("swapThunk_static", MethodAttributes.Public | MethodAttributes.Static, typeof(void), new Type[] { typeof(int), typeof(ILookupThunk) });
@@ -541,8 +515,8 @@ namespace clojure.lang.CljCompiler.Ast
             ParameterExpression pi = Expression.Parameter(typeof(int), "i");
             ParameterExpression pt = Expression.Parameter(typeof(ILookupThunk), "t");
 
-            List<SwitchCase> cases = new List<SwitchCase>(_keywordCallsites.count());
-            for (int i = 0; i < _keywordCallsites.count(); i++)
+            List<SwitchCase> cases = new List<SwitchCase>(KeywordCallsites.count());
+            for (int i = 0; i < KeywordCallsites.count(); i++)
                 cases.Add(
                     Expression.SwitchCase(
                         Expression.Block(
@@ -568,7 +542,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void GenerateProtocolCallsites(TypeBuilder baseTB)
         {
-            int count = _protocolCallsites.count();
+            int count = ProtocolCallsites.count();
 
             _cachedTypeFields = new List<FieldBuilder>(count);
             _cachedProtoFnFields = new List<FieldBuilder>(count);
@@ -584,20 +558,6 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        internal static String CachedClassName(int n)
-        {
-            return "__cached_class__" + n;
-        }
-
-        internal static String CachedProtoFnName(int n)
-        {
-            return "__cached_proto_fn__" + n;
-        }
-
-        internal static String CachedProtoImplName(int n)
-        {
-            return "__cached_proto_impl__" + n;
-        }
 
 
         #endregion
@@ -635,29 +595,29 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void GenerateFnClass(IPersistentVector interfaces, GenContext context)
         {
-            string publicTypeName = IsDefType || (IsStatic && Compiler.IsCompiling) ? _internalName : _internalName + "__" + RT.nextID();
+            string publicTypeName = IsDefType || (IsStatic && Compiler.IsCompiling) ? InternalName : InternalName + "__" + RT.nextID();
 
             //Console.WriteLine("DefFn {0}, {1}", publicTypeName, context.AssemblyBuilder.GetName().Name);
 
-            _typeBuilder = context.AssemblyGen.DefinePublicType(publicTypeName, _baseType, true);
+            TypeBuilder = context.AssemblyGen.DefinePublicType(publicTypeName, _baseType, true);
             for (int i = 0; i < interfaces.count(); i++)
-                _typeBuilder.AddInterfaceImplementation((Type)interfaces.nth(i));
+                TypeBuilder.AddInterfaceImplementation((Type)interfaces.nth(i));
 
-            MarkAsSerializable(_typeBuilder);
+            MarkAsSerializable(TypeBuilder);
 
-            GenInterface.SetCustomAttributes(_typeBuilder, _classMeta);
+            GenInterface.SetCustomAttributes(TypeBuilder, ClassMeta);
 
-            GenerateStaticConstructor(_typeBuilder, _baseType, context.IsDebuggable);
-            _ctorInfo = GenerateConstructor(_typeBuilder, _baseType);
+            GenerateStaticConstructor(TypeBuilder, _baseType, context.IsDebuggable);
+            CtorInfo = GenerateConstructor(TypeBuilder, _baseType);
 
             if (_altCtorDrops > 0)
-                GenerateFieldOnlyConstructor(_typeBuilder, _baseType);
+                GenerateFieldOnlyConstructor(TypeBuilder, _baseType);
 
             if (SupportsMeta)
             {
-               /*_nonMetaCtorInfo = */ GenerateNonMetaConstructor(_typeBuilder, _baseType);
+               /*_nonMetaCtorInfo = */ GenerateNonMetaConstructor(TypeBuilder, _baseType);
             }
-            GenerateMetaFunctions(_typeBuilder);
+            GenerateMetaFunctions(TypeBuilder);
             GenerateStatics(context);
             GenerateMethods(context);
         }
@@ -665,7 +625,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void GenerateStaticConstructor(TypeBuilder fnTB, Type baseType, bool isDebuggable)
         {
-            if (_constants.count() > 0)
+            if (Constants.count() > 0)
             {
                 ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
                 MethodBuilder method1 = GenerateConstants(fnTB, baseType, isDebuggable);
@@ -689,9 +649,9 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.pushThreadBindings(RT.map(RT.PrintDupVar, true));
 
                 List<Expression> inits = new List<Expression>();
-                for (int i = 0; i < _constants.count(); i++)
+                for (int i = 0; i < Constants.count(); i++)
                 {
-                    Expression expr = GenerateValue(_constants.nth(i));
+                    Expression expr = GenerateValue(Constants.nth(i));
                     if (!expr.Type.IsPrimitive)
                     {
                         Expression init =
@@ -705,7 +665,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Expression block = Expression.Block(inits);
                 LambdaExpression lambda = Expression.Lambda(block);
-                MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_constants", MethodAttributes.Private | MethodAttributes.Static);
+                MethodBuilder methodBuilder = fnTB.DefineMethod(StaticCtorHelperName + "_constants", MethodAttributes.Private | MethodAttributes.Static);
                 lambda.CompileToMethod(methodBuilder, isDebuggable );
                 return methodBuilder;
             }
@@ -902,15 +862,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         private MethodBuilder GenerateKeywordCallsiteInit(TypeBuilder fnTB, Type baseType, bool isDebuggable)
         {
-            if (_keywordCallsites.count() == 0)
+            if (KeywordCallsites.count() == 0)
                 return null;
 
             List<Expression> inits = new List<Expression>();
             ParameterExpression parm = Expression.Parameter(typeof(KeywordLookupSite), "temp");
 
-            for (int i = 0; i < _keywordCallsites.count(); i++)
+            for (int i = 0; i < KeywordCallsites.count(); i++)
             {
-                Expression kArg = GenerateValue(_keywordCallsites.nth(i));
+                Expression kArg = GenerateValue(KeywordCallsites.nth(i));
                 Expression parmAssign =
                     Expression.Assign(
                         parm,
@@ -925,7 +885,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             Expression allInits = Expression.Block(new ParameterExpression[] { parm }, inits);
             LambdaExpression lambda = Expression.Lambda(allInits);
-            MethodBuilder methodBuilder = fnTB.DefineMethod(STATIC_CTOR_HELPER_NAME + "_kwcallsites", MethodAttributes.Private | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
+            MethodBuilder methodBuilder = fnTB.DefineMethod(StaticCtorHelperName + "_kwcallsites", MethodAttributes.Private | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
             lambda.CompileToMethod(methodBuilder, isDebuggable);
             return methodBuilder;
 
@@ -959,7 +919,7 @@ namespace clojure.lang.CljCompiler.Ast
                     gen.EmitFieldGet(fb);
                 }
 
-                gen.EmitNew(_ctorInfo);
+                gen.EmitNew(CtorInfo);
             }
             else
                 gen.EmitLoadArg(0);  //this
@@ -1025,7 +985,7 @@ namespace clojure.lang.CljCompiler.Ast
             for (int i = 0; i < _altCtorDrops; i++)
                 gen.EmitNull();
 
-            gen.Emit(OpCodes.Call, _ctorInfo);
+            gen.Emit(OpCodes.Call, CtorInfo);
 
             gen.Emit(OpCodes.Ret);
             return cb;
@@ -1046,7 +1006,7 @@ namespace clojure.lang.CljCompiler.Ast
             gen.EmitNull();     // null meta
             for (int i = 0; i < noMetaCtorTypes.Length; i++)
                 gen.EmitLoadArg(i + 1);
-            gen.Emit(OpCodes.Call, _ctorInfo);
+            gen.Emit(OpCodes.Call, CtorInfo);
             gen.Emit(OpCodes.Ret);
 
             return cb;
@@ -1100,10 +1060,10 @@ namespace clojure.lang.CljCompiler.Ast
             if (IsDefType)
                 return Expression.Constant(null);
 
-            List<Expression> args = new List<Expression>(_closes.count()+1);
+            List<Expression> args = new List<Expression>(Closes.count()+1);
             if (SupportsMeta)
                 args.Add(Expression.Constant(null,typeof(IPersistentMap))); // meta
-            for (ISeq s = RT.keys(_closes); s != null; s = s.next())
+            for (ISeq s = RT.keys(Closes); s != null; s = s.next())
             {
                 LocalBinding lb = (LocalBinding)s.first();
                 if (lb.PrimitiveType != null)
@@ -1112,7 +1072,7 @@ namespace clojure.lang.CljCompiler.Ast
                     args.Add(objx.GenLocal(context, lb));
             }
 
-            Expression newExpr = Expression.New(_ctorInfo, args);
+            Expression newExpr = Expression.New(CtorInfo, args);
 
             return newExpr;
         }
@@ -1179,7 +1139,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if ( _fnMode == FnMode.Full )
             {
-                if (_closes.containsKey(lb))
+                if (Closes.containsKey(lb))
                 {
                     Expression expr = Expression.Field(_thisParam, lb.Name);
                     Type primtType = lb.PrimitiveType;
@@ -1199,7 +1159,7 @@ namespace clojure.lang.CljCompiler.Ast
         internal Expression GenUnboxedLocal(GenContext context, LocalBinding lb)
         {
             Type primType = lb.PrimitiveType;
-            if (_closes.containsKey(lb) && _fnMode == FnMode.Full)
+            if (Closes.containsKey(lb) && _fnMode == FnMode.Full)
                 return Expression.Convert(Expression.Field(_thisParam, lb.Name), primType);
             else
                 return lb.ParamExpression;
@@ -1216,13 +1176,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Expression GenVar(GenContext context, Var var)
         {
-            int i = (int)_vars.valAt(var);
+            int i = (int)Vars.valAt(var);
             return GenConstant(context, i, var);
         }
 
         internal Expression GenVarValue(GenContext context, Var v)
         {
-            int i = (int)_vars.valAt(v);
+            int i = (int)Vars.valAt(v);
             if (_fnMode == Ast.FnMode.Full && !v.isDynamic())
             {
                 //Type ft = _varCallsites.contains(v) ? typeof(IFn) : typeof(Object);
@@ -1237,7 +1197,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal Expression GenKeyword(GenContext context, Keyword kw)
         {
-            int i = (int)_keywords.valAt(kw);
+            int i = (int)Keywords.valAt(kw);
             return GenConstant(context, i, kw);
         }
 
@@ -1249,7 +1209,7 @@ namespace clojure.lang.CljCompiler.Ast
             List<Expression> exprs = new List<Expression>();
             exprs.Add(initExpr);
 
-            for (ISeq s = RT.keys(_closes); s != null; s = s.next())
+            for (ISeq s = RT.keys(Closes); s != null; s = s.next())
             {
                 LocalBinding lb = (LocalBinding)s.first();
                 if (letFnLocals.contains(lb))
@@ -1267,6 +1227,15 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Block(new ParameterExpression[] { cvtParm }, exprs);           
         }
 
+
+        #endregion
+
+        #region no-DLR code gen
+
+        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        {
+            throw new NotImplementedException();
+        }
 
         #endregion
     }

@@ -551,5 +551,16 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+
+        internal static void EmitBoxReturn(ObjExpr2 objx, GenContext context, Type type)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected static void EmitUnboxArg(ObjExpr2 objx, GenContext context, Type FieldType)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

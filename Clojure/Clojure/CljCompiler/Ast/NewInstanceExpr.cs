@@ -115,9 +115,9 @@ namespace clojure.lang.CljCompiler.Ast
             Object frm)
         {
             NewInstanceExpr ret = new NewInstanceExpr(null);
-            ret._src = frm;
-            ret._name = className.ToString();
-            ret._classMeta = GenInterface.ExtractAttributes(RT.meta(className));
+            ret.Src = frm;
+            ret.Name = className.ToString();
+            ret.ClassMeta = GenInterface.ExtractAttributes(RT.meta(className));
             ret.InternalName = ret.Name;  // ret.Name.Replace('.', '/');
             // Java: ret.objtype = Type.getObjectType(ret.internalName);
 
@@ -138,8 +138,8 @@ namespace clojure.lang.CljCompiler.Ast
                 }
                 // Java TODO: inject __meta et al into closes - when?
                 // use array map to preserve ctor order
-                ret._closes = new PersistentArrayMap(closesvec);
-                ret._fields = fmap;
+                ret.Closes = new PersistentArrayMap(closesvec);
+                ret.Fields = fmap;
                 for (int i = fieldSyms.count() - 1; i >= 0 && (((Symbol)fieldSyms.nth(i)).Name.Equals("__meta") || ((Symbol)fieldSyms.nth(i)).Name.Equals("__extmap")); --i)
                     ret._altCtorDrops++;
             }
@@ -195,7 +195,7 @@ namespace clojure.lang.CljCompiler.Ast
                     Var.pushThreadBindings(
                         RT.map(
                             Compiler.MethodVar, null,
-                            Compiler.LocalEnvVar, ret._fields,
+                            Compiler.LocalEnvVar, ret.Fields,
                             Compiler.CompileStubSymVar, Symbol.intern(null, tagName),
                             Compiler.CompileStubClassVar, stub
                             ));
@@ -450,7 +450,7 @@ namespace clojure.lang.CljCompiler.Ast
                 LambdaExpression lambda = Expression.Lambda(GenerateValue(_hintedFields));
                 lambda.CompileToMethod(mbg, context.IsDebuggable);
 
-                if (_fields.count() > _hintedFields.count())
+                if (Fields.count() > _hintedFields.count())
                 {
                     // create(IPersistentMap)
                     MethodBuilder mbc = tb.DefineMethod("create", MethodAttributes.Public | MethodAttributes.Static, tb, new Type[] { typeof(IPersistentMap) });

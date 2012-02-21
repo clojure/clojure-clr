@@ -354,8 +354,8 @@ namespace clojure.lang.CljCompiler.Ast
         private void EmitForMethod(ObjExpr2 objx, GenContext context)
         {
             // TODO: Do we still need this?
-            if (_method.DeclaringType == (Type)Compiler.CompileStubOrigClassVar.deref())
-                _method = FindEquivalentMethod(_method, objx.BaseType);
+            //if (_method.DeclaringType == (Type)Compiler.CompileStubOrigClassVar.deref())
+            //    _method = FindEquivalentMethod(_method, objx.BaseType);
 
             if (_args.Exists((x) => x.ParamType == HostArg.ParameterType.ByRef)
                 || Array.Exists(_method.GetParameters(),(x)=> x.IsOut)
@@ -382,6 +382,21 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else
                 context.GetILGenerator().Emit(OpCodes.Callvirt, _method); 
+        }
+
+        private void EmitIntrinsicCall(ObjExpr2 objx, GenContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        private bool IsIntrinsic(MethodInfo _method)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static void EmitTypedArgs(ObjExpr2 objx, GenContext context, ParameterInfo[] parameterInfo, List<HostArg> _args)
+        {
+            throw new NotImplementedException();
         }
 
         protected abstract void EmitTargetExpression(ObjExpr2 objx, GenContext context);
@@ -438,5 +453,16 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
         #endregion
+
+        internal static void EmitArgsAsArray(IPersistentVector restArgs, ObjExpr2 objx, GenContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public static void EmitTypedArgs(ObjExpr2 objx, GenContext context, ParameterInfo[] parameterInfo, IPersistentVector iPersistentVector)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

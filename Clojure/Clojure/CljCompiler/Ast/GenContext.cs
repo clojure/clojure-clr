@@ -63,7 +63,7 @@ namespace clojure.lang.CljCompiler.Ast
         MethodBuilder _mb;
         public MethodBuilder MB { get { return _mb; } }
         public ILGen GetILGen() { return new ILGen(_mb.GetILGenerator()); }
-        public ILGenerator GetILGenerator() { return _mb.GetILGenerator() }
+        public ILGenerator GetILGenerator() { return _mb.GetILGenerator(); }
 
         TypeBuilder _tb;
         public TypeBuilder TB { get { return _tb; } }
@@ -116,6 +116,15 @@ namespace clojure.lang.CljCompiler.Ast
         private GenContext Clone()
         {
             return (GenContext) this.MemberwiseClone();
+        }
+
+
+        internal GenContext WithBuilders(TypeBuilder tb, MethodBuilder mb)
+        {
+            GenContext newContext = Clone();
+            newContext._tb = tb;
+            newContext._mb = mb;
+            return newContext;
         }
 
         #endregion
