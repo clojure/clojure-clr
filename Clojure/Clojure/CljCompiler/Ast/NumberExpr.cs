@@ -83,7 +83,7 @@ namespace clojure.lang.CljCompiler.Ast
             return objx.GenConstant(context, _id, _n);
         }
 
-        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             if (rhc != RHC.Statement)
                 objx.EmitConstant(context, _id, _n);
@@ -112,7 +112,7 @@ namespace clojure.lang.CljCompiler.Ast
             throw new ArgumentException("Unsupported Number type: " + _n.GetType().Name);
         }
 
-        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             ILGenerator ilg = context.GetILGenerator();
 

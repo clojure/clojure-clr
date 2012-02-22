@@ -130,7 +130,7 @@ namespace clojure.lang.CljCompiler.Ast
         MethodBuilder GenerateStaticMethod(ObjExpr objx, GenContext context)
         {
             string methodName = StaticMethodName;
-            TypeBuilder tb = objx.TypeBuilder;
+            TypeBuilder tb = objx.TypeBlder;
 
             List<ParameterExpression> parms = new List<ParameterExpression>(_argLocals.count() + 1);
             List<Type> parmTypes = new List<Type>(_argLocals.count() + 1);
@@ -229,7 +229,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (Prim != null)
                 GeneratePrimMethod(objx, context);
 
-            TypeBuilder tb = objx.TypeBuilder;
+            TypeBuilder tb = objx.TypeBlder;
 
             MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, ReturnType, ArgTypes);
 
@@ -357,7 +357,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         void GeneratePrimMethod(ObjExpr objx, GenContext context)
         {
-            TypeBuilder tb = objx.TypeBuilder;
+            TypeBuilder tb = objx.TypeBlder;
             MethodBuilder mb = tb.DefineMethod("invokePrim", MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, StaticReturnType, StaticMethodArgTypes);
 
 
@@ -390,6 +390,72 @@ namespace clojure.lang.CljCompiler.Ast
             if (IsExplicit)
                 tb.DefineMethodOverride(mb, _explicitMethodInfo);
 
+        }
+
+        #endregion
+
+        #region No-DLR code generation
+
+        
+        protected abstract String GetMethodName();
+        protected abstract Type GetReturnType();
+        protected abstract Type[] GetArgTypes();
+
+
+        public virtual void Emit(ObjExpr fn, GenContext context)
+        {
+            MethodBuilder mb = context.TB.DefineMethod(GetMethodName(), MethodAttributes.Public, GetReturnType(), GetArgTypes());
+
+            GenContext newContext = context.WithBuilders(context.TB, mb);
+            ILGenerator ilg = newContext.GetILGenerator();
+            Label loopLabel = ilg.DefineLabel();
+            // TODO: Debug info
+            try 
+            {
+                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));
+                ilg.MarkLabel(loopLabel);
+                _body.Emit(RHC.Return,fn,newContext);
+                ilg.Emit(OpCodes.Ret);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+        }
+
+
+        protected static void EmitBody(ObjExpr objx, GenContext context, Type retType, Expr body)
+        {
+            MaybePrimitiveExpr be = (MaybePrimitiveExpr)body;
+            if (Util.IsPrimitive(retType) && be.CanEmitPrimitive)
+            {
+            }
+            else
+            {
+                body.Emit(RHC.Return, objx, context);
+                if (retType == typeof(void))
+                    context.GetILGenerator().Emit(OpCodes.Pop);
+                else
+                    context.GetILGenerator().Emit(OpCodes.Unbox, retType);
+            }
+        }
+
+
+        protected void SetCustomAttributes(MethodBuilder mb)
+        {
+            GenInterface.SetCustomAttributes(mb, _methodMeta);
+            if (_parms != null)
+            {
+                for (int i = 0; i < _parms.count(); i++)
+                {
+                    IPersistentMap meta = GenInterface.ExtractAttributes(RT.meta(_parms.nth(i)));
+                    if (meta != null && meta.count() > 0)
+                    {
+                        ParameterBuilder pb = mb.DefineParameter(i + 1, ParameterAttributes.None, ((Symbol)_parms.nth(i)).Name);
+                        GenInterface.SetCustomAttributes(pb, meta);
+                    }
+                }
+            }
         }
 
         #endregion

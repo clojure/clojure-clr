@@ -75,7 +75,7 @@ namespace clojure.lang.CljCompiler.Ast
             return HostExpr.GenBoxReturn(GenCodeUnboxed(rhc, objx, context),FieldType,objx,context);
         }
 
-        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             HostExpr.EmitBoxReturn(objx, context, FieldType);
             if (rhc == RHC.Statement)
@@ -148,7 +148,7 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _tinfo.FieldType; }
         }
 
-        public override void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             // TODO: Debug info
             context.GetILGen().EmitFieldGet(_tinfo);
@@ -165,7 +165,7 @@ namespace clojure.lang.CljCompiler.Ast
             return e;
         }
 
-        public override void EmitAssign(RHC rhc, ObjExpr2 objx, GenContext context, Expr val)
+        public override void EmitAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
         {
             ILGen ilg = context.GetILGen();
 
@@ -229,7 +229,7 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _tinfo.PropertyType; }
         }
 
-        public override void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             // TODO: Debug info
             context.GetILGen().EmitPropertyGet(_tinfo);
@@ -246,7 +246,7 @@ namespace clojure.lang.CljCompiler.Ast
             return e;
         }
 
-        public override void EmitAssign(RHC rhc, ObjExpr2 objx, GenContext context, Expr val)
+        public override void EmitAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
         {
             ILGen ilg = context.GetILGen();
 

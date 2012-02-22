@@ -438,7 +438,7 @@ namespace clojure.lang.CljCompiler.Ast
 
 
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             // TODO: Debug info
             if (_isProtocol)
@@ -453,7 +453,7 @@ namespace clojure.lang.CljCompiler.Ast
                 context.GetILGenerator().Emit(OpCodes.Pop);
         }
 
-        void EmitProto(RHC rhc, ObjExpr2 objx, GenContext context)
+        void EmitProto(RHC rhc, ObjExpr objx, GenContext context)
         {
             ILGen ilg = context.GetILGen();
             Label onLabel = ilg.DefineLabel();
@@ -515,7 +515,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.MarkLabel(endLabel);
         }
 
-        void EmitArgsAndCall(int firstArgToEmit, RHC rhc, ObjExpr2 objx, GenContext context)
+        void EmitArgsAndCall(int firstArgToEmit, RHC rhc, ObjExpr objx, GenContext context)
         {
             for ( int i=firstArgToEmit; i< Math.Min(Compiler.MaxPositionalArity,_args.count()); i++ )
             {
@@ -536,7 +536,7 @@ namespace clojure.lang.CljCompiler.Ast
             //    method.EmitClearLocals(context);
             //}
 
-            context.GetILGenerator().Emit(OpCodes.Call,Compiler.Methods_IFn_invoke[Math.Min(Compiler.MaxPositionalArity+1,_args.count())]);
+            context.GetILGenerator().Emit(OpCodes.Callvirt,Compiler.Methods_IFn_invoke[Math.Min(Compiler.MaxPositionalArity+1,_args.count())]);
         }
 
         #endregion

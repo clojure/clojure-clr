@@ -75,8 +75,8 @@ namespace clojure.lang.CljCompiler.Ast
                         : ("fn"
                           + "__" + RT.nextID());            
 
-            Name = baseName + simpleName;
-            InternalName = Name.Replace('.', '/');
+            _name = baseName + simpleName;
+            InternalName = _name.Replace('.', '/');
         }
 
         #endregion
@@ -108,11 +108,11 @@ namespace clojure.lang.CljCompiler.Ast
             ISeq origForm = form;
 
             FnExpr fn = new FnExpr(Compiler.TagOf(form));
-            fn.Src = form;
+            fn._src = form;
 
             if (((IMeta)form.first()).meta() != null)
             {
-                fn.OnceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), KW_ONCE));
+                fn._onceOnly = RT.booleanCast(RT.get(RT.meta(form.first()), KW_ONCE));
             }
 
             fn.ComputeNames(form, name);
@@ -128,7 +128,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Symbol nm = (Symbol)RT.second(form);
                 fn._thisName = nm.Name;
-                fn.IsStatic = false; // RT.booleanCast(RT.get(nm.meta(), Compiler.STATIC_KEY));
+                fn._isStatic = false; // RT.booleanCast(RT.get(nm.meta(), Compiler.STATIC_KEY));
                 form = RT.cons(Compiler.FnSym, RT.next(RT.next(form)));
             }
 
@@ -168,7 +168,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                     for (ISeq s = RT.next(form); s != null; s = RT.next(s))
                     {
-                        FnMethod f = FnMethod.Parse(fn, (ISeq)RT.first(s), fn.IsStatic);
+                        FnMethod f = FnMethod.Parse(fn, (ISeq)RT.first(s), fn._isStatic);
                         if (f.IsVariadic)
                         {
                             if (variadicMethod == null)
@@ -187,7 +187,7 @@ namespace clojure.lang.CljCompiler.Ast
                     if (variadicMethod != null && methods.Count > 0 && methods.Keys.Max() >= variadicMethod.NumParams)
                         throw new ParseException("Can't have fixed arity methods with more params than the variadic method.");
 
-                    if (fn.IsStatic && fn.Closes.count() > 0)
+                    if (fn._isStatic && fn.Closes.count() > 0)
                         throw new ParseException("static fns can't be closures");
 
                     IPersistentCollection allMethods = null;
@@ -196,7 +196,7 @@ namespace clojure.lang.CljCompiler.Ast
                     if (variadicMethod != null)
                         allMethods = RT.conj(allMethods, variadicMethod);
 
-                    fn.Methods = allMethods;
+                    fn._methods = allMethods;
                     fn._variadicMethod = variadicMethod;
                     fn.Keywords = (IPersistentMap)Compiler.KeywordsVar.deref();
                     fn.Vars = (IPersistentMap)Compiler.VarsVar.deref();
@@ -233,7 +233,7 @@ namespace clojure.lang.CljCompiler.Ast
                         fn.IsVariadic ? typeof(RestFn) : typeof(AFunction),
                         null,
                         primTypes,
-                        fn.OnceOnly,
+                        fn._onceOnly,
                         newContext);
                 }
                 else
@@ -257,7 +257,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal void AddMethod(FnMethod method)
         {
-            Methods = RT.conj(Methods,method);
+            _methods = RT.conj(_methods,method);
         }
 
 
@@ -299,23 +299,23 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override void GenerateMethods(GenContext context)
         {
-            for (ISeq s = RT.seq(Methods); s != null; s = s.next())
+            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
             {
                 FnMethod method = (FnMethod)s.first();
                 method.GenerateCode(this,context);
             }
 
             if (IsVariadic)
-                GenerateGetRequiredArityMethod(TypeBuilder, _variadicMethod.RequiredArity);
+                GenerateGetRequiredArityMethod(_typeBuilder, _variadicMethod.RequiredArity);
 
             List<int> supportedArities = new List<int>();
-            for (ISeq s = RT.seq(Methods); s != null; s = s.next())
+            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
             {
                 FnMethod method = (FnMethod)s.first();
                 supportedArities.Add(method.NumParams);
             }
 
-            GenerateHasArityMethod(TypeBuilder,supportedArities,IsVariadic,IsVariadic ? _variadicMethod.RequiredArity : 0);
+            GenerateHasArityMethod(_typeBuilder, supportedArities, IsVariadic, IsVariadic ? _variadicMethod.RequiredArity : 0);
         }
 
         static MethodBuilder GenerateGetRequiredArityMethod(TypeBuilder tb, int requiredArity)
@@ -355,7 +355,7 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 exprs.Add(Expression.Assign(p1, Expression.New(p1.Type)));
 
-            for (ISeq s = RT.seq(Methods); s != null; s = s.next())
+            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
             {
                 FnMethod method = (FnMethod)s.first();
                 LambdaExpression lambda = method.GenerateImmediateLambda(rhc,this,context);
@@ -372,5 +372,47 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+
+
+        internal void EmitForDefn(ObjExpr objx, GenContext context)
+        {
+            Emit(RHC.Expression, objx, context);
+        }
+
+        protected override void EmitMethods(GenContext context)
+        {
+            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+            {
+                FnMethod method = (FnMethod)s.first();
+                method.Emit(this, context);
+            }
+
+            if (IsVariadic)
+                EmitGetRequiredArityMethod(_typeBuilder, _variadicMethod.RequiredArity);
+
+            List<int> supportedArities = new List<int>();
+            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+            {
+                FnMethod method = (FnMethod)s.first();
+                supportedArities.Add(method.NumParams);
+            }
+
+            EmitHasArityMethod(_typeBuilder, supportedArities, IsVariadic, IsVariadic ? _variadicMethod.RequiredArity : 0);
+        }
+
+        static void EmitGetRequiredArityMethod(TypeBuilder tb, int requiredArity)
+        {
+            MethodBuilder mb = tb.DefineMethod(
+                "getRequiredArity",
+                MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual,
+                typeof(int),
+                Type.EmptyTypes);
+
+            ILGen gen = new ILGen(mb.GetILGenerator());
+            gen.EmitInt(requiredArity);
+            gen.Emit(OpCodes.Ret);
+        }
+
     }
 }

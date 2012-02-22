@@ -21,6 +21,8 @@ using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
+using System.Reflection.Emit;
+using System.Reflection;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -40,7 +42,6 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _prim; }
         }
 
-
         #endregion
 
         #region C-tors
@@ -51,6 +52,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         // For top-level compilation only
+        // TODO: Can we get rid of this when the DLR-based compile goes away?
         public FnMethod(FnExpr fn, ObjMethod parent, BodyExpr body)
             :base(fn,parent)
         {
@@ -369,5 +371,141 @@ namespace clojure.lang.CljCompiler.Ast
         }
          
         #endregion
+
+        protected override string GetMethodName()
+        {
+            return IsVariadic ? "doInvoke" : "invoke";
+        }
+
+        protected override Type GetReturnType()
+        {
+            if (_prim != null) // Objx.IsStatic)
+                return _retType;
+
+            return typeof(object);
+        }
+
+        protected override Type[] GetArgTypes()
+        {
+            if (IsVariadic && _reqParms.count() == Compiler.MaxPositionalArity)
+            {
+                Type[] ret = new Type[Compiler.MaxPositionalArity + 1];
+                for (int i = 0; i < Compiler.MaxPositionalArity + 1; i++)
+                    ret[i] = typeof(Object);
+                return ret;
+            }
+            return Compiler.CreateObjectTypeArray(NumParams);
+        }   
+    
+        public override void Emit(ObjExpr fn, GenContext context)
+        {
+            if (Prim != null)
+                DoEmitPrim(fn, context);
+            else if (fn.IsStatic)
+                DoEmitStatic(fn, context);
+            else
+                DoEmit(fn, context);
+        }
+
+        private void DoEmitStatic(ObjExpr fn, GenContext context)
+        {
+           DoEmitPrimOrStatic(fn, context,true);   
+        }
+
+        private void DoEmitPrim(ObjExpr fn, GenContext context)
+        {
+            DoEmitPrimOrStatic(fn,context,false);
+        }
+
+        private void DoEmitPrimOrStatic(ObjExpr fn, GenContext context, bool isStatic)
+        {
+            TypeBuilder tb = fn.TypeBlder;
+
+            MethodAttributes attribs = isStatic 
+                ? MethodAttributes.Static | MethodAttributes.Public
+                : MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual;
+
+            string methodName = isStatic ? "invokeStatic" : "invokePrim";
+
+            MethodBuilder baseMB = tb.DefineMethod(methodName, attribs, GetReturnType(), _argTypes);
+
+            if ( ! isStatic )
+                SetCustomAttributes(baseMB);
+
+            GenContext baseContext = context.WithBuilders(tb, baseMB);
+            ILGenerator baseIlg = baseContext.GetILGenerator();
+
+            try 
+            {
+                Label loopLabel = baseIlg.DefineLabel();
+                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));
+    
+                // TODO: debug info
+                baseIlg.MarkLabel(loopLabel);
+                EmitBody(Objx,baseContext,_retType,_body);
+                baseIlg.Emit(OpCodes.Ret);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }            
+            // Generate the regular invoke, calling the static or prim method
+
+            MethodBuilder regularMB = tb.DefineMethod(GetMethodName(), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(Object), GetArgTypes());
+            SetCustomAttributes(regularMB);
+
+            GenContext regularContext = context.WithBuilders(tb,regularMB);
+            ILGenerator regIlg = regularContext.GetILGenerator();
+
+            if ( ! isStatic )
+                regIlg.Emit(OpCodes.Ldarg_0);
+            for(int i = 0; i < _argTypes.Length; i++)
+			{   
+                regIlg.Emit(OpCodes.Ldarg,i+1);
+                HostExpr.EmitUnboxArg(fn, context, _argTypes[i]);
+			}
+            regIlg.Emit(OpCodes.Call,baseMB);
+            regIlg.Emit(OpCodes.Box,GetReturnType());
+            regIlg.Emit(OpCodes.Ret);
+        }
+
+
+
+
+        private void DoEmit(ObjExpr fn, GenContext context)
+        {
+            TypeBuilder tb = fn.TypeBlder;
+
+            MethodAttributes attribs = MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual;
+
+            MethodBuilder mb = tb.DefineMethod(GetMethodName(), attribs, GetReturnType(), GetArgTypes());
+
+            SetCustomAttributes(mb);
+
+            GenContext newContext = context.WithBuilders(tb, mb);
+            ILGenerator baseIlg = newContext.GetILGenerator();
+
+            try
+            {
+                Label loopLabel = baseIlg.DefineLabel();
+                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
+
+                // TODO: debug info
+                baseIlg.MarkLabel(loopLabel);
+                _body.Emit(RHC.Return, fn, newContext);
+                baseIlg.Emit(OpCodes.Ret);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+
+            if (IsExplicit)
+                tb.DefineMethodOverride(mb, _explicitMethodInfo);  
+        }
+
+        
+
+
     }
 }

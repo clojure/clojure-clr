@@ -122,14 +122,14 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             EmitUnboxed(rhc, objx, context);
             HostExpr.EmitBoxReturn(objx, context, typeof(Object)); 
         }
 
 
-        public override void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             ParameterExpression param = Expression.Parameter(_target.HasClrType ? _target.ClrType : typeof(object));
 

@@ -111,7 +111,7 @@ namespace clojure.lang.CljCompiler.Ast
             return ret;
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             ILGenerator ilg = context.GetILGenerator();
 

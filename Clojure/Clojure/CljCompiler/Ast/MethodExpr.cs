@@ -32,6 +32,7 @@ using Microsoft.Scripting.Runtime;
 using clojure.lang.Runtime.Binding;
 using clojure.lang.Runtime;
 using System.Reflection.Emit;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -316,7 +317,7 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _method != null && Util.IsPrimitive(_method.ReturnType); }
         }
 
-        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             Type retType;
 
@@ -336,7 +337,7 @@ namespace clojure.lang.CljCompiler.Ast
                 context.GetILGenerator().Emit(OpCodes.Pop);
         }
 
-        public override void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             if (_method != null)
             {
@@ -351,7 +352,7 @@ namespace clojure.lang.CljCompiler.Ast
                 context.GetILGenerator().Emit(OpCodes.Pop);
         }
 
-        private void EmitForMethod(ObjExpr2 objx, GenContext context)
+        private void EmitForMethod(ObjExpr objx, GenContext context)
         {
             // TODO: Do we still need this?
             //if (_method.DeclaringType == (Type)Compiler.CompileStubOrigClassVar.deref())
@@ -372,7 +373,7 @@ namespace clojure.lang.CljCompiler.Ast
                 context.GetILGenerator().Emit(OpCodes.Castclass, _method.DeclaringType);
             }
 
-            MethodExpr.EmitTypedArgs(objx, context, _method.GetParameters(), _args);
+            EmitTypedArgs(objx, context, _method.GetParameters(), _args);
             if (IsStaticCall)
             {
                 if (IsIntrinsic(_method))
@@ -384,26 +385,24 @@ namespace clojure.lang.CljCompiler.Ast
                 context.GetILGenerator().Emit(OpCodes.Callvirt, _method); 
         }
 
-        private void EmitIntrinsicCall(ObjExpr2 objx, GenContext context)
+        private void EmitIntrinsicCall(ObjExpr objx, GenContext context)
         {
             throw new NotImplementedException();
         }
 
-        private bool IsIntrinsic(MethodInfo _method)
+        // TOD: Intrinsic call rewriting
+        private bool IsIntrinsic(MethodInfo method)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
-        public static void EmitTypedArgs(ObjExpr2 objx, GenContext context, ParameterInfo[] parameterInfo, List<HostArg> _args)
-        {
-            throw new NotImplementedException();
-        }
 
-        protected abstract void EmitTargetExpression(ObjExpr2 objx, GenContext context);
+
+        protected abstract void EmitTargetExpression(ObjExpr objx, GenContext context);
         protected abstract Type GetTargetType();
 
 
-        private void EmitComplexCall(ObjExpr2 objx, GenContext context)
+        private void EmitComplexCall(ObjExpr objx, GenContext context)
         {
             List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count+1);
             paramExprs.Add(Expression.Parameter(GetTargetType()));
@@ -454,15 +453,73 @@ namespace clojure.lang.CljCompiler.Ast
         }
         #endregion
 
-        internal static void EmitArgsAsArray(IPersistentVector restArgs, ObjExpr2 objx, GenContext context)
+        internal static void EmitArgsAsArray(IPersistentVector args, ObjExpr objx, GenContext context)
         {
-            throw new NotImplementedException();
+            ILGen ilg2 = context.GetILGen();
+            ilg2.EmitInt(args.count());
+            ilg2.Emit(OpCodes.Newarr, typeof(Object));
+
+            for (int i = 0; i < args.count(); i++)
+            {
+                ilg2.Emit(OpCodes.Dup);
+                ilg2.EmitInt(i);
+                ((Expr)args.nth(i)).Emit(RHC.Expression, objx, context);
+                ilg2.Emit(OpCodes.Stelem_Ref);
+            }
         }
 
-
-        public static void EmitTypedArgs(ObjExpr2 objx, GenContext context, ParameterInfo[] parameterInfo, IPersistentVector iPersistentVector)
+        public static void EmitTypedArgs(ObjExpr objx, GenContext context, ParameterInfo[] parms, List<HostArg> args)
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < parms.Length; i++)
+                EmitTypedArg(objx, context, parms[i].ParameterType, args[i].ArgExpr);
+
         }
+
+        public static void EmitTypedArgs(ObjExpr objx, GenContext context, ParameterInfo[] parms, IPersistentVector args)
+        {
+            for (int i = 0; i < parms.Length; i++)
+                EmitTypedArg(objx, context, parms[i].ParameterType, (Expr)args.nth(i));
+        }
+
+        static void EmitTypedArg(ObjExpr objx, GenContext context, Type paramType, Expr arg)
+        {
+            Type primt = Compiler.MaybePrimitiveType(arg);
+            MaybePrimitiveExpr mpe = arg as MaybePrimitiveExpr;
+            ILGen ilg = context.GetILGen();
+
+            if (primt == paramType)
+            {
+                mpe.EmitUnboxed(RHC.Expression, objx, context);
+            }
+            else if (primt == typeof(int) && paramType == typeof(long))
+            {
+                mpe.EmitUnboxed(RHC.Expression, objx, context);
+                ilg.EmitNumericCast(typeof(int), typeof(long), true);
+            }
+            else if (primt == typeof(long) && paramType == typeof(int))
+            {
+                mpe.EmitUnboxed(RHC.Expression, objx, context);
+                if (RT.booleanCast(RT.UncheckedMathVar.deref()))
+                    ilg.Emit(OpCodes.Call,Compiler.Method_RT_uncheckedIntCast_long);
+                else
+                    ilg.Emit(OpCodes.Call,Compiler.Method_RT_intCast_long);
+            }
+            else if (primt == typeof(float) && paramType == typeof(double))
+            {
+                mpe.EmitUnboxed(RHC.Expression, objx, context);
+                ilg.EmitNumericCast(typeof(float), typeof(double), true);
+            }
+            else if (primt == typeof(double) && paramType == typeof(float))
+            {
+                mpe.EmitUnboxed(RHC.Expression, objx, context);
+                ilg.EmitNumericCast(typeof(double), typeof(float), false);
+            }
+            else
+            {
+                arg.Emit(RHC.Expression, objx, context);
+                HostExpr.EmitUnboxArg(objx, context, paramType);
+            }
+        }
+
     }
 }

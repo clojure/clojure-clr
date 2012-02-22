@@ -30,6 +30,8 @@ using System.Dynamic;
 using Microsoft.Scripting.Actions.Calls;
 using Microsoft.Scripting.Actions;
 using Microsoft.Scripting.Runtime;
+using System.Reflection.Emit;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -235,7 +237,7 @@ namespace clojure.lang.CljCompiler.Ast
         public abstract Type ClrType { get; }
         public abstract object Eval();
         public abstract Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
-        public abstract void Emit(RHC rhc, ObjExpr2 objx, GenContext context);
+        public abstract void Emit(RHC rhc, ObjExpr objx, GenContext context);
 
         #endregion
 
@@ -247,7 +249,7 @@ namespace clojure.lang.CljCompiler.Ast
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2119:SealMethodsThatSatisfyPrivateInterfaces")]
         public abstract Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context);
 
-        public abstract void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context);
+        public abstract void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context);
 
         #endregion
 
@@ -553,14 +555,28 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
 
 
-        internal static void EmitBoxReturn(ObjExpr2 objx, GenContext context, Type type)
+        internal static void EmitBoxReturn(ObjExpr objx, GenContext context, Type returnType)
         {
-            throw new NotImplementedException();
+            EmitBoxReturn(objx, context.GetILGenerator(), returnType);
         }
 
-        protected static void EmitUnboxArg(ObjExpr2 objx, GenContext context, Type FieldType)
+        internal static void EmitBoxReturn(ObjExpr objx, ILGenerator ilg, Type returnType)
+
         {
-            throw new NotImplementedException();
+            if (returnType == typeof(void))
+                ilg.Emit(OpCodes.Ldnull);
+            else if (returnType.IsPrimitive || returnType.IsValueType)
+                ilg.Emit(OpCodes.Box, returnType);
+        }
+
+
+        internal static void EmitUnboxArg(ObjExpr objx, GenContext context, Type paramType)
+        {
+             if (paramType.IsPrimitive)
+             {
+                 ILGen ilg = context.GetILGen();
+                 ilg.EmitUnbox(paramType);
+             }
         }
     }
 }

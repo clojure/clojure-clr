@@ -87,7 +87,7 @@ namespace clojure.lang.CljCompiler.Ast
             return objx.GenVar(context,_var);
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             objx.EmitVar(context, _var);
             if (rhc == RHC.Statement)

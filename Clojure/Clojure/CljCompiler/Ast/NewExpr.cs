@@ -212,8 +212,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         private Expression GenTargetExpression(ObjExpr objx, GenContext context)
         {
-            if (Compiler.CompileStubOrigClassVar.isBound && Compiler.CompileStubOrigClassVar.deref() != null && objx.TypeBuilder != null)
-                return Expression.Constant(objx.TypeBuilder, typeof(Type));
+            if (Compiler.CompileStubOrigClassVar.isBound && Compiler.CompileStubOrigClassVar.deref() != null && objx.TypeBlder != null)
+                return Expression.Constant(objx.TypeBlder, typeof(Type));
 
             if (_type != null)
                 return Expression.Constant(_type, typeof(Type));
@@ -234,7 +234,7 @@ namespace clojure.lang.CljCompiler.Ast
             // JAVA: emitClearLocals
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             if (_ctor != null)
                 EmitForMethod(rhc, objx, context);
@@ -247,13 +247,13 @@ namespace clojure.lang.CljCompiler.Ast
                 context.GetILGenerator().Emit(OpCodes.Pop);
         }
 
-        private void EmitForMethod(RHC rhc, ObjExpr2 objx, GenContext context)
+        private void EmitForMethod(RHC rhc, ObjExpr objx, GenContext context)
         {
             EmitParamsForMethod(objx,context);
             context.GetILGenerator().Emit(OpCodes.Newobj,_ctor);
         }
 
-        private void EmitParamsForMethod(ObjExpr2 objx, GenContext context)
+        private void EmitParamsForMethod(ObjExpr objx, GenContext context)
         {
             ParameterInfo[] pis = _ctor.GetParameters();
 
@@ -291,7 +291,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
         
 
-        private void EmitForNoArgValueTypeCtor(RHC rhc, ObjExpr2 objx, GenContext context)
+        private void EmitForNoArgValueTypeCtor(RHC rhc, ObjExpr objx, GenContext context)
         {
             ILGenerator ilg = context.GetILGenerator();
             LocalBuilder loc = ilg.DeclareLocal(_type);
@@ -303,7 +303,7 @@ namespace clojure.lang.CljCompiler.Ast
         // TODO: See if it is worth removing the code duplication with MethodExp.GenDlr.
 
 
-        private void EmitComplexCall(RHC rhc, ObjExpr2 objx, GenContext context)
+        private void EmitComplexCall(RHC rhc, ObjExpr objx, GenContext context)
         {
             List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count+1);
             paramExprs.Add(Expression.Parameter(_type));
@@ -355,12 +355,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         static readonly MethodInfo Method_Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle");
 
-        private void EmitTargetExpression(ObjExpr2 objx, GenContext context)
+        private void EmitTargetExpression(ObjExpr objx, GenContext context)
         {
             ILGenerator ilg = context.GetILGenerator();
 
-            if (Compiler.CompileStubOrigClassVar.isBound && Compiler.CompileStubOrigClassVar.deref() != null && objx.TypeBuilder != null)
-                ilg.Emit(OpCodes.Ldtoken, objx.TypeBuilder);
+            if (Compiler.CompileStubOrigClassVar.isBound && Compiler.CompileStubOrigClassVar.deref() != null && objx.TypeBlder != null)
+                ilg.Emit(OpCodes.Ldtoken, objx.TypeBlder);
             else if (_type != null)
                 ilg.Emit(OpCodes.Ldtoken, typeof(Object));
             else

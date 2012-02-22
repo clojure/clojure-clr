@@ -120,7 +120,7 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Block(exprs);
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             for (int i = 0; i < _exprs.count() - 1; i++)
             {
@@ -155,7 +155,7 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Block(exprs);
         }
 
-        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             for (int i = 0; i < _exprs.count() - 1; i++)
             {

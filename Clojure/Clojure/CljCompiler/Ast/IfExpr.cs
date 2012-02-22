@@ -175,12 +175,12 @@ namespace clojure.lang.CljCompiler.Ast
             return cond;
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             DoEmit(rhc, objx, context, false);
         }
 
-        void DoEmit(RHC rhc, ObjExpr2 objx, GenContext context, bool emitUnboxed)
+        void DoEmit(RHC rhc, ObjExpr objx, GenContext context, bool emitUnboxed)
         {
             ILGenerator ilg = context.GetILGenerator();
             Label nullLabel = ilg.DefineLabel();
@@ -254,7 +254,7 @@ namespace clojure.lang.CljCompiler.Ast
             return GenCode(rhc, objx, context, true);
         }
 
-        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             DoEmit(rhc, objx, context, true);
         }

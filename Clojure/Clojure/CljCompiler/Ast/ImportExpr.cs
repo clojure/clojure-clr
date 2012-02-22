@@ -86,7 +86,7 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Call(getNsExpr, Compiler.Method_Namespace_importClass1, getTypeExpr);   
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             ILGenerator ilg = context.GetILGenerator();
             ilg.Emit(OpCodes.Call,Compiler.Method_Compiler_CurrentNamespace.GetGetMethod());

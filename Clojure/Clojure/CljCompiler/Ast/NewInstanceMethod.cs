@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -84,6 +85,22 @@ namespace clojure.lang.CljCompiler.Ast
         protected override Type StaticReturnType
         {
             get { return _retType; }
+        }
+
+
+        protected override string GetMethodName()
+        {
+            return _name;
+        }
+
+        protected override Type GetReturnType()
+        {
+            return _retType;
+        }
+
+        protected override Type[] GetArgTypes()
+        {
+            return _argTypes;
         }
 
         #endregion
@@ -335,6 +352,33 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return RT.vector(name, RT.seq(paramTypes), retType);
         }
+
+        #endregion
+
+        #region Non-DLR code gen
+
+        public override void Emit(ObjExpr fn, GenContext context)
+        {
+
+            MethodBuilder mb = context.TB.DefineMethod(GetMethodName(), MethodAttributes.Public, GetReturnType(), GetArgTypes());
+            SetCustomAttributes(mb);
+
+            GenContext newContext = context.WithBuilders(context.TB, mb);
+            ILGenerator ilg = newContext.GetILGenerator();
+            Label loopLabel = ilg.DefineLabel();
+            // TODO: Debug info
+            try 
+            {
+                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));
+                ilg.MarkLabel(loopLabel);
+                EmitBody(Objx,newContext,_retType,_body);
+                ilg.Emit(OpCodes.Ret);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+        }    
 
         #endregion
     }

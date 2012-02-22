@@ -93,7 +93,7 @@ namespace clojure.lang.CljCompiler.Ast
             return _target.GenAssign(rhc,objx,context,_val);
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             _target.EmitAssign(rhc, objx, context, _val);
         }

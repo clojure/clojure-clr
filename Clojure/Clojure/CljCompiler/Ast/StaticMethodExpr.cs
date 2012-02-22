@@ -95,7 +95,7 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Constant(_type, typeof(Type));
         }
 
-        protected override void EmitTargetExpression(ObjExpr2 objx, GenContext context)
+        protected override void EmitTargetExpression(ObjExpr objx, GenContext context)
         {
             ILGenerator ilg = context.GetILGenerator();
             ilg.Emit(OpCodes.Ldtoken, _type);
@@ -111,10 +111,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal bool CanEmitIntrinsicPredicate()
         {
-            throw new NotImplementedException();
+            return false;
         }
 
-        internal void EmitIntrinsicPredicate(RHC rHC, ObjExpr2 objx, GenContext context, Label falseLabel)
+        // TODO: IMplement intrinsics!!!
+
+        internal void EmitIntrinsicPredicate(RHC rHC, ObjExpr objx, GenContext context, Label falseLabel)
         {
             throw new NotImplementedException();
         }

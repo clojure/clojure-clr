@@ -104,7 +104,7 @@ namespace clojure.lang.CljCompiler.Ast
             return objx.GenConstant(context,_id,_v);
         }
 
-        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             objx.EmitConstant(context, _id, _v);
             if (rhc == RHC.Statement)

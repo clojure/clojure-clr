@@ -105,7 +105,7 @@ namespace clojure.lang.CljCompiler.Ast
             return expr;
         }
 
-        protected override void EmitTargetExpression(ObjExpr2 objx, GenContext context)
+        protected override void EmitTargetExpression(ObjExpr objx, GenContext context)
         {
             _target.Emit(RHC.Expression, objx, context);
         }

@@ -416,12 +416,12 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             DoEmit(rhc, objx, context, false);
         }
 
-        public void DoEmit(RHC rhc, ObjExpr2 objx, GenContext context, bool emitUnboxed)
+        public void DoEmit(RHC rhc, ObjExpr objx, GenContext context, bool emitUnboxed)
         {
             ILGen ilg = context.GetILGen();
 
@@ -488,7 +488,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        private void EmitExprForInts(ObjExpr2 objx, GenContext context, Type exprType, Label defaultLabel)
+        private void EmitExprForInts(ObjExpr objx, GenContext context, Type exprType, Label defaultLabel)
         {
             ILGenerator ilg = context.GetILGenerator();
 
@@ -526,7 +526,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        private void EmitThenForInts(ObjExpr2 objx, GenContext context, Type exprType, Expr test, Expr then, Label defaultLabel, bool emitUnboxed)
+        private void EmitThenForInts(ObjExpr objx, GenContext context, Type exprType, Expr test, Expr then, Label defaultLabel, bool emitUnboxed)
         {
             ILGenerator ilg = context.GetILGenerator();
 
@@ -573,7 +573,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        void EmitExprForHashes(ObjExpr2 objx, GenContext context)
+        void EmitExprForHashes(ObjExpr objx, GenContext context)
         {
             ILGenerator ilg = context.GetILGenerator();
 
@@ -582,7 +582,7 @@ namespace clojure.lang.CljCompiler.Ast
             EmitShiftMask(ilg);
         }
 
-        void EmitThenForHashes(ObjExpr2 objx, GenContext context, Expr test, Expr then, Label defaultLabel, bool emitUnboxed)
+        void EmitThenForHashes(ObjExpr objx, GenContext context, Expr test, Expr then, Label defaultLabel, bool emitUnboxed)
         {
             ILGenerator ilg = context.GetILGenerator();
 
@@ -601,7 +601,7 @@ namespace clojure.lang.CljCompiler.Ast
             EmitExpr(objx, context, then, emitUnboxed);  
         }
 
-        private void EmitExpr(ObjExpr2 objx, GenContext context, Expr expr, bool emitUnboxed)
+        private void EmitExpr(ObjExpr objx, GenContext context, Expr expr, bool emitUnboxed)
         {
             MaybePrimitiveExpr mbe = expr as MaybePrimitiveExpr;
             if (emitUnboxed && mbe != null)
@@ -625,7 +625,7 @@ namespace clojure.lang.CljCompiler.Ast
             return GenCode(rhc, objx, context, true);
         }
 
-        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             DoEmit(rhc, objx, context, true);
         }

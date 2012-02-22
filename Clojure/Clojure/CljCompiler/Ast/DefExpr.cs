@@ -222,7 +222,7 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Block(new ParameterExpression[] { parm }, exprs);
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             objx.EmitVar(context, _var);
             ILGen ilg = context.GetILGen();
@@ -243,8 +243,8 @@ namespace clojure.lang.CljCompiler.Ast
             if (_initProvided)
             {
                 ilg.Emit(OpCodes.Dup);
-                if (_init is FnExpr2)
-                    ((FnExpr2)_init).EmitForDefn(objx, context);
+                if (_init is FnExpr)
+                    ((FnExpr)_init).EmitForDefn(objx, context);
                 else
                     _init.Emit(RHC.Expression, objx, context);
                 ilg.EmitCall(Compiler.Method_Var_bindRoot);

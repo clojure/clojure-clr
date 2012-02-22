@@ -27,7 +27,7 @@ namespace clojure.lang.CljCompiler.Ast
         object EvalAssign(Expr val);
         Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val);
 
-        void EmitAssign(RHC rhc, ObjExpr2 objx, GenContext context, Expr val);
+        void EmitAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val);
 
     }
 }

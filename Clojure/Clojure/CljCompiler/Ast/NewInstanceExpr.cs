@@ -115,10 +115,10 @@ namespace clojure.lang.CljCompiler.Ast
             Object frm)
         {
             NewInstanceExpr ret = new NewInstanceExpr(null);
-            ret.Src = frm;
-            ret.Name = className.ToString();
-            ret.ClassMeta = GenInterface.ExtractAttributes(RT.meta(className));
-            ret.InternalName = ret.Name;  // ret.Name.Replace('.', '/');
+            ret._src = frm;
+            ret._name = className.ToString();
+            ret._classMeta = GenInterface.ExtractAttributes(RT.meta(className));
+            ret.InternalName = ret._name;  // ret.Name.Replace('.', '/');
             // Java: ret.objtype = Type.getObjectType(ret.internalName);
 
             if (thisSym != null)
@@ -139,7 +139,7 @@ namespace clojure.lang.CljCompiler.Ast
                 // Java TODO: inject __meta et al into closes - when?
                 // use array map to preserve ctor order
                 ret.Closes = new PersistentArrayMap(closesvec);
-                ret.Fields = fmap;
+                ret._fields = fmap;
                 for (int i = fieldSyms.count() - 1; i >= 0 && (((Symbol)fieldSyms.nth(i)).Name.Equals("__meta") || ((Symbol)fieldSyms.nth(i)).Name.Equals("__extmap")); --i)
                     ret._altCtorDrops++;
             }
@@ -195,7 +195,7 @@ namespace clojure.lang.CljCompiler.Ast
                     Var.pushThreadBindings(
                         RT.map(
                             Compiler.MethodVar, null,
-                            Compiler.LocalEnvVar, ret.Fields,
+                            Compiler.LocalEnvVar, ret._fields,
                             Compiler.CompileStubSymVar, Symbol.intern(null, tagName),
                             Compiler.CompileStubClassVar, stub
                             ));
@@ -211,7 +211,7 @@ namespace clojure.lang.CljCompiler.Ast
                     methods = RT.conj(methods, m);
                 }
 
-                ret.Methods = methods;
+                ret._methods = methods;
                 ret.Keywords = (IPersistentMap)Compiler.KeywordsVar.deref();
                 ret.Vars = (IPersistentMap)Compiler.VarsVar.deref();
                 ret.Constants = (PersistentVector)Compiler.ConstantsVar.deref();
@@ -401,7 +401,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             HashSet<MethodInfo> implemented = new HashSet<MethodInfo>();
 
-            for (ISeq s = RT.seq(Methods); s != null; s = s.next())
+            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
             {
                 NewInstanceMethod method = (NewInstanceMethod)s.first();
                 method.GenerateCode(this,context);
@@ -413,24 +413,14 @@ namespace clojure.lang.CljCompiler.Ast
                     if (NeedsDummy(mi,implemented))
                         GenerateDummyMethod(context,mi);
 
-            GenerateHasArityMethod(TypeBuilder, null, false, 0);
+            GenerateHasArityMethod(_typeBuilder, null, false, 0);
 
         }
 
-        private bool NeedsDummy(MethodInfo mi, HashSet<MethodInfo> implemented)
-        {
-            return !implemented.Contains(mi) && mi.DeclaringType.IsInterface && !(!IsDefType && mi.DeclaringType == typeof(IObj) || mi.DeclaringType == typeof(IMeta));
-        }
 
         private void GenerateDummyMethod(GenContext context, MethodInfo mi)
         {
-            TypeBuilder tb = TypeBuilder;
-
-            MethodBuilder mb = tb.DefineMethod(ExplicitMethodName(mi), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, mi.ReturnType, Compiler.GetTypes(mi.GetParameters()));
-            ILGen gen = new ILGen(mb.GetILGenerator());
-            gen.EmitNew(typeof(NotImplementedException),Type.EmptyTypes);
-            gen.Emit(OpCodes.Throw);
-            tb.DefineMethodOverride(mb, mi);            
+            EmitDummyMethod(context, mi);
         }
 
         private static string ExplicitMethodName(MethodInfo mi)
@@ -441,16 +431,25 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override void GenerateStatics(GenContext context)
         {
+            EmitStatics(context);
+        }
+
+        #endregion
+
+        #region No-DLR code generation
+
+        protected override void EmitStatics(GenContext context)
+        {
             if (IsDefType)
             {
-                TypeBuilder tb = TypeBuilder;
+                TypeBuilder tb = _typeBuilder;
 
                 // getBasis()
                 MethodBuilder mbg = tb.DefineMethod("getBasis", MethodAttributes.Public | MethodAttributes.Static, typeof(IPersistentVector), Type.EmptyTypes);
                 LambdaExpression lambda = Expression.Lambda(GenerateValue(_hintedFields));
                 lambda.CompileToMethod(mbg, context.IsDebuggable);
 
-                if (Fields.count() > _hintedFields.count())
+                if (_fields.count() > _hintedFields.count())
                 {
                     // create(IPersistentMap)
                     MethodBuilder mbc = tb.DefineMethod("create", MethodAttributes.Public | MethodAttributes.Static, tb, new Type[] { typeof(IPersistentMap) });
@@ -469,18 +468,18 @@ namespace clojure.lang.CljCompiler.Ast
                         gen.EmitString(bName);
                         gen.EmitCall(Compiler.Method_Keyword_intern_string);
                         gen.Emit(OpCodes.Dup);
-                        gen.Emit(OpCodes.Stloc,kwLocal.LocalIndex);
+                        gen.Emit(OpCodes.Stloc, kwLocal.LocalIndex);
                         gen.EmitNull();
                         gen.EmitCall(Compiler.Method_IPersistentMap_valAt2);
                         LocalBuilder lb = gen.DeclareLocal(t);
                         locals.Add(lb);
-                        if ( t.IsPrimitive )
+                        if (t.IsPrimitive)
                             gen.EmitUnbox(t);
                         gen.Emit(OpCodes.Stloc, lb.LocalIndex);
 
                         // arg_0 = arg_0.without(local_kw);
                         gen.EmitLoadArg(0);
-                        gen.Emit(OpCodes.Ldloc,kwLocal.LocalIndex);
+                        gen.Emit(OpCodes.Ldloc, kwLocal.LocalIndex);
                         gen.EmitCall(Compiler.Method_IPersistentMap_without);
                         gen.EmitStoreArg(0);
                     }
@@ -490,13 +489,52 @@ namespace clojure.lang.CljCompiler.Ast
                     gen.EmitNull();
                     gen.EmitLoadArg(0);
                     gen.EmitCall(Compiler.Method_RT_seqOrElse);
-                    gen.EmitNew(CtorInfo);
+                    gen.EmitNew(_ctorInfo);
 
                     gen.Emit(OpCodes.Ret);
                 }
             }
         }
 
+        protected override void EmitMethods(GenContext context)
+        {
+            HashSet<MethodInfo> implemented = new HashSet<MethodInfo>();
+
+            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+            {
+                NewInstanceMethod method = (NewInstanceMethod)s.first();
+                method.Emit(this, context);
+                implemented.UnionWith(method.MethodInfos);
+            }
+
+            foreach (List<MethodInfo> ms in _methodMap.Values)
+                foreach (MethodInfo mi in ms)
+                    if (NeedsDummy(mi, implemented))
+                        EmitDummyMethod(context, mi);
+
+            
+            EmitHasArityMethod(_typeBuilder, null, false, 0);
+        }
+
+
+        private bool NeedsDummy(MethodInfo mi, HashSet<MethodInfo> implemented)
+        {
+            return !implemented.Contains(mi) && mi.DeclaringType.IsInterface && !(!IsDefType && mi.DeclaringType == typeof(IObj) || mi.DeclaringType == typeof(IMeta));
+        }
+
+        private void EmitDummyMethod(GenContext context, MethodInfo mi)
+        {
+            TypeBuilder tb = _typeBuilder;
+
+            MethodBuilder mb = tb.DefineMethod(ExplicitMethodName(mi), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, mi.ReturnType, Compiler.GetTypes(mi.GetParameters()));
+            ILGen gen = new ILGen(mb.GetILGenerator());
+            gen.EmitNew(typeof(NotImplementedException), Type.EmptyTypes);
+            gen.Emit(OpCodes.Throw);
+            tb.DefineMethodOverride(mb, mi);
+        }
+
+
         #endregion
+
     }
 }

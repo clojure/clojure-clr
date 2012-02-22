@@ -3120,6 +3120,16 @@ namespace clojure.lang
                 Compiler.Compile(rdr, cljInfo.Directory.FullName, cljInfo.Name, relativePath);
         }
 
+        // TODO: Get rid of this when DLR gone
+        public static void CompileNoDLR(String relativePath)
+        {
+
+            string cljname = relativePath + ".clj";
+            FileInfo cljInfo = FindFile(cljname);
+            using (TextReader rdr = cljInfo.OpenText())
+                Compiler.CompileNoDlr(rdr, cljInfo.Directory.FullName, cljInfo.Name, cljname);
+        }
+
 
         static FileInfo FindFile(string path, string filename)
         {

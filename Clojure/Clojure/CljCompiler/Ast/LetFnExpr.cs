@@ -179,7 +179,7 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Block(parms,forms);
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             int n = _bindingInits.count();
             ILGen ilg = context.GetILGen();
@@ -209,7 +209,7 @@ namespace clojure.lang.CljCompiler.Ast
             for (int i = 0; i < n; i++)
             {
                 BindingInit bi = (BindingInit)_bindingInits.nth(i);
-                ObjExpr2 fe = (ObjExpr2)bi.Init;
+                ObjExpr fe = (ObjExpr)bi.Init;
     
                 fe.EmitLetFnInits(context, bi.Binding.LocalVar, objx, lbset);
             }

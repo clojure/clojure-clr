@@ -241,7 +241,7 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Block(tempVars, exprs);
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             ILGen ilg = context.GetILGen();
 

@@ -81,7 +81,7 @@ namespace clojure.lang.CljCompiler.Ast
             return HostExpr.GenBoxReturn(GenCodeUnboxed(RHC.Expression, objx, context), typeof(bool), objx, context);
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             EmitUnboxed(rhc, objx, context);
             HostExpr.EmitBoxReturn(objx, context, typeof(bool));
@@ -103,7 +103,7 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.TypeIs(_expr.GenCode(RHC.Expression, objx, context), _t); ;
         }
 
-        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             _expr.Emit(RHC.Expression, objx, context);
             context.GetILGenerator().Emit(OpCodes.Isinst, _t);

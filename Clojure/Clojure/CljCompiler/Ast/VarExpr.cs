@@ -83,7 +83,7 @@ namespace clojure.lang.CljCompiler.Ast
             return objx.GenVarValue(context, _var);
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             objx.EmitVarValue(context, _var);
             if (rhc == RHC.Statement)
@@ -108,7 +108,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        public void EmitAssign(RHC rhc, ObjExpr2 objx, GenContext context, Expr val)
+        public void EmitAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
         {
             ILGenerator ilg = context.GetILGenerator();
 

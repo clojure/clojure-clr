@@ -114,10 +114,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CljCompiler\Ast\FnExpr2.cs" />
     <Compile Include="CljCompiler\Ast\IntrinsicsRewriter.cs" />
     <Compile Include="CljCompiler\Ast\CaseExpr.cs" />
-    <Compile Include="CljCompiler\Ast\ObjExpr2.cs" />
     <Compile Include="Lib\ClrTypeSpec.cs" />
     <Compile Include="Lib\ExceptionInfo.cs" />
     <Compile Include="Lib\IFnArity.cs" />

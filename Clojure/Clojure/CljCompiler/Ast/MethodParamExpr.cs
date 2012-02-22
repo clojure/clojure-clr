@@ -70,7 +70,7 @@ namespace clojure.lang.CljCompiler.Ast
             throw new InvalidOperationException("Can't emit");
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             throw new InvalidOperationException("Can't emit");
         }
@@ -88,7 +88,7 @@ namespace clojure.lang.CljCompiler.Ast
             throw new InvalidOperationException("Can't emit");
         }
 
-        public void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             throw new InvalidOperationException("Can't emit");
         }

@@ -65,7 +65,7 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Constant(String.Intern(_str));
         }
 
-        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             if (rhc != RHC.Statement)
                 context.GetILGen().EmitString(_str);

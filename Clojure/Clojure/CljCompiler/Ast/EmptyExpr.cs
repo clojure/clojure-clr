@@ -101,7 +101,7 @@ namespace clojure.lang.CljCompiler.Ast
         static readonly FieldInfo ListEmptyFI = typeof(PersistentList.EmptyList).GetField("EMPTY");
         static readonly FieldInfo VectorEmptyFI = typeof(PersistentVector).GetField("EMPTY");
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             ILGen ilg = context.GetILGen();
             if (_coll is IPersistentList)

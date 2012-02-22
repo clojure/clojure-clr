@@ -75,7 +75,7 @@ namespace clojure.lang.CljCompiler.Ast
             return Expression.Empty();
         }
 
-        public void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             // do nothing
         }

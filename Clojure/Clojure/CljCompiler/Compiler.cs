@@ -1455,7 +1455,7 @@ namespace clojure.lang
             try
             {
                 // generate loader class
-                ObjExpr2 objx = new ObjExpr2(null);
+                ObjExpr objx = new ObjExpr(null);
                 objx.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.')) + "__init";
 
                 GenContext context = GenContext.CreateWithExternalAssembly(sourcePath, ".dll", true);
@@ -1508,7 +1508,7 @@ namespace clojure.lang
         }
 
 
-        private static void Compile1NoDlr(GenContext context,  ObjExpr2 objx, object form)
+        private static void Compile1NoDlr(GenContext context,  ObjExpr objx, object form)
         {
             int line = (int)LineVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
@@ -1536,6 +1536,7 @@ namespace clojure.lang
                     objx.Vars = (IPersistentMap)VarsVar.deref();
                     objx.Constants = (PersistentVector)ConstantsVar.deref();
                     expr.Emit(RHC.Expression,objx,context);
+                    context.GetILGenerator().Emit(OpCodes.Pop);
                     expr.Eval();
                 }
             }

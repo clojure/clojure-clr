@@ -117,7 +117,7 @@ namespace clojure.lang.CljCompiler.Ast
                 throw new InvalidOperationException("Unboxed emit of unknown member.");
         }
 
-        public override void Emit(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
             ILGen ilg = context.GetILGen();
 
@@ -148,7 +148,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        public override void EmitUnboxed(RHC rhc, ObjExpr2 objx, GenContext context)
+        public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
             ILGen ilg = context.GetILGen();
 
@@ -206,7 +206,7 @@ namespace clojure.lang.CljCompiler.Ast
             return call;
         }
 
-        public override void EmitAssign(RHC rhc, ObjExpr2 objx, GenContext context, Expr val)
+        public override void EmitAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
         {
             ILGen ilg = context.GetILGen();
 
