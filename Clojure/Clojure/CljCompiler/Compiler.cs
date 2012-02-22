@@ -1432,6 +1432,7 @@ namespace clojure.lang
             object form;
 
             string sourcePath = relativePath;
+            GenContext context = GenContext.CreateWithExternalAssembly(sourcePath, ".dll", true);
 
             LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
 
@@ -1449,7 +1450,8 @@ namespace clojure.lang
                 VarsVar, PersistentHashMap.EMPTY,
                 RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
                 RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
-                RT.DataReadersVar, RT.DataReadersVar.deref()
+                RT.DataReadersVar, RT.DataReadersVar.deref(),
+                CompilerContextVar, context
                 ));
 
             try
@@ -1458,7 +1460,6 @@ namespace clojure.lang
                 ObjExpr objx = new ObjExpr(null);
                 objx.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.')) + "__init";
 
-                GenContext context = GenContext.CreateWithExternalAssembly(sourcePath, ".dll", true);
                 TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
 
                 // static load method

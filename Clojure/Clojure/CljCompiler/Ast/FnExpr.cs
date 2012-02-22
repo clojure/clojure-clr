@@ -143,7 +143,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             GenContext newContext = null;
 
-            if (Compiler.IsCompiling || hasPrimDecls)
+            if (Compiler.IsCompiling || hasPrimDecls  || ! RT.CompileDLR )
             {
                 GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? Compiler.EvalContext;
                 newContext = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
@@ -220,7 +220,7 @@ namespace clojure.lang.CljCompiler.Ast
 
 
                 //if (Compiler.IsCompiling || prims.Count > 0)
-                if (Compiler.IsCompiling)
+                if (Compiler.IsCompiling || prims.Count > 0 || !RT.CompileDLR)
                 {
                     //GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? Compiler.EvalContext;
                     //GenContext genC = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
@@ -229,12 +229,19 @@ namespace clojure.lang.CljCompiler.Ast
                     foreach (string typename in prims)
                         primTypes = primTypes.cons(Type.GetType(typename));
 
-                    fn.Compile(
-                        fn.IsVariadic ? typeof(RestFn) : typeof(AFunction),
-                        null,
-                        primTypes,
-                        fn._onceOnly,
-                        newContext);
+                    if (RT.CompileDLR)
+                        fn.Compile(
+                            fn.IsVariadic ? typeof(RestFn) : typeof(AFunction),
+                            null,
+                            primTypes,
+                            fn._onceOnly,
+                            newContext);
+                    else
+                        fn.CompileNoDlr(
+                            fn.IsVariadic ? typeof(RestFn) : typeof(AFunction),
+                            primTypes,
+                            fn._onceOnly,
+                            newContext);
                 }
                 else
                 {

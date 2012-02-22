@@ -1275,8 +1275,11 @@ namespace clojure.lang.CljCompiler.Ast
             //Console.WriteLine("DefFn {0}, {1}", publicTypeName, context.AssemblyBuilder.GetName().Name);
 
             _typeBuilder = context.AssemblyGen.DefinePublicType(publicTypeName, superType, true);
-            for (int i = 0; i < interfaces.count(); i++)
-                _typeBuilder.AddInterfaceImplementation((Type)interfaces.nth(i));
+            if (interfaces != null)
+            {
+                for (int i = 0; i < interfaces.count(); i++)
+                    _typeBuilder.AddInterfaceImplementation((Type)interfaces.nth(i));
+            }
 
             ObjExpr.MarkAsSerializable(_typeBuilder);
             GenInterface.SetCustomAttributes(_typeBuilder, _classMeta);
@@ -1380,7 +1383,7 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         EmitValue(Constants.nth(i), ilg);
                         ilg.Emit(OpCodes.Castclass, ConstantType(i));
-                        ilg.Emit(OpCodes.Stfld, _constantFields[i]);
+                        ilg.Emit(OpCodes.Stsfld, _constantFields[i]);
                     }
                 }
             }
@@ -1447,8 +1450,11 @@ namespace clojure.lang.CljCompiler.Ast
             ILGen gen = new ILGen(cb.GetILGenerator());
 
             //Call base constructor
-            ConstructorInfo baseCtorInfo = baseType.GetConstructor(Type.EmptyTypes);
-            gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
+            ConstructorInfo baseCtorInfo = baseType.GetConstructor(BindingFlags.Instance|BindingFlags.NonPublic|BindingFlags.Public,null,Type.EmptyTypes,null);
+            if (baseCtorInfo == null)
+                throw new InvalidOperationException("Unable to find default constructor for " + baseType.FullName);
+
+            gen.EmitLoadArg(0);
             gen.Emit(OpCodes.Call, baseCtorInfo);
 
             // Store Meta
@@ -1910,7 +1916,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 if (lb.IsArg)
                 {
-                    int argOffset = IsStatic ? 0 : 1;
+                    int argOffset = IsStatic ? 1 : 0;
                     ilg.Emit(OpCodes.Ldarg, lb.Index - argOffset);
                     if (primType != null)
                         HostExpr.EmitBoxReturn(this, context, primType);

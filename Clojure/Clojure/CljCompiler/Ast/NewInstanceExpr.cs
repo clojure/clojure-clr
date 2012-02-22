@@ -229,7 +229,12 @@ namespace clojure.lang.CljCompiler.Ast
 
             // TOD:  Really, the first stub here should be 'superclass' but can't handle hostexprs nested in method bodies -- reify method compilation takes place before this sucker is compiled, so can't replace the call.
             // Might be able to flag stub classes and not try to convert, leading to a dynsite.
-            ret.Compile(stub, stub, interfaces, false, genC);
+
+            if (RT.CompileDLR)
+                ret.Compile(stub, stub, interfaces, false, genC);
+            else
+                ret.CompileNoDlr(stub, interfaces, false, genC);
+
             Compiler.RegisterDuplicateType(ret.CompiledType);
 
             return ret;
