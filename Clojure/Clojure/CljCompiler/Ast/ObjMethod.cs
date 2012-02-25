@@ -426,17 +426,46 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected static void EmitBody(ObjExpr objx, GenContext context, Type retType, Expr body)
         {
+            ILGen ilg = context.GetILGen();
+
             MaybePrimitiveExpr be = (MaybePrimitiveExpr)body;
             if (Util.IsPrimitive(retType) && be.CanEmitPrimitive)
             {
+                Type bt = Compiler.MaybePrimitiveType(be);
+                if (bt == retType)
+                    be.EmitUnboxed(RHC.Return, objx, context);
+                else if (retType == typeof(long) && bt == typeof(int))
+                {
+                    be.EmitUnboxed(RHC.Return, objx, context);
+                    ilg.EmitNumericCast(typeof(int), typeof(long), false);
+                }
+                else if (retType == typeof(double) && bt == typeof(float))
+                {
+                    be.EmitUnboxed(RHC.Return, objx, context);
+                    ilg.EmitNumericCast(typeof(float), typeof(double), false);
+                }
+                else if (retType == typeof(int) && bt == typeof(long))
+                {
+                    be.EmitUnboxed(RHC.Return, objx, context);
+                    ilg.EmitCall(Compiler.Method_RT_intCast_long);
+                }
+                else if (retType == typeof(float) && bt == typeof(double))
+                {
+                    be.EmitUnboxed(RHC.Return, objx, context);
+                    ilg.EmitNumericCast(typeof(double), typeof(float), false);
+                }
+                else
+                {
+                    throw new ArgumentException(String.Format("Mismatched primitive return, expected: {0}, had: {1}", retType, be.ClrType));
+                }
             }
             else
             {
                 body.Emit(RHC.Return, objx, context);
                 if (retType == typeof(void))
-                    context.GetILGenerator().Emit(OpCodes.Pop);
+                    ilg.Emit(OpCodes.Pop);
                 else
-                    context.GetILGenerator().Emit(OpCodes.Unbox, retType);
+                    ilg.Emit(OpCodes.Unbox_Any, retType);
             }
         }
 

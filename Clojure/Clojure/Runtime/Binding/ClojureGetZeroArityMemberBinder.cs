@@ -97,7 +97,7 @@ namespace clojure.lang.Runtime.Binding
                         Expression.New(typeof(MissingMethodException).GetConstructor(new Type[] { typeof(string) }),
                             Expression.Constant(String.Format("Cannot find {0} field/property/member name {1}", _isStatic ? "static" : "instance", this.Name))),
                         typeof(object)),
-                    target.Restrictions);
+                    target.Restrictions.Merge(BindingRestrictionsHelpers.GetRuntimeTypeRestriction(target)));
         }
 
         #endregion

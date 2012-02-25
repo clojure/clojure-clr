@@ -462,7 +462,7 @@ namespace clojure.lang.CljCompiler.Ast
             for(int i = 0; i < _argTypes.Length; i++)
 			{   
                 regIlg.Emit(OpCodes.Ldarg,i+1);
-                HostExpr.EmitUnboxArg(fn, context, _argTypes[i]);
+                HostExpr.EmitUnboxArg(fn, regularContext, _argTypes[i]);
 			}
             regIlg.Emit(OpCodes.Call,baseMB);
             regIlg.Emit(OpCodes.Box,GetReturnType());

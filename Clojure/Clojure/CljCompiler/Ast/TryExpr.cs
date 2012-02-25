@@ -64,8 +64,8 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Expr _tryExpr;
         readonly Expr _finallyExpr;
         readonly IPersistentVector _catchExprs;
-        readonly int _retLocal;
-        readonly int _finallyLocal;
+        //readonly int _retLocal;
+        //readonly int _finallyLocal;
 
         #endregion
 
@@ -76,8 +76,8 @@ namespace clojure.lang.CljCompiler.Ast
             _tryExpr = tryExpr;
             _catchExprs = catchExprs;
             _finallyExpr = finallyExpr;
-            _retLocal = retLocal;
-            _finallyLocal = finallyLocal;
+            //_retLocal = retLocal;
+            //_finallyLocal = finallyLocal;
         }
 
         #endregion
@@ -249,34 +249,37 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
-            ILGen ilg = context.GetILGen();
+            ILGenerator ilg = context.GetILGenerator();
 
-            Label beginLabel = ilg.BeginExceptionBlock();
+            LocalBuilder retLocal = ilg.DeclareLocal(typeof(Object));
+
+            Label endLabel = ilg.BeginExceptionBlock();
             _tryExpr.Emit(rhc, objx, context);
             if (rhc != RHC.Statement)
-                ilg.Emit(OpCodes.Stloc, _retLocal);
-            ilg.Emit(OpCodes.Leave,beginLabel);
+                ilg.Emit(OpCodes.Stloc, retLocal);
+            //ilg.Emit(OpCodes.Leave, endLabel);
 
             for (int i = 0; i < _catchExprs.count(); i++)
             {
                 CatchClause clause = (CatchClause)_catchExprs.nth(i);
                 ilg.BeginCatchBlock(clause.Type);
                 // Exception should be on the stack.  Put in clause local
-                ilg.Emit(OpCodes.Stloc, clause.Lb.Index);
+                clause.Lb.LocalVar = ilg.DeclareLocal(clause.Type);
+                ilg.Emit(OpCodes.Stloc, clause.Lb.LocalVar);
                 clause.Handler.Emit(rhc, objx, context);
                 if (rhc != RHC.Statement)
-                    ilg.Emit(OpCodes.Stloc, _retLocal);
+                    ilg.Emit(OpCodes.Stloc, retLocal);
+                //ilg.Emit(OpCodes.Leave, endLabel);
             }
 
-            if ( _finallyExpr != null )
+            if (_finallyExpr != null)
             {
                 ilg.BeginFinallyBlock();
                 _finallyExpr.Emit(RHC.Statement, objx, context);
             }
-
             ilg.EndExceptionBlock();
             if (rhc != RHC.Statement)
-                ilg.Emit(OpCodes.Ldloc, _retLocal);
+                ilg.Emit(OpCodes.Ldloc, retLocal);
         }
 
         #endregion
