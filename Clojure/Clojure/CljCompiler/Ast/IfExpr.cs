@@ -186,6 +186,7 @@ namespace clojure.lang.CljCompiler.Ast
             Label nullLabel = ilg.DefineLabel();
             Label falseLabel = ilg.DefineLabel();
             Label endLabel = ilg.DefineLabel();
+            Label trueLabel = ilg.DefineLabel();
 
             //  TODO: DEBUG INFO
 
@@ -200,12 +201,29 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else
             {
+                LocalBuilder tempLoc = ilg.DeclareLocal(typeof(Object));
+                tempLoc.SetLocalSymInfo("test");
+
                 _testExpr.Emit(RHC.Expression, objx, context);
                 ilg.Emit(OpCodes.Dup);
+                ilg.Emit(OpCodes.Stloc, tempLoc);
+
                 ilg.Emit(OpCodes.Brfalse, nullLabel);
-                ilg.Emit(OpCodes.Castclass, typeof(bool));
-                ilg.Emit(OpCodes.Brfalse, falseLabel);
+
+                ilg.Emit(OpCodes.Ldloc, tempLoc);
+                ilg.Emit(OpCodes.Isinst, typeof(bool));
+                ilg.Emit(OpCodes.Ldnull);
+                ilg.Emit(OpCodes.Cgt_Un);
+                ilg.Emit(OpCodes.Brfalse, trueLabel);
+
+                ilg.Emit(OpCodes.Ldloc, tempLoc);
+                ilg.Emit(OpCodes.Unbox_Any, typeof(bool));
+                ilg.Emit(OpCodes.Ldc_I4_0);
+                ilg.Emit(OpCodes.Ceq);
+                ilg.Emit(OpCodes.Brtrue, falseLabel);
             }
+
+            ilg.MarkLabel(trueLabel);
 
             if (emitUnboxed)
                 ((MaybePrimitiveExpr)_thenExpr).EmitUnboxed(rhc, objx, context);
@@ -214,7 +232,6 @@ namespace clojure.lang.CljCompiler.Ast
 
             ilg.Emit(OpCodes.Br, endLabel);
             ilg.MarkLabel(nullLabel);
-            ilg.Emit(OpCodes.Pop);
             ilg.MarkLabel(falseLabel);
 
             if (emitUnboxed)

@@ -1309,8 +1309,8 @@ namespace clojure.lang.CljCompiler.Ast
             EmitStatics(context);
             EmitMethods(context);
 
-            if (KeywordCallsites.count() > 0)
-                EmitSwapThunk(_typeBuilder);
+            //if (KeywordCallsites.count() > 0)
+            //    EmitSwapThunk(_typeBuilder);
 
             _compiledType = _typeBuilder.CreateType();
 
@@ -1363,9 +1363,9 @@ namespace clojure.lang.CljCompiler.Ast
                 EmitValue(k, ilg);
                 ilg.Emit(OpCodes.Newobj, Compiler.Ctor_KeywordLookupSite_1);
                 ilg.Emit(OpCodes.Dup);
-                ilg.Emit(OpCodes.Stfld, _keywordLookupSiteFields[i]);
+                ilg.Emit(OpCodes.Stsfld, _keywordLookupSiteFields[i]);
                 ilg.Emit(OpCodes.Castclass, typeof(ILookupThunk));
-                ilg.Emit(OpCodes.Stfld, _thunkFields[i]);
+                ilg.Emit(OpCodes.Stsfld, _thunkFields[i]);
             }
         }
 
@@ -1543,6 +1543,8 @@ namespace clojure.lang.CljCompiler.Ast
 
             ilg.EmitLoadArg(1);
             ilg.Emit(OpCodes.Switch, labels);
+            ilg.Emit(OpCodes.Br, endLabel);
+
             for (int i = 0; i < KeywordCallsites.count(); i++)
             {
                 ilg.MarkLabel(labels[i]);
@@ -1550,6 +1552,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.EmitFieldSet(_thunkFields[i]);
                 ilg.Emit(OpCodes.Br, endLabel);
             }
+
             ilg.MarkLabel(endLabel);
             ilg.Emit(OpCodes.Ret);
         }
@@ -1843,7 +1846,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg2.Emit(OpCodes.Dup);
                 ilg2.EmitInt(i++);
                 EmitValue(item, ilg);
-                HostExpr.EmitBoxReturn(this, ilg, item.GetType());
+                //HostExpr.EmitBoxReturn(this, ilg, item.GetType());
                 ilg2.Emit(OpCodes.Stelem_Ref);
             }
         }
@@ -1918,12 +1921,14 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     int argOffset = IsStatic ? 1 : 0;
                     ilg.Emit(OpCodes.Ldarg, lb.Index - argOffset);
-                    if (primType != null)
-                        HostExpr.EmitBoxReturn(this, context, primType);
                 }
                 else
+                {
                     ilg.Emit(OpCodes.Ldloc, lb.LocalVar);
-            }
+                }
+                if (primType != null)
+                    HostExpr.EmitBoxReturn(this, context, primType);
+             }
         }
 
         internal void EmitUnboxedLocal(GenContext context, LocalBinding lb)

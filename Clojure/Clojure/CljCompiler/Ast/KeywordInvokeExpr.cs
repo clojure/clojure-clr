@@ -190,6 +190,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Ldloc,resultLoc);                                  // result
             ilg.Emit(OpCodes.Br,endLabel);
 
+            ilg.MarkLabel(faultLabel);
             ilg.EmitFieldGet(objx.KeywordLookupSiteField(_siteIndex));           // site
             ilg.Emit(OpCodes.Ldloc,targetLoc);                                  // site, target
             ilg.EmitCall(Compiler.Method_ILookupSite_fault);                    // new-thunk
