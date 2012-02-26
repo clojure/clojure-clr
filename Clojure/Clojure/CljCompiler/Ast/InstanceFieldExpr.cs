@@ -214,13 +214,16 @@ namespace clojure.lang.CljCompiler.Ast
             if (_targetType != null && _tinfo != null)
             {
                 _target.Emit(RHC.Expression, objx, context);
-                ilg.Emit(OpCodes.Isinst, FieldType);
+                ilg.Emit(OpCodes.Castclass, _targetType);
                 val.Emit(RHC.Expression, objx, context);
                 LocalBuilder tmp = ilg.DeclareLocal(typeof(object));
                 tmp.SetLocalSymInfo("valTemp");
                 ilg.Emit(OpCodes.Dup);
                 ilg.Emit(OpCodes.Stloc, tmp);
-                HostExpr.EmitUnboxArg(objx, context, FieldType);
+                if (FieldType.IsPrimitive)
+                    HostExpr.EmitUnboxArg(objx, context, FieldType);
+                else
+                    ilg.Emit(OpCodes.Castclass, FieldType);
                 EmitSet(ilg);
                 ilg.Emit(OpCodes.Ldloc, tmp);
             }

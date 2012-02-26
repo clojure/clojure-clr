@@ -1917,8 +1917,13 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 if (lb.IsArg)
                 {
-                    int argOffset = IsStatic ? 1 : 0;
-                    ilg.Emit(OpCodes.Ldarg, lb.Index - argOffset);
+                    //int argOffset = IsStatic ? 1 : 0;
+                    //ilg.Emit(OpCodes.Ldarg, lb.Index - argOffset);
+                    ilg.Emit(OpCodes.Ldarg, lb.Index);
+                }
+                else if (lb.IsThis)
+                {
+                    ilg.Emit(OpCodes.Ldarg, 0);
                 }
                 else
                 {
@@ -1943,6 +1948,10 @@ namespace clojure.lang.CljCompiler.Ast
                 //int argOffset = IsStatic ? 0 : 1;
                 //ilg.Emit(OpCodes.Ldarg, lb.Index + argOffset);
                 ilg.Emit(OpCodes.Ldarg, lb.Index);
+            }
+            else if (lb.IsThis)
+            {
+                ilg.Emit(OpCodes.Ldarg, 0);
             }
             else
                 ilg.Emit(OpCodes.Ldloc, lb.LocalVar);

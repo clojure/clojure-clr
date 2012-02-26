@@ -615,15 +615,27 @@ namespace clojure.lang
              return PersistentHashSet.EMPTY;
          }
 
+
+         internal static LocalBinding RegisterLocalThis(Symbol sym, Symbol tag, Expr init)
+         {
+             return RegisterLocalInternal(sym, tag, init, true, false, false);
+         }
+
         internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init, bool isArg)
         {
-            return RegisterLocal(sym, tag, init, isArg, false);
+             return RegisterLocalInternal(sym, tag, init, false, isArg, false);
         }
+ 
 
         internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init, bool isArg, bool isByRef)
         {
+            return RegisterLocalInternal(sym,tag,init,false,isArg,isByRef);
+        }
+
+        private static LocalBinding RegisterLocalInternal(Symbol sym, Symbol tag, Expr init, bool isThis, bool isArg, bool isByRef)
+        {
             int num = GetAndIncLocalNum();
-            LocalBinding b = new LocalBinding(num, sym, tag, init, isArg, isByRef);
+            LocalBinding b = new LocalBinding(num, sym, tag, init, isThis, isArg, isByRef);
             IPersistentMap localsMap = (IPersistentMap)LocalEnvVar.deref();
             LocalEnvVar.set(RT.assoc(localsMap, b.Symbol, b));
             ObjMethod method = (ObjMethod)MethodVar.deref();

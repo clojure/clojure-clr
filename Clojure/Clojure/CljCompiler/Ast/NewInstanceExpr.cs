@@ -131,7 +131,7 @@ namespace clojure.lang.CljCompiler.Ast
                 for (int i = 0; i < fieldSyms.count(); i++)
                 {
                     Symbol sym = (Symbol)fieldSyms.nth(i);
-                    LocalBinding lb = new LocalBinding(-1, sym, null, new MethodParamExpr(Compiler.TagType(Compiler.TagOf(sym))), false, false);
+                    LocalBinding lb = new LocalBinding(-1, sym, null, new MethodParamExpr(Compiler.TagType(Compiler.TagOf(sym))), false, false, false);
                     fmap = fmap.assoc(sym, lb);
                     closesvec[i * 2] = lb;
                     closesvec[i * 2 + 1] = lb;

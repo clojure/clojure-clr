@@ -172,7 +172,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 // register 'this' as local 0  
                 if ( !isStatic )
-                    method._thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null,false);
+                    method._thisBinding = Compiler.RegisterLocalThis(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null);
 
                 ParamParseState paramState = ParamParseState.Required;
                 IPersistentVector argLocals = PersistentVector.EMPTY;

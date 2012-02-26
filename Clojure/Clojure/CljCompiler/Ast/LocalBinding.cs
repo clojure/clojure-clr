@@ -81,6 +81,11 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _isByRef; }
         }
 
+        readonly bool _isThis;
+
+        public bool IsThis { get { return _isThis; } }
+    
+
         //bool _canBeCleared = true;  //JVM-only -- we do not do clearing
 
         bool _recurMismatch = false;
@@ -95,7 +100,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region C-tors
 
-        public LocalBinding(int index, Symbol sym, Symbol tag, Expr init, bool isArg, bool isByRef)
+        public LocalBinding(int index, Symbol sym, Symbol tag, Expr init, bool isThis, bool isArg, bool isByRef)
         {
             if (Compiler.MaybePrimitiveType(init) != null && tag != null)
                 throw new InvalidOperationException("Can't type hint a local with a primitive initializer");
@@ -105,6 +110,7 @@ namespace clojure.lang.CljCompiler.Ast
             _tag = tag;
             _init = init;
             _name = Compiler.munge(sym.Name);
+            _isThis = isThis;
             _isArg = isArg;
             _isByRef = isByRef;
         }

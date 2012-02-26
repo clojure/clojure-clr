@@ -408,8 +408,10 @@ namespace clojure.lang.CljCompiler.Ast
             paramExprs.Add(Expression.Parameter(GetTargetType()));
             EmitTargetExpression(objx,context);
 
+            int i = 0;
             foreach ( HostArg ha in _args )
             {
+                i++;
                 Expr e = ha.ArgExpr;
                 Type argType = e.HasClrType ? (e.ClrType ?? typeof(Object)) : typeof(Object);
 
@@ -421,7 +423,7 @@ namespace clojure.lang.CljCompiler.Ast
                         break;
 
                     case HostArg.ParameterType.Standard:
-                        paramExprs.Add(Expression.Parameter(argType,ha.LocalBinding.Name));
+                        paramExprs.Add(Expression.Parameter(argType, ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
                         ha.ArgExpr.Emit(RHC.Expression,objx,context);
                         break;
 
