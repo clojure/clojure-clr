@@ -20,6 +20,7 @@ using Microsoft.Scripting.Ast;
 using System.Linq.Expressions;
 #endif
 using System.Reflection.Emit;
+using Microsoft.Scripting.Generation;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -105,8 +106,21 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
+            ILGen ilg = context.GetILGen();
+            Label endLabel = ilg.DefineLabel();
+            Label falseLabel = ilg.DefineLabel();
+
             _expr.Emit(RHC.Expression, objx, context);
-            context.GetILGenerator().Emit(OpCodes.Isinst, _t);
+            ilg.Emit(OpCodes.Isinst, _t);
+            ilg.Emit(OpCodes.Ldnull);
+            ilg.Emit(OpCodes.Ceq);
+            ilg.Emit(OpCodes.Brfalse_S, falseLabel);
+            ilg.EmitBoolean(true);
+            ilg.Emit(OpCodes.Br_S, endLabel);
+            ilg.MarkLabel(falseLabel);
+            ilg.EmitBoolean(false);
+            ilg.MarkLabel(endLabel);
+
         }
 
 
