@@ -33,6 +33,7 @@ using clojure.lang.CljCompiler.Ast;
 using System.Text;
 using clojure.lang.Runtime.Binding;
 using clojure.lang.Runtime;
+using System.Runtime.CompilerServices;
 
 namespace clojure.lang
 {
@@ -411,8 +412,9 @@ namespace clojure.lang
 
             Expression[] argExprs = ClrExtensions.ArrayInsert<Expression>(targetExpr, exprs);
 
-            // TODO: Get rid of Default
-            InvokeMemberBinder binder = new ClojureInvokeMemberBinder(ClojureContext.Default, methodName, argExprs.Length, isStatic);
+            CallSiteBinder binder = args.Length == 0 
+                ? (CallSiteBinder) new ClojureGetZeroArityMemberBinder(ClojureContext.Default, methodName, isStatic) 
+                : (CallSiteBinder) new ClojureInvokeMemberBinder(ClojureContext.Default, methodName, argExprs.Length, isStatic);
 
             Expression dyn = Expression.Dynamic(binder, typeof(object), argExprs);
 

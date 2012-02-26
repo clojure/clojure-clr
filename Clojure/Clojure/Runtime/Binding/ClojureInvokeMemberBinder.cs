@@ -84,7 +84,14 @@ namespace clojure.lang.Runtime.Binding
             if (methods.Count > 0)
             {
                 BindingTarget bt;
-                DynamicMetaObject dmo = _context.Binder.CallMethod(res, methods,BindingRestrictions.Empty,Name, NarrowingLevel.None, NarrowingLevel.All, out bt);
+                DynamicMetaObject dmo = _context.Binder.CallMethod(
+                    res, 
+                    methods,
+                    target.Restrictions.Merge(BindingRestrictionsHelpers.GetRuntimeTypeRestriction(target).Merge(BindingRestrictions.Combine(args))),
+                    Name, 
+                    NarrowingLevel.None, 
+                    NarrowingLevel.All, 
+                    out bt);
                 dmo = DynUtils.MaybeBoxReturnValue(dmo);
 
                 //; Console.WriteLine(dmo.Expression.DebugView);
@@ -97,7 +104,7 @@ namespace clojure.lang.Runtime.Binding
                         Expression.New(typeof(MissingMethodException).GetConstructor(new Type[] { typeof(string) }),
                             Expression.Constant(String.Format("Cannot find member {0} matching args", this.Name))),
                         typeof(object)),
-                    target.Restrictions.Merge(BindingRestrictions.Combine(args)));
+                    target.Restrictions.Merge(BindingRestrictionsHelpers.GetRuntimeTypeRestriction(target).Merge(BindingRestrictions.Combine(args))));
         }
 
         public override DynamicMetaObject FallbackInvoke(DynamicMetaObject target, DynamicMetaObject[] args, DynamicMetaObject errorSuggestion)
