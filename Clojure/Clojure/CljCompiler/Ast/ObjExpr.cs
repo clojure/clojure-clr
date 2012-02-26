@@ -2007,9 +2007,9 @@ namespace clojure.lang.CljCompiler.Ast
                         objx.EmitLocal(context,lb);
                         ilg.Emit(OpCodes.Stfld,fb);
                     }
-
                 }
             }
+            ilg.Emit(OpCodes.Pop);
         }
 
         protected static void EmitHasArityMethod(TypeBuilder tb, IList<int> arities, bool isVariadic, int reqArity)

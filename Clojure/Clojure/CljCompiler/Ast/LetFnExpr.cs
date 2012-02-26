@@ -191,6 +191,8 @@ namespace clojure.lang.CljCompiler.Ast
                 BindingInit bi = (BindingInit)_bindingInits.nth(i);
                 LocalBuilder local = ilg.DeclareLocal(typeof(IFn));
                 bi.Binding.LocalVar = local;
+                ilg.Emit(OpCodes.Ldnull);
+                ilg.Emit(OpCodes.Stloc, local);
             }
 
             // Then initialize
@@ -210,7 +212,8 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 BindingInit bi = (BindingInit)_bindingInits.nth(i);
                 ObjExpr fe = (ObjExpr)bi.Init;
-    
+
+                ilg.Emit(OpCodes.Ldloc, bi.Binding.LocalVar);
                 fe.EmitLetFnInits(context, bi.Binding.LocalVar, objx, lbset);
             }
 
