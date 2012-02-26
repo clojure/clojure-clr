@@ -1473,6 +1473,7 @@ namespace clojure.lang
 
                 initMB.GetILGenerator().Emit(OpCodes.Ret);
 
+                // static fields for constants
                 objx.EmitConstantFieldDefs(initTB);
                 MethodBuilder constInitsMB = objx.EmitConstants(initTB);
 
@@ -1480,12 +1481,10 @@ namespace clojure.lang
                 ConstructorBuilder cb = initTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
                 ILGenerator cbGen = cb.GetILGenerator();
 
-                cbGen.Emit(OpCodes.Call,constInitsMB);
-
                 Label exBlock = cbGen.BeginExceptionBlock();
 
                 cbGen.Emit(OpCodes.Call,Method_Compiler_PushNS);
-                cbGen.Emit(OpCodes.Call,initMB);
+                cbGen.Emit(OpCodes.Call, constInitsMB);
 
                 cbGen.BeginFinallyBlock();
                 cbGen.Emit(OpCodes.Call, Method_Var_popThreadBindings);
@@ -1536,6 +1535,7 @@ namespace clojure.lang
                     objx.Keywords = (IPersistentMap)KeywordsVar.deref();
                     objx.Vars = (IPersistentMap)VarsVar.deref();
                     objx.Constants = (PersistentVector)ConstantsVar.deref();
+                    objx.EmitConstantFieldDefs(context.TB);
                     expr.Emit(RHC.Expression,objx,context);
                     context.GetILGenerator().Emit(OpCodes.Pop);
                     expr.Eval();

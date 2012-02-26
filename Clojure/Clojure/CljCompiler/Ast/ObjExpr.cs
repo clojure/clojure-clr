@@ -1382,7 +1382,8 @@ namespace clojure.lang.CljCompiler.Ast
                     if (_constantFields[i] != null)
                     {
                         EmitValue(Constants.nth(i), ilg);
-                        ilg.Emit(OpCodes.Castclass, ConstantType(i));
+                        if ( Constants.nth(i).GetType() != ConstantType(i) )
+                            ilg.Emit(OpCodes.Castclass, ConstantType(i));
                         ilg.Emit(OpCodes.Stsfld, _constantFields[i]);
                     }
                 }
@@ -1603,19 +1604,26 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void EmitConstantFieldDefs(TypeBuilder baseTB)
         {
-            _constantFields = new Dictionary<int, FieldBuilder>(Constants.count());
+            // We have to do this different than the JVM version.
+            // The JVM does all these at the end.
+            // That works for the usual ObjExpr, but not for the top-level one that becomes __Init__.Initialize in the assembly.
+            // That one need the constants defined incrementally.
+            // This version accommodates the all-at-end approach for general ObjExprs and the incremental approach in Compiler.Compile1.
 
-            for (int i = 0; i < Constants.count(); i++)
+            if (_constantFields == null)
+                _constantFields = new Dictionary<int, FieldBuilder>(Constants.count());
+
+            int nextKey = _constantFields.Count == 0 ? 0 : _constantFields.Keys.Max() + 1;
+
+            for (int i = nextKey; i < Constants.count(); i++)
             {
-                string fieldName = ConstantName(i);
-                Type fieldType = ConstantType(i);
-                //object val = Constants.nth(i);
-                //Type valType = val == null ? fieldType : val.GetType();
-                //if (!valType.IsPrimitive)
-                //{
+                if (!_constantFields.ContainsKey(i))
+                {
+                    string fieldName = ConstantName(i);
+                    Type fieldType = ConstantType(i);
                     FieldBuilder fb = baseTB.DefineField(fieldName, fieldType, FieldAttributes.FamORAssem | FieldAttributes.Static);
                     _constantFields[i] = fb;
-                //}
+                }
             }
         }
 
@@ -1633,13 +1641,8 @@ namespace clojure.lang.CljCompiler.Ast
                     FieldBuilder fb;
                     if (_constantFields.TryGetValue(i, out fb))
                     {
-                        //object val = Constants.nth(i);
-                        //Type valType = val == null ? fb.FieldType : val.GetType();
-                        
                         EmitValue(Constants.nth(i), mb);
-                        //if (valType.IsPrimitive)
-                        //    ilg.Emit(OpCodes.Box,valType); 
-                        //else 
+                        if (Constants.nth(i).GetType() != ConstantType(i))
                             ilg.Emit(OpCodes.Castclass, ConstantType(i));
                         ilg.Emit(OpCodes.Stsfld, fb);
                     }
@@ -1854,11 +1857,6 @@ namespace clojure.lang.CljCompiler.Ast
         internal void EmitConstant(GenContext context, int id, object val)
         {
             ////if (_fnMode == FnMode.Full && !val.GetType().IsPrimitive)
- 
-            //if (!val.GetType().IsPrimitive)
-            //    EmitValue(val, context.GetILGenerator());
-            //else
-            //    context.GetILGenerator().Emit(OpCodes.Ldsfld, _constantFields[id]);
 
             FieldBuilder fb = null;
             if (_constantFields != null && _constantFields.TryGetValue(id, out fb))
