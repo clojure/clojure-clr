@@ -249,6 +249,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
+            if (_catchExprs.count() == 0 && _finallyExpr == null)
+            {
+                // degenerate case
+                _tryExpr.Emit(rhc, objx, context);
+                return;
+            }
+
             ILGenerator ilg = context.GetILGenerator();
 
             LocalBuilder retLocal = ilg.DeclareLocal(typeof(Object));
