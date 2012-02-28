@@ -30,7 +30,7 @@ namespace clojure.lang
 
         //static GenContext _staticContext = new GenContext("proxy", CompilerMode.Immediate);
         const string _methodMapFieldName = "__clojureFnMap";
-        static readonly MethodInfo Method_IPersistentCollection_Cons = typeof(IPersistentCollection).GetMethod("cons");
+        static readonly MethodInfo Method_IPersistentMap_Cons = typeof(IPersistentMap).GetMethod("cons");
         static readonly MethodInfo Method_RT_get = typeof(RT).GetMethod("get",new Type[]{ typeof(object), typeof(object) });
         static readonly ConstructorInfo CtorInfo_NotImplementedException_1 = typeof(NotImplementedException).GetConstructor(new Type[] { typeof(string) });
 
@@ -171,10 +171,10 @@ namespace clojure.lang
 
             gen.Emit(OpCodes.Dup);
             gen.EmitFieldGet(fb);                   // gen.Emit(OpCodes.Ldfld, fb);
-            gen.Emit(OpCodes.Castclass, typeof(IPersistentCollection));
+            gen.Emit(OpCodes.Castclass, typeof(IPersistentMap));
 
             gen.EmitLoadArg(1);                                     // gen.Emit(OpCodes.Ldarg_1);
-            gen.EmitCall(Method_IPersistentCollection_Cons);        //gen.Emit(OpCodes.Call, Method_IPersistentCollection_Cons);
+            gen.EmitCall(Method_IPersistentMap_Cons);        //gen.Emit(OpCodes.Call, Method_IPersistentCollection_Cons);
 
             gen.EmitFieldSet(fb);                                   // gen.Emit(OpCodes.Stfld, fb);
             gen.Emit(OpCodes.Ret);

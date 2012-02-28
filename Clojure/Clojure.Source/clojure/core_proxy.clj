@@ -268,7 +268,7 @@
   [& bases]
     (let [[super interfaces] (get-super-and-interfaces bases)
           pname (proxy-name super interfaces)]
-      (or  (RT/classForName pname)                            ;;; (RT/loadClassForName pname)
+      (or  (RT/classForName pname)                            ;;; (RT/loadClassForName pname)  ;; TODO: This causes a problem with muliple compiles
            (generate-proxy super interfaces))))               ;;; (let [[cname bytecode] (generate-proxy super interfaces)]
                                                               ;;;   (. ^DynamicClassLoader (deref clojure.lang.Compiler/LOADER) (defineClass pname bytecode))))))
 
