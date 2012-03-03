@@ -3093,10 +3093,12 @@ namespace clojure.lang
                 else
                     LoadScript(cljInfo, cljname); ;
             }
-            else if (!loaded)
+            else if (!loaded && tryLoadAsEmbeddedResource)
             {
                 LoadEmbeddedAssembly(relativePath, failIfNotFound);
             }
+            else if (!loaded && failIfNotFound)
+                throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));
         }
 
         static byte[] FindResource(string resourceName)
