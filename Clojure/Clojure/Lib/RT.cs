@@ -582,7 +582,7 @@ namespace clojure.lang
 
         static void DoInit()
         {
-            load("clojure/core");
+            load("clojure/core", true, true);
             //load("clojure/zip", false);
             ////load("clojure/xml", false);
             //load("clojure/set", false);
@@ -3050,7 +3050,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static void load(String relativePath)
         {
-            load(relativePath, true, true);
+            load(relativePath, true, false);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
