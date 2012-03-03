@@ -572,11 +572,89 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal static void EmitUnboxArg(ObjExpr objx, GenContext context, Type paramType)
         {
-             if (paramType.IsPrimitive)
-             {
-                 ILGen ilg = context.GetILGen();
-                 ilg.EmitUnbox(paramType);
-             }
+            EmitUnboxArg(context.GetILGenerator(), paramType);
+        }
+
+
+        internal static void EmitUnboxArg(ILGenerator gen, Type paramType)
+        {
+            if (paramType.IsPrimitive)
+            {
+                MethodInfo m = null;
+
+                if (paramType == typeof(bool))
+                {
+                    m = HostExpr.Method_RT_booleanCast;
+                }
+                else if (paramType == typeof(char))
+                {
+                    m = HostExpr.Method_RT_charCast;
+                }
+                else
+                {
+                    if (RT.booleanCast(RT.UncheckedMathVar.deref()))
+                    {
+                        if (paramType == typeof(sbyte))
+                            m = HostExpr.Method_RT_uncheckedSbyteCast;
+                        else if (paramType == typeof(byte))
+                            m = HostExpr.Method_RT_uncheckedByteCast;
+                        else if (paramType == typeof(short))
+                            m = HostExpr.Method_RT_uncheckedShortCast;
+                        else if (paramType == typeof(ushort))
+                            m = HostExpr.Method_RT_uncheckedUshortCast;
+                        else if (paramType == typeof(int))
+                            m = HostExpr.Method_RT_uncheckedIntCast;
+                        else if (paramType == typeof(uint))
+                            m = HostExpr.Method_RT_uncheckedUintCast;
+                        else if (paramType == typeof(long))
+                            m = HostExpr.Method_RT_uncheckedLongCast;
+                        else if (paramType == typeof(ulong))
+                            m = HostExpr.Method_RT_uncheckedUlongCast;
+                        else if (paramType == typeof(float))
+                            m = HostExpr.Method_RT_uncheckedFloatCast;
+                        else if (paramType == typeof(double))
+                            m = HostExpr.Method_RT_uncheckedDoubleCast;
+                        else if (paramType == typeof(char))
+                            m = HostExpr.Method_RT_uncheckedCharCast;
+                        else if (paramType == typeof(decimal))
+                            m = HostExpr.Method_RT_uncheckedDecimalCast;
+                    }
+                    else
+                    {
+                        if (paramType == typeof(sbyte))
+                            m = HostExpr.Method_RT_sbyteCast;
+                        else if (paramType == typeof(byte))
+                            m = HostExpr.Method_RT_byteCast;
+                        else if (paramType == typeof(short))
+                            m = HostExpr.Method_RT_shortCast;
+                        else if (paramType == typeof(ushort))
+                            m = HostExpr.Method_RT_ushortCast;
+                        else if (paramType == typeof(int))
+                            m = HostExpr.Method_RT_intCast;
+                        else if (paramType == typeof(uint))
+                            m = HostExpr.Method_RT_uintCast;
+                        else if (paramType == typeof(long))
+                            m = HostExpr.Method_RT_longCast;
+                        else if (paramType == typeof(ulong))
+                            m = HostExpr.Method_RT_ulongCast;
+                        else if (paramType == typeof(float))
+                            m = HostExpr.Method_RT_floatCast;
+                        else if (paramType == typeof(double))
+                            m = HostExpr.Method_RT_doubleCast;
+                        else if (paramType == typeof(char))
+                            m = HostExpr.Method_RT_charCast;
+                        else if (paramType == typeof(decimal))
+                            m = HostExpr.Method_RT_decimalCast;
+                    }
+                }
+
+                gen.Emit(OpCodes.Castclass, typeof(Object));
+                gen.Emit(OpCodes.Call,m);
+            }
+            else
+            {
+                gen.Emit(OpCodes.Castclass, paramType);
+            }
         }
     }
 }

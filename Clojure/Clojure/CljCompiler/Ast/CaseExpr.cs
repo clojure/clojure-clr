@@ -453,6 +453,8 @@ namespace clojure.lang.CljCompiler.Ast
                 Label[] la = new Label[(_high - _low) + 1];
                 for (int i = _low; i <= _high; i++)
                     la[i - _low] = labels.ContainsKey(i) ? labels[i] : defaultLabel;
+                ilg.Emit(OpCodes.Ldc_I4, _low);
+                ilg.Emit(OpCodes.Sub);
                 ilg.Emit(OpCodes.Switch, la);
                 ilg.Emit(OpCodes.Br, defaultLabel);
              }

@@ -360,8 +360,13 @@ namespace clojure.lang.CljCompiler.Ast
         public override void Emit(ObjExpr fn, GenContext context)
         {
 
-            MethodBuilder mb = context.TB.DefineMethod(GetMethodName(), MethodAttributes.Public, GetReturnType(), GetArgTypes());
+            MethodBuilder mb = context.TB.DefineMethod(GetMethodName(), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, GetReturnType(), GetArgTypes());
             SetCustomAttributes(mb);
+
+            Console.Write("Compiling method {0} ", GetMethodName());
+            foreach (Type t in GetArgTypes())
+                Console.Write("{0}, ", t.Name);
+            Console.WriteLine("returning {0}", GetReturnType().Name);
 
             GenContext newContext = context.WithBuilders(context.TB, mb);
             ILGenerator ilg = newContext.GetILGenerator();
@@ -378,6 +383,9 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Var.popThreadBindings();
             }
+
+            if (IsExplicit)
+                context.TB.DefineMethodOverride(mb, _explicitMethodInfo);
         }    
 
         #endregion

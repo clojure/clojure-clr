@@ -1265,7 +1265,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        public Type CompileNoDlr(Type superType, IPersistentVector interfaces, bool onetimeUse, GenContext context)
+        public Type CompileNoDlr(Type superType, Type stubType, IPersistentVector interfaces, bool onetimeUse, GenContext context)
         {
             if (_compiledType != null)
                 return _compiledType;
@@ -1284,40 +1284,59 @@ namespace clojure.lang.CljCompiler.Ast
             ObjExpr.MarkAsSerializable(_typeBuilder);
             GenInterface.SetCustomAttributes(_typeBuilder, _classMeta);
 
-            EmitConstantFieldDefs(_typeBuilder);
-            EmitKeywordCallsiteDefs(_typeBuilder);
-
-            EmitStaticConstructor(_typeBuilder);
-
-            if (SupportsMeta)
-                _metaField = _typeBuilder.DefineField("__meta", typeof(IPersistentMap), FieldAttributes.Public | FieldAttributes.InitOnly);
-
-            EmitClosedOverFields(_typeBuilder);
-            EmitProtocolCallsites(_typeBuilder);
-
-            _ctorInfo = EmitConstructor(_typeBuilder, superType);
-
-            if (_altCtorDrops > 0)
-                EmitFieldOnlyConstructor(_typeBuilder, superType);
-
-            if (SupportsMeta)
+            try
             {
-                EmitNonMetaConstructor(_typeBuilder, superType);
-                EmitMetaFunctions(_typeBuilder);
+                if (IsDefType)
+                {
+                    Compiler.RegisterDuplicateType(_typeBuilder);
+
+                    Var.pushThreadBindings(RT.map(
+                        Compiler.CompileStubOrigClassVar, stubType
+                        ));
+                    //,
+                    //Compiler.COMPILE_STUB_CLASS, _baseType));
+                }
+                EmitConstantFieldDefs(_typeBuilder);
+                EmitKeywordCallsiteDefs(_typeBuilder);
+
+                EmitStaticConstructor(_typeBuilder);
+
+                if (SupportsMeta)
+                    _metaField = _typeBuilder.DefineField("__meta", typeof(IPersistentMap), FieldAttributes.Public | FieldAttributes.InitOnly);
+
+                EmitClosedOverFields(_typeBuilder);
+                EmitProtocolCallsites(_typeBuilder);
+
+                _ctorInfo = EmitConstructor(_typeBuilder, superType);
+
+                if (_altCtorDrops > 0)
+                    EmitFieldOnlyConstructor(_typeBuilder, superType);
+
+                if (SupportsMeta)
+                {
+                    EmitNonMetaConstructor(_typeBuilder, superType);
+                    EmitMetaFunctions(_typeBuilder);
+                }
+
+                GenContext newContext = context.WithBuilders(_typeBuilder, null);
+                EmitStatics(newContext);
+                EmitMethods(newContext);
+
+                //if (KeywordCallsites.count() > 0)
+                //    EmitSwapThunk(_typeBuilder);
+
+                _compiledType = _typeBuilder.CreateType();
+
+                if (context.DynInitHelper != null)
+                    context.DynInitHelper.FinalizeType();
+
+                return _compiledType;
             }
-
-            EmitStatics(context);
-            EmitMethods(context);
-
-            //if (KeywordCallsites.count() > 0)
-            //    EmitSwapThunk(_typeBuilder);
-
-            _compiledType = _typeBuilder.CreateType();
-
-            if (context.DynInitHelper != null)
-                context.DynInitHelper.FinalizeType();
-
-            return _compiledType;
+            finally
+            {
+                if (IsDefType)
+                    Var.popThreadBindings();
+            }
         }
 
         void EmitKeywordCallsiteDefs(TypeBuilder baseTB)
@@ -1705,7 +1724,8 @@ namespace clojure.lang.CljCompiler.Ast
                     ilg.EmitType(t);
                 else
                 {
-                    ilg.EmitString(Compiler.DestubClassName(((Type)value).FullName));
+                    //ilg.EmitString(Compiler.DestubClassName(((Type)value).FullName));
+                    ilg.EmitString(((Type)value).FullName);
                     ilg.EmitCall(Compiler.Method_RT_classForName);
                 }
             }

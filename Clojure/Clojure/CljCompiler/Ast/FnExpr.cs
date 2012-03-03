@@ -239,6 +239,7 @@ namespace clojure.lang.CljCompiler.Ast
                     else
                         fn.CompileNoDlr(
                             fn.IsVariadic ? typeof(RestFn) : typeof(AFunction),
+                            null,
                             primTypes,
                             fn._onceOnly,
                             newContext);

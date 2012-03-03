@@ -259,13 +259,15 @@ namespace clojure.lang.CljCompiler.Ast
 
             for( int i =0; i< pis.Length; i++ ) 
             {
+                // TODO: if hostarg is by ref, we should deal with this?
                 HostArg arg = _args[i];
                 ParameterInfo pi = pis[i];
                 Type argType = arg.ArgExpr.HasClrType ? arg.ArgExpr.ClrType : typeof(object);
                 Type paramType = pi.ParameterType;
 
-                arg.ArgExpr.Emit(RHC.Expression,objx,context);
-            
+                //arg.ArgExpr.Emit(RHC.Expression,objx,context);
+                MethodExpr.EmitTypedArg(objx, context, paramType, arg.ArgExpr);
+
                 if (!CompatibleParameterTypes(paramType,argType)) 
                 {
                     if ( paramType != argType )

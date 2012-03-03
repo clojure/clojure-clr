@@ -233,7 +233,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (RT.CompileDLR)
                 ret.Compile(stub, stub, interfaces, false, genC);
             else
-                ret.CompileNoDlr(stub, interfaces, false, genC);
+                ret.CompileNoDlr(stub, stub, interfaces, false, genC);
 
             Compiler.RegisterDuplicateType(ret.CompiledType);
 
@@ -256,6 +256,8 @@ namespace clojure.lang.CljCompiler.Ast
          * Use it as a type hint for this, and bind the simple name of the class to this stub (in resolve etc)
          * Unmunge the name (using a magic prefix) on any code gen for classes
          */
+
+        // TODO: Preparse method heads to pick up signatures, implement those methods as abstract or as NotImpelmented so that Reflection can pick up calls during compilation and avoide a callsite.
         static Type CompileStub(Type super, NewInstanceExpr ret, Type[] interfaces, Object frm)
         {
 
@@ -514,8 +516,12 @@ namespace clojure.lang.CljCompiler.Ast
 
             foreach (List<MethodInfo> ms in _methodMap.Values)
                 foreach (MethodInfo mi in ms)
+                {
+                    Console.WriteLine("Considering dummy for {0}", mi.Name);
+
                     if (NeedsDummy(mi, implemented))
                         EmitDummyMethod(context, mi);
+                }
 
             
             EmitHasArityMethod(_typeBuilder, null, false, 0);
@@ -536,8 +542,12 @@ namespace clojure.lang.CljCompiler.Ast
             gen.EmitNew(typeof(NotImplementedException), Type.EmptyTypes);
             gen.Emit(OpCodes.Throw);
             tb.DefineMethodOverride(mb, mi);
+       
+            Console.Write("Defining dymmy method {0} ", ExplicitMethodName(mi));
+            foreach (Type t in Compiler.GetTypes(mi.GetParameters()))
+                Console.Write("{0}, ", t.Name);
+            Console.WriteLine("returning {0}", mi.ReturnType);
         }
-
 
         #endregion
 

@@ -123,7 +123,6 @@ namespace clojure.lang.CljCompiler.Ast
 
             Type targetType = _targetType;
 
-            // DO WE NEED THIS?
             //Type stubType = Compiler.CompileStubOrigClassVar.isBound ? (Type)Compiler.CompileStubOrigClassVar.deref() : null;
 
             //if (_targetType == stubType)
@@ -154,7 +153,6 @@ namespace clojure.lang.CljCompiler.Ast
 
             Type targetType = _targetType;
 
-            // DO WE NEED THIS?
             //Type stubType = Compiler.CompileStubOrigClassVar.isBound ? (Type)Compiler.CompileStubOrigClassVar.deref() : null;
 
             //if (_targetType == stubType)

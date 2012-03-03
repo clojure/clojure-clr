@@ -267,12 +267,12 @@ namespace clojure.lang.CljCompiler.Ast
                         else if (primt == typeof(long) && pt == typeof(int))
                         {
                             mpeArg.EmitUnboxed(RHC.Expression, objx, context);
-                            ilg.EmitNumericCast(typeof(int), typeof(long), true);
+                            ilg.Emit(OpCodes.Conv_I8);
                         }
                         else if (primt == typeof(double) && pt == typeof(float))
                         {
                             mpeArg.EmitUnboxed(RHC.Expression, objx, context);
-                            ilg.EmitNumericCast(typeof(float), typeof(double), true);
+                            ilg.Emit(OpCodes.Conv_R8);
                         }
                         else if (primt == typeof(int) && pt == typeof(long))
                         {
@@ -283,7 +283,7 @@ namespace clojure.lang.CljCompiler.Ast
                         else if (primt == typeof(float) && pt == typeof(double))
                         {
                             mpeArg.EmitUnboxed(RHC.Expression, objx, context);
-                            ilg.EmitNumericCast(typeof(double), typeof(float), false);
+                            ilg.Emit(OpCodes.Conv_R4);
                         }
                         else
                         {

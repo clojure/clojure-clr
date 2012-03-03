@@ -253,12 +253,14 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            ILGen gen = new ILGen(mb.GetILGenerator());
+            ILGenerator gener = mb.GetILGenerator();
+            ILGen gen = new ILGen(gener);
+
             gen.EmitLoadArg(0);
             for (int i = 1; i <= _argLocals.count(); i++)
             {
                 gen.EmitLoadArg(i);
-                EmitUnboxArg(gen, ArgTypes[i-1], StaticMethodArgTypes[i - 1]);
+                EmitUnboxArg(gener, ArgTypes[i-1], StaticMethodArgTypes[i - 1]);
             }        
             gen.EmitCall(_staticMethodBuilder);
             if (ReturnType != StaticReturnType)
@@ -270,90 +272,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         }
 
-        static void EmitUnboxArg(ILGen gen, Type argType, Type paramType)
+        static void EmitUnboxArg(ILGenerator gen, Type argType, Type paramType)
         {
-
              if (argType == paramType)
                 return;
-
-            if (paramType.IsPrimitive)
-            {
-                MethodInfo m = null;
-
-                if (paramType == typeof(bool))
-                {
-                    m = HostExpr.Method_RT_booleanCast;
-                }
-                else if (paramType == typeof(char))
-                {
-                    m = HostExpr.Method_RT_charCast;
-                }
-                else
-                {
-                    if (RT.booleanCast(RT.UncheckedMathVar.deref()))
-                    {
-                    if (paramType == typeof(sbyte))
-                        m = HostExpr.Method_RT_uncheckedSbyteCast;
-                    else if (paramType == typeof(byte))
-                        m = HostExpr.Method_RT_uncheckedByteCast;
-                    else if (paramType == typeof(short))
-                        m = HostExpr.Method_RT_uncheckedShortCast;
-                    else if (paramType == typeof(ushort))
-                        m = HostExpr.Method_RT_uncheckedUshortCast;
-                    else if (paramType == typeof(int))
-                        m = HostExpr.Method_RT_uncheckedIntCast;
-                    else if (paramType == typeof(uint))
-                        m = HostExpr.Method_RT_uncheckedUintCast;
-                    else if (paramType == typeof(long))
-                        m = HostExpr.Method_RT_uncheckedLongCast;
-                    else if (paramType == typeof(ulong))
-                        m = HostExpr.Method_RT_uncheckedUlongCast;
-                    else if (paramType == typeof(float))
-                        m = HostExpr.Method_RT_uncheckedFloatCast;
-                    else if (paramType == typeof(double))
-                        m = HostExpr.Method_RT_uncheckedDoubleCast;
-                    else if (paramType == typeof(char))
-                        m = HostExpr.Method_RT_uncheckedCharCast;
-                    else if (paramType == typeof(decimal))
-                        m = HostExpr.Method_RT_uncheckedDecimalCast;
-                    }
-                    else
-                    {
-                        if (paramType == typeof(sbyte))
-                            m = HostExpr.Method_RT_sbyteCast;
-                        else if (paramType == typeof(byte))
-                            m = HostExpr.Method_RT_byteCast;
-                        else if (paramType == typeof(short))
-                            m = HostExpr.Method_RT_shortCast;
-                        else if (paramType == typeof(ushort))
-                            m = HostExpr.Method_RT_ushortCast;
-                        else if (paramType == typeof(int))
-                            m = HostExpr.Method_RT_intCast;
-                        else if (paramType == typeof(uint))
-                            m = HostExpr.Method_RT_uintCast;
-                        else if (paramType == typeof(long))
-                            m = HostExpr.Method_RT_longCast;
-                        else if (paramType == typeof(ulong))
-                            m = HostExpr.Method_RT_ulongCast;
-                        else if (paramType == typeof(float))
-                            m = HostExpr.Method_RT_floatCast;
-                        else if (paramType == typeof(double))
-                            m = HostExpr.Method_RT_doubleCast;
-                        else if (paramType == typeof(char))
-                            m = HostExpr.Method_RT_charCast;
-                        else if (paramType == typeof(decimal))
-                            m = HostExpr.Method_RT_decimalCast;
-                    }
-                }
-
-                gen.Emit(OpCodes.Castclass, typeof(Object));
-                gen.EmitCall(m);
-            }
-            else
-            {
-                gen.Emit(OpCodes.Castclass, paramType);
-            }
+             HostExpr.EmitUnboxArg(gen, paramType); 
         }
+
 
         void GeneratePrimMethod(ObjExpr objx, GenContext context)
         {
@@ -426,7 +351,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected static void EmitBody(ObjExpr objx, GenContext context, Type retType, Expr body)
         {
-            ILGen ilg = context.GetILGen();
+            ILGenerator ilg = context.GetILGenerator();
 
             MaybePrimitiveExpr be = (MaybePrimitiveExpr)body;
             if (Util.IsPrimitive(retType) && be.CanEmitPrimitive)
@@ -437,22 +362,22 @@ namespace clojure.lang.CljCompiler.Ast
                 else if (retType == typeof(long) && bt == typeof(int))
                 {
                     be.EmitUnboxed(RHC.Return, objx, context);
-                    ilg.EmitNumericCast(typeof(int), typeof(long), false);
+                    ilg.Emit(OpCodes.Conv_I8);
                 }
                 else if (retType == typeof(double) && bt == typeof(float))
                 {
                     be.EmitUnboxed(RHC.Return, objx, context);
-                    ilg.EmitNumericCast(typeof(float), typeof(double), false);
+                    ilg.Emit(OpCodes.Conv_R8);
                 }
                 else if (retType == typeof(int) && bt == typeof(long))
                 {
                     be.EmitUnboxed(RHC.Return, objx, context);
-                    ilg.EmitCall(Compiler.Method_RT_intCast_long);
+                    ilg.Emit(OpCodes.Call,Compiler.Method_RT_intCast_long);
                 }
                 else if (retType == typeof(float) && bt == typeof(double))
                 {
                     be.EmitUnboxed(RHC.Return, objx, context);
-                    ilg.EmitNumericCast(typeof(double), typeof(float), false);
+                    ilg.Emit(OpCodes.Conv_R4);
                 }
                 else
                 {
@@ -465,7 +390,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (retType == typeof(void))
                     ilg.Emit(OpCodes.Pop);
                 else
-                    ilg.Emit(OpCodes.Unbox_Any, retType);
+                    EmitUnboxArg(ilg, typeof(object), retType);
             }
         }
 
