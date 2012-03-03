@@ -513,9 +513,21 @@ namespace clojure.lang
 
         #region Initialization
 
+        static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
+        {
+            var name = args.Name.Split(',').FirstOrDefault();
+            if (String.IsNullOrEmpty(name) || name.EndsWith(".resources")) return null;
+
+            name = name.Replace('.', '_');
+            var data = (byte[])Properties.Resources.ResourceManager.GetObject(name);
+            return (data == null) ? null : Assembly.Load(data);
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static RT()
         {
+            AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
+
             // TODO: Check for existence of ClojureContext.Default before doing this?
 
             ScriptRuntimeSetup setup = new ScriptRuntimeSetup();
@@ -3038,11 +3050,11 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static void load(String relativePath)
         {
-            load(relativePath, true);
+            load(relativePath, true, true);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static void load(String relativePath, Boolean failIfNotFound)
+        public static void load(String relativePath, Boolean failIfNotFound, Boolean tryLoadAsEmbeddedResource)
         {
             //string assemblyname = relativePath + ".clj.dll";
             //string cljname = relativePath + ".clj";
@@ -3081,10 +3093,39 @@ namespace clojure.lang
                 else
                     LoadScript(cljInfo, cljname); ;
             }
-            else if (!loaded && failIfNotFound)
-                throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));
+            else if (!loaded)
+            {
+                LoadEmbeddedAssembly(relativePath, failIfNotFound);
+            }
+        }
 
+        static byte[] FindResource(string resourceName)
+        {
+          return (byte[]) Properties.Resources.ResourceManager.GetObject(resourceName);
+        }
 
+        private static void LoadEmbeddedAssembly(string relativePath, bool failIfNotFound)
+        {
+            string resourceName = String.Concat(relativePath, ".clj")
+                .Replace('/', '_')
+                .Replace('.', '_');
+            byte[] assyData = FindResource(resourceName);
+            if (assyData != null)
+            {
+                try
+                {
+                    Var.pushThreadBindings(RT.map(CurrentNSVar, CurrentNSVar.deref(),
+                        WarnOnReflectionVar, WarnOnReflectionVar.deref(),
+                        RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
+                    Compiler.LoadAssembly(assyData);
+                }
+                finally
+                {
+                    Var.popThreadBindings();
+                }
+            }
+            else if (failIfNotFound)
+                throw new FileNotFoundException(String.Format("Could not locate embedded resource {0}.", resourceName));
         }
 
         private static void MaybeLoadCljScript(string cljname)
