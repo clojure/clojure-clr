@@ -77,6 +77,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
+            EmitUnboxed(RHC.Expression, objx, context);
             HostExpr.EmitBoxReturn(objx, context, FieldType);
             if (rhc == RHC.Statement)
                 context.GetILGenerator().Emit(OpCodes.Pop);
