@@ -517,12 +517,9 @@ namespace clojure.lang.CljCompiler.Ast
             foreach (List<MethodInfo> ms in _methodMap.Values)
                 foreach (MethodInfo mi in ms)
                 {
-                    Console.WriteLine("Considering dummy for {0}", mi.Name);
-
                     if (NeedsDummy(mi, implemented))
                         EmitDummyMethod(context, mi);
                 }
-
             
             EmitHasArityMethod(_typeBuilder, null, false, 0);
         }
@@ -543,10 +540,10 @@ namespace clojure.lang.CljCompiler.Ast
             gen.Emit(OpCodes.Throw);
             tb.DefineMethodOverride(mb, mi);
        
-            Console.Write("Defining dymmy method {0} ", ExplicitMethodName(mi));
-            foreach (Type t in Compiler.GetTypes(mi.GetParameters()))
-                Console.Write("{0}, ", t.Name);
-            Console.WriteLine("returning {0}", mi.ReturnType);
+            //Console.Write("Defining dymmy method {0} ", ExplicitMethodName(mi));
+            //foreach (Type t in Compiler.GetTypes(mi.GetParameters()))
+            //    Console.Write("{0}, ", t.Name);
+            //Console.WriteLine("returning {0}", mi.ReturnType);
         }
 
         #endregion

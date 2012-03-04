@@ -268,14 +268,14 @@ namespace clojure.lang.CljCompiler.Ast
                 //arg.ArgExpr.Emit(RHC.Expression,objx,context);
                 MethodExpr.EmitTypedArg(objx, context, paramType, arg.ArgExpr);
 
-                if (!CompatibleParameterTypes(paramType,argType)) 
-                {
-                    if ( paramType != argType )
-                        if ( paramType.IsByRef)
-                            paramType = paramType.GetElementType();
-                    if ( paramType != argType )
-                        context.GetILGenerator().Emit(OpCodes.Castclass,paramType);
-                }
+                //if (!CompatibleParameterTypes(paramType,argType)) 
+                //{
+                //    if ( paramType != argType )
+                //        if ( paramType.IsByRef)
+                //            paramType = paramType.GetElementType();
+                //    if ( paramType != argType )
+                //        context.GetILGenerator().Emit(OpCodes.Castclass,paramType);
+                //}
             }
         }
 
@@ -283,6 +283,7 @@ namespace clojure.lang.CljCompiler.Ast
         private static bool CompatibleParameterTypes(Type parameter, Type argument)
         {
             if (parameter == argument ||
+                argument == null ||
                 (!parameter.IsValueType && !argument.IsValueType && parameter.IsAssignableFrom(argument)))
                 return true;
 
@@ -307,52 +308,60 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void EmitComplexCall(RHC rhc, ObjExpr objx, GenContext context)
         {
-            List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count+1);
-            paramExprs.Add(Expression.Parameter(_type));
-            EmitTargetExpression(objx,context);
+            List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count + 1);
+            paramExprs.Add(Expression.Parameter(typeof(Type)));
+            EmitTargetExpression(objx, context);
 
-            foreach ( HostArg ha in _args )
+            int i = 0;
+            foreach (HostArg ha in _args)
             {
+                i++;
                 Expr e = ha.ArgExpr;
-                Type argType = e.HasClrType ? (e.ClrType ?? typeof(Object)) : typeof(Object);
+                Type argType = e.HasClrType && e.ClrType != null && e.ClrType.IsPrimitive ? e.ClrType : typeof(object);
 
                 switch (ha.ParamType)
                 {
                     case HostArg.ParameterType.ByRef:
-                        paramExprs.Add(Expression.Parameter(argType.MakeByRefType(),ha.LocalBinding.Name));
-                        context.GetILGenerator().Emit(OpCodes.Ldloca,ha.LocalBinding.LocalVar);
+                        paramExprs.Add(Expression.Parameter(argType.MakeByRefType(), ha.LocalBinding.Name));
+                        context.GetILGenerator().Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
                         break;
 
                     case HostArg.ParameterType.Standard:
-                        paramExprs.Add(Expression.Parameter(argType,ha.LocalBinding.Name));
-                        ha.ArgExpr.Emit(RHC.Expression,objx,context);
+                        paramExprs.Add(Expression.Parameter(argType, ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
+                        if (argType.IsPrimitive)
+                        {
+                            ((MaybePrimitiveExpr)ha.ArgExpr).EmitUnboxed(RHC.Expression, objx, context);
+                        }
+                        else
+                            ha.ArgExpr.Emit(RHC.Expression, objx, context);
                         break;
 
                     default:
                         throw Util.UnreachableCode();
                 }
-               
-                Type returnType = HasClrType ? ClrType : typeof(object);
-                CreateInstanceBinder binder = new ClojureCreateInstanceBinder(ClojureContext.Default,_args.Count);
-                DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
-                Expression call = dyn;
-                if ( context.DynInitHelper != null )
-                    call = context.DynInitHelper.ReduceDyn(dyn);
-                
-                if ( returnType == typeof(void) )
-                {
-                    call = Expression.Block(call,Expression.Default(typeof(object)));
-                    returnType = typeof(object);
-                }
-                call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
+            }
 
-                Type[] paramTypes = paramExprs.Map((x) => x.Type);
-                MethodBuilder mbLambda = context.TB.DefineMethod("__interop_ctor_"+RT.nextID(),MethodAttributes.Static|MethodAttributes.Public,CallingConventions.Standard,returnType,paramTypes);
-                LambdaExpression lambda = Expression.Lambda(call,paramExprs);
-                lambda.CompileToMethod(mbLambda);
+            Type returnType = HasClrType ? ClrType : typeof(object);
+            CreateInstanceBinder binder = new ClojureCreateInstanceBinder(ClojureContext.Default, _args.Count);
+            DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
+            Expression call = dyn;
+            if (context.DynInitHelper != null)
+                call = context.DynInitHelper.ReduceDyn(dyn);
 
-                context.GetILGenerator().Emit(OpCodes.Call,mbLambda);
-            }       
+            if (returnType == typeof(void))
+            {
+                call = Expression.Block(call, Expression.Default(typeof(object)));
+                returnType = typeof(object);
+            }
+            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
+
+            Type[] paramTypes = paramExprs.Map((x) => x.Type);
+            MethodBuilder mbLambda = context.TB.DefineMethod("__interop_ctor_" + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, paramTypes);
+            LambdaExpression lambda = Expression.Lambda(call, paramExprs);
+            lambda.CompileToMethod(mbLambda);
+
+            context.GetILGenerator().Emit(OpCodes.Call, mbLambda);
+
         }
 
         static readonly MethodInfo Method_Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle");

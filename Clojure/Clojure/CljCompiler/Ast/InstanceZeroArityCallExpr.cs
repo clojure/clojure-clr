@@ -131,7 +131,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
-            ParameterExpression param = Expression.Parameter(_target.HasClrType ? _target.ClrType : typeof(object));
+            Type paramType = _target.HasClrType && _target.ClrType != null && _target.ClrType.IsPrimitive ? _target.ClrType : typeof(object);
+
+            ParameterExpression param = Expression.Parameter(paramType);
 
             Type returnType = HasClrType ? ClrType : typeof(object);
 
@@ -146,7 +148,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
 
-            MethodBuilder mbLambda = context.TB.DefineMethod("__interop_" + _memberName + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, new Type[] {param.Type});
+            MethodBuilder mbLambda = context.TB.DefineMethod("__interop_" + _memberName + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, new Type[] {paramType});
             LambdaExpression lambda = Expression.Lambda(call, new ParameterExpression[] {param});
             lambda.CompileToMethod(mbLambda);
 

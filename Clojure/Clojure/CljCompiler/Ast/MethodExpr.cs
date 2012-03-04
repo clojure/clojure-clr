@@ -406,6 +406,9 @@ namespace clojure.lang.CljCompiler.Ast
             List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count + 1);
 
             Type targetType = GetTargetType();
+            if (!targetType.IsPrimitive)
+                targetType = typeof(object);
+
             //if (targetType == (Type)Compiler.CompileStubOrigClassVar.deref())
             //    targetType = objx.TypeBlder;
 
@@ -417,7 +420,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 i++;
                 Expr e = ha.ArgExpr;
-                Type argType = e.HasClrType ? (e.ClrType ?? typeof(Object)) : typeof(Object);
+                Type argType = e.HasClrType && e.ClrType != null && e.ClrType.IsPrimitive ? e.ClrType : typeof(object);
 
                 switch (ha.ParamType)
                 {
