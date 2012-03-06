@@ -152,8 +152,12 @@ namespace clojure.lang.CljCompiler.Ast
             LambdaExpression lambda = Expression.Lambda(call, new ParameterExpression[] {param});
             lambda.CompileToMethod(mbLambda);
 
+            ILGenerator ilg = context.GetILGenerator();
+
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+
             _target.Emit(RHC.Expression, objx, context);
-            context.GetILGenerator().Emit(OpCodes.Call, mbLambda);
+            ilg.Emit(OpCodes.Call, mbLambda);
         }
 
         #endregion

@@ -132,6 +132,7 @@ namespace clojure.lang
         //internal static readonly Var LINE_AFTER = Var.create(0).setDynamic();    // From the JVM version
         internal static readonly Var DocumentInfoVar = Var.create(null).setDynamic();  // Mine
         internal static readonly Var SourceSpanVar = Var.create(null).setDynamic();    // Mine
+        internal static readonly Var SymbolDocumentGeneratorVar = Var.create(null).setDynamic();    // Mine
 
         internal static readonly Var MethodVar = Var.create(null).setDynamic();
         public static readonly Var LocalEnvVar = Var.create(PersistentHashMap.EMPTY).setDynamic();
@@ -1174,6 +1175,12 @@ namespace clojure.lang
             return (SymbolDocumentInfo)DocumentInfoVar.deref();
         }
 
+        internal static SymbolDocumentGenerator SymDocGenerator()
+        {
+            return (SymbolDocumentGenerator)SymbolDocumentGeneratorVar.deref();
+        }
+        
+
         public static int GetLineFromSpanMap(IPersistentMap spanMap)
         {
             if (spanMap == null )
@@ -1211,7 +1218,7 @@ namespace clojure.lang
                 && GetLocation(spanMap, RT.EndColumnKey, out finishCol);
         }
 
-        internal static Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap, bool isDebuggable)
+        public static Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap, bool isDebuggable)
         {
             if ( isDebuggable && spanMap != null & Compiler.DocInfo() != null)
             {
@@ -1227,6 +1234,48 @@ namespace clojure.lang
             }
             return expr;
         }
+
+        public static void MaybeEmitDebugInfo(GenContext context, ILGenerator ilg, IPersistentMap spanMap)
+        {
+            MaybeEmitDebugInfo(context.ModuleBuilder, ilg, spanMap, context.IsDebuggable);
+        }
+
+        public static void MaybeEmitDebugInfo(GenContext context, ILGen ilg, IPersistentMap spanMap)
+        {
+            MaybeEmitDebugInfo(context.ModuleBuilder, ilg, spanMap, context.IsDebuggable);
+        }
+
+        public static void MaybeEmitDebugInfo(ModuleBuilder mb, ILGenerator ilg, IPersistentMap spanMap, bool isDebuggable)
+        {           
+            if ( ShouldEmitDebugInfo(spanMap,isDebuggable) )
+            {
+                int startLine;
+                int startCol;
+                int finishLine;
+                int finishCol;
+                if (GetLocations(spanMap, out startLine, out startCol, out finishLine, out finishCol))
+                    Compiler.SymDocGenerator().MarkSequencePoint(mb, Compiler.DocInfo(), ilg, startLine, startCol, finishLine, finishCol);
+            }
+        }
+                
+        public static void MaybeEmitDebugInfo(ModuleBuilder mb, ILGen ilg, IPersistentMap spanMap, bool isDebuggable)
+        {           
+            if ( ShouldEmitDebugInfo(spanMap,isDebuggable) )
+            {
+                int startLine;
+                int startCol;
+                int finishLine;
+                int finishCol;
+                if (GetLocations(spanMap, out startLine, out startCol, out finishLine, out finishCol))
+                    Compiler.SymDocGenerator().MarkSequencePoint(mb, Compiler.DocInfo(), ilg, startLine, startCol, finishLine, finishCol);
+            }
+        }
+
+        static bool ShouldEmitDebugInfo(IPersistentMap spanMap, bool isDebuggable)
+        {
+            return isDebuggable && spanMap != null & Compiler.DocInfo() != null && Compiler.SymDocGenerator() != null;
+        }
+
 
         static GenContext _evalContext = GenContext.CreateWithInternalAssembly("eval", false);
         static public GenContext EvalContext { get { return _evalContext; } }
@@ -1276,6 +1325,7 @@ namespace clojure.lang
                     //LINE_BEFORE, lntr.LineNumber,
                     //LINE_AFTER, lntr.LineNumber,
                 DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
+                SymbolDocumentGeneratorVar, new SymbolDocumentGenerator(),
                 ConstantsVar, PersistentVector.EMPTY,
                 ConstantIdsVar, new IdentityHashMap(),
                 KeywordsVar, PersistentHashMap.EMPTY,
@@ -1599,6 +1649,7 @@ namespace clojure.lang
                 SourcePathVar, sourcePath,
                 SourceVar, sourceName,
                 DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
+                SymbolDocumentGeneratorVar, new SymbolDocumentGenerator(),
 
                 RT.CurrentNSVar, RT.CurrentNSVar.deref(),
                 RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),

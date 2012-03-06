@@ -128,6 +128,8 @@ namespace clojure.lang.CljCompiler.Ast
             //if (_targetType == stubType)
             //    targetType = objx.BaseType;
 
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+
             if (targetType != null && _tinfo != null)
             {
                 _target.Emit(RHC.Expression, objx, context);
@@ -157,6 +159,8 @@ namespace clojure.lang.CljCompiler.Ast
 
             //if (_targetType == stubType)
             //    targetType = objx.BaseType;
+
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
 
             if (targetType != null && _tinfo != null)
             {
@@ -208,7 +212,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ILGen ilg = context.GetILGen();
 
-            // TODO: Debug info
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+
             if (_targetType != null && _tinfo != null)
             {
                 _target.Emit(RHC.Expression, objx, context);

@@ -319,6 +319,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
+            ILGenerator ilg = context.GetILGenerator();
+
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+
             Type retType;
 
             if (_method != null)
@@ -334,11 +338,15 @@ namespace clojure.lang.CljCompiler.Ast
             HostExpr.EmitBoxReturn(objx, context, retType);
 
             if (rhc == RHC.Statement)
-                context.GetILGenerator().Emit(OpCodes.Pop);
+                ilg.Emit(OpCodes.Pop);
         }
 
         public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
+            ILGenerator ilg = context.GetILGenerator();
+
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+
             if (_method != null)
             {
                 EmitForMethod(objx, context);
@@ -349,7 +357,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             if (rhc == RHC.Statement)
-                context.GetILGenerator().Emit(OpCodes.Pop);
+               ilg.Emit(OpCodes.Pop);
         }
 
         private void EmitForMethod(ObjExpr objx, GenContext context)

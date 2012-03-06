@@ -150,6 +150,8 @@ namespace clojure.lang.CljCompiler.Ast
             Label endLabel = ilg.DefineLabel();
             Label faultLabel = ilg.DefineLabel();
 
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+
             LocalBuilder thunkLoc = ilg.DeclareLocal(typeof(ILookupThunk));
             LocalBuilder targetLoc = ilg.DeclareLocal(typeof(Object));
             LocalBuilder resultLoc = ilg.DeclareLocal(typeof(Object));

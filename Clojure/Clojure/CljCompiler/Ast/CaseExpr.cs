@@ -425,6 +425,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ILGen ilg = context.GetILGen();
 
+            Compiler.MaybeEmitDebugInfo(context, ilg, _sourceSpan);
+
             Label defaultLabel = ilg.DefineLabel();
             Label endLabel = ilg.DefineLabel();
 

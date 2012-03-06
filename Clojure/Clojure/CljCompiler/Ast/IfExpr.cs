@@ -188,7 +188,8 @@ namespace clojure.lang.CljCompiler.Ast
             Label endLabel = ilg.DefineLabel();
             Label trueLabel = ilg.DefineLabel();
 
-            //  TODO: DEBUG INFO
+            Compiler.MaybeEmitDebugInfo(context, ilg, _sourceSpan);
+
 
             //  TODO: What about properties and fields?
             StaticMethodExpr sme = _testExpr as StaticMethodExpr;

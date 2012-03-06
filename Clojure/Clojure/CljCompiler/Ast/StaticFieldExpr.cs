@@ -151,8 +151,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
-            // TODO: Debug info
-            context.GetILGen().EmitFieldGet(_tinfo);
+            ILGen ilg = context.GetILGen();
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+            ilg.EmitFieldGet(_tinfo);
         }
 
         #endregion
@@ -170,7 +171,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ILGen ilg = context.GetILGen();
 
-            // TODO: Debug info
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+
             val.Emit(RHC.Expression, objx, context);
             ilg.Emit(OpCodes.Dup);
             HostExpr.EmitUnboxArg(objx, context, FieldType);
@@ -232,8 +234,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
         {
-            // TODO: Debug info
-            context.GetILGen().EmitPropertyGet(_tinfo);
+            ILGen ilg = context.GetILGen();
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+            ilg.EmitPropertyGet(_tinfo);
         }
 
         #endregion
@@ -251,7 +254,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ILGen ilg = context.GetILGen();
 
-            // TODO: Debug info
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+
             val.Emit(RHC.Expression, objx, context);
             ilg.Emit(OpCodes.Dup);
             HostExpr.EmitUnboxArg(objx, context, FieldType);

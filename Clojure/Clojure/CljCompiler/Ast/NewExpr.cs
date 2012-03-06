@@ -236,6 +236,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
+            ILGenerator ilg = context.GetILGenerator();
+
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+
             if (_ctor != null)
                 EmitForMethod(rhc, objx, context);
             else if (_isNoArgValueTypeCtor)
@@ -244,7 +248,7 @@ namespace clojure.lang.CljCompiler.Ast
                 EmitComplexCall(rhc, objx, context);
 
             if (rhc == RHC.Statement)
-                context.GetILGenerator().Emit(OpCodes.Pop);
+                ilg.Emit(OpCodes.Pop);
         }
 
         private void EmitForMethod(RHC rhc, ObjExpr objx, GenContext context)

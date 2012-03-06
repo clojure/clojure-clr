@@ -440,17 +440,20 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, GenContext context)
         {
-            // TODO: Debug info
+            ILGenerator ilg = context.GetILGenerator();
+
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+
             if (_isProtocol)
                 EmitProto(rhc, objx, context);
             else
             {
                 _fexpr.Emit(RHC.Expression, objx, context);
-                context.GetILGenerator().Emit(OpCodes.Castclass, typeof(IFn));
+                ilg.Emit(OpCodes.Castclass, typeof(IFn));
                 EmitArgsAndCall(0, rhc, objx, context);
             }
             if (rhc == RHC.Statement)
-                context.GetILGenerator().Emit(OpCodes.Pop);
+                ilg.Emit(OpCodes.Pop);
         }
 
         void EmitProto(RHC rhc, ObjExpr objx, GenContext context)
