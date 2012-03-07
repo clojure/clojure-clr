@@ -139,7 +139,7 @@ namespace clojure.lang.CljCompiler.Ast
                 // Java TODO: inject __meta et al into closes - when?
                 // use array map to preserve ctor order
                 ret.Closes = new PersistentArrayMap(closesvec);
-                ret._fields = fmap;
+                ret.Fields = fmap;
                 for (int i = fieldSyms.count() - 1; i >= 0 && (((Symbol)fieldSyms.nth(i)).Name.Equals("__meta") || ((Symbol)fieldSyms.nth(i)).Name.Equals("__extmap")); --i)
                     ret._altCtorDrops++;
             }
@@ -195,15 +195,16 @@ namespace clojure.lang.CljCompiler.Ast
                     Var.pushThreadBindings(
                         RT.map(
                             Compiler.MethodVar, null,
-                            Compiler.LocalEnvVar, ret._fields,
+                            Compiler.LocalEnvVar, ret.Fields,
                             Compiler.CompileStubSymVar, Symbol.intern(null, tagName),
                             Compiler.CompileStubClassVar, stub
                             ));
                     ret._hintedFields = RT.subvec(fieldSyms, 0, fieldSyms.count() - ret._altCtorDrops);
                 }
                 // now (methodname [args] body)*
-                // TODO: SourceLocation?
-                //ret.line = (Integer)LINE.deref();
+
+                ret.SpanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();
+
                 IPersistentCollection methods = null;
                 for (ISeq s = methodForms; s != null; s = RT.next(s))
                 {
@@ -456,7 +457,7 @@ namespace clojure.lang.CljCompiler.Ast
                 LambdaExpression lambda = Expression.Lambda(GenerateValue(_hintedFields));
                 lambda.CompileToMethod(mbg, context.IsDebuggable);
 
-                if (_fields.count() > _hintedFields.count())
+                if (Fields.count() > _hintedFields.count())
                 {
                     // create(IPersistentMap)
                     MethodBuilder mbc = tb.DefineMethod("create", MethodAttributes.Public | MethodAttributes.Static, tb, new Type[] { typeof(IPersistentMap) });

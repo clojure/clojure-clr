@@ -138,6 +138,8 @@ namespace clojure.lang.CljCompiler.Ast
             if (RT.second(form) is IPersistentVector)
                 form = RT.list(Compiler.FnSym, RT.next(form));
 
+            fn.SpanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();
+
             bool hasPrimDecls = HasPrimDecls((ISeq)RT.next(form));
 
 

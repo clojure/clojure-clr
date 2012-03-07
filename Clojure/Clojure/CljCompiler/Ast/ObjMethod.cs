@@ -49,6 +49,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected MethodBuilder _staticMethodBuilder;
 
+        protected IPersistentMap SpanMap { get; set; }
+
         #endregion
 
         #region Data accessors
@@ -334,7 +336,9 @@ namespace clojure.lang.CljCompiler.Ast
             GenContext newContext = context.WithBuilders(context.TB, mb);
             ILGenerator ilg = newContext.GetILGenerator();
             Label loopLabel = ilg.DefineLabel();
-            // TODO: Debug info
+
+            Compiler.MaybeEmitDebugInfo(context, ilg, SpanMap);
+
             try 
             {
                 Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));

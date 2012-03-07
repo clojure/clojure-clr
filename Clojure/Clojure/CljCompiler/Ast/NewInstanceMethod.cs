@@ -157,8 +157,8 @@ namespace clojure.lang.CljCompiler.Ast
             ISeq body = RT.next(RT.next(form));
             try
             {
-                // TODO: Add sourcelocation information
-                // method.line = (Integer) LINE.deref();
+
+                method.SpanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();
 
                 // register as the current method and set up a new env frame
                 // PathNode pnade = new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
@@ -371,7 +371,9 @@ namespace clojure.lang.CljCompiler.Ast
             GenContext newContext = context.WithBuilders(context.TB, mb);
             ILGenerator ilg = newContext.GetILGenerator();
             Label loopLabel = ilg.DefineLabel();
-            // TODO: Debug info
+
+            Compiler.MaybeEmitDebugInfo(context, ilg, SpanMap);
+
             try 
             {
                 Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));

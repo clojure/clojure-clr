@@ -155,6 +155,7 @@ namespace clojure.lang.CljCompiler.Ast
             try
             {
                 FnMethod method = new FnMethod(fn, (ObjMethod)Compiler.MethodVar.deref());
+                method.SpanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();
 
                 Var.pushThreadBindings(RT.map(
                     Compiler.MethodVar, method,
@@ -439,8 +440,9 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Label loopLabel = baseIlg.DefineLabel();
                 Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));
-    
-                // TODO: debug info
+
+                Compiler.MaybeEmitDebugInfo(context, baseIlg, SpanMap);
+                
                 baseIlg.MarkLabel(loopLabel);
                 EmitBody(Objx,baseContext,_retType,_body);
                 baseIlg.Emit(OpCodes.Ret);
@@ -490,7 +492,8 @@ namespace clojure.lang.CljCompiler.Ast
                 Label loopLabel = baseIlg.DefineLabel();
                 Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
 
-                // TODO: debug info
+                Compiler.MaybeEmitDebugInfo(context, baseIlg, SpanMap);
+
                 baseIlg.MarkLabel(loopLabel);
                 _body.Emit(RHC.Return, fn, newContext);
                 baseIlg.Emit(OpCodes.Ret);

@@ -69,7 +69,9 @@ namespace clojure.lang.CljCompiler.Ast
         public PersistentVector Constants { get; set; }
 
         Dictionary<int, FieldBuilder> _constantFields;
-        protected IPersistentMap _fields { get; set; }            // symbol -> lb
+        protected IPersistentMap Fields { get; set; }            // symbol -> lb
+
+        protected IPersistentMap SpanMap { get; set; }
 
         Type _compiledType;
         protected Type CompiledType
@@ -119,12 +121,12 @@ namespace clojure.lang.CljCompiler.Ast
 
  
 
-        protected bool IsDefType { get { return _fields != null; } }
+        protected bool IsDefType { get { return Fields != null; } }
         protected virtual bool SupportsMeta { get { return !IsDefType; } }
 
         internal bool IsVolatile(LocalBinding lb)
         {
-            return RT.booleanCast(RT.contains(_fields, lb.Symbol)) &&
+            return RT.booleanCast(RT.contains(Fields, lb.Symbol)) &&
                 RT.booleanCast(RT.get(lb.Symbol.meta(), Keyword.intern("volatile-mutable")));
         }
 
@@ -132,7 +134,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return IsVolatile(lb)
                 ||
-                RT.booleanCast(RT.contains(_fields, lb.Symbol)) &&
+                RT.booleanCast(RT.contains(Fields, lb.Symbol)) &&
                    RT.booleanCast(RT.get(lb.Symbol.meta(), Keyword.intern("unsynchronized-mutable")))
                 ||
                 lb.IsByRef;
@@ -1299,7 +1301,7 @@ namespace clojure.lang.CljCompiler.Ast
                 EmitConstantFieldDefs(_typeBuilder);
                 EmitKeywordCallsiteDefs(_typeBuilder);
 
-                EmitStaticConstructor(_typeBuilder);
+                EmitStaticConstructor(_typeBuilder, context);
 
                 if (SupportsMeta)
                     _metaField = _typeBuilder.DefineField("__meta", typeof(IPersistentMap), FieldAttributes.Public | FieldAttributes.InitOnly);
@@ -1307,7 +1309,7 @@ namespace clojure.lang.CljCompiler.Ast
                 EmitClosedOverFields(_typeBuilder);
                 EmitProtocolCallsites(_typeBuilder);
 
-                _ctorInfo = EmitConstructor(_typeBuilder, superType);
+                _ctorInfo = EmitConstructor(_typeBuilder, superType, context);
 
                 if (_altCtorDrops > 0)
                     EmitFieldOnlyConstructor(_typeBuilder, superType);
@@ -1359,9 +1361,12 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        private void EmitStaticConstructor(TypeBuilder fnTB)
+        private void EmitStaticConstructor(TypeBuilder fnTB, GenContext context)
         {
             ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
+
+            ILGenerator ilg = cb.GetILGenerator();
+            Compiler.MaybeEmitDebugInfo(context, ilg, SpanMap);
 
             if (Constants.count() > 0)
                 EmitConstantFieldInits(cb);
@@ -1369,7 +1374,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (KeywordCallsites.count() > 0)
                 EmitKeywordCallsiteInits(cb);
 
-            cb.GetILGenerator().Emit(OpCodes.Ret);
+            ilg.Emit(OpCodes.Ret);
         }
 
         private void EmitKeywordCallsiteInits(ConstructorBuilder cb)
@@ -1464,10 +1469,12 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        private ConstructorBuilder EmitConstructor(TypeBuilder fnTB, Type baseType)
+        private ConstructorBuilder EmitConstructor(TypeBuilder fnTB, Type baseType, GenContext context)
         {
             ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, CtorTypes());
             ILGen gen = new ILGen(cb.GetILGenerator());
+
+            Compiler.MaybeEmitDebugInfo(context, gen, SpanMap);
 
             //Call base constructor
             ConstructorInfo baseCtorInfo = baseType.GetConstructor(BindingFlags.Instance|BindingFlags.NonPublic|BindingFlags.Public,null,Type.EmptyTypes,null);
