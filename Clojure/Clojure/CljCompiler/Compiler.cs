@@ -1325,7 +1325,6 @@ namespace clojure.lang
                     //LINE_BEFORE, lntr.LineNumber,
                     //LINE_AFTER, lntr.LineNumber,
                 DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
-                SymbolDocumentGeneratorVar, new SymbolDocumentGenerator(),
                 ConstantsVar, PersistentVector.EMPTY,
                 ConstantIdsVar, new IdentityHashMap(),
                 KeywordsVar, PersistentHashMap.EMPTY,
@@ -1506,6 +1505,8 @@ namespace clojure.lang
                 LoopLocalsVar, null,
                 NextLocalNumVar, 0,
                 RT.CurrentNSVar, RT.CurrentNSVar.deref(),
+                DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
+                SymbolDocumentGeneratorVar, new SymbolDocumentGenerator(),
                 ConstantsVar, PersistentVector.EMPTY,
                 ConstantIdsVar, new IdentityHashMap(),
                 KeywordsVar, PersistentHashMap.EMPTY,
