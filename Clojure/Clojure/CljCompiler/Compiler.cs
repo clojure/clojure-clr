@@ -1394,36 +1394,26 @@ namespace clojure.lang
                                                                        Symbol.intern("*ns*")).setDynamic(), null));
         }
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         internal static bool LoadAssembly(FileInfo assyInfo)
         {
             Assembly assy = Assembly.LoadFrom(assyInfo.FullName);
-            return InitAssembly(assy);
-        }
-        
-        internal static bool LoadAssembly(byte[] assyData)
-        {
-            Assembly assy = Assembly.Load(assyData);
-            return InitAssembly(assy);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private static bool InitAssembly(Assembly assy)
-        {
             Type initType = assy.GetType("__Init__");
             if (initType == null)
             {
-              Console.WriteLine("Bad assembly");
-              return false;
+                Console.WriteLine("Bad assembly");
+                return false;
             }
             try
             {
-              initType.InvokeMember("Initialize", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, null, new object[0]);
-              return true;
+                initType.InvokeMember("Initialize", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, null, new object[0]);
+                return true;
             }
             catch (Exception e)
             {
-              Console.WriteLine("Error initializing {0}: {1}", assy.FullName, e.Message);
-              return false;
+                Console.WriteLine("Error initializing {0}: {1}", assyInfo.FullName, e.Message);
+                return false;
             }
         }
 

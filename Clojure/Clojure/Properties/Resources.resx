@@ -112,114 +112,12 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="clojure_clr_io_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.clr.io.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_clr_shell_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.clr.shell.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_core_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.core.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_core_clr_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.core_clr.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_core_deftype_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.core_deftype.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_core_print_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.core_print.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_core_protocols_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.core.protocols.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_core_proxy_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.core_proxy.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_data_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.data.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_genclass_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.genclass.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_gvec_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.gvec.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_instant_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.instant.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_main_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.main.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_pprint_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.pprint.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_pprint_cl_format_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.pprint.cl_format.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_pprint_column_writer_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.pprint.column_writer.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_pprint_dispatch_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.pprint.dispatch.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_pprint_pprint_base_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.pprint.pprint_base.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_pprint_pretty_writer_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.pprint.pretty_writer.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_pprint_print_table_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.pprint.print_table.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_pprint_utilities_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.pprint.utilities.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_reflect_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.reflect.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_reflect_clr_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.reflect.clr.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_repl_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.repl.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_set_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.set.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_stacktrace_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.stacktrace.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_string_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.string.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_template_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.template.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_test_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.test.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_test_junit_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.test.junit.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_test_tap_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.test.tap.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_uuid_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.uuid.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_walk_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.walk.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="clojure_zip_clj" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\clojure.zip.clj.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="version" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\bootstrap\version.properties;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>

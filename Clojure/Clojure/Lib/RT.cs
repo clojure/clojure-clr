@@ -513,21 +513,9 @@ namespace clojure.lang
 
         #region Initialization
 
-        static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
-        {
-            var name = args.Name.Split(',').FirstOrDefault();
-            if (String.IsNullOrEmpty(name) || name.EndsWith(".resources")) return null;
-
-            name = name.Replace('.', '_');
-            var data = (byte[])Properties.Resources.ResourceManager.GetObject(name);
-            return (data == null) ? null : Assembly.Load(data);
-        }
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static RT()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
-
             // TODO: Check for existence of ClojureContext.Default before doing this?
 
             ScriptRuntimeSetup setup = new ScriptRuntimeSetup();
@@ -582,7 +570,7 @@ namespace clojure.lang
 
         static void DoInit()
         {
-            load("clojure/core", true, true);
+            load("clojure/core");
             //load("clojure/zip", false);
             ////load("clojure/xml", false);
             //load("clojure/set", false);
@@ -3050,92 +3038,53 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static void load(String relativePath)
         {
-            bool loadAsResource = EmbeddedAssembly(relativePath);
-            load(relativePath, true, loadAsResource);
-        }
-
-        private static bool EmbeddedAssembly(String relativePath)
-        {
-            return (ResourceData(ResourceName(relativePath)) != null);
+            load(relativePath, true);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static void load(String relativePath, Boolean failIfNotFound, Boolean embeddedAssembly)
+        public static void load(String relativePath, Boolean failIfNotFound)
         {
-            if (embeddedAssembly)
-            {
-                LoadEmbeddedAssembly(relativePath, failIfNotFound);
-            }
-            else
-            {
-                string cljname = relativePath + ".clj";
-                FileInfo cljInfo = FindFile(cljname);
+            //string assemblyname = relativePath + ".clj.dll";
+            //string cljname = relativePath + ".clj";
 
-                string assemblyname = relativePath.Replace('/', '.') + ".clj.dll";
-                FileInfo assyInfo = FindFile(AppDomain.CurrentDomain.BaseDirectory, assemblyname);
+            //FileInfo assyInfo = FindFile(assemblyname);
+            //FileInfo cljInfo = FindFile(cljname);
 
-                bool loaded = false;
+            string cljname = relativePath + ".clj";
+            FileInfo cljInfo = FindFile(cljname);
 
-                if ((assyInfo != null &&
-                     (cljInfo == null || assyInfo.LastWriteTime > cljInfo.LastWriteTime)))
-                {
-                    try
-                    {
-                        Var.pushThreadBindings(RT.map(CurrentNSVar, CurrentNSVar.deref(),
-                                                      WarnOnReflectionVar, WarnOnReflectionVar.deref(),
-                                                      RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
-                        loaded = Compiler.LoadAssembly(assyInfo);
-                    }
-                    finally
-                    {
-                        Var.popThreadBindings();
-                    }
-                }
+            string assemblyname = relativePath.Replace('/', '.') + ".clj.dll";
+            FileInfo assyInfo = FindFile(AppDomain.CurrentDomain.BaseDirectory, assemblyname);
 
-                if (!loaded && cljInfo != null)
-                {
-                    if (booleanCast(Compiler.CompileFilesVar.deref()))
-                        Compile(cljInfo, cljname);
-                    else
-                        LoadScript(cljInfo, cljname);
-                }
-                else if (!loaded && failIfNotFound)
-                    throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));
-            }
-        }
+            bool loaded = false;
 
-        private static string ResourceName(string relativePath)
-        {
-            return String.Concat(relativePath, ".clj")
-                .Replace('/', '_')
-                .Replace('.', '_');
-        }
-
-        private static byte[] ResourceData(string resourceName)
-        {
-            return (byte[]) Properties.Resources.ResourceManager.GetObject(resourceName);
-        }
-
-        private static void LoadEmbeddedAssembly(string relativePath, bool failIfNotFound)
-        {
-            string resourceName = ResourceName(relativePath);
-            byte[] assemblyData = ResourceData(resourceName);
-            if (assemblyData != null)
+            if ((assyInfo != null &&
+                (cljInfo == null || assyInfo.LastWriteTime > cljInfo.LastWriteTime)))
             {
                 try
                 {
                     Var.pushThreadBindings(RT.map(CurrentNSVar, CurrentNSVar.deref(),
                         WarnOnReflectionVar, WarnOnReflectionVar.deref(),
                         RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
-                    Compiler.LoadAssembly(assemblyData);
+                    loaded = Compiler.LoadAssembly(assyInfo);
                 }
                 finally
                 {
                     Var.popThreadBindings();
                 }
             }
-            else if (failIfNotFound)
-                throw new FileNotFoundException(String.Format("Could not locate embedded assembly {0}.", resourceName));
+
+            if (!loaded && cljInfo != null)
+            {
+                if (booleanCast(Compiler.CompileFilesVar.deref()))
+                    Compile(cljInfo,cljname);
+                else
+                    LoadScript(cljInfo, cljname); ;
+            }
+            else if (!loaded && failIfNotFound)
+                throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));
+
+
         }
 
         private static void MaybeLoadCljScript(string cljname)
