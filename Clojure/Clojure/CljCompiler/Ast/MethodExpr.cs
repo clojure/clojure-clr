@@ -383,8 +383,8 @@ namespace clojure.lang.CljCompiler.Ast
             EmitTypedArgs(objx, context, _method.GetParameters(), _args);
             if (IsStaticCall)
             {
-                if (IsIntrinsic(_method))
-                    EmitIntrinsicCall(objx, context);
+                if (Intrinsics.HasOp(_method))
+                    Intrinsics.EmitOp(_method,context.GetILGenerator());
                 else
                     context.GetILGenerator().Emit(OpCodes.Call, _method);
             }
@@ -392,16 +392,7 @@ namespace clojure.lang.CljCompiler.Ast
                 context.GetILGenerator().Emit(OpCodes.Callvirt, _method); 
         }
 
-        private void EmitIntrinsicCall(ObjExpr objx, GenContext context)
-        {
-            throw new NotImplementedException();
-        }
 
-        // TOD: Intrinsic call rewriting
-        private bool IsIntrinsic(MethodInfo method)
-        {
-            return false;
-        }
 
 
 

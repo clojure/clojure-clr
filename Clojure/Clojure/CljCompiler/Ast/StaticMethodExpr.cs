@@ -111,14 +111,23 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal bool CanEmitIntrinsicPredicate()
         {
-            return false;
+            return _method != null && Intrinsics.HasPred(_method);
         }
 
-        // TODO: IMplement intrinsics!!!
-
-        internal void EmitIntrinsicPredicate(RHC rHC, ObjExpr objx, GenContext context, Label falseLabel)
+        internal void EmitIntrinsicPredicate(RHC rhc, ObjExpr objx, GenContext context, Label falseLabel)
         {
-            throw new NotImplementedException();
+            ILGenerator ilg = context.GetILGenerator();
+
+            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+
+            if (_method != null)
+            {
+                MethodExpr.EmitTypedArgs(objx, context, _method.GetParameters(), _args);
+                // JVM: clear locals
+                Intrinsics.EmitPred(_method, ilg, falseLabel);
+            }
+            else
+                throw new InvalidOperationException("Unboxed emit of unknown member");
         }
     }
 }
