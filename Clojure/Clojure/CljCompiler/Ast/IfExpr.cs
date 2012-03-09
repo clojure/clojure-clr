@@ -231,7 +231,11 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 _thenExpr.Emit(rhc, objx, context);
 
+            if (  rhc != RHC.Statement && HasThrowLast(_thenExpr) )
+                ilg.Emit(OpCodes.Ldnull);
+
             ilg.Emit(OpCodes.Br, endLabel);
+
             ilg.MarkLabel(nullLabel);
             ilg.MarkLabel(falseLabel);
 
@@ -240,6 +244,11 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 _elseExpr.Emit(rhc, objx, context);
             ilg.MarkLabel(endLabel);
+        }
+
+        static bool HasThrowLast(Expr expr)
+        {
+            return expr is ThrowExpr || (expr is BodyExpr && ((BodyExpr)expr).LastExpr is ThrowExpr);
         }
 
         #endregion

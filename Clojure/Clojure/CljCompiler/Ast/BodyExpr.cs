@@ -29,7 +29,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         readonly IPersistentVector _exprs;
 
-        Expr LastExpr
+        public Expr LastExpr
         {
             get
             {
