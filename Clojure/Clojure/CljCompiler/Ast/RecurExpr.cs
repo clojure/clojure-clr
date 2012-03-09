@@ -306,7 +306,8 @@ namespace clojure.lang.CljCompiler.Ast
                 LocalBinding lb = (LocalBinding)_loopLocals.nth(i);
                 Type primt = lb.PrimitiveType;
                 if (lb.IsArg)
-                    ilg.Emit(OpCodes.Starg, lb.Index - (objx.IsStatic ? 0 : 1));
+                    //ilg.Emit(OpCodes.Starg, lb.Index - (objx.IsStatic ? 0 : 1));
+                    ilg.Emit(OpCodes.Starg, lb.Index);
                 else
                 {
                     ilg.Emit(OpCodes.Stloc, lb.LocalVar);
