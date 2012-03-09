@@ -98,7 +98,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         static readonly FieldInfo HashMapEmptyFI = typeof(PersistentArrayMap).GetField("EMPTY");
         static readonly FieldInfo HashSetEmptyFI = typeof(PersistentHashSet).GetField("EMPTY");
-        static readonly FieldInfo ListEmptyFI = typeof(PersistentList.EmptyList).GetField("EMPTY");
+        static readonly FieldInfo ListEmptyFI = typeof(PersistentList).GetField("EMPTY");
         static readonly FieldInfo VectorEmptyFI = typeof(PersistentVector).GetField("EMPTY");
 
         public void Emit(RHC rhc, ObjExpr objx, GenContext context)
