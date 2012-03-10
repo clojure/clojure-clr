@@ -209,9 +209,9 @@ namespace clojure.lang.CljCompiler.Ast
             AddPred(nt, "gte", ddta, OpCodes.Blt );
             AddPred(nt, "gte", llta, OpCodes.Blt );
 
-            AddPred(ut, "equiv", llta, OpCodes.Beq );
-            AddPred(ut, "equiv", ddta, OpCodes.Beq );
-            AddPred(ut, "equiv", bbta, OpCodes.Beq );
+            AddPred(ut, "equiv", llta, OpCodes.Ceq, OpCodes.Brfalse);
+            AddPred(ut, "equiv", ddta, OpCodes.Ceq, OpCodes.Brfalse);
+            AddPred(ut, "equiv", bbta, OpCodes.Ceq, OpCodes.Brfalse);
 
             AddPred(nt, "isZero", dta, OpCodes.Ldc_I4_0, OpCodes.Conv_R8, OpCodes.Ceq, OpCodes.Brfalse );
             AddPred(nt, "isZero", lta,OpCodes.Ldc_I4_0, OpCodes.Conv_I8, OpCodes.Ceq, OpCodes.Brfalse );
