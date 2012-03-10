@@ -2725,7 +2725,108 @@ namespace clojure.lang
             return val;
         }
 
+
+        // overloads for alength
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(Object[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(bool[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(char[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(byte[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(sbyte[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(short[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(ushort[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(int[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(uint[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(long[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(ulong[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(float[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(double[] a)
+        {
+            return a.Length;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int alength(decimal[] a)
+        {
+            return a.Length;
+        }
+
+
         // overloads for array getters/setters
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static object aget(Object[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static object aset(Object[] xs, int i, object v)
+        {
+            xs[i] = v;
+            return v;
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static bool aget(bool[] xs, int i)

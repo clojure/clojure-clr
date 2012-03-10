@@ -132,7 +132,8 @@ namespace clojure.lang.CljCompiler.Ast
             AddOp(rtt, "aget", new Type[] { typeof(object[]), typeof(int) }, OpCodes.Ldelem_Ref );
 
             AddOp(rtt, "alength", new Type[] { typeof(float[]) }, OpCodes.Ldlen );
-            AddOp(rtt, "alength", new Type[] { typeof(double[]) }, OpCodes.Ldlen );
+            AddOp(rtt, "alength", new Type[] { typeof(double[]) }, OpCodes.Ldlen);
+            AddOp(rtt, "alength", new Type[] { typeof(decimal[]) }, OpCodes.Ldlen);
             AddOp(rtt, "alength", new Type[] { typeof(bool[]) }, OpCodes.Ldlen );
             AddOp(rtt, "alength", new Type[] { typeof(byte[]) }, OpCodes.Ldlen );
             AddOp(rtt, "alength", new Type[] { typeof(sbyte[]) }, OpCodes.Ldlen );
