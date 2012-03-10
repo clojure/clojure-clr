@@ -190,8 +190,6 @@ namespace clojure.lang.CljCompiler.Ast
 
             Compiler.MaybeEmitDebugInfo(context, ilg, _sourceSpan);
 
-
-            //  TODO: What about properties and fields?
             StaticMethodExpr sme = _testExpr as StaticMethodExpr;
             if (sme != null && sme.CanEmitIntrinsicPredicate())
                 sme.EmitIntrinsicPredicate(RHC.Expression, objx, context, falseLabel);
@@ -231,7 +229,9 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 _thenExpr.Emit(rhc, objx, context);
 
-            ilg.Emit(OpCodes.Br, endLabel);
+
+            if ( ! _thenExpr.HasThrowLast() )
+                ilg.Emit(OpCodes.Br, endLabel);
 
             ilg.MarkLabel(nullLabel);
             ilg.MarkLabel(falseLabel);
@@ -242,6 +242,9 @@ namespace clojure.lang.CljCompiler.Ast
                 _elseExpr.Emit(rhc, objx, context);
             ilg.MarkLabel(endLabel);
         }
+
+        public bool HasThrowLast() { return _elseExpr.HasThrowLast(); }
+
 
         #endregion
 

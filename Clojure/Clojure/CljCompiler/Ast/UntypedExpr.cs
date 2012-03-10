@@ -39,6 +39,9 @@ namespace clojure.lang.CljCompiler.Ast
             get { throw new ArgumentException("Has no CLR type"); }
         }
 
+        public virtual bool HasThrowLast() { return false; }
+
+
         public abstract object Eval();
         public abstract Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
         public abstract void Emit(RHC rhc, ObjExpr objx, GenContext context);

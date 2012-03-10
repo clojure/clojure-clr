@@ -88,7 +88,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (rhc != RHC.Statement)
                 objx.EmitConstant(context, _id, _n);
         }
-
+        
         #endregion
 
         #region MaybePrimitiveExpr Members

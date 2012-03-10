@@ -220,6 +220,9 @@ namespace clojure.lang.CljCompiler.Ast
             _body.Emit(rhc, objx, context);
         }
 
+        public bool HasThrowLast() { return _body.HasThrowLast(); }
+
+
         #endregion
     }
 }

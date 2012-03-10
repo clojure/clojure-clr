@@ -470,7 +470,8 @@ namespace clojure.lang.CljCompiler.Ast
                     EmitExpr(objx, context, _thens[i], emitUnboxed);
                 else
                     EmitThenForHashes(objx, context, _tests[i], _thens[i], defaultLabel, emitUnboxed);
-                ilg.Emit(OpCodes.Br, endLabel);
+                if ( ! _thens[i].HasThrowLast() )
+                    ilg.Emit(OpCodes.Br, endLabel);
             }
             ilg.MarkLabel(defaultLabel);
             EmitExpr(objx, context, _defaultExpr, emitUnboxed);
@@ -612,8 +613,9 @@ namespace clojure.lang.CljCompiler.Ast
                 mbe.EmitUnboxed(RHC.Expression, objx, context);
             else
                 expr.Emit(RHC.Expression, objx, context);
-        }   
+        }
 
+        public bool HasThrowLast() { return false; }
 
         #endregion
 

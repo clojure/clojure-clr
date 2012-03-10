@@ -168,5 +168,8 @@ namespace clojure.lang.CljCompiler.Ast
 
 
         #endregion
+
+        public bool HasThrowLast() { return LastExpr.HasThrowLast(); }
+
     }
 }

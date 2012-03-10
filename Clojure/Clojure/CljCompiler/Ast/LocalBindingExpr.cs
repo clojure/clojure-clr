@@ -91,6 +91,9 @@ namespace clojure.lang.CljCompiler.Ast
                 objx.EmitLocal(context, _b);
         }
 
+
+        public bool HasThrowLast() { return false; }
+
         #endregion
 
         #region MaybePrimitiveExpr Members

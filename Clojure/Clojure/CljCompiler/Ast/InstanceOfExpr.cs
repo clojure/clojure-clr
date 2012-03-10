@@ -90,6 +90,8 @@ namespace clojure.lang.CljCompiler.Ast
                 context.GetILGenerator().Emit(OpCodes.Pop);
         }
 
+        public bool HasThrowLast() { return false; }
+
         #endregion
 
         #region MaybePrimitiveExpr Members
