@@ -81,7 +81,8 @@ namespace clojure.lang.CljCompiler.Ast
             _excExpr.Emit(RHC.Expression, objx, context);
             ilg.Emit(OpCodes.Castclass, typeof(Exception));
             ilg.Emit(OpCodes.Throw);
-            //ilg.Emit(OpCodes.Ldnull);
+            if ( rhc != RHC.Statement )
+                ilg.Emit(OpCodes.Ldnull);
         }
 
         #endregion
