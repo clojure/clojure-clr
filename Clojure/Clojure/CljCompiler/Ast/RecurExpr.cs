@@ -315,7 +315,8 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             ilg.Emit(OpCodes.Br, loopLabel);
-            ilg.Emit(OpCodes.Ldnull);       // Need this to deal with with everyone expecting something on the stack??
+            if ( rhc !=  RHC.Statement )
+                ilg.Emit(OpCodes.Ldnull);       
         }
 
         #endregion
