@@ -81,9 +81,12 @@ namespace clojure.lang.CljCompiler.Ast
             _excExpr.Emit(RHC.Expression, objx, context);
             ilg.Emit(OpCodes.Castclass, typeof(Exception));
             ilg.Emit(OpCodes.Throw);
-            if ( rhc != RHC.Statement )
-                ilg.Emit(OpCodes.Ldnull);
+            //if (rhc != RHC.Statement)
+            //    ilg.Emit(OpCodes.Ldnull);
         }
+
+        public override bool HasThrowLast() { return true; }
+
 
         #endregion
     }

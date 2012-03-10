@@ -74,6 +74,10 @@ namespace clojure.lang.CljCompiler.Ast
         {
             throw new InvalidOperationException("Can't emit");
         }
+
+        public bool HasThrowLast() { return false; }
+
+
         #endregion
 
         #region MaybePrimitiveExpr Members

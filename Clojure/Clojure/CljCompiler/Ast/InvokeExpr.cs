@@ -542,6 +542,9 @@ namespace clojure.lang.CljCompiler.Ast
             context.GetILGenerator().Emit(OpCodes.Callvirt,Compiler.Methods_IFn_invoke[Math.Min(Compiler.MaxPositionalArity+1,_args.count())]);
         }
 
+        public bool HasThrowLast() { return false; }
+
+
         #endregion
     }
 }

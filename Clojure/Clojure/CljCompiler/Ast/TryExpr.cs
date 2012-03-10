@@ -289,6 +289,9 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Ldloc, retLocal);
         }
 
+        public bool HasThrowLast() { return false; }
+
+
         #endregion
     }
 }

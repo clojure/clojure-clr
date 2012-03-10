@@ -656,5 +656,8 @@ namespace clojure.lang.CljCompiler.Ast
                 gen.Emit(OpCodes.Castclass, paramType);
             }
         }
+
+        public bool HasThrowLast() { return false; }
+
     }
 }

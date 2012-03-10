@@ -37,6 +37,9 @@ namespace clojure.lang.CljCompiler.Ast
         public abstract Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
         public abstract void Emit(RHC rhc, ObjExpr objx, GenContext context);
 
+        public bool HasThrowLast() { return false; }
+
+
         #endregion
     }
 }

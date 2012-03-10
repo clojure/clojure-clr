@@ -2088,7 +2088,10 @@ namespace clojure.lang.CljCompiler.Ast
             gen.EmitBoolean(true);
             gen.Emit(OpCodes.Ret);
         }
-         
+
+        public bool HasThrowLast() { return false; }
+
+
         #endregion
     }
 }

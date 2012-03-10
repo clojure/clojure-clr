@@ -99,5 +99,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+        public bool HasThrowLast() { return false; }
     }
 }
