@@ -1549,7 +1549,7 @@ not a pretty writer (which keeps track of columns), this function always outputs
    conditional-newline)
 
   (\I
-   [:n [0 Int64]]     ;;; Was Int32, equiv/num messed it up
+   [:n [0 Int32]]     
    #{:colon} {}
    set-indent)
   )
