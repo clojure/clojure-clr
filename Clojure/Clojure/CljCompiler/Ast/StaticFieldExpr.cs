@@ -153,7 +153,39 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ILGen ilg = context.GetILGen();
             Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
-            ilg.EmitFieldGet(_tinfo);
+            if (_tinfo.IsLiteral)
+            {
+                // literal fields need to be inlined directly in here... We use GetRawConstant
+                // which will work even in partial trust if the constant is protected.
+                object value = _tinfo.GetRawConstantValue();
+                switch (Type.GetTypeCode(_tinfo.FieldType))
+                {
+                    case TypeCode.Boolean:
+                        if ((bool)value)
+                        {
+                            ilg.Emit(OpCodes.Ldc_I4_1);
+                        }
+                        else
+                        {
+                            ilg.Emit(OpCodes.Ldc_I4_0);
+                        }
+                        break;
+                    case TypeCode.Byte: ilg.Emit(OpCodes.Ldc_I4, (byte)value); break;
+                    case TypeCode.Char: ilg.Emit(OpCodes.Ldc_I4, (char)value); break;
+                    case TypeCode.Double: ilg.Emit(OpCodes.Ldc_R8, (double)value); break;
+                    case TypeCode.Int16: ilg.Emit(OpCodes.Ldc_I4, (short)value); break;
+                    case TypeCode.Int32: ilg.Emit(OpCodes.Ldc_I4, (int)value); break;
+                    case TypeCode.Int64: ilg.Emit(OpCodes.Ldc_I8, (long)value); break;
+                    case TypeCode.SByte: ilg.Emit(OpCodes.Ldc_I4, (sbyte)value); break;
+                    case TypeCode.Single: ilg.Emit(OpCodes.Ldc_R4, (float)value); break;
+                    case TypeCode.String: ilg.Emit(OpCodes.Ldstr, (string)value); break;
+                    case TypeCode.UInt16: ilg.Emit(OpCodes.Ldc_I4, (ushort)value); break;
+                    case TypeCode.UInt32: ilg.Emit(OpCodes.Ldc_I4, (uint)value); break;
+                    case TypeCode.UInt64: ilg.Emit(OpCodes.Ldc_I8, (ulong)value); break;
+                }
+            }
+            else
+                ilg.EmitFieldGet(_tinfo);
         }
 
         #endregion
