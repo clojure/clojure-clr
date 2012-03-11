@@ -289,7 +289,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Ldloc, retLocal);
         }
 
-        public bool HasThrowLast() { return false; }
+        public bool HasNormalExit() { return true; }
 
 
         #endregion

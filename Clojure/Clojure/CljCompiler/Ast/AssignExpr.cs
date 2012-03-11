@@ -100,6 +100,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        public bool HasThrowLast() { return false; }
+        public bool HasNormalExit() { return true; }
     }
 }

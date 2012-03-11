@@ -92,7 +92,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        public bool HasThrowLast() { return false; }
+        public bool HasNormalExit() { return true; }
 
         #endregion
 

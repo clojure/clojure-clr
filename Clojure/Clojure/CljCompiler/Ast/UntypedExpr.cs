@@ -39,7 +39,7 @@ namespace clojure.lang.CljCompiler.Ast
             get { throw new ArgumentException("Has no CLR type"); }
         }
 
-        public virtual bool HasThrowLast() { return false; }
+        public virtual bool HasNormalExit() { return true; }
 
 
         public abstract object Eval();

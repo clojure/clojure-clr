@@ -75,7 +75,7 @@ namespace clojure.lang.CljCompiler.Ast
             throw new InvalidOperationException("Can't emit");
         }
 
-        public bool HasThrowLast() { return false; }
+        public bool HasNormalExit() { return true; }
 
 
         #endregion

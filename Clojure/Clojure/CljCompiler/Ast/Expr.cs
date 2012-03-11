@@ -33,6 +33,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         void Emit(RHC rhc, ObjExpr objx, GenContext context);
 
-        bool HasThrowLast();
+        bool HasNormalExit();
     }
 }

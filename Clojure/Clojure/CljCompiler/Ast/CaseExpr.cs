@@ -470,7 +470,7 @@ namespace clojure.lang.CljCompiler.Ast
                     EmitExpr(objx, context, _thens[i], emitUnboxed);
                 else
                     EmitThenForHashes(objx, context, _tests[i], _thens[i], defaultLabel, emitUnboxed);
-                if ( ! _thens[i].HasThrowLast() )
+                if (  _thens[i].HasNormalExit() )
                     ilg.Emit(OpCodes.Br, endLabel);
             }
             ilg.MarkLabel(defaultLabel);
@@ -615,7 +615,17 @@ namespace clojure.lang.CljCompiler.Ast
                 expr.Emit(RHC.Expression, objx, context);
         }
 
-        public bool HasThrowLast() { return false; }
+        public bool HasNormalExit() 
+        {
+            if (_defaultExpr.HasNormalExit())
+                return true;
+
+            foreach (Expr e in _thens.Values)
+                if (e.HasNormalExit())
+                    return true;
+
+            return false;
+        }
 
         #endregion
 

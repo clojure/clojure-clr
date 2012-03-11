@@ -315,11 +315,11 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             ilg.Emit(OpCodes.Br, loopLabel);
-            if ( rhc !=  RHC.Statement )
-                ilg.Emit(OpCodes.Ldnull);       
+            //if (rhc != RHC.Statement)
+            //    ilg.Emit(OpCodes.Ldnull);       
         }
 
-        public bool HasThrowLast() { return false; }
+        public bool HasNormalExit() { return false; }
 
 
         #endregion

@@ -379,7 +379,8 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));
                 ilg.MarkLabel(loopLabel);
                 EmitBody(Objx,newContext,_retType,_body);
-                ilg.Emit(OpCodes.Ret);
+                if ( _body.HasNormalExit() )
+                    ilg.Emit(OpCodes.Ret);
             }
             finally
             {

@@ -445,7 +445,8 @@ namespace clojure.lang.CljCompiler.Ast
                 
                 baseIlg.MarkLabel(loopLabel);
                 EmitBody(Objx,baseContext,_retType,_body);
-                baseIlg.Emit(OpCodes.Ret);
+                if ( _body.HasNormalExit() )
+                    baseIlg.Emit(OpCodes.Ret);
             }
             finally
             {
@@ -496,7 +497,8 @@ namespace clojure.lang.CljCompiler.Ast
 
                 baseIlg.MarkLabel(loopLabel);
                 _body.Emit(RHC.Return, fn, newContext);
-                baseIlg.Emit(OpCodes.Ret);
+                if ( _body.HasNormalExit() )
+                    baseIlg.Emit(OpCodes.Ret);
             }
             finally
             {

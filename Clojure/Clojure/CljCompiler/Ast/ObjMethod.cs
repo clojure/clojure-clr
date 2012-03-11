@@ -391,10 +391,13 @@ namespace clojure.lang.CljCompiler.Ast
             else
             {
                 body.Emit(RHC.Return, objx, context);
-                if (retType == typeof(void))
-                    ilg.Emit(OpCodes.Pop);
-                else
-                    EmitUnboxArg(ilg, typeof(object), retType);
+                if (body.HasNormalExit())
+                {
+                    if (retType == typeof(void))
+                        ilg.Emit(OpCodes.Pop);
+                    else
+                        EmitUnboxArg(ilg, typeof(object), retType);
+                }
             }
         }
 
