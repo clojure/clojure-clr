@@ -2089,7 +2089,7 @@ namespace clojure.lang.CljCompiler.Ast
             gen.Emit(OpCodes.Ret);
         }
 
-        public bool HasThrowLast() { return false; }
+        public bool HasNormalExit() { return true; }
 
 
         #endregion

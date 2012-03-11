@@ -90,7 +90,7 @@ namespace clojure.lang.CljCompiler.Ast
                 context.GetILGenerator().Emit(OpCodes.Pop);
         }
 
-        public bool HasThrowLast() { return false; }
+        public bool HasNormalExit() { return true; }
 
         #endregion
 

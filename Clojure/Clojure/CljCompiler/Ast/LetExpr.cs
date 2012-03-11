@@ -337,7 +337,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        public bool HasThrowLast() { return _body.HasThrowLast(); }
+        public bool HasNormalExit() { return _body.HasNormalExit(); }
 
         #endregion
 

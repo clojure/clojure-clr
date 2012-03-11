@@ -230,7 +230,7 @@ namespace clojure.lang.CljCompiler.Ast
                 _thenExpr.Emit(rhc, objx, context);
 
 
-            if ( ! _thenExpr.HasThrowLast() )
+            if ( _thenExpr.HasNormalExit() )
                 ilg.Emit(OpCodes.Br, endLabel);
 
             ilg.MarkLabel(nullLabel);
@@ -243,8 +243,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.MarkLabel(endLabel);
         }
 
-        public bool HasThrowLast() { return _elseExpr.HasThrowLast(); }
-
+        public bool HasNormalExit() { return _thenExpr.HasNormalExit() || _elseExpr.HasNormalExit(); }
 
         #endregion
 
