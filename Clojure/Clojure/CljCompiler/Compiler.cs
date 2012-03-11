@@ -1298,158 +1298,158 @@ namespace clojure.lang
             return context == null ? "_INTERP" : "_COMP_" + (new AssemblyName(context.AssemblyBuilder.FullName)).Name;
         }
 
-        public static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
-        {
-            if (CompilePathVar.deref() == null)
-                throw new InvalidOperationException("*compile-path* not set");
+        //public static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
+        //{
+        //    if (CompilePathVar.deref() == null)
+        //        throw new InvalidOperationException("*compile-path* not set");
 
-            object eofVal = new object();
-            object form;
+        //    object eofVal = new object();
+        //    object form;
 
-            //string sourcePath = sourceDirectory == null ? sourceName : sourceDirectory + "\\" + sourceName;
-            string sourcePath = relativePath;
+        //    //string sourcePath = sourceDirectory == null ? sourceName : sourceDirectory + "\\" + sourceName;
+        //    string sourcePath = relativePath;
 
-            LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
+        //    LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
 
-            GenContext context = GenContext.CreateWithExternalAssembly(relativePath, ".dll", true);
-            GenContext evalContext = GenContext.CreateWithInternalAssembly("EvalForCompile", false);
+        //    GenContext context = GenContext.CreateWithExternalAssembly(relativePath, ".dll", true);
+        //    GenContext evalContext = GenContext.CreateWithInternalAssembly("EvalForCompile", false);
 
-            Var.pushThreadBindings(RT.map(
-                SourcePathVar, sourcePath,
-                SourceVar, sourceName,
-                MethodVar, null,
-                LocalEnvVar, null,
-                LoopLocalsVar, null,
-                NextLocalNumVar, 0,
-                RT.CurrentNSVar, RT.CurrentNSVar.deref(),
-                    //LINE_BEFORE, lntr.LineNumber,
-                    //LINE_AFTER, lntr.LineNumber,
-                DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
-                ConstantsVar, PersistentVector.EMPTY,
-                ConstantIdsVar, new IdentityHashMap(),
-                KeywordsVar, PersistentHashMap.EMPTY,
-                VarsVar, PersistentHashMap.EMPTY,
-                RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
-                RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
-                RT.DataReadersVar, RT.DataReadersVar.deref(),
-                //KEYWORD_CALLSITES, PersistentVector.EMPTY,  // jvm doesn't do this, don't know why
-                //VAR_CALLSITES, EmptyVarCallSites(),      // jvm doesn't do this, don't know why
-                //PROTOCOL_CALLSITES, PersistentVector.EMPTY, // jvm doesn't do this, don't know why
-                CompilerContextVar, context
-                ));
-
-
-            try
-            {
-                FnExpr objx = new FnExpr(null);
-                objx.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.')) + "__init";
-
-                TypeBuilder exprTB = context.AssemblyGen.DefinePublicType("__REPL__", typeof(object), true);
-
-                //List<string> names = new List<string>();
-                List<Expr> exprs = new List<Expr>();
-
-                int i = 0;
-                while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
-                {
-                    //Java version: LINE_AFTER.set(lntr.LineNumber);
-
-                    Compile1(context, evalContext, exprTB, form, exprs, ref i);
+        //    Var.pushThreadBindings(RT.map(
+        //        SourcePathVar, sourcePath,
+        //        SourceVar, sourceName,
+        //        MethodVar, null,
+        //        LocalEnvVar, null,
+        //        LoopLocalsVar, null,
+        //        NextLocalNumVar, 0,
+        //        RT.CurrentNSVar, RT.CurrentNSVar.deref(),
+        //            //LINE_BEFORE, lntr.LineNumber,
+        //            //LINE_AFTER, lntr.LineNumber,
+        //        DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
+        //        ConstantsVar, PersistentVector.EMPTY,
+        //        ConstantIdsVar, new IdentityHashMap(),
+        //        KeywordsVar, PersistentHashMap.EMPTY,
+        //        VarsVar, PersistentHashMap.EMPTY,
+        //        RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
+        //        RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
+        //        RT.DataReadersVar, RT.DataReadersVar.deref(),
+        //        //KEYWORD_CALLSITES, PersistentVector.EMPTY,  // jvm doesn't do this, don't know why
+        //        //VAR_CALLSITES, EmptyVarCallSites(),      // jvm doesn't do this, don't know why
+        //        //PROTOCOL_CALLSITES, PersistentVector.EMPTY, // jvm doesn't do this, don't know why
+        //        CompilerContextVar, context
+        //        ));
 
 
-                    //Java version: LINE_BEFORE.set(lntr.LineNumber);
-                }
+        //    try
+        //    {
+        //        FnExpr objx = new FnExpr(null);
+        //        objx.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.')) + "__init";
 
-                exprTB.CreateType();
+        //        TypeBuilder exprTB = context.AssemblyGen.DefinePublicType("__REPL__", typeof(object), true);
 
-                // Need to put the loader init in its own type because we can't generate calls on the MethodBuilders
-                //  until after their types have been closed.
+        //        //List<string> names = new List<string>();
+        //        List<Expr> exprs = new List<Expr>();
 
-                TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
+        //        int i = 0;
+        //        while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
+        //        {
+        //            //Java version: LINE_AFTER.set(lntr.LineNumber);
 
-                Expression pushNSExpr = Expression.Call(null, Method_Compiler_PushNS);
-                Expression popExpr = Expression.Call(null, Method_Var_popThreadBindings);
+        //            Compile1(context, evalContext, exprTB, form, exprs, ref i);
 
-                BodyExpr bodyExpr = new BodyExpr(PersistentVector.create1(exprs));
-                FnMethod method = new FnMethod(objx, null, bodyExpr);
-                objx.AddMethod(method);
 
-                objx.Keywords = (IPersistentMap)KeywordsVar.deref();
-                objx.Vars = (IPersistentMap)VarsVar.deref();
-                objx.Constants = (PersistentVector)ConstantsVar.deref();
-                //objx.KeywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
-                //objx.ProtocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
-                //objx.VarCallsites = (IPersistentSet)VAR_CALLSITES.deref();
+        //            //Java version: LINE_BEFORE.set(lntr.LineNumber);
+        //        }
 
-                objx.KeywordCallsites = PersistentVector.EMPTY;
-                objx.ProtocolCallsites = PersistentVector.EMPTY;
-                objx.VarCallsites = (IPersistentSet)EmptyVarCallSites();
+        //        exprTB.CreateType();
 
-                objx.Compile(typeof(AFunction), null, PersistentVector.EMPTY, false, context);
+        //        // Need to put the loader init in its own type because we can't generate calls on the MethodBuilders
+        //        //  until after their types have been closed.
 
-                Expression fnNew = objx.GenCode(RHC.Expression,objx,context);
-                Expression fnInvoke = Expression.Call(fnNew, fnNew.Type.GetMethod("invoke", System.Type.EmptyTypes));
+        //        TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
 
-                Expression tryCatch = Expression.TryCatchFinally(fnInvoke, popExpr);
+        //        Expression pushNSExpr = Expression.Call(null, Method_Compiler_PushNS);
+        //        Expression popExpr = Expression.Call(null, Method_Var_popThreadBindings);
 
-                Expression body = Expression.Block(pushNSExpr, tryCatch);
+        //        BodyExpr bodyExpr = new BodyExpr(PersistentVector.create1(exprs));
+        //        FnMethod method = new FnMethod(objx, null, bodyExpr);
+        //        objx.AddMethod(method);
 
-                // create initializer call
-                MethodBuilder mbInit = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static);
-                LambdaExpression initFn = Expression.Lambda(body);
-                //initFn.CompileToMethod(mbInit, DebugInfoGenerator.CreatePdbGenerator());
-                initFn.CompileToMethod(mbInit, context.IsDebuggable);
+        //        objx.Keywords = (IPersistentMap)KeywordsVar.deref();
+        //        objx.Vars = (IPersistentMap)VarsVar.deref();
+        //        objx.Constants = (PersistentVector)ConstantsVar.deref();
+        //        //objx.KeywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
+        //        //objx.ProtocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
+        //        //objx.VarCallsites = (IPersistentSet)VAR_CALLSITES.deref();
 
-                initTB.CreateType();
+        //        objx.KeywordCallsites = PersistentVector.EMPTY;
+        //        objx.ProtocolCallsites = PersistentVector.EMPTY;
+        //        objx.VarCallsites = (IPersistentSet)EmptyVarCallSites();
 
-                context.SaveAssembly();
-            }
-            catch (LispReader.ReaderException e)
-            {
-                throw new CompilerException(sourcePath, e.Line, e.InnerException);
-            }
-            finally
-            {
-                Var.popThreadBindings();
-            }
-            return null;
-        }
+        //        objx.Compile(typeof(AFunction), null, PersistentVector.EMPTY, false, context);
 
-        private static void Compile1(GenContext compileContext, GenContext evalContext, TypeBuilder exprTB, object form, List<Expr> exprs, ref int i)
-        {
+        //        Expression fnNew = objx.GenCode(RHC.Expression,objx,context);
+        //        Expression fnInvoke = Expression.Call(fnNew, fnNew.Type.GetMethod("invoke", System.Type.EmptyTypes));
 
-            int line = (int)LineVar.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
-                line = (int)RT.meta(form).valAt(RT.LineKey);
-            IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
-                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
+        //        Expression tryCatch = Expression.TryCatchFinally(fnInvoke, popExpr);
 
-            Var.pushThreadBindings(RT.map(LineVar, line, SourceSpanVar, sourceSpan));
+        //        Expression body = Expression.Block(pushNSExpr, tryCatch);
 
-            ParserContext pcontext = new ParserContext(RHC.Eval);
+        //        // create initializer call
+        //        MethodBuilder mbInit = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static);
+        //        LambdaExpression initFn = Expression.Lambda(body);
+        //        //initFn.CompileToMethod(mbInit, DebugInfoGenerator.CreatePdbGenerator());
+        //        initFn.CompileToMethod(mbInit, context.IsDebuggable);
 
-            try
-            {
+        //        initTB.CreateType();
 
-                form = Macroexpand(form);
-                if (form is IPersistentCollection && Util.Equals(RT.first(form), DoSym))
-                {
-                    for (ISeq s = RT.next(form); s != null; s = RT.next(s))
-                        Compile1(compileContext, evalContext, exprTB, RT.first(s), exprs, ref i);
-                }
-                else
-                {
-                    Expr expr = Analyze(pcontext, form);
-                    exprs.Add(expr);     // should pick up the keywords/vars/constants here
-                    expr.Eval();
-                }
-            }
-            finally
-            {
-                Var.popThreadBindings();
-            }
-        }
+        //        context.SaveAssembly();
+        //    }
+        //    catch (LispReader.ReaderException e)
+        //    {
+        //        throw new CompilerException(sourcePath, e.Line, e.InnerException);
+        //    }
+        //    finally
+        //    {
+        //        Var.popThreadBindings();
+        //    }
+        //    return null;
+        //}
+
+        //private static void Compile1(GenContext compileContext, GenContext evalContext, TypeBuilder exprTB, object form, List<Expr> exprs, ref int i)
+        //{
+
+        //    int line = (int)LineVar.deref();
+        //    if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
+        //        line = (int)RT.meta(form).valAt(RT.LineKey);
+        //    IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
+        //    if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
+        //        sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
+
+        //    Var.pushThreadBindings(RT.map(LineVar, line, SourceSpanVar, sourceSpan));
+
+        //    ParserContext pcontext = new ParserContext(RHC.Eval);
+
+        //    try
+        //    {
+
+        //        form = Macroexpand(form);
+        //        if (form is IPersistentCollection && Util.Equals(RT.first(form), DoSym))
+        //        {
+        //            for (ISeq s = RT.next(form); s != null; s = RT.next(s))
+        //                Compile1(compileContext, evalContext, exprTB, RT.first(s), exprs, ref i);
+        //        }
+        //        else
+        //        {
+        //            Expr expr = Analyze(pcontext, form);
+        //            exprs.Add(expr);     // should pick up the keywords/vars/constants here
+        //            expr.Eval();
+        //        }
+        //    }
+        //    finally
+        //    {
+        //        Var.popThreadBindings();
+        //    }
+        //}
 
         public static void PushNS()
         {
@@ -1484,7 +1484,7 @@ namespace clojure.lang
 
         #region Compile - no DLR
 
-        public static object CompileNoDlr(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
+        public static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
         {
             if (CompilePathVar.deref() == null)
                 throw new InvalidOperationException("*compile-path* not set");
@@ -1531,7 +1531,7 @@ namespace clojure.lang
 
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
-                    Compile1NoDlr(context, objx, form);
+                    Compile1(context, objx, form);
                 }
 
                 initMB.GetILGenerator().Emit(OpCodes.Ret);
@@ -1571,7 +1571,7 @@ namespace clojure.lang
         }
 
 
-        private static void Compile1NoDlr(GenContext context,  ObjExpr objx, object form)
+        private static void Compile1(GenContext context,  ObjExpr objx, object form)
         {
             int line = (int)LineVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
@@ -1590,7 +1590,7 @@ namespace clojure.lang
                 if (form is IPersistentCollection && Util.Equals(RT.first(form), DoSym))
                 {
                     for (ISeq s = RT.next(form); s != null; s = RT.next(s))
-                        Compile1NoDlr(context, objx, RT.first(s));
+                        Compile1(context, objx, RT.first(s));
                 }
                 else
                 {
@@ -1655,7 +1655,8 @@ namespace clojure.lang
                 RT.CurrentNSVar, RT.CurrentNSVar.deref(),
                 RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
                 RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
-                RT.DataReadersVar, RT.DataReadersVar.deref()
+                RT.DataReadersVar, RT.DataReadersVar.deref(),
+                CompilerContextVar, EvalContext
                 //LINE_BEFORE, lntr.LineNumber,
                 //LINE_AFTER, lntr.LineNumber
                 ));

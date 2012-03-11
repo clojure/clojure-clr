@@ -349,44 +349,44 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Compiling (class generation)
 
-        public Type Compile(Type superType, Type stubType, IPersistentVector interfaces, bool onetimeUse, GenContext context)
-        {
-            if (_compiledType != null)
-                return _compiledType;
+        //public Type Compile(Type superType, Type stubType, IPersistentVector interfaces, bool onetimeUse, GenContext context)
+        //{
+        //    if (_compiledType != null)
+        //        return _compiledType;
 
-            TypeBuilder baseTB = GenerateFnBaseClass(superType,context);
-            _baseType = baseTB.CreateType();
+        //    TypeBuilder baseTB = GenerateFnBaseClass(superType,context);
+        //    _baseType = baseTB.CreateType();
 
-            // patch this param type
+        //    // patch this param type
 
-            try
-            {
-                if (IsDefType)
-                {
-                    Compiler.RegisterDuplicateType(_baseType);
+        //    try
+        //    {
+        //        if (IsDefType)
+        //        {
+        //            Compiler.RegisterDuplicateType(_baseType);
 
-                    Var.pushThreadBindings(RT.map(
-                        Compiler.CompileStubOrigClassVar, stubType
-                        ));
-                        //,
-                        //Compiler.COMPILE_STUB_CLASS, _baseType));
-                }
+        //            Var.pushThreadBindings(RT.map(
+        //                Compiler.CompileStubOrigClassVar, stubType
+        //                ));
+        //                //,
+        //                //Compiler.COMPILE_STUB_CLASS, _baseType));
+        //        }
 
-                GenerateFnClass(interfaces, context);
-                _compiledType = _typeBuilder.CreateType();
+        //        GenerateFnClass(interfaces, context);
+        //        _compiledType = _typeBuilder.CreateType();
 
-                if (context.DynInitHelper != null)
-                    context.DynInitHelper.FinalizeType();
+        //        if (context.DynInitHelper != null)
+        //            context.DynInitHelper.FinalizeType();
 
-                _ctorInfo = _compiledType.GetConstructors()[0];  // TODO: When we have more than one c-tor, we'll have to fix this.
-                return _compiledType;
-            }
-            finally
-            {
-                if ( IsDefType )
-                    Var.popThreadBindings();
-            }
-        }
+        //        _ctorInfo = _compiledType.GetConstructors()[0];  // TODO: When we have more than one c-tor, we'll have to fix this.
+        //        return _compiledType;
+        //    }
+        //    finally
+        //    {
+        //        if ( IsDefType )
+        //            Var.popThreadBindings();
+        //    }
+        //}
         #endregion
 
         #region  Base class construction
@@ -1267,7 +1267,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        public Type CompileNoDlr(Type superType, Type stubType, IPersistentVector interfaces, bool onetimeUse, GenContext context)
+        public Type Compile(Type superType, Type stubType, IPersistentVector interfaces, bool onetimeUse, GenContext context)
         {
             if (_compiledType != null)
                 return _compiledType;

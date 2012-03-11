@@ -145,12 +145,12 @@ namespace clojure.lang.CljCompiler.Ast
 
             GenContext newContext = null;
 
-            if (Compiler.IsCompiling || hasPrimDecls  || ! RT.CompileDLR )
-            {
+            //if (Compiler.IsCompiling || hasPrimDecls  )// || ! RT.CompileDLR )
+            //{
                 GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? Compiler.EvalContext;
                 newContext = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
                 Var.pushThreadBindings(RT.map(Compiler.CompilerContextVar, newContext));
-            }
+            //}
 
             try
             {
@@ -222,8 +222,8 @@ namespace clojure.lang.CljCompiler.Ast
 
 
                 //if (Compiler.IsCompiling || prims.Count > 0)
-                if (Compiler.IsCompiling || prims.Count > 0 || !RT.CompileDLR)
-                {
+                //if (Compiler.IsCompiling || prims.Count > 0 ) //|| !RT.CompileDLR)
+                //{
                     //GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? Compiler.EvalContext;
                     //GenContext genC = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
 
@@ -231,26 +231,26 @@ namespace clojure.lang.CljCompiler.Ast
                     foreach (string typename in prims)
                         primTypes = primTypes.cons(Type.GetType(typename));
 
-                    if (RT.CompileDLR)
+                    //if (RT.CompileDLR)
                         fn.Compile(
                             fn.IsVariadic ? typeof(RestFn) : typeof(AFunction),
                             null,
                             primTypes,
                             fn._onceOnly,
                             newContext);
-                    else
-                        fn.CompileNoDlr(
-                            fn.IsVariadic ? typeof(RestFn) : typeof(AFunction),
-                            null,
-                            primTypes,
-                            fn._onceOnly,
-                            newContext);
-                }
-                else
-                {
-                    fn.CompiledType = fn.GetPrecompiledType();
-                    fn.FnMode = FnMode.Light;
-                }
+                    //else
+                    //    fn.CompileNoDlr(
+                    //        fn.IsVariadic ? typeof(RestFn) : typeof(AFunction),
+                    //        null,
+                    //        primTypes,
+                    //        fn._onceOnly,
+                    //        newContext);
+                //}
+                //else
+                //{
+                //    fn.CompiledType = fn.GetPrecompiledType();
+                //    fn.FnMode = FnMode.Light;
+                //}
 
                 if (fn.SupportsMeta)
                     return new MetaExpr(fn, MapExpr.Parse(pcon.EvalOrExpr(), fmeta));
@@ -284,16 +284,16 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        public override object Eval()
-        {
-            if (FnMode == FnMode.Full)
-                return base.Eval();
+        //public override object Eval()
+        //{
+        //    if (FnMode == FnMode.Full)
+        //        return base.Eval();
 
-            Expression fn = GenImmediateCode(RHC.Expression, this, Compiler.EvalContext);
-            Expression<Compiler.ReplDelegate> lambdaForCompile = Expression.Lambda<Compiler.ReplDelegate>(Expression.Convert(fn, typeof(Object)), "ReplCall", null);
-            return lambdaForCompile.Compile().Invoke();
+        //    Expression fn = GenImmediateCode(RHC.Expression, this, Compiler.EvalContext);
+        //    Expression<Compiler.ReplDelegate> lambdaForCompile = Expression.Lambda<Compiler.ReplDelegate>(Expression.Convert(fn, typeof(Object)), "ReplCall", null);
+        //    return lambdaForCompile.Compile().Invoke();
 
-        }
+        //}
 
         #endregion
 
