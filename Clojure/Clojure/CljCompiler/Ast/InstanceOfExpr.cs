@@ -113,15 +113,24 @@ namespace clojure.lang.CljCompiler.Ast
             Label falseLabel = ilg.DefineLabel();
 
             _expr.Emit(RHC.Expression, objx, context);
+            //ilg.Emit(OpCodes.Isinst, _t);
+            //ilg.Emit(OpCodes.Ldnull);
+            //ilg.Emit(OpCodes.Ceq);
+            //ilg.Emit(OpCodes.Brfalse_S, falseLabel);
+            //ilg.EmitBoolean(true);
+            //ilg.Emit(OpCodes.Br_S, endLabel);
+            //ilg.MarkLabel(falseLabel);
+            //ilg.EmitBoolean(false);
+            //ilg.MarkLabel(endLabel);
+
+            Type opType = _expr.HasClrType && _expr.ClrType != null ? _expr.ClrType : typeof(object);
+            if (opType.IsValueType)
+            {
+                ilg.Emit(OpCodes.Box, opType);
+            }
             ilg.Emit(OpCodes.Isinst, _t);
             ilg.Emit(OpCodes.Ldnull);
-            ilg.Emit(OpCodes.Ceq);
-            ilg.Emit(OpCodes.Brfalse_S, falseLabel);
-            ilg.EmitBoolean(true);
-            ilg.Emit(OpCodes.Br_S, endLabel);
-            ilg.MarkLabel(falseLabel);
-            ilg.EmitBoolean(false);
-            ilg.MarkLabel(endLabel);
+            ilg.Emit(OpCodes.Cgt_Un);
 
         }
 
