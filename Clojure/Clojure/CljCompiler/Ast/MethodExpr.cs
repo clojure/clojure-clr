@@ -430,7 +430,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                     case HostArg.ParameterType.Standard:
                         paramExprs.Add(Expression.Parameter(argType, ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
-                        if (argType.IsPrimitive)
+                        if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr)
                         {
                             ((MaybePrimitiveExpr)ha.ArgExpr).EmitUnboxed(RHC.Expression, objx, context);
                         }
