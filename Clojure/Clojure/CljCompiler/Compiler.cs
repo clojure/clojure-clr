@@ -161,6 +161,7 @@ namespace clojure.lang
         internal static readonly Var CompileStubOrigClassVar = Var.create(null).setDynamic();
 
         internal static readonly Var CompilerContextVar = Var.create(null).setDynamic();
+        internal static readonly Var CompilerActiveVar = Var.create(false).setDynamic();
 
         #endregion
 
@@ -1289,7 +1290,7 @@ namespace clojure.lang
 
         public static bool IsCompiling
         {
-            get { return CompilerContextVar.deref() != null; }
+            get { return RT.booleanCast(CompilerActiveVar.deref()); }
         }
 
         public static string IsCompilingSuffix()
@@ -1514,7 +1515,8 @@ namespace clojure.lang
                 RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
                 RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
                 RT.DataReadersVar, RT.DataReadersVar.deref(),
-                CompilerContextVar, context
+                CompilerContextVar, context,
+                CompilerActiveVar, true
                 ));
 
             try
