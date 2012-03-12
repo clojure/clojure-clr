@@ -470,7 +470,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Dup);                               // target, target
 
             LocalBuilder targetTemp = ilg.DeclareLocal(typeof(Object));
-            targetTemp.SetLocalSymInfo("target");
+            Compiler.MaybeSetLocalSymName(context, targetTemp, "target");
             ilg.Emit(OpCodes.Stloc,targetTemp);                  // target
 
             ilg.EmitCall(Compiler.Method_Util_classOf);          // class
@@ -487,7 +487,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.EmitCall(Compiler.Method_Util_classOf);          // class
             
             LocalBuilder typeTemp = ilg.DeclareLocal(typeof(Type));
-            typeTemp.SetLocalSymInfo("type");
+            Compiler.MaybeSetLocalSymName(context, typeTemp, "type");
             ilg.Emit(OpCodes.Stloc,typeTemp);                    //    (typeType <= class)
             
             ilg.EmitLoadArg(0);                                  // this

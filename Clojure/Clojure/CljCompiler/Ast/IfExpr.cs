@@ -201,7 +201,7 @@ namespace clojure.lang.CljCompiler.Ast
             else
             {
                 LocalBuilder tempLoc = ilg.DeclareLocal(typeof(Object));
-                tempLoc.SetLocalSymInfo("test");
+                Compiler.MaybeSetLocalSymName(context, tempLoc, "test");
 
                 _testExpr.Emit(RHC.Expression, objx, context);
                 ilg.Emit(OpCodes.Dup);

@@ -1277,6 +1277,12 @@ namespace clojure.lang
             return isDebuggable && spanMap != null & Compiler.DocInfo() != null && Compiler.SymDocGenerator() != null;
         }
 
+        public static void MaybeSetLocalSymName(GenContext context, LocalBuilder lb, string name)
+        {
+            if (context.IsDebuggable)
+                lb.SetLocalSymInfo(name);
+        }
+
 
         static GenContext _evalContext = GenContext.CreateWithInternalAssembly("eval", false);
         static public GenContext EvalContext { get { return _evalContext; } }
