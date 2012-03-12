@@ -499,8 +499,10 @@ namespace clojure.lang.CljCompiler.Ast
     
             objx.EmitVar(context,v);                              // var
             ilg.EmitCall(Compiler.Method_Var_getRawRoot);         // proto-fn
+            ilg.Emit(OpCodes.Castclass, typeof(IFn));
                        
             ilg.Emit(OpCodes.Ldloc,targetTemp);                  // proto-fn, target
+
             EmitArgsAndCall(1,rhc,objx,context);
             ilg.Emit(OpCodes.Br,endLabel);
 
