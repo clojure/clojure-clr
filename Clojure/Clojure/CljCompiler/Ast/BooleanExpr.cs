@@ -24,7 +24,7 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class BooleanExpr : LiteralExpr
+    class BooleanExpr : LiteralExpr  // , MaybePrimitiveExpr  TODO: No reason this shouldn't be, but it messes up the RecurExpr emit code.
     {
         #region Data
 
@@ -71,10 +71,28 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ILGen ilg = context.GetILGen();
             ilg.EmitBoolean(_val);
-            ilg.EmitBoxing(typeof(Boolean));
+            ilg.Emit(OpCodes.Box,typeof(bool));
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
         }
+
+        #endregion
+
+        #region MaybePrimitiveExpr members  - deleted (for now)
+
+        //public bool CanEmitPrimitive
+        //{
+        //    get { return true; }
+        //}
+
+        //public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        //{
+        //    ILGenerator ilg = context.GetILGenerator();
+        //    if (_val)
+        //        ilg.Emit(OpCodes.Ldc_I4_1);
+        //    else
+        //        ilg.Emit(OpCodes.Ldc_I4_0);
+        //}
 
         #endregion
     }

@@ -1702,27 +1702,27 @@ namespace clojure.lang.CljCompiler.Ast
             else if (value is Boolean)
             {
                 ilg.EmitBoolean((Boolean)value);
-                ilg.EmitBoxing(typeof(bool));
+                ilg.Emit(OpCodes.Box,typeof(bool));
             }
             else if (value is Int32)
             {
                 ilg.EmitInt((int)value);
-                ilg.EmitBoxing(typeof(int));
+                ilg.Emit(OpCodes.Box, typeof(int));
             }
             else if (value is Int64)
             {
                 ilg.EmitLong((long)value);
-                ilg.EmitBoxing(typeof(long));
+                ilg.Emit(OpCodes.Box, typeof(long));
             }
             else if (value is Double)
             {
                 ilg.EmitDouble((double)value);
-                ilg.EmitBoxing(typeof(double));
+                ilg.Emit(OpCodes.Box, typeof(double));
             }
             else if (value is Char)
             {
                 ilg.EmitChar((char)value);
-                ilg.EmitBoxing(typeof(char));
+                ilg.Emit(OpCodes.Box,typeof(char));
             }
             else if (value is Type)
             {
