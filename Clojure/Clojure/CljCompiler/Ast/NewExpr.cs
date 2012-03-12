@@ -331,13 +331,16 @@ namespace clojure.lang.CljCompiler.Ast
                         break;
 
                     case HostArg.ParameterType.Standard:
-                        paramExprs.Add(Expression.Parameter(argType, ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
                         if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr)
                         {
+                            paramExprs.Add(Expression.Parameter(argType, ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
                             ((MaybePrimitiveExpr)ha.ArgExpr).EmitUnboxed(RHC.Expression, objx, context);
                         }
                         else
+                        {
+                            paramExprs.Add(Expression.Parameter(typeof(object), ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
                             ha.ArgExpr.Emit(RHC.Expression, objx, context);
+                        }
                         break;
 
                     default:

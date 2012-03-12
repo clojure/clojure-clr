@@ -133,7 +133,17 @@ namespace clojure.lang.CljCompiler.Ast
             if (targetType != null && _tinfo != null)
             {
                 _target.Emit(RHC.Expression, objx, context);
-                ilg.Emit(OpCodes.Isinst, targetType);
+                // TODO: Transfer this mechanism for calls on value types to MethodExpr, InstanceZeroArityCallExpr, StaticFieldExpr
+                if (FieldDeclaringType.IsValueType)
+                {
+                    ilg.Emit(OpCodes.Unbox_Any, FieldDeclaringType);
+                    LocalBuilder vtTemp = ilg.DeclareLocal(FieldDeclaringType);
+                    vtTemp.SetLocalSymInfo("valueTemp");
+                    ilg.Emit(OpCodes.Stloc, vtTemp);
+                    ilg.Emit(OpCodes.Ldloca, vtTemp);
+                }
+                else
+                    ilg.Emit(OpCodes.Castclass, FieldDeclaringType);
                 EmitGet(ilg);
                 HostExpr.EmitBoxReturn(objx, context, FieldType);
             }
@@ -176,6 +186,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected abstract void EmitGet(ILGen ilg);
         protected abstract void EmitSet(ILGen ilg);
+        protected abstract Type FieldDeclaringType { get; }
 
         #endregion
 
@@ -292,6 +303,11 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _tinfo.FieldType; }
         }
 
+        protected override Type FieldDeclaringType
+        {
+            get { return  _tinfo.DeclaringType; }
+        }
+
         protected override void EmitGet(ILGen ilg)
         {
             ilg.EmitFieldGet(_tinfo);
@@ -372,6 +388,11 @@ namespace clojure.lang.CljCompiler.Ast
         protected override void EmitSet(ILGen ilg)
         {
             ilg.EmitPropertySet(_tinfo);
+        }
+
+        protected override Type FieldDeclaringType
+        {
+            get { return _tinfo.DeclaringType; }
         }
 
         #endregion

@@ -653,7 +653,13 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else
             {
-                gen.Emit(OpCodes.Castclass, paramType);
+                // TODO: Properly handle value types here.  Really, we need to know the incoming type.
+                if (paramType.IsValueType)
+                {
+                    gen.Emit(OpCodes.Unbox_Any, paramType);
+                }
+                else
+                    gen.Emit(OpCodes.Castclass, paramType);
             }
         }
 

@@ -363,10 +363,10 @@ namespace clojure.lang.CljCompiler.Ast
             MethodBuilder mb = context.TB.DefineMethod(GetMethodName(), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, GetReturnType(), GetArgTypes());
             SetCustomAttributes(mb);
 
-            Console.Write("Compiling method {0} ", GetMethodName());
-            foreach (Type t in GetArgTypes())
-                Console.Write("{0}, ", t.Name);
-            Console.WriteLine("returning {0}", GetReturnType().Name);
+            //Console.Write("Compiling method {0} ", GetMethodName());
+            //foreach (Type t in GetArgTypes())
+            //    Console.Write("{0}, ", t.Name);
+            //Console.WriteLine("returning {0}", GetReturnType().Name);
 
             GenContext newContext = context.WithBuilders(context.TB, mb);
             ILGenerator ilg = newContext.GetILGenerator();
