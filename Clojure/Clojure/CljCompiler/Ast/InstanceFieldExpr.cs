@@ -138,7 +138,7 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     ilg.Emit(OpCodes.Unbox_Any, FieldDeclaringType);
                     LocalBuilder vtTemp = ilg.DeclareLocal(FieldDeclaringType);
-                    vtTemp.SetLocalSymInfo("valueTemp");
+                    Compiler.MaybeSetLocalSymName(context, vtTemp, "valueTemp");
                     ilg.Emit(OpCodes.Stloc, vtTemp);
                     ilg.Emit(OpCodes.Ldloca, vtTemp);
                 }
@@ -231,7 +231,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Castclass, _targetType);
                 val.Emit(RHC.Expression, objx, context);
                 LocalBuilder tmp = ilg.DeclareLocal(typeof(object));
-                tmp.SetLocalSymInfo("valTemp");
+                Compiler.MaybeSetLocalSymName(context, tmp, "valTemp");
                 ilg.Emit(OpCodes.Dup);
                 ilg.Emit(OpCodes.Stloc, tmp);
                 if (FieldType.IsPrimitive)

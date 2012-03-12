@@ -298,7 +298,7 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     LocalBuilder local = ilg.DeclareLocal(primType);
                     locals.Add(local);
-                    local.SetLocalSymInfo(bi.Binding.Name);
+                    Compiler.MaybeSetLocalSymName(context, local, bi.Binding.Name);
                     bi.Binding.LocalVar = local;
                     
                     ((MaybePrimitiveExpr)bi.Init).EmitUnboxed(RHC.Expression, objx, context);
@@ -308,7 +308,7 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     LocalBuilder local = ilg.DeclareLocal(typeof(Object));
                     locals.Add(local);
-                    local.SetLocalSymInfo(bi.Binding.Name);
+                    Compiler.MaybeSetLocalSymName(context, local, bi.Binding.Name);
                     bi.Binding.LocalVar = local;
 
                     bi.Init.Emit(RHC.Expression, objx, context);

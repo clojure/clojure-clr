@@ -155,9 +155,9 @@ namespace clojure.lang.CljCompiler.Ast
             LocalBuilder thunkLoc = ilg.DeclareLocal(typeof(ILookupThunk));
             LocalBuilder targetLoc = ilg.DeclareLocal(typeof(Object));
             LocalBuilder resultLoc = ilg.DeclareLocal(typeof(Object));
-            thunkLoc.SetLocalSymInfo("thunk");
-            targetLoc.SetLocalSymInfo("target");
-            resultLoc.SetLocalSymInfo("result");
+            Compiler.MaybeSetLocalSymName(context, thunkLoc, "thunk");
+            Compiler.MaybeSetLocalSymName(context, targetLoc, "target");
+            Compiler.MaybeSetLocalSymName(context, resultLoc, "result");
 
             // TODO: Debug info
 
