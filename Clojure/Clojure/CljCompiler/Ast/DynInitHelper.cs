@@ -231,7 +231,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         // From Microsoft.Scripting.Generation.AssemblyGen
-        private int _index;
+        //private int _index;
         internal TypeBuilder DefineType(string name, Type parent, TypeAttributes attr, bool preserveName)
         {
             ContractUtils.RequiresNotNull(name, "name");
@@ -240,7 +240,7 @@ namespace clojure.lang.CljCompiler.Ast
             StringBuilder sb = new StringBuilder(name);
             if (!preserveName)
             {
-                int index = Interlocked.Increment(ref _index);
+                int index = RT.nextID(); //Interlocked.Increment(ref _index);
                 sb.Append("$");
                 sb.Append(index);
             }
@@ -251,7 +251,6 @@ namespace clojure.lang.CljCompiler.Ast
             sb.Replace('+', '_').Replace('[', '_').Replace(']', '_').Replace('*', '_').Replace('&', '_').Replace(',', '_').Replace('\\', '_');
 
             name = sb.ToString();
-
             return /* _myModule */ _assemblyGen.ModuleBuilder.DefineType(name, attr, parent);
         }
         private const MethodAttributes CtorAttributes = MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public;
