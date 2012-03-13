@@ -1276,42 +1276,42 @@ not a pretty writer (which keeps track of columns), this function always outputs
 
 (defdirectives 
   (\A 
-   [ :mincol [0 Int64] :colinc [1 Int64] :minpad [0 Int64] :padchar [\space Char] ] 
+   [ :mincol [0 Int32] :colinc [1 Int32] :minpad [0 Int32] :padchar [\space Char] ] 
    #{ :at :colon :both} {}
    #(format-ascii print-str %1 %2 %3))
 
   (\S 
-   [ :mincol [0 Int64] :colinc [1 Int64] :minpad [0 Int64] :padchar [\space Char] ] 
+   [ :mincol [0 Int32] :colinc [1 Int32] :minpad [0 Int32] :padchar [\space Char] ] 
    #{ :at :colon :both} {}
    #(format-ascii pr-str %1 %2 %3))
 
   (\D
-   [ :mincol [0 Int64] :padchar [\space Char] :commachar [\, Char] 
-    :commainterval [ 3 Int64]]
+   [ :mincol [0 Int32] :padchar [\space Char] :commachar [\, Char] 
+    :commainterval [ 3 Int32]]
    #{ :at :colon :both } {}
    #(format-integer 10 %1 %2 %3))
 
   (\B
-   [ :mincol [0 Int64] :padchar [\space Char] :commachar [\, Char] 
-    :commainterval [ 3 Int64]]
+   [ :mincol [0 Int32] :padchar [\space Char] :commachar [\, Char] 
+    :commainterval [ 3 Int32]]
    #{ :at :colon :both } {}
    #(format-integer 2 %1 %2 %3))
 
   (\O
-   [ :mincol [0 Int64] :padchar [\space Char] :commachar [\, Char] 
-    :commainterval [ 3 Int64]]
+   [ :mincol [0 Int32] :padchar [\space Char] :commachar [\, Char] 
+    :commainterval [ 3 Int32]]
    #{ :at :colon :both } {}
    #(format-integer 8 %1 %2 %3))
 
   (\X
-   [ :mincol [0 Int64] :padchar [\space Char] :commachar [\, Char] 
-    :commainterval [ 3 Int64]]
+   [ :mincol [0 Int32] :padchar [\space Char] :commachar [\, Char] 
+    :commainterval [ 3 Int32]]
    #{ :at :colon :both } {}
    #(format-integer 16 %1 %2 %3))
 
   (\R
-   [:base [nil Int64] :mincol [0 Int64] :padchar [\space Char] :commachar [\, Char] 
-    :commainterval [ 3 Int64]]
+   [:base [nil Int32] :mincol [0 Int32] :padchar [\space Char] :commachar [\, Char] 
+    :commainterval [ 3 Int32]]
    #{ :at :colon :both } {}
    (do
      (cond                          ; ~R is overloaded with bizareness
@@ -1340,32 +1340,32 @@ not a pretty writer (which keeps track of columns), this function always outputs
      :else plain-character))
 
   (\F
-   [ :w [nil Int64] :d [nil Int64] :k [0 Int64] :overflowchar [nil Char] 
+   [ :w [nil Int32] :d [nil Int32] :k [0 Int32] :overflowchar [nil Char] 
     :padchar [\space Char] ]
    #{ :at } {}
    fixed-float)
 
   (\E
-   [ :w [nil Int64] :d [nil Int64] :e [nil Int64] :k [1 Int64] 
+   [ :w [nil Int32] :d [nil Int32] :e [nil Int32] :k [1 Int32] 
     :overflowchar [nil Char] :padchar [\space Char] 
     :exponentchar [nil Char] ]
    #{ :at } {}
    exponential-float)
 
   (\G
-   [ :w [nil Int64] :d [nil Int64] :e [nil Int64] :k [1 Int64] 
+   [ :w [nil Int32] :d [nil Int32] :e [nil Int32] :k [1 Int32] 
     :overflowchar [nil Char] :padchar [\space Char] 
     :exponentchar [nil Char] ]
    #{ :at } {}
    general-float)
 
   (\$
-   [ :d [2 Int64] :n [1 Int64] :w [0 Int64] :padchar [\space Char]]
+   [ :d [2 Int32] :n [1 Int32] :w [0 Int32] :padchar [\space Char]]
    #{ :at :colon :both} {}
    dollar-float)
 
   (\% 
-   [ :count [1 Int64] ] 
+   [ :count [1 Int32] ] 
    #{ } {}
    (fn [params arg-navigator offsets]
      (dotimes [i (:count params)]
@@ -1373,7 +1373,7 @@ not a pretty writer (which keeps track of columns), this function always outputs
      arg-navigator))
 
   (\&
-   [ :count [1 Int64] ] 
+   [ :count [1 Int32] ] 
    #{ :pretty } {}
    (fn [params arg-navigator offsets]
      (let [cnt (:count params)]
@@ -1383,7 +1383,7 @@ not a pretty writer (which keeps track of columns), this function always outputs
      arg-navigator))
 
   (\| 
-   [ :count [1 Int64] ] 
+   [ :count [1 Int32] ] 
    #{ } {}
    (fn [params arg-navigator offsets]
      (dotimes [i (:count params)]
@@ -1391,7 +1391,7 @@ not a pretty writer (which keeps track of columns), this function always outputs
      arg-navigator))
 
   (\~ 
-   [ :n [1 Int64] ] 
+   [ :n [1 Int32] ] 
    #{ } {}
    (fn [params arg-navigator offsets]
      (let [n (:n params)]
@@ -1407,14 +1407,14 @@ not a pretty writer (which keeps track of columns), this function always outputs
      arg-navigator))
 
   (\T
-   [ :colnum [1 Int64] :colinc [1 Int64] ] 
+   [ :colnum [1 Int32] :colinc [1 Int32] ] 
    #{ :at :pretty } {}
    (if (:at params)
      #(relative-tabulation %1 %2 %3)
      #(absolute-tabulation %1 %2 %3)))
 
   (\* 
-   [ :n [1 Int64] ] 
+   [ :n [1 Int32] ] 
    #{ :colon :at } {}
    (fn [params navigator offsets]
      (let [n (:n params)]
@@ -1458,7 +1458,7 @@ not a pretty writer (which keeps track of columns), this function always outputs
   (\) [] #{} {} nil) 
 
   (\[
-   [ :selector [nil Int64] ]
+   [ :selector [nil Int32] ]
    #{ :colon :at } { :right \], :allows-separator true, :else :last }
    (cond
      (:colon params)
@@ -1470,13 +1470,13 @@ not a pretty writer (which keeps track of columns), this function always outputs
      true
      choice-conditional))
 
-  (\; [:min-remaining [nil Int64] :max-columns [nil Int64]] 
+  (\; [:min-remaining [nil Int32] :max-columns [nil Int32]] 
    #{ :colon } { :separator true } nil) 
    
   (\] [] #{} {} nil) 
 
   (\{
-   [ :max-iterations [nil Int64] ]
+   [ :max-iterations [nil Int32] ]
    #{ :colon :at :both} { :right \}, :allows-separator false }
    (cond
      (and (:at params) (:colon params))
@@ -1495,14 +1495,14 @@ not a pretty writer (which keeps track of columns), this function always outputs
   (\} [] #{:colon} {} nil) 
 
   (\<
-   [:mincol [0 Int64] :colinc [1 Int64] :minpad [0 Int64] :padchar [\space Char]]
+   [:mincol [0 Int32] :colinc [1 Int32] :minpad [0 Int32] :padchar [\space Char]]
    #{:colon :at :both :pretty} { :right \>, :allows-separator true, :else :first }
    logical-block-or-justify)
 
   (\> [] #{:colon} {} nil) 
 
   ;; TODO: detect errors in cases where colon not allowed
-  (\^ [:arg1 [nil Int64] :arg2 [nil Int64] :arg3 [nil Int64]] 
+  (\^ [:arg1 [nil Int32] :arg2 [nil Int32] :arg3 [nil Int32]] 
    #{:colon} {} 
    (fn [params navigator offsets]
      (let [arg1 (:arg1 params)
