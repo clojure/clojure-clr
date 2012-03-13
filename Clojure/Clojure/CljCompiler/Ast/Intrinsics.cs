@@ -131,20 +131,21 @@ namespace clojure.lang.CljCompiler.Ast
             //AddOp(rtt, "aget", new Type[] { typeof(bool[]), typeof(int) }, OpCodes.lde );
             AddOp(rtt, "aget", new Type[] { typeof(object[]), typeof(int) }, OpCodes.Ldelem_Ref );
 
-            AddOp(rtt, "alength", new Type[] { typeof(float[]) }, OpCodes.Ldlen );
-            AddOp(rtt, "alength", new Type[] { typeof(double[]) }, OpCodes.Ldlen);
-            AddOp(rtt, "alength", new Type[] { typeof(decimal[]) }, OpCodes.Ldlen);
-            AddOp(rtt, "alength", new Type[] { typeof(bool[]) }, OpCodes.Ldlen );
-            AddOp(rtt, "alength", new Type[] { typeof(byte[]) }, OpCodes.Ldlen );
-            AddOp(rtt, "alength", new Type[] { typeof(sbyte[]) }, OpCodes.Ldlen );
-            AddOp(rtt, "alength", new Type[] { typeof(short[]) }, OpCodes.Ldlen );
-            AddOp(rtt, "alength", new Type[] { typeof(ushort[]) }, OpCodes.Ldlen );
-            AddOp(rtt, "alength", new Type[] { typeof(int[]) }, OpCodes.Ldlen );
-            AddOp(rtt, "alength", new Type[] { typeof(uint[]) }, OpCodes.Ldlen );
-            AddOp(rtt, "alength", new Type[] { typeof(long[]) }, OpCodes.Ldlen );
-            AddOp(rtt, "alength", new Type[] { typeof(ulong[]) }, OpCodes.Ldlen );
-            AddOp(rtt, "alength", new Type[] { typeof(char[]) }, OpCodes.Ldlen );
-            AddOp(rtt, "alength", new Type[] { typeof(object[]) }, OpCodes.Ldlen );
+            // We need to write a special prefer method to distinguish these.
+            //AddOp(rtt, "alength", new Type[] { typeof(float[]) }, OpCodes.Ldlen );
+            //AddOp(rtt, "alength", new Type[] { typeof(double[]) }, OpCodes.Ldlen);
+            //AddOp(rtt, "alength", new Type[] { typeof(decimal[]) }, OpCodes.Ldlen);
+            //AddOp(rtt, "alength", new Type[] { typeof(bool[]) }, OpCodes.Ldlen );
+            //AddOp(rtt, "alength", new Type[] { typeof(byte[]) }, OpCodes.Ldlen );
+            //AddOp(rtt, "alength", new Type[] { typeof(sbyte[]) }, OpCodes.Ldlen );
+            //AddOp(rtt, "alength", new Type[] { typeof(short[]) }, OpCodes.Ldlen );
+            //AddOp(rtt, "alength", new Type[] { typeof(ushort[]) }, OpCodes.Ldlen );
+            //AddOp(rtt, "alength", new Type[] { typeof(int[]) }, OpCodes.Ldlen );
+            //AddOp(rtt, "alength", new Type[] { typeof(uint[]) }, OpCodes.Ldlen );
+            //AddOp(rtt, "alength", new Type[] { typeof(long[]) }, OpCodes.Ldlen );
+            //AddOp(rtt, "alength", new Type[] { typeof(ulong[]) }, OpCodes.Ldlen );
+            //AddOp(rtt, "alength", new Type[] { typeof(char[]) }, OpCodes.Ldlen );
+            //AddOp(rtt, "alength", new Type[] { typeof(object[]) }, OpCodes.Ldlen );
 
             AddOp(rtt, "doubleCast", lta, OpCodes.Conv_R8 );
             AddOp(rtt, "doubleCast", dta, OpCodes.Nop );
