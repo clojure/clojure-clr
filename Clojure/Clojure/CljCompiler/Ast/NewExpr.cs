@@ -380,7 +380,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (Compiler.CompileStubOrigClassVar.isBound && Compiler.CompileStubOrigClassVar.deref() != null && objx.TypeBlder != null)
                 ilg.Emit(OpCodes.Ldtoken, objx.TypeBlder);
             else if (_type != null)
-                ilg.Emit(OpCodes.Ldtoken, typeof(Object));
+                ilg.Emit(OpCodes.Ldtoken, _type);
             else
                 throw new ArgumentException("Cannot generate type for NewExpr. Serious!");
 
