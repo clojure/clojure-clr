@@ -133,17 +133,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (targetType != null && _tinfo != null)
             {
                 _target.Emit(RHC.Expression, objx, context);
-                // TODO: Transfer this mechanism for calls on value types to MethodExpr, InstanceZeroArityCallExpr, StaticFieldExpr
-                if (FieldDeclaringType.IsValueType)
-                {
-                    ilg.Emit(OpCodes.Unbox_Any, FieldDeclaringType);
-                    LocalBuilder vtTemp = ilg.DeclareLocal(FieldDeclaringType);
-                    Compiler.MaybeSetLocalSymName(context, vtTemp, "valueTemp");
-                    ilg.Emit(OpCodes.Stloc, vtTemp);
-                    ilg.Emit(OpCodes.Ldloca, vtTemp);
-                }
-                else
-                    ilg.Emit(OpCodes.Castclass, FieldDeclaringType);
+                MethodExpr.EmitPrepForCall(context, typeof(object), FieldDeclaringType);
                 EmitGet(ilg);
                 HostExpr.EmitBoxReturn(objx, context, FieldType);
             }
@@ -175,7 +165,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (targetType != null && _tinfo != null)
             {
                 _target.Emit(RHC.Expression, objx, context);
-                ilg.Emit(OpCodes.Isinst, targetType);
+                MethodExpr.EmitPrepForCall(context, typeof(object), FieldDeclaringType);
                 EmitGet(ilg);
             }
             else

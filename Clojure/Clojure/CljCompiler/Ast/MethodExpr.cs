@@ -364,6 +364,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             //if (_method.DeclaringType == (Type)Compiler.CompileStubOrigClassVar.deref())
             //    _method = FindEquivalentMethod(_method, objx.BaseType);
+            ILGenerator ilg = context.GetILGenerator();
 
             if (_args.Exists((x) => x.ParamType == HostArg.ParameterType.ByRef)
                 || Array.Exists(_method.GetParameters(),(x)=> x.ParameterType.IsByRef)
@@ -377,7 +378,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (!IsStaticCall)
             {
                 EmitTargetExpression(objx, context);
-                context.GetILGenerator().Emit(OpCodes.Castclass, _method.DeclaringType);
+                EmitPrepForCall(context,typeof(object),_method.DeclaringType);
             }
 
             EmitTypedArgs(objx, context, _method.GetParameters(), _args);
@@ -386,10 +387,10 @@ namespace clojure.lang.CljCompiler.Ast
                 if (Intrinsics.HasOp(_method))
                     Intrinsics.EmitOp(_method,context.GetILGenerator());
                 else
-                    context.GetILGenerator().Emit(OpCodes.Call, _method);
+                    ilg.Emit(OpCodes.Call, _method);
             }
             else
-                context.GetILGenerator().Emit(OpCodes.Callvirt, _method); 
+                ilg.Emit(OpCodes.Callvirt, _method); 
         }
 
 
@@ -536,6 +537,441 @@ namespace clojure.lang.CljCompiler.Ast
                 arg.Emit(RHC.Expression, objx, context);
                 HostExpr.EmitUnboxArg(objx, context, paramType);
             }
+        }
+
+
+        public static void EmitPrepForCall(GenContext context, Type targetType, Type declaringType)
+        {
+            ILGenerator ilg = context.GetILGenerator();
+
+            EmitConvertToType(ilg, targetType, declaringType, false);
+            if (declaringType.IsValueType)
+            {
+                LocalBuilder vtTemp = ilg.DeclareLocal(declaringType);
+                Compiler.MaybeSetLocalSymName(context, vtTemp, "valueTemp");
+                ilg.Emit(OpCodes.Stloc, vtTemp);
+                ilg.Emit(OpCodes.Ldloca, vtTemp);
+            }
+        }
+
+
+        // Adopted from DLR code (ILGen)
+        internal static void EmitConvertToType(ILGenerator ilg, Type typeFrom, Type typeTo, bool isChecked)
+        {
+            if (TypesAreEquivalent(typeFrom, typeTo))
+                return;
+
+            if (typeFrom == typeof(void) || typeTo == typeof(void))
+                return;
+
+            bool isTypeFromNullable = IsNullableType(typeFrom);
+            bool isTypeToNullable = IsNullableType(typeTo);
+
+            Type nnExprType = GetNonNullableType(typeFrom);
+            Type nnType = GetNonNullableType(typeTo);
+
+            // DLR also tests here: TypeUtils.IsLegalExplicitVariantDelegateConversion(typeFrom, typeTo))
+
+            if (typeFrom.IsInterface || // interface cast
+               typeTo.IsInterface ||
+               typeFrom == typeof(object) || // boxing cast
+               typeTo == typeof(object))
+            {
+                EmitCastToType(ilg, typeFrom, typeTo);
+            }
+            else if (isTypeFromNullable || isTypeToNullable)
+            {
+                EmitNullableConversion(ilg, typeFrom, typeTo, isChecked);
+            }
+            else if (!(IsConvertible(typeFrom) && IsConvertible(typeTo)) // primitive runtime conversion
+                     &&
+                     (nnExprType.IsAssignableFrom(nnType) || // down cast
+                     nnType.IsAssignableFrom(nnExprType))) // up cast
+            {
+                EmitCastToType(ilg, typeFrom, typeTo);
+            }
+            else if (typeFrom.IsArray && typeTo.IsArray)
+            {
+                // See DevDiv Bugs #94657.
+                EmitCastToType(ilg, typeFrom, typeTo);
+            }
+            else
+            {
+                EmitNumericConversion(ilg, typeFrom, typeTo, isChecked);
+            }
+        }        
+        
+        // Stolen from DLR code
+        static void EmitCastToType(ILGenerator ilg, Type typeFrom, Type typeTo) {
+            if (!typeFrom.IsValueType && typeTo.IsValueType) {
+                ilg.Emit(OpCodes.Unbox_Any, typeTo);
+            } else if (typeFrom.IsValueType && !typeTo.IsValueType) {
+                ilg.Emit(OpCodes.Box, typeFrom);
+                if (typeTo != typeof(object)) {
+                    ilg.Emit(OpCodes.Castclass, typeTo);
+                }
+            } else if (!typeFrom.IsValueType && !typeTo.IsValueType) {
+                ilg.Emit(OpCodes.Castclass, typeTo);
+            } else {
+                throw new InvalidCastException(String.Format("Cannot cast from {0} to {1}", typeFrom, typeTo));
+            }
+        }
+
+
+        // Taken from DLR code (TypeUtils)
+        static bool TypesAreEquivalent(Type t1, Type t2)
+        {
+            return t1 == t2 || t1.IsEquivalentTo(t2);
+        }
+
+        // Taken from DLR code (TypeUtils) 
+        internal static bool IsNullableType(Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+        }
+
+        // Taken from DLR code (TypeUtils) 
+        internal static Type GetNonNullableType(Type type)
+        {
+            if (IsNullableType(type))
+            {
+                return type.GetGenericArguments()[0];
+            }
+            return type;
+        }
+
+        // Taken from DLR code (TypeUtils) 
+        internal static bool IsConvertible(Type type)
+        {
+            type = GetNonNullableType(type);
+            if (type.IsEnum)
+            {
+                return true;
+            }
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Boolean:
+                case TypeCode.Byte:
+                case TypeCode.SByte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                case TypeCode.Single:
+                case TypeCode.Double:
+                case TypeCode.Char:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // Taken from DLR code (TypeUtils) 
+        internal static bool IsFloatingPointType(Type type)
+        {
+            type = GetNonNullableType(type);
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Single:
+                case TypeCode.Double:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // Taken from DLR code (TypeUtils) 
+        internal static bool IsUnsignedType(Type type)
+        {
+            type = GetNonNullableType(type);
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Byte:
+                case TypeCode.UInt16:
+                case TypeCode.Char:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+
+
+
+        // Taken from DLR code (ILGen)
+        private static void EmitNumericConversion(ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
+        {
+            bool isFromUnsigned = IsUnsignedType(typeFrom);
+            bool isFromFloatingPoint = IsFloatingPointType(typeFrom);
+            if (typeTo == typeof(Single))
+            {
+                if (isFromUnsigned)
+                    il.Emit(OpCodes.Conv_R_Un);
+                il.Emit(OpCodes.Conv_R4);
+            }
+            else if (typeTo == typeof(Double))
+            {
+                if (isFromUnsigned)
+                    il.Emit(OpCodes.Conv_R_Un);
+                il.Emit(OpCodes.Conv_R8);
+            }
+            else
+            {
+                TypeCode tc = Type.GetTypeCode(typeTo);
+                if (isChecked)
+                {
+                    // Overflow checking needs to know if the source value on the IL stack is unsigned or not.
+                    if (isFromUnsigned)
+                    {
+                        switch (tc)
+                        {
+                            case TypeCode.SByte:
+                                il.Emit(OpCodes.Conv_Ovf_I1_Un);
+                                break;
+                            case TypeCode.Int16:
+                                il.Emit(OpCodes.Conv_Ovf_I2_Un);
+                                break;
+                            case TypeCode.Int32:
+                                il.Emit(OpCodes.Conv_Ovf_I4_Un);
+                                break;
+                            case TypeCode.Int64:
+                                il.Emit(OpCodes.Conv_Ovf_I8_Un);
+                                break;
+                            case TypeCode.Byte:
+                                il.Emit(OpCodes.Conv_Ovf_U1_Un);
+                                break;
+                            case TypeCode.UInt16:
+                            case TypeCode.Char:
+                                il.Emit(OpCodes.Conv_Ovf_U2_Un);
+                                break;
+                            case TypeCode.UInt32:
+                                il.Emit(OpCodes.Conv_Ovf_U4_Un);
+                                break;
+                            case TypeCode.UInt64:
+                                il.Emit(OpCodes.Conv_Ovf_U8_Un);
+                                break;
+                            default:
+                                throw new InvalidOperationException("Cannot convert to " + typeTo);
+                        }
+                    }
+                    else
+                    {
+                        switch (tc)
+                        {
+                            case TypeCode.SByte:
+                                il.Emit(OpCodes.Conv_Ovf_I1);
+                                break;
+                            case TypeCode.Int16:
+                                il.Emit(OpCodes.Conv_Ovf_I2);
+                                break;
+                            case TypeCode.Int32:
+                                il.Emit(OpCodes.Conv_Ovf_I4);
+                                break;
+                            case TypeCode.Int64:
+                                il.Emit(OpCodes.Conv_Ovf_I8);
+                                break;
+                            case TypeCode.Byte:
+                                il.Emit(OpCodes.Conv_Ovf_U1);
+                                break;
+                            case TypeCode.UInt16:
+                            case TypeCode.Char:
+                                il.Emit(OpCodes.Conv_Ovf_U2);
+                                break;
+                            case TypeCode.UInt32:
+                                il.Emit(OpCodes.Conv_Ovf_U4);
+                                break;
+                            case TypeCode.UInt64:
+                                il.Emit(OpCodes.Conv_Ovf_U8);
+                                break;
+                            default:
+                                throw new InvalidOperationException("Cannot convert to " + typeTo);
+                        }
+                    }
+                }
+                else
+                {
+                    switch (tc)
+                    {
+                        case TypeCode.SByte:
+                            il.Emit(OpCodes.Conv_I1);
+                            break;
+                        case TypeCode.Byte:
+                            il.Emit(OpCodes.Conv_U1);
+                            break;
+                        case TypeCode.Int16:
+                            il.Emit(OpCodes.Conv_I2);
+                            break;
+                        case TypeCode.UInt16:
+                        case TypeCode.Char:
+                            il.Emit(OpCodes.Conv_U2);
+                            break;
+                        case TypeCode.Int32:
+                            il.Emit(OpCodes.Conv_I4);
+                            break;
+                        case TypeCode.UInt32:
+                            il.Emit(OpCodes.Conv_U4);
+                            break;
+                        case TypeCode.Int64:
+                            if (isFromUnsigned)
+                            {
+                                il.Emit(OpCodes.Conv_U8);
+                            }
+                            else
+                            {
+                                il.Emit(OpCodes.Conv_I8);
+                            }
+                            break;
+                        case TypeCode.UInt64:
+                            if (isFromUnsigned || isFromFloatingPoint)
+                            {
+                                il.Emit(OpCodes.Conv_U8);
+                            }
+                            else
+                            {
+                                il.Emit(OpCodes.Conv_I8);
+                            }
+                            break;
+                        default:
+                            throw new InvalidOperationException("Cannot convert to " + typeTo);
+                    }
+                }
+            }
+        }
+
+        // Taken from DLR code (ILGen)
+        private static void EmitNullableConversion(ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
+        {
+            bool isTypeFromNullable = IsNullableType(typeFrom);
+            bool isTypeToNullable = IsNullableType(typeTo);
+              if (isTypeFromNullable && isTypeToNullable)
+                EmitNullableToNullableConversion(il,typeFrom, typeTo, isChecked);
+            else if (isTypeFromNullable)
+                EmitNullableToNonNullableConversion(il, typeFrom, typeTo, isChecked);
+            else
+                EmitNonNullableToNullableConversion(il, typeFrom, typeTo, isChecked);
+        }
+
+
+        // Taken from DLR code (ILGen)
+        private static void EmitNonNullableToNullableConversion(ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
+        {
+            //Debug.Assert(!TypeUtils.IsNullableType(typeFrom));
+            //Debug.Assert(TypeUtils.IsNullableType(typeTo));
+            LocalBuilder locTo = null;
+            locTo = il.DeclareLocal(typeTo);
+            Type nnTypeTo = GetNonNullableType(typeTo);
+            EmitConvertToType(il, typeFrom, nnTypeTo, isChecked);
+            ConstructorInfo ci = typeTo.GetConstructor(new Type[] { nnTypeTo });
+            il.Emit(OpCodes.Newobj, ci);
+            il.Emit(OpCodes.Stloc, locTo);
+            il.Emit(OpCodes.Ldloc, locTo);
+        }
+
+
+        // Taken from DLR code (ILGen)
+        private static void EmitNullableToNonNullableConversion(ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
+        {
+            //Debug.Assert(TypeUtils.IsNullableType(typeFrom));
+            //Debug.Assert(!TypeUtils.IsNullableType(typeTo));
+            if (typeTo.IsValueType)
+                EmitNullableToNonNullableStructConversion(il,typeFrom, typeTo, isChecked);
+            else
+                EmitNullableToReferenceConversion(il,typeFrom);
+        }
+
+
+        // Taken from DLR code (ILGen)
+        private static void EmitNullableToNonNullableStructConversion(ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
+        {
+
+            //Debug.Assert(TypeUtils.IsNullableType(typeFrom));
+            //Debug.Assert(!TypeUtils.IsNullableType(typeTo));
+            //Debug.Assert(typeTo.IsValueType);
+            LocalBuilder locFrom = null;
+            locFrom = il.DeclareLocal(typeFrom);
+            il.Emit(OpCodes.Stloc, locFrom);
+            il.Emit(OpCodes.Ldloca, locFrom);
+            EmitGetValue(il,typeFrom);
+            Type nnTypeFrom = GetNonNullableType(typeFrom);
+            EmitConvertToType(il, nnTypeFrom, typeTo, isChecked);
+        }
+
+
+        // Taken from DLR code (ILGen)
+        private static void EmitNullableToReferenceConversion(ILGenerator il, Type typeFrom)
+        {
+            //Debug.Assert(TypeUtils.IsNullableType(typeFrom));
+            // We've got a conversion from nullable to Object, ValueType, Enum, etc.  Just box it so that
+            // we get the nullable semantics.  
+            il.Emit(OpCodes.Box, typeFrom);
+        }
+
+
+        // Taken from DLR code (ILGen)
+        private static void EmitNullableToNullableConversion(ILGenerator il, Type typeFrom, Type typeTo, bool isChecked)
+        {
+            //Debug.Assert(TypeUtils.IsNullableType(typeFrom));
+            //Debug.Assert(TypeUtils.IsNullableType(typeTo));
+            Label labIfNull = default(Label);
+            Label labEnd = default(Label);
+            LocalBuilder locFrom = null;
+            LocalBuilder locTo = null;
+            locFrom = il.DeclareLocal(typeFrom);
+            il.Emit(OpCodes.Stloc, locFrom);
+            locTo = il.DeclareLocal(typeTo);
+            // test for null
+            il.Emit(OpCodes.Ldloca, locFrom);
+            EmitHasValue(il,typeFrom);
+            labIfNull = il.DefineLabel();
+            il.Emit(OpCodes.Brfalse_S, labIfNull);
+            il.Emit(OpCodes.Ldloca, locFrom);
+            EmitGetValueOrDefault(il,typeFrom);
+            Type nnTypeFrom = GetNonNullableType(typeFrom);
+            Type nnTypeTo = GetNonNullableType(typeTo);
+            EmitConvertToType(il,nnTypeFrom, nnTypeTo, isChecked);
+            // construct result type
+            ConstructorInfo ci = typeTo.GetConstructor(new Type[] { nnTypeTo });
+            il.Emit(OpCodes.Newobj, ci);
+            il.Emit(OpCodes.Stloc, locTo);
+            labEnd = il.DefineLabel();
+            il.Emit(OpCodes.Br_S, labEnd);
+            // if null then create a default one
+            il.MarkLabel(labIfNull);
+            il.Emit(OpCodes.Ldloca, locTo);
+            il.Emit(OpCodes.Initobj, typeTo);
+            il.MarkLabel(labEnd);
+            il.Emit(OpCodes.Ldloc, locTo);
+        }
+
+
+        // Taken from DLR code (ILGen)
+        internal static void EmitHasValue(ILGenerator il, Type nullableType)
+        {
+            MethodInfo mi = nullableType.GetMethod("get_HasValue", BindingFlags.Instance | BindingFlags.Public);
+            //Debug.Assert(nullableType.IsValueType);
+            il.Emit(OpCodes.Call, mi);
+        }
+
+
+        // Taken from DLR code (ILGen)
+        internal static void EmitGetValue(ILGenerator il, Type nullableType)
+        {
+            MethodInfo mi = nullableType.GetMethod("get_Value", BindingFlags.Instance | BindingFlags.Public);
+            //Debug.Assert(nullableType.IsValueType);
+            il.Emit(OpCodes.Call, mi);
+        }
+
+
+        // Taken from DLR code (ILGen)
+        internal static void EmitGetValueOrDefault(ILGenerator il, Type nullableType)
+        {
+            MethodInfo mi = nullableType.GetMethod("GetValueOrDefault", System.Type.EmptyTypes);
+            //Debug.Assert(nullableType.IsValueType);
+            il.Emit(OpCodes.Call, mi);
         }
 
     }
