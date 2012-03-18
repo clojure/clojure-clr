@@ -1277,6 +1277,8 @@ namespace clojure.lang.CljCompiler.Ast
             //Console.WriteLine("DefFn {0}, {1}", publicTypeName, context.AssemblyBuilder.GetName().Name);
 
             _typeBuilder = context.AssemblyGen.DefinePublicType(publicTypeName, superType, true);
+            context = context.WithNewDynInitHelper();
+
             if (interfaces != null)
             {
                 for (int i = 0; i < interfaces.count(); i++)

@@ -164,18 +164,26 @@ namespace clojure.lang.CljCompiler.Ast
 
             //string[] inames = InterfaceNames(interfaces);
 
-            Type stub = CompileStub(superClass, ret, SeqToTypeArray(interfaces),frm);
+ 
+            // Needs its own GenContext so it has its own DynInitHelper
+            // Can't reuse Compiler.EvalContext if it is a DefType because we have to use the given name and will get a conflict on redefinition
+            GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? (ret.IsDefType ? GenContext.CreateWithExternalAssembly("deftype" + RT.nextID().ToString(), ".dll", true) : Compiler.EvalContext);
+            //GenContext context = Compiler.IsCompiling
+            //    ? Compiler.CompilerContextVar.get() as GenContext
+            //    : (ret.IsDefType
+            //        ? GenContext.CreateWithExternalAssembly("deftype" + RT.nextID().ToString(), ".dll", true)
+            //        : (Compiler.CompilerContextVar.get() as GenContext
+            //            ??
+            //            Compiler.EvalContext));
+
+            GenContext genC = context.WithNewDynInitHelper(ret.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
+            //genC.FnCompileMode = FnMode.Full;
+
+            Type stub = CompileStub(genC, superClass, ret, SeqToTypeArray(interfaces), frm);
             Symbol thisTag = Symbol.intern(null, stub.FullName);
             //Symbol stubTag = Symbol.intern(null,stub.FullName);
             //Symbol thisTag = Symbol.intern(null, tagName);
 
-            // Needs its own GenContext so it has its own DynInitHelper
-            // Can't reuse Compiler.EvalContext if it is a DefType because we have to use the given name and will get a conflict on redefinition
-            GenContext context = Compiler.IsCompiling
-                ? Compiler.CompilerContextVar.get() as GenContext 
-                :  GenContext.CreateWithExternalAssembly("deftype" + RT.nextID().ToString(),".dll",true);
-            GenContext genC = context.WithNewDynInitHelper(ret.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
-            //genC.FnCompileMode = FnMode.Full;
 
             try
             {
@@ -234,7 +242,7 @@ namespace clojure.lang.CljCompiler.Ast
             // Might be able to flag stub classes and not try to convert, leading to a dynsite.
 
             //if (RT.CompileDLR)
-                ret.Compile(stub, stub, interfaces, false, genC);
+            ret.Compile(stub, stub, interfaces, false, genC);
             //else
             //    ret.CompileNoDlr(stub, stub, interfaces, false, genC);
 
@@ -261,11 +269,12 @@ namespace clojure.lang.CljCompiler.Ast
          */
 
         // TODO: Preparse method heads to pick up signatures, implement those methods as abstract or as NotImpelmented so that Reflection can pick up calls during compilation and avoide a callsite.
-        static Type CompileStub(Type super, NewInstanceExpr ret, Type[] interfaces, Object frm)
+        static Type CompileStub(GenContext context, Type super, NewInstanceExpr ret, Type[] interfaces, Object frm)
         {
-
-            GenContext context = Compiler.IsCompiling ? Compiler.CompilerContextVar.get() as GenContext : GenContext.CreateWithExternalAssembly("stub" + RT.nextID().ToString(), ".dll", false);
-            TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.CompileStubPrefix + "." + ret.InternalName, TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
+            //GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? GenContext.CreateWithExternalAssembly("stub" + RT.nextID().ToString(), ".dll", false);
+            //GenContext context = Compiler.IsCompiling ? Compiler.CompilerContextVar.get() as GenContext : GenContext.CreateWithExternalAssembly("stub" + RT.nextID().ToString(), ".dll", false);
+            //context = GenContext.CreateWithExternalAssembly("stub" + RT.nextID().ToString(), ".dll", false);
+            TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.CompileStubPrefix + "." + ret.InternalName + RT.nextID(), TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
 
             tb.DefineDefaultConstructor(MethodAttributes.Public);
 
@@ -318,7 +327,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             Type t = tb.CreateType();
-            Compiler.RegisterDuplicateType(t);
+            //Compiler.RegisterDuplicateType(t);
             return t;
         }
 

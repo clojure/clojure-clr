@@ -143,12 +143,13 @@ namespace clojure.lang.CljCompiler.Ast
             bool hasPrimDecls = HasPrimDecls((ISeq)RT.next(form));
 
 
-            GenContext newContext = null;
+            //GenContext newContext = null;
 
+            // CNTXT
             //if (Compiler.IsCompiling || hasPrimDecls  )// || ! RT.CompileDLR )
             //{
                 GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? Compiler.EvalContext;
-                newContext = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
+                GenContext newContext = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
                 Var.pushThreadBindings(RT.map(Compiler.CompilerContextVar, newContext));
             //}
 
@@ -260,7 +261,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             finally
             {
-                if (newContext != null)
+                if (context != null)
                     Var.popThreadBindings();
             }
         }

@@ -101,8 +101,14 @@ namespace clojure.lang.CljCompiler.Ast
             AssemblyName aname = new AssemblyName(assyName);
             _assyGen = new AssemblyGen(aname, directory, extension, _isDebuggable);
             if ( createDynInitHelper )
-                _dynInitHelper = new DynInitHelper(_assyGen, "__InternalDynamicExpressionInits");
+                _dynInitHelper = new DynInitHelper(_assyGen, GenerateName());
         }
+
+        internal GenContext WithNewDynInitHelper()
+        {
+            return WithNewDynInitHelper(GenerateName());
+        }
+ 
 
         internal GenContext WithNewDynInitHelper(string dihClassName)
         {
@@ -111,6 +117,11 @@ namespace clojure.lang.CljCompiler.Ast
             newContext._dynInitHelper = new DynInitHelper(_assyGen, dihClassName);
 
             return newContext;
+        }
+
+        static string GenerateName()
+        {
+            return "__InternalDynamicExpressionInits_" + RT.nextID();
         }
 
         private GenContext Clone()
@@ -134,7 +145,7 @@ namespace clojure.lang.CljCompiler.Ast
         // DO not call context.AssmeblyGen.SaveAssembly() directly.
         internal void SaveAssembly()
         {
-            if ( _dynInitHelper != null )
+            if ( _dynInitHelper != null  )
                 _dynInitHelper.FinalizeType();
             _assyGen.SaveAssembly();
         }
