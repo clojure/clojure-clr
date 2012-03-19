@@ -529,15 +529,10 @@ namespace clojure.lang
             string weakName = args.Name.Split(',').FirstOrDefault();
             if (String.IsNullOrEmpty(weakName) || weakName.EndsWith(".resources")) return null;
 
-            try
-            {
-                byte[] data = ResourceHelper.GetResourceData(weakName + ".dll", ResourceFilePath);
-                return Assembly.Load(data);
-            }
-            catch
-            {
-                return null;
-            }
+            byte[] data;
+            return ResourceHelper.TryGetResourceData(weakName + ".dll", ResourceFilePath, out data)
+                     ? Assembly.Load(data)
+                     : null;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
@@ -3113,10 +3108,9 @@ namespace clojure.lang
             }
             else if (!loaded)
             {
-                try
+                byte[] data;
+                if (ResourceHelper.TryGetResourceData(assemblyname, ResourceFilePath, out data))
                 {
-                    byte[] data = ResourceHelper.GetResourceData(assemblyname, ResourceFilePath);
-
                     try
                     {
                         Var.pushThreadBindings(RT.map(CurrentNSVar, CurrentNSVar.deref(),
@@ -3129,7 +3123,6 @@ namespace clojure.lang
                         Var.popThreadBindings();
                     }
                 }
-                catch {}
 
                 if (!loaded && failIfNotFound)
                     throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Resources;
@@ -16,6 +15,20 @@ namespace ResPack
                 {
                     writer.AddResourceData(p.Key, String.Empty, p.Value);
                 }
+            }
+        }
+
+        public static bool TryGetResourceData(string key, string fileName, out byte[] data)
+        {
+            try
+            {
+                data = GetResourceData(key, fileName);
+                return (data != null);
+            }
+            catch
+            {
+                data = null;
+                return false;
             }
         }
 
