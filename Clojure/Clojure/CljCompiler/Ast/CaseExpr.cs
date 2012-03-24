@@ -15,14 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection.Emit;
-using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -114,10 +107,10 @@ namespace clojure.lang.CljCompiler.Ast
             //no need to worry about multiple evaluation
             public Expr Parse(ParserContext pcon, object frm)
             {
-                ISeq form = (ISeq) frm;
+                ISeq form = (ISeq)frm;
 
                 if (pcon.Rhc == RHC.Eval)
-                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnSym, PersistentVector.EMPTY, form)),"case__"+RT.nextID());
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnSym, PersistentVector.EMPTY, form)), "case__" + RT.nextID());
 
                 PersistentVector args = PersistentVector.create(form.next());
 
@@ -132,17 +125,14 @@ namespace clojure.lang.CljCompiler.Ast
 
                 ISeq keys = RT.keys(caseMap);
                 int low = Util.ConvertToInt(RT.first(keys));
-                int high = Util.ConvertToInt(RT.nth(keys,RT.count(keys)-1));
-                LocalBindingExpr testexpr = (LocalBindingExpr)Compiler.Analyze(pcon.SetRhc(RHC.Expression),exprForm);
+                int high = Util.ConvertToInt(RT.nth(keys, RT.count(keys) - 1));
+                LocalBindingExpr testexpr = (LocalBindingExpr)Compiler.Analyze(pcon.SetRhc(RHC.Expression), exprForm);
 
 
-                SortedDictionary<int,Expr> tests = new SortedDictionary<int,Expr>();
-                Dictionary<int,Expr> thens = new Dictionary<int,Expr>();
+                SortedDictionary<int, Expr> tests = new SortedDictionary<int, Expr>();
+                Dictionary<int, Expr> thens = new Dictionary<int, Expr>();
 
-                //testexpr.shouldClear = false;
-                //PathNode branch = new PathNode(PATHTYPE.BRANCH, (PathNode) CLEAR_PATH.get());
-            
-                foreach ( IMapEntry me in caseMap )
+                foreach (IMapEntry me in caseMap)
                 {
                     int minhash = Util.ConvertToInt(me.key());
                     object pair = me.val(); // [test-val then-expr]
@@ -150,47 +140,29 @@ namespace clojure.lang.CljCompiler.Ast
                     Expr testExpr = testType == _intKey
                         ? NumberExpr.Parse(Util.ConvertToInt(first))
                         : (first == null ? Compiler.NilExprInstance : new ConstantExpr(first));
-                        
+
                     tests[minhash] = testExpr;
                     Expr thenExpr;
-                    //try 
-                    //{
-                    //    Var.pushThreadBindings(
-                    //        RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
-                    thenExpr = Compiler.Analyze(pcon,RT.second(pair));
-                    //}
-                    //finally
-                    //{
-                    //    Var.popThreadBindings();
-                    //}
+                    thenExpr = Compiler.Analyze(pcon, RT.second(pair));
                     thens[minhash] = thenExpr;
                 }
-            
-                Expr defaultExpr;
-                //try 
-                //{
-                //    Var.pushThreadBindings(
-                //        RT.map(CLEAR_PATH, new PathNode(PATHTYPE.PATH,branch)));
-                defaultExpr = Compiler.Analyze(pcon,defaultForm);
-                //}
-                //finally
-                //{
-                //    Var.popThreadBindings();
-                //}
-            return new CaseExpr(
-                (IPersistentMap) Compiler.SourceSpanVar.deref(),
-                testexpr,
-                shift,
-                mask,
-                low,
-                high,
-                defaultExpr,
-                tests,
-                thens,
-                switchType,
-                testType,
-                skipCheck);
 
+                Expr defaultExpr;
+                defaultExpr = Compiler.Analyze(pcon, defaultForm);
+
+                return new CaseExpr(
+                    (IPersistentMap)Compiler.SourceSpanVar.deref(),
+                    testexpr,
+                    shift,
+                    mask,
+                    low,
+                    high,
+                    defaultExpr,
+                    tests,
+                    thens,
+                    switchType,
+                    testType,
+                    skipCheck);
             }
         }
         
@@ -207,225 +179,28 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Equivalent to :
-        ///    switch (hashed _expr)
-        ///    
-        ///      case i:  if _expr == _test_i
-        ///                 goto end with _then_i
-        ///               else goto default
-        ///               
-        ///      ...
-        ///      default:
-        ///            (default_label)
-        ///             goto end with _default
-        ///      end
-        ///    end_label:
-        ///      
-        /// </remarks>
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        // Equivalent to :
+        //    switch (hashed _expr)
+        //    
+        //      case i:  if _expr == _test_i
+        //                 goto end with _then_i
+        //               else goto default
+        //               
+        //      ...
+        //      default:
+        //            (default_label)
+        //             goto end with _default
+        //      end
+        //    end_label:
+
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            return GenCode(rhc, objx, context, false);
+            DoEmit(rhc, objx, ilg, false);
         }
 
-        Expression GenCode(RHC rhc, ObjExpr objx, GenContext context, bool genUnboxed)
+        public void DoEmit(RHC rhc, ObjExpr objx, CljILGen ilg, bool emitUnboxed)
         {
-            Type retType = HasClrType ? ClrType : typeof(object);
-
-            LabelTarget defaultLabel = Expression.Label("default");
-            LabelTarget endLabel = Expression.Label(retType,"end");
-
-            Type primExprType = Compiler.MaybePrimitiveType(_expr);
-
-            List<SwitchCase> cases = new List<SwitchCase>();
-
-            foreach (KeyValuePair<int, Expr> pair in _tests)
-            {
-                int i = pair.Key;
-                Expr test = pair.Value;
-
-                Expression testExpr;
-
-                if (_testType == _intKey)
-                    testExpr = GenTestForInts(objx, context, primExprType, test, genUnboxed);
-                else if (RT.booleanCast(RT.contains(_skipCheck, i)))
-                    testExpr = Expression.Constant(true,typeof(Boolean));
-                else
-                    testExpr = GenTestForHashes(objx, context, test, genUnboxed);
-
-                Expression result = GenResult(objx,context,_thens[i],genUnboxed,retType);
-
-                Expression body =
-                   Expression.Condition(
-                        testExpr,
-                        Expression.Return(endLabel,result),
-                        Expression.Goto(defaultLabel));
-
-                cases.Add(Expression.SwitchCase(body, Expression.Constant(i)));
-            }
-
-
-            Expression switchTestExpr = _testType == _intKey 
-                ? GenTestExprForInts(objx, context, primExprType,defaultLabel) 
-                : GenTestExprForHashes(objx, context);
-
-
-            Expression defaultExpr =
-                Expression.Block(
-                    Expression.Label(defaultLabel),
-                    Expression.Return(endLabel, GenResult(objx,context,_defaultExpr,genUnboxed,retType)));
-   
-            Expression switchExpr = switchTestExpr is GotoExpression 
-                ? defaultExpr // we know the test fails, the test code is GOTO(default)
-                : Expression.Switch(switchTestExpr, Expression.Goto(defaultLabel), cases.ToArray<SwitchCase>());
-
-
-            Expression block =
-                Expression.Block(retType,
-                    switchExpr,
-                    defaultExpr,
-                    Expression.Label(endLabel, Expression.Default(retType)));
-
-            block = Compiler.MaybeAddDebugInfo(block, _sourceSpan, context.IsDebuggable);
-            return block;
-        }
-
-        private Expression GenTestExprForInts(ObjExpr objx,GenContext context,Type exprType, LabelTarget defaultLabel)
-        {
-            if (exprType == null)
-            {
-                if (RT.booleanCast(RT.WarnOnReflectionVar.deref()))
-                {
-                    RT.errPrintWriter().WriteLine("Performance warning, {0}:{1} - case has int tests, but tested expression is not primitive.",
-                        Compiler.SourcePathVar.deref(), RT.get(_sourceSpan, RT.StartLineKey));
-                }
-                
-                ParameterExpression parm = Expression.Parameter(typeof(object),"p");
-                Expression initParm = Expression.Assign(parm,_expr.GenCode(RHC.Expression, objx, context));
-                Expression testType = Expression.Call(null,Compiler.Method_Util_IsNonCharNumeric,parm);          // matching JVM's handling of char as non-integer
-                Expression expr = GenShiftMask(Expression.Call(null,Compiler.Method_Util_ConvertToInt,parm));
-                return Expression.Block(
-                    new ParameterExpression[] { parm },
-                    initParm,
-                    Expression.IfThen(Expression.Not(testType), Expression.Goto(defaultLabel)),
-                    expr);
-            }
-            else if (exprType == typeof(long) || exprType == typeof(int) || exprType == typeof(short) || exprType == typeof(byte) || exprType == typeof(ulong) || exprType == typeof(uint) || exprType == typeof(ushort) || exprType == typeof(sbyte))
-            {
-                Expression expr = Expression.Convert(_expr.GenCodeUnboxed(RHC.Expression, objx, context),typeof(int));
-                return GenShiftMask(expr);
-            }
-            else
-            {
-                return Expression.Goto(defaultLabel);
-            }
-        }
-
-        private Expression GenTestExprForHashes(ObjExpr objx,GenContext context)
-        {
-            Expression expr = Expression.Call(null, Compiler.Method_Util_hash, Expression.Convert(_expr.GenCode(RHC.Expression, objx, context), typeof(Object)));
-            return GenShiftMask(expr);
-        }
-
-        bool IsShiftMasked { get { return _mask != 0; } }
-
-        Expression GenShiftMask(Expression expr)
-        {
-            if ( IsShiftMasked )
-                return 
-                    Expression.And(
-                        Expression.RightShift(
-                            expr,
-                            Expression.Constant(_shift)),
-                        Expression.Constant(_mask));
-            return expr;
-        }
-
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
-        private Expression GenTestForInts(ObjExpr objx, GenContext context, Type primExprType, Expr test, bool genUnboxed)
-        {
-            Expression condCode;
-
-            if (primExprType == null)
-            {
-                Expression exprCode = _expr.GenCode(RHC.Expression, objx, context);
-                Expression testCode = test.GenCode(RHC.Expression, objx, context);
-                condCode = Expression.Call(null, Compiler.Method_Util_equiv, Compiler.MaybeBox(exprCode), Compiler.MaybeBox(testCode));
-
-            }
-            else if (primExprType == typeof(long) || primExprType == typeof(ulong))
-            {
-                Expression exprCode = _expr.GenCodeUnboxed(RHC.Expression, objx, context);
-                Expression testCode = ((NumberExpr)test).GenCodeUnboxed(RHC.Expression, objx, context);
-                condCode = Expression.Equal(exprCode, testCode);
-            }
-            else if (primExprType == typeof(int) || primExprType == typeof(short) || primExprType == typeof(byte) 
-                  || primExprType == typeof(uint) || primExprType == typeof(ushort) || primExprType == typeof(sbyte))
-            {
-                if (IsShiftMasked)
-                {
-                    Expression exprCode = Expression.Convert(_expr.GenCodeUnboxed(RHC.Expression, objx, context),typeof(long));
-                    Expression testCode = ((NumberExpr)test).GenCodeUnboxed(RHC.Expression, objx, context);
-                    condCode = Expression.Equal(exprCode, testCode);
-                }
-                else
-                    condCode = Expression.Constant(true);
-            }
-            else
-            {
-                condCode = Expression.Constant(false);
-            }
-            return condCode;
-        }
-
-        private Expression GenTestForHashes(ObjExpr objx, GenContext context, Expr test, bool genUnboxed)
-        {
-            Expression exprCode = _expr.GenCode(RHC.Expression, objx, context);
-            Expression testCode = test.GenCode(RHC.Expression, objx, context);
-            Expression condCode = _testType == _hashIdentityKey
-                ? (Expression)Expression.Equal(exprCode, testCode)
-                : (Expression)Expression.Call(null, Compiler.Method_Util_equiv, Compiler.MaybeBox(exprCode), Compiler.MaybeBox(testCode));
-            return condCode;
-        }
-
-        private static Expression GenResult(ObjExpr objx, GenContext context, Expr expr, bool genUnboxed, Type retType)
-        {
-            MaybePrimitiveExpr mbExpr = expr as MaybePrimitiveExpr;
-            Expression result = genUnboxed && mbExpr != null
-                ? mbExpr.GenCodeUnboxed(RHC.Expression, objx, context)
-                : expr.GenCode(RHC.Expression, objx, context);
-
-            if (result.Type != retType)
-            {
-                if (expr is ThrowExpr)
-                {
-                    // Fix type on the throw expression
-                    UnaryExpression ur = (UnaryExpression)result;
-                    result = Expression.Throw(ur.Operand, retType);
-                }
-                else result = Expression.Convert(result, retType);
-            }
-
-           return result;
-        }
-
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            DoEmit(rhc, objx, context, false);
-        }
-
-        public void DoEmit(RHC rhc, ObjExpr objx, GenContext context, bool emitUnboxed)
-        {
-            ILGen ilg = context.GetILGen();
-
-            Compiler.MaybeEmitDebugInfo(context, ilg, _sourceSpan);
+            GenContext.EmitDebugInfo(ilg, _sourceSpan);
 
             Label defaultLabel = ilg.DefineLabel();
             Label endLabel = ilg.DefineLabel();
@@ -440,9 +215,9 @@ namespace clojure.lang.CljCompiler.Ast
 
 
             if (_testType == _intKey)
-                EmitExprForInts(objx, context, primExprType, defaultLabel);
+                EmitExprForInts(objx, ilg, primExprType, defaultLabel);
             else
-                EmitExprForHashes(objx, context);
+                EmitExprForHashes(objx, ilg);
 
             if (_switchType == _sparseKey)
             {
@@ -465,24 +240,25 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 ilg.MarkLabel(labels[i]);
                 if (_testType == _intKey)
-                    EmitThenForInts(objx, context, primExprType, _tests[i], _thens[i], defaultLabel, emitUnboxed);
+                    EmitThenForInts(objx, ilg, primExprType, _tests[i], _thens[i], defaultLabel, emitUnboxed);
                 else if ((bool)RT.contains(_skipCheck, i))
-                    EmitExpr(objx, context, _thens[i], emitUnboxed);
+                    EmitExpr(objx, ilg, _thens[i], emitUnboxed);
                 else
-                    EmitThenForHashes(objx, context, _tests[i], _thens[i], defaultLabel, emitUnboxed);
+                    EmitThenForHashes(objx, ilg, _tests[i], _thens[i], defaultLabel, emitUnboxed);
                 if (  _thens[i].HasNormalExit() )
                     ilg.Emit(OpCodes.Br, endLabel);
             }
             ilg.MarkLabel(defaultLabel);
-            EmitExpr(objx, context, _defaultExpr, emitUnboxed);
+            EmitExpr(objx, ilg, _defaultExpr, emitUnboxed);
             ilg.MarkLabel(endLabel);
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
         }
 
-        //bool IsShiftMasked { get { return _mask != 0; } }
 
-        void EmitShiftMask(ILGenerator ilg)
+        bool IsShiftMasked { get { return _mask != 0; } }
+
+        void EmitShiftMask(CljILGen ilg)
         {
             if (IsShiftMasked)
             {
@@ -493,10 +269,8 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        private void EmitExprForInts(ObjExpr objx, GenContext context, Type exprType, Label defaultLabel)
+        private void EmitExprForInts(ObjExpr objx, CljILGen ilg, Type exprType, Label defaultLabel)
         {
-            ILGenerator ilg = context.GetILGenerator();
-
             if (exprType == null)
             {
                 if ( RT.booleanCast(RT.WarnOnReflectionVar.deref()))
@@ -504,10 +278,10 @@ namespace clojure.lang.CljCompiler.Ast
                     RT.errPrintWriter().WriteLine("Performance warning, {0}:{1} - case has int tests, but tested expression is not primitive.",
                         Compiler.SourcePathVar.deref(),Compiler.GetLineFromSpanMap(_sourceSpan));
                 }
-                _expr.Emit(RHC.Expression,objx,context);
+                _expr.Emit(RHC.Expression,objx,ilg);
                 ilg.Emit(OpCodes.Call,Compiler.Method_Util_IsNonCharNumeric);
                 ilg.Emit(OpCodes.Brfalse,defaultLabel);
-                _expr.Emit(RHC.Expression,objx,context);
+                _expr.Emit(RHC.Expression,objx,ilg);
                 ilg.Emit(OpCodes.Call,Compiler.Method_Util_ConvertToInt);
                 EmitShiftMask(ilg);
             }
@@ -520,7 +294,7 @@ namespace clojure.lang.CljCompiler.Ast
                 || exprType == typeof(ushort)
                 || exprType == typeof(sbyte))
             {
-                _expr.EmitUnboxed(RHC.Expression,objx,context);
+                _expr.EmitUnboxed(RHC.Expression,objx,ilg);
                 ilg.Emit(OpCodes.Conv_I4);
                 EmitShiftMask(ilg);
 
@@ -531,25 +305,23 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        private void EmitThenForInts(ObjExpr objx, GenContext context, Type exprType, Expr test, Expr then, Label defaultLabel, bool emitUnboxed)
+        private void EmitThenForInts(ObjExpr objx, CljILGen ilg, Type exprType, Expr test, Expr then, Label defaultLabel, bool emitUnboxed)
         {
-            ILGenerator ilg = context.GetILGenerator();
-
-            if (exprType == null)
+             if (exprType == null)
             {
-                _expr.Emit(RHC.Expression, objx, context);
-                test.Emit(RHC.Expression, objx, context);
+                _expr.Emit(RHC.Expression, objx, ilg);
+                test.Emit(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Call, Compiler.Method_Util_equiv);
                 ilg.Emit(OpCodes.Brfalse, defaultLabel);
-                EmitExpr(objx, context, then, emitUnboxed);                
+                EmitExpr(objx, ilg, then, emitUnboxed);                
             }
             else if (exprType == typeof(long))
             {
-                ((NumberExpr)test).EmitUnboxed(RHC.Expression, objx, context);
-                _expr.EmitUnboxed(RHC.Expression, objx, context);
+                ((NumberExpr)test).EmitUnboxed(RHC.Expression, objx, ilg);
+                _expr.EmitUnboxed(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Ceq);
                 ilg.Emit(OpCodes.Brfalse, defaultLabel);
-                EmitExpr(objx, context, then, emitUnboxed);                
+                EmitExpr(objx, ilg, then, emitUnboxed);                
               
             }
             else if (exprType == typeof(int)
@@ -562,15 +334,15 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 if (IsShiftMasked)
                 {
-                    ((NumberExpr)test).EmitUnboxed(RHC.Expression, objx, context);
-                    _expr.EmitUnboxed(RHC.Expression, objx, context);
+                    ((NumberExpr)test).EmitUnboxed(RHC.Expression, objx, ilg);
+                    _expr.EmitUnboxed(RHC.Expression, objx, ilg);
                     ilg.Emit(OpCodes.Conv_I8);
                     ilg.Emit(OpCodes.Ceq);
                     ilg.Emit(OpCodes.Brfalse, defaultLabel);
-                    EmitExpr(objx, context, then, emitUnboxed);
+                    EmitExpr(objx, ilg, then, emitUnboxed);
                 }
                 // else direct match
-                EmitExpr(objx, context, then, emitUnboxed);  
+                EmitExpr(objx, ilg, then, emitUnboxed);  
             }
             else
             {
@@ -578,21 +350,17 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        void EmitExprForHashes(ObjExpr objx, GenContext context)
+        void EmitExprForHashes(ObjExpr objx, CljILGen ilg)
         {
-            ILGenerator ilg = context.GetILGenerator();
-
-            _expr.Emit(RHC.Expression, objx, context);
+            _expr.Emit(RHC.Expression, objx, ilg);
             ilg.Emit(OpCodes.Call, Compiler.Method_Util_hash);
             EmitShiftMask(ilg);
         }
 
-        void EmitThenForHashes(ObjExpr objx, GenContext context, Expr test, Expr then, Label defaultLabel, bool emitUnboxed)
+        void EmitThenForHashes(ObjExpr objx, CljILGen ilg, Expr test, Expr then, Label defaultLabel, bool emitUnboxed)
         {
-            ILGenerator ilg = context.GetILGenerator();
-
-            _expr.Emit(RHC.Expression, objx, context);
-            test.Emit(RHC.Expression, objx, context);
+            _expr.Emit(RHC.Expression, objx, ilg);
+            test.Emit(RHC.Expression, objx, ilg);
             if (_testType == _hashIdentityKey)
             {
                 ilg.Emit(OpCodes.Ceq);
@@ -603,16 +371,16 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Call, Compiler.Method_Util_equiv);
                 ilg.Emit(OpCodes.Brfalse, defaultLabel);
             }
-            EmitExpr(objx, context, then, emitUnboxed);  
+            EmitExpr(objx, ilg, then, emitUnboxed);  
         }
 
-        private void EmitExpr(ObjExpr objx, GenContext context, Expr expr, bool emitUnboxed)
+        private void EmitExpr(ObjExpr objx, CljILGen ilg, Expr expr, bool emitUnboxed)
         {
             MaybePrimitiveExpr mbe = expr as MaybePrimitiveExpr;
             if (emitUnboxed && mbe != null)
-                mbe.EmitUnboxed(RHC.Expression, objx, context);
+                mbe.EmitUnboxed(RHC.Expression, objx, ilg);
             else
-                expr.Emit(RHC.Expression, objx, context);
+                expr.Emit(RHC.Expression, objx, ilg);
         }
 
         public bool HasNormalExit() 
@@ -627,23 +395,14 @@ namespace clojure.lang.CljCompiler.Ast
             return false;
         }
 
-        #endregion
-
-        #region Primitive code generation
-
         public bool CanEmitPrimitive
         {
             get { return Util.IsPrimitive(_returnType); }
         }
 
-        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            return GenCode(rhc, objx, context, true);
-        }
-
-        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            DoEmit(rhc, objx, context, true);
+            DoEmit(rhc, objx, ilg, true);
         }
 
         #endregion

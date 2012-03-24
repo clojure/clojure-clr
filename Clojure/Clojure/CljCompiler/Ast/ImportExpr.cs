@@ -13,12 +13,6 @@
  **/
 
 using System;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -79,16 +73,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            Expression getTypeExpr = Expression.Call(null, Compiler.Method_RT_classForName, Expression.Constant(_c));
-            Expression getNsExpr = Expression.Property(null, Compiler.Method_Compiler_CurrentNamespace);
-            return Expression.Call(getNsExpr, Compiler.Method_Namespace_importClass1, getTypeExpr);   
-        }
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            ILGenerator ilg = context.GetILGenerator();
             ilg.Emit(OpCodes.Call,Compiler.Method_Compiler_CurrentNamespace.GetGetMethod());
             ilg.Emit(OpCodes.Ldstr, _c);
             ilg.Emit(OpCodes.Call, Compiler.Method_RT_classForName);

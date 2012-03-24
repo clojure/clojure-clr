@@ -14,13 +14,6 @@
 
 using System;
 
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-
-
 namespace clojure.lang.CljCompiler.Ast
 {
     class AssignExpr : Expr
@@ -88,18 +81,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            return _target.GenAssign(rhc,objx,context,_val);
+            _target.EmitAssign(rhc, objx, ilg, _val);
         }
 
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            _target.EmitAssign(rhc, objx, context, _val);
-        }
+        public bool HasNormalExit() { return true; }
 
         #endregion
 
-        public bool HasNormalExit() { return true; }
     }
 }

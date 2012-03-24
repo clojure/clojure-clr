@@ -15,15 +15,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection.Emit;
 using System.Reflection;
-using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -117,11 +110,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             fn.ComputeNames(form, name);
 
-            // Java: fn.objtype = Type.getObjectType(fn.internalName) -- makes no sense for us, this is ASM only.
-
             List<string> prims = new List<string>();
-
-
 
             //arglist might be preceded by symbol naming this fn
             if (RT.second(form) is Symbol)
@@ -143,13 +132,13 @@ namespace clojure.lang.CljCompiler.Ast
             bool hasPrimDecls = HasPrimDecls((ISeq)RT.next(form));
 
 
-            //GenContext newContext = null;
+            GenContext newContext = null;
 
-            // CNTXT
-            //if (Compiler.IsCompiling || hasPrimDecls  )// || ! RT.CompileDLR )
+  
+            //if (Compiler.IsCompiling || hasPrimDecls || fn.IsStatic )
             //{
-                GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? Compiler.EvalContext;
-                GenContext newContext = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
+                GenContext context = Compiler.CompilerContextVar.deref() as GenContext ?? Compiler.EvalContext;
+                newContext = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
                 Var.pushThreadBindings(RT.map(Compiler.CompilerContextVar, newContext));
             //}
 
@@ -222,35 +211,24 @@ namespace clojure.lang.CljCompiler.Ast
                 fn._hasMeta = RT.count(fmeta) > 0;
 
 
-                //if (Compiler.IsCompiling || prims.Count > 0)
-                //if (Compiler.IsCompiling || prims.Count > 0 ) //|| !RT.CompileDLR)
+                //if ( Compiler.IsCompiling || prims.Count > 0)
                 //{
-                    //GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? Compiler.EvalContext;
-                    //GenContext genC = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
 
                     IPersistentVector primTypes = PersistentVector.EMPTY;
                     foreach (string typename in prims)
                         primTypes = primTypes.cons(Type.GetType(typename));
 
-                    //if (RT.CompileDLR)
                         fn.Compile(
                             fn.IsVariadic ? typeof(RestFn) : typeof(AFunction),
                             null,
                             primTypes,
                             fn._onceOnly,
                             newContext);
-                    //else
-                    //    fn.CompileNoDlr(
-                    //        fn.IsVariadic ? typeof(RestFn) : typeof(AFunction),
-                    //        null,
-                    //        primTypes,
-                    //        fn._onceOnly,
-                    //        newContext);
                 //}
                 //else
                 //{
-                //    fn.CompiledType = fn.GetPrecompiledType();
-                //    fn.FnMode = FnMode.Light;
+                    //fn.FnMode = FnMode.Light;
+                    // fn.LightCompile(fn.GetPrecompiledType(), newContext);                   
                 //}
 
                 if (fn.SupportsMeta)
@@ -261,7 +239,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             finally
             {
-                if (context != null)
+                if (newContext != null)
                     Var.popThreadBindings();
             }
         }
@@ -281,69 +259,77 @@ namespace clojure.lang.CljCompiler.Ast
             return false;
         }
 
-        #endregion
-
-        #region eval
-
-        //public override object Eval()
+        //void LightCompile(Type compiledType, GenContext context)
         //{
-        //    if (FnMode == FnMode.Full)
-        //        return base.Eval();
+        //    if (CompiledType != null)
+        //        return;
 
-        //    Expression fn = GenImmediateCode(RHC.Expression, this, Compiler.EvalContext);
-        //    Expression<Compiler.ReplDelegate> lambdaForCompile = Expression.Lambda<Compiler.ReplDelegate>(Expression.Convert(fn, typeof(Object)), "ReplCall", null);
-        //    return lambdaForCompile.Compile().Invoke();
+        //    CompiledType = compiledType;
 
+        //    // Create a dynamic method that takes an array of closed-over values
+        //    // and returns an instance of AFnImpl.
+
+        //    for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+        //    {
+        //        FnMethod method = (FnMethod)s.first();
+        //        method.LightEmit(this, context);
+        //    }
+
+        //    DynamicMethod ctor = new DynamicMethod(_name+"_ctor_"+RT.nextID(),typeof(IFn),new Type[] { typeof(Object[]) });
+        //    ILGenerator ilg = ctor.GetILGenerator();
+        //    LocalBuilder fnLocal = ilg.DeclareLocal(CompiledType);
+            
+        //    if (CompiledType == typeof(RestFnImpl))
+        //    {
+        //        ilg.Emit(OpCodes.Ldc_I4,_variadicMethod.RequiredArity);
+        //        ilg.Emit(OpCodes.Newobj,Compiler.Ctor_RestFnImpl_1);
+        //    }
+        //    else
+        //    {
+        //        ilg.Emit(OpCodes.Newobj,Compiler.Ctor_AFnImpl);
+        //    }
+
+        //    ilg.Emit(OpCodes.Stloc,fnLocal);
+
+        //    for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+        //    {
+        //        FnMethod method = (FnMethod)s.first();
+        //        DynamicMethod dynm = method.DynMethod;
+
+        //        string fieldName = IsVariadic && method.IsVariadic
+        //            ? "_fnDo" + method.RequiredArity
+        //            : "_fn" + method.NumParams;
+                
+        //        FieldInfo fi = CompiledType.GetField(fieldName);
+                
+        //        ilg.Emit(OpCodes.Ldloc,fnLocal);
+        //        ilg.Emit(OpCodes,
+
+        //        ilg.Emit(OpCodes.Stfld,);
+
+        //    }
+
+        //    exprs.Add(p1);
+
+        //    Expression expr = Expression.Block(new ParameterExpression[] { p1 }, exprs);
+        //    return expr;
+        //}
         //}
 
         #endregion
 
-        #region Code generation
+        #region eval
 
-        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public override object Eval()
         {
-            if (FnMode == FnMode.Full)
-                return base.GenCode(rhc, objx, context);
+            //if (FnMode == FnMode.Full)
+                return base.Eval();
 
-            return GenImmediateCode(rhc, objx, context);
+            //Expression fn = GenImmediateCode(RHC.Expression, this, Compiler.EvalContext);
+            //Expression<Compiler.ReplDelegate> lambdaForCompile = Expression.Lambda<Compiler.ReplDelegate>(Expression.Convert(fn, typeof(Object)), "ReplCall", null);
+            //return lambdaForCompile.Compile().Invoke();
         }
 
-        protected override void GenerateMethods(GenContext context)
-        {
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
-            {
-                FnMethod method = (FnMethod)s.first();
-                method.GenerateCode(this,context);
-            }
-
-            if (IsVariadic)
-                GenerateGetRequiredArityMethod(_typeBuilder, _variadicMethod.RequiredArity);
-
-            List<int> supportedArities = new List<int>();
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
-            {
-                FnMethod method = (FnMethod)s.first();
-                supportedArities.Add(method.NumParams);
-            }
-
-            GenerateHasArityMethod(_typeBuilder, supportedArities, IsVariadic, IsVariadic ? _variadicMethod.RequiredArity : 0);
-        }
-
-        static MethodBuilder GenerateGetRequiredArityMethod(TypeBuilder tb, int requiredArity)
-        {
-            MethodBuilder mb = tb.DefineMethod(
-                "getRequiredArity",
-                MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual,
-                typeof(int),
-                Type.EmptyTypes);
-
-            ILGen gen = new ILGen(mb.GetILGenerator());
-            gen.EmitInt(requiredArity);
-            gen.Emit(OpCodes.Ret);
-
-            return mb;
-        }
-        
         #endregion
 
         #region Immediate mode compilation
@@ -353,50 +339,58 @@ namespace clojure.lang.CljCompiler.Ast
             return IsVariadic ? typeof(RestFnImpl) : typeof(AFnImpl);
         }
 
-        Expression GenImmediateCode(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            ParameterExpression p1 = Expression.Parameter(CompiledType, "__x__");
-            _thisParam = p1;
+        //Expression GenImmediateCode(RHC rhc, ObjExpr objx, GenContext context)
+        //{
+        //    ParameterExpression p1 = Expression.Parameter(CompiledType, "__x__");
+        //    _thisParam = p1;
 
-            List<Expression> exprs = new List<Expression>();
+        //    List<Expression> exprs = new List<Expression>();
 
-            if (CompiledType == typeof(RestFnImpl))
-                exprs.Add(Expression.Assign(p1,
-                          Expression.New(Compiler.Ctor_RestFnImpl_1, Expression.Constant(_variadicMethod.RequiredArity))));
-            else
-                exprs.Add(Expression.Assign(p1, Expression.New(p1.Type)));
+        //    if (CompiledType == typeof(RestFnImpl))
+        //        exprs.Add(Expression.Assign(p1,
+        //                  Expression.New(Compiler.Ctor_RestFnImpl_1, Expression.Constant(_variadicMethod.RequiredArity))));
+        //    else
+        //        exprs.Add(Expression.Assign(p1, Expression.New(p1.Type)));
 
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
-            {
-                FnMethod method = (FnMethod)s.first();
-                LambdaExpression lambda = method.GenerateImmediateLambda(rhc,this,context);
-                string fieldName = IsVariadic && method.IsVariadic
-                    ? "_fnDo" + method.RequiredArity
-                    : "_fn" + method.NumParams;
-                exprs.Add(Expression.Assign(Expression.Field(p1, fieldName), lambda));
-            }
+        //    for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+        //    {
+        //        FnMethod method = (FnMethod)s.first();
+        //        LambdaExpression lambda = method.GenerateImmediateLambda(rhc,this,context);
+        //        string fieldName = IsVariadic && method.IsVariadic
+        //            ? "_fnDo" + method.RequiredArity
+        //            : "_fn" + method.NumParams;
+        //        exprs.Add(Expression.Assign(Expression.Field(p1, fieldName), lambda));
+        //    }
 
-            exprs.Add(p1);
+        //    exprs.Add(p1);
 
-            Expression expr = Expression.Block(new ParameterExpression[] { p1 }, exprs);
-            return expr;
-        }
+        //    Expression expr = Expression.Block(new ParameterExpression[] { p1 }, exprs);
+        //    return expr;
+        //}
 
         #endregion
 
+        #region Code generation
 
-
-        internal void EmitForDefn(ObjExpr objx, GenContext context)
+        internal void EmitForDefn(ObjExpr objx, CljILGen ilg)
         {
-            Emit(RHC.Expression, objx, context);
+            Emit(RHC.Expression, objx, ilg);
         }
 
-        protected override void EmitMethods(GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
+        {
+            //if ( FnMode == FnMode.Full )
+                base.Emit(rhc, objx, ilg);
+
+            //HERE HERE HERE
+        }
+
+        protected override void EmitMethods(TypeBuilder tb)
         {
             for (ISeq s = RT.seq(_methods); s != null; s = s.next())
             {
                 FnMethod method = (FnMethod)s.first();
-                method.Emit(this, context);
+                method.Emit(this, tb);
             }
 
             if (IsVariadic)
@@ -420,10 +414,11 @@ namespace clojure.lang.CljCompiler.Ast
                 typeof(int),
                 Type.EmptyTypes);
 
-            ILGen gen = new ILGen(mb.GetILGenerator());
+            CljILGen gen = new CljILGen(mb.GetILGenerator());
             gen.EmitInt(requiredArity);
             gen.Emit(OpCodes.Ret);
         }
 
+        #endregion
     }
 }

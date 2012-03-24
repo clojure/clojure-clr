@@ -14,13 +14,7 @@
 
 using System;
 using System.Reflection;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection.Emit;
-using Microsoft.Scripting.Generation;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -32,12 +26,12 @@ namespace clojure.lang.CljCompiler.Ast
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         readonly string _fieldName;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]   
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         readonly Type _type;
-        
+
         protected readonly TInfo _tinfo;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]   
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         protected readonly string _source;
 
         protected readonly IPersistentMap _spanMap;
@@ -70,31 +64,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            return HostExpr.GenBoxReturn(GenCodeUnboxed(rhc, objx, context),FieldType,objx,context);
-        }
-
-        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            EmitUnboxed(RHC.Expression, objx, context);
-            HostExpr.EmitBoxReturn(objx, context, FieldType);
+            EmitUnboxed(RHC.Expression, objx, ilg);
+            HostExpr.EmitBoxReturn(objx, ilg, FieldType);
             if (rhc == RHC.Statement)
-                context.GetILGenerator().Emit(OpCodes.Pop);
-        }
-
-        #endregion
-
-        #region AssignableExpr Members
-
-        public override Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
-        {
-            Expression access = GenCodeUnboxed(RHC.Expression, objx, context);
-            Expression valExpr = val.GenCode(RHC.Expression, objx, context);
-            Expression unboxValExpr = HostExpr.GenUnboxArg(valExpr, FieldType);
-            Expression assign = Expression.Assign(access, unboxValExpr);
-            assign = Compiler.MaybeAddDebugInfo(assign, _spanMap, context.IsDebuggable);
-            return assign;
+                ilg.Emit(OpCodes.Pop);
         }
 
         #endregion
@@ -132,13 +107,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            Expression field = Expression.Field(null, _tinfo);
-            field = Compiler.MaybeAddDebugInfo(field, _spanMap, context.IsDebuggable);
-            return field;
-        }
-
         public override bool CanEmitPrimitive
         {
             get { return Util.IsPrimitive(_tinfo.FieldType); }
@@ -149,10 +117,9 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _tinfo.FieldType; }
         }
 
-        public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        public override void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            ILGen ilg = context.GetILGen();
-            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+            GenContext.EmitDebugInfo(ilg, _spanMap);
             if (_tinfo.IsLiteral)
             {
                 // literal fields need to be inlined directly in here... We use GetRawConstant
@@ -199,15 +166,13 @@ namespace clojure.lang.CljCompiler.Ast
             return e;
         }
 
-        public override void EmitAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
+        public override void EmitAssign(RHC rhc, ObjExpr objx, CljILGen ilg, Expr val)
         {
-            ILGen ilg = context.GetILGen();
+            GenContext.EmitDebugInfo(ilg, _spanMap);
 
-            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
-
-            val.Emit(RHC.Expression, objx, context);
+            val.Emit(RHC.Expression, objx, ilg);
             ilg.Emit(OpCodes.Dup);
-            HostExpr.EmitUnboxArg(objx, context, FieldType);
+            HostExpr.EmitUnboxArg(objx, ilg, FieldType);
             ilg.EmitFieldSet(_tinfo);
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
@@ -247,13 +212,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            Expression prop = Expression.Property(null, _tinfo);
-            prop = Compiler.MaybeAddDebugInfo(prop, _spanMap, context.IsDebuggable);
-            return prop;
-        }
-
         public override bool CanEmitPrimitive
         {
             get { return Util.IsPrimitive(_tinfo.PropertyType); }
@@ -264,10 +222,9 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _tinfo.PropertyType; }
         }
 
-        public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        public override void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            ILGen ilg = context.GetILGen();
-            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+            GenContext.EmitDebugInfo(ilg, _spanMap);
             ilg.EmitPropertyGet(_tinfo);
         }
 
@@ -282,15 +239,13 @@ namespace clojure.lang.CljCompiler.Ast
             return e;
         }
 
-        public override void EmitAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
+        public override void EmitAssign(RHC rhc, ObjExpr objx, CljILGen ilg, Expr val)
         {
-            ILGen ilg = context.GetILGen();
+            GenContext.EmitDebugInfo(ilg, _spanMap);
 
-            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
-
-            val.Emit(RHC.Expression, objx, context);
+            val.Emit(RHC.Expression, objx, ilg);
             ilg.Emit(OpCodes.Dup);
-            HostExpr.EmitUnboxArg(objx, context, FieldType);
+            HostExpr.EmitUnboxArg(objx, ilg, FieldType);
             ilg.EmitPropertySet(_tinfo);
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
@@ -298,5 +253,4 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
     }
-
 }

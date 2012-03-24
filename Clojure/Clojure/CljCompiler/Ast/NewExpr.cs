@@ -19,7 +19,6 @@ using System.Reflection;
 using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
-using Microsoft.Scripting.Ast; //for Utils in GenDlrForMethod
 #endif
 using System.Dynamic;
 using clojure.lang.Runtime.Binding;
@@ -137,127 +136,28 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            Expression call;
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
+        { 
+            GenContext.EmitDebugInfo(ilg, _spanMap);
 
             if (_ctor != null)
-                call = GenDlrForMethod(rhc, objx, context);
+                EmitForMethod(rhc, objx, ilg);
             else if (_isNoArgValueTypeCtor)
-                call = Expression.Default(_type);
+                EmitForNoArgValueTypeCtor(rhc, objx, ilg);
             else
-                call = GenerateComplexCall(rhc, objx, context);
-
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
-            return call;
-        }
-
-        // TODO: See if it is worth removing the code duplication with MethodExp.GenDlr.
-
-        private Expression GenerateComplexCall(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            Expression call;
-
-            Expression target = GenTargetExpression(objx,context);
-
-            List<Expression> exprs = new List<Expression>(_args.Count);
-            List<ParameterExpression> sbParams = new List<ParameterExpression>();
-            List<Expression> sbInits = new List<Expression>();
-            List<Expression> sbTransfers = new List<Expression>();
-            MethodExpr.GenerateComplexArgList(objx, context, _args, out exprs, out sbParams, out sbInits, out sbTransfers);
-
-            Expression[] argExprs = ClrExtensions.ArrayInsert<Expression>(target, exprs);
-
-
-            Type returnType = this.ClrType;
-            Type stubType = Compiler.CompileStubOrigClassVar.isBound ? (Type)Compiler.CompileStubOrigClassVar.deref() : null;
-
-            if (returnType == stubType)
-                returnType = objx.BaseType;
-
-            // TODO: get rid of Default
-            CreateInstanceBinder binder = new ClojureCreateInstanceBinder(ClojureContext.Default,_args.Count);
-            DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), argExprs);
-            // I'd like to use returnType in place of typeof(object) in the previous, 
-            // But I can't override ReturnType in DefaultCreateInstanceBinder and this causes an error.
-            // Look for the conversion below.
-
-            //if (context.Mode == CompilerMode.File)
-            if (context.DynInitHelper != null)
-                call = context.DynInitHelper.ReduceDyn(dyn);
-            else
-                call = dyn;
-
-            call = Expression.Convert(call, returnType);
-
-            if (sbParams.Count > 0)
-            {
-
-                // We have ref/out params.  Construct the complicated call;
-
-                ParameterExpression callValParam = Expression.Parameter(returnType, "__callVal");
-                ParameterExpression[] allParams = ClrExtensions.ArrayInsert<ParameterExpression>(callValParam, sbParams);
-
-                call = Expression.Block(
-                    returnType,
-                    allParams,
-                    Expression.Block(sbInits),
-                    Expression.Assign(callValParam, call),
-                    Expression.Block(sbTransfers),
-                    callValParam);
-            }
-
-            return call;    
-        }
-
-        private Expression GenTargetExpression(ObjExpr objx, GenContext context)
-        {
-            if (Compiler.CompileStubOrigClassVar.isBound && Compiler.CompileStubOrigClassVar.deref() != null && objx.TypeBlder != null)
-                return Expression.Constant(objx.TypeBlder, typeof(Type));
-
-            if (_type != null)
-                return Expression.Constant(_type, typeof(Type));
-
-            throw new ArgumentException("Cannot generate type for NewExpr. Serious!");
-
-            //string name = Compiler.DestubClassName(_type.FullName);
-            //return Expression.Call(null, Compiler.Method_RT_classForName, Expression.Constant(name));
-        }
-
-        Expression GenDlrForMethod(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            // The ctor is uniquely determined.
-
-            Expression[] args = HostExpr.GenTypedArgs(objx, context, _ctor.GetParameters(), _args);
-            return Utils.SimpleNewHelper(_ctor, args);
-
-            // JAVA: emitClearLocals
-        }
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            ILGenerator ilg = context.GetILGenerator();
-
-            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
-
-            if (_ctor != null)
-                EmitForMethod(rhc, objx, context);
-            else if (_isNoArgValueTypeCtor)
-                EmitForNoArgValueTypeCtor(rhc, objx, context);
-            else
-                EmitComplexCall(rhc, objx, context);
+                EmitComplexCall(rhc, objx, ilg);
 
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
         }
 
-        private void EmitForMethod(RHC rhc, ObjExpr objx, GenContext context)
+        private void EmitForMethod(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            EmitParamsForMethod(objx,context);
-            context.GetILGenerator().Emit(OpCodes.Newobj,_ctor);
+            EmitParamsForMethod(objx,ilg);
+            ilg.Emit(OpCodes.Newobj,_ctor);
         }
 
-        private void EmitParamsForMethod(ObjExpr objx, GenContext context)
+        private void EmitParamsForMethod(ObjExpr objx, CljILGen ilg)
         {
             ParameterInfo[] pis = _ctor.GetParameters();
 
@@ -270,7 +170,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Type paramType = pi.ParameterType;
 
                 //arg.ArgExpr.Emit(RHC.Expression,objx,context);
-                MethodExpr.EmitTypedArg(objx, context, paramType, arg.ArgExpr);
+                MethodExpr.EmitTypedArg(objx, ilg, paramType, arg.ArgExpr);
 
                 //if (!CompatibleParameterTypes(paramType,argType)) 
                 //{
@@ -296,11 +196,10 @@ namespace clojure.lang.CljCompiler.Ast
 
             return false;
         }
-        
 
-        private void EmitForNoArgValueTypeCtor(RHC rhc, ObjExpr objx, GenContext context)
+
+        private void EmitForNoArgValueTypeCtor(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            ILGenerator ilg = context.GetILGenerator();
             LocalBuilder loc = ilg.DeclareLocal(_type);
             ilg.Emit(OpCodes.Ldloca, loc);
             ilg.Emit(OpCodes.Initobj, _type);
@@ -310,11 +209,11 @@ namespace clojure.lang.CljCompiler.Ast
         // TODO: See if it is worth removing the code duplication with MethodExp.GenDlr.
 
 
-        private void EmitComplexCall(RHC rhc, ObjExpr objx, GenContext context)
+        private void EmitComplexCall(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count + 1);
             paramExprs.Add(Expression.Parameter(typeof(Type)));
-            EmitTargetExpression(objx, context);
+            EmitTargetExpression(objx, ilg);
 
             int i = 0;
             foreach (HostArg ha in _args)
@@ -327,19 +226,19 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     case HostArg.ParameterType.ByRef:
                         paramExprs.Add(Expression.Parameter(argType.MakeByRefType(), ha.LocalBinding.Name));
-                        context.GetILGenerator().Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
+                        ilg.Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
                         break;
 
                     case HostArg.ParameterType.Standard:
                         if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr)
                         {
                             paramExprs.Add(Expression.Parameter(argType, ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
-                            ((MaybePrimitiveExpr)ha.ArgExpr).EmitUnboxed(RHC.Expression, objx, context);
+                            ((MaybePrimitiveExpr)ha.ArgExpr).EmitUnboxed(RHC.Expression, objx, ilg);
                         }
                         else
                         {
                             paramExprs.Add(Expression.Parameter(typeof(object), ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
-                            ha.ArgExpr.Emit(RHC.Expression, objx, context);
+                            ha.ArgExpr.Emit(RHC.Expression, objx, ilg);
                         }
                         break;
 
@@ -352,6 +251,8 @@ namespace clojure.lang.CljCompiler.Ast
             CreateInstanceBinder binder = new ClojureCreateInstanceBinder(ClojureContext.Default, _args.Count);
             DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
             Expression call = dyn;
+
+            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
             if (context.DynInitHelper != null)
                 call = context.DynInitHelper.ReduceDyn(dyn);
 
@@ -360,23 +261,21 @@ namespace clojure.lang.CljCompiler.Ast
                 call = Expression.Block(call, Expression.Default(typeof(object)));
                 returnType = typeof(object);
             }
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
+            call = GenContext.AddDebugInfo(call, _spanMap);
 
             Type[] paramTypes = paramExprs.Map((x) => x.Type);
             MethodBuilder mbLambda = context.TB.DefineMethod("__interop_ctor_" + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, paramTypes);
             LambdaExpression lambda = Expression.Lambda(call, paramExprs);
             lambda.CompileToMethod(mbLambda);
 
-            context.GetILGenerator().Emit(OpCodes.Call, mbLambda);
+            ilg.Emit(OpCodes.Call, mbLambda);
 
         }
 
         static readonly MethodInfo Method_Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle");
 
-        private void EmitTargetExpression(ObjExpr objx, GenContext context)
+        private void EmitTargetExpression(ObjExpr objx, CljILGen ilg)
         {
-            ILGenerator ilg = context.GetILGenerator();
-
             if (Compiler.CompileStubOrigClassVar.isBound && Compiler.CompileStubOrigClassVar.deref() != null && objx.TypeBlder != null)
                 ilg.Emit(OpCodes.Ldtoken, objx.TypeBlder);
             else if (_type != null)
@@ -388,7 +287,6 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         public bool HasNormalExit() { return true; }
-
 
         #endregion
     }

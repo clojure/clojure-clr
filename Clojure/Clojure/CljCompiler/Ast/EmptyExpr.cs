@@ -13,15 +13,8 @@
  **/
 
 using System;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection;
 using System.Reflection.Emit;
-using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -78,32 +71,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            Type collType;
-
-            if (_coll is IPersistentList)
-                collType = typeof(PersistentList);
-            else if (_coll is IPersistentVector)
-                collType = typeof(PersistentVector);
-            else if (_coll is IPersistentMap)
-                collType = typeof(PersistentArrayMap);
-            else if (_coll is IPersistentSet)
-                collType = typeof(PersistentHashSet);
-            else
-                throw new InvalidOperationException("Unknown collection type.");
-
-            return Expression.Field(null, collType, "EMPTY");
-        }
-
         static readonly FieldInfo HashMapEmptyFI = typeof(PersistentArrayMap).GetField("EMPTY");
         static readonly FieldInfo HashSetEmptyFI = typeof(PersistentHashSet).GetField("EMPTY");
         static readonly FieldInfo ListEmptyFI = typeof(PersistentList).GetField("EMPTY");
         static readonly FieldInfo VectorEmptyFI = typeof(PersistentVector).GetField("EMPTY");
 
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            ILGen ilg = context.GetILGen();
             if (_coll is IPersistentList)
                 ilg.EmitFieldGet(ListEmptyFI);
             else if (_coll is IPersistentVector)

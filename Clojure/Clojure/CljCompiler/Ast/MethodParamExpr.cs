@@ -14,12 +14,6 @@
 
 using System;
 
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -65,38 +59,22 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            throw new InvalidOperationException("Can't emit");
-        }
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             throw new InvalidOperationException("Can't emit");
         }
 
         public bool HasNormalExit() { return true; }
 
-
-        #endregion
-
-        #region MaybePrimitiveExpr Members
-
         public bool CanEmitPrimitive
         {
             get { return Util.IsPrimitive(_t); }
         }
 
-        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             throw new InvalidOperationException("Can't emit");
         }
-
-        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            throw new InvalidOperationException("Can't emit");
-        }
-
 
         #endregion
     }

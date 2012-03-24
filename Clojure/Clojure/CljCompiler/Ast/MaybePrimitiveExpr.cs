@@ -13,18 +13,11 @@
  **/
 
 
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-
 namespace clojure.lang.CljCompiler.Ast
 {
     interface MaybePrimitiveExpr : Expr
     {
         bool CanEmitPrimitive { get; }
-        Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context);
-        void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context);
+        void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg);
     }
 }

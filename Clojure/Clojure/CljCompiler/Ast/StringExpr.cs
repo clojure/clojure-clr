@@ -14,11 +14,6 @@
 
 using System;
 
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -60,18 +55,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            return Expression.Constant(String.Intern(_str));
-        }
-
-        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             if (rhc != RHC.Statement)
-                context.GetILGen().EmitString(_str);
+                ilg.EmitString(_str);
         }
 
         #endregion
-
     }
 }

@@ -13,21 +13,12 @@
  **/
 
 
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-
-
 namespace clojure.lang.CljCompiler.Ast
 {
     interface AssignableExpr
     {
         object EvalAssign(Expr val);
-        Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val);
-
-        void EmitAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val);
+        void EmitAssign(RHC rhc, ObjExpr objx, CljILGen ilg, Expr val);
 
     }
 }

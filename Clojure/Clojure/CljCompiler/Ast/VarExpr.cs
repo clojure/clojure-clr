@@ -13,13 +13,8 @@
  **/
 
 using System;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection.Emit;
+
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -78,45 +73,28 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            return objx.GenVarValue(context, _var);
-        }
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            objx.EmitVarValue(context, _var);
+            objx.EmitVarValue(ilg, _var);
             if (rhc == RHC.Statement)
-                context.GetILGenerator().Emit(OpCodes.Pop);
+                ilg.Emit(OpCodes.Pop);
         }
 
         public bool HasNormalExit() { return true; }
 
-
         #endregion
 
         #region AssignableExpr Members
-
-        public Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
-        {
-            // RETYPE: Get rid of Box?
-            Expression varExpr = objx.GenVar(context, _var);
-            Expression valExpr = val.GenCode(RHC.Expression,objx,context);
-            return Expression.Call(varExpr, Compiler.Method_Var_set, Compiler.MaybeBox(valExpr));
-        }
 
         public object EvalAssign(Expr val)
         {
             return _var.set(val.Eval());
         }
 
-
-        public void EmitAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
+        public void EmitAssign(RHC rhc, ObjExpr objx, CljILGen ilg, Expr val)
         {
-            ILGenerator ilg = context.GetILGenerator();
-
-            objx.EmitVar(context, _var);
-            val.Emit(RHC.Expression, objx, context);
+            objx.EmitVar(ilg, _var);
+            val.Emit(RHC.Expression, objx, ilg);
             ilg.Emit(OpCodes.Call, Compiler.Method_Var_set);
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);

@@ -13,11 +13,6 @@
  **/
 
 using System;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -27,8 +22,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region AssignableExpr Members
 
         public abstract object EvalAssign(Expr val);
-        public abstract Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val);
-        public abstract void EmitAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val);
+        public abstract void EmitAssign(RHC rhc, ObjExpr objx, CljILGen ilg, Expr val);
 
         #endregion
 

@@ -60,7 +60,7 @@ namespace clojure.lang
             {
                 ParameterExpression pe = Expression.Parameter(pi.ParameterType, pi.Name);
                 parms.Add(pe);
-                callArgs.Add(Compiler.MaybeBox(pe));
+                callArgs.Add(MaybeBox(pe));
             }
 
             Expression call =                    
@@ -78,6 +78,21 @@ namespace clojure.lang
             return lambda.Compile();
         }
 
+
+        #endregion
+
+        #region Boxing arguments
+
+        internal static Expression MaybeBox(Expression expr)
+        {
+            if (expr.Type == typeof(void))
+                // I guess we'll pass a void.  This happens when we have a throw, for example.
+                return Expression.Block(expr, Expression.Default(typeof(object)));
+
+            return expr.Type.IsValueType
+                ? Expression.Convert(expr, typeof(object))
+                : expr;
+        }
 
         #endregion
     }

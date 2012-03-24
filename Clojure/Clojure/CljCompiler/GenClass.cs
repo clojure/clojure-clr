@@ -181,7 +181,7 @@ namespace clojure.lang
         private static void DefineStaticCtor(TypeBuilder proxyTB, string prefix, Dictionary<string, FieldBuilder> varMap, bool loadImplNameSpace, string implNamespace, string implCname)
         {
             ConstructorBuilder cb = proxyTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard,Type.EmptyTypes);
-            ILGen gen = new ILGen(cb.GetILGenerator());
+            CljILGen gen = new CljILGen(cb.GetILGenerator());
 
             foreach (KeyValuePair<string, FieldBuilder> pair in varMap)
             {
@@ -231,7 +231,7 @@ namespace clojure.lang
                     throw new InvalidOperationException("Base class constructor missing or private");
 
                 ConstructorBuilder cb = proxyTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, thisParamTypes);
-                ILGen gen = new ILGen(cb.GetILGenerator());
+                CljILGen gen = new CljILGen(cb.GetILGenerator());
 
                 Label noInitLabel = gen.DefineLabel();
                 Label noPostInitLabel = gen.DefineLabel();
@@ -359,7 +359,7 @@ namespace clojure.lang
                 if (!String.IsNullOrEmpty(factoryName))
                 {
                     MethodBuilder factoryMB = proxyTB.DefineMethod(factoryName, MethodAttributes.Public | MethodAttributes.Static, CallingConventions.Standard, proxyTB, thisParamTypes);
-                    ILGen genf = new ILGen(factoryMB.GetILGenerator());
+                    CljILGen genf = new CljILGen(factoryMB.GetILGenerator());
 
                     LocalBuilder[] locals = new LocalBuilder[thisParamTypes.Length];
                     for (int i = 0; i < thisParamTypes.Length; i++)
@@ -386,7 +386,7 @@ namespace clojure.lang
         static void EmitMain(GenContext context, TypeBuilder proxyTB, string mainName, FieldBuilder mainFB)
         {
             MethodBuilder cb = proxyTB.DefineMethod("Main",MethodAttributes.Public| MethodAttributes.Static,CallingConventions.Standard,typeof(void),new Type[] { typeof(String[]) });
-            ILGen gen = new ILGen(cb.GetILGenerator()); ;
+            CljILGen gen = new CljILGen(cb.GetILGenerator()); ;
 
             Label noMainLabel = gen.DefineLabel();
             Label endLabel = gen.DefineLabel();
@@ -429,7 +429,7 @@ namespace clojure.lang
                 {
                     case "super":
                         EmitForwardingMethod(proxyTB, false, regularFB, overloadFB, sig,
-                            delegate(ILGen gen)
+                            delegate(CljILGen gen)
                             {
                                 gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
                                 for (int i = 0; i < sig.ParamTypes.Length; i++)
@@ -439,14 +439,14 @@ namespace clojure.lang
                         break;
                     case "interface":
                         EmitForwardingMethod(proxyTB, false, regularFB, overloadFB, sig,
-                            delegate(ILGen gen)
+                            delegate(CljILGen gen)
                             {
                                 EmitUnsupported(gen, sig.Name);
                             });
                         break;
                     default:
                         EmitForwardingMethod(proxyTB, sig.IsStatic, regularFB, overloadFB, sig,
-                            delegate(ILGen gen)
+                            delegate(CljILGen gen)
                             {
                                 EmitUnsupported(gen, sig.Name);
                             });
@@ -468,7 +468,7 @@ namespace clojure.lang
             }
         }
 
-        delegate void ElseGenDelegate(ILGen gen);
+        delegate void ElseGenDelegate(CljILGen gen);
 
  
         private static void EmitForwardingMethod(TypeBuilder proxyTB, 
@@ -493,7 +493,7 @@ namespace clojure.lang
             }
 
             MethodBuilder mb = proxyTB.DefineMethod(sig.Name, attributes, conventions, sig.ReturnType, sig.ParamTypes);
-            ILGen gen = new ILGen(mb.GetILGenerator());
+            CljILGen gen = new CljILGen(mb.GetILGenerator());
 
             Label foundLabel = gen.DefineLabel();
             Label elseLabel = gen.DefineLabel();
@@ -551,7 +551,7 @@ namespace clojure.lang
             Type[] paramTypes = CreateTypeArray(mi.GetParameters());
 
             MethodBuilder mb = proxyTB.DefineMethod(p.Name, MethodAttributes.Public, CallingConventions.HasThis, mi.ReturnType, paramTypes);
-            ILGen gen = new ILGen(mb.GetILGenerator());
+            CljILGen gen = new CljILGen(mb.GetILGenerator());
             gen.EmitLoadArg(0);                             // gen.Emit(OpCodes.Ldarg_0);
             for (int i = 0; i < paramTypes.Length; i++)
                 gen.EmitLoadArg(i + 1);                     // gen.Emit(OpCodes.Ldarg, i + 1);
@@ -587,7 +587,7 @@ namespace clojure.lang
                         attribs |= MethodAttributes.Static;
 
                     MethodBuilder mb = proxyTB.DefineMethod(getterSym.Name, attribs, fld.FieldType, Type.EmptyTypes);
-                    ILGen gen = new ILGen(mb.GetILGenerator());
+                    CljILGen gen = new CljILGen(mb.GetILGenerator());
                     //if (fld.IsStatic)
                     //    gen.Emit(OpCodes.Ldsfld, fld);
                     //else
@@ -609,7 +609,7 @@ namespace clojure.lang
                         attribs |= MethodAttributes.Static;
 
                     MethodBuilder mb = proxyTB.DefineMethod(setterSym.Name, attribs, typeof(void), new Type[] { fld.FieldType });
-                    ILGen gen = new ILGen(mb.GetILGenerator());
+                    CljILGen gen = new CljILGen(mb.GetILGenerator());
                     if (fld.IsStatic)
                     {
                         gen.Emit(OpCodes.Ldarg_0);
@@ -679,7 +679,7 @@ namespace clojure.lang
             return paramTypes;
         }
 
-        static void EmitGetVar(ILGen gen, FieldBuilder fb)
+        static void EmitGetVar(CljILGen gen, FieldBuilder fb)
         {
             Label falseLabel = gen.DefineLabel();
             Label endLabel = gen.DefineLabel();
@@ -696,7 +696,7 @@ namespace clojure.lang
             gen.MarkLabel(endLabel);
         }
 
-        private static void EmitUnsupported(ILGen gen, string name)
+        private static void EmitUnsupported(CljILGen gen, string name)
         {
             gen.EmitString(name);                               // gen.Emit(OpCodes.Ldstr, name);
             gen.EmitNew(CtorInfo_NotImplementedException_1);    // gen.Emit(OpCodes.Newobj, CtorInfo_NotImplementedException_1);

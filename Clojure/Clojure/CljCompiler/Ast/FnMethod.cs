@@ -15,12 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection.Emit;
 using System.Reflection;
 
@@ -254,52 +248,52 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Immediate mode compilation
 
-        internal LambdaExpression GenerateImmediateLambda(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            List<ParameterExpression> parmExprs = new List<ParameterExpression>(_argLocals.count());
+        //internal LambdaExpression GenerateImmediateLambda(RHC rhc, ObjExpr objx, GenContext context)
+        //{
+        //    List<ParameterExpression> parmExprs = new List<ParameterExpression>(_argLocals.count());
 
-            if (_thisBinding != null )
-                _thisBinding.ParamExpression = objx.ThisParam;
+        //    if (_thisBinding != null )
+        //        _thisBinding.ParamExpression = objx.ThisParam;
 
-            try
-            {
+        //    try
+        //    {
 
-                LabelTarget loopLabel = Expression.Label("top");
+        //        LabelTarget loopLabel = Expression.Label("top");
 
-                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
+        //        Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
 
-                for (int i = 0; i < _argLocals.count(); i++)
-                {
-                    LocalBinding b = (LocalBinding)_argLocals.nth(i);
+        //        for (int i = 0; i < _argLocals.count(); i++)
+        //        {
+        //            LocalBinding b = (LocalBinding)_argLocals.nth(i);
 
-                    ParameterExpression pexpr = Expression.Parameter(typeof(object), b.Name);
-                    b.ParamExpression = pexpr;
-                    parmExprs.Add(pexpr);
-                }
+        //            ParameterExpression pexpr = Expression.Parameter(typeof(object), b.Name);
+        //            b.ParamExpression = pexpr;
+        //            parmExprs.Add(pexpr);
+        //        }
 
-                List<Expression> bodyExprs = new List<Expression>();
-                //bodyExprs.AddRange(typedParmInitExprs);
-                bodyExprs.Add(Expression.Label(loopLabel));
-                bodyExprs.Add(Compiler.MaybeBox(_body.GenCode(rhc,objx,context)));
+        //        List<Expression> bodyExprs = new List<Expression>();
+        //        //bodyExprs.AddRange(typedParmInitExprs);
+        //        bodyExprs.Add(Expression.Label(loopLabel));
+        //        bodyExprs.Add(Compiler.MaybeBox(_body.GenCode(rhc,objx,context)));
 
 
-                Expression block;
-                //if (typedParmExprs.Count > 0)
-                //    block = Expression.Block(typedParmExprs, bodyExprs);
-                //else
-                block = Expression.Block(bodyExprs);
+        //        Expression block;
+        //        //if (typedParmExprs.Count > 0)
+        //        //    block = Expression.Block(typedParmExprs, bodyExprs);
+        //        //else
+        //        block = Expression.Block(bodyExprs);
 
-                return Expression.Lambda(
-                    FuncTypeHelpers.GetFFuncType(parmExprs.Count),
-                    block,
-                    Objx.ThisName,
-                    parmExprs);
-            }
-            finally
-            {
-                Var.popThreadBindings();
-            }
-        }
+        //        return Expression.Lambda(
+        //            FuncTypeHelpers.GetFFuncType(parmExprs.Count),
+        //            block,
+        //            Objx.ThisName,
+        //            parmExprs);
+        //    }
+        //    finally
+        //    {
+        //        Var.popThreadBindings();
+        //    }
+        //}
 
         #endregion
 
@@ -373,6 +367,8 @@ namespace clojure.lang.CljCompiler.Ast
          
         #endregion
 
+        #region Code generation
+
         protected override string GetMethodName()
         {
             return IsVariadic ? "doInvoke" : "invoke";
@@ -396,32 +392,30 @@ namespace clojure.lang.CljCompiler.Ast
                 return ret;
             }
             return Compiler.CreateObjectTypeArray(NumParams);
-        }   
-    
-        public override void Emit(ObjExpr fn, GenContext context)
+        }
+
+        public override void Emit(ObjExpr fn, TypeBuilder tb)
         {
             if (Prim != null)
-                DoEmitPrim(fn, context);
+                DoEmitPrim(fn, tb);
             else if (fn.IsStatic)
-                DoEmitStatic(fn, context);
+                DoEmitStatic(fn, tb);
             else
-                DoEmit(fn, context);
+                DoEmit(fn, tb);
         }
 
-        private void DoEmitStatic(ObjExpr fn, GenContext context)
+        private void DoEmitStatic(ObjExpr fn, TypeBuilder tb)
         {
-           DoEmitPrimOrStatic(fn, context,true);   
+           DoEmitPrimOrStatic(fn, tb ,true);   
         }
 
-        private void DoEmitPrim(ObjExpr fn, GenContext context)
+        private void DoEmitPrim(ObjExpr fn, TypeBuilder tb)
         {
-            DoEmitPrimOrStatic(fn,context,false);
+            DoEmitPrimOrStatic(fn,tb,false);
         }
 
-        private void DoEmitPrimOrStatic(ObjExpr fn, GenContext context, bool isStatic)
+        private void DoEmitPrimOrStatic(ObjExpr fn, TypeBuilder tb, bool isStatic)
         {
-            TypeBuilder tb = fn.TypeBlder;
-
             MethodAttributes attribs = isStatic 
                 ? MethodAttributes.Static | MethodAttributes.Public
                 : MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual;
@@ -433,18 +427,17 @@ namespace clojure.lang.CljCompiler.Ast
             if ( ! isStatic )
                 SetCustomAttributes(baseMB);
 
-            GenContext baseContext = context.WithBuilders(tb, baseMB);
-            ILGenerator baseIlg = baseContext.GetILGenerator();
+            CljILGen baseIlg = new CljILGen(baseMB.GetILGenerator());
 
             try 
             {
                 Label loopLabel = baseIlg.DefineLabel();
                 Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));
 
-                Compiler.MaybeEmitDebugInfo(context, baseIlg, SpanMap);
+                GenContext.EmitDebugInfo(baseIlg, SpanMap);
                 
                 baseIlg.MarkLabel(loopLabel);
-                EmitBody(Objx,baseContext,_retType,_body);
+                EmitBody(Objx, baseIlg, _retType, _body);
                 if ( _body.HasNormalExit() )
                     baseIlg.Emit(OpCodes.Ret);
             }
@@ -457,46 +450,39 @@ namespace clojure.lang.CljCompiler.Ast
             MethodBuilder regularMB = tb.DefineMethod(GetMethodName(), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(Object), GetArgTypes());
             SetCustomAttributes(regularMB);
 
-            GenContext regularContext = context.WithBuilders(tb,regularMB);
-            ILGenerator regIlg = regularContext.GetILGenerator();
+            CljILGen regIlg = new CljILGen(regularMB.GetILGenerator());
 
             if ( ! isStatic )
                 regIlg.Emit(OpCodes.Ldarg_0);
             for(int i = 0; i < _argTypes.Length; i++)
 			{   
                 regIlg.Emit(OpCodes.Ldarg,i+1);
-                HostExpr.EmitUnboxArg(fn, regularContext, _argTypes[i]);
+                HostExpr.EmitUnboxArg(fn, regIlg, _argTypes[i]);
 			}
             regIlg.Emit(OpCodes.Call,baseMB);
             regIlg.Emit(OpCodes.Box,GetReturnType());
             regIlg.Emit(OpCodes.Ret);
         }
 
-
-
-
-        private void DoEmit(ObjExpr fn, GenContext context)
+        private void DoEmit(ObjExpr fn, TypeBuilder tb)
         {
-            TypeBuilder tb = fn.TypeBlder;
-
             MethodAttributes attribs = MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual;
 
             MethodBuilder mb = tb.DefineMethod(GetMethodName(), attribs, GetReturnType(), GetArgTypes());
 
             SetCustomAttributes(mb);
 
-            GenContext newContext = context.WithBuilders(tb, mb);
-            ILGenerator baseIlg = newContext.GetILGenerator();
+            CljILGen baseIlg = new CljILGen(mb.GetILGenerator());
 
             try
             {
                 Label loopLabel = baseIlg.DefineLabel();
                 Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
 
-                Compiler.MaybeEmitDebugInfo(context, baseIlg, SpanMap);
+                GenContext.EmitDebugInfo(baseIlg, SpanMap);
 
                 baseIlg.MarkLabel(loopLabel);
-                _body.Emit(RHC.Return, fn, newContext);
+                _body.Emit(RHC.Return, fn, baseIlg);
                 if ( _body.HasNormalExit() )
                     baseIlg.Emit(OpCodes.Ret);
             }
@@ -506,11 +492,9 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             if (IsExplicit)
-                tb.DefineMethodOverride(mb, _explicitMethodInfo);  
+                tb.DefineMethodOverride(mb, _explicitMethodInfo);
         }
 
-        
-
-
+        #endregion
     }
 }

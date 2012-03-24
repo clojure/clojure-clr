@@ -59,8 +59,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             if ( RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                 RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1} - reference to field/property {2} can't be resolved.",
-                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap), memberName);
- 
+                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap), memberName); 
         }
 
         #endregion
@@ -92,28 +91,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            return Compiler.MaybeBox(GenCodeUnboxed(rhc, objx, context));
-        }
+            EmitUnboxed(rhc, objx, ilg);
+            HostExpr.EmitBoxReturn(objx, ilg, typeof(Object));
 
-        public override Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            Expression target = _target.GenCode(RHC.Expression, objx, context);
-
-            Type returnType = HasClrType ? ClrType : typeof(object);
-
-            // TODO: Get rid of Default
-            GetMemberBinder binder = new ClojureGetZeroArityMemberBinder(ClojureContext.Default, _memberName, false);
-            DynamicExpression dyn = Expression.Dynamic(binder, returnType, new Expression[] { target });
-
-            Expression call = dyn;
-
-            if ( context.DynInitHelper != null )
-                call = context.DynInitHelper.ReduceDyn(dyn);
-
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
-            return call;
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
         }
 
         public override bool CanEmitPrimitive
@@ -121,18 +105,7 @@ namespace clojure.lang.CljCompiler.Ast
             get { return HasClrType && Util.IsPrimitive(ClrType); }
         }
 
-
-        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            EmitUnboxed(rhc, objx, context);
-            HostExpr.EmitBoxReturn(objx, context, typeof(Object));
-
-            if (rhc == RHC.Statement)
-                context.GetILGenerator().Emit(OpCodes.Pop);
-        }
-
-
-        public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        public override void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             Type paramType = _target.HasClrType && _target.ClrType != null && _target.ClrType.IsPrimitive ? _target.ClrType : typeof(object);
 
@@ -146,20 +119,20 @@ namespace clojure.lang.CljCompiler.Ast
 
             Expression call = dyn;
 
+            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
+
             if (context.DynInitHelper != null)
                 call = context.DynInitHelper.ReduceDyn(dyn);
 
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
+            call = GenContext.AddDebugInfo(call, _spanMap);
 
             MethodBuilder mbLambda = context.TB.DefineMethod("__interop_" + _memberName + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, new Type[] {paramType});
             LambdaExpression lambda = Expression.Lambda(call, new ParameterExpression[] {param});
             lambda.CompileToMethod(mbLambda);
 
-            ILGenerator ilg = context.GetILGenerator();
+            GenContext.EmitDebugInfo(ilg, _spanMap);
 
-            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
-
-            _target.Emit(RHC.Expression, objx, context);
+            _target.Emit(RHC.Expression, objx, ilg);
             ilg.Emit(OpCodes.Call, mbLambda);
         }
 

@@ -28,6 +28,7 @@ namespace clojure.lang
         #region Data
 
         IPersistentMap _meta;
+        Object[] _closure;
 
         public FFunc<
             object> _fn0;

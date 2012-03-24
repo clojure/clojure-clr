@@ -13,14 +13,6 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-using System.Text;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -43,8 +35,7 @@ namespace clojure.lang.CljCompiler.Ast
 
 
         public abstract object Eval();
-        public abstract Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
-        public abstract void Emit(RHC rhc, ObjExpr objx, GenContext context);
+        public abstract void Emit(RHC rhc, ObjExpr objx, CljILGen ilg);
 
         #endregion
     }

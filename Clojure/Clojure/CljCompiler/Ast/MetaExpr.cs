@@ -13,13 +13,6 @@
  **/
 
 using System;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-using Microsoft.Scripting.Generation;
 using System.Reflection.Emit;
 
 
@@ -69,26 +62,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            Expression objExpr = _expr.GenCode(RHC.Expression, objx, context);
-            Expression iobjExpr = Expression.Convert(objExpr, typeof(IObj));
-
-            Expression metaExpr = _meta.GenCode(RHC.Expression, objx, context);
-            metaExpr = Expression.Convert(metaExpr, typeof(IPersistentMap));
-    
-            Expression ret = Expression.Call(iobjExpr, Compiler.Method_IObj_withMeta, metaExpr);
-
-            return ret;
-        }
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            ILGen ilg = context.GetILGen();
-
-            _expr.Emit(RHC.Expression, objx, context);
+            _expr.Emit(RHC.Expression, objx, ilg);
             ilg.Emit(OpCodes.Castclass, typeof(IObj));
-            _meta.Emit(RHC.Expression, objx, context);
+            _meta.Emit(RHC.Expression, objx, ilg);
             ilg.Emit(OpCodes.Castclass, typeof(IPersistentMap));
             ilg.EmitCall(Compiler.Method_IObj_withMeta);
             if (rhc == RHC.Statement)

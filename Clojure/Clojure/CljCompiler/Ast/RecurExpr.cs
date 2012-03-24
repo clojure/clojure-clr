@@ -13,15 +13,7 @@
  **/
 
 using System;
-using System.Collections.Generic;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection.Emit;
-using Microsoft.Scripting.Generation;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -142,109 +134,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            LabelTarget loopLabel = (LabelTarget)Compiler.LoopLabelVar.deref();
-            if (loopLabel == null)
-                throw new InvalidOperationException("Recur not in proper context.");
-
-            int argCount = _args.count();
-
-            List<ParameterExpression> tempVars = new List<ParameterExpression>(argCount);
-            List<Expression> tempAssigns = new List<Expression>(argCount);
-            List<Expression> finalAssigns = new List<Expression>(argCount);
-
-            // Evaluate all the init forms into local variables.
-            for (int i = 0; i < _loopLocals.count(); i++)
-            {
-                LocalBinding lb = (LocalBinding)_loopLocals.nth(i);
-                Expr arg = (Expr)_args.nth(i);
-
-                ParameterExpression tempVar;
-                Expression valExpr;
-
-                Type primt = lb.PrimitiveType;
-                if (primt != null)
-                {
-                    tempVar = Expression.Parameter(primt, "__local__" + i);
-
-                    MaybePrimitiveExpr mpeArg = arg as MaybePrimitiveExpr;
-                    Type pt = Compiler.MaybePrimitiveType(arg);
-                    if (pt == primt)
-                    {
-                        valExpr = mpeArg.GenCodeUnboxed(RHC.Expression, objx, context);
-                        // do nothing
-                    }
-                    else if (primt == typeof(long) && pt == typeof(int))
-                    {
-                        valExpr = mpeArg.GenCodeUnboxed(RHC.Expression, objx, context);
-                        valExpr = Expression.Convert(valExpr, primt);
-                    }
-                    else if (primt == typeof(double) && pt == typeof(float))
-                    {
-                        valExpr = mpeArg.GenCodeUnboxed(RHC.Expression, objx, context);
-                        valExpr = Expression.Convert(valExpr, primt);
-                    }
-                    else if (primt == typeof(int) && pt == typeof(long))
-                    {
-                        valExpr = mpeArg.GenCodeUnboxed(RHC.Expression, objx, context);
-                        valExpr = Expression.Convert(valExpr, primt);
-                    }
-                    else if (primt == typeof(float) && pt == typeof(double))
-                    {
-                        valExpr = mpeArg.GenCodeUnboxed(RHC.Expression, objx, context);
-                        valExpr = Expression.Convert(valExpr, primt);
-                    }
-                    else
-                    {
-                        //if (true) //RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-                            //RT.errPrintWriter().WriteLine
-                        throw new ArgumentException(String.Format(
-                                "{0}:{1} recur arg for primitive local: {2} is not matching primitive, had: {3}, needed {4}",
-                                _source, _spanMap != null ? (int)_spanMap.valAt(RT.StartLineKey, 0) : 0, 
-                                lb.Name, (arg.HasClrType ? arg.ClrType.Name : "Object"), primt.Name));
-                        //valExpr = arg.GenCode(RHC.Expression, objx, context);
-                       // valExpr = Expression.Convert(valExpr, primt);
-                    }
-
-                }
-                else
-                {
-                    tempVar = Expression.Parameter(lb.ParamExpression.Type, "__local__" + i);
-                    valExpr = arg.GenCode(RHC.Expression, objx, context);
-                }
-                    
-
-                //ParameterExpression tempVar = Expression.Parameter(lb.ParamExpression.Type, "__local__" + i);
-                //Expression valExpr = ((Expr)_args.nth(i)).GenCode(RHC.Expression, objx, context);
-                tempVars.Add(tempVar);
-
-                //if (tempVar.Type == typeof(Object))
-                //    tempAssigns.Add(Expression.Assign(tempVar, Compiler.MaybeBox(valExpr)));
-                //else
-                //    tempAssigns.Add(Expression.Assign(tempVar, Expression.Convert(valExpr, tempVar.Type)));
-                if (valExpr.Type.IsPrimitive && !tempVar.Type.IsPrimitive)
-                    tempAssigns.Add(Expression.Assign(tempVar, Compiler.MaybeBox(valExpr)));
-                else if (!valExpr.Type.IsPrimitive && tempVar.Type.IsPrimitive)
-                    tempAssigns.Add(Expression.Assign(tempVar, HostExpr.GenUnboxArg(valExpr, tempVar.Type)));
-                else
-                    tempAssigns.Add(Expression.Assign(tempVar, valExpr));
-
-                finalAssigns.Add(Expression.Assign(lb.ParamExpression, tempVar));
-            }
-
-            List<Expression> exprs = tempAssigns;
-            exprs.AddRange(finalAssigns);
-            exprs.Add(Expression.Goto(loopLabel));
-            // need to do this to get a return value in the type inferencing -- else can't use this in a then or else clause.
-            exprs.Add(Expression.Constant(null));
-            return Expression.Block(tempVars, exprs);
-        }
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            ILGen ilg = context.GetILGen();
-
             Label loopLabel = (Label)Compiler.LoopLabelVar.deref();
             if (loopLabel == null)
                 throw new InvalidOperationException("Recur not in proper context.");
@@ -262,27 +153,27 @@ namespace clojure.lang.CljCompiler.Ast
                         Type pt = Compiler.MaybePrimitiveType(arg);
                         if (pt == primt)
                         {
-                            mpeArg.EmitUnboxed(RHC.Expression, objx, context);
+                            mpeArg.EmitUnboxed(RHC.Expression, objx, ilg);
                         }
                         else if (primt == typeof(long) && pt == typeof(int))
                         {
-                            mpeArg.EmitUnboxed(RHC.Expression, objx, context);
+                            mpeArg.EmitUnboxed(RHC.Expression, objx, ilg);
                             ilg.Emit(OpCodes.Conv_I8);
                         }
                         else if (primt == typeof(double) && pt == typeof(float))
                         {
-                            mpeArg.EmitUnboxed(RHC.Expression, objx, context);
+                            mpeArg.EmitUnboxed(RHC.Expression, objx, ilg);
                             ilg.Emit(OpCodes.Conv_R8);
                         }
                         else if (primt == typeof(int) && pt == typeof(long))
                         {
-                            mpeArg.EmitUnboxed(RHC.Expression, objx, context);
+                            mpeArg.EmitUnboxed(RHC.Expression, objx, ilg);
                             ilg.EmitCall(Compiler.Method_RT_intCast_long);
 
                         }
                         else if (primt == typeof(float) && pt == typeof(double))
                         {
-                            mpeArg.EmitUnboxed(RHC.Expression, objx, context);
+                            mpeArg.EmitUnboxed(RHC.Expression, objx, ilg);
                             ilg.Emit(OpCodes.Conv_R4);
                         }
                         else
@@ -296,7 +187,7 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                     else
                     {
-                        arg.Emit(RHC.Expression, objx, context);
+                        arg.Emit(RHC.Expression, objx, ilg);
                     }
 
                 }
@@ -320,7 +211,6 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         public bool HasNormalExit() { return false; }
-
 
         #endregion
     }

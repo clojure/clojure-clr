@@ -12,26 +12,10 @@
  *   Author: David Miller
  **/
 
-#if CLR2
-extern alias MSC;
-#endif
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-
-using System.Dynamic;
-using Microsoft.Scripting.Actions.Calls;
-using Microsoft.Scripting.Actions;
-using Microsoft.Scripting.Runtime;
 using System.Reflection.Emit;
-using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -236,8 +220,7 @@ namespace clojure.lang.CljCompiler.Ast
         public abstract bool HasClrType { get; }
         public abstract Type ClrType { get; }
         public abstract object Eval();
-        public abstract Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
-        public abstract void Emit(RHC rhc, ObjExpr objx, GenContext context);
+        public abstract void Emit(RHC rhc, ObjExpr objx, CljILGen ilg);
 
         #endregion
 
@@ -245,89 +228,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2119:SealMethodsThatSatisfyPrivateInterfaces")]
         public abstract bool CanEmitPrimitive { get; }
-        
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2119:SealMethodsThatSatisfyPrivateInterfaces")]
-        public abstract Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context);
 
-        public abstract void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context);
+        public abstract void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg);
 
         #endregion
 
         #region Reflection helpers
-
-        internal static Expression[] GenTypedArgs(ObjExpr objx, GenContext context, ParameterInfo[] parms, List<HostArg> args)
-        {
-            Expression[] exprs = new Expression[parms.Length];
-            for (int i = 0; i < parms.Length; i++)
-                exprs[i] = GenTypedArg(objx, context, parms[i].ParameterType, args[i].ArgExpr);
-            return exprs;
-        }
-
-        internal static Expression[] GenTypedArgs(ObjExpr objx, GenContext context, Type[] paramTypes, IPersistentVector args)
-        {
-            Expression[] exprs = new Expression[paramTypes.Length];
-            for (int i = 0; i < paramTypes.Length; i++)
-                exprs[i] = GenTypedArg(objx, context, paramTypes[i], (Expr)args.nth(i));
-            return exprs;
-        }
-
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
-        internal static Expression GenTypedArg(ObjExpr objx, GenContext context, Type paramType, Expr arg)
-        {
-            Type primt = Compiler.MaybePrimitiveType(arg);
-
-            if ( primt == paramType )
-            {
-                Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
-                return expr;
-            }
-            else if ( primt == typeof(int) && paramType == typeof(long) )
-            {
-                Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
-                expr = Expression.Convert(expr,typeof(long));
-                return expr;
-            }
-            else if ( primt == typeof(long) && paramType == typeof(int) )
-            {
-                Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
-                if (RT.booleanCast(RT.UncheckedMathVar.deref()))
-                    expr = Expression.Call(Compiler.Method_RT_uncheckedIntCast_long, expr);
-                else
-                    expr = Expression.Call(Compiler.Method_RT_intCast_long, expr);
-                return expr;
-            }
-            else if ( primt == typeof(float) && paramType == typeof(double) )
-            {
-                Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
-                expr = Expression.Convert(expr,typeof(double));
-                return expr;
-            }
-            else if ( primt == typeof(double) && paramType == typeof(float) )
-            {
-                Expression expr = ((MaybePrimitiveExpr)arg).GenCodeUnboxed(RHC.Expression, objx, context);
-                expr = Expression.Convert(expr,typeof(float));
-                return expr;
-            }
-            else
-            {
-                Expression argExpr = arg.GenCode(RHC.Expression, objx, context);
-                return GenUnboxArg(argExpr, paramType);
-            }
-        }
-
-        //internal static readonly MethodInfo Method_Util_ConvertToSByte = typeof(Util).GetMethod("ConvertToByte");
-        //internal static readonly MethodInfo Method_Util_ConvertToByte = typeof(Util).GetMethod("ConvertToByte");
-        //internal static readonly MethodInfo Method_Util_ConvertToShort = typeof(Util).GetMethod("ConvertToShort");
-        //internal static readonly MethodInfo Method_Util_ConvertToUShort = typeof(Util).GetMethod("ConvertToUShort");
-        //internal static readonly MethodInfo Method_Util_ConvertToInt = typeof(Util).GetMethod("ConvertToInt");
-        //internal static readonly MethodInfo Method_Util_ConvertToUInt = typeof(Util).GetMethod("ConvertToUInt");
-        //internal static readonly MethodInfo Method_Util_ConvertToLong = typeof(Util).GetMethod("ConvertToLong");
-        //internal static readonly MethodInfo Method_Util_ConvertToULong = typeof(Util).GetMethod("ConvertToULong");
-        //internal static readonly MethodInfo Method_Util_ConvertToFloat = typeof(Util).GetMethod("ConvertToFloat");
-        //internal static readonly MethodInfo Method_Util_ConvertToDouble = typeof(Util).GetMethod("ConvertToDouble");
-        //internal static readonly MethodInfo Method_Util_ConvertToChar = typeof(Util).GetMethod("ConvertToChar");
-        //internal static readonly MethodInfo Method_Util_ConvertToDecimal = typeof(Util).GetMethod("ConvertToDecimal");
 
         internal static readonly MethodInfo Method_RT_sbyteCast = typeof(RT).GetMethod("sbyteCast", new Type[] { typeof(object) });
         internal static readonly MethodInfo Method_RT_byteCast = typeof(RT).GetMethod("byteCast", new Type[] { typeof(object) });
@@ -357,117 +263,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal static readonly MethodInfo Method_RT_booleanCast = typeof(RT).GetMethod("booleanCast", new Type[] { typeof(object) });
 
-        internal static Expression GenUnboxArg(Expression argExpr, Type paramType)
-        {
-
-            Type argType = argExpr.Type;
-
-            if (argType == paramType)
-                return argExpr;
-
-            if (paramType == typeof(void))
-                return Expression.Block(argExpr, Expression.Empty());
-
-            if (argExpr.Type == typeof(void))
-                return Expression.Block(argExpr, Expression.Default(paramType));
-
-            //if (paramType.IsAssignableFrom(argType))
-            //    return argExpr;
-
-            if (paramType.IsPrimitive)
-            {
-                Expression objArgExpr = Expression.Convert(argExpr,typeof(object));
-
-                if (paramType == typeof(bool))
-                    return Expression.Call(null, Method_RT_booleanCast, objArgExpr);
-                //if (Util.IsPrimitiveNumeric(argType) && Util.IsPrimitiveNumeric(paramType))
-                //    return Expression.Convert(argExpr,paramType);
-                if (RT.booleanCast(RT.UncheckedMathVar.deref()))
-                {
-                    if (paramType == typeof(sbyte))
-                        return Expression.Call(null, Method_RT_uncheckedSbyteCast, objArgExpr);
-                    else if (paramType == typeof(byte))
-                        return Expression.Call(null, Method_RT_uncheckedByteCast, objArgExpr);
-                    else if (paramType == typeof(short))
-                        return Expression.Call(null, Method_RT_uncheckedShortCast, objArgExpr);
-                    else if (paramType == typeof(ushort))
-                        return Expression.Call(null, Method_RT_uncheckedUshortCast, objArgExpr);
-                    else if (paramType == typeof(int))
-                        return Expression.Call(null, Method_RT_uncheckedIntCast, objArgExpr);
-                    else if (paramType == typeof(uint))
-                        return Expression.Call(null, Method_RT_uncheckedUintCast, objArgExpr);
-                    else if (paramType == typeof(long))
-                        return Expression.Call(null, Method_RT_uncheckedLongCast, objArgExpr);
-                    else if (paramType == typeof(ulong))
-                        return Expression.Call(null, Method_RT_uncheckedUlongCast, objArgExpr);
-                    else if (paramType == typeof(float))
-                        return Expression.Call(null, Method_RT_uncheckedFloatCast, objArgExpr);
-                    else if (paramType == typeof(double))
-                        return Expression.Call(null, Method_RT_uncheckedDoubleCast, objArgExpr);
-                    else if (paramType == typeof(char))
-                        return Expression.Call(null, Method_RT_uncheckedCharCast, objArgExpr);
-                    else if (paramType == typeof(decimal))
-                        return Expression.Call(null, Method_RT_uncheckedDecimalCast, objArgExpr);
-                }
-                else
-                {
-                    if (paramType == typeof(sbyte))
-                        return Expression.Call(null, Method_RT_sbyteCast, objArgExpr);
-                    else if (paramType == typeof(byte))
-                        return Expression.Call(null, Method_RT_byteCast, objArgExpr);
-                    else if (paramType == typeof(short))
-                        return Expression.Call(null, Method_RT_shortCast, objArgExpr);
-                    else if (paramType == typeof(ushort))
-                        return Expression.Call(null, Method_RT_ushortCast, objArgExpr);
-                    else if (paramType == typeof(int))
-                        return Expression.Call(null, Method_RT_intCast, objArgExpr);
-                    else if (paramType == typeof(uint))
-                        return Expression.Call(null, Method_RT_uintCast, objArgExpr);
-                    else if (paramType == typeof(long))
-                        return Expression.Call(null, Method_RT_longCast, objArgExpr);
-                    else if (paramType == typeof(ulong))
-                        return Expression.Call(null, Method_RT_ulongCast, objArgExpr);
-                    else if (paramType == typeof(float))
-                        return Expression.Call(null, Method_RT_floatCast, objArgExpr);
-                    else if (paramType == typeof(double))
-                        return Expression.Call(null, Method_RT_doubleCast, objArgExpr);
-                    else if (paramType == typeof(char))
-                        return Expression.Call(null, Method_RT_charCast, objArgExpr);
-                    else if (paramType == typeof(decimal))
-                        return Expression.Call(null, Method_RT_decimalCast, objArgExpr);
-                }
-            }
-            
-            return Expression.Convert(argExpr,paramType);
-        }
-
-        #endregion
-
-        #region Code gen helpers
-
-        public static Expression GenBoxReturn(Expression expr, Type returnType, ObjExpr objx, GenContext context)
-        {
-            if (returnType == typeof(void))
-                return Expression.Block(expr, Compiler.NilExprInstance.GenCode(RHC.Expression,objx,context));
-
-            if (returnType.IsPrimitive)
-            {
-                Expression toConv;
-
-                if (returnType == typeof(int))
-                    toConv = Expression.Convert(expr, typeof(int));
-                if (returnType == typeof(float))
-                    toConv = Expression.Convert(expr, typeof(float));
-                else if (returnType == typeof(int))
-                    toConv = Expression.Convert(expr, typeof(long));
-                else
-                    toConv = expr;
-
-                return Expression.Convert(toConv, typeof(Object));
-            }
-
-            return expr;
-        }
 
         #endregion
 
@@ -554,13 +349,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
+        #region Code generation
 
-        internal static void EmitBoxReturn(ObjExpr objx, GenContext context, Type returnType)
-        {
-            EmitBoxReturn(objx, context.GetILGenerator(), returnType);
-        }
-
-        internal static void EmitBoxReturn(ObjExpr objx, ILGenerator ilg, Type returnType)
+        internal static void EmitBoxReturn(ObjExpr objx, CljILGen ilg, Type returnType)
 
         {
             if (returnType == typeof(void))
@@ -569,14 +360,12 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Box, returnType);
         }
 
-
-        internal static void EmitUnboxArg(ObjExpr objx, GenContext context, Type paramType)
+        internal static void EmitUnboxArg(ObjExpr objx, CljILGen ilg, Type paramType)
         {
-            EmitUnboxArg(context.GetILGenerator(), paramType);
+            EmitUnboxArg(ilg, paramType);
         }
 
-
-        internal static void EmitUnboxArg(ILGenerator gen, Type paramType)
+        internal static void EmitUnboxArg(CljILGen ilg, Type paramType)
         {
             if (paramType.IsPrimitive)
             {
@@ -648,22 +437,23 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
 
-                gen.Emit(OpCodes.Castclass, typeof(Object));
-                gen.Emit(OpCodes.Call,m);
+                ilg.Emit(OpCodes.Castclass, typeof(Object));
+                ilg.Emit(OpCodes.Call,m);
             }
             else
             {
                 // TODO: Properly handle value types here.  Really, we need to know the incoming type.
                 if (paramType.IsValueType)
                 {
-                    gen.Emit(OpCodes.Unbox_Any, paramType);
+                    ilg.Emit(OpCodes.Unbox_Any, paramType);
                 }
                 else
-                    gen.Emit(OpCodes.Castclass, paramType);
+                    ilg.Emit(OpCodes.Castclass, paramType);
             }
         }
 
         public bool HasNormalExit() { return true; }
 
+        #endregion
     }
 }

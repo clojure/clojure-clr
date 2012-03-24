@@ -13,14 +13,6 @@
  **/
 
 using System;
-using System.Collections.Generic;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-using Microsoft.Scripting.Generation;
 using System.Reflection.Emit;
 
 
@@ -94,7 +86,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (sym == null)
                     throw new ParseException("First argument to def must be a Symbol.");
 
-                //Console.WriteLine("Def {0}", sym.Name);
+                Console.WriteLine("Def {0}", sym.Name);
                 
                 Var v = Compiler.LookupVar(sym, true);
 
@@ -191,63 +183,31 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            List<Expression> exprs = new List<Expression>();
-
-            ParameterExpression parm = Expression.Parameter(typeof(Var), "v");
-
-            Expression varExpr = objx.GenVar(context,_var);
-
-            if (_isDynamic)
-                varExpr = Expression.Call(varExpr, Compiler.Method_Var_setDynamic0);
-
-            exprs.Add(Expression.Assign(parm, varExpr));
-
-            if (_meta != null)
-            {
-                if (_initProvided || true) //IncludesExplicitMetadata((MapExpr)_meta))
-                {
-                    exprs.Add(Expression.Call(parm, Compiler.Method_Var_setMeta, Expression.Convert(_meta.GenCode(RHC.Expression, objx, context), typeof(IPersistentMap))));
-                }
-            }
-
-            if (_initProvided )
-                // RETYPE: get rid of Box? 
-                // Java doesn't Box here, but we have to deal with unboxed bool values
-                exprs.Add(Expression.Call(parm, Compiler.Method_Var_bindRoot, Compiler.MaybeBox(_init.GenCode(RHC.Expression,objx,context))));
-
-            exprs.Add(parm);
-
-            return Expression.Block(new ParameterExpression[] { parm }, exprs);
-        }
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            objx.EmitVar(context, _var);
-            ILGen ilg = context.GetILGen();
+            objx.EmitVar(ilg, _var);
             if (_isDynamic)
             {
-                ilg.EmitCall(Compiler.Method_Var_setDynamic0);
+                ilg.Emit(OpCodes.Call, Compiler.Method_Var_setDynamic0);
             }
             if (_meta != null)
             {
                 if (_initProvided || true) //IncludesExplicitMetadata((MapExpr)_meta))
                 {
                     ilg.Emit(OpCodes.Dup);
-                    _meta.Emit(RHC.Expression, objx, context);
+                    _meta.Emit(RHC.Expression, objx, ilg);
                     ilg.Emit(OpCodes.Castclass, typeof(IPersistentMap));
-                    ilg.EmitCall(Compiler.Method_Var_setMeta);
+                    ilg.Emit(OpCodes.Call, Compiler.Method_Var_setMeta);
                 }
             }
             if (_initProvided)
             {
                 ilg.Emit(OpCodes.Dup);
                 if (_init is FnExpr)
-                    ((FnExpr)_init).EmitForDefn(objx, context);
+                    ((FnExpr)_init).EmitForDefn(objx, ilg);
                 else
-                    _init.Emit(RHC.Expression, objx, context);
-                ilg.EmitCall(Compiler.Method_Var_bindRoot);
+                    _init.Emit(RHC.Expression, objx, ilg);
+                ilg.Emit(OpCodes.Call,Compiler.Method_Var_bindRoot);
             }
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
@@ -259,18 +219,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Misc
 
-        private static bool IncludesExplicitMetadata(MapExpr expr) {
-        for(int i=0; i < expr.KeyVals.count(); i += 2)
+        private static bool IncludesExplicitMetadata(MapExpr expr)
+        {
+            for (int i = 0; i < expr.KeyVals.count(); i += 2)
             {
                 Keyword k = ((KeywordExpr)expr.KeyVals.nth(i)).Kw;
                 if ((k != RT.FileKey) &&
                     (k != RT.DeclaredKey) &&
-                    (k != RT.SourceSpanKey ) &&
+                    (k != RT.SourceSpanKey) &&
                     (k != RT.LineKey))
                     return true;
             }
-        return false;
-    }
+            return false;
+        }
 
         #endregion
     }

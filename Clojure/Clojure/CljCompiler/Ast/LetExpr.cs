@@ -14,13 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-using Microsoft.Scripting.Generation;
 using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -220,74 +213,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            return GenCode(rhc, objx, context, false);
+            DoEmit(rhc, objx, ilg, false);
         }
 
-        private Expression GenCode(RHC rhc, ObjExpr objx, GenContext context, bool genUnboxed)
+        void DoEmit(RHC rhc, ObjExpr objx, CljILGen ilg, bool emitUnboxed)
         {
-            LabelTarget loopLabel = Expression.Label();
-
-            List<ParameterExpression> parms = new List<ParameterExpression>();
-            List<Expression> forms = new List<Expression>();
-
-            for (int i = 0; i < _bindingInits.count(); i++)
-            {
-                BindingInit bi = (BindingInit)_bindingInits.nth(i);
-                Type primType = Compiler.MaybePrimitiveType(bi.Init);
-                ParameterExpression parmExpr;
-                Expression initExpr;
-                if ( primType != null ) 
-                {
-                    parmExpr = Expression.Parameter(primType,bi.Binding.Name);
-                    initExpr =  ((MaybePrimitiveExpr)bi.Init).GenCodeUnboxed(RHC.Expression,objx,context);
-                }
-                else 
-                {
-                    parmExpr =  Expression.Parameter(typeof(object),bi.Binding.Name);
-                    initExpr = Compiler.MaybeBox(bi.Init.GenCode(RHC.Expression,objx,context));
-                }
-                bi.Binding.ParamExpression = parmExpr;
-                parms.Add(parmExpr);
-                forms.Add(Expression.Assign(parmExpr, initExpr));
-            }
-
-
-            forms.Add(Expression.Label(loopLabel));
-
-            try
-            {
-                if (_isLoop)
-                    Var.pushThreadBindings(PersistentHashMap.create(Compiler.LoopLabelVar, loopLabel));
-
-                Expression form = genUnboxed 
-                    ? ((MaybePrimitiveExpr)_body).GenCodeUnboxed(rhc,objx,context) 
-                    : _body.GenCode(rhc,objx,context);
-
-                forms.Add(form);
-            }
-            finally
-            {
-                if (_isLoop)
-                    Var.popThreadBindings();
-            }
-
-            Expression block = Expression.Block(parms, forms);
-            return block;
-        }
-
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            DoEmit(rhc, objx, context, false);
-        }
-
-
-        void DoEmit(RHC rhc, ObjExpr objx, GenContext context, bool emitUnboxed)
-        {
-            ILGen ilg = context.GetILGen();
-
             List<LocalBuilder> locals = new List<LocalBuilder>();
             
             for (int i = 0; i < _bindingInits.count(); i++)
@@ -298,20 +230,20 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     LocalBuilder local = ilg.DeclareLocal(primType);
                     locals.Add(local);
-                    Compiler.MaybeSetLocalSymName(context, local, bi.Binding.Name);
+                    GenContext.SetLocalName(local, bi.Binding.Name);
                     bi.Binding.LocalVar = local;
                     
-                    ((MaybePrimitiveExpr)bi.Init).EmitUnboxed(RHC.Expression, objx, context);
+                    ((MaybePrimitiveExpr)bi.Init).EmitUnboxed(RHC.Expression, objx, ilg);
                     ilg.Emit(OpCodes.Stloc, local);
                 }
                 else
                 {
                     LocalBuilder local = ilg.DeclareLocal(typeof(Object));
                     locals.Add(local);
-                    Compiler.MaybeSetLocalSymName(context, local, bi.Binding.Name);
+                    GenContext.SetLocalName(local, bi.Binding.Name);
                     bi.Binding.LocalVar = local;
 
-                    bi.Init.Emit(RHC.Expression, objx, context);
+                    bi.Init.Emit(RHC.Expression, objx, ilg);
                     // TODO: DO we need to MaybeBox here?
                     ilg.Emit(OpCodes.Stloc, local);
                 }
@@ -326,9 +258,9 @@ namespace clojure.lang.CljCompiler.Ast
                     Var.pushThreadBindings(PersistentHashMap.create(Compiler.LoopLabelVar, loopLabel));
 
                 if (emitUnboxed)
-                    ((MaybePrimitiveExpr)_body).EmitUnboxed(rhc, objx, context);
+                    ((MaybePrimitiveExpr)_body).EmitUnboxed(rhc, objx, ilg);
                 else
-                    _body.Emit(rhc, objx, context);
+                    _body.Emit(rhc, objx, ilg);
             }
             finally
             {
@@ -339,25 +271,16 @@ namespace clojure.lang.CljCompiler.Ast
 
         public bool HasNormalExit() { return _body.HasNormalExit(); }
 
-        #endregion
-
-        #region MaybePrimitiveExpr Members
 
         public bool CanEmitPrimitive
         {
             get { return _body is MaybePrimitiveExpr && ((MaybePrimitiveExpr)_body).CanEmitPrimitive; }
         }
 
-        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            return GenCode(rhc, objx, context, true);
+            DoEmit(rhc, objx, ilg, true);
         }
-
-        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            DoEmit(rhc, objx, context, true);
-        }
-
 
         #endregion
     }

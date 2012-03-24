@@ -13,13 +13,6 @@
  **/
 
 using System;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-using Microsoft.Scripting.Generation;
 using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -223,45 +216,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            Expression basicBody = _tryExpr.GenCode(rhc, objx, context);
-            if (basicBody.Type == typeof(void))
-                basicBody = Expression.Block(basicBody, Expression.Default(typeof(object)));
-            Expression tryBody = Expression.Convert(basicBody,typeof(object));
-
-            CatchBlock[] catches = new CatchBlock[_catchExprs.count()];
-            for ( int i=0; i<_catchExprs.count(); i++ )
-            {
-                CatchClause clause = (CatchClause) _catchExprs.nth(i);
-                ParameterExpression parmExpr = Expression.Parameter(clause.Type, clause.Lb.Name);
-                clause.Lb.ParamExpression = parmExpr;
-                catches[i] = Expression.Catch(parmExpr, Expression.Convert(clause.Handler.GenCode(rhc, objx, context), typeof(object)));
-            }                
-
-            Expression tryStmt = _finallyExpr == null
-                ? catches.Length == 0 ? tryBody : Expression.TryCatch(tryBody, catches)
-                : Expression.TryCatchFinally(tryBody, _finallyExpr.GenCode(RHC.Statement, objx, context), catches);
-
-            return tryStmt;
-        }
-
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             if (_catchExprs.count() == 0 && _finallyExpr == null)
             {
                 // degenerate case
-                _tryExpr.Emit(rhc, objx, context);
+                _tryExpr.Emit(rhc, objx, ilg);
                 return;
             }
-
-            ILGenerator ilg = context.GetILGenerator();
 
             LocalBuilder retLocal = ilg.DeclareLocal(typeof(Object));
 
             Label endLabel = ilg.BeginExceptionBlock();
-            _tryExpr.Emit(rhc, objx, context);
+            _tryExpr.Emit(rhc, objx, ilg);
             if (rhc != RHC.Statement)
                 ilg.Emit(OpCodes.Stloc, retLocal);
             //ilg.Emit(OpCodes.Leave, endLabel);
@@ -273,7 +240,7 @@ namespace clojure.lang.CljCompiler.Ast
                 // Exception should be on the stack.  Put in clause local
                 clause.Lb.LocalVar = ilg.DeclareLocal(clause.Type);
                 ilg.Emit(OpCodes.Stloc, clause.Lb.LocalVar);
-                clause.Handler.Emit(rhc, objx, context);
+                clause.Handler.Emit(rhc, objx, ilg);
                 if (rhc != RHC.Statement)
                     ilg.Emit(OpCodes.Stloc, retLocal);
                 //ilg.Emit(OpCodes.Leave, endLabel);
@@ -282,7 +249,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (_finallyExpr != null)
             {
                 ilg.BeginFinallyBlock();
-                _finallyExpr.Emit(RHC.Statement, objx, context);
+                _finallyExpr.Emit(RHC.Statement, objx, ilg);
             }
             ilg.EndExceptionBlock();
             if (rhc != RHC.Statement)
@@ -290,7 +257,6 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         public bool HasNormalExit() { return true; }
-
 
         #endregion
     }
