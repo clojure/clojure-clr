@@ -155,22 +155,17 @@ namespace clojure.lang.CljCompiler.Ast
 
             ret._methodMap = overrideables;
 
-            //string[] inames = InterfaceNames(interfaces);
-
- 
-            // Needs its own GenContext so it has its own DynInitHelper
-            // Can't reuse Compiler.EvalContext if it is a DefType because we have to use the given name and will get a conflict on redefinition
-            GenContext context = Compiler.CompilerContextVar.deref() as GenContext ?? (ret.IsDefType ? GenContext.CreateWithExternalAssembly("deftype" + RT.nextID().ToString(), ".dll", true) : Compiler.EvalContext);
-            //GenContext context = Compiler.IsCompiling
-            //    ? Compiler.CompilerContextVar.get() as GenContext
-            //    : (ret.IsDefType
-            //        ? GenContext.CreateWithExternalAssembly("deftype" + RT.nextID().ToString(), ".dll", true)
-            //        : (Compiler.CompilerContextVar.get() as GenContext
-            //            ??
-            //            Compiler.EvalContext));
+  
+            GenContext context = Compiler.IsCompiling
+                ? Compiler.CompilerContextVar.get() as GenContext
+                : (ret.IsDefType
+                    ? GenContext.CreateWithExternalAssembly("deftype" + RT.nextID().ToString(), ".dll", true)
+                    : (Compiler.CompilerContextVar.get() as GenContext
+                        ??
+                        Compiler.EvalContext));
 
             GenContext genC = context.WithNewDynInitHelper(ret.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
- 
+
             Type stub = CompileStub(genC, superClass, ret, SeqToTypeArray(interfaces), frm);
             Symbol thisTag = Symbol.intern(null, stub.FullName);
             //Symbol stubTag = Symbol.intern(null,stub.FullName);
