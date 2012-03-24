@@ -155,6 +155,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             EmitParamsForMethod(objx,ilg);
             ilg.Emit(OpCodes.Newobj,_ctor);
+            if ( _type.IsValueType )
+                ilg.Emit(OpCodes.Box, _type);
         }
 
         private void EmitParamsForMethod(ObjExpr objx, CljILGen ilg)
