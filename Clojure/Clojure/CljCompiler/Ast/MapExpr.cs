@@ -13,13 +13,6 @@
  **/
 
 using System;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-using Microsoft.Scripting.Generation;
 using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -116,25 +109,16 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            Expression argArray = Compiler.GenArgArray(rhc,objx, context, _keyvals);
-            Expression ret = Expression.Call(Compiler.Method_RT_map, argArray);
-            return ret;
-        }
+            MethodExpr.EmitArgsAsArray(_keyvals, objx, ilg);
 
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            MethodExpr.EmitArgsAsArray(_keyvals, objx, context);
-
-            ILGen ilg = context.GetILGen();
             ilg.EmitCall(Compiler.Method_RT_map);
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);            
         }
 
         public bool HasNormalExit() { return true; }
-
 
         #endregion
     }

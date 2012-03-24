@@ -1,12 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-using System.Text;
 using System.Reflection.Emit;
 
 
@@ -78,44 +70,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            return objx.GenConstant(context, _id, _n);
-        }
-
-        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             if (rhc != RHC.Statement)
-                objx.EmitConstant(context, _id, _n);
+                objx.EmitConstant(ilg, _id, _n);
         }
-        
-        #endregion
-
-        #region MaybePrimitiveExpr Members
 
         public bool CanEmitPrimitive
         {
             get { return true; }
         }
 
-        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            Type t = _n.GetType();
-
-            if (t == typeof(int))
-                return Expression.Constant((long)(int)_n, typeof(long));
-            else if (t == typeof(double))
-                return Expression.Constant((double)_n, typeof(double));
-            else if ( t == typeof(long) )
-                return Expression.Constant((long)_n,typeof(long));
-
-            throw new ArgumentException("Unsupported Number type: " + _n.GetType().Name);
-        }
-
-        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            ILGenerator ilg = context.GetILGenerator();
-
             Type t = _n.GetType();
 
             if (t == typeof(int))
@@ -127,8 +94,6 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 throw new ArgumentException("Unsupported Number type: " + _n.GetType().Name);
         }
-
-
 
         #endregion
     }

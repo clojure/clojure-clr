@@ -14,15 +14,8 @@
 
 using System;
 using System.Collections.Generic;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection;
 using System.Reflection.Emit;
-using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -167,7 +160,7 @@ namespace clojure.lang.CljCompiler.Ast
  
             // Needs its own GenContext so it has its own DynInitHelper
             // Can't reuse Compiler.EvalContext if it is a DefType because we have to use the given name and will get a conflict on redefinition
-            GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? (ret.IsDefType ? GenContext.CreateWithExternalAssembly("deftype" + RT.nextID().ToString(), ".dll", true) : Compiler.EvalContext);
+            GenContext context = Compiler.CompilerContextVar.deref() as GenContext ?? (ret.IsDefType ? GenContext.CreateWithExternalAssembly("deftype" + RT.nextID().ToString(), ".dll", true) : Compiler.EvalContext);
             //GenContext context = Compiler.IsCompiling
             //    ? Compiler.CompilerContextVar.get() as GenContext
             //    : (ret.IsDefType
@@ -177,8 +170,7 @@ namespace clojure.lang.CljCompiler.Ast
             //            Compiler.EvalContext));
 
             GenContext genC = context.WithNewDynInitHelper(ret.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
-            //genC.FnCompileMode = FnMode.Full;
-
+ 
             Type stub = CompileStub(genC, superClass, ret, SeqToTypeArray(interfaces), frm);
             Symbol thisTag = Symbol.intern(null, stub.FullName);
             //Symbol stubTag = Symbol.intern(null,stub.FullName);
@@ -298,7 +290,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (ret.CtorTypes().Length > 0)
             {
                 ConstructorBuilder cb = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, ret.CtorTypes());
-                ILGen ilg = new ILGen(cb.GetILGenerator());
+                CljILGen ilg = new CljILGen(cb.GetILGenerator());
                 ilg.EmitLoadArg(0);
                 ilg.Emit(OpCodes.Call, super.GetConstructor(Type.EmptyTypes));
                 ilg.Emit(OpCodes.Ret);
@@ -314,7 +306,7 @@ namespace clojure.lang.CljCompiler.Ast
                         for (int i = 0; i < altCtorTypes.Length; i++)
                             altCtorTypes[i] = ctorTypes[i];
                         ConstructorBuilder cb2 = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
-                        ILGen ilg2 = new ILGen(cb2.GetILGenerator());
+                        CljILGen ilg2 = new CljILGen(cb2.GetILGenerator());
                         ilg2.EmitLoadArg(0);
                         for (int i = 0; i < newLen; i++)
                             ilg2.EmitLoadArg(i + 1);
@@ -416,63 +408,28 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        protected override void GenerateMethods(GenContext context)
-        {
-            HashSet<MethodInfo> implemented = new HashSet<MethodInfo>();
-
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
-            {
-                NewInstanceMethod method = (NewInstanceMethod)s.first();
-                method.GenerateCode(this,context);
-                implemented.UnionWith(method.MethodInfos);
-            }
-
-            foreach (List<MethodInfo> ms in _methodMap.Values)
-                foreach (MethodInfo mi in ms)
-                    if (NeedsDummy(mi,implemented))
-                        GenerateDummyMethod(context,mi);
-
-            GenerateHasArityMethod(_typeBuilder, null, false, 0);
-
-        }
-
-
-        private void GenerateDummyMethod(GenContext context, MethodInfo mi)
-        {
-            EmitDummyMethod(context, mi);
-        }
-
         private static string ExplicitMethodName(MethodInfo mi)
         {
             return mi.DeclaringType.Name + "." + mi.Name;
         }
 
-
-        protected override void GenerateStatics(GenContext context)
-        {
-            EmitStatics(context);
-        }
-
-        #endregion
-
-        #region No-DLR code generation
-
-        protected override void EmitStatics(GenContext context)
+        protected override void EmitStatics(TypeBuilder tb)
         {
             if (IsDefType)
             {
-                TypeBuilder tb = _typeBuilder;
-
                 // getBasis()
-                MethodBuilder mbg = tb.DefineMethod("getBasis", MethodAttributes.Public | MethodAttributes.Static, typeof(IPersistentVector), Type.EmptyTypes);
-                LambdaExpression lambda = Expression.Lambda(GenerateValue(_hintedFields));
-                lambda.CompileToMethod(mbg, context.IsDebuggable);
+                {
+                    MethodBuilder mbg = tb.DefineMethod("getBasis", MethodAttributes.Public | MethodAttributes.Static, typeof(IPersistentVector), Type.EmptyTypes);
+                    CljILGen ilg = new CljILGen(mbg.GetILGenerator());
+                    EmitValue(_hintedFields, ilg);
+                    ilg.Emit(OpCodes.Ret);
+                }
 
                 if (Fields.count() > _hintedFields.count())
                 {
                     // create(IPersistentMap)
                     MethodBuilder mbc = tb.DefineMethod("create", MethodAttributes.Public | MethodAttributes.Static, tb, new Type[] { typeof(IPersistentMap) });
-                    ILGen gen = new ILGen(mbc.GetILGenerator());
+                    CljILGen gen = new CljILGen(mbc.GetILGenerator());
 
                     LocalBuilder kwLocal = gen.DeclareLocal(typeof(Keyword));
                     List<LocalBuilder> locals = new List<LocalBuilder>();
@@ -515,14 +472,14 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        protected override void EmitMethods(GenContext context)
+        protected override void EmitMethods(TypeBuilder tb)
         {
             HashSet<MethodInfo> implemented = new HashSet<MethodInfo>();
 
             for (ISeq s = RT.seq(_methods); s != null; s = s.next())
             {
                 NewInstanceMethod method = (NewInstanceMethod)s.first();
-                method.Emit(this, context);
+                method.Emit(this, tb);
                 implemented.UnionWith(method.MethodInfos);
             }
 
@@ -530,24 +487,21 @@ namespace clojure.lang.CljCompiler.Ast
                 foreach (MethodInfo mi in ms)
                 {
                     if (NeedsDummy(mi, implemented))
-                        EmitDummyMethod(context, mi);
+                        EmitDummyMethod(tb, mi);
                 }
             
             EmitHasArityMethod(_typeBuilder, null, false, 0);
         }
-
 
         private bool NeedsDummy(MethodInfo mi, HashSet<MethodInfo> implemented)
         {
             return !implemented.Contains(mi) && mi.DeclaringType.IsInterface && !(!IsDefType && mi.DeclaringType == typeof(IObj) || mi.DeclaringType == typeof(IMeta));
         }
 
-        private void EmitDummyMethod(GenContext context, MethodInfo mi)
+        private void EmitDummyMethod(TypeBuilder tb, MethodInfo mi)
         {
-            TypeBuilder tb = _typeBuilder;
-
             MethodBuilder mb = tb.DefineMethod(ExplicitMethodName(mi), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, mi.ReturnType, Compiler.GetTypes(mi.GetParameters()));
-            ILGen gen = new ILGen(mb.GetILGenerator());
+            CljILGen gen = new CljILGen(mb.GetILGenerator());
             gen.EmitNew(typeof(NotImplementedException), Type.EmptyTypes);
             gen.Emit(OpCodes.Throw);
             tb.DefineMethodOverride(mb, mi);
@@ -559,6 +513,5 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
-
     }
 }

@@ -14,8 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Reflection.Emit;
 using System.Reflection;
 using Microsoft.Scripting.Utils;
@@ -24,6 +22,8 @@ namespace clojure.lang.CljCompiler.Ast
 {
     public class Intrinsics
     {
+        #region Data
+
         static Dictionary<MethodInfo, OpCode[]> _ops = new Dictionary<MethodInfo, OpCode[]>();
         static Dictionary<MethodInfo, OpCode[]> _preds = new Dictionary<MethodInfo, OpCode[]>();
 
@@ -50,6 +50,10 @@ namespace clojure.lang.CljCompiler.Ast
         {
             AddPred(type.GetMethod(name, argTypes), opcodes);
         }
+
+        #endregion
+
+        #region c-tors
 
         static Intrinsics()
         {
@@ -223,12 +227,16 @@ namespace clojure.lang.CljCompiler.Ast
             AddPred(nt, "isNeg", lta, OpCodes.Ldc_I4_0, OpCodes.Conv_I8, OpCodes.Bge );
         }
 
+        #endregion
+
+        #region Operations
+
         public static bool HasPred(MethodInfo method)
         {
             return _preds.ContainsKey(method);
         }
 
-        public static void EmitPred(MethodInfo method, ILGenerator ilg, Label falseLabel)
+        public static void EmitPred(MethodInfo method, CljILGen ilg, Label falseLabel)
         {
             OpCode[] opcodes = _preds[method];
 
@@ -242,7 +250,7 @@ namespace clojure.lang.CljCompiler.Ast
             return _ops.ContainsKey(method);
         }
 
-        public static void EmitOp(MethodInfo method, ILGenerator ilg)
+        public static void EmitOp(MethodInfo method, CljILGen ilg)
         {
             OpCode[] opcodes = _ops[method];
 
@@ -250,5 +258,6 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(opcode);
         }
 
+        #endregion
     }
 }

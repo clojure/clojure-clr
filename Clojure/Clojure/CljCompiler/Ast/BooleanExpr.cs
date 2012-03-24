@@ -13,13 +13,6 @@
  **/
 
 using System;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-using Microsoft.Scripting.Generation;
 using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -62,37 +55,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            return Expression.Constant(_val);
-        }
-
-        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            ILGen ilg = context.GetILGen();
             ilg.EmitBoolean(_val);
             ilg.Emit(OpCodes.Box,typeof(bool));
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
         }
-
-        #endregion
-
-        #region MaybePrimitiveExpr members  - deleted (for now)
-
-        //public bool CanEmitPrimitive
-        //{
-        //    get { return true; }
-        //}
-
-        //public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-        //{
-        //    ILGenerator ilg = context.GetILGenerator();
-        //    if (_val)
-        //        ilg.Emit(OpCodes.Ldc_I4_1);
-        //    else
-        //        ilg.Emit(OpCodes.Ldc_I4_0);
-        //}
 
         #endregion
     }

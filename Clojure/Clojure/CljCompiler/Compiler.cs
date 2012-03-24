@@ -17,17 +17,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Threading;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using clojure.lang.CljCompiler.Ast;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using Microsoft.Scripting.Generation;
-using AstUtils = Microsoft.Scripting.Ast.Utils;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization;
 
@@ -103,9 +95,7 @@ namespace clojure.lang
 
         //boolean
         internal static readonly Var CompileFilesVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                                                 //Symbol.intern("*compile-files*"), RT.F);
                                                          Symbol.intern("*compile-files*"), false).setDynamic();  
-        //JAVA: Boolean.FALSE -- changed from RT.F in rev 1108, not sure why
 
 
         internal static readonly Var InstanceVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
@@ -130,9 +120,7 @@ namespace clojure.lang
         internal static readonly Var LineVar = Var.create(0).setDynamic();          // From the JVM version
         //internal static readonly Var LINE_BEFORE = Var.create(0).setDynamic();   // From the JVM version
         //internal static readonly Var LINE_AFTER = Var.create(0).setDynamic();    // From the JVM version
-        internal static readonly Var DocumentInfoVar = Var.create(null).setDynamic();  // Mine
         internal static readonly Var SourceSpanVar = Var.create(null).setDynamic();    // Mine
-        internal static readonly Var SymbolDocumentGeneratorVar = Var.create(null).setDynamic();    // Mine
 
         internal static readonly Var MethodVar = Var.create(null).setDynamic();
         public static readonly Var LocalEnvVar = Var.create(PersistentHashMap.EMPTY).setDynamic();
@@ -209,14 +197,8 @@ namespace clojure.lang
 
         #region MethodInfos, etc.
 
-        //internal static readonly PropertyInfo Method_AFunction_MethodImplCache = typeof(AFunction).GetProperty("MethodImplCache");
-
-        //internal static readonly MethodInfo Method_ArraySeq_create = typeof(ArraySeq).GetMethod("create", BindingFlags.Static | BindingFlags.Public,null, new Type[] { typeof(object[]) }, null);
-
         internal static readonly PropertyInfo Method_Compiler_CurrentNamespace = typeof(Compiler).GetProperty("CurrentNamespace");
         internal static readonly MethodInfo Method_Compiler_PushNS = typeof(Compiler).GetMethod("PushNS");
-
-        //internal static readonly MethodInfo Method_Delegate_CreateDelegate = typeof(Delegate).GetMethod("CreateDelegate", BindingFlags.Static | BindingFlags.Public,null,new Type[] {typeof(Type), typeof(Object), typeof(string)},null);
 
         internal static readonly MethodInfo Method_ILookupSite_fault = typeof(ILookupSite).GetMethod("fault");
         internal static readonly MethodInfo Method_ILookupThunk_get = typeof(ILookupThunk).GetMethod("get");
@@ -226,38 +208,23 @@ namespace clojure.lang
 
         internal static readonly MethodInfo Method_IObj_withMeta = typeof(IObj).GetMethod("withMeta");
 
-        //internal static readonly MethodInfo Method_Keyword_intern_symbol = typeof(Keyword).GetMethod("intern", new Type[] { typeof(Symbol) });
         internal static readonly MethodInfo Method_Keyword_intern_string = typeof(Keyword).GetMethod("intern", new Type[] { typeof(String) });
         
-        //internal static readonly MethodInfo Method_KeywordLookupSite_Get = typeof(KeywordLookupSite).GetMethod("Get");
-
-        //internal static readonly MethodInfo Method_MethodImplCache_fnFor = typeof(MethodImplCache).GetMethod("fnFor");
-
         internal static readonly MethodInfo Method_Monitor_Enter = typeof(Monitor).GetMethod("Enter", new Type[] { typeof(Object) });
         internal static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit", new Type[] { typeof(Object) });
 
-        //internal static readonly MethodInfo Method_Object_ReferenceEquals = typeof(Object).GetMethod("ReferenceEquals");
-        //internal static readonly MethodInfo Method_Object_MemberwiseClone = typeof(Object).GetMethod("MemberwiseClone", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod);
-
         internal static readonly MethodInfo Method_Namespace_importClass1 = typeof(Namespace).GetMethod("importClass", new Type[] { typeof(Type) });
-
-        //internal static readonly MethodInfo Method_Numbers_num_long = typeof(Numbers).GetMethod("num", new Type[] { typeof(long) });
 
         internal static readonly MethodInfo Method_PersistentList_create = typeof(PersistentList).GetMethod("create", new Type[] { typeof(System.Collections.IList) });
         internal static readonly MethodInfo Method_PersistentHashSet_create = typeof(PersistentHashSet).GetMethod("create", new Type[] { typeof(Object[]) });
         internal static readonly FieldInfo Method_PersistentHashSet_EMPTY = typeof(PersistentHashSet).GetField("EMPTY");
 
-        //internal static readonly MethodInfo Method_Reflector_CallInstanceMethod = typeof(Reflector).GetMethod("CallInstanceMethod");
-        //internal static readonly MethodInfo Method_Reflector_CallStaticMethod = typeof(Reflector).GetMethod("CallStaticMethod");
-        //internal static readonly MethodInfo Method_Reflector_InvokeConstructor = typeof(Reflector).GetMethod("InvokeConstructor");
         internal static readonly MethodInfo Method_Reflector_GetInstanceFieldOrProperty = typeof(Reflector).GetMethod("GetInstanceFieldOrProperty");
         internal static readonly MethodInfo Method_Reflector_SetInstanceFieldOrProperty = typeof(Reflector).GetMethod("SetInstanceFieldOrProperty");
 
-        //internal static readonly MethodInfo Method_RT_arrayToList = typeof(RT).GetMethod("arrayToList");
         internal static readonly MethodInfo Method_RT_classForName = typeof(RT).GetMethod("classForName");
         internal static readonly MethodInfo Method_RT_intCast_long = typeof(RT).GetMethod("intCast", new Type[] { typeof(long) });
         internal static readonly MethodInfo Method_RT_uncheckedIntCast_long = typeof(RT).GetMethod("uncheckedIntCast", new Type[] { typeof(long) });
-        //internal static readonly MethodInfo Method_RT_IsTrue = typeof(RT).GetMethod("IsTrue");
         internal static readonly MethodInfo Method_RT_keyword = typeof(RT).GetMethod("keyword");
         internal static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
         internal static readonly MethodInfo Method_RT_seqOrElse = typeof(RT).GetMethod("seqOrElse");
@@ -273,7 +240,6 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Util_classOf = typeof(Util).GetMethod("classOf");
         internal static readonly MethodInfo Method_Util_ConvertToInt = typeof(Util).GetMethod("ConvertToInt");
 
-        //internal static readonly MethodInfo Method_Util_equals = typeof(Util).GetMethod("equals", new Type[] { typeof(object), typeof(object) });
         internal static readonly MethodInfo Method_Util_equiv = typeof(Util).GetMethod("equiv", new Type[] { typeof(object), typeof(object) });
         internal static readonly MethodInfo Method_Util_hash = typeof(Util).GetMethod("hash");
         internal static readonly MethodInfo Method_Util_IsNonCharNumeric = typeof(Util).GetMethod("IsNonCharNumeric");
@@ -283,15 +249,13 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Var_set = typeof(Var).GetMethod("set");
         internal static readonly MethodInfo Method_Var_setMeta = typeof(Var).GetMethod("setMeta");
         internal static readonly MethodInfo Method_Var_popThreadBindings = typeof(Var).GetMethod("popThreadBindings");
-        //internal static readonly MethodInfo Method_Var_hasRoot = typeof(Var).GetMethod("hasRoot");
         internal static readonly MethodInfo Method_Var_getRawRoot = typeof(Var).GetMethod("getRawRoot");
-        //internal static readonly MethodInfo Method_Var_getRoot = typeof(Var).GetMethod("getRoot");
         internal static readonly MethodInfo Method_Var_setDynamic0 = typeof(Var).GetMethod("setDynamic", Type.EmptyTypes);
-        //internal static readonly PropertyInfo Method_Var_Rev = typeof(Var).GetProperty("Rev");
 
         internal static readonly ConstructorInfo Ctor_KeywordLookupSite_1 = typeof(KeywordLookupSite).GetConstructor(new Type[] { typeof(Keyword) });
         internal static readonly ConstructorInfo Ctor_Regex_1 = typeof(Regex).GetConstructor(new Type[] { typeof(String) });
         internal static readonly ConstructorInfo Ctor_RestFnImpl_1 = typeof(RestFnImpl).GetConstructor(new Type[] { typeof(int) });
+        internal static readonly ConstructorInfo Ctor_AFnImpl = typeof(AFnImpl).GetConstructor(Type.EmptyTypes);
 
         internal static readonly ConstructorInfo Ctor_Serializable = typeof(SerializableAttribute).GetConstructor(Type.EmptyTypes);
 
@@ -471,23 +435,6 @@ namespace clojure.lang
                 return o;
             }
         }
-
-        //public static Namespace NamespaceFor(Symbol symbol)
-        //{
-        //    return NamespaceFor(CurrentNamespace, symbol);
-        //}
-
-        //public static Namespace NamespaceFor(Namespace n, Symbol symbol)
-        //{
-        //    // Note: presumes non-nil sym.ns
-        //    // first check against CurrentNamespace's aliases
-        //    Symbol nsSym = Symbol.intern(symbol.Namespace);
-        //    Namespace ns = n.LookupAlias(nsSym);
-        //    if (ns == null)
-        //        // otherwise, check the namespaces map
-        //        ns = Namespace.find(nsSym);
-        //    return ns;
-        //}
 
         #endregion
 
@@ -689,21 +636,6 @@ namespace clojure.lang
 
         #endregion
 
-        #region Boxing arguments
-
-        internal static Expression MaybeBox(Expression expr)
-        {
-            if (expr.Type == typeof(void))
-                // I guess we'll pass a void.  This happens when we have a throw, for example.
-                return Expression.Block(expr, Expression.Default(typeof(object)));
-
-            return expr.Type.IsValueType
-                ? Expression.Convert(expr, typeof(object))
-                : expr;
-        }
-
-        #endregion
-
         #region other type hacking
 
         internal static Type MaybePrimitiveType(Expr e)
@@ -744,37 +676,6 @@ namespace clojure.lang
             }
             return match;
         }
-
-
-        internal static Expression GenArgArray(RHC rhc, ObjExpr objx, GenContext context, IPersistentVector args)
-        {
-            Expression[] exprs = new Expression[args.count()];
-
-            for (int i = 0; i < args.count(); i++)
-            {
-                Expr arg = (Expr)args.nth(i);
-                exprs[i] = Compiler.MaybeBox(arg.GenCode(RHC.Expression,objx,context));
-            }
-
-            Expression argArray = Expression.NewArrayInit(typeof(object), exprs);
-            return argArray;
-        }
-
-        internal static Expression MaybeConvert(Expression expr, Type type)
-        {
-            if (type == typeof(void))
-                type = typeof(object);
-
-            if (expr.Type == typeof(void))
-                // I guess we'll pass a void.  This happens when we have a throw, for example.
-                return Expression.Block(expr, Expression.Default(type));
-
-            if (expr.Type == type)
-                return expr;
-
-            return Expression.Convert(expr, type);
-        }
-
 
         public static Type PrimType(Symbol sym)
         {
@@ -1171,17 +1072,6 @@ namespace clojure.lang
 
         #region Compilation
 
-        internal static SymbolDocumentInfo DocInfo()
-        {
-            return (SymbolDocumentInfo)DocumentInfoVar.deref();
-        }
-
-        internal static SymbolDocumentGenerator SymDocGenerator()
-        {
-            return (SymbolDocumentGenerator)SymbolDocumentGeneratorVar.deref();
-        }
-        
-
         public static int GetLineFromSpanMap(IPersistentMap spanMap)
         {
             if (spanMap == null )
@@ -1206,7 +1096,7 @@ namespace clojure.lang
             return false;
         }
 
-        static bool GetLocations(IPersistentMap spanMap, out int startLine, out int startCol, out int finishLine, out int finishCol)
+        public static bool GetLocations(IPersistentMap spanMap, out int startLine, out int startCol, out int finishLine, out int finishCol)
         {
             startLine = -1;
             startCol = -1;
@@ -1218,71 +1108,6 @@ namespace clojure.lang
                 && GetLocation(spanMap, RT.EndLineKey, out finishLine)
                 && GetLocation(spanMap, RT.EndColumnKey, out finishCol);
         }
-
-        public static Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap, bool isDebuggable)
-        {
-            if ( isDebuggable && spanMap != null & Compiler.DocInfo() != null)
-            {
-                int startLine;
-                int startCol;
-                int finishLine;
-                int finishCol;
-                if (GetLocations(spanMap, out startLine, out startCol, out finishLine, out finishCol))
-                    return AstUtils.AddDebugInfo(expr,
-                        Compiler.DocInfo(),
-                        new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.StartLineKey), (int)spanMap.valAt(RT.StartColumnKey)),
-                        new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.EndLineKey), (int)spanMap.valAt(RT.EndColumnKey)));
-            }
-            return expr;
-        }
-
-        public static void MaybeEmitDebugInfo(GenContext context, ILGenerator ilg, IPersistentMap spanMap)
-        {
-            MaybeEmitDebugInfo(context.ModuleBuilder, ilg, spanMap, context.IsDebuggable);
-        }
-
-        public static void MaybeEmitDebugInfo(GenContext context, ILGen ilg, IPersistentMap spanMap)
-        {
-            MaybeEmitDebugInfo(context.ModuleBuilder, ilg, spanMap, context.IsDebuggable);
-        }
-
-        public static void MaybeEmitDebugInfo(ModuleBuilder mb, ILGenerator ilg, IPersistentMap spanMap, bool isDebuggable)
-        {           
-            if ( ShouldEmitDebugInfo(spanMap,isDebuggable) )
-            {
-                int startLine;
-                int startCol;
-                int finishLine;
-                int finishCol;
-                if (GetLocations(spanMap, out startLine, out startCol, out finishLine, out finishCol))
-                    Compiler.SymDocGenerator().MarkSequencePoint(mb, Compiler.DocInfo(), ilg, startLine, startCol, finishLine, finishCol);
-            }
-        }
-                
-        public static void MaybeEmitDebugInfo(ModuleBuilder mb, ILGen ilg, IPersistentMap spanMap, bool isDebuggable)
-        {           
-            if ( ShouldEmitDebugInfo(spanMap,isDebuggable) )
-            {
-                int startLine;
-                int startCol;
-                int finishLine;
-                int finishCol;
-                if (GetLocations(spanMap, out startLine, out startCol, out finishLine, out finishCol))
-                    Compiler.SymDocGenerator().MarkSequencePoint(mb, Compiler.DocInfo(), ilg, startLine, startCol, finishLine, finishCol);
-            }
-        }
-
-        static bool ShouldEmitDebugInfo(IPersistentMap spanMap, bool isDebuggable)
-        {
-            return isDebuggable && spanMap != null & Compiler.DocInfo() != null && Compiler.SymDocGenerator() != null;
-        }
-
-        public static void MaybeSetLocalSymName(GenContext context, LocalBuilder lb, string name)
-        {
-            if (context.IsDebuggable)
-                lb.SetLocalSymInfo(name);
-        }
-
 
         static GenContext _evalContext = GenContext.CreateWithInternalAssembly("eval", false);
         static public GenContext EvalContext { get { return _evalContext; } }
@@ -1304,159 +1129,6 @@ namespace clojure.lang
             GenContext context = (GenContext)CompilerContextVar.deref();
             return context == null ? "_INTERP" : "_COMP_" + (new AssemblyName(context.AssemblyBuilder.FullName)).Name;
         }
-
-        //public static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
-        //{
-        //    if (CompilePathVar.deref() == null)
-        //        throw new InvalidOperationException("*compile-path* not set");
-
-        //    object eofVal = new object();
-        //    object form;
-
-        //    //string sourcePath = sourceDirectory == null ? sourceName : sourceDirectory + "\\" + sourceName;
-        //    string sourcePath = relativePath;
-
-        //    LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
-
-        //    GenContext context = GenContext.CreateWithExternalAssembly(relativePath, ".dll", true);
-        //    GenContext evalContext = GenContext.CreateWithInternalAssembly("EvalForCompile", false);
-
-        //    Var.pushThreadBindings(RT.map(
-        //        SourcePathVar, sourcePath,
-        //        SourceVar, sourceName,
-        //        MethodVar, null,
-        //        LocalEnvVar, null,
-        //        LoopLocalsVar, null,
-        //        NextLocalNumVar, 0,
-        //        RT.CurrentNSVar, RT.CurrentNSVar.deref(),
-        //            //LINE_BEFORE, lntr.LineNumber,
-        //            //LINE_AFTER, lntr.LineNumber,
-        //        DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
-        //        ConstantsVar, PersistentVector.EMPTY,
-        //        ConstantIdsVar, new IdentityHashMap(),
-        //        KeywordsVar, PersistentHashMap.EMPTY,
-        //        VarsVar, PersistentHashMap.EMPTY,
-        //        RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
-        //        RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
-        //        RT.DataReadersVar, RT.DataReadersVar.deref(),
-        //        //KEYWORD_CALLSITES, PersistentVector.EMPTY,  // jvm doesn't do this, don't know why
-        //        //VAR_CALLSITES, EmptyVarCallSites(),      // jvm doesn't do this, don't know why
-        //        //PROTOCOL_CALLSITES, PersistentVector.EMPTY, // jvm doesn't do this, don't know why
-        //        CompilerContextVar, context
-        //        ));
-
-
-        //    try
-        //    {
-        //        FnExpr objx = new FnExpr(null);
-        //        objx.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.')) + "__init";
-
-        //        TypeBuilder exprTB = context.AssemblyGen.DefinePublicType("__REPL__", typeof(object), true);
-
-        //        //List<string> names = new List<string>();
-        //        List<Expr> exprs = new List<Expr>();
-
-        //        int i = 0;
-        //        while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
-        //        {
-        //            //Java version: LINE_AFTER.set(lntr.LineNumber);
-
-        //            Compile1(context, evalContext, exprTB, form, exprs, ref i);
-
-
-        //            //Java version: LINE_BEFORE.set(lntr.LineNumber);
-        //        }
-
-        //        exprTB.CreateType();
-
-        //        // Need to put the loader init in its own type because we can't generate calls on the MethodBuilders
-        //        //  until after their types have been closed.
-
-        //        TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
-
-        //        Expression pushNSExpr = Expression.Call(null, Method_Compiler_PushNS);
-        //        Expression popExpr = Expression.Call(null, Method_Var_popThreadBindings);
-
-        //        BodyExpr bodyExpr = new BodyExpr(PersistentVector.create1(exprs));
-        //        FnMethod method = new FnMethod(objx, null, bodyExpr);
-        //        objx.AddMethod(method);
-
-        //        objx.Keywords = (IPersistentMap)KeywordsVar.deref();
-        //        objx.Vars = (IPersistentMap)VarsVar.deref();
-        //        objx.Constants = (PersistentVector)ConstantsVar.deref();
-        //        //objx.KeywordCallsites = (IPersistentVector)KEYWORD_CALLSITES.deref();
-        //        //objx.ProtocolCallsites = (IPersistentVector)PROTOCOL_CALLSITES.deref();
-        //        //objx.VarCallsites = (IPersistentSet)VAR_CALLSITES.deref();
-
-        //        objx.KeywordCallsites = PersistentVector.EMPTY;
-        //        objx.ProtocolCallsites = PersistentVector.EMPTY;
-        //        objx.VarCallsites = (IPersistentSet)EmptyVarCallSites();
-
-        //        objx.Compile(typeof(AFunction), null, PersistentVector.EMPTY, false, context);
-
-        //        Expression fnNew = objx.GenCode(RHC.Expression,objx,context);
-        //        Expression fnInvoke = Expression.Call(fnNew, fnNew.Type.GetMethod("invoke", System.Type.EmptyTypes));
-
-        //        Expression tryCatch = Expression.TryCatchFinally(fnInvoke, popExpr);
-
-        //        Expression body = Expression.Block(pushNSExpr, tryCatch);
-
-        //        // create initializer call
-        //        MethodBuilder mbInit = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static);
-        //        LambdaExpression initFn = Expression.Lambda(body);
-        //        //initFn.CompileToMethod(mbInit, DebugInfoGenerator.CreatePdbGenerator());
-        //        initFn.CompileToMethod(mbInit, context.IsDebuggable);
-
-        //        initTB.CreateType();
-
-        //        context.SaveAssembly();
-        //    }
-        //    catch (LispReader.ReaderException e)
-        //    {
-        //        throw new CompilerException(sourcePath, e.Line, e.InnerException);
-        //    }
-        //    finally
-        //    {
-        //        Var.popThreadBindings();
-        //    }
-        //    return null;
-        //}
-
-        //private static void Compile1(GenContext compileContext, GenContext evalContext, TypeBuilder exprTB, object form, List<Expr> exprs, ref int i)
-        //{
-
-        //    int line = (int)LineVar.deref();
-        //    if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
-        //        line = (int)RT.meta(form).valAt(RT.LineKey);
-        //    IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
-        //    if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
-        //        sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
-
-        //    Var.pushThreadBindings(RT.map(LineVar, line, SourceSpanVar, sourceSpan));
-
-        //    ParserContext pcontext = new ParserContext(RHC.Eval);
-
-        //    try
-        //    {
-
-        //        form = Macroexpand(form);
-        //        if (form is IPersistentCollection && Util.Equals(RT.first(form), DoSym))
-        //        {
-        //            for (ISeq s = RT.next(form); s != null; s = RT.next(s))
-        //                Compile1(compileContext, evalContext, exprTB, RT.first(s), exprs, ref i);
-        //        }
-        //        else
-        //        {
-        //            Expr expr = Analyze(pcontext, form);
-        //            exprs.Add(expr);     // should pick up the keywords/vars/constants here
-        //            expr.Eval();
-        //        }
-        //    }
-        //    finally
-        //    {
-        //        Var.popThreadBindings();
-        //    }
-        //}
 
         public static void PushNS()
         {
@@ -1487,10 +1159,6 @@ namespace clojure.lang
             }
         }
 
-        #endregion
-
-        #region Compile - no DLR
-
         public static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
         {
             if (CompilePathVar.deref() == null)
@@ -1500,7 +1168,18 @@ namespace clojure.lang
             object form;
 
             string sourcePath = relativePath;
-            GenContext context = GenContext.CreateWithExternalAssembly(sourcePath, ".dll", true);
+            GenContext context = GenContext.CreateWithExternalAssembly(sourceName, sourcePath, ".dll", true);
+
+            // generate loader class
+            ObjExpr objx = new ObjExpr(null);
+            objx.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.')) + "__init";
+
+            TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
+            context = context.WithTypeBuilder(initTB);
+
+            // static load method
+            MethodBuilder initMB = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
+            CljILGen ilg = new CljILGen(initMB.GetILGenerator());
 
             LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
 
@@ -1512,8 +1191,6 @@ namespace clojure.lang
                 LoopLocalsVar, null,
                 NextLocalNumVar, 0,
                 RT.CurrentNSVar, RT.CurrentNSVar.deref(),
-                DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
-                SymbolDocumentGeneratorVar, new SymbolDocumentGenerator(),
                 ConstantsVar, PersistentVector.EMPTY,
                 ConstantIdsVar, new IdentityHashMap(),
                 KeywordsVar, PersistentHashMap.EMPTY,
@@ -1527,19 +1204,9 @@ namespace clojure.lang
 
             try
             {
-                // generate loader class
-                ObjExpr objx = new ObjExpr(null);
-                objx.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.')) + "__init";
-
-                TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
-
-                // static load method
-                MethodBuilder initMB = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
-                context = context.WithBuilders(initTB, initMB);
-
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
-                    Compile1(context, objx, form);
+                    Compile1(initTB, ilg, objx, form);
                 }
 
                 initMB.GetILGenerator().Emit(OpCodes.Ret);
@@ -1579,7 +1246,7 @@ namespace clojure.lang
         }
 
 
-        private static void Compile1(GenContext context,  ObjExpr objx, object form)
+        private static void Compile1(TypeBuilder tb, CljILGen ilg,  ObjExpr objx, object form)
         {
             int line = (int)LineVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
@@ -1598,7 +1265,7 @@ namespace clojure.lang
                 if (form is IPersistentCollection && Util.Equals(RT.first(form), DoSym))
                 {
                     for (ISeq s = RT.next(form); s != null; s = RT.next(s))
-                        Compile1(context, objx, RT.first(s));
+                        Compile1(tb, ilg, objx, RT.first(s));
                 }
                 else
                 {
@@ -1606,9 +1273,9 @@ namespace clojure.lang
                     objx.Keywords = (IPersistentMap)KeywordsVar.deref();
                     objx.Vars = (IPersistentMap)VarsVar.deref();
                     objx.Constants = (PersistentVector)ConstantsVar.deref();
-                    objx.EmitConstantFieldDefs(context.TB);
-                    expr.Emit(RHC.Expression,objx,context);
-                    context.GetILGenerator().Emit(OpCodes.Pop);
+                    objx.EmitConstantFieldDefs(tb);
+                    expr.Emit(RHC.Expression,objx,ilg);
+                    ilg.Emit(OpCodes.Pop);
                     expr.Eval();
                 }
             }
@@ -1619,7 +1286,6 @@ namespace clojure.lang
         }
 
         #endregion
-        
         
         #region Loading
 
@@ -1657,8 +1323,6 @@ namespace clojure.lang
                 //LOADER, RT.makeClassLoader(),
                 SourcePathVar, sourcePath,
                 SourceVar, sourceName,
-                DocumentInfoVar, Expression.SymbolDocument(sourceName),  // I hope this is enough
-                SymbolDocumentGeneratorVar, new SymbolDocumentGenerator(),
 
                 RT.CurrentNSVar, RT.CurrentNSVar.deref(),
                 RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),

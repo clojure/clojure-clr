@@ -13,12 +13,6 @@
  **/
 
 using System;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -97,18 +91,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            // Java: fn.emitConstant(gen,id)
-            //return Expression.Constant(_v);
-            return objx.GenConstant(context,_id,_v);
-        }
-
-        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            objx.EmitConstant(context, _id, _v);
+            objx.EmitConstant(ilg, _id, _v);
             if (rhc == RHC.Statement)
-                context.GetILGenerator().Emit(OpCodes.Pop);
+                ilg.Emit(OpCodes.Pop);
         }
 
         #endregion

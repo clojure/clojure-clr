@@ -14,12 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection.Emit;
 
 
@@ -90,14 +84,8 @@ namespace clojure.lang.CljCompiler.Ast
             get { return true; }
         }
 
-        protected override Expression GenTargetExpression(ObjExpr objx, GenContext context)
+        protected override void EmitTargetExpression(ObjExpr objx, CljILGen ilg)
         {
-            return Expression.Constant(_type, typeof(Type));
-        }
-
-        protected override void EmitTargetExpression(ObjExpr objx, GenContext context)
-        {
-            ILGenerator ilg = context.GetILGenerator();
             ilg.Emit(OpCodes.Ldtoken, _type);
             ilg.Emit(OpCodes.Call, Compiler.Method_Type_GetTypeFromHandle);
         }
@@ -107,27 +95,25 @@ namespace clojure.lang.CljCompiler.Ast
             return typeof(Type);
         }
 
-        #endregion
-
         internal bool CanEmitIntrinsicPredicate()
         {
             return _method != null && Intrinsics.HasPred(_method);
         }
 
-        internal void EmitIntrinsicPredicate(RHC rhc, ObjExpr objx, GenContext context, Label falseLabel)
+        internal void EmitIntrinsicPredicate(RHC rhc, ObjExpr objx, CljILGen ilg, Label falseLabel)
         {
-            ILGenerator ilg = context.GetILGenerator();
-
-            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+            GenContext.EmitDebugInfo(ilg, _spanMap);
 
             if (_method != null)
             {
-                MethodExpr.EmitTypedArgs(objx, context, _method.GetParameters(), _args);
+                MethodExpr.EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
                 // JVM: clear locals
                 Intrinsics.EmitPred(_method, ilg, falseLabel);
             }
             else
                 throw new InvalidOperationException("Unboxed emit of unknown member");
         }
+
+        #endregion
     }
 }

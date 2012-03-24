@@ -355,12 +355,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region Non-DLR code gen
+        #region Code generation
 
-        public override void Emit(ObjExpr fn, GenContext context)
+        public override void Emit(ObjExpr fn, TypeBuilder tb)
         {
 
-            MethodBuilder mb = context.TB.DefineMethod(GetMethodName(), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, GetReturnType(), GetArgTypes());
+            MethodBuilder mb = tb.DefineMethod(GetMethodName(), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, GetReturnType(), GetArgTypes());
             SetCustomAttributes(mb);
 
             //Console.Write("Compiling method {0} ", GetMethodName());
@@ -368,17 +368,16 @@ namespace clojure.lang.CljCompiler.Ast
             //    Console.Write("{0}, ", t.Name);
             //Console.WriteLine("returning {0}", GetReturnType().Name);
 
-            GenContext newContext = context.WithBuilders(context.TB, mb);
-            ILGenerator ilg = newContext.GetILGenerator();
+            CljILGen ilg = new CljILGen(mb.GetILGenerator());
             Label loopLabel = ilg.DefineLabel();
 
-            Compiler.MaybeEmitDebugInfo(context, ilg, SpanMap);
+            GenContext.EmitDebugInfo(ilg, SpanMap);
 
             try 
             {
                 Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));
                 ilg.MarkLabel(loopLabel);
-                EmitBody(Objx,newContext,_retType,_body);
+                EmitBody(Objx,ilg,_retType,_body);
                 if ( _body.HasNormalExit() )
                     ilg.Emit(OpCodes.Ret);
             }
@@ -388,7 +387,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             if (IsExplicit)
-                context.TB.DefineMethodOverride(mb, _explicitMethodInfo);
+                tb.DefineMethodOverride(mb, _explicitMethodInfo);
         }    
 
         #endregion

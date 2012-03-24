@@ -13,13 +13,6 @@
  **/
 
 using System;
-using System.Collections.Generic;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -106,70 +99,34 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            List<Expression> exprs = new List<Expression>(_exprs.count());
-
-            for (int i = 0; i < _exprs.count()-1; i++)
-            {
-                Expr e = (Expr)_exprs.nth(i);
-                exprs.Add(e.GenCode(RHC.Statement,objx,context));
-            }
-            exprs.Add(LastExpr.GenCode(rhc, objx, context));
-
-            return Expression.Block(exprs);
-        }
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             for (int i = 0; i < _exprs.count() - 1; i++)
             {
                 Expr e = (Expr)_exprs.nth(i);
-                e.Emit(RHC.Statement, objx, context);
+                e.Emit(RHC.Statement, objx, ilg);
             }
-            LastExpr.Emit(rhc, objx, context);
+            LastExpr.Emit(rhc, objx, ilg);
         }
-
-        #endregion
-
-        #region MaybePrimitiveExpr Members
 
         public bool CanEmitPrimitive
         {
             get { return LastExpr is MaybePrimitiveExpr && ((MaybePrimitiveExpr)LastExpr).CanEmitPrimitive; }
         }
 
-        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            List<Expression> exprs = new List<Expression>(_exprs.count());
-
-            for (int i = 0; i < _exprs.count()-1; i++)
-            {
-                Expr e = (Expr)_exprs.nth(i);
-                exprs.Add(e.GenCode(RHC.Statement,objx,context));
-            }
-
-            MaybePrimitiveExpr last = (MaybePrimitiveExpr)LastExpr;
-            exprs.Add(last.GenCodeUnboxed(rhc,objx,context));
-
-            return Expression.Block(exprs);
-        }
-
-        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             for (int i = 0; i < _exprs.count() - 1; i++)
             {
                 Expr e = (Expr)_exprs.nth(i);
-                e.Emit(RHC.Statement, objx, context);
+                e.Emit(RHC.Statement, objx, ilg);
             }
             MaybePrimitiveExpr mbe = (MaybePrimitiveExpr)LastExpr;
-            mbe.EmitUnboxed(rhc, objx, context);
+            mbe.EmitUnboxed(rhc, objx, ilg);
         }
-
-
-        #endregion
 
         public bool HasNormalExit() { return LastExpr.HasNormalExit(); }
 
+        #endregion
     }
 }

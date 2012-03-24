@@ -15,13 +15,6 @@
 using System;
 using System.Collections.Generic;
 
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-using System.Reflection.Emit;
-
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -69,8 +62,7 @@ namespace clojure.lang.CljCompiler.Ast
             catch (Exception e)
             {
                 throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), e);
-            }
-                    
+            }                    
         }
 
         #endregion
@@ -96,18 +88,9 @@ namespace clojure.lang.CljCompiler.Ast
             get { return false; }
         }
 
-        protected override Expression GenTargetExpression(ObjExpr objx, GenContext context)
+        protected override void EmitTargetExpression(ObjExpr objx, CljILGen ilg)
         {
-            Expression expr = _target.GenCode(RHC.Expression, objx, context);
-            //if ( _target.HasClrType )
-            //    expr =  Expression.Convert(expr,_target.ClrType);
-
-            return expr;
-        }
-
-        protected override void EmitTargetExpression(ObjExpr objx, GenContext context)
-        {
-            _target.Emit(RHC.Expression, objx, context);
+            _target.Emit(RHC.Expression, objx, ilg);
         }
 
         protected override Type GetTargetType()

@@ -13,14 +13,7 @@
  **/
 
 using System;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection.Emit;
-using Microsoft.Scripting.Generation;
 
 
 namespace clojure.lang.CljCompiler.Ast
@@ -77,51 +70,27 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            return HostExpr.GenBoxReturn(GenCodeUnboxed(RHC.Expression, objx, context), typeof(bool), objx, context);
-        }
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            EmitUnboxed(rhc, objx, context);
-            HostExpr.EmitBoxReturn(objx, context, typeof(bool));
+            EmitUnboxed(rhc, objx, ilg);
+            HostExpr.EmitBoxReturn(objx, ilg, typeof(bool));
             if (rhc == RHC.Statement)
-                context.GetILGenerator().Emit(OpCodes.Pop);
+                ilg.Emit(OpCodes.Pop);
         }
 
         public bool HasNormalExit() { return true; }
-
-        #endregion
-
-        #region MaybePrimitiveExpr Members
 
         public bool CanEmitPrimitive
         {
             get { return true; }
         }
 
-        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            return Expression.TypeIs(_expr.GenCode(RHC.Expression, objx, context), _t); ;
-        }
-
-        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            ILGen ilg = context.GetILGen();
             Label endLabel = ilg.DefineLabel();
             Label falseLabel = ilg.DefineLabel();
 
-            _expr.Emit(RHC.Expression, objx, context);
-            //ilg.Emit(OpCodes.Isinst, _t);
-            //ilg.Emit(OpCodes.Ldnull);
-            //ilg.Emit(OpCodes.Ceq);
-            //ilg.Emit(OpCodes.Brfalse_S, falseLabel);
-            //ilg.EmitBoolean(true);
-            //ilg.Emit(OpCodes.Br_S, endLabel);
-            //ilg.MarkLabel(falseLabel);
-            //ilg.EmitBoolean(false);
-            //ilg.MarkLabel(endLabel);
+            _expr.Emit(RHC.Expression, objx, ilg);
 
             Type opType = _expr.HasClrType && _expr.ClrType != null ? _expr.ClrType : typeof(object);
             if (opType.IsValueType)
@@ -131,9 +100,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Isinst, _t);
             ilg.Emit(OpCodes.Ldnull);
             ilg.Emit(OpCodes.Cgt_Un);
-
         }
-
 
         #endregion
     }

@@ -14,13 +14,6 @@
 
 using System;
 using System.Reflection;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-using Microsoft.Scripting.Generation;
 using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -75,52 +68,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            Type targetType = _targetType;
-
-            Type stubType = Compiler.CompileStubOrigClassVar.isBound ? (Type)Compiler.CompileStubOrigClassVar.deref() : null;
-
-            if ( _targetType == stubType )
-                targetType = objx.BaseType;
-
-            Expression target = _target.GenCode(RHC.Expression, objx, context);
-            Expression call;
-            if (targetType != null && _tinfo != null)
-            {
-                Expression convTarget = Expression.Convert(target, targetType);
-                Expression access = GenAccess(rhc, objx, convTarget);
-                call = HostExpr.GenBoxReturn(access,FieldType,objx,context);
-            }
-            else
-            {
-                // TODO: Convert to Dynamic call site
-                call = Expression.Call(Compiler.Method_Reflector_GetInstanceFieldOrProperty, target, Expression.Constant(_fieldName));
-            }
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
-            return call;
-        }
-
-        protected abstract Expression GenAccess(RHC rhc, ObjExpr objx, Expression target);
-
-        public override Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            Expression target = _target.GenCode(RHC.Expression, objx, context);
-            if (_targetType != null && _tinfo != null)
-            {
-                Expression convTarget = Expression.Convert(target, _targetType);
-                Expression access = GenAccess(rhc,objx, convTarget);
-                access = Compiler.MaybeAddDebugInfo(access, _spanMap, context.IsDebuggable);
-                return access;
-            }
-            else
-                throw new InvalidOperationException("Unboxed emit of unknown member.");
-        }
-
-        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            ILGen ilg = context.GetILGen();
-
             Type targetType = _targetType;
 
             //Type stubType = Compiler.CompileStubOrigClassVar.isBound ? (Type)Compiler.CompileStubOrigClassVar.deref() : null;
@@ -128,19 +77,19 @@ namespace clojure.lang.CljCompiler.Ast
             //if (_targetType == stubType)
             //    targetType = objx.BaseType;
 
-            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+            GenContext.EmitDebugInfo(ilg, _spanMap);
 
             if (targetType != null && _tinfo != null)
             {
-                _target.Emit(RHC.Expression, objx, context);
-                MethodExpr.EmitPrepForCall(context, typeof(object), FieldDeclaringType);
+                _target.Emit(RHC.Expression, objx, ilg);
+                MethodExpr.EmitPrepForCall(ilg, typeof(object), FieldDeclaringType);
                 EmitGet(ilg);
-                HostExpr.EmitBoxReturn(objx, context, FieldType);
+                HostExpr.EmitBoxReturn(objx, ilg, FieldType);
             }
             else
             {
                 // TODO: convert to dynamic?
-                _target.Emit(RHC.Expression, objx, context);
+                _target.Emit(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Ldstr, _fieldName);
                 ilg.Emit(OpCodes.Call, Compiler.Method_Reflector_GetInstanceFieldOrProperty);
             }
@@ -149,10 +98,8 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        public override void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        public override void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            ILGen ilg = context.GetILGen();
-
             Type targetType = _targetType;
 
             //Type stubType = Compiler.CompileStubOrigClassVar.isBound ? (Type)Compiler.CompileStubOrigClassVar.deref() : null;
@@ -160,12 +107,12 @@ namespace clojure.lang.CljCompiler.Ast
             //if (_targetType == stubType)
             //    targetType = objx.BaseType;
 
-            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+            GenContext.EmitDebugInfo(ilg, _spanMap);
 
             if (targetType != null && _tinfo != null)
             {
-                _target.Emit(RHC.Expression, objx, context);
-                MethodExpr.EmitPrepForCall(context, typeof(object), FieldDeclaringType);
+                _target.Emit(RHC.Expression, objx, ilg);
+                MethodExpr.EmitPrepForCall(ilg, typeof(object), FieldDeclaringType);
                 EmitGet(ilg);
             }
             else
@@ -174,58 +121,29 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        protected abstract void EmitGet(ILGen ilg);
-        protected abstract void EmitSet(ILGen ilg);
+        protected abstract void EmitGet(CljILGen ilg);
+        protected abstract void EmitSet(CljILGen ilg);
         protected abstract Type FieldDeclaringType { get; }
 
         #endregion
 
         #region AssignableExpr Members
 
-        public override Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
+        public override void EmitAssign(RHC rhc, ObjExpr objx, CljILGen ilg, Expr val)
         {
-            Expression target = _target.GenCode(RHC.Expression, objx, context);
-            Expression valExpr = val.GenCode(RHC.Expression, objx, context);
-            Expression call;
-            if (_targetType != null && _tinfo != null)
-            {
-                Expression convTarget = Expression.Convert(target, _targetType);
-                Expression access = GenAccess(rhc, objx, convTarget);
-                Expression unboxValExpr = HostExpr.GenUnboxArg(valExpr, FieldType);
-                //call = Expression.Assign(access, Expression.Convert(valExpr, access.Type));
-                call = Expression.Assign(access, unboxValExpr);  
-            }
-            else
-            {
-                // TODO: Convert to a dynamic call site
-                call = Expression.Call(
-                    Compiler.Method_Reflector_SetInstanceFieldOrProperty,
-                    target,
-                    Expression.Constant(_fieldName),
-                    Compiler.MaybeBox(valExpr));
-            }
-
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap, context.IsDebuggable);
-            return call;
-        }
-
-        public override void EmitAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
-        {
-            ILGen ilg = context.GetILGen();
-
-            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
+            GenContext.EmitDebugInfo(ilg, _spanMap);
 
             if (_targetType != null && _tinfo != null)
             {
-                _target.Emit(RHC.Expression, objx, context);
+                _target.Emit(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Castclass, _targetType);
-                val.Emit(RHC.Expression, objx, context);
+                val.Emit(RHC.Expression, objx, ilg);
                 LocalBuilder tmp = ilg.DeclareLocal(typeof(object));
-                Compiler.MaybeSetLocalSymName(context, tmp, "valTemp");
+                GenContext.SetLocalName(tmp, "valTemp");
                 ilg.Emit(OpCodes.Dup);
                 ilg.Emit(OpCodes.Stloc, tmp);
                 if (FieldType.IsPrimitive)
-                    HostExpr.EmitUnboxArg(objx, context, FieldType);
+                    HostExpr.EmitUnboxArg(objx, ilg, FieldType);
                 else
                     ilg.Emit(OpCodes.Castclass, FieldType);
                 EmitSet(ilg);
@@ -233,9 +151,9 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else
             {
-                _target.Emit(RHC.Expression, objx, context);
+                _target.Emit(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Ldstr, _fieldName);
-                val.Emit(RHC.Expression, objx, context);
+                val.Emit(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Call, Compiler.Method_Reflector_SetInstanceFieldOrProperty); 
             }
             if (rhc == RHC.Statement)
@@ -278,11 +196,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        protected override Expression GenAccess(RHC rhc, ObjExpr objx, Expression target)
-        {
-            return Expression.Field(target, _tinfo);
-        }
-
         public override bool CanEmitPrimitive
         {
             get { return _targetType != null && _tinfo != null && Util.IsPrimitive(_tinfo.FieldType); }
@@ -298,12 +211,12 @@ namespace clojure.lang.CljCompiler.Ast
             get { return  _tinfo.DeclaringType; }
         }
 
-        protected override void EmitGet(ILGen ilg)
+        protected override void EmitGet(CljILGen ilg)
         {
             ilg.EmitFieldGet(_tinfo);
         }
 
-        protected override void EmitSet(ILGen ilg)
+        protected override void EmitSet(CljILGen ilg)
         {
             ilg.EmitFieldSet(_tinfo);
         }
@@ -355,11 +268,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        protected override Expression GenAccess(RHC rhc, ObjExpr objx, Expression target)
-        {
-            return Expression.Property(target, _tinfo);
-        }
-
         public override bool CanEmitPrimitive
         {
             get { return _targetType != null && _tinfo != null && Util.IsPrimitive(_tinfo.PropertyType); }
@@ -370,12 +278,12 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _tinfo.PropertyType; }
         }
 
-        protected override void EmitGet(ILGen ilg)
+        protected override void EmitGet(CljILGen ilg)
         {
             ilg.EmitPropertyGet(_tinfo);
         }
 
-        protected override void EmitSet(ILGen ilg)
+        protected override void EmitSet(CljILGen ilg)
         {
             ilg.EmitPropertySet(_tinfo);
         }

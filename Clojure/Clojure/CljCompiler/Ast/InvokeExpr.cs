@@ -14,16 +14,8 @@
 
 using System;
 using System.Collections.Generic;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection;
-using clojure.lang;
 using System.Reflection.Emit;
-using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -216,249 +208,24 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            Expression basicFn = _fexpr.GenCode(RHC.Expression, objx, context);
-            basicFn = Expression.Convert(basicFn, typeof(IFn));
+            GenContext.EmitDebugInfo(ilg, _spanMap);
 
             if (_isProtocol)
-                return GenProto(rhc,objx,context,basicFn);
-
-            return GenNonProto(rhc, objx, context, basicFn);
-        }
-
-        private Expression GenNonProto(RHC rhc, ObjExpr objx, GenContext context, Expression basicFn)
-        {
-            return GenerateArgsAndCall(rhc, objx, context, basicFn);
-        }
-
-
-        private Expression GenerateArgsAndCall(RHC rhc, ObjExpr objx, GenContext context, Expression fn, Expression arg0)
-        {
-            Expression[] args = new Expression[_args.count()];
-            args[0] = arg0;
-            GenerateArgs(rhc, objx, context, args, 1);
-            return GenerateCall(fn,args,context.IsDebuggable);
-        }
-
-        private Expression GenerateArgsAndCall(RHC rhc, ObjExpr objx, GenContext context, Expression fn)
-        {
-            Expression[] args = new Expression[_args.count()];
-            GenerateArgs(rhc, objx, context, args, 0);
-            return GenerateCall(fn, args, context.IsDebuggable);
-        }
-
-        private void GenerateArgs(RHC rhc, ObjExpr objx, GenContext context, Expression[] args, int firstIndex)
-        {
-            int argCount = _args.count();
-
-            for (int i = firstIndex; i < argCount; i++)
-            {
-                Expression bare = ((Expr)_args.nth(i)).GenCode(RHC.Expression,objx,context);
-                args[i] = Compiler.MaybeBox(bare);
-            }
-
-        }
-
-        private Expression GenerateCall(Expression fn, Expression[] args, bool isDebuggable)
-        {
-            Expression call = GenerateInvocation(fn, args);
-            call = Compiler.MaybeAddDebugInfo(call, _spanMap, isDebuggable);
-            return call;
-        }
-
-        private static Expression GenerateInvocation(Expression fn, Expression[] args)
-        {
-            MethodInfo mi;
-            Expression[] actualArgs;
-
-            if (args.Length <= Compiler.MaxPositionalArity)
-            {
-                mi = Compiler.Methods_IFn_invoke[args.Length];
-                actualArgs = args;
-            }
+                EmitProto(rhc, objx, ilg);
             else
             {
-                // pick up the extended version.
-                mi = Compiler.Methods_IFn_invoke[Compiler.MaxPositionalArity + 1];
-                Expression[] leftoverArgs = new Expression[args.Length - Compiler.MaxPositionalArity];
-                Array.Copy(args, Compiler.MaxPositionalArity, leftoverArgs, 0, args.Length - Compiler.MaxPositionalArity);
-
-                Expression restArg = Expression.NewArrayInit(typeof(object), leftoverArgs);
-
-                actualArgs = new Expression[Compiler.MaxPositionalArity + 1];
-                Array.Copy(args, 0, actualArgs, 0, Compiler.MaxPositionalArity);
-                actualArgs[Compiler.MaxPositionalArity] = restArg;
-            }
-
-            if (fn.Type != typeof(IFn))
-                fn = Expression.Convert(fn, typeof(IFn));
-
-            Expression call = Expression.Call(fn, mi, actualArgs);
-
-            return call;
-        }
-
-        // TODO: PRIORITY: IMPLEMENT protocolOn
-
-        private Expression GenProto(RHC rhc, ObjExpr objx, GenContext context, Expression fn)
-        {
-            switch (objx.FnMode)
-            {
-                case FnMode.Light:
-                    return GenProtoLight(rhc,objx,context, fn);
-                case FnMode.Full:
-                    return GenProtoFull(rhc, objx, context, fn);
-                default:
-                    throw Util.UnreachableCode();
-            }
-        }
-
-        // TODO: remove duplicate code between GenProtoLight and GenProtoFull
-
-        private Expression GenProtoLight(RHC rhc, ObjExpr objx, GenContext context, Expression fn)
-        {
-            Var v = ((VarExpr)_fexpr).Var;
-            Expr e = (Expr)_args.nth(0);
-
-            ParameterExpression targetParam = Expression.Parameter(typeof(Object), "target");
-            ParameterExpression targetTypeParam = Expression.Parameter(typeof(Type), "targetType");
-            ParameterExpression vpfnParam = Expression.Parameter(typeof(AFunction), "vpfn");
-            //ParameterExpression thisParam = objx.ThisParam;
-
-            Expression targetParamAssign = Expression.Assign(targetParam, Compiler.MaybeBox(e.GenCode(RHC.Expression,objx,context)));
-            Expression targetTypeParamAssign =
-                Expression.Assign(
-                    targetTypeParam,
-                    Expression.Call(null, Compiler.Method_Util_classOf, targetParam));
-
-            Expression vpfnParamAssign =
-                Expression.Assign(
-                    vpfnParam,
-                    Expression.Convert(Expression.Call(objx.GenVar(context, v), Compiler.Method_Var_getRawRoot), typeof(AFunction)));
-
-            if (_protocolOn == null)
-            {
-                return Expression.Block(
-                    new ParameterExpression[] { targetParam, targetTypeParam, vpfnParam },
-                    targetParamAssign,
-                    targetTypeParamAssign,
-                    vpfnParamAssign,
-                    GenerateArgsAndCall(rhc, objx, context, vpfnParam, targetParam));
-            }
-            else
-            {
-                Expression[] args = new Expression[_args.count() - 1];
-                for (int i = 1; i < _args.count(); i++)
-                {
-                    Expression bare = ((Expr)_args.nth(i)).GenCode(RHC.Expression,objx,context);
-                    args[i - 1] = Compiler.MaybeBox(bare);
-                }
-
-                return Expression.Block(
-                     new ParameterExpression[] { targetParam, targetTypeParam, vpfnParam },
-                     targetParamAssign,
-                     targetTypeParamAssign,
-                     Expression.Condition(
-                        Expression.Not(Expression.TypeIs(targetParam, _protocolOn)),
-                        Expression.Block(
-                            vpfnParamAssign,
-                            GenerateArgsAndCall(rhc, objx, context, vpfnParam, targetParam)),
-                         Compiler.MaybeBox(Expression.Call(Expression.Convert(targetParam, _protocolOn), _onMethod, args))));
-            }
-        }
-
-
-        private Expression GenProtoFull(RHC rhc, ObjExpr objx, GenContext context, Expression fn)
-        {
-            Var v = ((VarExpr)_fexpr).Var;
-            Expr e = (Expr)_args.nth(0);
-
-            ParameterExpression targetParam = Expression.Parameter(typeof(Object), "target");
-            ParameterExpression targetTypeParam = Expression.Parameter(typeof(Type), "targetType");
-            ParameterExpression vpfnParam = Expression.Parameter(typeof(AFunction), "vpfn");
-            ParameterExpression thisParam = objx.ThisParam;
-
-            Expression targetParamAssign = Expression.Assign(targetParam, Expression.Convert(e.GenCode(RHC.Expression, objx, context),targetParam.Type));
-            Expression targetTypeParamAssign =
-                Expression.Assign(
-                    targetTypeParam,
-                    Expression.Call(null, Compiler.Method_Util_classOf, targetParam));
-
-            Expression cachedTypeField = Expression.Field(thisParam, objx.CachedTypeField(_siteIndex));
-
-            Expression setCachedClass =
-                Expression.Assign(
-                    cachedTypeField,
-                    targetTypeParam);
-
-            Expression vpfnParamAssign =
-                Expression.Assign(
-                    vpfnParam,
-                    Expression.Convert(Expression.Call(objx.GenVar(context, v), Compiler.Method_Var_getRawRoot), typeof(AFunction)));
-
-            if (_protocolOn == null)
-            {
-                return Expression.Block(
-                    new ParameterExpression[] { targetParam, targetTypeParam, vpfnParam },
-                    targetParamAssign,
-                    targetTypeParamAssign,
-                    Expression.IfThen(
-                        Expression.NotEqual(targetTypeParam,cachedTypeField),
-                        setCachedClass),
-                    vpfnParamAssign,
-                    GenerateArgsAndCall(rhc, objx, context, vpfnParam, targetParam));
-            }
-            else
-            {
-                Expression[] args = new Expression[_args.count()-1];
-                for (int i = 1; i < _args.count(); i++)
-                {
-                    Expression bare = ((Expr)_args.nth(i)).GenCode(RHC.Expression, objx, context);
-                    args[i - 1] = Compiler.MaybeBox(bare);
-                }
-
-                return Expression.Block(
-                     new ParameterExpression[] { targetParam, targetTypeParam, vpfnParam },
-                     targetParamAssign,
-                     targetTypeParamAssign,
-                     Expression.Condition(
-                        Expression.And(
-                            Expression.NotEqual(targetTypeParam, cachedTypeField),
-                            Expression.TypeIs(targetParam, _protocolOn)),
-                        Compiler.MaybeBox(Expression.Call(Expression.Convert(targetParam, _protocolOn), _onMethod, args)),
-                        Expression.Block(
-                            Expression.IfThen(
-                                Expression.NotEqual(targetTypeParam, cachedTypeField),
-                                setCachedClass),
-                            vpfnParamAssign,
-                            GenerateArgsAndCall(rhc, objx, context, vpfnParam, targetParam))));
-            }
-        }
-
-
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            ILGenerator ilg = context.GetILGenerator();
-
-            Compiler.MaybeEmitDebugInfo(context, ilg, _spanMap);
-
-            if (_isProtocol)
-                EmitProto(rhc, objx, context);
-            else
-            {
-                _fexpr.Emit(RHC.Expression, objx, context);
+                _fexpr.Emit(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Castclass, typeof(IFn));
-                EmitArgsAndCall(0, rhc, objx, context);
+                EmitArgsAndCall(0, rhc, objx, ilg);
             }
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
         }
 
-        void EmitProto(RHC rhc, ObjExpr objx, GenContext context)
+        void EmitProto(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            ILGen ilg = context.GetILGen();
             Label onLabel = ilg.DefineLabel();
             Label callLabel = ilg.DefineLabel();
             Label endLabel = ilg.DefineLabel();
@@ -466,11 +233,11 @@ namespace clojure.lang.CljCompiler.Ast
             Var v = ((VarExpr)_fexpr).Var;
 
             Expr e = (Expr)_args.nth(0);
-            e.Emit(RHC.Expression, objx, context);               // target
+            e.Emit(RHC.Expression, objx, ilg);               // target
             ilg.Emit(OpCodes.Dup);                               // target, target
 
             LocalBuilder targetTemp = ilg.DeclareLocal(typeof(Object));
-            Compiler.MaybeSetLocalSymName(context, targetTemp, "target");
+            GenContext.SetLocalName(targetTemp, "target");
             ilg.Emit(OpCodes.Stloc,targetTemp);                  // target
 
             ilg.EmitCall(Compiler.Method_Util_classOf);          // class
@@ -487,7 +254,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.EmitCall(Compiler.Method_Util_classOf);          // class
             
             LocalBuilder typeTemp = ilg.DeclareLocal(typeof(Type));
-            Compiler.MaybeSetLocalSymName(context, typeTemp, "type");
+            GenContext.SetLocalName(typeTemp, "type");
             ilg.Emit(OpCodes.Stloc,typeTemp);                    //    (typeType <= class)
             
             ilg.EmitLoadArg(0);                                  // this
@@ -497,13 +264,13 @@ namespace clojure.lang.CljCompiler.Ast
 
             ilg.MarkLabel(callLabel);                       
     
-            objx.EmitVar(context,v);                              // var
+            objx.EmitVar(ilg,v);                              // var
             ilg.EmitCall(Compiler.Method_Var_getRawRoot);         // proto-fn
             ilg.Emit(OpCodes.Castclass, typeof(IFn));
                        
             ilg.Emit(OpCodes.Ldloc,targetTemp);                  // proto-fn, target
 
-            EmitArgsAndCall(1,rhc,objx,context);
+            EmitArgsAndCall(1,rhc,objx,ilg);
             ilg.Emit(OpCodes.Br,endLabel);
 
             ilg.MarkLabel(onLabel);
@@ -511,31 +278,31 @@ namespace clojure.lang.CljCompiler.Ast
             if ( _protocolOn != null )
             {
                 ilg.Emit(OpCodes.Castclass, _onMethod.DeclaringType);
-                MethodExpr.EmitTypedArgs(objx, context, _onMethod.GetParameters(), RT.subvec(_args, 1, _args.count()));
+                MethodExpr.EmitTypedArgs(objx, ilg, _onMethod.GetParameters(), RT.subvec(_args, 1, _args.count()));
                 //if (rhc == RHC.Return)
                 //{
                 //    ObjMethod2 method = (ObjMethod)Compiler.MethodVar.deref();
                 //    method.EmitClearLocals(context);
                 //}
                 ilg.EmitCall(_onMethod);
-                HostExpr.EmitBoxReturn(objx, context, _onMethod.ReturnType);                
+                HostExpr.EmitBoxReturn(objx, ilg, _onMethod.ReturnType);                
             }
             ilg.MarkLabel(endLabel);
         }
 
-        void EmitArgsAndCall(int firstArgToEmit, RHC rhc, ObjExpr objx, GenContext context)
+        void EmitArgsAndCall(int firstArgToEmit, RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             for ( int i=firstArgToEmit; i< Math.Min(Compiler.MaxPositionalArity,_args.count()); i++ )
             {
                 Expr e = (Expr) _args.nth(i);
-                e.Emit(RHC.Expression,objx,context);
+                e.Emit(RHC.Expression,objx,ilg);
             }
             if ( _args.count() > Compiler.MaxPositionalArity )
             {
                 IPersistentVector restArgs = PersistentVector.EMPTY;
                 for (int i=Compiler.MaxPositionalArity; i<_args.count(); i++ )
                     restArgs = restArgs.cons(_args.nth(i));
-                MethodExpr.EmitArgsAsArray(restArgs,objx,context);
+                MethodExpr.EmitArgsAsArray(restArgs,objx,ilg);
             }
 
             //if ( rhc == RHC.Return )
@@ -544,11 +311,10 @@ namespace clojure.lang.CljCompiler.Ast
             //    method.EmitClearLocals(context);
             //}
 
-            context.GetILGenerator().Emit(OpCodes.Callvirt,Compiler.Methods_IFn_invoke[Math.Min(Compiler.MaxPositionalArity+1,_args.count())]);
+           ilg.Emit(OpCodes.Callvirt,Compiler.Methods_IFn_invoke[Math.Min(Compiler.MaxPositionalArity+1,_args.count())]);
         }
 
         public bool HasNormalExit() { return true; }
-
 
         #endregion
     }

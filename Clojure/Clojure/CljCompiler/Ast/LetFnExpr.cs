@@ -14,14 +14,7 @@
 
 using System;
 using System.Collections.Generic;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection.Emit;
-using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -138,51 +131,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             int n = _bindingInits.count();
-            List<ParameterExpression> parms = new List<ParameterExpression>(n);
-            List<Expression> forms = new List<Expression>(n);
-
-            /// First, set up the environment.
-            for (int i = 0; i < n; i++)
-            {
-                BindingInit bi = (BindingInit)_bindingInits.nth(i);
-                ParameterExpression parmExpr = Expression.Parameter(typeof(IFn), bi.Binding.Name);
-                bi.Binding.ParamExpression = parmExpr;
-                parms.Add(parmExpr);
-            }
-
-            // Then initialize
-
-      		IPersistentSet lbset = PersistentHashSet.EMPTY;
-
-            for (int i = 0; i < n; i++)
-            {
-                BindingInit bi = (BindingInit)_bindingInits.nth(i);
-                lbset = (IPersistentSet)lbset.cons(bi.Binding);
-                ParameterExpression parmExpr = (ParameterExpression)bi.Binding.ParamExpression;
-                forms.Add(Expression.Assign(parmExpr, bi.Init.GenCode(RHC.Expression,objx,context)));
-            }
-
-            for (int i = 0; i < n; i++)
-            {
-                BindingInit bi = (BindingInit)_bindingInits.nth(i);
-                ObjExpr fe = (ObjExpr)bi.Init;
-                ParameterExpression parmExpr = (ParameterExpression)bi.Binding.ParamExpression;
-                forms.Add(fe.GenLetFnInits(context, parmExpr, objx, lbset));
-            }
-
-
-            // The work
-            forms.Add(_body.GenCode(rhc,objx,context));
-            return Expression.Block(parms,forms);
-        }
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            int n = _bindingInits.count();
-            ILGen ilg = context.GetILGen();
             List<LocalBuilder> locals = new List<LocalBuilder>();
 
             // Define our locals
@@ -204,7 +155,7 @@ namespace clojure.lang.CljCompiler.Ast
                 BindingInit bi = (BindingInit)_bindingInits.nth(i);
                 lbset = (IPersistentSet)lbset.cons(bi.Binding);
 
-                bi.Init.Emit(RHC.Expression, objx, context);
+                bi.Init.Emit(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Stloc,bi.Binding.LocalVar);
             }
 
@@ -214,14 +165,13 @@ namespace clojure.lang.CljCompiler.Ast
                 ObjExpr fe = (ObjExpr)bi.Init;
 
                 ilg.Emit(OpCodes.Ldloc, bi.Binding.LocalVar);
-                fe.EmitLetFnInits(context, bi.Binding.LocalVar, objx, lbset);
+                fe.EmitLetFnInits(ilg, bi.Binding.LocalVar, objx, lbset);
             }
 
-            _body.Emit(rhc, objx, context);
+            _body.Emit(rhc, objx, ilg);
         }
 
         public bool HasNormalExit() { return _body.HasNormalExit(); }
-
 
         #endregion
     }

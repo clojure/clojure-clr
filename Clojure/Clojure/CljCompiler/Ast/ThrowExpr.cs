@@ -13,12 +13,6 @@
  **/
 
 using System;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -66,25 +60,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public override Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
+        public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            Expression exc = _excExpr.GenCode(RHC.Expression, objx, context);
-            Expression exc2 = Expression.Convert(exc, typeof(Exception));
-
-            return Expression.Throw(exc2,typeof(object));
-        }
-
-        public override void Emit(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            ILGenerator ilg = context.GetILGenerator();
-
-            _excExpr.Emit(RHC.Expression, objx, context);
+            _excExpr.Emit(RHC.Expression, objx, ilg);
             ilg.Emit(OpCodes.Castclass, typeof(Exception));
             ilg.Emit(OpCodes.Throw);
         }
 
         public override bool HasNormalExit() { return false; }
-
 
         #endregion
     }

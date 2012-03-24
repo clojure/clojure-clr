@@ -25,7 +25,6 @@ using System.Linq.Expressions;
 using Microsoft.Scripting.Generation;
 using System.Runtime.CompilerServices;
 using Microsoft.Scripting.Utils;
-using System.Threading;
 using Microsoft.Scripting.Runtime;
 
 
@@ -279,7 +278,7 @@ namespace clojure.lang.CljCompiler.Ast
             //    _typeBuilder.AssemblyQualifiedName);
             
             ConstructorBuilder ctorB = _typeBuilder.DefineConstructor(MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
-            ILGen gen = new ILGen(ctorB.GetILGenerator());
+            CljILGen gen = new CljILGen(ctorB.GetILGenerator());
 
             for (int i = 0; i < _fieldBuilders.Count; i++)
             {

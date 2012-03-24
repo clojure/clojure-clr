@@ -14,12 +14,6 @@
 
 using System;
 
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-
 namespace clojure.lang.CljCompiler.Ast
 {
 
@@ -29,9 +23,7 @@ namespace clojure.lang.CljCompiler.Ast
         Type ClrType { get; }
 
         object Eval();
-        Expression GenCode(RHC rhc, ObjExpr objx, GenContext context);
-
-        void Emit(RHC rhc, ObjExpr objx, GenContext context);
+        void Emit(RHC rhc, ObjExpr objx, CljILGen ilg);
 
         bool HasNormalExit();
     }

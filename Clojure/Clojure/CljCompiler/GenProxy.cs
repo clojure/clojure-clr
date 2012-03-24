@@ -134,7 +134,7 @@ namespace clojure.lang
 
             ConstructorBuilder cb = proxyTB.DefineConstructor(ctor.Attributes, CallingConventions.HasThis, paramTypes);
             // Call base class ctor on all the args
-            ILGen gen = new ILGen(cb.GetILGenerator());
+            CljILGen gen = new CljILGen(cb.GetILGenerator());
             gen.EmitLoadArg(0);                         // gen.Emit(OpCodes.Ldarg_0);
             for (int i = 0; i < pinfos.Length; i++)
                 gen.EmitLoadArg(i + 1);                 // gen.Emit(OpCodes.Ldarg, i + 1);
@@ -155,7 +155,7 @@ namespace clojure.lang
                  MethodAttributes.Public|MethodAttributes.Virtual|MethodAttributes.HideBySig,
                  typeof(void),
                  new Type[] { typeof(IPersistentMap) });
-            ILGen gen = new ILGen(initMb.GetILGenerator());
+            CljILGen gen = new CljILGen(initMb.GetILGenerator());
             gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
             gen.EmitLoadArg(1);                     // gen.Emit(OpCodes.Ldarg_1);
             gen.EmitFieldSet(fb);                   // gen.Emit(OpCodes.Stfld, fb);
@@ -166,7 +166,7 @@ namespace clojure.lang
                  MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
                  typeof(void),
                  new Type[] { typeof(IPersistentMap) });
-            gen = new ILGen(updateTB.GetILGenerator());
+            gen = new CljILGen(updateTB.GetILGenerator());
             gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
 
             gen.Emit(OpCodes.Dup);
@@ -185,7 +185,7 @@ namespace clojure.lang
                 typeof(IPersistentMap),
                 Type.EmptyTypes);
 
-            gen = new ILGen(getMb.GetILGenerator());
+            gen = new CljILGen(getMb.GetILGenerator());
             gen.EmitLoadArg(0);                                     // gen.Emit(OpCodes.Ldarg_0);
             gen.EmitFieldGet(fb);                                   // gen.Emit(OpCodes.Ldfld, fb);
             gen.Emit(OpCodes.Ret);
@@ -301,7 +301,7 @@ namespace clojure.lang
             if (m.IsSpecialName)
                 specialMethods.Add(proxym);
 
-            ILGen gen = new ILGen(proxym.GetILGenerator());
+            CljILGen gen = new CljILGen(proxym.GetILGenerator());
             
             Label elseLabel = gen.DefineLabel();
             Label endLabel = gen.DefineLabel();

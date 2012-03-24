@@ -14,11 +14,6 @@
 
 using System;
 
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -79,40 +74,23 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            return objx.GenLocal(context,_b);
-        }
-
-
-        public void Emit(RHC rhc, ObjExpr objx, GenContext context)
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             if (rhc != RHC.Statement)
-                objx.EmitLocal(context, _b);
+                objx.EmitLocal(ilg, _b);
         }
 
-
         public bool HasNormalExit() { return true; }
-
-        #endregion
-
-        #region MaybePrimitiveExpr Members
 
         public bool CanEmitPrimitive
         {
             get { return _b.PrimitiveType != null; }
         }
 
-        public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            return objx.GenUnboxedLocal(context, _b);
+            objx.EmitUnboxedLocal(ilg, _b);
         }
-
-        public void EmitUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-        {
-            objx.EmitUnboxedLocal(context, _b);
-        }
-
 
         #endregion
 
@@ -123,20 +101,12 @@ namespace clojure.lang.CljCompiler.Ast
             throw new InvalidOperationException("Can't eval locals");
         }
 
-        public Expression GenAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
+        public void EmitAssign(RHC rhc, ObjExpr objx, CljILGen ilg, Expr val)
         {
-            return Expression.Block(
-                objx.GenAssignLocal(context,_b,val),
-                objx.GenLocal(context,_b));
-        }
-
-        public void EmitAssign(RHC rhc, ObjExpr objx, GenContext context, Expr val)
-        {
-            objx.EmitAssignLocal(context, _b, val);
+            objx.EmitAssignLocal(ilg, _b, val);
             if (rhc != RHC.Statement)
-                objx.EmitLocal(context, _b);
+                objx.EmitLocal(ilg, _b);
         }
-
 
         #endregion
     }

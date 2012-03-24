@@ -15,13 +15,15 @@
 using System.Reflection.Emit;
 using System.Reflection;
 #if CLR2
-
+using Microsoft.Scripting.Ast;
 #else
 using System.Linq.Expressions;
 #endif
 using Microsoft.Scripting.Generation;
 using System;
-
+using System.Diagnostics.SymbolStore;
+using clojure.lang.Runtime;
+using AstUtils = Microsoft.Scripting.Ast.Utils;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -30,7 +32,6 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly AssemblyGen _assyGen;
-
         public AssemblyGen AssemblyGen
         {
             get { return _assyGen; }
@@ -47,23 +48,25 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         DynInitHelper _dynInitHelper;
-
         internal DynInitHelper DynInitHelper
         {
             get { return _dynInitHelper; }
         }
 
         readonly bool _isDebuggable;
-
         public bool IsDebuggable
         {
             get { return _isDebuggable; }
         }
 
-        MethodBuilder _mb;
-        public MethodBuilder MB { get { return _mb; } }
-        public ILGen GetILGen() { return new ILGen(_mb.GetILGenerator()); }
-        public ILGenerator GetILGenerator() { return _mb.GetILGenerator(); }
+        readonly ISymbolDocumentWriter _docWriter;
+        public ISymbolDocumentWriter DocWriter
+        {
+            get { return _docWriter; }
+        }
+
+        readonly SymbolDocumentInfo _docInfo;
+        public SymbolDocumentInfo DocInfo { get { return _docInfo; } }
 
         TypeBuilder _tb;
         public TypeBuilder TB { get { return _tb; } }
@@ -74,17 +77,21 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static GenContext CreateWithInternalAssembly(string assyName, bool createDynInitHelper)
         {
-            return new GenContext(assyName, ".dll", null, createDynInitHelper);
+            return new GenContext(assyName, assyName, ".dll", null, createDynInitHelper);
+        }
+
+        public static GenContext CreateWithExternalAssembly(string sourceName, string assyName, string extension, bool createDynInitHelper)
+        {
+            string path = Compiler.CompilePathVar.deref() as string;
+            return new GenContext(sourceName, assyName, extension, path ?? System.IO.Directory.GetCurrentDirectory(),createDynInitHelper);
         }
 
         public static GenContext CreateWithExternalAssembly(string assyName, string extension, bool createDynInitHelper)
         {
-            string path = Compiler.CompilePathVar.deref() as string;
-            return new GenContext(assyName, extension, path ?? System.IO.Directory.GetCurrentDirectory(),createDynInitHelper);
+            return CreateWithExternalAssembly(assyName, assyName, extension, createDynInitHelper);
         }
 
-
-        private GenContext(string assyName, string extension, string directory, bool createDynInitHelper)
+        private GenContext(string sourceName, string assyName, string extension, string directory, bool createDynInitHelper)
         {
             // TODO: Make this settable from a *debug* flag
 #if DEBUG
@@ -102,13 +109,15 @@ namespace clojure.lang.CljCompiler.Ast
             _assyGen = new AssemblyGen(aname, directory, extension, _isDebuggable);
             if ( createDynInitHelper )
                 _dynInitHelper = new DynInitHelper(_assyGen, GenerateName());
+            if (_isDebuggable)
+                _docWriter = ModuleBuilder.DefineDocument(sourceName, ClojureContext.Default.LanguageGuid, ClojureContext.Default.VendorGuid, Guid.Empty);
+            _docInfo = Expression.SymbolDocument(sourceName);
         }
 
         internal GenContext WithNewDynInitHelper()
         {
             return WithNewDynInitHelper(GenerateName());
         }
- 
 
         internal GenContext WithNewDynInitHelper(string dihClassName)
         {
@@ -129,12 +138,10 @@ namespace clojure.lang.CljCompiler.Ast
             return (GenContext) this.MemberwiseClone();
         }
 
-
-        internal GenContext WithBuilders(TypeBuilder tb, MethodBuilder mb)
+        public GenContext WithTypeBuilder(TypeBuilder tb)
         {
             GenContext newContext = Clone();
             newContext._tb = tb;
-            newContext._mb = mb;
             return newContext;
         }
 
@@ -148,6 +155,73 @@ namespace clojure.lang.CljCompiler.Ast
             if ( _dynInitHelper != null  )
                 _dynInitHelper.FinalizeType();
             _assyGen.SaveAssembly();
+        }
+
+        #endregion
+
+        #region Debug info
+
+        public static Expression AddDebugInfo(Expression expr, IPersistentMap spanMap)
+        {
+            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
+            if (context == null)
+                return expr;
+
+            return context.MaybeAddDebugInfo(expr, spanMap);
+        }
+
+        public Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap)
+        {
+            if (_isDebuggable && spanMap != null & _docInfo != null)
+            {
+                int startLine;
+                int startCol;
+                int finishLine;
+                int finishCol;
+                if (Compiler.GetLocations(spanMap, out startLine, out startCol, out finishLine, out finishCol))
+                    return AstUtils.AddDebugInfo(expr,
+                        _docInfo,
+                        new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.StartLineKey), (int)spanMap.valAt(RT.StartColumnKey)),
+                        new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.EndLineKey), (int)spanMap.valAt(RT.EndColumnKey)));
+            }
+            return expr;
+        }
+
+        public static void EmitDebugInfo(CljILGen ilg, IPersistentMap spanMap)
+        {
+            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
+            if (context == null)
+                return;
+
+            context.MaybeEmitDebugInfo(ilg, spanMap);
+        }
+
+        public void MaybeEmitDebugInfo(CljILGen ilg, IPersistentMap spanMap)
+        {
+            if ( _docWriter != null && spanMap != null )
+            {
+                int startLine;
+                int startCol;
+                int finishLine;
+                int finishCol;
+                if (Compiler.GetLocations(spanMap, out startLine, out startCol, out finishLine, out finishCol))
+                    ilg.MarkSequencePoint(_docWriter, startLine, startCol, finishLine, finishCol);
+            }
+        }
+
+        public static void SetLocalName(LocalBuilder lb, string name)
+        {
+            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
+            if (context == null)
+                return;
+
+            context.MaybSetLocalName(lb, name);
+        }
+
+        public void MaybSetLocalName(LocalBuilder lb, string name)
+        {
+            if (_isDebuggable)
+                lb.SetLocalSymInfo(name);
         }
 
         #endregion
