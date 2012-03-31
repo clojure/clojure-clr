@@ -231,7 +231,6 @@ namespace clojure.lang.CljCompiler.Ast
             _tryExpr.Emit(rhc, objx, ilg);
             if (rhc != RHC.Statement)
                 ilg.Emit(OpCodes.Stloc, retLocal);
-            //ilg.Emit(OpCodes.Leave, endLabel);
 
             for (int i = 0; i < _catchExprs.count(); i++)
             {
@@ -243,7 +242,6 @@ namespace clojure.lang.CljCompiler.Ast
                 clause.Handler.Emit(rhc, objx, ilg);
                 if (rhc != RHC.Statement)
                     ilg.Emit(OpCodes.Stloc, retLocal);
-                //ilg.Emit(OpCodes.Leave, endLabel);
             }
 
             if (_finallyExpr != null)

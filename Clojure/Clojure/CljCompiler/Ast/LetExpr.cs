@@ -244,7 +244,6 @@ namespace clojure.lang.CljCompiler.Ast
                     bi.Binding.LocalVar = local;
 
                     bi.Init.Emit(RHC.Expression, objx, ilg);
-                    // TODO: DO we need to MaybeBox here?
                     ilg.Emit(OpCodes.Stloc, local);
                 }
              }

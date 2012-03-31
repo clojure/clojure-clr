@@ -142,7 +142,7 @@ namespace clojure.lang.CljCompiler.Ast
                 GenContext.SetLocalName(tmp, "valTemp");
                 ilg.Emit(OpCodes.Dup);
                 ilg.Emit(OpCodes.Stloc, tmp);
-                if (FieldType.IsPrimitive)
+                if (FieldType.IsValueType)
                     HostExpr.EmitUnboxArg(objx, ilg, FieldType);
                 else
                     ilg.Emit(OpCodes.Castclass, FieldType);
