@@ -383,57 +383,137 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     if (RT.booleanCast(RT.UncheckedMathVar.deref()))
                     {
-                        if (paramType == typeof(sbyte))
-                            m = HostExpr.Method_RT_uncheckedSbyteCast;
-                        else if (paramType == typeof(byte))
-                            m = HostExpr.Method_RT_uncheckedByteCast;
-                        else if (paramType == typeof(short))
-                            m = HostExpr.Method_RT_uncheckedShortCast;
-                        else if (paramType == typeof(ushort))
-                            m = HostExpr.Method_RT_uncheckedUshortCast;
-                        else if (paramType == typeof(int))
-                            m = HostExpr.Method_RT_uncheckedIntCast;
-                        else if (paramType == typeof(uint))
-                            m = HostExpr.Method_RT_uncheckedUintCast;
-                        else if (paramType == typeof(long))
-                            m = HostExpr.Method_RT_uncheckedLongCast;
-                        else if (paramType == typeof(ulong))
-                            m = HostExpr.Method_RT_uncheckedUlongCast;
-                        else if (paramType == typeof(float))
-                            m = HostExpr.Method_RT_uncheckedFloatCast;
-                        else if (paramType == typeof(double))
-                            m = HostExpr.Method_RT_uncheckedDoubleCast;
-                        else if (paramType == typeof(char))
-                            m = HostExpr.Method_RT_uncheckedCharCast;
-                        else if (paramType == typeof(decimal))
-                            m = HostExpr.Method_RT_uncheckedDecimalCast;
+                        switch (Type.GetTypeCode(paramType))
+                        {
+                            case TypeCode.SByte:
+                                m = HostExpr.Method_RT_uncheckedSbyteCast;
+                                break;
+                            case TypeCode.Byte:
+                                m = HostExpr.Method_RT_uncheckedByteCast;
+                                break;
+                            case TypeCode.Int16:
+                                m = HostExpr.Method_RT_uncheckedShortCast;
+                                break;
+                            case TypeCode.UInt16:
+                                m = HostExpr.Method_RT_uncheckedUshortCast;
+                                break;
+                            case TypeCode.Int32:
+                                m = HostExpr.Method_RT_uncheckedIntCast;
+                                break;
+                            case TypeCode.UInt32:
+                                m = HostExpr.Method_RT_uncheckedUintCast;
+                                break;
+                            case TypeCode.Int64:
+                                m = HostExpr.Method_RT_uncheckedLongCast;
+                                break;
+                            case TypeCode.UInt64:
+                                m = HostExpr.Method_RT_uncheckedUlongCast;
+                                break;
+                            case TypeCode.Single:
+                                m = HostExpr.Method_RT_uncheckedFloatCast;
+                                break;
+                            case TypeCode.Double:
+                                m = HostExpr.Method_RT_uncheckedDoubleCast;
+                                break;
+                            case TypeCode.Char:
+                                m = HostExpr.Method_RT_uncheckedCharCast;
+                                break;
+                            case TypeCode.Decimal:
+                                m = HostExpr.Method_RT_uncheckedDecimalCast;
+                                break;
+                        }
+
+                        //if (paramType == typeof(sbyte))
+                        //    m = HostExpr.Method_RT_uncheckedSbyteCast;
+                        //else if (paramType == typeof(byte))
+                        //    m = HostExpr.Method_RT_uncheckedByteCast;
+                        //else if (paramType == typeof(short))
+                        //    m = HostExpr.Method_RT_uncheckedShortCast;
+                        //else if (paramType == typeof(ushort))
+                        //    m = HostExpr.Method_RT_uncheckedUshortCast;
+                        //else if (paramType == typeof(int))
+                        //    m = HostExpr.Method_RT_uncheckedIntCast;
+                        //else if (paramType == typeof(uint))
+                        //    m = HostExpr.Method_RT_uncheckedUintCast;
+                        //else if (paramType == typeof(long))
+                        //    m = HostExpr.Method_RT_uncheckedLongCast;
+                        //else if (paramType == typeof(ulong))
+                        //    m = HostExpr.Method_RT_uncheckedUlongCast;
+                        //else if (paramType == typeof(float))
+                        //    m = HostExpr.Method_RT_uncheckedFloatCast;
+                        //else if (paramType == typeof(double))
+                        //    m = HostExpr.Method_RT_uncheckedDoubleCast;
+                        //else if (paramType == typeof(char))
+                        //    m = HostExpr.Method_RT_uncheckedCharCast;
+                        //else if (paramType == typeof(decimal))
+                        //    m = HostExpr.Method_RT_uncheckedDecimalCast;
                     }
                     else
                     {
-                        if (paramType == typeof(sbyte))
-                            m = HostExpr.Method_RT_sbyteCast;
-                        else if (paramType == typeof(byte))
-                            m = HostExpr.Method_RT_byteCast;
-                        else if (paramType == typeof(short))
-                            m = HostExpr.Method_RT_shortCast;
-                        else if (paramType == typeof(ushort))
-                            m = HostExpr.Method_RT_ushortCast;
-                        else if (paramType == typeof(int))
-                            m = HostExpr.Method_RT_intCast;
-                        else if (paramType == typeof(uint))
-                            m = HostExpr.Method_RT_uintCast;
-                        else if (paramType == typeof(long))
-                            m = HostExpr.Method_RT_longCast;
-                        else if (paramType == typeof(ulong))
-                            m = HostExpr.Method_RT_ulongCast;
-                        else if (paramType == typeof(float))
-                            m = HostExpr.Method_RT_floatCast;
-                        else if (paramType == typeof(double))
-                            m = HostExpr.Method_RT_doubleCast;
-                        else if (paramType == typeof(char))
-                            m = HostExpr.Method_RT_charCast;
-                        else if (paramType == typeof(decimal))
-                            m = HostExpr.Method_RT_decimalCast;
+                        switch (Type.GetTypeCode(paramType))
+                        {
+                            case TypeCode.SByte:
+                                m = HostExpr.Method_RT_sbyteCast;
+                                break;
+                            case TypeCode.Byte:
+                                m = HostExpr.Method_RT_byteCast;
+                                break;
+                            case TypeCode.Int16:
+                                m = HostExpr.Method_RT_shortCast;
+                                break;
+                            case TypeCode.UInt16:
+                                m = HostExpr.Method_RT_ushortCast;
+                                break;
+                            case TypeCode.Int32:
+                                m = HostExpr.Method_RT_intCast;
+                                break;
+                            case TypeCode.UInt32:
+                                m = HostExpr.Method_RT_uintCast;
+                                break;
+                            case TypeCode.Int64:
+                                m = HostExpr.Method_RT_longCast;
+                                break;
+                            case TypeCode.UInt64:
+                                m = HostExpr.Method_RT_ulongCast;
+                                break;
+                            case TypeCode.Single:
+                                m = HostExpr.Method_RT_floatCast;
+                                break;
+                            case TypeCode.Double:
+                                m = HostExpr.Method_RT_doubleCast;
+                                break;
+                            case TypeCode.Char:
+                                m = HostExpr.Method_RT_charCast;
+                                break;
+                            case TypeCode.Decimal:
+                                m = HostExpr.Method_RT_decimalCast;
+                                break;
+                        }
+
+                        //if (paramType == typeof(sbyte))
+                        //    m = HostExpr.Method_RT_sbyteCast;
+                        //else if (paramType == typeof(byte))
+                        //    m = HostExpr.Method_RT_byteCast;
+                        //else if (paramType == typeof(short))
+                        //    m = HostExpr.Method_RT_shortCast;
+                        //else if (paramType == typeof(ushort))
+                        //    m = HostExpr.Method_RT_ushortCast;
+                        //else if (paramType == typeof(int))
+                        //    m = HostExpr.Method_RT_intCast;
+                        //else if (paramType == typeof(uint))
+                        //    m = HostExpr.Method_RT_uintCast;
+                        //else if (paramType == typeof(long))
+                        //    m = HostExpr.Method_RT_longCast;
+                        //else if (paramType == typeof(ulong))
+                        //    m = HostExpr.Method_RT_ulongCast;
+                        //else if (paramType == typeof(float))
+                        //    m = HostExpr.Method_RT_floatCast;
+                        //else if (paramType == typeof(double))
+                        //    m = HostExpr.Method_RT_doubleCast;
+                        //else if (paramType == typeof(char))
+                        //    m = HostExpr.Method_RT_charCast;
+                        //else if (paramType == typeof(decimal))
+                        //    m = HostExpr.Method_RT_decimalCast;
                     }
                 }
 

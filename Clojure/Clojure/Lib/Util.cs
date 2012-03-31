@@ -244,405 +244,409 @@ namespace clojure.lang
 
         public static int ConvertToInt(object o)
         {
-            //  The Typecode dispatch version is much slower for most cases.
-            //  I leave it here as a reminder.
-            //return (int)Convert.ToDouble(o);
-            //switch (Type.GetTypeCode(o.GetType()))   // convert fix
-            //{
-            //    case TypeCode.Byte:
-            //        return (int)(Byte)o;
-            //    case TypeCode.Char:
-            //        return (int)(Char)o;
-            //    case TypeCode.Decimal:
-            //        return (int)(decimal)o;
-            //    case TypeCode.Double:
-            //        return (int)(double)o;
-            //    case TypeCode.Int16:
-            //        return (int)(short)o;
-            //    case TypeCode.Int32:
-            //        return (int)o;
-            //    case TypeCode.Int64:
-            //        return (int)(long)o;
-            //    case TypeCode.SByte:
-            //        return (int)(sbyte)o;
-            //    case TypeCode.Single:
-            //        return (int)(float)o;
-            //    case TypeCode.UInt16:
-            //        return (int)(ushort)o;
-            //    case TypeCode.UInt32:
-            //        return (int)(uint)o;
-            //    case TypeCode.UInt64:
-            //        return (int)(ulong)o;
-            //    default:
-            //        return Convert.ToInt32(o);
-            //}
-            if (o is Int32)
-                return (int)o;
-            else if (o is Int64)
-                return (int)(long)o;
-            else if (o is Double)
-                return (int)(double)o;
-            else if (o is Single)
-                return (int)(float)o;
-            else if (o is Int16)
-                return (int)(short)o;
-            else if (o is Byte)
-                return (int)(Byte)o;
-            else if (o is Char)
-                return (int)(Char)o;
-            else if (o is Decimal)
-                return (int)(decimal)o;
-            else if (o is SByte)
-                return (int)(sbyte)o;
-            else if (o is UInt16)
-                return (int)(ushort)o;
-            else if (o is UInt32)
-                return (int)(uint)o;
-            else if (o is UInt64)
-                return (int)(ulong)o;
-            else
-                return Convert.ToInt32(o, CultureInfo.InvariantCulture);
+            switch (Type.GetTypeCode(o.GetType()))
+            {
+                case TypeCode.Byte:
+                    return (int)(Byte)o;
+                case TypeCode.Char:
+                    return (int)(Char)o;
+                case TypeCode.Decimal:
+                    return (int)(decimal)o;
+                case TypeCode.Double:
+                    return (int)(double)o;
+                case TypeCode.Int16:
+                    return (int)(short)o;
+                case TypeCode.Int32:
+                    return (int)o;
+                case TypeCode.Int64:
+                    return (int)(long)o;
+                case TypeCode.SByte:
+                    return (int)(sbyte)o;
+                case TypeCode.Single:
+                    return (int)(float)o;
+                case TypeCode.UInt16:
+                    return (int)(ushort)o;
+                case TypeCode.UInt32:
+                    return (int)(uint)o;
+                case TypeCode.UInt64:
+                    return (int)(ulong)o;
+                default:
+                    return Convert.ToInt32(o, CultureInfo.InvariantCulture);
+            }
         }
 
         public static uint ConvertToUInt(object o)
         {
-            if (o is UInt32)
-                return (uint)o;
-            else if (o is Int32)
-                return (uint)(int)o;
-            else if (o is Int64)
-                return (uint)(long)o;
-            else if (o is Double)
-                return (uint)(double)o;
-            else if (o is Single)
-                return (uint)(float)o;
-            else if (o is Int16)
-                return (uint)(short)o;
-            else if (o is Byte)
-                return (uint)(Byte)o;
-            else if (o is Char)
-                return (uint)(Char)o;
-            else if (o is Decimal)
-                return (uint)(decimal)o;
-            else if (o is SByte)
-                return (uint)(sbyte)o;
-            else if (o is UInt16)
-                return (uint)(ushort)o;
-            else if (o is UInt64)
-                return (uint)(ulong)o;
-            else
-                return Convert.ToUInt32(o, CultureInfo.InvariantCulture);
+            switch (Type.GetTypeCode(o.GetType()))
+            {
+                case TypeCode.Byte:
+                    return (uint)(Byte)o;
+                case TypeCode.Char:
+                    return (uint)(Char)o;
+                case TypeCode.Decimal:
+                    return (uint)(decimal)o;
+                case TypeCode.Double:
+                    return (uint)(double)o;
+                case TypeCode.Int16:
+                    return (uint)(short)o;
+                case TypeCode.Int32:
+                    return (uint)(int)o;
+                case TypeCode.Int64:
+                    return (uint)(long)o;
+                case TypeCode.SByte:
+                    return (uint)(sbyte)o;
+                case TypeCode.Single:
+                    return (uint)(float)o;
+                case TypeCode.UInt16:
+                    return (uint)(ushort)o;
+                case TypeCode.UInt32:
+                    return (uint)o;
+                case TypeCode.UInt64:
+                    return (uint)(ulong)o;
+                default:
+                    return Convert.ToUInt32(o, CultureInfo.InvariantCulture);
+            } 
         }
 
         public static long ConvertToLong(object o)
         {
-            if (o is Int64)
-                return (long)o;
-            else if (o is Int32)
-                return (long)(int)o;
-            else if (o is Double)
-                return (long)(double)o;
-            else if (o is Single)
-                return (long)(float)o;
-            else if (o is Int16)
-                return (long)(short)o;
-            else if (o is Byte)
-                return (long)(Byte)o;
-            else if (o is Char)
-                return (long)(Char)o;
-            else if (o is Decimal)
-                return (long)(decimal)o;
-            else if (o is SByte)
-                return (long)(sbyte)o;
-            else if (o is UInt16)
-                return (long)(ushort)o;
-            else if (o is UInt32)
-                return (long)(uint)o;
-            else if (o is UInt64)
-                return (long)(ulong)o;
-            else
-                return Convert.ToInt64(o, CultureInfo.InvariantCulture);
+            switch (Type.GetTypeCode(o.GetType()))
+            {
+                case TypeCode.Byte:
+                    return (long)(Byte)o;
+                case TypeCode.Char:
+                    return (long)(Char)o;
+                case TypeCode.Decimal:
+                    return (long)(decimal)o;
+                case TypeCode.Double:
+                    return (long)(double)o;
+                case TypeCode.Int16:
+                    return (long)(short)o;
+                case TypeCode.Int32:
+                    return (long)(int)o;
+                case TypeCode.Int64:
+                    return (long)o;
+                case TypeCode.SByte:
+                    return (long)(sbyte)o;
+                case TypeCode.Single:
+                    return (long)(float)o;
+                case TypeCode.UInt16:
+                    return (long)(ushort)o;
+                case TypeCode.UInt32:
+                    return (long)(uint)o;
+                case TypeCode.UInt64:
+                    return (long)(ulong)o;
+                default:
+                    return Convert.ToInt64(o, CultureInfo.InvariantCulture);
+            }
         }
 
         public static ulong ConvertToULong(object o)
         {
-            if (o is UInt64)
-                return (ulong)o;
-            else if (o is Int64)
-                return (ulong)(long)o;
-            else if (o is Int32)
-                return (ulong)(int)o;
-            else if (o is Double)
-                return (ulong)(double)o;
-            else if (o is Single)
-                return (ulong)(float)o;
-            else if (o is Int16)
-                return (ulong)(short)o;
-            else if (o is Byte)
-                return (ulong)(Byte)o;
-            else if (o is Char)
-                return (ulong)(Char)o;
-            else if (o is Decimal)
-                return (ulong)(decimal)o;
-            else if (o is SByte)
-                return (ulong)(sbyte)o;
-            else if (o is UInt16)
-                return (ulong)(ushort)o;
-            else if (o is UInt32)
-                return (ulong)(uint)o;
-            else
-                return Convert.ToUInt64(o, CultureInfo.InvariantCulture);
+
+            switch (Type.GetTypeCode(o.GetType()))
+            {
+                case TypeCode.Byte:
+                    return (ulong)(Byte)o;
+                case TypeCode.Char:
+                    return (ulong)(Char)o;
+                case TypeCode.Decimal:
+                    return (ulong)(decimal)o;
+                case TypeCode.Double:
+                    return (ulong)(double)o;
+                case TypeCode.Int16:
+                    return (ulong)(short)o;
+                case TypeCode.Int32:
+                    return (ulong)(int)o;
+                case TypeCode.Int64:
+                    return (ulong)(long)o;
+                case TypeCode.SByte:
+                    return (ulong)(sbyte)o;
+                case TypeCode.Single:
+                    return (ulong)(float)o;
+                case TypeCode.UInt16:
+                    return (ulong)(ushort)o;
+                case TypeCode.UInt32:
+                    return (ulong)(uint)o;
+                case TypeCode.UInt64:
+                    return (ulong)o;
+                default:
+                    return Convert.ToUInt64(o, CultureInfo.InvariantCulture);
+            } 
         }
 
         //
 
         public static short ConvertToShort(object o)
         {
-            if (o is Int16)
-                return (short)o;
-            else if (o is Int32)
-                return (short)(int)o;
-            else if (o is Double)
-                return (short)(double)o;
-            else if (o is Single)
-                return (short)(float)o;
-            else if (o is Byte)
-                return (short)(Byte)o;
-            else if (o is Char)
-                return (short)(Char)o;
-            else if (o is Decimal)
-                return (short)(decimal)o;
-            else if (o is SByte)
-                return (short)(sbyte)o;
-            else if (o is UInt16)
-                return (short)(ushort)o;
-            else if (o is UInt32)
-                return (short)(uint)o;
-            else if (o is UInt64)
-                return (short)(ulong)o;
-            else if (o is Int64)
-                return (short)(long)o;
-            else
-                return Convert.ToInt16(o, CultureInfo.InvariantCulture);
+            switch (Type.GetTypeCode(o.GetType()))
+            {
+                case TypeCode.Byte:
+                    return (short)(Byte)o;
+                case TypeCode.Char:
+                    return (short)(Char)o;
+                case TypeCode.Decimal:
+                    return (short)(decimal)o;
+                case TypeCode.Double:
+                    return (short)(double)o;
+                case TypeCode.Int16:
+                    return (short)o;
+                case TypeCode.Int32:
+                    return (short)(int)o;
+                case TypeCode.Int64:
+                    return (short)(long)o;
+                case TypeCode.SByte:
+                    return (short)(sbyte)o;
+                case TypeCode.Single:
+                    return (short)(float)o;
+                case TypeCode.UInt16:
+                    return (short)(ushort)o;
+                case TypeCode.UInt32:
+                    return (short)(uint)o;
+                case TypeCode.UInt64:
+                    return (short)(ulong)o;
+                default:
+                    return Convert.ToInt16(o, CultureInfo.InvariantCulture);
+            } 
         }
 
         public static ushort ConvertToUShort(object o)
         {
-            if (o is UInt16)
-                return (ushort)o;
-            else if (o is Int64)
-                return (ushort)(long)o;
-            else if (o is Int32)
-                return (ushort)(int)o;
-            else if (o is Double)
-                return (ushort)(double)o;
-            else if (o is Single)
-                return (ushort)(float)o;
-            else if (o is Int16)
-                return (ushort)(short)o;
-            else if (o is Byte)
-                return (ushort)(Byte)o;
-            else if (o is Char)
-                return (ushort)(Char)o;
-            else if (o is Decimal)
-                return (ushort)(decimal)o;
-            else if (o is SByte)
-                return (ushort)(sbyte)o;
-            else if (o is UInt32)
-                return (ushort)(uint)o;
-            else if (o is UInt64)
-                return (ushort)(ushort)o;
-            else
-                return Convert.ToUInt16(o, CultureInfo.InvariantCulture);
+            switch (Type.GetTypeCode(o.GetType()))
+            {
+                case TypeCode.Byte:
+                    return (ushort)(Byte)o;
+                case TypeCode.Char:
+                    return (ushort)(Char)o;
+                case TypeCode.Decimal:
+                    return (ushort)(decimal)o;
+                case TypeCode.Double:
+                    return (ushort)(double)o;
+                case TypeCode.Int16:
+                    return (ushort)(short)o;
+                case TypeCode.Int32:
+                    return (ushort)(int)o;
+                case TypeCode.Int64:
+                    return (ushort)(long)o;
+                case TypeCode.SByte:
+                    return (ushort)(sbyte)o;
+                case TypeCode.Single:
+                    return (ushort)(float)o;
+                case TypeCode.UInt16:
+                    return (ushort)o;
+                case TypeCode.UInt32:
+                    return (ushort)(uint)o;
+                case TypeCode.UInt64:
+                    return (ushort)(ulong)o;
+                default:
+                    return Convert.ToUInt16(o, CultureInfo.InvariantCulture);
+            }
         }
 
         //
 
         public static sbyte ConvertToSByte(object o)
         {
-            if (o is SByte)
-                return (sbyte)o;
-            else if (o is Int32)
-                return (sbyte)(int)o;
-            else if (o is Double)
-                return (sbyte)(double)o;
-            else if (o is Single)
-                return (sbyte)(float)o;
-            else if (o is Int16)
-                return (sbyte)(short)o;
-            else if (o is Byte)
-                return (sbyte)(Byte)o;
-            else if (o is Char)
-                return (sbyte)(Char)o;
-            else if (o is Decimal)
-                return (sbyte)(decimal)o;
-            else if (o is UInt16)
-                return (sbyte)(ushort)o;
-            else if (o is UInt32)
-                return (sbyte)(uint)o;
-            else if (o is UInt64)
-                return (sbyte)(ulong)o;
-            else if (o is Int64)
-                return (sbyte)(long)o;
-            else
-                return Convert.ToSByte(o, CultureInfo.InvariantCulture);
+            switch (Type.GetTypeCode(o.GetType()))
+            {
+                case TypeCode.Byte:
+                    return (sbyte)(Byte)o;
+                case TypeCode.Char:
+                    return (sbyte)(Char)o;
+                case TypeCode.Decimal:
+                    return (sbyte)(decimal)o;
+                case TypeCode.Double:
+                    return (sbyte)(double)o;
+                case TypeCode.Int16:
+                    return (sbyte)(short)o;
+                case TypeCode.Int32:
+                    return (sbyte)(int)o;
+                case TypeCode.Int64:
+                    return (sbyte)(long)o;
+                case TypeCode.SByte:
+                    return (sbyte)o;
+                case TypeCode.Single:
+                    return (sbyte)(float)o;
+                case TypeCode.UInt16:
+                    return (sbyte)(ushort)o;
+                case TypeCode.UInt32:
+                    return (sbyte)(uint)o;
+                case TypeCode.UInt64:
+                    return (sbyte)(ulong)o;
+                default:
+                    return Convert.ToSByte(o, CultureInfo.InvariantCulture);
+            }
         }
 
         public static byte ConvertToByte(object o)
         {
-            if (o is Byte)
-                return (byte)o;
-            else if (o is Int32)
-                return (byte)(int)o;
-            else if (o is Int64)
-                return (byte)(long)o;
-            else if (o is Double)
-                return (byte)(double)o;
-            else if (o is Single)
-                return (byte)(float)o;
-            else if (o is Int16)
-                return (byte)(short)o;
-            else if (o is Char)
-                return (byte)(Char)o;
-            else if (o is Decimal)
-                return (byte)(decimal)o;
-            else if (o is SByte)
-                return (byte)(sbyte)o;
-            else if (o is UInt16)
-                return (byte)(ushort)o;
-            else if (o is UInt32)
-                return (byte)(uint)o;
-            else if (o is UInt64)
-                return (byte)(ushort)o;
-            else
-                return Convert.ToByte(o, CultureInfo.InvariantCulture);
+            switch (Type.GetTypeCode(o.GetType()))
+            {
+                case TypeCode.Byte:
+                    return (byte)o;
+                case TypeCode.Char:
+                    return (byte)(Char)o;
+                case TypeCode.Decimal:
+                    return (byte)(decimal)o;
+                case TypeCode.Double:
+                    return (byte)(double)o;
+                case TypeCode.Int16:
+                    return (byte)(short)o;
+                case TypeCode.Int32:
+                    return (byte)(int)o;
+                case TypeCode.Int64:
+                    return (byte)(long)o;
+                case TypeCode.SByte:
+                    return (byte)(sbyte)o;
+                case TypeCode.Single:
+                    return (byte)(float)o;
+                case TypeCode.UInt16:
+                    return (byte)(ushort)o;
+                case TypeCode.UInt32:
+                    return (byte)(uint)o;
+                case TypeCode.UInt64:
+                    return (byte)(ulong)o;
+                default:
+                    return Convert.ToByte(o, CultureInfo.InvariantCulture);
+            }
         }
 
         //
         
         public static float ConvertToFloat(object o)
         {
-            if (o is Single)
-                return (float)o;
-            else if (o is Double)
-                return (float)(double)o;
-            else if (o is Int32)
-                return (float)(int)o;
-            else if (o is Int64)
-                return (float)(long)o;
-            else if (o is Int16)
-                return (float)(short)o;
-            else if (o is Byte)
-                return (float)(Byte)o;
-            else if (o is Char)
-                return (float)(Char)o;
-            else if (o is Decimal)
-                return (float)(decimal)o;
-            else if (o is SByte)
-                return (float)(sbyte)o;
-            else if (o is UInt16)
-                return (float)(ushort)o;
-            else if (o is UInt32)
-                return (float)(uint)o;
-            else if (o is UInt64)
-                return (float)(ulong)o;
-            else
-                return Convert.ToSingle(o, CultureInfo.InvariantCulture);
+            switch (Type.GetTypeCode(o.GetType()))
+            {
+                case TypeCode.Byte:
+                    return (float)(byte)o;
+                case TypeCode.Char:
+                    return (float)(Char)o;
+                case TypeCode.Decimal:
+                    return (float)(decimal)o;
+                case TypeCode.Double:
+                    return (float)(double)o;
+                case TypeCode.Int16:
+                    return (float)(short)o;
+                case TypeCode.Int32:
+                    return (float)(int)o;
+                case TypeCode.Int64:
+                    return (float)(long)o;
+                case TypeCode.SByte:
+                    return (float)(sbyte)o;
+                case TypeCode.Single:
+                    return (float)o;
+                case TypeCode.UInt16:
+                    return (float)(ushort)o;
+                case TypeCode.UInt32:
+                    return (float)(uint)o;
+                case TypeCode.UInt64:
+                    return (float)(ulong)o;
+                default:
+                    return Convert.ToSingle(o, CultureInfo.InvariantCulture);
+            }
         }
 
         public static double ConvertToDouble(object o)
         {
-            if (o is Double)
-                return (double)o;
-            else if (o is Single)
-                return (double)(float)o; 
-            else if (o is Int32)
-                return (double)(int)o;
-            else if (o is Int64)
-                return (double)(long)o;
-            else if (o is Int16)
-                return (double)(short)o;
-            else if (o is Byte)
-                return (double)(Byte)o;
-            else if (o is Char)
-                return (double)(Char)o;
-            else if (o is Decimal)
-                return (double)(decimal)o;
-            else if (o is SByte)
-                return (double)(sbyte)o;
-            else if (o is UInt16)
-                return (double)(ushort)o;
-            else if (o is UInt32)
-                return (double)(uint)o;
-            else if (o is UInt64)
-                return (double)(ulong)o;
-            else
-                return Convert.ToDouble(o, CultureInfo.InvariantCulture);
+            switch (Type.GetTypeCode(o.GetType()))
+            {
+                case TypeCode.Byte:
+                    return (double)(byte)o;
+                case TypeCode.Char:
+                    return (double)(Char)o;
+                case TypeCode.Decimal:
+                    return (double)(decimal)o;
+                case TypeCode.Double:
+                    return (double)o;
+                case TypeCode.Int16:
+                    return (double)(short)o;
+                case TypeCode.Int32:
+                    return (double)(int)o;
+                case TypeCode.Int64:
+                    return (double)(long)o;
+                case TypeCode.SByte:
+                    return (double)(sbyte)o;
+                case TypeCode.Single:
+                    return (double)(float)o;
+                case TypeCode.UInt16:
+                    return (double)(ushort)o;
+                case TypeCode.UInt32:
+                    return (double)(uint)o;
+                case TypeCode.UInt64:
+                    return (double)(ulong)o;
+                default:
+                    return Convert.ToDouble(o, CultureInfo.InvariantCulture);
+            }
         }
 
 
         public static decimal ConvertToDecimal(object o)
         {
-            if (o is Decimal)
-                return (decimal)o;
-            else if (o is Double)
-                return (decimal)(double)o;
-            else if (o is Single)
-                return (decimal)(float)o;
-            else if (o is Int32)
-                return (decimal)(int)o;
-            else if (o is Int64)
-                return (decimal)(long)o;
-            else if (o is Int16)
-                return (decimal)(short)o;
-            else if (o is Byte)
-                return (decimal)(Byte)o;
-            else if (o is Char)
-                return (decimal)(Char)o;
-            else if (o is SByte)
-                return (decimal)(sbyte)o;
-            else if (o is UInt16)
-                return (decimal)(ushort)o;
-            else if (o is UInt32)
-                return (decimal)(uint)o;
-            else if (o is UInt64)
-                return (decimal)(ulong)o;
-            else
-                return Convert.ToDecimal(o, CultureInfo.InvariantCulture);
+            switch (Type.GetTypeCode(o.GetType()))
+            {
+                case TypeCode.Byte:
+                    return (decimal)(byte)o;
+                case TypeCode.Char:
+                    return (decimal)(Char)o;
+                case TypeCode.Decimal:
+                    return (decimal)o;
+                case TypeCode.Double:
+                    return (decimal)(double)o;
+                case TypeCode.Int16:
+                    return (decimal)(short)o;
+                case TypeCode.Int32:
+                    return (decimal)(int)o;
+                case TypeCode.Int64:
+                    return (decimal)(long)o;
+                case TypeCode.SByte:
+                    return (decimal)(sbyte)o;
+                case TypeCode.Single:
+                    return (decimal)(float)o;
+                case TypeCode.UInt16:
+                    return (decimal)(ushort)o;
+                case TypeCode.UInt32:
+                    return (decimal)(uint)o;
+                case TypeCode.UInt64:
+                    return (decimal)(ulong)o;
+                default:
+                    return Convert.ToDecimal(o, CultureInfo.InvariantCulture);
+            }
+           
         }
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         public static char ConvertToChar(object o)
         {
-            if (o is Char)
-                return (Char)o;
-            else if (o is Int32)
-                return (char)(int)o;
-            else if (o is Int64)
-                return (char)(long)o;
-            else if (o is Double)
-                return (char)(double)o;
-            else if (o is Single)
-                return (char)(float)o;
-            else if (o is Int16)
-                return (char)(short)o;
-            else if (o is Byte)
-                return (char)(Byte)o;
-            else if (o is Char)
-                return (char)(Char)o;
-            else if (o is Decimal)
-                return (char)(decimal)o;
-            else if (o is SByte)
-                return (char)(sbyte)o;
-            else if (o is UInt16)
-                return (char)(ushort)o;
-            else if (o is UInt32)
-                return (char)(uint)o;
-            else if (o is UInt64)
-                return (char)(ulong)o;
-            else
-                return Convert.ToChar(o, CultureInfo.InvariantCulture);
+            switch (Type.GetTypeCode(o.GetType()))
+            {
+                case TypeCode.Byte:
+                    return (char)(byte)o;
+                case TypeCode.Char:
+                    return (Char)o;
+                case TypeCode.Decimal:
+                    return (char)(decimal)o;
+                case TypeCode.Double:
+                    return (char)(double)o;
+                case TypeCode.Int16:
+                    return (char)(short)o;
+                case TypeCode.Int32:
+                    return (char)(int)o;
+                case TypeCode.Int64:
+                    return (char)(long)o;
+                case TypeCode.SByte:
+                    return (char)(sbyte)o;
+                case TypeCode.Single:
+                    return (char)(float)o;
+                case TypeCode.UInt16:
+                    return (char)(ushort)o;
+                case TypeCode.UInt32:
+                    return (char)(uint)o;
+                case TypeCode.UInt64:
+                    return (char)(ulong)o;
+                default:
+                    return Convert.ToChar(o, CultureInfo.InvariantCulture);
+            }
         }
 
 
