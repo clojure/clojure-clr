@@ -137,18 +137,18 @@ namespace clojure.lang.CljCompiler.Ast
                             ilg.Emit(OpCodes.Ldc_I4_0);
                         }
                         break;
-                    case TypeCode.Byte: ilg.Emit(OpCodes.Ldc_I4, (int)(byte)value); break;
-                    case TypeCode.Char: ilg.Emit(OpCodes.Ldc_I4, (int)(char)value); break;
-                    case TypeCode.Double: ilg.Emit(OpCodes.Ldc_R8, (double)value); break;
-                    case TypeCode.Int16: ilg.Emit(OpCodes.Ldc_I4, (int)(short)value); break;
-                    case TypeCode.Int32: ilg.Emit(OpCodes.Ldc_I4, (int)value); break;
-                    case TypeCode.Int64: ilg.Emit(OpCodes.Ldc_I8, (long)value); break;
-                    case TypeCode.SByte: ilg.Emit(OpCodes.Ldc_I4, (int)(sbyte)value); break;
-                    case TypeCode.Single: ilg.Emit(OpCodes.Ldc_R4, (float)value); break;
-                    case TypeCode.String: ilg.Emit(OpCodes.Ldstr, (string)value); break;
-                    case TypeCode.UInt16: ilg.Emit(OpCodes.Ldc_I4, (int)(ushort)value); break;
-                    case TypeCode.UInt32: ilg.Emit(OpCodes.Ldc_I4, (uint)value); break;
-                    case TypeCode.UInt64: ilg.Emit(OpCodes.Ldc_I8, (ulong)value); break;
+                    case TypeCode.Byte: ilg.EmitInt((int)(byte)value); break;
+                    case TypeCode.Char: ilg.EmitInt((int)(char)value); break;
+                    case TypeCode.Double: ilg.EmitDouble((double)value); break;
+                    case TypeCode.Int16: ilg.EmitInt((int)(short)value); break;
+                    case TypeCode.Int32: ilg.EmitInt((int)value); break;
+                    case TypeCode.Int64: ilg.EmitLong((long)value); break;
+                    case TypeCode.SByte: ilg.EmitInt((int)(sbyte)value); break;
+                    case TypeCode.Single: ilg.EmitSingle((float)value); break;
+                    case TypeCode.String: ilg.EmitString((string)value); break;
+                    case TypeCode.UInt16: ilg.EmitInt((int)(ushort)value); break;
+                    case TypeCode.UInt32: ilg.Emit(OpCodes.Ldc_I4,(uint)value); break;
+                    case TypeCode.UInt64: ilg.Emit(OpCodes.Ldc_I8,(ulong)value); break;
                 }
             }
             else

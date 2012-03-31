@@ -230,7 +230,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Label[] la = new Label[(_high - _low) + 1];
                 for (int i = _low; i <= _high; i++)
                     la[i - _low] = labels.ContainsKey(i) ? labels[i] : defaultLabel;
-                ilg.Emit(OpCodes.Ldc_I4, _low);
+                ilg.EmitInt(_low);
                 ilg.Emit(OpCodes.Sub);
                 ilg.Emit(OpCodes.Switch, la);
                 ilg.Emit(OpCodes.Br, defaultLabel);
@@ -262,9 +262,9 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if (IsShiftMasked)
             {
-                ilg.Emit(OpCodes.Ldc_I4, _shift);
+                ilg.EmitInt(_shift);
                 ilg.Emit(OpCodes.Shr);
-                ilg.Emit(OpCodes.Ldc_I4, _mask);
+                ilg.EmitInt(_mask);
                 ilg.Emit(OpCodes.And);
             }
         }

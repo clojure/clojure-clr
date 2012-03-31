@@ -456,11 +456,12 @@ namespace clojure.lang.CljCompiler.Ast
                 regIlg.Emit(OpCodes.Ldarg_0);
             for(int i = 0; i < _argTypes.Length; i++)
 			{   
-                regIlg.Emit(OpCodes.Ldarg,i+1);
+                regIlg.EmitLoadArg(i+1);
                 HostExpr.EmitUnboxArg(fn, regIlg, _argTypes[i]);
 			}
             regIlg.Emit(OpCodes.Call,baseMB);
-            regIlg.Emit(OpCodes.Box,GetReturnType());
+            if ( GetReturnType().IsValueType)
+                regIlg.Emit(OpCodes.Box,GetReturnType());
             regIlg.Emit(OpCodes.Ret);
         }
 

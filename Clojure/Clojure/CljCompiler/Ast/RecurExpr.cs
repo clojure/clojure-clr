@@ -198,7 +198,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Type primt = lb.PrimitiveType;
                 if (lb.IsArg)
                     //ilg.Emit(OpCodes.Starg, lb.Index - (objx.IsStatic ? 0 : 1));
-                    ilg.Emit(OpCodes.Starg, lb.Index);
+                    ilg.EmitStoreArg(lb.Index);
                 else
                 {
                     ilg.Emit(OpCodes.Stloc, lb.LocalVar);

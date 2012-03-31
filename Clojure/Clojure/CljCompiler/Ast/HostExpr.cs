@@ -422,31 +422,6 @@ namespace clojure.lang.CljCompiler.Ast
                                 m = HostExpr.Method_RT_uncheckedDecimalCast;
                                 break;
                         }
-
-                        //if (paramType == typeof(sbyte))
-                        //    m = HostExpr.Method_RT_uncheckedSbyteCast;
-                        //else if (paramType == typeof(byte))
-                        //    m = HostExpr.Method_RT_uncheckedByteCast;
-                        //else if (paramType == typeof(short))
-                        //    m = HostExpr.Method_RT_uncheckedShortCast;
-                        //else if (paramType == typeof(ushort))
-                        //    m = HostExpr.Method_RT_uncheckedUshortCast;
-                        //else if (paramType == typeof(int))
-                        //    m = HostExpr.Method_RT_uncheckedIntCast;
-                        //else if (paramType == typeof(uint))
-                        //    m = HostExpr.Method_RT_uncheckedUintCast;
-                        //else if (paramType == typeof(long))
-                        //    m = HostExpr.Method_RT_uncheckedLongCast;
-                        //else if (paramType == typeof(ulong))
-                        //    m = HostExpr.Method_RT_uncheckedUlongCast;
-                        //else if (paramType == typeof(float))
-                        //    m = HostExpr.Method_RT_uncheckedFloatCast;
-                        //else if (paramType == typeof(double))
-                        //    m = HostExpr.Method_RT_uncheckedDoubleCast;
-                        //else if (paramType == typeof(char))
-                        //    m = HostExpr.Method_RT_uncheckedCharCast;
-                        //else if (paramType == typeof(decimal))
-                        //    m = HostExpr.Method_RT_uncheckedDecimalCast;
                     }
                     else
                     {
@@ -489,31 +464,6 @@ namespace clojure.lang.CljCompiler.Ast
                                 m = HostExpr.Method_RT_decimalCast;
                                 break;
                         }
-
-                        //if (paramType == typeof(sbyte))
-                        //    m = HostExpr.Method_RT_sbyteCast;
-                        //else if (paramType == typeof(byte))
-                        //    m = HostExpr.Method_RT_byteCast;
-                        //else if (paramType == typeof(short))
-                        //    m = HostExpr.Method_RT_shortCast;
-                        //else if (paramType == typeof(ushort))
-                        //    m = HostExpr.Method_RT_ushortCast;
-                        //else if (paramType == typeof(int))
-                        //    m = HostExpr.Method_RT_intCast;
-                        //else if (paramType == typeof(uint))
-                        //    m = HostExpr.Method_RT_uintCast;
-                        //else if (paramType == typeof(long))
-                        //    m = HostExpr.Method_RT_longCast;
-                        //else if (paramType == typeof(ulong))
-                        //    m = HostExpr.Method_RT_ulongCast;
-                        //else if (paramType == typeof(float))
-                        //    m = HostExpr.Method_RT_floatCast;
-                        //else if (paramType == typeof(double))
-                        //    m = HostExpr.Method_RT_doubleCast;
-                        //else if (paramType == typeof(char))
-                        //    m = HostExpr.Method_RT_charCast;
-                        //else if (paramType == typeof(decimal))
-                        //    m = HostExpr.Method_RT_decimalCast;
                     }
                 }
 

@@ -86,11 +86,11 @@ namespace clojure.lang.CljCompiler.Ast
             Type t = _n.GetType();
 
             if (t == typeof(int))
-                ilg.Emit(OpCodes.Ldc_I8, (long)(int)_n);
+                ilg.EmitLong((long)(int)_n);
             else if (t == typeof(double))
-                ilg.Emit(OpCodes.Ldc_R8, (double)_n);
+                ilg.EmitDouble((double)_n);
             else if (t == typeof(long))
-                ilg.Emit(OpCodes.Ldc_I8, (long)_n);
+                ilg.EmitLong((long)_n);
             else
                 throw new ArgumentException("Unsupported Number type: " + _n.GetType().Name);
         }
