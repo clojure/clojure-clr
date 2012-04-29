@@ -36,6 +36,9 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _prim; }
         }
 
+        public DynamicMethod DynMethod { get; set; }
+
+
         #endregion
 
         #region C-tors
@@ -402,6 +405,41 @@ namespace clojure.lang.CljCompiler.Ast
                 DoEmitStatic(fn, tb);
             else
                 DoEmit(fn, tb);
+        }
+
+
+        internal void LightEmit(ObjExpr fn, Type fnType)
+        {
+            if (DynMethod != null)
+                return;
+
+            if (Prim != null || fn.IsStatic)
+                throw new InvalidOperationException("No light compile allowed for static methods or methods with primitive interfaces");
+
+            Type[] argTypes = ClrExtensions.ArrayInsert(fnType,GetArgTypes());
+
+            DynamicMethod meth = new DynamicMethod(GetMethodName(), GetReturnType(), argTypes, true);
+      
+            CljILGen baseIlg = new CljILGen(meth.GetILGenerator());
+
+            try
+            {
+                Label loopLabel = baseIlg.DefineLabel();
+                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
+
+                GenContext.EmitDebugInfo(baseIlg, SpanMap);
+
+                baseIlg.MarkLabel(loopLabel);
+                _body.Emit(RHC.Return, fn, baseIlg);
+                if (_body.HasNormalExit())
+                    baseIlg.Emit(OpCodes.Ret);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+
+            DynMethod = meth;
         }
 
         private void DoEmitStatic(ObjExpr fn, TypeBuilder tb)

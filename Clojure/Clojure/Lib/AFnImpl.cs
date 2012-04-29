@@ -23,12 +23,14 @@ namespace clojure.lang
     /// <para>We need this at the moment as a workaround to DLR not being able to generate instance methods from lambdas.</para>
     /// </remarks>
     [Serializable]
-    public class AFnImpl :  AFunction, Fn
+    public class AFnImpl :  AFunction, Fn, IFnClosure
     {
         #region Data
 
         IPersistentMap _meta;
-        Object[] _closure;
+        Closure _closure;
+
+        static readonly Closure _emptyClosure = new Closure(new object[0], new object[0]);
 
         public FFunc<
             object> _fn0;
@@ -156,6 +158,8 @@ namespace clojure.lang
 
         public AFnImpl()
         {
+            _meta = null;
+            _closure = _emptyClosure;
         }
 
         #endregion
@@ -593,6 +597,20 @@ namespace clojure.lang
                 default:
                     return arity >= 21 && _fnRest != null;
             }
+        }
+
+        #endregion
+
+        #region IFnClosure methods
+
+        public Closure GetClosure()
+        {
+            return _closure;
+        }
+
+        public void SetClosure(Closure closure)
+        {
+            _closure = closure;
         }
 
         #endregion

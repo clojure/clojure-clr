@@ -66,7 +66,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected IPersistentMap SpanMap { get; set; }
 
-        Type _compiledType;
+        protected Type _compiledType;
         protected Type CompiledType
         {
             get
@@ -998,11 +998,72 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal void EmitConstant(CljILGen ilg, int id, object val)
         {
-            FieldBuilder fb = null;
-            if (_fnMode == FnMode.Full && ConstantFields != null && ConstantFields.TryGetValue(id, out fb))
-                ilg.Emit(OpCodes.Ldsfld, fb);
+            if (_fnMode == Ast.FnMode.Light)
+            {
+                if (val == null)
+                {
+                    ilg.EmitNull();
+                }
+                if (val.GetType().IsPrimitive)
+                {
+                    EmitPrimitive(ilg, val);
+                    ilg.Emit(OpCodes.Box,val.GetType());
+                }
+                else
+                {
+                    ilg.Emit(OpCodes.Ldarg_0); // this
+                    ilg.Emit(OpCodes.Castclass, typeof(IFnClosure));
+                    ilg.EmitCall(Compiler.Method_IFnClosure_GetClosure);
+                    ilg.EmitFieldGet(Compiler.Field_Closure_Constants);
+                    ilg.EmitInt(id);
+                    ilg.EmitLoadElement(typeof(Object));
+                    ilg.Emit(OpCodes.Castclass, ConstantType(id));
+                }
+            }
             else
-                EmitValue(val, ilg);
+            {
+                FieldBuilder fb = null;
+                if (_fnMode == FnMode.Full && ConstantFields != null && ConstantFields.TryGetValue(id, out fb))
+                    ilg.Emit(OpCodes.Ldsfld, fb);
+                else
+                    EmitValue(val, ilg);
+            }
+        }
+
+
+        static void EmitPrimitive(CljILGen ilg, object val)
+        {
+            switch (Type.GetTypeCode(val.GetType()) )
+            {
+                case TypeCode.Boolean:
+                    ilg.EmitBoolean((bool)val); break;
+                case TypeCode.Byte:
+                    ilg.EmitByte((byte)val); break;
+                case TypeCode.Char:
+                    ilg.EmitChar((char)val); break;
+                case TypeCode.Decimal:
+                    ilg.EmitDecimal((decimal)val); break;
+                case TypeCode.Double:
+                    ilg.EmitDouble((double)val); break;
+                case TypeCode.Int16:
+                    ilg.EmitShort((short)val); break;
+                case TypeCode.Int32:
+                    ilg.EmitInt((int)val); break;
+                case TypeCode.Int64:
+                    ilg.EmitLong((long)val); break;
+                case TypeCode.SByte:
+                    ilg.EmitSByte((sbyte)val); break;
+                case TypeCode.Single:
+                    ilg.EmitSingle((float)val); break;
+                case TypeCode.UInt16:
+                    ilg.EmitUShort((ushort)val); break;
+                case TypeCode.UInt32:
+                    ilg.EmitUInt((uint)val); break;
+                case TypeCode.UInt64:
+                    ilg.EmitULong((ulong)val); break;
+                default:
+                    throw new InvalidOperationException("Unknown constant type in EmitPrimitive");
+            }
         }
 
         internal void EmitVar(CljILGen ilg, Var var)
@@ -1029,7 +1090,7 @@ namespace clojure.lang.CljCompiler.Ast
             else
             {
                 EmitConstant(ilg, i, v);
-                ilg.Emit(OpCodes.Call, Compiler.Method_Var_get);
+                ilg.Emit(OpCodes.Call, Compiler.Method_Var_getRawRoot);  // or just Method_Var_get??
             }
         }
 
@@ -1037,13 +1098,25 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Type primType = lb.PrimitiveType;
 
-            if (_fnMode == FnMode.Full && Closes.containsKey(lb))
+            if (Closes.containsKey(lb))
             {
-                ilg.Emit(OpCodes.Ldarg_0); // this
-                ilg.Emit(OpCodes.Ldfld, _closedOverFieldsMap[lb]);
-                if (primType != null)
-                    HostExpr.EmitBoxReturn(this, ilg, primType);
-                // TODO: ONCEONLY?            }
+                if (_fnMode == FnMode.Full)
+                {
+                    ilg.Emit(OpCodes.Ldarg_0); // this
+                    ilg.Emit(OpCodes.Ldfld, _closedOverFieldsMap[lb]);
+                    if (primType != null)
+                        HostExpr.EmitBoxReturn(this, ilg, primType);
+                    // TODO: ONCEONLY?    
+                }
+                else // FnMode.Light
+                {
+                    ilg.Emit(OpCodes.Ldarg_0); // this
+                    ilg.Emit(OpCodes.Castclass, typeof(IFnClosure));
+                    ilg.EmitCall(Compiler.Method_IFnClosure_GetClosure);
+                    ilg.EmitFieldGet(Compiler.Field_Closure_Locals);
+                    ilg.EmitInt(lb.Index);
+                    ilg.EmitLoadElement(typeof(Object));
+                }
             }
             else
             {
@@ -1068,10 +1141,24 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal void EmitUnboxedLocal(CljILGen ilg, LocalBinding lb)
         {
-            if (Closes.containsKey(lb) && _fnMode == FnMode.Full)
+            if (Closes.containsKey(lb))
             {
-                ilg.Emit(OpCodes.Ldarg_0); // this
-                ilg.Emit(OpCodes.Ldfld, _closedOverFieldsMap[lb]);
+                if (_fnMode == FnMode.Full)
+                {
+                    ilg.Emit(OpCodes.Ldarg_0); // this
+                    ilg.Emit(OpCodes.Ldfld, _closedOverFieldsMap[lb]);
+                }
+                else
+                {
+                    ilg.Emit(OpCodes.Ldarg_0); // this
+                    ilg.Emit(OpCodes.Castclass, typeof(IFnClosure)); 
+                    ilg.EmitCall(Compiler.Method_IFnClosure_GetClosure);
+                    ilg.EmitFieldGet(Compiler.Field_Closure_Locals);
+                    ilg.EmitInt(lb.Index);
+                    ilg.EmitLoadElement(typeof(Object));
+                    if (lb.PrimitiveType != null)
+                        ilg.Emit(OpCodes.Unbox, lb.PrimitiveType);
+                }
             }
             else if (lb.IsArg)
             {

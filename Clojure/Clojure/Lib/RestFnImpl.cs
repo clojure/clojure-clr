@@ -24,11 +24,14 @@ namespace clojure.lang
     // Overloading is not possible at the moment do to a bug in LambdaExpression.CompileToMethod
 
     [Serializable]
-    public class RestFnImpl : RestFn
+    public class RestFnImpl : RestFn, IFnClosure
     {
         #region Data
 
         IPersistentMap _meta;
+        Closure _closure;
+
+        static readonly Closure _emptyClosure = new Closure(new Object[0], new Object[0]);
 
         protected readonly int _reqArity;
 
@@ -40,6 +43,7 @@ namespace clojure.lang
         {
             _meta = null;
             _reqArity = reqArity;
+            _closure = _emptyClosure;
         }
 
         #endregion
@@ -854,5 +858,20 @@ namespace clojure.lang
         }
 
         #endregion
+
+        #region IFnClosure methods
+
+        public Closure GetClosure()
+        {
+            return _closure;
+        }
+
+        public void SetClosure(Closure closure)
+        {
+            _closure = closure;
+        }
+
+        #endregion
+
     }
 }
