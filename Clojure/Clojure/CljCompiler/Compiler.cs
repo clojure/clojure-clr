@@ -197,9 +197,17 @@ namespace clojure.lang
 
         #region MethodInfos, etc.
 
+        internal static readonly FieldInfo Field_Closure_Constants = typeof(Closure).GetField("Constants");
+        internal static readonly FieldInfo Field_Closure_Locals = typeof(Closure).GetField("Locals");
+
+        internal static readonly ConstructorInfo Ctor_Closure_2 = typeof(Closure).GetConstructor(new Type[] { typeof(Object[]), typeof(Object[]) });
+
+
         internal static readonly PropertyInfo Method_Compiler_CurrentNamespace = typeof(Compiler).GetProperty("CurrentNamespace");
         internal static readonly MethodInfo Method_Compiler_PushNS = typeof(Compiler).GetMethod("PushNS");
 
+        internal static readonly MethodInfo Method_IFnClosure_GetClosure = typeof(IFnClosure).GetMethod("GetClosure");
+        internal static readonly MethodInfo Method_IFnClosure_SetClosure = typeof(IFnClosure).GetMethod("SetClosure");
         internal static readonly MethodInfo Method_ILookupSite_fault = typeof(ILookupSite).GetMethod("fault");
         internal static readonly MethodInfo Method_ILookupThunk_get = typeof(ILookupThunk).GetMethod("get");
 
