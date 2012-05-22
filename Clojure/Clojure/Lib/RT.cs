@@ -23,6 +23,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using ResPack;
 using RTProperties = clojure.runtime.Properties;
 using Microsoft.Scripting.Hosting;
 using clojure.lang.Runtime;
@@ -280,6 +281,10 @@ namespace clojure.lang
         // for folks using Cygwin and its ilk.
         public const string ClojureLoadPathString = "CLOJURE_LOAD_PATH";
 
+        public const string ResourceFileName = "Clojure.resources";
+
+        private static readonly string ResourceFilePath;
+
         #endregion
 
         #region  It's true (or not)
@@ -512,10 +517,30 @@ namespace clojure.lang
         #endregion
 
         #region Initialization
+        
+        static string GetAssemblyParentDirectory()
+        {
+            Uri uri = new Uri(Assembly.GetExecutingAssembly().CodeBase);
+            return Path.GetDirectoryName(Uri.UnescapeDataString(uri.AbsolutePath));
+        }
+
+        static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
+        {
+            string weakName = args.Name.Split(',').FirstOrDefault();
+            if (String.IsNullOrEmpty(weakName) || weakName.EndsWith(".resources")) return null;
+
+            byte[] data;
+            return ResourceHelper.TryGetResourceData(weakName + ".dll", ResourceFilePath, out data)
+                     ? Assembly.Load(data)
+                     : null;
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static RT()
         {
+            ResourceFilePath = Path.Combine(GetAssemblyParentDirectory(), ResourceFileName);
+            AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
+
             // TODO: Check for existence of ClojureContext.Default before doing this?
 
             ScriptRuntimeSetup setup = new ScriptRuntimeSetup();
@@ -3081,10 +3106,27 @@ namespace clojure.lang
                 else
                     LoadScript(cljInfo, cljname); ;
             }
-            else if (!loaded && failIfNotFound)
-                throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));
+            else if (!loaded)
+            {
+                byte[] data;
+                if (ResourceHelper.TryGetResourceData(assemblyname, ResourceFilePath, out data))
+                {
+                    try
+                    {
+                        Var.pushThreadBindings(RT.map(CurrentNSVar, CurrentNSVar.deref(),
+                            WarnOnReflectionVar, WarnOnReflectionVar.deref(),
+                            RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
+                        loaded = Compiler.LoadAssembly(data);
+                    }
+                    finally
+                    {
+                        Var.popThreadBindings();
+                    }
+                }
 
-
+                if (!loaded && failIfNotFound)
+                    throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));
+            }
         }
 
         private static void MaybeLoadCljScript(string cljname)
