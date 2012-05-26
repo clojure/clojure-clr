@@ -1117,14 +1117,23 @@ namespace clojure.lang
                 && GetLocation(spanMap, RT.EndColumnKey, out finishCol);
         }
 
-        static GenContext _evalContext = GenContext.CreateWithInternalAssembly("eval", false);
+
+        static GenContext CreateEvalContext(string name, bool createDynInitHelper)
+        {
+            GenContext c = GenContext.CreateWithInternalAssembly("eval", createDynInitHelper);
+            //TypeBuilder tb = c.AssemblyGen.DefinePublicType("__Scratch__", typeof(object), false);
+            //return c.WithTypeBuilder(tb);
+            return c;
+        }
+
+        static GenContext _evalContext = CreateEvalContext("eval", false);
         static public GenContext EvalContext { get { return _evalContext; } }
 
         static int _saveId = 0;
         public static void SaveEvalContext()
         {
             _evalContext.SaveAssembly();
-            _evalContext = GenContext.CreateWithInternalAssembly("eval" + (_saveId++).ToString(), false);
+            _evalContext = CreateEvalContext("eval" + (_saveId++).ToString(), false);
         }
 
         public static bool IsCompiling

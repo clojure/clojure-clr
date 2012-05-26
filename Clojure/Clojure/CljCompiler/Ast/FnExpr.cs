@@ -40,7 +40,7 @@ namespace clojure.lang.CljCompiler.Ast
         private int _dynMethodMapKey = RT.nextID();
         public int DynMethodMapKey { get { return _dynMethodMapKey; } }
 
-        private Dictionary<int,WeakReference> _dynMethodMap;
+        private Dictionary<int,DynamicMethod> _dynMethodMap;
         private object[] _compiledConstants;
 
         #endregion
@@ -217,7 +217,7 @@ namespace clojure.lang.CljCompiler.Ast
                 fn._hasMeta = RT.count(fmeta) > 0;
 
 
-                if (Compiler.IsCompiling || prims.Count > 0)
+                if (Compiler.IsCompiling || prims.Count > 0|| fn.IsStatic)
                 {
 
                     IPersistentVector primTypes = PersistentVector.EMPTY;
@@ -234,7 +234,7 @@ namespace clojure.lang.CljCompiler.Ast
                 else
                 {
                     fn.FnMode = FnMode.Light;
-                    fn.LightCompile(fn.GetPrecompiledType(), newContext);                   
+                    fn.LightCompile(fn.GetPrecompiledType(), Compiler.EvalContext);
                 }
 
                 if (fn.SupportsMeta)
@@ -278,7 +278,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         void LightCompileMethods()
         {
-            Dictionary<int, WeakReference> dict = new Dictionary<int, WeakReference>();
+            Dictionary<int, DynamicMethod> dict = new Dictionary<int, DynamicMethod>();
 
             // Create a dynamic method that takes an array of closed-over values
             // and returns an instance of AFnImpl.
@@ -290,7 +290,8 @@ namespace clojure.lang.CljCompiler.Ast
                 int key = GetMethodKey(method);
                 Console.WriteLine("Store arity {0}", key);
 
-                dict[key] = new WeakReference(method.DynMethod);
+                //dict[key] = new WeakReference(method.DynMethod);
+                dict[key] = method.DynMethod;
             }
 
             DynMethodMap[DynMethodMapKey] = dict;
@@ -315,14 +316,18 @@ namespace clojure.lang.CljCompiler.Ast
         static readonly MethodInfo Method_FnExpr_GetDynMethod = typeof(FnExpr).GetMethod("GetDynMethod");
         static readonly MethodInfo Method_FnExpr_GetCompiledConstants = typeof(FnExpr).GetMethod("GetCompiledConstants");
 
-        static readonly Dictionary<int, Dictionary<int, WeakReference > > DynMethodMap = new Dictionary<int,Dictionary<int,WeakReference>>();
+        static readonly Dictionary<int, Dictionary<int, DynamicMethod > > DynMethodMap = new Dictionary<int,Dictionary<int,DynamicMethod>>();
         static readonly Dictionary<int, WeakReference> ConstantsMap = new Dictionary<int, WeakReference>();
 
         public static DynamicMethod GetDynMethod(int key, int arity)
         {
-            Dictionary<int, WeakReference > dict = DynMethodMap[key];
-            WeakReference wr = dict[arity];
-            return (DynamicMethod)wr.Target;
+            DynamicMethod dm = DynMethodMap[key][arity];
+            if (dm == null)
+                Console.WriteLine("Bad dynmeth retrieval");
+            return dm;
+        //    Dictionary<int, WeakReference > dict = DynMethodMap[key];
+        //    WeakReference wr = dict[arity];
+        //    return (DynamicMethod)wr.Target;
         }
          
         public static object[] GetCompiledConstants(int key)
@@ -338,7 +343,7 @@ namespace clojure.lang.CljCompiler.Ast
             //emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
             //objx arg is enclosing objx, not this
 
-
+            
             // Create the function instance
             LocalBuilder fnLocal = ilg.DeclareLocal(CompiledType);
             
@@ -354,6 +359,9 @@ namespace clojure.lang.CljCompiler.Ast
 
             ilg.Emit(OpCodes.Stloc, fnLocal);
 
+            ilg.EmitString(String.Format("Creating fn {0}", Name));
+            ilg.Emit(OpCodes.Call, typeof(System.Console).GetMethod("WriteLine", new Type[] { typeof(string) }));
+
             // Set up the methods
 
             for (ISeq s = RT.seq(_methods); s != null; s = s.next())
@@ -366,7 +374,7 @@ namespace clojure.lang.CljCompiler.Ast
                     ? "_fnDo" + (key - 1)  // because key is arity+1 for variadic
                     : "_fn" + key;
 
-                Console.WriteLine("Look up arity {0}, fieldName {1}", key,fieldName);
+                 Console.WriteLine("Look up arity {0}, fieldName {1}", key,fieldName);
 
                 FieldInfo fi = CompiledType.GetField(fieldName);
 
