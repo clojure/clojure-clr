@@ -255,7 +255,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression call = dyn;
 
             GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
-            if (context.DynInitHelper != null)
+            if ( context != null && context.DynInitHelper != null)
                 call = context.DynInitHelper.ReduceDyn(dyn);
 
             if (returnType == typeof(void))
@@ -266,12 +266,27 @@ namespace clojure.lang.CljCompiler.Ast
             call = GenContext.AddDebugInfo(call, _spanMap);
 
             Type[] paramTypes = paramExprs.Map((x) => x.Type);
-            MethodBuilder mbLambda = context.TB.DefineMethod("__interop_ctor_" + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, paramTypes);
             LambdaExpression lambda = Expression.Lambda(call, paramExprs);
-            lambda.CompileToMethod(mbLambda);
+            Type delType = lambda.Type;
 
-            ilg.Emit(OpCodes.Call, mbLambda);
+            if (context == null)
+            {
+                // light compile
 
+                Delegate d = lambda.Compile();
+                int key = RT.nextID();
+                MethodExpr.CacheDelegate(key, d);
+
+                ilg.EmitInt(key);
+                ilg.Emit(OpCodes.Call, MethodExpr.Method_MethodExpr_GetDelegate);
+                ilg.Emit(OpCodes.Call, delType.GetMethod("Invoke"));
+            }
+            else
+            {
+                MethodBuilder mbLambda = context.TB.DefineMethod("__interop_ctor_" + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, paramTypes);
+                lambda.CompileToMethod(mbLambda);
+                ilg.Emit(OpCodes.Call, mbLambda);
+            }
         }
 
         static readonly MethodInfo Method_Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle");

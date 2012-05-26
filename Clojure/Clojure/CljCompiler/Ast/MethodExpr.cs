@@ -141,6 +141,22 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Callvirt, _method); 
         }
 
+        public static readonly MethodInfo Method_MethodExpr_GetDelegate = typeof(MethodExpr).GetMethod("GetDelegate");
+ 
+        public static readonly Dictionary<int, Delegate> DelegatesMap = new Dictionary<int, Delegate>();
+
+        public static Delegate GetDelegate(int key)
+        {
+            Delegate d = DelegatesMap[key];
+            if (d == null)
+                Console.WriteLine("Bad delegate retrieval");
+            return d;
+        }
+
+        public static void CacheDelegate(int key, Delegate d)
+        {
+            DelegatesMap[key] = d;
+        }
 
         protected abstract void EmitTargetExpression(ObjExpr objx, CljILGen ilg);
         protected abstract Type GetTargetType();
@@ -197,7 +213,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expression call = dyn;
 
             GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
-            if (context.DynInitHelper != null)
+            if (context != null && context.DynInitHelper != null)
                 call = context.DynInitHelper.ReduceDyn(dyn);
 
             if (returnType == typeof(void))
@@ -208,11 +224,31 @@ namespace clojure.lang.CljCompiler.Ast
             call = GenContext.AddDebugInfo(call, _spanMap);
 
             Type[] paramTypes = paramExprs.Map((x) => x.Type);
-            MethodBuilder mbLambda = context.TB.DefineMethod("__interop_" + _methodName + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, paramTypes);
-            LambdaExpression lambda = Expression.Lambda(call, paramExprs);
-            lambda.CompileToMethod(mbLambda);
+            //Type delType = Expression.GetDelegateType(paramTypes.);
+            //LambdaExpression lambda = Expression.Lambda(delType,call, paramExprs);
 
-            ilg.Emit(OpCodes.Call, mbLambda);
+             LambdaExpression lambda = Expression.Lambda(call, paramExprs);
+             Type delType = lambda.Type;
+
+            if (context == null)
+            {
+                // light compile
+
+                Delegate d = lambda.Compile();
+                int key = RT.nextID();
+                CacheDelegate(key,d);
+
+                ilg.EmitInt(key);
+                ilg.Emit(OpCodes.Call, Method_MethodExpr_GetDelegate);
+                ilg.Emit(OpCodes.Call, delType.GetMethod("Invoke"));
+                
+            }
+            else
+            {
+                MethodBuilder mbLambda = context.TB.DefineMethod("__interop_" + _methodName + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, paramTypes);
+                lambda.CompileToMethod(mbLambda);
+                ilg.Emit(OpCodes.Call, mbLambda);
+            }
         }
 
         internal static void EmitArgsAsArray(IPersistentVector args, ObjExpr objx, CljILGen ilg)
