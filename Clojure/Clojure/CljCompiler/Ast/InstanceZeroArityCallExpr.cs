@@ -23,6 +23,7 @@ using clojure.lang.Runtime.Binding;
 using clojure.lang.Runtime;
 using System.Reflection.Emit;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -107,33 +108,36 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
+            // See MethodExpr.EmitComplexCall to see why this is so complicated
+
+            //  Build the parameter list
+
+            List<ParameterExpression> paramExprs = new List<ParameterExpression>();
+
             Type paramType = _target.HasClrType && _target.ClrType != null && _target.ClrType.IsPrimitive ? _target.ClrType : typeof(object);
-
             ParameterExpression param = Expression.Parameter(paramType);
+            paramExprs.Add(param);
 
+
+            // Build dynamic call and lambda
             Type returnType = HasClrType ? ClrType : typeof(object);
 
-            // TODO: Get rid of Default
             GetMemberBinder binder = new ClojureGetZeroArityMemberBinder(ClojureContext.Default, _memberName, false);
-            DynamicExpression dyn = Expression.Dynamic(binder, returnType, new Expression[] { param });
+            DynamicExpression dyn = Expression.Dynamic(binder, returnType, paramExprs);
 
-            Expression call = dyn;
 
-            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
+            LambdaExpression lambda;
+            Type delType;
+            MethodBuilder mbLambda;
 
-            if (context.DynInitHelper != null)
-                call = context.DynInitHelper.ReduceDyn(dyn);
+            MethodExpr.EmitDynamicCalPreamble(dyn, _spanMap, "__interop_" + _memberName + RT.nextID(), returnType, paramExprs, ilg, out lambda, out delType, out mbLambda);
 
-            call = GenContext.AddDebugInfo(call, _spanMap);
-
-            MethodBuilder mbLambda = context.TB.DefineMethod("__interop_" + _memberName + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, new Type[] {paramType});
-            LambdaExpression lambda = Expression.Lambda(call, new ParameterExpression[] {param});
-            lambda.CompileToMethod(mbLambda);
-
-            GenContext.EmitDebugInfo(ilg, _spanMap);
+            //  Emit target + args (no args, actually)
 
             _target.Emit(RHC.Expression, objx, ilg);
-            ilg.Emit(OpCodes.Call, mbLambda);
+
+            MethodExpr.EmitDynamicCallPostlude(lambda, delType, mbLambda, ilg);
+ 
         }
 
         #endregion

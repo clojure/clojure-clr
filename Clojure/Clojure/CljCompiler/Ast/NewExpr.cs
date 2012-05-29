@@ -208,14 +208,12 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Box, _type);
         }
 
-        // TODO: See if it is worth removing the code duplication with MethodExp.GenDlr.
-
-
         private void EmitComplexCall(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
+            // See the notes on MethodExpr.EmitComplexCall on why this is so complicated
+
             List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count + 1);
             paramExprs.Add(Expression.Parameter(typeof(Type)));
-            EmitTargetExpression(objx, ilg);
 
             int i = 0;
             foreach (HostArg ha in _args)
@@ -228,19 +226,16 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     case HostArg.ParameterType.ByRef:
                         paramExprs.Add(Expression.Parameter(argType.MakeByRefType(), ha.LocalBinding.Name));
-                        ilg.Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
                         break;
 
                     case HostArg.ParameterType.Standard:
                         if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr)
                         {
                             paramExprs.Add(Expression.Parameter(argType, ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
-                            ((MaybePrimitiveExpr)ha.ArgExpr).EmitUnboxed(RHC.Expression, objx, ilg);
                         }
                         else
                         {
                             paramExprs.Add(Expression.Parameter(typeof(object), ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
-                            ha.ArgExpr.Emit(RHC.Expression, objx, ilg);
                         }
                         break;
 
@@ -249,44 +244,51 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
+            // Build dynamic call and lambda
             Type returnType = HasClrType ? ClrType : typeof(object);
             CreateInstanceBinder binder = new ClojureCreateInstanceBinder(ClojureContext.Default, _args.Count);
             DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
-            Expression call = dyn;
 
-            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
-            if ( context != null && context.DynInitHelper != null)
-                call = context.DynInitHelper.ReduceDyn(dyn);
+            LambdaExpression lambda;
+            Type delType;
+            MethodBuilder mbLambda;
 
-            if (returnType == typeof(void))
+            MethodExpr.EmitDynamicCalPreamble(dyn, _spanMap, "__interop_ctor_" + RT.nextID(), returnType, paramExprs, ilg, out lambda, out delType, out mbLambda);
+
+            //  Emit target + args
+  
+            EmitTargetExpression(objx, ilg);
+
+            i = 0;
+            foreach (HostArg ha in _args)
             {
-                call = Expression.Block(call, Expression.Default(typeof(object)));
-                returnType = typeof(object);
+                i++;
+                Expr e = ha.ArgExpr;
+                Type argType = e.HasClrType && e.ClrType != null && e.ClrType.IsPrimitive ? e.ClrType : typeof(object);
+
+                switch (ha.ParamType)
+                {
+                    case HostArg.ParameterType.ByRef:
+                        ilg.Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
+                        break;
+
+                    case HostArg.ParameterType.Standard:
+                        if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr)
+                        {
+                            ((MaybePrimitiveExpr)ha.ArgExpr).EmitUnboxed(RHC.Expression, objx, ilg);
+                        }
+                        else
+                        {
+                            ha.ArgExpr.Emit(RHC.Expression, objx, ilg);
+                        }
+                        break;
+
+                    default:
+                        throw Util.UnreachableCode();
+                }
             }
-            call = GenContext.AddDebugInfo(call, _spanMap);
-
-            Type[] paramTypes = paramExprs.Map((x) => x.Type);
-            LambdaExpression lambda = Expression.Lambda(call, paramExprs);
-            Type delType = lambda.Type;
-
-            if (context == null)
-            {
-                // light compile
-
-                Delegate d = lambda.Compile();
-                int key = RT.nextID();
-                MethodExpr.CacheDelegate(key, d);
-
-                ilg.EmitInt(key);
-                ilg.Emit(OpCodes.Call, MethodExpr.Method_MethodExpr_GetDelegate);
-                ilg.Emit(OpCodes.Call, delType.GetMethod("Invoke"));
-            }
-            else
-            {
-                MethodBuilder mbLambda = context.TB.DefineMethod("__interop_ctor_" + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, paramTypes);
-                lambda.CompileToMethod(mbLambda);
-                ilg.Emit(OpCodes.Call, mbLambda);
-            }
+            
+            MethodExpr.EmitDynamicCallPostlude(lambda, delType, mbLambda, ilg); 
         }
 
         static readonly MethodInfo Method_Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle");
