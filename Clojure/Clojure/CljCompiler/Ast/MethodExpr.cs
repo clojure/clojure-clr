@@ -148,8 +148,6 @@ namespace clojure.lang.CljCompiler.Ast
         public static Delegate GetDelegate(int key)
         {
             Delegate d = DelegatesMap[key];
-            if (d == null)
-                Console.WriteLine("Bad delegate retrieval");
             return d;
         }
 
@@ -163,18 +161,39 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void EmitComplexCall(ObjExpr objx, CljILGen ilg)
         {
+            // This is made more complex than I'd like by light-compiling.
+            // Without light-compile, we could just:
+            //   Emit the target expression
+            //   Emit the arguments (and build up the parameter list for the lambda)
+            //   Create the lambda, compile to a methodbuilder, and call it.
+            // Light-compile forces us to 
+            //     create a lambda at the beginning because we must 
+            //     compile it to a delegate, to get the type
+            //     write code to grab the delegate from a cache
+            //     Then emit the target expression
+            //          emit the arguments (but note we need already to have built the parameter list)
+            //          Call the delegate
+            //  Combined, this becomes
+            //      Build the parameter list
+            //      Build the dynamic call and lambda  (slightly different for light-compile vs full)
+            //      if light-compile
+            //          build the delegate
+            //          cache it
+            //          emit code to retrieve and cast it
+            //       emit the target expression
+            //       emit the args
+            //       emit the call (slightly different for light compile vs full)
+            //
+
+            //  Build the parameter list
+
             List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count + 1);
 
             Type targetType = GetTargetType();
             if (!targetType.IsPrimitive)
                 targetType = typeof(object);
 
-            //if (targetType == (Type)Compiler.CompileStubOrigClassVar.deref())
-            //    targetType = objx.TypeBlder;
-
             paramExprs.Add(Expression.Parameter(targetType));
-            EmitTargetExpression(objx, ilg);
-
             int i = 0;
             foreach (HostArg ha in _args)
             {
@@ -186,18 +205,59 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     case HostArg.ParameterType.ByRef:
                         paramExprs.Add(Expression.Parameter(argType.MakeByRefType(), ha.LocalBinding.Name));
-                        ilg.Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
                         break;
 
                     case HostArg.ParameterType.Standard:
                         if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr)
                         {
                             paramExprs.Add(Expression.Parameter(argType, ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
-                            ((MaybePrimitiveExpr)ha.ArgExpr).EmitUnboxed(RHC.Expression, objx, ilg);
                         }
                         else
                         {
                             paramExprs.Add(Expression.Parameter(typeof(object), ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
+                        }
+                        break;
+
+                    default:
+                        throw Util.UnreachableCode();
+                }
+            }
+
+            // Build dynamic call and lambda
+            Type returnType = HasClrType ? ClrType : typeof(object);
+            InvokeMemberBinder binder = new ClojureInvokeMemberBinder(ClojureContext.Default, _methodName, paramExprs.Count, IsStaticCall);
+            DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
+
+            LambdaExpression lambda;
+            Type delType;
+            MethodBuilder mbLambda;
+
+            EmitDynamicCalPreamble(dyn, _spanMap, "__interop_" + _methodName + RT.nextID(), returnType, paramExprs, ilg, out lambda, out delType, out mbLambda);
+
+            //  Emit target + args
+            
+            EmitTargetExpression(objx, ilg);
+
+            i = 0;
+            foreach (HostArg ha in _args)
+            {
+                i++;
+                Expr e = ha.ArgExpr;
+                Type argType = e.HasClrType && e.ClrType != null && e.ClrType.IsPrimitive ? e.ClrType : typeof(object);
+
+                switch (ha.ParamType)
+                {
+                    case HostArg.ParameterType.ByRef:
+                        ilg.Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
+                        break;
+
+                    case HostArg.ParameterType.Standard:
+                        if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr)
+                        {
+                            ((MaybePrimitiveExpr)ha.ArgExpr).EmitUnboxed(RHC.Expression, objx, ilg);
+                        }
+                        else
+                        {
                             ha.ArgExpr.Emit(RHC.Expression, objx, ilg);
                         }
                         break;
@@ -207,9 +267,11 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            Type returnType = HasClrType ? ClrType : typeof(object);
-            InvokeMemberBinder binder = new ClojureInvokeMemberBinder(ClojureContext.Default, _methodName, paramExprs.Count, IsStaticCall);
-            DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
+            EmitDynamicCallPostlude(lambda, delType, mbLambda, ilg);
+        }
+
+        static public void EmitDynamicCalPreamble(DynamicExpression dyn, IPersistentMap spanMap, string methodName, Type returnType, List<ParameterExpression> paramExprs, CljILGen ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda)
+        {
             Expression call = dyn;
 
             GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
@@ -221,32 +283,53 @@ namespace clojure.lang.CljCompiler.Ast
                 call = Expression.Block(call, Expression.Default(typeof(object)));
                 returnType = typeof(object);
             }
-            call = GenContext.AddDebugInfo(call, _spanMap);
+            else if (returnType != call.Type)
+            {
+                call = Expression.Convert(call, returnType);
+            }
+
+            call = GenContext.AddDebugInfo(call, spanMap);
 
             Type[] paramTypes = paramExprs.Map((x) => x.Type);
-            //Type delType = Expression.GetDelegateType(paramTypes.);
-            //LambdaExpression lambda = Expression.Lambda(delType,call, paramExprs);
 
-             LambdaExpression lambda = Expression.Lambda(call, paramExprs);
-             Type delType = lambda.Type;
 
+            delType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, paramTypes);
+            lambda = Expression.Lambda(delType, call, paramExprs);
+            mbLambda = null;
+            
             if (context == null)
             {
                 // light compile
 
                 Delegate d = lambda.Compile();
                 int key = RT.nextID();
-                CacheDelegate(key,d);
-
+                CacheDelegate(key, d);
+ 
                 ilg.EmitInt(key);
                 ilg.Emit(OpCodes.Call, Method_MethodExpr_GetDelegate);
-                ilg.Emit(OpCodes.Call, delType.GetMethod("Invoke"));
-                
+                ilg.Emit(OpCodes.Castclass, delType);
             }
             else
             {
-                MethodBuilder mbLambda = context.TB.DefineMethod("__interop_" + _methodName + RT.nextID(), MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, paramTypes);
+                mbLambda = context.TB.DefineMethod(methodName, MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, paramTypes);
                 lambda.CompileToMethod(mbLambda);
+            }
+        }
+
+
+        static public void EmitDynamicCallPostlude(LambdaExpression lambda, Type delType, MethodBuilder mbLambda, CljILGen ilg)
+        {
+               GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
+ 
+            if ( context == null )
+            {
+                // light compile
+
+                MethodInfo mi = delType.GetMethod("Invoke");
+                ilg.Emit(OpCodes.Callvirt, mi);
+            }
+            else
+            {
                 ilg.Emit(OpCodes.Call, mbLambda);
             }
         }

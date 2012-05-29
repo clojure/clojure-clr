@@ -1082,7 +1082,7 @@ namespace clojure.lang.CljCompiler.Ast
         internal void EmitVarValue(CljILGen ilg, Var v)
         {
             int i = (int)Vars.valAt(v);
-            if ( _fnMode == Ast.FnMode.Full && !v.isDynamic() )
+            if ( !v.isDynamic() )
             {
                 EmitConstant(ilg, i, v);
                 ilg.Emit(OpCodes.Call, Compiler.Method_Var_getRawRoot);
@@ -1090,7 +1090,7 @@ namespace clojure.lang.CljCompiler.Ast
             else
             {
                 EmitConstant(ilg, i, v);
-                ilg.Emit(OpCodes.Call, Compiler.Method_Var_getRawRoot);  // or just Method_Var_get??
+                ilg.Emit(OpCodes.Call, Compiler.Method_Var_get);  // or just Method_Var_get??
             }
         }
 
@@ -1207,32 +1207,37 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal void EmitLetFnInits(CljILGen ilg, LocalBuilder localBuilder, ObjExpr objx, IPersistentSet letFnLocals)
         {
-            ilg.Emit(OpCodes.Castclass,_typeBuilder);
-
-            for (ISeq s = RT.keys(Closes); s != null; s = s.next())
+            if (_typeBuilder != null)
             {
-                LocalBinding lb = (LocalBinding)s.first();
-                if (letFnLocals.contains(lb))
-                {
-                    FieldBuilder fb;
-                    _closedOverFieldsMap.TryGetValue(lb,out fb);
+                // Full compile
+                ilg.Emit(OpCodes.Castclass, _typeBuilder);
 
-                    Type primt = lb.PrimitiveType;
-                    ilg.Emit(OpCodes.Dup);  // this
-                    if ( primt != null )
+                for (ISeq s = RT.keys(Closes); s != null; s = s.next())
+                {
+                    LocalBinding lb = (LocalBinding)s.first();
+                    if (letFnLocals.contains(lb))
                     {
-                        objx.EmitUnboxedLocal(ilg,lb);
-                        ilg.Emit(OpCodes.Stfld,fb);
-                    }
-                    else
-                    {
-                        objx.EmitLocal(ilg,lb);
-                        ilg.Emit(OpCodes.Stfld,fb);
+                        FieldBuilder fb;
+                        _closedOverFieldsMap.TryGetValue(lb, out fb);
+
+                        Type primt = lb.PrimitiveType;
+                        ilg.Emit(OpCodes.Dup);  // this
+                        if (primt != null)
+                        {
+                            objx.EmitUnboxedLocal(ilg, lb);
+                            ilg.Emit(OpCodes.Stfld, fb);
+                        }
+                        else
+                        {
+                            objx.EmitLocal(ilg, lb);
+                            ilg.Emit(OpCodes.Stfld, fb);
+                        }
                     }
                 }
+                ilg.Emit(OpCodes.Pop);
             }
-            ilg.Emit(OpCodes.Pop);
         }
+
 
         protected static void EmitHasArityMethod(TypeBuilder tb, IList<int> arities, bool isVariadic, int reqArity)
         {

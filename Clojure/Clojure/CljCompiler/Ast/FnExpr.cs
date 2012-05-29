@@ -288,7 +288,6 @@ namespace clojure.lang.CljCompiler.Ast
                 FnMethod method = (FnMethod)s.first();
                 method.LightEmit(this, CompiledType);
                 int key = GetMethodKey(method);
-                Console.WriteLine("Store arity {0}", key);
 
                 //dict[key] = new WeakReference(method.DynMethod);
                 dict[key] = method.DynMethod;
@@ -307,7 +306,8 @@ namespace clojure.lang.CljCompiler.Ast
                 cs[i] = Constants.nth(i);
             }
 
-            ConstantsMap[DynMethodMapKey] = new WeakReference(cs);
+            //ConstantsMap[DynMethodMapKey] = new WeakReference(cs);
+            ConstantsMap[DynMethodMapKey] = cs;
             _compiledConstants = cs;
         }
 
@@ -317,7 +317,7 @@ namespace clojure.lang.CljCompiler.Ast
         static readonly MethodInfo Method_FnExpr_GetCompiledConstants = typeof(FnExpr).GetMethod("GetCompiledConstants");
 
         static readonly Dictionary<int, Dictionary<int, DynamicMethod > > DynMethodMap = new Dictionary<int,Dictionary<int,DynamicMethod>>();
-        static readonly Dictionary<int, WeakReference> ConstantsMap = new Dictionary<int, WeakReference>();
+        static readonly Dictionary<int, object[]> ConstantsMap = new Dictionary<int, object[]>();
 
         public static DynamicMethod GetDynMethod(int key, int arity)
         {
@@ -332,8 +332,9 @@ namespace clojure.lang.CljCompiler.Ast
          
         public static object[] GetCompiledConstants(int key)
         {
-            WeakReference wr = ConstantsMap[key];
-            return (object[])wr.Target;
+            return ConstantsMap[key];
+            //WeakReference wr = ConstantsMap[key];
+            //return (object[])wr.Target;
         }
 
 
@@ -359,8 +360,8 @@ namespace clojure.lang.CljCompiler.Ast
 
             ilg.Emit(OpCodes.Stloc, fnLocal);
 
-            ilg.EmitString(String.Format("Creating fn {0}", Name));
-            ilg.Emit(OpCodes.Call, typeof(System.Console).GetMethod("WriteLine", new Type[] { typeof(string) }));
+            //ilg.EmitString(String.Format("Creating fn {0}", Name));
+            //ilg.Emit(OpCodes.Call, typeof(System.Console).GetMethod("WriteLine", new Type[] { typeof(string) }));
 
             // Set up the methods
 
@@ -368,13 +369,10 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 FnMethod method = (FnMethod)s.first();
                 int key = GetMethodKey(method);
-                Console.WriteLine("Look up arity {0}", key);
  
                 string fieldName = IsVariadic && method.IsVariadic
                     ? "_fnDo" + (key - 1)  // because key is arity+1 for variadic
                     : "_fn" + key;
-
-                 Console.WriteLine("Look up arity {0}, fieldName {1}", key,fieldName);
 
                 FieldInfo fi = CompiledType.GetField(fieldName);
 
@@ -401,7 +399,8 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else
             {
-                ilg.EmitNull();
+                ilg.EmitInt(0);
+                ilg.EmitArray(typeof(Object[]));
             }
 
             if (Closes.count() > 0)
@@ -423,7 +422,8 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else
             {
-                ilg.EmitNull();
+                ilg.EmitInt(0);
+                ilg.EmitArray(typeof(Object[]));
             }
 
             // Create the closure
