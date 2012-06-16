@@ -459,6 +459,22 @@ namespace clojure.lang.CljCompiler.Ast
                     if (context.DynInitHelper != null)
                         context.DynInitHelper.FinalizeType();
 
+                    //  If we don't pick up the ctor after we finalize the type, 
+                    //    we sometimes get a ctor which is not a RuntimeConstructorInfo
+                    //  This causes System.DynamicILGenerator.Emit(opcode,ContructorInfo) to blow up.
+                    //    The error says the ConstructorInfo is null, but there is a second case in the code.
+                    //  Thank heavens one can run Reflector on mscorlib.
+
+                    ConstructorInfo[] cis = _compiledType.GetConstructors();
+                    foreach (ConstructorInfo ci in cis)
+                    {
+                        if (ci.GetParameters().Length == CtorTypes().Length)
+                        {
+                            _ctorInfo = ci;
+                            break;
+                        }
+                    }
+
                     return _compiledType;
                 }
                 finally

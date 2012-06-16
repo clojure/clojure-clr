@@ -427,7 +427,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Label loopLabel = baseIlg.DefineLabel();
                 Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
 
-                GenContext.EmitDebugInfo(baseIlg, SpanMap);
+                //GenContext.EmitDebugInfo(baseIlg, SpanMap);
 
                 baseIlg.MarkLabel(loopLabel);
                 _body.Emit(RHC.Return, fn, baseIlg);
