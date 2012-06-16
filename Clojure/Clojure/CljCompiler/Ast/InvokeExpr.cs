@@ -226,6 +226,93 @@ namespace clojure.lang.CljCompiler.Ast
 
         void EmitProto(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
+            switch (objx.FnMode)
+            {
+                case FnMode.Light:
+                    EmitProtoLight(rhc, objx, ilg);
+                    break;
+                case FnMode.Full:
+                    EmitProtoFull(rhc, objx, ilg);
+                    break;
+                default:
+                    throw Util.UnreachableCode();
+            }
+        }
+
+        // TODO: Eliminate common code between EmitProtoLight and EmitProtoFull
+
+        void EmitProtoLight(RHC rhc, ObjExpr objx, CljILGen ilg)
+        {
+            Label onLabel = ilg.DefineLabel();
+            Label endLabel = ilg.DefineLabel();
+
+            Var v = ((VarExpr)_fexpr).Var;
+
+            Expr e = (Expr)_args.nth(0);
+            e.Emit(RHC.Expression, objx, ilg);               // target
+
+            LocalBuilder targetTemp = ilg.DeclareLocal(typeof(Object));
+            GenContext.SetLocalName(targetTemp, "target");
+            ilg.Emit(OpCodes.Stloc, targetTemp);             //   (targetTemp <= target)
+
+            ilg.EmitString(String.Format("In Light Proto for {0}",v.Symbol.ToString()));
+            ilg.Emit(OpCodes.Call,typeof(Console).GetMethod("WriteLine",new Type[] { typeof(string) }));
+
+            //if (_protocolOn != null)
+            //{
+            //    ilg.Emit(OpCodes.Ldloc, targetTemp);              // target
+            //    ilg.Emit(OpCodes.Isinst, _protocolOn);            // (target or null)
+            //    ilg.Emit(OpCodes.Ldnull);                         // (target or null), null
+            //    ilg.Emit(OpCodes.Cgt_Un);                         // (0 or 1)
+            //    ilg.Emit(OpCodes.Brtrue, onLabel);
+            //}
+
+            objx.EmitVar(ilg, v);                                 // var
+            ilg.Emit(OpCodes.Call, Compiler.Method_Var_getRawRoot);         // proto-fn
+
+
+                ilg.Emit(OpCodes.Dup);
+                ilg.Emit(OpCodes.Call, typeof(Object).GetMethod("GetType"));
+                ilg.Emit(OpCodes.Callvirt, typeof(Object).GetMethod("ToString"));
+                ilg.EmitString("Expected AFunction, got ");
+                ilg.Emit(OpCodes.Call, typeof(Console).GetMethod("Write", new Type[] { typeof(String) }));
+                ilg.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", new Type[] { typeof(String) }));
+            
+
+            ilg.Emit(OpCodes.Castclass, typeof(AFunction));
+
+            ilg.EmitString("Castclass worked ");
+            ilg.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", new Type[] { typeof(String) }));
+
+
+            ilg.Emit(OpCodes.Ldloc, targetTemp);                  // proto-fn, target
+
+            EmitArgsAndCall(1, rhc, objx, ilg);
+
+            ilg.EmitString("gen'd args and called");
+            ilg.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", new Type[] { typeof(String) }));
+
+            ilg.Emit(OpCodes.Br, endLabel);
+
+            //ilg.MarkLabel(onLabel);
+            //ilg.Emit(OpCodes.Ldloc, targetTemp);                  // target
+            //if (_protocolOn != null)
+            //{
+            //    ilg.Emit(OpCodes.Castclass, _protocolOn);
+            //    MethodExpr.EmitTypedArgs(objx, ilg, _onMethod.GetParameters(), RT.subvec(_args, 1, _args.count()));
+            //    //if (rhc == RHC.Return)
+            //    //{
+            //    //    ObjMethod2 method = (ObjMethod)Compiler.MethodVar.deref();
+            //    //    method.EmitClearLocals(context);
+            //    //}
+            //    ilg.Emit(OpCodes.Callvirt,_onMethod);
+            //    HostExpr.EmitBoxReturn(objx, ilg, _onMethod.ReturnType);
+            //}
+            ilg.MarkLabel(endLabel);
+        }
+
+        void EmitProtoFull(RHC rhc, ObjExpr objx, CljILGen ilg)
+        {
             Label onLabel = ilg.DefineLabel();
             Label callLabel = ilg.DefineLabel();
             Label endLabel = ilg.DefineLabel();
@@ -240,18 +327,20 @@ namespace clojure.lang.CljCompiler.Ast
             GenContext.SetLocalName(targetTemp, "target");
             ilg.Emit(OpCodes.Stloc,targetTemp);                  // target
 
-            ilg.EmitCall(Compiler.Method_Util_classOf);          // class
-            ilg.EmitLoadArg(0);
+            ilg.Emit(OpCodes.Call,Compiler.Method_Util_classOf);          // class
+            ilg.EmitLoadArg(0);                                  // class, this
             ilg.EmitFieldGet(objx.CachedTypeField(_siteIndex));  // class, cached-class
             ilg.Emit(OpCodes.Beq, callLabel);                    // 
             if (_protocolOn != null)
             {
                 ilg.Emit(OpCodes.Ldloc,targetTemp);              // target
-                ilg.Emit(OpCodes.Isinst, _protocolOn);
+                ilg.Emit(OpCodes.Isinst, _protocolOn);           // null or target
+                ilg.Emit(OpCodes.Ldnull);                        // (null or target), null
+                ilg.Emit(OpCodes.Cgt_Un);                        // (0 or 1)
                 ilg.Emit(OpCodes.Brtrue, onLabel);
             }
             ilg.Emit(OpCodes.Ldloc,targetTemp);                  // target
-            ilg.EmitCall(Compiler.Method_Util_classOf);          // class
+            ilg.Emit(OpCodes.Call,Compiler.Method_Util_classOf);          // class
             
             LocalBuilder typeTemp = ilg.DeclareLocal(typeof(Type));
             GenContext.SetLocalName(typeTemp, "type");
@@ -265,8 +354,8 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.MarkLabel(callLabel);                       
     
             objx.EmitVar(ilg,v);                              // var
-            ilg.EmitCall(Compiler.Method_Var_getRawRoot);         // proto-fn
-            ilg.Emit(OpCodes.Castclass, typeof(IFn));
+            ilg.Emit(OpCodes.Call,Compiler.Method_Var_getRawRoot);         // proto-fn
+            ilg.Emit(OpCodes.Castclass, typeof(AFunction));
                        
             ilg.Emit(OpCodes.Ldloc,targetTemp);                  // proto-fn, target
 
@@ -277,14 +366,14 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Ldloc,targetTemp);                  // target
             if ( _protocolOn != null )
             {
-                ilg.Emit(OpCodes.Castclass, _onMethod.DeclaringType);
+                ilg.Emit(OpCodes.Castclass, _protocolOn);
                 MethodExpr.EmitTypedArgs(objx, ilg, _onMethod.GetParameters(), RT.subvec(_args, 1, _args.count()));
                 //if (rhc == RHC.Return)
                 //{
                 //    ObjMethod2 method = (ObjMethod)Compiler.MethodVar.deref();
                 //    method.EmitClearLocals(context);
                 //}
-                ilg.EmitCall(_onMethod);
+                ilg.Emit(OpCodes.Callvirt, _onMethod);
                 HostExpr.EmitBoxReturn(objx, ilg, _onMethod.ReturnType);                
             }
             ilg.MarkLabel(endLabel);
@@ -311,7 +400,9 @@ namespace clojure.lang.CljCompiler.Ast
             //    method.EmitClearLocals(context);
             //}
 
-           ilg.Emit(OpCodes.Callvirt,Compiler.Methods_IFn_invoke[Math.Min(Compiler.MaxPositionalArity+1,_args.count())]);
+            MethodInfo mi = Compiler.Methods_IFn_invoke[Math.Min(Compiler.MaxPositionalArity+1,_args.count())];
+
+           ilg.Emit(OpCodes.Callvirt,mi);
         }
 
         public bool HasNormalExit() { return true; }

@@ -140,13 +140,13 @@ namespace clojure.lang.CljCompiler.Ast
 
             GenContext newContext = null;
 
-
-            if (Compiler.IsCompiling || hasPrimDecls || fn.IsStatic)
-            {
+            // Uncomment -if- to enable light compilation  (and see below)
+            //if (Compiler.IsCompiling || hasPrimDecls || fn.IsStatic)
+            //{
                 GenContext context = Compiler.CompilerContextVar.deref() as GenContext ?? Compiler.EvalContext;
                 newContext = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
                 Var.pushThreadBindings(RT.map(Compiler.CompilerContextVar, newContext));
-            }
+            //}
 
             try
             {
@@ -217,8 +217,9 @@ namespace clojure.lang.CljCompiler.Ast
                 fn._hasMeta = RT.count(fmeta) > 0;
 
 
-                if (Compiler.IsCompiling || prims.Count > 0|| fn.IsStatic)
-                {
+                // Uncomment if/else to enable light compilation (and see above)
+                //if (Compiler.IsCompiling || prims.Count > 0|| fn.IsStatic)
+                //{
 
                     IPersistentVector primTypes = PersistentVector.EMPTY;
                     foreach (string typename in prims)
@@ -230,12 +231,12 @@ namespace clojure.lang.CljCompiler.Ast
                             primTypes,
                             fn._onceOnly,
                             newContext);
-                }
-                else
-                {
-                    fn.FnMode = FnMode.Light;
-                    fn.LightCompile(fn.GetPrecompiledType(), Compiler.EvalContext);
-                }
+                //}
+                //else
+                //{
+                //    fn.FnMode = FnMode.Light;
+                //    fn.LightCompile(fn.GetPrecompiledType(), Compiler.EvalContext);
+                //}
 
                 if (fn.SupportsMeta)
                     return new MetaExpr(fn, MapExpr.Parse(pcon.EvalOrExpr(), fmeta));

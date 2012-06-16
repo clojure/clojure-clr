@@ -205,7 +205,16 @@ namespace clojure.lang.CljCompiler.Ast
                 int finishLine;
                 int finishCol;
                 if (Compiler.GetLocations(spanMap, out startLine, out startCol, out finishLine, out finishCol))
-                    ilg.MarkSequencePoint(_docWriter, startLine, startCol, finishLine, finishCol);
+                {
+                    try
+                    {
+                        ilg.MarkSequencePoint(_docWriter, startLine, startCol, finishLine, finishCol);
+                    }
+                    catch (NotSupportedException)
+                    {
+                        // probably a dynamic ilgen
+                    }
+                }
             }
         }
 
