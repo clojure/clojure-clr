@@ -145,7 +145,11 @@ namespace clojure.lang.CljCompiler.Ast
             else if (_isNoArgValueTypeCtor)
                 EmitForNoArgValueTypeCtor(rhc, objx, ilg);
             else
+            {
                 EmitComplexCall(rhc, objx, ilg);
+                if (_type.IsValueType)
+                    HostExpr.EmitBoxReturn(objx, ilg, _type);
+            }
 
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
