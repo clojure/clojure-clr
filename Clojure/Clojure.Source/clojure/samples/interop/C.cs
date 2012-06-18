@@ -23,7 +23,7 @@ namespace dm.interop
         public void m2(string format, params object[] args) { Console.WriteLine(format, args); }
 
         // Testing ref/out resolving
-        public int m3(int x) { return x; }
+        public int m3(int x) { return x+10; }
         public int m3(ref int x) { x = x + 1; return x+20; }
 
 

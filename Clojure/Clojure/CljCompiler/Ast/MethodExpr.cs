@@ -112,17 +112,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void EmitForMethod(ObjExpr objx, CljILGen ilg)
         {
-            //if (_method.DeclaringType == (Type)Compiler.CompileStubOrigClassVar.deref())
-            //    _method = FindEquivalentMethod(_method, objx.BaseType);
-            if (_args.Exists((x) => x.ParamType == HostArg.ParameterType.ByRef)
-                || Array.Exists(_method.GetParameters(),(x)=> x.ParameterType.IsByRef)
-                || _method.IsGenericMethodDefinition)
+            //if (_args.Exists((x) => x.ParamType == HostArg.ParameterType.ByRef)
+                //|| Array.Exists(_method.GetParameters(),(x)=> x.ParameterType.IsByRef)
+                //|| _method.IsGenericMethodDefinition)
+            if ( _method.IsGenericMethodDefinition )
             {
                 EmitComplexCall(objx, ilg);
                 return;
             }
 
-            // No by-ref args, not a generic method, so we can generate straight arg converts and call
             if (!IsStaticCall)
             {
                 EmitTargetExpression(objx, ilg);
@@ -188,12 +186,14 @@ namespace clojure.lang.CljCompiler.Ast
             //  Build the parameter list
 
             List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count + 1);
+            List<Type> paramTypes = new List<Type>(_args.Count + 1);
 
             Type targetType = GetTargetType();
             if (!targetType.IsPrimitive)
                 targetType = typeof(object);
 
             paramExprs.Add(Expression.Parameter(targetType));
+            paramTypes.Add(targetType);
             int i = 0;
             foreach (HostArg ha in _args)
             {
@@ -204,17 +204,23 @@ namespace clojure.lang.CljCompiler.Ast
                 switch (ha.ParamType)
                 {
                     case HostArg.ParameterType.ByRef:
-                        paramExprs.Add(Expression.Parameter(argType.MakeByRefType(), ha.LocalBinding.Name));
-                        break;
+                        {
+                            Type byRefType = argType.MakeByRefType();
+                            paramExprs.Add(Expression.Parameter(byRefType, ha.LocalBinding.Name));
+                            paramTypes.Add(byRefType);
+                            break;
+                        }
 
                     case HostArg.ParameterType.Standard:
                         if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr)
                         {
                             paramExprs.Add(Expression.Parameter(argType, ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
+                            paramTypes.Add(argType);
                         }
                         else
                         {
                             paramExprs.Add(Expression.Parameter(typeof(object), ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
+                            paramTypes.Add(typeof(object));
                         }
                         break;
 
@@ -226,13 +232,24 @@ namespace clojure.lang.CljCompiler.Ast
             // Build dynamic call and lambda
             Type returnType = HasClrType ? ClrType : typeof(object);
             InvokeMemberBinder binder = new ClojureInvokeMemberBinder(ClojureContext.Default, _methodName, paramExprs.Count, IsStaticCall);
-            DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
+
+            // This is what I want to do.
+            //DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
+            // Unfortunately, the Expression.Dynamic method does not respect byRef parameters.
+            // The workaround appears to be to roll your delegate type and then use Expression.MakeDynamic, as below.
+
+            List<Type> callsiteParamTypes = new List<Type>(paramTypes.Count + 1);
+            callsiteParamTypes.Add(typeof(System.Runtime.CompilerServices.CallSite));
+            callsiteParamTypes.AddRange(paramTypes);
+            Type dynType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, callsiteParamTypes.ToArray());
+ 
+            DynamicExpression dyn = Expression.MakeDynamic(dynType, binder, paramExprs);
 
             LambdaExpression lambda;
             Type delType;
             MethodBuilder mbLambda;
 
-            EmitDynamicCalPreamble(dyn, _spanMap, "__interop_" + _methodName + RT.nextID(), returnType, paramExprs, ilg, out lambda, out delType, out mbLambda);
+            EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _methodName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out lambda, out delType, out mbLambda);
 
             //  Emit target + args
             
@@ -248,7 +265,7 @@ namespace clojure.lang.CljCompiler.Ast
                 switch (ha.ParamType)
                 {
                     case HostArg.ParameterType.ByRef:
-                        ilg.Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
+                        EmitByRefArg(ha,objx,ilg);
                         break;
 
                     case HostArg.ParameterType.Standard:
@@ -270,7 +287,17 @@ namespace clojure.lang.CljCompiler.Ast
             EmitDynamicCallPostlude(lambda, delType, mbLambda, ilg);
         }
 
-        static public void EmitDynamicCalPreamble(DynamicExpression dyn, IPersistentMap spanMap, string methodName, Type returnType, List<ParameterExpression> paramExprs, CljILGen ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda)
+        public static void EmitByRefArg(HostArg ha, ObjExpr objx, CljILGen ilg)
+        {
+            if (ha.LocalBinding.IsArg)
+                ilg.Emit(OpCodes.Ldarga, ha.LocalBinding.Index);
+            else if (ha.LocalBinding.IsThis)
+                ilg.Emit(OpCodes.Ldarga, 0);
+            else
+                ilg.Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
+        }
+
+        static public void EmitDynamicCallPreamble(DynamicExpression dyn, IPersistentMap spanMap, string methodName, Type returnType, List<ParameterExpression> paramExprs, Type[] paramTypes, CljILGen ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda)
         {
             Expression call = dyn;
 
@@ -289,8 +316,6 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             call = GenContext.AddDebugInfo(call, spanMap);
-
-            Type[] paramTypes = paramExprs.Map((x) => x.Type);
 
 
             delType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, paramTypes);
@@ -351,8 +376,30 @@ namespace clojure.lang.CljCompiler.Ast
         public static void EmitTypedArgs(ObjExpr objx, CljILGen ilg, ParameterInfo[] parms, List<HostArg> args)
         {
             for (int i = 0; i < parms.Length; i++)
-                EmitTypedArg(objx, ilg, parms[i].ParameterType, args[i].ArgExpr);
+            {
+                HostArg ha = args[i];
+                ParameterInfo pi = parms[i];
+                bool argIsByRef = ha.ParamType == HostArg.ParameterType.ByRef;
+                bool paramIsByRef = pi.ParameterType.IsByRef;
 
+                if (!paramIsByRef)
+                    EmitTypedArg(objx, ilg, pi.ParameterType, ha.ArgExpr);
+                else // paramIsByRef
+                {
+                    if (argIsByRef)
+                    {
+                        EmitByRefArg(ha, objx, ilg);
+                    }
+                    else
+                    {
+                        EmitTypedArg(objx, ilg, parms[i].ParameterType, args[i].ArgExpr);
+                        LocalBuilder loc = ilg.DeclareLocal(pi.ParameterType);
+                        loc.SetLocalSymInfo("_byRef_temp" + i);
+                        ilg.Emit(OpCodes.Stloc, loc);
+                        ilg.Emit(OpCodes.Ldloca, loc);
+                    }
+                }
+            }
         }
 
         public static void EmitTypedArgs(ObjExpr objx, CljILGen ilg, ParameterInfo[] parms, IPersistentVector args)
