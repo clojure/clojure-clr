@@ -55,7 +55,7 @@
 (defn f2one [c x] 
   (.m2 c x))
   
-; (f2one c1 7)
+; (f2one c1 (int 7))
 ; (f2one c1 7.1)
 ; (f2one c1 "whatever")
 ; (f2one c1 '(a b c))
@@ -64,31 +64,32 @@
   (.m2 c x y))
   
 ; (f2two c1 "Here it is: {0}" 12)
-; (f2two c23 "Here it is: {0}" 12)
+; (f2two c2 "Here it is: {0}" 12)
 
 
 ; Test by-ref, resolved at compile-time
 
 (defn f3c [c n]
-  (let [m (int n)]
-     (.m3 ^dm.interop.C1 c (by-ref m))
-     m))
+  (let [m (int n)
+        v (.m3 ^dm.interop.C1 c (by-ref m))]
+     [v m]))
      
 ; Test by-ref, resolved at runtime
 
 (defn f3r [c n]
-  (let [m (int n)]
-     (.m3 c (by-ref m))
-     m))     
+  (let [m (int n)
+        v (.m3 c (by-ref m))]
+     [v m]))     
   
 ; Make sure we find the non-by-ref overload
 (defn f3n [c n]
-  (let [m (int n)]
-     (.m3 c m)))  
+  (let [m (int n)
+        v (.m3 c m)]
+	[v m]))
      
-; (f3c c1 12) => 13
-; (f3r c1 12) => 13
-; (f3n c1 12) => 12
+; (f3c c1 12) => [33 13]
+; (f3r c1 12) => [33 13]
+; (f3n c1 12) => [22 12]
 
 ; Testing some ambiguity with refs
 (defn f5 [c x y]

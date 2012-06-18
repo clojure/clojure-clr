@@ -166,45 +166,10 @@ namespace clojure.lang.CljCompiler.Ast
         private void EmitParamsForMethod(ObjExpr objx, CljILGen ilg)
         {
             ParameterInfo[] pis = _ctor.GetParameters();
-
-            for( int i =0; i< pis.Length; i++ ) 
-            {
-                // TODO: if hostarg is by ref, we should deal with this?
-                HostArg arg = _args[i];
-                ParameterInfo pi = pis[i];
-                Type argType = arg.ArgExpr.HasClrType ? arg.ArgExpr.ClrType : typeof(object);
-                Type paramType = pi.ParameterType;
-
-                //arg.ArgExpr.Emit(RHC.Expression,objx,context);
-                MethodExpr.EmitTypedArg(objx, ilg, paramType, arg.ArgExpr);
-
-                //if (!CompatibleParameterTypes(paramType,argType)) 
-                //{
-                //    if ( paramType != argType )
-                //        if ( paramType.IsByRef)
-                //            paramType = paramType.GetElementType();
-                //    if ( paramType != argType )
-                //        context.GetILGenerator().Emit(OpCodes.Castclass,paramType);
-                //}
-            }
+            MethodExpr.EmitTypedArgs(objx, ilg, pis, _args);
         }
 
-        // Straight from the  DLR code.
-        private static bool CompatibleParameterTypes(Type parameter, Type argument)
-        {
-            if (parameter == argument ||
-                argument == null ||
-                (!parameter.IsValueType && !argument.IsValueType && parameter.IsAssignableFrom(argument)))
-                return true;
-
-            if (parameter.IsByRef && parameter.GetElementType() == argument)
-                return true;
-
-            return false;
-        }
-
-
-        private void EmitForNoArgValueTypeCtor(RHC rhc, ObjExpr objx, CljILGen ilg)
+       private void EmitForNoArgValueTypeCtor(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             LocalBuilder loc = ilg.DeclareLocal(_type);
             ilg.Emit(OpCodes.Ldloca, loc);
@@ -217,7 +182,10 @@ namespace clojure.lang.CljCompiler.Ast
             // See the notes on MethodExpr.EmitComplexCall on why this is so complicated
 
             List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count + 1);
+            List<Type> paramTypes = new List<Type>(_args.Count + 1);
+
             paramExprs.Add(Expression.Parameter(typeof(Type)));
+            paramTypes.Add(typeof(Type));
 
             int i = 0;
             foreach (HostArg ha in _args)
@@ -229,17 +197,23 @@ namespace clojure.lang.CljCompiler.Ast
                 switch (ha.ParamType)
                 {
                     case HostArg.ParameterType.ByRef:
-                        paramExprs.Add(Expression.Parameter(argType.MakeByRefType(), ha.LocalBinding.Name));
-                        break;
+                        {
+                            Type byRefType = argType.MakeByRefType();
+                            paramExprs.Add(Expression.Parameter(byRefType, ha.LocalBinding.Name));
+                            paramTypes.Add(byRefType);
+                            break;
+                        }
 
                     case HostArg.ParameterType.Standard:
                         if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr)
                         {
                             paramExprs.Add(Expression.Parameter(argType, ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
+                            paramTypes.Add(argType);
                         }
                         else
                         {
                             paramExprs.Add(Expression.Parameter(typeof(object), ha.LocalBinding != null ? ha.LocalBinding.Name : "__temp_" + i));
+                            paramTypes.Add(typeof(object));
                         }
                         break;
 
@@ -257,7 +231,7 @@ namespace clojure.lang.CljCompiler.Ast
             Type delType;
             MethodBuilder mbLambda;
 
-            MethodExpr.EmitDynamicCalPreamble(dyn, _spanMap, "__interop_ctor_" + RT.nextID(), returnType, paramExprs, ilg, out lambda, out delType, out mbLambda);
+            MethodExpr.EmitDynamicCallPreamble(dyn, _spanMap, "__interop_ctor_" + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out lambda, out delType, out mbLambda);
 
             //  Emit target + args
   
@@ -273,7 +247,7 @@ namespace clojure.lang.CljCompiler.Ast
                 switch (ha.ParamType)
                 {
                     case HostArg.ParameterType.ByRef:
-                        ilg.Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
+                        MethodExpr.EmitByRefArg(ha, objx, ilg);
                         break;
 
                     case HostArg.ParameterType.Standard:

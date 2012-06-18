@@ -113,10 +113,12 @@ namespace clojure.lang.CljCompiler.Ast
             //  Build the parameter list
 
             List<ParameterExpression> paramExprs = new List<ParameterExpression>();
+            List<Type> paramTypes = new List<Type>();
 
             Type paramType = _target.HasClrType && _target.ClrType != null && _target.ClrType.IsPrimitive ? _target.ClrType : typeof(object);
             ParameterExpression param = Expression.Parameter(paramType);
             paramExprs.Add(param);
+            paramTypes.Add(paramType);
 
 
             // Build dynamic call and lambda
@@ -130,7 +132,7 @@ namespace clojure.lang.CljCompiler.Ast
             Type delType;
             MethodBuilder mbLambda;
 
-            MethodExpr.EmitDynamicCalPreamble(dyn, _spanMap, "__interop_" + _memberName + RT.nextID(), returnType, paramExprs, ilg, out lambda, out delType, out mbLambda);
+            MethodExpr.EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _memberName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out lambda, out delType, out mbLambda);
 
             //  Emit target + args (no args, actually)
 
