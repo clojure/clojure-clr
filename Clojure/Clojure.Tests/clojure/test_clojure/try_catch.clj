@@ -7,9 +7,11 @@
 ;   You must not remove this notice, or any other, from this software.
 
 ; Author: Paul M Bauer 
-
+(assembly-load-from "Clojure.Tests.dll")
 (ns clojure.test-clojure.try-catch
-  (:use clojure.test))
+  (:use clojure.test)
+  (:import [clojure.test ReflectorTryCatchFixture 
+                         ReflectorTryCatchFixture+Cookies]))                        ;;; ReflectorTryCatchFixture$Cookies
 
 (defn- get-exception [expression]
   (try (eval expression)

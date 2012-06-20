@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReflectorTryCatchFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Clojure\Clojure.csproj">
