@@ -22,13 +22,13 @@
   ([test msg] `(when-not ~test (fail ~msg)))
   ([test] `(verify ~test ~(str "failed: " (pr-str test)))))
 
-(defmacro ^:private divisible?
+(defn- divisible?
   [num div]
-  `(zero? (mod ~num ~div)))
+  (zero? (mod num div)))
 
-(defmacro ^:private indivisible?
+(defn- indivisible?
   [num div]
-  `(not (divisible? ~num ~div)))
+  (not (divisible? num div)))
 
 
 ;;; ------------------------------------------------------------------------
@@ -52,13 +52,13 @@ The function new-instant is called with the following arguments.
 
                 min  max           default
                 ---  ------------  -------
-  years          0          9'999      N/A (s must provide years)
+  years          0           9999      N/A (s must provide years)
   months         1             12        1
   days           1             31        1 (actual max days depends
   hours          0             23        0  on month and year)
   minutes        0             59        0
   seconds        0             60        0 (though 60 is only valid
-  nanoseconds    0    999'999'999        0  when minutes is 59)
+  nanoseconds    0      999999999        0  when minutes is 59)
   offset-sign   -1              1        0
   offset-hours   0             23        0
   offset-minutes 0             59        0
@@ -88,10 +88,9 @@ Grammar (of s):
 
 Unlike RFC3339:
 
-  - we only consdier timestamp (was 'date-time')
-    (removed: 'full-time', 'full-date')
+  - we only parse the timestamp format
   - timestamp can elide trailing components
-  - time-offset is optional
+  - time-offset is optional (defaults to +00:00)
 
 Though time-offset is syntactically optional, a missing time-offset
 will be treated as if the time-offset zero (+00:00) had been
@@ -158,52 +157,87 @@ with invalid arguments."
 ;;; ------------------------------------------------------------------------
 ;;; print integration
 
-;;;(defn- fixup-offset
-;;;  [^String s]
-;;;  (let [x (- (count s) 3)]
-;;;    (str (.Substring s 0 x) ":" (.Substring s x))))                       ;;; .substring
+;;;(def ^:private thread-local-utc-date-format
+;;;  ;; SimpleDateFormat is not thread-safe, so we use a ThreadLocal proxy for access.
+;;;  ;; http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4228335
+;;;  (proxy [ThreadLocal] []
+;;;    (initialValue []
+;;;      (doto (java.text.SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss.SSS-00:00")
+;;;        ;; RFC3339 says to use -00:00 when the timezone is unknown (+00:00 implies a known GMT)
+;;;        (.setTimeZone (java.util.TimeZone/getTimeZone "GMT"))))))
 
-(defn- caldate->rfc3339
-  "format System.DateTime or System.DateTimeOffset as RFC3339 timestamp."     ;;; java.util.Date or java.util.Calendar
-  [d]
-  (format "#inst \"%1$tFT%1$tT.%1$tL%1$tz\"" d))                                  ;;; took out fixup-offset wrapper call
+(defn- print-datetime                                                              ;;; print-date
+  "Print a System.DateTime as RFC3339 timestamp, always in UTC."                   ;;; java.util.Date
+  [ ^System.DateTime d, ^System.IO.TextWriter w]                                   ;;; ^java.util.Date  ^java.io.Writer
+  (let [utc-format "yyyy-MM-ddTHH:mm:ss.fff-00:00"]                                ;;; (.get thread-local-utc-date-format)
+    (.Write w "#inst \"")                                                          ;;; .write  
+    (.Write w (.ToString d utc-format ))                                           ;;; (.write w (.format utc-format d))
+    (.Write w "\"")))                                                              ;;; .write
+
+;;; DM Added
+(defn- print-datetimeoffset
+  "Print a System.DateTimeOffset as RFC3339 timestamp, always in UTC."
+  [ ^System.DateTimeOffset d, ^System.IO.TextWriter w]
+  (let [utc-format "yyyy-MM-ddTHH:mm:ss.fffzzzz"]
+    (.Write w "#inst \"")
+    (.Write w (.ToString d utc-format ))
+    (.Write w "\"")))
+;;; 
 
 (defmethod print-method System.DateTime                                   ;;; java.util.Date
   [^System.DateTime d, ^System.IO.TextWriter w]                           ;;; ^java.util.Date ^java.io.Writer
-  (.Write w (caldate->rfc3339 d)))                                        ;;; .write
+  (print-datetime d w))                                                   ;;; print-date
 
 (defmethod print-dup System.DateTime                                      ;;; java.util.Date
   [^System.DateTime d, ^System.IO.TextWriter w]                           ;;; ^java.util.Date ^java.io.Writer
-  (.Write w (caldate->rfc3339 d)))                                        ;;; .write
+  (print-datetime d w))                                                   ;;; print-date
+
+;;;(defn- print-calendar
+;;;  "Print a java.util.Calendar as RFC3339 timestamp, preserving timezone."
+;;;  [^java.util.Calendar c, ^java.io.Writer w]
+;;;  (let [calstr (format "%1$tFT%1$tT.%1$tL%1$tz" c)
+;;;        offset-minutes (- (.length calstr) 2)]
+;;;    ;; calstr is almost right, but is missing the colon in the offset
+;;;    (.write w "#inst \"")
+;;;    (.write w calstr 0 offset-minutes)
+;;;    (.write w ":")
+;;;    (.write w calstr offset-minutes 2)
+;;;    (.write w "\"")))
 
 (defmethod print-method System.DateTimeOffset                             ;;; java.util.Calendar
-  [^System.DateTimeOffset c, ^System.IO.TextWriter w]                     ;;; ^java.util.Calendar ^java.io.Writer
-  (.Write w (caldate->rfc3339 c)))                                        ;;; .write
+  [^System.DateTimeOffset d, ^System.IO.TextWriter w]                     ;;; ^java.util.Calendar ^java.io.Writer
+  (print-datetimeoffset d w))                                             ;;; print-date
 
 (defmethod print-dup System.DateTimeOffset                                ;;; java.util.Calendar
-  [^System.DateTimeOffset c, ^System.IO.TextWriter w]                     ;;; ^java.util.Calendar ^java.io.Writer
-  (.Write w (caldate->rfc3339 c)))                                        ;;; .write
+  [^System.DateTimeOffset d, ^System.IO.TextWriter w]                     ;;; ^java.util.Calendar ^java.io.Writer
+  (print-datetimeoffset d w))                                             ;;; print-date
 
-(defn- fixup-nanos                   ; 0123456789012345678901234567890123456
-  [^long nanos ^String s]            ; #@2011-01-01T01:00:00.000000000+01:00
-  (str (.Substring s 0 22)                                                              ;;; .substring
-       (format "%09d" nanos)
-       (.Substring s 31)))                                                              ;;; .substring
+;;;(def ^:private thread-local-utc-timestamp-format
+;;;  ;; SimpleDateFormat is not thread-safe, so we use a ThreadLocal proxy for access.
+;;;  ;; http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4228335
+;;;  (proxy [ThreadLocal] []
+;;;    (initialValue []
+;;;      (doto (java.text.SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss")
+;;;        (.setTimeZone (java.util.TimeZone/getTimeZone "GMT"))))))
 
-;;;(defn- timestamp->rfc3339
-;;;  [^java.sql.Timestamp ts]
-;;;  (->> ts
-;;;       (format "#inst \"%1$tFT%1$tT.%1$tN%1$tz\"") ; %1$tN prints 9 digits for frac.
-;;;       fixup-offset                                ; second, but last 6 are always
-;;;       (fixup-nanos (.getNanos ts))))              ; 0 though timestamp has getNanos
+;;;(defn- print-timestamp
+;;;  "Print a java.sql.Timestamp as RFC3339 timestamp, always in UTC."
+;;;  [^java.sql.Timestamp ts, ^java.io.Writer w]
+;;;  (let [utc-format (.get thread-local-utc-timestamp-format)]
+;;;    (.write w "#inst \"")
+;;;    (.write w (.format utc-format ts))
+;;;    ;; add on nanos and offset
+;;;    ;; RFC3339 says to use -00:00 when the timezone is unknown (+00:00 implies a known GMT)
+;;;    (.write w (format ".%09d-00:00" (.getNanos ts)))
+;;;    (.write w "\"")))
 
 ;;;(defmethod print-method java.sql.Timestamp
-;;;  [^java.sql.Timestamp t, ^java.io.Writer w]
-;;;  (.write w (timestamp->rfc3339 t)))
+;;;  [^java.sql.Timestamp ts, ^java.io.Writer w]
+;;;  (print-timestamp ts w))
 
 ;;;(defmethod print-dup java.sql.Timestamp
-;;;  [^java.sql.Timestamp t, ^java.io.Writer w]
-;;;  (.write w (timestamp->rfc3339 t)))
+;;;  [^java.sql.Timestamp ts, ^java.io.Writer w]
+;;;  (print-timestamp ts w))
 
 
 ;;; ------------------------------------------------------------------------
@@ -229,11 +263,11 @@ but truncating the subsecond fraction to milliseconds."
   ^DateTimeOffset
   [years months days hours minutes seconds nanoseconds
    offset-sign offset-hours offset-minutes]
-   (DateTimeOffset. years months days hours minutes seconds 
-        (/ nanoseconds 1000000) 
-        (if (neg? offset-sign) 
-		    (TimeSpan. (- offset-hours) (- offset-minutes) 0)
-			(TimeSpan. offset-hours offset-minutes 0))))
+  (DateTimeOffset. years months days hours minutes seconds 
+     (/ nanoseconds 1000000) 
+     (if (neg? offset-sign) 
+	   (TimeSpan. (- offset-hours) (- offset-minutes) 0)
+	   (TimeSpan. offset-hours offset-minutes 0))))
 ;;;
 
 
@@ -252,7 +286,7 @@ but truncating the subsecond fraction to milliseconds."
 milliseconds since the epoch, GMT."
   [years months days hours minutes seconds nanoseconds
    offset-sign offset-hours offset-minutes]
-   (.LocalDateTime (construct-datetimeoffset years months days
+   (.UtcDateTime (construct-datetimeoffset years months days
                                 hours minutes seconds nanoseconds
                                 offset-sign offset-hours offset-minutes)))
 ;;;
@@ -270,23 +304,28 @@ milliseconds since the epoch, GMT."
 ;;;    (.setNanos nanoseconds)))
 
 (def read-instant-datetime                                                                          ;;; read-instant-date
-     "Bind this to *instant-reader* to read instants as System.DateTime."                           ;;; java.util.Date.
-     (partial parse-timestamp (validated construct-datetime)))                                      ;;; construct-date
+  "To read an instant as a System.DateTime, bind *data-readers* to a map with 
+this var as the value for the 'inst key. The timezone offset will be used
+to convert into UTC."
+   (partial parse-timestamp (validated construct-datetime)))                                      ;;; construct-date
 
 ;;; DM: Added
 (def read-instant-datetimeoffset
-     "Bind this to *instant-reader* to read instants as System.DateTimeOffset."
-     (partial parse-timestamp (validated construct-datetimeoffset)))
+  "To read an instant as a System.DateTimeOffset, bind *data-readers* to a map with 
+this var as the value for the 'inst key. The timezone offset will be used
+to convert into UTC."    
+   (partial parse-timestamp (validated construct-datetimeoffset)))
 ;;;
 
 ;;;(def read-instant-calendar
-;;;     "Bind this to *instant-reader* to read instants as java.util.Calendar.
-;;;Calendar preserves the timezone offset originally used in the date
-;;;literal as written."
-;;;     (partial parse-timestamp (validated construct-calendar)))
+;;;  "To read an instant as a java.util.Calendar, bind *data-readers* to a map with
+;;;this var as the value for the 'inst key.  Calendar preserves the timezone
+;;;offset."
+;;;  (partial parse-timestamp (validated construct-calendar)))
 
 ;;;(def read-instant-timestamp
-;;;     "Bind this to *instant-reader* to read instants as
-;;;java.sql.Timestamp. Timestamp preserves fractional seconds with
-;;;nanosecond precision."
-;;;     (partial parse-timestamp (validated construct-timestamp)))
+;;;  "To read an instant as a java.sql.Timestamp, bind *data-readers* to a
+;;;map with this var as the value for the 'inst key. Timestamp preserves
+;;;fractional seconds with nanosecond precision. The timezone offset will
+;;;be used to convert into UTC."
+;;;  (partial parse-timestamp (validated construct-timestamp)))
