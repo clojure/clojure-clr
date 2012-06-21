@@ -987,7 +987,8 @@ namespace clojure.lang.CljCompiler.Ast
                 if (value is IObj && RT.count(((IObj)value).meta()) > 0)
                 {
                     ilg.Emit(OpCodes.Castclass, typeof(IObj));
-                    EmitValue(((IObj)value).meta(), ilg);
+                    Object m = ((IObj)value).meta();
+                    EmitValue(Compiler.ElideMeta(m), ilg);
                     ilg.Emit(OpCodes.Castclass, typeof(IPersistentMap));
                     ilg.Emit(OpCodes.Callvirt, Compiler.Method_IObj_withMeta);
                 }

@@ -141,6 +141,8 @@ namespace clojure.lang.CljCompiler.Ast
                 //            .without(Keyword.intern(null, "added"))
                 //            .without(Keyword.intern(null, "static"));
 
+                mm = (IPersistentMap)Compiler.ElideMeta(mm);
+
                 Expr meta =  mm == null || mm.count() == 0 ? null : Compiler.Analyze(pcon.EvalOrExpr(),mm);
                 Expr init = Compiler.Analyze(pcon.EvalOrExpr(),RT.third(form), v.Symbol.Name);
                 bool initProvided = RT.count(form) == 3;

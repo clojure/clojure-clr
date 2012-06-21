@@ -151,6 +151,22 @@ namespace clojure.lang
         internal static readonly Var CompilerContextVar = Var.create(null).setDynamic();
         internal static readonly Var CompilerActiveVar = Var.create(false).setDynamic();
 
+
+        // collection of keys
+        public static readonly Var ElideMetaVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+            Symbol.intern("*elide-meta*"), null).setDynamic();
+
+        public static object ElideMeta(object m)
+        {
+            ICollection<Object> elides = (ICollection<Object>)ElideMetaVar.get();
+            if (elides != null)
+            {
+                foreach (object k in elides)
+                    m = RT.dissoc(m, k);
+            }
+            return m;
+        }
+
         #endregion
 
         #region Special forms
