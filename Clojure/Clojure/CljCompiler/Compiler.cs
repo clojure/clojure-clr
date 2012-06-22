@@ -1580,31 +1580,42 @@ namespace clojure.lang
         [Serializable]
         public sealed class CompilerException : Exception
         {
+
+            #region Data
+            
+            string FileSource { get; set; }
+            
+            #endregion
+
             #region C-tors
 
             public CompilerException()
             {
+                FileSource = "<unknown>";
             }
 
             public CompilerException(string message)
                 : base(message)
             {
+                FileSource = "<unknown>";
             }
 
             public CompilerException(string message, Exception innerException)
                 :base(message,innerException)
             {
+                FileSource = "<unknown>";
             }
 
             public CompilerException(string source, int line, Exception cause)
                 : base(ErrorMsg(source, line, cause.ToString()), cause)
             {
-                Source = source;
+                FileSource = source;
             }
 
             private CompilerException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
+                FileSource = "<unknown>";
             }
 
             #endregion

@@ -49,7 +49,7 @@
 ;; Strings
 
 (defn temp-file
-  [prefix suffix]
+  [& ignore]                                          ;;; [prefix suffix]
   (FileInfo.                                          ;;;  (doto (File/createTempFile prefix suffix)
        (Path/GetTempFileName)))                       ;;;    (.deleteOnExit)))
 
@@ -58,7 +58,7 @@
   (if (= :string source)
     (read-string form)
     (do
-      (spit file form)
+      (spit file form :file-mode System.IO.FileMode/Truncate)
       (let [v (load-file (str file))] (.Delete file) v))))          ;;;  (load-file (str file)))))
 
 (defn code-units
@@ -73,7 +73,7 @@
     (doseq [source [:string :file]]
       (testing (str "Valid string literals read from " (name source))
         (are [x form] (= x (code-units
-                            (read-from source f (str "\"" form "\""))))
+                            (read-from source (temp-file) (str "\"" form "\""))))                ;;;  f => (temp-file)
              [] ""
              [34] "\\\""
              [10] "\\n"
@@ -281,7 +281,7 @@
   (let [f (temp-file "clojure.core-reader" "test")]
     (doseq [source [:string :file]]
       (testing (str "Valid char literals read from " (name source))
-        (are [x form] (= x (read-from source f form))
+        (are [x form] (= x (read-from source (temp-file) form))                       ;;; f -> (temp-file)
              (first "o") "\\o"
              (char 0) "\\o0"
              (char 0) "\\o000"

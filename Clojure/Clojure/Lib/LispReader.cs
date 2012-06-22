@@ -254,7 +254,7 @@ namespace clojure.lang
             {
                 int d = CharValueInRadix(token[i], radix);
                 if (d == -1)
-                    throw new ArgumentException("Invalid digit: " + (char)d);
+                    throw new ArgumentException("Invalid digit: " + token[i]);
                 uc = uc * radix + d;
             }
             return (char)uc;
@@ -265,7 +265,7 @@ namespace clojure.lang
 
             int uc = CharValueInRadix(initch, radix);
             if (uc == -1)
-                throw new ArgumentException("Invalid digit: " + initch);
+                throw new ArgumentException("Invalid digit: " + (char)initch);
             int i = 1;
             for (; i < length; ++i)
             {
@@ -739,7 +739,7 @@ namespace clojure.lang
                 {
                     char c = (char)readUnicodeChar(token, 1, 4, 16);
                     if (c >= '\uD800' && c <= '\uDFFF') // surrogate code unit?
-                        throw new InvalidOperationException("Invalid character constant: \\u" + ((int)c).ToString("X"));
+                        throw new InvalidOperationException("Invalid character constant: \\u" + ((int)c).ToString("x"));
                     return c;
                 }
                 else if (token.StartsWith("o"))
@@ -804,7 +804,8 @@ namespace clojure.lang
                                 break;
                             default:
                                 {
-                                    if (CharValueInRadix(ch, 8) != -1)
+                                    //if (CharValueInRadix(ch, 8) != -1)  -- this is correct, but we end up with different error message for 8,9 than JVM, so do the following to match:
+                                    if (Char.IsDigit((char)ch))
                                     {
                                         ch = readUnicodeChar((PushbackTextReader)r, ch, 8, 3, false);
                                         if (ch > 255) //octal377
