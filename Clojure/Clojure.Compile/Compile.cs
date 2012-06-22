@@ -29,7 +29,6 @@ namespace BootstrapCompile
         const string PATH_PROP = "CLOJURE_COMPILE_PATH";
         const string REFLECTION_WARNING_PROP = "CLOJURE_COMPILE_WARN_ON_REFLECTION";
         const string UNCHECKED_MATH_PROP = "CLOJURE_COMPILE_UNCHECKED_MATH";
-        const string ELIDE_META_PROP = "CLOJURE_ELIDE_META";
 
         static void Main(string[] args)
         {
@@ -54,7 +53,19 @@ namespace BootstrapCompile
             bool warnOnReflection = warnVal == null ? false : warnVal.Equals("true");
             string mathVal = Environment.GetEnvironmentVariable(UNCHECKED_MATH_PROP);
             bool uncheckedMath = mathVal == null ? false : mathVal.Equals("true");
-            object elide = RT.readString(Environment.GetEnvironmentVariable(ELIDE_META_PROP) ?? "nil");
+
+            object compilerOptions = null;
+            foreach (DictionaryEntry kv in Environment.GetEnvironmentVariables())
+            {
+                String name = (String)kv.Key;
+                String v = (String)kv.Value;
+                if ( name.StartsWith("CLOJURE_COMPILER_") )
+                {
+                    compilerOptions = RT.assoc(compilerOptions
+                        ,RT.keyword(null,name.Substring(1+name.LastIndexOf('_')))
+                        ,RT.readString(v));
+                }
+            }
 
             try
             {
@@ -62,7 +73,7 @@ namespace BootstrapCompile
                     Compiler.CompilePathVar, path,
                     RT.WarnOnReflectionVar, warnOnReflection,
                     RT.UncheckedMathVar, uncheckedMath,
-                    Compiler.ElideMetaVar,elide
+                    Compiler.CompilerOptionsVar, compilerOptions
                     ));
 
                 Stopwatch sw = new Stopwatch();

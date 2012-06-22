@@ -88,6 +88,9 @@ namespace clojure.lang
         //static readonly Keyword OnKeyword = Keyword.intern(null, "on");
         internal static readonly Keyword DynamicKeyword = Keyword.intern("dynamic");
 
+        internal static readonly Keyword DisableLocalsClearingKeyword = Keyword.intern("disable-locals-clearing");
+        internal static readonly Keyword ElideMetaKeyword = Keyword.intern("elide-meta");
+ 
 
         #endregion
 
@@ -151,14 +154,17 @@ namespace clojure.lang
         internal static readonly Var CompilerContextVar = Var.create(null).setDynamic();
         internal static readonly Var CompilerActiveVar = Var.create(false).setDynamic();
 
+        public static readonly Var CompilerOptionsVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+            Symbol.intern("*compiler-options*"), null).setDynamic();
 
-        // collection of keys
-        public static readonly Var ElideMetaVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-            Symbol.intern("*elide-meta*"), null).setDynamic();
+        public static object GetCompilerOption(Keyword k)
+        {
+            return RT.get(CompilerOptionsVar.deref(), k);
+        }
 
         public static object ElideMeta(object m)
         {
-            ICollection<Object> elides = (ICollection<Object>)ElideMetaVar.get();
+            ICollection<Object> elides = (ICollection<Object>)GetCompilerOption(ElideMetaKeyword);
             if (elides != null)
             {
                 foreach (object k in elides)
