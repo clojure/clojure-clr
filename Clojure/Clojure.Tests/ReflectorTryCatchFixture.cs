@@ -20,9 +20,16 @@ namespace clojure.test
             throw new Cookies("Double");
         }
 
+        public void failWithCause(Double y)
+        {
+            throw new Cookies("Wrapped", new Cookies("Cause"));
+        }
+  
+
         public sealed class Cookies : Exception
         {
             public Cookies(String msg) : base(msg) { }
+            public Cookies(String msg, Exception cause) : base(msg, cause) { }
         }
     }
 }

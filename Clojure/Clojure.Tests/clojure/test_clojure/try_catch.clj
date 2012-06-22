@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 ; Author: Paul M Bauer 
-(assembly-load-from "Clojure.Tests.dll")
+(assembly-load-from "Clojure.Tests.dll")                                           ;;; DM: Added
 (ns clojure.test-clojure.try-catch
   (:use clojure.test)
   (:import [clojure.test ReflectorTryCatchFixture 
@@ -24,3 +24,16 @@
                                           (type (get-exception expression)))
     "Eh, I'm pretty safe" nil
     '(System.IO.StreamReader. "CAFEBABEx0/idonotexist") System.IO.DirectoryNotFoundException))            ;;; java.io.FileReader.   java.io.FileNotFoundException
+
+
+(defn fail [x]
+  (ReflectorTryCatchFixture/fail x))
+
+(defn make-instance []
+  (ReflectorTryCatchFixture.))
+
+(deftest catch-receives-checked-exception-from-reflective-call
+  (is (thrown-with-msg? ReflectorTryCatchFixture+Cookies #"Long" (fail 1)))                 ;;; ReflectorTryCatchFixture$Cookies
+  (is (thrown-with-msg? ReflectorTryCatchFixture+Cookies #"Double" (fail 1.0)))             ;;; ReflectorTryCatchFixture$Cookies
+  (is (thrown-with-msg? ReflectorTryCatchFixture+Cookies #"Wrapped"                         ;;; ReflectorTryCatchFixture$Cookies
+        (.failWithCause (make-instance) 1.0))))
