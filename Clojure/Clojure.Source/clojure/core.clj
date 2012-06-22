@@ -6608,17 +6608,10 @@
   data_readers.clj or by rebinding this Var."
   {})
 
-(defn- data-reader-urls []                                      ;;; Actually, we will return a sequence of FileInfo instances
+(defn- data-reader-urls []                                         ;;; Actually, we will return a sequence of FileInfo instances
   (enumeration-seq
     (clojure.lang.RT/FindFiles "data_readers.clj")))               ;;;    (.. Thread currentThread getContextClassLoader
-                                                                ;;;        (getResources "data_readers.clj"))))
-
-(defn- assert-symbol [^clojure.lang.LineNumberingTextReader reader x]             ;;; LineNumberingPushbackReader
-  (when-not (symbol? x)
-    (throw (ex-info "non-symbol in data-reader file"
-                    {:file *file*
-                     :line (.LineNumber reader)                                   ;;; .getLineNumber
-                     :value x}))))
+                                                                   ;;;        (getResources "data_readers.clj"))))
 
 (defn- data-reader-var [sym]
   (intern (create-ns (symbol (namespace sym)))
@@ -6629,18 +6622,24 @@
                     (.OpenText url)  )]                                                                 ;;; (java.io.InputStreamReader.
                                                                                                         ;;;        (.openStream url) "UTF-8"))]
     (binding [*file* (.Name url)]                                                                       ;;; .getFile
-     (loop [mappings mappings]
-       (if-let [tag (read rdr false nil)]
-         (do (assert-symbol rdr tag)
-             (when (contains? mappings tag)
-               (throw (ex-info "Conflicting data-reader mapping"
-                               {:file *file*
-                                :line (.LineNumber rdr)                                                 ;;; .getLineNumber
-                                :symbol tag})))
-             (let [target (read rdr true nil)]
-               (assert-symbol rdr target)
-               (recur (assoc mappings tag (data-reader-var target)))))
-         mappings)))))
+      (let [new-mappings (read rdr false nil)]
+        (when (not (map? new-mappings))
+          (throw (ex-info (str "Not a valid data-reader map")
+                          {:url url})))
+        (reduce
+         (fn [m [k v]]
+           (when (not (symbol? k))
+             (throw (ex-info (str "Invalid form in data-reader file")
+                             {:url url
+                              :form k})))
+           (when (contains? mappings k)
+             (throw (ex-info "Conflicting data-reader mapping"
+                             {:url url
+                              :conflict k
+                              :mappings m})))
+           (assoc m k (data-reader-var v)))
+         mappings
+         new-mappings)))))
 
 (defn- load-data-readers []
   (alter-var-root #'*data-readers*
@@ -6648,4 +6647,8 @@
                     (reduce load-data-reader-file
                             mappings (data-reader-urls)))))
 
-(load-data-readers)
+(try
+ (load-data-readers)
+ (catch Exception t                                                                 ;;; Throwable
+   (System.Console/WriteLine (.StackTrace t))                                       ;;; .printStackTrace
+   (throw t)))
