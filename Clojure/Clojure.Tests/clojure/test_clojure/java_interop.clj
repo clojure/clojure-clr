@@ -8,7 +8,7 @@
 
 ; Author: Frantisek Sodomka
 
-
+(assembly-load-with-partial-name "System.Drawing")         ;;; DM: Added
 (ns clojure.test-clojure.java-interop
   (:use clojure.test))
 
@@ -41,14 +41,14 @@
       (. Math (Abs -7)) )
 
   ; (. target -prop)                                          ;;; Anyone know a class with public fields?
-  (are [x y] (= x y)
-      (let [p (System.Drawing.Point. 1 2)]                      ;;; java.awt.Point.
-        1 (.-X p)                                               ;;;  .-x
-        2 (.-Y p)                                               ;;;  .-y
-        1 (.  -X)                                               ;;;  -x
-        2 (. p -Y)                                               ;;;  -y
-        1 (. (System.Drawing.Point. 1 2) -X)                    ;;; java.awt.Point.   -x
-        2 (. (System.Drawing.Point. 1 2) -Y)))                  ;;; java.awt.Point.   -y
+  (let [p (System.Drawing.Point. 1 2)]                              ;;; java.awt.Point.
+    (are [x y] (= x y)
+       1 (.-X p)                                              ;;; .-x
+       2 (.-Y p)                                              ;;; .-y
+       1 (. p -X)                                             ;;; -x
+       2 (. p -Y)                                             ;;; -y
+       1 (. (System.Drawing.Point. 1 2) -X)                             ;;; java.awt.Point.  -x
+       2 (. (System.Drawing.Point. 1 2) -Y)))                           ;;; java.awt.Point.   -y
 
   ; Classname/staticField
   (are [x] (= x 2147483647)
