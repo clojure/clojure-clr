@@ -8,6 +8,8 @@
 
 (ns clojure.core.protocols)
 
+(set! *warn-on-reflection* true)
+
 (defprotocol InternalReduce
   "Protocol for concrete seq types that can reduce themselves
    faster than first/next recursion. Called by clojure.core/reduce."
@@ -94,4 +96,5 @@
 (emit-array-impls System.Int32 System.Int64 System.Single System.Double System.Byte System.SByte System.Char System.Boolean 
       System.Int16 System.UInt16 System.UInt32 System.UInt64)
 
- 
+(defprotocol IKVReduce
+  (kv-reduce [amap f init])) 

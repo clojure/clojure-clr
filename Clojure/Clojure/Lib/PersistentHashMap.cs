@@ -546,6 +546,18 @@ namespace clojure.lang
          }
 
         #endregion
+
+        #region kvreduce
+
+        public object kvreduce(IFn f, object init)
+        {
+            init = _hasNull ? f.invoke(init,null,_nullValue) : init;
+            if (_root != null)
+                return _root.KvReduce(f, init);
+            return init;
+        }
+
+        #endregion
         
         #region INode
 
@@ -627,6 +639,14 @@ namespace clojure.lang
             /// <param name="removedLeaf"></param>
             /// <returns></returns>
             INode Without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf);
+
+            /// <summary>
+            /// Perform key-value reduce.
+            /// </summary>
+            /// <param name="f"></param>
+            /// <param name="init"></param>
+            /// <returns></returns>
+            object KvReduce(IFn f, Object init);
         }
 
         #endregion
@@ -815,6 +835,14 @@ namespace clojure.lang
                     return editable;
                 }
                 return EditAndSet(edit, idx, n);
+            }
+
+            public object KvReduce(IFn f, object init)
+            {
+                foreach (INode node in _array)
+                    if (node != null)
+                        init = node.KvReduce(f, init);
+                return init;
             }
 
             #endregion
@@ -1192,8 +1220,12 @@ namespace clojure.lang
                     return EditAndRemovePair(edit, bit, idx);
                 }
                 return this;
-            }            
-        
+            }
+
+            public object KvReduce(IFn f, object init)
+            {
+                return NodeSeq.KvReduce(_array, f, init);
+            }
 
             #endregion
 
@@ -1386,6 +1418,11 @@ namespace clojure.lang
                 return editable;
             }
 
+            public object KvReduce(IFn f, object init)
+            {
+                return NodeSeq.KvReduce(_array, f, init);
+            }
+
             #endregion
 
             #region Implementation
@@ -1507,6 +1544,26 @@ namespace clojure.lang
                     return Create(_array, _i, _s.next());
                 return Create(_array, _i + 2, null);
             }
+            #endregion
+
+            #region KvReduce
+
+            static public object KvReduce(object[] array, IFn f, object init)
+            {
+                for (int i = 0; i < array.Length; i += 2)
+                {
+                    if (array[i] != null)
+                        init = f.invoke(init, array[i], array[i + 1]);
+                    else
+                    {
+                        INode node = (INode)array[i + 1];
+                        if (node != null)
+                            init = node.KvReduce(f, init);
+                    }
+                }
+                return init;
+            }
+
             #endregion
         }
     }

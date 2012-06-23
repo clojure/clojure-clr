@@ -677,6 +677,18 @@ namespace clojure.lang
 
         #endregion
 
+        #region kvreduce
+
+        public object kvreduce(IFn f, object init)
+        {
+            if (_tree != null)
+                return _tree.KvReduce(f, init);
+            return init;
+        }
+
+
+        #endregion
+
         [Serializable]
         abstract internal class Node : AMapEntry
         {
@@ -736,6 +748,15 @@ namespace clojure.lang
 
             abstract protected internal Node Replace(object key, object val, Node left, Node right);
 
+            public object KvReduce(IFn f, object init)
+            {
+                init = f.invoke(init, key(), val());
+                if (Left != null)
+                    init = Left.KvReduce(f, init);
+                if (Right != null)
+                    init = Right.KvReduce(f, init);
+                return init;
+            }
 
         }  // end class Node
 

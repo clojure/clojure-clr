@@ -602,5 +602,17 @@ namespace clojure.lang
         }
 
         #endregion
+
+        #region kvreduce
+
+        public object kvreduce(IFn f, object init)
+        {
+            for ( int i=0; i<_array.Length; i+=2)
+                init = f.invoke(init,_array[i],_array[i+1]);
+            return init;
+        }
+
+        #endregion
+
     }
 }
