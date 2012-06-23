@@ -77,7 +77,8 @@ namespace clojure.lang
                 return null;
             return spec.Resolve(
                 assyName => Assembly.Load(assyName),
-                (assy, typeName) => assy == null ? RT.classForName(typeName) : assy.GetType(typeName));
+                //(assy, typeName) => assy == null ? RT.classForName(typeName) : assy.GetType(typeName));  <--- this goes into an infinite loop on a non-existent typename
+                (assy, typeName) => assy == null ? (name.Equals(typeName) ? null : RT.classForName(typeName)) : assy.GetType(typeName));
         }
 
         #endregion
