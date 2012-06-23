@@ -205,6 +205,7 @@
                                               (clojure.lang.MapEntry. k# v#))))
                    `(seq [this#] (seq (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
                                           ~'__extmap)))
+					`(|System.Collections.Generic.IEnumerable`1[clojure.lang.IMapEntry]|.GetEnumerator [this#]  (clojure.lang.Runtime.ImmutableDictionaryEnumerator. this#))
                    `(^ clojure.lang.IPersistentMap assoc [this# k# ~gs]                        ;;; type hint added
                      (condp identical? k#
                        ~@(mapcat (fn [fld]
