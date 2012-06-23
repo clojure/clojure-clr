@@ -493,7 +493,7 @@ namespace clojure.lang.CljCompiler.Ast
             return !implemented.Contains(mi) && mi.DeclaringType.IsInterface && !(!IsDefType && mi.DeclaringType == typeof(IObj) || mi.DeclaringType == typeof(IMeta));
         }
 
-        private void EmitDummyMethod(TypeBuilder tb, MethodInfo mi)
+        private static void EmitDummyMethod(TypeBuilder tb, MethodInfo mi)
         {
             MethodBuilder mb = tb.DefineMethod(ExplicitMethodName(mi), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, mi.ReturnType, Compiler.GetTypes(mi.GetParameters()));
             CljILGen gen = new CljILGen(mb.GetILGenerator());

@@ -88,7 +88,10 @@ namespace clojure.lang
         //static readonly Keyword OnKeyword = Keyword.intern(null, "on");
         internal static readonly Keyword DynamicKeyword = Keyword.intern("dynamic");
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         internal static readonly Keyword DisableLocalsClearingKeyword = Keyword.intern("disable-locals-clearing");
+
         internal static readonly Keyword ElideMetaKeyword = Keyword.intern("elide-meta");
  
 
@@ -1258,7 +1261,7 @@ namespace clojure.lang
                 ConstructorBuilder cb = initTB.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
                 ILGenerator cbGen = cb.GetILGenerator();
 
-                Label exBlock = cbGen.BeginExceptionBlock();
+                cbGen.BeginExceptionBlock();
 
                 cbGen.Emit(OpCodes.Call,Method_Compiler_PushNS);
                 cbGen.Emit(OpCodes.Call, constInitsMB);
@@ -1580,7 +1583,6 @@ namespace clojure.lang
         [Serializable]
         public sealed class CompilerException : Exception
         {
-
             #region Data
             
             string FileSource { get; set; }
@@ -1615,7 +1617,10 @@ namespace clojure.lang
             private CompilerException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-                FileSource = "<unknown>";
+                if (info == null)
+                    throw new ArgumentNullException("info");
+
+                FileSource = info.GetString("FileSource");
             }
 
             #endregion
@@ -1630,6 +1635,14 @@ namespace clojure.lang
             static string ErrorMsg(string source, int line, string s)
             {
                 return string.Format("{0}, compiling: ({1}:{2})", s, source, line);
+            }
+
+            public override void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                if (info == null)
+                    throw new System.ArgumentNullException("info");
+                base.GetObjectData(info, context);
+                info.AddValue("FileSource", FileSource);
             }
 
             #endregion

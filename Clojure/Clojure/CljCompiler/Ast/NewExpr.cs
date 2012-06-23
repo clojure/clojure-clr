@@ -269,8 +269,6 @@ namespace clojure.lang.CljCompiler.Ast
             MethodExpr.EmitDynamicCallPostlude(lambda, delType, mbLambda, ilg); 
         }
 
-        static readonly MethodInfo Method_Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle");
-
         private void EmitTargetExpression(ObjExpr objx, CljILGen ilg)
         {
             if (Compiler.CompileStubOrigClassVar.isBound && Compiler.CompileStubOrigClassVar.deref() != null && objx.TypeBlder != null)

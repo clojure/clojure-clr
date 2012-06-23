@@ -19,9 +19,13 @@ namespace clojure.lang
     // This is essentially identical to DLR's System.Runtime.CompilerServices.Closure.
     // Because it does the exact same thing.
 
+    [Serializable]
     public sealed class Closure
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly")]
         public readonly object[] Constants;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly")]
         public readonly object[] Locals;
 
         public Closure(object[] constants, object[] locals)

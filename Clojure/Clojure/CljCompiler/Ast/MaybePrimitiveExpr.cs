@@ -15,7 +15,7 @@
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    interface MaybePrimitiveExpr : Expr
+    public interface MaybePrimitiveExpr : Expr
     {
         bool CanEmitPrimitive { get; }
         void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg);

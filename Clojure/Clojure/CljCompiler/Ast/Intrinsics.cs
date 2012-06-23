@@ -17,10 +17,12 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Reflection;
 using Microsoft.Scripting.Utils;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    public class Intrinsics
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
+    public static class Intrinsics
     {
         #region Data
 
@@ -55,6 +57,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region c-tors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static Intrinsics()
         {
             Type nt = typeof(Numbers);
@@ -236,7 +239,7 @@ namespace clojure.lang.CljCompiler.Ast
             return _preds.ContainsKey(method);
         }
 
-        public static void EmitPred(MethodInfo method, CljILGen ilg, Label falseLabel)
+        public static void EmitPred(MethodInfo method, ILGen ilg, Label falseLabel)
         {
             OpCode[] opcodes = _preds[method];
 
@@ -250,7 +253,7 @@ namespace clojure.lang.CljCompiler.Ast
             return _ops.ContainsKey(method);
         }
 
-        public static void EmitOp(MethodInfo method, CljILGen ilg)
+        public static void EmitOp(MethodInfo method, ILGen ilg)
         {
             OpCode[] opcodes = _ops[method];
 

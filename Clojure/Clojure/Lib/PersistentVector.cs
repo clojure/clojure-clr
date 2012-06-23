@@ -934,6 +934,7 @@ namespace clojure.lang
 
         #region kvreduce
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "kvreduce")]
         public object kvreduce(IFn f, object init)
         {
             int step = 0;

@@ -227,7 +227,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             LocalBuilder retLocal = ilg.DeclareLocal(typeof(Object));
 
-            Label endLabel = ilg.BeginExceptionBlock();
+            ilg.BeginExceptionBlock();
             _tryExpr.Emit(rhc, objx, ilg);
             if (rhc != RHC.Statement)
                 ilg.Emit(OpCodes.Stloc, retLocal);

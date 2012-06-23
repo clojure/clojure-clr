@@ -44,8 +44,6 @@ namespace clojure.lang.CljCompiler.Ast
         protected readonly IPersistentMap _spanMap;
         protected readonly Symbol _tag;
 
-        static readonly IntrinsicsRewriter _arithmeticRewriter = new IntrinsicsRewriter();
-
         #endregion
 
         #region C-tors

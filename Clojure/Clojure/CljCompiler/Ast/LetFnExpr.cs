@@ -134,7 +134,6 @@ namespace clojure.lang.CljCompiler.Ast
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             int n = _bindingInits.count();
-            List<LocalBuilder> locals = new List<LocalBuilder>();
 
             // Define our locals
             for (int i = 0; i < n; i++)

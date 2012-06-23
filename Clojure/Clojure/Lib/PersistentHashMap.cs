@@ -549,11 +549,12 @@ namespace clojure.lang
 
         #region kvreduce
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "kvreduce")]
         public object kvreduce(IFn f, object init)
         {
             init = _hasNull ? f.invoke(init,null,_nullValue) : init;
             if (_root != null)
-                return _root.KvReduce(f, init);
+                return _root.KVReduce(f, init);
             return init;
         }
 
@@ -646,7 +647,7 @@ namespace clojure.lang
             /// <param name="f"></param>
             /// <param name="init"></param>
             /// <returns></returns>
-            object KvReduce(IFn f, Object init);
+            object KVReduce(IFn f, Object init);
         }
 
         #endregion
@@ -837,11 +838,11 @@ namespace clojure.lang
                 return EditAndSet(edit, idx, n);
             }
 
-            public object KvReduce(IFn f, object init)
+            public object KVReduce(IFn f, object init)
             {
                 foreach (INode node in _array)
                     if (node != null)
-                        init = node.KvReduce(f, init);
+                        init = node.KVReduce(f, init);
                 return init;
             }
 
@@ -1222,7 +1223,7 @@ namespace clojure.lang
                 return this;
             }
 
-            public object KvReduce(IFn f, object init)
+            public object KVReduce(IFn f, object init)
             {
                 return NodeSeq.KvReduce(_array, f, init);
             }
@@ -1418,7 +1419,7 @@ namespace clojure.lang
                 return editable;
             }
 
-            public object KvReduce(IFn f, object init)
+            public object KVReduce(IFn f, object init)
             {
                 return NodeSeq.KvReduce(_array, f, init);
             }
@@ -1558,7 +1559,7 @@ namespace clojure.lang
                     {
                         INode node = (INode)array[i + 1];
                         if (node != null)
-                            init = node.KvReduce(f, init);
+                            init = node.KVReduce(f, init);
                     }
                 }
                 return init;

@@ -40,7 +40,11 @@ namespace clojure.lang.CljCompiler.Ast
         private int _dynMethodMapKey = RT.nextID();
         public int DynMethodMapKey { get { return _dynMethodMapKey; } }
 
-        private Dictionary<int,DynamicMethod> _dynMethodMap;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
+        private Dictionary<int, DynamicMethod> _dynMethodMap;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         private object[] _compiledConstants;
 
         #endregion
@@ -135,12 +139,12 @@ namespace clojure.lang.CljCompiler.Ast
 
             fn.SpanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();
 
-            bool hasPrimDecls = HasPrimDecls((ISeq)RT.next(form));
 
 
             GenContext newContext = null;
 
             // Uncomment -if- to enable light compilation  (and see below)
+            //bool hasPrimDecls = HasPrimDecls((ISeq)RT.next(form));
             //if (Compiler.IsCompiling || hasPrimDecls || fn.IsStatic)
             //{
                 GenContext context = Compiler.CompilerContextVar.deref() as GenContext ?? Compiler.EvalContext;

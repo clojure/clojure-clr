@@ -305,9 +305,10 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         private void EmitThenForInts(ObjExpr objx, CljILGen ilg, Type exprType, Expr test, Expr then, Label defaultLabel, bool emitUnboxed)
         {
-             if (exprType == null)
+            if (exprType == null)
             {
                 _expr.Emit(RHC.Expression, objx, ilg);
                 test.Emit(RHC.Expression, objx, ilg);
@@ -374,7 +375,7 @@ namespace clojure.lang.CljCompiler.Ast
             EmitExpr(objx, ilg, then, emitUnboxed);  
         }
 
-        private void EmitExpr(ObjExpr objx, CljILGen ilg, Expr expr, bool emitUnboxed)
+        private static void EmitExpr(ObjExpr objx, CljILGen ilg, Expr expr, bool emitUnboxed)
         {
             MaybePrimitiveExpr mbe = expr as MaybePrimitiveExpr;
             if (emitUnboxed && mbe != null)

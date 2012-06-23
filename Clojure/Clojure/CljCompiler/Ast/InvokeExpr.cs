@@ -243,7 +243,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         void EmitProtoLight(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            Label onLabel = ilg.DefineLabel();
             Label endLabel = ilg.DefineLabel();
 
             Var v = ((VarExpr)_fexpr).Var;

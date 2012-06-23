@@ -21,12 +21,12 @@ namespace clojure.lang.CljCompiler.Ast
 {
     public class CljILGen : ILGen
     {
-        ILGenerator _baseIlg;
+        //ILGenerator _baseIlg;
 
         public CljILGen(ILGenerator baseIlg)
             : base(baseIlg)
         {
-            _baseIlg = baseIlg;
+            //_baseIlg = baseIlg;
         }
 
 

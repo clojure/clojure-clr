@@ -87,9 +87,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            Label endLabel = ilg.DefineLabel();
-            Label falseLabel = ilg.DefineLabel();
-
             _expr.Emit(RHC.Expression, objx, ilg);
 
             // This corresponds to the most general case code in System.Linq.Expressions.Compiler.LambdaCompiler

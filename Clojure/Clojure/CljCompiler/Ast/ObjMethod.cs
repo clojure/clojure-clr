@@ -35,13 +35,11 @@ namespace clojure.lang.CljCompiler.Ast
         IPersistentSet _localsUsedInCatchFinally = PersistentHashSet.EMPTY;
         protected IPersistentMap _methodMeta;
 
-        protected LocalBinding _thisBinding;
+        //protected LocalBinding _thisBinding;
         protected Type _explicitInterface = null;
         protected MethodInfo _explicitMethodInfo = null;
 
         protected IPersistentVector _parms;
-
-        protected MethodBuilder _staticMethodBuilder;
 
         protected IPersistentMap SpanMap { get; set; }
 

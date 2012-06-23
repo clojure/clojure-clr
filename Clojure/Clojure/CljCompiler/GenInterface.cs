@@ -45,7 +45,8 @@ namespace clojure.lang
             for (ISeq s = RT.seq(extends); s != null; s = s.next())
             {
                 object f = s.first();
-                string name = f is String ? ((String)f) : ((Named)f).getName();
+                string name = f as String ?? ((Named)f).getName();
+
                 if (name.Contains("-"))
                     throw new ArgumentException("Interface methods must not contain '-'");
             }

@@ -59,7 +59,7 @@ namespace clojure.lang.CljCompiler.Ast
         public IPersistentMap Closes { get; set; }
         public IPersistentMap Keywords { get; set; }
         public IPersistentMap Vars { get; set; }
-        public PersistentVector Constants { get; set; }
+        public IPersistentVector Constants { get; set; }
 
         Dictionary<int, FieldBuilder> ConstantFields { get; set;} 
         protected IPersistentMap Fields { get; set; }            // symbol -> lb
@@ -1003,7 +1003,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Newarr, typeof(Object));
 
             int i = 0;
-            foreach (Object item in (ICollection)value)
+            foreach (Object item in coll)
             {
                 ilg.Emit(OpCodes.Dup);
                 ilg.EmitInt(i++);
