@@ -125,7 +125,16 @@ namespace clojure.lang.CljCompiler.Ast
             Type returnType = HasClrType ? ClrType : typeof(object);
 
             GetMemberBinder binder = new ClojureGetZeroArityMemberBinder(ClojureContext.Default, _memberName, false);
-            DynamicExpression dyn = Expression.Dynamic(binder, returnType, paramExprs);
+#if CLR2
+            // Not covariant. Sigh.
+            List<Expression> paramsAsExprs = new List<Expression>(paramExprs.Count);
+            paramsAsExprs.AddRange(paramExprs.ToArray());
+            DynamicExpression dyn = Expression.Dynamic(binder, returnType, paramsAsExprs);
+#else
+           DynamicExpression dyn = Expression.Dynamic(binder, returnType, paramExprs);
+
+#endif
+
 
 
             LambdaExpression lambda;

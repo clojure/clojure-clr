@@ -963,6 +963,16 @@ namespace clojure.lang
                 return m.Contains(key);
             }
             
+#if CLR2
+            // ISet<T> does not exist for CLR2
+            // TODO: Make this work for HashSet<T> no matter the T
+            HashSet<Object> hs = coll as HashSet<Object>;
+            if ( hs != null) 
+            {
+                // return  hs.Contains(key) ? RT.T : RT.F;
+                return hs.Contains(key);
+            }
+#else
             // TODO: Make this work for ISet<T> no matter the T
             ISet<Object> iso = coll as ISet<Object>;
             if (iso != null )
@@ -970,6 +980,7 @@ namespace clojure.lang
                 // return  iso.Contains(key) ? RT.T : RT.F;
                 return iso.Contains(key);
             }
+#endif
 
             if (Util.IsNumeric(key) && (coll is String || coll.GetType().IsArray))
             {

@@ -241,8 +241,14 @@ namespace clojure.lang.CljCompiler.Ast
             callsiteParamTypes.AddRange(paramTypes);
             Type dynType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, callsiteParamTypes.ToArray());
  
+#if CLR2
+            // Not covariant. Sigh.
+            List<Expression> paramsAsExprs = new List<Expression>(paramExprs.Count);
+            paramsAsExprs.AddRange(paramExprs.ToArray());
+            DynamicExpression dyn = Expression.MakeDynamic(dynType, binder, paramsAsExprs);
+#else
             DynamicExpression dyn = Expression.MakeDynamic(dynType, binder, paramExprs);
-
+#endif
             LambdaExpression lambda;
             Type delType;
             MethodBuilder mbLambda;
