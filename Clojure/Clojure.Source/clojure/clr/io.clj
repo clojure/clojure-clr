@@ -389,9 +389,9 @@
     (loop []
       (let [size (.Read input buffer 0 len)]
         (when (pos? size)
-          (let [cnt (.GetByteCount encoder buffer 0 size true)
+          (let [cnt (.GetByteCount encoder buffer 0 size false)
                 bytes (make-array Byte cnt)]
-            (do (.GetBytes encoder buffer 0 size bytes 0 true)
+            (do (.GetBytes encoder buffer 0 size bytes 0 false)
                 (.Write output bytes 0 cnt)
                 (recur))))))))
 

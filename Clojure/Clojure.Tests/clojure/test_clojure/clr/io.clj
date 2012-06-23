@@ -12,12 +12,20 @@
   (:use clojure.test clojure.clr.io
         [clojure.test-helper :only [platform-newlines]])
   (:import 
-    (System.IO FileInfo FileMode FileStream StreamReader StreamWriter MemoryStream)
-    (System.Text Encoding UTF8Encoding UnicodeEncoding)
+    (System.IO FileInfo FileMode FileStream StreamReader StreamWriter MemoryStream Path)
+    (System.Text Encoding UTF8Encoding UnicodeEncoding UTF32Encoding)
   ))
 
 (def utf8 (UTF8Encoding.))
 (def utf16 (UnicodeEncoding.))
+(def utf32 (UTF32Encoding.))
+
+(defmacro with-temp-file [[v] & body]
+	`(let [~v (FileInfo. (Path/GetTempFileName))]
+	   (try
+	      ~@body
+		  (finally (.Delete ~v)))))
+
 
 (defn temp-file
   [fname]
@@ -37,16 +45,23 @@
     bs))
     
 (deftest test-spit-and-slurp
-  (let [f (temp-file "text")]
-    (spit f "foobar")
-    (is (= "foobar" (slurp f)))
-    (spit f "foobar" :encoding utf16)
-    (is (= "foobar" (slurp f :encoding utf16)))
+  (let [content (apply str (concat "a" (repeat 500 "\u226a\ud83d\ude03")))]
+    (with-temp-file [f]
+	  (testing "spit/slurp with default encoding"
+        (spit f content)
+        (is (= content (slurp f)))))
+    (doseq [enc [ utf8 utf16 utf32 ]]
+	  (with-temp-file [f]
+	    (testing (str "split/slurp with encoding " enc)
+          (spit f content :encoding enc)
+		  (is (= content (slurp f :encoding enc))))))
     (testing "deprecated arity"
-      (is (=
-           (platform-newlines "WARNING: (slurp f enc) is deprecated, use (slurp f :encoding enc).\n")
-           (with-out-str
-             (is (= "foobar" (slurp f utf16)))))))))
+	  (with-temp-file [f]
+	    (spit f content :encoding utf16)
+        (is (=
+              (platform-newlines "WARNING: (slurp f enc) is deprecated, use (slurp f :encoding enc).\n")
+              (with-out-str
+                (is (= content (slurp f utf16))))))))))
   
 (deftest test-streams-defaults
   (let [f (temp-file "test-reader-writer")
@@ -77,7 +92,8 @@
 (defn data-fixture
   "in memory fixture data for tests"
   [in-encoding out-encoding]
-  (let [bs (get-bytes "hello" in-encoding)
+  (let [s (apply str (concat "a" (repeat 500 "\u226a\ud83d\ude03")))
+        bs (get-bytes s in-encoding)
         i (MemoryStream. bs)
         r (StreamReader. i in-encoding)
         o (MemoryStream.)
@@ -86,7 +102,7 @@
      :i i
      :r r
      :o o
-     :s "hello"
+     :s s
      :w w}))
 
 (deftest test-copy
@@ -100,7 +116,7 @@
           {:in :bs :out :w}]
          
          opts
-         [{} {:buffer-size 256}]]
+         [{} {:buffer-size 16} {:buffer-size 256}]]
      (let [{:keys [s o] :as d} (data-fixture utf8 utf8)]
        (apply copy (in d) (out d) (flatten (vec opts)))
        #_(when (= out :w) (.Flush (:w d)))
@@ -110,15 +126,16 @@
                            (str "combination " test opts))))))
 
 (deftest test-copy-encodings
-  (testing "from inputstream UTF-16 to writer UTF-8"
-    (let [{:keys [i s o w bs]} (data-fixture utf16 utf8)]
-      (copy i w :encoding utf16)
-      (.Flush w)
-      (bytes-should-equal (get-bytes s utf8) (.ToArray o) "")))
-  (testing "from reader UTF-8 to output-stream UTF-16"
-    (let [{:keys [r o s]} (data-fixture utf8 utf16)]
-      (copy r o :encoding utf16)
-      (bytes-should-equal (get-bytes s utf16) (.ToArray o) ""))))
+  (doseq [enc [ utf8 utf16 utf32 ]]
+    (testing (str "from inputstream " enc " to writer UTF-8")
+      (let [{:keys [i s o w bs]} (data-fixture enc utf8)]
+        (copy i w :encoding enc :buffer-size 16)
+        (.Flush w)
+        (bytes-should-equal (get-bytes s utf8) (.ToArray o) "")))
+    (testing (str "from reader UTF-8 to output-stream " enc)
+      (let [{:keys [r o s]} (data-fixture utf8  utf16)]
+        (copy r o :encoding enc :buffer-size 16)
+        (bytes-should-equal (get-bytes s enc) (.ToArray o) "")))))
 
 ;(deftest test-as-file
 ;  (are [result input] (= result (as-file input))
@@ -143,8 +160,9 @@
 ;
 ;(deftest test-input-stream
 ;  (let [file (temp-file "test-input-stream" "txt")
-;        bytes (.getBytes "foobar")]
-;    (spit file "foobar")
+;        content (apply str (concat "a" (repeat 500 "\u226a\ud83d\ude03")))
+;        bytes (.getBytes content)]
+;    (spit file content)
 ;    (doseq [[expr msg]
 ;            [[file File]
 ;             [(FileInputStream. file) FileInputStream]
