@@ -299,7 +299,8 @@ namespace clojure.lang.CljCompiler.Ast
                             }
                             catch (Exception)
                             {
-                                //aargh
+                                // aargh
+                                // leave t set to null -> return null
                             }
                         }
                     }
@@ -337,6 +338,20 @@ namespace clojure.lang.CljCompiler.Ast
                         case "ushorts": t = typeof(ushort[]); break;
                         case "ulongs": t = typeof(ulong[]); break;
                         case "sbytes": t = typeof(sbyte[]); break;
+                        case "int": t = typeof(int); break;
+                        case "long": t = typeof(long); break;
+                        case "short": t = typeof(short); break;
+                        case "byte": t = typeof(byte); break;
+                        case "float": t = typeof(float); break;
+                        case "double": t = typeof(double); break;
+                        case "char": t = typeof(char); break;
+                        case "bool":
+                        case "boolean": t = typeof(bool); break;
+                        case "uint": t = typeof(uint); break;
+                        case "ulong": t = typeof(ulong); break;
+                        case "ushort": t = typeof(ushort); break;
+                        case "sbyte": t = typeof(sbyte); break;
+
                     }
                 }
             }
