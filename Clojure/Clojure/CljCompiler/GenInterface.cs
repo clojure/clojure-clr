@@ -42,6 +42,15 @@ namespace clojure.lang
                 // TODO: In CLR4, should create a collectible type?
                 context = GenContext.CreateWithExternalAssembly(iName+"_"+RT.nextID(), ".dll", false);
 
+            for (ISeq s = RT.seq(extends); s != null; s = s.next())
+            {
+                object f = s.first();
+                string name = f is String ? ((String)f) : ((Named)f).getName();
+                if (name.Contains("-"))
+                    throw new ArgumentException("Interface methods must not contain '-'");
+            }
+
+
             Type[] interfaceTypes = GenClass.CreateTypeArray(extends == null ? null : extends.seq());
 
             TypeBuilder proxyTB = context.ModuleBuilder.DefineType(
