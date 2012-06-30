@@ -553,6 +553,8 @@ namespace clojure.lang
         public object kvreduce(IFn f, object init)
         {
             init = _hasNull ? f.invoke(init,null,_nullValue) : init;
+            if (RT.isReduced(init))
+                return ((IDeref)init).deref();
             if (_root != null)
                 return _root.KVReduce(f, init);
             return init;
@@ -841,8 +843,14 @@ namespace clojure.lang
             public object KVReduce(IFn f, object init)
             {
                 foreach (INode node in _array)
+                {
                     if (node != null)
+                    {
                         init = node.KVReduce(f, init);
+                        if (RT.isReduced(init))
+                            return ((IDeref)init).deref();
+                    }
+                }
                 return init;
             }
 
@@ -1561,6 +1569,8 @@ namespace clojure.lang
                         if (node != null)
                             init = node.KVReduce(f, init);
                     }
+                    if (RT.isReduced(init))
+                        return ((IDeref)init).deref();
                 }
                 return init;
             }

@@ -608,8 +608,12 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "kvreduce")]
         public object kvreduce(IFn f, object init)
         {
-            for ( int i=0; i<_array.Length; i+=2)
-                init = f.invoke(init,_array[i],_array[i+1]);
+            for (int i = 0; i < _array.Length; i += 2)
+            {
+                init = f.invoke(init, _array[i], _array[i + 1]);
+                if (RT.isReduced(init))
+                    return ((IDeref)init).deref();
+            }
             return init;
         }
 

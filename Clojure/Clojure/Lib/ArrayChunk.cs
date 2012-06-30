@@ -80,8 +80,14 @@ namespace clojure.lang
         public object reduce(IFn f, object start)
         {
             object ret = f.invoke(start, _array[_off]);
+            if (RT.isReduced(ret))
+                return ret;
             for (int x = _off + 1; x < _end; x++)
+            {
                 ret = f.invoke(ret, _array[x]);
+                if (RT.isReduced(ret))
+                    return ((IDeref)ret).deref();
+            }
             return ret;
         }
 

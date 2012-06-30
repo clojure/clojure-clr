@@ -2418,6 +2418,12 @@ namespace clojure.lang
         #region Reader support
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static bool isReduced(Object r)
+        {
+            return r is Reduced;
+        }
+        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static bool suppressRead()
         {
             // TODO: look up in suppress-read var  (java todo)

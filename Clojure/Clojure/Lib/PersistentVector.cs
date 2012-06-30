@@ -942,7 +942,11 @@ namespace clojure.lang
             {
                 object[] array = ArrayFor(i);
                 for (int j = 0; i < array.Length; j++)
+                {
                     init = f.invoke(init, j + i, array[j]);
+                    if (RT.isReduced(init))
+                        return ((IDeref)init).deref();
+                }
                 step = array.Length;
             }
             return init;
