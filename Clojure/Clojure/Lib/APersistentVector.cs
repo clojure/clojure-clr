@@ -503,7 +503,7 @@ namespace clojure.lang
 
         #region IEnumerable<Object>, IEnumerable Members
 
-        public IEnumerator<object> GetEnumerator()
+        public virtual IEnumerator<object> GetEnumerator()
         {
             for (ISeq s = seq(); s != null; s = s.next())
                 yield return s.first();
@@ -861,7 +861,7 @@ namespace clojure.lang
         /// Internal class providing subvector functionality for <see cref="APersistentVector">APersistentVector</see>.
         /// </summary>
         [Serializable]
-        public sealed class SubVector : APersistentVector, IPersistentCollection, IObj
+        public sealed class SubVector : APersistentVector, IPersistentCollection, IObj, IEnumerable
         {
             #region Data
 
@@ -1032,6 +1032,20 @@ namespace clojure.lang
                 return (_end - 1 == _start)
                     ? (IPersistentStack)PersistentVector.EMPTY
                     : new SubVector(_meta, _v, _start, _end - 1);
+            }
+
+            #endregion
+
+            #region IEnumerable members
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return ((PersistentVector)_v).RangedIterator(_start, _end);
+            }
+
+            public override IEnumerator<object> GetEnumerator()
+            {
+                return ((PersistentVector)_v).RangedIteratorT(_start, _end);
             }
 
             #endregion

@@ -15,6 +15,7 @@
 using System;
 using System.Collections;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace clojure.lang
 {
@@ -23,7 +24,7 @@ namespace clojure.lang
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
-    public class PersistentVector: APersistentVector, IObj, IEditableCollection
+    public class PersistentVector: APersistentVector, IObj, IEditableCollection, IEnumerable
     {
         #region Node class
 
@@ -950,6 +951,55 @@ namespace clojure.lang
                 step = array.Length;
             }
             return init;
+        }
+
+        #endregion
+
+        #region Ranged iterator
+
+        public IEnumerator RangedIterator(int start, int end)
+        {
+            int i = start;
+            int b = i - (i%32);
+            object[] arr = (start < count()) ? ArrayFor(i) : null;
+
+            while (i < end)
+            {
+                if (i - b == 32)
+                {
+                    arr = ArrayFor(i);
+                    b += 32;
+                }
+                yield return arr[i++ & 0x01f];
+            }
+        }
+
+        public IEnumerator<object> RangedIteratorT(int start, int end)
+        {
+            int i = start;
+            int b = i - (i % 32);
+            object[] arr = (start < count()) ? ArrayFor(i) : null;
+
+            while (i < end)
+            {
+                if (i - b == 32)
+                {
+                    arr = ArrayFor(i);
+                    b += 32;
+                }
+                yield return arr[i++ & 0x01f];
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return RangedIterator(0, count());
+        }
+        
+        public override IEnumerator<object> GetEnumerator()
+        {
+            return RangedIteratorT(0, count());
+
         }
 
         #endregion
