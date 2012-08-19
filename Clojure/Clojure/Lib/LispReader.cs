@@ -1069,6 +1069,9 @@ namespace clojure.lang
                 
                 if (form is IPersistentCollection)
                 {
+                    if (form is IRecord)
+                        return form;
+
                     if (form is IPersistentMap)
                     {
                         IPersistentVector keyvals = flattenMap(form);
