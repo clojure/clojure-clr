@@ -39,6 +39,7 @@ clojure.test-clojure.printer
 clojure.test-clojure.protocols
 clojure.test-clojure.protocols.hash-collisions
 clojure.test-clojure.reader
+clojure.test-clojure.reducers
 ;;; clojure.test-clojure.reflect   -- TODO: need to rewrite reflect tests
 clojure.test-clojure.refs
 clojure.test-clojure.repl
