@@ -292,6 +292,8 @@
 (defn- validate-fields
   ""
   [fields]
+  (when-not (vector? fields)
+    (throw (Exception. "No fields vector given.")))                                                                             ;;; AssertionError.
   (let [specials #{'__meta '__extmap}]
     (when (some specials fields)
       (throw (Exception. (str "The names in " specials " cannot be used as field names for types or records."))))))             ;;; AssertionError.
@@ -363,9 +365,10 @@
   Given (defrecord TypeName ...), two factory functions will be
   defined: ->TypeName, taking positional parameters for the fields,
   and map->TypeName, taking a map of keywords to field values."
-  {:added "1.2"} 
+  {:added "1.2"
+   :arglists '([name [& fields] & opts+specs])}
 
-  [name [& fields] & opts+specs]
+  [name fields & opts+specs]
   (let [gname name
         [interfaces methods opts] (parse-opts+specs opts+specs)
 		ns-part (namespace-munge *ns*)
@@ -455,9 +458,10 @@
 
   Given (deftype TypeName ...), a factory function called ->TypeName
   will be defined, taking positional parameters for the fields"
-  {:added "1.2"} 
+  {:added "1.2"
+   :arglists '([name [& fields] & opts+specs])}
 
-  [name [& fields] & opts+specs]
+  [name fields & opts+specs]
   (validate-fields fields)
   (let [gname name 
         [interfaces methods opts] (parse-opts+specs opts+specs)
