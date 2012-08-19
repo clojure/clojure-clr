@@ -564,6 +564,22 @@ Note this should only be used for the last one in the sequence"
       ["0" 0]
       [m2 (- (Int32/Parse e) delta)])))                                  ;;; (Integer/valueOf e)
 
+(defn- ^String inc-s
+  "Assumption: The input string consists of one or more decimal digits,
+and no other characters.  Return a string containing one or more
+decimal digits containing a decimal number one larger than the input
+string.  The output string will always be the same length as the input
+string, or one character longer."
+  [^String s]
+  (let [len-1 (dec (count s))]
+    (loop [i (int len-1)]
+      (cond
+       (neg? i) (apply str "1" (repeat (inc len-1) "0"))
+       (= \9 (.get_Chars s i)) (recur (dec i))                         ;;; .charAt
+       :else (apply str (subs s 0 i)
+                    (char (inc (int (.get_Chars s i))))                 ;;; .charAt
+                    (repeat (- len-1 i) "0"))))))
+
 (defn- round-str [m e d w]
   (if (or d w)
     (let [len (count m)
@@ -582,11 +598,7 @@ Note this should only be used for the last one in the sequence"
             (let [round-char (nth m1 round-pos)
                   ^String result (subs m1 0 round-pos)]
               (if (>= (int round-char) (int \5))
-                (let [result-val (Int32/Parse result)                                               ;;; Integer/valueOf
-                      leading-zeros (subs result 0 (min (prefix-count result \0) (- round-pos 1)))
-                      round-up-result (str leading-zeros
-                                           (.ToString (+ result-val                                     ;;;String/valueOf 
-                                                              (if (neg? result-val) -1 1))))
+                (let [round-up-result (inc-s result)
                       expanded (> (count round-up-result) (count result))]
                   [round-up-result e1 expanded])
                 [result e1 false]))
