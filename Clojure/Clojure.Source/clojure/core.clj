@@ -3246,12 +3246,13 @@
    :static true}
   [x] (cond
        (decimal? x) x
-       (float? x) (BigDecimal/Create (double x))                     ;;; (. BigDecimal valueOf (double x))
-       (ratio? x) (.ToBigDecimal ^clojure.lang.Ratio x)             ;;; (/ (BigDecimal. (.numerator x)) (.denominator x))
-       (instance? BigInteger x) (BigDecimal/Create ^BigInteger x)   ;;; (BigDecimal. ^BigInteger x)
-       (number? x) (BigDecimal/Create (long x))                      ;;; (BigDecimal/valueOf (long x))
-       :else  (BigDecimal/Create x)))                                ;;; (BigDecimal. x)))
-
+       (float? x) (BigDecimal/Create (double x))                                          ;;; (. BigDecimal valueOf (double x))
+       (ratio? x) (.ToBigDecimal ^clojure.lang.Ratio x)                                   ;;; (/ (BigDecimal. (.numerator ^clojure.lang.Ratio x)) (.denominator ^clojure.lang.Ratio x))
+       (instance? clojure.lang.BigInt x) (.ToBigDecimal ^clojure.lang.BigInt x)           ;;; .ToBigDecimal
+       (instance? BigInteger x) (BigDecimal/Create ^BigInteger x)                         ;;; (BigDecimal. ^BigInteger x)
+       (number? x) (BigDecimal/Create (long x))                                           ;;; (BigDecimal/valueOf (long x))
+       :else  (BigDecimal/Create x)))                                                     ;;; (BigDecimal. x)))
+	   
 (def ^:dynamic ^{:private true} print-initialized false)
 
 (defmulti print-method (fn [x writer]

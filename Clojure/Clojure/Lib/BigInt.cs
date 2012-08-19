@@ -616,6 +616,11 @@ namespace clojure.lang
             return _bipart == null ? (ulong)_lpart : _bipart.ToUInt64(provider);
         }
 
+        public BigDecimal ToBigDecimal()
+        {
+            return _bipart == null ? BigDecimal.Create(_lpart) : BigDecimal.Create(_bipart);
+        }
+
         #endregion
 
         #region Arithmetic operations
