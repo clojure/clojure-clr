@@ -110,6 +110,8 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr finallyExpr = null;
                 bool caught = false;
 
+                ParserContext recursePcon = new ParserContext(RHC.Expression,false);
+
                 int retLocal = Compiler.GetAndIncLocalNum();
                 int finallyLocal = Compiler.GetAndIncLocalNum();
 
@@ -131,7 +133,7 @@ namespace clojure.lang.CljCompiler.Ast
                             try
                             {
                                 Var.pushThreadBindings(RT.map(Compiler.NoRecurVar, true));
-                                bodyExpr = new BodyExpr.Parser().Parse(pcon.SetAssign(false), RT.seq(body));
+                                bodyExpr = new BodyExpr.Parser().Parse(recursePcon, RT.seq(body));
                             }
                             finally
                             {
@@ -160,7 +162,7 @@ namespace clojure.lang.CljCompiler.Ast
                                 LocalBinding lb = Compiler.RegisterLocal(sym,
                                     (Symbol)(RT.second(f) is Symbol ? RT.second(f) : null),
                                     null,false);
-                                Expr handler = (new BodyExpr.Parser()).Parse(pcon.SetAssign(false), RT.next(RT.next(RT.next(f))));
+                                Expr handler = (new BodyExpr.Parser()).Parse(recursePcon, RT.next(RT.next(RT.next(f))));
                                 catches = catches.cons(new CatchClause(t, lb, handler)); ;
                             }
                             finally
@@ -192,7 +194,7 @@ namespace clojure.lang.CljCompiler.Ast
                     try
                     {
                         Var.pushThreadBindings(RT.map(Compiler.NoRecurVar, true));
-                        bodyExpr = (new BodyExpr.Parser()).Parse(pcon, RT.seq(body));
+                        bodyExpr = (new BodyExpr.Parser()).Parse(recursePcon, RT.seq(body));
                     }
                     finally
                     {

@@ -71,9 +71,6 @@ namespace clojure.lang.CljCompiler.Ast
                 if (pcon.Rhc != RHC.Return || loopLocals == null)
                     throw new ParseException("Can only recur from tail position");
 
-                if (Compiler.InCatchFinallyVar.deref() != null)
-                    throw new ParseException("Cannot recur from catch/finally.");
-
                 if (Compiler.NoRecurVar.deref() != null)
                     throw new ParseException("Cannot recur across try");
 
