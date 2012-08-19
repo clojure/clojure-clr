@@ -1586,6 +1586,7 @@ namespace clojure.lang
             #region Data
             
             string FileSource { get; set; }
+            int Line { get; set; }
             
             #endregion
 
@@ -1612,6 +1613,7 @@ namespace clojure.lang
                 : base(ErrorMsg(source, line, cause.ToString()), cause)
             {
                 FileSource = source;
+                Line = line;
             }
 
             private CompilerException(SerializationInfo info, StreamingContext context)
