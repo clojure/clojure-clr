@@ -87,12 +87,15 @@
   (print-args o w)
   (.Write w ")"))
 
-(defmethod print-method Object [o, ^System.IO.TextWriter w]
+(defn- print-object [o, ^System.IO.TextWriter w]
   (.Write w "#<")
   (.Write w (.Name (class o)))     ;;; .getSimpleName => .Name
   (.Write w " ")
   (.Write w (str o))
   (.Write w ">"))
+
+(defmethod print-method Object [o, ^System.IO.TextWriter w]
+  (print-object o w))
 
 (defmethod print-method clojure.lang.Keyword [o, ^System.IO.TextWriter w]
   (.Write w (str o)))
@@ -256,6 +259,40 @@
   (print-map m print-dup w)
   (.Write w ")"))
   
+;; java.util
+(prefer-method print-method clojure.lang.IPersistentCollection System.Collections.ICollection)         ;;; java.util.Collection
+;;;(prefer-method print-method clojure.lang.IPersistentCollection java.util.RandomAccess)
+;;;(prefer-method print-method java.util.RandomAccess java.util.List)
+(prefer-method print-method clojure.lang.IPersistentCollection System.Collections.IDictionary)         ;;; java.util.Map
+
+(defmethod print-method System.Collections.ICollection [c, ^System.IO.TextWriter w]                    ;;; java.util.List
+  (if *print-readably*
+    (do
+      (print-meta c w)
+      (print-sequential "(" pr-on " " ")" c w))
+    (print-object c w)))
+
+;;;(defmethod print-method java.util.RandomAccess [v, ^System.IO.TextWriter w]
+;;;  (if *print-readably*
+;;;    (do
+;;;      (print-meta v w)
+;;;      (print-sequential "[" pr-on " " "]" v w))
+;;;    (print-object v w)))
+
+(defmethod print-method System.Collections.IDictionary [m, ^System.IO.TextWriter w]                  ;;; java.util.Map
+  (if *print-readably*
+    (do
+      (print-meta m w)
+      (print-map m pr-on w))
+    (print-object m w)))
+
+;;;(defmethod print-method java.util.Set [s, ^System.IO.TextWriter w]                ;;; One example where we need true generic handling -- this should be ISet<T>
+;;;  (if *print-readably*
+;;;    (do
+;;;      (print-meta s w)
+;;;      (print-sequential "#{" pr-on " " "}" (seq s) w))
+;;;   (print-object s w)))
+
 ;; Records
 
 (defmethod print-method clojure.lang.IRecord [r, ^System.IO.TextWriter w]
@@ -285,7 +322,7 @@
   (print-meta s w)
   (print-sequential "#{" pr-on " " "}" (seq s) w))
 
-(def ^{:tag String 
+(def ^{:tag String
        :doc "Returns name string for char or nil if none"
        :added "1.0"}
  char-name-string
