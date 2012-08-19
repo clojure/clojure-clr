@@ -988,7 +988,7 @@ namespace clojure.lang
             /// <remarks>Throws an exception if the index <c>i</c> is not in the range of the vector's elements.</remarks>
             public override object nth(int i)
             {
-                if (_start + i >= _end)
+                if (_start + i >= _end || i < 0)
                     throw new ArgumentOutOfRangeException("i");
                 return _v.nth(_start + i);
             }
