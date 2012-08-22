@@ -1554,9 +1554,13 @@ namespace clojure.lang
             if (x is byte || x is short || x is uint || x is sbyte || x is ushort)
                 return Util.ConvertToLong(x);
 
+
             Ratio r = x as Ratio;
             if (r != null)
                 return longCast(r.BigIntegerValue());
+
+            if (x is Char)
+                return longCast((char)x);
 
             return longCast(Util.ConvertToDouble(x));
         }
