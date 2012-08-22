@@ -751,15 +751,15 @@ namespace clojure.lang
 
             public object KvReduce(IFn f, object init)
             {
-                init = f.invoke(init, key(), val());
-                if (RT.isReduced(init))
-                    return ((IDeref)init).deref();
                 if (Left != null)
                 {
                     init = Left.KvReduce(f, init);
                     if (RT.isReduced(init))
                         return ((IDeref)init).deref();
                 }
+                init = f.invoke(init, key(), val());
+                if (RT.isReduced(init))
+                    return ((IDeref)init).deref(); 
                 if (Right != null)
                 {
                     init = Right.KvReduce(f, init);
