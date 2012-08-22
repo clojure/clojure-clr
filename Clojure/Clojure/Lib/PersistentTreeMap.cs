@@ -683,7 +683,9 @@ namespace clojure.lang
         public object kvreduce(IFn f, object init)
         {
             if (_tree != null)
-                return _tree.KvReduce(f, init);
+                init = _tree.KvReduce(f, init);
+            if (RT.isReduced(init))
+                init = ((IDeref)init).deref();
             return init;
         }
 
@@ -755,16 +757,14 @@ namespace clojure.lang
                 {
                     init = Left.KvReduce(f, init);
                     if (RT.isReduced(init))
-                        return ((IDeref)init).deref();
+                        return init;
                 }
                 init = f.invoke(init, key(), val());
                 if (RT.isReduced(init))
-                    return ((IDeref)init).deref(); 
+                    return init; 
                 if (Right != null)
                 {
                     init = Right.KvReduce(f, init);
-                    if (RT.isReduced(init))
-                        return ((IDeref)init).deref();
                 }
                 return init;
             }
