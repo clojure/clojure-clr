@@ -27,5 +27,5 @@
 	   ;;;[#{1} #{3} #{2}] (|System.Collections.Generic.List`1[System.Object]|. [1 2]) (|System.Collections.Generic.List`1[System.Object]|. [2 3])   ;;; HashSet
        [nil nil [1 2]] [1 2] (into-array [1 2])
        [nil nil [1 2]] (into-array [1 2]) [1 2]
-       [{:a {:c [1]}} {:a {:c [0]}} {:a {:c [nil 2] :b 1}}] {:a {:b 1 :c [1 2]}} {:a {:b 1 :c [0 2]}}))
-
+       [{:a {:c [1]}} {:a {:c [0]}} {:a {:c [nil 2] :b 1}}] {:a {:b 1 :c [1 2]}} {:a {:b 1 :c [0 2]}}
+       [{:a nil} {:a false} {:b nil :c false}] {:a nil :b nil :c false} {:a false :b nil :c false}))
