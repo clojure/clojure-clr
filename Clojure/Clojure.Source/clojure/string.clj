@@ -301,7 +301,7 @@ Design notes for clojure.string:
         (recur (inc index) buffer)))))
 
 
-(defn re-groups-direct
+(defn- re-groups-direct
   "similar to re-groups, but works on a Match directly, rather than JReMatcher"
   [^Match m]
   (let [strs (map #(.Value %) (.Groups ^Match m))
