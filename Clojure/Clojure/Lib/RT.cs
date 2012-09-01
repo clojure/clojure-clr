@@ -957,10 +957,10 @@ namespace clojure.lang
 
 
             IDictionary m = coll as IDictionary;
-            if (m != null && key != null)
+            if (m != null)
             {
                 //return m.Contains(key) ? RT.T : RT.F;
-                return m.Contains(key);
+                return key != null && m.Contains(key);
             }
             
 #if CLR2
@@ -987,9 +987,8 @@ namespace clojure.lang
                 int n = Util.ConvertToInt(key);
                 return n >= 0 && n < count(coll);
             }
-            
-            //return RT.F;
-            return false;
+
+            throw new ArgumentException("contains? not supported on type: " + coll.GetType().Name);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
