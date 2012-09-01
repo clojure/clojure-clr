@@ -78,7 +78,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            if (_coll is IPersistentList)
+            if (_coll is IPersistentList || _coll is LazySeq) // JVM does not include LazySeq test.  I'm getting it in some places.  LazySeq of 0 size got us here, we'll treat as an empty list
                 ilg.EmitFieldGet(ListEmptyFI);
             else if (_coll is IPersistentVector)
                 ilg.EmitFieldGet(VectorEmptyFI);
