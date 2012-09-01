@@ -36,29 +36,39 @@ Design notes for clojure.string:
    general than String. In ordinary usage you will almost always
    pass concrete strings. If you are doing something unusual,
    e.g. passing a mutable implementation of CharSequence, then
-   thead-safety is your responsibility."
+   thread-safety is your responsibility."
       :author "Stuart Sierra, Stuart Halloway, David Liebke"}
   clojure.string
   (:refer-clojure :exclude (replace reverse))
-  (:import (System.Text.RegularExpressions Regex MatchEvaluator)              ; java.util.regex Pattern
+  (:import (System.Text.RegularExpressions Regex MatchEvaluator Match)              ; java.util.regex Pattern
            clojure.lang.LazilyPersistentVector))
-
+(declare re-groups-direct)                                    ;;; I'm going to add a little helper
 (defn ^String reverse
   "Returns s with its characters reversed."
   {:added "1.2"}
   [^String s]
   (clojure.lang.RT/StringReverse s))                           ;;; (.toString (.reverse (StringBuilder. s))))
 
+(defn ^String re-quote-replacement
+  "Given a replacement string that you wish to be a literal
+   replacement for a pattern match in replace or replace-first, do the
+   necessary escaping of special characters in the replacement."
+  {:added "1.4"}
+  [^String replacement]                                           ;;; ^CharSequence
+  replacement)                                                    ;;; TODO:  a no-op until I figure out the CLR equivalent -- (Matcher/quoteReplacement (.toString ^CharSequence replacement)))
+
 (defn- replace-by
   [^String s re f]
-  (.Replace re s                                                     ;;; (let [m (re-matcher re s)]
-        ^MatchEvaluator (gen-delegate MatchEvaluator [m] (f (.ToString m)))))    ;;;   (let [buffer (StringBuffer. (.length s))]
-                                                                     ;;;     (loop []
-                                                                     ;;;       (if (.find m)
-                                                                     ;;;         (do (.appendReplacement m buffer (f (re-groups m)))
-                                                                     ;;;             (recur))
-                                                                     ;;;         (do (.appendTail m buffer)
-                                                                     ;;;             (.toString buffer)))))))
+  (.Replace re s                                                              ;;; (let [m (re-matcher re s)]
+     ^MatchEvaluator (gen-delegate MatchEvaluator [m] (f (re-groups-direct m)))))   ;;;    (if (.find m)
+                                                                              ;;;      (let [buffer (StringBuffer. (.length s))]
+                                                                              ;;;        (loop [found true]
+                                                                              ;;;           (if found
+                                                                              ;;;            (do (.appendReplacement m buffer (Matcher/quoteReplacement (f (re-groups m))))
+                                                                              ;;;                (recur (.find m)))
+                                                                              ;;;            (do (.appendTail m buffer)
+                                                                              ;;;                (.toString buffer)))))
+                                                                              ;;;      s)))
 
 (defn replace
   "Replaces all instance of match with replacement in s.
@@ -69,7 +79,21 @@ Design notes for clojure.string:
    char / char
    pattern / (string or function of match).
    
-   See also replace-first."
+   See also replace-first.
+
+   The replacement is literal (i.e. none of its characters are treated
+   specially) for all cases above except pattern / string.
+
+   For pattern / string, $1, $2, etc. in the replacement string are
+   substituted with the string that matched the corresponding
+   parenthesized group in the pattern.  If you wish your replacement
+   string r to be used literally, use (re-quote-replacement r) as the
+   replacement argument.  See also documentation for
+   java.util.regex.Matcher's appendReplacement method.
+
+   Example:
+   (clojure.string/replace \"Almost Pig Latin\" #\"\\b(\\w)(\\w+)\\b\" \"$2$1ay\")
+   -> \"lmostAay igPay atinLay\""
   {:added "1.2"}
   [^String s match replacement]
   (cond 
@@ -83,14 +107,15 @@ Design notes for clojure.string:
 (defn- replace-first-by
   "Replace first match of re in s with the result of
   (f (re-groups the-match))."
-  [^String s ^Regex re f]                                            ;;; Pattern
-                                                                     ;;;(let [m (re-matcher re s)]
-    (.Replace re s                                                   ;;;    (let [buffer (StringBuffer.)]
-         ^MatchEvaluator (gen-delegate MatchEvaluator [m] (f (.ToString m)))     ;;;     (if (.find m)
-          1))                                                        ;;;       (let [rep (f (re-groups m))]
-                                                                     ;;;         (.appendReplacement m buffer rep)
-                                                                     ;;;         (.appendTail m buffer)
-                                                                     ;;;         (str buffer))))))
+  [^String s ^Regex re f]                                                       ;;; Pattern
+                                                                                ;;; (let [m (re-matcher re s)]
+  (.Replace re s                                                                ;;;   (if (.find m)
+     ^MatchEvaluator (gen-delegate MatchEvaluator [m] (f (re-groups-direct m)))      ;;;     (let [buffer (StringBuffer. (.length s))
+      1))                                                                       ;;;           rep (Matcher/quoteReplacement (f (re-groups m)))]
+                                                                                ;;;        (.appendReplacement m buffer rep)
+                                                                                ;;;        (.appendTail m buffer)
+                                                                                ;;;        (str buffer))
+                                                                                ;;;     s)))
 
 (defn- replace-first-char
   [^String s  match replace] (let [match ^Char (char match)]                                   ;;; Character hint on match
@@ -100,6 +125,14 @@ Design notes for clojure.string:
       s
       (str (subs s 0 i) replace (subs s (inc i))))))  )
       
+(defn- replace-first-str
+  [^String s ^String match ^String replace]                               ;;; ^CharSequence
+  (let [                                                                  ;;; ^String s (.toString s)
+        i (.IndexOf s match)]                                             ;;; .indexOf
+    (if (= -1 i)
+      s
+      (str (subs s 0 i) replace (subs s (+ i (.Length match)))))))         ;;; .length
+
 (defn replace-first
   "Replaces the first instance of match with replacement in s.
 
@@ -109,22 +142,37 @@ Design notes for clojure.string:
    string / string
    pattern / (string or function of match).
 
-   See also replace-all."
+   See also replace.
+
+   The replacement is literal (i.e. none of its characters are treated
+   specially) for all cases above except pattern / string.
+
+   For pattern / string, $1, $2, etc. in the replacement string are
+   substituted with the string that matched the corresponding
+   parenthesized group in the pattern.  If you wish your replacement
+   string r to be used literally, use (re-quote-replacement r) as the
+   replacement argument.  See also documentation for
+   java.util.regex.Matcher's appendReplacement method.
+
+   Example:
+   (clojure.string/replace-first \"swap first two words\"
+                                 #\"(\\w+)(\\s+)(\\w+)\" \"$3$2$1\")
+   -> \"first swap two words\""
+
   {:added "1.2"}
   [^String s match replacement]
   ;;;(let [s (.toString s)]
     (cond
-     (instance? Char match)                                                        ;;; Character
-       (replace-first-char s ^Char match replacement)
-     (instance? String match)
-      (.Replace (Regex. (Regex/Escape ^String match))  s ^String replacement 1)      ;;; (.replaceFirst s (Pattern/quote ^String match) ^String replacement)
-     (instance? Regex match)                                           ;;; Pattern
+     (instance? Char match)                                                         ;;; Character
+     (replace-first-char s ^Char match replacement)
+     (instance? String match)                                                       ;;; CharSequence
+     (replace-first-str s match                                                     ;;; (.toString ^CharSequence match)
+	                    replacement)                                                ;;; (.toString ^CharSequence replacement)
+     (instance? Regex match)                                                        ;;; Pattern
       (if (string? replacement)
-       (.Replace ^Regex match s ^String replacement 1)                                   ;;; (.replaceFirst (re-matcher ^Pattern match s) ^String replacement)
+       (.Replace ^Regex match s ^String replacement 1)                              ;;; (.replaceFirst (re-matcher ^Pattern match s) ^String replacement)
        (replace-first-by s match replacement))
-   :else (throw (ArgumentException. (str "Invalid match arg: " match)))))          ;;; IllegalArgumentException
-
-
+   :else (throw (ArgumentException. (str "Invalid match arg: " match)))))           ;;; IllegalArgumentException
 
 
 (defn ^String join
@@ -149,7 +197,7 @@ Design notes for clojure.string:
   {:added "1.2"}
   [^String s]
   (if (< (count s) 2)
-    (.ToUpper s)                                                         ;;; .toUpperCase
+    (.ToUpper s)                                                        ;;; .toUpperCase
     (str (.ToUpper ^String (subs s 0 1))                                ;;; .toUpperCase
          (.ToLower ^String (subs s 1)))))                               ;;; .toLowerCase
 
@@ -251,3 +299,14 @@ Design notes for clojure.string:
           (.Append buffer replacement)                                          ;;; .append
           (.Append buffer ch))                                                  ;;; .append
         (recur (inc index) buffer)))))
+
+
+(defn re-groups-direct
+  "similar to re-groups, but works on a Match directly, rather than JReMatcher"
+  [^Match m]
+  (let [strs (map #(.Value %) (.Groups ^Match m))
+        cnt (count strs)]
+	 (if (<= cnt 1) 
+	   (first strs)
+	   (into [] strs))))
+	    
