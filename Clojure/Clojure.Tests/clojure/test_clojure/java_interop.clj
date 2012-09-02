@@ -127,6 +127,7 @@
 ;;;        (:missing b :default) :default
 ;;;        (get b :missing) nil
 ;;;        (get b :missing :default) :default
+
 ;;;        (:class b) java.awt.Color )))
 
 
@@ -152,6 +153,12 @@
   (are [x y] (= x y)
       (bases  System.Math)                                      ;;; java.lang.Math)
         (list System.Object)                                    ;;; java.lang.Object)
+      (bases System.Collections.ICollection)                    ;;; java.util.Collection)
+        (list System.Collections.IEnumerable)                   ;;; java.lang.Iterable)
+      (bases System.Object)                                     ;;; java.lang.Object)
+        nil
+      (bases System.IComparable)                                ;;; java.lang.Comparable)
+        nil
       (bases System.Int32)                                      ;;; java.lang.Integer)
         (list System.ValueType System.IComparable System.IFormattable System.IConvertible |System.IComparable`1[System.Int32]| |System.IEquatable`1[System.Int32]|) ))  ;;; (java.lang.Number java.lang.Comparable)
 

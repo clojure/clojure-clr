@@ -4915,10 +4915,9 @@
    :static true}
   [^Type c]                             ;;;  Class ==> Type
   (when c
-    (let [i (.GetInterfaces c)             ;;;  .getInterfaces ==> .GetInterfaces
+    (let [i (seq (.GetInterfaces c))             ;;;  .getInterfaces ==> .GetInterfaces
           s (.BaseType c)]                 ;;;  .getSuperclass ==> BaseType
-      (not-empty
-        (if s (cons s i) i)))))
+      (if s (cons s i) i))))
 
 (defn supers
   "Returns the immediate and indirect superclasses and interfaces of c, if any"
