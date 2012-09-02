@@ -153,9 +153,7 @@
       (bases  System.Math)                                      ;;; java.lang.Math)
         (list System.Object)                                    ;;; java.lang.Object)
       (bases System.Int32)                                      ;;; java.lang.Integer)
-        (list System.ValueType System.IComparable System.IFormattable System.IConvertible |System.IComparable`1[System.Int32]| |System.IEquatable`1[System.Int32]|)   ;;; (java.lang.Number java.lang.Comparable)
-	  (bases System.Collections.ICollection)                    ;;; java.util.List
-	    (list System.Collections.IEnumerable) ))                ;;; java.util.Collection
+        (list System.ValueType System.IComparable System.IFormattable System.IConvertible |System.IComparable`1[System.Int32]| |System.IEquatable`1[System.Int32]|) ))  ;;; (java.lang.Number java.lang.Comparable)
 
 (deftest test-supers
   (are [x y] (= x y)

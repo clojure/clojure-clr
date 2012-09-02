@@ -4918,7 +4918,7 @@
     (let [i (.GetInterfaces c)             ;;;  .getInterfaces ==> .GetInterfaces
           s (.BaseType c)]                 ;;;  .getSuperclass ==> BaseType
       (not-empty
-        (if s (cons s i) (seq i))))))
+        (if s (cons s i) i)))))
 
 (defn supers
   "Returns the immediate and indirect superclasses and interfaces of c, if any"
