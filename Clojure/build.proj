@@ -31,7 +31,7 @@
   </Target>
   
   <Target Name="Test" DependsOnTargets="Build;CompileTest">
-    <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Source\clojure\run_tests.clj" DestinationFolder="$(OutputPath)" />
+    <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_tests.clj" DestinationFolder="$(OutputPath)" />
     <Exec Command="$(clji) clojure\run_tests.clj"
           WorkingDirectory="$(OutputPath)"/>
   </Target>
