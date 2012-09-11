@@ -5,6 +5,7 @@
     <!--<Platform Condition=" '$(Platform)' == '' ">Any CPU</Platform>-->
     <cljc>Clojure.Compile.exe</cljc>
     <clji>Clojure.Main.exe</clji>
+    <Runtime>.Net</Runtime>
   </PropertyGroup>
   
   <!--Is there a way to avoid this duplication? This is also encoded in the project files, although relative to a different path -->
@@ -22,34 +23,53 @@
   </PropertyGroup>
   
   <Target Name="Build">
-    <MSBuild Projects="ClojureCLR.sln"/>
+    <MSBuild Projects="ClojureCLR.sln"
+             Properties="Runtime=$(Runtime)"/>
   </Target>
   
   <Target Name="CompileTest" DependsOnTargets="Build">
-    <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.protocols.more-examples clojure.test-clojure.repl.example" 
-          WorkingDirectory="$(OutputPath)"/>
+    <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.protocols.more-examples clojure.test-clojure.repl.example" 
+          WorkingDirectory="$(OutputPath)"
+           Condition=" '$(Runtime)' == '.Net' "/>
+    <Exec Command="mono $(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.protocols.more-examples clojure.test-clojure.repl.example" 
+          WorkingDirectory="$(OutputPath)"
+           Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
   
   <Target Name="Test" DependsOnTargets="Build;CompileTest">
-    <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Source\clojure\run_tests.clj" DestinationFolder="$(OutputPath)" />
-    <Exec Command="$(clji) clojure\run_tests.clj"
-          WorkingDirectory="$(OutputPath)"/>
+    <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_tests.clj" DestinationFolder="$(OutputPath)" />
+    <Exec Command="$(clji) clojure\run_tests.clj"
+          WorkingDirectory="$(OutputPath)"
+           Condition=" '$(Runtime)' == '.Net' "/>
+    <Exec Command="mono $(clji) clojure\run_tests.clj"
+          WorkingDirectory="$(OutputPath)"
+           Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
   
+  <!-- RJ: Reworked Dist target to work around Mono bug related to embeding ItemGroup inside a Target tag -->
   <Target Name="Dist" DependsOnTargets="Build">
-    <ItemGroup>
-      <!--DLR-->
+    <!--DLR-->
       <Dlls Include="$(OutputPath)\Microsoft.*" />
       <!--Clojure dlls and exes-->
-      <Dlls Include="$(OutputPath)\Clojure.*" 
-                 Exclude="$(OutputPath)\Clojure.Tests.dll;$(OutputPath)\Clojure.Tests.pdb;
-                          $(OutputPath)\Clojure.Source.dll;$(OutputPath)\Clojure.Source.pdb;
-                          $(OutputPath)\clojure.test-clojure.genclass.examples.ExampleClass.dll;
-                          $(OutputPath)\clojure.test-clojure.genclass.examples.ExampleClass.pdb;
-                          $(OutputPath)\Clojure.Main.vshost.exe;$(OutputPath)\Clojure.Main.vshost.exe.manifest" />
+      <CreateItem
+      Include="$(OutputPath)\Clojure.*;$(OutputPath)\Microsoft.*" 
+      Exclude="$(OutputPath)\Clojure.Tests.dll;$(OutputPath)\Clojure.Tests.pdb;
+               $(OutputPath)\Clojure.Source.dll;$(OutputPath)\Clojure.Source.pdb;
+               $(OutputPath)\clojure.test-clojure.genclass.examples.ExampleClass.dll;
+               $(OutputPath)\clojure.test-clojure.genclass.examples.ExampleClass.pdb;
+               $(OutputPath)\Clojure.Main.vshost.exe;$(OutputPath)\Clojure.Main.vshost.exe.manifest">
+      <Output
+            TaskParameter="Include"
+            ItemName="Dlls"/>
+     </CreateItem>
       <!--clj and AOT clj files-->
-      <CljFiles Include="$(OutputPath)\clojure\**\*" Exclude="$(OutputPath)\clojure\test_clojure\**\*" />
-    </ItemGroup>
+    <CreateItem
+       Include="$(OutputPath)\clojure\**\*"
+       Exclude="$(OutputPath)\clojure\test_clojure\**\*">
+     <Output
+       TaskParameter="Include"
+       ItemName="CljFiles"/>
+     </CreateItem>
     <Copy SourceFiles="@(Dlls)" DestinationFolder="..\dist\$(Configuration)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(CljFiles)" DestinationFolder="..\dist\$(Configuration)\clojure\%(RecursiveDir)" SkipUnchangedFiles="true" />
   </Target>
