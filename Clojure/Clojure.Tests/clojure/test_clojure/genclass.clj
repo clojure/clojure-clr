@@ -13,7 +13,7 @@
   (:import [clojure.test_clojure.genclass.examples
             ExampleClass
             ;;;ExampleAnnotationClass
-			ProtectedFinalTester
+			;;;ProtectedFinalTester
             ArrayDefInterface
             ArrayGenInterface]
 
