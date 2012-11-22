@@ -3390,7 +3390,7 @@
                               (try
                                 (with-open ~(subvec bindings 2) ~@body)
                                 (finally
-                                  (. ~(bindings 0) Dispose))))      ;;; close => Dispose
+                                  (. ~(with-meta (bindings 0) {:tag 'IDisposable}) Dispose))))      ;;; close => Dispose  Added the with-meta to provide the type hint for IDisposable
     :else (throw (ArgumentException.                              ;;;IllegalArgumentException.
                    "with-open only allows Symbols in bindings"))))
 
