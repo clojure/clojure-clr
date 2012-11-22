@@ -1147,13 +1147,17 @@ namespace clojure.lang
                 return notFound;
             }
 
-            IList list = coll as IList;
-            if (list != null)   // Changed to RandomAccess in Java Rev 1218.  
-            {
-                if (n < list.Count)
-                    return list[n];
-                return notFound;
-            }
+            // Causes a problem with infinite LazySequences
+            // Four years after the fact, I now know why the change was made in Java Rev 1218.
+            // There is no RandomAccess equivalent in CLR.
+            // So we don't blow off IList's completely, I put this after the code that catches LazySeqs.
+            //IList list = coll as IList;
+            //if (list != null)   // Changed to RandomAccess in Java Rev 1218.  
+            //{
+            //    if (n < list.Count)
+            //        return list[n];
+            //    return notFound;
+            //}
 
             JReMatcher jrem = coll as JReMatcher;
             if (jrem != null)
@@ -1212,6 +1216,14 @@ namespace clojure.lang
                     if (i == n)
                         return seq.first();
                 }
+                return notFound;
+            }
+
+            IList list = coll as IList;
+            if (list != null)   // Changed to RandomAccess in Java Rev 1218.  
+            {
+                if (n < list.Count)
+                    return list[n];
                 return notFound;
             }
 
