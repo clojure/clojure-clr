@@ -215,6 +215,7 @@ namespace clojure.lang
                 MethodSignature sig = new MethodSignature(m);
                 if (!considered.Contains(sig)
                     && !m.IsPrivate
+                    && !m.IsAssembly
                     && !m.IsStatic
                     && !m.IsFinal
                     && !m.Name.Equals("Finalize"))
