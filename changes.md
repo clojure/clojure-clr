@@ -1,6 +1,6 @@
 ﻿<!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
-# Changes to Clojure in Version 1.4
+# Changes to Clojure in Version 1.4.1
 
 ## CONTENTS
 
@@ -29,6 +29,7 @@
     2.19 Java int is boxed as java.lang.Integer
  3 Performance Enhancements
  4 Bug Fixes
+ 5 Big Fixes in 1.4.1
 </pre>
 
 ## 1 Deprecated and Removed Features
@@ -342,4 +343,15 @@ for more information.
   Fix printf handling of tz for DateTimeOffsets
 * CLJCLR-??? 
   Fix infinite recursion on generic type lookup when type name is bad
+  
+## 4 Bug Fixes
+  
+* CLJCLR-??? 
+  Fix RT.nth problem with LazySeq
+* CLJCLR-???
+  Fix with-open to include type hint for IDisposable before Dispose call
+* CLJCLR-???
+  Fix clojure.repl proxy of PushbackTextREader problem under 4.5
+
+
   
