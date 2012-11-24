@@ -65,7 +65,7 @@
     <Reference Include="Microsoft.Scripting" Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">
       <HintPath>..\..\lib\DLR\4.0\Microsoft.Scripting.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Scripting.Core" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
+    <Reference Include="Microsoft.Scripting.Core" Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">
       <HintPath>..\..\lib\DLR\2.0\Microsoft.Scripting.Core.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">

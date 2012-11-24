@@ -67,21 +67,38 @@
 ;;;
 ;;;   (defn- fjjoin [task] (.join ^jsr166y.ForkJoinTask task))))
 
-(defn- fjtask [^|System.Func`1[System.Object]| f]
-  (|System.Threading.Tasks.Task`1[System.Object]|. f))
+(compile-if 
+  (Type/GetType "System.Threading.Tasks.Task`1")
+  (do 
+    (defn- fjtask [^|System.Func`1[System.Object]| f]
+      (|System.Threading.Tasks.Task`1[System.Object]|. f))
 
-(defn- fjinvoke [f]
-  (let [^|System.Threading.Tasks.Task`1[System.Object]| task (fjtask f)]
-	 (.RunSynchronously task)
-	 (.Result task)))
+    (defn- fjinvoke [f]
+      (let [^|System.Threading.Tasks.Task`1[System.Object]| task (fjtask f)]
+    	 (.RunSynchronously task)
+    	 (.Result task)))
 
-(defn- fjfork [^|System.Threading.Tasks.Task`1[System.Object]| task] 
-  (.Start  task))
+    (defn- fjfork [^|System.Threading.Tasks.Task`1[System.Object]| task] 
+      (.Start  task))
 
-(defn- fjjoin [^|System.Threading.Tasks.Task`1[System.Object]| task]
-  (.Wait task)
-  (.Result task))
+    (defn- fjjoin [^|System.Threading.Tasks.Task`1[System.Object]| task]
+      (.Wait task)
+      (.Result task)))
+  (do
+      (defn- fjtask [^clojure.lang.IFn f]
+      (clojure.lang.Task35. f))
 
+    (defn- fjinvoke [f]
+      (let [^clojure.lang.Task35 task (fjtask f)]
+    	 (.RunSynchronously task)
+    	 (.Result task)))
+
+    (defn- fjfork [^clojure.lang.Task35 task] 
+      (.Start  task))
+
+    (defn- fjjoin [^clojure.lang.Task35 task]
+      (.Wait task)
+      (.Result task))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
