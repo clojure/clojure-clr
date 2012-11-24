@@ -270,6 +270,10 @@
                 [name doc-string? attr-map? ([params*] prepost-map? body)+ attr-map?])
    :added "1.0"}
  defn (fn defn [&form &env name & fdecl]
+        ;; Note: Cannot delegate this check to def because of the call to (with-meta name ..)
+        (if (instance? clojure.lang.Symbol name)
+          nil
+          (throw (ArgumentException. "First argument to defn must be a symbol")))   ;;; IllegalArgumentException
         (let [m (if (string? (first fdecl))
                   {:doc (first fdecl)}
                   {})
@@ -4031,9 +4035,31 @@
   [& sigs]
     (let [name (if (symbol? (first sigs)) (first sigs) nil)
           sigs (if name (next sigs) sigs)
-          sigs (if (vector? (first sigs)) (list sigs) sigs)
+          sigs (if (vector? (first sigs)) 
+                 (list sigs) 
+                 (if (seq? (first sigs))
+                   sigs
+                   ;; Assume single arity syntax
+                   (throw (ArgumentException.                                 ;;; IllegalArgumentException
+                            (if (seq sigs)
+                              (str "Parameter declaration " 
+                                   (first sigs)
+                                   " should be a vector")
+                              (str "Parameter declaration missing"))))))
           psig (fn* [sig]
+                 ;; Ensure correct type before destructuring sig
+                 (when (not (seq? sig))
+                   (throw (ArgumentException.                                ;;; IllegalArgumentException
+                            (str "Invalid signature " sig
+                                 " should be a list"))))
                  (let [[params & body] sig
+                       _ (when (not (vector? params))
+                           (throw (ArgumentException.                        ;;; IllegalArgumentException
+                                    (if (seq? (first sigs))
+                                      (str "Parameter declaration " params
+                                           " should be a vector")
+                                      (str "Invalid signature " sig
+                                           " should be a list")))))
                        conds (when (and (next body) (map? (first body))) 
                                            (first body))
                        body (if conds (next body) body)
@@ -6622,8 +6648,24 @@
 (defn- ^{:dynamic true} assert-valid-fdecl
   "A good fdecl looks like (([a] ...) ([a b] ...)) near the end of defn."
   [fdecl]
-  (if-let [bad-args (seq (remove #(vector? %) (map first fdecl)))]
-    (throw (ArgumentException. (str "Parameter declaration " (first bad-args) " should be a vector")))))  ;;; IllegalArgumentException
+  (when (empty? fdecl) (throw (ArgumentException.                                          ;;; IllegalArgumentException
+                                "Parameter declaration missing")))
+  (let [argdecls (map 
+                   #(if (seq? %)
+                      (first %)
+                      (throw (ArgumentException.                                           ;;; IllegalArgumentException
+                        (if (seq? (first fdecl))
+                          (str "Invalid signature "
+                               %
+                               " should be a list")
+                          (str "Parameter declaration "
+                               %
+                               " should be a vector")))))
+                   fdecl)
+        bad-args (seq (remove #(vector? %) argdecls))]
+    (when bad-args
+      (throw (ArgumentException. (str "Parameter declaration " (first bad-args)            ;;; IllegalArgumentException
+                                             " should be a vector"))))))
 
 (defn with-redefs-fn
   "Temporarily redefines Vars during a call to func.  Each val of
