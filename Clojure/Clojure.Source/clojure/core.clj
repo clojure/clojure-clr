@@ -3800,11 +3800,13 @@
           to-do (if (= :all (:refer fs))
                   (keys nspublics)
                   (or (:refer fs) (:only fs) (keys nspublics)))]
+      (when-not (instance? clojure.lang.Sequential to-do)
+        (throw (new Exception ":only/:refer value must be a sequential collection of symbols")))
       (doseq [sym to-do]
         (when-not (exclude sym)
           (let [v (nspublics sym)]
             (when-not v
-              (throw (new InvalidOperationException                        ;;; java.lang.IllegalAccessErro
+              (throw (new InvalidOperationException                        ;;; java.lang.IllegalAccessError
                           (if (get (ns-interns ns) sym)
                             (str sym " is not public")
                             (str sym " does not exist")))))
