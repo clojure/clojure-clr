@@ -24,7 +24,7 @@ clojure.test-clojure.clr.io              ;;;java.io
 ;;;clojure.test-clojure.java.shell
 clojure.test-clojure.java-interop
 clojure.test-clojure.keywords
-clojure.test-clojure.load
+;;;clojure.test-clojure.load  - no longer present
 clojure.test-clojure.logic
 clojure.test-clojure.macros
 clojure.test-clojure.main
