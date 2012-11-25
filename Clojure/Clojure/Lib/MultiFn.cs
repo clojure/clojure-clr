@@ -14,6 +14,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace clojure.lang
 {
@@ -48,7 +49,7 @@ namespace clojure.lang
         /// <summary>
         /// The methods defined for this multifunction.
         /// </summary>
-        IPersistentMap _methodTable;
+        volatile IPersistentMap _methodTable;
 
         /// <summary>
         /// The methods defined for this multifunction.
@@ -61,7 +62,7 @@ namespace clojure.lang
         /// <summary>
         /// Method preferences.
         /// </summary>
-        IPersistentMap _preferTable;
+        volatile IPersistentMap _preferTable;
 
         /// <summary>
         /// Method preferences.
@@ -74,12 +75,14 @@ namespace clojure.lang
         /// <summary>
         /// Cache of previously encountered dispatch-value to method mappings.
         /// </summary>
-        IPersistentMap _methodCache;
+        volatile IPersistentMap _methodCache;
 
         /// <summary>
         /// Hierarchy on which cached computations are based.
         /// </summary>
-        object _cachedHierarchy;
+        volatile object _cachedHierarchy;
+
+        ReaderWriterLockSlim _rw;
 
         //static readonly Var _assoc = RT.var("clojure.core", "assoc");
         //static readonly Var _dissoc = RT.var("clojure.core", "dissoc");
@@ -108,6 +111,7 @@ namespace clojure.lang
             _preferTable = PersistentHashMap.EMPTY;
             _hierarchy = hierarchy;
             _cachedHierarchy = null;
+            _rw = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         }
 
         #endregion
@@ -121,25 +125,21 @@ namespace clojure.lang
         /// <param name="method">The method code.</param>
         /// <returns>This multifunction.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public MultiFn addMethod(object dispatchVal, IFn method)
         {
-            return addMethodImpl(dispatchVal, method);
+            _rw.EnterWriteLock();
+            try
+            {
+                _methodTable = MethodTable.assoc(dispatchVal, method);
+                ResetCache();
+                return this;
+            }
+            finally
+            {
+                _rw.ExitWriteLock();
+            }
         }
 
-
-        /// <summary>
-        /// Implements adding a new method to this multimethod
-        /// </summary>
-        /// <param name="dispatchVal">The discriminator value for this method.</param>
-        /// <param name="method">The method code.</param>
-        /// <returns>This multifunction.</returns>
-        MultiFn addMethodImpl(object dispatchVal, IFn method)
-        {
-            _methodTable = MethodTable.assoc(dispatchVal, method);
-            ResetCache();
-            return this;
-        }
 
         /// <summary>
         /// Remove a method.
@@ -147,12 +147,19 @@ namespace clojure.lang
         /// <param name="dispatchVal">The dispatch value for the multimethod.</param>
         /// <returns>This multifunction.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remove")]
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public MultiFn removeMethod(object dispatchVal)
         {
-            _methodTable = MethodTable.without(dispatchVal);
-            ResetCache();
-            return this;
+            _rw.EnterWriteLock();
+            try
+            {
+                _methodTable = MethodTable.without(dispatchVal);
+                ResetCache();
+                return this;
+            }
+            finally
+            {
+                _rw.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -162,16 +169,23 @@ namespace clojure.lang
         /// <param name="dispatchValY">The less preferred dispatch value.</param>
         /// <returns>This multifunction.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "prefer")]
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public MultiFn preferMethod(object dispatchValX, object dispatchValY)
         {
-            if (Prefers(dispatchValY, dispatchValX))
-                throw new InvalidOperationException(String.Format("Preference conflict in multimethod {0}: {1} is already preferred to {2}", _name,dispatchValY, dispatchValX));
-            _preferTable = PreferTable.assoc(dispatchValX,
-                RT.conj((IPersistentCollection)RT.get(_preferTable, dispatchValX, PersistentHashSet.EMPTY),
-                        dispatchValY));
-            ResetCache();
-            return this;
+            _rw.EnterWriteLock();
+            try
+            {
+                if (Prefers(dispatchValY, dispatchValX))
+                    throw new InvalidOperationException(String.Format("Preference conflict in multimethod {0}: {1} is already preferred to {2}", _name, dispatchValY, dispatchValX));
+                _preferTable = PreferTable.assoc(dispatchValX,
+                    RT.conj((IPersistentCollection)RT.get(_preferTable, dispatchValX, PersistentHashSet.EMPTY),
+                            dispatchValY));
+                ResetCache();
+                return this;
+            }
+            finally
+            {
+                _rw.ExitWriteLock();
+            }
         }
 
         #endregion
@@ -227,9 +241,17 @@ namespace clojure.lang
         /// <returns></returns>
         private IPersistentMap ResetCache()
         {
-            _methodCache = MethodTable;
-            _cachedHierarchy = _hierarchy.deref();
-            return _methodCache;
+            _rw.EnterWriteLock();
+            try
+            {
+                _methodCache = MethodTable;
+                _cachedHierarchy = _hierarchy.deref();
+                return _methodCache;
+            }
+            finally
+            {
+                _rw.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -239,7 +261,6 @@ namespace clojure.lang
         /// <returns>The preferred method for the value.</returns>
         /// <remarks>lower initial letter for core.clj compatibility</remarks>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public IFn getMethod(object dispatchVal)
         {
             if (_cachedHierarchy != _hierarchy.deref())
@@ -272,32 +293,56 @@ namespace clojure.lang
         /// <returns>The mest method.</returns>
         private IFn FindAndCacheBestMethod(object dispatchVal)
         {
-            IMapEntry bestEntry = null;
-            foreach (IMapEntry me in MethodTable)
+            _rw.EnterWriteLock();
+            IMapEntry bestEntry;
+            IPersistentMap mt = _methodTable;
+            IPersistentMap pt = _preferTable;
+            object ch = _cachedHierarchy;
+            try
             {
-                if (IsA(dispatchVal, me.key()))
+                bestEntry = null;
+
+                foreach (IMapEntry me in MethodTable)
                 {
-                    if (bestEntry == null || Dominates(me.key(), bestEntry.key()))
-                        bestEntry = me;
-                    if (!Dominates(bestEntry.key(), me.key()))
-                        throw new ArgumentException(String.Format("Multiple methods in multimethod {0} match dispatch value: {1} -> {2} and {3}, and neither is preferred",
-                            _name,dispatchVal, me.key(), bestEntry.key()));
+                    if (IsA(dispatchVal, me.key()))
+                    {
+                        if (bestEntry == null || Dominates(me.key(), bestEntry.key()))
+                            bestEntry = me;
+                        if (!Dominates(bestEntry.key(), me.key()))
+                            throw new ArgumentException(String.Format("Multiple methods in multimethod {0} match dispatch value: {1} -> {2} and {3}, and neither is preferred",
+                                _name, dispatchVal, me.key(), bestEntry.key()));
+                    }
                 }
+                if (bestEntry == null)
+                    return null;
             }
-            if (bestEntry == null)
-                return null;
+            finally
+            {
+                _rw.ExitWriteLock();
+            }
 
             // ensure basis has stayed stable throughout, else redo
-            if (_cachedHierarchy == _hierarchy.deref())
+            _rw.EnterWriteLock();
+            try
             {
-                // place in cache
-                _methodCache = _methodCache.assoc(dispatchVal, bestEntry.val());
-                return (IFn)bestEntry.val();
+                if (mt == _methodTable
+                    && pt == _preferTable
+                    && ch == _cachedHierarchy
+                    && _cachedHierarchy == _hierarchy.deref())
+                {
+                    // place in cache
+                    _methodCache = _methodCache.assoc(dispatchVal, bestEntry.val());
+                    return (IFn)bestEntry.val();
+                }
+                else
+                {
+                    ResetCache();
+                    return FindAndCacheBestMethod(dispatchVal);
+                }
             }
-            else
+            finally
             {
-                ResetCache();
-                return FindAndCacheBestMethod(dispatchVal);
+                _rw.ExitWriteLock();
             }
         }
 
@@ -327,12 +372,19 @@ namespace clojure.lang
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "reset")]
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public MultiFn reset()
         {
-            _methodTable = _methodCache = _preferTable = PersistentHashMap.EMPTY;
-            _cachedHierarchy = null;
-            return this;
+            _rw.EnterWriteLock();
+            try
+            {
+                _methodTable = _methodCache = _preferTable = PersistentHashMap.EMPTY;
+                _cachedHierarchy = null;
+                return this;
+            }
+            finally
+            {
+                _rw.ExitWriteLock();
+            }
         }
 
         #endregion
