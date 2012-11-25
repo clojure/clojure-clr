@@ -27,7 +27,7 @@ namespace clojure.lang
     /// richer semantics for exceptions should use this in lieu of defining project-specific
     /// exception classes.</remarks>
     [Serializable]
-    public class ExceptionInfo : Exception
+    public class ExceptionInfo : Exception, IExceptionInfo
     {
         #region Data
 

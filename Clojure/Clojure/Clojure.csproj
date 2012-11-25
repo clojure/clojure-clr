@@ -110,6 +110,7 @@
     <Compile Include="CljCompiler\Ast\CaseExpr.cs" />
     <Compile Include="Lib\ClrTypeSpec.cs" />
     <Compile Include="Lib\ExceptionInfo.cs" />
+    <Compile Include="Lib\IExceptionInfo.cs" />
     <Compile Include="Lib\IFnArity.cs" />
     <Compile Include="Lib\IFnClosure.cs" />
     <Compile Include="Lib\Reduced.cs" />
