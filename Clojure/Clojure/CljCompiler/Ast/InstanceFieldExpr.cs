@@ -51,8 +51,8 @@ namespace clojure.lang.CljCompiler.Ast
             // Java version does not include check on _targetType
             // However, this seems consistent with the checks in the generation code.
             if ( (_targetType == null || _tinfo == null) && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
-                RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1} - reference to field/property {2} can't be resolved.", 
-                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap),_fieldName);
+                RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1}:{2} - reference to field/property {3} can't be resolved.", 
+                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap),Compiler.GetColumnFromSpanMap(_spanMap),_fieldName);
         }
 
         #endregion

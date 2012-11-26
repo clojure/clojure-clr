@@ -201,7 +201,7 @@ namespace clojure.lang
                 if (lntr == null)
                     throw;
 
-                throw new ReaderException(lntr.LineNumber, e);
+                throw new ReaderException(lntr.LineNumber, lntr.ColumnNumber, e);
             }
         }
 
@@ -874,6 +874,7 @@ namespace clojure.lang
                 {
                     return s.withMeta(RT.map(
                         RT.LineKey, startLine, // This is what is supported by the JVM version
+                        RT.ColumnKey, startCol,
                         // We add a :source-span key, value is map with the other values.
                         // A map is used here so that we are print-dup--serializable.
                         RT.SourceSpanKey, RT.map(
@@ -996,7 +997,7 @@ namespace clojure.lang
                     if (formAsIobj != null && formAsIobj.meta() != null)
                     {
                         //filter line numbers & source span info
-                        IPersistentMap newMeta = formAsIobj.meta().without(RT.LineKey).without(RT.SourceSpanKey);
+                        IPersistentMap newMeta = formAsIobj.meta().without(RT.LineKey).without(RT.ColumnKey).without(RT.SourceSpanKey);
                         if (newMeta.count() > 0)
                             return RT.list(WITH_META, ret, syntaxQuote(formAsIobj.meta()));
                     }
@@ -1248,6 +1249,7 @@ namespace clojure.lang
                 {
                     if (startLine != -1 && o is ISeq)
                         metaAsMap = metaAsMap.assoc(RT.LineKey, startLine)
+                            .assoc(RT.ColumnKey,startCol)
                             .assoc(RT.SourceSpanKey, RT.map(
                                 RT.StartLineKey, startLine,
                                 RT.StartColumnKey, startCol,
@@ -1590,33 +1592,45 @@ namespace clojure.lang
                 get { return _line; }
             }
 
-            public ReaderException(int line, Exception e)
+            readonly int _column;
+
+            public int Column
+            {
+                get { return _column; }
+            }
+
+            public ReaderException(int line, int column, Exception e)
                 : base(null, e)
             {
                 _line = line;
+                _column = column;
             }
 
             public ReaderException()
             {
                 _line = -1;
+                _column = -1;
             }
 
             public ReaderException(string msg)
                 : base(msg)
             {
                 _line = -1;
+                _column = -1;
             }
 
             public ReaderException(string msg, Exception innerException)
                 : base(msg, innerException)
             {
                 _line = -1;
+                _column = -1;
             }
 
             private ReaderException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
                 _line = info.GetInt32("Line");
+                _column = info.GetInt32("Column");
             }
 
             [System.Security.SecurityCritical]
@@ -1628,6 +1642,7 @@ namespace clojure.lang
                 }
                 base.GetObjectData(info, context);
                 info.AddValue("Line", this._line, typeof(int));
+                info.AddValue("Column", this._column, typeof(int));
             }
         }
 

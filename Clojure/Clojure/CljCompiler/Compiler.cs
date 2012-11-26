@@ -124,8 +124,11 @@ namespace clojure.lang
 
         //Integer
         internal static readonly Var LineVar = Var.create(0).setDynamic();          // From the JVM version
+        internal static readonly Var ColumnVar = Var.create(0).setDynamic();          // From the JVM version
         //internal static readonly Var LINE_BEFORE = Var.create(0).setDynamic();   // From the JVM version
+        //internal static readonly Var COLUMN_BEFORE = Var.create(0).setDynamic();   // From the JVM version
         //internal static readonly Var LINE_AFTER = Var.create(0).setDynamic();    // From the JVM version
+        //internal static readonly Var COLUMN_AFTER = Var.create(0).setDynamic();    // From the JVM version
         internal static readonly Var SourceSpanVar = Var.create(null).setDynamic();    // Mine
 
         internal static readonly Var MethodVar = Var.create(null).setDynamic();
@@ -843,6 +846,9 @@ namespace clojure.lang
             int line = (int)LineVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
                 line = (int)RT.meta(form).valAt(RT.LineKey);
+            int column = (int)ColumnVar.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.ColumnKey))
+                column = (int)RT.meta(form).valAt(RT.ColumnKey);
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
@@ -850,7 +856,7 @@ namespace clojure.lang
             ParserContext pconExpr = new ParserContext(RHC.Expression);
             ParserContext pconEval = new ParserContext(RHC.Eval);
 
-            Var.pushThreadBindings(RT.map(LineVar, line, SourceSpanVar, sourceSpan, CompilerContextVar, null));
+            Var.pushThreadBindings(RT.map(LineVar, line, ColumnVar, column, SourceSpanVar, sourceSpan, CompilerContextVar, null));
             try
             {
                 form = Macroexpand(form);
@@ -1117,6 +1123,19 @@ namespace clojure.lang
             return 0;
         }
 
+
+        public static int GetColumnFromSpanMap(IPersistentMap spanMap)
+        {
+            if (spanMap == null)
+                return 0;
+
+            int line;
+            if (GetLocation(spanMap, RT.StartColumnKey, out line))
+                return line;
+
+            return 0;
+        }
+
         static bool GetLocation(IPersistentMap spanMap, Keyword key, out int val)
         {
             object oval = spanMap.valAt(key);
@@ -1278,7 +1297,7 @@ namespace clojure.lang
             }
             catch (LispReader.ReaderException e)
             {
-                throw new CompilerException(sourcePath, e.Line, e.InnerException);
+                throw new CompilerException(sourcePath, e.Line,  e.Column, e.InnerException);
             }
             finally
             {
@@ -1293,13 +1312,16 @@ namespace clojure.lang
             int line = (int)LineVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
                 line = (int)RT.meta(form).valAt(RT.LineKey);
+            int column = (int)ColumnVar.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.ColumnKey))
+                column = (int)RT.meta(form).valAt(RT.ColumnKey);
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
 
             ParserContext evPC = new ParserContext(RHC.Eval);
  
-            Var.pushThreadBindings(RT.map(LineVar, line, SourceSpanVar, sourceSpan));
+            Var.pushThreadBindings(RT.map(LineVar, line, ColumnVar, column, SourceSpanVar, sourceSpan));
 
             try
             {
@@ -1372,7 +1394,9 @@ namespace clojure.lang
                 RT.DataReadersVar, RT.DataReadersVar.deref(),
                 CompilerContextVar, EvalContext
                 //LINE_BEFORE, lntr.LineNumber,
-                //LINE_AFTER, lntr.LineNumber
+                //LINE_AFTER, lntr.LineNumber,
+                //COLUMN_BEFORE, lntr.ColumnNumber,
+                //COLUMN_AFTER, lntr.ColumnNumber
                 ));
 
             try
@@ -1380,15 +1404,17 @@ namespace clojure.lang
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     //LINE_AFTER.set(lntr.LineNumber);
+                    //COLUMN_AFTER.set(lntr.ColumnNumber);
                     //Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
                     //ret = ast.Compile().Invoke();
                     ret = eval(form);
                     //LINE_BEFORE.set(lntr.LineNumber);
+                    //COLUMN_BEFORE.set(lntr.ColumnNumber);
                 }
             }
             catch (LispReader.ReaderException e)
             {
-                throw new CompilerException(sourcePath, e.Line, e.InnerException);
+                throw new CompilerException(sourcePath, e.Line, e.Column, e.InnerException);
             }
             finally
             {
@@ -1460,7 +1486,7 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                throw new CompilerException((String)SourcePathVar.deref(), (int)LineVar.deref(), e);
+                throw new CompilerException((String)SourcePathVar.deref(), (int)LineVar.deref(), (int)ColumnVar.deref(), e);
             }
         }
 
@@ -1529,13 +1555,16 @@ namespace clojure.lang
         private static Expr AnalyzeSeq(ParserContext pcon, ISeq form, string name )
         {
             int line = (int)LineVar.deref();
+            int column = (int)ColumnVar.deref();
+            IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
                 line = (int)RT.meta(form).valAt(RT.LineKey);
-            IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
+            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.ColumnKey))
+                column = (int)RT.meta(form).valAt(RT.ColumnKey);
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
 
-            Var.pushThreadBindings(RT.map(LineVar, line, SourceSpanVar, sourceSpan));
+            Var.pushThreadBindings(RT.map(LineVar, line, ColumnVar, column, SourceSpanVar, sourceSpan));
 
             try
             {
@@ -1567,7 +1596,7 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                throw new CompilerException((String)SourcePathVar.deref(), (int)LineVar.deref(), e);
+                throw new CompilerException((String)SourcePathVar.deref(), (int)LineVar.deref(), (int)ColumnVar.deref(), e);
             }
             finally
             {
@@ -1609,8 +1638,8 @@ namespace clojure.lang
                 FileSource = "<unknown>";
             }
 
-            public CompilerException(string source, int line, Exception cause)
-                : base(ErrorMsg(source, line, cause.ToString()), cause)
+            public CompilerException(string source, int line, int column, Exception cause)
+                : base(ErrorMsg(source, line, column, cause.ToString()), cause)
             {
                 FileSource = source;
                 Line = line;
@@ -1634,9 +1663,9 @@ namespace clojure.lang
                 return Message;
             }
 
-            static string ErrorMsg(string source, int line, string s)
+            static string ErrorMsg(string source, int line, int column, string s)
             {
-                return string.Format("{0}, compiling: ({1}:{2})", s, source, line);
+                return string.Format("{0}, compiling: ({1}:{2}:{3})", s, source, line,column);
             }
 
             public override void GetObjectData(SerializationInfo info, StreamingContext context)

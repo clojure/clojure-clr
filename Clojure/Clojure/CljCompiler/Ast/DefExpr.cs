@@ -29,15 +29,17 @@ namespace clojure.lang.CljCompiler.Ast
         readonly bool _isDynamic;
         readonly string _source;
         readonly int _line;
+        readonly int _column;
 
         #endregion
 
         #region Ctors
 
-        public DefExpr(string source, int line, Var var, Expr init, Expr meta, bool initProvided, bool isDyanamic)
+        public DefExpr(string source, int line, int column, Var var, Expr init, Expr meta, bool initProvided, bool isDyanamic)
         {
             _source = source;
             _line = line;
+            _column = column;
             _var = var;
             _init = init;
             _meta = meta;
@@ -127,6 +129,7 @@ namespace clojure.lang.CljCompiler.Ast
                 Object source_path = Compiler.SourcePathVar.get();
                 source_path = source_path ?? "NO_SOURCE_FILE";
                 mm = (IPersistentMap)RT.assoc(mm,RT.LineKey, Compiler.LineVar.get())
+                    .assoc(RT.ColumnKey,Compiler.ColumnVar.get())
                     .assoc(RT.FileKey, source_path);
                     //.assoc(RT.SOURCE_SPAN_KEY,Compiler.SOURCE_SPAN.deref());
                 if (docstring != null)
@@ -136,6 +139,7 @@ namespace clojure.lang.CljCompiler.Ast
                 //            .without(Keyword.intern(null, "arglists"))
                 //            .without(RT.FILE_KEY)
                 //            .without(RT.LINE_KEY)
+                //            .without(RT.COLUMN_KEY)
                 //            .without(Keyword.intern(null, "ns"))
                 //            .without(Keyword.intern(null, "name"))
                 //            .without(Keyword.intern(null, "added"))
@@ -150,6 +154,7 @@ namespace clojure.lang.CljCompiler.Ast
                 return new DefExpr(
                     (string)Compiler.SourceVar.deref(),
                     (int) Compiler.LineVar.deref(),
+                    (int) Compiler.ColumnVar.deref(),
                     v, init, meta, initProvided,isDynamic);
             }
         }
@@ -177,7 +182,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             catch (Exception e)
             {
-                throw new Compiler.CompilerException(_source, _line, e);
+                throw new Compiler.CompilerException(_source, _line, _column, e);
             }
         }
 
@@ -229,7 +234,8 @@ namespace clojure.lang.CljCompiler.Ast
                 if ((k != RT.FileKey) &&
                     (k != RT.DeclaredKey) &&
                     (k != RT.SourceSpanKey) &&
-                    (k != RT.LineKey))
+                    (k != RT.LineKey) &&
+                    (k != RT.ColumnKey))
                     return true;
             }
             return false;

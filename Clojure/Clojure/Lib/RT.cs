@@ -324,6 +324,9 @@ namespace clojure.lang
         public static readonly Keyword LineKey 
             = Keyword.intern(null, "line");
 
+        public static readonly Keyword ColumnKey
+            = Keyword.intern(null, "column");
+
         public static readonly Keyword FileKey
             = Keyword.intern(null, "file");
 

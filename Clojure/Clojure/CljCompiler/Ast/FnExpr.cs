@@ -217,7 +217,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 IPersistentMap fmeta = RT.meta(origForm);
                 if (fmeta != null)
-                    fmeta = fmeta.without(RT.LineKey).without(RT.FileKey);
+                    fmeta = fmeta.without(RT.LineKey).without(RT.ColumnKey).without(RT.SourceSpanKey).without(RT.FileKey);
                 fn._hasMeta = RT.count(fmeta) > 0;
 
 

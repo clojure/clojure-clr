@@ -71,7 +71,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             catch (Exception e)
             {
-                throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), e);
+                throw new Compiler.CompilerException(_source, Compiler.GetLineFromSpanMap(_spanMap), Compiler.GetColumnFromSpanMap(_spanMap), e);
             }
         }
 

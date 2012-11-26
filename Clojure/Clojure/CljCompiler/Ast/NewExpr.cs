@@ -71,8 +71,8 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             if (ctor == null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
-                RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1} - call to {2} ctor can't be resolved.",
-                    Compiler.SourcePathVar.deref(), _spanMap != null ? (int)_spanMap.valAt(RT.StartLineKey, 0) : 0, _type.FullName);
+                RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1}:{2} - call to {3} ctor can't be resolved.",
+                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap), Compiler.GetColumnFromSpanMap(_spanMap), _type.FullName);
 
             return ctor;
         }

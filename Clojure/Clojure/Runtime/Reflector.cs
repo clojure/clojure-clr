@@ -364,8 +364,8 @@ namespace clojure.lang
         private static void MaybeReflectionWarn(IPersistentMap spanMap, MethodBase method, string methodName, IList<HostArg> args)
         {
             if (method == null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
-                RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1} - call to {2} can't be resolved.",
-                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), methodName));
+                RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1}:{2} - call to {3} can't be resolved.",
+                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap),methodName));
         }
 
         public static MethodInfo GetArityZeroMethod(Type t, string name, bool getStatics)

@@ -32,8 +32,11 @@
         (string? (:file m)) true
         (> (.Length (:file m)) 0) true            ;;; .length
 
-        ;(integer? (:start-line (:source-span m))) true   ;;; (integer? (:line m)) true
-        ;(> (:start-line (:source-span m)) 0) true        ;;; (> (:line m) 0) true
+       (integer? (:line m)) true
+       (> (:line m) 0) true
+
+        (integer? (:column m)) true
+        (> (:column m) 0) true
 
         (:macro m) true
         (:name m) 'when )))
