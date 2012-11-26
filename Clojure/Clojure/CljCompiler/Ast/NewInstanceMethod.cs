@@ -163,7 +163,7 @@ namespace clojure.lang.CljCompiler.Ast
                 // register as the current method and set up a new env frame
                 // PathNode pnade = new PathNode(PATHTYPE.PATH, (PathNode) CLEAR_PATH.get());
                 Var.pushThreadBindings(
-                    RT.map(
+                    RT.mapUniqueKeys(
                         Compiler.MethodVar, method,
                         Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
                         Compiler.LoopLocalsVar, null,

@@ -154,7 +154,7 @@ namespace clojure.lang.CljCompiler.Ast
                 FnMethod method = new FnMethod(fn, (ObjMethod)Compiler.MethodVar.deref());
                 method.SpanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();
 
-                Var.pushThreadBindings(RT.map(
+                Var.pushThreadBindings(RT.mapUniqueKeys(
                     Compiler.MethodVar, method,
                     Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
                     Compiler.LoopLocalsVar, null,

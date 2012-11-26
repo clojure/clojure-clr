@@ -58,7 +58,11 @@ namespace clojure.lang.CljCompiler.Ast
         public static Expr Parse(ParserContext pcon, IPersistentMap form)
         {
             ParserContext pconToUse = pcon.EvalOrExpr();
-            bool constant = true;
+
+            bool keysConstant = true;
+            bool valsConstant = true;
+            bool allConstantKeysUnique = true;
+            IPersistentSet constantKeys = PersistentHashSet.EMPTY;
 
             IPersistentVector keyvals = PersistentVector.EMPTY;
 
@@ -69,24 +73,54 @@ namespace clojure.lang.CljCompiler.Ast
                 Expr v = Compiler.Analyze(pconToUse, e.val());
                 keyvals = (IPersistentVector)keyvals.cons(k);
                 keyvals = (IPersistentVector)keyvals.cons(v);
-                if (!(k is LiteralExpr && v is LiteralExpr))
-                    constant = false;
+                if (k is LiteralExpr)
+                {
+                    object kval = k.Eval();
+                    if (constantKeys.contains(kval))
+                        allConstantKeysUnique = false;
+                    else
+                        constantKeys = (IPersistentSet)constantKeys.cons(kval);
+                }
+                else
+                    keysConstant = false;
+                if (!(v is LiteralExpr))
+                    valsConstant = false;
             }
+
             Expr ret = new MapExpr(keyvals);
 
             IObj iobjForm = form as IObj;
             if (iobjForm != null && iobjForm.meta() != null)
                 return Compiler.OptionallyGenerateMetaInit(pcon, form, ret);
-            else if (constant)
+            //else if (constant)
+            //{
+            // This 'optimzation' works, mostly, unless you have nested map values.
+            // The nested map values do not participate in the constants map, so you end up with the code to create the keys.
+            // Result: huge duplication of keyword creation.  3X increase in init time to the REPL.
+            //    //IPersistentMap m = PersistentHashMap.EMPTY;
+            //    //for (int i = 0; i < keyvals.length(); i += 2)
+            //    //    m = m.assoc(((LiteralExpr)keyvals.nth(i)).Val, ((LiteralExpr)keyvals.nth(i + 1)).Val);
+            //    //return new ConstantExpr(m);
+            //    return ret;
+            //}
+            else if (keysConstant)
             {
-                // This 'optimzation' works, mostly, unless you have nested map values.
-                // The nested map values do not participate in the constants map, so you end up with the code to create the keys.
-                // Result: huge duplication of keyword creation.  3X increase in init time to the REPL.
-                //IPersistentMap m = PersistentHashMap.EMPTY;
-                //for (int i = 0; i < keyvals.length(); i += 2)
-                //    m = m.assoc(((LiteralExpr)keyvals.nth(i)).Val, ((LiteralExpr)keyvals.nth(i + 1)).Val);
-                //return new ConstantExpr(m);
-                return ret;
+                // TBD: Add more detail to exception thrown below.
+                if (!allConstantKeysUnique)
+                    throw new ArgumentException("Duplicate constant keys in map");
+                if (valsConstant)
+                {
+                    // This 'optimzation' works, mostly, unless you have nested map values.
+                    // The nested map values do not participate in the constants map, so you end up with the code to create the keys.
+                    // Result: huge duplication of keyword creation.  3X increase in init time to the REPL.
+                    //IPersistentMap m = PersistentHashMap.EMPTY;
+                    //for (int i = 0; i < keyvals.length(); i += 2)
+                    //    m = m.assoc(((LiteralExpr)keyvals.nth(i)).Val, ((LiteralExpr)keyvals.nth(i + 1)).Val);
+                    //return new ConstantExpr(m);
+                    return ret;
+                }
+                else
+                    return ret;
             }
             else
                 return ret;
@@ -111,9 +145,34 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
+            bool allKeysConstant = true;
+            bool allConstantKeysUnique = true;
+            IPersistentSet constantKeys = PersistentHashSet.EMPTY;
+
+            for (int i = 0; i < _keyvals.count(); i += 2)
+            {
+                Expr k = (Expr)_keyvals.nth(i);
+                if (k is LiteralExpr)
+                {
+                    object kval = k.Eval();
+                    if (constantKeys.contains(kval))
+                        allConstantKeysUnique = false;
+                    else
+                        constantKeys = (IPersistentSet)constantKeys.cons(kval);
+                }
+                else
+                {
+                    allKeysConstant = false;
+                }
+            }
+
             MethodExpr.EmitArgsAsArray(_keyvals, objx, ilg);
 
-            ilg.EmitCall(Compiler.Method_RT_map);
+            if ((allKeysConstant && allConstantKeysUnique) || (_keyvals.count() <= 2))
+                ilg.EmitCall(Compiler.Method_RT_mapUniqueKeys);
+            else
+                ilg.EmitCall(Compiler.Method_RT_map);
+
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);            
         }

@@ -156,7 +156,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 try
                 {
-                    Var.pushThreadBindings(RT.map(
+                    Var.pushThreadBindings(RT.mapUniqueKeys(
                         Compiler.ConstantsVar, PersistentVector.EMPTY,
                         Compiler.ConstantIdsVar, new IdentityHashMap(),
                         Compiler.KeywordsVar, PersistentHashMap.EMPTY,

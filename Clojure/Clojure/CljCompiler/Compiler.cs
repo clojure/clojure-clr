@@ -263,6 +263,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_RT_uncheckedIntCast_long = typeof(RT).GetMethod("uncheckedIntCast", new Type[] { typeof(long) });
         internal static readonly MethodInfo Method_RT_keyword = typeof(RT).GetMethod("keyword");
         internal static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
+        internal static readonly MethodInfo Method_RT_mapUniqueKeys = typeof(RT).GetMethod("mapUniqueKeys"); 
         internal static readonly MethodInfo Method_RT_seqOrElse = typeof(RT).GetMethod("seqOrElse");
         internal static readonly MethodInfo Method_RT_set = typeof(RT).GetMethod("set");
         internal static readonly MethodInfo Method_RT_vector = typeof(RT).GetMethod("vector");
@@ -1244,7 +1245,7 @@ namespace clojure.lang
 
             LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
 
-            Var.pushThreadBindings(RT.map(
+            Var.pushThreadBindings(RT.mapUniqueKeys(
                 SourcePathVar, sourcePath,
                 SourceVar, sourceName,
                 MethodVar, null,
@@ -1383,7 +1384,7 @@ namespace clojure.lang
 
             LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
  
-            Var.pushThreadBindings(RT.map(
+            Var.pushThreadBindings(RT.mapUniqueKeys(
                 //LOADER, RT.makeClassLoader(),
                 SourcePathVar, sourcePath,
                 SourceVar, sourceName,

@@ -585,7 +585,7 @@ namespace clojure.lang
         public static void PostBootstrapInit()
         {
             Var.pushThreadBindings(
-                RT.map(CurrentNSVar, CurrentNSVar.deref(),
+                RT.mapUniqueKeys(CurrentNSVar, CurrentNSVar.deref(),
                 WarnOnReflectionVar, WarnOnReflectionVar.deref(),
                 RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
             try
@@ -2158,6 +2158,16 @@ namespace clojure.lang
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static IPersistentMap mapUniqueKeys(params object[] init)
+        {
+            if (init == null)
+                return PersistentArrayMap.EMPTY;
+            else if (init.Length <= PersistentArrayMap.HashtableThreshold)
+                return new PersistentArrayMap(init);
+            return PersistentHashMap.create(init);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IPersistentSet set(params object[] init)
         {
             return PersistentHashSet.createWithCheck(init);
@@ -3114,7 +3124,7 @@ namespace clojure.lang
             {
                 try
                 {
-                    Var.pushThreadBindings(RT.map(CurrentNSVar, CurrentNSVar.deref(),
+                    Var.pushThreadBindings(RT.mapUniqueKeys(CurrentNSVar, CurrentNSVar.deref(),
                         WarnOnReflectionVar, WarnOnReflectionVar.deref(),
                         RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
                     loaded = Compiler.LoadAssembly(assyInfo);

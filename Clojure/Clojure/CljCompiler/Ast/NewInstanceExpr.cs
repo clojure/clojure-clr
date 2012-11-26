@@ -175,7 +175,7 @@ namespace clojure.lang.CljCompiler.Ast
             try
             {
                 Var.pushThreadBindings(
-                    RT.map(
+                    RT.mapUniqueKeys(
                         Compiler.ConstantsVar, PersistentVector.EMPTY,
                         Compiler.ConstantIdsVar, new IdentityHashMap(),
                         Compiler.KeywordsVar, PersistentHashMap.EMPTY,
@@ -190,7 +190,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (ret.IsDefType)
                 {
                     Var.pushThreadBindings(
-                        RT.map(
+                        RT.mapUniqueKeys(
                             Compiler.MethodVar, null,
                             Compiler.LocalEnvVar, ret.Fields,
                             Compiler.CompileStubSymVar, Symbol.intern(null, tagName),
