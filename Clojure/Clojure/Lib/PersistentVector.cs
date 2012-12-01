@@ -471,7 +471,7 @@ namespace clojure.lang
         }
 
         [Serializable]
-        sealed public class ChunkedSeq : ASeq, IChunkedSeq
+        sealed public class ChunkedSeq : ASeq, IChunkedSeq, Counted
         {
             #region Data
 
@@ -583,6 +583,15 @@ namespace clojure.lang
 
             #endregion
 
+            #region Counted members
+
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "count")]
+            public override int count()
+            {
+                return _vec._cnt - (_i + _offset);
+            }
+           
+            #endregion
         }
 
         #endregion
