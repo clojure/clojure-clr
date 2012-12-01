@@ -721,20 +721,56 @@ namespace clojure.lang
             Type t = null;
             switch (sym.Name)
             {
-                case "int": t = typeof(int); break;
-                case "long": t = typeof(long); break;
-                case "float": t = typeof(float); break;
-                case "double": t = typeof(double); break;
-                case "char": t = typeof(char); break;
-                case "short": t = typeof(short); break;
-                case "byte": t = typeof(byte); break;
+                case "int":
+                case "Int32":
+                case "System.Int32":
+                    t = typeof(int); break;
+                case "long":
+                case "Int64":
+                case "System.Int64":
+                    t = typeof(long); break;
+                case "float": 
+                case "Single":
+                case "System.Single":
+                    t = typeof(float); break;
+                case "double": 
+                case "Double":
+                case "System.Double":
+                    t = typeof(double); break;
+                case "char": 
+                case "Char":
+                case "System.Char":
+                    t = typeof(char); break;
+                case "short": 
+                case "Int16":
+                case "System.Int16":
+                    t = typeof(short); break;
+                case "byte":
+                case "Byte":
+                case "System.Byte":
+                    t = typeof(byte); break;
                 case "bool":
-                case "boolean": t = typeof(bool); break;
+                case "boolean":
+                case "Boolean":
+                case "System.Boolean":
+                    t = typeof(bool); break;
                 case "void": t = typeof(void); break;
-                case "uint": t = typeof(uint); break;
-                case "ulong": t = typeof(ulong); break;
-                case "ushort": t = typeof(ushort); break;
-                case "sbyte": t = typeof(sbyte); break;
+                case "uint":
+                case "UInt32":
+                case "System.UInt32":
+                    t = typeof(uint); break;
+                case "ulong":
+                case "UInt64":
+                case "System.UInt64":
+                    t = typeof(ulong); break;
+                case "ushort":
+                case "UInt16":
+                case "System.UInt16":
+                    t = typeof(ushort); break;
+                case "sbyte":
+                case "SByte":
+                case "System.SByte":
+                    t = typeof(sbyte); break;
             }
             return t;
         }
@@ -1084,6 +1120,22 @@ namespace clojure.lang
             return ts;
         }
 
+        static Dictionary<Type, Symbol> TypeToTagDict = new Dictionary<Type, Symbol>()
+        {
+            { typeof(bool), Symbol.create(null,"bool") },
+            { typeof(char), Symbol.create(null,"char") },
+            { typeof(byte), Symbol.create(null,"byte") },
+            { typeof(sbyte), Symbol.create(null,"sbyte") },
+            { typeof(short), Symbol.create(null,"short") },
+            { typeof(ushort), Symbol.create(null,"ushort") },
+            { typeof(int), Symbol.create(null,"int") },
+            { typeof(uint), Symbol.create(null,"uint") },
+            { typeof(long), Symbol.create(null,"long") },
+            { typeof(ulong), Symbol.create(null,"ulong") },
+            { typeof(float), Symbol.create(null,"float") },
+            { typeof(double), Symbol.create(null,"double") },
+        };
+
         internal static Symbol TagOf(object o)
         {
             object tag = RT.get(RT.meta(o), RT.TagKey);
@@ -1098,6 +1150,15 @@ namespace clojure.lang
                 string str = tag as String;
                 if (str != null)
                     return Symbol.intern(null, str);
+            }
+
+            {
+                Type t = tag as Type;
+                Symbol sym;
+                if ( t != null && TypeToTagDict.TryGetValue(t, out sym))
+                {
+                    return sym;
+                }
             }
 
             return null;
