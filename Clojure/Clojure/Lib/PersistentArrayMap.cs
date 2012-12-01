@@ -107,6 +107,70 @@ namespace clojure.lang
             return new PersistentArrayMap(init);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "createAsIfByAssoc")]
+        public static PersistentArrayMap createAsIfByAssoc(Object[] init)
+        {
+            // ClojureJVM says: If this looks like it is doing busy-work, it is because it
+            // is achieving these goals: O(n^2) run time like
+            // createWithCheck(), never modify init arg, and only
+            // allocate memory if there are duplicate keys.
+            int n = 0;
+            for (int i = 0; i < init.Length; i += 2)
+            {
+                bool duplicateKey = false;
+                for (int j = 0; j < i; j += 2)
+                {
+                    if (EqualKey(init[i], init[j]))
+                    {
+                        duplicateKey = true;
+                        break;
+                    }
+                }
+                if (!duplicateKey)
+                    n += 2;
+            }
+            if (n < init.Length)
+            {
+                // Create a new shorter array with unique keys, and
+                // the last value associated with each key.  To behave
+                // like assoc, the first occurrence of each key must
+                // be used, since its metadata may be different than
+                // later equal keys.
+                Object[] nodups = new Object[n];
+                int m = 0;
+                for (int i = 0; i < init.Length; i += 2)
+                {
+                    bool duplicateKey = false;
+                    for (int j = 0; j < m; j += 2)
+                    {
+                        if (EqualKey(init[i], nodups[j]))
+                        {
+                            duplicateKey = true;
+                            break;
+                        }
+                    }
+                    if (!duplicateKey)
+                    {
+                        int j;
+                        for (j = init.Length - 2; j >= i; j -= 2)
+                        {
+                            if (EqualKey(init[i], init[j]))
+                            {
+                                break;
+                            }
+                        }
+                        nodups[m] = init[i];
+                        nodups[m + 1] = init[j + 1];
+                        m += 2;
+                    }
+                }
+                if (m != n)
+                    throw new ArgumentException("Internal error: m=" + m);
+                init = nodups;
+            }
+            return new PersistentArrayMap(init);
+        }
+
         /// <summary>
         /// Create an empty <see cref="PersistentArrayMap">PersistentArrayMap</see>.
         /// </summary>
