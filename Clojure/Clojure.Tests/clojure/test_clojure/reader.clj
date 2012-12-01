@@ -21,6 +21,7 @@
   (:use [clojure.instant :only [read-instant-datetime                        ;;; read-instant-date
                                 read-instant-datetimeoffset                  ;;; read-instant-calendar
                                 ]])                                          ;;; read-instant-timestamp
+  (:require clojure.walk)
   (:import [clojure.lang BigInt Ratio]
            System.IO.Path  System.IO.FileInfo
            ))                                                                ;;; java.util.TimeZone
@@ -394,6 +395,41 @@
 (deftest t-Regex)
 
 ;; Metadata (^ or #^ (deprecated))
+
+(deftest t-line-column-numbers
+  (let [code "(ns reader-metadata-test
+  (:require [clojure.java.io
+             :refer (resource reader)]))
+
+(let [a 5]
+  ^:added-metadata
+  (defn add-5
+    [x]
+    (reduce + x (range a))))"
+        stream (clojure.lang.LineNumberingTextReader.                                       ;;; clojure.lang.LineNumberingPushbackReader.
+                 (System.IO.StringReader. code))                                             ;;; java.io.StringReader.
+        top-levels (take-while identity (repeatedly #(read stream false nil)))
+        expected-metadata '{ns {:line 1, :column 1}
+                            :require {:line 2, :column 3}
+                            resource {:line 3, :column 21}
+                            let {:line 5, :column 1}
+                            defn {:line 6, :column 3 :added-metadata true}
+                            reduce {:line 9, :column 5}
+                            range {:line 9, :column 17}}
+        verified-forms (atom 0)]
+    (doseq [form top-levels]
+      (clojure.walk/postwalk
+        #(when (list? %)
+           (is (= (expected-metadata (first %))
+                  (meta %)))
+           (is (->> (meta %)
+                 vals
+                 (filter number?)
+                 (every? (partial instance? Int32))))                                      ;;; Integer
+           (swap! verified-forms inc))
+        form))
+    ;; sanity check against e.g. reading returning ()
+    (is (= (count expected-metadata) @verified-forms))))
 
 (deftest t-Metadata
   (is (= (meta '^:static ^:awesome ^{:static false :bar :baz} sym) {:awesome true, :bar :baz, :static true})))
