@@ -196,6 +196,13 @@
 				    (when-not (instance? clojure.lang.Compiler+CompilerException ex)
                       (str " " (if el (stack-element-str el) "[trace missing]"))))))))
 
+(def ^{:doc "A sequence of lib specs that are applied to `require`
+by default when a new command-line REPL is started."} repl-requires
+  '[[clojure.repl :refer (source apropos dir pst doc find-doc)]
+    ;;;[clojure.java.javadoc :refer (javadoc)]                            ;;; commented out
+    [clojure.pprint :refer (pp pprint)]])
+
+
 (defn repl
   "Generic, reusable, read-eval-print loop. By default, reads from *in*,
   writes to *out*, and prints exception summaries to *err*. If you use the
@@ -275,8 +282,6 @@
       (catch Exception e                ;;; Throwable
         (caught e)
         (set! *e e)))
-     (use '[clojure.repl :only (source apropos dir pst doc find-doc)])
-     (use '[clojure.pprint :only (pp pprint)])
      (prompt)
      (flush)
      (loop []
@@ -348,7 +353,9 @@
   [[_ & args] inits]
   (when-not (some #(= eval-opt (init-dispatch (first %))) inits)
     (println "Clojure" (clojure-version)))
-  (repl :init #(initialize args inits))
+  (repl :init (fn []
+                (initialize args inits)
+                (apply require repl-requires)))
   (prn)
   (Environment/Exit 0))                        ;;;  System.Exit
 
