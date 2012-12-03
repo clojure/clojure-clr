@@ -140,6 +140,7 @@
   [typesyms & body]
   (generate-generic-delegate "System.Action" typesyms body))  
 
+
 ; Attribute handling
 
 (defn enum? [v]
@@ -159,22 +160,70 @@
       
       
 ; Note: we are not handling the non-CLS-compliant case of a one-dimensional array of arg values -- yet.
+;
+;  Most often attributes will be attached to classes, methods, etc. via metadata.
+;  The key will be an class derived from System.Attribute.
+;  The value will be arguments to the constructor and/or property setters.
+;  We wish to simplify the syntax for the most common (simplest) cases.
+;  We have to accommodate:
+;    positional arguments to pass to constructors
+;    property/value pairs
+;    multiple values for an attribute
+; The _normalized form_ for an attribute argument is:
+;
+;   #{ init1 init2 ... }
+;
+;  where an <init> is a hash with keys representing property names (and case is important).
+;  The special key :__args will have as a value a vector of arguments that are passed to the constructor for the attribute class.
+;
+;  The surface synax (the value for the metadata allows the following simplifications:
+;  
+;  A set implies multiple values.  Each element of the set will be processed to create a standardarized init.
+;  A vector implies just c-tor args. 
+;  A map will be passed through
+;  Any other value implies a single argument to a constructor.
+;
+;  System.Serializable {}    =>   System.Serializable #{ {} }   =>  call no-arg c-tor 
+;
+;  Assuming we have imported FileIOPermission and SecurityAction from System.Security.Permissions:
+;  
+;  FileIOPermission SecurityAction/Demand     =>  FileIOPermission #{ {:__args [SecurityAction/Demand]} }  =>  new FileIOPermission(SecurityAction/Demand)
+;
+;  FileIOPermission #{ SecurityAction/Demand SecurityAction/Deny }
+;              ==> FileIOPermission #{  {:__args [SecurityAction/Demand]} {:__args [SecurityAction/Deny]} 
+;              ==> new FileIOPermission(SecurityAction/Demand) + new FileIOPermission(SecurityAction/Demand)  (multiple values for this attribute)
+;
+; FileIOPermission #{ SecurityAction/Demand { :__args [SecurityAction/Deny] :Read "abc" } }
+;             ==> FileIOPermission #{  {:__args [SecurityAction/Demand]} {:__args [SecurityAction/Deny] :Read "abc"} 
+;              ==> new FileIOPermission(SecurityAction/Demand) 
+;                  let x = new FileIOPermission(SecurityAction/Demand) + x.Read = "abc"
+;			     (multiple values for this attribute, second has ctor call + property set)
+;
+;  Note that symbols are eval.  They must evaluate to either values of enums or to types.
+
 
 (defn- normalize-attribute-arg-value [v]
   (cond
 	(symbol? v) (let [ev (eval v)]
-	              (enum? ev) ev
-	              (class? ev) ev
-	              :else   ev ) ;(throw (ArgumentException. (str "Unsupported attribute argument value: " v " of class " (class ev)))))
+		          (cond
+				     (enum? ev) ev
+	                 (class? ev) ev
+	                  :else  (throw (ArgumentException. (str "Unsupported attribute argument value: " v " of class " (class ev))))))
+	(vector? v) (into1 [] (map normalize-attribute-arg-value v))
+	(map? v) (into1 {} (map (fn [[k v]] [k (normalize-attribute-arg-value v)]) v))
 	:else v))
-     
-      
-(defn- normalize-attribute-arg [arg]
+
+(defn- normalize-attribute-init [init]
   (cond
-     (vector? arg) { :__args (map normalize-attribute-arg-value arg) }
-     (map? arg)    (into1 {} (map (fn [k v] [k (normalize-attribute-arg-value v)]) arg))
-     :else         { :__args [ (normalize-attribute-arg-value arg) ] }))
-    
+	(vector? init) { :__args (map normalize-attribute-arg-value init) }
+	(map? init)    (into1 {} (map (fn [[k v]] [k (normalize-attribute-arg-value v)]) init))
+	:else          { :__args [ (normalize-attribute-arg-value init) ] } ))
+     
+(defn- normalize-attribute-arg [arg]
+  (if (set? arg)    
+	(into1 #{} (map normalize-attribute-init arg))
+	#{ (normalize-attribute-init arg) }))
+  
 (defn- resolve-attribute [v]
   (cond
     (is-attribute? v) v
@@ -191,6 +240,9 @@
          (when-let [c (resolve-attribute k)]
            [ c (normalize-attribute-arg v) ])))))
 
+
+
+;; assembly loading helpers
 
 (defn assembly-load 
   "Load an assembly given its name"

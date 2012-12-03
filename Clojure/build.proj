@@ -28,10 +28,10 @@
   </Target>
   
   <Target Name="CompileTest" DependsOnTargets="Build">
-    <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.protocols.more-examples clojure.test-clojure.repl.example" 
+    <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes" 
           WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == '.Net' "/>
-    <Exec Command="mono $(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.protocols.more-examples clojure.test-clojure.repl.example" 
+    <Exec Command="mono $(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes" 
           WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>

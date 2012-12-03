@@ -126,7 +126,7 @@ namespace clojure.lang
             DefineCtors(proxyTB, superClass, 
                 implNamespace + "." + prefix + initName, 
                 implNamespace + "." + prefix + postInitName, 
-                ctorTypes, initFB, postInitFB, stateFB, factoryName);
+                ctors, ctorTypes, initFB, postInitFB, stateFB, factoryName);
 
             EmitMethods(proxyTB, sigs, overloads, varMap, exposesMethods);
             EmitExposers(proxyTB, superClass, exposesFields);
@@ -209,14 +209,20 @@ namespace clojure.lang
             Type superClass, 
             string initName, 
             string postInitName, 
-            ISeq ctorsTypes, 
+            ISeq ctors, 
+            ISeq ctorTypes,
             FieldBuilder initFB, 
             FieldBuilder postInitFB, 
             FieldBuilder stateFB,
             string factoryName)
         {
-            for (ISeq s = ctorsTypes; s != null; s = s.next())
+            ISeq s1 = ctors;
+            for (ISeq s = ctorTypes; s != null; s = s.next())
             {
+                // TODO: Get rid of this mess by making sure the metadata on the keys of the constructors map gets copied to the constructor-types map.  Sigh.
+                IPersistentMap ctorAttributes = GenInterface.ExtractAttributes(RT.meta(((IMapEntry)s1.first()).key()));
+                s1 = s1.next(); 
+                
                 IMapEntry me = (IMapEntry)s.first();
                 ISeq thisParamTypesV = (ISeq)me.key();
                 ISeq baseParamTypesV = (ISeq)me.val();
@@ -231,6 +237,8 @@ namespace clojure.lang
                     throw new InvalidOperationException("Base class constructor missing or private");
 
                 ConstructorBuilder cb = proxyTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, thisParamTypes);
+                GenInterface.SetCustomAttributes(cb, ctorAttributes);
+
                 CljILGen gen = new CljILGen(cb.GetILGenerator());
 
                 Label noInitLabel = gen.DefineLabel();

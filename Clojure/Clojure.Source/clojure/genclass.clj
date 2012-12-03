@@ -89,7 +89,7 @@
         interfaces (map the-class implements)
         supers (cons super interfaces)
         ctor-sig-map (doall (or constructors (zipmap (ctor-sigs super) (ctor-sigs super))))
-        class-mapper (fn [coll] (doall (map the-class coll)))
+        class-mapper (fn [coll] (with-meta (doall (map the-class coll)) (meta coll)))
         ctor-sig-type-map (doall (zipmap (doall (map class-mapper (keys ctor-sig-map))) (doall (map class-mapper (vals ctor-sig-map)))))
         cname (. name (Replace "." "/"))
         pkg-name name

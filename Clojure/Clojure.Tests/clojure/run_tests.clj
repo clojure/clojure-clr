@@ -2,7 +2,7 @@
 
 (def test-namespaces '[
 clojure.test-clojure.agents
-;;;clojure.test-clojure.annotations
+clojure.test-clojure.attributes            ;;;clojure.test-clojure.annotations
 clojure.test-clojure.atoms
 clojure.test-clojure.clojure-set
 clojure.test-clojure.clojure-walk                       
