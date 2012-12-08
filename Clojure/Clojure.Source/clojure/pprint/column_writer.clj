@@ -66,6 +66,8 @@
      (let [fields (ref {:max max-columns, :cur 0, :line 0 :base writer})]
        (proxy [TextWriter IDeref] []
          (deref [] fields)
+		 (Flush []
+		   (.Flush writer))
          (Write
           ([^chars cbuf off len]   (let [off (int off) len (int len)]       ;;; removed ^Integer hints on off, len 
              (let [^TextWriter writer (get-field this :base)] 
