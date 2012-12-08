@@ -29,7 +29,7 @@ namespace clojure.lang
     /// </remarks>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
-    public class PersistentQueue : Obj, IPersistentList, ICollection, ICollection<Object>, Counted
+    public class PersistentQueue : Obj, IPersistentList, ICollection, ICollection<Object>, Counted, IHashEq
     {
         #region Data
 
@@ -107,9 +107,9 @@ namespace clojure.lang
         {
             if (_hash == -1)
             {
-                int hash = 0;
+                int hash = 1;
                 for (ISeq s = seq(); s != null; s = s.next())
-                    hash = Util.hashCombine(hash, Util.hash(s.first()));
+                    hash = 31 * hash + (s.first() == null ? 0 : s.first().GetHashCode());
                 _hash = hash;
             }
             return _hash;
@@ -311,6 +311,21 @@ namespace clojure.lang
 
         #endregion
 
+        #region IHashEq members
+
+        public int hasheq()
+        {
+            int hash = 1;
+            for (ISeq s = seq(); s != null; s = s.next())
+            {
+                hash = 31 * hash + Util.hasheq(s.first());
+            }
+            return hash;
+
+        }
+
+        #endregion
+
         /// <summary>
         /// Represents an <see cref="ISeq">ISeq</see> over a <see cref="PersistentQueue">PersistentQueue</see>.
         /// </summary>
@@ -419,5 +434,7 @@ namespace clojure.lang
 
             #endregion
         }
+
+
     }
 }
