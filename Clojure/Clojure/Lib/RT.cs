@@ -438,6 +438,9 @@ namespace clojure.lang
         public static readonly Var DataReadersVar
             = Var.intern(ClojureNamespace, Symbol.intern("*data-readers*"), RT.map()).setDynamic();
 
+        public static readonly Var DefaultDataReaderFnVar
+            = Var.intern(ClojureNamespace, Symbol.intern("*default-data-reader-fn*"), RT.map());
+
         public static readonly Var DefaultDataReadersVar
            = Var.intern(ClojureNamespace, Symbol.intern("default-data-readers"), RT.map());
         

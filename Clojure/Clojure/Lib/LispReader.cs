@@ -1501,7 +1501,13 @@ namespace clojure.lang
                     dataReaders = (ILookup)RT.DefaultDataReadersVar.deref();
                     dataReader = (IFn)RT.get(dataReaders, tag);
                     if (dataReader == null)
-                        throw new ArgumentException("No reader function for tag " + tag.ToString());
+                    {
+                        IFn default_reader = (IFn)RT.DefaultDataReaderFnVar.deref();
+                        if (default_reader != null)
+                            return default_reader.invoke(tag, o);
+                        else
+                            throw new ArgumentException("No reader function for tag " + tag.ToString());
+                    }
                 }
                 return dataReader.invoke(o);
             }

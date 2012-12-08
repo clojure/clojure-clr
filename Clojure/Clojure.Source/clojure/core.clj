@@ -6819,6 +6819,13 @@
   data_readers.clj or by rebinding this Var."
   {})
 
+(def ^{:added "1.5" :dynamic true} *default-data-reader-fn* 
+  "When no data reader is found for a tag and *default-data-reader-fn*
+  is non-nil, it will be called with two arguments,
+  the tag and the value.  If *default-data-reader-fn* is nil (the
+  default), an exception will be thrown for the unknown tag."
+  nil)
+
 (defn- data-reader-urls []                                         ;;; Actually, we will return a sequence of FileInfo instances
   (enumeration-seq
     (clojure.lang.RT/FindFiles "data_readers.clj")))               ;;;    (.. Thread currentThread getContextClassLoader
