@@ -22,7 +22,7 @@ namespace clojure.lang
     /// Represents a multifunction.
     /// </summary>
     /// <remarks>See the Clojure documentation for more details.</remarks>
-    public class MultiFn : AFn
+    public class MultiFn : AFn, IDisposable
     {
         #region Data
 
@@ -83,6 +83,7 @@ namespace clojure.lang
         volatile object _cachedHierarchy;
 
         ReaderWriterLockSlim _rw;
+        bool _disposed = false;
 
         //static readonly Var _assoc = RT.var("clojure.core", "assoc");
         //static readonly Var _dissoc = RT.var("clojure.core", "dissoc");
@@ -772,5 +773,26 @@ namespace clojure.lang
 
         #endregion
 
+        #region IDisposable members
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    ((IDisposable)_rw).Dispose();
+                }
+
+                _disposed = true;
+            }
+        }
+        #endregion
     }
 }
