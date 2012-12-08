@@ -147,7 +147,7 @@ namespace clojure.lang
             for (ISeq s = RT.seq(inits); s != null; s = s.next())
             {
                 IPersistentMap init = (IPersistentMap)s.first();
-                builders.Add(CreateCustomAttributeBuilder(t, (IPersistentMap)s.first()));
+                builders.Add(CreateCustomAttributeBuilder(t, init));
             }
 
             return builders;

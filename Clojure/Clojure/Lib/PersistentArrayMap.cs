@@ -107,7 +107,8 @@ namespace clojure.lang
             return new PersistentArrayMap(init);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "createAsIfByAssoc")]
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static PersistentArrayMap createAsIfByAssoc(Object[] init)
         {
             // ClojureJVM says: If this looks like it is doing busy-work, it is because it
