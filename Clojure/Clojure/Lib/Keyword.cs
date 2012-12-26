@@ -23,7 +23,7 @@ namespace clojure.lang
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229:ImplementSerializationConstructors", Justification = "Not needed")]
     [Serializable]
-    public sealed class Keyword: AFn, Named, IComparable, ISerializable // ??JAVA only used IFn, not AFn.  NOt sure why.
+    public sealed class Keyword: AFn, Named, IComparable, ISerializable, IHashEq // ??JAVA only used IFn, not AFn.  NOt sure why.
     {
         #region Data
 
@@ -346,6 +346,15 @@ namespace clojure.lang
         public static Keyword find(String nsname)
         {
             return find(Symbol.intern(nsname));
+        }
+
+        #endregion
+
+        #region IHashEq members
+
+        public int hasheq()
+        {
+            return _hash;
         }
 
         #endregion

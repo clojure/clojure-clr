@@ -33,16 +33,21 @@ namespace clojure.lang
             if (o == null)
                 return 0;
 
-            if (Util.IsNumeric(o))
-                return Numbers.hasheq(o);
-
             IHashEq ihe = o as IHashEq;
             if (ihe != null)
-                return ihe.hasheq();
+                return dohasheq(ihe);
+
+            if (Util.IsNumeric(o))
+                return Numbers.hasheq(o);
 
             return o.GetHashCode();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dohasheq")]
+        private static int dohasheq(IHashEq ihe)
+        {
+            return ihe.hasheq();
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hash")]
         static public int hashCombine(int seed, int hash)

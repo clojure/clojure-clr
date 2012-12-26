@@ -22,7 +22,7 @@ namespace clojure.lang
     /// </summary>
     /// <remarks>See the Clojure documentation for more information.</remarks>
     [Serializable]
-    public class Symbol: AFn, IObj, Named, IComparable, ISerializable
+    public class Symbol: AFn, IObj, Named, IComparable, ISerializable, IHashEq
     {
         #region Instance variables
 
@@ -403,6 +403,15 @@ namespace clojure.lang
         {
             info.AddValue("_name",_name);
             info.AddValue("_ns", _ns);
+        }
+
+        #endregion
+
+        #region IHashEq members
+
+        public int hasheq()
+        {
+            return _hash;
         }
 
         #endregion
