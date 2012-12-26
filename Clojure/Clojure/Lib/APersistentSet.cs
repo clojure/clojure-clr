@@ -30,6 +30,12 @@ namespace clojure.lang
         protected int _hash = -1;
 
         /// <summary>
+        /// Caches the hashseq code, when computed.
+        /// </summary>
+        /// <remarks>The value <value>-1</value> indicates that the hasheq code has not been computed yet.</remarks>
+        int _hasheq = -1;
+
+        /// <summary>
         /// The underlying map that contains the set's elements.
         /// </summary>
         protected readonly IPersistentMap _impl;
@@ -265,13 +271,17 @@ namespace clojure.lang
 
         public int hasheq()
         {
-            int hash = 0;
-            for (ISeq s = seq(); s != null; s = s.next())
+            if (_hasheq == -1)
             {
-                object e = s.first();
-                hash += Util.hasheq(e);
+                int hash = 0;
+                for (ISeq s = seq(); s != null; s = s.next())
+                {
+                    object e = s.first();
+                    hash += Util.hasheq(e);
+                }
+                _hasheq = hash;
             }
-            return hash;
+            return _hasheq;
         }
 
         #endregion

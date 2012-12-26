@@ -59,6 +59,12 @@ namespace clojure.lang
         /// </summary>
         protected int _hash = -1;
 
+        /// <summary>
+        /// Caches the hashseq code, when computed.
+        /// </summary>
+        /// <remarks>The value <value>-1</value> indicates that the hasheq code has not been computed yet.</remarks>
+        int _hasheq = -1;
+
         #endregion
 
         #region C-tors & factory methods
@@ -315,15 +321,17 @@ namespace clojure.lang
 
         public int hasheq()
         {
-            int hash = 1;
-            for (ISeq s = seq(); s != null; s = s.next())
+            if (_hasheq == -1)
             {
-                hash = 31 * hash + Util.hasheq(s.first());
+                int hash = 1;
+                for (ISeq s = seq(); s != null; s = s.next())
+                {
+                    hash = 31 * hash + Util.hasheq(s.first());
+                }
+                _hasheq = hash;
             }
-            return hash;
-
+            return _hasheq;
         }
-
         #endregion
 
         /// <summary>

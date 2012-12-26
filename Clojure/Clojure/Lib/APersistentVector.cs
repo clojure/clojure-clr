@@ -33,6 +33,12 @@ namespace clojure.lang
         /// </summary>
         int _hash = -1;
 
+        /// <summary>
+        /// Caches the hashseq code, when computed.
+        /// </summary>
+        /// <remarks>The value <value>-1</value> indicates that the hasheq code has not been computed yet.</remarks>
+        int _hasheq = -1;
+
         #endregion
 
         #region Object overrides
@@ -551,10 +557,14 @@ namespace clojure.lang
 
         public int hasheq()
         {
-            int hash = 1;
-            foreach (object o in this)
-                hash = 31 * hash + Util.hasheq(o);
-            return hash;
+            if (_hasheq == -1)
+            {
+                int hash = 1;
+                foreach (object o in this)
+                    hash = 31 * hash + Util.hasheq(o);
+                _hasheq = hash;
+            }
+            return _hasheq;
         }
 
         #endregion
