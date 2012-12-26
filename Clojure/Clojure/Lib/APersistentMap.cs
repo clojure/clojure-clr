@@ -456,12 +456,13 @@ namespace clojure.lang
         {
             if (_hasheq == -1)
             {
-                _hasheq = MapHasheq(this);
+                _hasheq = mapHasheq(this);
             }
             return _hasheq;
         }
 
-        public static int MapHasheq(IPersistentMap m)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "map")]
+        public static int mapHasheq(IPersistentMap m)
         {
             int hash = 0;
             for (ISeq s = m.seq(); s != null; s = s.next())

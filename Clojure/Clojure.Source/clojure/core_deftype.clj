@@ -189,7 +189,7 @@ ditto for method impls defined with deftype, defrecord, and reify."))))
       (eqhash [[i m]] 
         [(conj i 'clojure.lang.IHashEq)
          (conj m
-               `(hasheq [this#] (bit-xor ~type-hash (.GetHashCode this#)))                      ;;; .hashCode
+               `(hasheq [this#] (bit-xor ~type-hash (clojure.lang.APersistentMap/mapHasheq this#)))                      ;;; .hashCode
                `(GetHashCode [this#] (clojure.lang.APersistentMap/mapHash this#))               ;;; hashCode
                `(Equals [this# ~gs] (clojure.lang.APersistentMap/mapEquals this# ~gs)))])       ;;; equals
       (iobj [[i m]] 
