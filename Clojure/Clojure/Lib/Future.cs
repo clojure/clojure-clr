@@ -111,6 +111,27 @@ namespace clojure.lang
             return _cancelled;
         }
 
+
+        public object get()
+        {
+            return deref();
+        }
+
+        public object get(int millis)
+        {
+            if (!_t.Join(millis))
+                throw new FutureTimeoutException();
+            if (_cancelled)
+            {
+                throw new FutureAbortedException();
+            }
+            if (_error != null)
+            {
+                throw new InvalidOperationException("Future has an error", _error);
+            }
+            return _value;      
+        }
+
         #endregion
 
         #region IDeref Members
@@ -187,6 +208,25 @@ namespace clojure.lang
         public FutureAbortedException(string msg, Exception inner) : base(msg, inner) { }
 
         protected FutureAbortedException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+
+        #endregion
+    }
+
+    [Serializable]
+    public class FutureTimeoutException : Exception
+    {
+        #region C-tors
+
+        public FutureTimeoutException() { }
+
+        public FutureTimeoutException(string msg) : base(msg) { }
+
+        public FutureTimeoutException(string msg, Exception inner) : base(msg, inner) { }
+
+        protected FutureTimeoutException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
