@@ -49,6 +49,8 @@ namespace clojure.lang.CljCompiler.Ast
                 return _thenExpr.HasClrType
                 && _elseExpr.HasClrType
                 && (_thenExpr.ClrType == _elseExpr.ClrType
+                    || _thenExpr.ClrType == Recur.RecurType
+                    || _elseExpr.ClrType == Recur.RecurType
                     || (_thenExpr.ClrType == null && !_elseExpr.ClrType.IsValueType)
                     || (_elseExpr.ClrType == null && !_thenExpr.ClrType.IsValueType));
             }
@@ -56,7 +58,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Type ClrType
         {
-            get { return _thenExpr.ClrType ?? _elseExpr.ClrType; }
+            get
+            {
+                Type thenType = _thenExpr.ClrType;
+                if (thenType != null && thenType != Recur.RecurType)
+                    return thenType;
+                return _elseExpr.ClrType;
+            }
         }
 
         #endregion

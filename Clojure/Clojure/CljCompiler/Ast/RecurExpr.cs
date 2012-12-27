@@ -18,7 +18,7 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class RecurExpr : Expr
+    class RecurExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
@@ -50,7 +50,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Type ClrType
         {
-            get { return null; }
+            get { return Recur.RecurType; }
         }
 
         #endregion
@@ -209,6 +209,21 @@ namespace clojure.lang.CljCompiler.Ast
 
         public bool HasNormalExit() { return false; }
 
+        public bool CanEmitPrimitive
+        {
+            get { return true; }
+        }
+
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
+        {
+            Emit(rhc, objx, ilg);
+        }
+
         #endregion
+    }
+
+    class Recur
+    {
+        public static Type RecurType = typeof(Recur);
     }
 }
