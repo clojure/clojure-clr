@@ -253,12 +253,32 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The key to search for.</param>
         /// <returns>The index of the key if found; -1 otherwise.</returns>
-        private int IndexOfKey(object key)
+        private int IndexOfObject(object key)
         {
+            Util.EquivPred ep = Util.GetEquivPred(key);
             for (int i = 0; i < _array.Length; i += 2)
-                if (EqualKey(_array[i],key))
+                if (ep(key, _array[i]))
                     return i;
             return -1;
+        }
+
+        /// <summary>
+        /// Gets the index of the key in the array.
+        /// </summary>
+        /// <param name="key">The key to search for.</param>
+        /// <returns>The index of the key if found; -1 otherwise.</returns>
+        private int IndexOfKey(object key)
+        {
+            if (key is Keyword)
+            {
+                for (int i = 0; i < _array.Length; i += 2)
+                    if (key == _array[i])
+                        return i;
+                return -1;
+            }
+
+            else
+                return IndexOfObject(key);
         }
 
         /// <summary>
@@ -270,6 +290,8 @@ namespace clojure.lang
         /// <remarks>Handles nulls properly.</remarks>
         static bool EqualKey(object k1, object k2)
         {
+            if (k1 is Keyword)
+                return k1 == k2;
             return Util.equiv(k1, k2);
         }
 

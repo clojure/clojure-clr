@@ -14,6 +14,7 @@
 
 using System;
 using System.Globalization;
+using System.Collections;
 //using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
@@ -72,6 +73,36 @@ namespace clojure.lang
                 return k1.Equals(k2);
             }
             return false;
+        }
+
+        public delegate bool EquivPred(object k1, object k2);
+
+        static EquivPred _equivNull = (k1, k2) => { return k2 == null; };
+        static EquivPred _equivEquals = (k1, k2) => { return k1.Equals(k2); };
+        static EquivPred _equivNumber = (k1, k2) =>
+        {
+            if (IsNumeric(k2))
+                return Numbers.equal(k1, k2);
+            return false;
+        };
+        static EquivPred _equivColl = (k1, k2) =>
+            {
+                if (k1 is IPersistentCollection || k2 is IPersistentCollection)
+                    return pcequiv(k1, k2);
+                return k1.Equals(k2);
+            };
+
+        public static EquivPred GetEquivPred(object k1)
+        {
+            if (k1 == null)
+                return _equivNull;
+            else if (IsNumeric(k1))
+                return _equivNumber;
+            else if (k1 is string || k1 is Symbol)
+                return _equivEquals;
+            else if (k1 is ICollection || k1 is IDictionary)
+                return _equivColl;
+            return _equivEquals;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
