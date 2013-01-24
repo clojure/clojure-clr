@@ -2728,7 +2728,7 @@ namespace clojure.lang
             foreach (Assembly assy1 in assys)
             {
                 Type t1 = assy1.GetType(p, false);
-                if (t1 != null)
+                if (t1 != null && ! candidateTypes.Contains(t1))
                     candidateTypes.Add(t1);
             }
 
