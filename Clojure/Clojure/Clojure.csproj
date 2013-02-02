@@ -115,6 +115,7 @@
     <Compile Include="Lib\IFnClosure.cs" />
     <Compile Include="Lib\Reduced.cs" />
     <Compile Include="Lib\Task35.cs" />
+    <Compile Include="Readers\PushbackInputStream.cs" />
     <Compile Include="Runtime\Binding\BindingHelpers.cs" />
     <Compile Include="Runtime\Binding\ClojureOverloadResolver.cs" />
     <Compile Include="Runtime\Binding\ClojureCreateInstanceBinder.cs" />
