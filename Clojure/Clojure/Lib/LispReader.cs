@@ -422,6 +422,11 @@ namespace clojure.lang
             }
         }
 
+        public static object InterpretToken(string token)
+        {
+            return InterpretToken(token, -1);
+        }
+
         public static object InterpretToken(string token, int lastSlashIndex)
         {
             if (token.Equals("nil"))
@@ -518,7 +523,7 @@ namespace clojure.lang
                     if (ns == null)
                         return null;
                     else
-                        return Keyword.intern(Compiler.CurrentNamespace.Name.getName(), nameStr);
+                        return Keyword.intern(ns.Name.getName(), nameStr);
                 }
                 else if (nsStr.StartsWith(":"))
                     return Keyword.intern(nsStr.Substring(1), nameStr);
@@ -1381,15 +1386,9 @@ namespace clojure.lang
                 //    return interpretToken(readToken(r, '%'));
                 if (ARG_ENV.deref() == null)
                 {
-                    string token;
-                    int lastSlashIndex;
-                    if (readToken(r, '%', out token, out lastSlashIndex))
-                        throw new EndOfStreamException("EOF while reading %-token");
-                    else
-                        return InterpretToken(token, lastSlashIndex);
+                    return InterpretToken(readSimpleToken(r, '%'));
                 }
-
-
+                
                 int ch = r.Read();
                 Unread(r, ch);
                 //% alone is first arg
