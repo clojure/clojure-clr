@@ -145,7 +145,6 @@
     <Compile Include="Lib\ArityException.cs" />
     <Compile Include="Lib\AtomicBoolean.cs" />
     <Compile Include="Lib\BigDecimal.cs" />
-    <Compile Include="CljCompiler\Ast\AFnImplGenerator.cs" />
     <Compile Include="CljCompiler\Ast\AssignableExpr.cs" />
     <Compile Include="CljCompiler\Ast\AssignExpr.cs" />
     <Compile Include="CljCompiler\Ast\BindingInit.cs" />
