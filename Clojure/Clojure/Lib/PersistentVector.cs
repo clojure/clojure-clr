@@ -29,7 +29,7 @@ namespace clojure.lang
         #region Node class
 
         [Serializable]
-        public class Node
+        public sealed class Node
         {
             #region Data
 
@@ -80,6 +80,10 @@ namespace clojure.lang
         readonly int _shift;
         readonly Node _root;
         readonly object[] _tail;
+
+        public int Shift { get { return _shift; } }
+        public Node Root { get { return _root; } }
+        public object[] Tail() { return _tail; } 
 
         readonly IPersistentMap _meta;
 
