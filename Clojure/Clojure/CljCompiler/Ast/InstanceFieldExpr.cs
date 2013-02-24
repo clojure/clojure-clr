@@ -213,11 +213,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override void EmitGet(CljILGen ilg)
         {
+            ilg.MaybeEmitVolatileOp(_tinfo);
             ilg.EmitFieldGet(_tinfo);
         }
 
         protected override void EmitSet(CljILGen ilg)
         {
+            ilg.MaybeEmitVolatileOp(_tinfo);
             ilg.EmitFieldSet(_tinfo);
         }
 

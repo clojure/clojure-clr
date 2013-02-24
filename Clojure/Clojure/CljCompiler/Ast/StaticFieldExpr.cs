@@ -147,12 +147,15 @@ namespace clojure.lang.CljCompiler.Ast
                     case TypeCode.Single: ilg.EmitSingle((float)value); break;
                     case TypeCode.String: ilg.EmitString((string)value); break;
                     case TypeCode.UInt16: ilg.EmitInt((int)(ushort)value); break;
-                    case TypeCode.UInt32: ilg.Emit(OpCodes.Ldc_I4,(uint)value); break;
-                    case TypeCode.UInt64: ilg.Emit(OpCodes.Ldc_I8,(ulong)value); break;
+                    case TypeCode.UInt32: ilg.Emit(OpCodes.Ldc_I4, (uint)value); break;
+                    case TypeCode.UInt64: ilg.Emit(OpCodes.Ldc_I8, (ulong)value); break;
                 }
             }
             else
+            {
+                ilg.MaybeEmitVolatileOp(_tinfo);
                 ilg.EmitFieldGet(_tinfo);
+            }
         }
 
         #endregion
@@ -173,6 +176,7 @@ namespace clojure.lang.CljCompiler.Ast
             val.Emit(RHC.Expression, objx, ilg);
             ilg.Emit(OpCodes.Dup);
             HostExpr.EmitUnboxArg(objx, ilg, FieldType);
+            ilg.MaybeEmitVolatileOp(_tinfo);
             ilg.EmitFieldSet(_tinfo);
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
