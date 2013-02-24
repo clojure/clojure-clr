@@ -98,7 +98,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ISeq form = (ISeq)frm;
 
                 if (pcon.Rhc != RHC.Return)
-                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnSym, PersistentVector.EMPTY, form)), "try__" + RT.nextID());
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnOnceSym, PersistentVector.EMPTY, form)), "try__" + RT.nextID());
 
                 // (try try-expr* catch-expr* finally-expr?)
                 // catch-expr: (catch class sym expr*)

@@ -78,7 +78,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 if (pcon.Rhc == RHC.Eval
                     || (pcon.Rhc == RHC.Expression && isLoop))
-                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnSym, PersistentVector.EMPTY, form)), "let__" + RT.nextID());
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnOnceSym, PersistentVector.EMPTY, form)), "let__" + RT.nextID());
 
                 ObjMethod method = (ObjMethod)Compiler.MethodVar.deref();
                 IPersistentMap backupMethodLocals = method.Locals;

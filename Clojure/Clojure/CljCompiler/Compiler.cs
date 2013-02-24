@@ -44,6 +44,7 @@ namespace clojure.lang
         public static readonly Symbol LetfnSym = Symbol.intern("letfn*");
         public static readonly Symbol DoSym = Symbol.intern("do");
         public static readonly Symbol FnSym = Symbol.intern("fn*");
+        public static readonly Symbol FnOnceSym = (Symbol) Symbol.intern("fn*").withMeta(RT.map(Keyword.intern(null, "once"), true));
         public static readonly Symbol QuoteSym = Symbol.intern("quote");
         public static readonly Symbol TheVarSym = Symbol.intern("var");
         public static readonly Symbol DotSym = Symbol.intern(".");
