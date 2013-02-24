@@ -362,31 +362,27 @@
 
 
 (def primitives-classnames    ;; not clear what the equiv should be
-  {Single  "Single"   ;;{Float/TYPE "Float/TYPE"
-   Int32   "Int32"    ;; Integer/TYPE "Integer/TYPE"
-   Int64   "Int64"    ;; Long/TYPE "Long/TYPE"
-   Boolean "Boolean"  ;; Boolean/TYPE "Boolean/TYPE"
-   Char    "Char"     ;; Character/TYPE "Character/TYPE"
-   Double  "Double"   ;; Double/TYPE "Double/TYPE"
-   Byte    "Byte"     ;; Byte/TYPE "Byte/TYPE"
-   Int16   "Int16"})  ;; Short/TYPE "Short/TYPE"})
+  {Single  "float"   ;;{Float/TYPE "Float/TYPE"
+   Int32   "int"    ;; Integer/TYPE "Integer/TYPE"
+   Int64   "long"    ;; Long/TYPE "Long/TYPE"
+   Boolean "bool"  ;; Boolean/TYPE "Boolean/TYPE"
+   Char    "char"     ;; Character/TYPE "Character/TYPE"
+   Double  "double"   ;; Double/TYPE "Double/TYPE"
+   Byte    "byte"     ;; Byte/TYPE "Byte/TYPE"
+   Int16   "short"    ;; Short/TYPE "Short/TYPE"})
+   SByte   "sbyte"    ;; ADDED
+   UInt16  "ushort"   ;; ADDED
+   UInt32  "uint"     ;; ADDED
+   UInt64  "ulong" })  ;; ADDED
   
 (defmethod print-method Type [^Type c, ^System.IO.TextWriter w]
   (.Write w (.FullName c)))   ;;; .getName => .FullName
 
 (defmethod print-dup Type [^Type c, ^System.IO.TextWriter w]
-  (cond
-    (.IsPrimitive c) (do                                             ;; .isPrimitive
-                       (.Write w "#=(identity ")
-                       (.Write w ^String (primitives-classnames c))
-                       (.Write w ")"))
-    (.IsArray c) (do                                                 ;; .isArray ,  java.lang.Class/forName =>
-                   (.Write w "#=(clojure.lang.RT/classForName \"")
-                   (.Write w (.FullName c))                           ;; .getName => .FullName
-                   (.Write w "\")"))
-    :else (do
-            (.Write w "#=")
-            (.Write w (.FullName c)))))    ;;; .getName => .FullName
+  (let [^String cs (or (primitives-classnames c) (.FullName c))]        ;; .getName => .FullName
+    (.Write w "#=\"")
+    (.Write w cs)
+    (.Write w "\"")))
 
 (defmethod print-method clojure.lang.BigDecimal [b, ^System.IO.TextWriter w]    ;;; java.math.BigDecimal
   (.Write w (str b))
@@ -421,7 +417,7 @@
 (defmethod print-dup System.Text.RegularExpressions.Regex [p ^System.IO.TextWriter w] (print-method p w))  ;;; java.util.regex.Pattern =>
   
 (defmethod print-dup clojure.lang.Namespace [^clojure.lang.Namespace n ^System.IO.TextWriter w]
-  (.Write w "#=(find-ns ")
+  (.Write w "#=(clojure.lang.Namespace/find ")
   (print-dup (.Name n) w)    ;; .name
   (.Write w ")"))
 
@@ -433,7 +429,8 @@
                                      (agent-error o))
                               " FAILED"
                               ""))
-                    pr-on, "", ">", (list (if (and (instance? clojure.lang.IPending o) (not (.isRealized o)))
+                    pr-on, "", ">", (list (if (and (instance? clojure.lang.IPending o)
+                                                   (not (.isRealized ^clojure.lang.IPending o)))
                                             :pending
                                             @o)), w))
 

@@ -432,8 +432,25 @@ namespace clojure.lang
             = Var.intern(ClojureNamespace, Symbol.intern("*agent*"), null).setDynamic();
 
         public static readonly Var ReadEvalVar
-            //= Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), RT.T);
-            = Var.intern(ClojureNamespace, Symbol.intern("*read-eval*"), true).setDynamic();
+            //= Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), RT.F);
+            = Var.intern(ClojureNamespace, Symbol.intern("*read-eval*"), false).setDynamic();
+
+        public static readonly Var ReadWhiteListVar
+            = Var.intern(ClojureNamespace, Symbol.intern("*read-whitelist*"),
+                         RT.vector(
+                                    // JVM has Number here.  I list all numeric types
+                                    typeof(byte), typeof(sbyte),
+                                    typeof(short), typeof(ushort),
+                                    typeof(int), typeof(uint),
+                                    typeof(long), typeof(ulong),
+                                    typeof(Single), typeof(double),
+                                    typeof(decimal), typeof(BigInt),
+                                    typeof(BigInteger), typeof(BigDecimal),
+                                    typeof(System.Collections.ICollection),
+                                    typeof(System.Collections.IDictionary),
+                                    typeof(clojure.lang.Namespace),
+                                    typeof(clojure.lang.Fn))).setDynamic();
+
 
         public static readonly Var DataReadersVar
             = Var.intern(ClojureNamespace, Symbol.intern("*data-readers*"), RT.map()).setDynamic();
@@ -2633,8 +2650,9 @@ namespace clojure.lang
             }
             else if (x is Type)
             {
-                w.Write("#=");
+                w.Write("#=\"");
                 w.Write(((Type)x).FullName);
+                w.Write('"');
             }
             else if (x is BigDecimal && readably)
             {
