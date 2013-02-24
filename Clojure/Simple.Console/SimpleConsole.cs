@@ -115,7 +115,7 @@ Please use Clojure.Main for everyday chores."
                 RT.PrintMetaVar, RT.PrintMetaVar.deref(),
                 //RT.PRINT_LENGTH, RT.PRINT_LENGTH.deref(),
                 //RT.PRINT_LEVEL, RT.PRINT_LEVEL.deref(),
-                Compiler.CompilePathVar, Environment.GetEnvironmentVariable("clojure.compile.path" ?? "classes")
+                Compiler.CompilePathVar, Environment.GetEnvironmentVariable("CLOJURE_COMPILE_PATH" ?? "classes")
                 ));
 
             try

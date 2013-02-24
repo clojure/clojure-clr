@@ -100,6 +100,7 @@ namespace clojure.lang.CljCompiler.Ast
         FieldBuilder _metaField;
         List<FieldBuilder> _closedOverFields;
         Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;
+        Dictionary<FieldBuilder, LocalBinding> _closedOverFieldsToBindingsMap;
 
         protected int _altCtorDrops;
 
@@ -123,7 +124,7 @@ namespace clojure.lang.CljCompiler.Ast
                 RT.booleanCast(RT.get(lb.Symbol.meta(), Keyword.intern("volatile-mutable")));
         }
 
-        bool IsMutable(LocalBinding lb)
+        internal bool IsMutable(LocalBinding lb)
         {
             return IsVolatile(lb)
                 ||
@@ -217,12 +218,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         
         protected string _thisName;
-        protected IPersistentVector _closesExprs = PersistentVector.EMPTY;  // localbinding exprs
-        protected IPersistentSet _volatiles = PersistentHashSet.EMPTY;      // symbols
+        //protected IPersistentVector _closesExprs = PersistentVector.EMPTY;  // localbinding exprs
+        //protected IPersistentSet _volatiles = PersistentHashSet.EMPTY;      // symbols
         protected IPersistentVector _hintedFields = PersistentVector.EMPTY; // hinted fields
         // int line;
  
-        protected Type _baseType = null;
+        //protected Type _baseType = null;
 
         
         //protected ParameterExpression _thisParam = null;
@@ -259,10 +260,10 @@ namespace clojure.lang.CljCompiler.Ast
             set { _varCallsites = value; }
         }
 
-        public Type BaseType
-        {
-            get { return _baseType; }
-        }
+        //public Type BaseType
+        //{
+        //    get { return _baseType; }
+        //}
 
         //public ParameterExpression ThisParam
         //{
@@ -536,9 +537,11 @@ namespace clojure.lang.CljCompiler.Ast
                 EmitValue(k, ilg);
                 ilg.Emit(OpCodes.Newobj, Compiler.Ctor_KeywordLookupSite_1);
                 ilg.Emit(OpCodes.Dup);
-                ilg.Emit(OpCodes.Stsfld, _keywordLookupSiteFields[i]);
+                FieldBuilder kfb = _keywordLookupSiteFields[i];
+                ilg.Emit(OpCodes.Stsfld, kfb);
                 ilg.Emit(OpCodes.Castclass, typeof(ILookupThunk));
-                ilg.Emit(OpCodes.Stsfld, _thunkFields[i]);
+                FieldBuilder tfb = _thunkFields[i];
+                ilg.Emit(OpCodes.Stsfld, tfb);
             }
         }
 
@@ -555,7 +558,8 @@ namespace clojure.lang.CljCompiler.Ast
                         EmitValue(Constants.nth(i), ilg);
                         if ( Constants.nth(i).GetType() != ConstantType(i) )
                             ilg.Emit(OpCodes.Castclass, ConstantType(i));
-                        ilg.Emit(OpCodes.Stsfld, ConstantFields[i]);
+                        FieldBuilder fb = ConstantFields[i];
+                        ilg.Emit(OpCodes.Stsfld,fb);
                     }
                 }
             }
@@ -568,6 +572,7 @@ namespace clojure.lang.CljCompiler.Ast
         void EmitClosedOverFields(TypeBuilder tb)
         {
             _closedOverFields = new List<FieldBuilder>(Closes.count());
+            _closedOverFieldsToBindingsMap = new Dictionary<FieldBuilder, LocalBinding>(Closes.count());
             _closedOverFieldsMap = new Dictionary<LocalBinding, FieldBuilder>(Closes.count());
 
             // closed-overs map to instance fields.
@@ -594,6 +599,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 _closedOverFields.Add(fb);
                 _closedOverFieldsMap[lb] = fb;
+                _closedOverFieldsToBindingsMap[fb] = lb;
             }
         }
 
@@ -646,9 +652,11 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 //LocalBinding lb = (LocalBinding)s.first();
                 FieldBuilder fb = _closedOverFields[a];
+                bool isVolatile = IsVolatile(_closedOverFieldsToBindingsMap[fb]);
 
                 gen.EmitLoadArg(0);             // gen.Emit(OpCodes.Ldarg_0);
                 gen.EmitLoadArg(a + offset);         // gen.Emit(OpCodes.Ldarg, a + 1);
+                gen.MaybeEmitVolatileOp(isVolatile);
                 gen.Emit(OpCodes.Stfld, fb);
             }
             gen.Emit(OpCodes.Ret);
@@ -749,6 +757,7 @@ namespace clojure.lang.CljCompiler.Ast
                 foreach (FieldBuilder fb in _closedOverFields)
                 {
                     gen.EmitLoadArg(0);
+                    gen.MaybeEmitVolatileOp(fb);
                     gen.EmitFieldGet(fb);
                 }
 
@@ -1041,7 +1050,10 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 FieldBuilder fb = null;
                 if (_fnMode == FnMode.Full && ConstantFields != null && ConstantFields.TryGetValue(id, out fb))
+                {
+                    ilg.MaybeEmitVolatileOp(fb);
                     ilg.Emit(OpCodes.Ldsfld, fb);
+                }
                 else
                     EmitValue(val, ilg);
             }
@@ -1120,7 +1132,9 @@ namespace clojure.lang.CljCompiler.Ast
                 if (_fnMode == FnMode.Full)
                 {
                     ilg.Emit(OpCodes.Ldarg_0); // this
-                    ilg.Emit(OpCodes.Ldfld, _closedOverFieldsMap[lb]);
+                    FieldBuilder fb = _closedOverFieldsMap[lb];
+                    ilg.MaybeEmitVolatileOp(IsVolatile(lb)); 
+                    ilg.Emit(OpCodes.Ldfld, fb);
                     if (primType != null)
                         HostExpr.EmitBoxReturn(this, ilg, primType);
                     // TODO: ONCEONLY?    
@@ -1163,7 +1177,9 @@ namespace clojure.lang.CljCompiler.Ast
                 if (_fnMode == FnMode.Full)
                 {
                     ilg.Emit(OpCodes.Ldarg_0); // this
-                    ilg.Emit(OpCodes.Ldfld, _closedOverFieldsMap[lb]);
+                    FieldBuilder fb = _closedOverFieldsMap[lb];
+                    ilg.MaybeEmitVolatileOp(IsVolatile(lb));
+                    ilg.Emit(OpCodes.Ldfld, fb);
                 }
                 else
                 {
@@ -1216,7 +1232,10 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             if (hasField)
+            {
+                ilg.MaybeEmitVolatileOp(IsVolatile(lb));
                 ilg.Emit(OpCodes.Stfld, fb);
+            }
             else
                 ilg.Emit(OpCodes.Stloc, lb.LocalVar);
         }
@@ -1242,11 +1261,13 @@ namespace clojure.lang.CljCompiler.Ast
                         if (primt != null)
                         {
                             objx.EmitUnboxedLocal(ilg, lb);
+                            ilg.MaybeEmitVolatileOp(IsVolatile(lb));
                             ilg.Emit(OpCodes.Stfld, fb);
                         }
                         else
                         {
                             objx.EmitLocal(ilg, lb);
+                            ilg.MaybeEmitVolatileOp(IsVolatile(lb));
                             ilg.Emit(OpCodes.Stfld, fb);
                         }
                     }

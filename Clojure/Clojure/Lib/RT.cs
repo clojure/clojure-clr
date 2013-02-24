@@ -3220,7 +3220,7 @@ namespace clojure.lang
             if ( assy != null )
                 yield return Path.GetDirectoryName(assy.Location);
 
-            string rawpaths = (string)System.Environment.GetEnvironmentVariables()[ClojureLoadPathString];
+            string rawpaths = (string)System.Environment.GetEnvironmentVariable(ClojureLoadPathString);
             if (rawpaths == null)
                 yield break;
 

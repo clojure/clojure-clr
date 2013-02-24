@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -271,14 +272,15 @@ namespace clojure.lang.CljCompiler.Ast
                 LocalBinding lb = (LocalBinding)s.first();
                 FieldAttributes access = FieldAttributes.Public;
 
-                // TODO: FIgure out Volatile
-                if (!ret.IsVolatile(lb))
+                if (!ret.IsMutable(lb))
                     access |= FieldAttributes.InitOnly;
 
-                if (lb.PrimitiveType != null)
-                    tb.DefineField(lb.Name, lb.PrimitiveType, access);
+                Type fieldType = lb.PrimitiveType ?? typeof(Object);
+
+                if (ret.IsVolatile(lb))
+                   tb.DefineField(lb.Name, fieldType, new Type[] { typeof(IsVolatile) }, Type.EmptyTypes, access);
                 else
-                    tb.DefineField(lb.Name, typeof(Object), access);
+                    tb.DefineField(lb.Name, fieldType, access);
             }
 
             // ctor that takes closed-overs and does nothing

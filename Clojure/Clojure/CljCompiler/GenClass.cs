@@ -605,6 +605,7 @@ namespace clojure.lang
                     //}
                     if (!fld.IsStatic)
                         gen.EmitLoadArg(0);
+                    gen.MaybeEmitVolatileOp(fld);
                     gen.EmitFieldGet(fld);
 
                     gen.Emit(OpCodes.Ret);
@@ -629,6 +630,7 @@ namespace clojure.lang
                         gen.Emit(OpCodes.Ldarg_1);
                         //gen.Emit(OpCodes.Stfld, fld);
                     }
+                    gen.MaybeEmitVolatileOp(fld);
                     gen.EmitFieldSet(fld);
                     gen.Emit(OpCodes.Ret);
                 }

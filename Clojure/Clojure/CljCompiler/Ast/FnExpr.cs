@@ -390,6 +390,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Callvirt, Method_DynamicMethod_CreateDelegate);
                 ilg.Emit(OpCodes.Castclass, fi.FieldType);
 
+                ilg.MaybeEmitVolatileOp(fi);
                 ilg.EmitFieldSet(fi);
             }
 
