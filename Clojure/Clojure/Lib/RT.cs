@@ -433,7 +433,8 @@ namespace clojure.lang
 
         public static readonly Var ReadEvalVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), RT.F);
-            = Var.intern(ClojureNamespace, Symbol.intern("*read-eval*"), false).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*read-eval*"), 
+                        Keyword.intern(null,"default")).setDynamic();
 
         public static readonly Var ReadWhiteListVar
             = Var.intern(ClojureNamespace, Symbol.intern("*read-whitelist*"),
@@ -448,7 +449,6 @@ namespace clojure.lang
                                     typeof(BigInteger), typeof(BigDecimal),
                                     typeof(System.Collections.ICollection),
                                     typeof(System.Collections.IDictionary),
-                                    typeof(clojure.lang.Namespace),
                                     typeof(clojure.lang.Fn))).setDynamic();
 
 

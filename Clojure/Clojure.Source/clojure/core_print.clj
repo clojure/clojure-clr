@@ -417,7 +417,7 @@
 (defmethod print-dup System.Text.RegularExpressions.Regex [p ^System.IO.TextWriter w] (print-method p w))  ;;; java.util.regex.Pattern =>
   
 (defmethod print-dup clojure.lang.Namespace [^clojure.lang.Namespace n ^System.IO.TextWriter w]
-  (.Write w "#=(clojure.lang.Namespace/find ")
+  (.Write w "#=(find-ns ")
   (print-dup (.Name n) w)    ;; .name
   (.Write w ")"))
 

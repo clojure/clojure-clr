@@ -33,6 +33,7 @@ namespace clojure.lang
 
         static readonly Symbol QUOTE = Symbol.intern("quote");
         static readonly Symbol THE_VAR = Symbol.intern("var");
+        static readonly Symbol FIND_NS = Symbol.intern("find-ns");
         static readonly Symbol UNQUOTE = Symbol.intern("clojure.core", "unquote");
         static readonly Symbol UNQUOTE_SPLICING = Symbol.intern("clojure.core", "unquote-splicing");
         static readonly Symbol DEREF = Symbol.intern("clojure.core", "deref");
@@ -1458,7 +1459,12 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char eq)
             {
-                bool readeval = RT.booleanCast(RT.ReadEvalVar.deref());
+                object rawreadeval = RT.ReadEvalVar.deref();
+                bool readeval = RT.booleanCast(rawreadeval);
+                if (!readeval)
+                {
+                    throw new InvalidOperationException("eval reading not allowed when *read-eval* is false");
+                }
 
                 Object o = read(r, true, null, true);
                 if (o is Symbol || o is String )
@@ -1475,6 +1481,11 @@ namespace clojure.lang
                         Symbol vs = (Symbol)RT.second(o);
                         return RT.var(vs.Namespace, vs.Name);  //Compiler.resolve((Symbol) RT.second(o),true);
                     }
+                    if (fs.Equals(FIND_NS))
+                    {
+                        Symbol sym = (Symbol)RT.second(o);
+                        return Namespace.find(sym);
+                    }
                     if (fs.Name.EndsWith("."))
                     {
                         string s = fs.ToString();
@@ -1485,7 +1496,7 @@ namespace clojure.lang
                             Object[] args = RT.toArray(RT.next(o));
                             return Reflector.InvokeConstructor(t, args);
                         }
-                        throw new InvalidOperationException("eval reading not allowed when *read-eval* is false");
+                        throw new InvalidOperationException("eval reading not allowed");
                     }
                     if (Compiler.NamesStaticMember(fs))
                     {
@@ -1495,7 +1506,7 @@ namespace clojure.lang
                             Object[] args = RT.toArray(RT.next(o));
                             return Reflector.InvokeStaticMethod(t, fs.Name, args);
                         }
-                        throw new InvalidOperationException("eval reading not allowed when *read-eval* is false");
+                        throw new InvalidOperationException("eval reading not allowed");
                     }
                     if (readeval)
                     {
@@ -1506,7 +1517,7 @@ namespace clojure.lang
                         }
                         throw new InvalidOperationException("Can't resolve " + fs);
                     }
-                    throw new InvalidOperationException("eval reading not allowed when *read-eval* is false");
+                    throw new InvalidOperationException("eval reading not allowed");
                 }
                 else
                     throw new InvalidOperationException("Unsupported #= form");
@@ -1554,6 +1565,9 @@ namespace clojure.lang
             static object ReadRecord(PushbackTextReader r, Symbol recordName)
             {
                 Type recordType = RT.classForName(recordName.ToString());
+                bool readeval = RT.booleanCast(RT.ReadEvalVar.deref());
+                if (!readeval && !typeof(IRecord).IsAssignableFrom(recordType))
+                    throw new InvalidOperationException("Record construction syntax can only be used for records, unless *read-eval* == true ");
 
                 char endch;
                 bool shortForm = true;
