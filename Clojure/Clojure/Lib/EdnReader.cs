@@ -150,7 +150,7 @@ namespace clojure.lang
                     //return RT.suppressRead() ? null : interpretToken(token);
                     string token;
                     int lastSlashIndex;
-                    bool eofSeen = readToken(r, (char)ch, out token, out lastSlashIndex);
+                    bool eofSeen = readToken(r, (char)ch, true, out token, out lastSlashIndex);
                     if (eofSeen)
                     {
                         if (eofIsError)
@@ -310,8 +310,11 @@ namespace clojure.lang
 
         #region Reading tokens
 
-        static string readSimpleToken(PushbackTextReader r, char initch)
+        static string readSimpleToken(PushbackTextReader r, char initch, bool leadConstituent)
         {
+            if (leadConstituent && NonConstituent(initch))
+                throw new InvalidOperationException("Invalid leading characters: " + (char)initch);
+
             StringBuilder sb = new StringBuilder();
             sb.Append(initch);
 
@@ -327,9 +330,9 @@ namespace clojure.lang
             }
         }
 
-        static bool readToken(PushbackTextReader r, char initch, out string nameString, out int lastSlashIndex)
+        static bool readToken(PushbackTextReader r, char initch, bool leadConstituent, out string nameString, out int lastSlashIndex)
         {
-            if (NonConstituent(initch))
+            if (leadConstituent && NonConstituent(initch))
                 throw new InvalidOperationException("Invalid leading characters: " + (char)initch);
 
             bool oddVertBarMode = false;
@@ -617,7 +620,7 @@ namespace clojure.lang
                 int ch = r.Read();
                 if (ch == -1)
                     throw new EndOfStreamException("EOF while reading character");
-                String token = readSimpleToken(r, (char)ch);
+                String token = readSimpleToken(r, (char)ch, false);
                 if (token.Length == 1)
                     return token[0];
                 else if (token.Equals("newline"))
