@@ -1450,7 +1450,6 @@ namespace clojure.lang
                 //LOADER, RT.makeClassLoader(),
                 SourcePathVar, sourcePath,
                 SourceVar, sourceName,
-                RT.ReadEvalVar, true,
                 RT.CurrentNSVar, RT.CurrentNSVar.deref(),
                 RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
                 RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),

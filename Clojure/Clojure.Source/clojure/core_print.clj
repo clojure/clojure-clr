@@ -362,27 +362,36 @@
 
 
 (def primitives-classnames    ;; not clear what the equiv should be
-  {Single  "float"   ;;{Float/TYPE "Float/TYPE"
-   Int32   "int"    ;; Integer/TYPE "Integer/TYPE"
-   Int64   "long"    ;; Long/TYPE "Long/TYPE"
-   Boolean "bool"  ;; Boolean/TYPE "Boolean/TYPE"
-   Char    "char"     ;; Character/TYPE "Character/TYPE"
-   Double  "double"   ;; Double/TYPE "Double/TYPE"
-   Byte    "byte"     ;; Byte/TYPE "Byte/TYPE"
-   Int16   "short"    ;; Short/TYPE "Short/TYPE"})
-   SByte   "sbyte"    ;; ADDED
-   UInt16  "ushort"   ;; ADDED
-   UInt32  "uint"     ;; ADDED
-   UInt64  "ulong" })  ;; ADDED
+  {Single  "System.Single"   ;;{Float/TYPE "Float/TYPE"
+   Int32   "System.Int32"    ;; Integer/TYPE "Integer/TYPE"
+   Int64   "System.Int64"    ;; Long/TYPE "Long/TYPE"
+   Boolean "System.Boolean"  ;; Boolean/TYPE "Boolean/TYPE"
+   Char    "System.Char"     ;; Character/TYPE "Character/TYPE"
+   Double  "System.Double"   ;; Double/TYPE "Double/TYPE"
+   Byte    "System.Byte"     ;; Byte/TYPE "Byte/TYPE"
+   Int16   "System.Int16"    ;; Short/TYPE "Short/TYPE"})
+   SByte   "System.SByte"    ;; ADDED
+   UInt16  "System.UInt16"   ;; ADDED
+   UInt32  "System.UInt32"   ;; ADDED
+   UInt64  "System.UInt64"   ;; ADDED
+   Decimal "System.Decimal" })  ;; ADDED
   
 (defmethod print-method Type [^Type c, ^System.IO.TextWriter w]
   (.Write w (.FullName c)))   ;;; .getName => .FullName
 
 (defmethod print-dup Type [^Type c, ^System.IO.TextWriter w]
-  (let [^String cs (or (primitives-classnames c) (.FullName c))]        ;; .getName => .FullName
-    (.Write w "#=\"")
-    (.Write w cs)
-    (.Write w "\"")))
+  (cond
+    (.IsPrimitive c) (do                                             ;; .isPrimitive
+                       (.Write w "#=(identity ")
+                       (.Write w ^String (primitives-classnames c))
+                       (.Write w ")"))
+    (.IsArray c) (do                                                 ;; .isArray ,  java.lang.Class/forName =>
+                   (.Write w "#=(clojure.lang.RT/classForName \"")
+                   (.Write w (.FullName c))                           ;; .getName => .FullName
+                   (.Write w "\")"))
+    :else (do
+            (.Write w "#=")
+            (.Write w (.FullName c)))))    ;;; .getName => .FullName
 
 (defmethod print-method clojure.lang.BigDecimal [b, ^System.IO.TextWriter w]    ;;; java.math.BigDecimal
   (.Write w (str b))

@@ -33,7 +33,6 @@ namespace clojure.lang
 
         static readonly Symbol QUOTE = Symbol.intern("quote");
         static readonly Symbol THE_VAR = Symbol.intern("var");
-        static readonly Symbol FIND_NS = Symbol.intern("find-ns");
         static readonly Symbol UNQUOTE = Symbol.intern("clojure.core", "unquote");
         static readonly Symbol UNQUOTE_SPLICING = Symbol.intern("clojure.core", "unquote-splicing");
         static readonly Symbol DEREF = Symbol.intern("clojure.core", "deref");
@@ -1427,51 +1426,20 @@ namespace clojure.lang
 
         #region EvalREader
 
-        static IPersistentMap _primClasses = RT.map(
-            "int",    typeof(Int32),
-            "long",   typeof(Int64),
-            "float",  typeof(Single),
-            "double", typeof(Double),
-            "char",   typeof(Char),
-            "bool",   typeof(Boolean),
-            "short",  typeof(Int16),
-            "byte",   typeof(Byte),
-            "void",   typeof(void),
-            "uint",   typeof(UInt32),
-            "ulong",  typeof(UInt64),
-            "ushort", typeof(UInt16),
-            "sbyte",  typeof(SByte));
-
-        static bool OnWhiteList(Type t)
-        {
-            ICollection<Type> whiteList = (ICollection<Type>)RT.ReadWhiteListVar.deref();
-
-            foreach (Type wt in whiteList)
-            {
-                if (wt.IsAssignableFrom(t))
-                    return true;
-            }
-            return false;
-        }
-
         //TODO: Need to figure out who to deal with typenames in the context of multiple loaded assemblies.
         public sealed class EvalReader : ReaderBase
         {
             protected override object Read(PushbackTextReader r, char eq)
             {
-                object rawreadeval = RT.ReadEvalVar.deref();
-                bool readeval = RT.booleanCast(rawreadeval);
-                if (!readeval)
+                if (!RT.booleanCast(RT.ReadEvalVar.deref()))
                 {
-                    throw new InvalidOperationException("eval reading not allowed when *read-eval* is false");
+                    throw new InvalidOperationException("EvalReader not allowed when *read-eval* is false");
                 }
 
                 Object o = read(r, true, null, true);
-                if (o is Symbol || o is String )
+                if (o is Symbol  )
                 {
-                    String s = o.ToString();
-                    Type t = (Type)_primClasses.valAt(s);
-                    return t ?? RT.classForName(s);
+                    return RT.classForName(o.ToString());
                 }
                 else if (o is IPersistentList)
                 {
@@ -1481,43 +1449,28 @@ namespace clojure.lang
                         Symbol vs = (Symbol)RT.second(o);
                         return RT.var(vs.Namespace, vs.Name);  //Compiler.resolve((Symbol) RT.second(o),true);
                     }
-                    if (fs.Equals(FIND_NS))
-                    {
-                        Symbol sym = (Symbol)RT.second(o);
-                        return Namespace.find(sym);
-                    }
+
                     if (fs.Name.EndsWith("."))
                     {
+                        Object[] args = RT.toArray(RT.next(o));
+                        //return Reflector.InvokeConstructor(RT.classForName(fs.Name.Substring(0, fs.Name.Length - 1)), args);
+                        // I think the JVM code is wrong here
                         string s = fs.ToString();
-                        Type t = RT.classForName(s.Substring(0, s.Length - 1));
-
-                        if (readeval || OnWhiteList(t) || typeof(clojure.lang.Fn).IsAssignableFrom(t))
-                        {
-                            Object[] args = RT.toArray(RT.next(o));
-                            return Reflector.InvokeConstructor(t, args);
-                        }
-                        throw new InvalidOperationException("eval reading not allowed");
+                        return Reflector.InvokeConstructor(RT.classForName(s.Substring(0, s.Length - 1)), args);
                     }
                     if (Compiler.NamesStaticMember(fs))
                     {
-                        Type t = RT.classForName(fs.Namespace);
-                        if (readeval || OnWhiteList(t))
-                        {
-                            Object[] args = RT.toArray(RT.next(o));
-                            return Reflector.InvokeStaticMethod(t, fs.Name, args);
-                        }
-                        throw new InvalidOperationException("eval reading not allowed");
+
+                        Object[] args = RT.toArray(RT.next(o));
+                        return Reflector.InvokeStaticMethod(fs.Namespace, fs.Name, args);
                     }
-                    if (readeval)
+                
+                    Object v = Compiler.maybeResolveIn(Compiler.CurrentNamespace, fs);
+                    if (v is Var)
                     {
-                        Object v = Compiler.maybeResolveIn(Compiler.CurrentNamespace, fs);
-                        if (v is Var)
-                        {
-                            return ((IFn)v).applyTo(RT.next(o));
-                        }
-                        throw new InvalidOperationException("Can't resolve " + fs);
+                        return ((IFn)v).applyTo(RT.next(o));
                     }
-                    throw new InvalidOperationException("eval reading not allowed");
+                    throw new InvalidOperationException("Can't resolve " + fs);
                 }
                 else
                     throw new InvalidOperationException("Unsupported #= form");

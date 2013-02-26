@@ -433,17 +433,7 @@ namespace clojure.lang
 
         public static readonly Var ReadEvalVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), RT.F);
-            = Var.intern(ClojureNamespace, Symbol.intern("*read-eval*"), 
-                        Keyword.intern(null,"default")).setDynamic();
-
-        public static readonly Var ReadWhiteListVar
-            = Var.intern(ClojureNamespace, Symbol.intern("*read-whitelist*"),
-                         RT.vector(
-                                    // JVM has Number here.  The only numbers we have with c-tors are the following:
-                                    typeof(BigInt), typeof(BigInteger), typeof(BigDecimal),
-                                    typeof(System.Collections.ICollection),
-                                    typeof(System.Collections.IDictionary))).setDynamic();
-
+            = Var.intern(ClojureNamespace, Symbol.intern("*read-eval*"),true).setDynamic();
 
         public static readonly Var DataReadersVar
             = Var.intern(ClojureNamespace, Symbol.intern("*data-readers*"), RT.map()).setDynamic();
@@ -2643,9 +2633,8 @@ namespace clojure.lang
             }
             else if (x is Type)
             {
-                w.Write("#=\"");
+                w.Write("#=");
                 w.Write(((Type)x).FullName);
-                w.Write('"');
             }
             else if (x is BigDecimal && readably)
             {
