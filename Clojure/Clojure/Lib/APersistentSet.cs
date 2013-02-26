@@ -94,23 +94,45 @@ namespace clojure.lang
         /// <returns><value>true</value> if the specified Object is equal to the current Object; 
         /// otherwise, <value>false</value>.
         /// </returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public override bool Equals(object obj)
+        {
+            return setEquals(this, obj);
+        }
+
+        public static bool setEquals(IPersistentSet s1, object obj)
         {
             // I really can't do what the Java version does.
             // It casts to a Set.  No such thing here.  We'll use IPersistentSet instead.
+            
 
-            if (this == obj)
+            if (s1 == obj)
                 return true;
 
-            IPersistentSet s = obj as IPersistentSet;
-            if (s == null)
+#if CLR2
+            // No System.Collections.Generic.ISet<T>
+#else
+            ISet<Object> is2 = obj as ISet<Object>;
+            if (is2 != null)
+            {
+                if (is2.Count != s1.count())
+                    return false;
+                foreach (Object elt in is2)
+                    if (!s1.contains(elt))
+                        return false;
+                return true;
+            }
+#endif
+
+            IPersistentSet s2 = obj as IPersistentSet;
+            if (s2 == null)
                 return false;
 
-            if (s.count() != count())   /// JVM has also: || s.GetHashCode() != GetHashCode()),, but I can't guarantee this
+            if (s2.count() != s1.count())   
                 return false;
 
-            for (ISeq seq = s.seq(); seq != null; seq = seq.next())
-                if (!contains(seq.first()))
+            for (ISeq seq = s2.seq(); seq != null; seq = seq.next())
+                if (!s1.contains(seq.first()))
                     return false;
 
             return true;
@@ -180,7 +202,7 @@ namespace clojure.lang
         /// <returns><c>true</c> if the object is equivalent; <c>false</c> otherwise.</returns>
         public bool equiv(object o)
         {
-            return Equals(o);
+            return setEquals(this,o);
         }
 
         #endregion
