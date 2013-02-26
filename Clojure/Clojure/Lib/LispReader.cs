@@ -49,6 +49,8 @@ namespace clojure.lang
         static readonly Symbol SLASH = Symbol.intern("/");
         static readonly Symbol CLOJURE_SLASH = Symbol.intern("clojure.core","/");
 
+        static readonly Keyword UNKNOWN = Keyword.intern(null, "unknown");
+
         #endregion
 
         #region Var environments
@@ -132,6 +134,9 @@ namespace clojure.lang
             object eofValue,
             bool isRecursive)
         {
+            if (RT.ReadEvalVar.deref() == UNKNOWN)
+                throw new InvalidOperationException("Reading disallowed - *read-eval* bound to :unknown");
+
             try
             {
                 for (; ; )
@@ -1517,10 +1522,11 @@ namespace clojure.lang
 
             static object ReadRecord(PushbackTextReader r, Symbol recordName)
             {
-                Type recordType = RT.classForName(recordName.ToString());
                 bool readeval = RT.booleanCast(RT.ReadEvalVar.deref());
-                if (!readeval && !typeof(IRecord).IsAssignableFrom(recordType))
-                    throw new InvalidOperationException("Record construction syntax can only be used for records, unless *read-eval* == true ");
+                if (!readeval)
+                    throw new InvalidOperationException("Record construction syntax can only be used when *read-eval* == true ");
+
+                Type recordType = RT.classForName(recordName.ToString());
 
                 char endch;
                 bool shortForm = true;

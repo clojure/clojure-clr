@@ -431,9 +431,10 @@ namespace clojure.lang
         public static readonly Var AgentVar
             = Var.intern(ClojureNamespace, Symbol.intern("*agent*"), null).setDynamic();
 
+        static Object _readeval = ReadTrueFalseUnknown(Environment.GetEnvironmentVariable("CLOJURE_READ_EVAL") ?? Environment.GetEnvironmentVariable("clojure.read.eval") ?? "true");
+            
         public static readonly Var ReadEvalVar
-            //= Var.intern(CLOJURE_NS, Symbol.intern("*read-eval*"), RT.F);
-            = Var.intern(ClojureNamespace, Symbol.intern("*read-eval*"),true).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*read-eval*"),_readeval).setDynamic();
 
         public static readonly Var DataReadersVar
             = Var.intern(ClojureNamespace, Symbol.intern("*data-readers*"), RT.map()).setDynamic();
@@ -2447,6 +2448,15 @@ namespace clojure.lang
         #endregion
 
         #region Reader support
+
+        static Object ReadTrueFalseUnknown(String s)
+        {
+            if (s.Equals("true"))
+                return true;
+            else if (s.Equals("false"))
+                return false;
+            return Keyword.intern(null, "unknown");
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static bool isReduced(Object r)
