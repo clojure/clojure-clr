@@ -28,9 +28,13 @@ namespace clojure.lang
 
         static readonly Symbol SLASH = Symbol.intern("/");
 
+        static readonly Keyword EOF = Keyword.intern(null,"eof");
+
         #endregion
 
         #region Macro characters & #-dispatch
+
+        static IFn _taggedReader = new TaggedReader();
 
         static IFn[] _macros = new IFn[256];
         static IFn[] _dispatchMacros = new IFn[256];
@@ -76,17 +80,23 @@ namespace clojure.lang
 
         #region main entry points - readString, read
 
-        static public Object readString(String s)
+        static public Object readString(String s, IPersistentMap opts)
         {
             PushbackTextReader r = new PushbackTextReader(new System.IO.StringReader(s));
-            return EdnReader.read(r, true, null, false);
+            return read(r, opts);
+        }
+
+        public static Object read(PushbackTextReader r, IPersistentMap opts)
+        {
+            return read(r, !opts.containsKey(EOF), opts.valAt(EOF), false, opts);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object read(PushbackTextReader r,
             bool eofIsError,
             object eofValue,
-            bool isRecursive)
+            bool isRecursive,
+            Object opts)
         {
             try
             {
@@ -113,7 +123,7 @@ namespace clojure.lang
                     IFn macroFn = getMacro(ch);
                     if (macroFn != null)
                     {
-                        object ret = macroFn.invoke(r, (char)ch);
+                        object ret = macroFn.invoke(r, (char)ch, opts);
                         if (RT.suppressRead())
                             return null;
                         // no op macros return the reader
@@ -161,9 +171,9 @@ namespace clojure.lang
             }
         }
 
-        private static object ReadAux(PushbackTextReader r)
+        private static object ReadAux(PushbackTextReader r, object opts)
         {
-            return read(r, true, null, true);
+            return read(r, true, null, true, opts);
         }
 
         #endregion
@@ -180,6 +190,12 @@ namespace clojure.lang
         {
             return Char.IsWhiteSpace((char)ch) || ch == ',';
         }
+
+        static bool NonConstituent(int ch)
+        {
+            return ch == '@' || ch == '`' || ch == '~';
+        }
+
 
         // Roughly a match to Java Character.digit(char,int),
         // though I don't handle all unicode digits.
@@ -241,7 +257,7 @@ namespace clojure.lang
 
         #region  Other
 
-        static List<Object> ReadDelimitedList(char delim, PushbackTextReader r, bool isRecursive)
+        static List<Object> ReadDelimitedList(char delim, PushbackTextReader r, bool isRecursive, object opts)
         {
             LineNumberingTextReader lntr = r as LineNumberingTextReader;
             int firstLine = lntr != null ? lntr.LineNumber : -1;
@@ -271,7 +287,7 @@ namespace clojure.lang
                 IFn macroFn = getMacro(ch);
                 if (macroFn != null)
                 {
-                    Object mret = macroFn.invoke(r, (char)ch);
+                    Object mret = macroFn.invoke(r, (char)ch, opts);
                     //no op macros return the reader
                     if (mret != r)
                         a.Add(mret);
@@ -279,7 +295,7 @@ namespace clojure.lang
                 else
                 {
                     Unread(r, ch);
-                    object o = read(r, true, null, isRecursive);
+                    object o = read(r, true, null, isRecursive, opts);
                     if (o != r)
                         a.Add(o);
                 }
@@ -311,6 +327,9 @@ namespace clojure.lang
 
         static bool readToken(PushbackTextReader r, char initch, out string nameString, out int lastSlashIndex)
         {
+            if (NonConstituent(initch))
+                throw new InvalidOperationException("Invalid leading characters: " + (char)initch);
+
             bool oddVertBarMode = false;
             lastSlashIndex = -1;
             bool allowSymEscape = RT.booleanCast(RT.AllowSymbolEscapeVar.deref());
@@ -319,7 +338,7 @@ namespace clojure.lang
 
             if (allowSymEscape && initch == '|')
                 oddVertBarMode = true;
-            else
+            else 
                 sb.Append(initch);
 
             for (; ; )
@@ -354,6 +373,8 @@ namespace clojure.lang
                         nameString = sb.ToString();
                         return false;
                     }
+                    else if (NonConstituent(ch))
+                        throw new InvalidOperationException("Invalid constituent character: " + (char)ch);
                     else if (ch == '|' && allowSymEscape)
                     {
                         oddVertBarMode = true;
@@ -577,19 +598,19 @@ namespace clojure.lang
 
         public abstract class ReaderBase : AFn
         {
-            public override object invoke(object arg1, object arg2)
+            public override object invoke(object arg1, object arg2, object arg3)
             {
-                return Read((PushbackTextReader)arg1, (Char)arg2);
+                return Read((PushbackTextReader)arg1, (Char)arg2, arg3);
             }
 
-            protected abstract object Read(PushbackTextReader r, char c);
+            protected abstract object Read(PushbackTextReader r, char c, object opts);
         }
 
         #region CharacterReader
 
         public sealed class CharacterReader : ReaderBase
         {
-            protected override object Read(PushbackTextReader r, char backslash)
+            protected override object Read(PushbackTextReader r, char backslash, object opts)
             {
                 int ch = r.Read();
                 if (ch == -1)
@@ -636,7 +657,7 @@ namespace clojure.lang
 
         public sealed class StringReader : ReaderBase
         {
-            protected override object Read(PushbackTextReader r, char doublequote)
+            protected override object Read(PushbackTextReader r, char doublequote, object opts)
             {
                 StringBuilder sb = new StringBuilder();
 
@@ -703,7 +724,7 @@ namespace clojure.lang
 
         public sealed class CommentReader : ReaderBase
         {
-            protected override object Read(PushbackTextReader r, char semicolon)
+            protected override object Read(PushbackTextReader r, char semicolon, object opts)
             {
                 int ch;
                 do
@@ -716,9 +737,9 @@ namespace clojure.lang
 
         public sealed class DiscardReader : ReaderBase
         {
-            protected override object Read(PushbackTextReader r, char underscore)
+            protected override object Read(PushbackTextReader r, char underscore, object opts)
             {
-                ReadAux(r);
+                ReadAux(r,opts);
                 return r;
             }
         }
@@ -729,7 +750,7 @@ namespace clojure.lang
 
         public sealed class DispatchReader : ReaderBase
         {
-            protected override object Read(PushbackTextReader r, char hash)
+            protected override object Read(PushbackTextReader r, char hash, object opts)
             {
                 int ch = r.Read();
                 if (ch == -1)
@@ -737,9 +758,15 @@ namespace clojure.lang
                 IFn fn = _dispatchMacros[ch];
                 if (fn == null)
                 {
+                    // try tagged reader
+                    if (Char.IsLetter((char)ch))
+                    {
+                        Unread(r, ch);
+                        return _taggedReader.invoke(r, ch, opts);
+                    }
                     throw new InvalidOperationException(String.Format("No dispatch macro for: {0}", (char)ch));
                 }
-                return fn.invoke(r, (char)ch);
+                return fn.invoke(r, (char)ch, opts);
             }
         }
 
@@ -750,7 +777,7 @@ namespace clojure.lang
         public sealed class MetaReader : ReaderBase
         {
 
-            protected override object Read(PushbackTextReader r, char caret)
+            protected override object Read(PushbackTextReader r, char caret, object opts)
             {
                 int startLine = -1;
                 int startCol = -1;
@@ -764,7 +791,7 @@ namespace clojure.lang
 
                 IPersistentMap metaAsMap;
                 {
-                    object meta = ReadAux(r);
+                    object meta = ReadAux(r,opts);
 
                     if (meta is Symbol || meta is String)
                         metaAsMap = RT.map(RT.TagKey, meta);
@@ -774,7 +801,7 @@ namespace clojure.lang
                         throw new ArgumentException("Metadata must be Symbol,Keyword,String or Map");
                 }
 
-                object o = ReadAux(r);
+                object o = ReadAux(r,opts);
                 if (o is IMeta)
                 {
                     if (startLine != -1 && o is ISeq)
@@ -811,7 +838,7 @@ namespace clojure.lang
 
         public sealed class ListReader : ReaderBase
         {
-            protected override object Read(PushbackTextReader r, char leftparen)
+            protected override object Read(PushbackTextReader r, char leftparen, object opts)
             {
                 int startLine = -1;
                 int startCol = -1;
@@ -822,7 +849,7 @@ namespace clojure.lang
                     startLine = lntr.LineNumber;
                     startCol = lntr.ColumnNumber;
                 }
-                IList<Object> list = ReadDelimitedList(')', r, true);
+                IList<Object> list = ReadDelimitedList(')', r, true, opts);
                 if (list.Count == 0)
                     return PersistentList.EMPTY;
                 IObj s = (IObj)PersistentList.create((IList)list);
@@ -832,17 +859,17 @@ namespace clojure.lang
 
         public sealed class VectorReader : ReaderBase
         {
-            protected override object Read(PushbackTextReader r, char leftparen)
+            protected override object Read(PushbackTextReader r, char leftparen, object opts)
             {
-                return LazilyPersistentVector.create(ReadDelimitedList(']', r, true));
+                return LazilyPersistentVector.create(ReadDelimitedList(']', r, true, opts));
             }
         }
 
         public sealed class MapReader : ReaderBase
         {
-            protected override object Read(PushbackTextReader r, char leftbrace)
+            protected override object Read(PushbackTextReader r, char leftbrace, object opts)
             {
-                Object[] a = ReadDelimitedList('}', r, true).ToArray();
+                Object[] a = ReadDelimitedList('}', r, true, opts).ToArray();
                 if ((a.Length & 1) == 1)
                     throw new ArgumentException("Map literal must contain an even number of forms");
                 return RT.map(a);
@@ -851,15 +878,15 @@ namespace clojure.lang
 
         public sealed class SetReader : ReaderBase
         {
-            protected override object Read(PushbackTextReader r, char leftbracket)
+            protected override object Read(PushbackTextReader r, char leftbracket, object opts)
             {
-                return PersistentHashSet.createWithCheck(ReadDelimitedList('}', r, true));
+                return PersistentHashSet.createWithCheck(ReadDelimitedList('}', r, true, opts));
             }
         }
 
         public sealed class UnmatchedDelimiterReader : ReaderBase
         {
-            protected override object Read(PushbackTextReader reader, char rightdelim)
+            protected override object Read(PushbackTextReader reader, char rightdelim, object opts)
             {
                 throw new ArgumentException("Unmatched delimiter: " + rightdelim);
             }
@@ -871,9 +898,48 @@ namespace clojure.lang
 
         public sealed class UnreadableReader : ReaderBase
         {
-            protected override object Read(PushbackTextReader reader, char leftangle)
+            protected override object Read(PushbackTextReader reader, char leftangle, object opts)
             {
                 throw new ArgumentException("Unreadable form");
+            }
+        }
+
+        #endregion
+
+        #region TaggedReader
+
+        public sealed class TaggedReader : ReaderBase
+        {
+            protected override object Read(PushbackTextReader r, char leftparen, object opts)
+            {
+                object name = read(r, true, null, false, opts);
+                Symbol sym = name as Symbol;
+                if (sym == null)
+                    throw new InvalidOperationException("Reader tag must be a symbol");
+                return ReadTagged(r, sym, (IPersistentMap)opts);
+            }
+
+            static readonly Keyword READERS = Keyword.intern(null, "readers");
+            static readonly Keyword DEFAULT = Keyword.intern(null, "default");
+
+            private object ReadTagged(PushbackTextReader r, Symbol tag, IPersistentMap opts)
+            {
+                object o = ReadAux(r, opts);
+
+                ILookup readers = (ILookup)RT.get(opts, READERS);
+                IFn dataReader = (IFn)RT.get(readers, tag);
+                if (dataReader == null)
+                    dataReader = (IFn)RT.get(RT.DefaultDataReadersVar.deref(), tag);
+                if (dataReader == null)
+                {
+                    IFn defaultReader = (IFn)RT.get(opts, DEFAULT);
+                    if (defaultReader != null)
+                        return defaultReader.invoke(tag, o);
+                    else
+                        throw new InvalidOperationException("No reader function for tag " + tag.ToString());
+                }
+                else
+                    return dataReader.invoke(o);
             }
         }
 
