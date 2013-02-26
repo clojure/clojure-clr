@@ -33,7 +33,7 @@ namespace clojure.lang.CljCompiler.Ast
             //_baseIlg = baseIlg;
         }
 
-        private bool IsVolatile(FieldInfo fi)
+        private static bool IsVolatile(FieldInfo fi)
         {
             // This would work in Mono
             //foreach (Type t in fi.GetRequiredCustomModifiers() )
@@ -83,9 +83,9 @@ namespace clojure.lang.CljCompiler.Ast
                 return GetCustomModTypes(fi).Contains(typeof(IsVolatile));
             }
 
-            public static List<Type> GetCustomModTypes(FieldInfo fi)
+            public static IList<Type> GetCustomModTypes(FieldInfo fi)
             {
-                List<int> modMetaTokens = GetCustomModMetadataTokens(fi);
+                IList<int> modMetaTokens = GetCustomModMetadataTokens(fi);
                 List<Type> types = new List<Type>(modMetaTokens.Count);
 
 
@@ -104,19 +104,20 @@ namespace clojure.lang.CljCompiler.Ast
                 return types;
             }
 
-            public static List<int> GetCustomModMetadataTokens(FieldInfo fi)
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
+            public static IList<int> GetCustomModMetadataTokens(FieldInfo fi)
             {
                 byte[] sig = fi.Module.ResolveSignature(fi.MetadataToken);
                 return ReadCustomMods(sig);
             }
 
-            static List<int> ReadCustomMods(byte[] sig)
+            static IList<int> ReadCustomMods(byte[] sig)
             {
                 int start = 0;
                 return ReadCustomMods(sig, start + 1, out start);
             }
 
-            static List<int> ReadCustomMods(byte[] sig, int pos, out int nextPos)
+            static IList<int> ReadCustomMods(byte[] sig, int pos, out int nextPos)
             {
                 List<int> mods = new List<int>();
                 int start = pos;

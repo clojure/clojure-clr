@@ -72,7 +72,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ISeq body = RT.next(RT.next(form));
 
                 if (pcon.Rhc == RHC.Eval)
-                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnSym, PersistentVector.EMPTY, form)), "letfn__" + RT.nextID());
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnOnceSym, PersistentVector.EMPTY, form)), "letfn__" + RT.nextID());
 
                 IPersistentMap dynamicBindings = RT.map(
                     Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),

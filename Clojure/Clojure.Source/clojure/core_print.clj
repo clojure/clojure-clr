@@ -362,14 +362,19 @@
 
 
 (def primitives-classnames    ;; not clear what the equiv should be
-  {Single  "Single"   ;;{Float/TYPE "Float/TYPE"
-   Int32   "Int32"    ;; Integer/TYPE "Integer/TYPE"
-   Int64   "Int64"    ;; Long/TYPE "Long/TYPE"
-   Boolean "Boolean"  ;; Boolean/TYPE "Boolean/TYPE"
-   Char    "Char"     ;; Character/TYPE "Character/TYPE"
-   Double  "Double"   ;; Double/TYPE "Double/TYPE"
-   Byte    "Byte"     ;; Byte/TYPE "Byte/TYPE"
-   Int16   "Int16"})  ;; Short/TYPE "Short/TYPE"})
+  {Single  "System.Single"   ;;{Float/TYPE "Float/TYPE"
+   Int32   "System.Int32"    ;; Integer/TYPE "Integer/TYPE"
+   Int64   "System.Int64"    ;; Long/TYPE "Long/TYPE"
+   Boolean "System.Boolean"  ;; Boolean/TYPE "Boolean/TYPE"
+   Char    "System.Char"     ;; Character/TYPE "Character/TYPE"
+   Double  "System.Double"   ;; Double/TYPE "Double/TYPE"
+   Byte    "System.Byte"     ;; Byte/TYPE "Byte/TYPE"
+   Int16   "System.Int16"    ;; Short/TYPE "Short/TYPE"})
+   SByte   "System.SByte"    ;; ADDED
+   UInt16  "System.UInt16"   ;; ADDED
+   UInt32  "System.UInt32"   ;; ADDED
+   UInt64  "System.UInt64"   ;; ADDED
+   Decimal "System.Decimal" })  ;; ADDED
   
 (defmethod print-method Type [^Type c, ^System.IO.TextWriter w]
   (.Write w (.FullName c)))   ;;; .getName => .FullName
@@ -433,7 +438,8 @@
                                      (agent-error o))
                               " FAILED"
                               ""))
-                    pr-on, "", ">", (list (if (and (instance? clojure.lang.IPending o) (not (.isRealized o)))
+                    pr-on, "", ">", (list (if (and (instance? clojure.lang.IPending o)
+                                                   (not (.isRealized ^clojure.lang.IPending o)))
                                             :pending
                                             @o)), w))
 

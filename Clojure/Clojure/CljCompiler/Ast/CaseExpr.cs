@@ -110,7 +110,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ISeq form = (ISeq)frm;
 
                 if (pcon.Rhc == RHC.Eval)
-                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnSym, PersistentVector.EMPTY, form)), "case__" + RT.nextID());
+                    return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnOnceSym, PersistentVector.EMPTY, form)), "case__" + RT.nextID());
 
                 PersistentVector args = PersistentVector.create(form.next());
 

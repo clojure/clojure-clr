@@ -44,6 +44,7 @@ namespace clojure.lang
         public static readonly Symbol LetfnSym = Symbol.intern("letfn*");
         public static readonly Symbol DoSym = Symbol.intern("do");
         public static readonly Symbol FnSym = Symbol.intern("fn*");
+        public static readonly Symbol FnOnceSym = (Symbol) Symbol.intern("fn*").withMeta(RT.map(Keyword.intern(null, "once"), true));
         public static readonly Symbol QuoteSym = Symbol.intern("quote");
         public static readonly Symbol TheVarSym = Symbol.intern("var");
         public static readonly Symbol DotSym = Symbol.intern(".");
@@ -1256,7 +1257,8 @@ namespace clojure.lang
         public static void PushNS()
         {
             Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.intern("clojure.core"),
-                                                                       Symbol.intern("*ns*")).setDynamic(), null));
+                                                                       Symbol.intern("*ns*")).setDynamic(), null,
+                                                                       RT.ReadEvalVar, true /* RT.T */));
         }
 
 
@@ -1313,6 +1315,7 @@ namespace clojure.lang
                 LocalEnvVar, null,
                 LoopLocalsVar, null,
                 NextLocalNumVar, 0,
+                RT.ReadEvalVar, true /* RT.T */,
                 RT.CurrentNSVar, RT.CurrentNSVar.deref(),
                 ConstantsVar, PersistentVector.EMPTY,
                 ConstantIdsVar, new IdentityHashMap(),
@@ -1449,7 +1452,7 @@ namespace clojure.lang
                 //LOADER, RT.makeClassLoader(),
                 SourcePathVar, sourcePath,
                 SourceVar, sourceName,
-
+                RT.ReadEvalVar, true /* RT.T */,
                 RT.CurrentNSVar, RT.CurrentNSVar.deref(),
                 RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
                 RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),

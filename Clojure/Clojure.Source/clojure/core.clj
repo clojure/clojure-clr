@@ -3389,7 +3389,12 @@
 (defn read   ;;; still have an error here, probably from leftover newline causing interference with REPL
   "Reads the next object from stream, which must be an instance of
   java.io.PushbackReader or some derivee.  stream defaults to the
-  current value of *in* ."
+  current value of *in*.
+
+  Note that read can execute code (controlled by *read-eval*),
+  and as such should be used only with trusted sources.
+
+  For data structure interop use clojure.edn/read"
   {:added "1.0"
    :static true}
   ([]
@@ -3411,7 +3416,12 @@
 ;;;    (.readLine ^java.io.BufferedReader *in*)))
     
 (defn read-string
-  "Reads one object from the string s"
+  "Reads one object from the string s.
+
+  Note that read-string can execute code (controlled by *read-eval*),
+  and as such should be used only with trusted sources.
+  
+  For data structure interop use clojure.edn/read-string"
   {:added "1.0"
    :static true}
   [s] (clojure.lang.RT/readString s))
@@ -3991,7 +4001,7 @@
 					         gmapseq (with-meta gmap {:tag 'clojure.lang.ISeq})
                              defaults (:or b)]
                          (loop [ret (-> bvec (conj gmap) (conj v)
-                                        (conj gmap) (conj `(if (seq? ~gmap) (clojure.lang.PersistentHashMap/create ~gmapseq) ~gmap))
+                                        (conj gmap) (conj `(if (seq? ~gmap) (clojure.lang.PersistentHashMap/create (seq ~gmapseq)) ~gmap))
                                         ((fn [ret]
                                            (if (:as b)
                                              (conj ret (:as b) gmap)
@@ -5871,11 +5881,29 @@
   {:added "1.0"})
 
 (add-doc-and-meta *read-eval*
-  "When set to logical false, the EvalReader (#=(...)) is disabled in the 
-  read/load in the thread-local binding.
-  Example: (binding [*read-eval* false] (read-string \"#=(eval (def x 3))\"))
+ "Defaults to true (or value specified by system property, see below)
+  ***This setting implies that the full power of the reader is in play,
+  including syntax that can cause code to execute. It should never be
+  used with untrusted sources. See also: clojure.end/read.***
 
-  Defaults to true"
+  When set to logical false in the thread-local binding,
+  the eval reader (#=) and record/type literal syntax are disabled in read/load.
+  Example (will fail): (binding [*read-eval* false] (read-string \"#=(* 2 21)\"))
+
+  The default binding can be controlled by the system property
+  'clojure.read.eval' System properties can be set on the command line
+  like this:
+
+  java -Dclojure.read.eval=false ...
+
+  The system property can also be set to 'unknown' via
+  -Dclojure.read.eval=unknown, in which case the default binding
+  is :unknown and all reads will fail in contexts where *read-eval*
+  has not been explicitly bound to either true or false. This setting
+  can be a useful diagnostic tool to ensure that all of your reads
+  occur in considered contexts. You can also accomplish this in a
+  particular scope by binding *read-eval* to :unknown
+  "
   {:added "1.0"})
 
 (defn future?
@@ -6149,6 +6177,11 @@
      (clojure.core.protocols/coll-reduce coll f val)))
 
 (extend-protocol clojure.core.protocols/IKVReduce
+ nil
+ (kv-reduce
+  [_ f init]
+  init)
+
  ;;slow path default
  clojure.lang.IPersistentMap
  (kv-reduce 

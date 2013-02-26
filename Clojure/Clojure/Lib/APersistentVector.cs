@@ -881,14 +881,29 @@ namespace clojure.lang
             readonly IPersistentVector _v;
 
             /// <summary>
+            /// The vector being subvectored.
+            /// </summary>
+            public IPersistentVector V { get { return _v; } }
+
+            /// <summary>
             /// The start index of the subvector.
             /// </summary>
             readonly int _start;
 
             /// <summary>
+            /// The start index of the subvector.
+            /// </summary>
+            /// public int Start { get { return _start; } }
+
+            /// <summary>
             /// The end index of the subvector.
             /// </summary>
             readonly int _end;
+
+            /// <summary>
+            /// The end index of the subvector.
+            /// </summary>
+            public int End { get { return _end; } }
 
             readonly IPersistentMap _meta;
 
