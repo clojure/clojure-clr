@@ -439,17 +439,10 @@ namespace clojure.lang
         public static readonly Var ReadWhiteListVar
             = Var.intern(ClojureNamespace, Symbol.intern("*read-whitelist*"),
                          RT.vector(
-                                    // JVM has Number here.  I list all numeric types
-                                    typeof(byte), typeof(sbyte),
-                                    typeof(short), typeof(ushort),
-                                    typeof(int), typeof(uint),
-                                    typeof(long), typeof(ulong),
-                                    typeof(Single), typeof(double),
-                                    typeof(decimal), typeof(BigInt),
-                                    typeof(BigInteger), typeof(BigDecimal),
+                                    // JVM has Number here.  The only numbers we have with c-tors are the following:
+                                    typeof(BigInt), typeof(BigInteger), typeof(BigDecimal),
                                     typeof(System.Collections.ICollection),
-                                    typeof(System.Collections.IDictionary),
-                                    typeof(clojure.lang.Fn))).setDynamic();
+                                    typeof(System.Collections.IDictionary))).setDynamic();
 
 
         public static readonly Var DataReadersVar

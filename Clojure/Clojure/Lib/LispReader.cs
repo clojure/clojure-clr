@@ -1491,7 +1491,7 @@ namespace clojure.lang
                         string s = fs.ToString();
                         Type t = RT.classForName(s.Substring(0, s.Length - 1));
 
-                        if (readeval || OnWhiteList(t))
+                        if (readeval || OnWhiteList(t) || typeof(clojure.lang.Fn).IsAssignableFrom(t))
                         {
                             Object[] args = RT.toArray(RT.next(o));
                             return Reflector.InvokeConstructor(t, args);
