@@ -137,4 +137,7 @@
     <PostBuildEvent Condition=" '$(Runtime)' == 'Mono' ">mono "$(TargetPath)" clojure.core clojure.core.protocols clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect</PostBuildEvent>
     <PostBuildEvent Condition=" '$(Runtime)' == '.Net' ">"$(TargetPath)" clojure.core clojure.core.protocols clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect</PostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>"$(TargetPath)" clojure.core clojure.core.protocols clojure.main clojure.set clojure.edn clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect</PostBuildEvent>
+  </PropertyGroup>
 </Project>
