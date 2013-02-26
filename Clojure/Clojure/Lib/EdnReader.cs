@@ -22,7 +22,7 @@ using System.Text.RegularExpressions;
 
 namespace clojure.lang
 {
-    public class EdnReader
+    public static class EdnReader
     {
         #region Symbol definitions
 
@@ -80,12 +80,14 @@ namespace clojure.lang
 
         #region main entry points - readString, read
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "read")]
         static public Object readString(String s, IPersistentMap opts)
         {
             PushbackTextReader r = new PushbackTextReader(new System.IO.StringReader(s));
             return read(r, opts);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "read")]
         public static Object read(PushbackTextReader r, IPersistentMap opts)
         {
             return read(r, !opts.containsKey(EOF), opts.valAt(EOF), false, opts);
@@ -840,15 +842,15 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char leftparen, object opts)
             {
-                int startLine = -1;
-                int startCol = -1;
-                LineNumberingTextReader lntr = r as LineNumberingTextReader;
+                //int startLine = -1;
+                //int startCol = -1;
+                //LineNumberingTextReader lntr = r as LineNumberingTextReader;
 
-                if (lntr != null)
-                {
-                    startLine = lntr.LineNumber;
-                    startCol = lntr.ColumnNumber;
-                }
+                //if (lntr != null)
+                //{
+                //    startLine = lntr.LineNumber;
+                //    startCol = lntr.ColumnNumber;
+                //}
                 IList<Object> list = ReadDelimitedList(')', r, true, opts);
                 if (list.Count == 0)
                     return PersistentList.EMPTY;
@@ -922,7 +924,7 @@ namespace clojure.lang
             static readonly Keyword READERS = Keyword.intern(null, "readers");
             static readonly Keyword DEFAULT = Keyword.intern(null, "default");
 
-            private object ReadTagged(PushbackTextReader r, Symbol tag, IPersistentMap opts)
+            private static object ReadTagged(PushbackTextReader r, Symbol tag, IPersistentMap opts)
             {
                 object o = ReadAux(r, opts);
 

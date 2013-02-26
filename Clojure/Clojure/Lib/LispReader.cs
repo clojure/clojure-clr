@@ -134,7 +134,8 @@ namespace clojure.lang
             object eofValue,
             bool isRecursive)
         {
-            if (RT.ReadEvalVar.deref() == UNKNOWN)
+
+            if (UNKNOWN.Equals(RT.ReadEvalVar.deref()))
                 throw new InvalidOperationException("Reading disallowed - *read-eval* bound to :unknown");
 
             try

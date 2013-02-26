@@ -94,12 +94,12 @@ namespace clojure.lang
         /// <returns><value>true</value> if the specified Object is equal to the current Object; 
         /// otherwise, <value>false</value>.
         /// </returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public override bool Equals(object obj)
         {
             return setEquals(this, obj);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
         public static bool setEquals(IPersistentSet s1, object obj)
         {
             // I really can't do what the Java version does.
