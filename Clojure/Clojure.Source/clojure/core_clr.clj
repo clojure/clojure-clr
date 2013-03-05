@@ -267,3 +267,19 @@
   {:added "1.4"}
   [^String assembly-name]
   (System.Reflection.Assembly/LoadWithPartialName assembly-name))
+
+(defn add-ns-load-mapping
+  "Convenience function to assist with loading .clj files embedded in
+  C# projects.  ns-root specifies part of a namespace such as MyNamespace.A and
+  fs-root specifies the filesystem location in which to look for files within that
+  namespace.  For example, if MyNamespace.A mapped to MyNsA would allow
+  MyNamespace.A.B to be loaded from MyNsA\\B.clj.  When a .clj file is marked as an
+  embedded resource in a C# project, it will be stored in the resulting .dll with
+  the default project namespace prefixed to its path.  To allow these files to
+  be loaded dynamically during development, the paths to these files can be mapped
+  to allow them to be loaded from a different directory other than their root namespace
+  (i.e. the common case where the project directory is different from its default
+  namespace)."
+  [^String ns-root ^String fs-root]
+  (swap! *ns-load-mappings* conj
+	[(.Replace ns-root "." "/") fs-root]))

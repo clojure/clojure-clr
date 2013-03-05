@@ -1254,6 +1254,11 @@ namespace clojure.lang
             return context == null ? "_INTERP" : "_COMP_" + (new AssemblyName(context.AssemblyBuilder.FullName)).Name;
         }
 
+        internal static string InitClassName(string sourcePath)
+        {
+            return "__Init__$" + sourcePath.Replace(".", "/");
+        }
+        
         public static void PushNS()
         {
             Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.intern("clojure.core"),
@@ -1261,45 +1266,34 @@ namespace clojure.lang
                                                                        RT.ReadEvalVar, true /* RT.T */));
         }
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        internal static bool LoadAssembly(FileInfo assyInfo)
-        {
-            Assembly assy = Assembly.LoadFrom(assyInfo.FullName);
-            Type initType = assy.GetType("__Init__");
-            if (initType == null)
-            {
-                Console.WriteLine("Bad assembly");
-                return false;
-            }
-            try
-            {
-                initType.InvokeMember("Initialize", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, null, new object[0]);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Error initializing {0}: {1}", assyInfo.FullName, e.Message);
-                return false;
-            }
-        }
-
         public static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
         {
             if (CompilePathVar.deref() == null)
                 throw new InvalidOperationException("*compile-path* not set");
 
+            string sourcePath = relativePath;
+            GenContext context = GenContext.CreateWithExternalAssembly(sourceName, sourcePath, ".dll", true);
+
+            Compile(context, rdr, sourceDirectory, sourceName, relativePath);
+
+            context.SaveAssembly();
+
+            return null;
+        }
+
+        public static object Compile(GenContext context,TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
+        {
             object eofVal = new object();
             object form;
 
             string sourcePath = relativePath;
-            GenContext context = GenContext.CreateWithExternalAssembly(sourceName, sourcePath, ".dll", true);
 
             // generate loader class
             ObjExpr objx = new ObjExpr(null);
-            objx.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.')) + "__init";
+            var internalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.'));
+            objx.InternalName = internalName + "__init";
 
-            TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
+            TypeBuilder initTB = context.AssemblyGen.DefinePublicType(InitClassName(internalName), typeof(object), true);
             context = context.WithTypeBuilder(initTB);
 
             // static load method
@@ -1357,8 +1351,6 @@ namespace clojure.lang
                 cbGen.Emit(OpCodes.Ret);
 
                 initTB.CreateType();
-
-                context.SaveAssembly();
             }
             catch (LispReader.ReaderException e)
             {
@@ -1418,10 +1410,72 @@ namespace clojure.lang
         
         #region Loading
 
+        internal static bool LoadAssembly(FileInfo assyInfo, string relativePath)
+        {
+            Assembly assy = Assembly.LoadFrom(assyInfo.FullName);
+            return InitAssembly(assy, relativePath);
+        }
+
+        internal static bool LoadAssembly(byte[] assyData, string relativePath)
+        {
+            Assembly assy = Assembly.Load(assyData);
+            return InitAssembly(assy, relativePath);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        private static bool InitAssembly(Assembly assy, string relativePath)
+        {
+            Type initType = assy.GetType(InitClassName(relativePath));
+            if (initType == null)
+            {
+                initType = assy.GetType("__Init__"); // old init class name
+                if (initType == null)
+                {
+                    Console.WriteLine("Bad assembly");
+                    return false;
+                }
+            }
+            return InvokeInitType(assy, initType);
+        }
+
+        private static bool InvokeInitType(Assembly assy, Type initType)
+        {
+            try
+            {
+                initType.InvokeMember("Initialize", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, null, new object[0]);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error initializing {0}: {1}", assy.FullName, e);
+                return false;
+            }
+        }
+
+        internal static bool TryLoadInitType(string relativePath)
+        {
+            var initClassName = InitClassName(relativePath);
+            Type initType = null;
+            foreach(var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+#if CLR2
+                if(asm.ManifestModule is ModuleBuilder)
+#else
+                if (asm.IsDynamic)
+#endif
+                    continue;
+                initType = asm.GetType(initClassName);
+                if (initType != null)
+                    break;
+            }
+            if (initType == null)
+                return false;
+            return InvokeInitType(initType.Assembly, initType);
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
         public static object loadFile(string fileName)
-        {
-            FileInfo finfo = new FileInfo(fileName);
+        {            FileInfo finfo = new FileInfo(fileName);
             if (!finfo.Exists)
                 throw new FileNotFoundException("Cannot find file to load", fileName);
 
