@@ -3158,7 +3158,6 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static void load(String relativePath, Boolean failIfNotFound)
         {
-            bool loaded = false;
             string cljname = relativePath + ".clj";
             string assemblyname = relativePath.Replace('/', '.') + ".clj.dll";
 
@@ -3173,10 +3172,11 @@ namespace clojure.lang
                 {
                     try
                     {
-                    Var.pushThreadBindings(RT.mapUniqueKeys(CurrentNSVar, CurrentNSVar.deref(),
-                                                      WarnOnReflectionVar, WarnOnReflectionVar.deref(),
-                                                      RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
-                        loaded = Compiler.LoadAssembly(assyInfo, relativePath);
+                        Var.pushThreadBindings(RT.mapUniqueKeys(CurrentNSVar, CurrentNSVar.deref(),
+                                                          WarnOnReflectionVar, WarnOnReflectionVar.deref(),
+                                                          RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
+                        Compiler.LoadAssembly(assyInfo, relativePath);
+                        return;
                     }
                     finally
                     {
@@ -3184,38 +3184,33 @@ namespace clojure.lang
                     }
                 }
 
-                if(!loaded)
+                if (cljInfo != null)
                 {
-                    if (cljInfo != null)
-                    {
-                        if (booleanCast(Compiler.CompileFilesVar.deref()))
-                            Compile(cljInfo, cljname);
-                        else
-                            LoadScript(cljInfo, cljname);
-                        loaded = true;
-                    }
+                    if (booleanCast(Compiler.CompileFilesVar.deref()))
+                        Compile(cljInfo, cljname);
+                    else
+                        LoadScript(cljInfo, cljname);
+                    return;
                 }
             }
 
-
-            if (!loaded)
+            try
             {
-                try
-                {
-                    Var.pushThreadBindings(RT.map(CurrentNSVar, CurrentNSVar.deref(),
-                        WarnOnReflectionVar, WarnOnReflectionVar.deref(),
-                        RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
-                    loaded = Compiler.TryLoadInitType(relativePath);
-                }
-                finally
-                {
-                    Var.popThreadBindings();
-                }
-                if (!loaded)
-                {
-                    loaded = TryLoadFromEmbeddedResource(relativePath, assemblyname);
-                }
+                Var.pushThreadBindings(RT.map(CurrentNSVar, CurrentNSVar.deref(),
+                    WarnOnReflectionVar, WarnOnReflectionVar.deref(),
+                    RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
+                if (Compiler.TryLoadInitType(relativePath))
+                    return;
             }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+
+
+            bool loaded = TryLoadFromEmbeddedResource(relativePath, assemblyname);
+
+
             if (!loaded && failIfNotFound)
                 throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));
 
@@ -3232,14 +3227,15 @@ namespace clojure.lang
                     Var.pushThreadBindings(RT.map(CurrentNSVar, CurrentNSVar.deref(),
                                                   WarnOnReflectionVar, WarnOnReflectionVar.deref(),
                                                   RT.UncheckedMathVar, RT.UncheckedMathVar.deref()));
-                    if (Compiler.LoadAssembly(ReadStreamBytes(asmStream), relativePath))
-                        return true;
+                    Compiler.LoadAssembly(ReadStreamBytes(asmStream), relativePath);
+                    return true;
                 }
                 finally
                 {
                     Var.popThreadBindings();
                 }
             }
+
             var embeddedCljName = relativePath.Replace("/", ".") + ".clj";
             var stream = GetEmbeddedResourceStream(embeddedCljName, out containingAssembly);
             if (stream != null)
@@ -3291,24 +3287,6 @@ namespace clojure.lang
             using ( TextReader rdr = cljInfo.OpenText() )
                 Compile(cljInfo.Directory.FullName, cljInfo.Name, rdr, relativePath);
         }
-
-        // TODO: Get rid of this when DLR gone
-        //public static bool CompileDLR = true;
-        //public static void CompileNoDLR(String relativePath)
-        //{
-        //    try
-        //    {
-        //        CompileDLR = false;
-        //        string cljname = relativePath + ".clj";
-        //        FileInfo cljInfo = FindFile(cljname);
-        //        using (TextReader rdr = cljInfo.OpenText())
-        //            Compiler.CompileNoDlr(rdr, cljInfo.Directory.FullName, cljInfo.Name, cljname);
-        //    }
-        //    finally
-        //    {
-        //        CompileDLR = true;
-        //    }
-        //}
 
         private static void Compile(string dirName, string name, TextReader rdr, string relativePath)
         {

@@ -1410,20 +1410,55 @@ namespace clojure.lang
         
         #region Loading
 
-        internal static bool LoadAssembly(FileInfo assyInfo, string relativePath)
+        internal static void LoadAssembly(FileInfo assyInfo, string relativePath)
         {
-            Assembly assy = Assembly.LoadFrom(assyInfo.FullName);
-            return InitAssembly(assy, relativePath);
+            Assembly assy;
+
+            try
+            {
+                assy = Assembly.LoadFrom(assyInfo.FullName);
+            }
+            catch (IOException e)
+            {
+                throw new AssemblyNotFoundException(e.Message,e);
+            }
+            catch (ArgumentException e)
+            {
+                throw new AssemblyNotFoundException(e.Message,e);
+            }
+            catch (BadImageFormatException e)
+            {
+                throw new AssemblyNotFoundException(e.Message, e);
+            }
+            catch (System.Security.SecurityException e)
+            {
+                throw new AssemblyNotFoundException(e.Message, e);
+            }
+
+            InitAssembly(assy, relativePath);
         }
 
-        internal static bool LoadAssembly(byte[] assyData, string relativePath)
+        internal static void LoadAssembly(byte[] assyData, string relativePath)
         {
-            Assembly assy = Assembly.Load(assyData);
-            return InitAssembly(assy, relativePath);
+            Assembly assy;
+            try
+            {
+                assy = Assembly.Load(assyData);
+            }
+            catch (ArgumentException e)
+            {
+                throw new AssemblyNotFoundException(e.Message, e);
+            }
+            catch (BadImageFormatException e)
+            {
+                throw new AssemblyNotFoundException(e.Message, e);
+            }
+
+            InitAssembly(assy, relativePath);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private static bool InitAssembly(Assembly assy, string relativePath)
+        private static void InitAssembly(Assembly assy, string relativePath)
         {
             Type initType = assy.GetType(InitClassName(relativePath));
             if (initType == null)
@@ -1431,24 +1466,21 @@ namespace clojure.lang
                 initType = assy.GetType("__Init__"); // old init class name
                 if (initType == null)
                 {
-                    Console.WriteLine("Bad assembly");
-                    return false;
+                    throw new AssemblyInitializationException(String.Format("Cannot find initializer for {0}.{1}",assy.FullName,relativePath));
                 }
             }
-            return InvokeInitType(assy, initType);
+            InvokeInitType(assy, initType);
         }
 
-        private static bool InvokeInitType(Assembly assy, Type initType)
+        private static void InvokeInitType(Assembly assy, Type initType)
         {
             try
             {
                 initType.InvokeMember("Initialize", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, null, new object[0]);
-                return true;
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error initializing {0}: {1}", assy.FullName, e);
-                return false;
+                throw new AssemblyInitializationException(String.Format("Error initializing {0}: {1}", assy.FullName, e.Message),e);
             }
         }
 
@@ -1470,7 +1502,15 @@ namespace clojure.lang
             }
             if (initType == null)
                 return false;
-            return InvokeInitType(initType.Assembly, initType);
+            try
+            {
+                InvokeInitType(initType.Assembly, initType);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
@@ -1793,6 +1833,91 @@ namespace clojure.lang
                     throw new System.ArgumentNullException("info");
                 base.GetObjectData(info, context);
                 info.AddValue("FileSource", FileSource);
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        #region AssemblyLoadException
+
+        [Serializable]
+        public class AssemblyLoadException : Exception
+        {
+            #region C-tors
+
+            public AssemblyLoadException()
+            {
+            }
+
+            public AssemblyLoadException(string msg)
+                : base(msg)
+            {
+            }
+
+            public AssemblyLoadException(string msg, Exception innerException)
+                : base(msg, innerException)
+            {
+            }
+
+            protected AssemblyLoadException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+            }
+
+            #endregion
+        }
+
+        [Serializable]
+        public sealed class AssemblyNotFoundException : AssemblyLoadException
+        {
+            #region C-tors
+
+            public AssemblyNotFoundException()
+            {
+            }
+
+            public AssemblyNotFoundException(string msg)
+                : base(msg)
+            {
+            }
+
+            public AssemblyNotFoundException(string msg, Exception innerException)
+                : base(msg, innerException)
+            {
+            }
+
+            private AssemblyNotFoundException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+            }
+
+            #endregion
+        }
+
+        [Serializable]
+        public sealed class AssemblyInitializationException : AssemblyLoadException
+        {
+            #region C-tors
+
+            public AssemblyInitializationException()
+            {
+            }
+
+            public AssemblyInitializationException(string msg)
+                : base(msg)
+            {
+            }
+
+            public AssemblyInitializationException(string msg, Exception innerException)
+                : base(msg, innerException)
+            {
+            }
+
+            private AssemblyInitializationException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
             }
 
             #endregion
