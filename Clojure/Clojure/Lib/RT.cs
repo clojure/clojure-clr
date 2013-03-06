@@ -3458,6 +3458,10 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible")]
         public static bool _doRTBootstrap = true;
 
+        /// <summary>
+        /// Disable file loading
+        /// </summary>
+        /// <remarks>Prevent the load method from searching the file system for .clj and .clj.dll files.  Used in production systems when all namespaces are to found in loaded assemblies.</remarks>
         public static bool DisableFileLoad = false;
     }
 

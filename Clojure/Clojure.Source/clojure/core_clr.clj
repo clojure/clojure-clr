@@ -280,6 +280,7 @@
   to allow them to be loaded from a different directory other than their root namespace
   (i.e. the common case where the project directory is different from its default
   namespace)."
+  {:added "1.5"}
   [^String ns-root ^String fs-root]
   (swap! *ns-load-mappings* conj
 	[(.Replace ns-root "." "/") fs-root]))
