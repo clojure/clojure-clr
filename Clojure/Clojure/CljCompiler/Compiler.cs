@@ -1254,6 +1254,11 @@ namespace clojure.lang
             return context == null ? "_INTERP" : "_COMP_" + (new AssemblyName(context.AssemblyBuilder.FullName)).Name;
         }
 
+        internal static string InitClassName(string sourcePath)
+        {
+            return "__Init__$" + sourcePath.Replace(".", "/");
+        }
+        
         public static void PushNS()
         {
             Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.intern("clojure.core"),
@@ -1261,45 +1266,34 @@ namespace clojure.lang
                                                                        RT.ReadEvalVar, true /* RT.T */));
         }
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        internal static bool LoadAssembly(FileInfo assyInfo)
-        {
-            Assembly assy = Assembly.LoadFrom(assyInfo.FullName);
-            Type initType = assy.GetType("__Init__");
-            if (initType == null)
-            {
-                Console.WriteLine("Bad assembly");
-                return false;
-            }
-            try
-            {
-                initType.InvokeMember("Initialize", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, null, new object[0]);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Error initializing {0}: {1}", assyInfo.FullName, e.Message);
-                return false;
-            }
-        }
-
         public static object Compile(TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
         {
             if (CompilePathVar.deref() == null)
                 throw new InvalidOperationException("*compile-path* not set");
 
+            string sourcePath = relativePath;
+            GenContext context = GenContext.CreateWithExternalAssembly(sourceName, sourcePath, ".dll", true);
+
+            Compile(context, rdr, sourceDirectory, sourceName, relativePath);
+
+            context.SaveAssembly();
+
+            return null;
+        }
+
+        public static object Compile(GenContext context,TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
+        {
             object eofVal = new object();
             object form;
 
             string sourcePath = relativePath;
-            GenContext context = GenContext.CreateWithExternalAssembly(sourceName, sourcePath, ".dll", true);
 
             // generate loader class
             ObjExpr objx = new ObjExpr(null);
-            objx.InternalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.')) + "__init";
+            var internalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.'));
+            objx.InternalName = internalName + "__init";
 
-            TypeBuilder initTB = context.AssemblyGen.DefinePublicType("__Init__", typeof(object), true);
+            TypeBuilder initTB = context.AssemblyGen.DefinePublicType(InitClassName(internalName), typeof(object), true);
             context = context.WithTypeBuilder(initTB);
 
             // static load method
@@ -1357,8 +1351,6 @@ namespace clojure.lang
                 cbGen.Emit(OpCodes.Ret);
 
                 initTB.CreateType();
-
-                context.SaveAssembly();
             }
             catch (LispReader.ReaderException e)
             {
@@ -1418,10 +1410,112 @@ namespace clojure.lang
         
         #region Loading
 
+        internal static void LoadAssembly(FileInfo assyInfo, string relativePath)
+        {
+            Assembly assy;
+
+            try
+            {
+                assy = Assembly.LoadFrom(assyInfo.FullName);
+            }
+            catch (IOException e)
+            {
+                throw new AssemblyNotFoundException(e.Message,e);
+            }
+            catch (ArgumentException e)
+            {
+                throw new AssemblyNotFoundException(e.Message,e);
+            }
+            catch (BadImageFormatException e)
+            {
+                throw new AssemblyNotFoundException(e.Message, e);
+            }
+            catch (System.Security.SecurityException e)
+            {
+                throw new AssemblyNotFoundException(e.Message, e);
+            }
+
+            InitAssembly(assy, relativePath);
+        }
+
+        internal static void LoadAssembly(byte[] assyData, string relativePath)
+        {
+            Assembly assy;
+            try
+            {
+                assy = Assembly.Load(assyData);
+            }
+            catch (ArgumentException e)
+            {
+                throw new AssemblyNotFoundException(e.Message, e);
+            }
+            catch (BadImageFormatException e)
+            {
+                throw new AssemblyNotFoundException(e.Message, e);
+            }
+
+            InitAssembly(assy, relativePath);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        private static void InitAssembly(Assembly assy, string relativePath)
+        {
+            Type initType = assy.GetType(InitClassName(relativePath));
+            if (initType == null)
+            {
+                initType = assy.GetType("__Init__"); // old init class name
+                if (initType == null)
+                {
+                    throw new AssemblyInitializationException(String.Format("Cannot find initializer for {0}.{1}",assy.FullName,relativePath));
+                }
+            }
+            InvokeInitType(assy, initType);
+        }
+
+        private static void InvokeInitType(Assembly assy, Type initType)
+        {
+            try
+            {
+                initType.InvokeMember("Initialize", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, Type.DefaultBinder, null, new object[0]);
+            }
+            catch (Exception e)
+            {
+                throw new AssemblyInitializationException(String.Format("Error initializing {0}: {1}", assy.FullName, e.Message),e);
+            }
+        }
+
+        internal static bool TryLoadInitType(string relativePath)
+        {
+            var initClassName = InitClassName(relativePath);
+            Type initType = null;
+            foreach(var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+#if CLR2
+                if(asm.ManifestModule is ModuleBuilder)
+#else
+                if (asm.IsDynamic)
+#endif
+                    continue;
+                initType = asm.GetType(initClassName);
+                if (initType != null)
+                    break;
+            }
+            if (initType == null)
+                return false;
+            try
+            {
+                InvokeInitType(initType.Assembly, initType);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
         public static object loadFile(string fileName)
-        {
-            FileInfo finfo = new FileInfo(fileName);
+        {            FileInfo finfo = new FileInfo(fileName);
             if (!finfo.Exists)
                 throw new FileNotFoundException("Cannot find file to load", fileName);
 
@@ -1739,6 +1833,91 @@ namespace clojure.lang
                     throw new System.ArgumentNullException("info");
                 base.GetObjectData(info, context);
                 info.AddValue("FileSource", FileSource);
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        #region AssemblyLoadException
+
+        [Serializable]
+        public class AssemblyLoadException : Exception
+        {
+            #region C-tors
+
+            public AssemblyLoadException()
+            {
+            }
+
+            public AssemblyLoadException(string msg)
+                : base(msg)
+            {
+            }
+
+            public AssemblyLoadException(string msg, Exception innerException)
+                : base(msg, innerException)
+            {
+            }
+
+            protected AssemblyLoadException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+            }
+
+            #endregion
+        }
+
+        [Serializable]
+        public sealed class AssemblyNotFoundException : AssemblyLoadException
+        {
+            #region C-tors
+
+            public AssemblyNotFoundException()
+            {
+            }
+
+            public AssemblyNotFoundException(string msg)
+                : base(msg)
+            {
+            }
+
+            public AssemblyNotFoundException(string msg, Exception innerException)
+                : base(msg, innerException)
+            {
+            }
+
+            private AssemblyNotFoundException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+            }
+
+            #endregion
+        }
+
+        [Serializable]
+        public sealed class AssemblyInitializationException : AssemblyLoadException
+        {
+            #region C-tors
+
+            public AssemblyInitializationException()
+            {
+            }
+
+            public AssemblyInitializationException(string msg)
+                : base(msg)
+            {
+            }
+
+            public AssemblyInitializationException(string msg, Exception innerException)
+                : base(msg, innerException)
+            {
+            }
+
+            private AssemblyInitializationException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
             }
 
             #endregion
