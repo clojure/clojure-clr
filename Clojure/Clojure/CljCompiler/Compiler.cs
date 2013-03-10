@@ -1507,7 +1507,7 @@ namespace clojure.lang
                 InvokeInitType(initType.Assembly, initType);
                 return true;
             }
-            catch (Exception)
+            catch (AssemblyInitializationException)
             {
                 return false;
             }

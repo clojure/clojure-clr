@@ -485,7 +485,7 @@ namespace clojure.lang.CljCompiler.Ast
                                 m = HostExpr.Method_RT_uncheckedDecimalCast;
                                 break;
                             default:
-                                throw new ArgumentOutOfRangeException("typeCode", typeCode, string.Format("Don't know how to handle typeCode {0}", typeCode));
+                                throw new ArgumentOutOfRangeException("paramType", paramType, string.Format("Don't know how to handle typeCode {0} for paramType", typeCode));
                         }
                     }
                     else
@@ -529,7 +529,7 @@ namespace clojure.lang.CljCompiler.Ast
                                 m = HostExpr.Method_RT_decimalCast;
                                 break;
                             default:
-                                throw new ArgumentOutOfRangeException("typeCode", typeCode, string.Format("Don't know how to handle typeCode {0}", typeCode));
+                                throw new ArgumentOutOfRangeException("paramType", paramType, string.Format("Don't know how to handle typeCode {0} for paramType", typeCode));
                         }
                     }
                 }

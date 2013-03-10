@@ -3335,7 +3335,7 @@ namespace clojure.lang
             = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
                                                  Symbol.intern("*ns-load-mappings*"), new Atom(PersistentVector.EMPTY)).setDynamic();
 
-        public static FileInfo FindRemappedFile(string filename)
+        public static FileInfo FindRemappedFile(string fileName)
         {
             var nsLoadMappings = NSLoadMappings.deref() as Atom;
             if (nsLoadMappings == null) return null;
@@ -3347,10 +3347,10 @@ namespace clojure.lang
                 var nsRoot = mapping[0] as string;
                 if (nsRoot == null) continue;
                 nsRoot = nsRoot.Replace('.', '/');
-                if(filename.StartsWith(nsRoot))
+                if(fileName.StartsWith(nsRoot))
                 {
                     var fsRoot = mapping[1] as string;
-                    var probePath = ConvertPath(fsRoot) + ConvertPath(filename.Substring(nsRoot.Length));
+                    var probePath = ConvertPath(fsRoot) + ConvertPath(fileName.Substring(nsRoot.Length));
                     if(File.Exists(probePath))
                         return new FileInfo(probePath);
                 }
@@ -3386,7 +3386,16 @@ namespace clojure.lang
                         return stream;
                     }
                 }
-                catch (Exception)
+                catch (ArgumentException)
+                {
+                }
+                catch (IOException)
+                {
+                }
+                catch (NotImplementedException)
+                {
+                }
+                catch (BadImageFormatException)
                 {
                 }
             }
@@ -3439,7 +3448,9 @@ namespace clojure.lang
         /// <summary>
         /// Disable file loading
         /// </summary>
-        /// <remarks>Prevent the load method from searching the file system for .clj and .clj.dll files.  Used in production systems when all namespaces are to found in loaded assemblies.</remarks>
+        /// <remarks>Prevent the load method from searching the file system for .clj and .clj.dll files.  
+        /// Used in production systems when all namespaces are to be found in loaded assemblies.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible")]
         public static bool DisableFileLoad = false;
     }
 
