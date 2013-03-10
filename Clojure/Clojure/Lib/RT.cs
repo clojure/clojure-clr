@@ -3377,26 +3377,34 @@ namespace clojure.lang
             containingAssembly = null;
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
-                try
+                if (!asm.IsDynamic)
                 {
-                    var stream = asm.GetManifestResourceStream(resourceName);
-                    if (stream != null)
+                    try
                     {
-                        containingAssembly = asm;
-                        return stream;
+                        var stream = asm.GetManifestResourceStream(resourceName);
+                        if (stream != null)
+                        {
+                            containingAssembly = asm;
+                            return stream;
+                        }
                     }
-                }
-                catch (ArgumentException)
-                {
-                }
-                catch (IOException)
-                {
-                }
-                catch (NotImplementedException)
-                {
-                }
-                catch (BadImageFormatException)
-                {
+                    catch (ArgumentException)
+                    {
+                    }
+                    catch (IOException)
+                    {
+                    }
+                    catch (NotImplementedException)
+                    {
+                    }
+                    catch (BadImageFormatException)
+                    {
+                    }
+                    catch (NotSupportedException)
+                    {
+                        // Hopefully only dynamic assemblies
+                        // We catch them above because we know dynamic assemblies do not support this
+                    }
                 }
             }
             return null;
