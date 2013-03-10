@@ -28,47 +28,45 @@
   </Target>
   
   <Target Name="CompileTest" DependsOnTargets="Build">
-    <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes" 
-          WorkingDirectory="$(OutputPath)"
+    <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes" 
+          WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == '.Net' "/>
-    <Exec Command="mono $(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes" 
-          WorkingDirectory="$(OutputPath)"
+    <Exec Command="mono $(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes" 
+          WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
   
   <Target Name="Test" DependsOnTargets="Build;CompileTest">
     <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_tests.clj" DestinationFolder="$(OutputPath)" />
-    <Exec Command="$(clji) clojure\run_tests.clj"
-          WorkingDirectory="$(OutputPath)"
-           Condition=" '$(Runtime)' == '.Net' "/>
-    <Exec Command="mono $(clji) clojure\run_tests.clj"
-          WorkingDirectory="$(OutputPath)"
+    <Exec Command="$(clji) clojure\run_tests.clj"
+          WorkingDirectory="$(OutputPath)"
+           Condition=" '$(Runtime)' == '.Net' "/>
+    <Exec Command="mono $(clji) clojure\run_tests.clj"
+          WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
   
   <!-- RJ: Reworked Dist target to work around Mono bug related to embeding ItemGroup inside a Target tag -->
   <Target Name="Dist" DependsOnTargets="Build">
-    <!--DLR-->
-      <Dlls Include="$(OutputPath)\Microsoft.*" />
-      <!--Clojure dlls and exes-->
-      <CreateItem
-      Include="$(OutputPath)\Clojure.*;$(OutputPath)\Microsoft.*" 
-      Exclude="$(OutputPath)\Clojure.Tests.dll;$(OutputPath)\Clojure.Tests.pdb;
-               $(OutputPath)\Clojure.Source.dll;$(OutputPath)\Clojure.Source.pdb;
-               $(OutputPath)\clojure.test-clojure.genclass.examples.ExampleClass.dll;
-               $(OutputPath)\clojure.test-clojure.genclass.examples.ExampleClass.pdb;
-               $(OutputPath)\Clojure.Main.vshost.exe;$(OutputPath)\Clojure.Main.vshost.exe.manifest">
-      <Output
-            TaskParameter="Include"
-            ItemName="Dlls"/>
+      <!--DLR, Clojure dlls and exes-->
+      <CreateItem
+      Include="$(OutputPath)\Clojure.*;$(OutputPath)\Microsoft.*" 
+      Exclude="$(OutputPath)\Clojure.Tests.dll;$(OutputPath)\Clojure.Tests.pdb;
+               $(OutputPath)\Clojure.Source.dll;$(OutputPath)\Clojure.Source.pdb;
+               $(OutputPath)\clojure.test-clojure.genclass.examples.ExampleClass.dll;
+               $(OutputPath)\clojure.test-clojure.genclass.examples.ExampleClass.pdb;
+               $(OutputPath)\Clojure.Main.vshost.exe;$(OutputPath)\Clojure.Main.vshost.exe.manifest">
+      <Output
+            TaskParameter="Include"
+            ItemName="Dlls"/>
      </CreateItem>
       <!--clj and AOT clj files-->
-    <CreateItem
-       Include="$(OutputPath)\clojure\**\*"
-       Exclude="$(OutputPath)\clojure\test_clojure\**\*">
-     <Output
-       TaskParameter="Include"
-       ItemName="CljFiles"/>
+    <CreateItem
+       Include="$(OutputPath)\clojure\**\*"
+       Exclude="$(OutputPath)\clojure\test_clojure\**\*">
+     <Output
+       TaskParameter="Include"
+       ItemName="CljFiles"/>
      </CreateItem>
     <Copy SourceFiles="@(Dlls)" DestinationFolder="..\dist\$(Configuration)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(CljFiles)" DestinationFolder="..\dist\$(Configuration)\clojure\%(RecursiveDir)" SkipUnchangedFiles="true" />
