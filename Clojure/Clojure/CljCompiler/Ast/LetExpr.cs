@@ -128,7 +128,6 @@ namespace clojure.lang.CljCompiler.Ast
                                     HostArg ha = new HostArg(HostArg.ParameterType.Standard, init, null);
                                     List<HostArg> has = new List<HostArg>(1);
                                     has.Add(ha);
-                                    // TODO: We need to define RT.box !!!
                                     init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "box", null, has);
                                     if (RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                                         RT.errPrintWriter().WriteLine("Auto-boxing loop arg: " + sym);
