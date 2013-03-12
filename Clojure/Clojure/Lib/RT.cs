@@ -3164,7 +3164,7 @@ namespace clojure.lang
             if (!RuntimeBootstrapFlag.DisableFileLoad)
             {
                 FileInfo cljInfo = FindFile(cljname);
-                FileInfo assyInfo = FindFile(AppDomain.CurrentDomain.BaseDirectory, assemblyname);
+                FileInfo assyInfo = FindFile(assemblyname);
 
 
                 if ((assyInfo != null &&
@@ -3304,6 +3304,14 @@ namespace clojure.lang
 
         static IEnumerable<string> GetFindFilePaths()
         {
+            return GetFindFilePathsRaw().Distinct();
+        }
+
+        static IEnumerable<string> GetFindFilePathsRaw()
+        {
+            yield return System.AppDomain.CurrentDomain.BaseDirectory;
+            yield return Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "bin");
+            
             yield return Directory.GetCurrentDirectory();
 
             Assembly assy = Assembly.GetEntryAssembly();
