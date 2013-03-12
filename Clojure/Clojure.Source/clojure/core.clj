@@ -322,7 +322,7 @@
   {:added "1.0"
    :static true}
   [^Type c x]   ;;; changed Class to Type
-   (if (. c (IsInstanceOfType x)) x (throw  (InvalidCastException. "Unable to cast."))))  ;;;  original (. c (cast x)))     
+   (if (. c (IsInstanceOfType x)) x (throw  (InvalidCastException. (.ToString (.GetType x))))))  ;;;  original (. c (cast x)))     
 
 (defn to-array
   "Returns an array of Objects containing the contents of coll, which
