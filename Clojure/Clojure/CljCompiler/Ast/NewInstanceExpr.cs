@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -370,7 +371,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             IPersistentVector mk = MSig(m);
             if (!(mm.ContainsKey(mk)
-                || !(m.IsPublic || m.IsFamily)
+                || !(m.IsPublic || m.IsProtected())
                 || m.IsStatic
                 || m.IsFinal))
                 AddMethod(mm, mk, m);

@@ -751,7 +751,7 @@ namespace clojure.lang
             {
                 MethodSignature ms = new MethodSignature(mi, source);
                 if (!considered.Contains(ms)
-                    && (mi.IsPublic || mi.IsFamily)
+                    && (mi.IsPublic || mi.IsProtected())
                     && !mi.IsStatic
                     && !mi.IsFinal
                     && !"Dispose".Equals(mi.Name))
