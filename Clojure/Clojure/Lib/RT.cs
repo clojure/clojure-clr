@@ -19,13 +19,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using RTProperties = clojure.runtime.Properties;
-using Microsoft.Scripting.Hosting;
 using clojure.lang.Runtime;
+using Microsoft.Scripting.Hosting;
+using RTProperties = clojure.runtime.Properties;
 //using BigDecimal = java.math.BigDecimal;
 
 namespace clojure.lang
@@ -3394,7 +3395,11 @@ namespace clojure.lang
             containingAssembly = null;
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
+#if CLR2
+                if (!(asm is AssemblyBuilder))
+#else
                 if (!asm.IsDynamic)
+#endif
                 {
                     try
                     {
