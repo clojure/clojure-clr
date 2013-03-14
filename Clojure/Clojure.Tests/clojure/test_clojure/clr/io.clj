@@ -49,7 +49,7 @@
     (with-temp-file [f]
 	  (testing "spit/slurp with default encoding"
         (spit f content)
-        (is (= content (slurp f)))))
+        (is (= content (slurp f :encoding utf8)))))	;;RJ Added :encoding utf8
     (doseq [enc [ utf8 utf16 utf32 ]]
 	  (with-temp-file [f]
 	    (testing (str "split/slurp with encoding " enc)
@@ -80,7 +80,7 @@
            f (FileStream. (.FullName f) FileMode/Open)
            (text-writer f :encoding utf8) (StreamReader. (FileStream. (.FullName f) FileMode/Open) utf8))
 
-      (is (= content (slurp (get-bytes content utf8))))
+      (is (= content (slurp (get-bytes content utf8) :encoding utf8)))	;;RJ Added :encoding utf8
       ;(is (= content (slurp (.ToCharArray content))))
       (finally
        (.Delete f)))))
