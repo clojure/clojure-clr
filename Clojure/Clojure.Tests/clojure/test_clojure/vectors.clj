@@ -216,7 +216,7 @@
              (:rand-greater-3 regular-vecs))))
     (testing "Comparable.compareTo"
       (testing "incompatible"
-        (is (thrown? InvalidCastException (.CompareTo int-vec nil)))                  ;;; NullPointerException  .compareTo
+        (is (thrown? NullReferenceException (.CompareTo int-vec nil)))                  ;;; NullPointerException  .compareTo
         (are [x] (thrown? InvalidCastException (.CompareTo int-vec x))                    ;;; ClassCastException  .compareTo
              '()
              {}
