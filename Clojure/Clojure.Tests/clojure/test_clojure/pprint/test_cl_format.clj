@@ -531,9 +531,9 @@
 )
 
 (simple-tests angle-bracket-max-column-tests
-  (cl-format nil "~%;; ~{~<~%;; ~1,50:; ~A~>~}.~%" (into [] (.Split #"\\s" "This function computes the circular thermodynamic coefficient of the thrombulator angle for use in determining the reaction distance" )))
+  (cl-format nil "~%;; ~{~<~%;; ~1,50:; ~A~>~}.~%" (into [] (split "This function computes the circular thermodynamic coefficient of the thrombulator angle for use in determining the reaction distance" #"\s" )))	;;RJ: Updated .Split to clojure.string/split and move Regex as the second function parameter for correct function behavior
   "\n;;  This function computes the circular\n;;  thermodynamic coefficient of the thrombulator\n;;  angle for use in determining the reaction\n;;  distance.\n"
-(cl-format true "~%;; ~{~<~%;; ~:; ~A~>~}.~%" (into [] (.Split #"\\s" "This function computes the circular thermodynamic coefficient of the thrombulator angle for use in determining the reaction distance." ))))
+(cl-format true "~%;; ~{~<~%;; ~:; ~A~>~}.~%" (into [] (split "This function computes the circular thermodynamic coefficient of the thrombulator angle for use in determining the reaction distance." #"\s" ))))
 
 (defn list-to-table [aseq column-width]
   (let [stream (get-pretty-writer (System.IO.StringWriter.))]              ;;; (java.io.StringWriter

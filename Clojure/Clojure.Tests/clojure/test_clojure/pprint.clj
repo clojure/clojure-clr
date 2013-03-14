@@ -12,6 +12,7 @@
   (:refer-clojure :exclude [format])
   (:use [clojure.test :only (deftest is are run-tests)]
         [clojure.test-helper :only [platform-newlines]]
+	[clojure.string :only [split]]                  ;;RJ: Added to include clojure.string/split to replace .Split
         clojure.test-clojure.pprint.test-helper
         clojure.pprint))
 
