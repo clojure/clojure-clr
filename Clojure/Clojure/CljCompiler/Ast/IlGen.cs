@@ -35,18 +35,22 @@ namespace clojure.lang.CljCompiler.Ast
 
         private static bool IsVolatile(FieldInfo fi)
         {
-            // This would work in Mono
-            //foreach (Type t in fi.GetRequiredCustomModifiers() )
-            //    if ( t == typeof(IsVolatile) )
-            //        return true;
-
             // Cannot work with signatures on uncreated types
-            Type t = fi.DeclaringType;
-            TypeBuilder tb = t as TypeBuilder;
-            if (tb != null && !tb.IsCreated())
-                return false;
+            {
+                Type t = fi.DeclaringType;
+                TypeBuilder tb = t as TypeBuilder;
+                if (tb != null && !tb.IsCreated())
+                    return false;
+            }
 
+#if MONO
+            foreach (Type t in fi.GetRequiredCustomModifiers() )
+                if ( t == typeof(IsVolatile) )
+                    return true;
+            return false;
+#else
             return FieldSigReader.IsVolatile(fi);
+#endif
         }
 
         public void MaybeEmitVolatileOp(FieldInfo fi)
