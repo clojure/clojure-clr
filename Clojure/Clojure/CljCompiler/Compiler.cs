@@ -1457,13 +1457,25 @@ namespace clojure.lang
             InitAssembly(assy, relativePath);
         }
 
+
+        private static Type GetTypeFromAssy(Assembly assy, string typeName)
+        {
+#if MONO
+            // I have no idea why Mono can't find our initializer types using Assembly.GetType(string).
+            // This is roll-your-own.
+			Type[] types = assy.GetExportedTypes ();			foreach (Type t in types)             {				if (t.Name.Equals (typeName))					return t;			}			return null;
+#else
+            return assy.GetType(typeName);
+#endif
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private static void InitAssembly(Assembly assy, string relativePath)
         {
-            Type initType = assy.GetType(InitClassName(relativePath));
+            Type initType = GetTypeFromAssy(assy,InitClassName(relativePath));
             if (initType == null)
             {
-                initType = assy.GetType("__Init__"); // old init class name
+                initType = GetTypeFromAssy(assy, "__Init__"); // old init class name
                 if (initType == null)
                 {
                     throw new AssemblyInitializationException(String.Format("Cannot find initializer for {0}.{1}",assy.FullName,relativePath));
