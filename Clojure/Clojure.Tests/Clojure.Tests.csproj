@@ -77,8 +77,9 @@
     <Reference Include="clojure.data.generators">
       <HintPath>..\packages\clojure.data.generators.0.1.0.0\lib\net40\clojure.data.generators.dll</HintPath>
     </Reference>
-    <Reference Include="clojure.test.generative">
-      <HintPath>..\packages\clojure.test.generative.0.1.4.1\lib\net40\clojure.test.generative.dll</HintPath>
+    <Reference Include="clojure.test.generative, Version=0.1.4.2, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\clojure.test.generative.0.1.4.2\lib\net40\clojure.test.generative.dll</HintPath>
     </Reference>
     <Reference Include="clojure.tools.namespace">
       <HintPath>..\packages\clojure.tools.namespace.0.2.2.0\lib\net40\clojure.tools.namespace.dll</HintPath>
