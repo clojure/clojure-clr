@@ -78,11 +78,11 @@
 ;;;      (is (= String (.superFindSystemClass obj "java.lang.String"))))))
 
 (deftest interface-array-type-hints
-  (let [array-types       {:ints     (class (int-array 0))
-                           :bytes    (class (byte-array 0))
-                           :shorts   (class (short-array 0))
-                           :chars    (class (char-array 0))
-                           :longs    (class (long-array 0))
+  (let [array-types       {:ints     (class (int-array 0))     :uints (class (uint-array 0))
+                           :bytes    (class (byte-array 0))    :sbytes (class (sbyte-array 0))
+                           :shorts   (class (short-array 0))   :ushorts (class (ushort-array 0))
+                           :chars    (class (char-array 0))   
+                           :longs    (class (long-array 0))    :ulongs (class (ulong-array 0))
                            :floats   (class (float-array 0))
                            :doubles  (class (double-array 0))
                            :booleans (class (boolean-array 0))
@@ -97,22 +97,22 @@
         (testing "sugar primitive array hints"
           (are [name type] (= (type array-types)
                               (parameter-type (method-with-name name)))
-               "takesByteArray"    :bytes
+               "takesByteArray"    :bytes              "takesSByteArray"    :sbytes
                "takesCharArray"    :chars
-               "takesShortArray"   :shorts
-               "takesIntArray"     :ints
-               "takesLongArray"    :longs
+               "takesShortArray"   :shorts             "takesUShortArray"   :ushorts
+               "takesIntArray"     :ints               "takesUIntArray"     :uints
+               "takesLongArray"    :longs              "takesULongArray"    :ulongs
                "takesFloatArray"   :floats
                "takesDoubleArray"  :doubles
                "takesBooleanArray" :booleans))
         (testing "raw primitive array hints"
           (are [name type] (= (type array-types)
                               (return-type (method-with-name name)))
-               "returnsByteArray"    :bytes
+               "returnsByteArray"    :bytes             "returnsSByteArray"    :sbytes
                "returnsCharArray"    :chars
-               "returnsShortArray"   :shorts
-               "returnsIntArray"     :ints
-               "returnsLongArray"    :longs
+               "returnsShortArray"   :shorts            "returnsUShortArray"   :ushorts
+               "returnsIntArray"     :ints              "returnsUIntArray"     :uints
+               "returnsLongArray"    :longs             "returnsULongArray"    :ulongs
                "returnsFloatArray"   :floats
                "returnsDoubleArray"  :doubles
                "returnsBooleanArray" :booleans))))
@@ -121,22 +121,22 @@
         (testing "sugar primitive array hints"
           (are [name type] (= (type array-types)
                               (parameter-type (method-with-name name)))
-               "takesByteArray"    :bytes
+               "takesByteArray"    :bytes            "takesSByteArray"    :sbytes
                "takesCharArray"    :chars
-               "takesShortArray"   :shorts
-               "takesIntArray"     :ints
-               "takesLongArray"    :longs
+               "takesShortArray"   :shorts           "takesUShortArray"   :ushorts
+               "takesIntArray"     :ints             "takesUIntArray"     :uints
+               "takesLongArray"    :longs            "takesULongArray"    :ulongs
                "takesFloatArray"   :floats
                "takesDoubleArray"  :doubles
                "takesBooleanArray" :booleans))
         (testing "raw primitive array hints"
           (are [name type] (= (type array-types)
                               (return-type (method-with-name name)))
-               "returnsByteArray"    :bytes
+               "returnsByteArray"    :bytes          "returnsSByteArray"    :sbytes
                "returnsCharArray"    :chars
-               "returnsShortArray"   :shorts
-               "returnsIntArray"     :ints
-               "returnsLongArray"    :longs
+               "returnsShortArray"   :shorts         "returnsUShortArray"   :ushorts
+               "returnsIntArray"     :ints           "returnsUIntArray"     :uints
+               "returnsLongArray"    :longs          "returnsULongArray"    :ulongs
                "returnsFloatArray"   :floats
                "returnsDoubleArray"  :doubles
                "returnsBooleanArray" :booleans))))))

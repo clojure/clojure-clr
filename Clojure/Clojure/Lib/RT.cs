@@ -2891,6 +2891,19 @@ namespace clojure.lang
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static sbyte aget(sbyte[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static sbyte aset(sbyte[] xs, int i, sbyte v)
+        {
+            xs[i] = v;
+            return v;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static short aget(short[] xs, int i)
         {
             return xs[i];
@@ -2898,6 +2911,19 @@ namespace clojure.lang
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static short aset(short[] xs, int i, short v)
+        {
+            xs[i] = v;
+            return v;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ushort aget(ushort[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ushort aset(ushort[] xs, int i, ushort v)
         {
             xs[i] = v;
             return v;
@@ -2917,6 +2943,19 @@ namespace clojure.lang
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static uint aget(uint[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static uint aset(uint[] xs, int i, uint v)
+        {
+            xs[i] = v;
+            return v;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long aget(long[] xs, int i)
         {
             return xs[i];
@@ -2924,6 +2963,19 @@ namespace clojure.lang
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long aset(long[] xs, int i, long v)
+        {
+            xs[i] = v;
+            return v;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ulong aget(ulong[] xs, int i)
+        {
+            return xs[i];
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ulong aset(ulong[] xs, int i, ulong v)
         {
             xs[i] = v;
             return v;

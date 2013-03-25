@@ -1445,6 +1445,44 @@ namespace clojure.lang
             }
         }
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static uint[] uint_array(int size, Object init)
+        {
+            uint[] ret = new uint[size];
+            if (Util.IsNumeric(init))
+            {
+                uint f = Util.ConvertToUInt(init);
+                for (int i = 0; i < ret.Length; i++)
+                    ret[i] = f;
+            }
+            else
+            {
+                ISeq s = RT.seq(init);
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToUInt(s.first());
+            }
+            return ret;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static uint[] uint_array(Object sizeOrSeq)
+        {
+            if (Util.IsNumeric(sizeOrSeq))
+                return new uint[Util.ConvertToUInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = RT.count(s);
+                uint[] ret = new uint[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToUInt(s.first());
+                return ret;
+            }
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long[] long_array(int size, Object init)
@@ -1482,6 +1520,42 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ulong[] ulong_array(int size, Object init)
+        {
+            ulong[] ret = new ulong[size];
+            if (Util.IsNumeric(init))
+            {
+                ulong f = Util.ConvertToULong(init);
+                for (int i = 0; i < ret.Length; i++)
+                    ret[i] = f;
+            }
+            else
+            {
+                ISeq s = RT.seq(init);
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToULong(s.first());
+            }
+            return ret;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ulong[] ulong_array(Object sizeOrSeq)
+        {
+            if (Util.IsNumeric(sizeOrSeq))
+                return new ulong[Util.ConvertToInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = RT.count(s);
+                ulong[] ret = new ulong[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToULong(s.first());
+                return ret;
+            }
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
@@ -1516,6 +1590,44 @@ namespace clojure.lang
                 short[] ret = new short[size];
                 for (int i = 0; i < size && s != null; i++, s = s.next())
                     ret[i] = Util.ConvertToShort(s.first());
+                return ret;
+            }
+        }
+
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ushort[] ushort_array(int size, Object init)
+        {
+            ushort[] ret = new ushort[size];
+            if (Util.IsNumeric(init))
+            {
+                ushort f = Util.ConvertToUShort(init);
+                for (int i = 0; i < ret.Length; i++)
+                    ret[i] = f;
+            }
+            else
+            {
+                ISeq s = RT.seq(init);
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToUShort(s.first());
+            }
+            return ret;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ushort[] ushort_array(Object sizeOrSeq)
+        {
+            if (Util.IsNumeric(sizeOrSeq))
+                return new ushort[Util.ConvertToInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = RT.count(s);
+                ushort[] ret = new ushort[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToUShort(s.first());
                 return ret;
             }
         }
@@ -1599,6 +1711,44 @@ namespace clojure.lang
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static sbyte[] sbyte_array(int size, Object init)
+        {
+            sbyte[] ret = new sbyte[size];
+            if (Util.IsNumeric(init))
+            {
+                sbyte f = Util.ConvertToSByte(init);
+                for (int i = 0; i < ret.Length; i++)
+                    ret[i] = f;
+            }
+            else
+            {
+                ISeq s = RT.seq(init);
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToSByte(s.first());
+            }
+            return ret;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static sbyte[] sbyte_array(Object sizeOrSeq)
+        {
+            if (Util.IsNumeric(sizeOrSeq))
+                return new sbyte[Util.ConvertToInt(sizeOrSeq)];
+            else
+            {
+                ISeq s = RT.seq(sizeOrSeq);
+                int size = RT.count(s);
+                sbyte[] ret = new sbyte[size];
+                for (int i = 0; i < size && s != null; i++, s = s.next())
+                    ret[i] = Util.ConvertToSByte(s.first());
+                return ret;
+            }
+        }
+
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static bool[] boolean_array(int size, Object init)
         {
             bool[] ret = new bool[size];
@@ -1648,6 +1798,12 @@ namespace clojure.lang
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static sbyte[] sbytes(Object array)
+        {
+            return (sbyte[])array;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static char[] chars(Object array)
         {
             return (char[])array;
@@ -1657,6 +1813,12 @@ namespace clojure.lang
         public static short[] shorts(Object array)
         {
             return (short[])array;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ushort[] ushorts(Object array)
+        {
+            return (ushort[])array;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
@@ -1678,9 +1840,21 @@ namespace clojure.lang
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static uint[] uints(Object array)
+        {
+            return (uint[])array;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long[] longs(Object array)
         {
             return (long[])array;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ulong[] ulongs(Object array)
+        {
+            return (ulong[])array;
         }
 
         #endregion

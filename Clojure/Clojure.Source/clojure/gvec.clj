@@ -462,12 +462,12 @@
             (aset [_ ~garr i# val#] (aset ~tgarr i# (~t val#))))))
 
 (def ^{:private true} ams
-     {:int (mk-am int)
-      :long (mk-am long)
-      :float (mk-am float)
+     {:int (mk-am int)          :uint (mk-am uint)
+      :long (mk-am long)        :ulong (mk-am ulong)
+      :float (mk-am float)      
       :double (mk-am double)
-      :byte (mk-am byte)
-      :short (mk-am short)
+      :byte (mk-am byte)        :sbyte (mk-am sbyte)
+      :short (mk-am short)      :ushort (mk-am ushort)
       :char (mk-am char)
       :boolean (mk-am boolean)})
 

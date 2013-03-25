@@ -77,6 +77,41 @@
     :added "1.0"}
   aset-sbyte setSByte sbyte)
 
+;; Addtional array types
+
+(defn uint-array
+  "Creates an array of uints"
+  {:inline (fn [& args] `(. clojure.lang.Numbers uint_array ~@args))
+   :inline-arities #{1 2}
+   :added "1.5"}
+  ([size-or-seq] (. clojure.lang.Numbers uint_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers uint_array size init-val-or-seq)))
+
+(defn ushort-array
+  "Creates an array of ushorts"
+  {:inline (fn [& args] `(. clojure.lang.Numbers ushort_array ~@args))
+   :inline-arities #{1 2}
+   :added "1.5"}
+  ([size-or-seq] (. clojure.lang.Numbers ushort_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers ushort_array size init-val-or-seq)))
+
+(defn ulong-array
+  "Creates an array of ulongs"
+  {:inline (fn [& args] `(. clojure.lang.Numbers ulong_array ~@args))
+   :inline-arities #{1 2}
+   :added "1.5"}
+  ([size-or-seq] (. clojure.lang.Numbers ulong_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers ulong_array size init-val-or-seq)))
+
+(defn sbyte-array
+  "Creates an array of sbytes"
+  {:inline (fn [& args] `(. clojure.lang.Numbers sbyte_array ~@args))
+   :inline-arities #{1 2}
+   :added "1.5"}
+  ([size-or-seq] (. clojure.lang.Numbers sbyte_array size-or-seq))
+  ([size init-val-or-seq] (. clojure.lang.Numbers sbyte_array size init-val-or-seq)))
+
+
 ; Support for enums
   
 (defn enum-val [t n]
