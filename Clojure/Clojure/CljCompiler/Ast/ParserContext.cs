@@ -38,9 +38,6 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _rhc; }
         } 
 
-
-        //readonly bool _isRecurContext;
-
         public bool IsRecurContext
         {
             get { return _rhc == RHC.Return; }
@@ -52,7 +49,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get { return _isAssignContext; }
         } 
-
 
         #endregion
 

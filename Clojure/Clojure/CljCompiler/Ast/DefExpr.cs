@@ -135,6 +135,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (docstring != null)
                     mm = (IPersistentMap)RT.assoc(mm, RT.DocKey, docstring);
 
+                //  Following comment in JVM version
                 //mm = mm.without(RT.DOC_KEY)
                 //            .without(Keyword.intern(null, "arglists"))
                 //            .without(RT.FILE_KEY)

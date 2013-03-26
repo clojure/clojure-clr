@@ -97,7 +97,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        // TODO: Handle by-ref
         public override object Eval()
         {
             return _tinfo.GetValue(null);
@@ -206,7 +205,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        // TODO: Handle by-ref
         public override object Eval()
         {
             return _tinfo.GetValue(null,new object[0]);

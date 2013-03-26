@@ -26,7 +26,6 @@ namespace Clojure.Tests.LibTests
 {
 
     // TODO: Add tests for APersistentVector.SubVector
-    // TODO: Add tests for APersistentVector.stream
 
     [TestFixture]
     public class APersistentVectorTests : AssertionHelper

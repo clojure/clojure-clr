@@ -209,10 +209,7 @@ namespace clojure.lang.CljCompiler.Ast
             foreach (int i in _tests.Keys)
                 labels[i] = ilg.DefineLabel();
 
-            // TODO: debug info
-
             Type primExprType = Compiler.MaybePrimitiveType(_expr);
-
 
             if (_testType == _intKey)
                 EmitExprForInts(objx, ilg, primExprType, defaultLabel);

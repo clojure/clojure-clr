@@ -243,10 +243,6 @@ namespace clojure.lang.CljCompiler.Ast
                             throw new ParseException("Can't find matching overloaded method: " + name.Name);
 
                         method._minfos = ms;
-
-                        //if (m.ReturnType != method._retType)
-                        //    throw new ArgumentException(String.Format("Mismatched return type: {0}, expected {1}, had: {2}",
-                        //        name.Name, m.ReturnType.Name, method._retType.Name));
                     }
                     else // one match
                     {
@@ -363,11 +359,6 @@ namespace clojure.lang.CljCompiler.Ast
 
             MethodBuilder mb = tb.DefineMethod(GetMethodName(), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, GetReturnType(), GetArgTypes());
             SetCustomAttributes(mb);
-
-            //Console.Write("Compiling method {0} ", GetMethodName());
-            //foreach (Type t in GetArgTypes())
-            //    Console.Write("{0}, ", t.Name);
-            //Console.WriteLine("returning {0}", GetReturnType().Name);
 
             CljILGen ilg = new CljILGen(mb.GetILGenerator());
             Label loopLabel = ilg.DefineLabel();

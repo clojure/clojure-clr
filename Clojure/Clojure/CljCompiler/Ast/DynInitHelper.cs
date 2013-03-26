@@ -55,8 +55,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             _assemblyGen = ag;
             _typeName = typeName;
-            //_typeBuilder = ag.DefinePublicType(typeName, typeof(object), true);
-            //_typeGen = new TypeGen(ag, _typeBuilder);
         }
 
         #endregion
@@ -123,20 +121,6 @@ namespace clojure.lang.CljCompiler.Ast
 
             _fieldBuilders.Add(fb);
             _fieldInits.Add(init);
-
-
-            //Type t = init.Type;
-            //if (t.IsGenericType)
-            //{
-            //    Type[] args = t.GetGenericArguments()[0].GetGenericArguments(); ;
-            //    // skip the first one, it is the site.
-            //    for (int k = 1; k < args.Length; k++)
-            //    {
-            //        Type p = args[k];
-            //        //if (!p.Assembly.GetName().Name.Equals("mscorlib") && !p.Assembly.GetName().Name.Equals("Clojure"))
-            //        //    Console.WriteLine("Found {0}", p.ToString());
-            //    }
-            //}
 
             // rewrite the node...
             return Expression.Field(null, fb);
@@ -258,7 +242,6 @@ namespace clojure.lang.CljCompiler.Ast
         private const TypeAttributes DelegateAttributes = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass;
         private static readonly Type[] _DelegateCtorSignature = new Type[] { typeof(object), typeof(IntPtr) };
 
-
         #endregion
 
         #region Finalizing
@@ -274,9 +257,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         void CreateStaticCtor()
         {
-            //Console.WriteLine("Creating static ctor for {0}",
-            //    _typeBuilder.AssemblyQualifiedName);
-            
             ConstructorBuilder ctorB = _typeBuilder.DefineConstructor(MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
             CljILGen gen = new CljILGen(ctorB.GetILGenerator());
 

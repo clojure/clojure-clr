@@ -110,9 +110,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void EmitForMethod(ObjExpr objx, CljILGen ilg)
         {
-            //if (_args.Exists((x) => x.ParamType == HostArg.ParameterType.ByRef)
-                //|| Array.Exists(_method.GetParameters(),(x)=> x.ParameterType.IsByRef)
-                //|| _method.IsGenericMethodDefinition)
             if ( _method.IsGenericMethodDefinition )
             {
                 EmitComplexCall(objx, ilg);
