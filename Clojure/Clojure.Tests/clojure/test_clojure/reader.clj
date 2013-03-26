@@ -600,7 +600,7 @@
 
 (defspec types-that-should-roundtrip
   roundtrip
-  [^anything o]
+  [^{:tag cgen/ednable} o]
   (when-not (= o %)
     (throw (ex-info "Value cannot roundtrip, see ex-data" {:printed o :read %}))))
 
