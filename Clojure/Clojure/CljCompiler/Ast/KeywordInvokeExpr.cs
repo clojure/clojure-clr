@@ -82,73 +82,65 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            if (objx.FnMode == FnMode.Light)
-            {
-                // This will emit a plain Keyword reference, rather than a callsite.
-                InvokeExpr ie = new InvokeExpr(_source, _spanMap, (Symbol)_tag, _kw, RT.vector(_target));
-                ie.Emit(rhc, objx, ilg);
-            }
-            else
-            {
-                Label endLabel = ilg.DefineLabel();
-                Label faultLabel = ilg.DefineLabel();
 
-                GenContext.EmitDebugInfo(ilg, _spanMap);
+            Label endLabel = ilg.DefineLabel();
+            Label faultLabel = ilg.DefineLabel();
 
-                LocalBuilder thunkLoc = ilg.DeclareLocal(typeof(ILookupThunk));
-                LocalBuilder targetLoc = ilg.DeclareLocal(typeof(Object));
-                LocalBuilder resultLoc = ilg.DeclareLocal(typeof(Object));
-                GenContext.SetLocalName(thunkLoc, "thunk");
-                GenContext.SetLocalName(targetLoc, "target");
-                GenContext.SetLocalName(resultLoc, "result");
+            GenContext.EmitDebugInfo(ilg, _spanMap);
 
-                // TODO: Debug info
+            LocalBuilder thunkLoc = ilg.DeclareLocal(typeof(ILookupThunk));
+            LocalBuilder targetLoc = ilg.DeclareLocal(typeof(Object));
+            LocalBuilder resultLoc = ilg.DeclareLocal(typeof(Object));
+            GenContext.SetLocalName(thunkLoc, "thunk");
+            GenContext.SetLocalName(targetLoc, "target");
+            GenContext.SetLocalName(resultLoc, "result");
 
-                // pseudo-code:
-                //  ILookupThunk thunk = objclass.ThunkField(i)
-                //  object target = ...code...
-                //  object val = thunk.get(target)
-                //  if ( val != thunk )
-                //     return val
-                //  else
-                //     KeywordLookupSite site = objclass.SiteField(i)
-                //     thunk = site.fault(target)
-                //     objclass.ThunkField(i) = thunk
-                //     val = thunk.get(target)
-                //     return val
+            // TODO: Debug info
 
-                ilg.EmitFieldGet(objx.ThunkField(_siteIndex));                     // thunk
-                ilg.Emit(OpCodes.Stloc, thunkLoc);                                  //  (thunkLoc <= thunk)
+            // pseudo-code:
+            //  ILookupThunk thunk = objclass.ThunkField(i)
+            //  object target = ...code...
+            //  object val = thunk.get(target)
+            //  if ( val != thunk )
+            //     return val
+            //  else
+            //     KeywordLookupSite site = objclass.SiteField(i)
+            //     thunk = site.fault(target)
+            //     objclass.ThunkField(i) = thunk
+            //     val = thunk.get(target)
+            //     return val
 
-                _target.Emit(RHC.Expression, objx, ilg);                         // target
-                ilg.Emit(OpCodes.Stloc, targetLoc);                                  //   (targetLoc <= target)
+            ilg.EmitFieldGet(objx.ThunkField(_siteIndex));                     // thunk
+            ilg.Emit(OpCodes.Stloc, thunkLoc);                                  //  (thunkLoc <= thunk)
 
-                ilg.Emit(OpCodes.Ldloc, thunkLoc);
-                ilg.Emit(OpCodes.Ldloc, targetLoc);
-                ilg.EmitCall(Compiler.Method_ILookupThunk_get);                    // result
-                ilg.Emit(OpCodes.Stloc, resultLoc);                                 //    (resultLoc <= result)
+            _target.Emit(RHC.Expression, objx, ilg);                         // target
+            ilg.Emit(OpCodes.Stloc, targetLoc);                                  //   (targetLoc <= target)
 
-                ilg.Emit(OpCodes.Ldloc, thunkLoc);
-                ilg.Emit(OpCodes.Ldloc, resultLoc);
-                ilg.Emit(OpCodes.Beq, faultLabel);
+            ilg.Emit(OpCodes.Ldloc, thunkLoc);
+            ilg.Emit(OpCodes.Ldloc, targetLoc);
+            ilg.EmitCall(Compiler.Method_ILookupThunk_get);                    // result
+            ilg.Emit(OpCodes.Stloc, resultLoc);                                 //    (resultLoc <= result)
 
-                ilg.Emit(OpCodes.Ldloc, resultLoc);                                  // result
-                ilg.Emit(OpCodes.Br, endLabel);
+            ilg.Emit(OpCodes.Ldloc, thunkLoc);
+            ilg.Emit(OpCodes.Ldloc, resultLoc);
+            ilg.Emit(OpCodes.Beq, faultLabel);
 
-                ilg.MarkLabel(faultLabel);
-                ilg.EmitFieldGet(objx.KeywordLookupSiteField(_siteIndex));           // site
-                ilg.Emit(OpCodes.Ldloc, targetLoc);                                  // site, target
-                ilg.EmitCall(Compiler.Method_ILookupSite_fault);                    // new-thunk
-                ilg.Emit(OpCodes.Dup);                                              // new-thunk, new-thunk
-                ilg.EmitFieldSet(objx.ThunkField(_siteIndex));                      // new-thunk
+            ilg.Emit(OpCodes.Ldloc, resultLoc);                                  // result
+            ilg.Emit(OpCodes.Br, endLabel);
 
-                ilg.Emit(OpCodes.Ldloc, targetLoc);                                 // new-thunk, target
-                ilg.EmitCall(Compiler.Method_ILookupThunk_get);                    // result
+            ilg.MarkLabel(faultLabel);
+            ilg.EmitFieldGet(objx.KeywordLookupSiteField(_siteIndex));           // site
+            ilg.Emit(OpCodes.Ldloc, targetLoc);                                  // site, target
+            ilg.EmitCall(Compiler.Method_ILookupSite_fault);                    // new-thunk
+            ilg.Emit(OpCodes.Dup);                                              // new-thunk, new-thunk
+            ilg.EmitFieldSet(objx.ThunkField(_siteIndex));                      // new-thunk
 
-                ilg.MarkLabel(endLabel);                                           // result
-                if (rhc == RHC.Statement)
-                    ilg.Emit(OpCodes.Pop);
-            }
+            ilg.Emit(OpCodes.Ldloc, targetLoc);                                 // new-thunk, target
+            ilg.EmitCall(Compiler.Method_ILookupThunk_get);                    // result
+
+            ilg.MarkLabel(endLabel);                                           // result
+            if (rhc == RHC.Statement)
+                ilg.Emit(OpCodes.Pop);
         }
 
         public bool HasNormalExit() { return true; }

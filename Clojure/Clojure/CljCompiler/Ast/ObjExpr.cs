@@ -24,26 +24,6 @@ using System.Text.RegularExpressions;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    #region Enums
-
-    /// <summary>
-    /// Indicates whether we need full class generation for the current function
-    /// </summary>
-    public enum FnMode
-    {
-        /// <summary>
-        /// The current ObjExpr is not generating its own class
-        /// </summary>
-        Light,
-
-        /// <summary>
-        /// The current ObjExpr is generating its own class
-        /// </summary>
-        Full
-    };
-
-    #endregion
-
     public class ObjExpr : Expr
     {
         #region Data
@@ -213,36 +193,10 @@ namespace clojure.lang.CljCompiler.Ast
             return _thunkFields[i];
         }
 
-
-        // OLD ONLY
-
-        
         protected string _thisName;
-        //protected IPersistentVector _closesExprs = PersistentVector.EMPTY;  // localbinding exprs
-        //protected IPersistentSet _volatiles = PersistentHashSet.EMPTY;      // symbols
         protected IPersistentVector _hintedFields = PersistentVector.EMPTY; // hinted fields
-        // int line;
- 
-        //protected Type _baseType = null;
-
-        
-        //protected ParameterExpression _thisParam = null;
-
-        private FnMode _fnMode = FnMode.Full;
-
-        public FnMode FnMode
-        {
-            get { return _fnMode; }
-            set { _fnMode = value; }
-        }
-
- 
 
         private IPersistentSet _varCallsites;
-
-
-
-
         
         #endregion
 
@@ -1024,39 +978,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal void EmitConstant(CljILGen ilg, int id, object val)
         {
-            if (_fnMode == Ast.FnMode.Light)
+            FieldBuilder fb = null;
+            if ( ConstantFields != null && ConstantFields.TryGetValue(id, out fb))
             {
-                if (val == null)
-                {
-                    ilg.EmitNull();
-                }
-                if (val.GetType().IsPrimitive)
-                {
-                    EmitPrimitive(ilg, val);
-                    ilg.Emit(OpCodes.Box,val.GetType());
-                }
-                else
-                {
-                    ilg.Emit(OpCodes.Ldarg_0); // this
-                    ilg.Emit(OpCodes.Castclass, typeof(IFnClosure));
-                    ilg.EmitCall(Compiler.Method_IFnClosure_GetClosure);
-                    ilg.EmitFieldGet(Compiler.Field_Closure_Constants);
-                    ilg.EmitInt(id);
-                    ilg.EmitLoadElement(typeof(Object));
-                    ilg.Emit(OpCodes.Castclass, ConstantType(id));
-                }
+                ilg.MaybeEmitVolatileOp(fb);
+                ilg.Emit(OpCodes.Ldsfld, fb);
             }
             else
-            {
-                FieldBuilder fb = null;
-                if (_fnMode == FnMode.Full && ConstantFields != null && ConstantFields.TryGetValue(id, out fb))
-                {
-                    ilg.MaybeEmitVolatileOp(fb);
-                    ilg.Emit(OpCodes.Ldsfld, fb);
-                }
-                else
-                    EmitValue(val, ilg);
-            }
+                EmitValue(val, ilg);
         }
 
 
@@ -1129,25 +1058,13 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (Closes.containsKey(lb))
             {
-                if (_fnMode == FnMode.Full)
-                {
-                    ilg.Emit(OpCodes.Ldarg_0); // this
-                    FieldBuilder fb = _closedOverFieldsMap[lb];
-                    ilg.MaybeEmitVolatileOp(IsVolatile(lb)); 
-                    ilg.Emit(OpCodes.Ldfld, fb);
-                    if (primType != null)
-                        HostExpr.EmitBoxReturn(this, ilg, primType);
-                    // TODO: ONCEONLY?    
-                }
-                else // FnMode.Light
-                {
-                    ilg.Emit(OpCodes.Ldarg_0); // this
-                    ilg.Emit(OpCodes.Castclass, typeof(IFnClosure));
-                    ilg.EmitCall(Compiler.Method_IFnClosure_GetClosure);
-                    ilg.EmitFieldGet(Compiler.Field_Closure_Locals);
-                    ilg.EmitInt(lb.Index);
-                    ilg.EmitLoadElement(typeof(Object));
-                }
+                ilg.Emit(OpCodes.Ldarg_0); // this
+                FieldBuilder fb = _closedOverFieldsMap[lb];
+                ilg.MaybeEmitVolatileOp(IsVolatile(lb));
+                ilg.Emit(OpCodes.Ldfld, fb);
+                if (primType != null)
+                    HostExpr.EmitBoxReturn(this, ilg, primType);
+                // TODO: ONCEONLY?    
             }
             else
             {
@@ -1174,24 +1091,10 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if (Closes.containsKey(lb))
             {
-                if (_fnMode == FnMode.Full)
-                {
-                    ilg.Emit(OpCodes.Ldarg_0); // this
-                    FieldBuilder fb = _closedOverFieldsMap[lb];
-                    ilg.MaybeEmitVolatileOp(IsVolatile(lb));
-                    ilg.Emit(OpCodes.Ldfld, fb);
-                }
-                else
-                {
-                    ilg.Emit(OpCodes.Ldarg_0); // this
-                    ilg.Emit(OpCodes.Castclass, typeof(IFnClosure)); 
-                    ilg.EmitCall(Compiler.Method_IFnClosure_GetClosure);
-                    ilg.EmitFieldGet(Compiler.Field_Closure_Locals);
-                    ilg.EmitInt(lb.Index);
-                    ilg.EmitLoadElement(typeof(Object));
-                    if (lb.PrimitiveType != null)
-                        ilg.Emit(OpCodes.Unbox, lb.PrimitiveType);
-                }
+                ilg.Emit(OpCodes.Ldarg_0); // this
+                FieldBuilder fb = _closedOverFieldsMap[lb];
+                ilg.MaybeEmitVolatileOp(IsVolatile(lb));
+                ilg.Emit(OpCodes.Ldfld, fb);
             }
             else if (lb.IsArg)
             {

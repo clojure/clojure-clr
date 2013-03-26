@@ -139,18 +139,12 @@ namespace clojure.lang.CljCompiler.Ast
 
             fn.SpanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();
 
-
-
             GenContext newContext = null;
 
-            // Uncomment -if- to enable light compilation  (and see below)
-            //bool hasPrimDecls = HasPrimDecls((ISeq)RT.next(form));
-            //if (Compiler.IsCompiling || hasPrimDecls || fn.IsStatic)
-            //{
-                GenContext context = Compiler.CompilerContextVar.deref() as GenContext ?? Compiler.EvalContext;
-                newContext = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
-                Var.pushThreadBindings(RT.map(Compiler.CompilerContextVar, newContext));
-            //}
+            GenContext context = Compiler.CompilerContextVar.deref() as GenContext ?? Compiler.EvalContext;
+            newContext = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
+            Var.pushThreadBindings(RT.map(Compiler.CompilerContextVar, newContext));
+
 
             try
             {
@@ -221,26 +215,16 @@ namespace clojure.lang.CljCompiler.Ast
                 fn._hasMeta = RT.count(fmeta) > 0;
 
 
-                // Uncomment if/else to enable light compilation (and see above)
-                //if (Compiler.IsCompiling || prims.Count > 0|| fn.IsStatic)
-                //{
+                IPersistentVector primTypes = PersistentVector.EMPTY;
+                foreach (string typename in prims)
+                    primTypes = primTypes.cons(Type.GetType(typename));
 
-                    IPersistentVector primTypes = PersistentVector.EMPTY;
-                    foreach (string typename in prims)
-                        primTypes = primTypes.cons(Type.GetType(typename));
-
-                        fn.Compile(
-                            fn.IsVariadic ? typeof(RestFn) : typeof(AFunction),
-                            null,
-                            primTypes,
-                            fn._onceOnly,
-                            newContext);
-                //}
-                //else
-                //{
-                //    fn.FnMode = FnMode.Light;
-                //    fn.LightCompile(fn.GetPrecompiledType(), Compiler.EvalContext);
-                //}
+                fn.Compile(
+                    fn.IsVariadic ? typeof(RestFn) : typeof(AFunction),
+                    null,
+                    primTypes,
+                    fn._onceOnly,
+                    newContext);
 
                 if (fn.SupportsMeta)
                     return new MetaExpr(fn, MapExpr.Parse(pcon.EvalOrExpr(), fmeta));
@@ -270,53 +254,6 @@ namespace clojure.lang.CljCompiler.Ast
             return false;
         }
 
-        void LightCompile(Type compiledType, GenContext context)
-        {
-            if (_compiledType != null)
-                return;
-
-            _compiledType = compiledType;
-
-            LightCompileMethods();
-            LightCompileConstants();
-        }
-
-        void LightCompileMethods()
-        {
-            Dictionary<int, DynamicMethod> dict = new Dictionary<int, DynamicMethod>();
-
-            // Create a dynamic method that takes an array of closed-over values
-            // and returns an instance of AFnImpl.
-
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
-            {
-                FnMethod method = (FnMethod)s.first();
-                method.LightEmit(this, CompiledType);
-                int key = GetMethodKey(method);
-
-                //dict[key] = new WeakReference(method.DynMethod);
-                dict[key] = method.DynMethod;
-            }
-
-            DynMethodMap[DynMethodMapKey] = dict;
-            _dynMethodMap = dict;
-        }
-
-        void LightCompileConstants()
-        {
-            object[] cs = new object[Constants.count()];
-
-            for (int i = 0; i < Constants.count(); i++)
-            {
-                cs[i] = Constants.nth(i);
-            }
-
-            //ConstantsMap[DynMethodMapKey] = new WeakReference(cs);
-            ConstantsMap[DynMethodMapKey] = cs;
-            _compiledConstants = cs;
-        }
-
-
         static readonly MethodInfo Method_DynamicMethod_CreateDelegate = typeof(DynamicMethod).GetMethod("CreateDelegate", new Type[] { typeof(Type), typeof(object) });
         static readonly MethodInfo Method_FnExpr_GetDynMethod = typeof(FnExpr).GetMethod("GetDynMethod");
         static readonly MethodInfo Method_FnExpr_GetCompiledConstants = typeof(FnExpr).GetMethod("GetCompiledConstants");
@@ -340,106 +277,6 @@ namespace clojure.lang.CljCompiler.Ast
             return ConstantsMap[key];
             //WeakReference wr = ConstantsMap[key];
             //return (object[])wr.Target;
-        }
-
-
-        void LightEmit(RHC rhc, ObjExpr objx, CljILGen ilg)
-        {
-
-            //emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
-            //objx arg is enclosing objx, not this
-
-            
-            // Create the function instance
-            LocalBuilder fnLocal = ilg.DeclareLocal(CompiledType);
-            
-            if (CompiledType == typeof(RestFnImpl))
-            {
-                ilg.EmitInt(_variadicMethod.RequiredArity);
-                ilg.EmitNew(Compiler.Ctor_RestFnImpl_1);
-            }
-            else
-            {
-                ilg.EmitNew(Compiler.Ctor_AFnImpl);
-            }
-
-            ilg.Emit(OpCodes.Stloc, fnLocal);
-
-            //ilg.EmitString(String.Format("Creating fn {0}", Name));
-            //ilg.Emit(OpCodes.Call, typeof(System.Console).GetMethod("WriteLine", new Type[] { typeof(string) }));
-
-            // Set up the methods
-
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
-            {
-                FnMethod method = (FnMethod)s.first();
-                int key = GetMethodKey(method);
- 
-                string fieldName = IsVariadic && method.IsVariadic
-                    ? "_fnDo" + (key - 1)  // because key is arity+1 for variadic
-                    : "_fn" + key;
-
-                FieldInfo fi = CompiledType.GetField(fieldName);
-
-                ilg.Emit(OpCodes.Ldloc, fnLocal);
-
-
-                EmitGetDynMethod(key, ilg);
-                ilg.EmitType(fi.FieldType);
-                ilg.Emit(OpCodes.Ldloc, fnLocal);
-                ilg.Emit(OpCodes.Callvirt, Method_DynamicMethod_CreateDelegate);
-                ilg.Emit(OpCodes.Castclass, fi.FieldType);
-
-                ilg.MaybeEmitVolatileOp(fi);
-                ilg.EmitFieldSet(fi);
-            }
-
-
-
-            // setup the constants and locals
-            ilg.Emit(OpCodes.Ldloc, fnLocal);
-
-            if (Constants.count() > 0)
-            {
-                EmitGetCompiledConstants(ilg);
-            }
-            else
-            {
-                ilg.EmitInt(0);
-                ilg.EmitArray(typeof(Object[]));
-            }
-
-            if (Closes.count() > 0)
-            {
-
-                int maxIndex = Closes.Max(c => ((LocalBinding)c.key()).Index);
-
-                ilg.EmitInt(maxIndex + 1);
-                ilg.Emit(OpCodes.Newarr, typeof(object));
-
-                for (ISeq s = RT.keys(Closes); s != null; s = s.next())
-                {
-                    LocalBinding lb = (LocalBinding)s.first();
-                    ilg.Emit(OpCodes.Dup);
-                    ilg.EmitInt(lb.Index);
-                    objx.EmitLocal(ilg, lb);
-                    ilg.EmitStoreElement(typeof(object));
-                }
-            }
-            else
-            {
-                ilg.EmitInt(0);
-                ilg.EmitArray(typeof(Object[]));
-            }
-
-            // Create the closure
-            ilg.EmitNew(Compiler.Ctor_Closure_2);
-
-            // Assign the clojure
-            ilg.EmitCall(Compiler.Method_IFnClosure_SetClosure);
-
-            // Leave the instance on the stack.
-            ilg.Emit(OpCodes.Ldloc, fnLocal);
         }
 
         private static int GetMethodKey(FnMethod method)
@@ -470,18 +307,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override object Eval()
         {
-            if (FnMode == FnMode.Full)
-                return base.Eval();
-            else
-            {
-                DynamicMethod dyn = new DynamicMethod("__fnEval_" + RT.nextID(), typeof(object), Type.EmptyTypes,true);
-                CljILGen ilg = new CljILGen(dyn.GetILGenerator());
-
-                LightEmit(RHC.Expression, this /* WRONG!!! */, ilg);
-                ilg.Emit(OpCodes.Ret);
-                Delegate dlg = dyn.CreateDelegate(typeof(Compiler.ReplDelegate));
-                return dlg.DynamicInvoke();
-            }
+            return base.Eval();
         }
 
         #endregion
@@ -529,14 +355,6 @@ namespace clojure.lang.CljCompiler.Ast
         internal void EmitForDefn(ObjExpr objx, CljILGen ilg)
         {
             Emit(RHC.Expression, objx, ilg);
-        }
-
-        public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
-        {
-            if (FnMode == FnMode.Full)
-                base.Emit(rhc, objx, ilg);
-            else
-                LightEmit(rhc, objx, ilg);
         }
 
         protected override void EmitMethods(TypeBuilder tb)

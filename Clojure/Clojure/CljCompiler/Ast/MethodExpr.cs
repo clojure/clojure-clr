@@ -154,6 +154,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void EmitComplexCall(ObjExpr objx, CljILGen ilg)
         {
+            // TOD: We have gotten rid of light-compile. Simplify this.
             // This is made more complex than I'd like by light-compiling.
             // Without light-compile, we could just:
             //   Emit the target expression
