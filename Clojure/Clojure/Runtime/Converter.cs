@@ -50,6 +50,14 @@ namespace clojure.lang.Runtime
             //    return true;
             //}
 
+            // Because long[] and ulong[] are inter-assignable, we run into problems.
+            // Let's just not convert from an array of one primitive type to another.
+
+            if (fromType.IsArray && toType.IsArray && (Util.IsPrimitiveNumeric(fromType.GetElementType()) || Util.IsPrimitiveNumeric(toType.GetElementType())))
+            {
+                return false;
+            }
+
             if (!Util.IsPrimitiveNumeric(fromType) && toType.IsAssignableFrom(fromType))
             {
                 return true;

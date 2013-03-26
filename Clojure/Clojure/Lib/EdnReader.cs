@@ -767,7 +767,7 @@ namespace clojure.lang
                     if (Char.IsLetter((char)ch))
                     {
                         Unread(r, ch);
-                        return _taggedReader.invoke(r, ch, opts);
+                        return _taggedReader.invoke(r,(char)ch, opts);
                     }
                     throw new InvalidOperationException(String.Format("No dispatch macro for: {0}", (char)ch));
                 }

@@ -133,7 +133,7 @@ namespace clojure.lang.CljCompiler.Ast
                             try
                             {
                                 Var.pushThreadBindings(RT.map(Compiler.NoRecurVar, true));
-                                bodyExpr = new BodyExpr.Parser().Parse(recursePcon, RT.seq(body));
+                                bodyExpr = new BodyExpr.Parser().Parse(pcon, RT.seq(body));
                             }
                             finally
                             {

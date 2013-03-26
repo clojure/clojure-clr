@@ -9,7 +9,7 @@
 ;;Author: Frantisek Sodomka
 
 
-(ns clojure.test-clojure.clojure-xml
+#_(ns clojure.test-clojure.clojure-xml
   (:use clojure.test)
   (:require [clojure.xml :as xml]))
 

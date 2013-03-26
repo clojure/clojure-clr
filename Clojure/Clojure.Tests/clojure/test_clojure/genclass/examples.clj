@@ -54,23 +54,23 @@
 
 (definterface ArrayDefInterface
   ; primitive array sugar
-  (^void takesByteArray [^bytes a])
+  (^void takesByteArray [^bytes a])    (^void takesSByteArray [^sbytes a])
   (^void takesCharArray [^chars a])
-  (^void takesShortArray [^shorts a])
-  (^void takesIntArray [^ints a])
-  (^void takesLongArray [^longs a])
+  (^void takesShortArray [^shorts a])  (^void takesUShortArray [^ushorts a])
+  (^void takesIntArray [^ints a])      (^void takesUIntArray [^uints a])
+  (^void takesLongArray [^longs a])    (^void takesULongArray [^ulongs a])
   (^void takesFloatArray [^floats a])
   (^void takesDoubleArray [^doubles a])
   (^void takesBooleanArray [^booleans a])
   ; raw primitive arrays
-  (^"System.Byte[]"    returnsByteArray [])             ;;; "[B"
-  (^"System.Char[]"    returnsCharArray [])             ;;; "[C"
-  (^"System.Int32[]"   returnsIntArray [])              ;;; "[I"
-  (^"System.Int16[]"   returnsShortArray [])            ;;; "[S"
-  (^"System.Int64[]"   returnsLongArray [])             ;;; "[J"
-  (^"System.Single[]"  returnsFloatArray [])            ;;; "[F"
-  (^"System.Double[]"  returnsDoubleArray [])           ;;; "[D"
-  (^"System.Boolean[]" returnsBooleanArray []))         ;;; "[Z"
+  (^"System.Byte[]"    returnsByteArray [])        (^"System.SByte[]"    returnsSByteArray [])      ;;; "[B"
+  (^"System.Char[]"    returnsCharArray [])                                                         ;;; "[C"
+  (^"System.Int32[]"   returnsIntArray [])         (^"System.UInt32[]"   returnsUIntArray [])       ;;; "[I"
+  (^"System.Int16[]"   returnsShortArray [])       (^"System.UInt16[]"   returnsUShortArray [])     ;;; "[S"
+  (^"System.Int64[]"   returnsLongArray [])        (^"System.UInt64[]"   returnsULongArray [])      ;;; "[J"
+  (^"System.Single[]"  returnsFloatArray [])                                                        ;;; "[F"
+  (^"System.Double[]"  returnsDoubleArray [])                                                       ;;; "[D"
+  (^"System.Boolean[]" returnsBooleanArray []))                                                     ;;; "[Z"
 
 (definterface UsesPreviousInterfaceFromThisFile
   (^clojure.test_clojure.genclass.examples.ArrayDefInterface
@@ -80,20 +80,20 @@
 (gen-interface
   :name clojure.test_clojure.genclass.examples.ArrayGenInterface
   :methods [; sugar
-            [takesByteArray [bytes] void]
+            [takesByteArray [bytes] void]                [takesSByteArray [sbytes] void]
             [takesCharArray [chars] void]
-            [takesShortArray [shorts] void]
-            [takesIntArray [ints] void]
-            [takesLongArray [longs] void]
+            [takesShortArray [shorts] void]              [takesUShortArray [ushorts] void]
+            [takesIntArray [ints] void]                  [takesUIntArray [uints] void]
+            [takesLongArray [longs] void]                [takesULongArray [ulongs] void]
             [takesFloatArray [floats] void]
             [takesDoubleArray [doubles] void]
             [takesBooleanArray [booleans] void]
             ; raw primitive types
-            [returnsByteArray [] "System.Byte[]"]               ;;; "[B"]
-            [returnsCharArray [] "System.Char[]"]               ;;; "[C"]
-            [returnsShortArray [] "System.Int16[]"]             ;;; "[S"]
-            [returnsIntArray [] "System.Int32[]"]               ;;; "[I"]
-            [returnsLongArray [] "System.Int64[]"]              ;;; "[J"]
-            [returnsFloatArray [] "System.Single[]"]            ;;; "[F"]
-            [returnsDoubleArray [] "System.Double[]"]           ;;; "[D"]
-            [returnsBooleanArray [] "System.Boolean[]"]])         ;;; "[Z"]
+            [returnsByteArray [] "System.Byte[]"]        [returnsSByteArray [] "System.SByte[]"]       ;;; "[B"]
+            [returnsCharArray [] "System.Char[]"]                                                      ;;; "[C"]
+            [returnsShortArray [] "System.Int16[]"]      [returnsUShortArray [] "System.UInt16[]"]     ;;; "[S"]
+            [returnsIntArray [] "System.Int32[]"]        [returnsUIntArray [] "System.UInt32[]"]       ;;; "[I"]
+            [returnsLongArray [] "System.Int64[]"]       [returnsULongArray [] "System.UInt64[]"]      ;;; "[J"]
+            [returnsFloatArray [] "System.Single[]"]                                                   ;;; "[F"]
+            [returnsDoubleArray [] "System.Double[]"]                                                  ;;; "[D"]
+            [returnsBooleanArray [] "System.Boolean[]"]])                                              ;;; "[Z"]
