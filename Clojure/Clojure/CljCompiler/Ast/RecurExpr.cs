@@ -202,9 +202,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            ilg.Emit(OpCodes.Br, loopLabel);
-            //if (rhc != RHC.Statement)
-            //    ilg.Emit(OpCodes.Ldnull);       
+            ilg.Emit(OpCodes.Br, loopLabel);   
         }
 
         public bool HasNormalExit() { return false; }

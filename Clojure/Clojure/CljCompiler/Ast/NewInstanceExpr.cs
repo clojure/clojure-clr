@@ -260,9 +260,6 @@ namespace clojure.lang.CljCompiler.Ast
         // TODO: Preparse method heads to pick up signatures, implement those methods as abstract or as NotImpelmented so that Reflection can pick up calls during compilation and avoide a callsite.
         static Type CompileStub(GenContext context, Type super, NewInstanceExpr ret, Type[] interfaces, Object frm)
         {
-            //GenContext context = Compiler.CompilerContextVar.get() as GenContext ?? GenContext.CreateWithExternalAssembly("stub" + RT.nextID().ToString(), ".dll", false);
-            //GenContext context = Compiler.IsCompiling ? Compiler.CompilerContextVar.get() as GenContext : GenContext.CreateWithExternalAssembly("stub" + RT.nextID().ToString(), ".dll", false);
-            //context = GenContext.CreateWithExternalAssembly("stub" + RT.nextID().ToString(), ".dll", false);
             TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.CompileStubPrefix + "." + ret.InternalName + RT.nextID(), TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
 
             tb.DefineDefaultConstructor(MethodAttributes.Public);
@@ -503,11 +500,6 @@ namespace clojure.lang.CljCompiler.Ast
             gen.EmitNew(typeof(NotImplementedException), Type.EmptyTypes);
             gen.Emit(OpCodes.Throw);
             tb.DefineMethodOverride(mb, mi);
-       
-            //Console.Write("Defining dymmy method {0} ", ExplicitMethodName(mi));
-            //foreach (Type t in Compiler.GetTypes(mi.GetParameters()))
-            //    Console.Write("{0}, ", t.Name);
-            //Console.WriteLine("returning {0}", mi.ReturnType);
         }
 
         #endregion

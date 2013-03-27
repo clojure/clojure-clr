@@ -37,17 +37,7 @@ namespace BootstrapCompile
 
             string path = Environment.GetEnvironmentVariable(PATH_PROP);
 
-            // TODO: get rid of this when we have the full build process set up
-            //if ( path == null )
-            //{
-            //    errTW.WriteLine("ERROR: Must set system property {0}",PATH_PROP);
-            //    errTW.WriteLine("to the location for the compiled .class files.");
-            //    errTW.WriteLine("This directory must also be on your {0}.",RT.ClojureLoadPathString);
-            //    Environment.Exit(1);
-            //}
-
             path = path ?? ".";
-
 
             string warnVal =  Environment.GetEnvironmentVariable(REFLECTION_WARNING_PROP);
             bool warnOnReflection = warnVal == null ? false : warnVal.Equals("true");

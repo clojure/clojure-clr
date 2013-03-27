@@ -18,12 +18,8 @@ namespace clojure.lang
     /// <summary>
     /// Adds methods that exist in Java Array class, for compatibility with core.clj.
     /// </summary>
-    /// <remarks>The setters don't buy us much.  In the JVM version, they can prevent some boxing.  
-    /// Here, we don't have type-specific setters in class Array, so we'll end up boxing anywa.</remarks>
     public static class ArrayHelper
     {
-        //TODO: Rethink this.
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static void setInt(int[] a, int index, int value)
         {

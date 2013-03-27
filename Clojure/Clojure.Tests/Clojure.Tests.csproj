@@ -74,16 +74,17 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="clojure.data.generators, Version=0.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="clojure.data.generators, Version=0.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\clojure.data.generators.0.1.1.0\lib\net40\clojure.data.generators.dll</HintPath>
+      <HintPath>..\packages\clojure.data.generators.0.1.2.0\lib\net35\clojure.data.generators.dll</HintPath>
     </Reference>
-    <Reference Include="clojure.test.generative, Version=0.1.4.2, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="clojure.test.generative, Version=0.1.4.3, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\clojure.test.generative.0.1.4.2\lib\net40\clojure.test.generative.dll</HintPath>
+      <HintPath>..\packages\clojure.test.generative.0.1.4.3\lib\net35\clojure.test.generative.dll</HintPath>
     </Reference>
-    <Reference Include="clojure.tools.namespace">
-      <HintPath>..\packages\clojure.tools.namespace.0.2.2.0\lib\net40\clojure.tools.namespace.dll</HintPath>
+    <Reference Include="clojure.tools.namespace, Version=0.2.2.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\clojure.tools.namespace.0.2.2.1\lib\net35\clojure.tools.namespace.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">

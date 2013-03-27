@@ -72,11 +72,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Type targetType = _targetType;
 
-            //Type stubType = Compiler.CompileStubOrigClassVar.isBound ? (Type)Compiler.CompileStubOrigClassVar.deref() : null;
-
-            //if (_targetType == stubType)
-            //    targetType = objx.BaseType;
-
             GenContext.EmitDebugInfo(ilg, _spanMap);
 
             if (targetType != null && _tinfo != null)
@@ -88,7 +83,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else
             {
-                // TODO: convert to dynamic?
+                // We could convert this to a dynamic call-site
                 _target.Emit(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Ldstr, _fieldName);
                 ilg.Emit(OpCodes.Call, Compiler.Method_Reflector_GetInstanceFieldOrProperty);
@@ -101,11 +96,6 @@ namespace clojure.lang.CljCompiler.Ast
         public override void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             Type targetType = _targetType;
-
-            //Type stubType = Compiler.CompileStubOrigClassVar.isBound ? (Type)Compiler.CompileStubOrigClassVar.deref() : null;
-
-            //if (_targetType == stubType)
-            //    targetType = objx.BaseType;
 
             GenContext.EmitDebugInfo(ilg, _spanMap);
 
@@ -186,7 +176,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        // TODO: Handle by-ref
         public override object Eval()
         {
             return _tinfo.GetValue(_target.Eval());
@@ -260,7 +249,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
-        // TODO: Handle by-ref
         public override object Eval()
         {
             return _tinfo.GetValue(_target.Eval(), new object[0]);
