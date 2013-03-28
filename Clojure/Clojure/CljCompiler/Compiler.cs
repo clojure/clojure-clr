@@ -1500,7 +1500,7 @@ namespace clojure.lang
         {
             var initClassName = InitClassName(relativePath);
             Type initType = null;
-            foreach(var asm in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
 #if CLR2
                 if(asm.ManifestModule is ModuleBuilder)
@@ -1514,15 +1514,9 @@ namespace clojure.lang
             }
             if (initType == null)
                 return false;
-            try
-            {
-                InvokeInitType(initType.Assembly, initType);
-                return true;
-            }
-            catch (AssemblyInitializationException)
-            {
-                return false;
-            }
+
+            InvokeInitType(initType.Assembly, initType);
+            return true;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
