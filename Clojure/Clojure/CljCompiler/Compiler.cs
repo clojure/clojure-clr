@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.IO;
 using System.Threading;
@@ -1349,6 +1350,11 @@ namespace clojure.lang
 
                 cbGen.EndExceptionBlock();
                 cbGen.Emit(OpCodes.Ret);
+
+                var descAttrBuilder =
+                 new CustomAttributeBuilder(typeof (DescriptionAttribute).GetConstructor(new[] {typeof (String)}),
+                                           new [] {String.Format("{{:clojure-namespace {0}}}", CurrentNamespace)});
+                initTB.SetCustomAttribute(descAttrBuilder);
 
                 initTB.CreateType();
             }
