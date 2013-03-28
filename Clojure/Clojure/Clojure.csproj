@@ -339,7 +339,6 @@
     <None Include="Bootstrap\version.properties" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="Resources\version.txt" />
   </ItemGroup>
   <ItemGroup>
