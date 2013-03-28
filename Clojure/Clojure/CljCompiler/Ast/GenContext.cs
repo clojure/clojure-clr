@@ -77,13 +77,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static GenContext CreateWithInternalAssembly(string assyName, bool createDynInitHelper)
         {
-            return new GenContext(assyName, assyName, ".dll", null, createDynInitHelper);
+            return CreateGenContext(assyName, assyName, ".dll", null, createDynInitHelper);
+        }
+
+        public static GenContext CreateWithExternalAssembly(string sourceName, AssemblyName assemblyName, string extension, bool createDynInitHelper)
+        {
+            string path = Compiler.CompilePathVar.deref() as string;
+            return new GenContext(path ?? System.IO.Directory.GetCurrentDirectory(), assemblyName, extension, createDynInitHelper, sourceName);
         }
 
         public static GenContext CreateWithExternalAssembly(string sourceName, string assyName, string extension, bool createDynInitHelper)
         {
             string path = Compiler.CompilePathVar.deref() as string;
-            return new GenContext(sourceName, assyName, extension, path ?? System.IO.Directory.GetCurrentDirectory(),createDynInitHelper);
+            return CreateGenContext(sourceName, assyName, extension, path ?? System.IO.Directory.GetCurrentDirectory(),createDynInitHelper);
         }
 
         public static GenContext CreateWithExternalAssembly(string assyName, string extension, bool createDynInitHelper)
@@ -91,14 +97,8 @@ namespace clojure.lang.CljCompiler.Ast
             return CreateWithExternalAssembly(assyName, assyName, extension, createDynInitHelper);
         }
 
-        private GenContext(string sourceName, string assyName, string extension, string directory, bool createDynInitHelper)
+        private static GenContext CreateGenContext(string sourceName, string assyName, string extension, string directory, bool createDynInitHelper)
         {
-            // TODO: Make this settable from a *debug* flag
-#if DEBUG
-            _isDebuggable = true;
-#else
-            _isDebuggable = false;
-#endif
             if (directory != null)
             {
                 if (directory.Length > 0 ) //&& directory != ".")
@@ -106,6 +106,18 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             AssemblyName aname = new AssemblyName(assyName);
+            return new GenContext(directory, aname, extension, createDynInitHelper, sourceName);
+        }
+
+        private GenContext(string directory, AssemblyName aname, string extension, bool createDynInitHelper, string sourceName)
+        {
+            // TODO: Make this settable from a *debug* flag
+#if DEBUG
+            _isDebuggable = true;
+#else
+            _isDebuggable = false;
+#endif
+
             _assyGen = new AssemblyGen(aname, directory, extension, _isDebuggable);
             if ( createDynInitHelper )
                 _dynInitHelper = new DynInitHelper(_assyGen, GenerateName());
