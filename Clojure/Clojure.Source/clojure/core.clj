@@ -6878,8 +6878,8 @@
 
 (defn- data-reader-urls []                                         ;;; Actually, we will return a sequence of FileInfo instances
   (enumeration-seq
-    (clojure.lang.RT/FindFiles "data_readers.clj")))               ;;;    (.. Thread currentThread getContextClassLoader
-                                                                   ;;;        (getResources "data_readers.clj"))))
+    (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.clj"))))               ;;;    (.. Thread currentThread getContextClassLoader
+                                                                                                                    ;;;        (getResources "data_readers.clj"))))
 
 (defn- data-reader-var [sym]
   (intern (create-ns (symbol (namespace sym)))
