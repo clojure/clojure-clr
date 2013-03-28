@@ -312,44 +312,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #region Immediate mode compilation
-
-        protected Type GetPrecompiledType()
-        {
-            return IsVariadic ? typeof(RestFnImpl) : typeof(AFnImpl);
-        }
-
-        //Expression GenImmediateCode(RHC rhc, ObjExpr objx, GenContext context)
-        //{
-        //    ParameterExpression p1 = Expression.Parameter(CompiledType, "__x__");
-        //    _thisParam = p1;
-
-        //    List<Expression> exprs = new List<Expression>();
-
-        //    if (CompiledType == typeof(RestFnImpl))
-        //        exprs.Add(Expression.Assign(p1,
-        //                  Expression.New(Compiler.Ctor_RestFnImpl_1, Expression.Constant(_variadicMethod.RequiredArity))));
-        //    else
-        //        exprs.Add(Expression.Assign(p1, Expression.New(p1.Type)));
-
-        //    for (ISeq s = RT.seq(_methods); s != null; s = s.next())
-        //    {
-        //        FnMethod method = (FnMethod)s.first();
-        //        LambdaExpression lambda = method.GenerateImmediateLambda(rhc,this,context);
-        //        string fieldName = IsVariadic && method.IsVariadic
-        //            ? "_fnDo" + method.RequiredArity
-        //            : "_fn" + method.NumParams;
-        //        exprs.Add(Expression.Assign(Expression.Field(p1, fieldName), lambda));
-        //    }
-
-        //    exprs.Add(p1);
-
-        //    Expression expr = Expression.Block(new ParameterExpression[] { p1 }, exprs);
-        //    return expr;
-        //}
-
-        #endregion
-
         #region Code generation
 
         internal void EmitForDefn(ObjExpr objx, CljILGen ilg)
