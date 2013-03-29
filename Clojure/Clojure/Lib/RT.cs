@@ -2788,7 +2788,21 @@ namespace clojure.lang
             foreach (Assembly assy1 in assys)
             {
                 Type t1 = assy1.GetType(p, false);
-                if (t1 != null && ! candidateTypes.Contains(t1))
+#if MONO
+                // I do not know why Assembly.GetType fails to find types in our assemblies in Mono
+                if (t1 == null)
+                {
+                    foreach (Type tt in assy1.GetTypes())
+                    {
+                        if (tt.Name.Equals(p))
+                        {
+                            t1 = tt;
+                            break;
+                        }
+                    }
+                }
+#endif
+                if (t1 != null && !candidateTypes.Contains(t1))
                     candidateTypes.Add(t1);
             }
 
