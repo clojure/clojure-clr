@@ -6551,15 +6551,15 @@
       (when-let [s (seq coll)]
         (let [seg (doall (take n s))]
           (cons seg (partition-all n step (nthrest s step))))))))
-;TODO: define shuffle
-;(defn shuffle
-;  "Return a random permutation of coll"
-;  {:added "1.1"
-;   :static true}
-;  [^java.util.Collection coll]
-;  (let [al (java.util.ArrayList. coll)]
-;    (java.util.Collections/shuffle al)
-;    (clojure.lang.RT/vector (.toArray al))))
+
+(defn shuffle
+  "Return a random permutation of coll"
+  {:added "1.1"
+   :static true}
+  [^System.Collections.ICollection coll]                           ;;; ^java.util.Collection
+  (let [al (System.Collections.ArrayList. coll)]                         ;;; java.util.ArrayList.
+    (clojure.lang.Util/Shuffle al)                                 ;;; java.util.Collections/shuffle
+    (clojure.lang.RT/vector (.ToArray al))))                       ;;; .toArray
 
 (defn map-indexed
   "Returns a lazy sequence consisting of the result of applying f to 0

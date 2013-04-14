@@ -807,6 +807,21 @@ namespace clojure.lang
             return false;
         }
 
+
+        // I can hardly claim this is original.
+        public static void Shuffle(IList list)
+        {
+            Random rnd = new Random();
+            for (int i = list.Count - 1; i >= 1; i--)
+            {
+                int j = rnd.Next(i + 1);
+                object temp = list[j];
+                list[j] = list[i];
+                list[i] = temp;
+            }
+        }
+
+
         #region Stolen code
         // The following code is from Microsoft's DLR..
         // It had the following notice:
