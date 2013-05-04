@@ -42,6 +42,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DlrConsole", "DlrConsole\Dl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Csharp.Tests", "Csharp.Tests\Csharp.Tests.csproj", "{D4B7FCED-73D0-4333-9800-611A1D1C2993}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{CA275FBE-AA0C-4EAA-A944-2B000007AE5B}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug 3.5|Any CPU = Debug 3.5|Any CPU
