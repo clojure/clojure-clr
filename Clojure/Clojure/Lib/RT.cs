@@ -3387,8 +3387,8 @@ namespace clojure.lang
         {
             yield return System.AppDomain.CurrentDomain.BaseDirectory;
             yield return Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "bin");
-            
             yield return Directory.GetCurrentDirectory();
+            yield return Path.GetDirectoryName(typeof(RT).Assembly.Location);
 
             Assembly assy = Assembly.GetEntryAssembly();
             if ( assy != null )
