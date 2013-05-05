@@ -1535,6 +1535,11 @@ namespace clojure.lang
                 return load(rdr, finfo.FullName, finfo.Name, fileName);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
+        public static object load(TextReader rdr)
+        {
+            return load(rdr, null, "NO_SOURCE_FILE", null);  // ?
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
         public static object load(TextReader rdr, string relativePath)
