@@ -1259,8 +1259,9 @@ namespace clojure.lang
 
         #region boxing/casts
 
-        #region
+        #region box
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "box")]
         static public Object box(Object x)
         {
             return x;
