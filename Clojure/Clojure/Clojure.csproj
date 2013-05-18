@@ -31,6 +31,9 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug 3.5|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -75,22 +78,33 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Dynamic" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
-      <HintPath>..\..\lib\DLR\2.0\Microsoft.Dynamic.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Dynamic" Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">
-      <HintPath>..\..\lib\DLR\4.0\Microsoft.Dynamic.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Scripting" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
-      <HintPath>..\..\lib\DLR\2.0\Microsoft.Scripting.dll</HintPath>
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net40\Microsoft.Dynamic.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Scripting" Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">
-      <HintPath>..\..\lib\DLR\4.0\Microsoft.Scripting.dll</HintPath>
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net40\Microsoft.Scripting.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Scripting.AspNet" Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net40\Microsoft.Scripting.AspNet.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.Metadata" Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net40\Microsoft.Scripting.Metadata.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Dynamic" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net35\Microsoft.Dynamic.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net35\Microsoft.Scripting.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.AspNet" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net35\Microsoft.Scripting.AspNet.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.Metadata" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net35\Microsoft.Scripting.Metadata.dll</HintPath>
+    </Reference>	
     <Reference Include="Microsoft.Scripting.Core" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
-      <HintPath>..\..\lib\DLR\2.0\Microsoft.Scripting.Core.dll</HintPath>
-      <Aliases>global,MSC</Aliases>
-    </Reference>
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net35\Microsoft.Scripting.Core.dll</HintPath>
+    </Reference>	
     <Reference Include="System" />
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
@@ -339,6 +353,7 @@
     <None Include="Bootstrap\version.properties" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Resources\version.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -358,11 +373,12 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
- <PropertyGroup>
+  <PropertyGroup>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(CLOJURE_SNK)</AssemblyOriginatorKeyFile>
-</PropertyGroup> 
+  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

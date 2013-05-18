@@ -14,6 +14,8 @@
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug 4.0|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -56,10 +58,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Dynamic">
-      <HintPath>..\..\lib\DLR\4.0\Microsoft.Dynamic.dll</HintPath>
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net40\Microsoft.Dynamic.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Scripting">
-      <HintPath>..\..\lib\DLR\4.0\Microsoft.Scripting.dll</HintPath>
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net40\Microsoft.Scripting.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.AspNet">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net40\Microsoft.Scripting.AspNet.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.Metadata">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net40\Microsoft.Scripting.Metadata.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -75,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Clojure\Clojure.csproj">
@@ -83,6 +92,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -12,10 +12,6 @@
  *   Author: David Miller
  **/
 
-#if CLR2
-extern alias MSC;
-#endif
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -291,7 +287,7 @@ namespace clojure.lang
                 {
                     case HostArg.ParameterType.ByRef:
 #if CLR2
-                        t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+                        t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
 #else
                         t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
 #endif

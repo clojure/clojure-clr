@@ -13,26 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clojure.Source", "Clojure.S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clojure.Compile", "Clojure.Compile\Clojure.Compile.csproj", "{3DBF3359-43B5-47C9-9E4D-CF50D7587F20}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{5CEB2D5C-FADB-46A5-BB96-E8E0BC499CBC}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DLR", "DLR", "{2CE92758-ACB9-472F-8A51-7180D52B6584}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2.0", "2.0", "{0B10A935-F4D1-4136-8A06-825FE733DCC3}"
-	ProjectSection(SolutionItems) = preProject
-		..\lib\DLR\2.0\Microsoft.Dynamic.dll = ..\lib\DLR\2.0\Microsoft.Dynamic.dll
-		..\lib\DLR\2.0\Microsoft.Scripting.Core.dll = ..\lib\DLR\2.0\Microsoft.Scripting.Core.dll
-		..\lib\DLR\2.0\Microsoft.Scripting.Debugging.dll = ..\lib\DLR\2.0\Microsoft.Scripting.Debugging.dll
-		..\lib\DLR\2.0\Microsoft.Scripting.dll = ..\lib\DLR\2.0\Microsoft.Scripting.dll
-		..\lib\DLR\2.0\Microsoft.Scripting.ExtensionAttribute.dll = ..\lib\DLR\2.0\Microsoft.Scripting.ExtensionAttribute.dll
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4.0", "4.0", "{C2140248-C9BD-4C35-B442-156A74A415F9}"
-	ProjectSection(SolutionItems) = preProject
-		..\lib\DLR\4.0\Microsoft.Dynamic.dll = ..\lib\DLR\4.0\Microsoft.Dynamic.dll
-		..\lib\DLR\4.0\Microsoft.Scripting.Debugging.dll = ..\lib\DLR\4.0\Microsoft.Scripting.Debugging.dll
-		..\lib\DLR\4.0\Microsoft.Scripting.dll = ..\lib\DLR\4.0\Microsoft.Scripting.dll
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6EFD39C3-8DC2-4188-845B-303375E78550}"
 	ProjectSection(SolutionItems) = preProject
 		build.proj = build.proj
@@ -124,10 +104,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{2CE92758-ACB9-472F-8A51-7180D52B6584} = {5CEB2D5C-FADB-46A5-BB96-E8E0BC499CBC}
-		{0B10A935-F4D1-4136-8A06-825FE733DCC3} = {2CE92758-ACB9-472F-8A51-7180D52B6584}
-		{C2140248-C9BD-4C35-B442-156A74A415F9} = {2CE92758-ACB9-472F-8A51-7180D52B6584}
 	EndGlobalSection
 EndGlobal
