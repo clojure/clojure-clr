@@ -505,6 +505,21 @@ in order to allow extend-protocol to extend to primitive types.  (And also to me
 Added clojure.lang.PushbackInputStream, parallel to clojure.lang.PushbackTextReader, corresponding to
 the difference between streams and readers.
 
+### 1.5 NuGet & packaging
+
+We have moved to using NuGet for dependencies.  This includes the clojure.test.generative package needed for testing,
+but also we now pull the DLR from a NuGet package -- no more need to pull down lib2.zip to build.
+
+Support has been added to allow all DLLs required to run ClojureCLR to be put into Clojure.dll itself.  
+This will simplify packaging ClojureCLR itself as a NuGet package.
+
+Some specific enhancements:
+
+* [CLJCLR-19] Enhance path probing for load to inclde the same folder as Clojure.dll.
+* [CLJCLR-20] Allow (optional) signing of Clojure.dll -- this is for people building NuGet packages using Clojure.dll.
+* Add Ilmerge target to build.proj
+
+
 ## 2 Bug fixes specific to ClojureCLR
 
 * Updated arr with ^objects type information so the aget function will be properly resolved
@@ -528,6 +543,15 @@ the difference between streams and readers.
 * Fix bugs in io.clj and pprint.clj for the Clojure.Test project
 * Fix the one buggy pprint test.  Yay!
 * Add primitive array types for sbyte, ushort, uint, ulong
+* Modify DlrConsole project to not use the Client profile
+* CLJCLR-16: Compile.TryLoadInitType should not catch AssemblyInitializationException
+* CLJCLR-13: Add namespace DescriptionAttribute to init type on AOT-compiled DLLs
+* Fix data-readers setup
+* Fix RT.classForName for Mono
+* Implement clojure.core/shuffle (at long last)
+* Fix an encoding arg in an io test
+* [CLJCLR-18]: core/load-reader invokes Compiler.load with the wrong # of args
+* [CLJCLR-17]: Add missing c-tors to clojure.lang.BigDecimal so clojure.core/bigdec works.
 
 # Changes to Clojure in Version 1.4
 
