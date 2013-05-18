@@ -174,6 +174,7 @@ namespace clojure.lang.CljCompiler.Ast
             LocalBuilder loc = ilg.DeclareLocal(_type);
             ilg.Emit(OpCodes.Ldloca, loc);
             ilg.Emit(OpCodes.Initobj, _type);
+            ilg.Emit(OpCodes.Ldloc, loc);
             ilg.Emit(OpCodes.Box, _type);
         }
 
