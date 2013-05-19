@@ -207,7 +207,7 @@
   (let [rec (r 1 2)]
     (is (.Equals (r 1 3 {} {:c 4}) (merge rec {:b 3 :c 4})))                   ;;; .equals
     (is (.Equals {:foo 1 :b 2} (set/rename-keys rec {:a :foo})))               ;;; .equals
-    #_(is (.Equals {:a 11 :b 2 :c 10} (merge-with + rec {:a 10 :c 10})))))       ;;; .equals
+    (is (.Equals {:a 11 :b 2 :c 10} (merge-with + rec {:a 10 :c 10})))))       ;;; .equals
 
 (deftest degenerate-defrecord-test
   (let [empty (EmptyRecord.)]
@@ -219,13 +219,13 @@
     (let [rec (r 1 2)]
       (is (= 2 (.get_Count rec)))                   ;;; .size
       (is (= 3 (.get_Count (assoc rec :c 3))))      ;;; .size
-      ;;;(is (not (.isEmpty rec)))
-      ;;;(is (.isEmpty (EmptyRecord.)))
-      (is (.Contains rec :a))                    ;;; containsKey
-      (is (not (.Contains rec :c)))              ;;; containsKey
-      ;;;(is (.containsValue rec 1))
-      ;;;(is (not (.containsValue rec 3)))
-      (is (= 1 (.get_Item rec :a)))              ;;; .get
+      (is (< 0 (.get_Count rec)))                   ;;;(is (not (.isEmpty rec)))
+      (is (zero? (.get_Count (EmptyRecord.))))      ;;;(is (.isEmpty (EmptyRecord.)))
+      (is (.Contains rec :a))                       ;;; containsKey
+      (is (not (.Contains rec :c)))                 ;;; containsKey
+      (is (.contains (.get_Values rec) 1))          ;;;(is (.containsValue rec 1))
+      (is (not (.contains (.get_Values rec) 3)))    ;;;(is (not (.containsValue rec 3)))
+      (is (= 1 (.get_Item rec :a)))                 ;;; .get
       (is (thrown? NotSupportedException (.set_Item rec :a 1)))      ;;; UnsupportedOperationException set
       (is (thrown? NotSupportedException (.Remove rec :a)))      ;;; UnsupportedOperationException   remove
       ;;;(is (thrown? NotSupportedException (.putAll rec {})))      ;;; UnsupportedOperationException
@@ -431,21 +431,21 @@
            (eval #clojure.test_clojure.protocols.RecordToTestLiterals{:a #clojure.test_clojure.protocols.RecordToTestLiterals[42]})))
     (is (= 42 (.a (eval #clojure.test_clojure.protocols.TypeToTestLiterals[42])))))
   
-;  (testing "that ctor literals only work with constants or statics"
-;    (is (thrown? Exception (read-string "#java.util.Locale[(str 'en)]")))
-;    (is (thrown? Exception (read-string "(let [s \"en\"] #java.util.Locale[(str 'en)])")))
-;    (is (thrown? Exception (read-string "#clojure.test_clojure.protocols.RecordToTestLiterals{(keyword \"a\") 42}"))))
-  
-;  (testing "that the correct errors are thrown with malformed literals"
-;    (is (thrown-with-msg?
-;          Exception
-;          #"Unreadable constructor form.*"
-;          (read-string "#java.util.Locale(\"en\")")))
-;    (is (thrown-with-msg?
-;          Exception
-;          #"Unexpected number of constructor arguments.*"
-;          (read-string "#java.util.Locale[\"\" \"\" \"\" \"\"]")))
-);    (is (thrown? Exception (read-string "#java.util.Nachos(\"en\")")))))
+  (testing "that ctor literals only work with constants or statics"
+    (is (thrown? Exception (read-string "#System.Globalization.CultureInfo[(str 'en)]")))                                    ;;; java.util.Locale
+    (is (thrown? Exception (read-string "(let [s \"en\"] #System.Globalization.CultureInfo[(str 'en)])")))                   ;;; java.util.Locale
+    (is (thrown? Exception (read-string "#clojure.test_clojure.protocols.RecordToTestLiterals{(keyword \"a\") 42}"))))
+ 
+  (testing "that the correct errors are thrown with malformed literals"
+    (is (thrown-with-msg?
+          Exception
+          #"Unreadable constructor form.*"
+          (read-string "#System.Globalization.CultureInfo(\"en\")")))                                                        ;;; java.util.Locale
+    (is (thrown-with-msg?
+          Exception
+          #"Unexpected number of constructor arguments.*"
+          (read-string "#System.Globalization.CultureInfo[\"\" \"\" \"\" \"\"]")))                                           ;;; java.util.Locale
+    (is (thrown? Exception (read-string "#java.util.Nachos(\"en\")")))))
 
 (defrecord RecordToTestPrinting [a b])
 (deftest defrecord-printing

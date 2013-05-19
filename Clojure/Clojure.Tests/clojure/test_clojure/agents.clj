@@ -49,6 +49,7 @@
     (is (= agt (first @err)))
   (is (true? (instance? ArithmeticException (second @err))))))
 
+
 ;; TODO: make these tests deterministic (i.e. not sleep and hope)
 
 #_(deftest fail-handler
@@ -72,7 +73,7 @@
     (send failing-agent (fn [_] (throw (Exception.))))   ;;; RuntimeException
     (is (.Await latch 10000))))          ;;; 10 TimeUnit/Seconds
 
-#_(deftest can-send-to-self-from-error-handler-before-popping-action-that-caused-error
+(deftest can-send-to-self-from-error-handler-before-popping-action-that-caused-error
   (let [latch (CountDownLatch. 1)
         handler (fn [agt err]
                   (send *agent* 
@@ -152,6 +153,28 @@
       (.Start)
       (.Join))
     (is (= @a :thread-binding))))
+
+;; check for a race condition that was causing seque to leak threads from the
+;; send-off pool. Specifically, if we consume all items from the seque, and
+;; the LBQ continues to grow, it means there was an agent action blocking on
+;; the .put, which would block indefinitely outside of this test.
+;;;(deftest seque-threads
+;;;  (let [queue-size 5
+;;;        slow-seq (for [x (take (* 2 queue-size) (iterate inc 0))]
+;;;                   (do (Thread/sleep 25)
+;;;                       x))
+;;;        small-lbq (java.util.concurrent.LinkedBlockingQueue. queue-size)
+;;;        worker (seque small-lbq slow-seq)]
+;;;    (doall worker)
+;;;    (is (= worker slow-seq))
+;;;    (Thread/sleep 250) ;; make sure agents have time to run or get blocked
+;;;    (let [queue-backlog (.size small-lbq)]
+;;;      (is (<= 0 queue-backlog queue-size))
+;;;      (when-not (zero? queue-backlog)
+;;;        (.take small-lbq)
+;;;        (Thread/sleep 250) ;; see if agent was blocking, indicating a thread leak
+;;;        (is (= (.size small-lbq)
+;;;               (dec queue-backlog)))))))
 
 ; http://clojure.org/agents
 

@@ -71,17 +71,17 @@
 
 
 
-;;;(deftest test-new
-;;;  ; Integer
+(deftest test-new
+  ;;;  ; Integer                                              ;;; no equivalent
   ;;;(are [expr cls value] (and (= (class expr) cls)
   ;;;                          (= expr value))
   ;;;    (new java.lang.Integer 42) java.lang.Integer 42
   ;;;    (java.lang.Integer. 123) java.lang.Integer 123 )
 
   ; Date
-  ;;;(are [x] (= (class x) java.util.Date)
-  ;;;    (new java.util.Date)
-  ;;;    (java.util.Date.) ))
+  (are [x] (= (class x) System.DateTime)          ;;; java.util.Date
+      (new System.DateTime)                       ;;; java.util.Date
+      (System.DateTime.) ))                       ;;; java.util.Date
 
 
 (deftest test-instance?

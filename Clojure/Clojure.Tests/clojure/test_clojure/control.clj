@@ -344,9 +344,9 @@
          :small 1
          :big 1073741824
          :else 2))
-  ;(testing "test emits return types"                                          ;;; TODO: Find another type (ctor or method) (Long doesn't work) to test reflection
-  ;  (should-not-reflect (Long. (case 1 1 1))) ; new Long(long)
-  ;  (should-not-reflect (Long. (case 1 1 "1")))) ; new Long(String)
+  (testing "test emits return types"
+    (should-not-reflect (clojure.lang.BigDecimal/Create (case 1 1 1)))                   ;;; (Long. (case 1 1 1)) ; new Long(long)
+    (should-not-reflect (clojure.lang.BigDecimal/Create (case 1 1 "1"))))                ;;; (Long. (case 1 1 "1")) ; new Long(String)
   (testing "non-equivalence of chars and nums"
     (are [result input] (= result (case input 97 :97 :else))
       :else \a
@@ -361,11 +361,11 @@
           ArgumentException                                         ;;; IllegalArgumentException
           #"Duplicate case test constant: 1"
           (eval `(case 0 1 :x 1 :y)))))
-  ;(testing "test correct behaviour on Number truncation"                      ;;; TODO: Figure out the equivalent for us
-  ;  (let [^Object x (Long. 8589934591)  ; force bindings to not be emitted as a primitive long
-  ;        ^Object y (Long. -1)]
-  ;    (is (= :diff (case x -1 :oops :diff)))
-  ;    (is (= :same (case y -1 :same :oops)))))
+  (testing "test correct behaviour on Number truncation"          
+    (let [^Object x (identity 8589934591)                           ;;; (Long. 8589934591)  ; force bindings to not be emitted as a primitive long
+          ^Object y (identity -1)]                                  ;;; (Long. -1)
+      (is (= :diff (case x -1 :oops :diff)))
+      (is (= :same (case y -1 :same :oops)))))
   (testing "test correct behavior on hash collision"
     (is (== (hash 1) (hash 9223372039002259457N)))
     (are [result input] (= result (case input
