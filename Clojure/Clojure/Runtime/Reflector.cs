@@ -427,7 +427,12 @@ namespace clojure.lang
             List<ConstructorInfo> infos = new List<ConstructorInfo>(einfos);
 
             if (infos.Count == 0)
-                throw new ArgumentException("NO matching constructor found for " + t.Name);
+            {
+                if (t.IsValueType && args.Length == 0)
+                    // invoke default c-tor
+                    return Activator.CreateInstance(t);
+                throw new ArgumentException("No matching constructor found for " + t.Name);
+            }
             else if (infos.Count == 1)
             {
                 ConstructorInfo info = infos[0];
