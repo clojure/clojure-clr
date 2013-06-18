@@ -2791,17 +2791,30 @@ namespace clojure.lang
                 Type t1 = assy1.GetType(p, false);
 #if MONO
                 // I do not know why Assembly.GetType fails to find types in our assemblies in Mono
-                if (t1 == null)
+                if (t1 == null )
                 {
-                    foreach (Type tt in assy1.GetTypes())
-                    {
-                        if (tt.Name.Equals(p))
-                        {
-                            t1 = tt;
-                            break;
-                        }
-                    }
-                }
+#if CLR2
+					if (!(assy1 is AssemblyBuilder))
+#else
+					if (!assy1.IsDynamic)
+#endif
+					{
+						try {
+
+							foreach (Type tt in assy1.GetTypes())
+							{
+								if (tt.Name.Equals(p))
+								{
+									t1 = tt;
+									break;
+								}
+							}
+						}
+						catch ( System.Reflection.ReflectionTypeLoadException )
+						{
+						}
+					}
+				}
 #endif
                 if (t1 != null && !candidateTypes.Contains(t1))
                     candidateTypes.Add(t1);
