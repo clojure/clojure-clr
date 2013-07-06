@@ -1154,7 +1154,7 @@
   (is (= (partition-all 4 2 [1 2 3 4 5 6 7 8 9])
 [[1 2 3 4] [3 4 5 6] [5 6 7 8] [7 8 9] [9]])))
 
-;;;(deftest test-shuffle-invariants
-;;;  (is (= (count (shuffle [1 2 3 4])) 4))
-;;;  (let [shuffled-seq (shuffle [1 2 3 4])]
-;;;    (is (every? #{1 2 3 4} shuffled-seq))))
+(deftest test-shuffle-invariants
+  (is (= (count (shuffle [1 2 3 4])) 4))
+  (let [shuffled-seq (shuffle [1 2 3 4])]
+    (is (every? #{1 2 3 4} shuffled-seq))))

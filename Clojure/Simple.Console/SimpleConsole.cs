@@ -19,12 +19,7 @@ using System.Text;
 using clojure.lang;
 using System.Diagnostics;
 using System.IO;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
-//using Microsoft.Scripting.Generation;
+
 
 namespace clojure.console
 {

@@ -254,7 +254,6 @@ namespace clojure.lang.CljCompiler.Ast
             return false;
         }
 
-        static readonly MethodInfo Method_DynamicMethod_CreateDelegate = typeof(DynamicMethod).GetMethod("CreateDelegate", new Type[] { typeof(Type), typeof(object) });
         static readonly MethodInfo Method_FnExpr_GetDynMethod = typeof(FnExpr).GetMethod("GetDynMethod");
         static readonly MethodInfo Method_FnExpr_GetCompiledConstants = typeof(FnExpr).GetMethod("GetCompiledConstants");
 

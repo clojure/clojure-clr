@@ -511,6 +511,69 @@ namespace clojure.lang
             return d;
         }
 
+        /// <summary>
+        /// Create a BigDecimal by parsing a string.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static BigDecimal Create(String v)
+        {
+            return BigDecimal.Parse(v);
+        }
+
+
+        /// <summary>
+        /// Create a BigDecimal by parsing a string.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>        
+        public static BigDecimal Create(String v, Context c)
+        {
+            return BigDecimal.Parse(v, c);
+        }
+
+
+        /// <summary>
+        /// Create a BigDecimal by parsing a character array.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static BigDecimal Create(char[] v)
+        {
+            return BigDecimal.Parse(v);
+        }
+
+
+        /// <summary>
+        /// Create a BigDecimal by parsing a character array.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static BigDecimal Create(char[] v, Context c)
+        {
+            return BigDecimal.Parse(v,c);
+        }
+
+
+        /// <summary>
+        /// Create a BigDecimal by parsing a segment of character array.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static BigDecimal Create(char[] v, int offset, int len)
+        {
+            return BigDecimal.Parse(v,offset,len);
+        }
+
+        /// <summary>
+        /// Create a BigDecimal by parsing a segment of character array.
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static BigDecimal Create(char[] v, int offset, int len, Context c)
+        {
+            return BigDecimal.Parse(v, offset, len, c);
+        }
 
         #endregion
 

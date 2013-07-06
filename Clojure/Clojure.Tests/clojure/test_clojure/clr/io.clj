@@ -133,7 +133,7 @@
         (.Flush w)
         (bytes-should-equal (get-bytes s utf8) (.ToArray o) "")))
     (testing (str "from reader UTF-8 to output-stream " enc)
-      (let [{:keys [r o s]} (data-fixture utf8  utf16)]
+      (let [{:keys [r o s]} (data-fixture utf8  enc)]
         (copy r o :encoding enc :buffer-size 16)
         (bytes-should-equal (get-bytes s enc) (.ToArray o) "")))))
 

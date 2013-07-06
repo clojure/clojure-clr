@@ -12,10 +12,6 @@
  *   Author: David Miller
  **/
 
-#if CLR2
-extern alias MSC;
-#endif
-
 using System;
 using System.Collections.Generic;
 

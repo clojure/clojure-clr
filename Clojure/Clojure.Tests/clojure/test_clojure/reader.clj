@@ -539,9 +539,9 @@
   (is (= System.Guid (class #uuid "550e8400-e29b-41d4-a716-446655440000")))             ;;; java.util.UUID
   (is (.Equals #uuid "550e8400-e29b-41d4-a716-446655440000"                             ;;; .equals
                #uuid "550e8400-e29b-41d4-a716-446655440000"))
-  #_(is (not (identical? #uuid "550e8400-e29b-41d4-a716-446655440000"
+  #_(is (not (identical? #uuid "550e8400-e29b-41d4-a716-446655440000"                   ;;; this test doesn't work for us because System.GUid is a value type and value types are treated as values by idnentical?
                        #uuid "550e8400-e29b-41d4-a716-446655440000")))
-  #_(is (= 4 (.version #uuid "550e8400-e29b-41d4-a716-446655440000")))
+  #_(is (= 4 (.version #uuid "550e8400-e29b-41d4-a716-446655440000")))                  ;;; No .version in CL
   (is (= (print-str #uuid "550e8400-e29b-41d4-a716-446655440000")
          "#uuid \"550e8400-e29b-41d4-a716-446655440000\"")))
 

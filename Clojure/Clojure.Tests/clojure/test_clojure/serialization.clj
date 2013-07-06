@@ -132,15 +132,15 @@
     ; (they're referred to by defrecord instances)
     *ns*))
 
-;;;(deftest function-serialization
-;;;  (let [capture 5]
-;;;    (are [f] (= capture ((-> f serialize deserialize)))
-;;;      (constantly 5)                                       <--- TODO: unable to find assembly core.clj
-;;;      (fn [] 5)                                             <--- TODO: problem serializing delegates over dynamic
-;;;      #(do 5                                               <--- TODO: problem serializing delegates over dynamic
-;;;      (constantly capture)                                  <--- TODO: unable to find assembly core.clj
-;;;      (fn [] capture)                                      <--- TODO: problem serializing delegates over dynamic
-;;;      #(do capture))))                                      <--- TODO: problem serializing delegates over dynamic
+(deftest function-serialization
+  (let [capture 5]
+    (are [f] (= capture ((-> f serialize deserialize)))
+      (constantly 5)
+;;;      (fn [] 5)                                            <--- TODO: unable to find assembly eval
+;;;      #(do 5                                               <--- TODO: unable to find assembly eval
+      (constantly capture)
+;;;      (fn [] capture)                                      <--- TODO: unable to find assembly eval
+)))  ;;;      #(do capture))))                                <--- TODO: unable to find assembly eval
 
 (deftest check-unserializable-objects
   (are [t] (thrown?  System.Runtime.Serialization.SerializationException (serialize t))              ;;; java.io.NotSerializableException

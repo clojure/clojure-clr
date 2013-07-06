@@ -12,10 +12,6 @@
  *   Author: David Miller
  **/
 
-#if CLR2
-extern alias MSC;
-#endif
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -291,7 +287,7 @@ namespace clojure.lang
                 {
                     case HostArg.ParameterType.ByRef:
 #if CLR2
-                        t = typeof(MSC::System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
+                        t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
 #else
                         t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
 #endif
@@ -431,7 +427,12 @@ namespace clojure.lang
             List<ConstructorInfo> infos = new List<ConstructorInfo>(einfos);
 
             if (infos.Count == 0)
-                throw new ArgumentException("NO matching constructor found for " + t.Name);
+            {
+                if (t.IsValueType && args.Length == 0)
+                    // invoke default c-tor
+                    return Activator.CreateInstance(t);
+                throw new ArgumentException("No matching constructor found for " + t.Name);
+            }
             else if (infos.Count == 1)
             {
                 ConstructorInfo info = infos[0];

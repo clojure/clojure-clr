@@ -1259,8 +1259,9 @@ namespace clojure.lang
 
         #region boxing/casts
 
-        #region
+        #region box
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "box")]
         static public Object box(Object x)
         {
             return x;
@@ -2788,7 +2789,34 @@ namespace clojure.lang
             foreach (Assembly assy1 in assys)
             {
                 Type t1 = assy1.GetType(p, false);
-                if (t1 != null && ! candidateTypes.Contains(t1))
+#if MONO
+                // I do not know why Assembly.GetType fails to find types in our assemblies in Mono
+                if (t1 == null )
+                {
+#if CLR2
+					if (!(assy1 is AssemblyBuilder))
+#else
+					if (!assy1.IsDynamic)
+#endif
+					{
+						try {
+
+							foreach (Type tt in assy1.GetTypes())
+							{
+								if (tt.Name.Equals(p))
+								{
+									t1 = tt;
+									break;
+								}
+							}
+						}
+						catch ( System.Reflection.ReflectionTypeLoadException )
+						{
+						}
+					}
+				}
+#endif
+                if (t1 != null && !candidateTypes.Contains(t1))
                     candidateTypes.Add(t1);
             }
 
@@ -3373,8 +3401,8 @@ namespace clojure.lang
         {
             yield return System.AppDomain.CurrentDomain.BaseDirectory;
             yield return Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "bin");
-            
             yield return Directory.GetCurrentDirectory();
+            yield return Path.GetDirectoryName(typeof(RT).Assembly.Location);
 
             Assembly assy = Assembly.GetEntryAssembly();
             if ( assy != null )
