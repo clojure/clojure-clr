@@ -84,7 +84,7 @@ namespace clojure.lang
             string extension = hasMain ? ".exe" : ".dll";
 
             
-            GenContext context = GenContext.CreateWithExternalAssembly(Compiler.munge(path=="." ? className : path + "/" + className), extension, true);
+            GenContext context = GenContext.CreateWithExternalAssembly(Compiler.munge(className), extension, true);
 
             // define the class
             List<Type> interfaceTypes = new List<Type>();
