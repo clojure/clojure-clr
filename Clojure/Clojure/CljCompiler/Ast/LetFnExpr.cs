@@ -102,7 +102,7 @@ namespace clojure.lang.CljCompiler.Ast
                     for (int i = 0; i < bindings.count(); i += 2)
                     {
                         Symbol sym = (Symbol)bindings.nth(i);
-                        Expr init = Compiler.Analyze(pcon.SetRhc(RHC.Expression),bindings.nth(i + 1));
+                        Expr init = Compiler.Analyze(pcon.SetRhc(RHC.Expression),bindings.nth(i + 1),sym.Name);
                         LocalBinding b = (LocalBinding)lbs.nth(i / 2);
                         b.Init = init;
                         BindingInit bi = new BindingInit(b, init);
