@@ -192,7 +192,7 @@ namespace clojure.lang.CljCompiler.Ast
             for (int i = _loopLocals.count() - 1; i >= 0; i--)
             {
                 LocalBinding lb = (LocalBinding)_loopLocals.nth(i);
-                Type primt = lb.PrimitiveType;
+                //Type primt = lb.PrimitiveType;
                 if (lb.IsArg)
                     //ilg.Emit(OpCodes.Starg, lb.Index - (objx.IsStatic ? 0 : 1));
                     ilg.EmitStoreArg(lb.Index);

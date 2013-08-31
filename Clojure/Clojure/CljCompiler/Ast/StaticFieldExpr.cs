@@ -23,11 +23,14 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
+        // Keep these around for debugging
+#pragma warning disable 414
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         readonly string _fieldName;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         readonly Type _type;
+#pragma warning restore 414
 
         protected readonly TInfo _tinfo;
 
