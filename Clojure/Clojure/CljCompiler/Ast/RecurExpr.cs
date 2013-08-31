@@ -133,7 +133,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            Label loopLabel = (Label)Compiler.LoopLabelVar.deref();
+            Label? loopLabel = (Label)Compiler.LoopLabelVar.deref();
             if (loopLabel == null)
                 throw new InvalidOperationException("Recur not in proper context.");
 
@@ -202,7 +202,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            ilg.Emit(OpCodes.Br, loopLabel);   
+            ilg.Emit(OpCodes.Br, loopLabel.Value);   
         }
 
         public bool HasNormalExit() { return false; }
