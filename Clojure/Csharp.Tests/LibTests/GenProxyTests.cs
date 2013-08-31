@@ -477,8 +477,6 @@ namespace Clojure.Tests.LibTests
         {
             //SanityCheck.PrintMethods(_obj.GetType());
            
-            MethodInfo[] minfos = _proxyType.GetMethods();
-
             Impl1 impl1 = _obj as Impl1;
             Expect(impl1.m1(21), EqualTo(100));
 
@@ -961,7 +959,7 @@ namespace Clojure.Tests.LibTests
 
             Type myType = tb.CreateType();
             MethodInfo[] minfos = myType.GetMethods();
-            PropertyInfo[] pinfos = myType.GetProperties();
+
             Expect(minfos, Not.Null);
 
             ConstructorInfo ctor = myType.GetConstructor(Type.EmptyTypes);

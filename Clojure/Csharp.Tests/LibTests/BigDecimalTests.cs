@@ -4368,7 +4368,7 @@ namespace Clojure.Tests.LibTests
                 GetThreeArgs(test, out arg1Str, out arg2Str, out resultStr);
                 BigDecimal arg1 = BigDecimal.Parse(arg1Str);
                 BigDecimal arg2 = BigDecimal.Parse(arg2Str);
-                BigDecimal val = arg1.DivideInteger(arg2, c);
+                arg1.DivideInteger(arg2, c);
                 Expect(false);
             }
             catch (ArithmeticException )

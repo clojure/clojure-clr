@@ -181,7 +181,7 @@ namespace Clojure.Tests.LibTests
         public void InvokeOnNoArgsFails()
         {
             Keyword k1 = Keyword.intern(Symbol.intern("abc"));
-            object o = k1.invoke();
+            k1.invoke();
         }
 
         [Test]
@@ -193,7 +193,7 @@ namespace Clojure.Tests.LibTests
             dict[k1] = 7;
             dict["abc"] = 8;
 
-            object o = k1.invoke(dict, 20, null);
+            k1.invoke(dict, 20, null);
         }
   
         #endregion
@@ -206,7 +206,7 @@ namespace Clojure.Tests.LibTests
         {
             Symbol s1 = Symbol.intern("abc");
             Keyword k1 = Keyword.intern(s1);
-            int c = k1.CompareTo(s1);
+            k1.CompareTo(s1);
         }
 
         [Test]

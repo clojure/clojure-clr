@@ -264,7 +264,11 @@ namespace Clojure.Tests.LibTests
         public void SeqIteratorOnEmptyHasNoCurrent()
         {
             SeqEnumerator s = new SeqEnumerator(null);
+            
+#pragma warning disable 219
+            // Have to assign to access
             object o = s.Current;
+#pragma warning restore 219
         }
 
         [Test]
@@ -291,7 +295,11 @@ namespace Clojure.Tests.LibTests
             s.MoveNext();
             s.MoveNext();
             s.MoveNext();
+            
+#pragma warning disable 219
+            // Have to assign to access
             object o = s.Current;
+#pragma warning restore 219
         }
 
 

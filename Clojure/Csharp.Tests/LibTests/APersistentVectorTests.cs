@@ -400,7 +400,7 @@ namespace Clojure.Tests.LibTests
         public void AssocWithNonNumericKeyThrowsException()
         {
             CPV v = new CPV(new object[] { 4, 5, 6 });
-            Associative a = v.assoc("a", 7);
+            v.assoc("a", 7);
         }
 
         [Test]
@@ -436,7 +436,7 @@ namespace Clojure.Tests.LibTests
         {
             //This just checks that APersistentVector.assoc calls CPV.assocN
             CPV v = new CPV(new object[] { 4, 5, 6 });
-            Associative a = v.assoc(4, 10);
+            v.assoc(4, 10);
         }
 
         [Test]
@@ -445,7 +445,7 @@ namespace Clojure.Tests.LibTests
         {
             //This just checks that APersistentVector.assoc calls CPV.assocN
             CPV v = new CPV(new object[] { 4, 5, 6 });
-            Associative a = v.assoc(-1, 10);
+            v.assoc(-1, 10);
         }
 
         [Test]
@@ -477,8 +477,6 @@ namespace Clojure.Tests.LibTests
         public void ValAtOnIndexOutOfRangeReturnsDefault()
         {
             CPV v = new CPV(new object[] { 4, 5, 6 });
-
-            IMapEntry me = v.entryAt(5);
 
             object val1 = v.valAt(4);
             object val2 = v.valAt(4, "abc");

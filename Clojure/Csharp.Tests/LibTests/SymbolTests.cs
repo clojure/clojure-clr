@@ -238,7 +238,7 @@ namespace Clojure.Tests.LibTests
         public void InvokeOnNoArgsFails()
         {
             Symbol sym1 = Symbol.intern("abc");
-            object o = sym1.invoke();
+            sym1.invoke();
         }
 
         [Test]
@@ -250,7 +250,7 @@ namespace Clojure.Tests.LibTests
             dict[sym1] = 7;
             dict["abc"] = 8;
 
-            object o = sym1.invoke(dict,20,null);
+            sym1.invoke(dict,20,null);
         }
   
         #endregion
@@ -262,7 +262,7 @@ namespace Clojure.Tests.LibTests
         public void CompareToNonSymbolFails()
         {
             Symbol sym1 = Symbol.intern("abc");
-            int c = sym1.CompareTo("abc");
+            sym1.CompareTo("abc");
         }
 
         [Test]

@@ -108,7 +108,7 @@ namespace Clojure.Tests.LibTests
         public void NthOutOfRangeLowFails()
         {
             PersistentVector v = PersistentVector.create(1, 2, 3);
-            object obj = v.nth(-4);
+            v.nth(-4);
         }
 
         [Test]
@@ -116,7 +116,7 @@ namespace Clojure.Tests.LibTests
         public void NthOutOfRangeHighFails()
         {
             PersistentVector v = PersistentVector.create(1, 2, 3);
-            object obj = v.nth(4);
+            v.nth(4);
         }
 
         [Test]
@@ -160,7 +160,7 @@ namespace Clojure.Tests.LibTests
         {
             Range r = new Range(2, 5);
             PersistentVector v1 = PersistentVector.create(r);
-            IPersistentVector v2 = v1.assocN(-4, 10);
+            v1.assocN(-4, 10);
         }
 
         [Test]
@@ -169,7 +169,7 @@ namespace Clojure.Tests.LibTests
         {
             Range r = new Range(2, 5);
             PersistentVector v1 = PersistentVector.create(r);
-            IPersistentVector v2 = v1.assocN(4, 10);
+            v1.assocN(4, 10);
         }
 
         [Test]
@@ -254,7 +254,7 @@ namespace Clojure.Tests.LibTests
         public void PopOnEmptyThrowsException()
         {
             PersistentVector v = PersistentVector.create();
-            IPersistentStack s = v.pop();
+            v.pop();
         }
 
         [Test]

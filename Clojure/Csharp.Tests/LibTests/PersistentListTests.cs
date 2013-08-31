@@ -91,7 +91,7 @@ namespace Clojure.Tests.LibTests
         public void DoublePopOnSingletonListYieldsException()
         {
             PersistentList p = new PersistentList("abc");
-            IPersistentStack s = p.pop().pop();
+            p.pop().pop();
         }
 
         #endregion

@@ -289,7 +289,7 @@ namespace Clojure.Tests.LibTests
             d[2] = "b";
 
             IPersistentMap m1 = PersistentArrayMap.create(d);
-            IPersistentMap m2 = m1.assocEx(2, "c");
+            m1.assocEx(2, "c");
         }
 
 
@@ -602,7 +602,7 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m = PersistentArrayMap.create(d);
 
             IPersistentVector v = PersistentVector.create(2, "c", 3, "d");
-            IPersistentMap c = m.cons(v);
+            m.cons(v);
 
         }
 

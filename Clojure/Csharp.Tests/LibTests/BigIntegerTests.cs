@@ -275,21 +275,21 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(OverflowException))]
         public void Create_double_fails_on_pos_infinity()
         {
-            BigInteger i = BigInteger.Create(Double.PositiveInfinity);
+           BigInteger.Create(Double.PositiveInfinity);
         }
 
         [Test]
         [ExpectedException(typeof(OverflowException))]
         public void Create_double_fails_on_neg_infinity()
         {
-            BigInteger i = BigInteger.Create(Double.NegativeInfinity);
+            BigInteger.Create(Double.NegativeInfinity);
         }
 
         [Test]
         [ExpectedException(typeof(OverflowException))]
         public void Create_double_fails_on_NaN()
         {
-            BigInteger i = BigInteger.Create(Double.NaN);
+            BigInteger.Create(Double.NaN);
         }
 
         #endregion
@@ -326,7 +326,7 @@ namespace Clojure.Tests.LibTests
         public void BI_basic_ctor_fails_on_bad_sign_neg()
         {
             uint[] data = new uint[] { 1 };
-            BigInteger i = new BigInteger(-2, data);
+            new BigInteger(-2, data);
         }
 
         [Test]
@@ -334,14 +334,14 @@ namespace Clojure.Tests.LibTests
         public void BI_basic_ctor_fails_on_bad_sign_pos()
         {
             uint[] data = new uint[] { 1 };
-            BigInteger i = new BigInteger(2, data);
+            new BigInteger(2, data);
         }
 
         [Test]
         [ExpectedException(typeof(NullReferenceException))]
         public void BI_basic_ctor_fails_on_null_mag()
         {
-            BigInteger i = new BigInteger(1, null);
+            new BigInteger(1, null);
         }
 
         [Test]
@@ -349,7 +349,7 @@ namespace Clojure.Tests.LibTests
         public void BI_basic_ctor_fails_on_zero_sign_on_nonzero_mag()
         {
             uint[] data = new uint[] { 1 };
-            BigInteger i = new BigInteger(0, data);
+            new BigInteger(0, data);
         }
 
         [Test]
@@ -597,7 +597,7 @@ namespace Clojure.Tests.LibTests
         public void ToString_fails_on_radix_too_small()
         {
             BigInteger i = new BigInteger(0, new uint[0]);
-            string result = i.ToString(1);
+            i.ToString(1);
         }
 
         [Test]
@@ -605,7 +605,7 @@ namespace Clojure.Tests.LibTests
         public void ToString_detects_radix_too_large()
         {
             BigInteger i = new BigInteger(0, new uint[0]);
-            string result = i.ToString(37);
+            i.ToString(37);
         }
 
         [Test]
