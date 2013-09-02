@@ -110,7 +110,7 @@ namespace Clojure.Tests.LibTests
         public void NthOutOfRangeLowFails()
         {
             MapEntry me = new MapEntry(1, "abc");
-            object obj = me.nth(-4);
+            me.nth(-4);
         }
 
         [Test]
@@ -118,7 +118,7 @@ namespace Clojure.Tests.LibTests
         public void NthOutOfRangeHighFails()
         {
             MapEntry me = new MapEntry(1, "abc");
-            object obj = me.nth(4);
+            me.nth(4);
         }
 
         [Test]
@@ -152,7 +152,7 @@ namespace Clojure.Tests.LibTests
         public void AssocNOutOfRangeLowThrows()
         {
             MapEntry me = new MapEntry(1, "abc");
-            IPersistentVector v1 = me.assocN(-4, 2);
+            me.assocN(-4, 2);
         }
 
         [Test]
@@ -160,7 +160,7 @@ namespace Clojure.Tests.LibTests
         public void AssocNOutOfRangeHighThrows()
         {
             MapEntry me = new MapEntry(1, "abc");
-            IPersistentVector v1 = me.assocN(4, 2);
+            me.assocN(4, 2);
         }
 
         [Test]

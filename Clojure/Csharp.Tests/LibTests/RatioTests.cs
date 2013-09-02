@@ -87,7 +87,7 @@ namespace Clojure.Tests.LibTests
             BigInteger n1 = BigInteger.Create(1);
             BigInteger d1 = BigInteger.Create(3);
             Ratio r1 = new Ratio(n1, d1);
-            BigDecimal bd = r1.ToBigDecimal();
+            r1.ToBigDecimal();
         }
 
         [Test]
@@ -108,7 +108,6 @@ namespace Clojure.Tests.LibTests
             BigInteger n1 = BigInteger.Create(1);
             BigInteger d1 = BigInteger.Create(3);
             Ratio r1 = new Ratio(n1, d1);
-            BigDecimal.Context c = new BigDecimal.Context(6, BigDecimal.RoundingMode.HalfUp);
             double d = r1.ToDouble(null);
             Expect(d, EqualTo(0.3333333333333333));  // precision = 16
         }

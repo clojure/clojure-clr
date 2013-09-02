@@ -31,7 +31,6 @@ namespace clojure.lang
         object _result;
         Exception _error;
         ManualResetEvent _waitHandle = new ManualResetEvent(false);
-        bool _done = false;
         bool _disposed = false;
 
         #endregion

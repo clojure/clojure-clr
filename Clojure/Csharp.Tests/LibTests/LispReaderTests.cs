@@ -190,7 +190,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(FormatException))]
         public void MatchNumberFailsOnRadixSnafu()
         {
-            object o3 = LispReader.MatchNumber("10RAA");
+            LispReader.MatchNumber("10RAA");
         }
         #endregion
 
@@ -232,7 +232,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(System.IO.EndOfStreamException))]
         public void EofValueFailsOnEof()
         {
-            object o = LispReader.read(CreatePushbackReaderFromString("   "), true, 7, false);
+            LispReader.read(CreatePushbackReaderFromString("   "), true, 7, false);
         }
 
         #endregion
@@ -363,21 +363,21 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArgumentException))]
         public void NamespaceEndingWithColonSlashIsBad()
         {
-            object o1 = ReadFromString("ab:/cd");
+            ReadFromString("ab:/cd");
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NameEndingWithColonIsBad()
         {
-            object o1 = ReadFromString("ab/cd:");
+            ReadFromString("ab/cd:");
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NameEndingWithColonIsBad2()
         {
-            object o1 = ReadFromString("cd:");
+            ReadFromString("cd:");
         }
 
         [Test]
@@ -391,14 +391,14 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArgumentException))]
         public void NameContainingDoubleColonNotAtBeginningIsBad()
         {
-            object o1 = ReadFromString("ab::cd");
+            ReadFromString("ab::cd");
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NamespaceContainingDoubleColonNotAtBeginningIsBad()
         {
-            object o1 = ReadFromString("ab::cd/ef");
+            ReadFromString("ab::cd/ef");
         }
 
         [Test]
@@ -459,7 +459,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(System.IO.EndOfStreamException))]
         public void PipeEscapingWithOddPipesIsBad()
         {
-            object o1 = ReadFromString("ab|cd|ef|gh");
+            ReadFromString("ab|cd|ef|gh");
         }
 
         #endregion
@@ -521,7 +521,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(System.IO.EndOfStreamException))]
         public void NoEndingDoubleQuoteFails()
         {
-            object o1 = ReadFromString("\"abc");
+            ReadFromString("\"abc");
         }
 
         [Test]
@@ -568,7 +568,7 @@ namespace Clojure.Tests.LibTests
             };
             string s = new String(chars);
 
-            object o1 = ReadFromString(s);
+            ReadFromString(s);
         }
 
         [Test]
@@ -597,7 +597,7 @@ namespace Clojure.Tests.LibTests
             };
             string s = new String(chars);
 
-            object o1 = ReadFromString(s);
+            ReadFromString(s);
         }
 
         [Test]
@@ -610,7 +610,7 @@ namespace Clojure.Tests.LibTests
             };
             string s = new String(chars);
 
-            object o1 = ReadFromString(s);
+            ReadFromString(s);
         }
 
 
@@ -640,7 +640,7 @@ namespace Clojure.Tests.LibTests
             };
             string s = new String(chars);
 
-            object o1 = ReadFromString(s);
+            ReadFromString(s);
         }
 
 
@@ -654,7 +654,7 @@ namespace Clojure.Tests.LibTests
             };
             string s = new String(chars);
 
-            object o1 = ReadFromString(s);
+            ReadFromString(s);
         }
 
         [ExpectedException(typeof(ArgumentException))]
@@ -667,7 +667,7 @@ namespace Clojure.Tests.LibTests
             };
             string s = new String(chars);
 
-            object o1 = ReadFromString(s);
+            ReadFromString(s);
         }
 
 
@@ -695,7 +695,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(System.IO.EndOfStreamException))]
         public void BackslashFollowedByEOFFails()
         {
-            object o1 = ReadFromString("\\");
+            ReadFromString("\\");
         }
 
         [Test]
@@ -727,21 +727,21 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArgumentException))]
         public void BackslashUnicodeWithEOFFails()
         {
-            object o1 = ReadFromString("\\u12C 4");
+            ReadFromString("\\u12C 4");
         }
 
         [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void BackslashUnicodeInBadRangeFails()
         {
-            object o1 = ReadFromString("\\uDAAA");
+           ReadFromString("\\uDAAA");
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void BackslashUnicodeWithBadDigitFails()
         {
-            object o1 = ReadFromString("\\u12X4");
+            ReadFromString("\\u12X4");
         }
 
         [Test]
@@ -755,35 +755,35 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArgumentException))]
         public void BackslashOctalWithEOFFails()
         {
-            object o1 = ReadFromString("\\u12 4");
+            ReadFromString("\\u12 4");
         }
 
         [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void BackslashOctalInBadRangeFails()
         {
-            object o1 = ReadFromString("\\o444");
+            ReadFromString("\\o444");
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void BackslashOctalWithBadDigitFails()
         {
-            object o1 = ReadFromString("\\o128");
+            ReadFromString("\\o128");
         }
 
         [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void BackslashOctalWithTooManyDigitsFails()
         {
-            object o1 = ReadFromString("\\o0012 aa");
+            ReadFromString("\\o0012 aa");
         }
 
         [Test]
         [ExpectedException(typeof(InvalidOperationException))]
         public void BackslashWithOtherFails()
         {
-            object o1 = ReadFromString("\\aa");
+            ReadFromString("\\aa");
         }
 
         #endregion
@@ -875,7 +875,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(System.IO.EndOfStreamException))]
         public void MissingListTerminatorFails()
         {
-            Object o1 = ReadFromString("(a b 1 2");
+            ReadFromString("(a b 1 2");
         }
 
         [Test]
@@ -947,7 +947,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(System.IO.EndOfStreamException))]
         public void MissingVectorTerminatorFails()
         {
-            Object o1 = ReadFromString("[a b 1 2");
+            ReadFromString("[a b 1 2");
         }
 
         #endregion
@@ -979,7 +979,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(System.IO.EndOfStreamException))]
         public void MissingRightBraceFails()
         {
-            Object o1 = ReadFromString("{a b 1 2");
+            ReadFromString("{a b 1 2");
         }
 
         //[Test]
@@ -1019,7 +1019,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(System.IO.EndOfStreamException))]
         public void MissingSetTerminatorFails()
         {
-            Object o1 = ReadFromString("#{a b 1 2");
+            ReadFromString("#{a b 1 2");
         }
 
         #endregion
@@ -1030,14 +1030,14 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArgumentException))]
         public void NakedRightParenIsBad()
         {
-            Object o1 = ReadFromString("}");
+            ReadFromString("}");
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void NakedRightBracketIsBad()
         {
-            Object o1 = ReadFromString("]");
+            ReadFromString("]");
         }
 
 
@@ -1045,14 +1045,14 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArgumentException))]
         public void NakedRightBraceIsBad()
         {
-            Object o1 = ReadFromString("}");
+            ReadFromString("}");
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void MismatchedDelimiterIsBad()
         {
-            Object o1 = ReadFromString("( a b c }");
+            ReadFromString("( a b c }");
         }
 
         #endregion
@@ -1177,7 +1177,6 @@ namespace Clojure.Tests.LibTests
             // Return should be 
             //    (clojure/seq (clojure/concat (clojure/list (quote abc__N)) 
             //                                 (clojure/list (quote abc__N)))))
-            string str = o1.ToString();
 
             Expect(o1, InstanceOf(typeof(ISeq)));
             ISeq s = o1 as ISeq;
@@ -1468,7 +1467,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArgumentException))]
         public void SQonUnquoteSpliceNotInListFails()
         {
-            object o1 = ReadFromString("`~@x");
+            ReadFromString("`~@x");
         }
 
         [Test]
@@ -1528,7 +1527,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArgumentException))]
         public void SharpDispatchOnInvalidCharFails()
         {
-            object o1 = ReadFromString("#a(1 2)");
+            ReadFromString("#1(1 2)");
         }
 
         #endregion
@@ -1539,14 +1538,14 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArgumentException))]
         public void MetaOnImproperMetadataFails()
         {
-            object o1 = ReadFromString("^1 (a b c");
+            ReadFromString("^1 (a b c");
         }
 
         [Test]
         [ExpectedException(typeof(ArgumentException))]
         public void MetaOnAppliedToNonIObjFails()
         {
-            object o1 = ReadFromString("^{:a 1} 7");
+            ReadFromString("^{:a 1} 7");
         }
 
         [Test]
@@ -1651,7 +1650,7 @@ namespace Clojure.Tests.LibTests
             Expect(o.meta(), InstanceOf(typeof(IPersistentMap)));
             IPersistentMap m = o.meta() as IPersistentMap;
 
-            Expect(m.count(), EqualTo(3));
+            Expect(m.count(), EqualTo(4));
             Expect(m.valAt(Keyword.intern(null, "tag")), EqualTo(Symbol.intern(null,"c")));
             Expect(m.valAt(Keyword.intern(null, "line")), EqualTo(3));
         }
@@ -1690,7 +1689,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(System.IO.EndOfStreamException))]
         public void SharpDQHitsEOFFails()
         {
-            object o1 = ReadFromString("#\"abc");
+            ReadFromString("#\"abc");
         }
 
         [Test]
@@ -1863,7 +1862,7 @@ namespace Clojure.Tests.LibTests
         [ExpectedException(typeof(ArgumentException))]
         public void ArgReaderFollowedByNonNumericFails()
         {
-            object o1 = ReadFromString("#(+ %a 2)");
+            ReadFromString("#(+ %a 2)");
         }
 
 

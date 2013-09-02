@@ -33,14 +33,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         readonly Expr _target;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
-        readonly Type _targetType; 
-       
         readonly string _memberName;
 
+        // Keep these around for debugging
+#pragma warning disable 414
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         protected readonly string _source;
-        
+#pragma warning restore 414
+
         protected readonly IPersistentMap _spanMap;
         protected readonly Symbol _tag;
 
@@ -55,8 +55,6 @@ namespace clojure.lang.CljCompiler.Ast
             _memberName = memberName;
             _target = target;
             _tag = tag;
-
-            _targetType = target.HasClrType ? target.ClrType : null;
 
             if ( RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                 RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1}:{2} - reference to field/property {3} can't be resolved.",

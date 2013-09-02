@@ -136,7 +136,7 @@ namespace Clojure.Tests.LibTests
         public void AssocNOutOfRangeLowFails()
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
-            IPersistentVector v2 = v.assocN(-4, 4);
+            v.assocN(-4, 4);
         }
 
         [Test]
@@ -144,7 +144,7 @@ namespace Clojure.Tests.LibTests
         public void AssocNOutOfRangeHighFails()
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
-            IPersistentVector v2 = v.assocN(4, 4);
+            v.assocN(4, 4);
         }
 
 
@@ -199,7 +199,7 @@ namespace Clojure.Tests.LibTests
         public void PopOnEmptyFails()
         {
             IPersistentVector v = LazilyPersistentVector.createOwning();
-            IPersistentStack v2 = ((IPersistentStack)v).pop();
+            ((IPersistentStack)v).pop();
         }
 
         #endregion

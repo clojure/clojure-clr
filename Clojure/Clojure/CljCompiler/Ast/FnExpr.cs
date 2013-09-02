@@ -40,13 +40,6 @@ namespace clojure.lang.CljCompiler.Ast
         private int _dynMethodMapKey = RT.nextID();
         public int DynMethodMapKey { get { return _dynMethodMapKey; } }
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
-        private Dictionary<int, DynamicMethod> _dynMethodMap;
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
-        private object[] _compiledConstants;
-
         #endregion
 
         #region Ctors
