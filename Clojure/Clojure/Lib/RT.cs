@@ -19,15 +19,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using clojure.lang.CljCompiler.Ast;
 using clojure.lang.Runtime;
 using Microsoft.Scripting.Hosting;
 using RTProperties = clojure.runtime.Properties;
-//using BigDecimal = java.math.BigDecimal;
+
 
 namespace clojure.lang
 {
@@ -3383,6 +3383,29 @@ namespace clojure.lang
         private static void Compile(string dirName, string name, TextReader rdr, string relativePath)
         {
             Compiler.Compile(rdr, dirName, name, relativePath);
+        }
+
+        public static void Compile(List<string> cljNames, string assemblyName, bool hasMain)
+        {
+            try
+            {
+                Var.pushThreadBindings(mapUniqueKeys(Compiler.CompileFilesVar, true));
+                GenContext context = GenContext.CreateWithExternalAssembly(assemblyName, assemblyName, hasMain ? ".exe" : ".dll", true);
+                foreach (string cljName in cljNames)
+                {
+                    string fileName = cljName.Replace("-", "_").Replace(".", "/") + ".clj";
+                    FileInfo cljInfo = FindFile(fileName);
+                    using (TextReader rdr = cljInfo.OpenText())
+                    {
+                        Compiler.Compile(context, rdr, cljInfo.Directory.FullName, cljInfo.Name, fileName);
+                    }
+                }
+                context.SaveAssembly();
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
         }
 
         static FileInfo FindFile(string path, string filename)

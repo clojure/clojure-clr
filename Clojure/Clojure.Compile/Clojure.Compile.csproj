@@ -74,9 +74,9 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
-     <Reference Include="Microsoft.Scripting.Core" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
+    <Reference Include="Microsoft.Scripting.Core" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net35\Microsoft.Scripting.Core.dll</HintPath>
-    </Reference>	 
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -134,7 +134,10 @@
     <Runtime>.Net</Runtime>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent Condition=" '$(Runtime)' == 'Mono' ">mono "$(TargetPath)" clojure.core clojure.core.protocols clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect</PostBuildEvent>
-    <PostBuildEvent Condition=" '$(Runtime)' == '.Net' ">"$(TargetPath)" clojure.core clojure.core.protocols clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(Runtime)' == 'Mono' ">mono "$(TargetPath)" -o clojure.core.clj.dll clojure.core clojure.core.protocols clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(Runtime)' == '.Net' ">"$(TargetPath)" -o clojure.core.clj.dll clojure.core clojure.core.protocols clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>"$(TargetPath)" -o clojure.core2.clj.dll clojure.core clojure.core.protocols clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect</PostBuildEvent>
   </PropertyGroup>
 </Project>
