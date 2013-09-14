@@ -83,10 +83,8 @@ namespace clojure.lang
 
             string extension = hasMain ? ".exe" : ".dll";
 
-
-            GenContext context = Compiler.IsCompiling 
-                ? Compiler.CompilerContextVar.deref() as GenContext 
-                : GenContext.CreateWithExternalAssembly(Compiler.munge(className), extension, true);
+            
+            GenContext context = GenContext.CreateWithExternalAssembly(Compiler.munge(className), extension, true);
 
             // define the class
             List<Type> interfaceTypes = new List<Type>();
@@ -138,8 +136,7 @@ namespace clojure.lang
 
             Type t = proxyTB.CreateType();
 
-            if ( ! Compiler.IsCompiling)
-                context.SaveAssembly();
+            context.SaveAssembly();
 
             return t;
         }

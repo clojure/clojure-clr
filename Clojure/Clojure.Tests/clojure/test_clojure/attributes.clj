@@ -83,7 +83,7 @@ Foo (#^{     ObsoleteAttribute "abc"
 (defn foo-init [obj]
   [[obj] nil])
 
-;;(assembly-load "foo.Bar")
+(assembly-load "foo.Bar")
 (deftest test-attributes-on-constructor
   (is (some #(instance? ObsoleteAttribute %)
             (for [ctor (.GetConstructors (clojure.lang.RT/classForName "foo.Bar"))
