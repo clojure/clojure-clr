@@ -136,6 +136,9 @@ UpgradeLog*.htm
 App_Data/*.mdf
 App_Data/*.ldf
 
+# Nuget Packages
+*.nupkg
+
 # =========================
 # Windows detritus
 # =========================
