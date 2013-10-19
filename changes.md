@@ -552,6 +552,17 @@ Some specific enhancements:
 * Fix an encoding arg in an io test
 * [CLJCLR-18]: core/load-reader invokes Compiler.load with the wrong # of args
 * [CLJCLR-17]: Add missing c-tors to clojure.lang.BigDecimal so clojure.core/bigdec works.
+* [CLJCLR-19]: Enhance path probing for load to include the same folder as Clojure.dll
+* [CLJCLR-20]: Allow (optional) signing of Clojure.dll
+* Update to DLR packaged on nuget
+* [CLJCLR-21]: Improper codege for (new valuetype)
+* [CLJCLR-22]: Reflector/InvokeConstructor should handle default c-tor for value types
+* Fix GetTypes on dynamic assemblies in RT.classForName for mono builds
+* [CLJCLR-23]: don't prepend *compiler-path* to assembly name in GenClass
+* Add name to Analyze call on value forms in LetFnExpr parsing
+* Fix cast + null comparison of Label value type in RecurExpr
+* Remove unused variables in various places
+
 
 # Changes to Clojure in Version 1.4
 
