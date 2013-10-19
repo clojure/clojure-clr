@@ -5,7 +5,7 @@
     <!--<Platform Condition=" '$(Platform)' == '' ">Any CPU</Platform>-->
     <cljc>Clojure.Compile.exe</cljc>
     <clji>Clojure.Main.exe</clji>
-    <Runtime>.Net</Runtime>
+    <Runtime Condition=" '$(Runtime)' == '' ">.Net</Runtime>
     <DefineConstants Condition=" '$(Runtime)' == 'Mono' ">MONO</DefineConstants>
     <DefineConstants Condition=" '$(Runtime)' == '.Net' ">DOTNET</DefineConstants>    
   </PropertyGroup>
