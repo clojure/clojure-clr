@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <Runtime Condition=" '$(Runtime)' == '' ">.Net</Runtime>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
@@ -131,13 +132,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <Runtime>.Net</Runtime>
-  </PropertyGroup>
-  <PropertyGroup>
     <PostBuildEvent Condition=" '$(Runtime)' == 'Mono' ">mono "$(TargetPath)" clojure.core clojure.core.protocols clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect</PostBuildEvent>
     <PostBuildEvent Condition=" '$(Runtime)' == '.Net' ">"$(TargetPath)" clojure.core clojure.core.protocols clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>"$(TargetPath)" clojure.core clojure.core.protocols clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect clojure.edn</PostBuildEvent>
   </PropertyGroup>
 </Project>
