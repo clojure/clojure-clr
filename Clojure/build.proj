@@ -6,8 +6,12 @@
     <cljc>Clojure.Compile.exe</cljc>
     <clji>Clojure.Main.exe</clji>
     <Runtime Condition=" '$(Runtime)' == '' ">.Net</Runtime>
-    <DefineConstants Condition=" '$(Runtime)' == 'Mono' ">MONO</DefineConstants>
-    <DefineConstants Condition=" '$(Runtime)' == '.Net' ">DOTNET</DefineConstants>    
+    <!-- 
+	<DefineConstants Condition=" '$(Runtime)' == 'Mono' ">MONO</DefineConstants>
+    <DefineConstants Condition=" '$(Runtime)' == '.Net' ">DOTNET</DefineConstants> 
+	-->	
+	<PlatformSym Condition=" '$(Runtime)' == 'Mono' ">MONO</PlatformSym>
+	<PlatformSym Condition=" '$(Runtime)' == '.Net' ">DOTNET</PlatformSym>
   </PropertyGroup>
   
   <!--Is there a way to avoid this duplication? This is also encoded in the project files, although relative to a different path -->
@@ -26,7 +30,7 @@
   
   <Target Name="Build">
     <MSBuild Projects="ClojureCLR.sln"
-             Properties="Runtime=$(Runtime);DefineConstants=$(DefineConstants)"/>
+             Properties="Runtime=$(Runtime)"/>
   </Target>
   
   <Target Name="CompileTest" DependsOnTargets="Build">
