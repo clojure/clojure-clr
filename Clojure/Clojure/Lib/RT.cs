@@ -717,7 +717,9 @@ namespace clojure.lang
             //else if (coll is IEnumerator)  // java: Iterator
             //    return EnumeratorSeq.create((IEnumerator)coll);
 
-            throw new ArgumentException("Don't know how to create ISeq from: " + coll.GetType().FullName);
+            throw new ExceptionInfo("Don't know how to create ISeq from: " + coll.GetType().FullName, 
+                map(Keyword.intern("instance"), coll));
+
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
