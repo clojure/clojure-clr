@@ -4889,17 +4889,17 @@
 ;  (and (class? c)
 ;       (.isAssignableFrom java.lang.annotation.Annotation c)))
 ;
-;(defn- is-runtime-annotation? [#^Class c]
+;(defn- is-runtime-annotation? [^Class c]
 ;  (boolean 
 ;   (and (is-annotation? c)
-;        (when-let [#^java.lang.annotation.Retention r 
+;        (when-let [^java.lang.annotation.Retention r 
 ;                   (.getAnnotation c java.lang.annotation.Retention)] 
 ;          (= (.value r) java.lang.annotation.RetentionPolicy/RUNTIME)))))
 ;
-;(defn- descriptor [#^Class c] (clojure.asm.Type/getDescriptor c))
+;(defn- descriptor [^Class c] (clojure.asm.Type/getDescriptor c))
 ;
 ;(declare process-annotation)
-;(defn- add-annotation [#^clojure.asm.AnnotationVisitor av name v]
+;(defn- add-annotation [^clojure.asm.AnnotationVisitor av name v]
 ;  (cond
 ;   (vector? v) (let [avec (.visitArray av name)]
 ;                 (doseq [vval v]

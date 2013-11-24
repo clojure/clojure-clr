@@ -15,17 +15,17 @@
 
 (definterface Foo (foo []))
 
-(deftype #^{
+(deftype ^{
              ObsoleteAttribute "abc"
              FileDialogPermissionAttribute SecurityAction/Demand
 			 FileIOPermissionAttribute #{ SecurityAction/Demand { :__args [SecurityAction/Deny] :Read "def" }}}
-   Bar [#^int a
-        #^{ :tag int
+   Bar [^int a
+        ^{ :tag int
 		    NonSerializedAttribute {}
             ObsoleteAttribute "abc"}
 		b]
 
-Foo (#^{     ObsoleteAttribute "abc"
+Foo (^{     ObsoleteAttribute "abc"
              FileDialogPermissionAttribute SecurityAction/Demand
 			 FileIOPermissionAttribute #{ SecurityAction/Demand { :__args [SecurityAction/Deny] :Read "def" }}}
      foo [this] 42))

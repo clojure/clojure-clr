@@ -666,28 +666,28 @@ namespace Clojure.Tests.LibTests
         
         // (defn- upcase-writer 
         //  "Returns a proxy that wraps writer, converting all characters to upper case"
-        //  [#^java.io.Writer writer]
+        //  [^java.io.Writer writer]
         //  (proxy [java.io.Writer] []
         //    (close [] (.close writer))
         //    (flush [] (.flush writer))
-        //    (write ([#^chars cbuf #^Integer off #^Integer len] 
+        //    (write ([^chars cbuf ^Integer off ^Integer len] 
         //              (.write writer cbuf off len))
         //           ([x]
         //              (condp = (class x)
         //                        String 
-        //                          (let [s #^String x]
+        //                          (let [s ^String x]
         //                             (.write writer (.toUpperCase s)))
         //                        Integer
-        //                         (let [c #^Character x]
+        //                         (let [c ^Character x]
         //                             (.write writer (int (Character/toUpperCase (char c))))))))))
         // In a CLR version:
          //  (defn upcase-writer
-         //    [#^System.IO.TextWriter tw]
+         //    [^System.IO.TextWriter tw]
          //    (proxy [System.IO.TextWriter] []
-         //      (Write ([#^chars cbuf #^Int32 off #^Int32 len] (.Write tw cbuf off len))
+         //      (Write ([^chars cbuf ^Int32 off #Int32 len] (.Write tw cbuf off len))
          //             ([x] (condp (class x)
-         //                    System.String (let [s #^System.String x] (.Write tw (. s ToUpper)))
-         //                    Int32 (let [c #^Int32 x] (.Write tw (int (Char/ToUpper (char c))))))))))
+         //                    System.String (let [s ^System.String x] (.Write tw (. s ToUpper)))
+         //                    Int32 (let [c ^Int32 x] (.Write tw (int (Char/ToUpper (char c))))))))))
 
         // Not having the kind of closures I want, I'll fake it with a static variable.
 
