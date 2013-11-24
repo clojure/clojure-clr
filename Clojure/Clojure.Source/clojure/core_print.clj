@@ -88,9 +88,13 @@
   (.Write w ")"))
 
 (defn- print-object [o, ^System.IO.TextWriter w]
+  (when (instance? clojure.lang.IMeta o)
+    (print-meta o w))
   (.Write w "#<")
-  (.Write w (.Name (class o)))     ;;; .getSimpleName => .Name
-  (.Write w " ")
+  (let [name (.Name (class o))]                                         ;;; .getSimpleName => .Name
+    (when (seq name) ;; anonymous classes have a simple name of ""
+      (.Write w name)
+      (.Write w " ")))
   (.Write w (str o))
   (.Write w ">"))
 
