@@ -2793,33 +2793,37 @@ namespace clojure.lang
             foreach (Assembly assy1 in assys)
             {
                 Type t1 = assy1.GetType(p, false);
-#if MONO
-                // I do not know why Assembly.GetType fails to find types in our assemblies in Mono
-                if (t1 == null )
+
+                if (IsRunningOnMono)
                 {
+                    // I do not know why Assembly.GetType fails to find types in our assemblies in Mono
+                    if (t1 == null)
+                    {
 #if CLR2
 					if (!(assy1 is AssemblyBuilder))
 #else
-					if (!assy1.IsDynamic)
+                        if (!assy1.IsDynamic)
 #endif
-					{
-						try {
+                        {
+                            try
+                            {
 
-							foreach (Type tt in assy1.GetTypes())
-							{
-								if (tt.Name.Equals(p))
-								{
-									t1 = tt;
-									break;
-								}
-							}
-						}
-						catch ( System.Reflection.ReflectionTypeLoadException )
-						{
-						}
-					}
-				}
-#endif
+                                foreach (Type tt in assy1.GetTypes())
+                                {
+                                    if (tt.Name.Equals(p))
+                                    {
+                                        t1 = tt;
+                                        break;
+                                    }
+                                }
+                            }
+                            catch (System.Reflection.ReflectionTypeLoadException)
+                            {
+                            }
+                        }
+                    }
+                }
+
                 if (t1 != null && !candidateTypes.Contains(t1))
                     candidateTypes.Add(t1);
             }
@@ -3235,9 +3239,9 @@ namespace clojure.lang
             return new string(output);
         }
 
+        private static readonly bool _isRunningOnMono = Type.GetType("Mono.Runtime") != null;
 
-        
-
+        public static bool IsRunningOnMono { get { return _isRunningOnMono; } }
 
         #endregion
 
