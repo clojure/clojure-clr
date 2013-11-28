@@ -30,7 +30,7 @@
   
   <Target Name="Build">
     <MSBuild Projects="ClojureCLR.sln"
-             Properties="Runtime=$(Runtime)"/>
+             Properties="Runtime=$(Runtime);PlatformSym=$(PlatformSym)"/>
   </Target>
   
   <Target Name="CompileTest" DependsOnTargets="Build">
