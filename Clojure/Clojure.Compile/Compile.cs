@@ -89,7 +89,6 @@ namespace BootstrapCompile
                 Var.popThreadBindings();
                 try {
                     outTW.Flush();
-                    outTW.Close();
                 }
                 catch ( IOException e)
                 {
