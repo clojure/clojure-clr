@@ -1548,11 +1548,15 @@
   list already. If there are more forms, inserts the first form as the
   second item in second form, etc."
   {:added "1.0"}
-  ([x] x)
-  ([x form] (if (seq? form)
-              (with-meta `(~(first form) ~x ~@(next form)) (meta form))
-              (list form x)))
-  ([x form & more] `(-> (-> ~x ~form) ~@more)))
+  [x & forms]
+  (loop [x x, forms forms]
+    (if forms
+      (let [form (first forms)
+            threaded (if (seq? form)
+                       (with-meta `(~(first form) ~x ~@(next form)) (meta form))
+                       (list form x))]
+        (recur threaded (next forms)))
+      x)))
 
 (defmacro ->>
   "Threads the expr through the forms. Inserts x as the
@@ -1560,10 +1564,15 @@
   list already. If there are more forms, inserts the first form as the
   last item in second form, etc."
   {:added "1.1"}
-  ([x form] (if (seq? form)
+  [x & forms]
+  (loop [x x, forms forms]
+    (if forms
+      (let [form (first forms)
+            threaded (if (seq? form)
               (with-meta `(~(first form) ~@(next form)  ~x) (meta form))
-              (list form x)))
-  ([x form & more] `(->> (->> ~x ~form) ~@more)))
+              (list form x))]
+        (recur threaded (next forms)))
+      x)))
 
 (def map)
 
