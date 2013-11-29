@@ -3277,7 +3277,8 @@
   [x] (cond
        (instance? clojure.lang.BigInt x) x
        (instance? BigInteger x) (clojure.lang.BigInt/fromBigInteger x)
-       (decimal? x) (bigint (.toBigInteger ^BigDecimal x))
+       (decimal? x) (bigint (.ToBigInteger ^BigDecimal x))
+	   (float? x) (bigint (BigDecimal/Create (double x)))                        ;;; (. BigDecimal valueOf (double x))
        (ratio? x) (bigint (.BigIntegerValue ^clojure.lang.Ratio x))
        (number? x) (clojure.lang.BigInt/valueOf (long x))
        :else (bigint (BigInteger. x))))
@@ -3290,9 +3291,10 @@
   [x] (cond
        (instance? BigInteger x) x
 	   (instance? clojure.lang.BigInt x) (.toBigInteger ^clojure.lang.BigInt x)
-       (decimal? x) (.ToBigInteger ^BigDecimal x)             ;;; toBigInteger
+       (decimal? x) (.ToBigInteger ^BigDecimal x)                                ;;; toBigInteger
+	   (float? x) (.ToBigInteger (BigDecimal/Create (double x)))                 ;;; (.toBigInteger (. BigDecimal valueOf (double x)))
        (ratio? x) (.BigIntegerValue ^clojure.lang.Ratio x)
-       (number? x) (BigInteger/Create (long x))                ;;;(BigInteger/valueOf (long x))
+       (number? x) (BigInteger/Create (long x))                                  ;;;(BigInteger/valueOf (long x))
        :else (BigInteger. x)))
 
 (defn bigdec

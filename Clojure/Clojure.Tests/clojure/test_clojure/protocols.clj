@@ -606,3 +606,13 @@
   (is (= "foo" (sqtp "foo")))
   (is (= :foo (sqtp :foo))))
 
+
+(defprotocol Dasherizer
+  (-do-dashed [this]))
+(deftype Dashed []
+  Dasherizer
+  (-do-dashed [this] 10))
+
+(deftest test-leading-dashes
+  (is (= 10 (-do-dashed (Dashed.))))
+  (is (= [10] (map -do-dashed [(Dashed.)]))))
