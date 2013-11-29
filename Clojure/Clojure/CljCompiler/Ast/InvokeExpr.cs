@@ -129,11 +129,13 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (varFexpr != null && varFexpr.Var.Equals(Compiler.InstanceVar))
             {
-                if ( RT.second(form) is Symbol )
+                Expr sexpr = Compiler.Analyze(pcon.SetRhc(RHC.Expression), RT.second(form));
+                ConstantExpr csexpr = sexpr as ConstantExpr;
+                if (csexpr != null)
                 {
-                    Type t = HostExpr.MaybeType(RT.second(form),false);
-                    if ( t != null )
-                        return new InstanceOfExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), t, Compiler.Analyze(pcon,RT.third(form)));
+                    Type tval = csexpr.Val as Type;
+                    if (tval != null)
+                        return new InstanceOfExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tval, Compiler.Analyze(pcon, RT.third(form)));
                 }
             }
 
