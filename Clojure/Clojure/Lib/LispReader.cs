@@ -1619,8 +1619,8 @@ namespace clojure.lang
                 int ch = r.Read();
 
                 // flush whitespace
-                //while (isWhitespace(ch))
-                //    ch = r.Read();
+                while (isWhitespace(ch))
+                    ch = r.Read();
 
                 // A defrecord ctor can take two forms.  Check for map->R version first.
                 if (ch == '{')
