@@ -32,7 +32,14 @@
    (fn [x] [x (inc x)])
    (fn [x] [x (inc x) x])])
 
-(defequivtest test-reduce
+(deftest test-mapcat-obeys-reduced
+  (is (= [1 "0" 2 "1" 3]
+        (->> (concat (range 100) (lazy-seq (throw (Exception. "Too eager"))))
+          (r/mapcat (juxt inc str))
+          (r/take 5)
+          (into [])))))
+
+ (defequivtest test-reduce
   [reduce r/reduce identity]
   [+' *'])
 
