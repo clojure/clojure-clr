@@ -496,12 +496,10 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        public void ColonDigitIsKeyword()
+        [ExpectedException(typeof(ArgumentException))]
+        public void ColonDigitIsNotKeyword()
         {
-            object o1 = ReadFromString(":1");
-            Expect(o1, TypeOf(typeof(Keyword)));
-            Expect(((Keyword)o1).Namespace, Null);
-            Expect(((Keyword)o1).Name, EqualTo("1"));
+            ReadFromString(":1");
         }
 
         [Test]

@@ -478,7 +478,6 @@ namespace clojure.lang
 
         //static Regex symbolPat = new Regex("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
         static Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
-        static Regex keywordPat = new Regex("^[:]?([^/].*/)?(/|[^/][^/]*)$");
 
         private static void ExtractNamesUsingMask(string token,string maskNS,string maskName, out string ns, out string name)
         {
@@ -509,7 +508,7 @@ namespace clojure.lang
 
                 if (mask.StartsWith("::"))
                 {
-                    Match m2 = keywordPat.Match(mask.Substring(2));
+                    Match m2 = symbolPat.Match(mask.Substring(2));
                     if (!m2.Success)
                         return null;
 
@@ -534,7 +533,7 @@ namespace clojure.lang
 
                 if (isKeyword)
                 {
-                    Match m2 = keywordPat.Match(mask.Substring(1));
+                    Match m2 = symbolPat.Match(mask.Substring(1));
                     if (!m2.Success)
                         return null;
                     string ns;
