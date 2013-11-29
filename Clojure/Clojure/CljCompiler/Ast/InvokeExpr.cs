@@ -127,7 +127,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expr fexpr = Compiler.Analyze(pcon,form.first());
             VarExpr varFexpr = fexpr as VarExpr;
 
-            if (varFexpr != null && varFexpr.Var.Equals(Compiler.InstanceVar))
+            if (varFexpr != null && varFexpr.Var.Equals(Compiler.InstanceVar) && RT.count(form) == 3)
             {
                 Expr sexpr = Compiler.Analyze(pcon.SetRhc(RHC.Expression), RT.second(form));
                 ConstantExpr csexpr = sexpr as ConstantExpr;
