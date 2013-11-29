@@ -199,3 +199,27 @@
       (doseq [f (.listFiles (java.io.File. "test"))
               :when (re-find #"dummy.clj" (str f))]
         (.delete f)))))
+
+(deftest CLJ-1184-do-in-non-list-test
+  (testing "do in a vector throws an exception"
+    (is (thrown? Compiler+CompilerException                                          ;;; Compiler$CompilerException
+                 (eval '[do 1 2 3]))))
+  (testing "do in a set throws an exception"
+    (is (thrown? Compiler+CompilerException                                          ;;; Compiler$CompilerException
+                 (eval '#{do}))))
+
+  ;; compile uses a separate code path so we have to call it directly
+  ;; to test it
+  (letfn [(compile [s]         (System.IO.Directory/CreateDirectory "test/clojure")               ;;; DM: Added the CreateDirectory
+            (spit "test/clojure/bad_def_test.clj" (str "(ns test.clojure.bad-def-test)\n" s))     ;;; DM: Added test. to ns
+            (try
+             (binding [*compile-path* "test"]
+               (clojure.core/compile 'test.clojure.bad-def-test))                                 ;;; DM: Added test. to name
+             (finally
+               (doseq [f (.EnumerateFiles (System.IO.DirectoryInfo. "test/clojure"))              ;;; .listFiles java.io.File.
+                       :when (re-find #"bad_def_test" (str f))]
+                 (.Delete f)))))]
+    (testing "do in a vector throws an exception in compilation"
+      (is (thrown? Compiler+CompilerException (compile "[do 1 2 3]"))))                           ;;; Compiler$CompilerException
+    (testing "do in a set throws an exception in compilation"
+      (is (thrown? Compiler+CompilerException (compile "#{do}"))))))                              ;;; Compiler$CompilerException

@@ -899,9 +899,9 @@ namespace clojure.lang
             try
             {
                 form = Macroexpand(form);
-                bool formIsIpc = (form as IPersistentCollection) != null;
+              
 
-                if (formIsIpc && Util.equals(RT.first(form), DoSym))
+                if (form is ISeq && Util.equals(RT.first(form), DoSym))
                 {
                     ISeq s = RT.next(form);
                     for (; RT.next(s) != null; s = RT.next(s))
@@ -909,7 +909,7 @@ namespace clojure.lang
                     return eval(RT.first(s));
                 }
                 else if ( (form is IType) ||
-                    (formIsIpc && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def"))))
+                    (form is IPersistentCollection && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def"))))
                 {
                     ObjExpr objx = (ObjExpr)Analyze(pconExpr, RT.list(FnSym, PersistentVector.EMPTY, form), "eval__" + RT.nextID());
                     IFn fn = (IFn)objx.Eval();
@@ -1389,7 +1389,7 @@ namespace clojure.lang
             try
             {
                 form = Macroexpand(form);
-                if (form is IPersistentCollection && Util.Equals(RT.first(form), DoSym))
+                if (form is ISeq && Util.Equals(RT.first(form), DoSym))
                 {
                     for (ISeq s = RT.next(form); s != null; s = RT.next(s))
                         Compile1(tb, ilg, objx, RT.first(s));
