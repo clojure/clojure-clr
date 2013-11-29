@@ -133,6 +133,16 @@ namespace clojure.lang
         //internal static readonly Var COLUMN_AFTER = Var.create(0).setDynamic();    // From the JVM version
         internal static readonly Var SourceSpanVar = Var.create(null).setDynamic();    // Mine
 
+        internal static int LineVarDeref()
+        {
+            return Util.ConvertToInt(LineVar.deref());
+        }
+
+        internal static int ColumnVarDeref()
+        {
+            return Util.ConvertToInt(ColumnVar.deref());
+        }
+
         internal static readonly Var MethodVar = Var.create(null).setDynamic();
         public static readonly Var LocalEnvVar = Var.create(PersistentHashMap.EMPTY).setDynamic();
         //Integer
@@ -872,12 +882,12 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "eval")]
         public static object eval(object form)
         {
-            int line = (int)LineVar.deref();
+            object line = LineVarDeref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
-                line = (int)RT.meta(form).valAt(RT.LineKey);
-            int column = (int)ColumnVar.deref();
+                line = RT.meta(form).valAt(RT.LineKey);
+            object column = ColumnVarDeref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.ColumnKey))
-                column = (int)RT.meta(form).valAt(RT.ColumnKey);
+                column = RT.meta(form).valAt(RT.ColumnKey);
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
@@ -1362,12 +1372,12 @@ namespace clojure.lang
 
         private static void Compile1(TypeBuilder tb, CljILGen ilg,  ObjExpr objx, object form)
         {
-            int line = (int)LineVar.deref();
+            object line = LineVarDeref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
-                line = (int)RT.meta(form).valAt(RT.LineKey);
-            int column = (int)ColumnVar.deref();
+                line = RT.meta(form).valAt(RT.LineKey);
+            object column = ColumnVarDeref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.ColumnKey))
-                column = (int)RT.meta(form).valAt(RT.ColumnKey);
+                column = RT.meta(form).valAt(RT.ColumnKey);
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
@@ -1659,7 +1669,7 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                throw new CompilerException((String)SourcePathVar.deref(), (int)LineVar.deref(), (int)ColumnVar.deref(), e);
+                throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), e);
             }
         }
 
@@ -1727,13 +1737,13 @@ namespace clojure.lang
 
         private static Expr AnalyzeSeq(ParserContext pcon, ISeq form, string name )
         {
-            int line = (int)LineVar.deref();
-            int column = (int)ColumnVar.deref();
+            object line = LineVarDeref();
+            object column = ColumnVarDeref();
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
-                line = (int)RT.meta(form).valAt(RT.LineKey);
+                line = RT.meta(form).valAt(RT.LineKey);
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.ColumnKey))
-                column = (int)RT.meta(form).valAt(RT.ColumnKey);
+                column = RT.meta(form).valAt(RT.ColumnKey);
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
 
@@ -1769,7 +1779,7 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                throw new CompilerException((String)SourcePathVar.deref(), (int)LineVar.deref(), (int)ColumnVar.deref(), e);
+                throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), e);
             }
             finally
             {

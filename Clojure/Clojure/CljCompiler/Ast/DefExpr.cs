@@ -154,8 +154,8 @@ namespace clojure.lang.CljCompiler.Ast
 
                 return new DefExpr(
                     (string)Compiler.SourceVar.deref(),
-                    (int) Compiler.LineVar.deref(),
-                    (int) Compiler.ColumnVar.deref(),
+                    Compiler.LineVarDeref(),
+                    Compiler.ColumnVarDeref(),
                     v, init, meta, initProvided,isDynamic);
             }
         }
