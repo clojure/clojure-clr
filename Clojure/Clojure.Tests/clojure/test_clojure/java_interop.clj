@@ -70,7 +70,6 @@
         {"a" 1 "b" 2} m )))                                  ;;; m {"a" 1 "b" 2}   (the other order does not work at this time)
 
 
-
 (deftest test-new
   ;;;  ; Integer                                              ;;; no equivalent
   ;;;(are [expr cls value] (and (= (class expr) cls)
@@ -101,9 +100,13 @@
   ; it is a Long, nothing else
   (are [x y] (= (instance? x 42) y)
       Int32 false                    ;;; java.lang.Integer
-      Int64 true                   ;;; java.lang.Long
-      Char false                    ;;; java.lang.Character
-      String false ))               ;;; java.lang.String
+      Int64 true                     ;;; java.lang.Long
+      Char false                     ;;; java.lang.Character
+      String false )                 ;;; java.lang.String
+
+  ; test compiler macro
+  (is (let [Int64 String] (instance? Int64 "abc")))                     ;;; Long  Long
+  (is (thrown? clojure.lang.ArityException (instance? Int64))))         ;;; Long
 
 ; set!
 
