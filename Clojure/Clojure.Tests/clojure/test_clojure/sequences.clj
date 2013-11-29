@@ -533,6 +533,7 @@
     (nnext (sorted-set 1 2)) nil
     (nnext (sorted-set 1 2 3 4)) '(3 4) ))
 
+
 (deftest test-nth
   ; maps, sets are not supported
   (is (thrown? InvalidOperationException (nth {} 0)))               ;;; UnsupportedOperationException
@@ -681,7 +682,11 @@
 
     (interleave [] [3 4]) ()
     (interleave [1 2] []) ()
-    (interleave [] []) () ))
+    (interleave [] []) ()
+
+    (interleave [1]) '(1)
+
+    (interleave) () ))
 
 
 (deftest test-zipmap
