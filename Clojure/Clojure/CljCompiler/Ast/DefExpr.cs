@@ -110,7 +110,7 @@ namespace clojure.lang.CljCompiler.Ast
                 bool isDynamic = RT.booleanCast(RT.get(mm, Compiler.DynamicKeyword));
                 if (isDynamic)
                     v.setDynamic();
-                if (!isDynamic && sym.Name.StartsWith("*") && sym.Name.EndsWith("*") && sym.Name.Length > 1)
+                if (!isDynamic && sym.Name.StartsWith("*") && sym.Name.EndsWith("*") && sym.Name.Length > 2)
                 {
                     RT.errPrintWriter().WriteLine("Warning: {0} not declared dynamic and thus is not dynamically rebindable, "
                                           + "but its name suggests otherwise. Please either indicate ^:dynamic {0} or change the name. ({1}:{2}\n",
