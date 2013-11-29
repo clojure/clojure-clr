@@ -46,9 +46,6 @@ namespace clojure.lang
         static readonly Symbol LIST = Symbol.intern("clojure.core", "list");
         static readonly Symbol SEQ = Symbol.intern("clojure.core","seq");
 
-        static readonly Symbol SLASH = Symbol.intern("/");
-        static readonly Symbol CLOJURE_SLASH = Symbol.intern("clojure.core","/");
-
         static readonly Keyword UNKNOWN = Keyword.intern(null, "unknown");
 
         #endregion
@@ -186,16 +183,18 @@ namespace clojure.lang
 
                     //string token = readToken(r, (char)ch);
                     //return RT.suppressRead() ? null : interpretToken(token);
+                    string rawToken;
                     string token;
-                    int lastSlashIndex;
-                    bool eofSeen = readToken(r, (char)ch, out token, out lastSlashIndex);
+                    string mask;
+                    bool eofSeen;
+                    readToken(r, (char)ch, out rawToken, out token, out mask, out eofSeen);
                     if (eofSeen)
                     {
                         if (eofIsError)
-                            throw new EndOfStreamException("EOF while reading");
+                            throw new EndOfStreamException("EOF while reading symbol");
                         return eofValue;
                     }
-                    return RT.suppressRead() ? null : InterpretToken(token,lastSlashIndex);
+                    return RT.suppressRead() ? null : InterpretToken(rawToken, token, mask);
                 }
             }
             catch (Exception e)
@@ -369,60 +368,86 @@ namespace clojure.lang
             }
         }
 
-        static bool readToken(PushbackTextReader r, char initch, out string nameString, out int lastSlashIndex)
+
+        static void readToken(PushbackTextReader r, char initch, out String rawToken, out String token, out String mask, out bool eofSeen)
         {
-            bool oddVertBarMode = false;
-            lastSlashIndex = -1;
             bool allowSymEscape = RT.booleanCast(RT.AllowSymbolEscapeVar.deref());
 
-            StringBuilder sb = new StringBuilder();
+            bool rawMode = false;
+
+            StringBuilder sbRaw = new StringBuilder();
+            StringBuilder sbToken = new StringBuilder();
+            StringBuilder sbMask = new StringBuilder();
 
             if (allowSymEscape && initch == '|')
-                oddVertBarMode = true;
+            {
+                rawMode = true;
+                sbRaw.Append(initch);
+            }
             else
-                sb.Append(initch);
+            {
+                sbRaw.Append(initch);
+                sbToken.Append(initch);
+                sbMask.Append(initch);
+            }
 
             for (; ; )
             {
                 int ch = r.Read();
-                if (oddVertBarMode)
+                if (rawMode)
                 {
                     if (ch == -1)
                     {
-                        nameString = sb.ToString();
-                        return true;
+                        rawToken = sbRaw.ToString();
+                        token = sbToken.ToString();
+                        mask = sbMask.ToString();
+                        eofSeen = true;
+                        return;
                     }
                     if (ch == '|')
                     {
                         int ch2 = r.Read();
                         if (ch2 == '|')
-                            sb.Append('|');
+                        {
+                            sbRaw.Append('|');
+                            sbToken.Append('|');
+                            sbMask.Append('a');
+                        }
                         else
                         {
                             r.Unread(ch2);
-                            oddVertBarMode = false;
+                            rawMode = false;
+                            sbRaw.Append(ch);
                         }
                     }
-                    else 
-                        sb.Append((char)ch);
+                    else
+                    {
+                        sbRaw.Append((char)ch);
+                        sbToken.Append((char)ch);
+                        sbMask.Append('a');
+                    }
                 }
                 else
                 {
                     if (ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
                     {
                         Unread(r, ch);
-                        nameString = sb.ToString();
-                        return false;
+                        rawToken = sbRaw.ToString();
+                        token = sbToken.ToString();
+                        mask = sbMask.ToString();
+                        eofSeen = false;
+                        return;
                     }
                     else if (ch == '|' && allowSymEscape)
                     {
-                        oddVertBarMode = true;
+                        rawMode = true;
+                        sbRaw.Append((char)ch);
                     }
                     else
                     {
-                        sb.Append((char)ch);
-                        if (ch == '/')
-                            lastSlashIndex = sb.Length - 1;
+                        sbRaw.Append((char)ch);
+                        sbToken.Append((char)ch);
+                        sbMask.Append((char)ch);
                     }
                 }
             }
@@ -430,122 +455,181 @@ namespace clojure.lang
 
         public static object InterpretToken(string token)
         {
-            return InterpretToken(token, -1);
+            return InterpretToken(token,token,token);
         }
 
-        public static object InterpretToken(string token, int lastSlashIndex)
+        public static object InterpretToken(string rawToken, string token, string mask)
         {
-            if (token.Equals("nil"))
-            {
+            if ( token.Equals("nil") )
                 return null;
-            }
-            else if (token.Equals("true"))
-            {
-                //return RT.T;
-                return true;
-            }
+            else if ( token.Equals("true") )
+                return true;  // RT.T
             else if (token.Equals("false"))
-            {
-                //return RT.F;
-                return false;
-            }
-            else if (token.Equals("/"))
-            {
-                return SLASH;
-            }
-            else if (token.Equals("clojure.core//"))
-            {
-                return CLOJURE_SLASH;
-            }
+                return false; // RT.F;
 
-            object ret = null;
+            object ret = matchSymbol(token, mask);
 
-            ret = matchSymbol(token, lastSlashIndex);
             if (ret != null)
                 return ret;
 
-            throw new ArgumentException("Invalid token: " + token);
+            throw new ArgumentException("Invalid token: " + rawToken);
         }
 
 
-        static Regex nsSymbolPat = new Regex("^[:]?\\D");
-        static Regex nameSymbolPat = new Regex("^\\D");
+        //static Regex symbolPat = new Regex("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
+        static Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
+        static Regex keywordPat = new Regex("^[:]?([^/].*/)?(/|[^/][^/]*)$");
 
-        static object matchSymbol(string token, int lastSlashIndex)
+        private static void ExtractNamesUsingMask(string token,string maskNS,string maskName, out string ns, out string name)
         {
-            // no :: except at beginning
-            if (token.IndexOf("::", 1) != -1)
-                return null;
-
-            string nsStr;
-            string nameStr;
-            bool hasNS;
-
-            if (lastSlashIndex == -1)
+            if (String.IsNullOrEmpty(maskNS))
             {
-                hasNS = false;
-                nsStr = String.Empty;
-                nameStr = token;
+                ns = null;
+                name = token;
             }
             else
             {
-                hasNS = true;
-                nsStr = token.Substring(0, lastSlashIndex);
-                nameStr = token.Substring(lastSlashIndex + 1);
-            }
-
-            // Must begin with non-digit, or ':' + non-digit if there is a namespace
-            Match nameMatch = hasNS ? nameSymbolPat.Match(nameStr) : nsSymbolPat.Match(nameStr);
-            if (!nameMatch.Success)
-                return null;
-
-            // no trailing :
-            if (nameStr.EndsWith(":"))
-                return null;
-
-            if (hasNS)
-            {
-                // Must begin with non-digit or ':' + non-digit
-                Match nsMatch = nsSymbolPat.Match(nsStr);
-                if (!nsMatch.Success)
-                    return null;
-
-                // no trailing :
-                if (nsStr.EndsWith(":"))
-                    return null;
-
-            }
-
-            // Do keyword detection
-
-            if (hasNS)
-            {
-                if (nsStr.StartsWith("::"))
-                {
-                    Symbol nsSym = Symbol.intern(nsStr.Substring(2));
-                    Namespace ns = Compiler.CurrentNamespace.LookupAlias(nsSym);
-                    if (ns == null)
-                        ns = Namespace.find(nsSym);
-                    if (ns == null)
-                        return null;
-                    else
-                        return Keyword.intern(ns.Name.getName(), nameStr);
-                }
-                else if (nsStr.StartsWith(":"))
-                    return Keyword.intern(nsStr.Substring(1), nameStr);
-                else
-                    return Symbol.intern(nsStr, nameStr);
-            }
-            else
-            {
-                if ( nameStr.StartsWith("::"))
-                    return Keyword.intern(Compiler.CurrentNamespace.Name.getName(),nameStr.Substring(2));
-                else if ( nameStr.StartsWith(":") )
-                    return Keyword.intern(nameStr.Substring(1));
-                else
-                    return Symbol.intern(null,nameStr);  // Avoid / interpretation in intern(string)
+                ns = token.Substring(0, maskNS.Length-1);
+                name = token.Substring(maskNS.Length);
             }
         }
+
+        static object matchSymbol(string token, string mask)
+        {
+            Match m = symbolPat.Match(mask);
+
+            if (m.Success)
+            {
+                string maskNS = m.Groups[1].Value;
+                string maskName = m.Groups[2].Value;
+                if (maskNS != null && maskNS.EndsWith(":/")
+                    || maskName.EndsWith(":")
+                    || mask.IndexOf("::", 1) != -1)
+                    return null;
+
+                if (mask.StartsWith("::"))
+                {
+                    Match m2 = keywordPat.Match(mask.Substring(2));
+                    if (!m2.Success)
+                        return null;
+
+
+                    string ns;
+                    string name;
+                    ExtractNamesUsingMask(token.Substring(2), m2.Groups[1].Value, m2.Groups[2].Value, out ns, out name);
+                    Symbol ks = Symbol.intern(ns, name);
+                    Namespace kns;
+                    if (ks.Namespace != null)
+                        kns = Compiler.namespaceFor(ks);
+                    else
+                        kns = Compiler.CurrentNamespace;
+                    // auto-resolving keyword
+                    if (kns != null)
+                        return Keyword.intern(kns.Name.Name, ks.Name);
+                    else
+                        return null;
+                }
+
+                bool isKeyword = mask[0] == ':';
+
+                if (isKeyword)
+                {
+                    Match m2 = keywordPat.Match(mask.Substring(1));
+                    if (!m2.Success)
+                        return null;
+                    string ns;
+                    string name;
+                    ExtractNamesUsingMask(token.Substring(1), m2.Groups[1].Value, m2.Groups[2].Value, out ns, out name);
+                    return Keyword.intern(ns, name); 
+                }
+                else
+                {
+                    string ns;
+                    string name;
+                    ExtractNamesUsingMask(token, maskNS, maskName, out ns, out name);
+                    return Symbol.intern(ns, name);
+                }
+            }
+
+            return null;
+        }
+
+
+
+        //    // either namespaceToken is null or containts
+        //    // no :: except at beginning
+        //    if (token.IndexOf("::", 1) != -1)
+        //        return null;
+
+        //    string nsStr;
+        //    string nameStr;
+        //    bool hasNS;
+
+        //    if (lastSlashIndex == -1)
+        //    {
+        //        hasNS = false;
+        //        nsStr = String.Empty;
+        //        nameStr = token;
+        //    }
+        //    else
+        //    {
+        //        hasNS = true;
+        //        nsStr = token.Substring(0, lastSlashIndex);
+        //        nameStr = token.Substring(lastSlashIndex + 1);
+        //    }
+
+        //    // Must begin with non-digit, or ':' + non-digit if there is a namespace
+        //    Match nameMatch = hasNS ? nameSymbolPat.Match(nameStr) : nsSymbolPat.Match(nameStr);
+        //    if (!nameMatch.Success)
+        //        return null;
+
+        //    // no trailing :
+        //    if (nameStr.EndsWith(":"))
+        //        return null;
+
+        //    if (hasNS)
+        //    {
+        //        // Must begin with non-digit or ':' + non-digit
+        //        Match nsMatch = nsSymbolPat.Match(nsStr);
+        //        if (!nsMatch.Success)
+        //            return null;
+
+        //        // no trailing :
+        //        if (nsStr.EndsWith(":"))
+        //            return null;
+
+        //    }
+
+        //    // Do keyword detection
+
+        //    if (hasNS)
+        //    {
+        //        if (nsStr.StartsWith("::"))
+        //        {
+        //            Symbol nsSym = Symbol.intern(nsStr.Substring(2));
+        //            Namespace ns = Compiler.CurrentNamespace.LookupAlias(nsSym);
+        //            if (ns == null)
+        //                ns = Namespace.find(nsSym);
+        //            if (ns == null)
+        //                return null;
+        //            else
+        //                return Keyword.intern(ns.Name.getName(), nameStr);
+        //        }
+        //        else if (nsStr.StartsWith(":"))
+        //            return Keyword.intern(nsStr.Substring(1), nameStr);
+        //        else
+        //            return Symbol.intern(nsStr, nameStr);
+        //    }
+        //    else
+        //    {
+        //        if ( nameStr.StartsWith("::"))
+        //            return Keyword.intern(Compiler.CurrentNamespace.Name.getName(),nameStr.Substring(2));
+        //        else if ( nameStr.StartsWith(":") )
+        //            return Keyword.intern(nameStr.Substring(1));
+        //        else
+        //            return Symbol.intern(null,nameStr);  // Avoid / interpretation in intern(string)
+        //    }
+        //}
 
         #endregion
 

@@ -92,7 +92,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "intern")]
         static public Symbol intern(string nsname)
         {
-            int i = nsname.LastIndexOf('/');
+            int i = nsname.IndexOf('/');
             return i == -1 || nsname.Equals("/")
                 ? new Symbol(null, String.Intern(nsname))
                 : new Symbol(String.Intern(nsname.Substring(0, i)),

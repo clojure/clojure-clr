@@ -495,6 +495,23 @@ namespace Clojure.Tests.LibTests
             Expect(((Keyword)o1).Name, EqualTo("abc"));
         }
 
+        [Test]
+        public void ColonDigitIsKeyword()
+        {
+            object o1 = ReadFromString(":1");
+            Expect(o1, TypeOf(typeof(Keyword)));
+            Expect(((Keyword)o1).Namespace, Null);
+            Expect(((Keyword)o1).Name, EqualTo("1"));
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentException))]
+        public void ColonWithNSAndMissingNameIsBad()
+        {
+            ReadFromString(":bar/");
+        }
+
+
         // At one time, this test worked.  Now, according to the documentation, it should not work.  Did something change?  Never mind.
         //[Test]
         //public void LeadingDoubleColonDoesNotSetNamespaceIfPeriodsInName()
