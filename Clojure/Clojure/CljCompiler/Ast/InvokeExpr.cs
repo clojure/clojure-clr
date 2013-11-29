@@ -243,7 +243,6 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Stloc,targetTemp);                  // target
 
             ilg.Emit(OpCodes.Call,Compiler.Method_Util_classOf);          // class
-            ilg.EmitLoadArg(0);                                  // class, this
             ilg.EmitFieldGet(objx.CachedTypeField(_siteIndex));  // class, cached-class
             ilg.Emit(OpCodes.Beq, callLabel);                    // 
             if (_protocolOn != null)
@@ -261,7 +260,6 @@ namespace clojure.lang.CljCompiler.Ast
             GenContext.SetLocalName(typeTemp, "type");
             ilg.Emit(OpCodes.Stloc,typeTemp);                    //    (typeType <= class)
             
-            ilg.EmitLoadArg(0);                                  // this
             
             ilg.Emit(OpCodes.Ldloc,typeTemp);                    // this, class
             ilg.EmitFieldSet(objx.CachedTypeField(_siteIndex));  // 
