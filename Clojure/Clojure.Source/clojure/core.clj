@@ -3304,7 +3304,7 @@
        (decimal? x) (bigint (.ToBigInteger ^BigDecimal x))
 	   (float? x) (bigint (BigDecimal/Create (double x)))                        ;;; (. BigDecimal valueOf (double x))
        (ratio? x) (bigint (.BigIntegerValue ^clojure.lang.Ratio x))
-       (number? x) (clojure.lang.BigInt/valueOf (long x))
+       (number? x) (clojure.lang.BigInt/valueOf (long x))   (string? x) (bigint (BigInteger/Parse ^String x))   ;; DM: Added string clause
        :else (bigint (BigInteger. x))))
 
 (defn biginteger
@@ -3318,7 +3318,7 @@
        (decimal? x) (.ToBigInteger ^BigDecimal x)                                ;;; toBigInteger
 	   (float? x) (.ToBigInteger (BigDecimal/Create (double x)))                 ;;; (.toBigInteger (. BigDecimal valueOf (double x)))
        (ratio? x) (.BigIntegerValue ^clojure.lang.Ratio x)
-       (number? x) (BigInteger/Create (long x))                                  ;;;(BigInteger/valueOf (long x))
+       (number? x) (BigInteger/Create (long x))      (string? x) (bigint (BigInteger/Parse ^String x))          ;;;(BigInteger/valueOf (long x))  DM: Added string clause
        :else (BigInteger. x)))
 
 (defn bigdec
@@ -3329,7 +3329,7 @@
   [x] (cond
        (decimal? x) x
        (float? x) (BigDecimal/Create (double x))                                          ;;; (. BigDecimal valueOf (double x))
-       (ratio? x) (.ToBigDecimal ^clojure.lang.Ratio x)                                   ;;; (/ (BigDecimal. (.numerator ^clojure.lang.Ratio x)) (.denominator ^clojure.lang.Ratio x))
+       (ratio? x) (/ (BigDecimal/Create (.numerator ^clojure.lang.Ratio x)) (.denominator ^clojure.lang.Ratio x))     ;;; (/ (BigDecimal. (.numerator ^clojure.lang.Ratio x)) (.denominator ^clojure.lang.Ratio x))
        (instance? clojure.lang.BigInt x) (.ToBigDecimal ^clojure.lang.BigInt x)           ;;; .ToBigDecimal
        (instance? BigInteger x) (BigDecimal/Create ^BigInteger x)                         ;;; (BigDecimal. ^BigInteger x)
        (number? x) (BigDecimal/Create (long x))                                           ;;; (BigDecimal/valueOf (long x))
