@@ -23,6 +23,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization;
+using System.Collections;
 
 namespace clojure.lang
 {
@@ -836,6 +837,67 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         public static IPersistentMap CHAR_MAP { get { return _charMap; } }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        static readonly public IPersistentMap DEMUNGE_MAP = CreateDemungeMap();
+
+        private static IPersistentMap CreateDemungeMap()
+        {
+            // DEMUNGE_MAP maps strings to characters in the opposite
+            // direction that CHAR_MAP does, plus it maps "$" to '/'
+
+            IPersistentMap m = RT.map("$", '/');
+            for (ISeq s = RT.seq(CHAR_MAP); s != null; s = s.next())
+            {
+                IMapEntry e = (IMapEntry)s.first();
+                Char origch = (Char)e.key();
+                String escapeStr = (String)e.val();
+                m = m.assoc(escapeStr, origch);
+            }
+            return m;
+        }
+
+
+        private class LengthCmp : IComparer
+        {
+            public int Compare(object x, object y)
+            {
+                return ((String)y).Length - ((String)x).Length;
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        static readonly public Regex DEMUNGE_PATTERN = CreateDemungePattern();
+
+        private static Regex CreateDemungePattern()
+        {
+            // DEMUNGE_PATTERN searches for the first of any occurrence of
+            // the strings that are keys of DEMUNGE_MAP.
+            // Note: Regex matching rules mean that #"_|_COLON_" "_COLON_"
+            // returns "_", but #"_COLON_|_" "_COLON_" returns "_COLON_"
+            // as desired.  Sorting string keys of DEMUNGE_MAP from longest to
+            // shortest ensures correct matching behavior, even if some strings are
+            // prefixes of others.
+
+            object[] mungeStrs = RT.toArray(RT.keys(DEMUNGE_MAP));
+            Array.Sort(mungeStrs, new LengthCmp());
+            StringBuilder sb = new StringBuilder();
+            bool first = true;
+            foreach (Object s in mungeStrs) 
+            {
+                String escapeStr = (String) s;
+                if ( ! first )
+                    sb.Append("|");
+                first = false;
+                sb.Append(Regex.Escape(escapeStr));
+            }
+
+            return new Regex(sb.ToString());
+        }
+
+        
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "munge")]
         public static string munge(string name)
         {
@@ -848,6 +910,27 @@ namespace clojure.lang
                 else
                     sb.Append(sub);
             }
+            return sb.ToString();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "demunge")]
+        public static String demunge(string mungedNamed)
+        {
+            StringBuilder sb = new StringBuilder();
+            int lastMatchEnd = 0;
+            for (Match m = DEMUNGE_PATTERN.Match(mungedNamed); m.Success; m = m.NextMatch() )
+            {
+                int start = m.Index;
+
+                // Keep everything before the match
+                sb.Append(mungedNamed.Substring(lastMatchEnd, start-lastMatchEnd));
+                lastMatchEnd = start + m.Length;
+                // Replace the match with DEMUNGE_MAP result
+                Char origCh = (Char)DEMUNGE_MAP.valAt(m.Groups[0].Value);
+                sb.Append(origCh);
+            }
+            // Keep everything after the last match
+            sb.Append(mungedNamed.Substring(lastMatchEnd));
             return sb.ToString();
         }
 
