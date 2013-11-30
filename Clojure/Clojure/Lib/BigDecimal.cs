@@ -1122,7 +1122,17 @@ namespace clojure.lang
         public double ToDouble(IFormatProvider provider)
         {
             // As j.m.BigDecimal puts it: "Somewhat inefficient, but guaranteed to work."
-            return Double.Parse(ToString(), provider);
+            // However, JVM's double parser goes to +/- Infinity when out of range,
+            // while CLR's throws an exception.
+            // Hate dealing with that.
+            try
+            {
+                return Double.Parse(ToString(), provider);
+            }
+            catch (OverflowException)
+            {
+                return IsNegative ? Double.NegativeInfinity : Double.PositiveInfinity;
+            }
         }
 
         public short ToInt16(IFormatProvider provider)
