@@ -116,7 +116,7 @@ namespace clojure.lang
 
         static bool isTerminatingMacro(int ch)
         {
-            return (ch != '#' && ch != '\'' && ch < _macros.Length && _macros[ch] != null);
+            return (ch != '#' && ch != '\'' && ch != '%' && isMacro(ch));
         }
 
         #endregion
