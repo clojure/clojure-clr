@@ -738,126 +738,331 @@ namespace clojure.lang
 
         public object invoke(object arg1)
         {
-            return GetFn().invoke(arg1);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null));
         }
 
         public object invoke(object arg1, object arg2)
         {
-            return GetFn().invoke(arg1, arg2);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null),
+                Util.Ret1(arg2,arg2=null));
         }
 
         public object invoke(object arg1, object arg2, object arg3)
         {
-            return GetFn().invoke(arg1, arg2, arg3);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null),
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null),
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg7,arg7=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null), 
+                Util.Ret1(arg10,arg10=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null), 
+                Util.Ret1(arg10,arg10=null),
+                Util.Ret1(arg11,arg11=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null),
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null), 
+                Util.Ret1(arg10,arg10=null), 
+                Util.Ret1(arg11,arg11=null), 
+                Util.Ret1(arg12,arg12=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null), 
+                Util.Ret1(arg10,arg10=null), 
+                Util.Ret1(arg11,arg11=null), 
+                Util.Ret1(arg12,arg12=null), 
+                Util.Ret1(arg13,arg13=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null), 
+                Util.Ret1(arg10,arg10=null), 
+                Util.Ret1(arg11,arg11=null), 
+                Util.Ret1(arg12,arg12=null), 
+                Util.Ret1(arg13,arg13=null), 
+                Util.Ret1(arg14,arg14=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null), 
+                Util.Ret1(arg10,arg10=null), 
+                Util.Ret1(arg11,arg11=null), 
+                Util.Ret1(arg12,arg12=null), 
+                Util.Ret1(arg13,arg13=null), 
+                Util.Ret1(arg14,arg14=null), 
+                Util.Ret1(arg15,arg15=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-                               arg16);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null),
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null), 
+                Util.Ret1(arg10,arg10=null),
+                Util.Ret1(arg11,arg11=null),
+                Util.Ret1(arg12,arg12=null),
+                Util.Ret1(arg13,arg13=null),
+                Util.Ret1(arg14,arg14=null),
+                Util.Ret1(arg15,arg15=null),
+                Util.Ret1(arg16,arg16=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-                               arg16, arg17);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null),
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null), 
+                Util.Ret1(arg10,arg10=null), 
+                Util.Ret1(arg11,arg11=null), 
+                Util.Ret1(arg12,arg12=null), 
+                Util.Ret1(arg13,arg13=null), 
+                Util.Ret1(arg14,arg14=null), 
+                Util.Ret1(arg15,arg15=null),
+                Util.Ret1(arg16,arg16=null), 
+                Util.Ret1(arg17,arg17=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17, object arg18)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-                               arg16, arg17, arg18);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null),
+                Util.Ret1(arg3,arg3=null),
+                Util.Ret1(arg4,arg4=null),
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null),
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null), 
+                Util.Ret1(arg10,arg10=null),
+                Util.Ret1(arg11,arg11=null),
+                Util.Ret1(arg12,arg12=null),
+                Util.Ret1(arg13,arg13=null),
+                Util.Ret1(arg14,arg14=null),
+                Util.Ret1(arg15,arg15=null), 
+                Util.Ret1(arg16,arg16=null), 
+                Util.Ret1(arg17,arg17=null), 
+                Util.Ret1(arg18,arg18=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17, object arg18, object arg19)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-                               arg16, arg17, arg18, arg19);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null),
+                Util.Ret1(arg3,arg3=null),
+                Util.Ret1(arg4,arg4=null),
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null), 
+                Util.Ret1(arg10,arg10=null), 
+                Util.Ret1(arg11,arg11=null), 
+                Util.Ret1(arg12,arg12=null), 
+                Util.Ret1(arg13,arg13=null), 
+                Util.Ret1(arg14,arg14=null), 
+                Util.Ret1(arg15,arg15=null),  
+                Util.Ret1(arg16,arg16=null), 
+                Util.Ret1(arg17,arg17=null), 
+                Util.Ret1(arg18,arg18=null), 
+                Util.Ret1(arg19,arg19=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
                              object arg8, object arg9, object arg10, object arg11, object arg12, object arg13, object arg14,
                              object arg15, object arg16, object arg17, object arg18, object arg19, object arg20)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-                               arg16, arg17, arg18, arg19, arg20);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null),
+                Util.Ret1(arg2,arg2=null), 
+                Util.Ret1(arg3,arg3=null), 
+                Util.Ret1(arg4,arg4=null), 
+                Util.Ret1(arg5,arg5=null), 
+                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null), 
+                Util.Ret1(arg10,arg10=null), 
+                Util.Ret1(arg11,arg11=null), 
+                Util.Ret1(arg12,arg12=null), 
+                Util.Ret1(arg13,arg13=null), 
+                Util.Ret1(arg14,arg14=null), 
+                Util.Ret1(arg15,arg15=null), 
+                Util.Ret1(arg16,arg16=null), 
+                Util.Ret1(arg17,arg17=null), 
+                Util.Ret1(arg18,arg18=null), 
+                Util.Ret1(arg19,arg19=null), 
+                Util.Ret1(arg20,arg20=null));
         }
 
         public  object invoke(object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7,
@@ -865,8 +1070,28 @@ namespace clojure.lang
                              object arg15, object arg16, object arg17, object arg18, object arg19, object arg20,
                              params object[] args)
         {
-            return GetFn().invoke(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15,
-                               arg16, arg17, arg18, arg19, arg20, args);
+            return GetFn().invoke(
+                Util.Ret1(arg1,arg1=null), 
+                Util.Ret1(arg2,arg2=null),
+                Util.Ret1(arg3,arg3=null),
+                Util.Ret1(arg4,arg4=null),
+                Util.Ret1(arg5,arg5=null),
+                Util.Ret1(arg6,arg6=null),
+                Util.Ret1(arg7,arg7=null), 
+                Util.Ret1(arg8,arg8=null), 
+                Util.Ret1(arg9,arg9=null), 
+                Util.Ret1(arg10,arg10=null), 
+                Util.Ret1(arg11,arg11=null), 
+                Util.Ret1(arg12,arg12=null), 
+                Util.Ret1(arg13,arg13=null), 
+                Util.Ret1(arg14,arg14=null), 
+                Util.Ret1(arg15,arg15=null), 
+                Util.Ret1(arg16,arg16=null), 
+                Util.Ret1(arg17,arg17=null), 
+                Util.Ret1(arg18,arg18=null), 
+                Util.Ret1(arg19,arg19=null), 
+                Util.Ret1(arg20,arg20=null), 
+                Util.Ret1(args,args=null));
         }
 
         public  object applyTo(ISeq arglist)
