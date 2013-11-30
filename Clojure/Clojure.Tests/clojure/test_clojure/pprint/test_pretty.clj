@@ -130,10 +130,11 @@ Usage: *hello*
   `(simple-tests ~test-name
      ~@(apply concat
               (for [block blocks]
-                `[(with-out-str
-                    (with-pprint-dispatch code-dispatch
-                      (pprint (read-string (platform-newlines ~block)))))
-                  (platform-newlines (str ~block "\n"))]))))
+			    ;;; Change broke 5 tests, leaving original: 58faf8e (2013.10.25)            ;;; `[(str/split-lines
+                `[(with-out-str                                                             ;;;    (with-out-str
+                    (with-pprint-dispatch code-dispatch                                     ;;;      (with-pprint-dispatch code-dispatch
+                      (pprint (read-string (platform-newlines ~block)))))                   ;;;        (pprint (read-string ~block)))))
+                  (platform-newlines (str ~block "\n"))]))))                                ;;;   (str/split-lines ~block)]))))  // original did not have (platform-newlines
 
 (code-block code-block-tests
   "(defn cl-format
