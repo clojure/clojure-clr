@@ -1401,10 +1401,10 @@ namespace clojure.lang
                             return this;
                         return new HashCollisionNode(null, hash, _count, CloneAndSet(_array, idx + 1, val));
                     }
-                    object[] newArray = new object[_array.Length + 2];
-                    Array.Copy(_array, 0, newArray, 0, _array.Length);
-                    newArray[_array.Length] = key;
-                    newArray[_array.Length + 1] = val;
+                    Object[] newArray = new Object[2 * (_count + 1)];
+                    Array.Copy(_array, 0, newArray, 0, 2 * _count);
+                    newArray[2 * _count] = key;
+                    newArray[2 * _count + 1] = val;
                     addedLeaf.Val = addedLeaf;
                     return new HashCollisionNode(_edit, hash, _count + 1, newArray);
                 }
