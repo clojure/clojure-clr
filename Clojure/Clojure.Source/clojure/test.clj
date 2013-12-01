@@ -333,9 +333,12 @@
   report :type)
 
 (defn- file-and-line 
-  [exception depth]
-  (let  [ s (.GetFrame (System.Diagnostics.StackTrace. exception true) depth)]    ;;; [^StackTraceElement s (nth (.getStackTrace exception) depth)]
-    {:file (.GetFileName s) :line (.GetFileLineNumber s)}))                       ;;; .getFileName  .getLineNumber
+  [^Exception exception depth]                                                    ;;; Throwable
+  (let [stacktrace (System.Diagnostics.StackTrace. exception true)]               ;;; (.getStackTrace exception)
+    (if (< depth (.FrameCount stacktrace))                                        ;;; (count stacktrace)
+      (let [^System.Diagnostics.StackFrame s (.GetFrame stacktrace depth)]        ;;; ^StackTraceElement (nth stacktrace depth)
+        {:file (.GetFileName s) :line (.GetFileLineNumber s)})                    ;;; .getFileName  .getLineNumber
+      {:file nil :line nil})))
 
 (defn do-report
   "Add file and line information to a test result and call report.
