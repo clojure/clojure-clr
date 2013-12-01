@@ -510,7 +510,7 @@ namespace clojure.lang
                     else
                         return notFound;
                 if (_root == null)
-                    return null;
+                    return notFound;
                 return _root.Find(0, Hash(key), key, notFound);                
             }
 
