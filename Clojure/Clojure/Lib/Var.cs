@@ -1091,7 +1091,7 @@ namespace clojure.lang
                 Util.Ret1(arg18,arg18=null), 
                 Util.Ret1(arg19,arg19=null), 
                 Util.Ret1(arg20,arg20=null), 
-                Util.Ret1(args,args=null));
+                (Object[])Util.Ret1(args,args=null));
         }
 
         public  object applyTo(ISeq arglist)
