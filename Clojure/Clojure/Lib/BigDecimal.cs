@@ -2369,6 +2369,19 @@ namespace clojure.lang
         }
 
 
+        /// <summary>
+        /// Returns a BigDecimal numerically equal to this one, but with 
+        /// any trailing zeros removed.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>Ended up needing this in ClojureCLR, grabbed from OpenJDK.</remarks>
+        public BigDecimal StripTrailingZeros()
+        {    
+            BigDecimal result = new BigDecimal(this._coeff,this._exp);
+            result.StripZerosToMatchExponent(Int64.MaxValue);
+            return result;
+        }
+
         #endregion
 
         #region Rounding/quantize/rescale
