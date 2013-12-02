@@ -1211,7 +1211,7 @@ namespace clojure.lang
 
             public override bool equiv(object x, object y)
             {
-                return ToBigDecimal(x).Equals(ToBigDecimal(y));
+                return ToBigDecimal(x).CompareTo(ToBigDecimal(y)) == 0;
             }
 
             public override bool lt(object x, object y)
@@ -1303,6 +1303,24 @@ namespace clojure.lang
                 long lpart = Util.ConvertToLong(x);
                 return (int)(lpart ^ (lpart >> 32));
             }
+
+            if (xc == typeof(BigDecimal))
+            {
+                // stripTrailingZeros() to make all numerically equal
+                // BigDecimal values come out the same before calling
+                // hashCode.  Special check for 0 because
+                // stripTrailingZeros() does not do anything to values
+                // equal to 0 with different scales.
+                if (isZero(x))
+                    return BigDecimal.Zero.GetHashCode();
+                else
+                {
+                    BigDecimal tmp = ((BigDecimal)x).StripTrailingZeros();
+                    return tmp.GetHashCode();
+                }
+            }
+
+
             return x.GetHashCode();
         }
 
