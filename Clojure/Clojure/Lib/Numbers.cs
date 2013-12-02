@@ -628,6 +628,9 @@ namespace clojure.lang
                 long lx = Util.ConvertToLong(x);
                 long ly = Util.ConvertToLong(y);
 
+                if (lx == Int64.MinValue && ly < 0)
+                    return BIGINT_OPS.multiply(x, y);
+
                 long ret = lx * ly;
                 if (ly != 0 && ret / ly != lx)
                     return BIGINT_OPS.multiply(x, y);
@@ -2321,6 +2324,8 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static long multiply(long x, long y)
         {
+            if (x == Int64.MinValue && y < 0)
+                return ThrowIntOverflow();
             long ret = x * y;
             if (y != 0 && ret / y != x)
                 return ThrowIntOverflow();
@@ -2330,6 +2335,8 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static object multiplyP(long x, long y)
         {
+            if (x == Int64.MinValue && y < 0)
+                return multiplyP((object)x, (object)y);
             long ret = x * y;
             if (y != 0 && ret / y != x)
                 return multiplyP((object)x, (object)y);

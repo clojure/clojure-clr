@@ -643,7 +643,8 @@ namespace clojure.lang
             if ((_bipart == null) && (y._bipart == null))
             {
                 long ret = _lpart * y._lpart;
-                if (y._lpart == 0 || ret / y._lpart == _lpart)
+                if (y._lpart == 0 
+                    || (_lpart != Int64.MinValue && unchecked(ret / y._lpart) == _lpart ))
                     return BigInt.valueOf(ret);
             }
             return BigInt.fromBigInteger(this.toBigInteger().Multiply(y.toBigInteger()));

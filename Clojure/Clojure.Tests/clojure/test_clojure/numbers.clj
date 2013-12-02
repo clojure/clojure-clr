@@ -214,6 +214,17 @@
 
   (is (> (* 3 (int (/ Int32/MaxValue 2.0))) Int32/MaxValue)) )  ; no overflow  ;;; Integer/MAX_VALUE
 
+(deftest test-multiply-longs-at-edge
+  (are [x] (= x 9223372036854775808N)
+       (*' -1 Int64/MinValue)                                     ;;; Long/MIN_VALUE
+       (*' Int64/MinValue -1)                                     ;;; Long/MIN_VALUE
+       (* -1N Int64/MinValue)                                     ;;; Long/MIN_VALUE
+       (* Int64/MinValue -1N)                                     ;;; Long/MIN_VALUE
+       (* -1 (bigint Int64/MinValue))                             ;;; Long/MIN_VALUE
+       (* (bigint Int64/MinValue) -1))                            ;;; Long/MIN_VALUE
+  (is (thrown? ArithmeticException (* Int64/MinValue -1)))        ;;; Long/MIN_VALUE
+  (is (thrown? ArithmeticException (* -1 Int64/MinValue))))       ;;; Long/MIN_VALUE
+
 (deftest test-ratios-simplify-to-ints-where-appropriate
   (testing "negative denominator (assembla #275)"
     (is (integer? (/ 1 -1/2)))
