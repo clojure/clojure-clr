@@ -20,12 +20,7 @@ using System.Collections.Generic;
 namespace clojure.lang
 {
 
-
-    /// <summary>
-    /// Implements standard IEnumerator behavior over an <see cref="ISeq">ISeq</see>.
-    /// </summary>
-    /// <remarks>Equivalent to Java verion: SeqIterator</remarks>
-    public sealed class SeqEnumerator : IEnumerator, IEnumerator<Object>
+    public class TypedSeqEnumerator<T> : IEnumerator, IEnumerator<T>
     {
         #region Data
        
@@ -52,7 +47,7 @@ namespace clojure.lang
         /// Construct one from a given sequence.
         /// </summary>
         /// <param name="seq">The underlying sequence.</param>
-        public SeqEnumerator(ISeq seq)
+        public TypedSeqEnumerator(ISeq seq)
         {
             _origSeq = seq;
             _isAtEnd = _origSeq == null;
@@ -61,7 +56,7 @@ namespace clojure.lang
 
         #endregion
 
-        #region IEnumerator Members
+        #region IEnumerator and IEnumerator<T> Members
 
         /// <summary>
         /// The current item.
@@ -109,9 +104,54 @@ namespace clojure.lang
             _origSeq = null;
             _seq = null;
         }
+       
+
+        T IEnumerator<T>.Current
+        {
+            get { return (T)this.Current; }
+        }
 
         #endregion
     }
+
+    
+
+    /// <summary>
+    /// Implements standard IEnumerator behavior over an <see cref="ISeq">ISeq</see>.
+    /// </summary>
+    /// <remarks>Equivalent to Java verion: SeqIterator</remarks>
+    public sealed class SeqEnumerator : TypedSeqEnumerator<Object>
+    {
+        #region C-tors
+
+        /// <summary>
+        /// Construct one from a given sequence.
+        /// </summary>
+        /// <param name="seq">The underlying sequence.</param>
+        public SeqEnumerator(ISeq seq)
+            :base(seq)
+        {
+        }
+
+        #endregion
+    }
+
+    public sealed class IMapEntrySeqEnumerator : TypedSeqEnumerator<IMapEntry>
+    {
+        #region C-tors
+
+        /// <summary>
+        /// Construct one from a given sequence.
+        /// </summary>
+        /// <param name="seq">The underlying sequence.</param>
+        public IMapEntrySeqEnumerator(ISeq seq)
+            :base(seq)
+        {
+        }
+
+        #endregion
+    }
+
 }
 
 
