@@ -132,16 +132,19 @@
 (defn- imap-cons
   [^clojure.lang.IPersistentMap this o]
   (cond
-   (instance? clojure.lang.IMapEntry o)                              ;;; java.util.Map$Entry
+   (instance? clojure.lang.IMapEntry o)                             ;;; java.util.Map$Entry
      (let [^clojure.lang.IMapEntry pair o]                          ;;; java.util.Map$Entry
-       (.assoc this (.key pair) (.val pair)))                ;;; .getKey .getValue
+       (.assoc this (.key pair) (.val pair)))                       ;;; .getKey .getValue
+   (instance? System.Collections.DictionaryEntry o)                 ;;; DM: Added
+   (let [^clojure.lang.IMapEntry pair o]                            ;;; DM: Added
+       (.assoc this (.Key pair) (.Value pair)))                     ;;; DM: Added
    (instance? clojure.lang.IPersistentVector o)
      (let [^clojure.lang.IPersistentVector vec o]
        (.assoc this (.nth vec 0) (.nth vec 1)))
    :else (loop [this this
                 o o]
       (if (seq o)
-        (let [^clojure.lang.IMapEntry pair (first o)]                       ;;; java.util.Map$Entry
+        (let [^clojure.lang.IMapEntry pair (first o)]                ;;; java.util.Map$Entry
           (recur (.assoc this (.key pair) (.val pair)) (rest o)))    ;;; .getKey .getValue
         this))))
 
@@ -215,7 +218,7 @@
                                               (clojure.lang.MapEntry. k# v#))))
                    `(seq [this#] (seq (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
                                           ~'__extmap)))
-					`(|System.Collections.Generic.IEnumerable`1[clojure.lang.IMapEntry]|.GetEnumerator [this#]  (clojure.lang.Runtime.ImmutableDictionaryEnumerator. this#))
+					`(|System.Collections.Generic.IEnumerable`1[clojure.lang.IMapEntry]|.GetEnumerator [this#]  (clojure.lang.IMapEntrySeqEnumerator. this#))
                    `(^ clojure.lang.IPersistentMap assoc [this# k# ~gs]                        ;;; type hint added
                      (condp identical? k#
                        ~@(mapcat (fn [fld]
@@ -248,7 +251,7 @@
                   `(Contains [this# k#] (.containsKey this# k#))
                   `(CopyTo [this# a# i#]  (throw (InvalidOperationException.)))   ;;; TODO: implement this.  Got lazy.
                   `(System.Collections.IDictionary.GetEnumerator [this#]  (clojure.lang.Runtime.ImmutableDictionaryEnumerator. this#))
-                  `(System.Collections.IEnumerable.GetEnumerator [this#]  (clojure.lang.Runtime.ImmutableDictionaryEnumerator. this#))
+                  `(System.Collections.IEnumerable.GetEnumerator [this#]  (clojure.lang.IMapEntrySeqEnumerator. (seq this#)))
                   )])                 
       (ipc [[i m]]
            [(conj i 'clojure.lang.IPersistentCollection)
