@@ -126,13 +126,13 @@ namespace clojure.lang
             Symbol.intern("*file*"), "NO_SOURCE_PATH").setDynamic();
 
         //Integer
-        internal static readonly Var LineVar = Var.create(0).setDynamic();          // From the JVM version
-        internal static readonly Var ColumnVar = Var.create(0).setDynamic();          // From the JVM version
+        public static readonly Var LineVar = Var.create(0).setDynamic();          // From the JVM version
+        public static readonly Var ColumnVar = Var.create(0).setDynamic();          // From the JVM version
         //internal static readonly Var LINE_BEFORE = Var.create(0).setDynamic();   // From the JVM version
         //internal static readonly Var COLUMN_BEFORE = Var.create(0).setDynamic();   // From the JVM version
         //internal static readonly Var LINE_AFTER = Var.create(0).setDynamic();    // From the JVM version
         //internal static readonly Var COLUMN_AFTER = Var.create(0).setDynamic();    // From the JVM version
-        internal static readonly Var SourceSpanVar = Var.create(null).setDynamic();    // Mine
+        public static readonly Var SourceSpanVar = Var.create(null).setDynamic();    // Mine
 
         internal static int LineVarDeref()
         {
@@ -1665,22 +1665,38 @@ namespace clojure.lang
                 //COLUMN_AFTER, lntr.ColumnNumber
                 ));
 
+            int lineBefore = lntr.LineNumber;
+            int lineAfter = lntr.LineNumber;
+            int columnBefore = lntr.ColumnNumber;
+            int columnAfter = lntr.ColumnNumber;
             try
             {
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     //LINE_AFTER.set(lntr.LineNumber);
                     //COLUMN_AFTER.set(lntr.ColumnNumber);
+                    lineAfter = lntr.LineNumber;
+                    columnAfter = lntr.ColumnNumber;
                     //Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
                     //ret = ast.Compile().Invoke();
                     ret = eval(form);
                     //LINE_BEFORE.set(lntr.LineNumber);
                     //COLUMN_BEFORE.set(lntr.ColumnNumber);
+                    lineBefore = lntr.LineNumber;
+                    columnBefore = lntr.ColumnNumber;
                 }
             }
             catch (LispReader.ReaderException e)
             {
                 throw new CompilerException(sourcePath, e.Line, e.Column, e.InnerException);
+            }
+            catch (CompilerException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new CompilerException(sourcePath, lineBefore, columnBefore, e);
             }
             finally
             {
