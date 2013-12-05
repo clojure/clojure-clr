@@ -550,6 +550,31 @@ namespace clojure.lang
             return x >> n;
         }
 
+        public static int shiftRightLogicalInt(int x, int n)
+        {
+            return (int)((uint)x >> n);
+        }
+
+        static long shiftRightLogical(Object x, Object y)
+        {
+            return shiftRightLogical(bitOpsCast(x), bitOpsCast(y));
+        }
+
+        public static long shiftRightLogical(Object x, long y)
+        {
+            return shiftRightLogical(bitOpsCast(x), y);
+        }
+        
+        public static long shiftRightLogical(long x, Object y)
+        {
+            return shiftRightLogical(x, bitOpsCast(y));
+        }
+
+        public static long shiftRightLogical(long x, long n)
+        {
+            return (long)((ulong)x >> (int)n);
+        }
+
         #endregion
 
         #region LongOps
