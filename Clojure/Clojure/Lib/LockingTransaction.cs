@@ -661,7 +661,6 @@ namespace clojure.lang
 
                         // at this point, all values calced, all refs to be written locked
                         // no more client code to be called
-                        int msecs = System.Environment.TickCount;
                         long commitPoint = GetCommitPoint();
                         foreach (KeyValuePair<Ref, object> pair in _vals)
                         {
@@ -669,7 +668,7 @@ namespace clojure.lang
                             object oldval = r.TryGetVal();
                             object newval = pair.Value;
                           
-                            r.SetValue(newval, commitPoint, msecs);
+                            r.SetValue(newval, commitPoint);
                             if (r.getWatches().count() > 0)
                                 notify.Add(new Notify(r, oldval, newval));
                         }
