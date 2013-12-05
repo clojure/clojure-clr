@@ -96,7 +96,7 @@ namespace clojure.lang.CljCompiler.Ast
             AddOp(nt, "remainder", llta, OpCodes.Rem);
             AddOp(nt, "shiftLeft", llta, OpCodes.Conv_I4, OpCodes.Shl);
             AddOp(nt, "shiftRight", llta, OpCodes.Conv_I4, OpCodes.Shr);
-            AddOp(nt, "shiftRightLogical", llta, OpCodes.Conv_I4, OpCodes.Shr_Un);
+            AddOp(nt, "unsignedShiftRight", llta, OpCodes.Conv_I4, OpCodes.Shr_Un);
             AddOp(nt, "minus", dta, OpCodes.Neg);
             AddOp(nt, "minus", ddta, OpCodes.Sub);
             AddOp(nt, "inc", dta, OpCodes.Ldc_I4_1, OpCodes.Conv_R8, OpCodes.Add);
@@ -104,7 +104,7 @@ namespace clojure.lang.CljCompiler.Ast
             AddOp(nt, "quotient", llta, OpCodes.Div);
             AddOp(nt, "shiftLeftInt", iita, OpCodes.Shl);
             AddOp(nt, "shiftRightInt", iita, OpCodes.Shr);
-            AddOp(nt, "shiftRightLogicalInt", iita, OpCodes.Shr_Un);
+            AddOp(nt, "unsignedShiftRightInt", iita, OpCodes.Shr_Un);
             AddOp(nt, "unchecked_int_add", iita, OpCodes.Add );
             AddOp(nt, "unchecked_int_subtract", iita, OpCodes.Sub );
             AddOp(nt, "unchecked_int_negate", ita, OpCodes.Neg );

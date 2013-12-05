@@ -550,27 +550,27 @@ namespace clojure.lang
             return x >> n;
         }
 
-        public static int shiftRightLogicalInt(int x, int n)
+        public static int unsignedShiftRightInt(int x, int n)
         {
             return (int)((uint)x >> n);
         }
 
-        static long shiftRightLogical(Object x, Object y)
+        static long unsignedShiftRight(Object x, Object y)
         {
-            return shiftRightLogical(bitOpsCast(x), bitOpsCast(y));
+            return unsignedShiftRight(bitOpsCast(x), bitOpsCast(y));
         }
 
-        public static long shiftRightLogical(Object x, long y)
+        public static long unsignedShiftRight(Object x, long y)
         {
-            return shiftRightLogical(bitOpsCast(x), y);
-        }
-        
-        public static long shiftRightLogical(long x, Object y)
-        {
-            return shiftRightLogical(x, bitOpsCast(y));
+            return unsignedShiftRight(bitOpsCast(x), y);
         }
 
-        public static long shiftRightLogical(long x, long n)
+        public static long unsignedShiftRight(long x, Object y)
+        {
+            return unsignedShiftRight(x, bitOpsCast(y));
+        }
+
+        public static long unsignedShiftRight(long x, long n)
         {
             return (long)((ulong)x >> (int)n);
         }
