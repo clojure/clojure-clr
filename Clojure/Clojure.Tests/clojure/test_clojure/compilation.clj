@@ -218,7 +218,7 @@
              (binding [*compile-path* "test"]
                (clojure.core/compile 'test.clojure.bad-def-test))                                 ;;; DM: Added test. to name
              (finally
-               (doseq [f (.EnumerateFiles (System.IO.DirectoryInfo. "test/clojure"))              ;;; .listFiles java.io.File.
+               (doseq [f (.GetFiles (System.IO.DirectoryInfo. "test/clojure"))                    ;;; .listFiles java.io.File.
                        :when (re-find #"bad_def_test" (str f))]
                  (.Delete f)))))]
     (testing "do in a vector throws an exception in compilation"
