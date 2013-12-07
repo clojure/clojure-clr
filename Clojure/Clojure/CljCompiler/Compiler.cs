@@ -1666,19 +1666,17 @@ namespace clojure.lang
                 ));
 
             int lineBefore = lntr.LineNumber;
-            int lineAfter = lntr.LineNumber;
             int columnBefore = lntr.ColumnNumber;
-            int columnAfter = lntr.ColumnNumber;
+            //int lineAfter = lntr.LineNumber;
+            //int columnAfter = lntr.ColumnNumber;
             try
             {
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     //LINE_AFTER.set(lntr.LineNumber);
                     //COLUMN_AFTER.set(lntr.ColumnNumber);
-                    lineAfter = lntr.LineNumber;
-                    columnAfter = lntr.ColumnNumber;
-                    //Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
-                    //ret = ast.Compile().Invoke();
+                    //lineAfter = lntr.LineNumber;
+                    //columnAfter = lntr.ColumnNumber;
                     ret = eval(form);
                     //LINE_BEFORE.set(lntr.LineNumber);
                     //COLUMN_BEFORE.set(lntr.ColumnNumber);

@@ -17,6 +17,7 @@ using clojure.lang;
 
 namespace clojure.api
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "API")]
     public static class API
     {
         private static Symbol asSym(object o)
@@ -31,6 +32,7 @@ namespace clojure.api
         /// </summary>
         /// <param name="qualifiedName">a String or clojure.lang.Symbol</param>
         /// <returns>a clojure.lang.IFn</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "var")]
         public static IFn var(object qualifiedName)
         {
             Symbol s = asSym(qualifiedName);
@@ -43,6 +45,7 @@ namespace clojure.api
         /// <param name="ns">a String or clojure.lang.Symbol</param>
         /// <param name="name">a String or clojure.lang.Symbol</param>
         /// <returns>a clojure.lang.IFn</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "var")] 
         public static IFn var(object ns, object name)
         {
             return Var.intern(asSym(ns), asSym(name));
@@ -53,11 +56,14 @@ namespace clojure.api
         /// </summary>
         /// <param name="s">a string</param>
         /// <returns>an Object or nil</returns>
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "read")]
         public static object read(string s)
         {
             return EdnReadString.invoke(s);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static API()
         {
             Symbol edn = (Symbol)var("clojure.core", "symbol").invoke("clojure.edn");

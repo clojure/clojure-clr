@@ -550,26 +550,31 @@ namespace clojure.lang
             return x >> n;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int unsignedShiftRightInt(int x, int n)
         {
             return (int)((uint)x >> n);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static long unsignedShiftRight(Object x, Object y)
         {
             return unsignedShiftRight(bitOpsCast(x), bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long unsignedShiftRight(Object x, long y)
         {
             return unsignedShiftRight(bitOpsCast(x), y);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long unsignedShiftRight(long x, Object y)
         {
             return unsignedShiftRight(x, bitOpsCast(y));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static long unsignedShiftRight(long x, long n)
         {
             return (long)((ulong)x >> (int)n);

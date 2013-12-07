@@ -101,10 +101,15 @@ namespace clojure.lang
 
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
             _origSeq = null;
             _seq = null;
         }
-       
 
         T IEnumerator<T>.Current
         {
@@ -112,9 +117,7 @@ namespace clojure.lang
         }
 
         #endregion
-    }
-
-    
+     }
 
     /// <summary>
     /// Implements standard IEnumerator behavior over an <see cref="ISeq">ISeq</see>.

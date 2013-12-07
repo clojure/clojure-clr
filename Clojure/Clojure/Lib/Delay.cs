@@ -81,6 +81,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns>The value</returns>
         /// <remarks>Forces the computation if it has not happened yet.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public object deref()
         {
