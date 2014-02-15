@@ -569,6 +569,22 @@ namespace clojure.lang
 
         #endregion
 
+        #region Ranged iterator
+
+        public virtual IEnumerator RangedIterator(int start, int end)
+        {
+            for (int i = start; i < end; i++)
+                yield return nth(i);
+        }
+
+        public virtual IEnumerator<object> RangedIteratorT(int start, int end)
+        {
+            for (int i = start; i < end; i++)
+                yield return nth(i);
+        }
+
+        #endregion
+
 
         /// <summary>
         /// Internal class providing <see cref="ISeq">ISeq</see> functionality for <see cref="APersistentVector">APersistentVector</see>.
@@ -1065,12 +1081,18 @@ namespace clojure.lang
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return ((PersistentVector)_v).RangedIterator(_start, _end);
+                APersistentVector av = _v as APersistentVector;
+                if ( av != null )
+                    return av.RangedIterator(_start, _end);
+                return base.GetEnumerator();    
             }
 
             public override IEnumerator<object> GetEnumerator()
             {
-                return ((PersistentVector)_v).RangedIteratorT(_start, _end);
+                APersistentVector av = _v as APersistentVector;
+                if (av != null)
+                    return av.RangedIteratorT(_start, _end);
+                return base.GetEnumerator();    
             }
 
             #endregion
