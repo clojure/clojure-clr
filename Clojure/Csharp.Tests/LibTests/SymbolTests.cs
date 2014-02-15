@@ -92,15 +92,15 @@ namespace Clojure.Tests.LibTests
         }
 
 
-        [Test]
-        public void Intern1CreatesSymbolWithNSFromLastSlash()
-        {
-            Symbol sym = Symbol.intern("ghi/def/abc");
+        //[Test]
+        //public void Intern1CreatesSymbolWithNSFromLastSlash()
+        //{
+        //    Symbol sym = Symbol.intern("ghi/def/abc");
 
-            Expect(sym.Name, EqualTo("abc"));
-            Expect(sym.Namespace, EqualTo("ghi/def"));
-            Expect(sym.meta(), Null);
-        }
+        //    Expect(sym.Name, EqualTo("abc"));
+        //    Expect(sym.Namespace, EqualTo("ghi/def"));
+        //    Expect(sym.meta(), Null);
+        //}
 
         [Test]
         public void Intern1InternsStrings()
