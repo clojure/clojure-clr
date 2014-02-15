@@ -1335,6 +1335,14 @@ namespace clojure.lang
                 return Murmur3.HashLong(lpart);
             }
 
+            {
+                // Make BigInteger conform with Int64 when in Int64 range
+                long lval;
+                BigInteger bi = x as BigInteger;
+                if (bi != null && bi.AsInt64(out lval))
+                    return Murmur3.HashLong(lval);
+            }
+
             if (xc == typeof(BigDecimal))
             {
                 // stripTrailingZeros() to make all numerically equal
