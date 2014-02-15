@@ -343,7 +343,8 @@ namespace clojure.lang
             ISeq s = seq();
             if (s == null)
                 return 1;
-            return Util.hasheq(s);
+            //return Util.hasheq(s);
+            return Murmur3.HashOrdered(this);
         }
 
         #endregion

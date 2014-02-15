@@ -323,12 +323,13 @@ namespace clojure.lang
         {
             if (_hasheq == -1)
             {
-                int hash = 1;
-                for (ISeq s = seq(); s != null; s = s.next())
-                {
-                    hash = 31 * hash + Util.hasheq(s.first());
-                }
-                _hasheq = hash;
+                //int hash = 1;
+                //for (ISeq s = seq(); s != null; s = s.next())
+                //{
+                //    hash = 31 * hash + Util.hasheq(s.first());
+                //}
+                //_hasheq = hash;
+                _hasheq = Murmur3.HashOrdered(this);
             }
             return _hasheq;
         }

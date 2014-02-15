@@ -1331,7 +1331,8 @@ namespace clojure.lang
                 || xc == typeof(sbyte))
             {
                 long lpart = Util.ConvertToLong(x);
-                return (int)(lpart ^ (lpart >> 32));
+                //return (int)(lpart ^ (lpart >> 32));
+                return Murmur3.HashLong(lpart);
             }
 
             if (xc == typeof(BigDecimal))

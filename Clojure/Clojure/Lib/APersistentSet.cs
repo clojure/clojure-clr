@@ -295,13 +295,14 @@ namespace clojure.lang
         {
             if (_hasheq == -1)
             {
-                int hash = 0;
-                for (ISeq s = seq(); s != null; s = s.next())
-                {
-                    object e = s.first();
-                    hash += Util.hasheq(e);
-                }
-                _hasheq = hash;
+                //int hash = 0;
+                //for (ISeq s = seq(); s != null; s = s.next())
+                //{
+                //    object e = s.first();
+                //    hash += Util.hasheq(e);
+                //}
+                //_hasheq = hash;
+                _hasheq = Murmur3.HashUnordered(this);
             }
             return _hasheq;
         }

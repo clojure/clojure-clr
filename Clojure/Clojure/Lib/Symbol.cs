@@ -133,7 +133,7 @@ namespace clojure.lang
         /// <returns>The hash code.</returns>
         private int ComputeHashCode()
         {
-            return Util.hashCombine(_name.GetHashCode(), Util.hash(_ns));
+            return Util.hashCombine(Util.hasheq(_name),Util.hasheq(_ns));
         }
 
 

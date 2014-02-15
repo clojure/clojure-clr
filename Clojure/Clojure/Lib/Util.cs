@@ -41,6 +41,10 @@ namespace clojure.lang
             if (Util.IsNumeric(o))
                 return Numbers.hasheq(o);
 
+            String s = o as string;
+            if (s != null )
+                return Murmur3.HashString(s);
+
             return o.GetHashCode();
         }
 

@@ -18,7 +18,7 @@ namespace clojure.lang
 {
     // Copying JVM's clojure.lang.BigInt class as closely as possible
 
-    public class BigInt : IConvertible
+    public class BigInt : IConvertible, IHashEq
     {
         #region Data
 
@@ -678,6 +678,18 @@ namespace clojure.lang
                 return _lpart < y._lpart;
             }
             return this.toBigInteger().CompareTo(y.toBigInteger()) < 0;
+        }
+
+        #endregion
+
+        #region IHashEq
+
+        public int hasheq()
+        {
+            if (_bipart == null)
+                return Murmur3.HashLong(_lpart);
+
+            return _bipart.GetHashCode();
         }
 
         #endregion
