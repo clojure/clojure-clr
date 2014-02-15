@@ -138,44 +138,32 @@ namespace clojure.lang
 
             return Finalize(hash, 2 * input.Length);
         }
-
+        
         public static uint HashOrderedU(IEnumerable xs)
         {
-            uint hash = Seed;
             int n = 0;
+            uint hash = 1;
+
             foreach (Object x in xs)
             {
-                uint key = (uint)Util.hasheq(x);
-                key = MixKey(key);
-                hash = MixHash(hash, key);
+                hash = 31 * hash + unchecked((uint)Util.hasheq(x));
                 ++n;
             }
-            return Finalize(hash, n);
+            return FinalizeCollHash(hash, n);
         }
 
         public static uint HashUnorderedU(IEnumerable xs)
         {
-            uint sum = 0;
-            uint xor = 0;
+            uint hash = 0;
             int n = 0;
-            uint prod = 1;
+
             foreach (Object x in xs)
             {
-                uint h = (uint)Util.hasheq(x);
-                sum += h;
-                xor ^= h;
-                if (h != 0)
-                    prod *= h;
+                hash += unchecked((uint)Util.hasheq(x));
                 ++n;
             }
-            uint hash = Seed;
-            uint key = MixKey(sum);
-            hash = MixHash(hash, key);
-            key = MixKey(xor);
-            hash = MixHash(hash, key);
-            key = MixKey(prod);
-            hash = MixHash(hash, key);
-            return Finalize(hash, n);
+
+            return FinalizeCollHash(hash, n);
         }
 
         #endregion
@@ -208,6 +196,14 @@ namespace clojure.lang
             hash *= 0xc2b2ae35;
             hash ^= hash >> 16;
             return hash;
+        }
+
+        private static uint FinalizeCollHash(uint hash, int count)
+        {
+            uint h1 = Seed;
+            uint k1 = MixKey(hash);
+            h1 = MixHash(h1, k1);
+            return Finalize(h1, count);
         }
 
         private static uint RotateLeft(uint x, int n)
