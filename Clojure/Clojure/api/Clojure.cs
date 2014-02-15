@@ -15,10 +15,41 @@
 using System;
 using clojure.lang;
 
-namespace clojure.api
+namespace clojure.clr.api
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "API")]
-    public static class API
+    /// <summary>
+    /// Provides a minimal interface to bootstrap Clojure access from other CLR languages.
+    /// </summary>
+    /// <remarks>
+    /// <para>The Clojure class provides a minimal interface to bootstrap Clojure access 
+    /// from other JVM languages. It provides:</para>
+    /// <list type=">">
+    /// <item>The ability to use Clojure's namespaces to locate an arbitrary
+    /// <a href="http://clojure.org/vars">var</a>, returning the
+    /// var's clojure.lang.IFn interface.</item>
+    /// <item>A convenience method <c>read</c> for reading data using
+    /// Clojure's edn reader</item>
+    /// </list>
+    /// <para>To lookup and call a Clojure function:</para>
+    /// <code>
+    /// IFn plus = Clojure.var("clojure.core", "+");
+    /// plus.invoke(1, 2);
+    /// </code>
+    /// <para>Functions in <c>clojure.core</c> are automatically loaded. Other
+    /// namespaces can be loaded via <c>require</c>:</para>
+    /// <code>
+    /// IFn require = Clojure.var("clojure.core", "require");
+    /// require.invoke(Clojure.read("clojure.set"));
+    /// </code>
+    /// <para><c>IFn</c>s can be passed to higher order functions, e.g. the
+    /// example below passes <c>plus</c> to <c>read</c>:</para>
+    /// <code>
+    /// IFn map = Clojure.var("clojure.core", "map");
+    /// IFn inc = Clojure.var("clojure.core", "inc");
+    /// map.invoke(inc, Clojure.read("[1 2 3]"));
+    /// </code>
+    /// </remarks>
+    public static class Clojure
     {
         private static Symbol asSym(object o)
         {
@@ -56,7 +87,6 @@ namespace clojure.api
         /// </summary>
         /// <param name="s">a string</param>
         /// <returns>an Object or nil</returns>
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "read")]
         public static object read(string s)
         {
@@ -64,7 +94,7 @@ namespace clojure.api
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
-        static API()
+        static Clojure()
         {
             Symbol edn = (Symbol)var("clojure.core", "symbol").invoke("clojure.edn");
             var("clojure.core", "require").invoke(edn);

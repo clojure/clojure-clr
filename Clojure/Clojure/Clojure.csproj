@@ -119,7 +119,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="api\API.cs" />
+    <Compile Include="api\Clojure.cs" />
     <Compile Include="CljCompiler\Ast\IlGen.cs" />
     <Compile Include="CljCompiler\Ast\Intrinsics.cs" />
     <Compile Include="CljCompiler\Ast\CaseExpr.cs" />
@@ -376,6 +376,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="api\package.html" />
+    <Content Include="package.html" />
   </ItemGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
