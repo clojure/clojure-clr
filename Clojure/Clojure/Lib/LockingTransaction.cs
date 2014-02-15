@@ -563,13 +563,29 @@ namespace clojure.lang
             // We can could define a delegate for this, probably use ThreadStartDelegate.
             // Should still have a version that takes IFn.
             LockingTransaction t = _transaction;
+            Object ret;
+
             if (t == null)
+            {
                 _transaction = t = new LockingTransaction();
+                try
+                {
+                    ret = t.Run(fn);
+                }
+                finally
+                {
+                    _transaction = null;
+                }
+            }
+            else
+            {
+                if (t._info != null)
+                    ret = fn.invoke();
+                else
+                    ret = t.Run(fn);
+            }
 
-            if (t._info != null)
-                return fn.invoke();
-
-            return t.Run(fn);
+            return ret;
         }
 
         class Notify

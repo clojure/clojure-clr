@@ -101,6 +101,8 @@ namespace clojure.lang
         {
             #region Data
 
+            internal static readonly Frame TOP = new Frame(PersistentHashMap.EMPTY, null);
+
             /// <summary>
             /// A mapping from <see cref="Var">Var</see>s to <see cref="TBox"/>es holding their values.
             /// </summary>
@@ -132,14 +134,6 @@ namespace clojure.lang
             #region Ctors
 
             /// <summary>
-            /// Construct an empty frame.
-            /// </summary>
-            public Frame()
-                : this(PersistentHashMap.EMPTY, null)
-            {
-            }
-
-            /// <summary>
             /// Construct a frame on the stack.
             /// </summary>
             /// <param name="frameBindings">The bindings for this frame only.</param>
@@ -158,9 +152,7 @@ namespace clojure.lang
 
             public object Clone()
             {
-                Frame f = new Frame();
-                f._bindings = this._bindings;
-                return f;
+                return new Frame(_bindings, null);
             }
 
             #endregion
@@ -196,7 +188,7 @@ namespace clojure.lang
             get
             {
                 if (_currentFrame == null)
-                    _currentFrame = new Frame();
+                    _currentFrame = Frame.TOP;
                 return _currentFrame;
             }
             set
@@ -407,19 +399,13 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object getThreadBindingFrame()
         {
-            Frame f = CurrentFrame;
-            if ( f != null )
-                return f;
-            return new Frame();
+            return CurrentFrame;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Object cloneThreadBindingFrame()
         {
-            Frame f = CurrentFrame;
-            if (f != null)
-                return f.Clone();
-            return new Frame();
+            return CurrentFrame.Clone();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
@@ -676,10 +662,13 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static void popThreadBindings()
         {
-            Frame f = CurrentFrame;
-            if (f.Prev == null)
+            Frame f = CurrentFrame.Prev;
+            if (f == null)
                 throw new InvalidOperationException("Pop without matching push");
-            CurrentFrame = f.Prev;
+            else if (f == Frame.TOP)
+                CurrentFrame = null;
+            else 
+                CurrentFrame = f;
         }
 
         /// <summary>
