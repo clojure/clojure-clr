@@ -56,8 +56,8 @@ namespace clojure.lang
 
         public override void Close()
         {
-            BaseStream.Close();
-            base.Close();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected override void Dispose(bool disposing)

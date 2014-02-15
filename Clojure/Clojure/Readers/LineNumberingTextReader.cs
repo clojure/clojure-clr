@@ -142,8 +142,8 @@ namespace clojure.lang
 
         public override void Close()
         {
-            _baseReader.Close();
-            base.Close();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected override void Dispose(bool disposing)
