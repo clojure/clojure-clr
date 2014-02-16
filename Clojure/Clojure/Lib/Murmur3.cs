@@ -74,6 +74,11 @@ namespace clojure.lang
             return unchecked((int)HashUnorderedU(input));
         }
 
+        public static int mixCollHash(int hash, int count)
+        {
+            return unchecked((int)mixCollHashU((uint)hash, count));
+        }
+
         #endregion
 
         #region uint-returning API
@@ -157,13 +162,18 @@ namespace clojure.lang
             uint hash = 0;
             int n = 0;
 
-            foreach (Object x in xs)
+            foreach (Object x in xs )
             {
-                hash += unchecked((uint)Util.hasheq(x));
+                hash +=  unchecked((uint)Util.hasheq(x));
                 ++n;
             }
 
             return FinalizeCollHash(hash, n);
+        }
+
+        public static uint mixCollHashU(uint hash, int count)
+        {
+            return FinalizeCollHash(hash, count);
         }
 
         #endregion
