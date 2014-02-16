@@ -103,7 +103,6 @@ namespace clojure.lang
 
         private readonly Array _a;
         private readonly int _i;
-        private readonly Type _ct;
 
         #endregion
 
@@ -113,7 +112,6 @@ namespace clojure.lang
         {
             _a = (Array)array;
             _i = index;
-            _ct = array.GetType().GetElementType();
         }
 
         public UntypedArraySeq(IPersistentMap meta, object array, int index)
@@ -121,7 +119,6 @@ namespace clojure.lang
         {
             _a = (Array)array;
             _i = index;
-            _ct = array.GetType().GetElementType();
         }
 
         #endregion
@@ -130,7 +127,7 @@ namespace clojure.lang
 
         public override object first()
         {
-            return Reflector.prepRet(_ct,_a.GetValue(_i));
+            return Reflector.prepRet(typeof(Object),_a.GetValue(_i));
         }
 
         public override ISeq next()
@@ -173,17 +170,17 @@ namespace clojure.lang
 
         public object reduce(IFn f)
         {
-            object ret = Reflector.prepRet(_ct,_a.GetValue(_i));
+            object ret = Reflector.prepRet(typeof(object),_a.GetValue(_i));
             for (int x = _i + 1; x < _a.Length; x++)
-                ret = f.invoke(ret, Reflector.prepRet(_ct,_a.GetValue(x)));
+                ret = f.invoke(ret, Reflector.prepRet(typeof(object), _a.GetValue(x)));
             return ret;
         }
 
         public object reduce(IFn f, object start)
         {
-            object ret = f.invoke(start, Reflector.prepRet(_ct,_a.GetValue(_i)));
+            object ret = f.invoke(start, Reflector.prepRet(typeof(object), _a.GetValue(_i)));
             for (int x = _i + 1; x < _a.Length; x++)
-                ret = f.invoke(ret, Reflector.prepRet(_ct,_a.GetValue(x)));
+                ret = f.invoke(ret, Reflector.prepRet(typeof(object), _a.GetValue(x)));
             return ret;
         }
 
@@ -195,7 +192,7 @@ namespace clojure.lang
         {
             int n = _a.Length;
             for (int j = _i; j < n; j++)
-                if (Util.equals(value, Reflector.prepRet(_ct,_a.GetValue(j))))
+                if (Util.equals(value, Reflector.prepRet(typeof(object), _a.GetValue(j))))
                     return j - _i;
             return -1;
         }
@@ -243,7 +240,7 @@ namespace clojure.lang
         {
             _array = array;
             _i = index;
-            _ct = array.GetType().GetElementType();
+            _ct = typeof(T);
         }
 
         #endregion
