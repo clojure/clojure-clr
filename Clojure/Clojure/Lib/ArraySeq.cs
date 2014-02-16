@@ -28,7 +28,6 @@ namespace clojure.lang
     {
         #region C-tors and factory methods
 
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create", Justification="Compatibility with clojure.core")]
         static public IArraySeq create()
         {
@@ -54,9 +53,9 @@ namespace clojure.lang
 
         internal static IArraySeq createFromObject(Object array)
         {
-            Array aa = (Array)array;
+            Array aa = array as Array;
 
-            if (array == null || aa.Length == 0)
+            if (aa == null || aa.Length == 0)
                 return null;
 
             Type elementType = array.GetType().GetElementType();
@@ -88,139 +87,149 @@ namespace clojure.lang
                     return new ArraySeq_uint(null, (uint[])aa, 0);
                 case TypeCode.UInt64:
                     return new ArraySeq_ulong(null, (ulong[])aa, 0);
+                case TypeCode.Object:
+                    return new ArraySeq_object(null, (object[])aa, 0);
                 default:
-                    return new UntypedArraySeq(array, 0);
+                    {
+                        Object[] objArray = new Object[aa.Length];
+                        Array.Copy(aa, objArray, aa.Length);
+                        return new ArraySeq_object(null, objArray, 0);
+                    }
             }
         }
 
         #endregion
     }
 
-    [Serializable]
-    public class UntypedArraySeq : ASeq, IArraySeq
-    {
-        #region Data
+    #region UntypedArraySeq (deprecated)
 
-        private readonly Array _a;
-        private readonly int _i;
+    //[Serializable]
+    //public class UntypedArraySeq : ASeq, IArraySeq
+    //{
+    //    #region Data
 
-        #endregion
+    //    private readonly Array _a;
+    //    private readonly int _i;
 
-        #region Ctors
+    //    #endregion
 
-        public UntypedArraySeq(object array, int index)
-        {
-            _a = (Array)array;
-            _i = index;
-        }
+    //    #region Ctors
 
-        public UntypedArraySeq(IPersistentMap meta, object array, int index)
-            : base(meta)
-        {
-            _a = (Array)array;
-            _i = index;
-        }
+    //    public UntypedArraySeq(object array, int index)
+    //    {
+    //        _a = (Array)array;
+    //        _i = index;
+    //    }
 
-        #endregion
+    //    public UntypedArraySeq(IPersistentMap meta, object array, int index)
+    //        : base(meta)
+    //    {
+    //        _a = (Array)array;
+    //        _i = index;
+    //    }
 
-        #region ISeq members
+    //    #endregion
 
-        public override object first()
-        {
-            return Reflector.prepRet(typeof(Object),_a.GetValue(_i));
-        }
+    //    #region ISeq members
 
-        public override ISeq next()
-        {
-            if (_i + 1 < _a.Length)
-                return new UntypedArraySeq(_a, _i + 1);
-            return null;
-        }
+    //    public override object first()
+    //    {
+    //        return Reflector.prepRet(typeof(Object),_a.GetValue(_i));
+    //    }
 
-        #endregion
+    //    public override ISeq next()
+    //    {
+    //        if (_i + 1 < _a.Length)
+    //            return new UntypedArraySeq(_a, _i + 1);
+    //        return null;
+    //    }
 
-        #region IPersistentCollection members
+    //    #endregion
 
-        public override int count()
-        {
-            return _a.Length - _i;
-        }
+    //    #region IPersistentCollection members
 
-        #endregion
+    //    public override int count()
+    //    {
+    //        return _a.Length - _i;
+    //    }
 
-        #region IObj members
+    //    #endregion
 
-        public override IObj withMeta(IPersistentMap meta)
-        {
-            return new UntypedArraySeq(meta, _a, _i);
-        }
+    //    #region IObj members
 
-        #endregion
+    //    public override IObj withMeta(IPersistentMap meta)
+    //    {
+    //        return new UntypedArraySeq(meta, _a, _i);
+    //    }
 
-        #region IndexedSeq Members
+    //    #endregion
 
-        public int index()
-        {
-            return _i;
-        }
+    //    #region IndexedSeq Members
 
-        #endregion
+    //    public int index()
+    //    {
+    //        return _i;
+    //    }
 
-        #region IReduce Members
+    //    #endregion
 
-        public object reduce(IFn f)
-        {
-            object ret = Reflector.prepRet(typeof(object),_a.GetValue(_i));
-            for (int x = _i + 1; x < _a.Length; x++)
-                ret = f.invoke(ret, Reflector.prepRet(typeof(object), _a.GetValue(x)));
-            return ret;
-        }
+    //    #region IReduce Members
 
-        public object reduce(IFn f, object start)
-        {
-            object ret = f.invoke(start, Reflector.prepRet(typeof(object), _a.GetValue(_i)));
-            for (int x = _i + 1; x < _a.Length; x++)
-                ret = f.invoke(ret, Reflector.prepRet(typeof(object), _a.GetValue(x)));
-            return ret;
-        }
+    //    public object reduce(IFn f)
+    //    {
+    //        object ret = Reflector.prepRet(typeof(object),_a.GetValue(_i));
+    //        for (int x = _i + 1; x < _a.Length; x++)
+    //            ret = f.invoke(ret, Reflector.prepRet(typeof(object), _a.GetValue(x)));
+    //        return ret;
+    //    }
 
-        #endregion
+    //    public object reduce(IFn f, object start)
+    //    {
+    //        object ret = f.invoke(start, Reflector.prepRet(typeof(object), _a.GetValue(_i)));
+    //        for (int x = _i + 1; x < _a.Length; x++)
+    //            ret = f.invoke(ret, Reflector.prepRet(typeof(object), _a.GetValue(x)));
+    //        return ret;
+    //    }
 
-        #region IList members
+    //    #endregion
 
-        public override int IndexOf(object value)
-        {
-            int n = _a.Length;
-            for (int j = _i; j < n; j++)
-                if (Util.equals(value, Reflector.prepRet(typeof(object), _a.GetValue(j))))
-                    return j - _i;
-            return -1;
-        }
+    //    #region IList members
 
-        #endregion
+    //    public override int IndexOf(object value)
+    //    {
+    //        int n = _a.Length;
+    //        for (int j = _i; j < n; j++)
+    //            if (Util.equals(value, Reflector.prepRet(typeof(object), _a.GetValue(j))))
+    //                return j - _i;
+    //        return -1;
+    //    }
 
-        #region IArraySeq members
+    //    #endregion
 
-        public object[] ToArray()
-        {
-              object[] items = new object[_a.Length];
-              for (int i = 0; i < _a.Length; i++)
-                  items[i] = _a.GetValue(i);
-                return items;
-        }
+    //    #region IArraySeq members
 
-        public object Array()
-        {
-            return _a;
-        }
+    //    public object[] ToArray()
+    //    {
+    //          object[] items = new object[_a.Length];
+    //          for (int i = 0; i < _a.Length; i++)
+    //              items[i] = _a.GetValue(i);
+    //            return items;
+    //    }
 
-        public int Index()
-        {
-            return _i;
-        }
+    //    public object Array()
+    //    {
+    //        return _a;
+    //    }
 
-        #endregion
-    }
+    //    public int Index()
+    //    {
+    //        return _i;
+    //    }
+
+    //    #endregion
+    //}
+
+    #endregion
 
     [Serializable]
     public abstract class TypedArraySeq<T> : ASeq, IArraySeq
@@ -229,7 +238,7 @@ namespace clojure.lang
 
         protected readonly T[] _array;
         protected readonly int _i;
-        protected readonly Type _ct;
+        //protected readonly Type _ct;
 
         #endregion
 
@@ -240,7 +249,7 @@ namespace clojure.lang
         {
             _array = array;
             _i = index;
-            _ct = typeof(T);
+            //_ct = typeof(T);
         }
 
         #endregion
@@ -273,7 +282,8 @@ namespace clojure.lang
 
         public override object first()
         {
-            return Reflector.prepRet(_ct,_array[_i]);
+            return _array[_i];
+            //return Reflector.prepRet(_ct,_array[_i]);
         }
 
         public override ISeq next()
@@ -307,17 +317,25 @@ namespace clojure.lang
 
         public object reduce(IFn f)
         {
-            object ret = Reflector.prepRet(_ct,_array[_i]);
+            //object ret = Reflector.prepRet(_ct,_array[_i]);
+            object ret = _array[_i];
             for (int x = _i + 1; x < _array.Length; x++)
-                ret = f.invoke(ret, Reflector.prepRet(_ct,_array[x]));
+            {
+                //ret = f.invoke(ret, Reflector.prepRet(_ct, _array[x]));
+                ret = f.invoke(ret, _array[x]);
+            }
             return ret;
         }
 
         public object reduce(IFn f, object start)
         {
-            object ret = f.invoke(start, Reflector.prepRet(_ct, _array[_i]));
+            //object ret = f.invoke(start, Reflector.prepRet(_ct, _array[_i]));
+            object ret = f.invoke(start, _array[_i]);
             for (int x = _i + 1; x < _array.Length; x++)
-                ret = f.invoke(ret, Reflector.prepRet(_ct,_array[x]));
+            {
+                //ret = f.invoke(ret, Reflector.prepRet(_ct, _array[x]));
+                ret = f.invoke(ret, _array[x]);
+            }
             return ret;
         }
 

@@ -117,7 +117,7 @@
                   (recur (inc i) ret)))
          val))))
   
-  clojure.lang.UntypedArraySeq                             ;;; ArraySeq
+  clojure.lang.ArraySeq_object                             ;;; ArraySeq
   (internal-reduce
        [a-seq f val]
        (let [^objects arr (.Array a-seq)]           ;;; .array
