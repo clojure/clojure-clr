@@ -366,9 +366,9 @@
           ^Object y (identity -1)]                                  ;;; (Long. -1)
       (is (= :diff (case x -1 :oops :diff)))
       (is (= :same (case y -1 :same :oops)))))
-  ;;FIXME - these are no longer collisions
-  #_(testing "test correct behavior on hash collision"
-    (is (== (hash 1) (hash 9223372039002259457N)))
+  (testing "test correct behavior on hash collision"
+    ;; case uses Java .hashCode to put values into hash buckets.
+    (is (== (.GetHashCode 1) (.GetHashCode 9223372039002259457N)))        ;;; .hashCode .hashCode
     (are [result input] (= result (case input
                                     1 :long
                                     9223372039002259457N :big
