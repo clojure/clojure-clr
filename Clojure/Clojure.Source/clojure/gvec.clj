@@ -10,6 +10,8 @@
 
 (in-ns 'clojure.core)
 
+(import '(clojure.lang Murmur3))
+
 ;(set! *warn-on-reflection* true)
 
 (deftype VecNode [edit arr])
@@ -145,6 +147,11 @@
                                 (clojure.lang.Util/hash val))
                  (inc i))))))
 
+  ;todo - cache
+  clojure.lang.IHashEq
+  (hasheq [this]
+    (Murmur3/HashOrdered this))
+ 
   clojure.lang.Counted
   (count [_] cnt)
 
