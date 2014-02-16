@@ -96,17 +96,17 @@ Design notes for clojure.string:
    -> \"lmostAay igPay atinLay\""
   {:added "1.2"}
   [^String s match replacement]
-  (cond 
-   (instance? Char match) (.Replace s ^Char match ^Char replacement)                         ;;;  Character  .replace
-   (instance? String match) (.Replace s ^String match ^String replacement)                   ;;; .replace
-   (instance? Regex match) (if (string? replacement)                                         ;;; Pattern
-                             (.Replace match s replacement)                                  ;;; (.replaceAll (re-matcher ^Pattern match s) ^String replacement)
-                             (replace-by s match replacement))
-   :else (throw (ArgumentException. (str "Invalid match arg: " match)))))                 ;;; IllegalArgumentException
+  (let []   ;                                                                                  ;;; [s (.toString s)]
+    (cond 
+     (instance? Char match) (.Replace s ^Char match ^Char replacement)                         ;;;  Character  .replace
+     (instance? String match) (.Replace s ^String match ^String replacement)                   ;;; .replace
+     (instance? Regex match) (if (string? replacement)                                         ;;; Pattern
+                               (.Replace match s replacement)                                  ;;; (.replaceAll (re-matcher ^Pattern match s)
+							                                                                   ;;;     (.toString ^CharSequence replacement))
+                               (replace-by s match replacement))
+     :else (throw (ArgumentException. (str "Invalid match arg: " match))))))                   ;;; IllegalArgumentException
 
 (defn- replace-first-by
-  "Replace first match of re in s with the result of
-  (f (re-groups the-match))."
   [^String s ^Regex re f]                                                       ;;; Pattern
                                                                                 ;;; (let [m (re-matcher re s)]
   (.Replace re s                                                                ;;;   (if (.find m)
@@ -195,11 +195,12 @@ Design notes for clojure.string:
   "Converts first character of the string to upper-case, all other
   characters to lower-case."
   {:added "1.2"}
-  [^String s]
-  (if (< (count s) 2)
-    (.ToUpper s)                                                        ;;; .toUpperCase
-    (str (.ToUpper ^String (subs s 0 1))                                ;;; .toUpperCase
-         (.ToLower ^String (subs s 1)))))                               ;;; .toLowerCase
+  [^String s]                                                           ;;; ^CharSequence
+  (let []                                                               ;;; [s (.toString s)]
+    (if (< (count s) 2)
+      (.ToUpper s)                                                      ;;; .toUpperCase
+      (str (.ToUpper ^String (subs s 0 1))                              ;;; .toUpperCase
+           (.ToLower ^String (subs s 1))))))                            ;;; .toLowerCase
 
 (defn ^String upper-case
   "Converts string to all upper-case."
@@ -231,30 +232,42 @@ Design notes for clojure.string:
 (defn ^String trim
   "Removes whitespace from both ends of string."
   {:added "1.2"}
-  [^String s]
-  (.Trim s))                                                                ;;; .trim
+  [^String s]                                                              ;;; ^CharSequence
+  (let [len (.Length s)]                                                   ;;; .length
+    (loop [rindex len]                                                       
+      (if (zero? rindex)
+        ""
+        (if (Char/IsWhiteSpace (.get_Chars s (dec rindex)))                ;;; Character/isWhitespace   .charAt 
+          (recur (dec rindex))
+          ;; there is at least one non-whitespace char in the string,
+          ;; so no need to check for lindex reaching len.
+          (loop [lindex 0]
+            (if (Char/IsWhiteSpace (.get_Chars s lindex))                  ;;; Character/isWhitespace   .charAt 
+              (recur (inc lindex))
+              (.. s (Substring lindex (- rindex lindex))))))))))           ;;;  (subSequence lindex rindex) toSTring
 
 (defn ^String triml
   "Removes whitespace from the left side of string."
   {:added "1.2"}
-  [^String s]
-  (loop [index (int 0)]
-    (if (= (.Length s) index)                                       ;;; .length
-      ""
-      (if (Char/IsWhiteSpace (.get_Chars s index))                      ;;; Character/isWhitespace   .charAt 
-        (recur (inc index))
-        (.Substring s index)))))                                          ;;; .substring
+  [^String s]                                                              ;;; ^CharSequence           
+  (let [len (.Length s)]                                                   ;;; .length
+    (loop [index 0]
+      (if (= len index)
+        ""
+        (if (Char/IsWhiteSpace (.get_Chars s index))                       ;;; Character/isWhitespace   .charAt 
+          (recur (unchecked-inc index))
+          (.. s (Substring index)))))))                                    ;;;  (subSequence index len)  toSTring
 
 (defn ^String trimr
   "Removes whitespace from the right side of string."
   {:added "1.2"}
-  [^String s]
- (loop [index (.Length s)]                                            ;;; .length
+  [^String s]                                                              ;;; ^CharSequence  
+  (loop [index (.Length s)]                                                ;;; .length
     (if (zero? index)
       ""
-      (if (Char/IsWhiteSpace (.get_Chars s (dec index)))                  ;;; Character/isWhitespace   .charAt 
-        (recur (dec index))
-        (.Substring s 0 index)))))                                    ;;; .substring
+      (if (Char/IsWhiteSpace (.get_Chars s (unchecked-dec index)))         ;;; Character/isWhitespace   .charAt 
+        (recur (unchecked-dec index))
+        (.. s (Substring 0 index))))))                     ;;;  (subSequence 0 index)  toSTring
 
 (defn ^String trim-newline
   "Removes all trailing newline \\n or return \\r characters from
