@@ -150,7 +150,9 @@ Example: (source-fn 'filter)"
                       (Read [] (let [i (proxy-super Read)]                          ;;; read read
                                  (.Append text (char i))                            ;;; .append
                                  i)))]
-            (read (clojure.lang.PushbackTextReader. pbr))                           ;;; (read (PushbackReader. pbr))
+            (if (= :unknown *read-eval*)
+              (throw (InvalidOperationException. "Unable to read source while *read-eval* is :unknown."))    ;;; IllegalStateException
+              (read (clojure.lang.PushbackTextReader. pbr)))                           ;;; (read (PushbackReader. pbr))
             (str text)))))))
 
 (defmacro source
