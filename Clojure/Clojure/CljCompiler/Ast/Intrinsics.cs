@@ -122,8 +122,8 @@ namespace clojure.lang.CljCompiler.Ast
             AddOp(nt, "unchecked_multiply", llta, OpCodes.Mul );
             AddOp(nt, "unchecked_multiply", llta, OpCodes.Mul );
             AddOp(nt, "unchecked_inc", lta, OpCodes.Ldc_I4_1, OpCodes.Conv_I8, OpCodes.Add );
-            AddOp(nt, "unchecked_inc", dta, OpCodes.Ldc_I4_1, OpCodes.Conv_R8, OpCodes.Sub );
-            AddOp(nt, "unchecked_dec", lta, OpCodes.Ldc_I4_1, OpCodes.Conv_I8, OpCodes.Add );
+            AddOp(nt, "unchecked_inc", dta, OpCodes.Ldc_I4_1, OpCodes.Conv_R8, OpCodes.Add );
+            AddOp(nt, "unchecked_dec", lta, OpCodes.Ldc_I4_1, OpCodes.Conv_I8, OpCodes.Sub );
             AddOp(nt, "unchecked_dec", dta, OpCodes.Ldc_I4_1, OpCodes.Conv_R8, OpCodes.Sub );
 
             AddOp(rtt, "aget", new Type[] { typeof(float[]), typeof(int) }, OpCodes.Ldelem_R4 );
