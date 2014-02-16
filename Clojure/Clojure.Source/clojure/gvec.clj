@@ -134,7 +134,7 @@
                (.Equals (.nth this i) (nth o i)) (recur (inc i))                                   ;;; .equals
                :else false)))
      (or (instance? clojure.lang.Sequential o) (instance? System.Collections.IList o))             ;;; java.util.List
-       (.Equals (seq this) (seq o))                                                                ;;; .equals
+       (or (and (nil? (seq this)) (nil? (seq o))) (and (not (nil? (seq this))) (.Equals (seq this) (seq o))))              ;;; (.equals (seq this) (seq o))
      :else false))
 
   ;todo - cache
