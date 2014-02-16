@@ -340,10 +340,6 @@ namespace clojure.lang
 
         public int hasheq()
         {
-            ISeq s = seq();
-            if (s == null)
-                return 1;
-            //return Util.hasheq(s);
             return Murmur3.HashOrdered(this);
         }
 

@@ -15,6 +15,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace clojure.lang
 {
@@ -281,8 +282,14 @@ namespace clojure.lang
         /// Represents an empty <see cref="IPersistentList">IPersistentList</see>.
         /// </summary>
         [Serializable]
-        public class EmptyList : Obj, IPersistentList, IList, IList<Object>, ISeq, Counted
+        public class EmptyList : Obj, IPersistentList, IList, IList<Object>, ISeq, Counted, IHashEq
         {
+            #region Data
+
+            static readonly int _hasheq = Murmur3.HashOrdered(Enumerable.Empty<Object>());
+
+            #endregion
+
             #region C-tors
 
             /// <summary>
@@ -312,7 +319,7 @@ namespace clojure.lang
             /// <returns>The hash code</returns>
             public override int GetHashCode()
             {
-                return -1;
+                return 1;
             }
 
             /// <summary>
@@ -565,6 +572,15 @@ namespace clojure.lang
                 {
                     throw new InvalidOperationException("Cannot modify an immutable list");
                 }
+            }
+
+            #endregion
+
+            #region IHashEq members
+
+            public int hasheq()
+            {
+                return _hasheq;
             }
 
             #endregion
