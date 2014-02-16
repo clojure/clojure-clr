@@ -173,6 +173,19 @@
         #{System.IFormattable System.IConvertible System.IComparable |System.IEquatable`1[System.Int32]| |System.IComparable`1[System.Int32]|     ;;; java.lang.Number java.lang.Object
 		System.Object System.ValueType}   ))                     ;;; java.lang.Comparable java.io.Serializable} ))
 
+(deftest test-proxy-super
+  (let [d (proxy [System.Collections.ArrayList] [[1 2 3]]                                ;;; java.util.BitSet  []
+            (IndexOf [value startIndex]                                                      ;;; flip [bitIndex]
+              (try
+                (proxy-super IndexOf value startIndex)                                       ;;; (proxy-super flip bitIndex)
+                (catch ArgumentOutOfRangeException e                             ;;; IndexOutOfBoundsException
+                  (throw (ArgumentException. "replaced"))))))]                   ;;; IllegalArgumentException
+    ;; normal call
+    (is (zero? (.IndexOf d 1 0)))                                                     ;;; (nil? (.flip d 0))
+    ;; exception should use proxied form and return IllegalArg
+    (is (thrown? ArgumentException (.IndexOf d 1 -1)))                               ;;; (.flip d -1) IllegalArgumentException
+    ;; same behavior on second call
+    (is (thrown? ArgumentException (.IndexOf d 1 -1)))))                             ;;; (.flip d -1) IllegalArgumentException
 
 ; Arrays: [alength] aget aset [make-array to-array into-array to-array-2d aclone]
 ;   [float-array, int-array, etc]
