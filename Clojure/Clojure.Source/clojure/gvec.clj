@@ -142,7 +142,7 @@
         hash
         (let [val (.nth this i)]
           (recur (unchecked-add-int (unchecked-multiply-int 31 hash) 
-                                (clojure.lang.Util/Hash val))                                       ;;; /hash
+                                (clojure.lang.Util/hash val))
                  (inc i))))))
 
   clojure.lang.Counted
@@ -363,10 +363,10 @@
 
   System.Collections.IEnumerable                                                            ;;; java.lang.Iterable
   (GetEnumerator [this]                                                                          ;;; iterator
-    (let [i (clojure.lang.AtomicInteger. 0)]                                 ;;; java.util.concurrent.atomic.AtomicInteger.
+    (let [i (clojure.lang.AtomicInteger. -1)]                                 ;;; java.util.concurrent.atomic.AtomicInteger.
       (reify System.Collections.IEnumerator                                  ;;; java.util.Iterator
         (MoveNext [_] (< (.incrementAndGet i) cnt))                              ;;; (hasNext [_] (< (.get i) cnt))
-        (get_Current  [_]  (.nth this (.get i)))                                     ;;; (next [_] (.nth this (dec (.incrementAndGet i))))
+        (get_Current  [_]  (try (.nth this (.get i))  (catch IndexOutOfRangeException e (throw (InvalidOperationException.)))))                                     ;;; (next [_] (.nth this (dec (.incrementAndGet i))))
         (Reset    [_]  (.set i 0)))))                                            ;;; (remove [_] (throw (UnsupportedOperationException.))))))
 
   ;java.util.Collection
