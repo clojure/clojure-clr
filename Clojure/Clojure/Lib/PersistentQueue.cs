@@ -335,7 +335,7 @@ namespace clojure.lang
                 //    hash = 31 * hash + Util.hasheq(s.first());
                 //}
                 //_hasheq = hash;
-                _hasheq = Murmur3.HashOrdered(this);
+                _hasheq = Murmur3.hashOrdered(this);
             }
             return _hasheq;
         }

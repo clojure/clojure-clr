@@ -457,7 +457,7 @@ namespace clojure.lang
             if (_hasheq == -1)
             {
                 //_hasheq = mapHasheq(this);
-                _hasheq = Murmur3.HashUnordered(this);
+                _hasheq = Murmur3.hashUnordered(this);
             }
             return _hasheq;
         }

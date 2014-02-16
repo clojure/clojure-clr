@@ -302,7 +302,7 @@ namespace clojure.lang
                 //    hash += Util.hasheq(e);
                 //}
                 //_hasheq = hash;
-                _hasheq = Murmur3.HashUnordered(this);
+                _hasheq = Murmur3.hashUnordered(this);
             }
             return _hasheq;
         }

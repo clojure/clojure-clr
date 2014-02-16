@@ -340,7 +340,7 @@ namespace clojure.lang
 
         public int hasheq()
         {
-            return Murmur3.HashOrdered(this);
+            return Murmur3.hashOrdered(this);
         }
 
         #endregion

@@ -563,7 +563,7 @@ namespace clojure.lang
                 //foreach (object o in this)
                 //    hash = 31 * hash + Util.hasheq(o);
                 //_hasheq = hash;
-                _hasheq = Murmur3.HashOrdered(this);
+                _hasheq = Murmur3.hashOrdered(this);
             }
             return _hasheq;
         }

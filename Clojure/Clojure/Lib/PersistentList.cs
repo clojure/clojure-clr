@@ -286,7 +286,7 @@ namespace clojure.lang
         {
             #region Data
 
-            static readonly int _hasheq = Murmur3.HashOrdered(Enumerable.Empty<Object>());
+            static readonly int _hasheq = Murmur3.hashOrdered(Enumerable.Empty<Object>());
 
             #endregion
 
