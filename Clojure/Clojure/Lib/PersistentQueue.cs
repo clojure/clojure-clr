@@ -300,8 +300,11 @@ namespace clojure.lang
             for (s = _f; s != null; s = s.next())
                 yield return s.first();
 
-            for (s = _r.seq(); s != null; s = s.next())
-                yield return s.first();
+            if (_r != null)
+            {
+                for (s = _r.seq(); s != null; s = s.next())
+                    yield return s.first();
+            }
         }
 
 
@@ -311,8 +314,11 @@ namespace clojure.lang
             for (s = _f; s != null; s = s.next())
                 yield return s.first();
 
-            for (s = _r.seq(); s != null; s = s.next())
-                yield return s.first();
+            if (_r != null)
+            {
+                for (s = _r.seq(); s != null; s = s.next())
+                    yield return s.first();
+            }
         }
 
         #endregion
