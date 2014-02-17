@@ -149,7 +149,7 @@ namespace clojure.lang
             IList<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, true);
 
             MethodBase method = GetMatchingMethodAux(targetType, args, methods, methodName, true);
-            MaybeReflectionWarn(spanMap, method, methodName, args);
+            MaybeReflectionWarn(spanMap, targetType, true, methods.Count > 0,  method, methodName, args);
             return (MethodInfo)method;
         }
 
@@ -165,14 +165,16 @@ namespace clojure.lang
         public static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Expr target, IList<HostArg> args, string methodName, IList<Type> typeArgs)
         {
             MethodBase method = null;
+            bool hasMethods = false;
             if (target.HasClrType)
             {
                 Type targetType = target.ClrType;
                 IList<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, false);
                 method = GetMatchingMethodAux(targetType, args, methods, methodName, false);
+                hasMethods = methods.Count > 0;
             }
 
-            MaybeReflectionWarn(spanMap, method, methodName, args);
+            MaybeReflectionWarn(spanMap, (target.HasClrType ? target.ClrType : null), false, hasMethods, method, methodName, args);
             return (MethodInfo)method;
         }
 
@@ -313,7 +315,6 @@ namespace clojure.lang
             return null;
         }
 
-
         private static MethodBase GetMatchingMethodAux(Type targetType, object[] actualArgs, IList<MethodBase> methods, string methodName, bool isStatic)
         {
             int argCount = actualArgs.Length;
@@ -321,8 +322,8 @@ namespace clojure.lang
             if (methods.Count == 0)
                 return null;
 
-            if (methods.Count == 1)
-                return methods[0];
+            //if (methods.Count == 1)
+            //    return methods[0];
 
             IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(argCount + (isStatic ? 0 : 1));
             if (!isStatic)
@@ -355,13 +356,41 @@ namespace clojure.lang
             return infos;
         }
 
-
-
-        private static void MaybeReflectionWarn(IPersistentMap spanMap, MethodBase method, string methodName, IList<HostArg> args)
+        private static void MaybeReflectionWarn(IPersistentMap spanMap, Type targetType, bool isStatic, bool hasMethods, MethodBase method, string methodName, IList<HostArg> args)
         {
             if (method == null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
-                RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1}:{2} - call to {3} can't be resolved.",
-                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap),methodName));
+            {
+                if (targetType == null)
+                {
+                    RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1}:{2} - call to method {4} can't be resolved (target class is unknown).",
+                        Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap), (isStatic ? "static " : ""), methodName));
+                }
+                else if (hasMethods)
+                {
+                    RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1}:{2} - call to {3}method {4} on {5} can't be resolved (argument types: {6}).",
+                        Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap), (isStatic ? "static " : ""), methodName, targetType.FullName, GetTypeStringForArgs(args)));
+                }
+                else
+                {
+                    RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1}:{2} - call to {3}method {4} on {5} can't be resolved (no such method).",
+                        Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap), (isStatic ? "static " : ""), methodName, targetType.FullName, GetTypeStringForArgs(args)));
+                }
+            }
+        }
+
+        private static string GetTypeStringForArgs(IList<HostArg> args)
+        {
+            StringBuilder sb = new StringBuilder();
+            int i = 0;
+            foreach (HostArg ha in args)
+            {
+                Expr e = ha.ArgExpr;
+                if (i > 0)
+                    sb.Append(", ");
+                sb.Append(e.HasClrType ? e.ClrType.FullName : "unknown");
+                i++;
+            }
+            return sb.ToString();
         }
 
         public static MethodInfo GetArityZeroMethod(Type t, string name, bool getStatics)
