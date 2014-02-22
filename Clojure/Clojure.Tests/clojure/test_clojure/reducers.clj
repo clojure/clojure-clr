@@ -63,7 +63,7 @@
   (is (= 0 (r/fold + nil))))
 
 (deftest test-fold-runtime-exception
-  (is (thrown? System.AggregateException                                            ;;; IndexOutOfBoundsException
+  (is (thrown? System.Exception                                            ;;; IndexOutOfBoundsException  - this would be an AggregateException in 4.0, something else in 3.5
                (let [test-map-count 1234
                      k-fail (rand-int test-map-count)]
                  (r/fold (fn ([])
