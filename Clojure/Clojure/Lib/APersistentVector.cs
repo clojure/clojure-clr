@@ -563,7 +563,7 @@ namespace clojure.lang
                 //foreach (object o in this)
                 //    hash = 31 * hash + Util.hasheq(o);
                 //_hasheq = hash;
-                _hasheq = Murmur3.hashOrdered(this);
+                _hasheq = Murmur3.HashOrdered(this);
             }
             return _hasheq;
         }
@@ -572,12 +572,14 @@ namespace clojure.lang
 
         #region Ranged iterator
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "End")]
         public virtual IEnumerator RangedIterator(int start, int end)
         {
             for (int i = start; i < end; i++)
                 yield return nth(i);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "End")]
         public virtual IEnumerator<object> RangedIteratorT(int start, int end)
         {
             for (int i = start; i < end; i++)

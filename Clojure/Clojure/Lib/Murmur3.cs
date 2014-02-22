@@ -64,19 +64,19 @@ namespace clojure.lang
             return unchecked((int)HashStringU(input));
         }
 
-        public static int hashOrdered(IEnumerable input)
+        public static int HashOrdered(IEnumerable input)
         {
-            return unchecked((int)hashOrderedU(input));
+            return unchecked((int)HashOrderedU(input));
         }
 
-        public static int hashUnordered(IEnumerable input)
+        public static int HashUnordered(IEnumerable input)
         {
-            return unchecked((int)hashUnorderedU(input));
+            return unchecked((int)HashUnorderedU(input));
         }
 
-        public static int mixCollHash(int hash, int count)
+        public static int MixCollHash(int hash, int count)
         {
-            return unchecked((int)mixCollHashU((uint)hash, count));
+            return unchecked((int)MixCollHashU((uint)hash, count));
         }
 
         #endregion
@@ -144,7 +144,7 @@ namespace clojure.lang
             return Finalize(hash, 2 * input.Length);
         }
         
-        public static uint hashOrderedU(IEnumerable xs)
+        public static uint HashOrderedU(IEnumerable xs)
         {
             int n = 0;
             uint hash = 1;
@@ -157,7 +157,7 @@ namespace clojure.lang
             return FinalizeCollHash(hash, n);
         }
 
-        public static uint hashUnorderedU(IEnumerable xs)
+        public static uint HashUnorderedU(IEnumerable xs)
         {
             uint hash = 0;
             int n = 0;
@@ -171,7 +171,7 @@ namespace clojure.lang
             return FinalizeCollHash(hash, n);
         }
 
-        public static uint mixCollHashU(uint hash, int count)
+        public static uint MixCollHashU(uint hash, int count)
         {
             return FinalizeCollHash(hash, count);
         }
