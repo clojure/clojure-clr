@@ -54,12 +54,6 @@ namespace clojure.lang
 
         #region Lifetime methods
 
-        public override void Close()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (!_disposed)
