@@ -4746,7 +4746,7 @@
    See http://clojure.org/data_structures#hash for full algorithms."
   {:added "1.6"
    :static true}
-  [^long hash-basis count] (clojure.lang.Murmur3/mixCollHash hash-basis count))
+  [^long hash-basis count] (clojure.lang.Murmur3/MixCollHash hash-basis count))   ;;; mixCollHash
  
 (defn hash-ordered-coll
   "Returns the hash code, consistent with =, for an external ordered
@@ -4754,7 +4754,7 @@
    See http://clojure.org/data_structures#hash for full algorithms."
   {:added "1.6"
    :static true}
-  [coll] (clojure.lang.Murmur3/hashOrdered coll))
+  [coll] (clojure.lang.Murmur3/HashOrdered coll))                                 ;;; hashOrdered
 
 (defn hash-unordered-coll
   "Returns the hash code, consistent with =, for an external unordered
@@ -4764,7 +4764,7 @@
    See http://clojure.org/data_structures#hash for full algorithms."
   {:added "1.6"
    :static true}
-  [coll] (clojure.lang.Murmur3/hashUnordered coll))
+  [coll] (clojure.lang.Murmur3/HashUnordered coll))                               ;;; hashUnordered
  
 (defn interpose
   "Returns a lazy seq of the elements of coll separated by sep"

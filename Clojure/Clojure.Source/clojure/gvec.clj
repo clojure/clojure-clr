@@ -152,7 +152,7 @@
   ;todo - cache
   clojure.lang.IHashEq
   (hasheq [this]
-    (Murmur3/hashOrdered this))
+    (Murmur3/HashOrdered this))                                                                  ;;; hashOrdered
  
   clojure.lang.Counted
   (count [_] cnt)
