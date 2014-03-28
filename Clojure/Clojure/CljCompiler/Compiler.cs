@@ -23,6 +23,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization;
+using System.Collections;
 
 namespace clojure.lang
 {
@@ -125,13 +126,23 @@ namespace clojure.lang
             Symbol.intern("*file*"), "NO_SOURCE_PATH").setDynamic();
 
         //Integer
-        internal static readonly Var LineVar = Var.create(0).setDynamic();          // From the JVM version
-        internal static readonly Var ColumnVar = Var.create(0).setDynamic();          // From the JVM version
+        public static readonly Var LineVar = Var.create(0).setDynamic();          // From the JVM version
+        public static readonly Var ColumnVar = Var.create(0).setDynamic();          // From the JVM version
         //internal static readonly Var LINE_BEFORE = Var.create(0).setDynamic();   // From the JVM version
         //internal static readonly Var COLUMN_BEFORE = Var.create(0).setDynamic();   // From the JVM version
         //internal static readonly Var LINE_AFTER = Var.create(0).setDynamic();    // From the JVM version
         //internal static readonly Var COLUMN_AFTER = Var.create(0).setDynamic();    // From the JVM version
-        internal static readonly Var SourceSpanVar = Var.create(null).setDynamic();    // Mine
+        public static readonly Var SourceSpanVar = Var.create(null).setDynamic();    // Mine
+
+        internal static int LineVarDeref()
+        {
+            return Util.ConvertToInt(LineVar.deref());
+        }
+
+        internal static int ColumnVarDeref()
+        {
+            return Util.ConvertToInt(ColumnVar.deref());
+        }
 
         internal static readonly Var MethodVar = Var.create(null).setDynamic();
         public static readonly Var LocalEnvVar = Var.create(PersistentHashMap.EMPTY).setDynamic();
@@ -826,6 +837,67 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         public static IPersistentMap CHAR_MAP { get { return _charMap; } }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        static readonly public IPersistentMap DEMUNGE_MAP = CreateDemungeMap();
+
+        private static IPersistentMap CreateDemungeMap()
+        {
+            // DEMUNGE_MAP maps strings to characters in the opposite
+            // direction that CHAR_MAP does, plus it maps "$" to '/'
+
+            IPersistentMap m = RT.map("$", '/');
+            for (ISeq s = RT.seq(CHAR_MAP); s != null; s = s.next())
+            {
+                IMapEntry e = (IMapEntry)s.first();
+                Char origch = (Char)e.key();
+                String escapeStr = (String)e.val();
+                m = m.assoc(escapeStr, origch);
+            }
+            return m;
+        }
+
+
+        private class LengthCmp : IComparer
+        {
+            public int Compare(object x, object y)
+            {
+                return ((String)y).Length - ((String)x).Length;
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        static readonly public Regex DEMUNGE_PATTERN = CreateDemungePattern();
+
+        private static Regex CreateDemungePattern()
+        {
+            // DEMUNGE_PATTERN searches for the first of any occurrence of
+            // the strings that are keys of DEMUNGE_MAP.
+            // Note: Regex matching rules mean that #"_|_COLON_" "_COLON_"
+            // returns "_", but #"_COLON_|_" "_COLON_" returns "_COLON_"
+            // as desired.  Sorting string keys of DEMUNGE_MAP from longest to
+            // shortest ensures correct matching behavior, even if some strings are
+            // prefixes of others.
+
+            object[] mungeStrs = RT.toArray(RT.keys(DEMUNGE_MAP));
+            Array.Sort(mungeStrs, new LengthCmp());
+            StringBuilder sb = new StringBuilder();
+            bool first = true;
+            foreach (Object s in mungeStrs) 
+            {
+                String escapeStr = (String) s;
+                if ( ! first )
+                    sb.Append("|");
+                first = false;
+                sb.Append(Regex.Escape(escapeStr));
+            }
+
+            return new Regex(sb.ToString());
+        }
+
+        
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "munge")]
         public static string munge(string name)
         {
@@ -838,6 +910,27 @@ namespace clojure.lang
                 else
                     sb.Append(sub);
             }
+            return sb.ToString();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "demunge")]
+        public static String demunge(string mungedNamed)
+        {
+            StringBuilder sb = new StringBuilder();
+            int lastMatchEnd = 0;
+            for (Match m = DEMUNGE_PATTERN.Match(mungedNamed); m.Success; m = m.NextMatch() )
+            {
+                int start = m.Index;
+
+                // Keep everything before the match
+                sb.Append(mungedNamed.Substring(lastMatchEnd, start-lastMatchEnd));
+                lastMatchEnd = start + m.Length;
+                // Replace the match with DEMUNGE_MAP result
+                Char origCh = (Char)DEMUNGE_MAP.valAt(m.Groups[0].Value);
+                sb.Append(origCh);
+            }
+            // Keep everything after the last match
+            sb.Append(mungedNamed.Substring(lastMatchEnd));
             return sb.ToString();
         }
 
@@ -872,12 +965,12 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "eval")]
         public static object eval(object form)
         {
-            int line = (int)LineVar.deref();
+            object line = LineVarDeref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
-                line = (int)RT.meta(form).valAt(RT.LineKey);
-            int column = (int)ColumnVar.deref();
+                line = RT.meta(form).valAt(RT.LineKey);
+            object column = ColumnVarDeref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.ColumnKey))
-                column = (int)RT.meta(form).valAt(RT.ColumnKey);
+                column = RT.meta(form).valAt(RT.ColumnKey);
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
@@ -889,9 +982,9 @@ namespace clojure.lang
             try
             {
                 form = Macroexpand(form);
-                bool formIsIpc = (form as IPersistentCollection) != null;
+              
 
-                if (formIsIpc && Util.equals(RT.first(form), DoSym))
+                if (form is ISeq && Util.equals(RT.first(form), DoSym))
                 {
                     ISeq s = RT.next(form);
                     for (; RT.next(s) != null; s = RT.next(s))
@@ -899,7 +992,7 @@ namespace clojure.lang
                     return eval(RT.first(s));
                 }
                 else if ( (form is IType) ||
-                    (formIsIpc && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def"))))
+                    (form is IPersistentCollection && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def"))))
                 {
                     ObjExpr objx = (ObjExpr)Analyze(pconExpr, RT.list(FnSym, PersistentVector.EMPTY, form), "eval__" + RT.nextID());
                     IFn fn = (IFn)objx.Eval();
@@ -1362,12 +1455,12 @@ namespace clojure.lang
 
         private static void Compile1(TypeBuilder tb, CljILGen ilg,  ObjExpr objx, object form)
         {
-            int line = (int)LineVar.deref();
+            object line = LineVarDeref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
-                line = (int)RT.meta(form).valAt(RT.LineKey);
-            int column = (int)ColumnVar.deref();
+                line = RT.meta(form).valAt(RT.LineKey);
+            object column = ColumnVarDeref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.ColumnKey))
-                column = (int)RT.meta(form).valAt(RT.ColumnKey);
+                column = RT.meta(form).valAt(RT.ColumnKey);
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
@@ -1379,7 +1472,7 @@ namespace clojure.lang
             try
             {
                 form = Macroexpand(form);
-                if (form is IPersistentCollection && Util.Equals(RT.first(form), DoSym))
+                if (form is ISeq && Util.Equals(RT.first(form), DoSym))
                 {
                     for (ISeq s = RT.next(form); s != null; s = RT.next(s))
                         Compile1(tb, ilg, objx, RT.first(s));
@@ -1456,13 +1549,20 @@ namespace clojure.lang
 
         private static Type GetTypeFromAssy(Assembly assy, string typeName)
         {
-#if MONO
-            // I have no idea why Mono can't find our initializer types using Assembly.GetType(string).
-            // This is roll-your-own.
-			Type[] types = assy.GetExportedTypes ();			foreach (Type t in types)             {				if (t.Name.Equals (typeName))					return t;			}			return null;
-#else
-            return assy.GetType(typeName);
-#endif
+            if (RT.IsRunningOnMono)
+            {
+                // I have no idea why Mono can't find our initializer types using Assembly.GetType(string).
+                // This is roll-your-own.
+                Type[] types = assy.GetExportedTypes();
+                foreach (Type t in types)
+                {
+                    if (t.Name.Equals(typeName))
+                        return t;
+                }
+                return null;
+            }
+            else
+                return assy.GetType(typeName);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -1565,22 +1665,36 @@ namespace clojure.lang
                 //COLUMN_AFTER, lntr.ColumnNumber
                 ));
 
+            int lineBefore = lntr.LineNumber;
+            int columnBefore = lntr.ColumnNumber;
+            //int lineAfter = lntr.LineNumber;
+            //int columnAfter = lntr.ColumnNumber;
             try
             {
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
                     //LINE_AFTER.set(lntr.LineNumber);
                     //COLUMN_AFTER.set(lntr.ColumnNumber);
-                    //Expression<ReplDelegate> ast = Compiler.GenerateLambda(form, false);
-                    //ret = ast.Compile().Invoke();
+                    //lineAfter = lntr.LineNumber;
+                    //columnAfter = lntr.ColumnNumber;
                     ret = eval(form);
                     //LINE_BEFORE.set(lntr.LineNumber);
                     //COLUMN_BEFORE.set(lntr.ColumnNumber);
+                    lineBefore = lntr.LineNumber;
+                    columnBefore = lntr.ColumnNumber;
                 }
             }
             catch (LispReader.ReaderException e)
             {
                 throw new CompilerException(sourcePath, e.Line, e.Column, e.InnerException);
+            }
+            catch (CompilerException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new CompilerException(sourcePath, lineBefore, columnBefore, e);
             }
             finally
             {
@@ -1652,7 +1766,7 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                throw new CompilerException((String)SourcePathVar.deref(), (int)LineVar.deref(), (int)ColumnVar.deref(), e);
+                throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), e);
             }
         }
 
@@ -1720,13 +1834,13 @@ namespace clojure.lang
 
         private static Expr AnalyzeSeq(ParserContext pcon, ISeq form, string name )
         {
-            int line = (int)LineVar.deref();
-            int column = (int)ColumnVar.deref();
+            object line = LineVarDeref();
+            object column = ColumnVarDeref();
             IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
-                line = (int)RT.meta(form).valAt(RT.LineKey);
+                line = RT.meta(form).valAt(RT.LineKey);
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.ColumnKey))
-                column = (int)RT.meta(form).valAt(RT.ColumnKey);
+                column = RT.meta(form).valAt(RT.ColumnKey);
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
 
@@ -1762,7 +1876,7 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                throw new CompilerException((String)SourcePathVar.deref(), (int)LineVar.deref(), (int)ColumnVar.deref(), e);
+                throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), e);
             }
             finally
             {

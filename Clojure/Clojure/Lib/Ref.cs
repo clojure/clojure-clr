@@ -59,11 +59,6 @@ namespace clojure.lang
             }
 
             /// <summary>
-            /// The clock time. (not used?)
-            /// </summary>
-            //int _msecs;
-
-            /// <summary>
             /// The prior <see cref="TVal">TVal</see>.
             /// </summary>
             /// <remarks>Implements a doubly-linked circular list.</remarks>
@@ -102,16 +97,10 @@ namespace clojure.lang
             /// <summary>
             /// Construct a TVal, linked to a previous TVal.
             /// </summary>
-            /// <param name="val"></param>
-            /// <param name="point"></param>
-            /// <param name="msecs"></param>
-            /// <param name="prior"></param>
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "msecs")]
-            public TVal(object val, long point, int msecs, TVal prior)
+            public TVal(object val, long point, TVal prior)
             {
                 _val = val;
                 _point = point;
-                //_msecs = msecs;
                 _prior = prior;
                 _next = _prior._next;
                 _prior._next = this;
@@ -121,16 +110,10 @@ namespace clojure.lang
             /// <summary>
             /// Construct a TVal, linked to itself.
             /// </summary>
-            /// <param name="val"></param>
-            /// <param name="point"></param>
-            /// <param name="msecs"></param>
-            /// 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "msecs")]
-            public TVal(object val, long point, int msecs)
+            public TVal(object val, long point)
             {
                 _val = val;
                 _point = point;
-                //_msecs = msecs;
                 _prior = this;
                 _next = this;
             }
@@ -144,13 +127,10 @@ namespace clojure.lang
             /// </summary>
             /// <param name="val"></param>
             /// <param name="point"></param>
-            /// <param name="msecs"></param>
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "msecs")]
-            public void SetValue(object val, long point, int msecs)
+            public void SetValue(object val, long point)
             {
                 _val = val;
                 _point = point;
-                //_msecs = msecs;
             }
 
             #endregion
@@ -271,7 +251,7 @@ namespace clojure.lang
             _id = _ids.getAndIncrement();
             _faults = new AtomicInteger();
             _lock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
-            _tvals = new TVal(initval, 0, System.Environment.TickCount);
+            _tvals = new TVal(initval, 0);
         }
 
         #endregion
@@ -451,22 +431,21 @@ namespace clojure.lang
         /// </summary>
         /// <param name="val">The new value.</param>
         /// <param name="commitPoint">The transaction's commit point.</param>
-        /// <param name="msecs">The clock time.</param>
-        internal void SetValue(object val, long commitPoint, int msecs)
+        internal void SetValue(object val, long commitPoint)
         {
             int hcount = HistCount();
 
             if (_tvals == null)
-                _tvals = new TVal(val, commitPoint, msecs);
+                _tvals = new TVal(val, commitPoint);
             else if ( (_faults.get() > 0 && hcount < _maxHistory) || hcount < _minHistory )
             {
-                _tvals = new TVal(val, commitPoint, msecs, _tvals);
+                _tvals = new TVal(val, commitPoint, _tvals);
                 _faults.set(0);
             }
             else
             {
                 _tvals = _tvals.Next;
-                _tvals.SetValue(val, commitPoint, msecs);
+                _tvals.SetValue(val, commitPoint);
             }
         }
 

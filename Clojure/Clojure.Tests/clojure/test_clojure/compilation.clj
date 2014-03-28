@@ -11,6 +11,8 @@
 
 (ns clojure.test-clojure.compilation
   (:import (clojure.lang Compiler Compiler+CompilerException))                                 ;;; Compiler$CompilerException
+  (:require [clojure.test.generative :refer (defspec)]
+            [clojure.data.generators :as gen])
   (:use clojure.test
         [clojure.test-helper :only (should-not-reflect should-print-err-message)]))
 
@@ -172,3 +174,71 @@
   
   (should-print-err-message #"(?s).*k is not matching primitive.*"
     #(loop [k (clojure.test-clojure.compilation/primfn)] (recur :foo))))
+
+#_(deftest CLJ-1154-use-out-after-compile
+  ;; This test creates a dummy file to compile, sets up a dummy
+  ;; compiled output directory, and a dummy output stream, and
+  ;; verifies the stream is still usable after compiling.
+  (spit "test/dummy.clj" "(ns dummy)")
+  (try
+    (let [compile-path (System/getProperty "clojure.compile.path")
+          tmp (java.io.File. "tmp")
+          new-out (java.io.OutputStreamWriter. (java.io.ByteArrayOutputStream.))]
+      (binding [clojure.core/*out* new-out]
+        (try
+          (.mkdir tmp)
+          (System/setProperty "clojure.compile.path" "tmp")
+          (clojure.lang.Compile/main (into-array ["dummy"]))
+          (println "this should still work without throwing an exception" )
+          (finally
+            (if compile-path
+              (System/setProperty "clojure.compile.path" compile-path)
+              (System/clearProperty "clojure.compile.path"))
+            (doseq [f (.listFiles tmp)]
+              (.delete f))
+            (.delete tmp)))))
+    (finally
+      (doseq [f (.listFiles (java.io.File. "test"))
+              :when (re-find #"dummy.clj" (str f))]
+        (.delete f)))))
+
+(deftest CLJ-1184-do-in-non-list-test
+  (testing "do in a vector throws an exception"
+    (is (thrown? Compiler+CompilerException                                          ;;; Compiler$CompilerException
+                 (eval '[do 1 2 3]))))
+  (testing "do in a set throws an exception"
+    (is (thrown? Compiler+CompilerException                                          ;;; Compiler$CompilerException
+                 (eval '#{do}))))
+
+  ;; compile uses a separate code path so we have to call it directly
+  ;; to test it
+  (letfn [(compile [s]         (System.IO.Directory/CreateDirectory "test/clojure")               ;;; DM: Added the CreateDirectory
+            (spit "test/clojure/bad_def_test.clj" (str "(ns test.clojure.bad-def-test)\n" s))     ;;; DM: Added test. to ns
+            (try
+             (binding [*compile-path* "test"]
+               (clojure.core/compile 'test.clojure.bad-def-test))                                 ;;; DM: Added test. to name
+             (finally
+               (doseq [f (.GetFiles (System.IO.DirectoryInfo. "test/clojure"))                    ;;; .listFiles java.io.File.
+                       :when (re-find #"bad_def_test" (str f))]
+                 (.Delete f)))))]
+    (testing "do in a vector throws an exception in compilation"
+      (is (thrown? Compiler+CompilerException (compile "[do 1 2 3]"))))                           ;;; Compiler$CompilerException
+    (testing "do in a set throws an exception in compilation"
+      (is (thrown? Compiler+CompilerException (compile "#{do}"))))))                              ;;; Compiler$CompilerException
+
+(defn gen-name []
+  ;; Not all names can be correctly demunged. Skip names that contain
+  ;; a munge word as they will not properly demunge.
+  (let [munge-words (remove clojure.string/blank?
+                            (conj (map #(clojure.string/replace % "_" "")
+                                       (vals Compiler/CHAR_MAP)) "_"))]
+    (first (filter (fn [n] (not-any? #(>= (.IndexOf n %) 0) munge-words))                            ;;; indexOf
+                   (repeatedly #(name (gen/symbol (constantly 10))))))))
+
+(defn munge-roundtrip [n]
+  (Compiler/demunge (Compiler/munge n)))
+
+(defspec test-munge-roundtrip
+  munge-roundtrip
+  [^{:tag clojure.test-clojure.compilation/gen-name} n]
+  (assert (= n %)))

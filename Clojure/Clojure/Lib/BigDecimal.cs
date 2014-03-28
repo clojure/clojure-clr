@@ -1122,7 +1122,17 @@ namespace clojure.lang
         public double ToDouble(IFormatProvider provider)
         {
             // As j.m.BigDecimal puts it: "Somewhat inefficient, but guaranteed to work."
-            return Double.Parse(ToString(), provider);
+            // However, JVM's double parser goes to +/- Infinity when out of range,
+            // while CLR's throws an exception.
+            // Hate dealing with that.
+            try
+            {
+                return Double.Parse(ToString(), provider);
+            }
+            catch (OverflowException)
+            {
+                return IsNegative ? Double.NegativeInfinity : Double.PositiveInfinity;
+            }
         }
 
         public short ToInt16(IFormatProvider provider)
@@ -2358,6 +2368,19 @@ namespace clojure.lang
             return this;
         }
 
+
+        /// <summary>
+        /// Returns a BigDecimal numerically equal to this one, but with 
+        /// any trailing zeros removed.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>Ended up needing this in ClojureCLR, grabbed from OpenJDK.</remarks>
+        public BigDecimal StripTrailingZeros()
+        {    
+            BigDecimal result = new BigDecimal(this._coeff,this._exp);
+            result.StripZerosToMatchExponent(Int64.MaxValue);
+            return result;
+        }
 
         #endregion
 

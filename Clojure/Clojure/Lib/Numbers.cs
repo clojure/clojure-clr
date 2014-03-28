@@ -550,6 +550,36 @@ namespace clojure.lang
             return x >> n;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static int unsignedShiftRightInt(int x, int n)
+        {
+            return (int)((uint)x >> n);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        static long unsignedShiftRight(Object x, Object y)
+        {
+            return unsignedShiftRight(bitOpsCast(x), bitOpsCast(y));
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static long unsignedShiftRight(Object x, long y)
+        {
+            return unsignedShiftRight(bitOpsCast(x), y);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static long unsignedShiftRight(long x, Object y)
+        {
+            return unsignedShiftRight(x, bitOpsCast(y));
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static long unsignedShiftRight(long x, long n)
+        {
+            return (long)((ulong)x >> (int)n);
+        }
+
         #endregion
 
         #region LongOps
@@ -627,6 +657,9 @@ namespace clojure.lang
             {
                 long lx = Util.ConvertToLong(x);
                 long ly = Util.ConvertToLong(y);
+
+                if (lx == Int64.MinValue && ly < 0)
+                    return BIGINT_OPS.multiply(x, y);
 
                 long ret = lx * ly;
                 if (ly != 0 && ret / ly != lx)
@@ -1208,7 +1241,7 @@ namespace clojure.lang
 
             public override bool equiv(object x, object y)
             {
-                return ToBigDecimal(x).Equals(ToBigDecimal(y));
+                return ToBigDecimal(x).CompareTo(ToBigDecimal(y)) == 0;
             }
 
             public override bool lt(object x, object y)
@@ -1298,8 +1331,35 @@ namespace clojure.lang
                 || xc == typeof(sbyte))
             {
                 long lpart = Util.ConvertToLong(x);
-                return (int)(lpart ^ (lpart >> 32));
+                //return (int)(lpart ^ (lpart >> 32));
+                return Murmur3.HashLong(lpart);
             }
+
+            {
+                // Make BigInteger conform with Int64 when in Int64 range
+                long lval;
+                BigInteger bi = x as BigInteger;
+                if (bi != null && bi.AsInt64(out lval))
+                    return Murmur3.HashLong(lval);
+            }
+
+            if (xc == typeof(BigDecimal))
+            {
+                // stripTrailingZeros() to make all numerically equal
+                // BigDecimal values come out the same before calling
+                // hashCode.  Special check for 0 because
+                // stripTrailingZeros() does not do anything to values
+                // equal to 0 with different scales.
+                if (isZero(x))
+                    return BigDecimal.Zero.GetHashCode();
+                else
+                {
+                    BigDecimal tmp = ((BigDecimal)x).StripTrailingZeros();
+                    return tmp.GetHashCode();
+                }
+            }
+
+
             return x.GetHashCode();
         }
 
@@ -2321,6 +2381,8 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static long multiply(long x, long y)
         {
+            if (x == Int64.MinValue && y < 0)
+                return ThrowIntOverflow();
             long ret = x * y;
             if (y != 0 && ret / y != x)
                 return ThrowIntOverflow();
@@ -2330,6 +2392,8 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
         public static object multiplyP(long x, long y)
         {
+            if (x == Int64.MinValue && y < 0)
+                return multiplyP((object)x, (object)y);
             long ret = x * y;
             if (y != 0 && ret / y != x)
                 return multiplyP((object)x, (object)y);

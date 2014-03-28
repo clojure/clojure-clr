@@ -353,7 +353,9 @@
   (are [err msg form] (thrown-with-msg? err msg (read-string form))
        Exception #"Invalid token: foo:" "foo:"
        Exception #"Invalid token: :bar/" ":bar/"
-       Exception #"Invalid token: ::does.not/exist" "::does.not/exist"))
+       Exception #"Invalid token: ::does.not/exist" "::does.not/exist"
+	   Exception #"Invalid token: :5" ":5"))
+
 ;; Lists
 
 (deftest t-Lists)
@@ -460,6 +462,13 @@
 
 (deftest t-read)
 
+(deftest division
+  (is (= clojure.core// /))
+  (binding [*ns* *ns*]
+    (eval '(do (ns foo
+                 (:require [clojure.core :as bar])
+                 (:use [clojure.test]))
+               (is (= clojure.core// bar//))))))
 
 (deftest Instants
   (testing "Instants are read as System.DateTime by default"                       ;;; java.util.Date

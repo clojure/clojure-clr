@@ -127,13 +127,15 @@ namespace clojure.lang.CljCompiler.Ast
             Expr fexpr = Compiler.Analyze(pcon,form.first());
             VarExpr varFexpr = fexpr as VarExpr;
 
-            if (varFexpr != null && varFexpr.Var.Equals(Compiler.InstanceVar))
+            if (varFexpr != null && varFexpr.Var.Equals(Compiler.InstanceVar) && RT.count(form) == 3)
             {
-                if ( RT.second(form) is Symbol )
+                Expr sexpr = Compiler.Analyze(pcon.SetRhc(RHC.Expression), RT.second(form));
+                ConstantExpr csexpr = sexpr as ConstantExpr;
+                if (csexpr != null)
                 {
-                    Type t = HostExpr.MaybeType(RT.second(form),false);
-                    if ( t != null )
-                        return new InstanceOfExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), t, Compiler.Analyze(pcon,RT.third(form)));
+                    Type tval = csexpr.Val as Type;
+                    if (tval != null)
+                        return new InstanceOfExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tval, Compiler.Analyze(pcon, RT.third(form)));
                 }
             }
 
@@ -241,7 +243,6 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Stloc,targetTemp);                  // target
 
             ilg.Emit(OpCodes.Call,Compiler.Method_Util_classOf);          // class
-            ilg.EmitLoadArg(0);                                  // class, this
             ilg.EmitFieldGet(objx.CachedTypeField(_siteIndex));  // class, cached-class
             ilg.Emit(OpCodes.Beq, callLabel);                    // 
             if (_protocolOn != null)
@@ -259,7 +260,6 @@ namespace clojure.lang.CljCompiler.Ast
             GenContext.SetLocalName(typeTemp, "type");
             ilg.Emit(OpCodes.Stloc,typeTemp);                    //    (typeType <= class)
             
-            ilg.EmitLoadArg(0);                                  // this
             
             ilg.Emit(OpCodes.Ldloc,typeTemp);                    // this, class
             ilg.EmitFieldSet(objx.CachedTypeField(_siteIndex));  // 

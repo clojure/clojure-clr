@@ -1,5 +1,338 @@
 ﻿<!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.6
+
+## CONTENTS
+
+## 1 Compatibility and Dependencies
+
+## 1.1 JDK Version Update
+
+Clojure now builds with Java SE 1.6 and emits bytecode requiring Java
+SE 1.6 instead of Java SE 1.5. [CLJ-1268]
+
+## 1.2 ASM Library Update
+
+The embedded version of the ASM bytecode library has been upgraded to
+ASM 4.1. [CLJ-713]
+
+## 1.3 Promoted "Alpha" Features
+
+The following features are no longer marked Alpha in Clojure:
+
+* Watches - add-watch, remove-watch
+* Transients - transient, persistent!, conj!, assoc!, dissoc!, pop!, disj!
+* Exception data - ex-info, ex-data
+* Promises - promise, deliver
+* Records - defrecord
+* Types - deftype
+* Pretty-print tables - print-table
+
+## 2 New and Improved Features
+
+### 2.1 Java API
+
+The clojure.java.api package provides a minimal interface to bootstrap
+Clojure access from other JVM languages. It does this by providing:
+1. The ability to use Clojure's namespaces to locate an arbitrary var,
+   returning the var's clojure.lang.IFn interface.
+2. A convenience method read for reading data using Clojure's edn
+   reader.
+
+IFns provide complete access to Clojure's APIs. You can also access
+any other library written in Clojure, after adding either its source
+or compiled form to the classpath.
+
+The public Java API for Clojure consists of the following classes and interfaces:
+
+* clojure.java.api.Clojure        = clojure.clr.api.Clojure in ClojureJVM
+* clojure.lang.IFn
+
+All other Java classes should be treated as implementation details,
+and applications should avoid relying on them.
+
+To look up and call a Clojure function:
+
+    IFn plus = Clojure.var("clojure.core", "+");
+    plus.invoke(1, 2);
+
+Functions in clojure.core are automatically loaded. Other namespaces
+can be loaded via require:
+
+    IFn require = Clojure.var("clojure.core", "require");
+    require.invoke(Clojure.read("clojure.set"));
+   
+IFns can be passed to higher order functions, e.g. the example below
+passes plus to read:
+
+    IFn map = Clojure.var("clojure.core", "map");
+    IFn inc = Clojure.var("clojure.core", "inc");
+    map.invoke(inc, Clojure.read("[1 2 3]"));
+
+Most IFns in Clojure refer to functions. A few, however, refer to
+non-function data values. To access these, use deref instead of fn:
+
+    IFn printLength = Clojure.var("clojure.core", "*print-length*");
+    Clojure.var("clojure.core", "deref").invoke(printLength);
+
+### 2.2 Map destructuring extended to support namespaced keys
+
+* [CLJ-1318](http://dev.clojure.org/jira/browse/CLJ-1318)
+
+In the past, map destructuring with :keys and :syms would not work
+with maps containing namespaced keys or symbols. The :keys and :syms
+forms have been updated to allow them to match namespaced keys and
+bind to a local variable based on the name.
+
+Examples:
+
+    (let [m {:x/a 1, :y/b 2}
+          {:keys [x/a y/b]} m]
+      (+ a b))
+
+    (let [m {'x/a 1, 'y/b 2}
+          {:syms [x/a y/b]} m]
+      (+ a b))
+
+Additionally, the :keys form can now take keywords instead of symbols.
+This provides support specifically for auto-resolved keywords:
+
+    (let [m {:x/a 1, :y/b 2}
+          {:keys [:x/a :y/b]} m]
+      (+ a b))
+
+    (let [m {::x 1}
+          {:keys [::x]} m]
+      x)
+
+### 2.3 New "some" operations
+
+Many conditional functions rely on logical truth (where "falsey"
+values are nil or false). Sometimes it is useful to have functions
+that rely on "not nilness" instead. These functions have been added to
+support these cases [CLJ-1343]:
+
+* some? - same as (not (nil? x))
+* if-some - like if-let, but checks (some? test) instead of test
+* when-some - like when-let, but checks (some? test) instead of test
+
+### 2.4 Hashing
+
+Clojure 1.6 provides new hashing algorithms for primitives and
+collections, accessible via IHashEq/hasheq (in Java) or the
+clojure.core/hash function (in Clojure). In general, these changes
+should be transparent to users, except hash codes used inside hashed
+collections like maps and sets will have better properties.
+
+Hash codes returned by the Java .hashCode() method are unchanged and
+continue to match Java behavior or conform to the Java specification
+as appropriate.
+
+Any collections implementing IHashEq or wishing to interoperate with
+Clojure collections should conform to the hashing algorithms specified
+in http://clojure.org/data_structures#hash and use the new function
+`mix-collection-hash` for the final mixing operation. Any details of
+the current hashing algorithm not specified on that page should be
+considered subject to future change.
+
+### 2.5 bitops
+  
+* [CLJ-827](http://dev.clojure.org/jira/browse/CLJ-827) - unsigned-bit-shift-right
+
+A new unsigned-bit-shift-right (Java's >>>) has been added to the core
+library. The shift distance is truncated to the least 6 bits (per the
+Java specification for long >>>).
+
+Examples:
+  (unsigned-bit-shift-right 2r100 1) ;; 2r010
+  (unsigned-bit-shift-right 2r100 2) ;; 2r001
+  (unsigned-bit-shift-right 2r100 3) ;; 2r000
+
+### 2.6 clojure.test
+
+* [CLJ-866](http://dev.clojure.org/jira/browse/CLJ-866) - test-vars
+
+Added a new clojure.test/test-vars function that takes a list of vars, groups them by namespace, and
+runs them *with their fixtures*.
+
+## 3 Enhancements
+
+### 3.1 Printing
+
+* [CLJ-908](http://dev.clojure.org/jira/browse/CLJ-908)
+  Print metadata for functions when *print-meta* is true and remove errant space at beginning.
+* [CLJ-937](http://dev.clojure.org/jira/browse/CLJ-937)
+  pprint cl-format now supports E, F, and G formats for ratios.
+
+### 3.2 Error messages
+
+* [CLJ-1099](http://dev.clojure.org/jira/browse/CLJ-1099)
+  If non-seq passed where seq is needed, error message now is an ExceptionInfo with the instance value, retrievable via ex-data.
+* [CLJ-1083](http://dev.clojure.org/jira/browse/CLJ-1083)
+  Fix error message reporting for "munged" function names (like a->b).
+* [CLJ-1056](http://dev.clojure.org/jira/browse/CLJ-1056)
+  Handle more cases and improve error message for errors in defprotocol definitions.
+* [CLJ-1102](http://dev.clojure.org/jira/browse/CLJ-1102)
+  Better handling of exceptions with empty stack traces.
+* [CLJ-939](http://dev.clojure.org/jira/browse/CLJ-939)
+  Exceptions thrown in the top level ns form are reported without file or line number.  
+
+### 3.3 Documentation strings
+
+* [CLJ-1164](http://dev.clojure.org/jira/browse/CLJ-1164)
+  Fix typos in clojure.instant/validated and other internal instant functions.
+* [CLJ-1143](http://dev.clojure.org/jira/browse/CLJ-1143)
+  Correct doc string for ns macro.
+* [CLJ-196](http://dev.clojure.org/jira/browse/CLJ-196)
+  Clarify value of *file* is undefined in the REPL.
+* [CLJ-1228](http://dev.clojure.org/jira/browse/CLJ-1228)
+  Fix a number of spelling errors in namespace and doc strings.
+* [CLJ-835](http://dev.clojure.org/jira/browse/CLJ-835)
+  Update defmulti doc to clarify expectations for hierarchy argument.
+* [CLJ-1304](http://dev.clojure.org/jira/browse/CLJ-1304)
+  Fix minor typos in documentation and comments
+* [CLJ-1302](http://dev.clojure.org/jira/browse/CLJ-1302)
+  Mention that keys and vals order are consistent with seq order
+
+### 3.4 Performance
+
+* [CLJ-858](http://dev.clojure.org/jira/browse/CLJ-858)
+  Improve speed of STM by removing System.currentTimeMillis.
+* [CLJ-669](http://dev.clojure.org/jira/browse/CLJ-669)
+  clojure.java.io/do-copy: use java.nio for Files
+* [commit](https://github.com/clojure/clojure/commit/0b73494c3c855e54b1da591eeb687f24f608f346)
+  Reduce overhead of protocol callsites by removing unneeded generated
+  cache fields.
+
+### 3.5 Other enhancements
+
+* [CLJ-908](http://dev.clojure.org/jira/browse/CLJ-908)
+  Make *default-data-reader-fn* set!-able in REPL, similar to *data-readers*.
+* [CLJ-783](http://dev.clojure.org/jira/browse/CLJ-783)
+  Make clojure.inspector/inspect-tree work on sets.
+* [CLJ-896](http://dev.clojure.org/jira/browse/CLJ-896)
+  Make browse-url aware of xdg-open.
+* [CLJ-1160](http://dev.clojure.org/jira/browse/CLJ-1160)
+  Fix clojure.core.reducers/mapcat does not stop on reduced? values.
+* [CLJ-1121](http://dev.clojure.org/jira/browse/CLJ-1121)
+  -> and ->> have been rewritten to work with a broader set of macros.
+* [CLJ-1105](http://dev.clojure.org/jira/browse/CLJ-1105)
+  clojure.walk now supports records.
+* [CLJ-949](http://dev.clojure.org/jira/browse/CLJ-949)
+  Removed all unnecessary cases of sneakyThrow.
+* [CLJ-1238](http://dev.clojure.org/jira/browse/CLJ-1238)
+  Allow EdnReader to read foo// (matches LispReader behavior).
+* [CLJ-1264](http://dev.clojure.org/jira/browse/CLJ-1264)
+  Remove uses of _ as a var in the Java code (causes warning in Java 8).
+* [CLJ-394](http://dev.clojure.org/jira/browse/CLJ-394)
+  Add record? predicate.
+* [CLJ-1200](http://dev.clojure.org/jira/browse/CLJ-1200)
+  ArraySeq dead code cleanup, ArraySeq_short support added.
+* [CLJ-1331](http://dev.clojure.org/jira/browse/CLJ-1331)
+  Primitive vectors should implement hasheq and use new hash algorithm
+
+## 4 Bug Fixes
+
+* [CLJ-1018](http://dev.clojure.org/jira/browse/CLJ-1018)
+  Make range consistently return () with a step of 0.
+* [CLJ-863](http://dev.clojure.org/jira/browse/CLJ-863)
+  Make interleave return () on 0 args and identity on 1 args.
+* [CLJ-1072](http://dev.clojure.org/jira/browse/CLJ-1072)
+  Update internal usages of the old metadata reader syntax to new syntax.
+* [CLJ-1193](http://dev.clojure.org/jira/browse/CLJ-1193)
+  Make bigint and biginteger functions work on double values outside long range.
+* [CLJ-1154](http://dev.clojure.org/jira/browse/CLJ-1154)
+  Make Compile.java flush but not close stdout so errors can be reported.
+* [CLJ-1161](http://dev.clojure.org/jira/browse/CLJ-1161)
+  Remove bad version.properties from sources jar.
+* [CLJ-1175](http://dev.clojure.org/jira/browse/CLJ-1175)
+  Fix invalid behavior of Delay/deref if an exception is thrown - exception will
+  now be rethrown on subsequent calls and not enter a corrupted state.
+* [CLJ-1171](http://dev.clojure.org/jira/browse/CLJ-1171)
+  Fix several issues with instance? to make it consistent when used with apply.
+* [CLJ-1202](http://dev.clojure.org/jira/browse/CLJ-1202)
+  Protocol fns with dashes may get incorrectly compiled into field accesses.
+* [CLJ-850](http://dev.clojure.org/jira/browse/CLJ-850)
+  Add check to emit invokePrim with return type of double or long if type-hinted.
+* [CLJ-1177](http://dev.clojure.org/jira/browse/CLJ-1177)
+  clojure.java.io URL to File coercion corrupts path containing UTF-8 characters.
+* [CLJ-1234](http://dev.clojure.org/jira/browse/CLJ-1234)
+  Accept whitespace in Record and Type reader forms (similar to data literals).
+* [CLJ-1233](http://dev.clojure.org/jira/browse/CLJ-1233)
+  Allow ** as a valid symbol name without triggering dynamic warnings.
+* [CLJ-1246](http://dev.clojure.org/jira/browse/CLJ-1246)
+  Add support to clojure.reflect for classes with annotations.
+  * [CLJ-1184](http://dev.clojure.org/jira/browse/CLJ-1184)
+  Evaling #{do ...} or [do ...] is treated as do special form.
+* [CLJ-1090](http://dev.clojure.org/jira/browse/CLJ-1090)
+  Indirect function calls through Var instances fail to clear locals.
+* [CLJ-1076](http://dev.clojure.org/jira/browse/CLJ-1076)
+  pprint tests fail on Windows, expecting \n.
+* [CLJ-766](http://dev.clojure.org/jira/browse/CLJ-766)
+  Make into-array work consistently with short-array and byte-array on
+  bigger types.
+* [CLJ-1285](http://dev.clojure.org/jira/browse/CLJ-1285)
+  Data structure invariants are violated after persistent operations when
+  collision node created by transients.
+* [CLJ-1222](http://dev.clojure.org/jira/browse/CLJ-1222)
+  Multiplication overflow issues around Long/MIN_VALUE
+* [CLJ-1118](http://dev.clojure.org/jira/browse/CLJ-1118)
+  Inconsistent numeric comparison semantics between BigDecimals and other numerics
+* [CLJ-1125](http://dev.clojure.org/jira/browse/CLJ-1125)
+  Clojure can leak memory in a servlet container when using dynamic
+  bindings or STM transactions.
+* [CLJ-1082](http://dev.clojure.org/jira/browse/CLJ-1082)
+  Subvecs of primitve vectors cannot be reduced
+* [CLJ-1301](http://dev.clojure.org/jira/browse/CLJ-1301)
+  Case expressions use a mixture of hashCode and hasheq, potentially
+  leading to missed case matches when these differ.
+* [CLJ-983](http://dev.clojure.org/jira/browse/CLJ-983)
+  proxy-super does not restore original binding if call throws exception
+* [CLJ-1176](http://dev.clojure.org/jira/browse/CLJ-1176)
+  clojure.repl/source errors when *read-eval* bound to :unknown
+* [CLJ-935](http://dev.clojure.org/jira/browse/CLJ-935)
+  clojure.string/trim uses different definition of whitespace than
+  triml and trimr
+* [CLJ-935](http://dev.clojure.org/jira/browse/CLJ-935)
+  StackOverflowError on exception in reducef for PersistentHashMap
+  fold
+* [CLJ-1328](http://dev.clojure.org/jira/browse/CLJ-1328)
+  Fix some tests in the Clojure test suite to make their names unique
+  and independent of hashing order
+* [CLJ-1328](http://dev.clojure.org/jira/browse/CLJ-1328)
+  Empty primitive vectors throw NPE on .equals with non-vector
+  sequential types
+
+# Changes to ClojureCLR in Version 1.6
+
+We have made all the changes, bug fixes, etc., listed above that are relevant to ClojureCLR.
+
+## Catching up
+
+Leftover from Version 1.5 was the integration of test.generative. Done.
+
+## Bug fixes
+
+* BigDecimal.ToDouble: catch overflow on conversion
+* Fix clojure.core/bigint and biginteger to handle strings, bigdec to properly handle ratios under *math-context*
+* Take care of some unused variable warnings in compiler and RT
+* Remove unneeded reference in Csharp.Tests project
+* Added BigDecimal.StripTrailingZeros
+* Add IMapEntrySeqEnumerator, refactor against SeqEnumerator to puu out generic TypedSeqEnumerator<T>
+* Fix enumerators on Record type to use IMapEntrySeqEnumerator
+* FxCop fixes
+* Fix test in test-clojure/compilation.clj for .Net 3.5
+* Fix Close methods in pushback readers
+* Remove C# test invalidated by changes in keyword handling
+* Fix bad numeric intrinsics definitions
+* Fix GetHashCode and GetEnumerator in clojure.lang.Vec
+* Fix PersistentQueue/GetEnumerator to handle empty queue
+
+## Enhancements
+
+* Add minimal Murmur3 hash implementation
+
+
 # Changes to Clojure in Version 1.5.1
  
 * fix for leak caused by ddc65a96fdb1163b
@@ -552,6 +885,17 @@ Some specific enhancements:
 * Fix an encoding arg in an io test
 * [CLJCLR-18]: core/load-reader invokes Compiler.load with the wrong # of args
 * [CLJCLR-17]: Add missing c-tors to clojure.lang.BigDecimal so clojure.core/bigdec works.
+* [CLJCLR-19]: Enhance path probing for load to include the same folder as Clojure.dll
+* [CLJCLR-20]: Allow (optional) signing of Clojure.dll
+* Update to DLR packaged on nuget
+* [CLJCLR-21]: Improper codege for (new valuetype)
+* [CLJCLR-22]: Reflector/InvokeConstructor should handle default c-tor for value types
+* Fix GetTypes on dynamic assemblies in RT.classForName for mono builds
+* [CLJCLR-23]: don't prepend *compiler-path* to assembly name in GenClass
+* Add name to Analyze call on value forms in LetFnExpr parsing
+* Fix cast + null comparison of Label value type in RecurExpr
+* Remove unused variables in various places
+
 
 # Changes to Clojure in Version 1.4
 

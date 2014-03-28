@@ -300,8 +300,11 @@ namespace clojure.lang
             for (s = _f; s != null; s = s.next())
                 yield return s.first();
 
-            for (s = _r.seq(); s != null; s = s.next())
-                yield return s.first();
+            if (_r != null)
+            {
+                for (s = _r.seq(); s != null; s = s.next())
+                    yield return s.first();
+            }
         }
 
 
@@ -311,8 +314,11 @@ namespace clojure.lang
             for (s = _f; s != null; s = s.next())
                 yield return s.first();
 
-            for (s = _r.seq(); s != null; s = s.next())
-                yield return s.first();
+            if (_r != null)
+            {
+                for (s = _r.seq(); s != null; s = s.next())
+                    yield return s.first();
+            }
         }
 
         #endregion
@@ -323,12 +329,13 @@ namespace clojure.lang
         {
             if (_hasheq == -1)
             {
-                int hash = 1;
-                for (ISeq s = seq(); s != null; s = s.next())
-                {
-                    hash = 31 * hash + Util.hasheq(s.first());
-                }
-                _hasheq = hash;
+                //int hash = 1;
+                //for (ISeq s = seq(); s != null; s = s.next())
+                //{
+                //    hash = 31 * hash + Util.hasheq(s.first());
+                //}
+                //_hasheq = hash;
+                _hasheq = Murmur3.HashOrdered(this);
             }
             return _hasheq;
         }

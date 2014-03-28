@@ -32,7 +32,14 @@
    (fn [x] [x (inc x)])
    (fn [x] [x (inc x) x])])
 
-(defequivtest test-reduce
+(deftest test-mapcat-obeys-reduced
+  (is (= [1 "0" 2 "1" 3]
+        (->> (concat (range 100) (lazy-seq (throw (Exception. "Too eager"))))
+          (r/mapcat (juxt inc str))
+          (r/take 5)
+          (into [])))))
+
+ (defequivtest test-reduce
   [reduce r/reduce identity]
   [+' *'])
 
@@ -54,3 +61,13 @@
 (deftest test-nil
   (is (= {:k :v} (reduce-kv assoc {:k :v} nil)))
   (is (= 0 (r/fold + nil))))
+
+(deftest test-fold-runtime-exception
+  (is (thrown? System.Exception                                            ;;; IndexOutOfBoundsException  - this would be an AggregateException in 4.0, something else in 3.5
+               (let [test-map-count 1234
+                     k-fail (rand-int test-map-count)]
+                 (r/fold (fn ([])
+                           ([ret [k v]])
+                           ([ret k v] (when (= k k-fail)
+                                        (throw (IndexOutOfRangeException.)))))      ;;; IndexOutOfBoundsException
+                         (zipmap (range test-map-count) (repeat :dummy)))))))

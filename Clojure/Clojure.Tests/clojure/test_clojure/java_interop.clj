@@ -70,7 +70,6 @@
         {"a" 1 "b" 2} m )))                                  ;;; m {"a" 1 "b" 2}   (the other order does not work at this time)
 
 
-
 (deftest test-new
   ;;;  ; Integer                                              ;;; no equivalent
   ;;;(are [expr cls value] (and (= (class expr) cls)
@@ -101,9 +100,13 @@
   ; it is a Long, nothing else
   (are [x y] (= (instance? x 42) y)
       Int32 false                    ;;; java.lang.Integer
-      Int64 true                   ;;; java.lang.Long
-      Char false                    ;;; java.lang.Character
-      String false ))               ;;; java.lang.String
+      Int64 true                     ;;; java.lang.Long
+      Char false                     ;;; java.lang.Character
+      String false )                 ;;; java.lang.String
+
+  ; test compiler macro
+  (is (let [Int64 String] (instance? Int64 "abc")))                     ;;; Long  Long
+  (is (thrown? clojure.lang.ArityException (instance? Int64))))         ;;; Long
 
 ; set!
 
@@ -170,6 +173,19 @@
         #{System.IFormattable System.IConvertible System.IComparable |System.IEquatable`1[System.Int32]| |System.IComparable`1[System.Int32]|     ;;; java.lang.Number java.lang.Object
 		System.Object System.ValueType}   ))                     ;;; java.lang.Comparable java.io.Serializable} ))
 
+(deftest test-proxy-super
+  (let [d (proxy [System.Collections.ArrayList] [[1 2 3]]                                ;;; java.util.BitSet  []
+            (IndexOf [value startIndex]                                                      ;;; flip [bitIndex]
+              (try
+                (proxy-super IndexOf value startIndex)                                       ;;; (proxy-super flip bitIndex)
+                (catch ArgumentOutOfRangeException e                             ;;; IndexOutOfBoundsException
+                  (throw (ArgumentException. "replaced"))))))]                   ;;; IllegalArgumentException
+    ;; normal call
+    (is (zero? (.IndexOf d 1 0)))                                                     ;;; (nil? (.flip d 0))
+    ;; exception should use proxied form and return IllegalArg
+    (is (thrown? ArgumentException (.IndexOf d 1 -1)))                               ;;; (.flip d -1) IllegalArgumentException
+    ;; same behavior on second call
+    (is (thrown? ArgumentException (.IndexOf d 1 -1)))))                             ;;; (.flip d -1) IllegalArgumentException
 
 ; Arrays: [alength] aget aset [make-array to-array into-array to-array-2d aclone]
 ;   [float-array, int-array, etc]
@@ -284,6 +300,29 @@
       (to-array [])
       (to-array [1 2 3]) ))
 
+(defn queue [& contents]
+  (apply conj (clojure.lang.PersistentQueue/EMPTY) contents))
+
+#_(defn array-typed-equals [expected actual]
+  (and (= (class expected) (class actual))
+       (java.util.Arrays/equals expected actual)))
+
+#_(defmacro test-to-passed-array-for [collection-type]
+  `(deftest ~(symbol (str "test-to-passed-array-for-" collection-type))
+     (let [string-array# (make-array String 5)
+           shorter# (~collection-type "1" "2" "3")
+           same-length# (~collection-type "1" "2" "3" "4" "5")
+           longer# (~collection-type "1" "2" "3" "4" "5" "6")]
+       (are [expected actual] (array-typed-equals expected actual)
+            (into-array String ["1" "2" "3" nil nil]) (.toArray shorter# string-array#)
+            (into-array String ["1" "2" "3" "4" "5"]) (.toArray same-length# string-array#)
+            (into-array String ["1" "2" "3" "4" "5" "6"]) (.toArray longer# string-array#)))))
+
+;; Irrelevant for CLR -- CopyArray blows up on shorter destination, no creation of new destination
+#_(test-to-passed-array-for vector)
+#_(test-to-passed-array-for list)
+;;(test-to-passed-array-for hash-set)
+#_(test-to-passed-array-for queue)
 
 (deftest test-into-array
   ; compatible types only
@@ -425,8 +464,12 @@
       (double-array [1 2 3])
       (boolean-array [true false])
       (byte-array [(byte 1) (byte 2)])
+      (byte-array [1 2])
+      (byte-array 2 [1 2])
       (char-array [\a \b \c])
       (short-array [(short 1) (short 2)])
+      (short-array [1 2])
+      (short-array 2 [1 2])
       (make-array Int32 3)  ;;;(make-array Integer/TYPE 3)
       (to-array [1 "a" :k])
       (into-array [1 2 3]) )

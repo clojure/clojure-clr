@@ -9,7 +9,7 @@
 ; Utilities meant to be used interactively at the REPL
 
 (ns
-  #^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim"
+  ^{:author "Chris Houser, Christophe Grand, Stephen Gilardi, Michel Salim"
      :doc "Utilities meant to be used interactively at the REPL"}
   clojure.repl
   )   ;;;(:import (java.io LineNumberReader InputStreamReader PushbackReader)
@@ -150,7 +150,9 @@ Example: (source-fn 'filter)"
                       (Read [] (let [i (proxy-super Read)]                          ;;; read read
                                  (.Append text (char i))                            ;;; .append
                                  i)))]
-            (read (clojure.lang.PushbackTextReader. pbr))                           ;;; (read (PushbackReader. pbr))
+            (if (= :unknown *read-eval*)
+              (throw (InvalidOperationException. "Unable to read source while *read-eval* is :unknown."))    ;;; IllegalStateException
+              (read (clojure.lang.PushbackTextReader. pbr)))                           ;;; (read (PushbackReader. pbr))
             (str text)))))))
 
 (defmacro source
@@ -186,33 +188,12 @@ str-or-pattern."
   `(doseq [v# (dir-fn '~nsname)]
      (println v#)))
 
-(def ^:private demunge-map
-  (into {"$" "/"} (map (fn [[k v]] [v k]) clojure.lang.Compiler/CHAR_MAP)))
-
-(def ^:private demunge-pattern
-  (re-pattern (apply str (interpose "|" (map #(.Replace % "_" "[_]")   ;;;     #(str "\\Q" % "\\E")
-                                             (keys demunge-map))))))
-
-(defn- re-replace [re s f]
-  (let [m (re-matcher re s)
-        mseq (take-while identity
-                         (repeatedly #(when (re-find m)
-                                        [(re-groups m) (.start m) (.end m)])))]
-    (apply str
-           (concat
-             (mapcat (fn [[_ _ start] [groups end]]
-                       (if end
-                         [(subs s start end) (f groups)]
-                         [(subs s start)]))
-                     (cons [0 0 0] mseq)
-                     (concat mseq [nil]))))))
-
 (defn demunge
   "Given a string representation of a fn class,
   as in a stack trace element, returns a readable version."
   {:added "1.3"}
   [fn-name]
-  (re-replace demunge-pattern fn-name demunge-map))
+  (clojure.lang.Compiler/demunge fn-name))
 
 (defn root-cause
   "Returns the initial cause of an exception or error by peeling off all of

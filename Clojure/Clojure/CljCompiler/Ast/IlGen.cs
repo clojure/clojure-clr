@@ -40,14 +40,15 @@ namespace clojure.lang.CljCompiler.Ast
                     return false;
             }
 
-#if MONO
-            foreach (Type t in fi.GetRequiredCustomModifiers() )
-                if ( t == typeof(IsVolatile) )
-                    return true;
-            return false;
-#else
-            return FieldSigReader.IsVolatile(fi);
-#endif
+            if (RT.IsRunningOnMono)
+            {
+                foreach (Type t in fi.GetRequiredCustomModifiers())
+                    if (t == typeof(IsVolatile))
+                        return true;
+                return false;
+            }
+            else
+                return FieldSigReader.IsVolatile(fi);
         }
 
         public void MaybeEmitVolatileOp(FieldInfo fi)

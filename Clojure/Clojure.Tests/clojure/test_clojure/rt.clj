@@ -33,19 +33,35 @@
      (defn prefers [] (throw (Exception. "rebound!")))))                                          ;;; RuntimeException
   (testing "reflection cannot resolve field"
     (should-print-err-message
-     #"Reflection warning, .*:\d+:\d+ - reference to field/property blah can't be resolved.\r?\n"
+     #"Reflection warning, .*:\d+:\d+ - reference to field/property blah can't be resolved \(target class is unknown\).\r?\n"
      (defn foo [x] (.blah x))))
-  (testing "reflection cannot resolve instance method"              ;;; TODO: Figure out why the regexes don't match in these two tests.  They look identical to me.
+  (testing "reflection cannot resolve instance method on known class"              ;;; TODO: Figure out why the regexes don't match in these two tests.  They look identical to me.
     (should-print-err-message
-     #"Reflection warning, .*:\d+:\d+ - call to zap can't be resolved.\r?\n"
+     #"Reflection warning, .*:\d+:\d+ - reference to field/property blah on System\.String can't be resolved\.\r?\n"
+     (defn foo [^String x] (.blah x))))
+  (testing "reflection cannot resolve instance method because it is missing"
+    (should-print-err-message
+     #"Reflection warning, .*:\d+:\d+ - call to method zap on System\.String can't be resolved \(no such method\)\.\r?\n"
+     (defn foo [^String x] (.zap x 1))))
+  (testing "reflection cannot resolve instance method because it has incompatible argument types"
+    (should-print-err-message
+     #"Reflection warning, .*:\d+:\d+ - call to method IndexOf on System\.String can't be resolved \(argument types: System\.Double, clojure\.lang\.Symbol\)\.\r?\n"
+     (defn foo [^String x] (.IndexOf x 12.1 'a))))
+  (testing "reflection cannot resolve instance method because it has unknown argument types"
+    (should-print-err-message
+     #"Reflection warning, .*:\d+:\d+ - call to method IndexOf on System\.String can't be resolved \(argument types: unknown\)\.\r?\n"
+     (defn foo [^String x y] (.IndexOf x y))))
+  (testing "reflection cannot resolve instance method because target class is unknown"
+    (should-print-err-message
+     #"Reflection warning, .*:\d+:\d+ - call to method zap can't be resolved \(target class is unknown\)\.\r?\n"
      (defn foo [x] (.zap x 1))))
   (testing "reflection cannot resolve static method"
     (should-print-err-message
-     #"Reflection warning, .*:\d+:\d+ - call to Format can't be resolved.\r?\n"
-     (defn foo [] (String/Format #"boom"))))                                                            ;;; (defn foo [] (Integer/valueOf #"boom"))))
+     #"Reflection warning, .*:\d+:\d+ - call to static method Format on System\.String can't be resolved \(argument types: System\.Text\.RegularExpressions\.Regex, System\.Int64\)\.\r?\n"
+     (defn foo [] (String/Format #"boom" 12))))                                                            ;;; (defn foo [] (Integer/valueOf #"boom"))))
   (testing "reflection cannot resolved constructor"
     (should-print-err-message
-     #"Reflection warning, .*:\d+:\d+ - call to System.String ctor can't be resolved.\r?\n"       ;;; java.lang.String
+     #"Reflection warning, .*:\d+:\d+ - call to System\.String ctor can't be resolved.\r?\n"       ;;; java.lang.String
      (defn foo [] (String. 1 2 3)))))
 
 (def example-var)

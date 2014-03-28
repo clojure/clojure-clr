@@ -333,9 +333,12 @@
   report :type)
 
 (defn- file-and-line 
-  [exception depth]
-  (let  [ s (.GetFrame (System.Diagnostics.StackTrace. exception true) depth)]    ;;; [^StackTraceElement s (nth (.getStackTrace exception) depth)]
-    {:file (.GetFileName s) :line (.GetFileLineNumber s)}))                       ;;; .getFileName  .getLineNumber
+  [^Exception exception depth]                                                    ;;; Throwable
+  (let [stacktrace (System.Diagnostics.StackTrace. exception true)]               ;;; (.getStackTrace exception)
+    (if (< depth (.FrameCount stacktrace))                                        ;;; (count stacktrace)
+      (let [^System.Diagnostics.StackFrame s (.GetFrame stacktrace depth)]        ;;; ^StackTraceElement (nth stacktrace depth)
+        {:file (.GetFileName s) :line (.GetFileLineNumber s)})                    ;;; .getFileName  .getLineNumber
+      {:file nil :line nil})))
 
 (defn do-report
   "Add file and line information to a test result and call report.
@@ -704,17 +707,24 @@
                       :expected nil, :actual e})))
       (do-report {:type :end-test-var, :var v}))))
 
-(defn test-all-vars
-  "Calls test-var on every var interned in the namespace, with fixtures."
+(defn test-vars
+  "Groups vars by their namespace and runs test-vars on them with
+   appropriate fixtures applied."
+  {:added "1.6"}
+  [vars]
+  (doseq [[ns vars] (group-by (comp :ns meta) vars)]
+    (let [once-fixture-fn (join-fixtures (::once-fixtures (meta ns)))
+          each-fixture-fn (join-fixtures (::each-fixtures (meta ns)))]
+      (once-fixture-fn
+       (fn []
+         (doseq [v vars]
+           (each-fixture-fn (fn [] (test-var v)))))))))
+
+ (defn test-all-vars
+  "Calls test-vars on every var interned in the namespace, with fixtures."
   {:added "1.1"} 
   [ns]
-  (let [once-fixture-fn (join-fixtures (::once-fixtures (meta ns)))
-        each-fixture-fn (join-fixtures (::each-fixtures (meta ns)))]
-    (once-fixture-fn
-     (fn []
-       (doseq [v (vals (ns-interns ns))]
-         (when (:test (meta v))
-           (each-fixture-fn (fn [] (test-var v)))))))))
+  (test-vars (vals (ns-interns ns))))
 
 (defn test-ns
   "If the namespace defines a function named test-ns-hook, calls that.
@@ -722,7 +732,7 @@
   namespace object or a symbol.
 
   Internally binds *report-counters* to a ref initialized to
-  *inital-report-counters*.  Returns the final, dereferenced state of
+  *initial-report-counters*.  Returns the final, dereferenced state of
   *report-counters*."
   {:added "1.1"} 
   [ns]

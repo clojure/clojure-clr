@@ -74,8 +74,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public IPersistentVector ProtocolCallsites { get; set; }
         List<FieldBuilder> _cachedTypeFields;
-        List<FieldBuilder> _cachedProtoFnFields;
-        List<FieldBuilder> _cachedProtoImplFields;
+
 
         FieldBuilder _metaField;
         List<FieldBuilder> _closedOverFields;
@@ -138,17 +137,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return "__cached_class__" + n;
         }
-
-        internal static String CachedProtoFnName(int n)
-        {
-            return "__cached_proto_fn__" + n;
-        }
-
-        internal static String CachedProtoImplName(int n)
-        {
-            return "__cached_proto_impl__" + n;
-        }
-
 
         private static string ConstantName(int i)
         {
@@ -213,32 +201,6 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _varCallsites; }
             set { _varCallsites = value; }
         }
-
-        //public Type BaseType
-        //{
-        //    get { return _baseType; }
-        //}
-
-        //public ParameterExpression ThisParam
-        //{
-        //    get { return _thisParam; }
-        //    set { _thisParam = value; }
-        //}
-
-        internal FieldBuilder CachedProtoFnField(int i)
-        {
-            return _cachedProtoFnFields[i];
-        }
-
-        internal FieldBuilder CachedProtoImplField(int i)
-        {
-            return _cachedProtoImplFields[i];
-        }
-
-
-
-
-
 
         #endregion
 
@@ -562,15 +524,11 @@ namespace clojure.lang.CljCompiler.Ast
             int count = ProtocolCallsites.count();
 
             _cachedTypeFields = new List<FieldBuilder>(count);
-            _cachedProtoFnFields = new List<FieldBuilder>(count);
-            _cachedProtoImplFields = new List<FieldBuilder>(count);
 
 
             for (int i = 0; i < count; i++)
             {
-                _cachedTypeFields.Add(tb.DefineField(CachedClassName(i), typeof(Type), FieldAttributes.Public));
-                _cachedProtoFnFields.Add(tb.DefineField(CachedProtoFnName(i), typeof(AFunction), FieldAttributes.Public));
-                _cachedProtoImplFields.Add(tb.DefineField(CachedProtoImplName(i), typeof(IFn), FieldAttributes.Public));
+                _cachedTypeFields.Add(tb.DefineField(CachedClassName(i), typeof(Type), FieldAttributes.Public|FieldAttributes.Static));
             }
         }
 

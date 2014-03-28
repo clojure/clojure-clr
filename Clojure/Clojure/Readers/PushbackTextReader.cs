@@ -87,12 +87,6 @@ namespace clojure.lang
 
         #region Lifetime methods
 
-        public override void Close()
-        {
-            _baseReader.Close();
-            base.Close();
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (!_disposed)

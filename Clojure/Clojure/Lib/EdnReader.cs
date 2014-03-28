@@ -26,8 +26,6 @@ namespace clojure.lang
     {
         #region Symbol definitions
 
-        static readonly Symbol SLASH = Symbol.intern("/");
-
         static readonly Keyword EOF = Keyword.intern(null,"eof");
 
         #endregion
@@ -148,16 +146,18 @@ namespace clojure.lang
 
                     //string token = readToken(r, (char)ch);
                     //return RT.suppressRead() ? null : interpretToken(token);
+                    string rawToken;
                     string token;
-                    int lastSlashIndex;
-                    bool eofSeen = readToken(r, (char)ch, true, out token, out lastSlashIndex);
+                    string mask;
+                    bool eofSeen;
+                    readToken(r, (char)ch, true, out rawToken, out token, out mask, out eofSeen);
                     if (eofSeen)
                     {
                         if (eofIsError)
-                            throw new EndOfStreamException("EOF while reading");
+                            throw new EndOfStreamException("EOF while reading symbol");
                         return eofValue;
                     }
-                    return RT.suppressRead() ? null : InterpretToken(token, lastSlashIndex);
+                    return RT.suppressRead() ? null : InterpretToken(rawToken, token, mask);
                 }
             }
             catch (Exception e)
@@ -330,65 +330,90 @@ namespace clojure.lang
             }
         }
 
-        static bool readToken(PushbackTextReader r, char initch, bool leadConstituent, out string nameString, out int lastSlashIndex)
+        static void readToken(PushbackTextReader r, char initch, bool leadConstituent, out String rawToken, out String token, out String mask, out bool eofSeen)
         {
             if (leadConstituent && NonConstituent(initch))
                 throw new InvalidOperationException("Invalid leading characters: " + (char)initch);
 
-            bool oddVertBarMode = false;
-            lastSlashIndex = -1;
             bool allowSymEscape = RT.booleanCast(RT.AllowSymbolEscapeVar.deref());
 
-            StringBuilder sb = new StringBuilder();
+            bool rawMode = false;
+
+            StringBuilder sbRaw = new StringBuilder();
+            StringBuilder sbToken = new StringBuilder();
+            StringBuilder sbMask = new StringBuilder();
 
             if (allowSymEscape && initch == '|')
-                oddVertBarMode = true;
-            else 
-                sb.Append(initch);
+            {
+                rawMode = true;
+                sbRaw.Append(initch);
+            }
+            else
+            {
+                sbRaw.Append(initch);
+                sbToken.Append(initch);
+                sbMask.Append(initch);
+            }
 
             for (; ; )
             {
                 int ch = r.Read();
-                if (oddVertBarMode)
+                if (rawMode)
                 {
                     if (ch == -1)
                     {
-                        nameString = sb.ToString();
-                        return true;
+                        rawToken = sbRaw.ToString();
+                        token = sbToken.ToString();
+                        mask = sbMask.ToString();
+                        eofSeen = true;
+                        return;
                     }
                     if (ch == '|')
                     {
                         int ch2 = r.Read();
                         if (ch2 == '|')
-                            sb.Append('|');
+                        {
+                            sbRaw.Append('|');
+                            sbToken.Append('|');
+                            sbMask.Append('a');
+                        }
                         else
                         {
                             r.Unread(ch2);
-                            oddVertBarMode = false;
+                            rawMode = false;
+                            sbRaw.Append(ch);
                         }
                     }
                     else
-                        sb.Append((char)ch);
+                    {
+                        sbRaw.Append((char)ch);
+                        sbToken.Append((char)ch);
+                        sbMask.Append('a');
+                    }
                 }
                 else
                 {
                     if (ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
                     {
                         Unread(r, ch);
-                        nameString = sb.ToString();
-                        return false;
+                        rawToken = sbRaw.ToString();
+                        token = sbToken.ToString();
+                        mask = sbMask.ToString();
+                        eofSeen = false;
+                        return;
                     }
                     else if (NonConstituent(ch))
                         throw new InvalidOperationException("Invalid constituent character: " + (char)ch);
                     else if (ch == '|' && allowSymEscape)
                     {
-                        oddVertBarMode = true;
+                        rawMode = true;
+                        sbRaw.Append((char)ch);
                     }
                     else
                     {
-                        sb.Append((char)ch);
-                        if (ch == '/')
-                            lastSlashIndex = sb.Length - 1;
+                        sbRaw.Append((char)ch);
+                        sbToken.Append((char)ch);
+                        sbMask.Append((char)ch);
                     }
                 }
             }
@@ -396,10 +421,10 @@ namespace clojure.lang
 
         public static object InterpretToken(string token)
         {
-            return InterpretToken(token, -1);
+            return InterpretToken(token, token, token);
         }
 
-        public static object InterpretToken(string token, int lastSlashIndex)
+        public static object InterpretToken(string rawToken, string token, string mask)
         {
             if (token.Equals("nil"))
             {
@@ -415,73 +440,69 @@ namespace clojure.lang
                 //return RT.F;
                 return false;
             }
-            else if (token.Equals("/"))
-            {
-                return SLASH;
-            }
 
-            object ret = null;
-
-            ret = matchSymbol(token, lastSlashIndex);
+            object ret = matchSymbol(token, mask);
             if (ret != null)
                 return ret;
 
-            throw new ArgumentException("Invalid token: " + token);
+            throw new ArgumentException("Invalid token: " + rawToken);
         }
 
 
-        static Regex nsSymbolPat = new Regex("^[:]?\\D");
-        static Regex nameSymbolPat = new Regex("^\\D");
+        static Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
 
-        static object matchSymbol(string token, int lastSlashIndex)
+        private static void ExtractNamesUsingMask(string token, string maskNS, string maskName, out string ns, out string name)
         {
-            // no :: except at beginning
-            if (token.IndexOf("::", 1) != -1)
-                return null;
-
-            string nsStr;
-            string nameStr;
-
-            if (lastSlashIndex == -1)
+            if (String.IsNullOrEmpty(maskNS))
             {
-                nsStr = null;
-                nameStr = token;
+                ns = null;
+                name = token;
             }
             else
             {
-                nsStr = token.Substring(0, lastSlashIndex);
-                nameStr = token.Substring(lastSlashIndex + 1);
+                ns = token.Substring(0, maskNS.Length - 1);
+                name = token.Substring(maskNS.Length);
             }
+        }
 
-            // Must begin with non-digit, or ':' + non-digit if there is a namespace
-            Match nameMatch = nsStr != null ? nameSymbolPat.Match(nameStr) : nsSymbolPat.Match(nameStr);
-            if (!nameMatch.Success)
-                return null;
+        static object matchSymbol(string token, string mask)
+         {
+            Match m = symbolPat.Match(mask);
 
-            // no trailing :
-            if (nameStr.EndsWith(":"))
-                return null;
-
-            if (nsStr != null)
+            if (m.Success)
             {
-                // Must begin with non-digit or ':' + non-digit
-                Match nsMatch = nsSymbolPat.Match(nsStr);
-                if (!nsMatch.Success)
+                string maskNS = m.Groups[1].Value;
+                string maskName = m.Groups[2].Value;
+                if (maskNS != null && maskNS.EndsWith(":/")
+                    || maskName.EndsWith(":")
+                    || mask.IndexOf("::", 1) != -1)
                     return null;
 
-                // no trailing :/ on ns
-                if (nsStr != null && nsStr.EndsWith(":/"))
+                if (mask.StartsWith("::"))
                     return null;
+
+                bool isKeyword = mask[0] == ':';
+
+                if (isKeyword)
+                {
+                    Match m2 = symbolPat.Match(mask.Substring(1));
+                    if (!m2.Success)
+                        return null;
+                    string ns;
+                    string name;
+                    ExtractNamesUsingMask(token.Substring(1), m2.Groups[1].Value, m2.Groups[2].Value, out ns, out name);
+                    return Keyword.intern(ns, name); 
+                }
+                else
+                {
+                    string ns;
+                    string name;
+                    ExtractNamesUsingMask(token, maskNS, maskName, out ns, out name);
+                    return Symbol.intern(ns, name);
+                }
             }
 
-            if (token.StartsWith("::"))
-                return null;
-
-            bool isKeyword = token[0] == ':';
-            Symbol sym = Symbol.intern(token.Substring(isKeyword ? 1 : 0));
-            if (isKeyword)
-                return Keyword.intern(sym);
-            return sym;
+            return null;
         }
 
         #endregion

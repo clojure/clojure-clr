@@ -28,3 +28,13 @@
 (deftest test-disj!
   (testing "disjoin multiple items in one call"
     (is (= #{5 20} (-> #{5 10 15 20} transient (disj! 10 15) persistent!)))))
+
+(deftest empty-transient
+  (is (= false (.contains (transient #{}) :bogus-key))))
+
+(deftest persistent-assoc-on-collision
+  (testing "Persistent assoc on a collision node which underwent a transient dissoc"
+    (let [a (reify Object (GetHashCode [_] 42))                                            ;;; hashCode
+          b (reify Object (GetHashCode [_] 42))]                                           ;;; hashCode
+      (is (= (-> #{a b} transient (disj! a) persistent! (conj a))
+            (-> #{a b} transient (disj! a) persistent! (conj a)))))))

@@ -12,7 +12,10 @@
 (ns clojure.test-clojure.data-structures
   (:use clojure.test
         [clojure.test.generative :exclude (is)])
-  (:require [clojure.test-clojure.generators :as cgen]))
+  (:require [clojure.test-clojure.generators :as cgen]
+            [clojure.data.generators :as gen]
+			[clojure.string :as string]))
+
 
 ;; *** Helper functions ***
 
@@ -30,7 +33,49 @@
              (+ i (count (nthnext coll i)))
              (+ i (count (drop i coll))))))))
 
-;; *** General ***
+(defn- transient? [x]
+  (instance? clojure.lang.ITransientCollection x))
+
+(defn gen-transient-action []
+  (gen/rand-nth [[#(conj! %1 %2) #(conj %1 %2) (gen/uniform -100 100)]
+                 [#(disj! %1 %2) #(disj %1 %2) (gen/uniform -100 100)]
+                 [persistent! identity]
+                 [identity transient]]))
+
+(defn gen-transient-actions []
+  (gen/reps #(gen/uniform 0 100) gen-transient-action))
+
+(defn assert-same-collection [a b]
+  (assert (= (count a) (count b) (.count a) (.count b)))               ;;; .size  .size
+  (assert (= a b))
+  (assert (= b a))
+  (assert (.Equals ^Object a b))                                       ;;; .equals
+  (assert (.Equals ^Object b a))                                       ;;; .equals
+  (assert (= (hash a) (hash b)))
+  (assert (= (.GetHashCode ^Object a) (.GetHashCode ^Object b)))       ;;; .hashCode .hashCode
+  (assert (= a
+             (into (empty a) a)
+             (into (empty b) b)
+             (into (empty a) b)
+             (into (empty b) a))))
+
+(defn apply-actions [coll actions]
+  (reduce (fn [c [tfunc pfunc & args]]
+            (apply (if (transient? c) tfunc pfunc) c args))
+          coll
+          actions))
+
+(defn to-persistent [c]
+  (if (transient? c) (persistent! c) c))
+
+(defspec conj-persistent-transient
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-transient-actions} actions]
+  (assert-same-collection
+   (to-persistent (apply-actions #{} actions))
+   (to-persistent (apply-actions #{} actions))))
+
+ ;; *** General ***
 
 (defstruct equality-struct :a :b)
 
@@ -557,7 +602,7 @@
 
 (deftest test-get
   (let [m {:a 1, :b 2, :c {:d 3, :e 4}, :f nil, :g false, nil {:h 5}}]
-    (is (thrown? ArgumentException (get-in {:a 1} 5)))                        ;;; IllegalArgumentException
+    (is (thrown? Exception (get-in {:a 1} 5)))                        ;;; Throwable
     (are [x y] (= x y)
          (get m :a) 1
          (get m :e) nil
@@ -964,4 +1009,103 @@
        {:a 1} (assoc {} :a 1)
        {:a 2 :b -2} (assoc {} :b -2 :a 2))
   (is (thrown? ArgumentException (assoc [] 0 5 1)))              ;;; IllegalArgumentException
-  (is (thrown? ArgumentException (assoc {} :b -2 :a))))			;;; IllegalArgumentException			              
+  (is (thrown? ArgumentException (assoc {} :b -2 :a))))			;;; IllegalArgumentException	
+  
+  (defn is-same-collection [a b]
+  (let [msg (format "(class a)=%s (class b)=%s a=%s b=%s"
+                    (.Name (class a)) (.Name (class b)) a b)]               ;;; .getName .getName
+    (is (= (count a) (count b) (.get_Count a) (.get_Count b)) msg)          ;;; .size .size
+    (is (= a b) msg)
+    (is (= b a) msg)
+    (is (.Equals ^Object a b) msg)                                          ;;; .equals
+    (is (.Equals ^Object b a) msg)                                          ;;; .equals
+    (is (= (hash a) (hash b)) msg)
+    (is (= (.GetHashCode ^Object a) (.GetHashCode ^Object b)) msg)))        ;;; .hashCode .hashCode
+
+(deftest ordered-collection-equality-test
+  (let [empty-colls [ []
+                      '()
+                      (lazy-seq)
+                      clojure.lang.PersistentQueue/EMPTY
+                      (vector-of :long) ]]
+    (doseq [c1 empty-colls, c2 empty-colls]
+      (is-same-collection c1 c2)))
+  (let [colls1 [ [-3 :a "7th"]
+                 '(-3 :a "7th")
+                 (lazy-seq (cons -3
+                   (lazy-seq (cons :a
+                     (lazy-seq (cons "7th" nil))))))
+                 (into clojure.lang.PersistentQueue/EMPTY
+                       [-3 :a "7th"]) ]]
+    (doseq [c1 colls1, c2 colls1]
+      (is-same-collection c1 c2)))
+  (is-same-collection [-3 1 7] (vector-of :long -3 1 7)))
+
+(defn case-indendent-string-cmp [s1 s2]
+  (compare (string/lower-case s1) (string/lower-case s2)))
+
+(deftest set-equality-test
+  (let [empty-sets [ #{}
+                     (hash-set)
+                     (sorted-set)
+                     (sorted-set-by case-indendent-string-cmp) ]]
+    (doseq [s1 empty-sets, s2 empty-sets]
+      (is-same-collection s1 s2)))
+  (let [sets1 [ #{"Banana" "apple" "7th"}
+                (hash-set "Banana" "apple" "7th")
+                (sorted-set "Banana" "apple" "7th")
+                (sorted-set-by case-indendent-string-cmp "Banana" "apple" "7th") ]]
+    (doseq [s1 sets1, s2 sets1]
+      (is-same-collection s1 s2))))
+
+(deftest map-equality-test
+  (let [empty-maps [ {}
+                     (hash-map)
+                     (array-map)
+                     (sorted-map)
+                     (sorted-map-by case-indendent-string-cmp) ]]
+    (doseq [m1 empty-maps, m2 empty-maps]
+      (is-same-collection m1 m2)))
+  (let [maps1 [ {"Banana" "like", "apple" "love", "7th" "indifferent"}
+                (hash-map "Banana" "like", "apple" "love", "7th" "indifferent")
+                (array-map "Banana" "like", "apple" "love", "7th" "indifferent")
+                (sorted-map "Banana" "like", "apple" "love", "7th" "indifferent")
+                (sorted-map-by case-indendent-string-cmp
+                               "Banana" "like", "apple" "love", "7th" "indifferent") ]]
+    (doseq [m1 maps1, m2 maps1]
+      (is-same-collection m1 m2))))	  
+	  
+;; *** Collection hashes ***
+;; See: http://clojure.org/data_structures#hash
+
+(defn hash-ordered [collection]
+  (-> (reduce (fn [acc e] (unchecked-add-int (unchecked-multiply-int 31 acc) (hash e)))
+              1
+              collection)
+      (mix-collection-hash (count collection))))
+
+(defn hash-unordered [collection]
+  (-> (reduce unchecked-add-int 0 (map hash collection))
+      (mix-collection-hash (count collection))))
+
+(defn gen-elements
+  []
+  (gen/vec gen/anything))
+
+(defspec ordered-collection-hashes-match
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-elements} elem]
+  (let [v (vec elem)
+        l (apply list elem)]
+    (is (= (hash v)
+           (hash l)
+           (hash (map identity elem))
+           (hash-ordered elem)))))
+
+(defspec unordered-set-hashes-match
+  identity
+  [^{:tag clojure.test-clojure.data-structures/gen-elements} elem]
+  (let [unique-elem (distinct elem)
+        s (into #{} unique-elem)]
+    (is (= (hash s)
+           (hash-unordered unique-elem)))))	              

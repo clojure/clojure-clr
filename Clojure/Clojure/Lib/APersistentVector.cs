@@ -559,12 +559,31 @@ namespace clojure.lang
         {
             if (_hasheq == -1)
             {
-                int hash = 1;
-                foreach (object o in this)
-                    hash = 31 * hash + Util.hasheq(o);
-                _hasheq = hash;
+                //int hash = 1;
+                //foreach (object o in this)
+                //    hash = 31 * hash + Util.hasheq(o);
+                //_hasheq = hash;
+                _hasheq = Murmur3.HashOrdered(this);
             }
             return _hasheq;
+        }
+
+        #endregion
+
+        #region Ranged iterator
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "End")]
+        public virtual IEnumerator RangedIterator(int start, int end)
+        {
+            for (int i = start; i < end; i++)
+                yield return nth(i);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "End")]
+        public virtual IEnumerator<object> RangedIteratorT(int start, int end)
+        {
+            for (int i = start; i < end; i++)
+                yield return nth(i);
         }
 
         #endregion
@@ -1065,12 +1084,18 @@ namespace clojure.lang
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return ((PersistentVector)_v).RangedIterator(_start, _end);
+                APersistentVector av = _v as APersistentVector;
+                if ( av != null )
+                    return av.RangedIterator(_start, _end);
+                return base.GetEnumerator();    
             }
 
             public override IEnumerator<object> GetEnumerator()
             {
-                return ((PersistentVector)_v).RangedIteratorT(_start, _end);
+                APersistentVector av = _v as APersistentVector;
+                if (av != null)
+                    return av.RangedIteratorT(_start, _end);
+                return base.GetEnumerator();    
             }
 
             #endregion

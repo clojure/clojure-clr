@@ -12,6 +12,7 @@
  *   Author: David Miller
  **/
 
+using System;
 using System.Runtime.CompilerServices;
 
 namespace clojure.lang
@@ -27,6 +28,11 @@ namespace clojure.lang
         /// The value, after it has been computed.
         /// </summary>
         object _val;
+
+        /// <summary>
+        /// Cached exception, if encountered
+        /// </summary>
+        Exception _exception;
 
         /// <summary>
         /// The function being delayed.
@@ -45,6 +51,7 @@ namespace clojure.lang
         {
             _fn = fn;
             _val = null;
+            _exception = null;
         }
 
         #endregion
@@ -74,14 +81,26 @@ namespace clojure.lang
         /// </summary>
         /// <returns>The value</returns>
         /// <remarks>Forces the computation if it has not happened yet.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public object deref()
         {
             if (_fn != null)
             {
-                _val = _fn.invoke();
+                try
+                {
+                    _val = _fn.invoke();
+                }
+                catch (Exception e)
+                {
+                    _exception = e;
+                }
                 _fn = null;
             }
+
+            if (_exception != null)
+                throw _exception;
+         
             return _val;
         }
 

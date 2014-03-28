@@ -152,6 +152,21 @@
              (exception))
        ))
 
+(deftest test-if-some
+  (are [x y] (= x y)
+       1 (if-some [a 1] a)
+       false (if-some [a false] a)
+       nil (if-some [a nil] (exception))
+       3 (if-some [[a b] [1 2]] (+ a b))
+       1 (if-some [[a b] nil] b 1)
+       1 (if-some [a nil] (exception) 1)))
+
+(deftest test-when-some
+  (are [x y] (= x y)
+       1 (when-some [a 1] a)
+       2 (when-some [[a b] [1 2]] b)
+       false (when-some [a false] a)
+       nil (when-some [a nil] (exception))))
 
 (deftest test-cond
   (are [x y] (= x y)
@@ -324,7 +339,7 @@
            :set #{3 2 1}
            :set (sorted-set 2 1 3))))
   (testing "test number equivalence"
-    (is (= :1 (case 1N 1 :1 :else))))
+    (is (= :one (case 1N 1 :one :else))))
   (testing "test warn when boxing/hashing expr for all-ints case"
     (should-print-err-message
       #"Performance warning, .*:\d+ - case has int tests, but tested expression is not primitive..*\r?\n"
@@ -348,10 +363,10 @@
     (should-not-reflect (clojure.lang.BigDecimal/Create (case 1 1 1)))                   ;;; (Long. (case 1 1 1)) ; new Long(long)
     (should-not-reflect (clojure.lang.BigDecimal/Create (case 1 1 "1"))))                ;;; (Long. (case 1 1 "1")) ; new Long(String)
   (testing "non-equivalence of chars and nums"
-    (are [result input] (= result (case input 97 :97 :else))
+    (are [result input] (= result (case input 97 :got97 :else))
       :else \a
       :else (char \a)
-      :97 (int \a))
+      :got97 (int \a))
     (are [result input] (= result (case input \a :a :else))
       :else 97
       :else 97N
@@ -367,7 +382,8 @@
       (is (= :diff (case x -1 :oops :diff)))
       (is (= :same (case y -1 :same :oops)))))
   (testing "test correct behavior on hash collision"
-    (is (== (hash 1) (hash 9223372039002259457N)))
+    ;; case uses Java .hashCode to put values into hash buckets.
+    (is (== (.GetHashCode 1) (.GetHashCode 9223372039002259457N)))        ;;; .hashCode .hashCode
     (are [result input] (= result (case input
                                     1 :long
                                     9223372039002259457N :big

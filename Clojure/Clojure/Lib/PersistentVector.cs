@@ -970,7 +970,7 @@ namespace clojure.lang
 
         #region Ranged iterator
 
-        public IEnumerator RangedIterator(int start, int end)
+        public override IEnumerator RangedIterator(int start, int end)
         {
             int i = start;
             int b = i - (i%32);
@@ -987,7 +987,7 @@ namespace clojure.lang
             }
         }
 
-        public IEnumerator<object> RangedIteratorT(int start, int end)
+        public override IEnumerator<object> RangedIteratorT(int start, int end)
         {
             int i = start;
             int b = i - (i % 32);

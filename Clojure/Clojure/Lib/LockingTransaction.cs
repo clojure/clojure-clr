@@ -563,13 +563,29 @@ namespace clojure.lang
             // We can could define a delegate for this, probably use ThreadStartDelegate.
             // Should still have a version that takes IFn.
             LockingTransaction t = _transaction;
+            Object ret;
+
             if (t == null)
+            {
                 _transaction = t = new LockingTransaction();
+                try
+                {
+                    ret = t.Run(fn);
+                }
+                finally
+                {
+                    _transaction = null;
+                }
+            }
+            else
+            {
+                if (t._info != null)
+                    ret = fn.invoke();
+                else
+                    ret = t.Run(fn);
+            }
 
-            if (t._info != null)
-                return fn.invoke();
-
-            return t.Run(fn);
+            return ret;
         }
 
         class Notify
@@ -661,7 +677,6 @@ namespace clojure.lang
 
                         // at this point, all values calced, all refs to be written locked
                         // no more client code to be called
-                        int msecs = System.Environment.TickCount;
                         long commitPoint = GetCommitPoint();
                         foreach (KeyValuePair<Ref, object> pair in _vals)
                         {
@@ -669,7 +684,7 @@ namespace clojure.lang
                             object oldval = r.TryGetVal();
                             object newval = pair.Value;
                           
-                            r.SetValue(newval, commitPoint, msecs);
+                            r.SetValue(newval, commitPoint);
                             if (r.getWatches().count() > 0)
                                 notify.Add(new Notify(r, oldval, newval));
                         }

@@ -10,6 +10,8 @@
 
 (in-ns 'clojure.core)
 
+(import '(clojure.lang Murmur3))
+
 ;(set! *warn-on-reflection* true)
 
 (deftype VecNode [edit arr])
@@ -132,7 +134,9 @@
                (.Equals (.nth this i) (nth o i)) (recur (inc i))                                   ;;; .equals
                :else false)))
      (or (instance? clojure.lang.Sequential o) (instance? System.Collections.IList o))             ;;; java.util.List
-       (.Equals (seq this) (seq o))                                                                ;;; .equals
+       (if-let [st (seq this)]
+         (.Equals st (seq o))                                                                      ;;; .equals
+         (nil? (seq o)))
      :else false))
 
   ;todo - cache
@@ -142,9 +146,14 @@
         hash
         (let [val (.nth this i)]
           (recur (unchecked-add-int (unchecked-multiply-int 31 hash) 
-                                (clojure.lang.Util/Hash val))                                       ;;; /hash
+                                (clojure.lang.Util/hash val))
                  (inc i))))))
 
+  ;todo - cache
+  clojure.lang.IHashEq
+  (hasheq [this]
+    (Murmur3/HashOrdered this))                                                                  ;;; hashOrdered
+ 
   clojure.lang.Counted
   (count [_] cnt)
 
@@ -347,7 +356,7 @@
   (CompareTo [this o]                                                                     ;;; compareTo
     (if (identical? this o)
       0
-      (let [#^clojure.lang.IPersistentVector v (cast clojure.lang.IPersistentVector o)
+      (let [^clojure.lang.IPersistentVector v (cast clojure.lang.IPersistentVector o)
             vcnt (.count v)]
         (cond
           (< cnt vcnt) -1
@@ -363,10 +372,10 @@
 
   System.Collections.IEnumerable                                                            ;;; java.lang.Iterable
   (GetEnumerator [this]                                                                          ;;; iterator
-    (let [i (clojure.lang.AtomicInteger. 0)]                                 ;;; java.util.concurrent.atomic.AtomicInteger.
+    (let [i (clojure.lang.AtomicInteger. -1)]                                 ;;; java.util.concurrent.atomic.AtomicInteger.
       (reify System.Collections.IEnumerator                                  ;;; java.util.Iterator
         (MoveNext [_] (< (.incrementAndGet i) cnt))                              ;;; (hasNext [_] (< (.get i) cnt))
-        (get_Current  [_]  (.nth this (.get i)))                                     ;;; (next [_] (.nth this (dec (.incrementAndGet i))))
+        (get_Current  [_]  (try (.nth this (.get i))  (catch IndexOutOfRangeException e (throw (InvalidOperationException.)))))                                     ;;; (next [_] (.nth this (dec (.incrementAndGet i))))
         (Reset    [_]  (.set i 0)))))                                            ;;; (remove [_] (throw (UnsupportedOperationException.))))))
 
   ;java.util.Collection

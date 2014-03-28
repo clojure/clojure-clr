@@ -27,33 +27,12 @@
   [^StackTraceElement el]
   (.getClassName el))
 
-(def ^:private demunge-map
-  (into {"$" "/"} (map (fn [[k v]] [v k]) clojure.lang.Compiler/CHAR_MAP)))
-
-(def ^:private demunge-pattern
-  (re-pattern (apply str (interpose "|" (map #(.Replace % "_" "[_]")   ;;;     #(str "\\Q" % "\\E")
-                                             (keys demunge-map))))))
-
-(defn- re-replace [re s f]
-  (let [m (re-matcher re s)
-        mseq (take-while identity
-                         (repeatedly #(when (re-find m)
-                                        [(re-groups m) (.start m) (.end m)])))]
-    (apply str
-           (concat
-             (mapcat (fn [[_ _ start] [groups end]]
-                       (if end
-                         [(subs s start end) (f groups)]
-                         [(subs s start)]))
-                     (cons [0 0 0] mseq)
-                     (concat mseq [nil]))))))
-
 (defn demunge
   "Given a string representation of a fn class,
   as in a stack trace element, returns a readable version."
   {:added "1.3"}
   [fn-name]
-  (re-replace demunge-pattern fn-name demunge-map))
+  (clojure.lang.Compiler/demunge fn-name))
 
 (defn root-cause
   "Returns the initial cause of an exception or error by peeling off all of
@@ -114,6 +93,7 @@
              *print-length* *print-length*
              *print-level* *print-level*
 			 *data-readers* *data-readers*
+			 *default-data-reader-fn* *default-data-reader-fn*
              *compile-path* (or (Environment/GetEnvironmentVariable "CLOJURE_COMPILE_PATH") ".")  ;;;(System/getProperty "clojure.compile.path" "classes")
              *command-line-args* *command-line-args*
 			 *unchecked-math* *unchecked-math*
@@ -242,7 +222,7 @@ by default when a new command-line REPL is started."} repl-requires
          - else returns the next object read from the input stream
        default: repl-read
 
-     - :eval, funtion of one argument, returns the evaluation of its
+     - :eval, function of one argument, returns the evaluation of its
        argument
        default: eval
 

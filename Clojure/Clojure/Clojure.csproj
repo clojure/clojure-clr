@@ -40,7 +40,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\3.5\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CLR2</DefineConstants>
+    <DefineConstants>$(PlatformSym);TRACE;DEBUG;CLR2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -50,7 +50,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\3.5\Release\</OutputPath>
-    <DefineConstants>TRACE;CLR2</DefineConstants>
+    <DefineConstants>$(PlatformSym);TRACE;CLR2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -61,7 +61,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\4.0\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
+    <DefineConstants>$(PlatformSym);TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -71,7 +71,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\4.0\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>$(PlatformSym);TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
@@ -101,10 +101,10 @@
     </Reference>
     <Reference Include="Microsoft.Scripting.Metadata" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net35\Microsoft.Scripting.Metadata.dll</HintPath>
-    </Reference>	
+    </Reference>
     <Reference Include="Microsoft.Scripting.Core" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net35\Microsoft.Scripting.Core.dll</HintPath>
-    </Reference>	
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
@@ -119,6 +119,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="api\Clojure.cs" />
     <Compile Include="CljCompiler\Ast\IlGen.cs" />
     <Compile Include="CljCompiler\Ast\Intrinsics.cs" />
     <Compile Include="CljCompiler\Ast\CaseExpr.cs" />
@@ -128,6 +129,7 @@
     <Compile Include="Lib\IExceptionInfo.cs" />
     <Compile Include="Lib\IFnArity.cs" />
     <Compile Include="Lib\IFnClosure.cs" />
+    <Compile Include="Lib\Murmur3.cs" />
     <Compile Include="Lib\Reduced.cs" />
     <Compile Include="Lib\Task35.cs" />
     <Compile Include="Readers\PushbackInputStream.cs" />
@@ -372,6 +374,10 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="api\package.html" />
+    <Content Include="package.html" />
   </ItemGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>

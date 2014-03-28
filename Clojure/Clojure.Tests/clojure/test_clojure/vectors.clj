@@ -79,6 +79,11 @@
            vs-32 vs
            vs nil))))
 
+(deftest test-primitive-subvector-reduce
+  ;; regression test for CLJ-1082
+  (is (== 60 (let [prim-vec (into (vector-of :long) (range 1000))]
+               (reduce + (subvec prim-vec 10 15))))))
+
 (deftest test-vec-compare
   (let [nums      (range 1 100)
         ; randomly replaces a single item with the given value
@@ -322,7 +327,9 @@
            (vector-of ""))))
   (testing "vector-like (vector-of :type x1 x2 x3 … xn)"
     (are [vec gvec] (and (instance? clojure.core.Vec gvec)
-                         (= (into (vector-of :int) vec) gvec))
+                         (= (into (vector-of :int) vec) gvec)
+                         (= vec gvec)
+                         (= (hash vec) (hash gvec)))
          [1] (vector-of :int 1)
          [1 2] (vector-of :int 1 2)
          [1 2 3] (vector-of :int 1 2 3)

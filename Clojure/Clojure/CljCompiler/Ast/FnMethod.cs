@@ -375,7 +375,13 @@ namespace clojure.lang.CljCompiler.Ast
 
             string methodName = isStatic ? "invokeStatic" : "invokePrim";
 
-            MethodBuilder baseMB = tb.DefineMethod(methodName, attribs, GetReturnType(), _argTypes);
+            Type returnType;
+            if (_retType == typeof(double) || _retType == typeof(long))
+                returnType = GetReturnType();
+            else
+                returnType = typeof(object);
+
+            MethodBuilder baseMB = tb.DefineMethod(methodName, attribs, returnType, _argTypes);
 
             if ( ! isStatic )
                 SetCustomAttributes(baseMB);

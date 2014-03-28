@@ -19,8 +19,14 @@ namespace clojure.lang
     /// <summary>
     /// Represents an object that can be used a function.
     /// </summary>
-    public interface IFn // Callable, Runnable -- are there Java equivalents? -- 
-                         // there is a notion in DLR of an attribute to method when the object is used in a functional position.
+    /// <remarks>
+    /// <para>
+    /// <c>IFn</c> provides complete access to invoking
+    /// any of Clojure's <a href="http://clojure.github.io/clojure/">API</a>s.
+    /// You can also access any other library written in Clojure, after adding
+    /// either its source or compiled form to the classpath.</para>
+    /// </remarks>
+    public interface IFn // Callable, Runnable -- no equivalents
     {
         #region Invoke methods
 
