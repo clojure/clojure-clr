@@ -407,6 +407,22 @@ namespace clojure.lang
             List<MethodInfo> infos = new List<MethodInfo>(einfo);
             if (infos.Count() == 1)
                 return infos[0];
+            else if (getStatics && infos.Count > 1)
+            {
+                // static method with no arguments, multiple implementations.  Find closest to leaf in hierarchy.
+                Type d = infos[0].DeclaringType;
+                MethodInfo m = infos[0];
+                for (int i = 1; i < infos.Count; i++)
+                {
+                    Type d1 = infos[i].DeclaringType;
+                    if (d1.IsSubclassOf(d))
+                    {
+                        d = d1;
+                        m = infos[i];
+                    }
+                }
+                return m;
+            }
             else
                 return null;
         }

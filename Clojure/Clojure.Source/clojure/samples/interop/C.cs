@@ -154,4 +154,43 @@ namespace dm.interop
    
 
     }
+
+    public class ParentClass
+    {
+        public static string Create()
+        {
+            return "Parent create, no args";
+        }
+
+        public static string Create(string input)
+        {
+            return String.Format("Parent create, arg = {0}", input);
+        }
+    }
+
+    public class DerivedClass : ParentClass
+    {
+        public new static string Create()
+        {
+            return "Derived create, no args";
+        }
+
+        public new static string Create(string input)
+        {
+            return String.Format("Derived create, arg = {0}", input);
+        }
+
+        public static string Create2()
+        {
+            return "Derived create2, no args";
+        }
+
+        public static string Create2(string input)
+        {
+            return String.Format("Derived create2, arg = {0}", input);
+        }
+
+    }
+
+
 }
