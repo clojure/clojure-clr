@@ -42,8 +42,8 @@ namespace clojure.lang
                 return Numbers.hasheq(o);
 
             String s = o as string;
-            if (s != null )
-                return Murmur3.HashString(s);
+            if (s != null)
+                return Murmur3.HashInt(s.GetHashCode());
 
             return o.GetHashCode();
         }
