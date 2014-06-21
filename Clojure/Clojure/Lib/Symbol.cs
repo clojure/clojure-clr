@@ -43,6 +43,11 @@ namespace clojure.lang
         /// </summary>
         protected readonly int _hash;
 
+        /// <summary>
+        /// The cached hashcode.
+        /// </summary>
+        protected readonly int _hasheq;
+
         readonly IPersistentMap _meta;
 
         // cache ToString/ToStringEscaped if called
@@ -111,6 +116,7 @@ namespace clojure.lang
             _name = name_interned;
             _ns = ns_interned;
             _hash = ComputeHashCode();
+            _hasheq = ComputeHasheqCode();
         }
 
         /// <summary>
@@ -125,17 +131,26 @@ namespace clojure.lang
             _name = name_interned;
             _ns = ns_interned;
             _hash = ComputeHashCode();
+            _hasheq = ComputeHasheqCode();
         }
 
         /// <summary>
-        /// Compute the hash code for the symbol.
+        /// Compute the hasheq code for the symbol.
         /// </summary>
         /// <returns>The hash code.</returns>
-        private int ComputeHashCode()
+        private int ComputeHasheqCode()
         {
             return Util.hashCombine(Util.hasheq(_name),Util.hasheq(_ns));
         }
 
+        /// <summary>
+        /// Compute the hasheq code for the symbol.
+        /// </summary>
+        /// <returns>The hash code.</returns>
+        private int ComputeHashCode()
+        {
+            return Util.hashCombine(_name.GetHashCode(), Util.hash(_ns));
+        }
 
         /// <summary>
         /// Construct a Symbol during deserialization.

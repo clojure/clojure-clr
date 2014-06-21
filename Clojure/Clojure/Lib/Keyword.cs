@@ -33,9 +33,9 @@ namespace clojure.lang
         private readonly Symbol _sym;
 
         /// <summary>
-        /// Caches the hash value for the keyword.
+        /// Caches the hasheq value for the keyword.
         /// </summary>
-        readonly int _hash;
+        readonly int _hasheq;
 
         /// <summary>
         /// Map from symbol to keyword to uniquify keywords.
@@ -115,7 +115,7 @@ namespace clojure.lang
         private Keyword(Symbol sym)
         {
             _sym = sym;
-            _hash = (int)(_sym.GetHashCode() + 0x9e3779b9);
+            _hasheq = (int)(_sym.hasheq() + 0x9e3779b9);
         }
 
 
@@ -158,7 +158,7 @@ namespace clojure.lang
         /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
-            return _hash;
+            return (int)(_sym.GetHashCode() + 0x9e3779b9);
         }
 
         #endregion
@@ -354,7 +354,7 @@ namespace clojure.lang
 
         public int hasheq()
         {
-            return _hash;
+            return _hasheq;
         }
 
         #endregion
