@@ -140,7 +140,7 @@ namespace clojure.lang
         /// <returns>The hash code.</returns>
         private int ComputeHasheqCode()
         {
-            return Util.hashCombine(Util.hasheq(_name),Util.hasheq(_ns));
+            return Util.hashCombine(Murmur3.HashString(_name),Util.hasheq(_ns));
         }
 
         /// <summary>
