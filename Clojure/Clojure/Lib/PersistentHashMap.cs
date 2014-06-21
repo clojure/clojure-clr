@@ -557,7 +557,13 @@ namespace clojure.lang
             if (RT.isReduced(init))
                 return ((IDeref)init).deref();
             if (_root != null)
-                return _root.KVReduce(f, init);
+            {
+                init = _root.KVReduce(f, init);
+                if (RT.isReduced(init))
+                    return ((IDeref)init).deref();
+                else
+                    return init;
+            }
             return init;
         }
 
@@ -877,7 +883,7 @@ namespace clojure.lang
                     {
                         init = node.KVReduce(f, init);
                         if (RT.isReduced(init))
-                            return ((IDeref)init).deref();
+                            return init;
                     }
                 }
                 return init;
@@ -1642,7 +1648,7 @@ namespace clojure.lang
                             init = node.KVReduce(f, init);
                     }
                     if (RT.isReduced(init))
-                        return ((IDeref)init).deref();
+                        return init;
                 }
                 return init;
             }
