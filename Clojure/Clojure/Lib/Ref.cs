@@ -250,7 +250,7 @@ namespace clojure.lang
         {
             _id = _ids.getAndIncrement();
             _faults = new AtomicInteger();
-            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
             _tvals = new TVal(initval, 0);
         }
 

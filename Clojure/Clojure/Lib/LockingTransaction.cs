@@ -837,7 +837,7 @@ namespace clojure.lang
             if (_ensures.Contains(r))
                 return;
 
-            Lock(r);
+            r.EnterReadLock();
 
             // someone completed a write after our shapshot
             if (r.CurrentValPoint() > _readPoint)
