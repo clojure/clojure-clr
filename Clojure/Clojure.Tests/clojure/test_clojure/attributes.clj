@@ -7,7 +7,7 @@
 ;   You must not remove this notice, or any other, from this software.
 
 ;;  Original authors: Stuart Halloway, Rich Hickey
-;;  CLR-verision author: David Miller
+;;  CLR version author: David Miller
 
 (ns clojure.test-clojure.attributes
   (:use clojure.test)
@@ -78,6 +78,10 @@ Foo (^{     ObsoleteAttribute "abc"
            :extends clojure.lang.Box
            :constructors {^{ObsoleteAttribute "help"} [Object] [Object]}
            :init init
+		   :class-attributes {
+             ObsoleteAttribute "abc"
+             FileDialogPermissionAttribute SecurityAction/Demand
+			 FileIOPermissionAttribute #{ SecurityAction/Demand { :__args [SecurityAction/Deny] :Read "def" }}}
            :prefix "foo")
 
 (defn foo-init [obj]
@@ -90,9 +94,9 @@ Foo (^{     ObsoleteAttribute "abc"
                   attribute (get-custom-attributes ctor)]
               attribute))))
 
+(deftest test-attributes-on-genclass-class
+  (is (=
+       expected-attributes
+       (into #{} (map attribute->map (get-custom-attributes (clojure.lang.RT/classForName "foo.Bar")))))))
 
-
-
-    
-    
-	
+  
