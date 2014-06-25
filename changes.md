@@ -367,10 +367,21 @@ Leftover from Version 1.5 was the integration of test.generative. Done.
 * Fix bad numeric intrinsics definitions
 * Fix GetHashCode and GetEnumerator in clojure.lang.Vec
 * Fix PersistentQueue/GetEnumerator to handle empty queue
+* [CLJCLR-30](http://dev.clojure.org/jira/browse/CLJCLR-30)
+  invoking parameterless static with with 'new modifier does not find derived class method
+* [CLJCLR-31](http://dev.clojure.org/jira/browse/CLJCLR-31)
+  Fix locking mode on Ref and make ensure properly lock Ref
+* [CLJCLR-26](http://dev.clojure.org/jira/browse/CLJCLR-26)
+  In Compiler, put decl/init of _duplicateTypeMap berore FnOnceSym
+
 
 ## Enhancements
 
 * Add minimal Murmur3 hash implementation
+* [CLJCLR-27](http://dev.clojure.org/jira/browse/CLJCLR-27)
+  Allow attachment of attributes to gen-class'd class
+* [CLJCLR-29](http://dev.clojure.org/jira/browse/CLJCLR-29)
+  Add links to ClojureCLR ML, G+ community, JIRA, to the readme
 
 
 # Changes to Clojure in Version 1.5.1
