@@ -36,6 +36,24 @@ namespace clojure.lang
 
         #endregion
 
+        #region Duplicate types
+
+        static Dictionary<String, Type> _duplicateTypeMap = new Dictionary<string, Type>();
+
+        internal static void RegisterDuplicateType(Type type)
+        {
+            _duplicateTypeMap[type.FullName] = type;
+        }
+
+        internal static Type FindDuplicateType(string typename)
+        {
+            Type type;
+            _duplicateTypeMap.TryGetValue(typename, out type);
+            return type;
+        }
+
+        #endregion
+        
         #region Symbols
 
         public static readonly Symbol DefSym = Symbol.intern("def");
@@ -932,24 +950,6 @@ namespace clojure.lang
             // Keep everything after the last match
             sb.Append(mungedNamed.Substring(lastMatchEnd));
             return sb.ToString();
-        }
-
-        #endregion
-
-        #region Duplicate types
-
-        static Dictionary<String, Type> _duplicateTypeMap = new Dictionary<string, Type>();
-
-        internal static void RegisterDuplicateType(Type type)
-        {
-            _duplicateTypeMap[type.FullName] = type;
-        }
-
-        internal static Type FindDuplicateType(string typename)
-        {
-            Type type;
-            _duplicateTypeMap.TryGetValue(typename, out type);
-            return type;
         }
 
         #endregion

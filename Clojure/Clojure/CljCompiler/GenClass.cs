@@ -73,7 +73,8 @@ namespace clojure.lang
             string postInitName,
             string implCname,
             string implNamespace,
-            bool loadImplNamespace)
+            bool loadImplNamespace,
+            IPersistentMap attributes)
         {
             className = className.Replace('-', '_');
 
@@ -98,6 +99,8 @@ namespace clojure.lang
                 TypeAttributes.Class | TypeAttributes.Public,
                 superClass,
                 interfaceTypes.ToArray());
+
+            GenInterface.SetCustomAttributes(proxyTB, attributes);
 
             List<MethodSignature> sigs = GetAllSignatures(superClass,interfaceTypes,methods);
             Dictionary<string,List<MethodSignature>>  overloads = ComputeOverloads(sigs);

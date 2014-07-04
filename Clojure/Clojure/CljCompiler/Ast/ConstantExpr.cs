@@ -52,7 +52,14 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                return _v.GetType();
+                if (_v is APersistentMap)
+                    return typeof(APersistentMap);
+                else if (_v is APersistentSet)
+                    return typeof(APersistentSet);
+                else if (_v is APersistentVector)
+                    return typeof(APersistentVector);
+                else
+                    return _v.GetType();
             }
         }
 

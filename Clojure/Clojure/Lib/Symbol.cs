@@ -41,7 +41,7 @@ namespace clojure.lang
         /// <summary>
         /// The cached hashcode.
         /// </summary>
-        protected readonly int _hash;
+        protected int _hasheq = 0;
 
         readonly IPersistentMap _meta;
 
@@ -110,7 +110,6 @@ namespace clojure.lang
             _meta = null;
             _name = name_interned;
             _ns = ns_interned;
-            _hash = ComputeHashCode();
         }
 
         /// <summary>
@@ -124,18 +123,7 @@ namespace clojure.lang
             _meta = meta;
             _name = name_interned;
             _ns = ns_interned;
-            _hash = ComputeHashCode();
         }
-
-        /// <summary>
-        /// Compute the hash code for the symbol.
-        /// </summary>
-        /// <returns>The hash code.</returns>
-        private int ComputeHashCode()
-        {
-            return Util.hashCombine(Util.hasheq(_name),Util.hasheq(_ns));
-        }
-
 
         /// <summary>
         /// Construct a Symbol during deserialization.
@@ -148,8 +136,6 @@ namespace clojure.lang
 
             string nsStr = info.GetString("_ns");
             _ns = nsStr == null ? null : String.Intern(nsStr);
-
-            _hash = ComputeHashCode();
         }
 
         #endregion
@@ -216,7 +202,7 @@ namespace clojure.lang
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            return _hash;
+            return Util.hashCombine(_name.GetHashCode(), Util.hash(_ns));
         }
 
         #endregion
@@ -411,7 +397,11 @@ namespace clojure.lang
 
         public int hasheq()
         {
-            return _hash;
+            if (_hasheq == 0)
+            {
+                _hasheq = Util.hashCombine(Murmur3.HashString(_name), Util.hasheq(_ns));
+            }
+            return _hasheq;
         }
 
         #endregion

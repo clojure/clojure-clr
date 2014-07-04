@@ -139,7 +139,7 @@
 
 
 (deftest test-cons
-  (is (thrown? Exception (cons 1 2)))         ;;; Throwable
+  (is (thrown? ArgumentException (cons 1 2)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (cons 1 nil) '(1)
     (cons nil nil) '(nil)
@@ -243,14 +243,14 @@
 
 
 (deftest test-first
-;  (is (thrown? Exception (first)))            ;;; Throwable
-  (is (thrown? Exception (first true)))       ;;; Throwable
-  (is (thrown? Exception (first false)))      ;;; Throwable
-  (is (thrown? Exception (first 1)))          ;;; Throwable
-;  (is (thrown? Exception (first 1 2)))        ;;; Throwable
-  (is (thrown? Exception (first \a)))         ;;; Throwable
-  (is (thrown? Exception (first 's)))         ;;; Throwable
-  (is (thrown? Exception (first :k)))         ;;; Throwable
+;  (is (thrown? ArgumentException (first)))            ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first true)))       ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first false)))      ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first 1)))          ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (first 1 2)))        ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first \a)))         ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first 's)))         ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (first :k)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (first nil) nil
 
@@ -310,14 +310,14 @@
 
 
 (deftest test-next
-;  (is (thrown? Exception (next)))            ;;; Throwable
-  (is (thrown? Exception (next true)))       ;;; Throwable
-  (is (thrown? Exception (next false)))      ;;; Throwable
-  (is (thrown? Exception (next 1)))          ;;; Throwable
-;  (is (thrown? Exception (next 1 2)))        ;;; Throwable
-  (is (thrown? Exception (next \a)))         ;;; Throwable
-  (is (thrown? Exception (next 's)))         ;;; Throwable
-  (is (thrown? Exception (next :k)))         ;;; Throwable
+;  (is (thrown? ArgumentException (next)))            ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next true)))       ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next false)))      ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next 1)))          ;;; IllegalArgumentException
+;  (is (thrown? ArgumentException (next 1 2)))        ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next \a)))         ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next 's)))         ;;; IllegalArgumentException
+  (is (thrown? ArgumentException (next :k)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (next nil) nil
 
@@ -445,7 +445,7 @@
 ;; (ffirst coll) = (first (first coll))
 ;;
 (deftest test-ffirst
-;  (is (thrown? Exception (ffirst)))         ;;; Throwable
+;  (is (thrown? ArgumentException (ffirst)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (ffirst nil) nil
 
@@ -465,7 +465,7 @@
 ;; (fnext coll) = (first (next coll)) = (second coll)
 ;;
 (deftest test-fnext
-;  (is (thrown? Exception (fnext)))         ;;; Throwable
+;  (is (thrown? ArgumentException (fnext)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (fnext nil) nil
 
@@ -489,7 +489,7 @@
 ;; (nfirst coll) = (next (first coll))
 ;;
 (deftest test-nfirst
-;  (is (thrown? Exception (nfirst)))         ;;; Throwable
+;  (is (thrown? ArgumentException (nfirst)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (nfirst nil) nil
 
@@ -509,7 +509,7 @@
 ;; (nnext coll) = (next (next coll))
 ;;
 (deftest test-nnext
-;  (is (thrown? Exception (nnext)))         ;;; Throwable
+;  (is (thrown? ArgumentException (nnext)))         ;;; IllegalArgumentException
   (are [x y] (= x y)
     (nnext nil) nil
 
@@ -881,7 +881,7 @@
 
 
 (deftest test-repeat
-  ;(is (thrown? Exception (repeat)))         ;;; Throwable
+  ;(is (thrown? ArgumentException (repeat)))         ;;; IllegalArgumentException
 
   ; infinite sequence => use take
   (are [x y] (= x y)
