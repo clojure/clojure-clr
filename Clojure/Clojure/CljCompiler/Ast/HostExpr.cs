@@ -287,7 +287,7 @@ namespace clojure.lang.CljCompiler.Ast
                         return (Type)Compiler.CompileStubClassVar.get();
                     if (sym.Name.IndexOf('.') > 0 || sym.Name[sym.Name.Length - 1] == ']')  // Array.  JVM version detects [whatever  notation.
 
-                        t = RT.classForName(sym.Name);
+                        t = RT.classForNameE(sym.Name);
                     else
                     {
                         object o = Compiler.CurrentNamespace.GetMapping(sym);
@@ -310,7 +310,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
             else if (stringOk && form is string)
-                t = RT.classForName((string)form);
+                t = RT.classForNameE((string)form);
 
             return t;
         }

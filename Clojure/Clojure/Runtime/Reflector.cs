@@ -515,7 +515,7 @@ namespace clojure.lang
         // At the moment, only used by the LispReader
         public static Object InvokeStaticMethod(String typeName, String methodName, Object[] args)
         {
-            Type t = RT.classForName(typeName);
+            Type t = RT.classForNameE(typeName);
             return InvokeStaticMethod(t, methodName, args);
         }
 

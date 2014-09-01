@@ -443,7 +443,7 @@ namespace clojure.lang
                 return v;
             }
             else if (symbol.Name.IndexOf('.') > 0 || symbol.Name[symbol.Name.Length - 1] == ']')
-                return RT.classForName(symbol.Name);
+                return RT.classForNameE(symbol.Name);
             else if (symbol.Equals(NsSym))
                 return RT.NSVar;
             else if (symbol.Equals(InNsSym))
@@ -482,7 +482,7 @@ namespace clojure.lang
             }
             else if (symbol.Name.IndexOf('.') > 0 && !symbol.Name.EndsWith(".")
                 || symbol.Name[symbol.Name.Length - 1] == ']')              /// JAVA: symbol.Name[0] == '[')
-                return RT.classForName(symbol.Name);
+                return RT.classForNameE(symbol.Name);
             else if (symbol.Equals(NsSym))
                 return RT.NSVar;
             else if (symbol.Equals(InNsSym))

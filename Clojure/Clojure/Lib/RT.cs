@@ -2838,6 +2838,17 @@ namespace clojure.lang
 
             return t;
         }
+        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static Type classForNameE(string p)
+        {
+            Type t = classForName(p);
+            if (t == null)
+            {
+                throw new TypeNotFoundException(p);
+            }
+            return t;
+        }
 
         #endregion
 
