@@ -98,6 +98,10 @@ namespace clojure.lang
             FieldInfo field = GetField(t, fieldName, false);
             if (field != null)
             {
+                if (field.IsInitOnly)
+                {
+                    throw new InvalidOperationException(String.Format("Attempt to set readonly field {0} in class {1}", field.Name, field.DeclaringType));
+                }
                 field.SetValue(target, val);
                 return val;
             }
