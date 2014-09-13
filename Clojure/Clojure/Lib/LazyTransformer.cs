@@ -322,12 +322,12 @@ namespace clojure.lang
 
         public IEnumerator GetEnumerator()
         {
-            return new SeqEnumerator(seq());
+            return new SeqEnumerator(this);
         }
 
         IEnumerator<object> IEnumerable<object>.GetEnumerator()
         {
-            return new SeqEnumerator(seq());
+            return new SeqEnumerator(this);
         }
 
         #endregion
@@ -385,8 +385,12 @@ namespace clojure.lang
                 while (lt._stepper != null && _ie.MoveNext())
                 {
                     object item = _ie.Current;
-                    if ( RT.isReduced(_xform.invoke(lt,_ie.Current)))
+                    if (RT.isReduced(_xform.invoke(lt, _ie.Current)))
+                    {
+                        if (lt._rest != null)
+                            lt._rest._stepper = null;
                         break;
+                    }
                 }
                 if ( lt._stepper != null )
                     _xform.invoke(lt);
@@ -449,7 +453,11 @@ namespace clojure.lang
                 while (lt._stepper != null && MoveNext())
                 {
                     if (RT.isReduced(_xform.applyTo(RT.cons(lt, Current()))))
+                    {
+                        if (lt._rest != null)
+                            lt._rest._stepper = null;
                         break;
+                    }
                 }
                 if (lt._stepper != null)
                     _xform.invoke(lt);

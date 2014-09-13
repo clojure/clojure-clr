@@ -24,20 +24,13 @@ namespace clojure.lang
     {
         #region Data
        
-        /// <summary>
-        /// <value>true</value> if we have reached the end of the sequence.
-        /// </summary>
-        bool _isAtEnd;
+        private bool _isRealized;
+        private object _orig;
+        private object _curr;
+        private object _next;
 
-        /// <summary>
-        /// Current position in the sequence.
-        /// </summary>
-        private ISeq _seq;
+        static object _start = new object();
 
-        /// <summary>
-        /// The original sequence (for resetting).
-        /// </summary>
-        private ISeq _origSeq;
 
         #endregion
 
@@ -47,11 +40,12 @@ namespace clojure.lang
         /// Construct one from a given sequence.
         /// </summary>
         /// <param name="seq">The underlying sequence.</param>
-        public TypedSeqEnumerator(ISeq seq)
+        public TypedSeqEnumerator(object o)
         {
-            _origSeq = seq;
-            _isAtEnd = _origSeq == null;
-            _seq = null;
+            _isRealized = false;
+            _curr = _start;
+            _orig = o;
+            _next = o;
         }
 
         #endregion
@@ -65,10 +59,13 @@ namespace clojure.lang
         {
             get
             {
-                if (_isAtEnd || _seq == null)
+                if (_next == null  )
                     throw new InvalidOperationException("No current value.");
 
-                return _seq.first();
+                if (_curr == _start)
+                    _curr = RT.first(_next);
+
+                return _curr;
             }
         }
 
@@ -79,24 +76,30 @@ namespace clojure.lang
         /// <value>false</value> if the sequence is already at the end.</returns>
         public bool MoveNext()
         {
-            if (_isAtEnd || _origSeq == null)
+            if (_next == null )
                 return false;
 
-            if (_seq == null)
-                _seq = _origSeq;
-            else
+            if (! _isRealized)
             {
-                _seq = _seq.next();
-                if (_seq == null)
-                    _isAtEnd = true;
+                _curr = _start;
+                _isRealized = true;
+                _next = RT.seq(_next);
             }
-            return !_isAtEnd;
+            else 
+            {
+                _curr = _start;
+                _next = RT.next(_next);
+            }
+            
+            return _next != null;
         }
 
         public void Reset()
         {
-            _isAtEnd = _origSeq == null;
-            _seq = null;
+            // TODO: Fix this -- we already realized this.
+            _isRealized = false;
+            _curr = _start;
+            _next = _orig;
         }
 
         public void Dispose()
@@ -107,8 +110,9 @@ namespace clojure.lang
 
         private void Dispose(bool disposing)
         {
-            _origSeq = null;
-            _seq = null;
+            _orig = null;
+            _curr = null;
+            _next = null;
         }
 
         T IEnumerator<T>.Current
@@ -131,7 +135,7 @@ namespace clojure.lang
         /// Construct one from a given sequence.
         /// </summary>
         /// <param name="seq">The underlying sequence.</param>
-        public SeqEnumerator(ISeq seq)
+        public SeqEnumerator(object seq)
             :base(seq)
         {
         }
