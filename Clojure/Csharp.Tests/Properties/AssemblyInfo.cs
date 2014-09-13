@@ -8,9 +8,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Csharp.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("DePaul University")]
 [assembly: AssemblyProduct("Csharp.Tests")]
-[assembly: AssemblyCopyright("Copyright © DePaul University 2012")]
+[assembly: AssemblyCopyright("Copyright © 2009-14")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

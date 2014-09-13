@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Clojure.Main")]
-[assembly: AssemblyCopyright("Copyright © 2009-13")]
+[assembly: AssemblyCopyright("Copyright © 2009-14")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

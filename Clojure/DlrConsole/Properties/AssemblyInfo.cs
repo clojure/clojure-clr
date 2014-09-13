@@ -8,9 +8,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("DlrConsole")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("DePaul University")]
 [assembly: AssemblyProduct("DlrConsole")]
-[assembly: AssemblyCopyright("Copyright © DePaul University 2011")]
+[assembly: AssemblyCopyright("Copyright © 2009-14")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
