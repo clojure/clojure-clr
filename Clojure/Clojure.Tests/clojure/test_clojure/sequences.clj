@@ -1165,3 +1165,21 @@
   (is (= (count (shuffle [1 2 3 4])) 4))
   (let [shuffled-seq (shuffle [1 2 3 4])]
     (is (every? #{1 2 3 4} shuffled-seq))))
+
+(deftest test-ArrayIter
+  (are [arr expected]
+    (let [iter (clojure.lang.ArrayIter/createFromObject arr)]
+      (loop [accum []]
+        (if (.MoveNext iter)                                     ;;; .hasNext
+          (recur (conj accum (.Current iter)))                   ;;; .next
+          (is (= expected accum)))))
+    nil []
+    (object-array ["a" "b" "c"]) ["a" "b" "c"]
+    (boolean-array [false true false]) [false true false]
+    (byte-array [1 2]) [(byte 1) (byte 2)]
+    (short-array [1 2]) [1 2]
+    (int-array [1 2]) [1 2]
+    (long-array [1 2]) [1 2]
+    (float-array [2.0 -2.5]) [2.0 -2.5]
+    (double-array [1.2 -3.5]) [1.2 -3.5]
+    (char-array [\H \i]) [\H \i]))

@@ -750,7 +750,9 @@ namespace clojure.lang
             if (str != null)
                 return StringIterator(str).GetEnumerator();
 
-            // JVM TODO: something better for arrays
+            if (coll.GetType().IsArray)
+                return ArrayIter.createFromObject(coll);
+
             return iter(seq(coll));
         }
 

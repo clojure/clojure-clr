@@ -341,6 +341,7 @@ namespace clojure.lang
 
         #endregion
 
+        #region steppers
 
         public interface IStepper
         {
@@ -453,6 +454,8 @@ namespace clojure.lang
                 if (lt._stepper != null)
                     _xform.invoke(lt);
             }
-		}            
+        }
+
+        #endregion
     }
 }
