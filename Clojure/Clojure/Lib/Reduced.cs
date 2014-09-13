@@ -16,7 +16,7 @@ using System;
 
 namespace clojure.lang
 {
-    public class Reduced : IDeref
+    public sealed class Reduced : IDeref
     {
         Object _val;
 

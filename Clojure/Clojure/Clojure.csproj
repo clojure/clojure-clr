@@ -129,6 +129,7 @@
     <Compile Include="Lib\IExceptionInfo.cs" />
     <Compile Include="Lib\IFnArity.cs" />
     <Compile Include="Lib\IFnClosure.cs" />
+    <Compile Include="Lib\LazyTransformer.cs" />
     <Compile Include="Lib\Murmur3.cs" />
     <Compile Include="Lib\Reduced.cs" />
     <Compile Include="Lib\Task35.cs" />
