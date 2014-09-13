@@ -29,13 +29,11 @@ namespace clojure.lang
         /// <summary>
         /// The name of the namespace for this symbol (if namespace-qualified).
         /// </summary>
-        /// <remarks>This string must be interned.</remarks>
         protected readonly  string _ns;
 
         /// <summary>
         /// The name of the symbol.
         /// </summary>
-        /// <remarks>This string must be interned.</remarks>
         protected readonly string _name;
 
         /// <summary>
@@ -81,7 +79,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "intern")]
         static public Symbol intern(string ns, string name)
         {
-            return new Symbol(ns == null ? null : String.Intern(ns), String.Intern(name));
+            return new Symbol(ns, name);
         }
 
         /// <summary>
@@ -94,9 +92,9 @@ namespace clojure.lang
         {
             int i = nsname.IndexOf('/');
             return i == -1 || nsname.Equals("/")
-                ? new Symbol(null, String.Intern(nsname))
-                : new Symbol(String.Intern(nsname.Substring(0, i)),
-                             String.Intern(nsname.Substring(i + 1)));
+                ? new Symbol(null, nsname)
+                : new Symbol(nsname.Substring(0, i),
+                             nsname.Substring(i + 1));
         }
 
         /// <summary>
@@ -151,7 +149,7 @@ namespace clojure.lang
             if (_str == null)
             {
                 if (_ns != null)
-                    _str = String.Intern(_ns + "/" + _name);
+                    _str = _ns + "/" + _name;
                 else
                     _str = _name;
             }
@@ -168,7 +166,7 @@ namespace clojure.lang
             if (_strEsc == null)
             {
                 if (_ns != null)
-                    _strEsc = String.Intern(NameMaybeEscaped(_ns) + "/" + NameMaybeEscaped(_name));
+                    _strEsc = NameMaybeEscaped(_ns) + "/" + NameMaybeEscaped(_name);
                 else
                     _strEsc = NameMaybeEscaped(_name);
 
@@ -192,8 +190,7 @@ namespace clojure.lang
             if (ReferenceEquals(sym,null))
                 return false;
 
-            // interned strings, use identity compare
-            return (Object.ReferenceEquals(Name,sym.Name) && (Object.ReferenceEquals(Namespace,sym.Namespace)));
+            return Util.equals(_ns, sym._ns) && _name.Equals(sym._name);
         }
 
         /// <summary>
