@@ -73,11 +73,17 @@ namespace clojure.lang
 
         public override bool Equals(object obj)
         {
-            ISeq s = seq();
-            if (s != null)
-                return s.equiv(obj);
-            else
-                return (obj is Sequential || obj is IList) && RT.seq(obj) == null;
+            if (this == obj)
+                return true;
+            if (!(obj is Sequential || obj is IList))
+                return false;
+            ISeq ms = RT.seq(obj);
+            for (ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
+            {
+                if (ms == null || !Util.equiv(s.first(), ms.first()))
+                    return false;
+            }
+            return ms == null;
         }
 
         #endregion
@@ -128,7 +134,17 @@ namespace clojure.lang
 
         public bool equiv(object o)
         {
-            return Equals(o);
+            if (this == o)
+                return true;
+            if (!(o is Sequential || o is IList))
+                return false;
+            ISeq ms = RT.seq(o);
+            for (ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
+            {
+                if (ms == null || !Util.equiv(s.first(), ms.first()))
+                    return false;
+            }
+            return ms == null;
         }
 
         #endregion
@@ -141,7 +157,7 @@ namespace clojure.lang
                 seq();
             if (_rest == null)
                 return null;
-            return _rest;
+            return _first;
         }
 
         public ISeq next()
@@ -384,7 +400,6 @@ namespace clojure.lang
             {
                 while (lt._stepper != null && _ie.MoveNext())
                 {
-                    object item = _ie.Current;
                     if (RT.isReduced(_xform.invoke(lt, _ie.Current)))
                     {
                         if (lt._rest != null)

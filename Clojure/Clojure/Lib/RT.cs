@@ -734,17 +734,17 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IEnumerator iter(Object coll)
         {
-            IEnumerable able = coll as IEnumerable;
-            if (able != null)
-                return able.GetEnumerator();
- 
             if (coll == null)
                 return NullIterator().GetEnumerator();
 
             // handled by IEnumerable case above
-            //IDictionary dict = coll as IDictionary;
-            //if (dict != null)
-            //    return dict.GetEnumerator();
+            IDictionary dict = coll as IDictionary;
+            if (dict != null)
+                return dict.GetEnumerator();
+
+            IEnumerable able = coll as IEnumerable;  // reordered
+            if (able != null)
+                return able.GetEnumerator();
 
             string str = coll as string;
             if (str != null)
