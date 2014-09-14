@@ -38,3 +38,18 @@
           b (reify Object (GetHashCode [_] 42))]                                           ;;; hashCode
       (is (= (-> #{a b} transient (disj! a) persistent! (conj a))
             (-> #{a b} transient (disj! a) persistent! (conj a)))))))
+
+(deftest transient-mod-after-persistent
+  (let [v [1 2 3]
+        t (transient v)
+        t2 (conj! t 4)
+        p (persistent! t2)]
+    (is (= [1 2 3 4] p))
+    (is (thrown? InvalidOperationException (conj! t2 5)))))             ;;; IllegalAccessError
+
+(deftest transient-mod-ok-across-threads
+  (let [v [1 2 3]
+        t (transient v)
+        t2 @(future (conj! t 4))
+        p (persistent! t2)]
+   (is (= [1 2 3 4] p))))
