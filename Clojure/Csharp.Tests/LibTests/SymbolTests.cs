@@ -53,23 +53,6 @@ namespace Clojure.Tests.LibTests
             Expect(sym.meta(), Null);
         }
 
-        [Test]
-        public void Intern2InternsStrings()
-        {
-            String symname = new StringBuilder().Append("ab").Append("c").ToString();
-            String nsname  = new StringBuilder().Append("ab").Append("c").ToString();
-
-            Symbol sym1 = Symbol.intern(nsname,symname);
-            Symbol sym2 = Symbol.intern(nsname,symname);
-
-            Expect(String.IsInterned(sym1.Name),Not.Null);
-            Expect(String.IsInterned(sym1.Namespace), Not.Null);
-            Expect(Object.ReferenceEquals(sym1.Name, sym2.Name));
-            Expect(Object.ReferenceEquals(sym1.Namespace, sym2.Namespace));
-            Expect(object.ReferenceEquals(sym1.Name, symname), False);
-        }
-
-
 
         [Test]
         public void Intern1CreatesSymbolWithNoNS()
@@ -89,31 +72,6 @@ namespace Clojure.Tests.LibTests
             Expect(sym.Name, EqualTo("abc"));
             Expect(sym.Namespace, EqualTo("def"));
             Expect(sym.meta(), Null);
-        }
-
-
-        //[Test]
-        //public void Intern1CreatesSymbolWithNSFromLastSlash()
-        //{
-        //    Symbol sym = Symbol.intern("ghi/def/abc");
-
-        //    Expect(sym.Name, EqualTo("abc"));
-        //    Expect(sym.Namespace, EqualTo("ghi/def"));
-        //    Expect(sym.meta(), Null);
-        //}
-
-        [Test]
-        public void Intern1InternsStrings()
-        {
-            String name = new StringBuilder().Append("def/").Append("abc").ToString();
-
-            Symbol sym1 = Symbol.intern(name);
-            Symbol sym2 = Symbol.intern(name);
-
-            Expect(String.IsInterned(sym1.Name), Not.Null);
-            Expect(String.IsInterned(sym1.Namespace), Not.Null);
-            Expect(Object.ReferenceEquals(sym1.Name, sym2.Name));
-            Expect(Object.ReferenceEquals(sym1.Namespace, sym2.Namespace));
         }
 
         #endregion

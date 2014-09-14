@@ -218,6 +218,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected override void EmitSet(CljILGen ilg)
         {
+            if ( _tinfo.IsInitOnly )
+            {
+                throw new InvalidOperationException(String.Format("Attempt to set readonly field {0} in class {1}", _tinfo.Name, _tinfo.DeclaringType));
+            }
             ilg.MaybeEmitVolatileOp(_tinfo);
             ilg.EmitFieldSet(_tinfo);
         }
@@ -230,6 +234,12 @@ namespace clojure.lang.CljCompiler.Ast
         {
             object target = _target.Eval();
             object e = val.Eval();
+
+            if (_tinfo.IsInitOnly)
+            {
+                throw new InvalidOperationException(String.Format("Attempt to set readonly field {0} in class {1}", _tinfo.Name, _targetType));
+            }
+
             _tinfo.SetValue(target, e);
             return e;
         }

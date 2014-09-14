@@ -720,6 +720,42 @@ namespace clojure.lang
             throw new ArgumentException("Don't know how to create ISeq from: " + coll.GetType().FullName);
         }
 
+        static IEnumerable NullIterator()
+        {
+            yield break;
+        }
+
+        static IEnumerable StringIterator(string str)
+        {
+            for (int i = 0; i < str.Length; i++)
+                yield return str[i];
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static IEnumerator iter(Object coll)
+        {
+            if (coll == null)
+                return NullIterator().GetEnumerator();
+
+            // handled by IEnumerable case above
+            IDictionary dict = coll as IDictionary;
+            if (dict != null)
+                return dict.GetEnumerator();
+
+            IEnumerable able = coll as IEnumerable;  // reordered
+            if (able != null)
+                return able.GetEnumerator();
+
+            string str = coll as string;
+            if (str != null)
+                return StringIterator(str).GetEnumerator();
+
+            if (coll.GetType().IsArray)
+                return ArrayIter.createFromObject(coll);
+
+            return iter(seq(coll));
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object seqOrElse(object o)
         {
@@ -2836,6 +2872,17 @@ namespace clojure.lang
             if (t == null && p.IndexOfAny(_triggerTypeChars) != -1)
                 t = ClrTypeSpec.GetTypeFromName(p);
 
+            return t;
+        }
+        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static Type classForNameE(string p)
+        {
+            Type t = classForName(p);
+            if (t == null)
+            {
+                throw new TypeNotFoundException(p);
+            }
             return t;
         }
 

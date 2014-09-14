@@ -1528,7 +1528,7 @@ namespace clojure.lang
                 Object o = read(r, true, null, true);
                 if (o is Symbol  )
                 {
-                    return RT.classForName(o.ToString());
+                    return RT.classForNameE(o.ToString());
                 }
                 else if (o is IPersistentList)
                 {
@@ -1545,7 +1545,7 @@ namespace clojure.lang
                         //return Reflector.InvokeConstructor(RT.classForName(fs.Name.Substring(0, fs.Name.Length - 1)), args);
                         // I think the JVM code is wrong here
                         string s = fs.ToString();
-                        return Reflector.InvokeConstructor(RT.classForName(s.Substring(0, s.Length - 1)), args);
+                        return Reflector.InvokeConstructor(RT.classForNameE(s.Substring(0, s.Length - 1)), args);
                     }
                     if (Compiler.NamesStaticMember(fs))
                     {
@@ -1610,7 +1610,7 @@ namespace clojure.lang
                 if (!readeval)
                     throw new InvalidOperationException("Record construction syntax can only be used when *read-eval* == true ");
 
-                Type recordType = RT.classForName(recordName.ToString());
+                Type recordType = RT.classForNameE(recordName.ToString());
 
                 char endch;
                 bool shortForm = true;

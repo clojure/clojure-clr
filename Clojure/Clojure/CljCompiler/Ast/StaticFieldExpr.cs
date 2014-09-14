@@ -166,6 +166,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override object EvalAssign(Expr val)
         {
+            if (_tinfo.IsInitOnly)
+            {
+                throw new InvalidOperationException(String.Format("Attempt to set readonly static field {0} in class {1}", _tinfo.Name, _tinfo.DeclaringType));
+            }
+
             object e = val.Eval();
             _tinfo.SetValue(null, e);
             return e;
@@ -173,6 +178,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void EmitAssign(RHC rhc, ObjExpr objx, CljILGen ilg, Expr val)
         {
+            if (_tinfo.IsInitOnly)
+            {
+                throw new InvalidOperationException(String.Format("Attempt to set readonly static field {0} in class {1}", _tinfo.Name, _tinfo.DeclaringType));
+            }
+
             GenContext.EmitDebugInfo(ilg, _spanMap);
 
             val.Emit(RHC.Expression, objx, ilg);

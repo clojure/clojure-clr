@@ -65,15 +65,18 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Keyword intern(Symbol sym)
         {
-            if (sym.meta() != null)
-                sym = (Symbol)sym.withMeta(null);
-            // TODO: Analyze this code for improvements
-            Keyword k = new Keyword(sym);
-            //Keyword existing = _symKeyMap.PutIfAbsent(sym, k);
-            //return existing == null ? k : existing;
-            WeakReference wr = new WeakReference(k);
-            wr.Target = k;
-            WeakReference existingRef = _symKeyMap.PutIfAbsent(sym, wr);
+            Keyword k = null;
+            WeakReference existingRef = _symKeyMap.Get(sym);
+            if (existingRef == null)
+            {
+                if (sym.meta() != null)
+                    sym = (Symbol)sym.withMeta(null);
+                k = new Keyword(sym);
+
+                WeakReference wr = new WeakReference(k);
+                wr.Target = k;
+                existingRef = _symKeyMap.PutIfAbsent(sym, wr);
+            }
             if (existingRef == null)
                 return k;
             Keyword existingk = (Keyword)existingRef.Target;
@@ -130,7 +133,7 @@ namespace clojure.lang
         public override string ToString()
         {
             if (_str == null)
-                _str = String.Intern(":" + _sym.ToString());
+                _str = ":" + _sym.ToString();
             return _str;
         }
 

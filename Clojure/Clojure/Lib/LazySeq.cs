@@ -326,12 +326,12 @@ namespace clojure.lang
 
         public IEnumerator<object> GetEnumerator()
         {
-            return new SeqEnumerator(seq());
+            return new SeqEnumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new SeqEnumerator(seq());
+            return new SeqEnumerator(this);
         }
 
         #endregion

@@ -401,7 +401,7 @@ namespace clojure.lang
 
         public IEnumerator<object> GetEnumerator()
         {
-            return new SeqEnumerator(seq());
+            return new SeqEnumerator(this);
         }
 
         /// <summary>
@@ -410,7 +410,7 @@ namespace clojure.lang
         /// <returns>A <see cref="SeqEnumerator">SeqEnumerator</see> that iterates through the sequence.</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new SeqEnumerator(seq());
+            return new SeqEnumerator(this);
         }
 
         #endregion

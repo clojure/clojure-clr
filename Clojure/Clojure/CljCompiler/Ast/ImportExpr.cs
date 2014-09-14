@@ -65,7 +65,7 @@ namespace clojure.lang.CljCompiler.Ast
         public object Eval()
         {
             Namespace ns = (Namespace)RT.CurrentNSVar.deref();
-            ns.importClass(RT.classForName(_c));
+            ns.importClass(RT.classForNameE(_c));
             return null;
         }
 

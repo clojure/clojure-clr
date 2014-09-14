@@ -8,9 +8,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Csharp.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("DePaul University")]
 [assembly: AssemblyProduct("Csharp.Tests")]
-[assembly: AssemblyCopyright("Copyright © DePaul University 2012")]
+[assembly: AssemblyCopyright("Copyright © 2009-14")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,4 +31,4 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.6.0")]
+[assembly: AssemblyVersion("1.7.0")]
