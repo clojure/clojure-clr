@@ -13,13 +13,9 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.IO;
 using clojure.lang;
-using System.Collections;
-using System.Diagnostics;
 
 namespace BootstrapCompile
 {
@@ -44,26 +40,12 @@ namespace BootstrapCompile
             string mathVal = Environment.GetEnvironmentVariable(UNCHECKED_MATH_PROP);
             bool uncheckedMath = mathVal == null ? false : mathVal.Equals("true");
 
-            object compilerOptions = null;
-            foreach (DictionaryEntry kv in Environment.GetEnvironmentVariables())
-            {
-                String name = (String)kv.Key;
-                String v = (String)kv.Value;
-                if ( name.StartsWith("CLOJURE_COMPILER_") )
-                {
-                    compilerOptions = RT.assoc(compilerOptions
-                        ,RT.keyword(null,name.Substring(1+name.LastIndexOf('_')))
-                        ,RT.readString(v));
-                }
-            }
-
             try
             {
                 Var.pushThreadBindings(RT.map(
                     Compiler.CompilePathVar, path,
                     RT.WarnOnReflectionVar, warnOnReflection,
-                    RT.UncheckedMathVar, uncheckedMath,
-                    Compiler.CompilerOptionsVar, compilerOptions
+                    RT.UncheckedMathVar, uncheckedMath
                     ));
 
                 Stopwatch sw = new Stopwatch();

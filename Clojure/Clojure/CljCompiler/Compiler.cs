@@ -191,12 +191,32 @@ namespace clojure.lang
         internal static readonly Var CompilerContextVar = Var.create(null).setDynamic();
         internal static readonly Var CompilerActiveVar = Var.create(false).setDynamic();
 
-        public static readonly Var CompilerOptionsVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-            Symbol.intern("*compiler-options*"), null).setDynamic();
+        public static Var CompilerOptionsVar;
 
         public static object GetCompilerOption(Keyword k)
         {
             return RT.get(CompilerOptionsVar.deref(), k);
+        }
+
+        static void InitializeCompilerOptions()
+        {
+            Object compilerOptions = null;
+
+            foreach (DictionaryEntry de in Environment.GetEnvironmentVariables())
+            {
+                string name = (string)de.Key;
+                string v = (string)de.Value;
+                if (name.StartsWith("CLOJURE_COMPILER_"))
+                {
+                    compilerOptions = RT.assoc(compilerOptions,
+                        RT.keyword(null, name.Substring(1 + name.LastIndexOf("_"))),
+                        RT.readString(v));
+                }
+
+            }
+
+            CompilerOptionsVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
+                Symbol.intern("*compiler-options*"), compilerOptions).setDynamic();
         }
 
         public static object ElideMeta(object m)
@@ -342,6 +362,8 @@ namespace clojure.lang
             types[Compiler.MaxPositionalArity] = typeof(object[]);
             Methods_IFn_invoke[Compiler.MaxPositionalArity + 1]
                 = typeof(IFn).GetMethod("invoke", types);
+
+            InitializeCompilerOptions();
         }
 
         #endregion
