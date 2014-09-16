@@ -271,12 +271,7 @@ namespace clojure.lang
             if (targetFn != null)
                 return targetFn;
 
-            targetFn = FindAndCacheBestMethod(dispatchVal);
-            if (targetFn != null)
-                return targetFn;
-
-            targetFn = (IFn)MethodTable.valAt(_defaultDispatchVal);
-            return targetFn;
+            return FindAndCacheBestMethod(dispatchVal);
         }
 
         private IFn GetFn(object dispatchVal)
@@ -295,13 +290,13 @@ namespace clojure.lang
         private IFn FindAndCacheBestMethod(object dispatchVal)
         {
             _rw.EnterWriteLock();
-            IMapEntry bestEntry;
+            object bestValue;
             IPersistentMap mt = _methodTable;
             IPersistentMap pt = _preferTable;
             object ch = _cachedHierarchy;
             try
             {
-                bestEntry = null;
+                IMapEntry bestEntry = null;
 
                 foreach (IMapEntry me in MethodTable)
                 {
@@ -315,7 +310,13 @@ namespace clojure.lang
                     }
                 }
                 if (bestEntry == null)
-                    return null;
+                {
+                    bestValue = _methodTable.valAt(_defaultDispatchVal);
+                    if (bestValue == null)
+                        return null;
+                }
+                else
+                    bestValue = bestEntry.val();
             }
             finally
             {
@@ -332,8 +333,8 @@ namespace clojure.lang
                     && _cachedHierarchy == _hierarchy.deref())
                 {
                     // place in cache
-                    _methodCache = _methodCache.assoc(dispatchVal, bestEntry.val());
-                    return (IFn)bestEntry.val();
+                    _methodCache = _methodCache.assoc(dispatchVal, bestValue);
+                    return (IFn)bestValue;
                 }
                 else
                 {
