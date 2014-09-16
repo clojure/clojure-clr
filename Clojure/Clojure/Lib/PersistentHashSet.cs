@@ -48,10 +48,10 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static PersistentHashSet create(params object[] init)
         {
-            PersistentHashSet ret = EMPTY;
+            ITransientSet ret = (ITransientSet)EMPTY.asTransient();
             for (int i = 0; i < init.Length; ++i)
-                ret = (PersistentHashSet)ret.cons(init[i]);
-            return ret;
+                ret = (ITransientSet)ret.conj(init[i]);
+            return (PersistentHashSet)ret.persistent();
         }
 
         /// <summary>
@@ -64,10 +64,10 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static PersistentHashSet create(IList init)
         {
-            PersistentHashSet ret = EMPTY;
+            ITransientSet ret = (ITransientSet)EMPTY.asTransient();
             foreach (object obj in init)
-                ret = (PersistentHashSet)ret.cons(obj);
-            return ret;
+                ret = (ITransientSet)ret.conj(obj);
+            return (PersistentHashSet)ret.persistent();
         }
 
         /// <summary>
@@ -78,10 +78,10 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static PersistentHashSet create(ISeq items)
         {
-            PersistentHashSet ret = EMPTY;
+            ITransientSet ret = (ITransientSet)EMPTY.asTransient(); 
             for (; items != null; items = items.next())
-                ret = (PersistentHashSet)ret.cons(items.first());
-            return ret;
+                ret = (ITransientSet)ret.conj(items.first());
+            return (PersistentHashSet)ret.persistent();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
