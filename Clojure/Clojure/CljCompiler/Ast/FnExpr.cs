@@ -91,7 +91,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                return typeof(AFunction);
+                return _tag != null ? HostExpr.TagToType(_tag) : typeof(AFunction);
             }
         }
 

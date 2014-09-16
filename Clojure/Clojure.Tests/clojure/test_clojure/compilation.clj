@@ -242,3 +242,17 @@
   munge-roundtrip
   [^{:tag clojure.test-clojure.compilation/gen-name} n]
   (assert (= n %)))
+  
+(deftest test-fnexpr-type-hint
+  (testing "CLJ-1378: FnExpr should be allowed to override its reported class with a type hint."
+    ;;;(is (thrown? Compiler$CompilerException
+    ;;;             (load-string "(.submit (java.util.concurrent.Executors/newCachedThreadPool) #())")))
+    ;;;(is (try (load-string "(.submit (java.util.concurrent.Executors/newCachedThreadPool) ^Runnable #())")
+    ;;;         (catch Compiler$CompilerException e nil))))
+	(is (thrown? Microsoft.Scripting.ArgumentTypeException
+	             (try (load-string "(System.Threading.Thread. #())")
+				   (catch Compiler+CompilerException e (throw (.InnerException e))))))
+	(is (thrown? InvalidCastException
+	             (try (load-string "(System.Threading.Thread. ^System.Threading.ThreadStart #())") 
+				   (catch Compiler+CompilerException e (throw (.InnerException e))))))			   	 
+			 ))
