@@ -87,42 +87,42 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static PersistentHashSet createWithCheck(params object[] init)
         {
-            PersistentHashSet ret = EMPTY;
+            ITransientSet ret = (ITransientSet)EMPTY.asTransient(); 
             for (int i = 0; i < init.Length; i++)
             {
-                ret = (PersistentHashSet)ret.cons(init[i]);
+                ret = (ITransientSet)ret.conj(init[i]);
                 if (ret.count() != i + 1)
                     throw new ArgumentException("Duplicate key: " + init[i]);
             }
-            return ret;
+            return (PersistentHashSet)ret.persistent();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static PersistentHashSet createWithCheck(IList init)
         {
-            PersistentHashSet ret = EMPTY;
+            ITransientSet ret = (ITransientSet)EMPTY.asTransient(); 
             int i = 0;
             foreach (Object key in init)
             {
-                ret = (PersistentHashSet)ret.cons(key);
+                ret = (ITransientSet)ret.conj(key);
                 if (ret.count() != i + 1)
                     throw new ArgumentException("Duplicate key: " + key);
                 ++i;
             }
-            return ret;
+            return (PersistentHashSet)ret.persistent();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static PersistentHashSet createWithCheck(ISeq items)
         {
-            PersistentHashSet ret = EMPTY;
+            ITransientSet ret = (ITransientSet)EMPTY.asTransient(); 
             for (int i = 0; items != null; items = items.next(), ++i)
             {
-                ret = (PersistentHashSet)ret.cons(items.first());
+                ret = (ITransientSet)ret.conj(items.first());
                 if (ret.count() != i + 1)
                     throw new ArgumentException("Duplicate key: " + items.first());
             }
-            return ret;
+            return (PersistentHashSet)ret.persistent();
         }
 
 
