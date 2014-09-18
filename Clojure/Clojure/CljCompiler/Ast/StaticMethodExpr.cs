@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 
 
@@ -34,6 +35,29 @@ namespace clojure.lang.CljCompiler.Ast
         {
             _type = type;
             _method  = Reflector.GetMatchingMethod(spanMap, _type, _args, _methodName, typeArgs);
+            if ( _method != null && RT.booleanCast(RT.UncheckedMathVar.deref()) && IsBoxedMath(_method))
+            {
+                RT.errPrintWriter().WriteLine("Boxed math warning, {0}:{1}:{2} - call {3}.",
+                    Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap), _method.ToString());
+            }
+        }
+
+        public static bool IsBoxedMath(MethodInfo m)
+        {
+            Type t = m.DeclaringType;
+            if ( t == typeof(Numbers))
+            {
+                object[] boxedMaths = m.GetCustomAttributes(typeof(WarnBoxedMathAttribute), true);
+                if (boxedMaths.Length > 0)
+                    return ((WarnBoxedMathAttribute)boxedMaths[0]).Value;
+
+                ParameterInfo[] pis = ((MethodBase)m).GetParameters();
+                foreach (ParameterInfo param in pis)
+                    if (param.ParameterType.Equals(typeof(object)) )
+                        return true;
+            }
+
+            return false;
         }
 
         #endregion

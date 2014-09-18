@@ -135,6 +135,7 @@
     <Compile Include="Lib\Reduced.cs" />
     <Compile Include="Lib\Task35.cs" />
     <Compile Include="Lib\TypeNotFoundException.cs" />
+    <Compile Include="Lib\WarnBoxedMathAttribute.cs" />
     <Compile Include="Readers\PushbackInputStream.cs" />
     <Compile Include="Runtime\Binding\BindingHelpers.cs" />
     <Compile Include="Runtime\Binding\ClojureOverloadResolver.cs" />
