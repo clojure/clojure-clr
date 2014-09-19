@@ -91,6 +91,7 @@
       (sequence (map inc) (range 10)) (range 1 11)
       (range 1 11) (sequence (map inc) (range 10))))
 
+
 (deftest test-lazy-seq
   (are [x] (seq? x)
       (lazy-seq nil)
@@ -1151,6 +1152,21 @@
 [1 3 6 10 15]))
   (is (= (reductions + 10 [1 2 3 4 5])
 [10 11 13 16 20 25])))
+
+(deftest test-reductions-obeys-reduced
+  (is (= [0 :x]
+         (reductions (constantly (reduced :x))
+                     (range))))
+  (is (= [:x]
+         (reductions (fn [acc x] x)
+                     (reduced :x)
+                     (range))))
+  (is (= [2 6 12 12]
+         (reductions (fn [acc x]
+                       (if (= x :stop)
+                         (reduced acc)
+                         (+ acc x)))
+                     [2 4 6 :stop 8 10]))))
 
 (deftest test-rand-nth-invariants
   (let [elt (rand-nth [:a :b :c :d])]
