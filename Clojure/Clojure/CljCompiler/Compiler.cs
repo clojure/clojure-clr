@@ -520,7 +520,7 @@ namespace clojure.lang
 
         #region Bindings, registration
         
-        private static void RegisterVar(Var v)
+        public static void RegisterVar(Var v)
         {
             if (!VarsVar.isBound)
                 return;

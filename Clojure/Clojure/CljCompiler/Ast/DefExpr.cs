@@ -98,7 +98,10 @@ namespace clojure.lang.CljCompiler.Ast
                 if (!v.Namespace.Equals(Compiler.CurrentNamespace))
                 {
                     if (sym.Namespace == null)
+                    {
                         v = Compiler.CurrentNamespace.intern(sym);
+                        Compiler.RegisterVar(v);
+                    }
 
                     //throw new Exception(string.Format("Name conflict, can't def {0} because namespace: {1} refers to: {2}",
                     //            sym, Compiler.CurrentNamespace.Name, v));
