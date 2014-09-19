@@ -1080,6 +1080,14 @@ namespace clojure.lang
                     // hide the 2 extra params for a macro
                     throw new ArityException(e.Actual - 2, e.Name);
                 }
+                    catch (CompilerException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), e);
+                }
             }
             else
             {

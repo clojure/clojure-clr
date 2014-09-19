@@ -7071,17 +7071,17 @@
                       (first %)
                       (throw (ArgumentException.                                           ;;; IllegalArgumentException
                         (if (seq? (first fdecl))
-                          (str "Invalid signature "
+                          (str "Invalid signature \""
                                %
-                               " should be a list")
-                          (str "Parameter declaration "
+                               "\" should be a list")
+                          (str "Parameter declaration \""
                                %
-                               " should be a vector")))))
+                               "\" should be a vector")))))
                    fdecl)
         bad-args (seq (remove #(vector? %) argdecls))]
     (when bad-args
-      (throw (ArgumentException. (str "Parameter declaration " (first bad-args)            ;;; IllegalArgumentException
-                                             " should be a vector"))))))
+      (throw (ArgumentException. (str "Parameter declaration \"" (first bad-args)            ;;; IllegalArgumentException
+                                             "\" should be a vector"))))))
 
 (defn with-redefs-fn
   "Temporarily redefines Vars during a call to func.  Each val of
