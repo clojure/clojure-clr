@@ -41,6 +41,8 @@ namespace clojure.lang
             object remainder(object x, object y);
             bool equiv(object x, object y);
             bool lt(object x, object y);
+            bool lte(object x, object y);
+            bool gte(object x, object y);
             object negate(object x);
             object negateP(object x);
             object inc(object x);
@@ -96,6 +98,8 @@ namespace clojure.lang
             public abstract object remainder(object x, object y);
             public abstract bool equiv(object x, object y);
             public abstract bool lt(object x, object y);
+            public abstract bool lte(object x, object y);
+            public abstract bool gte(object x, object y); 
             public abstract object negate(object x);
             public abstract object inc(object x);
             public abstract object dec(object x);
@@ -279,7 +283,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lte")]
         public static bool lte(object x, object y)
         {
-            return !ops(x).combine(ops(y)).lt(y,x);
+            return ops(x).combine(ops(y)).lte(x, y);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gt")]
@@ -291,7 +295,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gte")]
         public static bool gte(object x, object y)
         {
-            return !ops(x).combine(ops(y)).lt(x, y);
+            return ops(x).combine(ops(y)).gte(x, y);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "compare")]
@@ -724,6 +728,16 @@ namespace clojure.lang
                 return Util.ConvertToLong(x) < Util.ConvertToLong(y);
             }
 
+            public bool lte(object x, object y)
+            {
+                return Util.ConvertToLong(x) <= Util.ConvertToLong(y);
+            }
+
+            public bool gte(object x, object y)
+            {
+                return Util.ConvertToLong(x) >= Util.ConvertToLong(y);
+            }
+            	
             public object negate(object x)
             {
                 long val = Util.ConvertToLong(x);
@@ -859,6 +873,16 @@ namespace clojure.lang
             public override bool lt(object x, object y)
             {
                 return Util.ConvertToDouble(x) < Util.ConvertToDouble(y);
+            }
+
+            public override bool lte(object x, object y)
+            {
+                return Util.ConvertToDouble(x) <= Util.ConvertToDouble(y);
+            }
+
+            public override bool gte(object x, object y)
+            {
+                return Util.ConvertToDouble(x) >= Util.ConvertToDouble(y);
             }
 
             public override object negate(object x)
@@ -1012,6 +1036,22 @@ namespace clojure.lang
                 return rx.numerator * ry.denominator < ry.numerator * rx.denominator;
             }
 
+            public override bool lte(object x, object y)
+            {
+                Ratio rx = ToRatio(x);
+                Ratio ry = ToRatio(y);
+
+                return rx.numerator * ry.denominator <= ry.numerator * rx.denominator;
+            }
+
+            public override bool gte(object x, object y)
+            {
+                Ratio rx = ToRatio(x);
+                Ratio ry = ToRatio(y);
+
+                return rx.numerator * ry.denominator >= ry.numerator * rx.denominator;
+            }
+
             public override object negate(object x)
             {
                 Ratio rx = (Ratio)x;    
@@ -1129,6 +1169,16 @@ namespace clojure.lang
             public override bool lt(object x, object y)
             {
                 return ToBigInt(x).lt(ToBigInt(y));
+            }
+
+            public override bool lte(object x, object y)
+            {
+                return ToBigInteger(x) <= ToBigInteger(y);
+            }
+
+            public override bool gte(object x, object y)
+            {
+                return ToBigInteger(x) >= ToBigInteger(y);
             }
 
             public override object negate(object x)
@@ -1255,6 +1305,15 @@ namespace clojure.lang
                 return ToBigDecimal(x).CompareTo(ToBigDecimal(y)) < 0;
             }
 
+            public override bool lte(object x, object y)
+            {
+                return ToBigDecimal(x).CompareTo(ToBigDecimal(y)) <= 0;
+            }
+
+            public override bool gte(object x, object y)
+            {
+                return ToBigDecimal(x).CompareTo(ToBigDecimal(y)) >= 0;
+            }
 
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
             public override object negate(object x)
