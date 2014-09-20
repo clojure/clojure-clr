@@ -416,7 +416,7 @@ namespace clojure.lang
         {
             #region Data
 
-            [NonSerialized] AtomicBoolean _edit;
+            [NonSerialized] AtomicReference<Thread> _edit;
             INode _root;
             int _count;
             bool _hasNull;
@@ -428,11 +428,11 @@ namespace clojure.lang
             #region Ctors
 
             public TransientHashMap(PersistentHashMap m)
-                : this(new AtomicBoolean(true), m._root, m._count, m._hasNull, m._nullValue)
+                : this(new AtomicReference<Thread>(Thread.CurrentThread), m._root, m._count, m._hasNull, m._nullValue)
             {
             }
 
-            TransientHashMap(AtomicBoolean edit, INode root, int count, bool hasNull, object nullValue)
+            TransientHashMap(AtomicReference<Thread> edit, INode root, int count, bool hasNull, object nullValue)
             {
                 _edit = edit;
                 _root = root;
@@ -494,7 +494,7 @@ namespace clojure.lang
 
             protected override IPersistentMap doPersistent()
             {
-                _edit.set(false);
+                _edit.Set(null);
                 return new PersistentHashMap(_count, _root, _hasNull, _nullValue);
             }
 
@@ -535,9 +535,8 @@ namespace clojure.lang
 
             protected override void EnsureEditable()
             {
-                if (_edit.get())
-                    return;
-                throw new InvalidOperationException("Transient used after persistent! call");
+                if (_edit.Get() == null )
+                    throw new InvalidOperationException("Transient used after persistent! call");
             }
 
             #endregion
@@ -651,7 +650,7 @@ namespace clojure.lang
             /// <param name="val"></param>
             /// <param name="addedLeaf"></param>
             /// <returns></returns>
-            INode Assoc(AtomicBoolean edit, int shift, int hash, object key, object val, Box addedLeaf);
+            INode Assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf);
 
             /// <summary>
             /// Return a trie with the given key removed.
@@ -662,7 +661,7 @@ namespace clojure.lang
             /// <param name="key"></param>
             /// <param name="removedLeaf"></param>
             /// <returns></returns>
-            INode Without(AtomicBoolean edit, int shift, int hash, object key, Box removedLeaf);
+            INode Without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf);
 
             /// <summary>
             /// Perform key-value reduce.
@@ -730,13 +729,13 @@ namespace clojure.lang
             if (key1hash == key2hash)
                 return new HashCollisionNode(null, key1hash, 2, new object[] { key1, val1, key2, val2 });
             Box _ = new Box(null);
-            AtomicBoolean edit = new AtomicBoolean(false);
+            AtomicReference<Thread> edit = new AtomicReference<Thread>();
             return BitmapIndexedNode.EMPTY
                 .Assoc(edit, shift, key1hash, key1, val1, _)
                 .Assoc(edit, shift, key2hash, key2, val2, _);
         }
 
-        private static INode CreateNode(AtomicBoolean edit, int shift, Object key1, Object val1, int key2hash, Object key2, Object val2)
+        private static INode CreateNode(AtomicReference<Thread> edit, int shift, Object key1, Object val1, int key2hash, Object key2, Object val2)
         {
             int key1hash = Hash(key1);
             if (key1hash == key2hash)
@@ -766,13 +765,13 @@ namespace clojure.lang
             int _count;
             readonly INode[] _array;
             [NonSerialized]
-            readonly AtomicBoolean _edit;
+            readonly AtomicReference<Thread> _edit;
 
             #endregion
 
             #region C-tors
 
-            public ArrayNode(AtomicBoolean edit, int count, INode[] array)
+            public ArrayNode(AtomicReference<Thread> edit, int count, INode[] array)
             {
                 _array = array;
                 _edit = edit;
@@ -837,7 +836,7 @@ namespace clojure.lang
                 return Seq.create(_array);
             }
 
-            public INode Assoc(AtomicBoolean edit, int shift, int hash, object key, object val, Box addedLeaf)
+            public INode Assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
             {
                 int idx = Util.Mask(hash, shift);
                 INode node = _array[idx];
@@ -853,7 +852,7 @@ namespace clojure.lang
                 return EditAndSet(edit, idx, n);
             }
 
-            public INode Without(AtomicBoolean edit, int shift, int hash, object key, Box removedLeaf)
+            public INode Without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf)
             {
                 int idx = Util.Mask(hash, shift);
                 INode node = _array[idx];
@@ -923,21 +922,21 @@ namespace clojure.lang
 
             #region Implementation details
 
-            ArrayNode EnsureEditable(AtomicBoolean edit)
+            ArrayNode EnsureEditable(AtomicReference<Thread> edit)
             {
                 if (_edit == edit)
                     return this;
                 return new ArrayNode(edit, _count, (INode[])_array.Clone());
             }
 
-            ArrayNode EditAndSet(AtomicBoolean edit, int i, INode n)
+            ArrayNode EditAndSet(AtomicReference<Thread> edit, int i, INode n)
             {
                 ArrayNode editable = EnsureEditable(edit);
                 editable._array[i] = n;
                 return editable;
             }
 
-            INode pack(AtomicBoolean edit, int idx)
+            INode pack(AtomicReference<Thread> edit, int idx)
             {
                 Object[] newArray = new Object[2 * (_count - 1)];
                 int j = 1;
@@ -1045,7 +1044,7 @@ namespace clojure.lang
             int _bitmap;
             object[] _array;
             [NonSerialized]
-            readonly AtomicBoolean _edit;
+            readonly AtomicReference<Thread> _edit;
 
             #endregion
 
@@ -1060,7 +1059,7 @@ namespace clojure.lang
 
             #region C-tors & factory methods
 
-            internal BitmapIndexedNode(AtomicBoolean edit, int bitmap, object[] array)
+            internal BitmapIndexedNode(AtomicReference<Thread> edit, int bitmap, object[] array)
             {
                 _bitmap = bitmap;
                 _array = array;
@@ -1196,7 +1195,7 @@ namespace clojure.lang
                 return NodeSeq.Create(_array);
             }
 
-            public INode Assoc(AtomicBoolean edit, int shift, int hash, object key, object val, Box addedLeaf)
+            public INode Assoc(AtomicReference<Thread> edit, int shift, int hash, object key, object val, Box addedLeaf)
             {
                 int bit = Bitpos(hash, shift);
                 int idx = Index(bit);
@@ -1269,7 +1268,7 @@ namespace clojure.lang
 
 
 
-            public INode Without(AtomicBoolean edit, int shift, int hash, object key, Box removedLeaf)
+            public INode Without(AtomicReference<Thread> edit, int shift, int hash, object key, Box removedLeaf)
             {
                 int bit = Bitpos(hash, shift);
                 if ((_bitmap & bit) == 0)
@@ -1312,14 +1311,14 @@ namespace clojure.lang
 
             #region Implementation
 
-            private BitmapIndexedNode EditAndSet(AtomicBoolean edit, int i, Object a)
+            private BitmapIndexedNode EditAndSet(AtomicReference<Thread> edit, int i, Object a)
             {
                 BitmapIndexedNode editable = EnsureEditable(edit);
                 editable._array[i] = a;
                 return editable;
             }
 
-            private BitmapIndexedNode EditAndSet(AtomicBoolean edit, int i, Object a, int j, Object b)
+            private BitmapIndexedNode EditAndSet(AtomicReference<Thread> edit, int i, Object a, int j, Object b)
             {
                 BitmapIndexedNode editable = EnsureEditable(edit);
                 editable._array[i] = a;
@@ -1327,7 +1326,7 @@ namespace clojure.lang
                 return editable;
             }
 
-            private BitmapIndexedNode EditAndRemovePair(AtomicBoolean edit, int bit, int i)
+            private BitmapIndexedNode EditAndRemovePair(AtomicReference<Thread> edit, int bit, int i)
             {
                 if (_bitmap == bit)
                     return null;
@@ -1339,7 +1338,7 @@ namespace clojure.lang
                 return editable;
             }
 
-            BitmapIndexedNode EnsureEditable(AtomicBoolean edit)
+            BitmapIndexedNode EnsureEditable(AtomicReference<Thread> edit)
             {
                 if (_edit == edit)
                     return this;
@@ -1364,13 +1363,13 @@ namespace clojure.lang
             int _count;
             object[] _array;
             [NonSerialized]
-            readonly AtomicBoolean _edit;
+            readonly AtomicReference<Thread> _edit;
 
             #endregion
 
             #region C-tors
 
-            public HashCollisionNode(AtomicBoolean edit, int hash, int count, params object[] array)
+            public HashCollisionNode(AtomicReference<Thread> edit, int hash, int count, params object[] array)
             {
                 _edit = edit;
                 _hash = hash;
@@ -1454,7 +1453,7 @@ namespace clojure.lang
                 return NodeSeq.Create(_array);
             }
 
-            public INode Assoc(AtomicBoolean edit, int shift, int hash, Object key, Object val, Box addedLeaf)
+            public INode Assoc(AtomicReference<Thread> edit, int shift, int hash, Object key, Object val, Box addedLeaf)
             {
                 if (hash == _hash)
                 {
@@ -1484,7 +1483,7 @@ namespace clojure.lang
                     .Assoc(edit, shift, hash, key, val, addedLeaf);
             }
 
-            public INode Without(AtomicBoolean edit, int shift, int hash, Object key, Box removedLeaf)
+            public INode Without(AtomicReference<Thread> edit, int shift, int hash, Object key, Box removedLeaf)
             {
                 int idx = FindIndex(key);
                 if (idx == -1)
@@ -1514,7 +1513,7 @@ namespace clojure.lang
 
             #region Implementation
 
-            HashCollisionNode EnsureEditable(AtomicBoolean edit)
+            HashCollisionNode EnsureEditable(AtomicReference<Thread> edit)
             {
                 if (_edit == edit)
                     return this;
@@ -1523,7 +1522,7 @@ namespace clojure.lang
                 return new HashCollisionNode(edit, _hash, _count, newArray);
             }
 
-            HashCollisionNode EnsureEditable(AtomicBoolean edit, int count, Object[] array)
+            HashCollisionNode EnsureEditable(AtomicReference<Thread> edit, int count, Object[] array)
             {
                 if (_edit == edit)
                 {
@@ -1534,14 +1533,14 @@ namespace clojure.lang
                 return new HashCollisionNode(edit, _hash, count, array);
             }
 
-            HashCollisionNode EditAndSet(AtomicBoolean edit, int i, Object a)
+            HashCollisionNode EditAndSet(AtomicReference<Thread> edit, int i, Object a)
             {
                 HashCollisionNode editable = EnsureEditable(edit);
                 editable._array[i] = a;
                 return editable;
             }
 
-            HashCollisionNode EditAndSet(AtomicBoolean edit, int i, Object a, int j, Object b)
+            HashCollisionNode EditAndSet(AtomicReference<Thread> edit, int i, Object a, int j, Object b)
             {
                 HashCollisionNode editable = EnsureEditable(edit);
                 editable._array[i] = a;

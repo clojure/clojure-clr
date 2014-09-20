@@ -34,9 +34,9 @@ namespace clojure.lang
             #region Data
 
             [NonSerialized]
-            readonly AtomicBoolean _edit;
+            readonly AtomicReference<Thread> _edit;
 
-            public AtomicBoolean Edit
+            public AtomicReference<Thread> Edit
             {
                 get { return _edit; }
             } 
@@ -54,13 +54,13 @@ namespace clojure.lang
 
             #region C-tors
 
-            public Node(AtomicBoolean edit, object[] array)
+            public Node(AtomicReference<Thread> edit, object[] array)
             {
                 _edit = edit;
                 _array = array;
             }
 
-            public Node(AtomicBoolean edit)
+            public Node(AtomicReference<Thread> edit)
             {
                 _edit = edit;
                 _array = new object[32];
@@ -73,7 +73,7 @@ namespace clojure.lang
 
         #region Data
 
-        static readonly AtomicBoolean NoEdit = new AtomicBoolean(false);
+        static readonly AtomicReference<Thread> NoEdit = new AtomicReference<Thread>();
         internal static readonly Node EmptyNode = new Node(NoEdit, new object[32]);
 
         readonly int _cnt;
@@ -352,7 +352,7 @@ namespace clojure.lang
             return ret;
         }
 
-        static Node newPath(AtomicBoolean edit, int level, Node node)
+        static Node newPath(AtomicReference<Thread> edit, int level, Node node)
         {
             if (level == 0)
                 return node;
@@ -653,10 +653,9 @@ namespace clojure.lang
 
             void EnsureEditable()
             {
-                bool owner = _root.Edit.get();
-                if (owner)
-                    return;
-                throw new InvalidOperationException("Transient used after persistent! call");
+                Thread owner = _root.Edit.Get();
+                if (owner == null)
+                    throw new InvalidOperationException("Transient used after persistent! call");
             }
 
 
@@ -669,7 +668,7 @@ namespace clojure.lang
 
             static Node EditableRoot(Node node)
             {
-                return new Node(new AtomicBoolean(true), (object[])node.Array.Clone());
+                return new Node(new AtomicReference<Thread>(Thread.CurrentThread), (object[])node.Array.Clone());
             }
 
             static object[] EditableTail(object[] tl)
@@ -910,7 +909,7 @@ namespace clojure.lang
             public IPersistentCollection persistent()
             {
                 EnsureEditable();
-                _root.Edit.set(false);
+                _root.Edit.Set(null);
                 object[] trimmedTail = new object[_cnt-Tailoff()];
                 Array.Copy(_tail,trimmedTail,trimmedTail.Length);
                 return new PersistentVector(_cnt, _shift, _root, trimmedTail);

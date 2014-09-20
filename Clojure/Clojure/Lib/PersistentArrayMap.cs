@@ -588,7 +588,7 @@ namespace clojure.lang
             int _len;
             readonly object[] _array;
             
-            [NonSerialized] bool _owner;
+            [NonSerialized] Thread _owner;
 
             #endregion
 
@@ -597,7 +597,7 @@ namespace clojure.lang
 
             public TransientArrayMap(object[] array)
             {
-                _owner = true;
+                _owner = Thread.CurrentThread;
                 _array = new object[Math.Max(HashtableThreshold, array.Length)];
                 Array.Copy(array, _array, array.Length);
                 _len = array.Length;
@@ -622,9 +622,8 @@ namespace clojure.lang
 
             protected override void EnsureEditable()
             {
-                if (_owner)
-                    return;
-                throw new InvalidOperationException("Transient used after persistent! call");
+                if (_owner == null )
+                    throw new InvalidOperationException("Transient used after persistent! call");
             }
 
             protected override ITransientMap doAssoc(object key, object val)
@@ -677,7 +676,7 @@ namespace clojure.lang
             protected override IPersistentMap doPersistent()
             {
                 EnsureEditable();
-                _owner = false;
+                _owner = null;
                 object[] a = new object[_len];
                 Array.Copy(_array, a, _len);
                 return new PersistentArrayMap(a);
