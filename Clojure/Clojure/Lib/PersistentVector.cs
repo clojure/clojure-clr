@@ -24,7 +24,7 @@ namespace clojure.lang
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
-    public class PersistentVector: APersistentVector, IObj, IEditableCollection, IEnumerable
+    public class PersistentVector: APersistentVector, IObj, IEditableCollection, IEnumerable, IReduce
     {
         #region Node class
 
@@ -943,7 +943,30 @@ namespace clojure.lang
  
         #endregion
 
-        #region kvreduce
+        #region IReduce members and kvreduce
+
+        public object reduce(IFn f)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public object reduce(IFn f, object init)
+        {
+            int step = 0;
+            for (int i = 0; i < _cnt; i += step)
+            {
+                Object[] array = ArrayFor(i);
+                for (int j = 0; j < array.Length; ++j)
+                {
+                    init = f.invoke(init, array[j]);
+                    if (RT.isReduced(init))
+                        return ((IDeref)init).deref();
+                }
+                step = array.Length;
+            }
+            return init;
+        }
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "kvreduce")]
         public object kvreduce(IFn f, object init)
