@@ -490,7 +490,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private bool NeedsDummy(MethodInfo mi, HashSet<MethodInfo> implemented)
         {
-            return !implemented.Contains(mi) && mi.DeclaringType.IsInterface && !(!IsDefType && mi.DeclaringType == typeof(IObj) || mi.DeclaringType == typeof(IMeta));
+            return !implemented.Contains(mi) && mi.DeclaringType.IsInterface && !(SupportsMeta && (mi.DeclaringType == typeof(IObj) || mi.DeclaringType == typeof(IMeta)));
         }
 
         private static void EmitDummyMethod(TypeBuilder tb, MethodInfo mi)
