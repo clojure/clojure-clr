@@ -281,6 +281,9 @@ namespace clojure.lang.CljCompiler.Ast
             if (form is Symbol)
             {
                 Symbol sym = (Symbol)form;
+                // if symbol refers to something in the lexical scope, it's not a type
+                if(Compiler.LocalEnvVar.deref() != null && ((IPersistentMap)Compiler.LocalEnvVar.deref()).containsKey(sym))
+                    return null;
                 if (sym.Namespace == null) // if ns-qualified, can't be classname
                 {
                     if (Util.equals(sym, Compiler.CompileStubSymVar.get()))
@@ -317,7 +320,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal static Type TagToType(object tag)
         {
-            Type t = MaybeType(tag, true);
+            Type t = null;
 
             Symbol sym = tag as Symbol;
             if (sym != null)
@@ -395,6 +398,8 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
+            if(t == null)
+                t = MaybeType(tag, true);
             if (t != null)
                 return t;
 
