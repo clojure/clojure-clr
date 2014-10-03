@@ -2811,6 +2811,9 @@ namespace clojure.lang
         {
             Type t = null;
 
+            // fastest path, will succeed for assembly qualified names (returned by Type.AssemblyQualifiedName)
+            // or namespace qualified names (returned by Type.FullName) in the executing assembly or mscorlib
+            // e.g. "UnityEngine.Transform, UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
             t = Type.GetType(p, false);
 
             if (t != null)
@@ -2824,6 +2827,17 @@ namespace clojure.lang
             Assembly[] assys = domain.GetAssemblies();
             List<Type> candidateTypes = new List<Type>();
 
+            // fast path, will succeed for namespace qualified names (returned by Type.FullName)
+            // e.g. "UnityEngine.Transform"
+            foreach (Assembly assy in assys)
+            {
+                  Type t1 = assy.GetType(p, false);
+                  if(t1 != null)
+                        return t1;
+            }
+
+            // slow path, will succeed for display names (returned by Type.Name)
+            // e.g. "Transform"
             foreach (Assembly assy1 in assys)
             {
                 Type t1 = assy1.GetType(p, false);
