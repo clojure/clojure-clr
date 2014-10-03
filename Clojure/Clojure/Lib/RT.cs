@@ -3328,7 +3328,7 @@ namespace clojure.lang
 
 
                 if ((assyInfo != null &&
-                     (cljInfo == null || assyInfo.LastWriteTime > cljInfo.LastWriteTime)))
+                     (cljInfo == null || assyInfo.LastWriteTime >= cljInfo.LastWriteTime)))
                 {
                     try
                     {
