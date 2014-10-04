@@ -945,8 +945,8 @@
 (defn +
   "Returns the sum of nums. (+) returns 0. Does not auto-promote
   longs, will throw on overflow. See also: +'"
-  {:inline (fn [x y] `(. clojure.lang.Numbers (~(if *unchecked-math* 'unchecked_add 'add) ~x ~y)))
-   :inline-arities #{2}
+  {:inline (nary-inline 'add 'unchecked_add)
+   :inline-arities >1?
    :added "1.2"}
   ([] 0)
   ([x] (. clojure.lang.RT (NumberCast x)))        ;;;  (cast Number x))
