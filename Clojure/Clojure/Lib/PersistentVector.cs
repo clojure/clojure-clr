@@ -975,7 +975,7 @@ namespace clojure.lang
             for (int i = 0; i < _cnt; i += step)
             {
                 object[] array = ArrayFor(i);
-                for (int j = 0; i < array.Length; j++)
+                for (int j = 0; j < array.Length; j++)
                 {
                     init = f.invoke(init, j + i, array[j]);
                     if (RT.isReduced(init))
