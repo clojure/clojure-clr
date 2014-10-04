@@ -2732,8 +2732,11 @@ namespace clojure.lang
             }
             else if (x is Type)
             {
+                string tName = ((Type)x).AssemblyQualifiedName;
+                if (LispReader.NameRequiresEscaping(tName))
+                    tName = LispReader.VbarEscape(tName);
                 w.Write("#=");
-                w.Write(((Type)x).FullName);
+                w.Write(tName);
             }
             else if (x is BigDecimal && readably)
             {
