@@ -83,7 +83,7 @@ namespace Clojure.Tests.LibTests
 
             Future f = new Future(fn);
             Expect(f.isCancelled(), EqualTo(false));
-            Expect(f.cancel(), EqualTo(true));
+            Expect(f.cancel(true), EqualTo(true));
             Expect(f.isCancelled(), EqualTo(true));
         }
 
@@ -94,8 +94,8 @@ namespace Clojure.Tests.LibTests
             fn._fn0 = () => { while (true); };
 
             Future f = new Future(fn);
-            Expect(f.cancel(), EqualTo(true));
-            Expect(f.cancel(), EqualTo(false));
+            Expect(f.cancel(true), EqualTo(true));
+            Expect(f.cancel(true), EqualTo(false));
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace Clojure.Tests.LibTests
 
             Future f = new Future(fn);
             Expect(f.deref(), EqualTo(42));
-            Expect(f.cancel(), EqualTo(false));
+            Expect(f.cancel(true), EqualTo(false));
             Expect(f.isCancelled(), EqualTo(false));
         }
 
@@ -118,7 +118,7 @@ namespace Clojure.Tests.LibTests
             fn._fn0 = () => { while (true); };
 
             Future f = new Future(fn);
-            f.cancel();
+            f.cancel(true);
             f.deref();
         }
     }

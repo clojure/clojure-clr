@@ -91,18 +91,32 @@ namespace clojure.lang
         /// <returns>True if the attempt succeeds. False if the task already completed
         /// or was cancelled previously.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "cancel")]
-        public bool cancel()
+        public bool cancel(bool mayInterruptIfRunning)
         {
             // Already completed or cancelled.
             if (_t.Join(0))
                 return false;
 
-            // Don't abort until the task thread has established its ThreadAbortException catch block.
-            _started.WaitOne();
+            if (mayInterruptIfRunning)
+            {
+                // Don't abort until the task thread has established its ThreadAbortException catch block.
+                _started.WaitOne();
 
-            _t.Abort();
+                _t.Abort();
+            }
             _t.Join();
             return _cancelled;
+        }
+
+        /// <summary>
+        /// Attempts to abort the future.
+        /// </summary>
+        /// <returns>True if the attempt succeeds. False if the task already completed
+        /// or was cancelled previously.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "cancel")]
+        public bool cancel()
+        {
+            return cancel(true);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
