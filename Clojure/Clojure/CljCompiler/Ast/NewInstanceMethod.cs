@@ -117,7 +117,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Parsing
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
-        public static NewInstanceMethod Parse(ObjExpr objx, ISeq form, Symbol thisTag, Dictionary<IPersistentVector, List<MethodInfo>> overrideables)
+        public static NewInstanceMethod Parse(ObjExpr objx, ISeq form, Symbol thisTag, Dictionary<IPersistentVector, List<MethodInfo>> overrideables, Dictionary<IPersistentVector, List<MethodInfo>> explicits)
         {
             // (methodname [this-name args*] body...)
             // this-name might be nil
@@ -226,7 +226,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 Dictionary<IPersistentVector, List<MethodInfo>> matches =
                     method.IsExplicit 
-                    ? FindMethodsWithNameAndArity(method._explicitInterface, methodName, parms.count(), overrideables)
+                    ? FindMethodsWithNameAndArity(method._explicitInterface, methodName, parms.count(), overrideables, explicits)
                     : FindMethodsWithNameAndArity(methodName, parms.count(), overrideables);
 
                 IPersistentVector mk = MSig(methodName, pTypes, method._retType);
@@ -323,22 +323,30 @@ namespace clojure.lang.CljCompiler.Ast
             Type explicitInterface,
             String name,
             int arity,
-            Dictionary<IPersistentVector, List<MethodInfo>> mm)
+             Dictionary<IPersistentVector, List<MethodInfo>> overrideables,
+            Dictionary<IPersistentVector, List<MethodInfo>> explicits)
         {
             Dictionary<IPersistentVector, List<MethodInfo>> ret = new Dictionary<IPersistentVector, List<MethodInfo>>();
 
-            foreach (KeyValuePair<IPersistentVector, List<MethodInfo>> kv in mm)
+            foreach (KeyValuePair<IPersistentVector, List<MethodInfo>> kv in overrideables)
+            {
+                MethodInfo m = kv.Value[0];
+                if (name.Equals(m.Name) && m.GetParameters().Length == arity && m.DeclaringType == explicitInterface)
+                    ret[kv.Key] = kv.Value;
+            }
+
+            foreach (KeyValuePair<IPersistentVector, List<MethodInfo>> kv in explicits)
             {
                 foreach (MethodInfo mi in kv.Value)
                     if (name.Equals(mi.Name) && mi.GetParameters().Length == arity && mi.DeclaringType == explicitInterface)
                     {
-                        // Should be only one, but I'm being cautious.
                         List<MethodInfo> list;
                         if (!ret.TryGetValue(kv.Key, out list))
                         {
                             list = new List<MethodInfo>();
                             ret[kv.Key] = list;
                         }
+                        if ( ! list.Contains(mi))
                         list.Add(mi);
                     }
             }

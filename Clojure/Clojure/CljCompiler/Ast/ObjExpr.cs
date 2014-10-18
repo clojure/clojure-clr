@@ -351,7 +351,9 @@ namespace clojure.lang.CljCompiler.Ast
                     if (SupportsMeta)
                         _metaField = _typeBuilder.DefineField("__meta", typeof(IPersistentMap), FieldAttributes.Public | FieldAttributes.InitOnly);
 
-                    EmitClosedOverFields(_typeBuilder);
+                    // If this IsDefType, then it has already emitted the closed-over fields on the base class.
+                    if ( ! IsDefType )
+                        EmitClosedOverFields(_typeBuilder);
                     EmitProtocolCallsites(_typeBuilder);
 
                     _ctorInfo = EmitConstructor(_typeBuilder, superType);
@@ -485,7 +487,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        void EmitClosedOverFields(TypeBuilder tb)
+        protected void EmitClosedOverFields(TypeBuilder tb)
         {
             _closedOverFields = new List<FieldBuilder>(Closes.count());
             _closedOverFieldsToBindingsMap = new Dictionary<FieldBuilder, LocalBinding>(Closes.count());
