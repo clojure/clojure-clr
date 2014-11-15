@@ -26,6 +26,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         readonly Type _type;
 
+        static readonly Keyword warnOnBoxedKeyword = Keyword.intern("warn-on-boxed");
+
         #endregion
 
         #region Ctors
@@ -35,7 +37,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             _type = type;
             _method  = Reflector.GetMatchingMethod(spanMap, _type, _args, _methodName, typeArgs);
-            if ( _method != null && RT.booleanCast(RT.UncheckedMathVar.deref()) && IsBoxedMath(_method))
+            if ( _method != null && warnOnBoxedKeyword.Equals(RT.UncheckedMathVar.deref()) && IsBoxedMath(_method))
             {
                 RT.errPrintWriter().WriteLine("Boxed math warning, {0}:{1}:{2} - call {3}.",
                     Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap), _method.ToString());

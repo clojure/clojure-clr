@@ -38,7 +38,12 @@ namespace BootstrapCompile
             string warnVal =  Environment.GetEnvironmentVariable(REFLECTION_WARNING_PROP);
             bool warnOnReflection = warnVal == null ? false : warnVal.Equals("true");
             string mathVal = Environment.GetEnvironmentVariable(UNCHECKED_MATH_PROP);
-            bool uncheckedMath = mathVal == null ? false : mathVal.Equals("true");
+            object uncheckedMath = false;
+
+            if ("true".Equals(mathVal))
+                uncheckedMath = true;
+            else if ("warn-on-boxed".Equals(mathVal))
+                uncheckedMath = Keyword.intern("warn-on-boxed");
 
             try
             {
