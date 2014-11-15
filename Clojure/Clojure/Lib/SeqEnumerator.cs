@@ -36,6 +36,19 @@ namespace clojure.lang
 
         #region C-tors
 
+
+        /// <summary>
+        /// Construct one from a given sequence.  (preserve original ctor for compatibility)
+        /// </summary>
+        /// <param name="seq">The underlying sequence.</param>
+        public TypedSeqEnumerator(ISeq o)
+        {
+            _isRealized = false;
+            _curr = _start;
+            _orig = o;
+            _next = o;
+        }
+
         /// <summary>
         /// Construct one from a given sequence.
         /// </summary>
@@ -131,6 +144,16 @@ namespace clojure.lang
     {
         #region C-tors
 
+
+        /// <summary>
+        /// Construct one from a given sequence. (preserve original ctor for compatibility)
+        /// </summary>
+        /// <param name="seq">The underlying sequence.</param>
+        public SeqEnumerator(ISeq seq)
+            : base(seq)
+        {
+        }
+
         /// <summary>
         /// Construct one from a given sequence.
         /// </summary>
@@ -147,11 +170,21 @@ namespace clojure.lang
     {
         #region C-tors
 
+
+        /// <summary>
+        /// Construct one from a given sequence. (preserve original ctor for compatibility)
+        /// </summary>
+        /// <param name="seq">The underlying sequence.</param>
+        public IMapEntrySeqEnumerator(ISeq seq)
+            : base(seq)
+        {
+        }
+
         /// <summary>
         /// Construct one from a given sequence.
         /// </summary>
         /// <param name="seq">The underlying sequence.</param>
-        public IMapEntrySeqEnumerator(ISeq seq)
+        public IMapEntrySeqEnumerator(object seq)
             :base(seq)
         {
         }
