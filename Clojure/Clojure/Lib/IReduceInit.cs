@@ -18,15 +18,16 @@ namespace clojure.lang
     /// <summary>
     /// Represents a collection that supports function mapping/reduction.
     /// </summary>
-    public interface IReduce : IReduceInit
+    public interface IReduceInit
     {
         /// <summary>
         /// Reduce the collection using a function.
         /// </summary>
         /// <param name="f">The function to apply.</param>
+        /// <param name="start">An initial value to get started.</param>
         /// <returns>The reduced value</returns>
-        /// <remarks>Computes f(...f(f(f(i0,i1),i2),i3),...).</remarks>
+        /// <remarks>Computes f(...f(f(f(start,i0),i1),i2),...).</remarks>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "reduce")]
-        object reduce(IFn f);
+        object reduce(IFn f, object start);
     }
 }
