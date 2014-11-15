@@ -265,23 +265,6 @@ namespace clojure.lang.CljCompiler.Ast
 
             tb.DefineDefaultConstructor(MethodAttributes.Public);
 
-            //// instance fields for closed-overs
-            //for (ISeq s = RT.keys(ret.Closes); s != null; s = s.next())
-            //{
-            //    LocalBinding lb = (LocalBinding)s.first();
-            //    FieldAttributes access = FieldAttributes.Public;
-
-            //    if (!ret.IsMutable(lb))
-            //        access |= FieldAttributes.InitOnly;
-
-            //    Type fieldType = lb.PrimitiveType ?? typeof(Object);
-
-            //    if (ret.IsVolatile(lb))
-            //       tb.DefineField(lb.Name, fieldType, new Type[] { typeof(IsVolatile) }, Type.EmptyTypes, access);
-            //    else
-            //        tb.DefineField(lb.Name, fieldType, access);
-            //}
-
             ret.EmitClosedOverFields(tb);
 
             // ctor that takes closed-overs and does nothing
