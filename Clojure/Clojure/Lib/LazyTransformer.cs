@@ -368,8 +368,7 @@ namespace clojure.lang
         {
             public override object invoke(object result)
             {
-                LazyTransformer lt 
-                    = (LazyTransformer)(RT.isReduced(result) ? ((Reduced)result).deref() : result);
+                LazyTransformer lt = (LazyTransformer) result;
                 lt._stepper = null;
                 return result;
             }
@@ -402,9 +401,15 @@ namespace clojure.lang
                 {
                     if (RT.isReduced(_xform.invoke(lt, _ie.Current)))
                     {
-                        if (lt._rest != null)
-                            lt._rest._stepper = null;
-                        break;
+                        lt._stepper = null;
+                        LazyTransformer et = lt;
+                        while (et._rest != null)
+                        {
+                            et = et._rest;
+                            et._stepper = null;
+                        }
+                        _xform.invoke(et);
+                        return;
                     }
                 }
                 if ( lt._stepper != null )
@@ -416,8 +421,7 @@ namespace clojure.lang
         {
             public override Object invoke(Object result)
             {
-                LazyTransformer lt = (LazyTransformer) (RT.isReduced(result)?
-			                                        ((Reduced)result).deref():result);
+                LazyTransformer lt = (LazyTransformer)result;
 			    lt._stepper = null;
 			    return lt;
             }
@@ -469,9 +473,15 @@ namespace clojure.lang
                 {
                     if (RT.isReduced(_xform.applyTo(RT.cons(lt, Current()))))
                     {
-                        if (lt._rest != null)
-                            lt._rest._stepper = null;
-                        break;
+                        lt._stepper = null;
+                        LazyTransformer et = lt;
+                        while (et._rest != null)
+                        {
+                            et = et._rest;
+                            et._stepper = null;
+                        }
+                        _xform.invoke(et);
+                        return;
                     }
                 }
                 if (lt._stepper != null)
