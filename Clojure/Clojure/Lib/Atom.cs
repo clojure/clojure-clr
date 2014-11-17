@@ -19,7 +19,7 @@ namespace clojure.lang
     /// <summary>
     /// Provides spin-loop synchronized access to a value.  One of the reference types.
     /// </summary>
-    public class Atom : ARef
+    public class Atom : ARef, IAtom
     {
         #region Data
 
