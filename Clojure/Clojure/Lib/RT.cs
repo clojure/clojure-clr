@@ -3372,8 +3372,10 @@ namespace clojure.lang
 
 
             if (!loaded && failIfNotFound)
-                throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.", assemblyname, cljname));
-
+                throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.{2}", 
+                    assemblyname, 
+                    cljname,
+                    relativePath.Contains("_") ? " Please check that namespaces with dashes use underscores in the Clojure file name." : ""));
         }
 
         private static bool TryLoadFromEmbeddedResource(string relativePath, string assemblyname)
