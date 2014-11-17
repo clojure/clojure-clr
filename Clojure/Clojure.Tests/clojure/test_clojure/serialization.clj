@@ -123,6 +123,16 @@
     ::namespaced-keyword
     'symbol))
 
+(deftest tostringed-bytes
+  (let [rt #(-> % serialize seq)
+        s1 (rt 'sym123)
+        k1 (rt :kw123)
+        _ (.ToString 'sym123)                      ;;; .toString
+        _ (.ToString :kw123)                       ;;; .toString
+        s2 (rt 'sym123)
+        k2 (rt :kw123)]
+    (is (= s1 s2))
+    (is (= k1 k2))))
 
 (deftest interned-serializations
   (are [v] (identical? v (-> v serialize deserialize))

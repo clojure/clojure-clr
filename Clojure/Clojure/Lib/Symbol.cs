@@ -44,7 +44,10 @@ namespace clojure.lang
         readonly IPersistentMap _meta;
 
         // cache ToString/ToStringEscaped if called
+        [NonSerialized]
         string _str;
+
+        [NonSerialized]
         string _strEsc;
 
         #endregion

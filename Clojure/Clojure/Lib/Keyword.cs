@@ -51,6 +51,7 @@ namespace clojure.lang
         }
 
         // cache ToString if called
+        [NonSerialized]
         string _str;
 
         #endregion
