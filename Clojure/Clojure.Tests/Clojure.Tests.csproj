@@ -84,9 +84,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\clojure.test.generative.0.1.4.3\lib\net35\clojure.test.generative.dll</HintPath>
     </Reference>
-    <Reference Include="clojure.tools.namespace, Version=0.2.2.1, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="clojure.tools.namespace, Version=0.2.7.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\clojure.tools.namespace.0.2.2.1\lib\net35\clojure.tools.namespace.dll</HintPath>
+      <HintPath>..\packages\clojure.tools.namespace.0.2.7.0\lib\net35\clojure.tools.namespace.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
