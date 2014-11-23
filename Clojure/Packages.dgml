@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph GraphDirection="LeftToRight" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+    <Node Id="Csharp.Tests" Label="Csharp.Tests" Category="Project" />
+    <Node Id="NUnit 2.6.3" Label="NUnit 2.6.3" Category="Package" />
+    <Node Id="DlrConsole" Label="DlrConsole" Category="Project" />
+    <Node Id="DynamicLanguageRuntime 1.1.0-alpha1" Label="DynamicLanguageRuntime 1.1.0-alpha1" Category="Package" />
+    <Node Id="Clojure.Tests" Label="Clojure.Tests" Category="Project" />
+    <Node Id="clojure.data.generators 0.1.2.0" Label="clojure.data.generators 0.1.2.0" Category="Package" />
+    <Node Id="clojure.test.generative 0.5.0.1" Label="clojure.test.generative 0.5.0.1" Category="Package" />
+    <Node Id="clojure.tools.namespace 0.2.7.0" Label="clojure.tools.namespace 0.2.7.0" Category="Package" />
+    <Node Id="Clojure" Label="Clojure" Category="Project" />
+    <Node Id="DynamicLanguageRuntime 1.1.0-alpha1" Label="DynamicLanguageRuntime 1.1.0-alpha1" Category="Package" />
+  </Nodes>
+  <Links>
+    <Link Source="Csharp.Tests" Target="NUnit 2.6.3" Category="Installed Package" />
+    <Link Source="DlrConsole" Target="DynamicLanguageRuntime 1.1.0-alpha1" Category="Installed Package" />
+    <Link Source="clojure.test.generative 0.5.0.1" Target="clojure.tools.namespace 0.2.7.0" Category="Package Dependency" />
+    <Link Source="clojure.test.generative 0.5.0.1" Target="clojure.data.generators 0.1.2.0" Category="Package Dependency" />
+    <Link Source="Clojure.Tests" Target="clojure.test.generative 0.5.0.1" Category="Installed Package" />
+    <Link Source="Clojure" Target="DynamicLanguageRuntime 1.1.0-alpha1" Category="Installed Package" />
+  </Links>
+  <Categories>
+    <Category Id="Project" />
+    <Category Id="Package" />
+  </Categories>
+  <Styles>
+    <Style TargetType="Node" GroupLabel="Project" ValueLabel="True">
+      <Condition Expression="HasCategory('Project')" />
+      <Setter Property="Background" Value="Blue" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Package Dependency" ValueLabel="True">
+      <Condition Expression="HasCategory('Package Dependency')" />
+      <Setter Property="Background" Value="Yellow" />
+    </Style>
+  </Styles>
+</DirectedGraph>

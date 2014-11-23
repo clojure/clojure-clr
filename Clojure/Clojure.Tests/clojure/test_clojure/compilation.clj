@@ -12,7 +12,8 @@
 (ns clojure.test-clojure.compilation
   (:import (clojure.lang Compiler Compiler+CompilerException))                                 ;;; Compiler$CompilerException
   (:require [clojure.test.generative :refer (defspec)]
-            [clojure.data.generators :as gen])
+            [clojure.data.generators :as gen]
+			clojure.string)                                                                    ;;; DM:Added -- seem to have an order dependency that no longer works.
   (:use clojure.test
         [clojure.test-helper :only (should-not-reflect should-print-err-message)]))
 
