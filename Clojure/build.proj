@@ -43,15 +43,26 @@
   </Target>
   
   <Target Name="Test" DependsOnTargets="Build;CompileTest">
-    <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_tests.clj" DestinationFolder="$(OutputPath)" />
-    <Exec Command="$(clji) clojure\run_tests.clj"
+    <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test.clj" DestinationFolder="$(OutputPath)" />
+    <Exec Command="$(clji) clojure\run_test.clj"
           WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == '.Net' "/>
-    <Exec Command="mono $(clji) clojure\run_tests.clj"
+    <Exec Command="mono $(clji) clojure\run_test.clj"
           WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
-  
+
+  <Target Name="TestGen" DependsOnTargets="Build;CompileTest">
+    <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test_generative.clj" DestinationFolder="$(OutputPath)" />
+    <Exec Command="$(clji) clojure\run_test_generative.clj"
+          WorkingDirectory="$(OutputPath)"
+           Condition=" '$(Runtime)' == '.Net' "/>
+    <Exec Command="mono $(clji) clojure\run_test_generative.clj"
+          WorkingDirectory="$(OutputPath)"
+           Condition=" '$(Runtime)' == 'Mono' "/>
+  </Target>
+
+
   <!-- RJ: Reworked Dist target to work around Mono bug related to embeding ItemGroup inside a Target tag -->
   <Target Name="Dist" DependsOnTargets="Build">
       <!--DLR, Clojure dlls and exes-->
