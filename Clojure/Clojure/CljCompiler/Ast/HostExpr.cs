@@ -293,6 +293,8 @@ namespace clojure.lang.CljCompiler.Ast
                         object o = Compiler.CurrentNamespace.GetMapping(sym);
                         if (o is Type)
                             t = (Type)o;
+                        else if (Compiler.LocalEnvVar.deref() != null && ((IPersistentMap)Compiler.LocalEnvVar.deref()).containsKey(form))  // JVM casts to java.util.Map
+                            return null;
                         else
                         {
                             try
@@ -317,7 +319,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal static Type TagToType(object tag)
         {
-            Type t = MaybeType(tag, true);
+            Type t = null;
 
             Symbol sym = tag as Symbol;
             if (sym != null)
@@ -394,6 +396,9 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
             }
+           
+            if ( t == null )
+                t = MaybeType(tag, true);
 
             if (t != null)
                 return t;
