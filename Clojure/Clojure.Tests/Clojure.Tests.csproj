@@ -80,6 +80,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\clojure.data.generators.0.1.2.0\lib\net35\clojure.data.generators.dll</HintPath>
     </Reference>
+    <Reference Include="clojure.test.check">
+      <HintPath>..\packages\clojure.test.check.0.6.1.1\lib\net35\clojure.test.check.dll</HintPath>
+    </Reference>
     <Reference Include="clojure.test.generative">
       <HintPath>..\packages\clojure.test.generative.0.5.0.1\lib\net35\clojure.test.generative.dll</HintPath>
     </Reference>
