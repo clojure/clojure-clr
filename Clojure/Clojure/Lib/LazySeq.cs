@@ -60,7 +60,7 @@ namespace clojure.lang
         {
             ISeq s = seq();
             if (s != null)
-                return s.equiv(obj);
+                return s.Equals(obj);
             else
                 return (obj is Sequential || obj is IList) && RT.seq(obj) == null;
         }
@@ -135,7 +135,11 @@ namespace clojure.lang
 
         public bool equiv(object o)
         {
-            return Equals(o);
+            ISeq s = seq();
+            if (s != null)
+                return s.equiv(o);
+            else
+                return (o is Sequential || o is IList) && RT.seq(o) == null;
         }
 
         #endregion
