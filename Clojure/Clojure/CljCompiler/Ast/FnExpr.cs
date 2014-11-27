@@ -59,17 +59,24 @@ namespace clojure.lang.CljCompiler.Ast
             ObjMethod enclosingMethod = (ObjMethod)Compiler.MethodVar.deref();
 
             string baseName = enclosingMethod != null
-                ? (enclosingMethod.Objx.Name + "$")
+                ? enclosingMethod.Objx.Name
                 : Compiler.munge(Compiler.CurrentNamespace.Name.Name) + "$";
 
-            if (RT.second(form) is Symbol)
-                name = ((Symbol)RT.second(form)).Name;
+            Symbol nm = RT.second(form) as Symbol;
 
-            string simpleName = name != null ?
-                        (Compiler.munge(name).Replace(".", "_DOT_")
-                        + (enclosingMethod != null ? "__" + RT.nextID() : ""))
-                        : ("fn"
-                          + "__" + RT.nextID());            
+            if (nm != null )
+            {
+                name = nm.Name + "__" + RT.nextID();
+            }
+            else
+            {
+                if (name == null)
+                    name = "fn__" + RT.nextID();
+                else if (enclosingMethod != null)
+                    name += "__" + RT.nextID();
+            }
+
+            string simpleName = Compiler.munge(name).Replace(".", "_DOT_");
 
             _name = baseName + simpleName;
             InternalName = _name.Replace('.', '/');
@@ -116,9 +123,9 @@ namespace clojure.lang.CljCompiler.Ast
             List<string> prims = new List<string>();
 
             //arglist might be preceded by symbol naming this fn
-            if (RT.second(form) is Symbol)
+             Symbol nm = RT.second(form) as Symbol;
+            if (nm != null)
             {
-                Symbol nm = (Symbol)RT.second(form);
                 fn._thisName = nm.Name;
                 fn._isStatic = false; // RT.booleanCast(RT.get(nm.meta(), Compiler.STATIC_KEY));
                 form = RT.cons(Compiler.FnSym, RT.next(RT.next(form)));
