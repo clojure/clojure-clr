@@ -13,15 +13,27 @@
  **/
 
 
+using System.Diagnostics.CodeAnalysis;
 namespace clojure.lang
 {
     public interface IAtom
     {
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "swap")]   
         object swap(IFn f);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "swap")]
         object swap(IFn f, object arg);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "swap")]
         object swap(IFn f, object arg1, object arg2);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "swap")]
         object swap(IFn f, object x, object y, ISeq args);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "compare")]
         bool compareAndSet(object oldv, object newv);
+
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "reset")]
         object reset(object newval);
     }
 }

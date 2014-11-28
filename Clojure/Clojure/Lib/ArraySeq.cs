@@ -272,7 +272,7 @@ namespace clojure.lang
 
         #endregion
 
-        #region
+        #region overrides
 
         public override int IndexOf(object value)
         {
@@ -280,7 +280,6 @@ namespace clojure.lang
         }
 
         #endregion
-
     }
 
     [Serializable]

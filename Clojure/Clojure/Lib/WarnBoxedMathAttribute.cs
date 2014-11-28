@@ -6,9 +6,10 @@ using System.Text;
 namespace clojure.lang
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class WarnBoxedMathAttribute : Attribute
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
+    public sealed class WarnBoxedMathAttribute : Attribute
     {
-        public bool Value { get; set; }
+        public bool Value { get; private set; }
 
         public WarnBoxedMathAttribute(bool val)
         {

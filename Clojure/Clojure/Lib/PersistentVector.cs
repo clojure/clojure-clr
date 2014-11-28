@@ -950,7 +950,7 @@ namespace clojure.lang
             throw new InvalidOperationException();
         }
 
-        public object reduce(IFn f, object init)
+        public object reduce(IFn f, object start)
         {
             int step = 0;
             for (int i = 0; i < _cnt; i += step)
@@ -958,13 +958,13 @@ namespace clojure.lang
                 Object[] array = ArrayFor(i);
                 for (int j = 0; j < array.Length; ++j)
                 {
-                    init = f.invoke(init, array[j]);
-                    if (RT.isReduced(init))
-                        return ((IDeref)init).deref();
+                    start = f.invoke(start, array[j]);
+                    if (RT.isReduced(start))
+                        return ((IDeref)start).deref();
                 }
                 step = array.Length;
             }
-            return init;
+            return start;
         }
 
 

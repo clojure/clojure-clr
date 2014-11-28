@@ -252,7 +252,8 @@ namespace clojure.lang
             if (ovar != null)
             {
                 Namespace ns = ovar.Namespace;
-                if (ns == this || (v is Var && ((Var)v).ns == RT.ClojureNamespace))
+                Var vv = v as Var;
+                if (ns == this || (vv != null && vv.ns == RT.ClojureNamespace))
                     return;
                 if (ns != RT.ClojureNamespace)
                     throw new InvalidOperationException(sym + " already refers to: " + o + " in namespace: " + _name);

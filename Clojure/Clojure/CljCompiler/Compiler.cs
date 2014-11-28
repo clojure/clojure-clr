@@ -190,7 +190,8 @@ namespace clojure.lang
 
         internal static readonly Var CompilerContextVar = Var.create(null).setDynamic();
         internal static readonly Var CompilerActiveVar = Var.create(false).setDynamic();
-
+        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible")]  
         public static Var CompilerOptionsVar;
 
         public static object GetCompilerOption(Keyword k)

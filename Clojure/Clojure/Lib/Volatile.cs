@@ -29,6 +29,7 @@ namespace clojure.lang
             return _val;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "reset")]
         public object reset(object newval)
         {
             return _val = newval;

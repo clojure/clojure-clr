@@ -35,12 +35,14 @@ namespace clojure.lang
         {
             _stepper = stepper;
         }
-
+        
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static LazyTransformer create(IFn xform, Object coll)
         {
             return new LazyTransformer(new Stepper(xform, RT.iter(coll)));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static LazyTransformer createMulti(IFn xform, Object[] colls)
         {
             IEnumerator[] enums = new IEnumerator[colls.Length];
@@ -361,6 +363,8 @@ namespace clojure.lang
 
         public interface IStepper
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Step")]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "step")]
             void step(LazyTransformer lt);
         }
 

@@ -181,16 +181,16 @@ namespace clojure.lang
         /// <summary>
         /// Set the value.
         /// </summary>
-        /// <param name="newv">The new value.</param>
+        /// <param name="newval">The new value.</param>
         /// <returns>The new value.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public object reset(object newv)
+        public object reset(object newval)
         {
-            object oldv = _state.Get();
-            Validate(newv);
-            _state.Set(newv);
-            NotifyWatches(oldv, newv);
-            return newv;
+            object oldval = _state.Get();
+            Validate(newval);
+            _state.Set(newval);
+            NotifyWatches(oldval, newval);
+            return newval;
         }
 
         #endregion

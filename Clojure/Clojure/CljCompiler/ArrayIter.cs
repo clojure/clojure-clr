@@ -34,13 +34,13 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static IEnumerator<Object> create(params Object[] items )
         {
             return ArrayEnumerable<object>(items,0).GetEnumerator();
         }
 
-
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static IEnumerator createFromObject(object array)
         {
             if (array == null)
