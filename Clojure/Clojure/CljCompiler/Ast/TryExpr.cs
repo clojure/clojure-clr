@@ -242,7 +242,7 @@ namespace clojure.lang.CljCompiler.Ast
                 clause.Lb.LocalVar = ilg.DeclareLocal(clause.Type);
                 ilg.Emit(OpCodes.Stloc, clause.Lb.LocalVar);
                 clause.Handler.Emit(rhc, objx, ilg);
-                if (rhc != RHC.Statement)
+                if (clause.Handler.HasNormalExit() && rhc != RHC.Statement)
                     ilg.Emit(OpCodes.Stloc, retLocal);
             }
 
