@@ -122,12 +122,14 @@ namespace clojure.lang.CljCompiler.Ast
             if (IsStaticCall)
             {
                 if (Intrinsics.HasOp(_method))
-                    Intrinsics.EmitOp(_method,ilg);
+                    Intrinsics.EmitOp(_method, ilg);
                 else
                     ilg.Emit(OpCodes.Call, _method);
             }
+            else if (_method.IsVirtual)
+                ilg.Emit(OpCodes.Callvirt, _method);
             else
-                ilg.Emit(OpCodes.Callvirt, _method); 
+                ilg.Emit(OpCodes.Call, _method);
         }
 
         public static readonly MethodInfo Method_MethodExpr_GetDelegate = typeof(MethodExpr).GetMethod("GetDelegate");
