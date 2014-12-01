@@ -545,7 +545,9 @@ namespace clojure.lang
                 if (sig.ReturnType == typeof(void))
                     gen.Emit(OpCodes.Pop);
                 else if (sig.ReturnType.IsValueType)
-                    gen.Emit(OpCodes.Unbox_Any,sig.ReturnType);
+                    gen.Emit(OpCodes.Unbox_Any, sig.ReturnType);
+                else
+                    gen.Emit(OpCodes.Castclass, sig.ReturnType);
                 gen.Emit(OpCodes.Br_S, endLabel);
 
                 gen.MarkLabel(elseLabel);
