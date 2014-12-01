@@ -32,7 +32,8 @@ namespace clojure.lang
         #region other constants
 
         internal const int MaxPositionalArity = 20;
-        internal const string CompileStubPrefix = "compile__stub";
+        //internal const string CompileStubPrefix = "compile__stub";
+        internal const string DeftypeBaseClassNamePrefix = "DeftypeBase";
 
         #endregion
 
@@ -429,14 +430,6 @@ namespace clojure.lang
         public static Namespace CurrentNamespace
         {
             get { return (Namespace)RT.CurrentNSVar.deref(); }
-        }
-
-        public static string DestubClassName(String className)
-        {
-            //skip over prefix + '.' or '/'
-            if (className.StartsWith(CompileStubPrefix))
-                return className.Substring(CompileStubPrefix.Length + 1);
-            return className;
         }
 
         public static object Resolve(Symbol symbol, bool allowPrivate)

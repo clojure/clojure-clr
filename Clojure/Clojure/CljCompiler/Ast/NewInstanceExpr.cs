@@ -169,11 +169,8 @@ namespace clojure.lang.CljCompiler.Ast
 
             GenContext genC = context.WithNewDynInitHelper(ret.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
 
-            Type stub = CompileStub(genC, superClass, ret, SeqToTypeArray(interfaces), frm);
-            Symbol thisTag = Symbol.intern(null, stub.FullName);
-            //Symbol stubTag = Symbol.intern(null,stub.FullName);
-            //Symbol thisTag = Symbol.intern(null, tagName);
-
+            Type baseClass = ret.CompileBaseClass(genC, superClass, SeqToTypeArray(interfaces), frm);
+            Symbol thisTag = Symbol.intern(null, baseClass.FullName);
 
             try
             {
@@ -197,7 +194,7 @@ namespace clojure.lang.CljCompiler.Ast
                             Compiler.MethodVar, null,
                             Compiler.LocalEnvVar, ret.Fields,
                             Compiler.CompileStubSymVar, Symbol.intern(null, tagName),
-                            Compiler.CompileStubClassVar, stub
+                            Compiler.CompileStubClassVar, baseClass
                             ));
                     ret._hintedFields = RT.subvec(fieldSyms, 0, fieldSyms.count() - ret._altCtorDrops);
                 }
@@ -228,13 +225,10 @@ namespace clojure.lang.CljCompiler.Ast
                 Var.popThreadBindings();
             }
 
-            // TOD:  Really, the first stub here should be 'superclass' but can't handle hostexprs nested in method bodies -- reify method compilation takes place before this sucker is compiled, so can't replace the call.
-            // Might be able to flag stub classes and not try to convert, leading to a dynsite.
+            // TOD:  Really, the first baseclass here should be 'superclass' but can't handle hostexprs nested in method bodies -- reify method compilation takes place before this sucker is compiled, so can't replace the call.
+            // Might be able to flag baseclass classes and not try to convert, leading to a dynsite.
 
-            //if (RT.CompileDLR)
-            ret.Compile(stub, stub, interfaces, false, genC);
-            //else
-            //    ret.CompileNoDlr(stub, stub, interfaces, false, genC);
+            ret.Compile(baseClass, baseClass, interfaces, false, genC);
 
             Compiler.RegisterDuplicateType(ret.CompiledType);
 
@@ -251,6 +245,8 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         /***
+         * THIS COMMENT IS FROM THE JVM version.Not exactly true for us.
+         * 
          * Current host interop uses reflection, which requires pre-existing classes
          * Work around this by:
          * Generate a stub class that has the same interfaces and fields as the class we are generating.
@@ -258,29 +254,65 @@ namespace clojure.lang.CljCompiler.Ast
          * Unmunge the name (using a magic prefix) on any code gen for classes
          */
 
-        // TODO: Preparse method heads to pick up signatures, implement those methods as abstract or as NotImpelmented so that Reflection can pick up calls during compilation and avoide a callsite.
-        static Type CompileStub(GenContext context, Type super, NewInstanceExpr ret, Type[] interfaces, Object frm)
+        /*
+         * We can't just play fake renaming games here.
+         * We need an actual base class under our class.
+         * The base class:
+         *   Has a default ctor.
+         *   Has instance variables for the closed-over values.
+         *   Provides a ctor which initializes those instance variables.
+         *   
+         * */
+
+        Type CompileBaseClass(GenContext context, Type super, Type[] interfaces, Object frm)
         {
-            TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.CompileStubPrefix + "." + ret.InternalName + RT.nextID(), TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
+            //TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.CompileStubPrefix + "." + InternalName + RT.nextID(), TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
+            TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.DeftypeBaseClassNamePrefix + "." + InternalName + RT.nextID(), TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
 
             tb.DefineDefaultConstructor(MethodAttributes.Public);
+            EmitClosedOverFields(tb);
+            DefineBaseClassClosedOverConstructors(super, tb);
+            DefineBaseClassMethods(interfaces, tb);
 
-            ret.EmitClosedOverFields(tb);
+            Type t = tb.CreateType();
+            _baseClass = t;
 
+            _baseClassClosedOverCtor = GetConstructorWithArgCount(t, CtorTypes().Length);
+            if (_altCtorDrops > 0)
+                _baseClassAltCtor = GetConstructorWithArgCount(t, CtorTypes().Length - _altCtorDrops);
+
+            return t;
+        }
+
+        private void DefineBaseClassClosedOverConstructors(Type super, TypeBuilder tb)
+        {
             // ctor that takes closed-overs and does nothing
-            if (ret.CtorTypes().Length > 0)
+            if (CtorTypes().Length > 0)
             {
-                ConstructorBuilder cb = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, ret.CtorTypes());
+                ConstructorBuilder cb = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis,CtorTypes());
                 CljILGen ilg = new CljILGen(cb.GetILGenerator());
                 ilg.EmitLoadArg(0);
                 ilg.Emit(OpCodes.Call, super.GetConstructor(Type.EmptyTypes));
+
+                // store closed-overs in their fields
+                int a = 0;
+
+                for (ISeq s = RT.keys(Closes); s != null; s = s.next(), a++)
+                {
+                    FieldBuilder fb = _closedOverFields[a];
+                    bool isVolatile = IsVolatile(_closedOverFieldsToBindingsMap[fb]);
+
+                    ilg.EmitLoadArg(0);             // gen.Emit(OpCodes.Ldarg_0);
+                    ilg.EmitLoadArg(a + 1);         // gen.Emit(OpCodes.Ldarg, a + 1);
+                    ilg.MaybeEmitVolatileOp(isVolatile);
+                    ilg.Emit(OpCodes.Stfld, fb);
+                }
                 ilg.Emit(OpCodes.Ret);
 
-
-                if (ret._altCtorDrops > 0)
+                if (_altCtorDrops > 0)
                 {
-                    Type[] ctorTypes = ret.CtorTypes();
-                    int newLen = ctorTypes.Length - ret._altCtorDrops;
+                    Type[] ctorTypes = CtorTypes();
+                    int newLen = ctorTypes.Length - _altCtorDrops;
                     if (newLen > 0)
                     {
                         Type[] altCtorTypes = new Type[newLen];
@@ -291,21 +323,25 @@ namespace clojure.lang.CljCompiler.Ast
                         ilg2.EmitLoadArg(0);
                         for (int i = 0; i < newLen; i++)
                             ilg2.EmitLoadArg(i + 1);
-                        for (int i = 0; i < ret._altCtorDrops; i++)
+                        for (int i = 0; i < _altCtorDrops; i++)
                             ilg2.EmitNull();
                         ilg2.Emit(OpCodes.Call, cb);
                         ilg2.Emit(OpCodes.Ret);
                     }
                 }
             }
+        }
 
+
+        private static void DefineBaseClassMethods(Type[] interfaces, TypeBuilder tb)
+        {
             Dictionary<string, List<MethodInfo>> impled = new Dictionary<string, List<MethodInfo>>();
 
             foreach (Type itype in interfaces)
             {
                 foreach (MethodInfo mi in itype.GetMethods())
                 {
-                    bool isExplicit = HasShadowedMethod(mi,impled);
+                    bool isExplicit = HasShadowedMethod(mi, impled);
 
                     EmitDummyMethod(tb, mi, isExplicit);
 
@@ -315,12 +351,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 }
             }
-
-            Type t = tb.CreateType();
-            //Compiler.RegisterDuplicateType(t);
-            return t;
         }
-
         private static bool HasShadowedMethod(MethodInfo mi, Dictionary<string, List<MethodInfo>> impled)
         {
             List<MethodInfo> possibles;

@@ -68,6 +68,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected ConstructorInfo _ctorInfo;
 
+        protected ConstructorInfo _baseClassClosedOverCtor;  // needed by NewInstanceExpr
+        protected ConstructorInfo _baseClassAltCtor;          // needed by NewInstanceExpr
+        protected Type _baseClass;                           // needed by NewInstanceExpr
+
         public IPersistentVector KeywordCallsites { get; set; }
         List<FieldBuilder> _keywordLookupSiteFields;
         List<FieldBuilder> _thunkFields;
@@ -77,9 +81,9 @@ namespace clojure.lang.CljCompiler.Ast
 
 
         FieldBuilder _metaField;
-        List<FieldBuilder> _closedOverFields;
-        Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;
-        Dictionary<FieldBuilder, LocalBinding> _closedOverFieldsToBindingsMap;
+        protected List<FieldBuilder> _closedOverFields;
+        protected Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;
+        protected Dictionary<FieldBuilder, LocalBinding> _closedOverFieldsToBindingsMap;
 
         protected int _altCtorDrops;
 
@@ -275,6 +279,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation 
 
+        #region Emitting a Fn
+
         public virtual void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             //emitting a Fn means constructing an instance, feeding closed-overs from enclosing scope, if any
@@ -306,14 +312,16 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Pop);
         }
 
+        #endregion
+
+        #region Fn class construction
+
         public Type Compile(Type superType, Type stubType, IPersistentVector interfaces, bool onetimeUse, GenContext context)
         {
             if (_compiledType != null)
                 return _compiledType;
 
             string publicTypeName = IsDefType || (_isStatic && Compiler.IsCompiling) ? InternalName : InternalName + "__" + RT.nextID();
-
-            //Console.WriteLine("DefFn {0}, {1}", publicTypeName, context.AssemblyBuilder.GetName().Name);
 
             _typeBuilder = context.AssemblyGen.DefinePublicType(publicTypeName, superType, true);
             context = context.WithNewDynInitHelper().WithTypeBuilder(_typeBuilder);
@@ -378,21 +386,7 @@ namespace clojure.lang.CljCompiler.Ast
                     if (context.DynInitHelper != null)
                         context.DynInitHelper.FinalizeType();
 
-                    //  If we don't pick up the ctor after we finalize the type, 
-                    //    we sometimes get a ctor which is not a RuntimeConstructorInfo
-                    //  This causes System.DynamicILGenerator.Emit(opcode,ContructorInfo) to blow up.
-                    //    The error says the ConstructorInfo is null, but there is a second case in the code.
-                    //  Thank heavens one can run Reflector on mscorlib.
-
-                    ConstructorInfo[] cis = _compiledType.GetConstructors();
-                    foreach (ConstructorInfo ci in cis)
-                    {
-                        if (ci.GetParameters().Length == CtorTypes().Length)
-                        {
-                            _ctorInfo = ci;
-                            break;
-                        }
-                    }
+                    _ctorInfo = GetConstructorWithArgCount(_compiledType, CtorTypes().Length);
 
                     return _compiledType;
                 }
@@ -536,13 +530,48 @@ namespace clojure.lang.CljCompiler.Ast
 
         private ConstructorBuilder EmitConstructor(TypeBuilder fnTB, Type baseType)
         {
+            if (IsDefType)
+                return EmitConstructorForDefType(fnTB, baseType);
+            else
+                return EmitConstructorForNonDefType(fnTB, baseType);
+        }
+
+        private ConstructorBuilder EmitConstructorForDefType(TypeBuilder fnTB, Type baseType)
+        {
+            ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, CtorTypes());
+            CljILGen gen = new CljILGen(cb.GetILGenerator());
+
+            GenContext.EmitDebugInfo(gen, SpanMap);
+
+            // Pass closed-overs to base class ctor
+
+            gen.EmitLoadArg(0);             // gen.Emit(OpCodes.Ldarg_0);
+            int a = 0;
+            for (ISeq s = RT.keys(Closes); s != null; s = s.next(), a++)
+            {
+                //LocalBinding lb = (LocalBinding)s.first();
+                FieldBuilder fb = _closedOverFields[a];
+                bool isVolatile = IsVolatile(_closedOverFieldsToBindingsMap[fb]);
+
+                gen.EmitLoadArg(a + 1);         // gen.Emit(OpCodes.Ldarg, a + 1);
+            }
+            gen.Emit(OpCodes.Call, _baseClassClosedOverCtor);
+
+            gen.Emit(OpCodes.Ret);
+
+            return cb;
+        }
+
+
+        private ConstructorBuilder EmitConstructorForNonDefType(TypeBuilder fnTB, Type baseType)
+        {
             ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, CtorTypes());
             CljILGen gen = new CljILGen(cb.GetILGenerator());
 
             GenContext.EmitDebugInfo(gen, SpanMap);
 
             //Call base constructor
-            ConstructorInfo baseCtorInfo = baseType.GetConstructor(BindingFlags.Instance|BindingFlags.NonPublic|BindingFlags.Public,null,Type.EmptyTypes,null);
+            ConstructorInfo baseCtorInfo = baseType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public, null, Type.EmptyTypes, null);
             if (baseCtorInfo == null)
                 throw new InvalidOperationException("Unable to find default constructor for " + baseType.FullName);
 
@@ -745,6 +774,31 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+        //  If we don't pick up the ctor after we finalize the type, 
+        //    we sometimes get a ctor which is not a RuntimeConstructorInfo
+        //  This causes System.DynamicILGenerator.Emit(opcode,ContructorInfo) to blow up.
+        //    The error says the ConstructorInfo is null, but there is a second case in the code.
+        //  Thank heavens one can run Reflector on mscorlib.
+        //
+        // We will take the first ctor with indicated number of args.
+        // In our use case, it should be unique.
+        static protected ConstructorInfo GetConstructorWithArgCount(Type t, int numArgs)
+        {
+            ConstructorInfo[] cis = t.GetConstructors();
+            foreach (ConstructorInfo ci in cis)
+            {
+                if (ci.GetParameters().Length == numArgs)
+                {
+                    return ci;
+                }
+            }
+            return null;
+        }
+
+        #endregion
+
+        #region Direct code generation
+        
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         protected void EmitValue(object value, CljILGen ilg)
         {
@@ -1182,6 +1236,8 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         public bool HasNormalExit() { return true; }
+
+        #endregion
 
         #endregion
     }
