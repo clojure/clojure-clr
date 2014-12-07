@@ -155,7 +155,7 @@
     (Murmur3/HashOrdered this))                                                                  ;;; hashOrdered
  
   clojure.lang.Counted
-  (count [_] cnt)
+  (clojure.lang.Counted.count [_] cnt)
 
   clojure.lang.IMeta
   (meta [_] _meta)
@@ -242,6 +242,8 @@
          (new Vec am cnt shift (.doAssoc this shift root i val) tail (meta this)))
      (= i cnt) (.cons this val)
      :else (throw (IndexOutOfRangeException.))))                                               ;;; IndexOutOfBoundsException
+
+  (count [_] cnt)
   
   clojure.lang.Reversible
   (rseq [this]
