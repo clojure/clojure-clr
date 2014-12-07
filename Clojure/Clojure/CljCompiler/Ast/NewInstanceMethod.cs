@@ -365,7 +365,7 @@ namespace clojure.lang.CljCompiler.Ast
         public override void Emit(ObjExpr fn, TypeBuilder tb)
         {
 
-            MethodBuilder mb = tb.DefineMethod(GetMethodName(), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, GetReturnType(), GetArgTypes());
+            MethodBuilder mb = tb.DefineMethod(GetMethodName(), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig, GetReturnType(), GetArgTypes());
             SetCustomAttributes(mb);
 
             CljILGen ilg = new CljILGen(mb.GetILGenerator());
