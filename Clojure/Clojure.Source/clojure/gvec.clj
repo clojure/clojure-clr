@@ -189,7 +189,7 @@
             (new Vec am (inc cnt) (+ shift (int 5)) new-root (let [tl (.array am 1)] (.aset am  tl 0 val) tl) (meta this)))
           (new Vec am (inc cnt) shift (.pushTail this shift root tail-node) 
                  (let [tl (.array am 1)] (.aset am  tl 0 val) tl) (meta this))))))
-
+  (count [_] cnt)                                                                                        ;;; ADDED
   (empty [_] (new Vec am 0 5 EMPTY-NODE (.array am 0) nil))                             
   (equiv [this o]
     (cond 
@@ -243,7 +243,7 @@
      (= i cnt) (.cons this val)
      :else (throw (IndexOutOfRangeException.))))                                               ;;; IndexOutOfBoundsException
 
-  (count [_] cnt)
+  (clojure.lang.IPersistentVector.count [_] cnt)
   
   clojure.lang.Reversible
   (rseq [this]

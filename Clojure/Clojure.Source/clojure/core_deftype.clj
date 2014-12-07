@@ -261,7 +261,8 @@
            [(conj i 'clojure.lang.IPersistentCollection)                                                  ;;; ADDED
             (conj m                                                                                       ;;; ADDED                   
                   `(clojure.lang.IPersistentCollection.cons [this# e#]                                    ;;; ADDED
-                        ((var imap-cons) this# e#)))])                                                    ;;; ADDED
+                        ((var imap-cons) this# e#))                                                       ;;; ADDED                   
+			      `(clojure.lang.IPersistentCollection.count [this#] (+ ~(count base-fields) (count ~'__extmap))))])	  ;;; ADDED
       (associative                                                                                        ;;; ADDED
             [[i m]]                                                                                       ;;; ADDED
             [(conj i 'clojure.lang.Associative)                                                           ;;; ADDED
