@@ -92,13 +92,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             _expr.Emit(RHC.Expression, objx, ilg);
 
-            // This corresponds to the most general case code in System.Linq.Expressions.Compiler.LambdaCompiler
-
-            Type opType = _expr.HasClrType && _expr.ClrType != null ? _expr.ClrType : typeof(object);
-            if (opType.IsValueType)
-            {
-                ilg.Emit(OpCodes.Box, opType);
-            }
             ilg.Emit(OpCodes.Isinst, _t);
             ilg.Emit(OpCodes.Ldnull);
             ilg.Emit(OpCodes.Cgt_Un);
