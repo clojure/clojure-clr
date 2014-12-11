@@ -157,7 +157,7 @@
 
 
 (deftest test-bases
-  (are [x y] (= x y)
+  (are [x y] (= (set x) (set y))                                ;;; added calls to set
       (bases  System.Math)                                      ;;; java.lang.Math)
         (list System.Object)                                    ;;; java.lang.Object)
       (bases System.Collections.ICollection)                    ;;; java.util.Collection)
