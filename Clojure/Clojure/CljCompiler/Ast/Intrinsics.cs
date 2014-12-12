@@ -94,9 +94,9 @@ namespace clojure.lang.CljCompiler.Ast
             AddOp(nt, "multiply", ddta, OpCodes.Mul);
             AddOp(nt, "divide", ddta, OpCodes.Div);
             AddOp(nt, "remainder", llta, OpCodes.Rem);
-            AddOp(nt, "shiftLeft", llta, OpCodes.Conv_I4, OpCodes.Shl);
-            AddOp(nt, "shiftRight", llta, OpCodes.Conv_I4, OpCodes.Shr);
-            AddOp(nt, "unsignedShiftRight", llta, OpCodes.Conv_I4, OpCodes.Shr_Un);
+            AddOp(nt, "shiftLeft", llta,  OpCodes.Shl);
+            AddOp(nt, "shiftRight", llta,  OpCodes.Shr);
+            AddOp(nt, "unsignedShiftRight", llta, OpCodes.Shr_Un);
             AddOp(nt, "minus", dta, OpCodes.Neg);
             AddOp(nt, "minus", ddta, OpCodes.Sub);
             AddOp(nt, "inc", dta, OpCodes.Ldc_I4_1, OpCodes.Conv_R8, OpCodes.Add);
@@ -258,6 +258,27 @@ namespace clojure.lang.CljCompiler.Ast
         public static void EmitOp(MethodInfo method, ILGen ilg)
         {
             OpCode[] opcodes = _ops[method];
+
+            // special case the shift methods because we didn't create a way to embed arguments to the opcodes.
+            // the long second-arg bit-shifts need to mask to a value <= 63
+            // the int second-arg bit-shifts need to maks to a value <= 31
+            switch (method.Name)
+            {
+                case "shiftLeft":
+                case "shiftRight":
+                case "unsignedShiftRight":
+                    ilg.Emit(OpCodes.Conv_I4);
+                    ilg.EmitInt(0x3f);
+                    ilg.Emit(OpCodes.And);
+                    break;
+
+                case "shiftLeftInt":
+                case "shiftRightInt":
+                case "unsignedShiftRightInt":
+                    ilg.EmitInt(0x1f);
+                    ilg.Emit(OpCodes.And);
+                    break;
+            }
 
             foreach ( OpCode opcode in opcodes )
                 ilg.Emit(opcode);
