@@ -819,6 +819,12 @@ namespace clojure.lang
             if (d != null)
                 return d.Count;
 
+            if (o is DictionaryEntry)
+                return 2;
+
+            if (o.GetType().IsGenericType && o.GetType().Name == "KeyValuePair`2")
+                return 2;
+
             Array a = o as Array;
             if (a != null)
                 return a.GetLength(0);
