@@ -416,11 +416,11 @@ namespace clojure.lang
         {
             #region Data
 
-            [NonSerialized] AtomicReference<Thread> _edit;
-            INode _root;
-            int _count;
-            bool _hasNull;
-            object _nullValue;
+            [NonSerialized] readonly AtomicReference<Thread> _edit;
+            volatile INode _root;
+            volatile int _count;
+            volatile bool _hasNull;
+            volatile object _nullValue;
             readonly Box _leafFlag = new Box(null);
 
             #endregion

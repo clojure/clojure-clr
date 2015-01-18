@@ -615,10 +615,10 @@ namespace clojure.lang
         {
             #region Data
 
-            int _cnt;
-	        int _shift;
-	        Node _root;
-            object[] _tail;
+            volatile int _cnt;
+            volatile int _shift;
+            volatile Node _root;
+            volatile object[] _tail;
 
             #endregion
 

@@ -13,18 +13,13 @@
  **/
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Scripting.Utils;
 using System.ComponentModel;
 using System.Reflection;
 using Microsoft.Scripting.Actions.Calls;
-using System.Collections;
 using Microsoft.Scripting.Runtime;
-using System.Runtime.CompilerServices;
-using Microsoft.Scripting.Actions;
-using Microsoft.Scripting;
+using Microsoft.Scripting.Utils;
 
 namespace clojure.lang.Runtime
 {

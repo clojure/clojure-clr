@@ -585,10 +585,10 @@ namespace clojure.lang
         {
             #region Data
 
-            int _len;
+            volatile int _len;
             readonly object[] _array;
             
-            [NonSerialized] Thread _owner;
+            [NonSerialized] volatile Thread _owner;
 
             #endregion
 

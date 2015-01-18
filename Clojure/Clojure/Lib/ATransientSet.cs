@@ -19,7 +19,7 @@ namespace clojure.lang
     {
         #region Data
 
-        protected ITransientMap _impl;
+        protected volatile ITransientMap _impl;
 
         #endregion
 
