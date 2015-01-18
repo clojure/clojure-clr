@@ -197,25 +197,33 @@ namespace clojure.lang
 
         public object reduce(IFn f)
         {
-            //object ret = Reflector.prepRet(_ct,_array[_i]);
+            if (_array == null)
+                return null;
+
             object ret = _array[_i];
             for (int x = _i + 1; x < _array.Length; x++)
             {
-                //ret = f.invoke(ret, Reflector.prepRet(_ct, _array[x]));
                 ret = f.invoke(ret, _array[x]);
+                if (RT.isReduced(ret))
+                    return ((IDeref)ret).deref();
             }
             return ret;
         }
 
         public object reduce(IFn f, object start)
         {
-            //object ret = f.invoke(start, Reflector.prepRet(_ct, _array[_i]));
+            if (_array == null)
+                return null;
+
             object ret = f.invoke(start, _array[_i]);
             for (int x = _i + 1; x < _array.Length; x++)
             {
-                //ret = f.invoke(ret, Reflector.prepRet(_ct, _array[x]));
+                if (RT.isReduced(ret))
+                    return ((IDeref)ret).deref(); 
                 ret = f.invoke(ret, _array[x]);
             }
+            if (RT.isReduced(ret))
+                return ((IDeref)ret).deref(); 
             return ret;
         }
 

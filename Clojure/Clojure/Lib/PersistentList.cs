@@ -274,11 +274,13 @@ namespace clojure.lang
         public object reduce(IFn f, object start)
         {
             object ret = f.invoke(start, first());
-            for (ISeq s = next(); s != null; s = s.next()) { 
-                ret = f.invoke(ret, s.first());
+            for (ISeq s = next(); s != null; s = s.next()) {
                 if (RT.isReduced(ret))
-                    return ((IDeref)ret).deref();
+                    return ((IDeref)ret).deref(); 
+                ret = f.invoke(ret, s.first());
             }
+            if (RT.isReduced(ret))
+                return ((IDeref)ret).deref();
             return ret;
         }
 
