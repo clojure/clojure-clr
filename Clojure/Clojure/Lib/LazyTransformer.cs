@@ -26,6 +26,8 @@ namespace clojure.lang
         IStepper _stepper;
         object _first = null;
         LazyTransformer _rest = null;
+        [NonSerialized] int _hash = -1;
+        [NonSerialized] int _hasheq = -1;
 
         #endregion
 
@@ -67,10 +69,16 @@ namespace clojure.lang
 
         public override int GetHashCode()
         {
-            ISeq s = seq();
-            if (s == null)
-                return 1;
-            return Util.hash(s);
+            if (_hash == -1)
+            {
+                int hash = 1;
+                for (ISeq s = seq(); s != null; s = s.next())
+                {
+                    hash = 31 * hash + (s.first() == null ? 0 : s.first().GetHashCode());
+                }
+                this._hash = hash;
+            }
+            return _hash;
         }
 
         public override bool Equals(object obj)
@@ -354,7 +362,11 @@ namespace clojure.lang
 
         public int hasheq()
         {
-            return Murmur3.HashOrdered(this);
+            if (_hasheq == -1)
+            {
+                _hasheq = Murmur3.HashOrdered(this);
+            }
+            return _hasheq;
         }
 
         #endregion
