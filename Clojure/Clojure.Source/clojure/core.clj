@@ -3926,11 +3926,22 @@
                 (clojure.lang.LineNumberingTextReader.))]   ;;; was (clojure.lang.LineNumberingPushbackReader.))]
     (load-reader rdr)))
 
+(defn set?
+  "Returns true if x implements IPersistentSet"
+  {:added "1.0"
+   :static true}
+  [x] (instance? clojure.lang.IPersistentSet x))
+  
 (defn set
   "Returns a set of the distinct elements of coll."
   {:added "1.0"
    :static true}
-  [coll] (clojure.lang.PersistentHashSet/create (seq coll)))
+  [coll]
+  (if (set? coll)
+    (with-meta coll nil)
+    (if (instance? clojure.lang.IReduceInit coll)
+      (persistent! (.reduce ^clojure.lang.IReduceInit coll conj! (transient #{})))
+      (persistent! (reduce1 conj! (transient #{}) coll)))))
 
 (defn ^{:private true
    :static true}
@@ -5901,12 +5912,6 @@
    :static true}
   [x] (instance? clojure.lang.IPersistentList x))
 
-(defn set?
-  "Returns true if x implements IPersistentSet"
-  {:added "1.0"
-   :static true}
-  [x] (instance? clojure.lang.IPersistentSet x))
-  
 (defn ifn?
   "Returns true if x implements IFn. Note that many data structures
   (e.g. sets and maps) implement IFn"
