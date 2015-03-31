@@ -119,7 +119,7 @@ namespace clojure.lang
                 {
                     object[] argsarray = (object[])ias.ToArray();
                     IPersistentList ret = EMPTY;
-                    for (int i = argsarray.Length - 1; i >= 0; i--)
+                    for (int i = argsarray.Length - 1; i >= ias.index(); i--)
                         ret = (IPersistentList)ret.cons(argsarray[i]);
                     return ret;
                 }
