@@ -257,3 +257,18 @@
 	             (try (load-string "(System.Threading.Thread. ^System.Threading.ThreadStart #())") 
 				   (catch Compiler+CompilerException e (throw (.InnerException e))))))			   	 
 			 ))
+
+(defrecord Y [a])
+#clojure.test_clojure.compilation.Y[1]
+(defrecord Y [b])
+
+(binding [*compile-path* "."]              ;;; "target/test-classes"
+  (compile 'clojure.test-clojure.compilation.examples))
+
+(deftest CLJ-979
+  (is (= clojure.test_clojure.compilation.examples.X
+         (class (clojure.test-clojure.compilation.examples/->X))))
+  (is (.b (clojure.test_clojure.compilation.Y. 1)))
+  (is (= clojure.test_clojure.compilation.examples.T
+         (class (clojure.test_clojure.compilation.examples.T.))
+         (class (clojure.test-clojure.compilation.examples/->T)))))
