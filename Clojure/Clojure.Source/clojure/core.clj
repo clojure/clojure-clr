@@ -352,9 +352,9 @@
   {:added "1.0"
    :static true}
   ([coll]
-   (if (instance? System.Collections.ICollection coll)                                        ;;;   java.util.Collection
-     (clojure.lang.LazilyPersistentVector/create coll)                                       
-     (. clojure.lang.LazilyPersistentVector (createOwning (to-array coll))))))
+   (if (vector? coll)
+     (with-meta coll nil)
+     (clojure.lang.LazilyPersistentVector/create coll))))
 
 (defn hash-map
   "keyval => key val

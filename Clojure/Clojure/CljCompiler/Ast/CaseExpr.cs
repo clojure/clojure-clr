@@ -112,7 +112,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (pcon.Rhc == RHC.Eval)
                     return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnOnceSym, PersistentVector.EMPTY, form)), "case__" + RT.nextID());
 
-                PersistentVector args = PersistentVector.create(form.next());
+                IPersistentVector args = LazilyPersistentVector.create(form.next());
 
                 object exprForm = args.nth(0);
                 int shift = Util.ConvertToInt(args.nth(1));

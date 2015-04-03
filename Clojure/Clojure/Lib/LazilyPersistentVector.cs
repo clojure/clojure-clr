@@ -13,6 +13,7 @@
  **/
 
 using System;
+using System.Collections;
 
 namespace clojure.lang
 {
@@ -49,15 +50,21 @@ namespace clojure.lang
         /// <param name="coll">The collection of items.</param>
         /// <returns>A <see cref="LazilyPersistentVector">LazilyPersistentVector</see>.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
-        static public IPersistentVector create(System.Collections.ICollection coll)
+        static public IPersistentVector create(object obj)
         {
-            if (!(coll is ISeq) && coll.Count <= 32)
-            {
-                object[] array = new object[coll.Count];
-                coll.CopyTo(array, 0);
-                return createOwning(array);
-            }
-            return PersistentVector.create(RT.seq(coll));
+            IReduceInit ri = obj as IReduceInit;
+            if (ri != null)
+                return PersistentVector.create(ri);
+
+            ISeq iseq = obj as ISeq;
+            if (iseq != null)
+                return PersistentVector.create(RT.seq(obj));
+
+            IEnumerable ie = obj as IEnumerable;
+            if (ie != null)
+                return PersistentVector.create1(ie);
+
+            return createOwning(RT.toArray(obj));
         }
 
         #endregion
