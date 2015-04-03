@@ -225,14 +225,10 @@ namespace clojure.lang
                 r.Unread(ch);
         }
 
-
         static internal bool isWhitespace(int ch)
         {
             return Char.IsWhiteSpace((char)ch) || ch == ',';
         }
-
-
-
 
         // Roughly a match to Java Character.digit(char,int),
         // though I don't handle all unicode digits.
