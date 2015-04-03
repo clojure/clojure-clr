@@ -219,14 +219,14 @@ namespace clojure.lang
         
         #region Character hacking
 
-        static void Unread(PushbackTextReader r, int ch)
+        static internal void Unread(PushbackTextReader r, int ch)
         {
             if (ch != -1)
                 r.Unread(ch);
         }
 
 
-        static bool isWhitespace(int ch)
+        static internal bool isWhitespace(int ch)
         {
             return Char.IsWhiteSpace((char)ch) || ch == ',';
         }

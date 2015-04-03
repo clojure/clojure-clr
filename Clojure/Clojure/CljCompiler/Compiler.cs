@@ -1663,6 +1663,14 @@ namespace clojure.lang
 
         public delegate object ReplDelegate();
 
+        static void ConsumeWhitespaces(LineNumberingTextReader lnReader)
+        {
+            int ch = lnReader.Read();
+            while (LispReader.isWhitespace(ch))
+                ch = lnReader.Read();
+            LispReader.Unread(lnReader, ch);
+        }
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
         public static object load(TextReader rdr, string sourcePath, string sourceName, string relativePath)
@@ -1672,7 +1680,9 @@ namespace clojure.lang
             object form;
 
             LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
- 
+
+            ConsumeWhitespaces(lntr);
+
             Var.pushThreadBindings(RT.mapUniqueKeys(
                 //LOADER, RT.makeClassLoader(),
                 SourcePathVar, sourcePath,
@@ -1697,6 +1707,7 @@ namespace clojure.lang
             {
                 while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
                 {
+                    ConsumeWhitespaces(lntr);
                     //LINE_AFTER.set(lntr.LineNumber);
                     //COLUMN_AFTER.set(lntr.ColumnNumber);
                     //lineAfter = lntr.LineNumber;
