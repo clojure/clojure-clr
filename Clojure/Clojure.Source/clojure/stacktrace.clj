@@ -35,7 +35,7 @@
 	(print (str class "." method)))))                                   ;;;  use when we have printf:  (printf "%s.%s" class method))))
   (print (str " (" (.GetFileName e) ":" (.GetFileLineNumber e) ")")))   ;;;  use when we have printf:  (printf " (%s:%d)" (or (.getFileName e) "") (.getLineNumber e)))
 
-(defn print-throwable
+#_(defn print-throwable
   "Prints the class and message of a Throwable."
   {:added "1.1"} 
   [tr]

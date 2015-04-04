@@ -405,9 +405,9 @@ namespace clojure.lang
                     return createHT(_array).assoc(key, val);
                 newArray = new object[_array.Length + 2];
                 if (_array.Length > 0)
-                    Array.Copy(_array, 0, newArray, 2, _array.Length);
-                newArray[0] = key;
-                newArray[1] = val;
+                    Array.Copy(_array, 0, newArray, 0, _array.Length);
+                newArray[newArray.Length-2] = key;
+                newArray[newArray.Length - 1] = val;
             }
             return create(newArray);
         }

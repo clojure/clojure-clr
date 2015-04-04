@@ -113,7 +113,7 @@ namespace clojure.lang.CljCompiler.Ast
                     // This 'optimzation' works, mostly, unless you have nested map values.
                     // The nested map values do not participate in the constants map, so you end up with the code to create the keys.
                     // Result: huge duplication of keyword creation.  3X increase in init time to the REPL.
-                    //IPersistentMap m = PersistentHashMap.EMPTY;
+                    //IPersistentMap m = PersistentArrayMap.EMPTY;
                     //for (int i = 0; i < keyvals.length(); i += 2)
                     //    m = m.assoc(((LiteralExpr)keyvals.nth(i)).Val, ((LiteralExpr)keyvals.nth(i + 1)).Val);
                     //return new ConstantExpr(m);

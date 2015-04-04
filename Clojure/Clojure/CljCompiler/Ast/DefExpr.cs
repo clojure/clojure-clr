@@ -200,8 +200,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        static readonly FieldInfo VarNsFI = typeof(Var).GetField("_ns");
-        static readonly FieldInfo VarSymFI = typeof(Var).GetField("_sym");
+        static readonly FieldInfo VarNsFI = typeof(Var).GetField("_ns", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+        static readonly FieldInfo VarSymFI = typeof(Var).GetField("_sym", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
         static readonly MethodInfo NamespaceReferMI = typeof(Namespace).GetMethod("refer");
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
