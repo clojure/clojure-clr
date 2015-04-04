@@ -94,7 +94,7 @@
   (print-args o w)
   (.Write w ")"))
 
-(defn- print-object [o, ^System.IO.TextWriter w]
+(defn- print-tagged-object [o rep ^System.IO.TextWriter w]
   (when (instance? clojure.lang.IMeta o)
     (print-meta o w))
   (.Write w "#object[")
@@ -103,8 +103,12 @@
       (print-method (.Name c) w)                   ;;; .getName
       (.Write w (.Name c))))                       ;;; .getName
   (.Write w " ")
-  (print-method (str o) w)
+  (.Write w (format "0x%x " (System.Runtime.CompilerServices.RuntimeHelpers/GetHashCode o)))   ;;; (System/identityHashCode o)
+  (print-method rep w)
   (.Write w "]"))
+
+(defn- print-object [o, ^System.IO.TextWriter w]
+  (print-tagged-object o (str o) w))
 
 (defmethod print-method Object [o, ^System.IO.TextWriter w]
   (print-object o w))
@@ -438,24 +442,36 @@
   (print-dup (.Name n) w)    ;; .name
   (.Write w ")"))
 
+(defn- deref-as-map [^clojure.lang.IDeref o]
+  (let [pending (and (instance? clojure.lang.IPending o)
+                     (not (.isRealized ^clojure.lang.IPending o)))
+        [ex val]
+        (when-not pending
+          (try [false (deref o)]
+               (catch Exception e                                  ;;; Throwable
+                 [true e])))]
+    {:status
+     (cond
+      (or ex
+          (and (instance? clojure.lang.Agent o)
+               (agent-error o)))
+      :failed
+
+      pending
+      :pending
+
+      :else
+      :ready)
+
+     :val val}))
+
 (defmethod print-method clojure.lang.IDeref [o ^System.IO.TextWriter w]
-  (print-sequential (format "#<%s@%x%s: "
-                            (.Name (class o))     ;;; .getSimpleName => .Name
-                            (System.Runtime.CompilerServices.RuntimeHelpers/GetHashCode o)         ;;;   Closest I coudl find for (System/identityHashCode o)
-                            (if (and (instance? clojure.lang.Agent o)
-                                     (agent-error o))
-                              " FAILED"
-                              ""))
-                    pr-on, "", ">", (list (if (and (instance? clojure.lang.IPending o)
-                                                   (not (.isRealized ^clojure.lang.IPending o)))
-                                            :pending
-                                            @o)), w))
+  (print-tagged-object o (deref-as-map o) w))
 
 (defmethod print-method  System.Diagnostics.StackFrame [^System.Diagnostics.StackFrame o ^System.IO.TextWriter w]                            ;;;  StackTraceElement  ^StackTraceElement
   (print-method [(symbol (.FullName (.GetType o))) (symbol (.Name (.GetMethod o))) (.GetFileName o) (.GetFileLineNumber o)] w))      ;;; (.getClassName o)  (.getMethodName o) .getFileName .getLineNumber
 
-(defn print-throwable [^Exception o ^System.IO.TextWriter w]                                                     ;;; ^Throwable
-  (.Write w "#error")
+(defn- throwable-as-map [^Exception o]                                                                           ;;; ^Throwable
   (let [base (fn [^Exception t]                                                                                  ;;; ^Throwable
                {:type (class t)
                 :message (.Message t)                                                                            ;;; .getLocalizedMessage
@@ -463,11 +479,14 @@
         via (loop [via [], ^Exception t o]                                                                       ;;; ^Throwable
               (if t
                 (recur (conj via t) (.InnerException t))                                                         ;;; .getCause
-                via))        
-        x {:cause (.Message ^Exception (last via))                                                               ;;; (.getLocalizedMessage ^Throwable
+                via))]
+   {:cause (.Message ^Exception (last via))                                                               ;;; (.getLocalizedMessage ^Throwable
            :via (vec (map base via))
-           :trace (vec (.GetFrames (System.Diagnostics.StackTrace. (or ^Exception (last via) o) true)))}]        ;;;  .getStackTrace ^Throwable  
-    (print-method x w)))
+           :trace (vec (.GetFrames (System.Diagnostics.StackTrace. (or ^Exception (last via) o) true)))}))        ;;;  .getStackTrace ^Throwable  
+
+(defn print-throwable [^Exception o ^System.IO.TextWriter w]                                                     ;;; ^Throwable
+  (.Write w "#error")
+  (print-method (throwable-as-map o) w))
 
 (defmethod print-method Exception [^Exception o ^System.IO.TextWriter w]                                         ;;; Throwable ^Throwable
   (print-throwable o w))
