@@ -29,6 +29,7 @@ namespace clojure.lang
         public int LineNumber
         {
             get { return _lineNumber; }
+            set { _lineNumber = value; }
         }
 
         private int _prevColumnNumber = 1;
