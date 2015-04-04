@@ -902,9 +902,9 @@ namespace Clojure.Tests.LibTests
             Expect(io.meta().valAt(RT.LineKey), EqualTo(3));
             IPersistentMap sourceSpanMap = (IPersistentMap)io.meta().valAt(RT.SourceSpanKey);
             Expect(sourceSpanMap.valAt(RT.StartLineKey), EqualTo(3));
-            Expect(sourceSpanMap.valAt(RT.StartColumnKey), EqualTo(2));
+            Expect(sourceSpanMap.valAt(RT.StartColumnKey), EqualTo(3));
             Expect(sourceSpanMap.valAt(RT.EndLineKey), EqualTo(4));
-            Expect(sourceSpanMap.valAt(RT.EndColumnKey),EqualTo(4));            
+            Expect(sourceSpanMap.valAt(RT.EndColumnKey),EqualTo(5));            
         }
 
         #endregion

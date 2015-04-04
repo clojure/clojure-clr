@@ -49,7 +49,7 @@ namespace Clojure.Tests.ReaderTests
         public void Initializes_properly()
         {
             Expect(_rdr.Index, EqualTo(0));
-            Expect(_rdr.ColumnNumber, EqualTo(0));
+            Expect(_rdr.ColumnNumber, EqualTo(1));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.Peek(), EqualTo((int)_sample[0]));
             Expect(_rdr.AtLineStart);
@@ -68,12 +68,12 @@ namespace Clojure.Tests.ReaderTests
                 'r', 's', 't', 'u', 'v' };
 
             int[] positions = new int[] {
-                1, 2, 3, 0,
-                1, 2, 0,
-                1, 2, 3, 4, 5, 6, 0,
-                1, 2, 3, 4, 5, 6, 0,
-                0,
-                1, 2, 3, 4, 5 };
+                2, 3, 4, 1,
+                2, 3, 1,
+                2, 3, 4, 5, 6, 7, 1, 
+                2, 3, 4, 5, 6, 7, 1, 
+                1,
+                2, 3, 4, 5,6 };
 
             int[] lines = new int[] {
                 1, 1, 1, 2,
@@ -100,11 +100,11 @@ namespace Clojure.Tests.ReaderTests
                 false, false, false, false, false
             };
 
-            int i=0;
+            int i = 0;
             int ch;
             while ((ch = _rdr.Read()) != -1)
             {
-                Expect(_rdr.Index,EqualTo(indexes[i]));
+                Expect(_rdr.Index, EqualTo(indexes[i]));
                 Expect(ch, EqualTo(chars[i]));
                 Expect(_rdr.ColumnNumber, EqualTo(positions[i]));
                 Expect(_rdr.LineNumber, EqualTo(lines[i]));
@@ -125,7 +125,7 @@ namespace Clojure.Tests.ReaderTests
                 "rstuv" };
 
             int[] positions = new int[] {
-                0,0,0,0,0,5 };
+                1,1,1,1,1,6 };
 
             int[] lineNums = new int[] {
                 2, 3, 4, 5, 6, 6 };
@@ -161,7 +161,7 @@ namespace Clojure.Tests.ReaderTests
                 new char[] { 'm',  'n',  'o', 'p',  'q' },
                 new char[] { '\n', '\n', 'r', 's',  't' },
                 new char[] { 'u',  'v' } };
-            int[] positions = new int[] { 1, 3, 1, 6, 3, 5 };
+            int[] positions = new int[] { 2, 4, 2, 7, 4, 6 };
             int[] lineNums = new int[] { 2, 3, 4, 4, 6, 6 };
             bool[] starts = new bool[] { false, false, false, false, false, true, };
             int[] indexes = new int[] { 5, 10, 16, 21, 26, 28 };
@@ -205,34 +205,34 @@ namespace Clojure.Tests.ReaderTests
         {
             int c1 = _rdr.Read();
             Expect(c1, EqualTo((int)'a'));
-            Expect(_rdr.ColumnNumber, EqualTo(1));
+            Expect(_rdr.ColumnNumber, EqualTo(2));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
             Expect(_rdr.Index, EqualTo(1));
 
             int c2 = _rdr.Read();
             Expect(c2, EqualTo((int)'b'));
-            Expect(_rdr.ColumnNumber, EqualTo(2));
+            Expect(_rdr.ColumnNumber, EqualTo(3));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
             Expect(_rdr.Index, EqualTo(2));
 
             _rdr.Unread('x');
-            Expect(_rdr.ColumnNumber, EqualTo(1));
+            Expect(_rdr.ColumnNumber, EqualTo(2));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
             Expect(_rdr.Index, EqualTo(1));
 
             int c3 = _rdr.Read();
             Expect(c3, EqualTo((int)'x'));
-            Expect(_rdr.ColumnNumber, EqualTo(2));
+            Expect(_rdr.ColumnNumber, EqualTo(3));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
             Expect(_rdr.Index, EqualTo(2));
 
             int c4 = _rdr.Read();
             Expect(c4, EqualTo((int)'c'));
-            Expect(_rdr.ColumnNumber, EqualTo(3));
+            Expect(_rdr.ColumnNumber, EqualTo(4));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
             Expect(_rdr.Index, EqualTo(3));
@@ -243,48 +243,48 @@ namespace Clojure.Tests.ReaderTests
         {
             int c1 = _rdr.Read();
             Expect(c1, EqualTo((int)'a'));
-            Expect(_rdr.ColumnNumber, EqualTo(1));
+            Expect(_rdr.ColumnNumber, EqualTo(2));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
             Expect(_rdr.Index, EqualTo(1));
 
             int c2 = _rdr.Read();
             Expect(c2, EqualTo((int)'b'));
-            Expect(_rdr.ColumnNumber, EqualTo(2));
+            Expect(_rdr.ColumnNumber, EqualTo(3));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
             Expect(_rdr.Index, EqualTo(2));
 
             int c3 = _rdr.Read();
             Expect(c3, EqualTo((int)'c'));
-            Expect(_rdr.ColumnNumber, EqualTo(3));
+            Expect(_rdr.ColumnNumber, EqualTo(4));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
             Expect(_rdr.Index, EqualTo(3));
 
             int c4 = _rdr.Read();
             Expect(c4, EqualTo((int)'\n'));
-            Expect(_rdr.ColumnNumber, EqualTo(0));
+            Expect(_rdr.ColumnNumber, EqualTo(1));
             Expect(_rdr.LineNumber, EqualTo(2));
             Expect(_rdr.AtLineStart);
             Expect(_rdr.Index, EqualTo(4));
 
             _rdr.Unread(c4);
-            Expect(_rdr.ColumnNumber, EqualTo(3));
+            Expect(_rdr.ColumnNumber, EqualTo(4));
             Expect(_rdr.LineNumber, EqualTo(1));
             Expect(_rdr.AtLineStart, False);
             Expect(_rdr.Index, EqualTo(3));
 
             int c5 = _rdr.Read();
             Expect(c5, EqualTo((int)'\n'));
-            Expect(_rdr.ColumnNumber, EqualTo(0));
+            Expect(_rdr.ColumnNumber, EqualTo(1));
             Expect(_rdr.LineNumber, EqualTo(2));
             Expect(_rdr.AtLineStart);
             Expect(_rdr.Index, EqualTo(4));
 
             int c6 = _rdr.Read();
             Expect(c6, EqualTo((int)'d'));
-            Expect(_rdr.ColumnNumber, EqualTo(1));
+            Expect(_rdr.ColumnNumber, EqualTo(2));
             Expect(_rdr.LineNumber, EqualTo(2));
             Expect(_rdr.AtLineStart, False);
             Expect(_rdr.Index, EqualTo(5));
