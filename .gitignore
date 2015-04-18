@@ -163,7 +163,7 @@ $RECYCLE.BIN/
 #
 ######
 
-lib/
+####lib/
 
 # Emacs artifacts
 *~
