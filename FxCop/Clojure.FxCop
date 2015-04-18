@@ -214,6 +214,43 @@
      </Module>
     </Modules>
    </Target>
+   <Target Name="$(ProjectDir)/../bin/4.0/Debug/Clojure.dll">
+    <Modules>
+     <Module Name="clojure.dll">
+      <Namespaces>
+       <Namespace Name="clojure.lang.CljCompiler.Ast">
+        <Types>
+         <Type Name="ObjExpr">
+          <Members>
+           <Member Name="#_closedOverFields">
+            <Messages>
+             <Message TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002" Created="2015-04-03 19:09:25Z">
+              <Issue>
+               <Item>'List&lt;FieldBuilder&gt;'</Item>
+               <Item>'ObjExpr._closedOverFields'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#EmitConstructorForDefType(System.Reflection.Emit.TypeBuilder,System.Type)">
+            <Messages>
+             <Message Id="isVolatile" TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804" Created="2015-04-03 19:09:25Z">
+              <Issue>
+               <Item>'ObjExpr.EmitConstructorForDefType(TypeBuilder, Type)'</Item>
+               <Item>'isVolatile'</Item>
+               <Item>'bool'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+      </Namespaces>
+     </Module>
+    </Modules>
+   </Target>
    <Target Name="$(ProjectDir)/../bin/4.0/Debug/Clojure.Main.exe">
     <Modules>
      <Module Name="clojure.main.exe">
@@ -231,6 +268,12 @@
   <Rules>
    <Rule TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210">
     <Resolution Name="NoStrongName">Sign {0} with a strong name key.</Resolution>
+   </Rule>
+   <Rule TypeName="DoNotExposeGenericLists" Category="Microsoft.Design" CheckId="CA1002">
+    <Resolution Name="Default">Change {0} in {1} to use Collection&lt;T&gt;, ReadOnlyCollection&lt;T&gt; or KeyedCollection&lt;K,V&gt;</Resolution>
+   </Rule>
+   <Rule TypeName="RemoveUnusedLocals" Category="Microsoft.Performance" CheckId="CA1804">
+    <Resolution Name="Default">{0} declares a variable, {1}, of type {2}, which is never used or is only assigned to. Use this variable or remove it.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>
