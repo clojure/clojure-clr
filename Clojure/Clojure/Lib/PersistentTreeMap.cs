@@ -23,7 +23,7 @@ namespace clojure.lang
     /// </summary>
     /// <remarks>
     /// <para>>Note that instances of this class are constant values
-    /// i.e., add/remove etc return new values.</para
+    /// i.e., add/remove etc return new values.</para>
     /// <para>See Okasaki, Kahrs, Larsen et al</para>
     /// </remarks>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]

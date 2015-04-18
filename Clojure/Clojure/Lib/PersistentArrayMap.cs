@@ -13,8 +13,8 @@
  **/
 
 using System;
-
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace clojure.lang
@@ -32,7 +32,7 @@ namespace clojure.lang
     /// </remarks>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
-    public class PersistentArrayMap : APersistentMap, IObj, IEditableCollection
+    public class PersistentArrayMap : APersistentMap, IObj, IEditableCollection, IMapEnumerable, IMapEnumerableTyped<Object,Object>, IEnumerable, IEnumerable<IMapEntry>
     {
         #region Data
 
@@ -699,6 +699,50 @@ namespace clojure.lang
                     return ((IDeref)init).deref();
             }
             return init;
+        }
+
+        #endregion
+
+        #region IMapEnumerable, IMapEnumerableTyped, IEnumerable ...
+
+        public IEnumerator keyEnumerator()
+        {
+            return tkeyEnumerator();
+        }
+
+        public IEnumerator valEnumerator()
+        {
+            return tvalEnumerator();
+        }
+
+        public IEnumerator<object> tkeyEnumerator()
+        {
+            for (int i = 0; i < _array.Length; i += 2)
+                yield return _array[i];
+        }
+
+        public IEnumerator<object> tvalEnumerator()
+        {
+            for (int i = 0; i < _array.Length; i += 2)
+                yield return _array[i + 1];
+        }
+
+
+        public override IEnumerator<KeyValuePair<object, object>> GetEnumerator()
+        {
+            for (int i = 0; i < _array.Length; i += 2)
+                yield return new KeyValuePair<object, object>(_array[i], _array[i + 1]);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<IMapEntry>)this).GetEnumerator();
+        }
+
+        IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
+        {
+            for (int i = 0; i < _array.Length; i += 2)
+                yield return new MapEntry(_array[i], _array[i + 1]);
         }
 
         #endregion

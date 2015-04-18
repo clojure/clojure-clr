@@ -13,6 +13,8 @@
  **/
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace clojure.lang
 {
@@ -21,7 +23,7 @@ namespace clojure.lang
     /// </summary>
     /// <remarks>See the Clojure API for more information.</remarks>
     [Serializable]
-    public class PersistentStructMap : APersistentMap, IObj
+    public class PersistentStructMap : APersistentMap, IObj, IEnumerable<IMapEntry>, IDictionary<Object, Object>
     {
 
         #region Internal classes
@@ -440,6 +442,33 @@ namespace clojure.lang
                 ? this
                 : makeNew(_meta, _def, _vals, newExt);
          }
+
+        #endregion
+
+        #region Enumerators
+
+        public override IEnumerator<KeyValuePair<object, object>> GetEnumerator()
+        {
+            var enumerator =  ((IEnumerator<IMapEntry>)this);
+            while (enumerator.MoveNext())
+            {
+                var ime = enumerator.Current;
+                yield return new KeyValuePair<object,object>(ime.key(),ime.val());
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<IMapEntry>)this).GetEnumerator();
+        }
+
+        IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
+        {
+            foreach ( IMapEntry ime in _def.Keyslots )
+                yield return ime;
+            foreach ( IMapEntry ime in _ext)
+                yield return ime;
+        }
 
         #endregion
 

@@ -36,7 +36,7 @@ namespace clojure.lang
     /// </remarks>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
-    public class PersistentHashMap: APersistentMap, IEditableCollection, IObj
+    public class PersistentHashMap : APersistentMap, IEditableCollection, IObj, IMapEnumerable, IMapEnumerableTyped<Object, Object>, IEnumerable, IEnumerable<IMapEntry>
     {
         #region Data
 
@@ -544,6 +544,90 @@ namespace clojure.lang
 
         #endregion
 
+        #region IMapEnumerable, IMapEnumerableTyped, IEnumerable, ... 
+
+        public delegate T KVMangleDel<T>(object k, object v);
+
+        static IEnumerator EmptyEnumerator()
+        {
+            return EmptyEnumeratorT<Object>();
+        }
+
+        static IEnumerator<T> EmptyEnumeratorT<T>()
+        {
+            yield break;
+        }
+
+        static IEnumerator NullIterator(KVMangleDel<Object> d, object nullValue, IEnumerator root)
+        {
+            yield return d(null, nullValue);
+            while (root.MoveNext())
+                yield return root.Current;
+        }
+
+        static IEnumerator<T> NullIteratorT<T>(KVMangleDel<T> d, object nullValue, IEnumerator<T> root)
+        {
+            yield return d(null, nullValue);
+            while (root.MoveNext())
+                yield return root.Current;
+        }
+
+        public IEnumerator MakeEnumerator(KVMangleDel<Object> d)
+        {
+            IEnumerator rootIter = (_root == null ? EmptyEnumerator() : _root.Iterator(d));
+            if (!_hasNull)
+                return rootIter;
+        
+            return NullIterator(d,_nullValue, rootIter);
+        }
+
+        public IEnumerator<T> MakeEnumeratorT<T>(KVMangleDel<T> d)
+        {
+            IEnumerator<T> rootIter = (_root == null ? EmptyEnumeratorT<T>() : _root.IteratorT<T>(d));
+            if (!_hasNull)
+                return rootIter;
+
+            return NullIteratorT(d, _nullValue, rootIter);
+        }
+
+        public IEnumerator keyEnumerator()
+        {
+            return MakeEnumerator((k,v) => k);
+        }
+
+        public IEnumerator valEnumerator()
+        {
+            return MakeEnumerator((k, v) => v);
+        }
+
+        public IEnumerator<object> tkeyEnumerator()
+        {
+            return MakeEnumeratorT((k, v) => k);
+        }
+
+        public IEnumerator<object> tvalEnumerator()
+        {
+            return MakeEnumeratorT((k, v) => v);
+        }
+
+        public override IEnumerator<KeyValuePair<object, object>> GetEnumerator()
+        {
+            return MakeEnumeratorT((k, v) => new KeyValuePair<Object,Object>(k,v));
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return MakeEnumeratorT((k, v) => new MapEntry(k,v));
+        }
+
+        IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
+        {
+            return MakeEnumeratorT((k, v) => new MapEntry(k, v));
+        }
+
+
+        #endregion
+
         #region kvreduce & fold
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "kvreduce")]
@@ -587,7 +671,7 @@ namespace clojure.lang
         /// <summary>
         /// Interface for all nodes in the trie.
         /// </summary>
-        public interface INode
+        public interface  INode
         {
             /// <summary>
             /// Return a trie with a new key/value pair.
@@ -681,6 +765,9 @@ namespace clojure.lang
             /// <param name="fjjoin"></param>
             /// <returns></returns>
             object Fold(IFn combinef, IFn reducef, IFn fjtask, IFn fjfork, IFn fjjoin);
+
+            IEnumerator Iterator(KVMangleDel<Object> d);
+            IEnumerator<T> IteratorT<T>(KVMangleDel<T> d);
         }
 
         #endregion
@@ -756,6 +843,8 @@ namespace clojure.lang
         }
 
         #endregion
+
+        #region ArrayNode
 
         [Serializable]
         sealed class ArrayNode : INode
@@ -1029,7 +1118,43 @@ namespace clojure.lang
             }
 
             #endregion
+
+            #region iterators
+
+            public IEnumerator Iterator(KVMangleDel<Object> d)
+            {
+                foreach (INode node in _array)
+                {
+                    if (node != null)
+                    {
+                        IEnumerator ie = node.Iterator(d);
+
+                        while (ie.MoveNext())
+                            yield return ie.Current;
+                    }
+                }
+            }
+
+            public IEnumerator<T> IteratorT<T>(KVMangleDel<T> d)
+            {
+                foreach (INode node in _array)
+                {
+                    if (node != null)
+                    {
+                        IEnumerator<T> ie = node.IteratorT(d);
+
+                        while (ie.MoveNext())
+                            yield return ie.Current;
+                    }
+                }
+            }
+
+            #endregion
         }
+
+        #endregion
+
+        #region BitmapIndexNode
 
         /// <summary>
         ///  Represents an internal node in the trie, not full.
@@ -1349,7 +1474,25 @@ namespace clojure.lang
             }
 
             #endregion
+
+            #region iterators
+
+            public IEnumerator Iterator(KVMangleDel<Object> d)
+           { 
+                return NodeIter.GetEnumerator(_array, d);
+            }
+
+            public IEnumerator<T> IteratorT<T>(KVMangleDel<T> d)
+            {
+                return NodeIter.GetEnumeratorT(_array, d);
+            }
+
+            #endregion
         }
+
+        #endregion
+
+        #region HashCollisionNode
 
         /// <summary>
         /// Represents a leaf node corresponding to multiple map entries, all with keys that have the same hash value.
@@ -1550,8 +1693,66 @@ namespace clojure.lang
 
             #endregion
 
+            #region iterators
+
+            public IEnumerator Iterator(KVMangleDel<Object> d)
+            {
+                return NodeIter.GetEnumerator(_array, d);
+            }
+
+            public IEnumerator<T> IteratorT<T>(KVMangleDel<T> d)
+            {
+                return NodeIter.GetEnumeratorT(_array, d);
+            }
+
+            #endregion
+
         }
 
+        #endregion
+
+        #region NodeIter
+
+        static class NodeIter
+        {
+            public static IEnumerator GetEnumerator(object[] array, KVMangleDel<Object> d)
+            {
+                for ( int i=0; i< array.Length; i+=2)
+                {
+                    object key = array[i];
+                    object nodeOrVal = array[i+1];
+                    if (key != null)
+                        yield return d(key, nodeOrVal);
+                    else if ( nodeOrVal != null )
+                    {
+                        IEnumerator ie = ((INode)nodeOrVal).Iterator(d);
+                        while (ie.MoveNext())
+                            yield return ie.Current;
+                    }
+                }
+            }
+
+            public static IEnumerator<T> GetEnumeratorT<T>(object[] array, KVMangleDel<T> d)
+            {
+                for (int i = 0; i < array.Length; i += 2)
+                {
+                    object key = array[i];
+                    object nodeOrVal = array[i + 1];
+                    if (key != null)
+                        yield return d(key, nodeOrVal);
+                    else if (nodeOrVal != null)
+                    {
+                        IEnumerator<T> ie = ((INode)nodeOrVal).IteratorT(d);
+                        while (ie.MoveNext())
+                            yield return ie.Current;
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region NodeSeq
 
         [Serializable]
         sealed class NodeSeq : ASeq
@@ -1654,5 +1855,7 @@ namespace clojure.lang
 
             #endregion
         }
+
+        #endregion
     }
 }

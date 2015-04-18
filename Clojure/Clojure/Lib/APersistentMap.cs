@@ -319,7 +319,7 @@ namespace clojure.lang
         }
 
 
-        virtual public IEnumerator<KeyValuePair<object, object>> GetEnumerator()
+        public virtual IEnumerator<KeyValuePair<object, object>> GetEnumerator()
         {
             for (ISeq s = seq(); s != null; s = s.next())
             {
@@ -330,7 +330,7 @@ namespace clojure.lang
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new MapEnumerator(this);
+            return ((IEnumerable<IMapEntry>)this).GetEnumerator();
         }
 
         IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
@@ -476,6 +476,7 @@ namespace clojure.lang
 
         #endregion
 
+        #region Key and value sequences
 
         /// <summary>
         /// Implements a sequence across the keys of map.
@@ -612,5 +613,7 @@ namespace clojure.lang
 
             #endregion
         }
+
+        #endregion
     }
 }

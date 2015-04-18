@@ -277,14 +277,25 @@ namespace clojure.lang
 
         #region IEnumerable Members
         
+        IEnumerator<object> DirectEnumerator()
+        {
+            var e = _impl.GetEnumerator();
+            while (e.MoveNext())
+                yield return e.Current.key();
+        }
+
         public IEnumerator<object> GetEnumerator()
         {
-            return new SeqEnumerator(this);
+            var ime = _impl as IMapEnumerableTyped<Object,Object>;
+            if (ime != null)
+                return ime.tkeyEnumerator();
+
+            return DirectEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new SeqEnumerator(this);
+            return GetEnumerator();
         }
 
         #endregion
