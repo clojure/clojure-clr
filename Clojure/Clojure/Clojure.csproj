@@ -125,6 +125,7 @@
     <Compile Include="CljCompiler\Ast\Intrinsics.cs" />
     <Compile Include="CljCompiler\Ast\CaseExpr.cs" />
     <Compile Include="Lib\ClrTypeSpec.cs" />
+    <Compile Include="Lib\Cycle.cs" />
     <Compile Include="Lib\EdnReader.cs" />
     <Compile Include="Lib\ExceptionInfo.cs" />
     <Compile Include="Lib\IAtom.cs" />
@@ -133,10 +134,12 @@
     <Compile Include="Lib\IFnClosure.cs" />
     <Compile Include="Lib\IMapEnumerable.cs" />
     <Compile Include="Lib\IReduceInit.cs" />
+    <Compile Include="Lib\Iterate.cs" />
     <Compile Include="Lib\LazyTransformer.cs" />
     <Compile Include="Lib\Murmur3.cs" />
     <Compile Include="Lib\RecordEnumerable.cs" />
     <Compile Include="Lib\Reduced.cs" />
+    <Compile Include="Lib\Repeat.cs" />
     <Compile Include="Lib\Task35.cs" />
     <Compile Include="Lib\TypeNotFoundException.cs" />
     <Compile Include="Lib\Volatile.cs" />
