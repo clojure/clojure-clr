@@ -100,8 +100,6 @@ namespace clojure.lang
         /// <remarks>Internal use only.  Used to interface with core.clj.</remarks>
         sealed class PLCreator : RestFn
         {
-            IPersistentMap _meta;
-
             public override int getRequiredArity()
             {
                 return 0;
@@ -128,18 +126,6 @@ namespace clojure.lang
                 for (ISeq s = RT.seq(args); s != null; s = s.next())
                     list.Add(s.first());
                 return create(list);
-            }
-
-            public override IObj withMeta(IPersistentMap meta)
-            {
-                PLCreator copy = (PLCreator)MemberwiseClone();
-                copy._meta = meta;
-                return copy;
-            }
-
-            public override IPersistentMap meta()
-            {
-                return _meta;
             }
         }
 
