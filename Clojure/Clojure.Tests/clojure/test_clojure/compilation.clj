@@ -8,11 +8,12 @@
 
 ; Author: Frantisek Sodomka
 
-
+(assembly-load-from "clojure.test_clojure.compilation.line_number_examples.clj.dll")                   ;;; DM:Added
 (ns clojure.test-clojure.compilation
   (:import (clojure.lang Compiler Compiler+CompilerException))                                 ;;; Compiler$CompilerException
   (:require [clojure.test.generative :refer (defspec)]
-            [clojure.data.generators :as gen]
+		    [clojure.data.generators :as gen]
+			[clojure.test-clojure.compilation.line-number-examples :as line]
 			clojure.string)                                                                    ;;; DM:Added -- seem to have an order dependency that no longer works.
   (:use clojure.test
         [clojure.test-helper :only (should-not-reflect should-print-err-message)]))
@@ -31,7 +32,7 @@
 
         (string? (:doc m)) true
         (> (.Length (:doc m)) 0) true             ;;; .length
-        
+
         (string? (:file m)) true
         (> (.Length (:file m)) 0) true            ;;; .length
 
@@ -172,7 +173,7 @@
 (deftest primitive-return-decl
   (should-not-reflect #(loop [k 5] (recur (clojure.test-clojure.compilation/primfn))))
   (should-not-reflect #(loop [k 5.0] (recur (clojure.test-clojure.compilation/primfn 0))))
-  
+
   (should-print-err-message #"(?s).*k is not matching primitive.*"
     #(loop [k (clojure.test-clojure.compilation/primfn)] (recur :foo))))
 
@@ -264,6 +265,36 @@
 
 (binding [*compile-path* "."]              ;;; "target/test-classes"
   (compile 'clojure.test-clojure.compilation.examples))
+
+#_(deftest test-compiler-line-numbers                   ;;; DM: TODO :: Improve Compiler source information.  And then do https://github.com/clojure/clojure/commit/715754d3f69e85b07fa56047f0d43d400ab36fce
+  (let [fails-on-line-number? (fn [expected function]
+                                 (try
+                                   (function)
+                                   nil
+                                   (catch Exception t                                                                    ;;; Throwable
+                                     (let [frames (filter #(= "line_number_examples.clj" (.GetFileName %))               ;;; .getFileName
+                                                          (.GetFrames (System.Diagnostics.StackTrace. t true)))          ;;; (.getStackTrace t))
+                                           _ (if (zero? (count frames))
+                                               (Console/WriteLine (.ToString t))                                         ;;; (.printStackTrace t)
+                                               )
+                                           actual (.GetFileLineNumber ^System.Diagnostics.StackFrame (first frames))]    ;;; .getLineNumber ^StackTraceElement
+                                       (= expected actual)))))]
+    (is (fails-on-line-number?  13 line/instance-field))
+    (is (fails-on-line-number?  19 line/instance-field-reflected))
+    (is (fails-on-line-number?  25 line/instance-field-unboxed))
+    #_(is (fails-on-line-number?  32 line/instance-field-assign))
+    (is (fails-on-line-number?  40 line/instance-field-assign-reflected))
+    #_(is (fails-on-line-number?  47 line/static-field-assign))
+    (is (fails-on-line-number?  54 line/instance-method))
+    (is (fails-on-line-number?  61 line/instance-method-reflected))
+    (is (fails-on-line-number?  68 line/instance-method-unboxed))
+    (is (fails-on-line-number?  74 line/static-method))
+    (is (fails-on-line-number?  80 line/static-method-reflected))
+    (is (fails-on-line-number?  86 line/static-method-unboxed))
+    (is (fails-on-line-number?  92 line/invoke))
+    (is (fails-on-line-number? 101 line/threading))
+    (is (fails-on-line-number? 112 line/keyword-invoke))
+    (is (fails-on-line-number? 119 line/invoke-cast))))
 
 (deftest CLJ-979
   (is (= clojure.test_clojure.compilation.examples.X
