@@ -30,6 +30,28 @@
      (let [s (seq coll)]
        (internal-reduce s f val))))
 
+(defn- iter-reduce
+  ([^System.Collections.IEnumerable coll f]                      ;;; ^java.lang.Iterable
+   (let [iter (.GetEnumerator coll)]                             ;;; .iterator
+     (if (.MoveNext iter)                                        ;;; .hasNext
+       (loop [ret (.Current iter)]                               ;;; .next
+         (if (.MoveNext iter)                                    ;;; .hasNext 
+           (let [ret (f ret (.Current iter))]                    ;;; .next
+             (if (reduced? ret)
+               @ret
+               (recur ret)))
+           ret))
+       (f))))
+  ([^System.Collections.IEnumerable coll f val]                 ;;; ^java.lang.Iterable
+   (let [iter (.GetEnumerator coll)]                            ;;; .iterator
+     (loop [ret val]
+       (if (.MoveNext iter)                                     ;;; .hasNext
+         (let [ret (f ret (.Current iter))]                     ;;; .next
+           (if (reduced? ret)
+             @ret
+             (recur ret)))
+         ret)))))
+
 (extend-protocol CollReduce
   nil
   (coll-reduce
@@ -66,27 +88,18 @@
   
   System.Collections.IEnumerable                     ;;;Iterable
   (coll-reduce
-   ([coll f]
-      (let [iter (.GetEnumerator coll)]              ;;; .iterator
-        (if (.MoveNext iter)                         ;;; .hasNext
-          (loop [ret (.Current iter)]                ;;; .next
-            (if (.MoveNext iter)                     ;;; .hasNext
-              (let [ret (f ret (.Current iter))]     ;;; .next
-                (if (reduced? ret)
-                  @ret
-                  (recur ret)))
-              ret))
-          (f))))
-   ([coll f val]
-      (let [iter (.GetEnumerator coll)]             ;;; .iterator
-        (loop [ret val]
-          (if (.MoveNext iter)                      ;;; .hasNext
-            (let [ret (f ret (.Current iter))]      ;;; .next
-                (if (reduced? ret)
-                  @ret
-                  (recur ret)))
-            ret)))))
-  )
+   ([coll f] (iter-reduce coll f))
+   ([coll f val] (iter-reduce coll f val)))
+
+  clojure.lang.APersistentMap+KeySeq                ;;; $KeySeq
+  (coll-reduce
+    ([coll f] (iter-reduce coll f))
+    ([coll f val] (iter-reduce coll f val)))
+
+  clojure.lang.APersistentMap+ValSeq                ;;; $ValSeq
+  (coll-reduce
+    ([coll f] (iter-reduce coll f))
+    ([coll f val] (iter-reduce coll f val))))
 
 (extend-protocol InternalReduce
   nil

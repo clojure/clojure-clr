@@ -765,12 +765,18 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq keys(object coll)
         {
+            IPersistentMap ipm = coll as IPersistentMap;
+            if (ipm != null)
+                return APersistentMap.KeySeq.createFromMap(ipm);
             return APersistentMap.KeySeq.create(seq(coll));
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq vals(object coll)
         {
+            IPersistentMap ipm = coll as IPersistentMap;
+            if (ipm != null)
+                return APersistentMap.ValSeq.createFromMap(ipm);
             return APersistentMap.ValSeq.create(seq(coll));
         }
 

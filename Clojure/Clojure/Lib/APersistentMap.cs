@@ -482,11 +482,12 @@ namespace clojure.lang
         /// Implements a sequence across the keys of map.
         /// </summary>
         [Serializable]
-        public sealed class KeySeq : ASeq
+        public sealed class KeySeq : ASeq, IEnumerable
         {
             #region Data
 
-            ISeq _seq;
+            readonly ISeq _seq;
+            readonly IEnumerable _enumerable;
 
             #endregion
 
@@ -497,18 +498,32 @@ namespace clojure.lang
             {
                 if (seq == null)
                     return null;
-                return new KeySeq(seq);
+                return new KeySeq(seq, null);
             }
 
-            private KeySeq(ISeq seq)
+
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+            static public KeySeq createFromMap(IPersistentMap map)
+            {
+                if (map == null)
+                    return null;
+                ISeq seq = map.seq();
+                if (seq == null)
+                    return null;
+                return new KeySeq(seq, map);
+            }
+
+            private KeySeq(ISeq seq, IEnumerable enumerable)
             {
                 _seq = seq;
+                _enumerable = enumerable;
             }
 
-            private KeySeq(IPersistentMap meta, ISeq seq)
+            private KeySeq(IPersistentMap meta, ISeq seq, IEnumerable enumerable)
                 : base(meta)
             {
                 _seq = seq;
+                _enumerable = enumerable;
             }
 
             #endregion
@@ -538,21 +553,59 @@ namespace clojure.lang
 
             public override IObj withMeta(IPersistentMap meta)
             {
-                return new KeySeq(meta, _seq);
+                return new KeySeq(meta, _seq, _enumerable);
             }
 
             #endregion
+
+            #region IEnumerable members
+
+            IEnumerator<Object> KeyIteratorT(IEnumerable enumerable)
+            {
+                foreach (Object item in enumerable)
+                    yield return ((IMapEntry)item).key();
+            }
+
+            public override IEnumerator<object> GetEnumerator()
+            {
+                if (_enumerable == null)
+                    return base.GetEnumerator();
+
+                IMapEnumerableTyped<Object,Object> imit = _enumerable as IMapEnumerableTyped<Object,Object>;
+                if (imit != null)
+                    return (IEnumerator<object>)imit.tkeyEnumerator();
+
+
+                IMapEnumerable imi = _enumerable as IMapEnumerable;
+                if (imi != null)
+                    return (IEnumerator<object>)imi.keyEnumerator();
+
+                return KeyIteratorT(_enumerable);
+            }
+
+            /// <summary>
+            /// Returns an enumerator that iterates through a collection.
+            /// </summary>
+            /// <returns>A <see cref="SeqEnumerator">SeqEnumerator</see> that iterates through the sequence.</returns>
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            #endregion
+
         }
 
         /// <summary>
         /// Implements a sequence across the values of a map.
         /// </summary>
         [Serializable]
-        public sealed class ValSeq : ASeq
+        public sealed class ValSeq : ASeq, IEnumerable
         {
             #region Data
 
-            ISeq _seq;
+            readonly ISeq _seq;
+            readonly IEnumerable _enumerable;
 
             #endregion
 
@@ -563,18 +616,32 @@ namespace clojure.lang
             {
                 if (seq == null)
                     return null;
-                return new ValSeq(seq);
+                return new ValSeq(seq, null);
             }
 
-            private ValSeq(ISeq seq)
+
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+            static public ValSeq createFromMap(IPersistentMap map)
+            {
+                if (map == null)
+                    return null;
+                ISeq seq = map.seq();
+                if (seq == null)
+                    return null;
+                return new ValSeq(seq, map);
+            }
+
+            private ValSeq(ISeq seq, IEnumerable enumerable)
             {
                 _seq = seq;
+                _enumerable = enumerable;
             }
 
-            private ValSeq(IPersistentMap meta, ISeq seq)
+            private ValSeq(IPersistentMap meta, ISeq seq, IEnumerable enumerable)
                 : base(meta)
             {
                 _seq = seq;
+                _enumerable = enumerable;
             }
 
             #endregion
@@ -608,10 +675,46 @@ namespace clojure.lang
 
             public override IObj withMeta(IPersistentMap meta)
             {
-                return new ValSeq(meta, _seq);
+                return new ValSeq(meta, _seq, _enumerable);
             }
 
             #endregion
+
+            #region IEnumerable members
+
+            IEnumerator<Object> KeyIteratorT(IEnumerable enumerable)
+            {
+                foreach (Object item in enumerable)
+                    yield return ((IMapEntry)item).val();
+            }
+
+            public override IEnumerator<object> GetEnumerator()
+            {
+                if (_enumerable == null)
+                    return base.GetEnumerator();
+
+                IMapEnumerableTyped<Object, Object> imit = _enumerable as IMapEnumerableTyped<Object, Object>;
+                if (imit != null)
+                    return (IEnumerator<object>)imit.tvalEnumerator();
+
+
+                IMapEnumerable imi = _enumerable as IMapEnumerable;
+                if (imi != null)
+                    return (IEnumerator<object>)imi.valEnumerator();
+
+                return KeyIteratorT(_enumerable);
+            }
+
+            #endregion
+
+            /// <summary>
+            /// Returns an enumerator that iterates through a collection.
+            /// </summary>
+            /// <returns>A <see cref="SeqEnumerator">SeqEnumerator</see> that iterates through the sequence.</returns>
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
         }
 
         #endregion

@@ -399,7 +399,7 @@ namespace clojure.lang
 
         #region IEnumerable Members
 
-        public IEnumerator<object> GetEnumerator()
+        public virtual IEnumerator<object> GetEnumerator()
         {
             return new SeqEnumerator(this);
         }
