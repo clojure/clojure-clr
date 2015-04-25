@@ -391,7 +391,7 @@ namespace clojure.lang
                 Expr e = ha.ArgExpr;
                 if (i > 0)
                     sb.Append(", ");
-                sb.Append(e.HasClrType ? (e.ClrType != null ? e.ClrType.FullName : "nil") : "unknown");
+                sb.Append((e.HasClrType && e.ClrType != null) ?  e.ClrType.FullName : "unknown");
                 i++;
             }
             return sb.ToString();

@@ -51,6 +51,10 @@
     (should-print-err-message
      #"Reflection warning, .*:\d+:\d+ - call to method IndexOf on System\.String can't be resolved \(argument types: unknown\)\.\r?\n"
      (defn foo [^String x y] (.IndexOf x y))))
+  (testing "reflection error prints correctly for nil arguments"
+    (should-print-err-message
+     #"Reflection warning, .*:\d+:\d+ - call to method IndexOf on System.String can't be resolved \(argument types: unknown, unknown\)\.\r?\n"   ;;; divide on java\.math\.BigDecimal
+     (defn foo [a] (.IndexOf "abc" a nil))))                                                       ;;; .(.Divide 1M a nil) -- we don't have an overload on this
   (testing "reflection cannot resolve instance method because target class is unknown"
     (should-print-err-message
      #"Reflection warning, .*:\d+:\d+ - call to method zap can't be resolved \(target class is unknown\)\.\r?\n"
