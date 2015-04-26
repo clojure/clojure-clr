@@ -2526,9 +2526,15 @@
      (if (seq? coll) coll
          (or (seq coll) ())))
   ([xform coll]
-     (clojure.lang.LazyTransformer/create xform coll))
+     (or (clojure.lang.RT/chunkEnumeratorSeq                                                 ;;; chunkIteratorSeq
+         (clojure.lang.TransformerEnumerator/create xform (clojure.lang.RT/iter coll)))      ;;; TransformerIterator
+       ()))
   ([xform coll & colls]
-     (clojure.lang.LazyTransformer/createMulti xform (to-array (cons coll colls)))))
+     (or (clojure.lang.RT/chunkEnumeratorSeq                                                 ;;; chunkIteratorSeq
+         (clojure.lang.TransformerEnumerator/createMulti                                     ;;; TransformerIterator
+           xform
+           (map #(clojure.lang.RT/iter %) (cons coll colls))))
+       ())))
 
 (defn every?
   "Returns true if (pred x) is logical true for every x in coll, else
@@ -5473,7 +5479,7 @@
   {:added "1.0"
    :static true}
  [iter]
-  (clojure.lang.EnumeratorSeq/create iter))   ;;; IteratorSeq
+  (clojure.lang.RT/chunkEnumeratorSeq iter))                                                    ;;; chunkIteratorSeq
 
 (defn enumeration-seq
   "Returns a seq on a java.util.Enumeration"
@@ -7320,10 +7326,8 @@
 
 (deftype Eduction [xform coll]
    System.Collections.IEnumerable                                                                    ;;; Iterable
-   (GetEnumerator [_] (.GetEnumerator ^System.Collections.ICollection (sequence xform coll)))        ;;; iterator  .iterator ^java.util.Collection
-
-   clojure.lang.Seqable
-   (seq [_] (seq (sequence xform coll)))
+   (GetEnumerator [_]                                                                                ;;; iterator
+     (clojure.lang.TransformerEnumerator/create xform (clojure.lang.RT/iter coll)))                  ;;; TransformerIterator
 
    clojure.lang.IReduceInit
    (reduce [_ f init]
@@ -7333,12 +7337,14 @@
    clojure.lang.Sequential)
 
 (defn eduction
-  "Returns a reducible/iterable/seqable sequence of application of
-  the transducer to the items in coll. Note that these applications
-  will be performed every time reduce/iterator/seq is called."
-  {:added "1.7"}
-  [xform coll]
-  (Eduction. xform coll))
+  "Returns a reducible/iterable application of the transducers
+  to the items in coll. Transducers are applied in order as if
+  combined with comp. Note that these applications will be
+  performed every time reduce/iterator is called."
+  {:arglists '([xform* coll])
+   :added "1.7"}
+  [& xforms]
+  (Eduction. (apply comp (butlast xforms)) (last xforms)))
 
 (defmethod print-method Eduction [c, ^System.IO.TextWriter w]                          ;;; ^Writer
   (if *print-readably*

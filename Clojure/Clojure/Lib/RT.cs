@@ -675,6 +675,50 @@ namespace clojure.lang
 
         #region Collections support
 
+        private const int CHUNK_SIZE = 32;
+        
+        // Because of the need to look before you leap (make sure one element exists)
+        // this is more complicated than the JVM version:  In JVM-land, you can hasNext before you move.
+
+        public static ISeq chunkEnumeratorSeq(IEnumerator iter)
+        {
+            if (!iter.MoveNext())
+                return null;
+
+            return PrimedChunkEnumeratorSeq(iter);
+        }
+
+        private static ISeq PrimedChunkEnumeratorSeq(IEnumerator iter)
+        {
+            return new LazySeq(new ChunkEnumeratorSeqHelper(iter));
+        }
+
+        private class ChunkEnumeratorSeqHelper : AFn
+        {
+            IEnumerator _iter;
+
+            public ChunkEnumeratorSeqHelper(IEnumerator iter)
+            {
+                _iter = iter;
+            }
+
+            // Assumes MoveNext has already been called on _iter.
+            public override object invoke()
+            {
+                object[] arr = new object[CHUNK_SIZE];
+                bool more = true;
+                int n = 0;
+                for (; n < CHUNK_SIZE && more; ++n)
+                {
+                    arr[n] = _iter.Current;
+                    more = _iter.MoveNext();
+                }
+
+                return new ChunkedCons(new ArrayChunk(arr, 0, n), more ?  PrimedChunkEnumeratorSeq(_iter) : null);
+            }
+        }
+
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq seq(object coll)
         {
@@ -708,7 +752,7 @@ namespace clojure.lang
 
             IEnumerable ie = coll as IEnumerable;
             if (ie != null)  // java: Iterable  -- reordered clauses so others take precedence.
-                return EnumeratorSeq.create(ie.GetEnumerator());  // IteratorSeq
+                return chunkEnumeratorSeq(ie.GetEnumerator());            // chunkIteratorSeq
 
             // The equivalent for Java:Map is IDictionary.  IDictionary is IEnumerable, so is handled above.
             //else if(coll isntanceof Map)  
