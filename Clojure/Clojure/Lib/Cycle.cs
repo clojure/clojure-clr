@@ -23,52 +23,61 @@ namespace clojure.lang
         #region Data
 
         readonly ISeq _all;      // never null
-        readonly ISeq _current;  // never null
+        readonly ISeq _prev;
+        volatile ISeq _current;  // lazily realized
         volatile ISeq _next;  // cached
 
         #endregion
 
         #region Ctors and factories
 
-        private Cycle(ISeq all, ISeq current)
+        private Cycle(ISeq all, ISeq prev, ISeq current)
         {
             _all = all;
+            _prev = prev;
             _current = current;
         }
 
-        private Cycle(IPersistentMap meta, ISeq all, ISeq current)
+        private Cycle(IPersistentMap meta, ISeq all, ISeq prev, ISeq current, ISeq next)
             :base(meta)
         {
             _all = all;
+            _prev = prev;
             _current = current;
+            _next = next;
         }
 
         public static ISeq create(ISeq vals)
         {
             if (vals == null)
                 return PersistentList.EMPTY;
-            return new Cycle(vals, vals);
+            return new Cycle(vals, null, vals);
         }
 
         #endregion
 
         #region ISeq methods
 
+        // realization for use of current
+        ISeq Current()
+        {
+            if (_current == null)
+            {
+                ISeq c = _prev.next();
+                _current = (c == null) ? _all : c;
+            }
+            return _current;
+        }
+
         public override object first()
         {
-            return _current.first();
+            return Current().first();
         }
 
         public override ISeq next()
         {
             if (_next == null)
-            {
-                ISeq next = _current.next();
-                if (next != null)
-                    _next = new Cycle(_all, next);
-                else
-                    _next = new Cycle(_all, _all);
-            }
+                _next = new Cycle(_all, Current(), null);
             return _next;
         }
 
@@ -78,7 +87,7 @@ namespace clojure.lang
 
         public override IObj withMeta(IPersistentMap meta)
         {
-            return new Cycle(meta, _all, _current);
+            return new Cycle(meta, _all, _prev, _current, _next);
         }
 
         #endregion
@@ -87,8 +96,8 @@ namespace clojure.lang
 
         public object reduce(IFn f)
         {
-            Object ret = _current.first();
-            ISeq s = _current;
+            ISeq s = Current();
+            Object ret = s.first();
             while (true)
             {
                 s = s.next();
@@ -103,7 +112,7 @@ namespace clojure.lang
         public object reduce(IFn f, object start)
         {
             Object ret = start;
-            ISeq s = _current;
+            ISeq s = Current();
             while (true)
             {
                 ret = f.invoke(ret, s.first());
