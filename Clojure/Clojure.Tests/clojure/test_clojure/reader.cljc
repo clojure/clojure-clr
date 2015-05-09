@@ -695,3 +695,8 @@
     (is (thrown-with-msg? Exception #"must be a list" (read-string {:read-cond :allow} "#?[:foo :a :else :b]")))                     ;;; RuntimeException
     (is (thrown-with-msg? Exception #"Conditional read not allowed" (read-string {:read-cond :BOGUS} "#?[:clj :a :default nil]")))   ;;; RuntimeException
     (is (thrown-with-msg? Exception #"Conditional read not allowed" (read-string "#?[:clj :a :default nil]")))))                     ;;; RuntimeException
+
+(deftest eof-option
+  (is (= 23 (read-string {:eof 23} "")))
+  (is (= 23 (read {:eof 23} (clojure.lang.LineNumberingTextReader.           ;;; clojure.lang.LineNumberingPushbackReader.
+                             (System.IO.StringReader. ""))))))               ;;; java.io.StringReader.

@@ -2638,7 +2638,7 @@ namespace clojure.lang
         static public Object readString(String s, Object opts)
         {
             using (PushbackTextReader r = new PushbackTextReader(new StringReader(s)))
-                return LispReader.read(r, true, null, false, opts);
+                return LispReader.read(r, opts);
         }
 
 

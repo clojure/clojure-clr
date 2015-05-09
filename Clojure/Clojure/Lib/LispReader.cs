@@ -149,15 +149,14 @@ namespace clojure.lang
 
         static public Object read(PushbackTextReader r, Object opts)
         {
-            bool eofIsError = false;
+            bool eofIsError = true;
             object eofValue = null;
             if (opts != null && opts is IPersistentMap)
             {
-                Object eof = ((IPersistentMap)opts).containsKey(OPT_EOF);
-                if (EOFTHROW.Equals(eof))
-                    eofIsError = true;
-                else
+                Object eof = ((IPersistentMap)opts).valAt(OPT_EOF, EOFTHROW);
+                if(!EOFTHROW.Equals(eof)) 
                 {
+                    eofIsError = false;
                     eofValue = eof;
                 }
             }
