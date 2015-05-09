@@ -282,7 +282,7 @@
     <None Include="clojure\test_clojure\protocols\more_examples.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="clojure\test_clojure\reader.clj">
+    <None Include="clojure\test_clojure\reader.cljc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="clojure\test_clojure\reducers.clj">

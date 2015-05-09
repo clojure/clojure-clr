@@ -72,6 +72,7 @@
   [^System.Diagnostics.StackFrame el]                                                   ;;; StackTraceElement
   (let [file (.GetFileName el)                                       ;;; getFileName
         clojure-fn? (and file (or (.EndsWith file ".clj")            ;;; endsWith
+                                  (.EndsWith file ".cljc")           ;;; endsWith
                                   (= file "NO_SOURCE_FILE")))]
     (str (if clojure-fn?
            (demunge (stack-element-classname el))                              ;;; (.getClassName el))

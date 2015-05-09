@@ -491,4 +491,15 @@
 (defmethod print-method Exception [^Exception o ^System.IO.TextWriter w]                                         ;;; Throwable ^Throwable
   (print-throwable o w))
 
+(defmethod print-method clojure.lang.TaggedLiteral [o ^System.IO.TextWriter w]
+  (.Write w "#")
+  (print-method (:tag o) w)
+  (.Write w " ")
+  (print-method (:form o) w))
+
+(defmethod print-method clojure.lang.ReaderConditional [o ^System.IO.TextWriter w]
+  (.Write w "#?")
+  (when (:splicing? o) (.Write w "@"))
+  (print-method (:form o) w))
+
 (def ^{:private true} print-initialized true)  

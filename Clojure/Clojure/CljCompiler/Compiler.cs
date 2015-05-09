@@ -312,7 +312,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_RT_seqOrElse = typeof(RT).GetMethod("seqOrElse");
         internal static readonly MethodInfo Method_RT_set = typeof(RT).GetMethod("set");
         internal static readonly MethodInfo Method_RT_vector = typeof(RT).GetMethod("vector");
-        internal static readonly MethodInfo Method_RT_readString = typeof(RT).GetMethod("readString");
+        internal static readonly MethodInfo Method_RT_readString = typeof(RT).GetMethod("readString", new Type[]{ typeof(String) });
         internal static readonly MethodInfo Method_RT_var2 = typeof(RT).GetMethod("var", new Type[] { typeof(string), typeof(string) });
 
         internal static readonly MethodInfo Method_Symbol_intern2 = typeof(Symbol).GetMethod("intern", new Type[] { typeof(string), typeof(string) });
@@ -1432,7 +1432,9 @@ namespace clojure.lang
 
             try
             {
-                while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
+                Object readerOpts = ReaderOpts(sourceName);
+
+                while ((form = LispReader.read(lntr, false, eofVal, false, readerOpts)) != eofVal)
                 {
                     Compile1(initTB, ilg, objx, form);
                 }
@@ -1671,6 +1673,16 @@ namespace clojure.lang
             LispReader.Unread(lnReader, ch);
         }
 
+        static readonly Object OPTS_COND_ALLOWED = RT.mapUniqueKeys(LispReader.OPT_READ_COND, LispReader.COND_ALLOW);
+
+        static Object ReaderOpts(string sourceName)
+        {
+            if (sourceName != null && sourceName.EndsWith(".cljc"))
+                return OPTS_COND_ALLOWED;
+            else
+                return null;
+        }
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
         public static object load(TextReader rdr, string sourcePath, string sourceName, string relativePath)
@@ -1699,13 +1711,15 @@ namespace clojure.lang
                 //COLUMN_AFTER, lntr.ColumnNumber
                 ));
 
+            Object readerOpts = ReaderOpts(sourceName);
+
             int lineBefore = lntr.LineNumber;
             int columnBefore = lntr.ColumnNumber;
             //int lineAfter = lntr.LineNumber;
             //int columnAfter = lntr.ColumnNumber;
             try
             {
-                while ((form = LispReader.read(lntr, false, eofVal, false)) != eofVal)
+                while ((form = LispReader.read(lntr, false, eofVal, false, readerOpts)) != eofVal)
                 {
                     ConsumeWhitespaces(lntr);
                     //LINE_AFTER.set(lntr.LineNumber);

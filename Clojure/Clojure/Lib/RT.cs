@@ -447,7 +447,10 @@ namespace clojure.lang
 
         public static readonly Var DefaultDataReadersVar
            = Var.intern(ClojureNamespace, Symbol.intern("default-data-readers"), RT.map());
-        
+
+        public static readonly Var SuppressReadVar 
+            = Var.intern(ClojureNamespace, Symbol.intern("*suppress-read*"), null).setDynamic();
+
         public static readonly Var AssertVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*assert*"), RT.T);
             = Var.intern(ClojureNamespace, Symbol.intern("*assert*"), true).setDynamic();
@@ -2612,8 +2615,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static bool suppressRead()
         {
-            // TODO: look up in suppress-read var  (java todo)
-            return false;
+            return booleanCast(SuppressReadVar.deref());
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
@@ -2629,8 +2631,14 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object readString(String s)
         {
+            return readString(s,null);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        static public Object readString(String s, Object opts)
+        {
             using (PushbackTextReader r = new PushbackTextReader(new StringReader(s)))
-                return LispReader.read(r, true, null, false);
+                return LispReader.read(r, true, null, false, opts);
         }
 
 
@@ -3380,7 +3388,17 @@ namespace clojure.lang
             if (!RuntimeBootstrapFlag.DisableFileLoad)
             {
                 FileInfo cljInfo = FindFile(cljname);
+                if (cljInfo == null )
+                {
+                    cljname = relativePath + ".cljc";
+                    cljInfo = FindFile(cljname);
+                }
                 FileInfo assyInfo = FindFile(assemblyname);
+                if ( assyInfo == null )
+                {
+                    assemblyname = relativePath.Replace('/', '.') + ".cljc.dll";
+                    assyInfo = FindFile(assemblyname);
+                }
 
 
                 if ((assyInfo != null &&

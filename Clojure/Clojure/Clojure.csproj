@@ -136,9 +136,11 @@
     <Compile Include="Lib\IReduceInit.cs" />
     <Compile Include="Lib\Iterate.cs" />
     <Compile Include="Lib\Murmur3.cs" />
+    <Compile Include="Lib\ReaderConditional.cs" />
     <Compile Include="Lib\RecordEnumerable.cs" />
     <Compile Include="Lib\Reduced.cs" />
     <Compile Include="Lib\Repeat.cs" />
+    <Compile Include="Lib\TaggedLiteral.cs" />
     <Compile Include="Lib\Task35.cs" />
     <Compile Include="Lib\TransformerEnumerator.cs" />
     <Compile Include="Lib\TypeNotFoundException.cs" />
