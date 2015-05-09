@@ -531,5 +531,5 @@
    (loop [v  (vector-of t x1 x2 x3 x4)
           xn xn]
      (if xn
-       (recur (.cons v (first xn)) (next xn))
+       (recur (conj v (first xn)) (next xn))
        v))))
