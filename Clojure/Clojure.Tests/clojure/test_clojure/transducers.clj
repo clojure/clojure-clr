@@ -73,7 +73,7 @@
                gen-distinct gen-dedupe gen-interpose]))
 
 (def gen-actions
-  (gen/vector gen-action))
+  (gen/vector gen-action 1 5))
 
 (def gen-coll
   (gen/vector gen/int))
@@ -96,7 +96,7 @@
 
 (defn apply-as-xf-eduction
   [coll actions]
-  (apply eduction (into actions [coll])))
+  (into [] (eduction (apply comp (map :xf actions)) coll)))
 
 (defn apply-as-xf-transduce
   [coll actions]
@@ -137,7 +137,7 @@
 
 #_(deftest seq-and-transducer                              ;;; TODO:   This worked prior to the revison.
   (let [res (chk/quick-check                               ;;; Now fails occasionally (takes over 50,000 trials on average)
-              100000                                       ;;; x has indexing exception (nth on a vector) while xs xi xt are okay
+              200000                                       ;;; x has indexing exception (nth on a vector) while xs xi xt are okay
               (prop/for-all* [result-gen] result-good?))]
     (when-not (:result res)
       (is
