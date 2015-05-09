@@ -22,30 +22,35 @@ namespace clojure.lang
     {
         #region Data
 
+        static readonly Object UNREALIZED_SEED = new Object();
         readonly IFn _f;      // never null
-        readonly Object _seed;
+        readonly Object _prevSeed;
+        volatile Object _seed; // lazily realized
         volatile ISeq _next;  // cached
 
         #endregion
 
         #region Ctors and factories
 
-        Iterate(IFn f, Object seed)
+        Iterate(IFn f, Object prevSeed, Object seed)
         {
             _f = f;
+            _prevSeed = prevSeed;
             _seed = seed;
         }
 
-        private Iterate(IPersistentMap meta, IFn f, Object seed)
+        private Iterate(IPersistentMap meta, IFn f, Object prevSeed, Object seed, ISeq next)
             :base(meta)
         {
             _f = f;
+            _prevSeed = prevSeed;
             _seed = seed;
+            _next = next;
         }
 
         public static ISeq create(IFn f, Object seed)
         {
-            return new Iterate(f, seed);
+            return new Iterate(f, null, seed);
         }
 
         #endregion
@@ -54,6 +59,9 @@ namespace clojure.lang
 
         public override object first()
         {
+            if (_seed == UNREALIZED_SEED)
+                _seed = _f.invoke(_prevSeed);
+
             return _seed;
         }
 
@@ -61,7 +69,7 @@ namespace clojure.lang
         {
             if (_next == null)
             {
-                _next = new Iterate(_f, _f.invoke(_seed));
+                _next = new Iterate(_f, first(), UNREALIZED_SEED);
             }
             return _next;
         }
@@ -72,7 +80,7 @@ namespace clojure.lang
 
         public override IObj withMeta(IPersistentMap meta)
         {
-            return new Iterate(meta, _f, _seed);
+            return new Iterate(meta, _f, _prevSeed, _seed, _next);
         }
 
         #endregion
@@ -81,8 +89,9 @@ namespace clojure.lang
 
         public object reduce(IFn rf)
         {
-            Object ret = _seed;
-            Object v = _f.invoke(_seed);
+            Object ff = first();
+            Object ret = ff;
+            Object v = _f.invoke(ff);
             while (true)
             {
                 ret = rf.invoke(ret, v);
@@ -95,7 +104,7 @@ namespace clojure.lang
         public object reduce(IFn rf, object start)
         {
             Object ret = start;
-            Object v = _seed;
+            Object v = first();
             while (true)
             {
                 ret = rf.invoke(ret, v);
