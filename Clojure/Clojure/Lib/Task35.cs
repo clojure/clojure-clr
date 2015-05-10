@@ -22,7 +22,7 @@ namespace clojure.lang
     /// <summary>
     /// Minimal implementation of task functionality to support reducers library under .Net 3.5
     /// </summary>
-    class Task35 : IDisposable
+    public class Task35 : IDisposable
     {
 
         #region Data
