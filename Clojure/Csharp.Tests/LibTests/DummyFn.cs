@@ -14,7 +14,7 @@ namespace Clojure.Tests.LibTests
         public static IFn CreateForReduce()
         {
             AFnImpl fn = new AFnImpl();
-            fn._fn2 = ( object x, object y ) => { return ((int)x) + ((int)y); };
+            fn._fn2 = ( object x, object y ) => { return Numbers.addP(x,y); };
             return fn;
         }
 

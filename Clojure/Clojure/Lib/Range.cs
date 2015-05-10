@@ -13,78 +13,118 @@
  **/
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace clojure.lang
 {
     /// <summary>
-    /// Represents a (contiguous) range of integers.
+    /// Implements generic numeric (potentially infinite) range.    
     /// </summary>
     [Serializable]
-    public class Range : ASeq, IReduce, Counted
+    public class Range : ASeq, IChunkedSeq, IReduce, IEnumerable, IEnumerable<object>
     {
         #region Data
 
-        /// <summary>
-        /// Final value in the range.
-        /// </summary>
-        private readonly int _end;
+        const int CHUNK_SIZE = 32;
 
-        /// <summary>
-        /// First value in the range.
-        /// </summary>
-        private readonly int _n;
+        // Invariants guarantee this is never an empty or infinite seq
+        //   assert(start != end && step != 0)
+        readonly object _start;
+        readonly object _end;
+        readonly object _step;
+        readonly ExceedsBoundDel _exceedsBoundDel;
+        volatile IChunk _chunk;         // lazy
+        volatile ISeq _chunkNext;       // lazy
+        volatile ISeq _next;            // cached
+
+        #endregion
+
+        #region BoundsCheck
+
+        // this is a one method interface in the JVM version
+        // I've converted it to a delegate
+
+        private delegate bool ExceedsBoundDel(object val);
+
+        private static ExceedsBoundDel PositiveStep(object end)
+        {
+            return (val => Numbers.gte(val,end));
+        }
+
+        private static ExceedsBoundDel NegativeStep(object end)
+        {
+            return (val => Numbers.lte(val,end));
+        }
 
         #endregion
 
         #region C-tors and factory methods
 
-        /// <summary>
-        /// Initialize a range.
-        /// </summary>
-        /// <param name="start">Start value</param>
-        /// <param name="end">End value</param>
-        /// <remarks>Needed to interface with core.clj</remarks>
-        public Range(object start, object end)
-            : this(RT.intCast(start), RT.intCast(end))
+        private Range(Object start, Object end, Object step, ExceedsBoundDel exceedsBoundDel)
         {
+            _end = end;
+            _start = start;
+            _step = step;
+            _exceedsBoundDel = exceedsBoundDel;
         }
 
-        /// <summary>
-        /// Initialize a range.
-        /// </summary>
-        /// <param name="start">Start value</param>
-        /// <param name="end">End value</param>
-        public Range(int start, int end)
+        private Range(Object start, Object end, Object step, ExceedsBoundDel exceedsBoundDel, IChunk chunk, ISeq chunkNext)
         {
-            this._end = end;
-            this._n = start;
+            _end = end;
+            _start = start;
+            _step = step;
+            _exceedsBoundDel = exceedsBoundDel;
+            _chunk = chunk;
+            _chunkNext = chunkNext;
         }
 
-        /// <summary>
-        /// Initialize a range and attach metadata.
-        /// </summary>
-        /// <param name="meta">The metadata to attach.</param>
-        /// <param name="start">Start value</param>
-        /// <param name="end">End value</param>
-        public Range(IPersistentMap meta, int start, int end)
-            : base (meta)
+        private Range(IPersistentMap meta, Object start, Object end, Object step, ExceedsBoundDel exceedsBoundDel, IChunk chunk, ISeq chunkNext)
+            : base(meta)
         {
-            this._end = end;
-            this._n = start;
+            _end = end;
+            _start = start;
+            _step = step;
+            _exceedsBoundDel = exceedsBoundDel;
+            _chunk = chunk;
+            _chunkNext = chunkNext;
         }
 
+        public static ISeq create(Object end)
+        {
+            if (Numbers.isPos(end))
+                return new Range(0L, end, 1L, PositiveStep(end));
+            return PersistentList.EMPTY;
+        }
+
+        public static ISeq create(Object start, Object end)
+        {
+            return create(start, end, 1L);
+        }
+
+        public static ISeq create(Object start, Object end, Object step)
+        {
+            if ((Numbers.isPos(step) && Numbers.gt(start, end)) ||
+               (Numbers.isNeg(step) && Numbers.gt(end, start)) ||
+               Numbers.equiv(start, end))
+                return PersistentList.EMPTY;
+            if (Numbers.isZero(step))
+                return Repeat.create(start);
+            return new Range(start, end, step, Numbers.isPos(step) ? PositiveStep(end) : NegativeStep(end));
+        }
+    
         #endregion
 
         #region IPersistentCollection members
 
-        /// <summary>
-        /// Gets the number of items in the collection.
-        /// </summary>
-        /// <returns>The number of items in the collection.</returns>
-        public override int count()
-        {
-            return _n < _end ? _end - _n : 0;
-        }
+        ///// <summary>
+        ///// Gets the number of items in the collection.
+        ///// </summary>
+        ///// <returns>The number of items in the collection.</returns>
+        //public override int count()
+        //{
+        //    return _n < _end ? _end - _n : 0;
+        //}
 
         #endregion
 
@@ -96,7 +136,38 @@ namespace clojure.lang
         /// <returns>The first item.</returns>
         public override object first()
         {
-            return _n;
+            return _start;
+        }
+
+        void ForceChunk()
+        {
+            if (_chunk != null) return;
+
+            Object[] arr = new Object[CHUNK_SIZE];
+            int n = 0;
+            Object val = _start;
+            while (n < CHUNK_SIZE)
+            {
+                arr[n++] = val;
+                val = Numbers.addP(val, _step);
+                if (_exceedsBoundDel(val))
+                {
+                    //partial last chunk
+                    _chunk = new ArrayChunk(arr, 0, n);
+                    return;
+                }
+            }
+
+            // full last chunk
+            if (_exceedsBoundDel(val))
+            {
+                _chunk = new ArrayChunk(arr, 0, CHUNK_SIZE);
+                return;
+            }
+
+            // full intermediate chunk
+            _chunk = new ArrayChunk(arr, 0, CHUNK_SIZE);
+            _chunkNext = new Range(val, _end, _step, _exceedsBoundDel);
         }
 
         /// <summary>
@@ -105,9 +176,17 @@ namespace clojure.lang
         /// <returns>A seq of the items after the first, or <c>nil</c> if there are no more items.</returns>
         public override ISeq next()
         {
-            return (_n < _end - 1)
-                ? new Range(_meta, _n + 1, _end)
-                : null;
+            if (_next != null)
+                return _next;
+
+            ForceChunk();
+            if (_chunk.count() > 1)
+            {
+                IChunk smallerChunk = _chunk.dropFirst();
+                _next = new Range(_meta, smallerChunk.nth(0), _end, _step, _exceedsBoundDel, smallerChunk, _chunkNext);
+                return _next;
+            }
+            return chunkedNext();
         }
 
         #endregion
@@ -123,7 +202,7 @@ namespace clojure.lang
         {
             return meta == this.meta()
                  ? this
-                 : new Range(meta, _end, _n);
+                 : new Range(meta, _start, _end, _step, _exceedsBoundDel, _chunk, _chunkNext);
         }
 
         #endregion
@@ -138,10 +217,15 @@ namespace clojure.lang
         /// <remarks>Computes f(...f(f(f(i0,i1),i2),i3),...).</remarks>
         public object reduce(IFn f)
         {
-            object ret = _n;
-            for (int x = _n + 1; x < _end; x++)
-                ret = f.invoke(ret, x);
-            return ret;
+            Object acc = _start;
+            object i = Numbers.addP(_start, _step);
+            while (!_exceedsBoundDel(i))
+            {
+                acc = f.invoke(acc, i);
+                if (RT.isReduced(acc)) return ((Reduced)acc).deref();
+                i = Numbers.addP(i, _step);
+            }
+            return acc;
         }
 
         /// <summary>
@@ -151,12 +235,65 @@ namespace clojure.lang
         /// <param name="start">An initial value to get started.</param>
         /// <returns>The reduced value</returns>
         /// <remarks>Computes f(...f(f(f(start,i0),i1),i2),...).</remarks>
-        public object reduce(IFn f, object start)
+        public object reduce(IFn f, object val)
         {
-            object ret = f.invoke(start, _n);
-            for (int x = _n + 1; x < _end; x++)
-                ret = f.invoke(ret, x);
-            return ret;
+            Object acc = val;
+            Object i = _start;
+            while (!_exceedsBoundDel(i))
+            {
+                acc = f.invoke(acc, i);
+                if (RT.isReduced(acc)) return ((Reduced)acc).deref();
+                i = Numbers.addP(i, _step);
+            }
+            return acc;
+        }
+
+        #endregion
+
+        #region IChunkedSeq methods
+
+        public IChunk chunkedFirst()
+        {
+            ForceChunk();
+            return _chunk;
+        }
+
+        public ISeq chunkedNext()
+        {
+            return chunkedMore().seq();
+        }
+
+        public ISeq chunkedMore()
+        {
+            ForceChunk();
+            if (_chunkNext == null)
+                return PersistentList.EMPTY;
+            return _chunkNext;
+        }
+
+
+        //public new IPersistentCollection cons(object o)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        #endregion
+
+        #region IEnumerable
+
+        public new IEnumerator GetEnumerator()
+        {
+            object next = _start;
+            while (!_exceedsBoundDel(next))
+            {
+                yield return next;
+                next = Numbers.addP(next, _step);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
         #endregion

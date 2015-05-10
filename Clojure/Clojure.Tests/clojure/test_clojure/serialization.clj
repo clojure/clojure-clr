@@ -90,7 +90,7 @@
 
     ; lazy seqs
     ;;;(lazy-seq nil)                                            <-- TODO: Some LazySeqs won't serialize because of dynamic methods.  Need a flag to control dynamic versus emitted methods.
-    ;;;(lazy-seq (range 50))                                     <-- TODO: Some LazySeqs won't serialize because of dynamic methods.  Need a flag to control dynamic versus emitted methods.
+    ;;;(lazy-seq (list* (range 50)))                             <-- TODO: Some LazySeqs won't serialize because of dynamic methods.  Need a flag to control dynamic versus emitted methods.
 
     ; transient / persistent! round-trip
     (build-via-transient [])
