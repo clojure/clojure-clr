@@ -7442,9 +7442,11 @@ Note that read can execute code (controlled by *read-eval*),
   nil)
 
 (defn- data-reader-urls []                                         ;;; Actually, we will return a sequence of FileInfo instances
-  (enumeration-seq
-    (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.clj"))))               ;;;    (.. Thread currentThread getContextClassLoader
-                                                                                                                    ;;;        (getResources "data_readers.clj"))))
+  (let []                                                          ;;; cl (.. Thread currentThread getContextClassLoader)
+    (concat
+      (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.clj")))         ;;; (.getResources cl "data_readers.clj")
+      (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.clj"))))))      ;;; (.getResources cl "data_readers.cljc")
+
 
 (defn- data-reader-var [sym]
   (intern (create-ns (symbol (namespace sym)))
@@ -7455,7 +7457,10 @@ Note that read can execute code (controlled by *read-eval*),
                     (.OpenText url)  )]                                                                 ;;; (java.io.InputStreamReader.
                                                                                                         ;;;        (.openStream url) "UTF-8"))]
     (binding [*file* (.Name url)]                                                                       ;;; .getFile
-      (let [new-mappings (read rdr false nil)]
+      (let [read-opts (if (.EndsWith (.Name url) "cljc")                                                ;;; .endsWith  .getPath
+                        {:eof nil :read-cond :allow}
+                        {:eof nil})
+            new-mappings (read read-opts rdr)]
         (when (not (map? new-mappings))
           (throw (ex-info (str "Not a valid data-reader map")
                           {:url url})))
