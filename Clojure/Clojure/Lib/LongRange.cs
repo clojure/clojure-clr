@@ -23,6 +23,7 @@ namespace clojure.lang
     /// <summary>
     /// Implements the special common case of a finite range based on long start, end, and step.
     /// </summary>
+    [Serializable]
     public class LongRange: ASeq, Counted, IChunkedSeq, IReduce, IEnumerable, IEnumerable<Object>
     {
         #region Data
@@ -34,7 +35,7 @@ namespace clojure.lang
         readonly long _start;
         readonly long _end;
         readonly long _step;
-        readonly ExceedsBoundDel _exceedsBoundDel;
+        readonly IBoundsCheck _boundsCheck;
         volatile LongChunk _chunk;  // lazy
         volatile ISeq _chunkNext;        // lazy
         volatile ISeq _next;             // cached
@@ -44,50 +45,85 @@ namespace clojure.lang
         #region BoundsCheck
 
         // this is a one method interface in the JVM version
-        // I've converted it to a delegate
+        // Originally, I converted it to a delegate.
+        // Subsequently, they decided to make this class serializable, and serializability and lambdas/delegates do not mix.
+        // So I'm moving to the JVM solution.  Sigh.
 
-        private delegate bool ExceedsBoundDel(long val);
-
-        private static ExceedsBoundDel PositiveStep(long end) 
+        private interface IBoundsCheck
         {
-            return ( val => val >= end);
+            bool ExceededBounds(long val);
         }
 
-        private static ExceedsBoundDel NegativeStep(long end) 
+        [Serializable]
+        private class PositiveStepCheck: IBoundsCheck
         {
-            return ( val => val <= end);
+            long _end;
+
+            public PositiveStepCheck(long end)
+            {
+                _end = end;
+            }
+            public bool ExceededBounds(long val)
+            {
+                return val >= _end;
+            }
+        }
+
+        [Serializable]
+        private class NegativeStepCheck : IBoundsCheck
+        {
+            long _end;
+
+            public NegativeStepCheck(long end)
+            {
+                _end = end;
+            }
+            public bool ExceededBounds(long val)
+            {
+                return val <= _end;
+            }
+        }
+
+        private static IBoundsCheck PositiveStep(long end) 
+        {
+            return new PositiveStepCheck(end);
+        }
+
+        private static IBoundsCheck NegativeStep(long end) 
+        {
+            return new NegativeStepCheck(end);
         }
 
         #endregion
 
         #region Ctors and facxtories
 
-        LongRange(long start, long end, long step, ExceedsBoundDel exceedsBoundDel)
+        LongRange(long start, long end, long step, IBoundsCheck boundsCheck)
         {
             _start = start;
             _end = end;
             _step = step;
-            _exceedsBoundDel = exceedsBoundDel;
+            _boundsCheck = boundsCheck;
         }
 
-        private LongRange(long start, long end, long step, ExceedsBoundDel exceedsBoundDel, LongChunk chunk, ISeq chunkNext)
+        private LongRange(long start, long end, long step, IBoundsCheck boundsCheck, LongChunk chunk, ISeq chunkNext)
         {
             _start = start;
             _end = end;
             _step = step;
-            _exceedsBoundDel = exceedsBoundDel;
+            _boundsCheck = boundsCheck;
             _chunk = chunk;
             _chunkNext = chunkNext;
         }
 
 
-        private LongRange(IPersistentMap meta, long start, long end, long step, ExceedsBoundDel exceedsBoundDel, LongChunk chunk, ISeq chunkNext)
+        private LongRange(IPersistentMap meta, long start, long end, long step, IBoundsCheck boundsCheck, LongChunk chunk, ISeq chunkNext)
             : base(meta)
         {
             _start = start;
             _end = end;
             _step = step;
-            _exceedsBoundDel = exceedsBoundDel;
+            _boundsCheck = boundsCheck;
             _chunk = chunk;
             _chunkNext = chunkNext;
         }
@@ -134,7 +170,7 @@ namespace clojure.lang
         {
             if (meta == _meta)
                 return this;
-            return new LongRange(meta, _start, _end, _step, _exceedsBoundDel, _chunk, _chunkNext);
+            return new LongRange(meta, _start, _end, _step, _boundsCheck, _chunk, _chunkNext);
         }
 
         #endregion
@@ -151,7 +187,7 @@ namespace clojure.lang
             if (_chunk != null) return;
 
             long nextStart = _start + (_step * CHUNK_SIZE);
-            if (_exceedsBoundDel(nextStart))
+            if (_boundsCheck.ExceededBounds(nextStart))
             {
                 int count = AbsCount(_start, _end, _step);
                 _chunk = new LongChunk(_start, _step, count);
@@ -159,7 +195,7 @@ namespace clojure.lang
             else
             {
                 _chunk = new LongChunk(_start, _step, CHUNK_SIZE);
-                _chunkNext = new LongRange(nextStart, _end, _step, _exceedsBoundDel);
+                _chunkNext = new LongRange(nextStart, _end, _step, _boundsCheck);
             }
         }
 
@@ -172,7 +208,7 @@ namespace clojure.lang
             if (_chunk.count() > 1)
             {
                 LongChunk smallerChunk = (LongChunk)_chunk.dropFirst();
-                _next = new LongRange(smallerChunk.first(), _end, _step, _exceedsBoundDel, smallerChunk, _chunkNext);
+                _next = new LongRange(smallerChunk.first(), _end, _step, _boundsCheck, smallerChunk, _chunkNext);
                 return _next;
             }
             return chunkedNext();
@@ -233,7 +269,7 @@ namespace clojure.lang
         {
             Object acc = _start;
             long i = _start + _step;
-            while (!_exceedsBoundDel(i))
+            while (!_boundsCheck.ExceededBounds(i))
             {
                 acc = f.invoke(acc, i);
                 Reduced accRed = acc as Reduced;
@@ -253,7 +289,7 @@ namespace clojure.lang
                 acc = f.invoke(acc, i);
                 if (RT.isReduced(acc)) return ((Reduced)acc).deref();
                 i += _step;
-            } while (!_exceedsBoundDel(i));
+            } while (!_boundsCheck.ExceededBounds(i));
             return acc;
         }
 
@@ -264,7 +300,7 @@ namespace clojure.lang
         public new IEnumerator GetEnumerator()
         {
             long next = _start;
-            while ( ! _exceedsBoundDel(next))
+            while (!_boundsCheck.ExceededBounds(next))
             {
                 yield return next;
                 next = next + _step;
@@ -280,6 +316,7 @@ namespace clojure.lang
 
         #region LongChunk
 
+        [Serializable]
         class LongChunk: IChunk
         {
             #region Data

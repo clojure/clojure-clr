@@ -33,7 +33,7 @@ namespace clojure.lang
         readonly object _start;
         readonly object _end;
         readonly object _step;
-        readonly ExceedsBoundDel _exceedsBoundDel;
+        readonly IBoundsCheck _boundsCheck;
         volatile IChunk _chunk;         // lazy
         volatile ISeq _chunkNext;       // lazy
         volatile ISeq _next;            // cached
@@ -42,50 +42,82 @@ namespace clojure.lang
 
         #region BoundsCheck
 
-        // this is a one method interface in the JVM version
-        // I've converted it to a delegate
-
-        private delegate bool ExceedsBoundDel(object val);
-
-        private static ExceedsBoundDel PositiveStep(object end)
+        private interface IBoundsCheck
         {
-            return (val => Numbers.gte(val,end));
+            bool ExceededBounds(object val);
         }
 
-        private static ExceedsBoundDel NegativeStep(object end)
+        [Serializable]
+        private class PositiveStepCheck : IBoundsCheck
         {
-            return (val => Numbers.lte(val,end));
+            object _end;
+
+            public PositiveStepCheck(object end)
+            {
+                _end = end;
+            }
+
+            public bool ExceededBounds(object val)
+            {
+                return Numbers.gte(val, _end);
+            }
+        }
+
+        [Serializable]
+        private class NegativeStepCheck : IBoundsCheck
+        {
+            object _end;
+
+            public NegativeStepCheck(object end)
+            {
+                _end = end;
+            }
+
+            public bool ExceededBounds(object val)
+            {
+                return Numbers.lte(val, _end);
+            }
+        }
+
+        private static IBoundsCheck PositiveStep(object end)
+        {
+            return new PositiveStepCheck(end);
+        }
+
+        private static IBoundsCheck NegativeStep(object end)
+        {
+            return new NegativeStepCheck(end);
         }
 
         #endregion
 
         #region C-tors and factory methods
 
-        private Range(Object start, Object end, Object step, ExceedsBoundDel exceedsBoundDel)
+        private Range(Object start, Object end, Object step, IBoundsCheck boundsCheck)
         {
             _end = end;
             _start = start;
             _step = step;
-            _exceedsBoundDel = exceedsBoundDel;
+            _boundsCheck = boundsCheck;
         }
 
-        private Range(Object start, Object end, Object step, ExceedsBoundDel exceedsBoundDel, IChunk chunk, ISeq chunkNext)
+        private Range(Object start, Object end, Object step, IBoundsCheck boundsCheck, IChunk chunk, ISeq chunkNext)
         {
             _end = end;
             _start = start;
             _step = step;
-            _exceedsBoundDel = exceedsBoundDel;
+            _boundsCheck = boundsCheck;
             _chunk = chunk;
             _chunkNext = chunkNext;
         }
 
-        private Range(IPersistentMap meta, Object start, Object end, Object step, ExceedsBoundDel exceedsBoundDel, IChunk chunk, ISeq chunkNext)
+        private Range(IPersistentMap meta, Object start, Object end, Object step, IBoundsCheck boundsCheck, IChunk chunk, ISeq chunkNext)
             : base(meta)
         {
             _end = end;
             _start = start;
             _step = step;
-            _exceedsBoundDel = exceedsBoundDel;
+            _boundsCheck = boundsCheck;
             _chunk = chunk;
             _chunkNext = chunkNext;
         }
@@ -150,7 +182,7 @@ namespace clojure.lang
             {
                 arr[n++] = val;
                 val = Numbers.addP(val, _step);
-                if (_exceedsBoundDel(val))
+                if (_boundsCheck.ExceededBounds(val))
                 {
                     //partial last chunk
                     _chunk = new ArrayChunk(arr, 0, n);
@@ -159,7 +191,7 @@ namespace clojure.lang
             }
 
             // full last chunk
-            if (_exceedsBoundDel(val))
+            if (_boundsCheck.ExceededBounds(val))
             {
                 _chunk = new ArrayChunk(arr, 0, CHUNK_SIZE);
                 return;
@@ -167,7 +199,7 @@ namespace clojure.lang
 
             // full intermediate chunk
             _chunk = new ArrayChunk(arr, 0, CHUNK_SIZE);
-            _chunkNext = new Range(val, _end, _step, _exceedsBoundDel);
+            _chunkNext = new Range(val, _end, _step, _boundsCheck);
         }
 
         /// <summary>
@@ -183,7 +215,7 @@ namespace clojure.lang
             if (_chunk.count() > 1)
             {
                 IChunk smallerChunk = _chunk.dropFirst();
-                _next = new Range(_meta, smallerChunk.nth(0), _end, _step, _exceedsBoundDel, smallerChunk, _chunkNext);
+                _next = new Range(_meta, smallerChunk.nth(0), _end, _step, _boundsCheck, smallerChunk, _chunkNext);
                 return _next;
             }
             return chunkedNext();
@@ -202,7 +234,7 @@ namespace clojure.lang
         {
             return meta == this.meta()
                  ? this
-                 : new Range(meta, _start, _end, _step, _exceedsBoundDel, _chunk, _chunkNext);
+                 : new Range(meta, _start, _end, _step, _boundsCheck, _chunk, _chunkNext);
         }
 
         #endregion
@@ -219,7 +251,7 @@ namespace clojure.lang
         {
             Object acc = _start;
             object i = Numbers.addP(_start, _step);
-            while (!_exceedsBoundDel(i))
+            while (!_boundsCheck.ExceededBounds(i))
             {
                 acc = f.invoke(acc, i);
                 if (RT.isReduced(acc)) return ((Reduced)acc).deref();
@@ -239,7 +271,7 @@ namespace clojure.lang
         {
             Object acc = val;
             Object i = _start;
-            while (!_exceedsBoundDel(i))
+            while (!_boundsCheck.ExceededBounds(i))
             {
                 acc = f.invoke(acc, i);
                 if (RT.isReduced(acc)) return ((Reduced)acc).deref();
@@ -284,7 +316,7 @@ namespace clojure.lang
         public new IEnumerator GetEnumerator()
         {
             object next = _start;
-            while (!_exceedsBoundDel(next))
+            while (!_boundsCheck.ExceededBounds(next))
             {
                 yield return next;
                 next = Numbers.addP(next, _step);

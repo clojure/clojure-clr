@@ -96,7 +96,7 @@
     (build-via-transient [])
     (build-via-transient {})
     (build-via-transient #{})
-    
+
     ; array-seqs
     (seq (make-array Object 10))
     (seq (make-array Boolean 10))                ;;; Boolean/TYPE
@@ -113,8 +113,13 @@
 
     ; misc seqs
     (seq "s11n")
-    ;;;(range 50)                                            <--- TODO: Figure out why some LazySeqs bomb  because unable to find assembly core.clj
-    (rseq (apply sorted-set (reverse (range 100))))))
+    (range 50)
+    (rseq (apply sorted-set (reverse (range 100))))
+
+    ;; partially realized chunked range
+    (let [r (range 50)]
+      (nth r 35)
+      r)))
 
 (deftest misc-serialization
   (are [v] (= v (-> v serialize deserialize))
