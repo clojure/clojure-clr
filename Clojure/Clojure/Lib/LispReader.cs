@@ -247,8 +247,6 @@ namespace clojure.lang
                     if (macroFn != null)
                     {
                         object ret = macroFn.invoke(r, (char)ch, opts, pendingForms);
-                        if (RT.suppressRead())
-                            return null;
                         // no op macros return the reader
                         if (ret == r)
                             continue;
@@ -1644,14 +1642,9 @@ namespace clojure.lang
                 if (sym == null)
                     throw new ArgumentException("Reader tag must be a symbol");
 
-                if (RT.suppressRead())
-                {
-                    read(r, true, null, true, opts, pendingForms);
-                    return r;
-                }
                 Object form = read(r, true, null, true, opts, pendingForms);
 
-                if (IsPreserveReadCond(opts))
+                if (IsPreserveReadCond(opts) || RT.suppressRead())
                 {
                     return TaggedLiteral.create(sym, form);
                 }
