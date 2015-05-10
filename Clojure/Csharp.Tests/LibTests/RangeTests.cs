@@ -72,7 +72,6 @@ namespace Clojure.Tests.LibTests
             IReduce r = (IReduce)_createFn(2L, 5L);
             object ret = r.reduce(fn);
             Expect(ret, EqualTo(9));
-            Console.WriteLine("asdfasdf");
         }
 
         [Test]
@@ -83,7 +82,6 @@ namespace Clojure.Tests.LibTests
             IReduce r = (IReduce)_createFn(2L, 5L);
             object ret = r.reduce(fn, 20);
             Expect(ret, EqualTo(29));
-            Console.WriteLine("qwerqwer");
         }
 
         #endregion
