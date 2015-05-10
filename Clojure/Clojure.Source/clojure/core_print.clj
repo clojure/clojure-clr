@@ -471,7 +471,7 @@
 (defmethod print-method  System.Diagnostics.StackFrame [^System.Diagnostics.StackFrame o ^System.IO.TextWriter w]                            ;;;  StackTraceElement  ^StackTraceElement
   (print-method [(symbol (.FullName (.GetType o))) (symbol (.Name (.GetMethod o))) (.GetFileName o) (.GetFileLineNumber o)] w))      ;;; (.getClassName o)  (.getMethodName o) .getFileName .getLineNumber
 
-(defn- throwable-as-map [^Exception o]                                                                           ;;; ^Throwable
+(defn Throwable->map [^Exception o]                                                                              ;;; ^Throwable
   (let [base (fn [^Exception t]                                                                                  ;;; ^Throwable
                {:type (class t)
                 :message (.Message t)                                                                            ;;; .getLocalizedMessage
@@ -485,8 +485,33 @@
            :trace (vec (.GetFrames (System.Diagnostics.StackTrace. (or ^Exception (last via) o) true)))}))        ;;;  .getStackTrace ^Throwable  
 
 (defn print-throwable [^Exception o ^System.IO.TextWriter w]                                                     ;;; ^Throwable
-  (.Write w "#error")
-  (print-method (throwable-as-map o) w))
+  (.Write w "#error {\n :cause ")
+  (let [{:keys [cause via trace]} (Throwable->map o)
+        print-via #(do (.Write w "{:type ")
+		               (print-method (:type %) w)
+					   (.Write w "\n   :message ")
+					   (print-method (:message %) w)
+					   (.Write w "\n   :at ")
+					   (print-method (:at %) w)
+					   (.Write w "}"))]
+    (print-method cause w)
+    (when via
+      (.Write w "\n :via\n [")
+      (when-let [fv (first via)]
+	    (print-via fv)
+        (doseq [v (rest via)]
+          (.Write w "\n  ")
+		  (print-via v)))
+      (.Write w "]"))
+    (when trace
+      (.Write w "\n :trace\n [")
+      (when-let [ft (first trace)]
+        (print-method ft w)
+        (doseq [t (rest trace)]
+          (.Write w "\n  ")
+          (print-method t w)))
+      (.Write w "]")))
+  (.Write w "}"))
 
 (defmethod print-method Exception [^Exception o ^System.IO.TextWriter w]                                         ;;; Throwable ^Throwable
   (print-throwable o w))
