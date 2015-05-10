@@ -622,7 +622,7 @@ namespace clojure.lang
 
         IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
         {
-            return MakeEnumeratorT((k, v) => new MapEntry(k, v));
+            return MakeEnumeratorT((k, v) => (IMapEntry) new MapEntry(k, v));
         }
 
 
