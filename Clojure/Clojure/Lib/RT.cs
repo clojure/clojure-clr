@@ -3538,7 +3538,7 @@ namespace clojure.lang
             return null;
         }
 
-        static IEnumerable<string> GetFindFilePaths()
+        public static IEnumerable<string> GetFindFilePaths()
         {
             return GetFindFilePathsRaw().Distinct();
         }
