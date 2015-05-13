@@ -384,7 +384,8 @@ namespace clojure.lang
             if (sym.Namespace != null)
             {
                 Namespace ns = namespaceFor(sym);
-                if (ns == null || ns.Name.Name == sym.Namespace)
+                if (ns == null || (ns.Name.Name == null ? sym.Namespace == null : ns.Name.Name.Equals(sym.Namespace)))
+
                     return sym;
                 return Symbol.intern(ns.Name.Name, sym.Name);
             }
