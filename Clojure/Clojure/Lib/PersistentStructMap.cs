@@ -386,7 +386,7 @@ namespace clojure.lang
             int? i = (int?)_def.Keyslots.valAt(key);
             if (i.HasValue)
                 return _vals[i.Value];
-            return _ext.valAt(key);
+            return _ext.valAt(key,notFound);
         }
 
         #endregion
@@ -464,8 +464,8 @@ namespace clojure.lang
 
         IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
         {
-            foreach ( IMapEntry ime in _def.Keyslots )
-                yield return ime;
+            foreach (IMapEntry ime in _def.Keyslots)
+                yield return new MapEntry(ime.key(), _vals[(int)ime.val()]);
             foreach ( IMapEntry ime in _ext)
                 yield return ime;
         }
