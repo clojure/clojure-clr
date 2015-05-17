@@ -20,8 +20,8 @@ namespace clojure.lang
     {
         #region Data
 
-        public static readonly Keyword TAG_KW = Keyword.intern("tag");
-        public static readonly Keyword FORM_KW = Keyword.intern("form");
+        public static readonly Keyword TagKeyword = Keyword.intern("tag");
+        public static readonly Keyword FormKeyword = Keyword.intern("form");
 
         public readonly Symbol _tag;
         public readonly Object _form;
@@ -30,6 +30,7 @@ namespace clojure.lang
 
         #region Ctors and factories
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static TaggedLiteral create(Symbol tag, Object form)
         {
             return new TaggedLiteral(tag, form);
@@ -52,11 +53,11 @@ namespace clojure.lang
 
         public object valAt(object key, object notFound)
         {
-            if (FORM_KW.Equals(key))
+            if (FormKeyword.Equals(key))
             {
                 return _form;
             }
-            else if (TAG_KW.Equals(key))
+            else if (TagKeyword.Equals(key))
             {
                 return _tag;
             }
@@ -70,13 +71,13 @@ namespace clojure.lang
 
         #region Object overrides
 
-        public override bool Equals(object o)
+        public override bool Equals(object obj)
         {
-            if (this == o) 
+            if (this == obj) 
                 return true;
             //if (o == null || GetType() != o.GetType()) return false;
 
-            TaggedLiteral that = o as TaggedLiteral;
+            TaggedLiteral that = obj as TaggedLiteral;
             if (that == null)
                 return false;
 

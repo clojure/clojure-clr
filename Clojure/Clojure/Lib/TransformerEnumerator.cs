@@ -26,7 +26,7 @@ using System.Collections.Concurrent;
 
 namespace clojure.lang
 {
-    public class TransformerEnumerator : IEnumerator
+    public sealed class TransformerEnumerator : IEnumerator, IEnumerator<Object>
     {
         #region Interfaces
 
@@ -85,6 +85,8 @@ namespace clojure.lang
         volatile Object _next = NONE;
         volatile bool _completed = false;
 
+        bool _disposed = false;
+
         #endregion
 
         #region Ctors and factories
@@ -96,11 +98,13 @@ namespace clojure.lang
             _multi = multi;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IEnumerator create(IFn xform, IEnumerator source)
         {
             return new TransformerEnumerator(xform, source, false);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IEnumerator createMulti(IFn xform, ICollection sources)
         {
             IEnumerator[] iters = new IEnumerator[sources.Count];
@@ -170,7 +174,24 @@ namespace clojure.lang
             return Step();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         public void Reset()
+        {
+            throw new NotImplementedException();
+        }
+
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        bool IEnumerator.MoveNext()
+        {
+            return MoveNext();
+        }
+
+        void IEnumerator.Reset()
         {
             throw new NotImplementedException();
         }
@@ -343,6 +364,25 @@ namespace clojure.lang
             public void Reset()
             {
                 throw new NotImplementedException();
+            }
+        }
+
+        #endregion
+
+        #region IDispose methods
+
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                _disposed = true;
             }
         }
 

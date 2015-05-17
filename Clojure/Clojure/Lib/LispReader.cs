@@ -36,8 +36,8 @@ namespace clojure.lang
         static readonly Symbol UNQUOTE = Symbol.intern("clojure.core", "unquote");
         static readonly Symbol UNQUOTE_SPLICING = Symbol.intern("clojure.core", "unquote-splicing");
         static readonly Symbol DEREF = Symbol.intern("clojure.core", "deref");
-        static readonly Symbol READ_COND = Symbol.intern("clojure.core", "read-cond");
-        static readonly Symbol READ_COND_SPLICING = Symbol.intern("clojure.core", "read-cond-splicing");
+        //static readonly Symbol READ_COND = Symbol.intern("clojure.core", "read-cond");
+        //static readonly Symbol READ_COND_SPLICING = Symbol.intern("clojure.core", "read-cond-splicing");
         //static readonly Symbol META = Symbol.intern("clojure.core", "meta");
         static readonly Symbol APPLY = Symbol.intern("clojure.core", "apply");
         static readonly Symbol CONCAT = Symbol.intern("clojure.core", "concat");
@@ -131,30 +131,31 @@ namespace clojure.lang
 
         // Reader opts
 
-        static public readonly Keyword OPT_EOF = Keyword.intern(null, "eof");
-        static public readonly Keyword OPT_FEATURES = Keyword.intern(null, "features");
-        static public readonly Keyword OPT_READ_COND = Keyword.intern(null, "read-cond");
+        internal static readonly Keyword OPT_EOF = Keyword.intern(null, "eof");
+        internal static readonly Keyword OPT_FEATURES = Keyword.intern(null, "features");
+        internal static readonly Keyword OPT_READ_COND = Keyword.intern(null, "read-cond");
 
         // EOF special value to throw on eof
-        static public readonly Keyword EOFTHROW = Keyword.intern(null, "eofthrow");
+        static readonly Keyword EOFTHROW = Keyword.intern(null, "eofthrow");
 
         // Platform features - always installed
-        static private readonly Keyword PLATFORM_KEY = Keyword.intern(null, "clj");
-        static private readonly Object PLATFORM_FEATURES = PersistentHashSet.create(PLATFORM_KEY);
+        static readonly Keyword PLATFORM_KEY = Keyword.intern(null, "clj");
+        static readonly Object PLATFORM_FEATURES = PersistentHashSet.create(PLATFORM_KEY);
 
         // Reader conditional options - use with :read-cond
-        static public readonly Keyword COND_ALLOW = Keyword.intern(null, "allow");
-        static public readonly Keyword COND_PRESERVE = Keyword.intern(null, "preserve");
+        internal static readonly Keyword COND_ALLOW = Keyword.intern(null, "allow");
+        internal static readonly Keyword COND_PRESERVE = Keyword.intern(null, "preserve");
 
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object read(PushbackTextReader r, Object opts)
         {
             bool eofIsError = true;
             object eofValue = null;
-            if (opts != null && opts is IPersistentMap)
+            IPersistentMap optsMap = opts as IPersistentMap;
+            if (optsMap != null)
             {
-                Object eof = ((IPersistentMap)opts).valAt(OPT_EOF, EOFTHROW);
-                if(!EOFTHROW.Equals(eof)) 
+                Object eof = optsMap.valAt(OPT_EOF, EOFTHROW);
+                if (!EOFTHROW.Equals(eof))
                 {
                     eofIsError = false;
                     eofValue = eof;
@@ -162,11 +163,7 @@ namespace clojure.lang
             }
             return read(r, eofIsError, eofValue, false, opts);
         }
-
-
-
-        // There is really no reason for the main entry point to have an isRecursive flag, is there?
-
+        
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static object read(PushbackTextReader r,
             bool eofIsError,
@@ -176,17 +173,19 @@ namespace clojure.lang
             return read(r, eofIsError, eofValue, isRecursive, PersistentHashMap.EMPTY);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object read(PushbackTextReader r, bool eofIsError, object eofValue, bool isRecursive, object opts)
         {
             return read(r, eofIsError, eofValue, null, null, isRecursive, opts, new LinkedList<Object>());
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static private Object read(PushbackTextReader r, bool eofIsError, Object eofValue, bool isRecursive, Object opts, Object pendingForms)
         {
             return read(r, eofIsError, eofValue, null, null, isRecursive, opts, pendingForms);
         }
 
-        static private Object installPlatformFeature(Object opts)
+        static private Object InstallPlatformFeature(Object opts)
         {
             if (opts == null)
                 return RT.mapUniqueKeys(LispReader.OPT_FEATURES, PLATFORM_FEATURES);
@@ -206,7 +205,7 @@ namespace clojure.lang
             if (UNKNOWN.Equals(RT.ReadEvalVar.deref()))
                 throw new InvalidOperationException("Reading disallowed - *read-eval* bound to :unknown");
 
-            opts = installPlatformFeature(opts);
+            opts = InstallPlatformFeature(opts);
 
             try
             {
@@ -862,6 +861,8 @@ namespace clojure.lang
 
         public abstract class ReaderBase : AFn
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "2#")]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "3#")]
             public override object invoke(object arg1, object arg2, object opts, object pendingForms)
             {
                 return Read((PushbackTextReader)arg1, (Char)arg2, opts, pendingForms);
@@ -1684,29 +1685,15 @@ namespace clojure.lang
 
                 Type recordType = RT.classForNameE(recordName.ToString());
 
-                bool shortForm = true;
-
-                if (form is IPersistentMap)
-                {
-                    shortForm = false;
-                }
-                else if (form is IPersistentVector)
-                {
-                    shortForm = true;
-                }
-                else
-                {
-                    throw new ArgumentException("Unreadable constructor form starting with \"#" + recordName + "\"");
-                }
-
+                IPersistentVector recordEntries;
+                IPersistentMap vals;
 
                 object ret = null;
                 ConstructorInfo[] allCtors = recordType.GetConstructors();
 
-                if (shortForm)
+                if ((recordEntries = form as IPersistentVector) != null)
                 {
-                    IPersistentVector recordEntries = (IPersistentVector)form;
-
+                    // shortForm
                     bool ctorFound = false;
                     foreach (ConstructorInfo cinfo in allCtors)
                         if (cinfo.GetParameters().Length == recordEntries.count())
@@ -1717,17 +1704,19 @@ namespace clojure.lang
 
                     ret = Reflector.InvokeConstructor(recordType, RT.toArray(recordEntries));
                 }
-                else
+                else if ((vals = form as IPersistentMap) != null)
                 {
-                    IPersistentMap vals = (IPersistentMap)form;
                     for (ISeq s = RT.keys(vals); s != null; s = s.next())
                     {
                         if (!(s.first() is Keyword))
                             throw new ArgumentException(String.Format("Unreadable defrecord form: key must be of type clojure.lang.Keyword, got {0}", s.first().ToString()));
                     }
 
-
                     ret = Reflector.InvokeStaticMethod(recordType, "create", new Object[] { vals });
+                }
+                else
+                {
+                    throw new ArgumentException("Unreadable constructor form starting with \"#" + recordName + "\"");
                 }
 
                 return ret;
@@ -1754,13 +1743,16 @@ namespace clojure.lang
 
         static bool IsPreserveReadCond(Object opts)
         {
-            if (RT.booleanCast(READ_COND_ENV.deref()) && opts is IPersistentMap)
+            if (RT.booleanCast(READ_COND_ENV.deref()))
             {
-                Object readCond = ((IPersistentMap)opts).valAt(OPT_READ_COND);
-                return COND_PRESERVE.Equals(readCond);
+                IPersistentMap optsMap = opts as IPersistentMap;
+                if (optsMap != null)
+                {
+                    Object readCond = optsMap.valAt(OPT_READ_COND);
+                    return COND_PRESERVE.Equals(readCond);
+                }
             }
-            else
-                return false;
+            return false;
         }
 
         public sealed class ConditionalReader : ReaderBase
@@ -1814,8 +1806,8 @@ namespace clojure.lang
             }
         }
 
-        public static readonly Keyword DEFAULT_FEATURE = Keyword.intern(null, "default");
-        public static readonly IPersistentSet RESERVED_FEATURES =
+        internal static readonly Keyword DEFAULT_FEATURE = Keyword.intern(null, "default");
+        internal static readonly IPersistentSet RESERVED_FEATURES =
              RT.set(Keyword.intern(null, "else"), Keyword.intern(null, "none"));
 
 
@@ -1831,6 +1823,7 @@ namespace clojure.lang
             return custom != null && custom.contains(feature);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "read")]
         public static Object readCondDelimited(PushbackTextReader r, bool splicing, object opts, object pendingForms)
         {
             object result = null;

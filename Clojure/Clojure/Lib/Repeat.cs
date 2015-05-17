@@ -45,11 +45,13 @@ namespace clojure.lang
             _val = val;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static Repeat create(Object val)
         {
             return new Repeat(INFINITE, val);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq create(long count, Object val)
         {
             if (count <= 0)

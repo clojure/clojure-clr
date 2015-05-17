@@ -26,13 +26,17 @@ namespace clojure.lang
     /// </remarks>
     public interface IMapEnumerable
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         IEnumerator keyEnumerator();
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         IEnumerator valEnumerator();
     }
 
     public interface IMapEnumerableTyped<TK, TV>
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         IEnumerator<TK> tkeyEnumerator();
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         IEnumerator<TV> tvalEnumerator();
     }
 

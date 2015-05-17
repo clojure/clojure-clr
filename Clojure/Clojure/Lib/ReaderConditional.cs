@@ -19,8 +19,8 @@ namespace clojure.lang
     {
         #region Data
 
-        public static readonly Keyword FORM_KW = Keyword.intern("form");
-        public static readonly Keyword SPLICING_KW = Keyword.intern("splicing?");
+        static readonly Keyword FORM_KW = Keyword.intern("form");
+        static readonly Keyword SPLICING_KW = Keyword.intern("splicing?");
 
         public readonly object _form;
         public readonly bool? _splicing;
@@ -29,6 +29,8 @@ namespace clojure.lang
 
         #region Ctors and factories
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ReaderConditional create(object form, bool? splicing)
         {
             return new ReaderConditional(form, splicing);
@@ -69,13 +71,13 @@ namespace clojure.lang
 
         #region Object overrides
 
-        public override bool Equals(object o)
+        public override bool Equals(object obj)
         {
-            if (this == o)
+            if (this == obj)
                 return true;
             //if (o == null || GetType() != o.GetType()) return false;
 
-            ReaderConditional that = o as ReaderConditional;
+            ReaderConditional that = obj as ReaderConditional;
             if (that == null)
                 return false;
 

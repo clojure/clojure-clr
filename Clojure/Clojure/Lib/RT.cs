@@ -683,6 +683,7 @@ namespace clojure.lang
         // Because of the need to look before you leap (make sure one element exists)
         // this is more complicated than the JVM version:  In JVM-land, you can hasNext before you move.
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq chunkEnumeratorSeq(IEnumerator iter)
         {
             if (!iter.MoveNext())

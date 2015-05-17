@@ -122,6 +122,7 @@ namespace clojure.lang
             _chunkNext = chunkNext;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq create(Object end)
         {
             if (Numbers.isPos(end))
@@ -129,11 +130,13 @@ namespace clojure.lang
             return PersistentList.EMPTY;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq create(Object start, Object end)
         {
             return create(start, end, 1L);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq create(Object start, Object end, Object step)
         {
             if ((Numbers.isPos(step) && Numbers.gt(start, end)) ||
@@ -267,6 +270,8 @@ namespace clojure.lang
         /// <param name="start">An initial value to get started.</param>
         /// <returns>The reduced value</returns>
         /// <remarks>Computes f(...f(f(f(start,i0),i1),i2),...).</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#")]
         public object reduce(IFn f, object val)
         {
             Object acc = val;

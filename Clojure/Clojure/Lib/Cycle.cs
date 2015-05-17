@@ -47,6 +47,7 @@ namespace clojure.lang
             _next = next;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq create(ISeq vals)
         {
             if (vals == null)

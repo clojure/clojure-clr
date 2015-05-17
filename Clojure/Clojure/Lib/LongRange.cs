@@ -129,6 +129,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq create(long end)
         {
             if (end > 0)
@@ -136,6 +137,7 @@ namespace clojure.lang
             return PersistentList.EMPTY;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq create(long start, long end)
         {
             if (start >= end)
@@ -143,6 +145,7 @@ namespace clojure.lang
             return new LongRange(start, end, 1L, PositiveStep(end));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq create(long start, long end, long step)
         {
             if (step > 0)
@@ -327,6 +330,7 @@ namespace clojure.lang
 
         #region IReduce methods
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public object reduce(IFn f)
         {
             Object acc = _start;
@@ -342,6 +346,8 @@ namespace clojure.lang
             return acc;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#")]
         public object reduce(IFn f, object val)
         {
             Object acc = val;

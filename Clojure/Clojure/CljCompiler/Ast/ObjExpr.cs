@@ -81,7 +81,7 @@ namespace clojure.lang.CljCompiler.Ast
 
 
         FieldBuilder _metaField;
-        protected List<FieldBuilder> _closedOverFields;
+        protected IList<FieldBuilder> _closedOverFields;
         protected Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;
         protected Dictionary<FieldBuilder, LocalBinding> _closedOverFieldsToBindingsMap;
 
@@ -550,8 +550,8 @@ namespace clojure.lang.CljCompiler.Ast
             for (ISeq s = RT.keys(Closes); s != null; s = s.next(), a++)
             {
                 //LocalBinding lb = (LocalBinding)s.first();
-                FieldBuilder fb = _closedOverFields[a];
-                bool isVolatile = IsVolatile(_closedOverFieldsToBindingsMap[fb]);
+                //FieldBuilder fb = _closedOverFields[a];
+                //bool isVolatile = IsVolatile(_closedOverFieldsToBindingsMap[fb]);
 
                 gen.EmitLoadArg(a + 1);         // gen.Emit(OpCodes.Ldarg, a + 1);
             }
