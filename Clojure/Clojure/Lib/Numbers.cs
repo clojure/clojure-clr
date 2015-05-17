@@ -2171,7 +2171,7 @@ namespace clojure.lang
 
         #region Int overloads for basic ops
 
-        static int ThrowIntOverflow()
+        public static int ThrowIntOverflow()
         {
             throw new ArithmeticException("integer overflow");
         }

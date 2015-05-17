@@ -1044,6 +1044,39 @@
       (reduce + (iterator-seq (.GetEnumerator (range 100)))) 4950                             ;;; .iterator 
       (reduce + (iterator-seq (.GetEnumerator (range 0.0 100.0 1.0)))) 4950.0 ))              ;;; .iterator 
 
+(defn unlimited-range-create [& args]
+  (let [[arg1 arg2 arg3] args]
+    (case (count args)
+      1 (clojure.lang.Range/create arg1)
+      2 (clojure.lang.Range/create arg1 arg2)
+      3 (clojure.lang.Range/create arg1 arg2 arg3))))
+
+(deftest test-longrange-corners
+  (let [lmax Int64/MaxValue                             ;;; Long/MAX_VALUE
+        lmax-1 (- Int64/MaxValue 1)                     ;;; Long/MAX_VALUE
+        lmax-2 (- Int64/MaxValue 2)                     ;;; Long/MAX_VALUE
+        lmax-31 (- Int64/MaxValue 31)                   ;;; Long/MAX_VALUE
+        lmax-32 (- Int64/MaxValue 32)                   ;;; Long/MAX_VALUE
+        lmax-33 (- Int64/MaxValue 33)                   ;;; Long/MAX_VALUE
+        lmin Int64/MinValue                             ;;; Long/MIN_VALUE
+        lmin+1 (+ Int64/MinValue 1)                     ;;; Long/MIN_VALUE
+        lmin+2 (+ Int64/MinValue 2)                     ;;; Long/MIN_VALUE
+        lmin+31 (+ Int64/MinValue 31)                   ;;; Long/MIN_VALUE
+        lmin+32 (+ Int64/MinValue 32)                   ;;; Long/MIN_VALUE
+        lmin+33 (+ Int64/MinValue 33)]
+    (doseq [range-args [ [lmax-2 lmax]
+                         [lmax-33 lmax]
+                         [lmax-33 lmax-31]
+                         [lmin+2 lmin -1]
+                         [lmin+33 lmin -1]
+                         [lmin+33 lmin+31 -1]
+                         [lmin lmax lmax]
+                         [lmax lmin lmin]
+                         [-1 lmax lmax]
+                         [1 lmin lmin]]]
+    (is (= (apply unlimited-range-create range-args)
+           (apply range range-args))
+        (apply str "from (range " (concat (interpose " " range-args) ")"))))))
 
 (deftest test-empty?
   (are [x] (empty? x)

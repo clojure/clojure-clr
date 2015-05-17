@@ -186,16 +186,29 @@ namespace clojure.lang
         {
             if (_chunk != null) return;
 
-            long nextStart = _start + (_step * CHUNK_SIZE);
-            if (_boundsCheck.ExceededBounds(nextStart))
+            long count;
+            try
             {
-                int count = AbsCount(_start, _end, _step);
-                _chunk = new LongChunk(_start, _step, count);
+                count = RangeCount(_start, _end, _step);
             }
-            else
+            catch (ArithmeticException)
             {
+                // size of total range is > Long.MAX_VALUE so must step to count
+                // this only happens in pathological range cases like:
+                // (range -9223372036854775808 9223372036854775807 9223372036854775807)
+                count = SteppingCount(_start, _end, _step);
+            }
+
+            if (count > CHUNK_SIZE)
+            { // not last chunk
+                long nextStart = _start + (_step * CHUNK_SIZE);   // cannot overflow, must be < end
                 _chunk = new LongChunk(_start, _step, CHUNK_SIZE);
                 _chunkNext = new LongRange(nextStart, _end, _step, _boundsCheck);
+            }
+            else
+            {  // last chunk
+                _chunk = new LongChunk(_start, _step, (int)count);   // count must 
+
             }
         }
 
@@ -223,19 +236,68 @@ namespace clojure.lang
 
         #region Counted methods
 
-        static int AbsCount(long start, long end, long step)
+        // fallback count mechanism for pathological cases
+        // returns either exact count or CHUNK_SIZE+1
+        long SteppingCount(long start, long end, long step)
         {
-            double c = (double)(end - start) / step;
-            int ic = (int)c;
-            if (c > ic)
-                return ic + 1;
-            else
-                return ic;
+            long count = 1;
+            long s = start;
+            while (count <= CHUNK_SIZE)
+            {
+                try
+                {
+                    s = Numbers.add(s, step);
+                    if (_boundsCheck.ExceededBounds(s))
+                        break;
+                    else
+                        count++;
+                }
+                catch (ArithmeticException)
+                {
+                    break;
+                }
+            }
+            return count;
+        }
+        
+        // returns exact size of remaining items OR throws ArithmeticException for overflow case
+        long RangeCount(long start, long end, long step)
+        {
+            // (1) count = ceiling ( (end - start) / step )
+            // (2) ceiling(a/b) = (a+b+o)/b where o=-1 for positive stepping and +1 for negative stepping
+            // thus: count = end - start + step + o / step
+            return Numbers.add(Numbers.add(Numbers.minus(end, start), step), _step > 0 ? -1 : 1) / step;
         }
 
         public override int count()
         {
-            return AbsCount(_start, _end, _step);
+            try
+            {
+                long c = RangeCount(_start, _end, _step);
+                if (c > Int32.MaxValue)
+                {
+                    return Numbers.ThrowIntOverflow();
+                }
+                else
+                {
+                    return (int)c;
+                }
+            }
+            catch (ArithmeticException)
+            {
+                // rare case from large range or step, fall back to iterating and counting
+                IEnumerator enumerator = this.GetEnumerator();
+                long count = 0;
+                while (enumerator.MoveNext())
+                {
+                    count++;
+                }
+
+                if (count > Int32.MaxValue)
+                    return Numbers.ThrowIntOverflow();
+                else
+                    return (int)count;
+            }
         }
   
         #endregion
@@ -303,7 +365,14 @@ namespace clojure.lang
             while (!_boundsCheck.ExceededBounds(next))
             {
                 yield return next;
-                next = next + _step;
+                try
+                {
+                    next = Numbers.add(next, _step);
+                }
+                catch (ArithmeticException)
+                {
+                    yield break;
+                }
             }
         }
 
