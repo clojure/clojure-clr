@@ -473,16 +473,25 @@
 
 (defn Throwable->map [^Exception o]                                                                              ;;; ^Throwable
   (let [base (fn [^Exception t]                                                                                  ;;; ^Throwable
-               {:type (class t)
-                :message (.Message t)                                                                            ;;; .getLocalizedMessage
-                :at (.GetFrame (System.Diagnostics.StackTrace. t true) 0)})                                      ;;; (get (.getStackTrace t) 0)
+                 (let [m {:type (class t)
+                        :message (.Message t)                                                                    ;;; .getLocalizedMessage
+                        :at (.GetFrame (System.Diagnostics.StackTrace. t true) 0)}                               ;;; (get (.getStackTrace t) 0)
+                     data (ex-data t)]
+                 (if data
+                   (assoc m :data data)
+                   m)))
         via (loop [via [], ^Exception t o]                                                                       ;;; ^Throwable
               (if t
                 (recur (conj via t) (.InnerException t))                                                         ;;; .getCause
-                via))]
-   {:cause (.Message ^Exception (last via))                                                               ;;; (.getLocalizedMessage ^Throwable
+                via))
+        ^Exception root (peek via)                                                                               ;;; Throwable
+        m {:cause (.Message root)                                                                                   ;;; (.getLocalizedMessage root)
            :via (vec (map base via))
-           :trace (vec (.GetFrames (System.Diagnostics.StackTrace. (or ^Exception (last via) o) true)))}))        ;;;  .getStackTrace ^Throwable  
+          :trace (vec (.GetFrames (System.Diagnostics.StackTrace. (or root o) true)))}                           ;;;  .getStackTrace ^Throwable  
+        data (ex-data root)]
+    (if data
+      (assoc m :data data)
+      m)))
 
 (defn print-throwable [^Exception o ^System.IO.TextWriter w]                                                     ;;; ^Throwable
   (.Write w "#error {\n :cause ")
