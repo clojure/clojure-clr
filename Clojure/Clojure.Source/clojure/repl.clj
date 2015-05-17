@@ -149,10 +149,11 @@ Example: (source-fn 'filter)"
                 pbr (proxy [clojure.lang.PushbackTextReader] [rdr]                  ;;; [PushbackReader] [rdr]
                       (Read [] (let [i (proxy-super Read)]                          ;;; read read
                                  (.Append text (char i))                            ;;; .append
-                                 i)))]
+                                 i)))
+                read-opts (if (.EndsWith ^String filepath "cljc") {:read-cond :allow} {})]                   ;;; .endsWith
             (if (= :unknown *read-eval*)
               (throw (InvalidOperationException. "Unable to read source while *read-eval* is :unknown."))    ;;; IllegalStateException
-              (read (clojure.lang.PushbackTextReader. pbr)))                           ;;; (read (PushbackReader. pbr))
+              (read read-opts (clojure.lang.PushbackTextReader. pbr)))                                       ;;; (read read-opts(PushbackReader. pbr))
             (str text)))))))
 
 (defmacro source
