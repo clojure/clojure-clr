@@ -18,7 +18,7 @@ using System;
 
 namespace clojure.lang
 {
-    public class Iterate : ASeq, IReduce
+    public class Iterate : ASeq, IReduce, IPending
     {
         #region Data
 
@@ -113,6 +113,15 @@ namespace clojure.lang
                 v = _f.invoke(v);
             }
 
+        }
+
+        #endregion
+
+        #region IPending methods
+
+        public bool isRealized()
+        {
+            return _seed != UNREALIZED_SEED;
         }
 
         #endregion

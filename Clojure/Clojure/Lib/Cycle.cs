@@ -18,7 +18,7 @@ using System;
 
 namespace clojure.lang
 {
-    public class Cycle : ASeq, IReduce
+    public class Cycle : ASeq, IReduce, IPending
     {
         #region Data
 
@@ -122,6 +122,15 @@ namespace clojure.lang
                 if (s == null)
                     s = _all;
             }
+        }
+
+        #endregion
+
+        #region IPending methods
+
+        public bool isRealized()
+        {
+            return _current != null;
         }
 
         #endregion
