@@ -176,13 +176,21 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object read(PushbackTextReader r, bool eofIsError, object eofValue, bool isRecursive, object opts)
         {
-            return read(r, eofIsError, eofValue, null, null, isRecursive, opts, new LinkedList<Object>());
+            return read(r, eofIsError, eofValue, null, null, isRecursive, opts, null);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static private Object read(PushbackTextReader r, bool eofIsError, Object eofValue, bool isRecursive, Object opts, Object pendingForms)
         {
-            return read(r, eofIsError, eofValue, null, null, isRecursive, opts, pendingForms);
+            return read(r, eofIsError, eofValue, null, null, isRecursive, opts, EnsurePending(pendingForms));
+        }
+
+        static Object EnsurePending(object pendingForms)
+        {
+            if (pendingForms == null)
+                return new LinkedList<Object>();
+            else
+                return pendingForms;
         }
 
         static private Object InstallPlatformFeature(Object opts)
@@ -1004,7 +1012,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char underscore, object opts, object pendingForms)
             {
-                ReadAux(r, opts, pendingForms);
+                ReadAux(r, opts, EnsurePending(pendingForms));
                 return r;
             }
         }
@@ -1026,7 +1034,7 @@ namespace clojure.lang
                     startLine = lntr.LineNumber;
                     startCol = lntr.ColumnNumber;
                 }
-                IList<Object> list = ReadDelimitedList(')', r, true, opts, pendingForms);
+                IList<Object> list = ReadDelimitedList(')', r, true, opts, EnsurePending(pendingForms));
                 if (list.Count == 0)
                     return PersistentList.EMPTY;
                 IObj s = (IObj)PersistentList.create((IList)list);
@@ -1052,7 +1060,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char leftparen, object opts, object pendingForms)
             {
-                return LazilyPersistentVector.create(ReadDelimitedList(']', r, true, opts, pendingForms));
+                return LazilyPersistentVector.create(ReadDelimitedList(']', r, true, opts, EnsurePending(pendingForms)));
             }
         }
 
@@ -1060,7 +1068,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char leftbrace, object opts, object pendingForms)
             {
-                Object[] a = ReadDelimitedList('}', r, true, opts, pendingForms).ToArray();
+                Object[] a = ReadDelimitedList('}', r, true, opts, EnsurePending(pendingForms)).ToArray();
                 if ((a.Length & 1) == 1)
                     throw new ArgumentException("Map literal must contain an even number of forms");
                 return RT.map(a);
@@ -1071,7 +1079,7 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char leftbracket, object opts, object pendingForms)
             {
-                return PersistentHashSet.createWithCheck(ReadDelimitedList('}', r, true, opts, pendingForms));
+                return PersistentHashSet.createWithCheck(ReadDelimitedList('}', r, true, opts, EnsurePending(pendingForms)));
             }
         }
 
@@ -1099,7 +1107,7 @@ namespace clojure.lang
             protected override object Read(PushbackTextReader r, char quote, object opts, object pendingForms)
             {
                 //object o = read(r, true, null, true, opts, pendingForms);
-                object o = ReadAux(r, opts, pendingForms);
+                object o = ReadAux(r, opts, EnsurePending(pendingForms));
                 return RT.list(_sym, o);
             }
         }
@@ -1119,7 +1127,7 @@ namespace clojure.lang
             {
                 Console.WriteLine("WARNING: read macro {0} is deprecated; use {1} instead", _macro, _sym.getName());
                 //object o = read(r, true, null, true, opts, pendingForms);
-                object o = ReadAux(r, opts, pendingForms);
+                object o = ReadAux(r, opts, EnsurePending(pendingForms));
                 return RT.list(_sym, o);
             }
         }
@@ -1136,7 +1144,7 @@ namespace clojure.lang
                 {
                     Var.pushThreadBindings(RT.map(GENSYM_ENV, PersistentHashMap.EMPTY));
                     //object form = read(r, true, null, true, opts, pendingForms);
-                    object form = ReadAux(r, opts, pendingForms);
+                    object form = ReadAux(r, opts, EnsurePending(pendingForms));
                     return syntaxQuote(form);
                 }
                 finally
@@ -1312,6 +1320,7 @@ namespace clojure.lang
                 int ch = r.Read();
                 if (ch == -1)
                     throw new EndOfStreamException("EOF while reading character");
+                pendingForms = EnsurePending(pendingForms);
                 if (ch == '@')
                 {
                     //object o = read(r, true, null, true, opts, pendingForms);
@@ -1361,6 +1370,7 @@ namespace clojure.lang
                 if (fn == null)
                 {
                     Unread(r, ch);
+                    pendingForms = EnsurePending(pendingForms);
                     object result = _ctorReader.invoke(r, (char)ch, opts, pendingForms);
 
                     if (result != null)
@@ -1389,6 +1399,8 @@ namespace clojure.lang
                     startLine = lntr.LineNumber;
                     startCol = lntr.ColumnNumber;
                 }
+
+                pendingForms = EnsurePending(pendingForms);
 
                 IPersistentMap metaAsMap;
                 {
@@ -1442,7 +1454,7 @@ namespace clojure.lang
             protected override object Read(PushbackTextReader r, char quote, object opts, object pendingForms)
             {
                 //object o = read(r, true, null, true, opts, pendingForms);
-                object o = ReadAux(r, opts, pendingForms);
+                object o = ReadAux(r, opts, EnsurePending(pendingForms));
                 //		if(o instanceof Symbol)
                 //			{
                 //			Object v = Compiler.maybeResolveIn(Compiler.currentNS(), (Symbol) o);
@@ -1496,7 +1508,7 @@ namespace clojure.lang
                     Var.pushThreadBindings(RT.map(ARG_ENV, PersistentTreeMap.EMPTY));
                     r.Unread('(');
                     ////object form = ReadAux(r, true, null, true, opts, pendingForms);
-                    object form = ReadAux(r, opts, pendingForms);
+                    object form = ReadAux(r, opts, EnsurePending(pendingForms));
                     //object form = _listReader.invoke(r, '(');
 
                     IPersistentVector args = PersistentVector.EMPTY;
@@ -1550,7 +1562,7 @@ namespace clojure.lang
                     return registerArg(1);
                 }
                 //object n = ReadAux(r, true, null, true, opts, pendingForms);
-                object n = ReadAux(r, opts, pendingForms);
+                object n = ReadAux(r, opts, EnsurePending(pendingForms));
                 if (n.Equals(Compiler.AmpersandSym))
                     return registerArg(-1);
                 if (!Util.IsNumeric(n))
@@ -1589,7 +1601,7 @@ namespace clojure.lang
                     throw new InvalidOperationException("EvalReader not allowed when *read-eval* is false");
                 }
 
-                Object o = read(r, true, null, true, opts, pendingForms);
+                Object o = read(r, true, null, true, opts, EnsurePending(pendingForms));
                 if (o is Symbol)
                 {
                     return RT.classForNameE(o.ToString());
@@ -1638,6 +1650,8 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char c, object opts, object pendingForms)
             {
+                pendingForms = EnsurePending(pendingForms);
+
                 Object name = read(r, true, null, false, opts, pendingForms);
                 Symbol sym = name as Symbol;
                 if (sym == null)
@@ -1790,7 +1804,7 @@ namespace clojure.lang
                     if (IsPreserveReadCond(opts))
                     {
                         IFn listReader = getMacro(ch); // should always be a list
-                        Object form = listReader.invoke(r, (char)ch, opts, pendingForms);
+                        Object form = listReader.invoke(r, (char)ch, opts, EnsurePending(pendingForms));
 
                         return ReaderConditional.create(form, splicing);
                     }
@@ -1828,6 +1842,8 @@ namespace clojure.lang
         {
             object result = null;
             object form; // The most recently ready form
+            Boolean toplevel = (pendingForms == null);
+            pendingForms = EnsurePending(pendingForms);
 
             LineNumberingTextReader lntr = r as LineNumberingTextReader;
             int firstLine = lntr != null ? lntr.LineNumber : -1;
@@ -1916,7 +1932,10 @@ namespace clojure.lang
                 IList<Object> resultAsList = result as IList<object>;
 
                 if (resultAsList == null)
-                    throw new ArgumentException("Spliced form list in read-cond-splicing must implement java.util.List");
+                    throw new ArgumentException("Spliced form list in read-cond-splicing must implement IList<Object>");
+
+                if (toplevel)
+                    throw new InvalidOperationException("Reader conditional splicing not allowed at the top level.");
 
                 LinkedList<Object> pendingLinked = pendingForms as LinkedList<Object>;
                 LinkedListNode<Object> node = pendingLinked.First;
