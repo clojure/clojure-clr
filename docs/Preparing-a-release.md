@@ -37,4 +37,5 @@
 # Preparing for next release
 
 * Modify Clojure\Clojure\Bootstrap\version.properties to desired development version  (master-SNAPSHOT)
+* If next iteration is a new point release, modify the version in the AssemblyInfo of all projects
 * Commit the change (Prepare for next development iteration ...)
