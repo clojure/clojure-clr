@@ -12,7 +12,7 @@
 
 (import '(clojure.lang Murmur3))
 
-;(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 (deftype VecNode [edit arr])
 
@@ -21,7 +21,7 @@
 (definterface IVecImpl
   (^int tailoff [])
   (arrayFor [^int i])
-  (pushTail [^int level parent tailnode])
+  (pushTail [^int level ^clojure.core.VecNode parent ^clojure.core.VecNode tailnode])
   (popTail [^int level node])
   (newPath [edit ^int level node])
   (doAssoc [^int level node ^int i val]))
@@ -128,7 +128,7 @@
 (defmethod print-method ::VecSeq [v w]
   ((get (methods print-method) clojure.lang.ISeq) v w))
 
-(deftype Vec [^clojure.core.ArrayManager am ^int cnt ^int shift root tail _meta]
+(deftype Vec [^clojure.core.ArrayManager am ^int cnt ^int shift ^clojure.core.VecNode root tail _meta]
   Object
   (Equals [this o]                                                                                ;;; equals
     (cond 
@@ -142,7 +142,7 @@
                :else false)))
      (or (instance? clojure.lang.Sequential o) (instance? System.Collections.IList o))             ;;; java.util.List
        (if-let [st (seq this)]
-         (.Equals st (seq o))                                                                      ;;; .equals
+         (.Equals ^Object st (seq o))                                                                      ;;; .equals, added ^Object
          (nil? (seq o)))
      :else false))
 
@@ -184,7 +184,7 @@
   (^clojure.lang.IPersistentCollection cons [this ^Object val]                                            ;;; added type hints because we overload cons
      (if (< (- cnt (.tailoff this)) (int 32))
       (let [new-tail (.array am (inc (.alength am tail)))]
-        (Array/Copy tail new-tail (.alength am tail))                                              ;;; (System/arraycopy tail 0 new-tail 0 (.alength am tail))
+        (Array/Copy ^Array tail ^Array new-tail (.alength am tail))                                              ;;; (System/arraycopy tail 0 new-tail 0 (.alength am tail))
         (.aset am new-tail (.alength am tail) val)
         (new Vec am (inc cnt) shift root new-tail (meta this)))
       (let [tail-node (VecNode. (.edit root) tail)] 
@@ -224,11 +224,11 @@
       (new Vec am 0 5 EMPTY-NODE (.array am 0) (meta this))
     (> (- cnt (.tailoff this)) 1)
       (let [new-tail (.array am (dec (.alength am tail)))]
-        (Array/Copy tail new-tail (.alength am new-tail))                                   ;;; (System/arraycopy tail 0 new-tail 0 (.alength am new-tail))
+        (Array/Copy ^Array tail ^Array new-tail (.alength am new-tail))                                   ;;; (System/arraycopy tail 0 new-tail 0 (.alength am new-tail))
         (new Vec am (dec cnt) shift root new-tail (meta this)))
     :else
       (let [new-tail (.arrayFor this (- cnt 2))
-            new-root (.popTail this shift root)]
+            new-root ^clojure.core.VecNode (.popTail this shift root)]
         (cond
          (nil? new-root) 
            (new Vec am (dec cnt) shift EMPTY-NODE new-tail (meta this))
@@ -243,14 +243,15 @@
      (and (<= (int 0) i) (< i cnt))
        (if (>= i (.tailoff this))
          (let [new-tail (.array am (.alength am tail))]
-           (Array/Copy tail new-tail (.alength am tail))                                       ;;; (System/arraycopy tail 0 new-tail 0 (.alength am tail))
+           (Array/Copy ^Array tail ^Array new-tail (.alength am tail))                                       ;;; (System/arraycopy tail 0 new-tail 0 (.alength am tail))
            (.aset am new-tail (bit-and i (int 0x1f)) val)
            (new Vec am cnt shift root new-tail (meta this)))
          (new Vec am cnt shift (.doAssoc this shift root i val) tail (meta this)))
      (= i cnt) (.cons this val)
      :else (throw (IndexOutOfRangeException.))))                                               ;;; IndexOutOfBoundsException
 
-  (clojure.lang.IPersistentVector.count [_] cnt)
+  (clojure.lang.IPersistentVector.count [_] cnt)                                               ;;; ADDED
+  (length [_] cnt)                                                                             ;;; ADDED
   
   clojure.lang.Reversible
   (rseq [this]
@@ -312,24 +313,26 @@
         (loop [node root level shift]
           (if (zero? level)
             (.arr node)
-            (recur (aget (.arr node) (bit-and (bit-shift-right i level) (int 0x1f)))               ;;; Got rid of ^objects tag on (.arr node)  TODO: Figure out why we don't compile properly with the tag.
+            (recur (aget ^objects (.arr node) (bit-and (bit-shift-right i level) (int 0x1f)))
                    (long (- level (int 5)))))))                                          ;;; added long cast to deal with occur
       (throw (IndexOutOfRangeException.))))                                                        ;;; IndexOutOfBoundsException
 
   (pushTail [this level parent tailnode]
     (let [subidx (bit-and (bit-shift-right (dec cnt) level) (int 0x1f))
-          ret (VecNode. (.edit parent) (aclone  (.arr parent)))                            ;;; Got rid of ^objects tag on (.arr parent)  TODO: Figure out why we don't compile properly with the tag.
+	      parent ^clojure.core.VecNode parent 
+          ret (VecNode. (.edit parent) (aclone  ^objects (.arr parent)))
           node-to-insert (if (= level (int 5))
                            tailnode
-                           (let [child (aget (.arr parent) subidx)]               ;;; Got rid of ^objects tag on (.arr parent)  TODO: Figure out why we don't compile properly with the tag.
+                           (let [child (aget ^objects (.arr parent) subidx)]
                              (if child
                                (.pushTail this (- level (int 5)) child tailnode)
                                (.newPath this (.edit root) (- level (int 5)) tailnode))))]
-      (aset (.arr ret) subidx node-to-insert)                                             ;;; Got rid of ^objects tag on (.arr ret)  TODO: Figure out why we don't compile properly with the tag.
+      (aset ^objects (.arr ret) subidx node-to-insert)
       ret))
 
   (popTail [this level node]
-    (let [subidx (bit-and (bit-shift-right (- cnt 2) level) (int 0x1f))]
+    (let [node ^clojure.core.VecNode node
+	      subidx (bit-and (bit-shift-right (- cnt 2) level) (int 0x1f))]
       (cond
        (> level 5) 
          (let [new-child (.popTail this (- level 5) (aget ^objects (.arr node) subidx))]
@@ -350,23 +353,24 @@
         (aset ^objects (.arr ret) 0 (.newPath this edit (- level (int 5)) node))
         ret)))
 
-  (doAssoc [this level node i val] 
-    (if (zero? level)
-      ;on this branch, array will need val type
-      (let [arr (.aclone am (.arr node))]
-        (.aset am arr (bit-and i (int 0x1f)) val)
-        (VecNode. (.edit node) arr))
-      (let [arr (aclone ^objects (.arr node))
-            subidx (bit-and (bit-shift-right i level) (int 0x1f))]
-        (aset arr subidx (.doAssoc this (- level (int 5)) (aget arr subidx) i val))
-        (VecNode. (.edit node) arr))))
+  (doAssoc [this level node i val]
+    (let [node ^clojure.core.VecNode node]
+      (if (zero? level)
+        ;on this branch, array will need val type
+        (let [arr (.aclone am (.arr node))]
+          (.aset am arr (bit-and i (int 0x1f)) val)
+          (VecNode. (.edit node) arr))
+        (let [arr (aclone ^objects (.arr node))
+              subidx (bit-and (bit-shift-right i level) (int 0x1f))]
+          (aset arr subidx (.doAssoc this (- level (int 5)) (aget arr subidx) i val))
+          (VecNode. (.edit node) arr)))))
 
   System.IComparable                                                                      ;;; java.lang.Comparable
   (CompareTo [this o]                                                                     ;;; compareTo
     (if (identical? this o)
       0
       (let [^clojure.lang.IPersistentVector v (cast clojure.lang.IPersistentVector o)
-            vcnt (.count v)]
+            vcnt (.length v)]                                                             ;;; .count  TODO: Figure out why it can't find .count (relates to count being new in IPersistentVector)
         (cond
           (< cnt vcnt) -1
           (> cnt vcnt) 1

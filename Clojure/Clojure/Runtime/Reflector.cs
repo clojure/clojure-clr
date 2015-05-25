@@ -399,23 +399,26 @@ namespace clojure.lang
 
         public static MethodInfo GetArityZeroMethod(Type t, string name, bool getStatics)
         {
-            BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
-            if (getStatics)
-                flags |= BindingFlags.Static;
-            else
-                flags |= BindingFlags.Instance;
+            //BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.InvokeMethod;
+            //if (getStatics)
+            //    flags |= BindingFlags.Static;
+            //else
+            //    flags |= BindingFlags.Instance;
 
-            //MethodInfo[] all = t.GetMethods();
+            ////MethodInfo[] all = t.GetMethods();
 
-            IEnumerable<MethodInfo> einfo = t.GetMethods(flags).Where(mi => mi.Name == name && mi.GetParameters().Length == 0);
-            List<MethodInfo> infos = new List<MethodInfo>(einfo);
+            //IEnumerable<MethodInfo> einfo = t.GetMethods(flags).Where(mi => mi.Name == name && mi.GetParameters().Length == 0);
+            //List<MethodInfo> infos = new List<MethodInfo>(einfo);
+
+            IList<MethodBase> infos = GetMethods(t, name, null, 0, getStatics);
+
             if (infos.Count() == 1)
-                return infos[0];
+                return (MethodInfo)infos[0];
             else if (getStatics && infos.Count > 1)
             {
                 // static method with no arguments, multiple implementations.  Find closest to leaf in hierarchy.
                 Type d = infos[0].DeclaringType;
-                MethodInfo m = infos[0];
+                MethodBase m = infos[0];
                 for (int i = 1; i < infos.Count; i++)
                 {
                     Type d1 = infos[i].DeclaringType;
@@ -425,7 +428,7 @@ namespace clojure.lang
                         m = infos[i];
                     }
                 }
-                return m;
+                return (MethodInfo)m;
             }
             else
                 return null;
