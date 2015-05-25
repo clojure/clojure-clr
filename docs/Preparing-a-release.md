@@ -6,6 +6,8 @@
 
 * Modify Clojure\Clojure\Bootstrap\version.properties to desired release version
 * Modify Clojure.nuspec to desired release version
+* Make sure CLOJURE_SNK is set to the .snk file to use
+** > set CLOJURE_SNK=d:\work\ClojureClr.snk
 * Build and test all of {Release, Debug} X {3.5, 4.0}
 * Commit the changed version  (Prepare release ...)
 * Tag this commit.
@@ -13,8 +15,6 @@
 
 ## For NuGet
 
-* Make sure CLOJURE_SNK is set to the .snk file to use
-** > set CLOJURE_SNK=d:\work\ClojureClr.snk
 * Make sure ILMERGE is on the PATH
 * Build the ILMERGEd dlls
 ** > msbuild build.proj /target:ilmerge /p:Configuration="Release 4.0" /p:Platform="Any CPU"
