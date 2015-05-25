@@ -37,7 +37,7 @@
     <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes clojure.test-clojure.compilation.line-number-examples" 
           WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == '.Net' "/>
-    <Exec Command="mono $(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes" 
+    <Exec Command="mono $(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes  clojure.test-clojure.compilation.line-number-examples" 
           WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
