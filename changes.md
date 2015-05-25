@@ -390,6 +390,80 @@ map data: `Throwable->map`.
 * [CLJ-1195](http://dev.clojure.org/jira/browse/CLJ-1195)
   emit-hinted-impl expands to ns-qualified invocation of fn
 
+# Changes to ClojureCLR in Version 1.7
+
+We have made all the changes, bug fixes, etc., listed above that are relevant to ClojureCLR.
+
+## Bug fixes / improvements
+
+* [CLJCLR-35](http://dev.clojure.org/jira/browse/CLJCLR-35)
+  make clojure.reflect/typesym work properly on generic type parameter types
+* [CLJCLR-36](http://dev.clojure.org/jira/browse/CLJCLR-36)
+  Emit dummy methods for IMeta/IObj when needed in typedef
+* [CLJCLR-39](http://dev.clojure.org/jira/browse/CLJCLR-39)
+  Use Type.AssemblyQualifiedName in RT.print when printing #= expressions for types
+* Use dlls over cljs when their timestamps are equal
+* [CLJCLR-40](http://dev.clojure.org/jira/browse/CLJCLR-40)
+  Fix broken reduce-kv on vectors
+* [CLJCLR-42](http://dev.clojure.org/jira/browse/CLJCLR-42)
+  clojure.core/+ should inline on arity >1.
+* [CLJCLR-47](http://dev.clojure.org/jira/browse/CLJCLR-47)
+  Make Future.cancel match JVM signature
+* [CLJCLR-46](http://dev.clojure.org/jira/browse/CLJCLR-46)
+  Fix Reflector.GetTypeStringForArgs to handle NilExprs (Has ClrType = true, ClrType = null)
+* [CLJCLR-43](http://dev.clojure.org/jira/browse/CLJCLR-43)
+  Rework of defrecord to get rid of reflection warnings
+* Really add test.check
+* [CLJCLR-49](http://dev.clojure.org/jira/browse/CLJCLR-49)
+  Make ArraySeq.createFromObject work on arrays of value types
+* [CLJCLR-50](http://dev.clojure.org/jira/browse/CLJCLR-50)
+  Deftype*-generated class ctor should not initalize readonly instance variables declared in base class
+* [CLJCLR-51](http://dev.clojure.org/jira/browse/CLJCLR-51)
+  Get rid of unreachable code after final recur/throw in catch clause
+* [CLJCLR-52](http://dev.clojure.org/jira/browse/CLJCLR-52)
+  HostExpr calls to methods on values types should use call
+* [CLJCLR-53](http://dev.clojure.org/jira/browse/CLJCLR-53)
+  Genclass: add cast to return type on forwarded method calls
+* [CLJCLR-55](http://dev.clojure.org/jira/browse/CLJCLR-55)
+  Fix deftype to not to method-override on non-explicit-implementation dummy methods in base class
+* [CLJCLR-56](http://dev.clojure.org/jira/browse/CLJCLR-56)
+  gvec blows on Mono due to problem with Vec.count
+* [CLJCLR-57](http://dev.clojure.org/jira/browse/CLJCLR-57)
+  defrecord needs explicit definition of IPersistentCollection.count (for Mono).
+* [CLJCLR-59](http://dev.clojure.org/jira/browse/CLJCLR-59)
+  IsInstanceExpr generates extra box instruction for target arg
+* [CLJCLR-58](http://dev.clojure.org/jira/browse/CLJCLR-58)
+  Make test for bases in test_clojure/java_interop order-independent
+* [CLJCLR-60](http://dev.clojure.org/jira/browse/CLJCLR-60)
+  bit-shift-X intrinsics must mask shift arg to 6 or 7 bits
+* Fix LineNumberingTextReader tests to match 1-based column numbering
+* Get rid of old DLR license files
+* Remove some unused file in Clojure/Clojure/Bootstrap
+* [CLJCLR-61](http://dev.clojure.org/jira/browse/CLJCLR-61)
+  Compile and ilmerge clojure.core.reducers
+* [CLJCLR-63](http://dev.clojure.org/jira/browse/CLJCLR-63)
+  Fix fjtask in clojure.core.reducers under .net 4.0
+* [CLJCLR-64](http://dev.clojure.org/jira/browse/CLJCLR-64)
+  Make slurp handle general URLs (not just file://)
+* [CLJCLR-66](http://dev.clojure.org/jira/browse/CLJCLR-66)
+  Make iterator on PersistentStructMap return correct values for intrinsic field
+* [CLJCLR-65](http://dev.clojure.org/jira/browse/CLJCLR-65)
+  Fix reflection warnings in gvec
+
+## other
+
+* Add fast path for RT.classForName
+* Update to use clojure.tools.namespace 0.2.7
+* Update to clojure.data.generative 0.5.0 and fix some test dependencies
+* Add batch file to run peverify on Clojure AOT output
+* Update library versions
+* [CLJCLR-62](http://dev.clojure.org/jira/browse/CLJCLR-62)
+  make Task35 accessible for reducers
+* [CLJCLR-44](http://dev.clojure.org/jira/browse/CLJCLR-44)
+  Expose RT.GetFindFilePaths
+* Upgrade to DynamicLanguageRuntime release (non-alpha) version
+* FxCop fixes
+
 # Changes to Clojure in Version 1.6
 
 ## CONTENTS
