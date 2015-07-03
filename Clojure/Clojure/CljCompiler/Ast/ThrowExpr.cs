@@ -27,6 +27,11 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
+        public ThrowExpr()
+            : this(null)
+        {
+        }
+
         public ThrowExpr(Expr excExpr)
         {
             _excExpr = excExpr;
@@ -42,6 +47,9 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 if (pcon.Rhc == RHC.Eval)
                     return Compiler.Analyze(pcon, RT.list(RT.list(Compiler.FnOnceSym, PersistentVector.EMPTY, form)), "throw__" + RT.nextID());
+
+                if (RT.Length((ISeq)form) == 1)
+                    return new ThrowExpr();
 
                 return new ThrowExpr(Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), RT.second(form)));
             }
@@ -62,9 +70,16 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            _excExpr.Emit(RHC.Expression, objx, ilg);
-            ilg.Emit(OpCodes.Castclass, typeof(Exception));
-            ilg.Emit(OpCodes.Throw);
+            if (_excExpr == null)
+            {
+                ilg.Emit(OpCodes.Rethrow);
+            }
+            else
+            {
+                _excExpr.Emit(RHC.Expression, objx, ilg);
+                ilg.Emit(OpCodes.Castclass, typeof(Exception));
+                ilg.Emit(OpCodes.Throw);
+            }
         }
 
         public override bool HasNormalExit() { return false; }
