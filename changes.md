@@ -500,6 +500,8 @@ We have made all the changes, bug fixes, etc., listed above that are relevant to
   Make iterator on PersistentStructMap return correct values for intrinsic field
 * [CLJCLR-65](http://dev.clojure.org/jira/browse/CLJCLR-65)
   Fix reflection warnings in gvec
+* [CLJCLR-68](http://dev.clojure.org/jira/browse/CLJCLR-68)
+  Allow rethrows
 
 ## other
 
