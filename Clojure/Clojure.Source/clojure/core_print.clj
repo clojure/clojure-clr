@@ -471,7 +471,10 @@
 (defmethod print-method  System.Diagnostics.StackFrame [^System.Diagnostics.StackFrame o ^System.IO.TextWriter w]                            ;;;  StackTraceElement  ^StackTraceElement
   (print-method [(symbol (.FullName (.GetType o))) (symbol (.Name (.GetMethod o))) (.GetFileName o) (.GetFileLineNumber o)] w))      ;;; (.getClassName o)  (.getMethodName o) .getFileName .getLineNumber
 
-(defn Throwable->map [^Exception o]                                                                              ;;; ^Throwable
+(defn Throwable->map
+  "Constructs a data representation for a Throwable."
+  {:added "1.7"}
+  [^Exception o]                                                                                                 ;;; ^Throwable
   (let [base (fn [^Exception t]                                                                                  ;;; ^Throwable
                  (let [m {:type (class t)
                         :message (.Message t)                                                                    ;;; .getLocalizedMessage
