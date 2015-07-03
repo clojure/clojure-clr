@@ -49,7 +49,7 @@
                                 ["let .* in %s:\\d+" '(let [a])] 
                                 ["let .* in %s:\\d+" '(let (a))]
                                 ["renamed-with-open .* in %s:\\d+" '(renamed-with-open [a])]]]
-    (is (thrown-with-msg? clojure.lang.Compiler+CompilerException                                   ;;; clojure.lang.Compiler$CompilerException
+    (is (thrown-with-msg? ArgumentException                                                     ;;; IllegalArgumentException
                           (re-pattern (format msg-regex-str *ns*))
                           (macroexpand form)))))
 
