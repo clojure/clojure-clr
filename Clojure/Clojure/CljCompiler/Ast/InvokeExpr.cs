@@ -152,9 +152,9 @@ namespace clojure.lang.CljCompiler.Ast
                         string primc = FnMethod.PrimInterface(sargs);
                         if (primc != null)
                             return Compiler.Analyze(pcon,
-                                RT.listStar(Symbol.intern(".invokePrim"),
+                                ((IObj)RT.listStar(Symbol.intern(".invokePrim"),
                                             ((Symbol)form.first()).withMeta(RT.map(RT.TagKey, Symbol.intern(primc))),
-                                            form.next()));
+                                            form.next())).withMeta((IPersistentMap)RT.conj(RT.meta(v), RT.meta(form))));
                         break;
                     }
                 }
