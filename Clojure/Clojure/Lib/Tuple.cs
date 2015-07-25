@@ -16,6 +16,7 @@
  **/
 
 using System;
+using System.Collections;
 
 namespace clojure.lang
 {
@@ -63,11 +64,11 @@ namespace clojure.lang
             throw new InvalidOperationException("Too large an array for tuple");
         }
 
-        public static IPersistentVector createFromColl(int count, Object coll)
+        public static IPersistentVector createFromColl(Object coll)
         {
             if (RT.SupportsRandomAccess(coll))               // Java has: coll is RandomAccess
             {
-                switch (count)
+                switch (RT.count(coll))                     // Java has: (ICollection)coll).Count but failes for null, strings, and some others.
                 {
                     case 0:
                         return EMPTY;

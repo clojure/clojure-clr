@@ -46,12 +46,16 @@ namespace clojure.lang
 
         static int fcount(Object c)
         {
-            if (c == null)
+            if (c == null)  // not in Java version.  How did this pass tests?
                 return 0;
 
             Counted ctd = c as Counted;
             if (ctd != null)
                 return ctd.count();
+
+            String s = c as String;   // not in Java version.  How did this pass tests?
+            if (s != null)
+                return s.Length;
 
             return ((ICollection)c).Count;
         }
@@ -66,7 +70,7 @@ namespace clojure.lang
         {
             if ((obj is Counted || RT.SupportsRandomAccess(obj))
                 && fcount(obj) <= Tuple.MAX_SIZE)
-                return Tuple.createFromColl(fcount(obj), obj);
+                return Tuple.createFromColl(obj);
 
             IReduceInit ri = obj as IReduceInit;
             if (ri != null)
