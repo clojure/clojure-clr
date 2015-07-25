@@ -2546,9 +2546,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public object seqToTypedArray(ISeq seq)
         {
-            Type type = (seq != null)
-                ? (seq.first() == null ? typeof(object) : seq.first().GetType())
-                : typeof(Object);
+            Type type = (seq != null && seq.first() != null) ? seq.first().GetType() : typeof(Object);
             return seqToTypedArray(type, seq);
         }
 

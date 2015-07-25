@@ -344,6 +344,8 @@
         (class (first a)) (class (first v)) ))
  
   (is (= \a (aget (into-array Char [\a \b \c]) 0)))                 ;;; Character/TYPE
+
+  (is (= [nil 1 2] (seq (into-array [nil 1 2]))))
   
   (let [types [Int32              ;;; Integer/TYPE
                Byte               ;;; Byte/TYPE
