@@ -70,7 +70,7 @@ namespace clojure.lang.CljCompiler.Ast
                 return Compiler.OptionallyGenerateMetaInit(pcon,form, ret);
             else if ( constant )
             {
-                IPersistentVector rv = PersistentVector.EMPTY;
+                IPersistentVector rv = Tuple.EMPTY;
                 for ( int i=0; i<args.count(); i++ )
                 {
                     LiteralExpr ve = (LiteralExpr)args.nth(i);
@@ -100,8 +100,17 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            MethodExpr.EmitArgsAsArray(_args, objx, ilg);
-            ilg.Emit(OpCodes.Call, Compiler.Method_RT_vector);
+            if (_args.count() <= Tuple.MAX_SIZE)
+            {
+                for (int i = 0; i < _args.count(); i++)
+                    ((Expr)_args.nth(i)).Emit(RHC.Expression, objx, ilg);
+                ilg.Emit(OpCodes.Call, Compiler.Methods_CreateTuple[_args.count()]);
+            }
+            else
+            {
+                MethodExpr.EmitArgsAsArray(_args, objx, ilg);
+                ilg.Emit(OpCodes.Call, Compiler.Method_RT_vector);
+            }
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
         }

@@ -1127,7 +1127,7 @@ namespace clojure.lang
 
             IDictionary m = (IDictionary)coll;
             if (m.Contains(key))
-                return new MapEntry(key, m[key]);
+                return Tuple.create(key, m[key]);
 
             return null;
         }
@@ -1145,6 +1145,19 @@ namespace clojure.lang
         //    return nth(coll, (int)n);
         //}
 
+        static public bool SupportsRandomAccess(object coll)
+        {
+            return coll is Indexed ||
+                coll == null ||
+                coll is String ||
+                coll.GetType().IsArray ||
+                coll is IList ||
+                coll is DictionaryEntry ||
+                coll is IMapEntry ||
+                coll is JReMatcher ||
+                coll is Match ||
+                (coll.GetType().IsGenericType && coll.GetType().Name == "KeyValuePair`2");
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object nth(object coll, int n)

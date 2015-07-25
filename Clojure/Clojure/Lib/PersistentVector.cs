@@ -116,6 +116,12 @@ namespace clojure.lang
 
         #region C-tors and factory methods
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "adopt")]
+        public static PersistentVector adopt(Object[] items)
+        {
+            return new PersistentVector(items.Length, 5, EmptyNode, items);
+        }
+
         /// <summary>
         /// Create a <see cref="PersistentVector">PersistentVector</see> from an <see cref="ISeq">IReduceInit</see>.
         /// </summary>
@@ -267,17 +273,6 @@ namespace clojure.lang
         #endregion
 
         #region IPersistentVector members
-
-        /// <summary>
-        /// Gets the number of items in the vector.
-        /// </summary>
-        /// <returns>The number of items.</returns>
-        /// <remarks>Not sure why you wouldn't use <c>count()</c> intead.</remarks>
-        public override int length()
-        {
-            return count();
-        }
-
 
         int tailoff()
         {

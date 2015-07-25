@@ -914,8 +914,18 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else if (value is IPersistentVector)
             {
-                EmitListAsObjectArray(value, ilg);
-                ilg.EmitCall(Compiler.Method_RT_vector);
+                IPersistentVector args = (IPersistentVector)value;
+                if (args.count() <= Tuple.MAX_SIZE)
+                {
+                    for (int i = 0; i < args.count(); i++)
+                        EmitValue(args.nth(i), ilg);
+                    ilg.Emit(OpCodes.Call, Compiler.Methods_CreateTuple[args.count()]);
+                }
+                else
+                {
+                    EmitListAsObjectArray(value, ilg);
+                    ilg.EmitCall(Compiler.Method_RT_vector);
+                }
             }
             else if (value is PersistentHashSet)
             {

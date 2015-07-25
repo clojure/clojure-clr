@@ -215,8 +215,8 @@
                    `(containsKey [this# k#] (not (identical? this# (.valAt this# k# this#))))
                    `(entryAt [this# k#] (let [v# (.valAt this# k# this#)]
                                             (when-not (identical? this# v#)
-                                              (clojure.lang.MapEntry. k# v#))))
-                   `(seq [this#] (seq (concat [~@(map #(list `new `clojure.lang.MapEntry (keyword %) %) base-fields)] 
+                                              (clojure.lang.Tuple/create k# v#))))
+                   `(seq [this#] (seq (concat [~@(map #(list `clojure.lang.Tuple/create (keyword %) %) base-fields)]
                                           ~'__extmap)))
 				   `(|System.Collections.Generic.IEnumerable`1[clojure.lang.IMapEntry]|.GetEnumerator [this#]  (.GetEnumerator (clojure.lang.RecordEnumerable. this# [~@(map keyword base-fields)] (clojure.lang.RT/iter ~'__extmap))))
                    `(^clojure.lang.IPersistentMap assoc [this# k# ~gs]                        ;;; type hint added

@@ -340,6 +340,15 @@ namespace clojure.lang
         internal static readonly ConstructorInfo Ctor_Serializable = typeof(SerializableAttribute).GetConstructor(Type.EmptyTypes);
 
         internal static readonly MethodInfo[] Methods_IFn_invoke = new MethodInfo[MaxPositionalArity + 2];
+        internal static readonly MethodInfo[] Methods_CreateTuple = new MethodInfo[] { 
+            typeof(Tuple).GetMethod("create",CreateObjectTypeArray(0)),
+            typeof(Tuple).GetMethod("create",CreateObjectTypeArray(1)),
+            typeof(Tuple).GetMethod("create",CreateObjectTypeArray(2)),
+            typeof(Tuple).GetMethod("create",CreateObjectTypeArray(3)),
+            typeof(Tuple).GetMethod("create",CreateObjectTypeArray(4)),
+            typeof(Tuple).GetMethod("create",CreateObjectTypeArray(5)),
+            typeof(Tuple).GetMethod("create",CreateObjectTypeArray(6)),
+        };
 
         internal static Type[] CreateObjectTypeArray(int size)
         {
@@ -358,6 +367,10 @@ namespace clojure.lang
         {
             for (int i = 0; i <= Compiler.MaxPositionalArity; i++)
                 Methods_IFn_invoke[i] = typeof(IFn).GetMethod("invoke", CreateObjectTypeArray(i));
+
+            for ( int i = 0; i < Methods_CreateTuple.Length; i++)
+                if (Methods_CreateTuple[i] == null)
+                    throw new ArgumentNullException(String.Format("Create Tuple method #{0} missing",i));
 
             Type[] types = new Type[Compiler.MaxPositionalArity + 1];
             CreateObjectTypeArray(Compiler.MaxPositionalArity).CopyTo(types, 0);

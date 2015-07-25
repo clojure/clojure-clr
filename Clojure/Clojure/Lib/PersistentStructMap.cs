@@ -359,7 +359,7 @@ namespace clojure.lang
             IMapEntry me = _def.Keyslots.entryAt(key);
             return me == null
                 ? _ext.entryAt(key)
-                : new MapEntry(me.key(), _vals[Util.ConvertToInt(me.val())]);
+                : Tuple.create(me.key(), _vals[Util.ConvertToInt(me.val())]);
         }
 
         /// <summary>
@@ -465,7 +465,7 @@ namespace clojure.lang
         IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
         {
             foreach (IMapEntry ime in _def.Keyslots)
-                yield return new MapEntry(ime.key(), _vals[(int)ime.val()]);
+                yield return Tuple.create(ime.key(), _vals[(int)ime.val()]);
             foreach ( IMapEntry ime in _ext)
                 yield return ime;
         }
@@ -551,7 +551,7 @@ namespace clojure.lang
             /// <returns>The first item.</returns>
             public override object first()
             {
-                return new MapEntry(_keys.first(),_vals[_i]);
+                return Tuple.create(_keys.first(),_vals[_i]);
             }
 
             /// <summary>
