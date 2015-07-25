@@ -44,6 +44,18 @@ namespace clojure.lang
                 //: new LazilyPersistentVector(null, items, null);
         }
 
+        static int fcount(Object c)
+        {
+            if (c == null)
+                return 0;
+
+            Counted ctd = c as Counted;
+            if (ctd != null)
+                return ctd.count();
+
+            return ((ICollection)c).Count;
+        }
+
         /// <summary>
         /// Create a <see cref="LazilyPersistentVector">LazilyPersistentVector</see> from an ICollection of items.
         /// </summary>
@@ -53,8 +65,8 @@ namespace clojure.lang
         static public IPersistentVector create(object obj)
         {
             if ((obj is Counted || RT.SupportsRandomAccess(obj))
-                && RT.count(obj) <= Tuple.MAX_SIZE)
-                return Tuple.createFromColl(obj);
+                && fcount(obj) <= Tuple.MAX_SIZE)
+                return Tuple.createFromColl(fcount(obj), obj);
 
             IReduceInit ri = obj as IReduceInit;
             if (ri != null)

@@ -63,11 +63,11 @@ namespace clojure.lang
             throw new InvalidOperationException("Too large an array for tuple");
         }
 
-        public static IPersistentVector createFromColl(Object coll)
+        public static IPersistentVector createFromColl(int count, Object coll)
         {
             if (RT.SupportsRandomAccess(coll))               // Java has: coll is RandomAccess
             {
-                switch (RT.count(coll))
+                switch (count)
                 {
                     case 0:
                         return EMPTY;
@@ -104,6 +104,9 @@ namespace clojure.lang
 
             public IObj withMeta(IPersistentMap meta)
             {
+                if (meta == null)
+                    return this;
+
                 return vec().withMeta(meta);
             }
 
