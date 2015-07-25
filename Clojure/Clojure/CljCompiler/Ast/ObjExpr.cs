@@ -880,7 +880,7 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     Symbol field = (Symbol)s.first();
                     Type k = Compiler.TagType(Compiler.TagOf(field));
-                    object val = Reflector.GetInstanceFieldOrProperty(value, field.Name);
+                    object val = Reflector.GetInstanceFieldOrProperty(value, Compiler.munge(field.Name));
                     EmitValue(val, ilg);
                     if (k.IsPrimitive)
                     {
