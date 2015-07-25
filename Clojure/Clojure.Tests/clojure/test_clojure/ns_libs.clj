@@ -66,15 +66,15 @@
 
 (deftest naming-types
   (testing "you cannot use a name already referred from another namespace"
-    (is (thrown? InvalidOperationException                                ;;; IllegalStateException
-                 #"String already refers to: class java.lang.String"
-                 (definterface String)))
-    (is (thrown? InvalidOperationException                               ;;; IllegalStateException
-                 #"StringBuffer already refers to: class java.lang.StringBuffer"
-                 (deftype Buffer [])))                                   ;;; StringBuffer  -- StringBuffer not imported
-    (is (thrown? InvalidOperationException                               ;;; IllegalStateException
-                 #"Integer already refers to: class java.lang.Integer"
-                 (defrecord Int32 [])))))                                ;;; Integer
+    (is (thrown-with-msg? InvalidOperationException                               ;;; IllegalStateException
+                          #"String already refers to: System.String"              ;;; class java.lang.String
+                          (definterface String)))
+    (is (thrown-with-msg? InvalidOperationException                               ;;; IllegalStateException
+                          #"Buffer already refers to: System.Buffer"              ;;;  StringBuffer class java.lang.StringBuffer
+                          (deftype Buffer [])))                                   ;;; StringBuffer  -- StringBuffer not imported
+    (is (thrown-with-msg? InvalidOperationException                               ;;; IllegalStateException
+                          #"Int32 already refers to: System.Int32"                ;;; Integer  class java.lang.Integer
+                          (defrecord Int32 [])))))                                ;;; Integer
 
 (deftest resolution
   (let [s (gensym)]
