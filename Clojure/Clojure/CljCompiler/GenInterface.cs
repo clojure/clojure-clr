@@ -60,6 +60,10 @@ namespace clojure.lang
                 null,
                 interfaceTypes);
 
+            // Should we associate source file info?
+            // See Java committ 8d6fdb, 2015.07.17, related to CLJ-1645
+            // TODO: part of check on debug info
+
             SetCustomAttributes(proxyTB, attributes);
 
             DefineMethods(proxyTB, methods);
