@@ -49,7 +49,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ISeq rform = (ISeq)frm;
                 rform = RT.next(rform);
 
-                string tagname = ((Symbol)rform.first()).ToString();
+                string tagname = ((Symbol)rform.first()).getName();
                 rform = rform.next();
                 Symbol classname = (Symbol)rform.first();
                 rform = rform.next();
@@ -63,7 +63,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 ObjExpr ret = Build((IPersistentVector)RT.get(opts, Compiler.ImplementsKeyword, PersistentVector.EMPTY), fields, null, tagname, classname,
-                             (Symbol)RT.get(opts, RT.TagKey), rform, frm);
+                             (Symbol)RT.get(opts, RT.TagKey), rform, frm,opts);
 
                 return ret;
             }
@@ -89,7 +89,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 rform = RT.next(rform);
 
-                ObjExpr ret = Build(interfaces, null, null, className, Symbol.intern(className), null, rform,frm);
+                ObjExpr ret = Build(interfaces, null, null, className, Symbol.intern(className), null, rform,frm, null);
                 IObj iobj = frm as IObj;
 
                 if (iobj != null && iobj.meta() != null)
@@ -107,7 +107,8 @@ namespace clojure.lang.CljCompiler.Ast
             Symbol className, 
             Symbol typeTag, 
             ISeq methodForms,
-            Object frm)
+            Object frm,
+            IPersistentMap opts)
         {
             NewInstanceExpr ret = new NewInstanceExpr(null);
             ret._src = frm;
@@ -115,6 +116,7 @@ namespace clojure.lang.CljCompiler.Ast
             ret._classMeta = GenInterface.ExtractAttributes(RT.meta(className));
             ret.InternalName = ret._name;  // ret.Name.Replace('.', '/');
             // Java: ret.objtype = Type.getObjectType(ret.internalName);
+            ret._opts = opts;
 
             if (thisSym != null)
                 ret._thisName = thisSym.Name;

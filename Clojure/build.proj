@@ -27,6 +27,27 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release 4.0' ">
     <OutputPath>..\bin\4.0\Release\</OutputPath>
   </PropertyGroup>
+
+  <UsingTask
+   TaskName="SetEnvironmentVariableTask"
+   TaskFactory="CodeTaskFactory"
+   AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v$(MSBuildToolsVersion).dll">
+
+    <ParameterGroup>
+      <Name ParameterType="System.String" Required="true" />
+      <Value ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+
+    <Task>
+      <Using Namespace="System" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+        Environment.SetEnvironmentVariable(Name, Value);
+      ]]>
+      </Code>
+    </Task>
+
+  </UsingTask>
   
   <Target Name="Build">
     <MSBuild Projects="ClojureCLR.sln"
@@ -34,16 +55,17 @@
   </Target>
   
   <Target Name="CompileTest" DependsOnTargets="Build">
-    <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes clojure.test-clojure.compilation.line-number-examples" 
+    <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes clojure.test-clojure.compilation.load-ns clojure.test-clojure.compilation.line-number-examples" 
           WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == '.Net' "/>
-    <Exec Command="mono $(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes  clojure.test-clojure.compilation.line-number-examples" 
+    <Exec Command="mono $(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes  clojure.test-clojure.compilation.load-ns clojure.test-clojure.compilation.line-number-examples" 
           WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
   
   <Target Name="Test" DependsOnTargets="Build;CompileTest">
     <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test.clj" DestinationFolder="$(OutputPath)" />
+    <SetEnvironmentVariableTask Name="clojure.test-clojure.exclude-namespaces" Value="#{clojure.test-clojure.compilation.load-ns}" />
     <Exec Command="$(clji) clojure\run_test.clj"
           WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == '.Net' "/>

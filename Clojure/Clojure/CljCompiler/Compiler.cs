@@ -99,6 +99,7 @@ namespace clojure.lang
 
         #region Keywords
 
+        internal static readonly Keyword LoadNsKeyword = Keyword.intern(null, "load-ns");
         static readonly Keyword InlineKeyword = Keyword.intern(null, "inline");
         static readonly Keyword InlineAritiesKeyword = Keyword.intern(null, "inline-arities");
         //internal static readonly Keyword StaticKeyword = Keyword.intern(null, "static");

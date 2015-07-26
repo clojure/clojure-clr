@@ -189,6 +189,8 @@ namespace clojure.lang.CljCompiler.Ast
         protected IPersistentVector _hintedFields = PersistentVector.EMPTY; // hinted fields
 
         private IPersistentSet _varCallsites;
+
+        protected IPersistentMap _opts = PersistentHashMap.EMPTY;
         
         #endregion
 
@@ -438,7 +440,29 @@ namespace clojure.lang.CljCompiler.Ast
             if (KeywordCallsites.count() > 0)
                 EmitKeywordCallsiteInits(ilg);
 
+            if ( IsDefType && RT.booleanCast(RT.get(_opts,Compiler.LoadNsKeyword)))
+                EmitLoadNsInitForDeftype(ilg);
+
             ilg.Emit(OpCodes.Ret);
+        }
+
+        private void EmitLoadNsInitForDeftype(CljILGen ilg)
+        {
+            string nsname = ((Symbol)RT.second(_src)).Namespace;
+            if ( !nsname.Equals("clojure.core"))
+            {
+                ilg.EmitString("clojure.core");
+                ilg.EmitString("require");
+                ilg.EmitCall(Compiler.Method_RT_var2);
+                ilg.EmitCall(Compiler.Method_Var_getRawRoot);
+                ilg.Emit(OpCodes.Castclass, typeof(IFn));
+                ilg.EmitNull();
+                ilg.EmitString(nsname);
+                ilg.EmitCall(Compiler.Method_Symbol_intern2);
+                ilg.EmitCall(Compiler.Methods_IFn_invoke[1]);
+                ilg.Emit(OpCodes.Pop);
+            }
+           
         }
 
         private void EmitKeywordCallsiteInits(CljILGen ilg)

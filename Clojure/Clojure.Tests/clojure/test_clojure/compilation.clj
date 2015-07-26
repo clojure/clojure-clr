@@ -8,7 +8,8 @@
 
 ; Author: Frantisek Sodomka
 
-(assembly-load-from "clojure.test_clojure.compilation.line_number_examples.clj.dll")                   ;;; DM:Added
+(assembly-load-from "clojure.test_clojure.compilation.line_number_examples.clj.dll")           ;;; DM:Added
+(assembly-load-from "clojure.test_clojure.compilation.load_ns.clj.dll")                        ;;; DM:Added
 (ns clojure.test-clojure.compilation
   (:import (clojure.lang Compiler Compiler+CompilerException))                                 ;;; Compiler$CompilerException
   (:require [clojure.test.generative :refer (defspec)]
@@ -311,6 +312,13 @@
   (is (= clojure.test_clojure.compilation.examples.T
          (class (clojure.test_clojure.compilation.examples.T.))
          (class (clojure.test-clojure.compilation.examples/->T)))))
+
+(deftest clj-1208
+  ;; clojure.test-clojure.compilation.load-ns has not been loaded
+  ;; so this would fail if the deftype didn't load it in its static
+  ;; initializer as the implementation of f requires a var from
+  ;; that namespace
+  (is (= 1 (.f (clojure.test_clojure.compilation.load_ns.x.)))))
 
 (deftest clj-1568
   (let [compiler-fails-at?
