@@ -399,6 +399,20 @@ namespace clojure.lang
                 return create(_v0, _v1, _v2, _v3, o);
             }
 
+            public override bool equiv(Object obj)
+            {
+                if (this == obj) return true;
+
+                T4 o4 = obj as T4;
+                if (o4 != null)
+                {
+                    return Util.equiv(_v0, o4._v0) &&
+                           Util.equiv(_v1, o4._v1) &&
+                           Util.equiv(_v2, o4._v2) &&
+                           Util.equiv(_v3, o4._v3);
+                }
+                return base.equiv(obj);
+            }
         }
 
         #endregion
@@ -452,6 +466,21 @@ namespace clojure.lang
                 return create(_v0, _v1, _v2, _v3, _v4, o);
             }
 
+            public override bool equiv(Object obj)
+            {
+                if (this == obj) return true;
+
+                T5 o5 = obj as T5;
+                if (o5 != null)
+                {
+                    return Util.equiv(_v0, o5._v0) &&
+                           Util.equiv(_v1, o5._v1) &&
+                           Util.equiv(_v2, o5._v2) &&
+                           Util.equiv(_v3, o5._v3) &&
+                           Util.equiv(_v4, o5._v4);
+                }
+                return base.equiv(obj);
+            }
         }
 
         #endregion
@@ -509,6 +538,22 @@ namespace clojure.lang
                 return vec().cons(o);
             }
 
+            public override bool equiv(Object obj)
+            {
+                if (this == obj) return true;
+
+                T6 o6 = obj as T6;
+                if (o6 != null)
+                {
+                    return Util.equiv(_v0, o6._v0) &&
+                           Util.equiv(_v1, o6._v1) &&
+                           Util.equiv(_v2, o6._v2) &&
+                           Util.equiv(_v3, o6._v3) &&
+                           Util.equiv(_v4, o6._v4) &&
+                           Util.equiv(_v5, o6._v5);
+                }
+                return base.equiv(obj);
+            }
         }
 
         #endregion
