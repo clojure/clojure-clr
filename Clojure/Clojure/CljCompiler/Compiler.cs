@@ -172,7 +172,7 @@ namespace clojure.lang
         // Label
         internal static readonly Var LoopLabelVar = Var.create().setDynamic();
 
-
+        internal static readonly Var InTryBlockVar = Var.create(null).setDynamic();          //null or not
         internal static readonly Var InCatchFinallyVar = Var.create(null).setDynamic();          //null or not
 
         internal static readonly Var NoRecurVar = Var.create(null).setDynamic();
@@ -1938,6 +1938,11 @@ namespace clojure.lang
             {
                 Var.popThreadBindings();
             }
+        }
+
+        internal static bool InTailCall(RHC context)
+        {
+            return (context == RHC.Return) && (InTryBlockVar.deref() == null);
         }
 
 

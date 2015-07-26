@@ -28,6 +28,7 @@ namespace clojure.lang.CljCompiler.Ast
         readonly IPersistentVector _args;
         readonly string _source;
         readonly IPersistentMap _spanMap;
+        readonly bool _tailPosition;
         bool _isProtocol = false;
         int _siteIndex = -1;
         Type _protocolOn;
@@ -40,12 +41,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public InvokeExpr(string source, IPersistentMap spanMap, Symbol tag, Expr fexpr, IPersistentVector args)
+        public InvokeExpr(string source, IPersistentMap spanMap, Symbol tag, Expr fexpr, IPersistentVector args, bool tailPosition)
         {
             _source = source;
             _spanMap = spanMap;
             _fexpr = fexpr;
             _args = args;
+            _tailPosition = tailPosition;
 
             VarExpr varFexpr = fexpr as VarExpr;
 
@@ -122,6 +124,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expr Parse(ParserContext pcon, ISeq form)
         {
+            bool tailPosition = Compiler.InTailCall(pcon.Rhc);
             pcon = pcon.EvalOrExpr();
 
             Expr fexpr = Compiler.Analyze(pcon,form.first());
@@ -179,7 +182,8 @@ namespace clojure.lang.CljCompiler.Ast
                 (IPersistentMap)Compiler.SourceSpanVar.deref(), //Compiler.GetSourceSpanMap(form),
                 Compiler.TagOf(form),
                 fexpr,
-                args);
+                args,
+                tailPosition);
         }
 
         #endregion
@@ -281,10 +285,11 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 ilg.Emit(OpCodes.Castclass, _protocolOn);
                 MethodExpr.EmitTypedArgs(objx, ilg, _onMethod.GetParameters(), RT.subvec(_args, 1, _args.count()));
-                //if (rhc == RHC.Return)
+                // In JVM.  No necessary here.
+                //if (_tailPosition)
                 //{
-                //    ObjMethod2 method = (ObjMethod)Compiler.MethodVar.deref();
-                //    method.EmitClearLocals(context);
+                //    ObjMethod method = (ObjMethod)Compiler.MethodVar.deref();
+                //    method.EmitClearThis(ilg);
                 //}
                 ilg.Emit(OpCodes.Callvirt, _onMethod);
                 HostExpr.EmitBoxReturn(objx, ilg, _onMethod.ReturnType);                
@@ -307,10 +312,11 @@ namespace clojure.lang.CljCompiler.Ast
                 MethodExpr.EmitArgsAsArray(restArgs,objx,ilg);
             }
 
-            //if ( rhc == RHC.Return )
+            // In JVM.  No necessary here.
+            //if (_tailPosition)
             //{
-            //    ObjMethod2 method = (ObjMethod2)Compiler.MethodVar.deref();
-            //    method.EmitClearLocals(context);
+            //    ObjMethod method = (ObjMethod)Compiler.MethodVar.deref();
+            //    method.EmitClearThis(ilg);
             //}
 
             MethodInfo mi = Compiler.Methods_IFn_invoke[Math.Min(Compiler.MaxPositionalArity+1,_args.count())];

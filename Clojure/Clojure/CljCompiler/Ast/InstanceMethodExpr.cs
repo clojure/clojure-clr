@@ -28,8 +28,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public InstanceMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string methodName, List<Type> typeArgs, List<HostArg> args)
-            : base(source,spanMap,tag,methodName,typeArgs,args)
+        public InstanceMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string methodName, List<Type> typeArgs, List<HostArg> args, bool tailPosition)
+            : base(source,spanMap,tag,methodName,typeArgs,args,tailPosition)
         {
             _target = target;
 

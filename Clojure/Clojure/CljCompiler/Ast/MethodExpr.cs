@@ -39,12 +39,13 @@ namespace clojure.lang.CljCompiler.Ast
         protected readonly string _source;
         protected readonly IPersistentMap _spanMap;
         protected readonly Symbol _tag;
+        protected readonly bool _tailPosition;
 
         #endregion
 
         #region C-tors
 
-        protected MethodExpr(string source, IPersistentMap spanMap, Symbol tag, string methodName, List<Type> typeArgs, List<HostArg> args)
+        protected MethodExpr(string source, IPersistentMap spanMap, Symbol tag, string methodName, List<Type> typeArgs, List<HostArg> args, bool tailPosition)
         {
             _source = source;
             _spanMap = spanMap;
@@ -52,6 +53,7 @@ namespace clojure.lang.CljCompiler.Ast
             _typeArgs = typeArgs;
             _args = args;
             _tag = tag;
+            _tailPosition = tailPosition;
         }
 
         #endregion
@@ -119,6 +121,11 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
+
+            // IN JVM:
+            //if (_tailPosition)
+            //    _method.EmitClearThis(ilg);
+
             if (IsStaticCall)
             {
                 if (Intrinsics.HasOp(_method))

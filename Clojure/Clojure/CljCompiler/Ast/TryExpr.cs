@@ -132,7 +132,7 @@ namespace clojure.lang.CljCompiler.Ast
                         {
                             try
                             {
-                                Var.pushThreadBindings(RT.map(Compiler.NoRecurVar, true));
+                                Var.pushThreadBindings(RT.map(Compiler.NoRecurVar, true, Compiler.InTryBlockVar, true));
                                 bodyExpr = new BodyExpr.Parser().Parse(pcon, RT.seq(body));
                             }
                             finally
@@ -191,6 +191,8 @@ namespace clojure.lang.CljCompiler.Ast
 
                 if (bodyExpr == null)
                 {
+                    // this codepath is hit when there is neither catch nor finally, e.g., (try (expr))
+                    // return a body expr directly
                     try
                     {
                         Var.pushThreadBindings(RT.map(Compiler.NoRecurVar, true));
@@ -200,6 +202,7 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         Var.popThreadBindings();
                     }
+                    return bodyExpr;
                 }
                 return new TryExpr(bodyExpr, catches, finallyExpr, retLocal, finallyLocal);
               }

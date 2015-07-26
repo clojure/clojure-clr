@@ -51,6 +51,7 @@ namespace clojure.lang.CljCompiler.Ast
                 IPersistentMap spanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();  // Compiler.GetSourceSpanMap(form);
 
                 Symbol tag = Compiler.TagOf(sform);
+                bool tailPosition = Compiler.InTailCall(pcon.Rhc);
 
                 // determine static or instance
                 // static target must be symbol, either fully.qualified.Typename or Typename that has been imported
@@ -91,7 +92,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if ((pinfo = Reflector.GetProperty(t, fieldName, true)) != null)
                             return new StaticPropertyExpr(source, spanMap, tag, t, fieldName, pinfo);
                         if (!isPropName && Reflector.GetArityZeroMethod(t, fieldName, true) != null)
-                            return new StaticMethodExpr(source, spanMap, tag, t, fieldName, null, new List<HostArg>());
+                            return new StaticMethodExpr(source, spanMap, tag, t, fieldName, null, new List<HostArg>(), tailPosition);
                         throw new MissingMemberException(t.Name, fieldName);
                     }
                     else if (instance != null && instance.HasClrType && instance.ClrType != null)
@@ -102,7 +103,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if ((pinfo = Reflector.GetProperty(instanceType, fieldName, false)) != null)
                             return new InstancePropertyExpr(source, spanMap, tag, instance, fieldName, pinfo);
                         if (!isPropName && Reflector.GetArityZeroMethod(instanceType, fieldName, false) != null)
-                            return new InstanceMethodExpr(source, spanMap, tag, instance, fieldName, null, new List<HostArg>());
+                            return new InstanceMethodExpr(source, spanMap, tag, instance, fieldName, null, new List<HostArg>(), tailPosition);
                         if (pcon.IsAssignContext)
                             return new InstanceFieldExpr(source, spanMap, tag, instance, fieldName, null); // same as InstancePropertyExpr when last arg is null
                         else
@@ -150,8 +151,8 @@ namespace clojure.lang.CljCompiler.Ast
                 List<HostArg> args = ParseArgs(pcon, RT.next(call));
 
                 return t != null
-                    ? (MethodExpr)(new StaticMethodExpr(source, spanMap, tag, t, methodName, typeArgs, args))
-                    : (MethodExpr)(new InstanceMethodExpr(source, spanMap, tag, instance, methodName, typeArgs, args));
+                    ? (MethodExpr)(new StaticMethodExpr(source, spanMap, tag, t, methodName, typeArgs, args, tailPosition))
+                    : (MethodExpr)(new InstanceMethodExpr(source, spanMap, tag, instance, methodName, typeArgs, args, tailPosition));
             }
         }
 

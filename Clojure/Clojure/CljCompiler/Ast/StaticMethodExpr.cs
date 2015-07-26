@@ -32,8 +32,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public StaticMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string methodName, List<Type> typeArgs, List<HostArg> args)
-            : base(source,spanMap,tag,methodName,typeArgs, args)
+        public StaticMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string methodName, List<Type> typeArgs, List<HostArg> args, bool tailPosition)
+            : base(source,spanMap,tag,methodName,typeArgs, args, tailPosition)
         {
             _type = type;
             _method  = Reflector.GetMatchingMethod(spanMap, _type, _args, _methodName, typeArgs);
