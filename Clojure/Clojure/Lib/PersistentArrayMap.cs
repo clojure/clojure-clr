@@ -314,7 +314,7 @@ namespace clojure.lang
         {
             int i = IndexOfKey(key);
             return i >= 0
-                ? Tuple.create(_array[i], _array[i + 1])
+                ? (IMapEntry)Tuple.create(_array[i], _array[i + 1])
                 : null;
         }
 
@@ -742,7 +742,7 @@ namespace clojure.lang
         IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
         {
             for (int i = 0; i < _array.Length; i += 2)
-                yield return Tuple.create(_array[i], _array[i + 1]);
+                yield return (IMapEntry) Tuple.create(_array[i], _array[i + 1]);
         }
 
         #endregion

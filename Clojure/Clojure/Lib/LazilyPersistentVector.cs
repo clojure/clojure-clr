@@ -35,9 +35,10 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         static public IPersistentVector createOwning(params object[] items)
         {
-            if (items.Length <= Tuple.MAX_SIZE)
-                return Tuple.createFromArray(items);
-            else if (items.Length <= 32)
+            //if (items.Length <= Tuple.MAX_SIZE)
+            //    return Tuple.createFromArray(items);
+            //else 
+            if (items.Length <= 32)
                 return new PersistentVector(items.Length, 5, PersistentVector.EmptyNode, items);
             return PersistentVector.create(items);
 
@@ -68,9 +69,9 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         static public IPersistentVector create(object obj)
         {
-            if ((obj is Counted || RT.SupportsRandomAccess(obj))
-                && fcount(obj) <= Tuple.MAX_SIZE)
-                return Tuple.createFromColl(obj);
+            //if ((obj is Counted || RT.SupportsRandomAccess(obj))
+            //    && fcount(obj) <= Tuple.MAX_SIZE)
+            //    return Tuple.createFromColl(obj);
 
             IReduceInit ri = obj as IReduceInit;
             if (ri != null)

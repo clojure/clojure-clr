@@ -89,17 +89,19 @@ namespace clojure.lang
 
         #region IMapEntry Members
 
-        /// <summary>
-        /// Get the key in a key/value pair.
-        /// </summary>
-        /// <returns>The key.</returns>
-        public abstract object key();
+        // With IMapEntry moved into APersistentVector, this is redundant.
 
-        /// <summary>
-        /// Get the value in a key/value pair.
-        /// </summary>
-        /// <returns>The value.</returns>
-        public abstract object val();
+        ///// <summary>
+        ///// Get the key in a key/value pair.
+        ///// </summary>
+        ///// <returns>The key.</returns>
+        //public abstract object key();
+
+        ///// <summary>
+        ///// Get the value in a key/value pair.
+        ///// </summary>
+        ///// <returns>The value.</returns>
+        //public abstract object val();
 
         #endregion
 

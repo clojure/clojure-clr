@@ -74,15 +74,14 @@ namespace clojure.lang.CljCompiler.Ast
         static readonly FieldInfo HashMapEmptyFI = typeof(PersistentArrayMap).GetField("EMPTY");
         static readonly FieldInfo HashSetEmptyFI = typeof(PersistentHashSet).GetField("EMPTY");
         static readonly FieldInfo ListEmptyFI = typeof(PersistentList).GetField("EMPTY");
-        static readonly FieldInfo TupleEmptyFI = typeof(Tuple).GetField("EMPTY");
-        //static readonly FieldInfo VectorEmptyFI = typeof(PersistentVector).GetField("EMPTY");
+        static readonly FieldInfo VectorEmptyFI = typeof(PersistentVector).GetField("EMPTY");
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             if (_coll is IPersistentList || _coll is LazySeq) // JVM does not include LazySeq test.  I'm getting it in some places.  LazySeq of 0 size got us here, we'll treat as an empty list
                 ilg.EmitFieldGet(ListEmptyFI);
             else if (_coll is IPersistentVector)
-                ilg.EmitFieldGet(TupleEmptyFI);
+                ilg.EmitFieldGet(VectorEmptyFI);
             else if (_coll is IPersistentMap)
                 ilg.EmitFieldGet(HashMapEmptyFI);
             else if (_coll is IPersistentSet)

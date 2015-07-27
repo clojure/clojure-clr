@@ -359,7 +359,7 @@ namespace clojure.lang
             IMapEntry me = _def.Keyslots.entryAt(key);
             return me == null
                 ? _ext.entryAt(key)
-                : Tuple.create(me.key(), _vals[Util.ConvertToInt(me.val())]);
+                : (IMapEntry)Tuple.create(me.key(), _vals[Util.ConvertToInt(me.val())]);
         }
 
         /// <summary>
@@ -465,7 +465,7 @@ namespace clojure.lang
         IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
         {
             foreach (IMapEntry ime in _def.Keyslots)
-                yield return Tuple.create(ime.key(), _vals[(int)ime.val()]);
+                yield return (IMapEntry) Tuple.create(ime.key(), _vals[(int)ime.val()]);
             foreach ( IMapEntry ime in _ext)
                 yield return ime;
         }

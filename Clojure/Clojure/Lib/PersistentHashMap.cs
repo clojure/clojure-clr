@@ -275,7 +275,7 @@ namespace clojure.lang
         public override IMapEntry entryAt(object key)
         {
             if (key == null)
-                return _hasNull ? Tuple.create(null, _nullValue) : null;
+                return _hasNull ? (IMapEntry)Tuple.create(null, _nullValue) : null;
             return (_root != null)
                 ? _root.Find(0,Hash(key),key)
                 : null;
@@ -1295,7 +1295,7 @@ namespace clojure.lang
                 if ( keyOrNull == null )
                     return ((INode)valOrNode).Find(shift+5,hash,key);
                 if ( Util.equiv(key,keyOrNull))
-                    return Tuple.create(keyOrNull,valOrNode);
+                    return (IMapEntry) Tuple.create(keyOrNull,valOrNode);
                 return null;
             }
 
@@ -1577,7 +1577,7 @@ namespace clojure.lang
                 if (idx < 0)
                     return null;
                 if (Util.equiv(key, _array[idx]))
-                    return Tuple.create(_array[idx], _array[idx + 1]);
+                    return (IMapEntry) Tuple.create(_array[idx], _array[idx + 1]);
                 return null;
             }
 

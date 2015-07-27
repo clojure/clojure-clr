@@ -70,7 +70,7 @@ namespace clojure.lang.CljCompiler.Ast
                 return Compiler.OptionallyGenerateMetaInit(pcon,form, ret);
             else if ( constant )
             {
-                IPersistentVector rv = Tuple.EMPTY;
+                IPersistentVector rv = PersistentVector.EMPTY;
                 for ( int i=0; i<args.count(); i++ )
                 {
                     LiteralExpr ve = (LiteralExpr)args.nth(i);

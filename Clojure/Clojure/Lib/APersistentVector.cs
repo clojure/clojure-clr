@@ -24,7 +24,7 @@ namespace clojure.lang
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
-    public abstract class APersistentVector: AFn, IPersistentVector, IList, IComparable, IList<Object>, IComparable<Object>, IHashEq
+    public abstract class APersistentVector: AFn, IPersistentVector, IList, IMapEntry, IComparable, IList<Object>, IComparable<Object>, IHashEq
     {
         #region Data
 
@@ -316,7 +316,7 @@ namespace clojure.lang
             {
                 int i = Util.ConvertToInt(key);
                 if (i >= 0 && i < count())
-                    return Tuple.create(key, nth(i));
+                    return (IMapEntry) Tuple.create(key, nth(i));
             }
             return null;
         }
@@ -543,6 +543,24 @@ namespace clojure.lang
         {
             for (ISeq s = seq(); s != null; s = s.next())
                 yield return s.first();
+        }
+
+        #endregion
+
+        #region IMapEntry methods
+
+        public virtual object key()
+        {
+            if (count() == 2)
+                return nth(0);
+            throw new InvalidOperationException();
+        }
+
+        public virtual object val()
+        {
+            if (count() == 2)
+                return nth(1);
+            throw new InvalidOperationException();
         }
 
         #endregion
@@ -1148,7 +1166,6 @@ namespace clojure.lang
 
             #endregion
         }
-
     }
 }
 
