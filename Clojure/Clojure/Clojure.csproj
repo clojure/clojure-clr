@@ -136,6 +136,7 @@
     <Compile Include="Lib\IExceptionInfo.cs" />
     <Compile Include="Lib\IFnArity.cs" />
     <Compile Include="Lib\IFnClosure.cs" />
+    <Compile Include="Lib\IKVReduce.cs" />
     <Compile Include="Lib\IMapEnumerable.cs" />
     <Compile Include="Lib\IReduceInit.cs" />
     <Compile Include="Lib\Iterate.cs" />

@@ -96,7 +96,7 @@ namespace clojure.lang
         #region ATuple
 
         [Serializable]
-        public abstract class ATuple : APersistentVector, IObj, IEditableCollection
+        public abstract class ATuple : APersistentVector, IObj, IEditableCollection, IKVReduce /* , IReduceInit */  /* in JVM, but no impl */
         {
             protected PersistentVector vec()
             {
@@ -134,6 +134,17 @@ namespace clojure.lang
             public ITransientCollection asTransient()
             {
                 return vec().asTransient();
+            }
+
+            public Object kvreduce(IFn f, Object init)
+            {
+                for (int i = 0; i < count(); i++)
+                {
+                    init = f.invoke(init, i, nth(i));
+                    if (init is Reduced)
+                        return ((IDeref)init).deref();
+                }
+                return init;
             }
         }
 

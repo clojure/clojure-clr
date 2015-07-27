@@ -24,7 +24,7 @@ namespace clojure.lang
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
-    public class PersistentVector: APersistentVector, IObj, IEditableCollection, IEnumerable, IReduce
+    public class PersistentVector: APersistentVector, IObj, IEditableCollection, IEnumerable, IReduce, IKVReduce
     {
         #region Node class
 

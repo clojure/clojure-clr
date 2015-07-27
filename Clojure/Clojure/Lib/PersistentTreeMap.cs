@@ -28,7 +28,7 @@ namespace clojure.lang
     /// </remarks>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
-    public class PersistentTreeMap : APersistentMap, IObj, Reversible, Sorted, IEnumerable<IMapEntry>, IDictionary
+    public class PersistentTreeMap : APersistentMap, IObj, Reversible, Sorted, IEnumerable<IMapEntry>, IDictionary, IKVReduce
     {
         #region Data
 
