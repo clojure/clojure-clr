@@ -34,9 +34,9 @@
    
    <PropertyGroup Condition=" '$(OS)' != 'Windows_NT'">
        <!-- We need to launch nuget.exe with the mono command if we're not on windows -->
-       <NuGetToolsPath>$(SolutionDir).nuget</NuGetToolsPath>
-       <PackagesConfig>packages.config</PackagesConfig>
-       <PackagesDir>$(SolutionDir)packages</PackagesDir>
+       <NuGetToolsPath>$([System.IO.Path]::Combine($(SolutionDir), ".nuget"))</NuGetToolsPath>
+       <PackagesConfig>$([System.IO.Path]::Combine($(ProjectDir), "packages.config"))</PackagesConfig>
+       <PackagesDir>$([System.IO.Path]::Combine($(SolutionDir), "packages"))</PackagesDir>
    </PropertyGroup>
    
    <PropertyGroup>
