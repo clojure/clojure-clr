@@ -29,25 +29,9 @@
   </PropertyGroup>
 
   <UsingTask
-   TaskName="SetEnvironmentVariableTask"
-   TaskFactory="CodeTaskFactory"
-   AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v$(MSBuildToolsVersion).dll">
+   TaskName="SetEnvVar"
+   AssemblyFile="BuildTasks\bin\Debug\BuildTasks.dll" />
 
-    <ParameterGroup>
-      <Name ParameterType="System.String" Required="true" />
-      <Value ParameterType="System.String" Required="true" />
-    </ParameterGroup>
-
-    <Task>
-      <Using Namespace="System" />
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[
-        Environment.SetEnvironmentVariable(Name, Value);
-      ]]>
-      </Code>
-    </Task>
-
-  </UsingTask>
   
   <Target Name="Build">
     <MSBuild Projects="ClojureCLR.sln"
@@ -65,7 +49,7 @@
   
   <Target Name="Test" DependsOnTargets="Build;CompileTest">
     <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test.clj" DestinationFolder="$(OutputPath)" />
-    <SetEnvironmentVariableTask Name="clojure.test-clojure.exclude-namespaces" Value="#{clojure.test-clojure.compilation.load-ns}" />
+    <SetEnvVar Name="clojure.test-clojure.exclude-namespaces" Value="#{clojure.test-clojure.compilation.load-ns}" />
     <Exec Command="$(clji) clojure\run_test.clj"
           WorkingDirectory="$(OutputPath)"
            Condition=" '$(Runtime)' == '.Net' "/>
