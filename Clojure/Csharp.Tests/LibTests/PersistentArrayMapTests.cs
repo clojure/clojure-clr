@@ -592,7 +592,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void ConsOnNon2IPVFails()
         {
             Dictionary<int, string> d = new Dictionary<int, string>();
