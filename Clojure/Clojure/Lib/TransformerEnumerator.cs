@@ -85,8 +85,6 @@ namespace clojure.lang
         volatile Object _next = NONE;
         volatile bool _completed = false;
 
-        bool _disposed = false;
-
         #endregion
 
         #region Ctors and factories
@@ -377,6 +375,7 @@ namespace clojure.lang
             GC.SuppressFinalize(this);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "disposing"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         private void Dispose(bool disposing)
         {
         }

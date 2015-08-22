@@ -123,6 +123,7 @@ namespace clojure.lang
 
         private void Dispose(bool disposing)
         {
+            if (!disposing) return;
             _orig = null;
             _curr = null;
             _next = null;

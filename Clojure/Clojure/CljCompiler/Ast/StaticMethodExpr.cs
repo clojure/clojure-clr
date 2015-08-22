@@ -34,7 +34,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public StaticMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string methodName, List<Type> typeArgs, List<HostArg> args, bool tailPosition)
+        public StaticMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string methodName, IList<Type> typeArgs, IList<HostArg> args, bool tailPosition)
             : base(source,spanMap,tag,methodName,typeArgs, args, tailPosition)
         {
             _type = type;

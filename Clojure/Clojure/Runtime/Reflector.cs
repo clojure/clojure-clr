@@ -367,18 +367,18 @@ namespace clojure.lang
             {
                 if (targetType == null)
                 {
-                    RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1}:{2} - call to method {4} can't be resolved (target class is unknown).",
+                    RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1}:{2} - call to {3} method {4} can't be resolved (target class is unknown).",
                         Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap), (isStatic ? "static " : ""), methodName));
                 }
                 else if (hasMethods)
                 {
-                    RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1}:{2} - call to {3}method {4} on {5} can't be resolved (argument types: {6}).",
+                    RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1}:{2} - call to {3} method {4} on {5} can't be resolved (argument types: {6}).",
                         Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap), (isStatic ? "static " : ""), methodName, targetType.FullName, GetTypeStringForArgs(args)));
                 }
                 else
                 {
-                    RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1}:{2} - call to {3}method {4} on {5} can't be resolved (no such method).",
-                        Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap), (isStatic ? "static " : ""), methodName, targetType.FullName, GetTypeStringForArgs(args)));
+                    RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1}:{2} - call to {3} method {4} on {5} can't be resolved (no such method).",
+                        Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap), (isStatic ? "static " : ""), methodName, targetType.FullName));
                 }
             }
         }

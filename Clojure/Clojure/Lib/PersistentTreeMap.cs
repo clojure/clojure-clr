@@ -86,7 +86,7 @@ namespace clojure.lang
             for (; items != null; items = items.next().next())
             {
                 if (items.next() == null)
-                    throw new ArgumentException(string.Format("No value supplied for key: %s", items.first()));
+                    throw new ArgumentException(string.Format("No value supplied for key: {0}", items.first()));
                 ret = ret.assoc(items.first(), items.next().first());
             }
             return (PersistentTreeMap)ret;
@@ -106,7 +106,7 @@ namespace clojure.lang
             for (; items != null; items = items.next().next())
             {
                 if (items.next() == null)
-                    throw new ArgumentException(string.Format("No value supplied for key: %s", items.first()));
+                    throw new ArgumentException(string.Format("No value supplied for key: {0}", items.first()));
                 ret = ret.assoc(items.first(), RT.second(items));
             }
             return (PersistentTreeMap)ret;

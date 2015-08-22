@@ -228,8 +228,8 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
     }
 
-    public class Recur
+    public static class Recur
     {
-        public static Type RecurType = typeof(Recur);
+        public static readonly Type RecurType = typeof(Recur);
     }
 }
