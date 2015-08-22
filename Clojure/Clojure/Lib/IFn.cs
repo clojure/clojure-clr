@@ -26,6 +26,7 @@ namespace clojure.lang
     /// You can also access any other library written in Clojure, after adding
     /// either its source or compiled form to the classpath.</para>
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
     public interface IFn // Callable, Runnable -- no equivalents
     {
         #region Invoke methods

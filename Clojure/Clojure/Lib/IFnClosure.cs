@@ -37,6 +37,7 @@ namespace clojure.lang
 
 
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
     public interface IFnClosure
     {
         Closure GetClosure();

@@ -75,7 +75,7 @@ namespace clojure.lang
         static IFn[] _macros = new IFn[256];
         static IFn[] _dispatchMacros = new IFn[256];
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static LispReader()
         {
             _macros['"'] = new StringReader();
@@ -551,6 +551,7 @@ namespace clojure.lang
         //static Regex symbolPat = new Regex("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
         static Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "maskName")]
         private static void ExtractNamesUsingMask(string token, string maskNS, string maskName, out string ns, out string name)
         {
             if (String.IsNullOrEmpty(maskNS))
@@ -1174,6 +1175,7 @@ namespace clojure.lang
                 return ret;
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
             private static object AnalyzeSyntaxQuote(object form, out bool checkMeta)
             {
                 checkMeta = true;
@@ -1495,6 +1497,7 @@ namespace clojure.lang
 
         #region Fn and Arg readers
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
         public sealed class FnReader : ReaderBase
         {
             //static ListReader _listReader = new ListReader();
@@ -1671,6 +1674,8 @@ namespace clojure.lang
             }
 
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "opts"), 
+             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "pendingForms")]
             static object ReadTagged(object o, Symbol tag, object opts, object pendingForms)
             {
                 ILookup dataReaders = (ILookup)RT.DataReadersVar.deref();
@@ -1691,6 +1696,8 @@ namespace clojure.lang
                 return dataReader.invoke(o);
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "opts"), 
+             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "pendingForms")]
             static object ReadRecord(object form, Symbol recordName, object opts, object pendingForms)
             {
                 bool readeval = RT.booleanCast(RT.ReadEvalVar.deref());

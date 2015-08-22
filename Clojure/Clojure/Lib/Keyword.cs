@@ -376,6 +376,7 @@ namespace clojure.lang
 
         #region c-tors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context")]
         KeywordSerializationHelper(SerializationInfo info, StreamingContext context)
         {
             _sym = (Symbol)info.GetValue("_sym", typeof(Symbol));

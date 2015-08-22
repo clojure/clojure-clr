@@ -96,6 +96,7 @@ namespace clojure.lang
             return spec;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         static ClrTypeSpec Parse(string name, ref int p, bool isRecursive, bool allowAssyQualName)
         {
             int pos = p;

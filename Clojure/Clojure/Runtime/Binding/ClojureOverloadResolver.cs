@@ -58,7 +58,7 @@ namespace clojure.lang.Runtime.Binding
     {
         #region Properties
 
-        private new ClojureBinder Binder { get { return (ClojureBinder)base.Binder; } }
+        //private new ClojureBinder Binder { get { return (ClojureBinder)base.Binder; } }
 
         #endregion
 

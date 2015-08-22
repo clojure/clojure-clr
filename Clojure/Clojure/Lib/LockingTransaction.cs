@@ -481,6 +481,7 @@ namespace clojure.lang
         /// <summary>
         /// Kill this transaction.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         void Abort()
         {
             Stop(KILLED);
@@ -608,6 +609,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="fn">The function to invoke.</param>
         /// <returns>The value computed by the function.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         object Run(IFn fn)
         {
             // TODO: Define an overload called on ThreadStartDelegate or something equivalent.

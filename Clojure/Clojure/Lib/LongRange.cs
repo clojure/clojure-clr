@@ -241,6 +241,7 @@ namespace clojure.lang
 
         // fallback count mechanism for pathological cases
         // returns either exact count or CHUNK_SIZE+1
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "end")]
         long SteppingCount(long start, long end, long step)
         {
             long count = 1;

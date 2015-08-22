@@ -316,6 +316,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.MarkLabel(endLabel);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "rhc")]
         void EmitArgsAndCall(int firstArgToEmit, RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             for ( int i=firstArgToEmit; i< Math.Min(Compiler.MaxPositionalArity,_args.count()); i++ )

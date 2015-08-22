@@ -27,6 +27,8 @@ using System.Collections;
 
 namespace clojure.lang
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces"), 
+     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     public static class Compiler
     {
         #region other constants
@@ -64,7 +66,9 @@ namespace clojure.lang
         public static readonly Symbol LetSym = Symbol.intern("let*");
         public static readonly Symbol LetfnSym = Symbol.intern("letfn*");
         public static readonly Symbol DoSym = Symbol.intern("do");
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
         public static readonly Symbol FnSym = Symbol.intern("fn*");
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
         public static readonly Symbol FnOnceSym = (Symbol) Symbol.intern("fn*").withMeta(RT.map(Keyword.intern(null, "once"), true));
         public static readonly Symbol QuoteSym = Symbol.intern("quote");
         public static readonly Symbol TheVarSym = Symbol.intern("var");
@@ -363,7 +367,7 @@ namespace clojure.lang
 
         #region C-tors & factory methods
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static Compiler()
         {
             for (int i = 0; i <= Compiler.MaxPositionalArity; i++)
@@ -1335,6 +1339,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "name")]
         static GenContext CreateEvalContext(string name, bool createDynInitHelper)
         {
             GenContext c = GenContext.CreateWithInternalAssembly("eval", createDynInitHelper);
@@ -1391,6 +1396,7 @@ namespace clojure.lang
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "sourceDirectory")]
         public static object Compile(GenContext context,TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
         {
             object eofVal = new object();
@@ -1527,6 +1533,7 @@ namespace clojure.lang
         
         #region Loading
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.Reflection.Assembly.LoadFrom")]
         internal static void LoadAssembly(FileInfo assyInfo, string relativePath)
         {
             Assembly assy;
@@ -1686,7 +1693,7 @@ namespace clojure.lang
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "relativePath"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
         public static object load(TextReader rdr, string sourcePath, string sourceName, string relativePath)
         {
             object ret = null;
@@ -1950,8 +1957,8 @@ namespace clojure.lang
         {
             #region Data
             
-            string FileSource { get; set; }
-            int Line { get; set; }
+            public string FileSource { get; private set; }
+            public int Line { get; private set; }
             
             #endregion
 

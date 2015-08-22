@@ -35,6 +35,7 @@ namespace clojure.lang
 
            readonly IFn _fn;
 
+           [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
            public IFn Fn
            {
                get { return _fn; }

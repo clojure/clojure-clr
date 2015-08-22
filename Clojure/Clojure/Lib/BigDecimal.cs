@@ -213,7 +213,8 @@ namespace clojure.lang
 
             #region other
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "bi"), 
+             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
             public bool RoundingNeeded(BigInteger bi)
             {
                 // TODO: Really
@@ -815,6 +816,7 @@ namespace clojure.lang
         /// <remarks> Ugly. We could use a RegEx, but trying to avoid unnecessary allocation, I guess.
         /// [+-]?\d*(\.\d*)?([Ee][+-]?\d+)?  with additional constraint that one of the two d* must have at least one char.
         ///</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         private static bool DoParse(char[] buf, int offset, int len, bool throwOnError, out BigDecimal v)
         {
             v = null;

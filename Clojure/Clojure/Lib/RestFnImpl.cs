@@ -23,7 +23,7 @@ namespace clojure.lang
     // Eventually, we need to do overloading to solve this problem.
     // Overloading is not possible at the moment do to a bug in LambdaExpression.CompileToMethod
 
-    [Serializable]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn"), Serializable]
     public class RestFnImpl : RestFn, IFnClosure
     {
         #region Data

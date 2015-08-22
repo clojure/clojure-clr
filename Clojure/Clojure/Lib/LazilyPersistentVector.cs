@@ -45,21 +45,21 @@ namespace clojure.lang
                 //: new LazilyPersistentVector(null, items, null);
         }
 
-        static int fcount(Object c)
-        {
-            if (c == null)  // not in Java version.  How did this pass tests?
-                return 0;
+        //static int fcount(Object c)
+        //{
+        //    if (c == null)  // not in Java version.  How did this pass tests?
+        //        return 0;
 
-            Counted ctd = c as Counted;
-            if (ctd != null)
-                return ctd.count();
+        //    Counted ctd = c as Counted;
+        //    if (ctd != null)
+        //        return ctd.count();
 
-            String s = c as String;   // not in Java version.  How did this pass tests?
-            if (s != null)
-                return s.Length;
+        //    String s = c as String;   // not in Java version.  How did this pass tests?
+        //    if (s != null)
+        //        return s.Length;
 
-            return ((ICollection)c).Count;
-        }
+        //    return ((ICollection)c).Count;
+        //}
 
         /// <summary>
         /// Create a <see cref="LazilyPersistentVector">LazilyPersistentVector</see> from an ICollection of items.

@@ -126,6 +126,7 @@ namespace clojure.lang.CljCompiler.Ast
             //prepared by case macro and presumed correct
             //case macro binds actual expr in let so expr is always a local,
             //no need to worry about multiple evaluation
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#")]
             public Expr Parse(ParserContext pcon, object frm)
             {
                 ISeq form = (ISeq)frm;

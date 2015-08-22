@@ -451,6 +451,7 @@ namespace clojure.lang
 
         static Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "maskName")]
         private static void ExtractNamesUsingMask(string token, string maskNS, string maskName, out string ns, out string name)
         {
             if (String.IsNullOrEmpty(maskNS))

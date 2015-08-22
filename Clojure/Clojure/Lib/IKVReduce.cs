@@ -20,6 +20,7 @@ namespace clojure.lang
 {
     public interface IKVReduce
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "kvreduce")]
         Object kvreduce(IFn f, Object init);
     }
 }

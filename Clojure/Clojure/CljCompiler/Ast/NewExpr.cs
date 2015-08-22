@@ -38,6 +38,7 @@ namespace clojure.lang.CljCompiler.Ast
         public ConstructorInfo Ctor { get { return _ctor; } }
         
         readonly Type _type;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods")]
         public Type Type { get { return _type; } }
         
         bool _isNoArgValueTypeCtor = false;
@@ -106,6 +107,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#")]
             public Expr Parse(ParserContext pcon, object frm)
             {
                 //int line = (int)Compiler.LINE.deref();
@@ -164,6 +166,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Pop);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "rhc")]
         private void EmitForMethod(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             EmitParamsForMethod(objx,ilg);
@@ -178,6 +181,7 @@ namespace clojure.lang.CljCompiler.Ast
             MethodExpr.EmitTypedArgs(objx, ilg, pis, _args);
         }
 
+       [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "objx"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "rhc")]
        private void EmitForNoArgValueTypeCtor(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             LocalBuilder loc = ilg.DeclareLocal(_type);
@@ -187,6 +191,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Box, _type);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "rhc")]
         private void EmitComplexCall(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             // See the notes on MethodExpr.EmitComplexCall on why this is so complicated

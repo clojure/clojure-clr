@@ -22,6 +22,7 @@ namespace clojure.lang
     /// Represents a multifunction.
     /// </summary>
     /// <remarks>See the Clojure documentation for more details.</remarks>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
     public class MultiFn : AFn, IDisposable
     {
         #region Data
@@ -102,6 +103,7 @@ namespace clojure.lang
         /// <param name="dispatchFn">The dispatch function.</param>
         /// <param name="defaultDispatchVal">The default dispatch value.</param>
         /// <param name="hierarchy">The hierarchy for this multifunction</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
         public MultiFn(string name, IFn dispatchFn, object defaultDispatchVal, IRef hierarchy)
         {
             _name = name;

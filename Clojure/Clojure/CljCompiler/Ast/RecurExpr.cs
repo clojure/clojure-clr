@@ -66,6 +66,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#")]
             public Expr Parse(ParserContext pcon, object frm)
             {
                 string source = (string)Compiler.SourceVar.deref();

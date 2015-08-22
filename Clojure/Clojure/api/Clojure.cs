@@ -50,6 +50,7 @@ namespace clojure.clr.api
     /// map.invoke(inc, Clojure.read("[1 2 3]"));
     /// </code>
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces")]
     public static class Clojure
     {
         private static Symbol asSym(object o)

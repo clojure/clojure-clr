@@ -49,6 +49,7 @@ namespace clojure.lang.CljCompiler.Ast
         public IPersistentMap Vars { get; internal set; }
         public IPersistentVector Constants { get; internal set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public Dictionary<int, FieldBuilder> ConstantFields { get; protected set; } 
         public IPersistentMap Fields { get; protected set; }            // symbol -> lb
         public IPersistentMap SpanMap { get; protected set; }
@@ -64,8 +65,11 @@ namespace clojure.lang.CljCompiler.Ast
         public IPersistentSet VarCallsites { get; protected set; }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public List<FieldBuilder> KeywordLookupSiteFields { get; protected set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public List<FieldBuilder> ThunkFields { get; protected set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public List<FieldBuilder> CachedTypeFields { get; protected set; }
 
 
@@ -86,8 +90,11 @@ namespace clojure.lang.CljCompiler.Ast
 
 
         public FieldBuilder MetaField { get; protected set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public IList<FieldBuilder> ClosedOverFields { get; protected set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public Dictionary<LocalBinding, FieldBuilder> ClosedOverFieldsMap { get; protected set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public Dictionary<FieldBuilder, LocalBinding> ClosedOverFieldsToBindingsMap { get; protected set; }
         public IPersistentVector HintedFields { get; protected set; }
 
@@ -95,6 +102,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public IPersistentCollection Methods { get; protected set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ID")]
         public int ConstantsID { get; protected set; }
         public bool OnceOnly { get; protected set; }
         public bool IsStatic { get; protected set; }
@@ -286,6 +294,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Fn class construction
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "onetimeUse")]
         public Type Compile(Type superType, Type stubType, IPersistentVector interfaces, bool onetimeUse, GenContext context)
         {
             if (CompiledType != null)
@@ -528,6 +537,7 @@ namespace clojure.lang.CljCompiler.Ast
                 return EmitConstructorForNonDefType(fnTB, baseType);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "baseType")]
         private ConstructorBuilder EmitConstructorForDefType(TypeBuilder fnTB, Type baseType)
         {
             ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, CtorTypes());
@@ -598,6 +608,7 @@ namespace clojure.lang.CljCompiler.Ast
             return cb;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "baseType")]
         private ConstructorBuilder EmitFieldOnlyConstructor(TypeBuilder fnTB, Type baseType)
         {
             Type[] ctorTypes = CtorTypes();
@@ -622,6 +633,7 @@ namespace clojure.lang.CljCompiler.Ast
             return cb;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "baseType")]
         private ConstructorBuilder EmitNonMetaConstructor(TypeBuilder fnTB, Type baseType)
         {
             Type[] ctorTypes = CtorTypes();
@@ -790,8 +802,8 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
 
         #region Direct code generation
-        
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         protected void EmitValue(object value, CljILGen ilg)
         {
             bool partial = true;
@@ -1160,6 +1172,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "localBuilder")]
         internal void EmitLetFnInits(CljILGen ilg, LocalBuilder localBuilder, ObjExpr objx, IPersistentSet letFnLocals)
         {
             if (TypeBuilder != null)

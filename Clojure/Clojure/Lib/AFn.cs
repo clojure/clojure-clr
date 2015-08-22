@@ -26,7 +26,7 @@ namespace clojure.lang
     /// <summary>
     /// Provides a basic implementation of <see cref="IFn">IFn</see> interface methods.
     /// </summary>
-    [Serializable]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn"), Serializable]
     public abstract class AFn : IFn, IDynamicMetaObjectProvider, IFnArity
     {
         #region IFn Members

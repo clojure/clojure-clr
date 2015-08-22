@@ -22,7 +22,7 @@ namespace clojure.lang
     /// <remarks>
     /// <para>We need this at the moment as a workaround to DLR not being able to generate instance methods from lambdas.</para>
     /// </remarks>
-    [Serializable]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn"), Serializable]
     public class AFnImpl :  AFunction, Fn, IFnClosure
     {
         #region Data

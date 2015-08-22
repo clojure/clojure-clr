@@ -22,6 +22,7 @@ namespace clojure.lang
     /// <summary>
     /// Interface supporting an IFn reporting what arities is supports
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
     public interface IFnArity
     {
         bool HasArity(int arity);

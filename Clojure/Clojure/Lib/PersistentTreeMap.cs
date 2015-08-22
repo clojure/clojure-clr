@@ -815,7 +815,7 @@ namespace clojure.lang
             }
         }
 
-        [Serializable]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1501:AvoidExcessiveInheritance"), Serializable]
         class BlackVal : Black
         {
             protected readonly object _val;
@@ -841,7 +841,7 @@ namespace clojure.lang
             }
         }
 
-        [Serializable]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1501:AvoidExcessiveInheritance"), Serializable]
         class BlackBranch : Black
         {
 
@@ -864,7 +864,7 @@ namespace clojure.lang
             }
         }
 
-        [Serializable]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1501:AvoidExcessiveInheritance"), Serializable]
         class BlackBranchVal : BlackBranch
         {
             readonly object _val;
@@ -934,7 +934,7 @@ namespace clojure.lang
 
         }
 
-        [Serializable]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1501:AvoidExcessiveInheritance"), Serializable]
         class RedVal : Red
         {
             protected readonly object _val;
@@ -959,7 +959,7 @@ namespace clojure.lang
 
         }
 
-        [Serializable]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1501:AvoidExcessiveInheritance"), Serializable]
         class RedBranch : Red
         {
 
@@ -1006,7 +1006,7 @@ namespace clojure.lang
 
         }
 
-        [Serializable]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1501:AvoidExcessiveInheritance"), Serializable]
         class RedBranchVal : RedBranch
         {
             readonly object _val;

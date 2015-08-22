@@ -36,5 +36,34 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         #endregion
+
+        #region Object overrides
+
+        public override bool Equals(object obj)
+        {
+            if ( ! (obj is BindingInit) )
+                return false;
+
+            BindingInit bi = (BindingInit) obj;
+
+            return _binding.Equals(bi._binding) && bi._init.Equals(bi._init);
+        }
+
+        public static bool operator ==(BindingInit b1, BindingInit b2)
+        {
+            return b1.Equals(b2);
+        }
+
+        public static bool operator !=(BindingInit b1, BindingInit b2)
+        {
+            return !b1.Equals(b2);
+        }
+
+        public override int GetHashCode()
+        {
+            return Util.hashCombine(_binding.GetHashCode(), _init.GetHashCode()); 
+        }
+       
+        #endregion
     }
 }

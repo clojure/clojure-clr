@@ -60,7 +60,7 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 4.0|AnyCPU'">
@@ -79,7 +79,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.Scripting.Core" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net35\Microsoft.Scripting.Core.dll</HintPath>
-    </Reference>	
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>

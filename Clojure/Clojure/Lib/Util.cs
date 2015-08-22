@@ -19,6 +19,7 @@ using System.Collections;
 
 namespace clojure.lang
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces")]
     public static class Util
     {
 
@@ -271,11 +272,13 @@ namespace clojure.lang
             return -1;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "nil")]
         public static object Ret1(object ret, object nil)
         {
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "nil")]
         public static ISeq Ret1(ISeq ret, object nil)
         {
             return ret;

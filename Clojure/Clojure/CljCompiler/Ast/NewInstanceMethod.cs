@@ -66,7 +66,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Parsing
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         public static NewInstanceMethod Parse(ObjExpr objx, ISeq form, Symbol thisTag, Dictionary<IPersistentVector, List<MethodInfo>> overrideables, Dictionary<IPersistentVector, List<MethodInfo>> explicits)
         {
             // (methodname [this-name args*] body...)

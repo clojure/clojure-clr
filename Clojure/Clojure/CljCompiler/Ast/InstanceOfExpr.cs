@@ -26,6 +26,7 @@ namespace clojure.lang.CljCompiler.Ast
         public Expr Expr { get { return _expr; } }
 
         readonly Type _t;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods")]
         public Type Type { get { return _t; } }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]

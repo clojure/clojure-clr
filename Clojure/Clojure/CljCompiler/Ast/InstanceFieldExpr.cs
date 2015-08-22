@@ -48,7 +48,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public InstanceFieldOrPropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string memberName, TInfo tinfo)
+        protected InstanceFieldOrPropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string memberName, TInfo tinfo)
         {
             _source = source;
             _spanMap = spanMap;

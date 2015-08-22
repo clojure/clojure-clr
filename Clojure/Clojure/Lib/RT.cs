@@ -31,6 +31,7 @@ using RTProperties = clojure.runtime.Properties;
 
 namespace clojure.lang
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     public static class RT
     {
         #region Default symbol-to-class map
@@ -439,6 +440,7 @@ namespace clojure.lang
         public static readonly Var DataReadersVar
             = Var.intern(ClojureNamespace, Symbol.intern("*data-readers*"), RT.map()).setDynamic();
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
         public static readonly Var DefaultDataReaderFnVar
             = Var.intern(ClojureNamespace, Symbol.intern("*default-data-reader-fn*"), RT.map());
 
@@ -539,7 +541,7 @@ namespace clojure.lang
             return Assembly.Load(ReadStreamBytes(stream));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static RT()
         {
             AppDomain.CurrentDomain.AssemblyResolve += ResolveAssembly;
@@ -1255,6 +1257,7 @@ namespace clojure.lang
             return NthFrom(coll, n, notFound);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         static object NthFrom(object coll, int n, object notFound)
         {
             if (coll == null)
@@ -2651,7 +2654,7 @@ namespace clojure.lang
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         static public void print(Object x, TextWriter w)
         {
@@ -3210,7 +3213,7 @@ namespace clojure.lang
             #region core.clj compatibility
 
             //  Somewhere, there is an explicit call to compare
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
             public int compare(object x, object y)
             {
                 return Util.compare(x, y);  // was ((IComparable)x).CompareTo(y);-- changed in Java rev 1145
@@ -3705,6 +3708,7 @@ namespace clojure.lang
         #endregion
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flag")]
     public static class RuntimeBootstrapFlag
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible")]

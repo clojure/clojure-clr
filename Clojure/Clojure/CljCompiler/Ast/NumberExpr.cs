@@ -44,7 +44,7 @@ namespace clojure.lang.CljCompiler.Ast
                 else if (_n is long)
                     return typeof(long);
                 else
-                    throw new ArgumentException("Unsupported Number type: " + _n.GetType().Name);
+                    throw new InvalidOperationException("Unsupported Number type: " + _n.GetType().Name);
             }
         }
 

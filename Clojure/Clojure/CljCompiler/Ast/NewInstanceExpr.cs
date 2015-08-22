@@ -43,6 +43,7 @@ namespace clojure.lang.CljCompiler.Ast
         
         public sealed class DefTypeParser : IParser
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#")]
             public Expr Parse(ParserContext pcon, object frm)
             {
                 // frm is: (deftype* tagname classname [fields] :implements [interfaces] :tag tagname methods*)
@@ -73,6 +74,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class ReifyParser : IParser
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#")]
             public Expr Parse(ParserContext pcon, object frm)
             {
                 // frm is:  (reify this-name? [interfaces] (method-name [args] body)* )
@@ -100,6 +102,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "typeTag")]
         internal static ObjExpr Build(
             IPersistentVector interfaceSyms, 
             IPersistentVector fieldSyms, 
@@ -267,6 +270,7 @@ namespace clojure.lang.CljCompiler.Ast
          *   
          * */
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "frm")]
         Type CompileBaseClass(GenContext context, Type super, Type[] interfaces, Object frm)
         {
             //TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.CompileStubPrefix + "." + InternalName + RT.nextID(), TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);

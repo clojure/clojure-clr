@@ -279,20 +279,20 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Misc
 
-        private static bool IncludesExplicitMetadata(MapExpr expr)
-        {
-            for (int i = 0; i < expr.KeyVals.count(); i += 2)
-            {
-                Keyword k = ((KeywordExpr)expr.KeyVals.nth(i)).Kw;
-                if ((k != RT.FileKey) &&
-                    (k != RT.DeclaredKey) &&
-                    (k != RT.SourceSpanKey) &&
-                    (k != RT.LineKey) &&
-                    (k != RT.ColumnKey))
-                    return true;
-            }
-            return false;
-        }
+        //private static bool IncludesExplicitMetadata(MapExpr expr)
+        //{
+        //    for (int i = 0; i < expr.KeyVals.count(); i += 2)
+        //    {
+        //        Keyword k = ((KeywordExpr)expr.KeyVals.nth(i)).Kw;
+        //        if ((k != RT.FileKey) &&
+        //            (k != RT.DeclaredKey) &&
+        //            (k != RT.SourceSpanKey) &&
+        //            (k != RT.LineKey) &&
+        //            (k != RT.ColumnKey))
+        //            return true;
+        //    }
+        //    return false;
+        //}
 
         #endregion
     }

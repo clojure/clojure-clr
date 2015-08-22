@@ -58,7 +58,7 @@ namespace clojure.lang
         #region Factory method
 
         public static Type GenerateClass(string className,
-            Type superClass,
+            Type superclass,
             ISeq interfaces,  // of Types 
             ISeq ctors, 
             ISeq ctorTypes,
@@ -97,12 +97,12 @@ namespace clojure.lang
             TypeBuilder proxyTB = context.ModuleBuilder.DefineType(
                 className,
                 TypeAttributes.Class | TypeAttributes.Public,
-                superClass,
+                superclass,
                 interfaceTypes.ToArray());
 
             GenInterface.SetCustomAttributes(proxyTB, attributes);
 
-            List<MethodSignature> sigs = GetAllSignatures(superClass,interfaceTypes,methods);
+            List<MethodSignature> sigs = GetAllSignatures(superclass,interfaceTypes,methods);
             Dictionary<string,List<MethodSignature>>  overloads = ComputeOverloads(sigs);
 
             HashSet<string> varNames = ComputeOverloadNames(overloads);  
@@ -126,13 +126,13 @@ namespace clojure.lang
             varMap.TryGetValue(postInitName, out postInitFB);
             varMap.TryGetValue(_mainName, out mainFB);
 
-            DefineCtors(proxyTB, superClass, 
+            DefineCtors(proxyTB, superclass, 
                 implNamespace + "." + prefix + initName, 
                 implNamespace + "." + prefix + postInitName, 
                 ctors, ctorTypes, initFB, postInitFB, stateFB, factoryName);
 
             EmitMethods(proxyTB, sigs, overloads, varMap, exposesMethods);
-            EmitExposers(proxyTB, superClass, exposesFields);
+            EmitExposers(proxyTB, superclass, exposesFields);
 
             if (hasMain)
                 EmitMain(context, proxyTB, implNamespace + "." + prefix + _mainName, mainFB);

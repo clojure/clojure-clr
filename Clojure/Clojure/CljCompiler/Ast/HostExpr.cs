@@ -32,6 +32,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
             public Expr Parse(ParserContext pcon, object form)
             {
                 ISeq sform = (ISeq)form;
@@ -318,6 +319,7 @@ namespace clojure.lang.CljCompiler.Ast
             return t;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         internal static Type TagToType(object tag)
         {
             Type t = null;
@@ -411,6 +413,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "objx")]
         internal static void EmitBoxReturn(ObjExpr objx, CljILGen ilg, Type returnType)
 
         {
@@ -420,11 +423,13 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Box, returnType);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "objx")]
         internal static void EmitUnboxArg(ObjExpr objx, CljILGen ilg, Type paramType)
         {
             EmitUnboxArg(ilg, paramType);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         internal static void EmitUnboxArg(CljILGen ilg, Type paramType)
         {
             if (paramType.IsPrimitive)

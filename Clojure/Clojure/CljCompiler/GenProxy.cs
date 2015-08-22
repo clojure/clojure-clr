@@ -53,6 +53,7 @@ namespace clojure.lang
 
         #region C-tors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "className")]
         GenProxy(string className)
         {
             if (Compiler.IsCompiling)

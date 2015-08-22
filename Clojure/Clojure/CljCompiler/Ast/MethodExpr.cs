@@ -154,6 +154,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Call, _method);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         public static readonly MethodInfo Method_MethodExpr_GetDelegate = typeof(MethodExpr).GetMethod("GetDelegate");
  
         public static readonly Dictionary<int, Delegate> DelegatesMap = new Dictionary<int, Delegate>();
@@ -309,6 +310,7 @@ namespace clojure.lang.CljCompiler.Ast
             EmitDynamicCallPostlude(lambda, delType, mbLambda, ilg);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "objx")]
         public static void EmitByRefArg(HostArg ha, ObjExpr objx, CljILGen ilg)
         {
             if (ha.LocalBinding.IsArg)
@@ -364,6 +366,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "lambda")]
         static public void EmitDynamicCallPostlude(LambdaExpression lambda, Type delType, MethodBuilder mbLambda, CljILGen ilg)
         {
                GenContext context = Compiler.CompilerContextVar.deref() as GenContext;

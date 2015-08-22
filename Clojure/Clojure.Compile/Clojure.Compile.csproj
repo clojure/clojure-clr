@@ -61,7 +61,7 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release 4.0|AnyCPU'">
@@ -135,5 +135,4 @@
     <PostBuildEvent Condition=" '$(Runtime)' == 'Mono' ">mono "$(TargetPath)" clojure.core clojure.core.protocols clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect clojure.edn</PostBuildEvent>
     <PostBuildEvent Condition=" '$(Runtime)' == '.Net' ">     "$(TargetPath)" clojure.core clojure.core.protocols clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect clojure.edn</PostBuildEvent>
   </PropertyGroup>
-
 </Project>

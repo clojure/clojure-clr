@@ -24,6 +24,7 @@ namespace clojure.lang.CljCompiler.Ast
         public sealed class CatchClause
         {
             readonly Type _type;
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods")]
             public Type Type { get { return _type; } }
 
             readonly LocalBinding _lb;
@@ -57,6 +58,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "finallyLocal"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "retLocal")]
         public TryExpr(Expr tryExpr, IPersistentVector catchExprs, Expr finallyExpr, int retLocal, int finallyLocal)
         {
             _tryExpr = tryExpr;
@@ -86,6 +88,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#")]
             public Expr Parse(ParserContext pcon, object frm)
             {
                 ISeq form = (ISeq)frm;

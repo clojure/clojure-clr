@@ -25,7 +25,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Type ClrType
         {
-            get { throw new ArgumentException("Has no CLR type"); }
+            get { throw new InvalidOperationException("Has no CLR type"); }
         }
 
         public virtual bool HasNormalExit() { return true; }
