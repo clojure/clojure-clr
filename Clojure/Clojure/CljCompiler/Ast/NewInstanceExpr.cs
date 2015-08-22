@@ -25,8 +25,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        Dictionary<IPersistentVector,List<MethodInfo>> _methodMap;
-        public Dictionary<IPersistentVector, List<MethodInfo>> MethodMap { get { return _methodMap; } }
+        Dictionary<IPersistentVector,IList<MethodInfo>> _methodMap;
+        public Dictionary<IPersistentVector, IList<MethodInfo>> MethodMap { get { return _methodMap; } }
 
         #endregion
 
@@ -158,8 +158,8 @@ namespace clojure.lang.CljCompiler.Ast
             }
             Type superClass = typeof(Object);
 
-            Dictionary<IPersistentVector, List<MethodInfo>> overrideables;
-            Dictionary<IPersistentVector, List<MethodInfo>> explicits;
+            Dictionary<IPersistentVector, IList<MethodInfo>> overrideables;
+            Dictionary<IPersistentVector, IList<MethodInfo>> explicits;
             GatherMethods(superClass, RT.seq(interfaces), out overrideables, out explicits);
 
             ret._methodMap = overrideables;
@@ -410,11 +410,11 @@ namespace clojure.lang.CljCompiler.Ast
         static void GatherMethods(
             Type st,
             ISeq interfaces,
-            out Dictionary<IPersistentVector, List<MethodInfo>> overrides,
-            out Dictionary<IPersistentVector, List<MethodInfo>> explicits)
+            out Dictionary<IPersistentVector, IList<MethodInfo>> overrides,
+            out Dictionary<IPersistentVector, IList<MethodInfo>> explicits)
         {
-            overrides = new Dictionary<IPersistentVector, List<MethodInfo>>();
-            explicits = new Dictionary<IPersistentVector, List<MethodInfo>>();
+            overrides = new Dictionary<IPersistentVector, IList<MethodInfo>>();
+            explicits = new Dictionary<IPersistentVector, IList<MethodInfo>>();
 
             GatherMethods(st, overrides);
             for (; interfaces != null; interfaces = interfaces.next()) {
@@ -423,7 +423,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        static void GatherMethods(Type t, Dictionary<IPersistentVector, List<MethodInfo>> mm)
+        static void GatherMethods(Type t, Dictionary<IPersistentVector, IList<MethodInfo>> mm)
         {
             for (Type mt = t; mt != null; mt = mt.BaseType)
                 foreach (MethodInfo m in mt.GetMethods(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
@@ -434,7 +434,7 @@ namespace clojure.lang.CljCompiler.Ast
                     GatherMethods(it, mm);
         }
 
-        static void ConsiderMethod(MethodInfo m, Dictionary<IPersistentVector, List<MethodInfo>> mm)
+        static void ConsiderMethod(MethodInfo m, Dictionary<IPersistentVector, IList<MethodInfo>> mm)
         {
             IPersistentVector mk = MSig(m);
             if (!(mm.ContainsKey(mk)
@@ -449,9 +449,9 @@ namespace clojure.lang.CljCompiler.Ast
             return RT.vector(m.Name, RT.seq(Compiler.GetTypes(m.GetParameters())), m.ReturnType);
         }
 
-        static void AddMethod(Dictionary<IPersistentVector, List<MethodInfo>> mm, IPersistentVector sig, MethodInfo m)
+        static void AddMethod(Dictionary<IPersistentVector, IList<MethodInfo>> mm, IPersistentVector sig, MethodInfo m)
         {
-            List<MethodInfo> value;
+            IList<MethodInfo> value;
             if (!mm.TryGetValue(sig, out value))
             {
                 value = new List<MethodInfo>();
@@ -460,11 +460,11 @@ namespace clojure.lang.CljCompiler.Ast
             value.Add(m);
         }
 
-        private static void GatherInterfaceExplicits(Type type, Dictionary<IPersistentVector, List<MethodInfo>> explicits)
+        private static void GatherInterfaceExplicits(Type type, Dictionary<IPersistentVector, IList<MethodInfo>> explicits)
         {
             foreach (MethodInfo m in type.GetMethods(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
-                List<MethodInfo> value;
+                IList<MethodInfo> value;
                 IPersistentVector mk = MSig(m);
                 if ( ! explicits.TryGetValue(mk,out value) )
                 {

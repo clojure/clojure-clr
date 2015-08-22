@@ -34,8 +34,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         static readonly Symbol dummyThis = Symbol.intern(null, "dummy_this_dlskjsdfower");
 
-        List<MethodInfo> _minfos;
-        public List<MethodInfo> MethodInfos { get { return _minfos; } }
+        IList<MethodInfo> _minfos;
+        public IList<MethodInfo> MethodInfos { get { return _minfos; } }
 
         #endregion
 
@@ -67,7 +67,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Parsing
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
-        public static NewInstanceMethod Parse(ObjExpr objx, ISeq form, Symbol thisTag, Dictionary<IPersistentVector, List<MethodInfo>> overrideables, Dictionary<IPersistentVector, List<MethodInfo>> explicits)
+        public static NewInstanceMethod Parse(ObjExpr objx, ISeq form, Symbol thisTag, Dictionary<IPersistentVector, IList<MethodInfo>> overrideables, Dictionary<IPersistentVector, IList<MethodInfo>> explicits)
         {
             // (methodname [this-name args*] body...)
             // this-name might be nil
@@ -174,13 +174,13 @@ namespace clojure.lang.CljCompiler.Ast
                     pRefs[i] = isByRef;
                 }
 
-                Dictionary<IPersistentVector, List<MethodInfo>> matches =
+                Dictionary<IPersistentVector, IList<MethodInfo>> matches =
                     method.IsExplicit 
                     ? FindMethodsWithNameAndArity(method.ExplicitInterface, methodName, parms.count(), overrideables, explicits)
                     : FindMethodsWithNameAndArity(methodName, parms.count(), overrideables);
 
                 IPersistentVector mk = MSig(methodName, pTypes, method._retType);
-                List<MethodInfo> ms = null;
+                IList<MethodInfo> ms = null;
                 if (matches.Count > 0 )
                 {
                     // multiple matches
@@ -253,14 +253,14 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        private static Dictionary<IPersistentVector, List<MethodInfo>> FindMethodsWithNameAndArity(
+        private static Dictionary<IPersistentVector, IList<MethodInfo>> FindMethodsWithNameAndArity(
             String name, 
             int arity, 
-            Dictionary<IPersistentVector, List<MethodInfo>> mm)
+            Dictionary<IPersistentVector, IList<MethodInfo>> mm)
         {
-            Dictionary<IPersistentVector, List<MethodInfo>> ret = new Dictionary<IPersistentVector, List<MethodInfo>>();
+            Dictionary<IPersistentVector, IList<MethodInfo>> ret = new Dictionary<IPersistentVector, IList<MethodInfo>>();
             
-            foreach (KeyValuePair<IPersistentVector, List<MethodInfo>> kv in mm)
+            foreach (KeyValuePair<IPersistentVector, IList<MethodInfo>> kv in mm)
             {
                 MethodInfo m = kv.Value[0];
                 if (name.Equals(m.Name) && m.GetParameters().Length == arity)
@@ -269,28 +269,28 @@ namespace clojure.lang.CljCompiler.Ast
             return ret;
         }
 
-        private static Dictionary<IPersistentVector, List<MethodInfo>> FindMethodsWithNameAndArity(
+        private static Dictionary<IPersistentVector, IList<MethodInfo>> FindMethodsWithNameAndArity(
             Type explicitInterface,
             String name,
             int arity,
-             Dictionary<IPersistentVector, List<MethodInfo>> overrideables,
-            Dictionary<IPersistentVector, List<MethodInfo>> explicits)
+             Dictionary<IPersistentVector, IList<MethodInfo>> overrideables,
+            Dictionary<IPersistentVector, IList<MethodInfo>> explicits)
         {
-            Dictionary<IPersistentVector, List<MethodInfo>> ret = new Dictionary<IPersistentVector, List<MethodInfo>>();
+            Dictionary<IPersistentVector, IList<MethodInfo>> ret = new Dictionary<IPersistentVector, IList<MethodInfo>>();
 
-            foreach (KeyValuePair<IPersistentVector, List<MethodInfo>> kv in overrideables)
+            foreach (KeyValuePair<IPersistentVector, IList<MethodInfo>> kv in overrideables)
             {
                 MethodInfo m = kv.Value[0];
                 if (name.Equals(m.Name) && m.GetParameters().Length == arity && m.DeclaringType == explicitInterface)
                     ret[kv.Key] = kv.Value;
             }
 
-            foreach (KeyValuePair<IPersistentVector, List<MethodInfo>> kv in explicits)
+            foreach (KeyValuePair<IPersistentVector, IList<MethodInfo>> kv in explicits)
             {
                 foreach (MethodInfo mi in kv.Value)
                     if (name.Equals(mi.Name) && mi.GetParameters().Length == arity && mi.DeclaringType == explicitInterface)
                     {
-                        List<MethodInfo> list;
+                        IList<MethodInfo> list;
                         if (!ret.TryGetValue(kv.Key, out list))
                         {
                             list = new List<MethodInfo>();

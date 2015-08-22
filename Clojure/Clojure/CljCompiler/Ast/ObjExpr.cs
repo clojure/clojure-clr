@@ -66,11 +66,11 @@ namespace clojure.lang.CljCompiler.Ast
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public List<FieldBuilder> KeywordLookupSiteFields { get; protected set; }
+        public IList<FieldBuilder> KeywordLookupSiteFields { get; protected set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public List<FieldBuilder> ThunkFields { get; protected set; }
+        public IList<FieldBuilder> ThunkFields { get; protected set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public List<FieldBuilder> CachedTypeFields { get; protected set; }
+        public IList<FieldBuilder> CachedTypeFields { get; protected set; }
 
 
         internal FieldBuilder KeywordLookupSiteField(int i)

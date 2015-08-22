@@ -35,11 +35,11 @@ namespace clojure.lang.CljCompiler.Ast
         protected readonly string _methodName;
         public string MethodName { get { return _methodName; } }
         
-        protected readonly List<HostArg> _args;
-        public List<HostArg> Args { get { return _args; } }
+        protected readonly IList<HostArg> _args;
+        public IList<HostArg> Args { get { return _args; } }
         
-        protected readonly List<Type> _typeArgs;
-        public List<Type> TypeArgs { get { return _typeArgs; } }
+        protected readonly IList<Type> _typeArgs;
+        public IList<Type> TypeArgs { get { return _typeArgs; } }
         
         protected MethodInfo _method;
         public MethodInfo Method { get { return _method; } }
@@ -60,7 +60,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region C-tors
 
-        protected MethodExpr(string source, IPersistentMap spanMap, Symbol tag, string methodName, List<Type> typeArgs, List<HostArg> args, bool tailPosition)
+        protected MethodExpr(string source, IPersistentMap spanMap, Symbol tag, string methodName, IList<Type> typeArgs, IList<HostArg> args, bool tailPosition)
         {
             _source = source;
             _spanMap = spanMap;
@@ -321,7 +321,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
         }
 
-        static public void EmitDynamicCallPreamble(DynamicExpression dyn, IPersistentMap spanMap, string methodName, Type returnType, List<ParameterExpression> paramExprs, Type[] paramTypes, CljILGen ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda)
+        static public void EmitDynamicCallPreamble(DynamicExpression dyn, IPersistentMap spanMap, string methodName, Type returnType, IList<ParameterExpression> paramExprs, Type[] paramTypes, CljILGen ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda)
         {
             Expression call = dyn;
 
@@ -398,7 +398,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        public static void EmitTypedArgs(ObjExpr objx, CljILGen ilg, ParameterInfo[] parms, List<HostArg> args)
+        public static void EmitTypedArgs(ObjExpr objx, CljILGen ilg, ParameterInfo[] parms, IList<HostArg> args)
         {
             for (int i = 0; i < parms.Length; i++)
             {

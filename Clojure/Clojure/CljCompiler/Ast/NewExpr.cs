@@ -31,8 +31,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        readonly List<HostArg> _args;
-        public List<HostArg> Args { get { return _args; } }
+        readonly IList<HostArg> _args;
+        public IList<HostArg> Args { get { return _args; } }
         
         readonly ConstructorInfo _ctor;
         public ConstructorInfo Ctor { get { return _ctor; } }
@@ -51,7 +51,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public NewExpr(Type type, List<HostArg> args, IPersistentMap spanMap)
+        public NewExpr(Type type, IList<HostArg> args, IPersistentMap spanMap)
         {
             _args = args;
             _type = type;
