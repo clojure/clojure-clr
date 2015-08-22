@@ -26,6 +26,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         Dictionary<IPersistentVector,IList<MethodInfo>> _methodMap;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public Dictionary<IPersistentVector, IList<MethodInfo>> MethodMap { get { return _methodMap; } }
 
         #endregion
@@ -385,23 +386,20 @@ namespace clojure.lang.CljCompiler.Ast
 
             return true;
         }
-
  
-        static string[] InterfaceNames(IPersistentVector interfaces)
-        {
-            int icnt = interfaces.count();
-            string[] inames = icnt > 0 ? new string[icnt] : null;
-            for (int i = 0; i < icnt; i++)
-                inames[i] = SlashName((Type)interfaces.nth(i));
-            return inames;
-        }
+        //static string[] InterfaceNames(IPersistentVector interfaces)
+        //{
+        //    int icnt = interfaces.count();
+        //    string[] inames = icnt > 0 ? new string[icnt] : null;
+        //    for (int i = 0; i < icnt; i++)
+        //        inames[i] = SlashName((Type)interfaces.nth(i));
+        //    return inames;
+        //}
 
-
-        static string SlashName(Type t)
-        {
-            return t.FullName.Replace(',', '/');
-        }
-
+        //static string SlashName(Type t)
+        //{
+        //    return t.FullName.Replace(',', '/');
+        //}
 
         #endregion
 

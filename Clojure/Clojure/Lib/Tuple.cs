@@ -20,7 +20,7 @@ using System.Collections;
 
 namespace clojure.lang
 {
-    public class Tuple
+    public static class Tuple
     {
         #region Data
 

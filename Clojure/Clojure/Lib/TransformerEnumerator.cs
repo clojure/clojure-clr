@@ -371,7 +371,6 @@ namespace clojure.lang
 
         #region IDispose methods
 
-
         public void Dispose()
         {
             Dispose(true);
@@ -380,10 +379,6 @@ namespace clojure.lang
 
         private void Dispose(bool disposing)
         {
-            if (!_disposed)
-            {
-                _disposed = true;
-            }
         }
 
         #endregion

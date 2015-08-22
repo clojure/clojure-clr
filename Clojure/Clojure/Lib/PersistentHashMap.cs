@@ -1768,6 +1768,7 @@ namespace clojure.lang
 
             #region Ctors
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
             NodeSeq(object[] array, int i)
                 : this(null, array, i, null)
             {

@@ -187,11 +187,11 @@ namespace clojure.lang.CljCompiler.Ast
             HostExpr.EmitUnboxArg(ilg, paramType);
         }
 
-        static void EmitClearThis(CljILGen ilg) 
-        {
-            ilg.EmitNull();
-            ilg.EmitStoreArg(0);
-        }
+        //static void EmitClearThis(CljILGen ilg) 
+        //{
+        //    ilg.EmitNull();
+        //    ilg.EmitStoreArg(0);
+        //}
 
         #endregion
     }

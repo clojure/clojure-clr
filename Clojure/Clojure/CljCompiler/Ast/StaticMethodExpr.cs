@@ -46,7 +46,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        public static bool IsBoxedMath(MethodInfo m)
+        public static bool IsBoxedMath(MethodBase m)
         {
             Type t = m.DeclaringType;
             if ( t == typeof(Numbers))

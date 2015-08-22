@@ -101,6 +101,7 @@ namespace clojure.lang
             _boundsCheck = boundsCheck;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         private Range(Object start, Object end, Object step, IBoundsCheck boundsCheck, IChunk chunk, ISeq chunkNext)
         {
             _end = end;

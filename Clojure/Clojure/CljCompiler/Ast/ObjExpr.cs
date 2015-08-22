@@ -654,31 +654,31 @@ namespace clojure.lang.CljCompiler.Ast
             return cb;
         }
 
-        void EmitSwapThunk(TypeBuilder tb)
-        {
-            MethodBuilder mb = tb.DefineMethod("swapThunk", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual, typeof(void), new Type[] { typeof(int), typeof(ILookupThunk) });
-            CljILGen ilg = new CljILGen(mb.GetILGenerator());
+        //void EmitSwapThunk(TypeBuilder tb)
+        //{
+        //    MethodBuilder mb = tb.DefineMethod("swapThunk", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual, typeof(void), new Type[] { typeof(int), typeof(ILookupThunk) });
+        //    CljILGen ilg = new CljILGen(mb.GetILGenerator());
 
-            Label endLabel = ilg.DefineLabel();
-            Label[] labels = new Label[KeywordCallsites.count()];
-            for (int i = 0; i < KeywordCallsites.count(); i++)
-                labels[i] = ilg.DefineLabel();
+        //    Label endLabel = ilg.DefineLabel();
+        //    Label[] labels = new Label[KeywordCallsites.count()];
+        //    for (int i = 0; i < KeywordCallsites.count(); i++)
+        //        labels[i] = ilg.DefineLabel();
 
-            ilg.EmitLoadArg(1);
-            ilg.Emit(OpCodes.Switch, labels);
-            ilg.Emit(OpCodes.Br, endLabel);
+        //    ilg.EmitLoadArg(1);
+        //    ilg.Emit(OpCodes.Switch, labels);
+        //    ilg.Emit(OpCodes.Br, endLabel);
 
-            for (int i = 0; i < KeywordCallsites.count(); i++)
-            {
-                ilg.MarkLabel(labels[i]);
-                ilg.EmitLoadArg(2);
-                ilg.EmitFieldSet(ThunkFields[i]);
-                ilg.Emit(OpCodes.Br, endLabel);
-            }
+        //    for (int i = 0; i < KeywordCallsites.count(); i++)
+        //    {
+        //        ilg.MarkLabel(labels[i]);
+        //        ilg.EmitLoadArg(2);
+        //        ilg.EmitFieldSet(ThunkFields[i]);
+        //        ilg.Emit(OpCodes.Br, endLabel);
+        //    }
 
-            ilg.MarkLabel(endLabel);
-            ilg.Emit(OpCodes.Ret);
-        }
+        //    ilg.MarkLabel(endLabel);
+        //    ilg.Emit(OpCodes.Ret);
+        //}
 
         private void EmitMetaFunctions(TypeBuilder fnTB)
         {
@@ -1017,40 +1017,40 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        static void EmitPrimitive(CljILGen ilg, object val)
-        {
-            switch (Type.GetTypeCode(val.GetType()) )
-            {
-                case TypeCode.Boolean:
-                    ilg.EmitBoolean((bool)val); break;
-                case TypeCode.Byte:
-                    ilg.EmitByte((byte)val); break;
-                case TypeCode.Char:
-                    ilg.EmitChar((char)val); break;
-                case TypeCode.Decimal:
-                    ilg.EmitDecimal((decimal)val); break;
-                case TypeCode.Double:
-                    ilg.EmitDouble((double)val); break;
-                case TypeCode.Int16:
-                    ilg.EmitShort((short)val); break;
-                case TypeCode.Int32:
-                    ilg.EmitInt((int)val); break;
-                case TypeCode.Int64:
-                    ilg.EmitLong((long)val); break;
-                case TypeCode.SByte:
-                    ilg.EmitSByte((sbyte)val); break;
-                case TypeCode.Single:
-                    ilg.EmitSingle((float)val); break;
-                case TypeCode.UInt16:
-                    ilg.EmitUShort((ushort)val); break;
-                case TypeCode.UInt32:
-                    ilg.EmitUInt((uint)val); break;
-                case TypeCode.UInt64:
-                    ilg.EmitULong((ulong)val); break;
-                default:
-                    throw new InvalidOperationException("Unknown constant type in EmitPrimitive");
-            }
-        }
+        //static void EmitPrimitive(CljILGen ilg, object val)
+        //{
+        //    switch (Type.GetTypeCode(val.GetType()) )
+        //    {
+        //        case TypeCode.Boolean:
+        //            ilg.EmitBoolean((bool)val); break;
+        //        case TypeCode.Byte:
+        //            ilg.EmitByte((byte)val); break;
+        //        case TypeCode.Char:
+        //            ilg.EmitChar((char)val); break;
+        //        case TypeCode.Decimal:
+        //            ilg.EmitDecimal((decimal)val); break;
+        //        case TypeCode.Double:
+        //            ilg.EmitDouble((double)val); break;
+        //        case TypeCode.Int16:
+        //            ilg.EmitShort((short)val); break;
+        //        case TypeCode.Int32:
+        //            ilg.EmitInt((int)val); break;
+        //        case TypeCode.Int64:
+        //            ilg.EmitLong((long)val); break;
+        //        case TypeCode.SByte:
+        //            ilg.EmitSByte((sbyte)val); break;
+        //        case TypeCode.Single:
+        //            ilg.EmitSingle((float)val); break;
+        //        case TypeCode.UInt16:
+        //            ilg.EmitUShort((ushort)val); break;
+        //        case TypeCode.UInt32:
+        //            ilg.EmitUInt((uint)val); break;
+        //        case TypeCode.UInt64:
+        //            ilg.EmitULong((ulong)val); break;
+        //        default:
+        //            throw new InvalidOperationException("Unknown constant type in EmitPrimitive");
+        //    }
+        //}
 
         internal void EmitVar(CljILGen ilg, Var var)
         {
