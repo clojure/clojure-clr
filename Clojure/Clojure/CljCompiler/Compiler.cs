@@ -369,10 +369,6 @@ namespace clojure.lang
             for (int i = 0; i <= Compiler.MaxPositionalArity; i++)
                 Methods_IFn_invoke[i] = typeof(IFn).GetMethod("invoke", CreateObjectTypeArray(i));
 
-            for ( int i = 0; i < Methods_CreateTuple.Length; i++)
-                if (Methods_CreateTuple[i] == null)
-                    throw new ArgumentNullException(String.Format("Create Tuple method #{0} missing",i));
-
             Type[] types = new Type[Compiler.MaxPositionalArity + 1];
             CreateObjectTypeArray(Compiler.MaxPositionalArity).CopyTo(types, 0);
             types[Compiler.MaxPositionalArity] = typeof(object[]);
