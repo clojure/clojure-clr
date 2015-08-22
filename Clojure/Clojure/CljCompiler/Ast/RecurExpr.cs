@@ -18,14 +18,21 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class RecurExpr : Expr, MaybePrimitiveExpr
+    public class RecurExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
         readonly IPersistentVector _args;
+        public IPersistentVector Args { get { return _args; } }
+
         readonly IPersistentVector _loopLocals;
+        public IPersistentVector LoopLocals { get { return _args; } }
+
         readonly string _source;
+        public string Source { get { return _source; } }
+
         readonly IPersistentMap _spanMap;
+        public IPersistentMap SpanMap { get { return _spanMap; } }
 
         #endregion
 
@@ -220,7 +227,7 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
     }
 
-    class Recur
+    public class Recur
     {
         public static Type RecurType = typeof(Recur);
     }

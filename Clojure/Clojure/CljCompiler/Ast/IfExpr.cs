@@ -17,14 +17,21 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class IfExpr : Expr, MaybePrimitiveExpr
+    public class IfExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
         readonly IPersistentMap _sourceSpan;
+        public IPersistentMap SourceSpan { get { return _sourceSpan; } } 
+
         readonly Expr _testExpr;
+        public Expr TestExpr { get { return _testExpr; } }
+
         readonly Expr _thenExpr;
+        public Expr ThenExpr { get { return _thenExpr; } }
+        
         readonly Expr _elseExpr;
+        public Expr ElseExpr { get { return _elseExpr; } }
 
         #endregion
 

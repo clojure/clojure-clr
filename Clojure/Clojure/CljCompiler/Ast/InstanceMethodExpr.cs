@@ -18,11 +18,12 @@ using System.Collections.Generic;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class InstanceMethodExpr : MethodExpr
+    public class InstanceMethodExpr : MethodExpr
     {
         #region Data
 
         readonly Expr _target;
+        public Expr Target { get { return _target; } }
 
         #endregion
 

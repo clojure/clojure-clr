@@ -17,11 +17,12 @@ using System;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class MonitorEnterExpr : UntypedExpr
+    public class MonitorEnterExpr : UntypedExpr
     {
         #region Data
 
         readonly Expr _target;
+        public Expr Target { get { return _target; } }
 
         #endregion
 

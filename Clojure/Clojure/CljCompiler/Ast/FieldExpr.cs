@@ -17,7 +17,7 @@ using System;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    abstract class FieldOrPropertyExpr : HostExpr, AssignableExpr
+    public abstract class FieldOrPropertyExpr : HostExpr, AssignableExpr
     {
         #region AssignableExpr Members
 

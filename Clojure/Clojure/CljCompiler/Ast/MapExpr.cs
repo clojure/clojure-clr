@@ -17,16 +17,12 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class MapExpr : Expr
+    public class MapExpr : Expr
     {
         #region Data
 
         readonly IPersistentVector _keyvals;
-
-        public IPersistentVector KeyVals
-        {
-            get { return _keyvals; }
-        } 
+        public IPersistentVector KeyVals { get { return _keyvals; } }
 
         #endregion
 

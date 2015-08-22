@@ -28,76 +28,78 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        const string ConstPrefix = "const__";
-        const string StaticCtorHelperName = "__static_ctor_helper";
+        public const string ConstPrefix = "const__";
+        public const string StaticCtorHelperName = "__static_ctor_helper";
 
-        public string InternalName { get; set; }
-        protected string _name;
-        public string Name { get { return _name; } }
+        public string InternalName { get; internal set; }
+        public string Name { get; protected set; }
+        public string ThisName { get; protected set; }
+
         protected readonly object _tag;
+        public object Tag { get { return _tag; } }
 
-        public IPersistentMap Closes { get; set; }
-        public IPersistentMap Keywords { get; set; }
-        public IPersistentMap Vars { get; set; }
-        public IPersistentVector Constants { get; set; }
+        public Object Src { get; protected set; }
+        public IPersistentMap Opts { get; protected set; }
 
-        Dictionary<int, FieldBuilder> ConstantFields { get; set;} 
-        protected IPersistentMap Fields { get; set; }            // symbol -> lb
 
-        protected IPersistentMap SpanMap { get; set; }
+        // If we were to get rid of setting these in Compiler.Compile1, we could change to protected.
+        // Perhaps part of passing context instead of using dynamic vars.
+        public IPersistentMap Closes { get; internal set; }
+        public IPersistentMap Keywords { get; internal set; }
+        public IPersistentMap Vars { get; internal set; }
+        public IPersistentVector Constants { get; internal set; }
 
-        protected Type _compiledType;
-        protected Type CompiledType
+        public Dictionary<int, FieldBuilder> ConstantFields { get; protected set; } 
+        public IPersistentMap Fields { get; protected set; }            // symbol -> lb
+        public IPersistentMap SpanMap { get; protected set; }
+        public Type CompiledType { get; protected set; }
+        public IPersistentMap ClassMeta { get; protected set; }
+        public TypeBuilder TypeBuilder { get; protected set; }
+        public ConstructorInfo CtorInfo { get; protected set; }
+        public ConstructorInfo BaseClassClosedOverCtor { get; protected set; }  // needed by NewInstanceExpr
+        public ConstructorInfo BaseClassAltCtor { get; protected set; }          // needed by NewInstanceExpr
+        public Type BaseClass { get; protected set; }                           // needed by NewInstanceExpr
+        public IPersistentVector KeywordCallsites { get; protected set; }
+        public IPersistentVector ProtocolCallsites { get; protected set; }
+        public IPersistentSet VarCallsites { get; protected set; }
+
+
+        public List<FieldBuilder> KeywordLookupSiteFields { get; protected set; }
+        public List<FieldBuilder> ThunkFields { get; protected set; }
+        public List<FieldBuilder> CachedTypeFields { get; protected set; }
+
+
+        internal FieldBuilder KeywordLookupSiteField(int i)
         {
-            get
-            {
-                if (_compiledType == null)
-                    // can't do much
-                    // Java will get the loader and define the clas from the stored bytecodes
-                    // Not sure what the equivalent would be.
-                    throw new InvalidOperationException("ObjExpr type not compiled");
-                return _compiledType;
-            }
-            set { _compiledType = value; }
+            return KeywordLookupSiteFields[i];
         }
 
-        protected IPersistentMap _classMeta;
+        internal FieldBuilder CachedTypeField(int i)
+        {
+            return CachedTypeFields[i];
+        }
 
-        protected TypeBuilder _typeBuilder;
-        public TypeBuilder TypeBlder { get { return _typeBuilder; } }
-
-        protected ConstructorInfo _ctorInfo;
-
-        protected ConstructorInfo _baseClassClosedOverCtor;  // needed by NewInstanceExpr
-        protected ConstructorInfo _baseClassAltCtor;          // needed by NewInstanceExpr
-        protected Type _baseClass;                           // needed by NewInstanceExpr
-
-        public IPersistentVector KeywordCallsites { get; set; }
-        List<FieldBuilder> _keywordLookupSiteFields;
-        List<FieldBuilder> _thunkFields;
-
-        public IPersistentVector ProtocolCallsites { get; set; }
-        List<FieldBuilder> _cachedTypeFields;
+        internal FieldBuilder ThunkField(int i)
+        {
+            return ThunkFields[i];
+        }
 
 
-        FieldBuilder _metaField;
-        protected IList<FieldBuilder> _closedOverFields;
-        protected Dictionary<LocalBinding, FieldBuilder> _closedOverFieldsMap;
-        protected Dictionary<FieldBuilder, LocalBinding> _closedOverFieldsToBindingsMap;
+        public FieldBuilder MetaField { get; protected set; }
+        public IList<FieldBuilder> ClosedOverFields { get; protected set; }
+        public Dictionary<LocalBinding, FieldBuilder> ClosedOverFieldsMap { get; protected set; }
+        public Dictionary<FieldBuilder, LocalBinding> ClosedOverFieldsToBindingsMap { get; protected set; }
+        public IPersistentVector HintedFields { get; protected set; }
 
-        protected int _altCtorDrops;
+        public int AltCtorDrops { get; protected set; }
 
-        protected IPersistentCollection _methods;
+        public IPersistentCollection Methods { get; protected set; }
 
-        protected int _constantsID;
-        protected bool _onceOnly;
-        protected Object _src;
-        protected bool _isStatic;
-        public bool IsStatic { get { return _isStatic; } }
+        public int ConstantsID { get; protected set; }
+        public bool OnceOnly { get; protected set; }
+        public bool IsStatic { get; protected set; }
 
-
- 
-
+        
         protected bool IsDefType { get { return Fields != null; } }
         protected virtual bool SupportsMeta { get { return !IsDefType; } }
 
@@ -170,44 +172,8 @@ namespace clojure.lang.CljCompiler.Ast
             return typeof(object);
         }
 
-        internal FieldBuilder KeywordLookupSiteField(int i)
-        {
-            return _keywordLookupSiteFields[i];
-        }
 
-        internal FieldBuilder CachedTypeField(int i)
-        {
-            return _cachedTypeFields[i];
-        }
-
-        internal FieldBuilder ThunkField(int i)
-        {
-            return _thunkFields[i];
-        }
-
-        protected string _thisName;
-        protected IPersistentVector _hintedFields = PersistentVector.EMPTY; // hinted fields
-
-        private IPersistentSet _varCallsites;
-
-        protected IPersistentMap _opts = PersistentHashMap.EMPTY;
         
-        #endregion
-
-        #region Data accessors
-
-        public string ThisName
-        {
-            get { return _thisName; }
-            //set { _thisName = value; }
-        }
-
-        internal IPersistentSet VarCallsites
-        {
-            get { return _varCallsites; }
-            set { _varCallsites = value; }
-        }
-
         #endregion
 
         #region C-tors
@@ -218,6 +184,8 @@ namespace clojure.lang.CljCompiler.Ast
             Keywords = PersistentHashMap.EMPTY;
             Vars = PersistentHashMap.EMPTY;
             Closes = PersistentHashMap.EMPTY;
+            HintedFields = PersistentVector.EMPTY;
+            Opts = PersistentHashMap.EMPTY;
         }
 
         #endregion
@@ -231,7 +199,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public virtual Type ClrType
         {
-            get { return _compiledType ?? (_tag != null ? HostExpr.TagToType(_tag) : typeof(IFn)); }
+            get { return CompiledType ?? (_tag != null ? HostExpr.TagToType(_tag) : typeof(IFn)); }
         }
 
         #endregion
@@ -307,7 +275,7 @@ namespace clojure.lang.CljCompiler.Ast
                         objx.EmitLocal(ilg, lb);
                 }
 
-                ilg.Emit(OpCodes.Newobj, _ctorInfo);
+                ilg.Emit(OpCodes.Newobj, CtorInfo);
             }
 
             if (rhc == RHC.Statement)
@@ -320,13 +288,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Type Compile(Type superType, Type stubType, IPersistentVector interfaces, bool onetimeUse, GenContext context)
         {
-            if (_compiledType != null)
-                return _compiledType;
+            if (CompiledType != null)
+                return CompiledType;
 
-            string publicTypeName = IsDefType || (_isStatic && Compiler.IsCompiling) ? InternalName : InternalName + "__" + RT.nextID();
+            string publicTypeName = IsDefType || (IsStatic && Compiler.IsCompiling) ? InternalName : InternalName + "__" + RT.nextID();
 
-            _typeBuilder = context.AssemblyGen.DefinePublicType(publicTypeName, superType, true);
-            context = context.WithNewDynInitHelper().WithTypeBuilder(_typeBuilder);
+            TypeBuilder = context.AssemblyGen.DefinePublicType(publicTypeName, superType, true);
+            context = context.WithNewDynInitHelper().WithTypeBuilder(TypeBuilder);
 
             Var.pushThreadBindings(RT.map(Compiler.CompilerContextVar, context));
 
@@ -335,17 +303,17 @@ namespace clojure.lang.CljCompiler.Ast
                 if (interfaces != null)
                 {
                     for (int i = 0; i < interfaces.count(); i++)
-                        _typeBuilder.AddInterfaceImplementation((Type)interfaces.nth(i));
+                        TypeBuilder.AddInterfaceImplementation((Type)interfaces.nth(i));
                 }
 
-                ObjExpr.MarkAsSerializable(_typeBuilder);
-                GenInterface.SetCustomAttributes(_typeBuilder, _classMeta);
+                ObjExpr.MarkAsSerializable(TypeBuilder);
+                GenInterface.SetCustomAttributes(TypeBuilder, ClassMeta);
 
                 try
                 {
                     if (IsDefType)
                     {
-                        Compiler.RegisterDuplicateType(_typeBuilder);
+                        Compiler.RegisterDuplicateType(TypeBuilder);
 
                         Var.pushThreadBindings(RT.map(
                             Compiler.CompileStubOrigClassVar, stubType
@@ -353,44 +321,44 @@ namespace clojure.lang.CljCompiler.Ast
                         //,
                         //Compiler.COMPILE_STUB_CLASS, _baseType));
                     }
-                    EmitConstantFieldDefs(_typeBuilder);
-                    EmitKeywordCallsiteDefs(_typeBuilder);
+                    EmitConstantFieldDefs(TypeBuilder);
+                    EmitKeywordCallsiteDefs(TypeBuilder);
 
-                    DefineStaticConstructor(_typeBuilder);
+                    DefineStaticConstructor(TypeBuilder);
 
                     if (SupportsMeta)
-                        _metaField = _typeBuilder.DefineField("__meta", typeof(IPersistentMap), FieldAttributes.Public | FieldAttributes.InitOnly);
+                        MetaField = TypeBuilder.DefineField("__meta", typeof(IPersistentMap), FieldAttributes.Public | FieldAttributes.InitOnly);
 
                     // If this IsDefType, then it has already emitted the closed-over fields on the base class.
                     if ( ! IsDefType )
-                        EmitClosedOverFields(_typeBuilder);
-                    EmitProtocolCallsites(_typeBuilder);
+                        EmitClosedOverFields(TypeBuilder);
+                    EmitProtocolCallsites(TypeBuilder);
 
-                    _ctorInfo = EmitConstructor(_typeBuilder, superType);
+                    CtorInfo = EmitConstructor(TypeBuilder, superType);
 
-                    if (_altCtorDrops > 0)
-                        EmitFieldOnlyConstructor(_typeBuilder, superType);
+                    if (AltCtorDrops > 0)
+                        EmitFieldOnlyConstructor(TypeBuilder, superType);
 
                     if (SupportsMeta)
                     {
-                        EmitNonMetaConstructor(_typeBuilder, superType);
-                        EmitMetaFunctions(_typeBuilder);
+                        EmitNonMetaConstructor(TypeBuilder, superType);
+                        EmitMetaFunctions(TypeBuilder);
                     }
 
-                    EmitStatics(_typeBuilder);
-                    EmitMethods(_typeBuilder);
+                    EmitStatics(TypeBuilder);
+                    EmitMethods(TypeBuilder);
 
                     //if (KeywordCallsites.count() > 0)
                     //    EmitSwapThunk(_typeBuilder);
 
-                    _compiledType = _typeBuilder.CreateType();
+                    CompiledType = TypeBuilder.CreateType();
 
                     if (context.DynInitHelper != null)
                         context.DynInitHelper.FinalizeType();
 
-                    _ctorInfo = GetConstructorWithArgCount(_compiledType, CtorTypes().Length);
+                    CtorInfo = GetConstructorWithArgCount(CompiledType, CtorTypes().Length);
 
-                    return _compiledType;
+                    return CompiledType;
                 }
                 finally
                 {
@@ -408,8 +376,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             int count = KeywordCallsites.count();
 
-            _keywordLookupSiteFields = new List<FieldBuilder>(count);
-            _thunkFields = new List<FieldBuilder>(count);
+            KeywordLookupSiteFields = new List<FieldBuilder>(count);
+            ThunkFields = new List<FieldBuilder>(count);
 
             for (int i = 0; i < KeywordCallsites.count(); i++)
             {
@@ -418,8 +386,8 @@ namespace clojure.lang.CljCompiler.Ast
                 string thunkName = ThunkNameStatic(i);
                 FieldBuilder fb1 = baseTB.DefineField(siteName, typeof(KeywordLookupSite), FieldAttributes.FamORAssem | FieldAttributes.Static);
                 FieldBuilder fb2 = baseTB.DefineField(thunkName, typeof(ILookupThunk), FieldAttributes.FamORAssem | FieldAttributes.Static);
-                _keywordLookupSiteFields.Add(fb1);
-                _thunkFields.Add(fb2);
+                KeywordLookupSiteFields.Add(fb1);
+                ThunkFields.Add(fb2);
             }
         }
 
@@ -440,7 +408,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (KeywordCallsites.count() > 0)
                 EmitKeywordCallsiteInits(ilg);
 
-            if ( IsDefType && RT.booleanCast(RT.get(_opts,Compiler.LoadNsKeyword)))
+            if ( IsDefType && RT.booleanCast(RT.get(Opts,Compiler.LoadNsKeyword)))
                 EmitLoadNsInitForDeftype(ilg);
 
             ilg.Emit(OpCodes.Ret);
@@ -448,7 +416,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void EmitLoadNsInitForDeftype(CljILGen ilg)
         {
-            string nsname = ((Symbol)RT.second(_src)).Namespace;
+            string nsname = ((Symbol)RT.second(Src)).Namespace;
             if ( !nsname.Equals("clojure.core"))
             {
                 ilg.EmitString("clojure.core");
@@ -473,10 +441,10 @@ namespace clojure.lang.CljCompiler.Ast
                 EmitValue(k, ilg);
                 ilg.Emit(OpCodes.Newobj, Compiler.Ctor_KeywordLookupSite_1);
                 ilg.Emit(OpCodes.Dup);
-                FieldBuilder kfb = _keywordLookupSiteFields[i];
+                FieldBuilder kfb = KeywordLookupSiteFields[i];
                 ilg.Emit(OpCodes.Stsfld, kfb);
                 ilg.Emit(OpCodes.Castclass, typeof(ILookupThunk));
-                FieldBuilder tfb = _thunkFields[i];
+                FieldBuilder tfb = ThunkFields[i];
                 ilg.Emit(OpCodes.Stsfld, tfb);
             }
         }
@@ -507,9 +475,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected void EmitClosedOverFields(TypeBuilder tb)
         {
-            _closedOverFields = new List<FieldBuilder>(Closes.count());
-            _closedOverFieldsToBindingsMap = new Dictionary<FieldBuilder, LocalBinding>(Closes.count());
-            _closedOverFieldsMap = new Dictionary<LocalBinding, FieldBuilder>(Closes.count());
+            ClosedOverFields = new List<FieldBuilder>(Closes.count());
+            ClosedOverFieldsToBindingsMap = new Dictionary<FieldBuilder, LocalBinding>(Closes.count());
+            ClosedOverFieldsMap = new Dictionary<LocalBinding, FieldBuilder>(Closes.count());
 
             // closed-overs map to instance fields.
             for (ISeq s = RT.keys(Closes); s != null; s = s.next())
@@ -533,9 +501,9 @@ namespace clojure.lang.CljCompiler.Ast
 
                 GenInterface.SetCustomAttributes(fb, GenInterface.ExtractAttributes(RT.meta(lb.Symbol)));
 
-                _closedOverFields.Add(fb);
-                _closedOverFieldsMap[lb] = fb;
-                _closedOverFieldsToBindingsMap[fb] = lb;
+                ClosedOverFields.Add(fb);
+                ClosedOverFieldsMap[lb] = fb;
+                ClosedOverFieldsToBindingsMap[fb] = lb;
             }
         }
 
@@ -543,12 +511,12 @@ namespace clojure.lang.CljCompiler.Ast
         {
             int count = ProtocolCallsites.count();
 
-            _cachedTypeFields = new List<FieldBuilder>(count);
+            CachedTypeFields = new List<FieldBuilder>(count);
 
 
             for (int i = 0; i < count; i++)
             {
-                _cachedTypeFields.Add(tb.DefineField(CachedClassName(i), typeof(Type), FieldAttributes.Public|FieldAttributes.Static));
+                CachedTypeFields.Add(tb.DefineField(CachedClassName(i), typeof(Type), FieldAttributes.Public|FieldAttributes.Static));
             }
         }
 
@@ -579,7 +547,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 gen.EmitLoadArg(a + 1);         // gen.Emit(OpCodes.Ldarg, a + 1);
             }
-            gen.Emit(OpCodes.Call, _baseClassClosedOverCtor);
+            gen.Emit(OpCodes.Call, BaseClassClosedOverCtor);
 
             gen.Emit(OpCodes.Ret);
 
@@ -608,7 +576,7 @@ namespace clojure.lang.CljCompiler.Ast
                 gen.EmitLoadArg(0);
                 gen.EmitLoadArg(1);
                 gen.Emit(OpCodes.Castclass, typeof(IPersistentMap));
-                gen.EmitFieldSet(_metaField);
+                gen.EmitFieldSet(MetaField);
             }
 
             // store closed-overs in their fields
@@ -618,8 +586,8 @@ namespace clojure.lang.CljCompiler.Ast
             for (ISeq s = RT.keys(Closes); s != null; s = s.next(), a++)
             {
                 //LocalBinding lb = (LocalBinding)s.first();
-                FieldBuilder fb = _closedOverFields[a];
-                bool isVolatile = IsVolatile(_closedOverFieldsToBindingsMap[fb]);
+                FieldBuilder fb = ClosedOverFields[a];
+                bool isVolatile = IsVolatile(ClosedOverFieldsToBindingsMap[fb]);
 
                 gen.EmitLoadArg(0);             // gen.Emit(OpCodes.Ldarg_0);
                 gen.EmitLoadArg(a + offset);         // gen.Emit(OpCodes.Ldarg, a + 1);
@@ -633,7 +601,7 @@ namespace clojure.lang.CljCompiler.Ast
         private ConstructorBuilder EmitFieldOnlyConstructor(TypeBuilder fnTB, Type baseType)
         {
             Type[] ctorTypes = CtorTypes();
-            Type[] altCtorTypes = new Type[ctorTypes.Length - _altCtorDrops];
+            Type[] altCtorTypes = new Type[ctorTypes.Length - AltCtorDrops];
             for (int i = 0; i < altCtorTypes.Length; i++)
                 altCtorTypes[i] = ctorTypes[i];
 
@@ -645,10 +613,10 @@ namespace clojure.lang.CljCompiler.Ast
             for (int i = 0; i < altCtorTypes.Length; i++)
                 gen.EmitLoadArg(i + 1);
 
-            for (int i = 0; i < _altCtorDrops; i++)
+            for (int i = 0; i < AltCtorDrops; i++)
                 gen.EmitNull();
 
-            gen.Emit(OpCodes.Call, _ctorInfo);
+            gen.Emit(OpCodes.Call, CtorInfo);
 
             gen.Emit(OpCodes.Ret);
             return cb;
@@ -668,7 +636,7 @@ namespace clojure.lang.CljCompiler.Ast
             gen.EmitNull();     // null meta
             for (int i = 0; i < noMetaCtorTypes.Length; i++)
                 gen.EmitLoadArg(i + 1);
-            gen.Emit(OpCodes.Call, _ctorInfo);
+            gen.Emit(OpCodes.Call, CtorInfo);
             gen.Emit(OpCodes.Ret);
 
             return cb;
@@ -692,7 +660,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 ilg.MarkLabel(labels[i]);
                 ilg.EmitLoadArg(2);
-                ilg.EmitFieldSet(_thunkFields[i]);
+                ilg.EmitFieldSet(ThunkFields[i]);
                 ilg.Emit(OpCodes.Br, endLabel);
             }
 
@@ -708,7 +676,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (SupportsMeta)
             {
                 gen.EmitLoadArg(0);
-                gen.EmitFieldGet(_metaField);
+                gen.EmitFieldGet(MetaField);
             }
             else
                 gen.EmitNull();
@@ -721,14 +689,14 @@ namespace clojure.lang.CljCompiler.Ast
             if (SupportsMeta)
             {
                 gen.EmitLoadArg(1);   // meta arg
-                foreach (FieldBuilder fb in _closedOverFields)
+                foreach (FieldBuilder fb in ClosedOverFields)
                 {
                     gen.EmitLoadArg(0);
                     gen.MaybeEmitVolatileOp(fb);
                     gen.EmitFieldGet(fb);
                 }
 
-                gen.EmitNew(_ctorInfo);
+                gen.EmitNew(CtorInfo);
             }
             else
                 gen.EmitLoadArg(0);  //this
@@ -1107,7 +1075,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (Closes.containsKey(lb))
             {
                 ilg.Emit(OpCodes.Ldarg_0); // this
-                FieldBuilder fb = _closedOverFieldsMap[lb];
+                FieldBuilder fb = ClosedOverFieldsMap[lb];
                 ilg.MaybeEmitVolatileOp(IsVolatile(lb));
                 ilg.Emit(OpCodes.Ldfld, fb);
                 if (primType != null)
@@ -1140,7 +1108,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (Closes.containsKey(lb))
             {
                 ilg.Emit(OpCodes.Ldarg_0); // this
-                FieldBuilder fb = _closedOverFieldsMap[lb];
+                FieldBuilder fb = ClosedOverFieldsMap[lb];
                 ilg.MaybeEmitVolatileOp(IsVolatile(lb));
                 ilg.Emit(OpCodes.Ldfld, fb);
             }
@@ -1164,7 +1132,7 @@ namespace clojure.lang.CljCompiler.Ast
                 throw new ArgumentException("Cannot assign to non-mutable: ", lb.Name);
 
             FieldBuilder fb = null;
-            bool hasField = _closedOverFieldsMap.TryGetValue(lb, out fb);
+            bool hasField = ClosedOverFieldsMap.TryGetValue(lb, out fb);
 
             ilg.Emit(OpCodes.Ldarg_0);  // this
 
@@ -1194,10 +1162,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal void EmitLetFnInits(CljILGen ilg, LocalBuilder localBuilder, ObjExpr objx, IPersistentSet letFnLocals)
         {
-            if (_typeBuilder != null)
+            if (TypeBuilder != null)
             {
                 // Full compile
-                ilg.Emit(OpCodes.Castclass, _typeBuilder);
+                ilg.Emit(OpCodes.Castclass, TypeBuilder);
 
                 for (ISeq s = RT.keys(Closes); s != null; s = s.next())
                 {
@@ -1205,7 +1173,7 @@ namespace clojure.lang.CljCompiler.Ast
                     if (letFnLocals.contains(lb))
                     {
                         FieldBuilder fb;
-                        _closedOverFieldsMap.TryGetValue(lb, out fb);
+                        ClosedOverFieldsMap.TryGetValue(lb, out fb);
 
                         Type primt = lb.PrimitiveType;
                         ilg.Emit(OpCodes.Dup);  // this

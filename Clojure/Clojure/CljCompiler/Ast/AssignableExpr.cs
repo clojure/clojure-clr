@@ -15,7 +15,7 @@
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    interface AssignableExpr
+    public interface AssignableExpr
     {
         object EvalAssign(Expr val);
         void EmitAssign(RHC rhc, ObjExpr objx, CljILGen ilg, Expr val);

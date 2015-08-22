@@ -17,14 +17,11 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class NilExpr : LiteralExpr
+    public class NilExpr : LiteralExpr
     {
         #region Data
 
-        public override object Val
-        {
-            get { return null; }
-        }
+        public override object Val { get { return null; } }
 
         #endregion
 

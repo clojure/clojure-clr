@@ -18,21 +18,23 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    sealed class InstanceOfExpr : Expr, MaybePrimitiveExpr
+    public sealed class InstanceOfExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
         readonly Expr _expr;
-        readonly Type _t;
+        public Expr Expr { get { return _expr; } }
 
-        // Keep these around for debugging
-#pragma warning disable 414
+        readonly Type _t;
+        public Type Type { get { return _t; } }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         readonly string _source;
+        public string Source { get { return _source; } }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         readonly IPersistentMap _spanMap;
-#pragma warning restore 414
+        public IPersistentMap SpanMap { get { return _spanMap; } }
 
         #endregion
 

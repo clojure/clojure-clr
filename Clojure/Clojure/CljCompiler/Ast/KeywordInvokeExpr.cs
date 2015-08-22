@@ -17,17 +17,28 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    sealed class KeywordInvokeExpr : Expr
+    public sealed class KeywordInvokeExpr : Expr
     {
         #region Data
 
         readonly KeywordExpr _kw;
-        readonly Object _tag;
-        readonly Expr _target;
-        readonly string _source;
-        readonly IPersistentMap _spanMap;
-        readonly int _siteIndex;
+        public KeywordExpr KWExpr { get { return _kw; } }
 
+        readonly Object _tag;
+        public object Tag { get { return _tag; } }
+        
+        readonly Expr _target;
+        public Expr Target { get { return _target; } }
+        
+        readonly string _source;
+        public string Source { get { return _source; } }
+        
+        readonly IPersistentMap _spanMap;
+        public IPersistentMap SpanMap { get { return _spanMap; } }
+        
+        readonly int _siteIndex;
+        public int SiteIndex { get { return _siteIndex; } }
+        
         #endregion
 
         #region C-tors

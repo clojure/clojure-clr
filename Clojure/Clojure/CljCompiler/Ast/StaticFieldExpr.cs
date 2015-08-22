@@ -19,26 +19,31 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    abstract class StaticFieldOrPropertyExpr<TInfo> : FieldOrPropertyExpr
+    public abstract class StaticFieldOrPropertyExpr<TInfo> : FieldOrPropertyExpr
     {
         #region Data
 
-        // Keep these around for debugging
-#pragma warning disable 414
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
-        readonly string _fieldName;
+        protected readonly string _memberName;
+        public string MemberName { get { return _memberName; } }
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
-        readonly Type _type;
-#pragma warning restore 414
+        protected readonly Type _type;
+        public Type MemberType { get { return _type; } }
 
         protected readonly TInfo _tinfo;
+        public TInfo MemberInfo { get { return _tinfo; } }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         protected readonly string _source;
+        public string Source { get { return _source; } }
 
         protected readonly IPersistentMap _spanMap;
+        public IPersistentMap SpanMap { get { return _spanMap; } }
+
         protected readonly Symbol _tag;
+        public Symbol Tag { get { return _tag; } }
 
         #endregion
 
@@ -48,7 +53,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             _source = source;
             _spanMap = spanMap;
-            _fieldName = fieldName;
+            _memberName = fieldName;
             _type = type;
             _tinfo = tinfo;
             _tag = tag;
@@ -78,7 +83,7 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
     }
 
-    sealed class StaticFieldExpr : StaticFieldOrPropertyExpr<FieldInfo>
+    public sealed class StaticFieldExpr : StaticFieldOrPropertyExpr<FieldInfo>
     {
         #region C-tors
 
@@ -196,12 +201,12 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
     }
 
-    sealed class StaticPropertyExpr : StaticFieldOrPropertyExpr<PropertyInfo>
+    public sealed class StaticPropertyExpr : StaticFieldOrPropertyExpr<PropertyInfo>
     {
         #region C-tors
 
-        public StaticPropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string fieldName, PropertyInfo pinfo)
-            : base(source, spanMap, tag, type, fieldName, pinfo)
+        public StaticPropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string propertyName, PropertyInfo pinfo)
+            : base(source, spanMap, tag, type, propertyName, pinfo)
         {
         }
 

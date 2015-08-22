@@ -18,13 +18,18 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class LetExpr : Expr, MaybePrimitiveExpr
+    public class LetExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
         readonly IPersistentVector _bindingInits;
+        public IPersistentVector BindingInits { get { return _bindingInits; } }
+
         readonly Expr _body;
+        public Expr Body { get { return _body; } }
+        
         readonly bool _isLoop;
+        public bool IsLoop { get { return _isLoop; } }
 
         #endregion
 
@@ -97,9 +102,7 @@ namespace clojure.lang.CljCompiler.Ast
                     IPersistentMap dynamicBindings = RT.map(
                         Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
                         Compiler.NextLocalNumVar, Compiler.NextLocalNumVar.deref());
-                    method.Locals = backupMethodLocals;
-                    method.IndexLocals = backupMethodIndexLocals;
-
+                    method.SetLocals(backupMethodLocals, backupMethodIndexLocals);
 
                     if (isLoop)
                         dynamicBindings = dynamicBindings.assoc(Compiler.LoopLocalsVar, null);

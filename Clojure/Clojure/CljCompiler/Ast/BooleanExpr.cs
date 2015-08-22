@@ -17,16 +17,12 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class BooleanExpr : LiteralExpr  // , MaybePrimitiveExpr  TODO: No reason this shouldn't be, but it messes up the RecurExpr emit code.
+    public class BooleanExpr : LiteralExpr  // , MaybePrimitiveExpr  TODO: No reason this shouldn't be, but it messes up the RecurExpr emit code.
     {
         #region Data
 
         readonly bool _val;
-
-        public override object Val
-        {
-            get { return _val; }
-        }
+        public override object Val { get { return _val; } }
 
         #endregion
 

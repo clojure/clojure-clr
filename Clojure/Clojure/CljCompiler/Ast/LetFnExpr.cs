@@ -18,12 +18,15 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class LetFnExpr : Expr
+    public class LetFnExpr : Expr
     {
         #region Data
 
         readonly IPersistentVector _bindingInits;
+        public IPersistentVector BindingInits { get { return _bindingInits; } }
+
         readonly Expr _body;
+        public Expr Body { get { return _body; } }
 
         #endregion
 

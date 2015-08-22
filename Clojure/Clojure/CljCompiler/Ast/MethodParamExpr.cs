@@ -17,11 +17,12 @@ using System;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    sealed class MethodParamExpr : Expr, MaybePrimitiveExpr
+    public sealed class MethodParamExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
         readonly Type _t;
+        public Type Type { get { return _t; } }
 
         #endregion
 

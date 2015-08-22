@@ -19,19 +19,36 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class DefExpr : Expr
+    public class DefExpr : Expr
     {
         #region Data
 
         readonly Var _var;
+        public Var Var { get { return _var; } }
+
         readonly Expr _init;
+        public Expr Init { get { return _init; } }
+
         readonly Expr _meta;
+        public Expr Meta { get { return _meta; } }
+
         readonly bool _initProvided;
+        public bool InitProvided { get { return _initProvided; } }
+        
         readonly bool _isDynamic;
+        public bool IsDynamic { get { return _isDynamic; } }
+        
         readonly bool _shadowsCoreMapping;
+        public bool ShadowsCoreMapping { get { return _shadowsCoreMapping; } }
+        
         readonly string _source;
+        public string Source { get { return _source; } }
+        
         readonly int _line;
+        public int Line { get { return _line; } }
+        
         readonly int _column;
+        public int Column { get { return _column; } }
 
         #endregion
 

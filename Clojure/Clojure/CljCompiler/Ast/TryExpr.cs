@@ -17,30 +17,20 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class TryExpr : Expr
+    public class TryExpr : Expr
     {
         #region Nested classes
 
         public sealed class CatchClause
         {
             readonly Type _type;
-            public Type Type
-            {
-              get { return _type; }  
-            } 
+            public Type Type { get { return _type; } }
 
             readonly LocalBinding _lb;
-            internal LocalBinding Lb
-            {
-              get { return _lb; }  
-            } 
+            internal LocalBinding Lb { get { return _lb; } }
 
             readonly Expr _handler;
-            internal Expr Handler
-            {
-              get { return _handler; }  
-            } 
-
+            internal Expr Handler { get { return _handler; } }
 
             public CatchClause(Type type, LocalBinding lb, Expr handler)
             {
@@ -55,10 +45,13 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Expr _tryExpr;
+        public Expr TryExp { get { return _tryExpr; } }
+
         readonly Expr _finallyExpr;
+        public Expr FinallyExpr { get { return _finallyExpr; } }
+
         readonly IPersistentVector _catchExprs;
-        //readonly int _retLocal;
-        //readonly int _finallyLocal;
+        public IPersistentVector CatchExprs { get { return _catchExprs; } }
 
         #endregion
 

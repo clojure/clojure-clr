@@ -17,11 +17,12 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class VectorExpr : Expr
+    public class VectorExpr : Expr
     {
         #region Data
 
         readonly IPersistentVector _args;
+        public IPersistentVector Args { get { return _args; } }
 
         #endregion
 

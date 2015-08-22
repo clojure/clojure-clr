@@ -17,18 +17,15 @@ using System;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class LocalBindingExpr : Expr, MaybePrimitiveExpr, AssignableExpr
+    public class LocalBindingExpr : Expr, MaybePrimitiveExpr, AssignableExpr
     {
         #region Data
 
         readonly LocalBinding _b;
-
-        internal LocalBinding Binding
-        {
-            get { return _b; }
-        } 
+        public LocalBinding Binding { get { return _b; } }
 
         readonly Symbol _tag;
+        public Symbol Tag { get { return _tag; } }
 
         #endregion
 

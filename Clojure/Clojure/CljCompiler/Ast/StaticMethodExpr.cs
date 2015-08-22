@@ -20,11 +20,12 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class StaticMethodExpr : MethodExpr
+    public class StaticMethodExpr : MethodExpr
     {
         #region Data
 
         readonly Type _type;
+        public Type Type { get { return _type; } }
 
         static readonly Keyword warnOnBoxedKeyword = Keyword.intern("warn-on-boxed");
 

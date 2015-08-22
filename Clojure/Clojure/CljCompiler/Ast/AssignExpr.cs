@@ -16,12 +16,15 @@ using System;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class AssignExpr : Expr
+    public class AssignExpr : Expr
     {
         #region Data
 
         readonly AssignableExpr _target;
+        public AssignableExpr Target { get { return _target; } }
+
         readonly Expr _val;
+        public Expr Val { get { return _val; } }
 
         #endregion
 
@@ -39,12 +42,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public bool HasClrType
         {
-            get { return _val.HasClrType; }
+            get { return Val.HasClrType; }
         }
 
         public Type ClrType
         {
-            get { return _val.ClrType; }
+            get { return Val.ClrType; }
         }
 
         #endregion

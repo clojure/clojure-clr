@@ -28,18 +28,33 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    abstract class MethodExpr : HostExpr
+    public abstract class MethodExpr : HostExpr
     {
         #region Data
 
         protected readonly string _methodName;
+        public string MethodName { get { return _methodName; } }
+        
         protected readonly List<HostArg> _args;
+        public List<HostArg> Args { get { return _args; } }
+        
         protected readonly List<Type> _typeArgs;
+        public List<Type> TypeArgs { get { return _typeArgs; } }
+        
         protected MethodInfo _method;
+        public MethodInfo Method { get { return _method; } }
+        
         protected readonly string _source;
+        public string Source { get { return _source; } }
+        
         protected readonly IPersistentMap _spanMap;
+        public IPersistentMap SpanMap { get { return _spanMap; } }
+        
         protected readonly Symbol _tag;
+        public Symbol Tag { get { return _tag; } }
+        
         protected readonly bool _tailPosition;
+        public bool TailPosition { get { return _tailPosition; } }
 
         #endregion
 

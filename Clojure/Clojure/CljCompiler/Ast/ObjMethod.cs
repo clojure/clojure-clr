@@ -19,70 +19,52 @@ using System.Reflection;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    abstract class ObjMethod
+    public abstract class ObjMethod
     {
         #region Data
 
         // Java: when closures are defined inside other closures,
         // the closed over locals need to be propagated to the enclosing objx
         readonly ObjMethod _parent;
-        IPersistentMap _locals = null;       // localbinding => localbinding
-        IPersistentMap _indexLocals = null;  // num -> localbinding
-        protected Expr _body = null;
-        ObjExpr _objx;
-        protected IPersistentVector _argLocals;
-        int _maxLocal = 0;
-        IPersistentSet _localsUsedInCatchFinally = PersistentHashSet.EMPTY;
-        protected IPersistentMap _methodMeta;
+        public ObjMethod Parent { get { return _parent; } }
 
-        //protected LocalBinding _thisBinding;
-        protected Type _explicitInterface = null;
-        protected MethodInfo _explicitMethodInfo = null;
+        public IPersistentMap Locals { get; protected set; } // localbinding => localbinding
+        public IPersistentMap IndexLocals { get; protected set; }  // num -> localbinding
 
-        protected IPersistentVector _parms;
+        readonly ObjExpr _objx;
+        public ObjExpr Objx { get { return _objx; } }
 
-        protected IPersistentMap SpanMap { get; set; }
+        public Expr Body { get; protected set; }
+        public IPersistentVector ArgLocals { get; protected set; }
+        public int MaxLocal { get; set; }
+        public IPersistentSet LocalsUsedInCatchFinally { get; set; }
+
+        public IPersistentMap MethodMeta { get; protected set; }
+
+        public Type ExplicitInterface { get; protected set; }
+        public MethodInfo ExplicitMethodInfo { get; protected set; }
+
+        public IPersistentVector Parms { get; protected set; }
+
+        public IPersistentMap SpanMap { get; protected set; }
 
         #endregion
 
         #region Data accessors
 
-        internal ObjMethod Parent
+        public void AddLocal(int index, LocalBinding lb)
         {
-            get { return _parent; }
+            Locals = (IPersistentMap)RT.assoc(Locals, lb, lb);
+            IndexLocals = (IPersistentMap)RT.assoc(IndexLocals, index, lb);
         }
 
-        public IPersistentMap Locals
+        public void SetLocals(IPersistentMap locals, IPersistentMap indexLocals)
         {
-            get { return _locals; }
-            set { _locals = value; }
+            Locals = locals;
+            IndexLocals = indexLocals;
         }
 
-        public IPersistentMap IndexLocals
-        {
-            get { return _indexLocals; }
-            set { _indexLocals = value; }
-        }
-
-        internal ObjExpr Objx
-        {
-            get { return _objx; }
-            //set { _objx = value; }
-        }
-
-        public int MaxLocal
-        {
-            get { return _maxLocal; }
-            set { _maxLocal = value; }
-        }
-
-        public IPersistentSet LocalsUsedInCatchFinally
-        {
-            get { return _localsUsedInCatchFinally; }
-            set { _localsUsedInCatchFinally = value; }
-        }
-
-        protected bool IsExplicit { get { return _explicitInterface != null; } }
+        protected bool IsExplicit { get { return ExplicitInterface != null; } }
 
         public virtual string Prim { get { return null; } }
 
@@ -90,15 +72,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region abstract methods
 
-        internal abstract bool IsVariadic { get; }
-        internal abstract int NumParams { get; }
-        internal abstract int RequiredArity { get; }
-        internal abstract string MethodName { get; }
-        protected abstract string StaticMethodName { get; }
-        protected abstract Type ReturnType { get; }
-        protected abstract Type StaticReturnType { get; }
-        protected abstract Type[] ArgTypes { get; }
-        protected abstract Type[] StaticMethodArgTypes { get; }
+        public abstract bool IsVariadic { get; }
+        public abstract int NumParams { get; }
+        public abstract int RequiredArity { get; }
+        public abstract string MethodName { get; }
+        public abstract Type ReturnType { get; }
+        public abstract Type[] ArgTypes { get; }
 
         #endregion
 
@@ -108,19 +87,16 @@ namespace clojure.lang.CljCompiler.Ast
         {
             _parent = parent;
             _objx = fn;
+            LocalsUsedInCatchFinally = PersistentHashSet.EMPTY;
         }
 
         #endregion
 
         #region Code generation
 
-        protected abstract String GetMethodName();
-        protected abstract Type GetReturnType();
-        protected abstract Type[] GetArgTypes();
-
         public virtual void Emit(ObjExpr fn, TypeBuilder tb)
         {
-            MethodBuilder mb = tb.DefineMethod(GetMethodName(), MethodAttributes.Public, GetReturnType(), GetArgTypes());
+            MethodBuilder mb = tb.DefineMethod(MethodName, MethodAttributes.Public, ReturnType, ArgTypes);
 
             CljILGen ilg = new CljILGen(mb.GetILGenerator());
             Label loopLabel = ilg.DefineLabel();
@@ -131,7 +107,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));
                 ilg.MarkLabel(loopLabel);
-                _body.Emit(RHC.Return,fn,ilg);
+                Body.Emit(RHC.Return,fn,ilg);
                 ilg.Emit(OpCodes.Ret);
             }
             finally
@@ -188,15 +164,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         protected void SetCustomAttributes(MethodBuilder mb)
         {
-            GenInterface.SetCustomAttributes(mb, _methodMeta);
-            if (_parms != null)
+            GenInterface.SetCustomAttributes(mb, MethodMeta);
+            if (Parms != null)
             {
-                for (int i = 0; i < _parms.count(); i++)
+                for (int i = 0; i < Parms.count(); i++)
                 {
-                    IPersistentMap meta = GenInterface.ExtractAttributes(RT.meta(_parms.nth(i)));
+                    IPersistentMap meta = GenInterface.ExtractAttributes(RT.meta(Parms.nth(i)));
                     if (meta != null && meta.count() > 0)
                     {
-                        ParameterBuilder pb = mb.DefineParameter(i + 1, ParameterAttributes.None, ((Symbol)_parms.nth(i)).Name);
+                        ParameterBuilder pb = mb.DefineParameter(i + 1, ParameterAttributes.None, ((Symbol)Parms.nth(i)).Name);
                         GenInterface.SetCustomAttributes(pb, meta);
                     }
                 }

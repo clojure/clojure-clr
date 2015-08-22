@@ -18,31 +18,42 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    abstract class InstanceFieldOrPropertyExpr<TInfo> : FieldOrPropertyExpr
+    public abstract class InstanceFieldOrPropertyExpr<TInfo> : FieldOrPropertyExpr
     {
         #region Data
 
         protected readonly Expr _target;
+        public Expr Target { get { return _target; } }
+
         protected readonly Type _targetType;
+        public Type TargetType { get { return _targetType; } }
+
         protected readonly TInfo _tinfo;
-        protected readonly string _fieldName;
+        public TInfo MemberInfo { get { return _tinfo; } }
+
+        protected readonly string _memberName;
+        public string MemberName { get { return _memberName; } }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         protected readonly string _source;
+        public string Source { get { return _source; } }
         
         protected readonly IPersistentMap _spanMap;
+        public IPersistentMap SpanMap { get { return _spanMap; } }
+
         protected readonly Symbol _tag;
+        public Symbol Tag { get { return _tag; } }
 
         #endregion
 
         #region Ctors
 
-        public InstanceFieldOrPropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string fieldName, TInfo tinfo)
+        public InstanceFieldOrPropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string memberName, TInfo tinfo)
         {
             _source = source;
             _spanMap = spanMap;
             _target = target;
-            _fieldName = fieldName;
+            _memberName = memberName;
             _tinfo = tinfo;
             _tag = tag;
 
@@ -55,12 +66,12 @@ namespace clojure.lang.CljCompiler.Ast
                 if (_targetType == null)
                 {
                     RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1}:{2} - reference to field/property {3} can't be resolved.",
-                        Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap), Compiler.GetColumnFromSpanMap(_spanMap), _fieldName);
+                        Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap), Compiler.GetColumnFromSpanMap(_spanMap), _memberName);
                 }
                 else
                 {
                     RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1}:{2} - reference to field/property {3} on {4} can't be resolved.",
-                       Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap), Compiler.GetColumnFromSpanMap(_spanMap), _fieldName, _targetType.FullName);
+                       Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap), Compiler.GetColumnFromSpanMap(_spanMap), _memberName, _targetType.FullName);
                 }
             }
         }
@@ -95,7 +106,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 // We could convert this to a dynamic call-site
                 _target.Emit(RHC.Expression, objx, ilg);
-                ilg.Emit(OpCodes.Ldstr, _fieldName);
+                ilg.Emit(OpCodes.Ldstr, _memberName);
                 ilg.Emit(OpCodes.Call, Compiler.Method_Reflector_GetInstanceFieldOrProperty);
             }
             if (rhc == RHC.Statement)
@@ -152,7 +163,7 @@ namespace clojure.lang.CljCompiler.Ast
             else
             {
                 _target.Emit(RHC.Expression, objx, ilg);
-                ilg.Emit(OpCodes.Ldstr, _fieldName);
+                ilg.Emit(OpCodes.Ldstr, _memberName);
                 val.Emit(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Call, Compiler.Method_Reflector_SetInstanceFieldOrProperty); 
             }
@@ -164,7 +175,7 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
     }
 
-    sealed class InstanceFieldExpr : InstanceFieldOrPropertyExpr<FieldInfo>
+    public sealed class InstanceFieldExpr : InstanceFieldOrPropertyExpr<FieldInfo>
     {
         #region C-tors
 
@@ -247,12 +258,12 @@ namespace clojure.lang.CljCompiler.Ast
         #endregion
     }
 
-    sealed class InstancePropertyExpr : InstanceFieldOrPropertyExpr<PropertyInfo>
+    public sealed class InstancePropertyExpr : InstanceFieldOrPropertyExpr<PropertyInfo>
     {
         #region C-tors
 
-        public InstancePropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string fieldName, PropertyInfo pinfo)
-            :base(source,spanMap,tag, target,fieldName,pinfo)  
+        public InstancePropertyExpr(string source, IPersistentMap spanMap, Symbol tag, Expr target, string propertyName, PropertyInfo pinfo)
+            :base(source,spanMap,tag, target,propertyName,pinfo)  
         {
         }
 

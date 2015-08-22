@@ -19,20 +19,39 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class InvokeExpr : Expr
+    public class InvokeExpr : Expr
     {
         #region Data
 
         readonly Expr _fexpr;
+        public Expr FExpr { get { return _fexpr; } }
+
         readonly Object _tag;
+        public Object Tag { get { return _tag; } }
+        
         readonly IPersistentVector _args;
+        public IPersistentVector Args { get { return _args; } }
+        
         readonly string _source;
+        public string Source { get { return _source; } }
+        
         readonly IPersistentMap _spanMap;
+        public IPersistentMap SpanMap { get { return _spanMap; } }
+        
         readonly bool _tailPosition;
+        public bool TailPosition { get { return _tailPosition; } }
+        
         bool _isProtocol = false;
+        public bool IsProtocol { get { return _isProtocol; } }
+        
         int _siteIndex = -1;
+        public int SiteIndex { get { return _siteIndex; } }
+        
         Type _protocolOn;
+        public Type ProtocolOn { get { return _protocolOn; } }
+        
         MethodInfo _onMethod;
+        public MethodInfo OnMethod { get { return _onMethod; } }
 
         static readonly Keyword _onKey = Keyword.intern("on");
         static readonly Keyword _methodMapKey = Keyword.intern("method-map");

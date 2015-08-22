@@ -18,17 +18,12 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class KeywordExpr : LiteralExpr
+    public class KeywordExpr : LiteralExpr
     {
         #region Data
 
         readonly Keyword _kw;
-
-        public Keyword Kw
-        {
-            get { return _kw; }
-        } 
-
+        public Keyword Kw { get { return _kw; } }
 
         #endregion
 

@@ -16,11 +16,12 @@ using System;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class BodyExpr : Expr, MaybePrimitiveExpr
+    public class BodyExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
         readonly IPersistentVector _exprs;
+        public IPersistentVector Exprs { get { return _exprs; } }
 
         public Expr LastExpr
         {

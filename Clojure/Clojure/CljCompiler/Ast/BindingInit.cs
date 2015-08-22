@@ -15,21 +15,19 @@
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    struct BindingInit
+    public struct BindingInit
     {
         #region Data
 
         private readonly LocalBinding _binding;
-        public LocalBinding Binding
-        {
-            get { return _binding; }
-        }
+        public LocalBinding Binding { get { return _binding; } }
 
         private readonly Expr _init;
-        public Expr Init
-        {
-            get { return _init; }
-        }
+        public Expr Init { get { return _init; } }
+
+        #endregion
+
+        #region Ctors
 
         public BindingInit(LocalBinding binding, Expr init)
         {

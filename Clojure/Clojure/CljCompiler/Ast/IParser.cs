@@ -15,7 +15,7 @@
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    interface IParser
+    public interface IParser
     {
         Expr Parse(ParserContext pcon, object form);
     }

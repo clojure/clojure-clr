@@ -27,15 +27,24 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class NewExpr : Expr
+    public class NewExpr : Expr
     {
         #region Data
 
         readonly List<HostArg> _args;
+        public List<HostArg> Args { get { return _args; } }
+        
         readonly ConstructorInfo _ctor;
+        public ConstructorInfo Ctor { get { return _ctor; } }
+        
         readonly Type _type;
+        public Type Type { get { return _type; } }
+        
         bool _isNoArgValueTypeCtor = false;
+        public bool IsNoArgValueTypeCtor { get { return _isNoArgValueTypeCtor; } }
+        
         readonly IPersistentMap _spanMap;
+        public IPersistentMap SpanMap { get { return _spanMap; } }
 
         #endregion
 
@@ -281,8 +290,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void EmitTargetExpression(ObjExpr objx, CljILGen ilg)
         {
-            if (Compiler.CompileStubOrigClassVar.isBound && Compiler.CompileStubOrigClassVar.deref() != null && objx.TypeBlder != null)
-                ilg.Emit(OpCodes.Ldtoken, objx.TypeBlder);
+            if (Compiler.CompileStubOrigClassVar.isBound && Compiler.CompileStubOrigClassVar.deref() != null && objx.TypeBuilder != null)
+                ilg.Emit(OpCodes.Ldtoken, objx.TypeBuilder);
             else if (_type != null)
                 ilg.Emit(OpCodes.Ldtoken, _type);
             else

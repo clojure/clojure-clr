@@ -21,11 +21,12 @@ using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    sealed class NewInstanceExpr : ObjExpr
+    public sealed class NewInstanceExpr : ObjExpr
     {
         #region Data
 
         Dictionary<IPersistentVector,List<MethodInfo>> _methodMap;
+        public Dictionary<IPersistentVector, List<MethodInfo>> MethodMap { get { return _methodMap; } }
 
         #endregion
 
@@ -111,15 +112,15 @@ namespace clojure.lang.CljCompiler.Ast
             IPersistentMap opts)
         {
             NewInstanceExpr ret = new NewInstanceExpr(null);
-            ret._src = frm;
-            ret._name = className.ToString();
-            ret._classMeta = GenInterface.ExtractAttributes(RT.meta(className));
-            ret.InternalName = ret._name;  // ret.Name.Replace('.', '/');
+            ret.Src = frm;
+            ret.Name = className.ToString();
+            ret.ClassMeta = GenInterface.ExtractAttributes(RT.meta(className));
+            ret.InternalName = ret.Name;  // ret.Name.Replace('.', '/');
             // Java: ret.objtype = Type.getObjectType(ret.internalName);
-            ret._opts = opts;
+            ret.Opts = opts;
 
             if (thisSym != null)
-                ret._thisName = thisSym.Name;
+                ret.ThisName = thisSym.Name;
 
             if (fieldSyms != null)
             {
@@ -138,7 +139,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ret.Closes = new PersistentArrayMap(closesvec);
                 ret.Fields = fmap;
                 for (int i = fieldSyms.count() - 1; i >= 0 && (((Symbol)fieldSyms.nth(i)).Name.Equals("__meta") || ((Symbol)fieldSyms.nth(i)).Name.Equals("__extmap")); --i)
-                    ret._altCtorDrops++;
+                    ret.AltCtorDrops++;
             }
 
             // Java TODO: set up volatiles
@@ -198,7 +199,7 @@ namespace clojure.lang.CljCompiler.Ast
                             Compiler.CompileStubSymVar, Symbol.intern(null, tagName),
                             Compiler.CompileStubClassVar, baseClass
                             ));
-                    ret._hintedFields = RT.subvec(fieldSyms, 0, fieldSyms.count() - ret._altCtorDrops);
+                    ret.HintedFields = RT.subvec(fieldSyms, 0, fieldSyms.count() - ret.AltCtorDrops);
                 }
                 // now (methodname [args] body)*
 
@@ -211,11 +212,11 @@ namespace clojure.lang.CljCompiler.Ast
                     methods = RT.conj(methods, m);
                 }
 
-                ret._methods = methods;
+                ret.Methods = methods;
                 ret.Keywords = (IPersistentMap)Compiler.KeywordsVar.deref();
                 ret.Vars = (IPersistentMap)Compiler.VarsVar.deref();
                 ret.Constants = (PersistentVector)Compiler.ConstantsVar.deref();
-                ret._constantsID = RT.nextID();
+                ret.ConstantsID = RT.nextID();
                 ret.KeywordCallsites = (IPersistentVector)Compiler.KeywordCallsitesVar.deref();
                 ret.ProtocolCallsites = (IPersistentVector)Compiler.ProtocolCallsitesVar.deref();
                 ret.VarCallsites = (IPersistentSet)Compiler.VarCallsitesVar.deref();
@@ -277,11 +278,11 @@ namespace clojure.lang.CljCompiler.Ast
             DefineBaseClassMethods(interfaces, tb);
 
             Type t = tb.CreateType();
-            _baseClass = t;
+            BaseClass = t;
 
-            _baseClassClosedOverCtor = GetConstructorWithArgCount(t, CtorTypes().Length);
-            if (_altCtorDrops > 0)
-                _baseClassAltCtor = GetConstructorWithArgCount(t, CtorTypes().Length - _altCtorDrops);
+            BaseClassClosedOverCtor = GetConstructorWithArgCount(t, CtorTypes().Length);
+            if (AltCtorDrops > 0)
+                BaseClassAltCtor = GetConstructorWithArgCount(t, CtorTypes().Length - AltCtorDrops);
 
             return t;
         }
@@ -301,8 +302,8 @@ namespace clojure.lang.CljCompiler.Ast
 
                 for (ISeq s = RT.keys(Closes); s != null; s = s.next(), a++)
                 {
-                    FieldBuilder fb = _closedOverFields[a];
-                    bool isVolatile = IsVolatile(_closedOverFieldsToBindingsMap[fb]);
+                    FieldBuilder fb = ClosedOverFields[a];
+                    bool isVolatile = IsVolatile(ClosedOverFieldsToBindingsMap[fb]);
 
                     ilg.EmitLoadArg(0);             // gen.Emit(OpCodes.Ldarg_0);
                     ilg.EmitLoadArg(a + 1);         // gen.Emit(OpCodes.Ldarg, a + 1);
@@ -311,10 +312,10 @@ namespace clojure.lang.CljCompiler.Ast
                 }
                 ilg.Emit(OpCodes.Ret);
 
-                if (_altCtorDrops > 0)
+                if (AltCtorDrops > 0)
                 {
                     Type[] ctorTypes = CtorTypes();
-                    int newLen = ctorTypes.Length - _altCtorDrops;
+                    int newLen = ctorTypes.Length - AltCtorDrops;
                     if (newLen > 0)
                     {
                         Type[] altCtorTypes = new Type[newLen];
@@ -325,7 +326,7 @@ namespace clojure.lang.CljCompiler.Ast
                         ilg2.EmitLoadArg(0);
                         for (int i = 0; i < newLen; i++)
                             ilg2.EmitLoadArg(i + 1);
-                        for (int i = 0; i < _altCtorDrops; i++)
+                        for (int i = 0; i < AltCtorDrops; i++)
                             ilg2.EmitNull();
                         ilg2.Emit(OpCodes.Call, cb);
                         ilg2.Emit(OpCodes.Ret);
@@ -498,11 +499,11 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     MethodBuilder mbg = tb.DefineMethod("getBasis", MethodAttributes.Public | MethodAttributes.Static, typeof(IPersistentVector), Type.EmptyTypes);
                     CljILGen ilg = new CljILGen(mbg.GetILGenerator());
-                    EmitValue(_hintedFields, ilg);
+                    EmitValue(HintedFields, ilg);
                     ilg.Emit(OpCodes.Ret);
                 }
 
-                if (Fields.count() > _hintedFields.count())
+                if (Fields.count() > HintedFields.count())
                 {
                     // create(IPersistentMap)
                     MethodBuilder mbc = tb.DefineMethod("create", MethodAttributes.Public | MethodAttributes.Static, tb, new Type[] { typeof(IPersistentMap) });
@@ -510,7 +511,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                     LocalBuilder kwLocal = gen.DeclareLocal(typeof(Keyword));
                     List<LocalBuilder> locals = new List<LocalBuilder>();
-                    for (ISeq s = RT.seq(_hintedFields); s != null; s = s.next())
+                    for (ISeq s = RT.seq(HintedFields); s != null; s = s.next())
                     {
                         string bName = ((Symbol)s.first()).Name;
                         Type t = Compiler.TagType(Compiler.TagOf(s.first()));
@@ -542,7 +543,7 @@ namespace clojure.lang.CljCompiler.Ast
                     gen.EmitNull();
                     gen.EmitLoadArg(0);
                     gen.EmitCall(Compiler.Method_RT_seqOrElse);
-                    gen.EmitNew(_ctorInfo);
+                    gen.EmitNew(CtorInfo);
 
                     gen.Emit(OpCodes.Ret);
                 }
@@ -553,7 +554,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             HashSet<MethodInfo> implemented = new HashSet<MethodInfo>();
 
-            for (ISeq s = RT.seq(_methods); s != null; s = s.next())
+            for (ISeq s = RT.seq(Methods); s != null; s = s.next())
             {
                 NewInstanceMethod method = (NewInstanceMethod)s.first();
                 method.Emit(this, tb);
@@ -567,7 +568,7 @@ namespace clojure.lang.CljCompiler.Ast
                         EmitDummyMethod(tb, mi,true);
                 }
             
-            EmitHasArityMethod(_typeBuilder, null, false, 0);
+            EmitHasArityMethod(TypeBuilder, null, false, 0);
         }
 
         private bool NeedsDummy(MethodInfo mi, HashSet<MethodInfo> implemented)

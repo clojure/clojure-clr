@@ -18,11 +18,12 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class EmptyExpr : Expr
+    public class EmptyExpr : Expr
     {
         #region Data
 
         readonly object _coll;
+        public object Coll { get { return _coll; } }
 
         #endregion
 

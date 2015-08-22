@@ -17,11 +17,12 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class ThrowExpr : UntypedExpr
+    public class ThrowExpr : UntypedExpr
     {
         #region Data
 
         readonly Expr _excExpr;
+        public Expr ExcExpr { get { return _excExpr; } }
 
         #endregion
 

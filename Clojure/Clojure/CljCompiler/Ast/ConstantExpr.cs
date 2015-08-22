@@ -17,17 +17,15 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class ConstantExpr : LiteralExpr
+    public class ConstantExpr : LiteralExpr
     {
         #region Data
 
         readonly object _v;
-        readonly int _id;
+        public override object Val { get { return _v; } }
 
-        public override object Val
-        {
-            get { return _v; }
-        }
+        readonly int _id;
+        public int Id { get { return _id; } }
 
         #endregion
 

@@ -19,23 +19,44 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class CaseExpr : Expr, MaybePrimitiveExpr
+    public class CaseExpr : Expr, MaybePrimitiveExpr
     {
         #region Data
 
         readonly LocalBindingExpr _expr;
+        public LocalBindingExpr Expr { get { return _expr; } }
+
         readonly int _shift, _mask;
+        public int Shift { get { return _shift; } }
+        public int Mask { get { return _mask; } }
+
         readonly int _low, _high;
+        public int Low { get { return _low; } }
+        public int High { get { return _high; } }
+
         readonly Expr _defaultExpr;
+        public Expr DefaultExpr { get { return _defaultExpr;  } }
+
         readonly SortedDictionary<int, Expr> _tests;
+        public SortedDictionary<int, Expr> Tests { get { return _tests; } }
+
         readonly Dictionary<int, Expr> _thens;
+        public Dictionary<int, Expr> Thens { get { return _thens; } }
 
         readonly IPersistentMap _sourceSpan;
+        public IPersistentMap SourceSpan { get { return _sourceSpan; } }
 
         readonly Keyword _switchType;
+        public Keyword SwitchType { get { return _switchType; } }
+
         readonly Keyword _testType;
+        public Keyword TestType { get { return _testType; } }
+
         readonly IPersistentSet _skipCheck;
+        public IPersistentSet SkipCheck { get { return _skipCheck; } }
+
         readonly Type _returnType;
+        public Type ReturnType { get { return _returnType; } }
 
         #endregion
 

@@ -4,12 +4,15 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class NumberExpr : LiteralExpr, MaybePrimitiveExpr
+    public class NumberExpr : LiteralExpr, MaybePrimitiveExpr
     {
         #region Data
 
         readonly object _n;
+        public object N { get { return _n; } }
+
         readonly int _id;
+        public int Id { get { return _id; } }
 
         #endregion
 

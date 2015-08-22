@@ -18,22 +18,15 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class VarExpr : Expr, AssignableExpr
+    public class VarExpr : Expr, AssignableExpr
     {
         #region Data
 
         readonly Var _var;
-        public Var Var
-        {
-            get { return _var; }
-        } 
+        public Var Var { get { return _var; } } 
 
         readonly object _tag;
-
-        public object Tag
-        {
-            get { return _tag; }
-        } 
+        public object Tag { get { return _tag; } }
 
         #endregion
 

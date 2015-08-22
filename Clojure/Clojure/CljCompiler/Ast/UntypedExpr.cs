@@ -17,14 +17,11 @@ using System;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    abstract class UntypedExpr : Expr
+    public abstract class UntypedExpr : Expr
     {
         #region Expr Members
-        
-        public bool HasClrType
-        {
-            get { return false;  }
-        }
+
+        public bool HasClrType { get { return false; } }
 
         public Type ClrType
         {
@@ -32,7 +29,6 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         public virtual bool HasNormalExit() { return true; }
-
 
         public abstract object Eval();
         public abstract void Emit(RHC rhc, ObjExpr objx, CljILGen ilg);

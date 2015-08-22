@@ -17,16 +17,12 @@ using System;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class StringExpr : LiteralExpr
+    public class StringExpr : LiteralExpr
     {
         #region Data
 
         readonly string _str;
-
-        public override object Val
-        {
-            get { return _str; }
-        }
+        public override object Val { get { return _str; } }
 
         #endregion
 

@@ -27,22 +27,25 @@ using System.Collections.Generic;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class InstanceZeroArityCallExpr : HostExpr
+    public class InstanceZeroArityCallExpr : HostExpr
     {
         #region Data
 
         readonly Expr _target;
+        public Expr Target { get { return _target; } }
 
         readonly string _memberName;
+        public string MemberName { get { return _memberName; } }
 
-        // Keep these around for debugging
-#pragma warning disable 414
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         protected readonly string _source;
-#pragma warning restore 414
+        public string Source { get { return _source; } }
 
         protected readonly IPersistentMap _spanMap;
+        public IPersistentMap SpanMap { get { return _spanMap; } }
+
         protected readonly Symbol _tag;
+        public Symbol Tag { get { return _tag; } }
 
         #endregion
 

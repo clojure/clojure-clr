@@ -17,16 +17,12 @@ using System;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class UnresolvedVarExpr : Expr
+    public class UnresolvedVarExpr : Expr
     {
         #region Data
 
         readonly Symbol _symbol;
-
-        public Symbol Symbol
-        {
-            get { return _symbol; }
-        } 
+        public Symbol Symbol { get { return _symbol; } }
 
         #endregion
 

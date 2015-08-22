@@ -677,8 +677,7 @@ namespace clojure.lang
             IPersistentMap localsMap = (IPersistentMap)LocalEnvVar.deref();
             LocalEnvVar.set(RT.assoc(localsMap, b.Symbol, b));
             ObjMethod method = (ObjMethod)MethodVar.deref();
-            method.Locals = (IPersistentMap)RT.assoc(method.Locals, b, b);
-            method.IndexLocals = (IPersistentMap)RT.assoc(method.IndexLocals, num, b);
+            method.AddLocal(num, b);
             return b;
         }
 

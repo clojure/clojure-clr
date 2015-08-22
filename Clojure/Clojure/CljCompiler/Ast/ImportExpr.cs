@@ -17,19 +17,20 @@ using System.Reflection.Emit;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class ImportExpr : Expr
+    public class ImportExpr : Expr
     {
         #region Data
 
-        readonly string _c;
+        readonly string _typeName;
+        public string TypeName { get { return _typeName; } }
 
         #endregion
 
         #region Ctors
 
-        public ImportExpr(string c)
+        public ImportExpr(string typeName)
         {
-            _c = c;
+            _typeName = typeName;
         }
 
         #endregion
@@ -65,7 +66,7 @@ namespace clojure.lang.CljCompiler.Ast
         public object Eval()
         {
             Namespace ns = (Namespace)RT.CurrentNSVar.deref();
-            ns.importClass(RT.classForNameE(_c));
+            ns.importClass(RT.classForNameE(_typeName));
             return null;
         }
 
@@ -76,7 +77,7 @@ namespace clojure.lang.CljCompiler.Ast
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             ilg.Emit(OpCodes.Call,Compiler.Method_Compiler_CurrentNamespace.GetGetMethod());
-            ilg.Emit(OpCodes.Ldstr, _c);
+            ilg.Emit(OpCodes.Ldstr, _typeName);
             ilg.Emit(OpCodes.Call, Compiler.Method_RT_classForName);
             ilg.Emit(OpCodes.Call, Compiler.Method_Namespace_importClass1);
             if (rhc == RHC.Statement)

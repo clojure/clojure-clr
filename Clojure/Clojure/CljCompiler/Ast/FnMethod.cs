@@ -20,24 +20,24 @@ using System.Reflection;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    class FnMethod : ObjMethod
+    public class FnMethod : ObjMethod
     {
         #region Data
         
         protected IPersistentVector _reqParms = PersistentVector.EMPTY;  // localbinding => localbinding
+        public IPersistentVector ReqParms { get { return _reqParms; } }
+        
         protected LocalBinding _restParm = null;
+        public LocalBinding RestParm { get { return _restParm; } }
+
         Type[] _argTypes;
+        // Accessor for _argTypes: see below.
+
         Type _retType;
+        // accessor for _retType: see below.
 
         string _prim;
-
-        public override string Prim
-        {
-            get { return _prim; }
-        }
-
-        public DynamicMethod DynMethod { get; set; }
-
+        public override string Prim { get { return _prim; } }
 
         #endregion
 
@@ -53,8 +53,8 @@ namespace clojure.lang.CljCompiler.Ast
         public FnMethod(FnExpr fn, ObjMethod parent, BodyExpr body)
             :base(fn,parent)
         {
-            _body = body;
-            _argLocals = PersistentVector.EMPTY;
+            Body = body;
+            ArgLocals = PersistentVector.EMPTY;
             //_thisBinding = Compiler.RegisterLocal(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null, false);
         }
 
@@ -62,49 +62,15 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region ObjMethod methods
 
-        internal override bool IsVariadic
-        {
-            get { return _restParm != null; }
-        }
+        public override bool IsVariadic { get { return _restParm != null; } }
 
-        internal override int NumParams
-        {
-            get { return _reqParms.count() + (IsVariadic ? 1 : 0); }
-        }
+        public override int NumParams { get { return _reqParms.count() + (IsVariadic ? 1 : 0); } }
 
-        internal override int RequiredArity
-        {
-            get { return _reqParms.count(); }
-        } 
+        public override int RequiredArity { get { return _reqParms.count(); } }
 
-        internal override string MethodName
-        {
-            get { return IsVariadic ? "doInvoke" : "invoke"; }
-        }
+        public override string MethodName { get { return IsVariadic ? "doInvoke" : "invoke"; } }
 
-        protected override string StaticMethodName
-        {
-            get
-            {
-                if (Objx.IsStatic && Compiler.IsCompiling)
-                    return "InvokeStatic";
-                else
-                    return String.Format("__invokeHelper_{0}{1}", RequiredArity, IsVariadic ? "v" : string.Empty);
-            }
-        }
-
-        protected override Type[] StaticMethodArgTypes
-        {
-            get
-            {
-                if (_argTypes != null)
-                    return _argTypes;
-
-                return ArgTypes;
-            }
-        }
-
-        protected override Type[] ArgTypes
+        public override Type[] ArgTypes
         {
             get
             {
@@ -120,16 +86,11 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        protected override Type ReturnType
-        {
-            get { return typeof(object); }
-        }
-
-        protected override Type StaticReturnType
+        public override Type ReturnType
         {
             get
             {
-                if ( _prim != null ) // Objx.IsStatic)
+                if (_prim != null) // Objx.IsStatic)
                     return _retType;
 
                 return typeof(object);
@@ -235,11 +196,11 @@ namespace clojure.lang.CljCompiler.Ast
                 if (method.RequiredArity > Compiler.MaxPositionalArity)
                     throw new ParseException(string.Format("Can't specify more than {0} parameters", Compiler.MaxPositionalArity));
                 Compiler.LoopLocalsVar.set(argLocals);
-                method._argLocals = argLocals;
+                method.ArgLocals = argLocals;
                 //if (isStatic)
                 if ( method.Prim != null )
                     method._argTypes = argTypes.ToArray();
-                method._body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return),body);
+                method.Body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return),body);
                 return method;
             }
             finally
@@ -322,30 +283,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        protected override string GetMethodName()
-        {
-            return IsVariadic ? "doInvoke" : "invoke";
-        }
-
-        protected override Type GetReturnType()
-        {
-            if (_prim != null) // Objx.IsStatic)
-                return _retType;
-
-            return typeof(object);
-        }
-
-        protected override Type[] GetArgTypes()
-        {
-            if (IsVariadic && _reqParms.count() == Compiler.MaxPositionalArity)
-            {
-                Type[] ret = new Type[Compiler.MaxPositionalArity + 1];
-                for (int i = 0; i < Compiler.MaxPositionalArity + 1; i++)
-                    ret[i] = typeof(Object);
-                return ret;
-            }
-            return Compiler.CreateObjectTypeArray(NumParams);
-        }
 
         public override void Emit(ObjExpr fn, TypeBuilder tb)
         {
@@ -377,7 +314,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             Type returnType;
             if (_retType == typeof(double) || _retType == typeof(long))
-                returnType = GetReturnType();
+                returnType = ReturnType;
             else
                 returnType = typeof(object);
 
@@ -396,8 +333,8 @@ namespace clojure.lang.CljCompiler.Ast
                 GenContext.EmitDebugInfo(baseIlg, SpanMap);
                 
                 baseIlg.MarkLabel(loopLabel);
-                EmitBody(Objx, baseIlg, _retType, _body);
-                if ( _body.HasNormalExit() )
+                EmitBody(Objx, baseIlg, _retType, Body);
+                if ( Body.HasNormalExit() )
                     baseIlg.Emit(OpCodes.Ret);
             }
             finally
@@ -406,7 +343,7 @@ namespace clojure.lang.CljCompiler.Ast
             }            
             // Generate the regular invoke, calling the static or prim method
 
-            MethodBuilder regularMB = tb.DefineMethod(GetMethodName(), MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(Object), GetArgTypes());
+            MethodBuilder regularMB = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(Object), ArgTypes);
             SetCustomAttributes(regularMB);
 
             CljILGen regIlg = new CljILGen(regularMB.GetILGenerator());
@@ -419,8 +356,8 @@ namespace clojure.lang.CljCompiler.Ast
                 HostExpr.EmitUnboxArg(fn, regIlg, _argTypes[i]);
 			}
             regIlg.Emit(OpCodes.Call,baseMB);
-            if ( GetReturnType().IsValueType)
-                regIlg.Emit(OpCodes.Box,GetReturnType());
+            if ( ReturnType.IsValueType)
+                regIlg.Emit(OpCodes.Box,ReturnType);
             regIlg.Emit(OpCodes.Ret);
         }
 
@@ -428,7 +365,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             MethodAttributes attribs = MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual;
 
-            MethodBuilder mb = tb.DefineMethod(GetMethodName(), attribs, GetReturnType(), GetArgTypes());
+            MethodBuilder mb = tb.DefineMethod(MethodName, attribs, ReturnType, ArgTypes);
 
             SetCustomAttributes(mb);
 
@@ -442,8 +379,8 @@ namespace clojure.lang.CljCompiler.Ast
                 GenContext.EmitDebugInfo(baseIlg, SpanMap);
 
                 baseIlg.MarkLabel(loopLabel);
-                _body.Emit(RHC.Return, fn, baseIlg);
-                if ( _body.HasNormalExit() )
+                Body.Emit(RHC.Return, fn, baseIlg);
+                if ( Body.HasNormalExit() )
                     baseIlg.Emit(OpCodes.Ret);
             }
             finally
@@ -452,7 +389,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             if (IsExplicit)
-                tb.DefineMethodOverride(mb, _explicitMethodInfo);
+                tb.DefineMethodOverride(mb, ExplicitMethodInfo);
         }
 
         #endregion

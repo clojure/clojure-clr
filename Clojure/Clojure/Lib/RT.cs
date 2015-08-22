@@ -395,14 +395,11 @@ namespace clojure.lang
             //= Var.intern(CLOJURE_NS, Symbol.intern("*print-dup*"), RT.F);
             = Var.intern(ClojureNamespace, Symbol.intern("*print-dup*"), false).setDynamic();
 
-        // Keep these around for debugging
-#pragma warning disable 414
         // We need this Var initializaed early on, I'm willing to waste the local init overhead to keep the code here with the others.
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         static readonly Var FlushOnNewlineVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*flush-on-newline*"), RT.T);
             = Var.intern(ClojureNamespace, Symbol.intern("*flush-on-newline*"), true).setDynamic();
-#pragma warning restore 414
 
         static readonly Var PrintInitializedVar 
             = Var.intern(ClojureNamespace, Symbol.intern("print-initialized"));
