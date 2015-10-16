@@ -139,7 +139,7 @@ namespace clojure.lang
         static readonly Keyword EOFTHROW = Keyword.intern(null, "eofthrow");
 
         // Platform features - always installed
-        static readonly Keyword PLATFORM_KEY = Keyword.intern(null, "clj");
+        static readonly Keyword PLATFORM_KEY = Keyword.intern(null, "cljr");
         static readonly Object PLATFORM_FEATURES = PersistentHashSet.create(PLATFORM_KEY);
 
         // Reader conditional options - use with :read-cond
