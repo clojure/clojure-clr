@@ -407,7 +407,9 @@
             Int32
             (p-write-char this x)
 			Int64
-            (p-write-char this x))))
+            (p-write-char this x)))
+        ([x off len]
+           (.Write this (subs (str x) off (+ off len)))))
 
       (ppflush []
              (if (= (getf :mode) :buffering)
