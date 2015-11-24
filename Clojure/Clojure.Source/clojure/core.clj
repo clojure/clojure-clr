@@ -5573,9 +5573,11 @@ Note that read can execute code (controlled by *read-eval*),
             (list* `gen-class :name (.Replace (str name) \- \_) :impl-ns name :main true (next gen-class-clause)))   ;;; .replace
         references (remove #(= :gen-class (first %)) references)
         ;ns-effect (clojure.core/in-ns name)
-        ]
+        name-metadata (meta name)]
     `(do
-       (clojure.core/in-ns '~name)      
+       (clojure.core/in-ns '~name)    
+       ~@(when name-metadata
+           `((.resetMeta (clojure.lang.Namespace/find '~name) ~name-metadata)))  
        (with-loading-context
         ~@(when gen-class-call (list gen-class-call))
         ~@(when (and (not= name 'clojure.core) (not-any? #(= :refer-clojure (first %)) references))
