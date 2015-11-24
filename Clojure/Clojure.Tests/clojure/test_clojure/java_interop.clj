@@ -53,8 +53,18 @@
   ; Classname/staticField
   (are [x] (= x 2147483647)
       Int32/MaxValue                              ;;; Integer/MAX_VALUE
-      (. Int32 MaxValue) ))                    ;;; Integer MAX_VALUE
+      (. Int32 MaxValue) ))                       ;;; Integer MAX_VALUE
 
+;;;(definterface I (a []))
+;;;(deftype T [a] I (a [_] "method"))
+
+;;;(deftest test-reflective-field-name-ambiguous
+;;;  (let [t (->T "field")]
+;;;    (is (= "method" (. ^T t a)))
+;;;    (is (= "field" (. ^T t -a)))
+;;;    (is (= "method" (. t a)))
+;;;    (is (= "field" (. t -a)))
+;;;    (is (thrown? MissingMethodException (. t -BOGUS)))))                                ;;; IllegalArgumentException
 
 (deftest test-double-dot
   (is (=  (.. Environment (GetEnvironmentVariables) (get_Item "Path"))             ;;;  (.. System (getProperties) (get "os.name"))
@@ -194,6 +204,11 @@
 ; Arrays: [alength] aget aset [make-array to-array into-array to-array-2d aclone]
 ;   [float-array, int-array, etc]
 ;   amap, areduce
+
+;; http://dev.clojure.org/jira/browse/CLJ-1657
+(deftest test-proxy-abstract-super
+  (let [p (proxy [System.IO.Stream] [])]                            ;;; java.io.Writer
+    (is (thrown? NotImplementedException (.Write p nil 1 1)))))     ;;; UnsupportedOperationException  (.close p)
 
 (defmacro deftest-type-array [type-array type]
   `(deftest ~(symbol (str "test-" type-array))
