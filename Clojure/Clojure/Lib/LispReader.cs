@@ -1844,10 +1844,12 @@ namespace clojure.lang
             return custom != null && custom.contains(feature);
         }
 
+        static readonly object READ_STARTED = new object();
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "read")]
         public static Object readCondDelimited(PushbackTextReader r, bool splicing, object opts, object pendingForms)
         {
-            object result = null;
+            object result = READ_STARTED;
             object form; // The most recently ready form
             Boolean toplevel = (pendingForms == null);
             pendingForms = EnsurePending(pendingForms);
@@ -1858,7 +1860,7 @@ namespace clojure.lang
             for (; ; )
             {
 
-                if (result == null)
+                if (result == READ_STARTED)
                 {
                     // Read the next feature
                     form = read(r, false, READ_EOF, ')', READ_FINISHED, true, opts, pendingForms);
@@ -1931,7 +1933,7 @@ namespace clojure.lang
 
             }
 
-            if (result == null)  // no features matched
+            if (result == READ_STARTED)  // no features matched
                 return r;
 
             if (splicing)
