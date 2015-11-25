@@ -31,14 +31,14 @@ namespace clojure.lang
         /// Holds the hash code.
         /// </summary>
         [NonSerialized]
-        protected int _hash = -1;
+        protected int _hash = 0;
 
         /// <summary>
         /// Caches the hashseq code, when computed.
         /// </summary>
-        /// <remarks>The value <value>-1</value> indicates that the hasheq code has not been computed yet.</remarks>        
+        /// <remarks>The value <value>0</value> indicates that the hasheq code has not been computed yet.</remarks>        
         [NonSerialized]
-        int _hasheq = -1;
+        int _hasheq = 0;
 
         #endregion
 
@@ -105,7 +105,7 @@ namespace clojure.lang
         /// <remarks>The hash code is cached after it is computed the first time.  The hash code depends on the value (sequenc of items).</remarks>
         public override int GetHashCode()
         { 
-            if ( _hash == -1 )
+            if ( _hash == 0 )
             {
                 int h = 1;
                 for (ISeq s = seq(); s != null; s = s.next())
@@ -419,7 +419,7 @@ namespace clojure.lang
 
         public int hasheq()
         {
-            if (_hasheq == -1)
+            if (_hasheq == 0)
             {
                 //int hash = 1;
                 //for (ISeq s = seq(); s != null; s = s.next())
