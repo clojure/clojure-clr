@@ -1801,7 +1801,10 @@ namespace clojure.lang
                     return NumberExpr.Parse(form);
                 else if (type == typeof(String))
                     return new StringExpr(String.Intern((String)form));
-                else if (form is IPersistentCollection && ((IPersistentCollection)form).count() == 0)
+                else if (form is IPersistentCollection
+                    && ! (form is IRecord)
+                    && ! (form is IType)
+                    && ((IPersistentCollection)form).count() == 0)
                     return OptionallyGenerateMetaInit(pcontext, form, new EmptyExpr(form));
                 else if (form is ISeq)
                     return AnalyzeSeq(pcontext, (ISeq)form, name);
