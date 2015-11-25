@@ -1782,9 +1782,11 @@ namespace clojure.lang
             {
                 if (form is LazySeq)
                 {
+                    object mform = form;
                     form = RT.seq(form);
                     if (form == null)
                         form = PersistentList.EMPTY;
+                    form = ((IObj)form).withMeta(RT.meta(mform));
                 }
                 if (form == null)
                     return NilExprInstance;

@@ -352,20 +352,5 @@
   ;; throws an exception on failure
   (is (eval `(fn [] ~(CLJ1399. 1)))))
 
-(deftest CLJ-1250-this-clearing
-  (let [closed-over-in-catch (let [x :foo]
-                               (fn []
-                                 (try
-                                   (throw (Exception. "boom"))
-                                   (catch Exception e
-                                     x)))) ;; x should remain accessible to the fn
-
-        a (atom nil)
-        closed-over-in-finally (fn []
-                                 (try
-                                   :ret
-                                   (finally
-                                     (reset! a :run))))]
-    (is (= :foo (closed-over-in-catch)))
-    (is (= :ret (closed-over-in-finally)))
-    (is (= :run @a))))
+(deftest CLJ-1586-lazyseq-literals-preserve-metadata
+  (should-not-reflect (eval (list '.Substring (with-meta (concat '(identity) '("foo")) {:tag 'String}) 0))))         ;;; .substring
