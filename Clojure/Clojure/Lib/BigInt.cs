@@ -655,6 +655,8 @@ namespace clojure.lang
         {
             if ((_bipart == null) && (y._bipart == null))
             {
+                if (_lpart == Int64.MinValue && y._lpart == -1)
+                    return BigInt.fromBigInteger(this.toBigInteger().Negate());
                 return BigInt.valueOf(_lpart / y._lpart);
             }
             return BigInt.fromBigInteger(this.toBigInteger().Divide(y.toBigInteger()));

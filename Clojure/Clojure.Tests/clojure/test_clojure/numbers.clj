@@ -300,6 +300,14 @@
   (is (thrown? ArithmeticException (/ 2 0)))
   (is (thrown? ArgumentException (/))) )              ;;; IllegalArgumentException
 
+(deftest test-divide-bigint-at-edge
+  (are [x] (= x (-' Int64/MinValue))                  ;;; Long/MIN_VALUE
+       (/ Int64/MinValue -1N)                         ;;; Long/MIN_VALUE
+       (/ (bigint Int64/MinValue) -1)                 ;;; Long/MIN_VALUE
+       (/ (bigint Int64/MinValue) -1N)                ;;; Long/MIN_VALUE
+       (quot Int64/MinValue -1N)                      ;;; Long/MIN_VALUE
+       (quot (bigint Int64/MinValue) -1)              ;;; Long/MIN_VALUE
+       (quot (bigint Int64/MinValue) -1N)))           ;;; Long/MIN_VALUE
 
 ;; mod
 ;; http://en.wikipedia.org/wiki/Modulo_operation
