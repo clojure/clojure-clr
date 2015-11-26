@@ -357,9 +357,6 @@ namespace clojure.lang.CljCompiler.Ast
                     EmitStatics(TypeBuilder);
                     EmitMethods(TypeBuilder);
 
-                    //if (KeywordCallsites.count() > 0)
-                    //    EmitSwapThunk(_typeBuilder);
-
                     CompiledType = TypeBuilder.CreateType();
 
                     if (context.DynInitHelper != null)
@@ -653,32 +650,6 @@ namespace clojure.lang.CljCompiler.Ast
 
             return cb;
         }
-
-        //void EmitSwapThunk(TypeBuilder tb)
-        //{
-        //    MethodBuilder mb = tb.DefineMethod("swapThunk", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual, typeof(void), new Type[] { typeof(int), typeof(ILookupThunk) });
-        //    CljILGen ilg = new CljILGen(mb.GetILGenerator());
-
-        //    Label endLabel = ilg.DefineLabel();
-        //    Label[] labels = new Label[KeywordCallsites.count()];
-        //    for (int i = 0; i < KeywordCallsites.count(); i++)
-        //        labels[i] = ilg.DefineLabel();
-
-        //    ilg.EmitLoadArg(1);
-        //    ilg.Emit(OpCodes.Switch, labels);
-        //    ilg.Emit(OpCodes.Br, endLabel);
-
-        //    for (int i = 0; i < KeywordCallsites.count(); i++)
-        //    {
-        //        ilg.MarkLabel(labels[i]);
-        //        ilg.EmitLoadArg(2);
-        //        ilg.EmitFieldSet(ThunkFields[i]);
-        //        ilg.Emit(OpCodes.Br, endLabel);
-        //    }
-
-        //    ilg.MarkLabel(endLabel);
-        //    ilg.Emit(OpCodes.Ret);
-        //}
 
         private void EmitMetaFunctions(TypeBuilder fnTB)
         {
