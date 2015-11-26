@@ -625,6 +625,13 @@ namespace clojure.lang
                 in_ns.invoke(USER);
                 refer.invoke(CLOJURE);
                 MaybeLoadCljScript("user.clj");
+
+                // start socket servers
+                Var require = var("clojure.core", "require");
+                Symbol SERVER = Symbol.intern("clojure.core.server");
+                require.invoke(SERVER);
+                Var start_servers = var("clojure.core.server", "start-servers");
+                start_servers.invoke(Environment.GetEnvironmentVariables());
             }
             finally
             {

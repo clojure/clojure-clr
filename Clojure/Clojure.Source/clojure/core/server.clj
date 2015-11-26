@@ -66,7 +66,7 @@
     (finally
       (locking lock
         (alter-var-root #'servers update-in [name :sessions] dissoc client-id))
-      (.Close ^System.IO.StreamReader in) (.Close conn))))                                                                 ;;; .close  DM: Added (.Close in)
+      (.Close ^System.IO.TextReader in) (.Close conn))))                                                                 ;;; .close  DM: Added (.Close in)
 
 (defn start-server
   "Start a socket server given the specified opts:
@@ -85,15 +85,15 @@
          :or {bind-err true
               server-daemon true
               client-daemon true}} opts
-         address (aget (.AddressList (Dns/GetHostEntry ^String address)) 0)                   ;;; (InetAddress/getByName address)  ;; nil returns loopback
-         socket (TcpListener. address port)]                                                  ;;; ( ServerSocket. port 0 address)
+         address (aget (.AddressList (Dns/GetHostEntry ^String (or address "localhost"))) 0)                          ;;; (InetAddress/getByName address)  ;; nil returns loopback
+         socket (TcpListener. address port)]                                                                         ;;; ( ServerSocket. port 0 address)
     (locking lock
       (alter-var-root #'servers assoc name {:name name, :socket socket, :sessions {}}))
     (thread
       (str "Clojure Server " name) server-daemon
-      (try   (.Start socket)                                                                       ;;; DM: Added (.Start socket)
+      (try   (.Start socket)                                                                                         ;;; DM: Added (.Start socket)
         (loop [client-counter 1]
-          (when (.IsBound (.Server socket))                                                        ;;;  (not (.isClosed socket))   -- IsBound isn't right, but I dont' ha
+          (when (.IsBound (.Server socket))                                                                          ;;;  (not (.isClosed socket))   -- IsBound isn't right, but I dont' ha
             (try
               (let [conn (.AcceptTcpClient socket)                                                                   ;;; .accept
                     in (clojure.lang.LineNumberingTextReader. (System.IO.StreamReader. (.GetStream conn)))           ;;; LineNumberingPushbackReader  java.io.InputStreamReader.  .getInputStream
