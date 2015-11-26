@@ -174,9 +174,9 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
                     (opt-base-str *print-base* n)))
     (ratio? n) (str
                 (if *print-radix* (or (get special-radix-markers *print-base*) (str "#" *print-base* "r")))
-                (opt-base-str *print-base* (.numerator n))
+                (opt-base-str *print-base* (.numerator ^clojure.lang.Ratio n))
                 "/"
-                (opt-base-str *print-base* (.denominator n)))
+                (opt-base-str *print-base* (.denominator ^clojure.lang.Ratio n)))
     :else nil))
 
 (defn- format-ascii [print-func params arg-navigator offsets]
@@ -208,7 +208,7 @@ http://www.lispworks.com/documentation/HyperSpec/Body/22_c.htm
   (cond
    (integer? x) true
    (decimal? x) true  ;;;  TODO: FIX THIS (>= (.ulp (.stripTrailingZeros (bigdec 0))) 1) ; true iff no fractional part       DM: ???????  doesn't mention x!!!
-   (float? x)   (= x (Math/Floor x))                                                             ;;; Math/floor
+   (float? x)   (= x (Math/Floor (float x)))                                                             ;;; Math/floor, added float call
    (ratio? x)   (let [^clojure.lang.Ratio r x]
                   (= 0 (rem (.numerator r) (.denominator r))))
    :else        false))
@@ -681,7 +681,7 @@ string, or one character longer."
         append-zero (and (not d) (<= (dec (count mantissa)) scaled-exp))
         [rounded-mantissa scaled-exp expanded] (round-str mantissa scaled-exp 
                                                           d (if w (- w (if add-sign 1 0))))
-        fixed-repr (get-fixed rounded-mantissa (if expanded (inc scaled-exp) scaled-exp) d)
+        ^String fixed-repr (get-fixed rounded-mantissa (if expanded (inc scaled-exp) scaled-exp) d)
         fixed-repr (if (and w d
                             (>= d 1)
                             (= (.get_Chars fixed-repr 0) \0)                                      ;;; .charAt
