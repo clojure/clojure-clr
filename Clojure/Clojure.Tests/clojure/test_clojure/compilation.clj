@@ -359,3 +359,9 @@
 
 (deftest CLJ-1586-lazyseq-literals-preserve-metadata
   (should-not-reflect (eval (list '.Substring (with-meta (concat '(identity) '("foo")) {:tag 'String}) 0))))         ;;; .substring
+
+(deftest CLJ-1456-compiler-error-on-incorrect-number-of-parameters-to-throw
+  #_(is (thrown? RuntimeException (eval '(defn foo [] (throw)))))                                                    ;;; not an error for us.  no arg signifies Rethrow
+  (is (thrown? Exception (eval '(defn foo [] (throw RuntimeException any-symbol)))))                                 ;;; RuntimeException
+  (is (thrown? Exception (eval '(defn foo [] (throw (RuntimeException.) any-symbol)))))                              ;;; RuntimeException
+  (is (var? (eval '(defn foo [] (throw (ArgumentException.)))))))                                                    ;;; IllegalArgumentException

@@ -52,6 +52,9 @@ namespace clojure.lang.CljCompiler.Ast
                 if (RT.Length((ISeq)form) == 1)
                     return new ThrowExpr();
 
+                if (RT.count(form) > 2)
+                    throw new InvalidOperationException("Too many arguments to throw, throw expects a single Exception instance");
+
                 return new ThrowExpr(Compiler.Analyze(pcon.SetRhc(RHC.Expression).SetAssign(false), RT.second(form)));
             }
         }
