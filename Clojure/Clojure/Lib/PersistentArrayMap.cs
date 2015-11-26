@@ -112,6 +112,9 @@ namespace clojure.lang
          System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static PersistentArrayMap createAsIfByAssoc(Object[] init)
         {
+            if ((init.Length & 1) == 1)
+                throw new ArgumentException(String.Format("No value supplied for key: {0}", init[init.Length - 1]), "init");
+
             // ClojureJVM says: If this looks like it is doing busy-work, it is because it
             // is achieving these goals: O(n^2) run time like
             // createWithCheck(), never modify init arg, and only
