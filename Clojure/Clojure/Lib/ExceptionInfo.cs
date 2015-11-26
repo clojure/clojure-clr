@@ -45,15 +45,17 @@ namespace clojure.lang
         #region C-tors
 
         public ExceptionInfo(String s, IPersistentMap data)
-            : base(s)
+            : this(s,data,null)
         {
-            this.data = data;
         }
 
         public ExceptionInfo(String s, IPersistentMap data, Exception innerException)
             : base(s, innerException)
         {
-            this.data = data;
+            if (data != null)
+                this.data = data;
+            else
+                throw new ArgumentException("Additional data must be non-nil.", "data");
         }
 
         public ExceptionInfo()

@@ -35,7 +35,6 @@
         (macroexpand `(m1 1 2))))
   (is (thrown-with-msg? ArityException  (System.Text.RegularExpressions.Regex. (System.Text.RegularExpressions.Regex/Escape "f2:+><->!#%&*b"))       ;;;  We don't have \Q... \E :  #"\Q/f2:+><->!#%&*|b\E"
         (f2:+><->!#%&*b 1 2))                                                                                                                        ;;; f2:+><->!#%&*|b  
-
         "ArityException messages should demunge function names"))
 
 (deftest assert-arg-messages
@@ -59,3 +58,36 @@
    (catch Exception t                                                  ;;; Throwable
      (is (= {:foo 1} (ex-data t)))))
   (is (nil? (ex-data (Exception. "example non ex-data")))))            ;;; RuntimeException
+
+(deftest Throwable->map-test
+  (testing "base functionality"
+    (let [{:keys [cause via trace]} (Throwable->map
+                                     (Exception. "I am a string literal"))]
+      (is (= cause "I am a string literal"))
+      (is (= 1 (count via)))
+      (is (vector? via))
+      (is (= ["I am a string literal"] (map :message via)))))
+  (testing "causes"
+    (let [{:keys [cause via trace]} (Throwable->map
+                                     (Exception. "I am not a number"
+                                                 (Exception. "double two")))]
+      (is (= cause "double two"))
+      (is (= ["I am not a number" "double two"]
+             (map :message via)))))
+  (testing "ex-data"
+    (let [{[{:keys [data]}] :via
+           data-top-level :data}
+          (Throwable->map (ex-info "ex-info"
+                                   {:some "data"}))]
+      (is (= data data-top-level {:some "data"})))))
+
+(deftest ex-info-disallows-nil-data
+  (is (thrown? Microsoft.Scripting.ArgumentTypeException (ex-info "message" nil)))        ;;; IllegalArgumentException  -- we have an overload on ctors --passing nil makes it impossible to determine which to call.
+  (is (thrown? ArgumentException (ex-info "message" nil (Exception. "cause")))))          ;;; IllegalArgumentException  Throwable.
+
+(deftest ex-info-arities-construct-equivalent-exceptions
+  (let [ex1 (ex-info "message" {:foo "bar"})
+        ex2 (ex-info "message" {:foo "bar"} nil)]
+    (is (= (.Message ex1) (.Message ex2)))                                                ;;; .getMessage  .getMessage
+    (is (= (.getData ex1) (.getData ex2)))
+    (is (= (.InnerException ex1) (.InnerException ex2)))))                                ;;; .getCause   .getCause 
