@@ -67,10 +67,21 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
+            static Keyword FormKey = Keyword.intern("form");
 
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
             public Expr Parse(ParserContext pcon, object form)
             {
+                int argCount = RT.count(form) - 1;
+                if (argCount != 1)
+                {
+                    IPersistentMap exData = new PersistentArrayMap(new Object[] { FormKey, form });
+                    throw new ExceptionInfo("Wrong number of args (" +
+                                            argCount +
+                                            ") passed to quote",
+                                            exData);
+                }
+
                 object v = RT.second(form);
                 if (v == null)
                     return Compiler.NilExprInstance;
