@@ -2,6 +2,8 @@
   (:require [clojure.string :as s])
   (:use clojure.test))
 
+(set! *warn-on-reflection* true)
+
 (deftest t-split
   (is (= ["a" "b"] (s/split "a-b" #"-")))
   (is (= ["a" "b-c"] (s/split "a-b-c" #"-" 2)))
@@ -143,3 +145,46 @@
     (is (= ["one" "two" "three"] result))
     (is (vector? result)))
   (is (= (list "foo") (s/split-lines "foo"))))
+
+  (deftest t-index-of
+  (let [sb  "tacos"]                                        ;;;  (StringBuffer. "tacos")  We don't have CharSequence, no need to work with a StringBuilder here
+    (is (= 2  (s/index-of sb "c")))
+    (is (= 2  (s/index-of sb \c)))
+    (is (= 1  (s/index-of sb "ac")))
+    (is (= 3  (s/index-of sb "o" 2)))
+    (is (= 3  (s/index-of sb  \o  2)))
+    #_(is (= 3  (s/index-of sb "o" -100)))                  ;;; negative index not valid
+    (is (= nil (s/index-of sb "z")))
+    (is (= nil (s/index-of sb \z)))
+    (is (= nil (s/index-of sb "z" 2)))
+    (is (= nil (s/index-of sb \z  2)))
+    #_(is (= nil (s/index-of sb "z" 100))                   ;;; out of range index not valid
+    #_(is (= nil (s/index-of sb "z" -10))))))               ;;; negative index not valid
+
+(deftest t-last-index-of
+  (let [sb "banana"]                                        ;;; (StringBuffer. "banana")  We don't have CharSequence, no need to work with a StringBuilder here
+    (is (= 4 (s/last-index-of sb "n")))
+    (is (= 4 (s/last-index-of sb \n)))
+    (is (= 3 (s/last-index-of sb "an")))
+    (is (= 4 (s/last-index-of sb "n" )))
+    (is (= 4 (s/last-index-of sb "n" 5)))
+    (is (= 4 (s/last-index-of sb \n  5)))
+    #_(is (= 4 (s/last-index-of sb "n" 500)))               ;;; negative index not valid
+    (is (= nil (s/last-index-of sb "z")))
+    (is (= nil (s/last-index-of sb "z" 1)))
+    (is (= nil (s/last-index-of sb \z  1)))
+    #_(is (= nil (s/last-index-of sb "z" 100))              ;;; negative index not valid
+    #_(is (= nil (s/last-index-of sb "z" -10))))))          ;;; negative index not valid
+
+(deftest t-starts-with?
+  (is (s/starts-with? "clojure west" "clojure"))       ;;; (StringBuffer. "clojure west")
+  (is (not (s/starts-with? "conj" "clojure"))))        ;;; (StringBuffer. "conj")
+
+(deftest t-ends-with?
+  (is (s/ends-with? "Clojure West" "West")             ;;; (StringBuffer. "Clojure West")
+  (is (not (s/ends-with? "Conj" "West")))))            ;;; (StringBuffer. "Conj")
+
+(deftest t-includes?
+  (let [sb "Clojure Applied Book"]                     ;;; (StringBuffer. "Clojure Applied Book")
+    (is (s/includes? sb "Applied"))
+    (is (not (s/includes? sb "Living")))))
