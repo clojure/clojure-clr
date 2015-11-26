@@ -17,7 +17,7 @@ using System.Collections;
 
 namespace clojure.lang
 {
-    abstract class ATransientMap : AFn, ITransientMap
+    public abstract class ATransientMap : AFn, ITransientMap
     {
         #region Methods to be supplied by derived classes
 
