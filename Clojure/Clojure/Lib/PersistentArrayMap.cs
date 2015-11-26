@@ -457,13 +457,8 @@ namespace clojure.lang
                 if (newlen == 0)
                     return (IPersistentMap)empty();
                 object[] newArray = new object[newlen];
-                for (int s = 0, d = 0; s < _array.Length; s += 2)
-                    if (s != i) // skip key to be removed
-                    {
-                        newArray[d] = _array[s];
-                        newArray[d + 1] = _array[s + 1];
-                        d += 2;
-                    }
+                Array.Copy(_array, 0, newArray, 0, i);
+                Array.Copy(_array,i+2,newArray,i,newlen-i);
                 return create(newArray);
             }
             else
