@@ -380,5 +380,6 @@ It is implemented with a number of custom enlive templates.\"
   (let [calendar (.ToDateTime (System.Globalization.GregorianCalendar.)  2014 3 29 14 0 0 0)       ;;; (doto (java.util.GregorianCalendar. 2014 3 29 14 0 0)
                                                                                                    ;;;     (.setTimeZone (java.util.TimeZone/getTimeZone "GMT")))
         calendar-str (with-out-str (pprint calendar))]
-    (is (= calendar-str (platform-newlines "#inst \"2014-03-29T14:00:00.000-00:00\"\n"))           ;;;  "#inst \"2014-04-29T14:00:00.000+00:00\"\n" DM: added platform-newlines
+    (is (= (str/split-lines calendar-str)
+	       ["#inst \"2014-03-29T14:00:00.000-00:00\"" ""])                                            ;;;  "#inst \"2014-04-29T14:00:00.000+00:00\""  Added ""
         "calendar object pretty prints")))
