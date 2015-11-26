@@ -329,6 +329,11 @@ namespace clojure.lang
                 return (obj is Sequential || obj is IList) && RT.seq(obj) == null;
             }
 
+            public override string ToString()
+            {
+                return "()";
+            }
+
             #endregion
 
             #region IObj methods

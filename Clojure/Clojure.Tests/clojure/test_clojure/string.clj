@@ -113,7 +113,8 @@
 ;       "baz::quux" s/replace-first ["baz--quux" #"--" "::"]
 ;       "baz::quux" s/replace-first ["baz--quux" (StringBuffer. "--") (StringBuffer. "::")]
 ;       "zim-zam" s/replace-first ["zim zam" #" " (StringBuffer. "-")]
-;       "\\\\ \\$" s/re-quote-replacement ["\\ $"];       "Pow" s/capitalize ["POW"]
+;       "\\\\ \\$" s/re-quote-replacement ["\\ $"]
+;       "Pow" s/capitalize ["POW"]
 ;       "BOOM" s/upper-case ["boom"]
 ;       "whimper" s/lower-case ["whimPER"]
 ;       ["foo" "bar"] s/split ["foo-bar" #"-"]
@@ -188,3 +189,8 @@
   (let [sb "Clojure Applied Book"]                     ;;; (StringBuffer. "Clojure Applied Book")
     (is (s/includes? sb "Applied"))
     (is (not (s/includes? sb "Living")))))
+
+(deftest empty-collections
+  (is (= "()" (str ())))
+  (is (= "{}" (str {})))
+  (is (= "[]" (str []))))
