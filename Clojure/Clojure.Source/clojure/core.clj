@@ -237,13 +237,25 @@
                (if (next body)
                  (with-meta arglist (conj (if (meta arglist) (meta arglist) {}) (first body)))
                  arglist)
-               arglist)))]
+               arglist)))
+         resolve-tag (fn [argvec]
+                        (let [m (meta argvec)
+                              ^clojure.lang.Symbol tag (:tag m)]
+                          (if (instance? clojure.lang.Symbol tag)
+                            (if (clojure.lang.Util/equiv (.IndexOf (.Name tag) ".") -1)                                              ;;; .indexOf  .getName
+                              (if (clojure.lang.Util/equals nil (clojure.lang.CljCompiler.Ast.HostExpr/maybeSpecialTag tag))         ;;; clojure.lang.Compiler$HostExpr
+                                (let [t (.Name (clojure.lang.CljCompiler.Ast.HostExpr/MaybeType tag false))                         ;;; .getName  clojure.lang.Compiler$HostExpr  maybeClass
+                                      resolvedtag (clojure.lang.Symbol/intern t)]
+                                  (with-meta argvec (assoc m :tag resolvedtag)))
+                                argvec)
+                              argvec)
+                            argvec)))]
      (if (seq? (first fdecl))
        (loop [ret [] fdecls fdecl]
          (if fdecls
-           (recur (conj ret (asig (first fdecls))) (next fdecls))
+           (recur (conj ret (resolve-tag (asig (first fdecls)))) (next fdecls))
            (seq ret)))
-       (list (asig fdecl))))))
+       (list (resolve-tag (asig fdecl)))))))
 
 
 (def 
