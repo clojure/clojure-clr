@@ -6652,14 +6652,10 @@ clojure.lang.IKVReduce
   {:added "1.0"}
   ([f & opts]
      (let [opts (normalize-slurp-opts opts)
-           sb (StringBuilder.)]                                      ;;; java.io.StringWriter
+           sw (System.IO.StringWriter.)]                                                    ;;; java.io.StringWriter
        (with-open [^System.IO.TextReader r (apply cio/text-reader f opts)]         ;;; java.io.Reader   jio/reader
-         (loop [c (.Read r)]                   ;;; .read
-           (if (neg? c)
-             (str sb)
-             (do
-               (.Append sb (char c))           ;;; .append
-               (recur (.Read r)))))))))        ;;; .read
+         (cio/copy r sw)                                                           ;;; jio/copy
+         (.ToString sw)))))                                                        ;;; .toString
 
 (defn spit
   "Opposite of slurp.  Opens f with writer, writes content, then
