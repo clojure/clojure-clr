@@ -85,6 +85,12 @@
       (finally
        (.Delete f)))))
 
+(deftest test-streams-nil
+  (is (thrown-with-msg? ArgumentException #"Cannot open.*nil" (text-reader nil)))                  ;;; IllegalArgumentException
+  (is (thrown-with-msg? ArgumentException #"Cannot open.*nil" (text-writer nil)))                  ;;; IllegalArgumentException
+  (is (thrown-with-msg? ArgumentException #"Cannot open.*nil" (input-stream nil)))            ;;; IllegalArgumentException
+  (is (thrown-with-msg? ArgumentException #"Cannot open.*nil" (output-stream nil))))          ;;; IllegalArgumentException
+
 (defn bytes-should-equal [byte-array-1 byte-array-2 msg]
   (is (= |System.Byte[]| (class byte-array-1) (class byte-array-2)) msg)
   (is (= (into []  byte-array-1) (into []  byte-array-2)) msg))

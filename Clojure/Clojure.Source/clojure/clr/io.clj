@@ -349,6 +349,17 @@
   IOFactory
   default-streams-impl)
 
+(extend nil
+  IOFactory
+  (assoc default-streams-impl
+    :make-text-reader (fn [x opts]
+                   (throw (ArgumentException.                           
+                           (str "Cannot open <" (pr-str x) "> as a Reader."))))
+    :make-text-writer (fn [x opts]
+                   (throw (ArgumentException.
+                           (str "Cannot open <" (pr-str x) "> as a Writer."))))))
+
+
 (defmulti
   ^{:doc "Internal helper for copy"
      :private true
