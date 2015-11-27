@@ -7,8 +7,8 @@
 (require
  '[clojure.test :as test]
  '[clojure.tools.namespace.find :as ns])
-(def namespaces (remove (read-string (System.Environment/GetEnvironmentVariable "clojure.test-clojure.exclude-namespaces"))  ;;; System/getProperty
-                        (ns/find-namespaces-in-dir (System.IO.DirectoryInfo. "clojure/test_clojure"))))                      ;;; (java.io.File. "test")
+(def namespaces (remove (read-string (or (System.Environment/GetEnvironmentVariable "clojure.test-clojure.exclude-namespaces") "#{}"))    ;;; System/getProperty  Added the or
+                        (ns/find-namespaces-in-dir (System.IO.DirectoryInfo. "clojure/test_clojure"))))                                   ;;; (java.io.File. "test")
 (doseq [ns namespaces] (require ns))
 (let [summary (apply test/run-tests namespaces)]
   (print summary))
