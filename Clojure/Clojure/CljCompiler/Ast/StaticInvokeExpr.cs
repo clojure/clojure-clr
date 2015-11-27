@@ -66,6 +66,10 @@ namespace clojure.lang.CljCompiler.Ast
     //        get { return _tag != null ? HostExpr.TagToType(_tag) : _retType; }
     //    }
 
+    //public Class getJavaClass() {
+    //    return retType((tag!=null)?HostExpr.tagToClass(tag):null, retClass);
+    //}
+
     //    #endregion
 
     //    #region parsing

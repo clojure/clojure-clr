@@ -765,6 +765,33 @@ namespace clojure.lang
             return match;
         }
 
+        public static bool Inty(Type t)
+        {
+            return t == typeof(int)
+                || t == typeof(uint)
+                || t == typeof(short)
+                || t == typeof(ushort)
+                || t == typeof(byte)
+                || t == typeof(sbyte)
+                || t == typeof(char)
+                || t == typeof(ulong);  // not sure abou this one.
+        }
+
+        public static Type RetType(Type tc, Type ret)
+        {
+            if (tc == null)
+                return ret;
+            if (ret == null)
+                return tc;
+            if (ret.IsPrimitive && tc.IsPrimitive)
+            {
+                if ((Inty(ret) && Inty(tc)) || (ret == tc))
+                    return tc;
+                throw new InvalidOperationException(String.Format("Cannot coerce {0} to {1}, use a cast instead", ret, tc));
+            }
+            return tc;
+        }
+
         public static Type PrimType(Symbol sym)
         {
             if (sym == null)

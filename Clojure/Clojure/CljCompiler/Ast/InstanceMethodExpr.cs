@@ -77,7 +77,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return _tag != null ? HostExpr.TagToType(_tag) : _method.ReturnType; }
+            get { return Compiler.RetType((_tag != null ? HostExpr.TagToType(_tag) : null), (_method != null) ? _method.ReturnType : null); }
         }
 
         #endregion
