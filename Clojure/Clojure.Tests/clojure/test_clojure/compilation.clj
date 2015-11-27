@@ -365,3 +365,23 @@
   (is (thrown? Exception (eval '(defn foo [] (throw RuntimeException any-symbol)))))                                 ;;; RuntimeException
   (is (thrown? Exception (eval '(defn foo [] (throw (RuntimeException.) any-symbol)))))                              ;;; RuntimeException
   (is (var? (eval '(defn foo [] (throw (ArgumentException.)))))))                                                    ;;; IllegalArgumentException
+
+(deftest clj-1809
+  (is (eval `(fn [y#]
+               (try
+                 (finally
+                   (let [z# y#])))))))
+
+;; See CLJ-1846
+(deftest incorrect-primitive-type-hint-throws
+  ;; invalid primitive type hint
+  (is (thrown-with-msg? Compiler+CompilerException #"Cannot coerce System.Int64 to System.Int32"                     ;;; Compiler$CompilerException  "Cannot coerce long to int
+        (load-string "(defn returns-long ^long [] 1) (Math/Sign ^int (returns-long))")))                             ;;; Integer/bitCount
+  ;; correct casting instead
+  (is (= 1 (load-string "(defn returns-long ^long [] 1) (Math/Sign (int (returns-long)))"))))                        ;;; Integer/bitCount
+
+;; See CLJ-1825
+(def zf (fn rf [x] (lazy-seq (cons x (rf x)))))
+(deftest test-anon-recursive-fn
+  (is (= [0 0] (take 2 ((fn rf [x] (lazy-seq (cons x (rf x)))) 0))))
+  (is (= [0 0] (take 2 (zf 0)))))
