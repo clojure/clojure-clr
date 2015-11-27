@@ -328,7 +328,12 @@
 (defmacro defrecord
   "(defrecord name [fields*]  options* specs*)
   
-  Currently there are no options.
+  Options are expressed as sequential keywords and arguments (in any order).
+
+  Supported options:
+  :load-ns - if true, importing the record class will cause the
+             namespace in which the record was defined to be loaded.
+             Defaults to false.
 
   Each spec consists of a protocol or interface name followed by zero
   or more method bodies:
@@ -433,7 +438,12 @@
 (defmacro deftype
   "(deftype name [fields*]  options* specs*)
   
-  Currently there are no options.
+  Options are expressed as sequential keywords and arguments (in any order).
+
+  Supported options:
+  :load-ns - if true, importing the record class will cause the
+             namespace in which the record was defined to be loaded.
+             Defaults to false.
 
   Each spec consists of a protocol or interface name followed by zero
   or more method bodies:
