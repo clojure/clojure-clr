@@ -1425,6 +1425,15 @@
 
 ;;map stuff
 
+(defn map-entry?                                                 ;;; hoping this is correct.  The equiv of Map$Entry is a struct, so not a base for anything.
+  "Return true if x is a map entry"                              ;;; Given the way it is used, adding KeyValuePair<Object,Object> and DictionaryEntry doesn't seem right
+  {:added "1.8"}
+  [x]
+  (and (instance? clojure.lang.IMapEntry x)                    ;;;  (instance? java.util.Map$Entry x)
+    (if (instance? clojure.lang.IPersistentVector x)
+      (= 2 (count x))
+      true)))
+
 (defn contains?
   "Returns true if key is present in the given collection, otherwise
   returns false.  Note that for numerically indexed collections like
