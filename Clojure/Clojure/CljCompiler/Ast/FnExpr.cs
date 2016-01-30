@@ -34,6 +34,8 @@ namespace clojure.lang.CljCompiler.Ast
         bool _hasMeta;
         protected override bool SupportsMeta { get { return _hasMeta; } }
 
+        bool _hasEnclosingMethod;
+
         private int _dynMethodMapKey = RT.nextID();
         public int DynMethodMapKey { get { return _dynMethodMapKey; } }
 
@@ -110,6 +112,12 @@ namespace clojure.lang.CljCompiler.Ast
 
             FnExpr fn = new FnExpr(Compiler.TagOf(form));
             fn.Src = form;
+
+            Keyword retKey = Keyword.intern(null, "rettag");  // TODO: make static
+            object retTag = RT.get(RT.meta(form), retKey);
+            ObjMethod enclosingMethod = (ObjMethod)Compiler.MethodVar.deref();
+            fn._hasEnclosingMethod = enclosingMethod != null;
+
 
             if (((IMeta)form.first()).meta() != null)
             {
