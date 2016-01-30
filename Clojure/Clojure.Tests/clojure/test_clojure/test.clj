@@ -78,7 +78,8 @@
                                 [])
         t (doto (Exception.) (.setStackTrace empty-stack))]
     (is (map? (#'clojure.test/file-and-line t 0)) "Should pass")
-    (is (string? (with-out-str (stack/print-stack-trace t))) "Should pass")))
+    (is (map? (#'clojure.test/stacktrace-file-and-line empty-stack)) "Should pass")
+	(is (string? (with-out-str (stack/print-stack-trace t))) "Should pass")))
 
  (deftest ^{:has-meta true} can-add-metadata-to-tests
   (is (:has-meta (meta #'can-add-metadata-to-tests)) "Should pass"))
