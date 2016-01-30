@@ -119,6 +119,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         internal static readonly Keyword DisableLocalsClearingKeyword = Keyword.intern("disable-locals-clearing");
 
+        internal static readonly Keyword DirectLinkingKeyword = Keyword.intern("direct-linking");
         internal static readonly Keyword ElideMetaKeyword = Keyword.intern("elide-meta");
  
 
@@ -700,6 +701,8 @@ namespace clojure.lang
             if (b != null)
             {
                 ObjMethod method = (ObjMethod)MethodVar.deref();
+                if (b.Index == 0)
+                    method.UsesThis = true;
                 CloseOver(b, method);
             }
 

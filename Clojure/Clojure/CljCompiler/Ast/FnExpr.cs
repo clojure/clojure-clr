@@ -133,7 +133,6 @@ namespace clojure.lang.CljCompiler.Ast
             if (nm != null)
             {
                 fn.ThisName = nm.Name;
-                fn.IsStatic = false; // RT.booleanCast(RT.get(nm.meta(), Compiler.STATIC_KEY));
                 form = RT.cons(Compiler.FnSym, RT.next(RT.next(form)));
             }
 
@@ -167,10 +166,16 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.NoRecurVar, null));
                     SortedDictionary<int, FnMethod> methods = new SortedDictionary<int, FnMethod>();
                     FnMethod variadicMethod = null;
+                    bool usesThis = false;
 
                     for (ISeq s = RT.next(form); s != null; s = RT.next(s))
                     {
-                        FnMethod f = FnMethod.Parse(fn, (ISeq)RT.first(s), fn.IsStatic);
+                        FnMethod f = FnMethod.Parse(fn, (ISeq)RT.first(s), retTag);
+                        if ( f.UsesThis)
+                        {
+                            Console.WriteLine("{0} uses this",fn.Name);
+                            usesThis = true;
+                        }
                         if (f.IsVariadic)
                         {
                             if (variadicMethod == null)
@@ -189,8 +194,7 @@ namespace clojure.lang.CljCompiler.Ast
                     if (variadicMethod != null && methods.Count > 0 && methods.Keys.Max() >= variadicMethod.NumParams)
                         throw new ParseException("Can't have fixed arity methods with more params than the variadic method.");
 
-                    if (fn.IsStatic && fn.Closes.count() > 0)
-                        throw new ParseException("static fns can't be closures");
+                    fn.CanBeDirect = !fn._hasEnclosingMethod && fn.Closes.count() == 0 && !usesThis;
 
                     IPersistentCollection allMethods = null;
                     foreach (FnMethod method in methods.Values)
@@ -217,7 +221,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 IPersistentMap fmeta = RT.meta(origForm);
                 if (fmeta != null)
-                    fmeta = fmeta.without(RT.LineKey).without(RT.ColumnKey).without(RT.SourceSpanKey).without(RT.FileKey);
+                    fmeta = fmeta.without(RT.LineKey).without(RT.ColumnKey).without(RT.SourceSpanKey).without(RT.FileKey).without(retKey);
                 fn._hasMeta = RT.count(fmeta) > 0;
 
 

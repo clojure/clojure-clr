@@ -104,7 +104,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         enum ParamParseState { Required, Rest, Done };
 
-        internal static FnMethod Parse(FnExpr fn, ISeq form, bool isStatic)
+        internal static FnMethod Parse(FnExpr fn, ISeq form, object retTag)
         {
             // ([args] body ... )
 
@@ -126,14 +126,29 @@ namespace clojure.lang.CljCompiler.Ast
                 //if (method._prim != null)
                 //    method._prim = method._prim.Replace('.', '/');
 
-                method._retType = Compiler.TagType(Compiler.TagOf(parms));
-                if (method._retType.IsPrimitive && !(method._retType == typeof(double) || method._retType == typeof(long)))
-                    throw new ParseException("Only long and double primitives are supported");
+               
+                if (retTag is String)
+                    retTag = Symbol.intern(null, (string)retTag);
+                if (!(retTag is Symbol))
+                    retTag = null;
+                if ( retTag != null)
+                {
+                    string retStr = ((Symbol)retTag).Name;
+                    if (!(retStr.Equals("long") || retStr.Equals("double")))
+                        retTag = null;
+                }
+                method._retType = Compiler.TagType(Compiler.TagOf(parms) ?? retTag);
+
+                if (method._retType.IsPrimitive)
+                {
+                    if (!(method._retType == typeof(double) || method._retType == typeof(long)))
+                        throw new ParseException("Only long and double primitives are supported");
+                }
+                else
+                    method._retType = typeof(object);
 
                 // register 'this' as local 0  
-                if ( !isStatic )
-                    //method._thisBinding = Compiler.RegisterLocalThis(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null);
-                    Compiler.RegisterLocalThis(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null);
+                Compiler.RegisterLocalThis(Symbol.intern(fn.ThisName ?? "fn__" + RT.nextID()), null, null);
 
                 ParamParseState paramState = ParamParseState.Required;
                 IPersistentVector argLocals = PersistentVector.EMPTY;
@@ -150,9 +165,6 @@ namespace clojure.lang.CljCompiler.Ast
                         throw new ParseException("Can't use qualified name as parameter: " + p);
                     if (p.Equals(Compiler.AmpersandSym))
                     {
-                        //if (isStatic)
-                        //    throw new Exception("Variadic fns cannot be static");
-
                         if (paramState == ParamParseState.Required)
                             paramState = ParamParseState.Rest;
                         else
@@ -198,7 +210,6 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new ParseException(string.Format("Can't specify more than {0} parameters", Compiler.MaxPositionalArity));
                 Compiler.LoopLocalsVar.set(argLocals);
                 method.ArgLocals = argLocals;
-                //if (isStatic)
                 if ( method.Prim != null )
                     method._argTypes = argTypes.ToArray();
                 method.Body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return),body);
@@ -289,8 +300,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if (Prim != null)
                 DoEmitPrim(fn, tb);
-            else if (fn.IsStatic)
-                DoEmitStatic(fn, tb);
+            //else if (fn.IsStatic)
+            //    DoEmitStatic(fn, tb);
             else
                 DoEmit(fn, tb);
         }

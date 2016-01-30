@@ -105,7 +105,7 @@ namespace clojure.lang.CljCompiler.Ast
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ID")]
         public int ConstantsID { get; protected set; }
         public bool OnceOnly { get; protected set; }
-        public bool IsStatic { get; protected set; }
+        public bool CanBeDirect { get; protected set; }
 
         
         protected bool IsDefType { get { return Fields != null; } }
@@ -300,7 +300,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (CompiledType != null)
                 return CompiledType;
 
-            string publicTypeName = IsDefType || (IsStatic && Compiler.IsCompiling) ? InternalName : InternalName + "__" + RT.nextID();
+            string publicTypeName = IsDefType /* || (CanBeDirect && Compiler.IsCompiling) */ ? InternalName : InternalName + "__" + RT.nextID();
 
             TypeBuilder = context.AssemblyGen.DefinePublicType(publicTypeName, superType, true);
             context = context.WithNewDynInitHelper().WithTypeBuilder(TypeBuilder);

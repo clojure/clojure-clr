@@ -47,6 +47,7 @@ namespace clojure.lang.CljCompiler.Ast
         public IPersistentVector Parms { get; protected set; }
 
         public IPersistentMap SpanMap { get; protected set; }
+        public bool UsesThis { get; set; }
 
         #endregion
 
