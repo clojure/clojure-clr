@@ -202,6 +202,23 @@ namespace clojure.lang.CljCompiler.Ast
                     if (variadicMethod != null)
                         allMethods = RT.conj(allMethods, variadicMethod);
 
+                    if ( fn.CanBeDirect )
+                    {
+                        for (ISeq s = RT.seq(allMethods); s != null; s = s.next())
+                        {
+                            FnMethod fm = s.first() as FnMethod;
+                            if ( fm.Locals != null)
+                            {
+                                for (ISeq sl = RT.seq(RT.keys(fm.Locals)); sl != null; sl = sl.next())
+                                {
+                                    LocalBinding lb = sl.first() as LocalBinding;
+                                    lb.Index -= 1;
+                                }
+                                fm.MaxLocal -= 1;
+                            }
+                        }
+                    }
+
                     fn.Methods = allMethods;
                     fn._variadicMethod = variadicMethod;
                     fn.Keywords = (IPersistentMap)Compiler.KeywordsVar.deref();

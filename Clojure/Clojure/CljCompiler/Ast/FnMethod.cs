@@ -210,8 +210,7 @@ namespace clojure.lang.CljCompiler.Ast
                     throw new ParseException(string.Format("Can't specify more than {0} parameters", Compiler.MaxPositionalArity));
                 Compiler.LoopLocalsVar.set(argLocals);
                 method.ArgLocals = argLocals;
-                if ( method.Prim != null )
-                    method._argTypes = argTypes.ToArray();
+                method._argTypes = argTypes.ToArray();
                 method.Body = (new BodyExpr.Parser()).Parse(new ParserContext(RHC.Return),body);
                 return method;
             }
@@ -298,31 +297,104 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override void Emit(ObjExpr fn, TypeBuilder tb)
         {
-            if (Prim != null)
+            if ( fn.CanBeDirect)
+            {
+                Console.WriteLine("emit static: {0}", fn.Name);
+                DoEmitStatic(fn, tb);
+            }
+            else if (Prim != null)
+            {
+                Console.WriteLine("emit prim: {0}", fn.Name);
                 DoEmitPrim(fn, tb);
-            //else if (fn.IsStatic)
-            //    DoEmitStatic(fn, tb);
+            }
             else
+            {
+                Console.WriteLine("emit normal: {0}", fn.Name);
                 DoEmit(fn, tb);
+            }
         }
 
         private void DoEmitStatic(ObjExpr fn, TypeBuilder tb)
         {
-           DoEmitPrimOrStatic(fn, tb ,true);   
+            MethodAttributes attribs = MethodAttributes.Static | MethodAttributes.Public;
+
+            string methodName = "invokeStatic";
+
+            Type returnType = ReturnType;
+
+            MethodBuilder baseMB = tb.DefineMethod(methodName, attribs, returnType, _argTypes);
+
+            CljILGen baseIlg = new CljILGen(baseMB.GetILGenerator());
+
+            try
+            {
+                Label loopLabel = baseIlg.DefineLabel();
+                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
+
+                GenContext.EmitDebugInfo(baseIlg, SpanMap);
+
+                baseIlg.MarkLabel(loopLabel);
+                EmitBody(Objx, baseIlg, _retType, Body);
+                if (Body.HasNormalExit())
+                    baseIlg.Emit(OpCodes.Ret);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+
+            // Generate the regular invoke, calling the static method
+            {
+                MethodBuilder regularMB = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(Object), ArgTypes);
+                SetCustomAttributes(regularMB);
+
+                CljILGen regIlg = new CljILGen(regularMB.GetILGenerator());
+
+                for (int i = 0; i < _argTypes.Length; i++)
+                {
+                    regIlg.EmitLoadArg(i + 1);
+                    HostExpr.EmitUnboxArg(fn, regIlg, _argTypes[i]);
+                }
+                regIlg.Emit(OpCodes.Call, baseMB);
+                if (ReturnType.IsValueType)
+                    regIlg.Emit(OpCodes.Box, ReturnType);
+                regIlg.Emit(OpCodes.Ret);
+            }
+
+            // Generate primInvoke if prim
+            if (Prim != null)
+            {
+                MethodAttributes primAttribs = MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual;
+
+                string primMethodName = "invokePrim";
+
+                Type primReturnType;
+                if (_retType == typeof(double) || _retType == typeof(long))
+                    primReturnType = ReturnType;
+                else
+                    primReturnType = typeof(object);
+
+                MethodBuilder primMB = tb.DefineMethod(primMethodName, primAttribs, primReturnType, _argTypes);
+                SetCustomAttributes(primMB);
+
+                CljILGen primIlg = new CljILGen(primMB.GetILGenerator());
+                for (int i = 0; i < _argTypes.Length; i++)
+                {
+                    primIlg.EmitLoadArg(i + 1);
+                    HostExpr.EmitUnboxArg(fn, primIlg, _argTypes[i]);
+                }
+                primIlg.Emit(OpCodes.Call, baseMB);
+                if (Body.HasNormalExit())
+                    primIlg.Emit(OpCodes.Ret);
+            }
+
         }
 
         private void DoEmitPrim(ObjExpr fn, TypeBuilder tb)
         {
-            DoEmitPrimOrStatic(fn,tb,false);
-        }
+            MethodAttributes attribs = MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual;
 
-        private void DoEmitPrimOrStatic(ObjExpr fn, TypeBuilder tb, bool isStatic)
-        {
-            MethodAttributes attribs = isStatic 
-                ? MethodAttributes.Static | MethodAttributes.Public
-                : MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual;
-
-            string methodName = isStatic ? "invokeStatic" : "invokePrim";
+            string methodName = "invokePrim";
 
             Type returnType;
             if (_retType == typeof(double) || _retType == typeof(long))
@@ -332,53 +404,50 @@ namespace clojure.lang.CljCompiler.Ast
 
             MethodBuilder baseMB = tb.DefineMethod(methodName, attribs, returnType, _argTypes);
 
-            if ( ! isStatic )
-                SetCustomAttributes(baseMB);
+            SetCustomAttributes(baseMB);
 
             CljILGen baseIlg = new CljILGen(baseMB.GetILGenerator());
 
-            try 
+            try
             {
                 Label loopLabel = baseIlg.DefineLabel();
-                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar,loopLabel,Compiler.MethodVar,this));
+                Var.pushThreadBindings(RT.map(Compiler.LoopLabelVar, loopLabel, Compiler.MethodVar, this));
 
                 GenContext.EmitDebugInfo(baseIlg, SpanMap);
-                
+
                 baseIlg.MarkLabel(loopLabel);
                 EmitBody(Objx, baseIlg, _retType, Body);
-                if ( Body.HasNormalExit() )
+                if (Body.HasNormalExit())
                     baseIlg.Emit(OpCodes.Ret);
             }
             finally
             {
                 Var.popThreadBindings();
-            }            
-            // Generate the regular invoke, calling the static or prim method
+            }
+
+            // Generate the regular invoke, calling the prim method
 
             MethodBuilder regularMB = tb.DefineMethod(MethodName, MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual, typeof(Object), ArgTypes);
             SetCustomAttributes(regularMB);
 
             CljILGen regIlg = new CljILGen(regularMB.GetILGenerator());
 
-            if ( ! isStatic )
-                regIlg.Emit(OpCodes.Ldarg_0);
-            for(int i = 0; i < _argTypes.Length; i++)
-			{   
-                regIlg.EmitLoadArg(i+1);
+            regIlg.Emit(OpCodes.Ldarg_0);
+            for (int i = 0; i < _argTypes.Length; i++)
+            {
+                regIlg.EmitLoadArg(i + 1);
                 HostExpr.EmitUnboxArg(fn, regIlg, _argTypes[i]);
-			}
-            regIlg.Emit(OpCodes.Call,baseMB);
-            if ( ReturnType.IsValueType)
-                regIlg.Emit(OpCodes.Box,ReturnType);
+            }
+            regIlg.Emit(OpCodes.Call, baseMB);
+            if (ReturnType.IsValueType)
+                regIlg.Emit(OpCodes.Box, ReturnType);
             regIlg.Emit(OpCodes.Ret);
         }
 
         private void DoEmit(ObjExpr fn, TypeBuilder tb)
         {
             MethodAttributes attribs = MethodAttributes.ReuseSlot | MethodAttributes.Public | MethodAttributes.Virtual;
-
             MethodBuilder mb = tb.DefineMethod(MethodName, attribs, ReturnType, ArgTypes);
-
             SetCustomAttributes(mb);
 
             CljILGen baseIlg = new CljILGen(mb.GetILGenerator());
@@ -392,7 +461,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 baseIlg.MarkLabel(loopLabel);
                 Body.Emit(RHC.Return, fn, baseIlg);
-                if ( Body.HasNormalExit() )
+                if (Body.HasNormalExit())
                     baseIlg.Emit(OpCodes.Ret);
             }
             finally

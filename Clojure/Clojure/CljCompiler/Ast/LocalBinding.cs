@@ -31,9 +31,8 @@ namespace clojure.lang.CljCompiler.Ast
         private readonly String _name;
         public String Name { get { return _name; } }
 
-        private readonly int _index;
-        public int Index { get { return _index; } }
-
+        public int Index { get; set;}
+    
         public LocalBuilder LocalVar { get; set; }
 
         readonly bool _isArg;
@@ -56,7 +55,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (Compiler.MaybePrimitiveType(init) != null && tag != null)
                 throw new InvalidOperationException("Can't type hint a local with a primitive initializer");
 
-            _index = index;
+            Index = index;
             _sym = sym;
             Tag = tag;
             Init = init;
