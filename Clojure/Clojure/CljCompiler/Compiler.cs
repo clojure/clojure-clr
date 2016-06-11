@@ -284,6 +284,8 @@ namespace clojure.lang
 
         #region MethodInfos, etc.
 
+        internal static readonly MethodInfo Method_ArraySeq_create = typeof(ArraySeq).GetMethod("create", new Type[] { typeof(Object[]) });
+
         internal static readonly PropertyInfo Method_Compiler_CurrentNamespace = typeof(Compiler).GetProperty("CurrentNamespace");
         internal static readonly MethodInfo Method_Compiler_PushNS = typeof(Compiler).GetMethod("PushNS");
 

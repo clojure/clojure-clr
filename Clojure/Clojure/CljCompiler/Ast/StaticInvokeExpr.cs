@@ -23,199 +23,174 @@ using Microsoft.Scripting.Ast;
 #endif
 using System.Text;
 using System.Reflection;
+using System.Reflection.Emit;
 
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    //class StaticInvokeExpr : Expr, MaybePrimitiveExpr
-    //{
-    //    #region Data
+    class StaticInvokeExpr : Expr, MaybePrimitiveExpr
+    {
+        #region Data
 
-    //    readonly Type _target;
-    //    readonly Type _retType;
-    //    readonly Type[] _paramTypes;
-    //    readonly IPersistentVector _args;
-    //    readonly bool _variadic;
-    //    readonly Symbol _tag;
+        readonly Type _target;
+        readonly MethodInfo _method;
+        readonly Type _retType;
+        readonly IPersistentVector _args;
 
-    //    #endregion
+        readonly bool _variadic;
+        readonly object _tag;
 
-    //    #region Ctors
+        #endregion
 
-    //    public StaticInvokeExpr(Type target, Type retType, Type[] paramTypes, bool variadic, IPersistentVector args, Symbol tag)
-    //    {
-    //        _target = target;
-    //        _retType = retType;
-    //        _paramTypes = paramTypes;
-    //        _variadic = variadic;
-    //        _args = args;
-    //        _tag = tag;
-    //    }
+        #region Ctors
 
-    //    #endregion
+        public StaticInvokeExpr(Type target, MethodInfo method, bool variadic, IPersistentVector args, object tag)
+        {
+            _target = target;
+            _method = method;
+            _retType = method.ReturnType;
+            _variadic = variadic;
+            _args = args;
+            _tag = tag;
+        }
 
-    //    #region Type mangling
+        #endregion
 
-    //    public bool HasClrType
-    //    {
-    //        get { return true; }
-    //    }
+        #region Type mangling
 
-    //    public Type ClrType
-    //    {
-    //        get { return _tag != null ? HostExpr.TagToType(_tag) : _retType; }
-    //    }
+        public bool HasClrType
+        {
+            get { return true; }
+        }
 
-    //public Class getJavaClass() {
-    //    return retType((tag!=null)?HostExpr.tagToClass(tag):null, retClass);
-    //}
+        public Type ClrType
+        {
+            get { return _tag != null ? HostExpr.TagToType(_tag) : _retType; }
+        }
 
-    //    #endregion
+        #endregion
 
-    //    #region parsing
+        #region parsing
 
-    //    public static Expr Parse(Var v, ISeq args, Symbol tag)
-    //    {
-    //        IPersistentCollection paramlists = (IPersistentCollection)RT.get(v.meta(), Compiler.ARGLISTS_KEY);
-    //        if (paramlists == null)
-    //            throw new InvalidOperationException("Can't call static fn with no arglists " + v);
+        public static Expr Parse(Var v, ISeq args, object tag)
+        {
+            if (!v.isBound || v.get() == null)
+            {
+                Console.WriteLine("Not bound: {0}", v);
+                return null;
+            }
 
-    //        IPersistentVector paramlist = null;
-    //        int argcount = RT.count(args);
-    //        bool variadic = false;
-    //        for (ISeq aseq = RT.seq(paramlists); aseq != null; aseq = aseq.next())
-    //        {
-    //            if (!(aseq.first() is IPersistentVector))
-    //                throw new InvalidOperationException("Expected vector arglist, had: " + aseq.first());
-    //            IPersistentVector alist = (IPersistentVector)aseq.first();
-    //            if (alist.count() > 1 && alist.nth(alist.count() - 2).Equals(Compiler._AMP_))
-    //            {
-    //                if (argcount >= alist.count() - 2)
-    //                {
-    //                    paramlist = alist;
-    //                    variadic = true;
-    //                }
-    //            }
-    //            else if (alist.count() == argcount)
-    //            {
-    //                paramlist = alist;
-    //                variadic = false;
-    //                break;
-    //            }
-    //        }
-    //        if (paramlist == null)
-    //            throw new ArgumentException(String.Format("Invalid arity - can't call: {0} with {1} args", v, argcount));
+            Type target = v.get().GetType();
 
-    //        Type retClass = Compiler.TagType(Compiler.TagOf(paramlist));
+            {
+                string tname = target.Name;
+                Console.WriteLine("Type: {0}", tname);
+            }
 
-    //        List<Type> paramTypes = new List<Type>();
+            MethodInfo[] allMethods = target.GetMethods();
+            bool variadic = false;
+            int argcount = RT.count(args);
+            MethodInfo method = null;
+            ParameterInfo[] pInfos = null;
 
-    //        if (variadic)
-    //        {
-    //            for (int i = 0; i < paramlist.count() - 2; i++)
-    //            {
-    //                Type pt = Compiler.TagType(Compiler.TagOf(paramlist.nth(i)));
-    //                paramTypes.Add(pt);
-    //            }
-    //            paramTypes.Add(typeof(ISeq));
-    //        }
-    //        else
-    //        {
-    //            for (int i = 0; i < paramlist.count(); i++)
-    //            {
-    //                Type pt = Compiler.TagType(Compiler.TagOf(paramlist.nth(i)));
-    //                paramTypes.Add(pt);
-    //            }
-    //        }
+            foreach (MethodInfo m in allMethods)
+            {
+                Console.WriteLine("Method {0}", m.Name);
+                if (m.IsStatic && m.Name.Equals("invokeStatic"))
+                {
+                    pInfos = m.GetParameters();
+                    if (argcount == pInfos.Length)
+                    {
+                        method = m;
+                        variadic = argcount > 0 && pInfos[pInfos.Length - 1].ParameterType == typeof(ISeq);
+                        break;
+                    }
+                    else if (argcount > pInfos.Length
+                        && pInfos.Length > 0
+                        && pInfos[pInfos.Length - 1].ParameterType == typeof(ISeq))
+                    {
+                        method = m;
+                        variadic = true;
+                        break;
+                    }
+                }
+            }
 
-    //        string cname = v.Namespace.Name.Name.Replace('.', '/').Replace('-', '_').Replace('-','_') + "$" + Compiler.munge(v.sym.Name);
-    //        Type target = RT.classForName(cname);  // not sure this will work.
+            if (method == null)
+                return null;
 
-    //        IPersistentVector argv = PersistentVector.EMPTY;
-    //        for (ISeq s = RT.seq(args); s != null; s = s.next())
-    //            argv = argv.cons(Compiler.Analyze(new ParserContext(RHC.Expression), s.first()));
+            IPersistentVector argv = PersistentVector.EMPTY;
+            for (ISeq s = RT.seq(args); s != null; s = s.next())
+                argv = argv.cons(Compiler.Analyze(new ParserContext(RHC.Expression), s.first()));
 
-    //        return new StaticInvokeExpr(target, retClass, paramTypes.ToArray(), variadic, argv, tag);
-    //    }
+            return new StaticInvokeExpr(target, method, variadic, argv, tag);
+        }
 
-    //    #endregion
+        #endregion
 
-    //    #region eval
+        #region eval
 
-    //    public object Eval()
-    //    {
-    //        throw new InvalidOperationException("Can't eval StaticInvokeExpr");
-    //    }
+        public object Eval()
+        {
+            throw new InvalidOperationException("Can't eval StaticInvokeExpr");
+        }
 
-    //    #endregion
+        #endregion
 
-    //    #region Generating code
-
-    //    public Expression GenCode(RHC rhc, ObjExpr objx, GenContext context)
-    //    {
-    //        Expression unboxed = GenCodeUnboxed(rhc, objx, context);
-    //        Expression e = unboxed;
-    //        if (rhc != RHC.Statement)
-    //            e = HostExpr.GenBoxReturn(e,_retType,objx,context);
-    //        return e;
-    //    }
-
-    //    #endregion
-
-    //    #region MaybePrimitiveExpr Members
-
-    //    public bool CanEmitPrimitive
-    //    {
-    //        get { return _retType.IsPrimitive; }
-    //    }
-
-    //    public Expression GenCodeUnboxed(RHC rhc, ObjExpr objx, GenContext context)
-    //    {
-    //        Expression[] argExprs;
-    //        Type[] argTypes;
-    //        if (_variadic)
-    //        {
-    //            argExprs = new Expression[_paramTypes.Length + 1];
-    //            argTypes = new Type[_paramTypes.Length + 1];
-    //            argExprs[0] = Expression.Constant(null, _target.BaseType);
-    //            argTypes[0] = _target.BaseType;
-
-    //            for (int i = 0; i < _paramTypes.Length - 1; i++)
-    //            {
-    //                Expr e = (Expr)_args.nth(i);
-    //                if (Compiler.MaybePrimitiveType(e) == _paramTypes[i])
-    //                    argExprs[i + 1] = ((MaybePrimitiveExpr)e).GenCodeUnboxed(RHC.Expression, objx, context);
-    //                else
-    //                    argExprs[i + 1] = HostExpr.GenUnboxArg(e.GenCode(RHC.Expression, objx, context),_paramTypes[i]);
-    //                argTypes[i + 1] = argExprs[i + 1].Type;
-    //            }
-    //            IPersistentVector restArgs = RT.subvec(_args, _paramTypes.Length - 1, _args.count());
-    //            Expression expr = Compiler.GenArgArray(RHC.Expression, objx, context, restArgs);
-    //            argExprs[_paramTypes.Length] = Expression.Call(Compiler.Method_ArraySeq_create, expr);
-    //            argTypes[_paramTypes.Length] = typeof(ISeq);
-    //        }
-    //        else
-    //        {
-    //            Expression[] argExprs1 = MethodExpr.GenTypedArgs(objx, context, _paramTypes, _args);
-    //            argExprs = new Expression[_args.count() + 1];
-    //            argTypes = new Type[_paramTypes.Length + 1];
-    //            argExprs[0] = Expression.Constant(null, _target.BaseType);
-    //            argTypes[0] = _target.BaseType;
-    //            for (int i = 0; i < _args.count(); i++)
-    //            {
-    //                argExprs[i + 1] = argExprs1[i];
-    //                argTypes[i + 1] = argExprs1[i].Type;
-    //            }
-    //        }
+        #region Generating code
 
 
-    //        //return Expression.Call(_target.GetMethod("InvokeStatic",argTypes),argExprs);
-    //        List<MethodBase> candidates = Reflector.GetMethods(_target, "InvokeStatic", null, argExprs.Length, true);
-    //        if (candidates.Count != 1)
-    //            throw new Exception("No static method of correct arity");
-    //        return Utils.ComplexCallHelper((MethodInfo)candidates[0], argExprs);
-    //    }
+        public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
+        {
+            EmitUnboxed(rhc, objx, ilg);
+            if (rhc != RHC.Statement)
+                HostExpr.EmitBoxReturn(objx, ilg, _retType);
+            if (rhc == RHC.Statement )
+                ilg.Emit(OpCodes.Pop);
+        }
 
-    //    #endregion
-    //}
+        public bool HasNormalExit()
+        {
+            return true;
+        }
+
+
+        public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
+        {
+            if (_variadic)
+            {
+                ParameterInfo[] pinfos = _method.GetParameters();
+                for (int i =0; i< pinfos.Length; i++ )
+                {
+                    Expr e = (Expr)_args.nth(i);
+                    if (Compiler.MaybePrimitiveType(e) == pinfos[i].ParameterType)
+                        ((MaybePrimitiveExpr)e).EmitUnboxed(RHC.Expression, objx, ilg);
+                    else
+                    {
+                        e.Emit(RHC.Expression, objx, ilg);
+                        HostExpr.EmitUnboxArg(objx, ilg, pinfos[i].ParameterType);
+                    }
+                }
+                IPersistentVector restArgs = RT.subvec(_args, pinfos.Length - 1, _args.count());
+                MethodExpr.EmitArgsAsArray(restArgs, objx, ilg);
+                ilg.EmitCall(Compiler.Method_ArraySeq_create);               
+            }
+            else
+                MethodExpr.EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
+
+            ilg.EmitCall(_method);
+
+        }
+
+        #endregion
+
+        #region MaybePrimitiveExpr Members
+
+        public bool CanEmitPrimitive
+        {
+            get { return _retType.IsPrimitive; }
+        }
+
+        #endregion
+    }
 }
