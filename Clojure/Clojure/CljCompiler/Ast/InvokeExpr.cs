@@ -157,8 +157,6 @@ namespace clojure.lang.CljCompiler.Ast
                 && pcon.Rhc != RHC.Eval )
             {
                 Var v = varFexpr.Var;
-                if (RT.get(RT.meta(v), RT.DeclaredKey) != null)
-                    Console.WriteLine("Declared: {0}",v);
                 if ( ! v.isDynamic() ||  RT.get(RT.meta(v), RT.DeclaredKey) == null )
                 {
                     Symbol formTag = Compiler.TagOf(form);
@@ -167,10 +165,8 @@ namespace clojure.lang.CljCompiler.Ast
                     object sigtag = SigTag(arity, v);
                     object vtag = RT.get(RT.meta(v), RT.TagKey);
                     StaticInvokeExpr ret = StaticInvokeExpr.Parse(v, RT.next(form), formTag ?? sigtag ?? vtag) as StaticInvokeExpr;
-                    if (ret != null && !((Compiler.IsCompiling || Compiler.IsCompilingDefType) && ret.Method.DeclaringType.Assembly.GetName().Name == "eval"))
+                    if (ret != null && !((Compiler.IsCompiling || Compiler.IsCompilingDefType) && GenContext.InternalAssemblies.ContainsKey(ret.Method.DeclaringType.Assembly)))
                     {
-                        if ((Compiler.IsCompiling|| Compiler.IsCompilingDefType) && ret.Method.DeclaringType.Assembly.GetName().Name == "eval")
-                            Console.WriteLine("Bingo: {0} {1}",ret.Method.Name,ret.Method.DeclaringType.Name);
                         //Console.WriteLine("invoke direct: {0}", v);
                         return ret;
                     }

@@ -173,7 +173,7 @@ namespace clojure.lang.CljCompiler.Ast
                         FnMethod f = FnMethod.Parse(fn, (ISeq)RT.first(s), retTag);
                         if ( f.UsesThis)
                         {
-                            Console.WriteLine("{0} uses this",fn.Name);
+                            //Console.WriteLine("{0} uses this",fn.Name);
                             usesThis = true;
                         }
                         if (f.IsVariadic)

@@ -299,17 +299,17 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if ( fn.CanBeDirect)
             {
-                Console.WriteLine("emit static: {0}", fn.Name);
+                //Console.WriteLine("emit static: {0}", fn.Name);
                 DoEmitStatic(fn, tb);
             }
             else if (Prim != null)
             {
-                Console.WriteLine("emit prim: {0}", fn.Name);
+                //Console.WriteLine("emit prim: {0}", fn.Name);
                 DoEmitPrim(fn, tb);
             }
             else
             {
-                Console.WriteLine("emit normal: {0}", fn.Name);
+                //Console.WriteLine("emit normal: {0}", fn.Name);
                 DoEmit(fn, tb);
             }
         }
@@ -381,7 +381,7 @@ namespace clojure.lang.CljCompiler.Ast
                 for (int i = 0; i < _argTypes.Length; i++)
                 {
                     primIlg.EmitLoadArg(i + 1);
-                    HostExpr.EmitUnboxArg(fn, primIlg, _argTypes[i]);
+                    //HostExpr.EmitUnboxArg(fn, primIlg, _argTypes[i]);
                 }
                 primIlg.Emit(OpCodes.Call, baseMB);
                 if (Body.HasNormalExit())

@@ -159,38 +159,29 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            try
+            if (_variadic)
             {
-                if (_variadic)
+                
+                ParameterInfo[] pinfos = _method.GetParameters();
+                for (int i =0; i< pinfos.Length-1; i++ )
                 {
-
-                    ParameterInfo[] pinfos = _method.GetParameters();
-                    for (int i = 0; i < pinfos.Length - 1; i++)
+                    Expr e = (Expr)_args.nth(i);
+                    if (Compiler.MaybePrimitiveType(e) == pinfos[i].ParameterType)
+                        ((MaybePrimitiveExpr)e).EmitUnboxed(RHC.Expression, objx, ilg);
+                    else
                     {
-                        Expr e = (Expr)_args.nth(i);
-                        if (Compiler.MaybePrimitiveType(e) == pinfos[i].ParameterType)
-                            ((MaybePrimitiveExpr)e).EmitUnboxed(RHC.Expression, objx, ilg);
-                        else
-                        {
-                            e.Emit(RHC.Expression, objx, ilg);
-                            HostExpr.EmitUnboxArg(objx, ilg, pinfos[i].ParameterType);
-                        }
+                        e.Emit(RHC.Expression, objx, ilg);
+                        HostExpr.EmitUnboxArg(objx, ilg, pinfos[i].ParameterType);
                     }
-                    IPersistentVector restArgs = RT.subvec(_args, pinfos.Length - 1, _args.count());
-                    MethodExpr.EmitArgsAsArray(restArgs, objx, ilg);
-                    ilg.EmitCall(Compiler.Method_ArraySeq_create);
                 }
-                else
-                    MethodExpr.EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
-
-                ilg.EmitCall(_method);
-
+                IPersistentVector restArgs = RT.subvec(_args, pinfos.Length - 1, _args.count());
+                MethodExpr.EmitArgsAsArray(restArgs, objx, ilg);
+                ilg.EmitCall(Compiler.Method_ArraySeq_create);               
             }
-            catch (Exception e)
-            {
-                Console.WriteLine("YIPPEE!!!!: {0}",e.Message);
-                throw;
-            }
+            else
+                MethodExpr.EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
+
+            ilg.EmitCall(_method);
         }
 
         #endregion

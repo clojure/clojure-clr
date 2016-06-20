@@ -24,6 +24,7 @@ using System;
 using System.Diagnostics.SymbolStore;
 using clojure.lang.Runtime;
 using AstUtils = Microsoft.Scripting.Ast.Utils;
+using System.Collections.Concurrent;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -75,9 +76,13 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region C-tors & factory methods
 
+        public static ConcurrentDictionary<Assembly, bool> InternalAssemblies = new ConcurrentDictionary<Assembly, bool>();
+
         public static GenContext CreateWithInternalAssembly(string assyName, bool createDynInitHelper)
         {
-            return CreateGenContext(assyName, assyName, ".dll", null, createDynInitHelper);
+            GenContext ctx = CreateGenContext(assyName, assyName, ".dll", null, createDynInitHelper);
+            InternalAssemblies[ctx.AssemblyBuilder] = true;
+            return ctx;
         }
 
         public static GenContext CreateWithExternalAssembly(string sourceName, AssemblyName assemblyName, string extension, bool createDynInitHelper)
