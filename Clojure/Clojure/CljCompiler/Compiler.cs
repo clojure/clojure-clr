@@ -194,6 +194,7 @@ namespace clojure.lang
         internal static readonly Var CompileStubSymVar = Var.create(null).setDynamic();
         internal static readonly Var CompileStubClassVar = Var.create(null).setDynamic();
         internal static readonly Var CompileStubOrigClassVar = Var.create(null).setDynamic();
+        internal static readonly Var CompilingDefTypeVar = Var.create(null).setDynamic();
 
         internal static readonly Var CompilerContextVar = Var.create(null).setDynamic();
         internal static readonly Var CompilerActiveVar = Var.create(false).setDynamic();
@@ -203,6 +204,8 @@ namespace clojure.lang
 
         public static object GetCompilerOption(Keyword k)
         {
+            var val = CompilerOptionsVar.deref();
+            var lu = RT.get(val, k);
             return RT.get(CompilerOptionsVar.deref(), k);
         }
 
@@ -210,7 +213,8 @@ namespace clojure.lang
         {
             Object compilerOptions = null;
 
-            foreach (DictionaryEntry de in Environment.GetEnvironmentVariables())
+            IDictionary envVars = Environment.GetEnvironmentVariables();
+            foreach (DictionaryEntry de in envVars)
             {
                 string name = (string)de.Key;
                 string v = (string)de.Value;
@@ -218,6 +222,12 @@ namespace clojure.lang
                 {
                     compilerOptions = RT.assoc(compilerOptions,
                         RT.keyword(null, name.Substring(1 + name.LastIndexOf("_"))),
+                        RT.readString(v));
+                }
+                if ( name.StartsWith("clojure.compiler."))
+                {
+                    compilerOptions = RT.assoc(compilerOptions,
+                        RT.keyword(null, name.Substring(1 + name.LastIndexOf("."))),
                         RT.readString(v));
                 }
 
@@ -1375,8 +1385,7 @@ namespace clojure.lang
         static GenContext CreateEvalContext(string name, bool createDynInitHelper)
         {
             GenContext c = GenContext.CreateWithInternalAssembly("eval", createDynInitHelper);
-            //TypeBuilder tb = c.AssemblyGen.DefinePublicType("__Scratch__", typeof(object), false);
-            //return c.WithTypeBuilder(tb);
+            //GenContext c = GenContext.CreateWithExternalAssembly("eval", ".dll", true);  // for debugging use with SaveEvalContext
             return c;
         }
 
@@ -1393,6 +1402,11 @@ namespace clojure.lang
         public static bool IsCompiling
         {
             get { return RT.booleanCast(CompilerActiveVar.deref()); }
+        }
+
+        public static bool IsCompilingDefType
+        {
+            get { return RT.booleanCast(CompilingDefTypeVar.deref()); }
         }
 
         public static string IsCompilingSuffix()

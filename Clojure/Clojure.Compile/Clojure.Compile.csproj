@@ -136,6 +136,7 @@
     <PostBuildEvent Condition=" '$(Runtime)' == '.Net' ">     "$(TargetPath)" clojure.core clojure.core.protocols clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect clojure.edn</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>"$(TargetPath)" clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect clojure.edn</PostBuildEvent>
+    <PostBuildEvent>set CLOJURE_COMPILER_direct-linking=true
+$(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect clojure.edn</PostBuildEvent>
   </PropertyGroup>
 </Project>

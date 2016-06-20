@@ -40,6 +40,8 @@ namespace clojure.lang.CljCompiler.Ast
         readonly bool _variadic;
         readonly object _tag;
 
+        public MethodInfo Method { get { return _method; } }
+
         #endregion
 
         #region Ctors
@@ -76,16 +78,11 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if (!v.isBound || v.get() == null)
             {
-                Console.WriteLine("Not bound: {0}", v);
+                //Console.WriteLine("Not bound: {0}", v);
                 return null;
             }
 
             Type target = v.get().GetType();
-
-            {
-                string tname = target.Name;
-                Console.WriteLine("Type: {0}", tname);
-            }
 
             MethodInfo[] allMethods = target.GetMethods();
             bool variadic = false;
@@ -95,7 +92,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             foreach (MethodInfo m in allMethods)
             {
-                Console.WriteLine("Method {0}", m.Name);
+                //Console.WriteLine("Method {0}", m.Name);
                 if (m.IsStatic && m.Name.Equals("invokeStatic"))
                 {
                     pInfos = m.GetParameters();
@@ -122,6 +119,11 @@ namespace clojure.lang.CljCompiler.Ast
             IPersistentVector argv = PersistentVector.EMPTY;
             for (ISeq s = RT.seq(args); s != null; s = s.next())
                 argv = argv.cons(Compiler.Analyze(new ParserContext(RHC.Expression), s.first()));
+
+            {
+                string tname = target.Name;
+                //Console.WriteLine("static invoke on type: {0}", tname);
+            }
 
             return new StaticInvokeExpr(target, method, variadic, argv, tag);
         }
@@ -157,29 +159,38 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            if (_variadic)
+            try
             {
-                ParameterInfo[] pinfos = _method.GetParameters();
-                for (int i =0; i< pinfos.Length; i++ )
+                if (_variadic)
                 {
-                    Expr e = (Expr)_args.nth(i);
-                    if (Compiler.MaybePrimitiveType(e) == pinfos[i].ParameterType)
-                        ((MaybePrimitiveExpr)e).EmitUnboxed(RHC.Expression, objx, ilg);
-                    else
+
+                    ParameterInfo[] pinfos = _method.GetParameters();
+                    for (int i = 0; i < pinfos.Length - 1; i++)
                     {
-                        e.Emit(RHC.Expression, objx, ilg);
-                        HostExpr.EmitUnboxArg(objx, ilg, pinfos[i].ParameterType);
+                        Expr e = (Expr)_args.nth(i);
+                        if (Compiler.MaybePrimitiveType(e) == pinfos[i].ParameterType)
+                            ((MaybePrimitiveExpr)e).EmitUnboxed(RHC.Expression, objx, ilg);
+                        else
+                        {
+                            e.Emit(RHC.Expression, objx, ilg);
+                            HostExpr.EmitUnboxArg(objx, ilg, pinfos[i].ParameterType);
+                        }
                     }
+                    IPersistentVector restArgs = RT.subvec(_args, pinfos.Length - 1, _args.count());
+                    MethodExpr.EmitArgsAsArray(restArgs, objx, ilg);
+                    ilg.EmitCall(Compiler.Method_ArraySeq_create);
                 }
-                IPersistentVector restArgs = RT.subvec(_args, pinfos.Length - 1, _args.count());
-                MethodExpr.EmitArgsAsArray(restArgs, objx, ilg);
-                ilg.EmitCall(Compiler.Method_ArraySeq_create);               
+                else
+                    MethodExpr.EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
+
+                ilg.EmitCall(_method);
+
             }
-            else
-                MethodExpr.EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
-
-            ilg.EmitCall(_method);
-
+            catch (Exception e)
+            {
+                Console.WriteLine("YIPPEE!!!!: {0}",e.Message);
+                throw;
+            }
         }
 
         #endregion

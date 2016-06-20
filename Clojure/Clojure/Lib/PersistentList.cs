@@ -98,7 +98,7 @@ namespace clojure.lang
         /// Provides a function to create a list from a sequence of arguments. (Internal use only.)
         /// </summary>
         /// <remarks>Internal use only.  Used to interface with core.clj.</remarks>
-        sealed class PLCreator : RestFn
+        public sealed class PLCreator : RestFn
         {
             public override int getRequiredArity()
             {
@@ -118,6 +118,24 @@ namespace clojure.lang
                     object[] argsarray = (object[])ias.ToArray();
                     IPersistentList ret = EMPTY;
                     for (int i = argsarray.Length - 1; i >= ias.index(); i--)
+                        ret = (IPersistentList)ret.cons(argsarray[i]);
+                    return ret;
+                }
+
+                List<object> list = new List<object>();
+                for (ISeq s = RT.seq(args); s != null; s = s.next())
+                    list.Add(s.first());
+                return create(list);
+            }
+
+            static public object invokeStatic(ISeq args)
+            {
+                IArraySeq ias = args as IArraySeq;
+                if (ias != null)
+                {
+                    object[] argsarray = (object[])ias.ToArray();
+                    IPersistentList ret = EMPTY;
+                    for (int i = argsarray.Length - 1; i >= 0; i--)
                         ret = (IPersistentList)ret.cons(argsarray[i]);
                     return ret;
                 }

@@ -30,17 +30,17 @@
 
  ;during bootstrap we don't have destructuring let, loop or fn, will redefine later
 (def
- ^{:macro true
+ ^{:macro true                        	    :dynamic true   ;;; ADDED :dynamic true -- eventually replace with :redef
    :added "1.0"}
   let (fn* let [&form &env & decl] (cons 'let* decl)))
   
 (def
- ^{:macro true
+ ^{:macro true                          	:dynamic true   ;;; ADDED :dynamic true -- eventually replace with :redef
    :added "1.0"}
  loop (fn* loop [&form &env & decl] (cons 'loop* decl)))  
  
  (def
- ^{:macro true
+ ^{:macro true                           	:dynamic true   ;;; ADDED :dynamic true -- eventually replace with :redef
    :added "1.0"}
  fn (fn* fn [&form &env & decl] 
          (.withMeta ^clojure.lang.IObj (cons 'fn* decl) 
@@ -286,7 +286,7 @@
     to the var metadata. prepost-map defines a map with optional keys
     :pre and :post that contain collections of pre or post conditions."
    :arglists '([name doc-string? attr-map? [params*] prepost-map? body]
-                [name doc-string? attr-map? ([params*] prepost-map? body)+ attr-map?])
+                [name doc-string? attr-map? ([params*] prepost-map? body)+ attr-map?])   				:dynamic true   ;;; ADDED :dynamic true -- eventually replace with :redef
    :added "1.0"}
  defn (fn defn [&form &env name & fdecl]
         ;; Note: Cannot delegate this check to def because of the call to (with-meta name ..)
@@ -463,7 +463,7 @@
                              (if (map? (first fd))
                                (recur (next fd))
                                fd)))
-                   fdecl (if (vector? (first fdecl))
+				   fdecl (if (vector? (first fdecl))
                            (list fdecl)
                            fdecl)
                    add-implicit-args (fn [fd]

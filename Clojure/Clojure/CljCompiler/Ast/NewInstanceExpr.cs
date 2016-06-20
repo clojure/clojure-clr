@@ -201,7 +201,8 @@ namespace clojure.lang.CljCompiler.Ast
                             Compiler.MethodVar, null,
                             Compiler.LocalEnvVar, ret.Fields,
                             Compiler.CompileStubSymVar, Symbol.intern(null, tagName),
-                            Compiler.CompileStubClassVar, baseClass
+                            Compiler.CompileStubClassVar, baseClass,
+                            Compiler.CompilingDefTypeVar, true
                             ));
                     ret.HintedFields = RT.subvec(fieldSyms, 0, fieldSyms.count() - ret.AltCtorDrops);
                 }

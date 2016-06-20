@@ -325,7 +325,8 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.RegisterDuplicateType(TypeBuilder);
 
                         Var.pushThreadBindings(RT.map(
-                            Compiler.CompileStubOrigClassVar, stubType
+                            Compiler.CompileStubOrigClassVar, stubType,
+                            Compiler.CompilingDefTypeVar, true
                             ));
                         //,
                         //Compiler.COMPILE_STUB_CLASS, _baseType));
@@ -358,6 +359,9 @@ namespace clojure.lang.CljCompiler.Ast
                     EmitMethods(TypeBuilder);
 
                     CompiledType = TypeBuilder.CreateType();
+
+                    var methods1 = TypeBuilder.GetMethods();
+                    var methods2 = CompiledType.GetMethods();
 
                     if (context.DynInitHelper != null)
                         context.DynInitHelper.FinalizeType();

@@ -34,6 +34,7 @@
 
   
   <Target Name="Build">
+    <SetEnvVar Name="clojure.compiler.direct-linking" Value="true" />
     <MSBuild Projects="ClojureCLR.sln"
              Properties="Runtime=$(Runtime);PlatformSym=$(PlatformSym)"/>
   </Target>

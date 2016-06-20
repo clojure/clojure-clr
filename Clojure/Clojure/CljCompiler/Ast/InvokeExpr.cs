@@ -104,23 +104,14 @@ namespace clojure.lang.CljCompiler.Ast
                 _tag = tag;
             else if (varFexpr != null)
             {
-                object arglists = RT.get(RT.meta(varFexpr.Var), Compiler.ArglistsKeyword);
-                object sigTag = null;
-                for (ISeq s = RT.seq(arglists); s != null; s = s.next())
-                {
-                    APersistentVector sig = (APersistentVector)s.first();
-                    int restOffset = sig.IndexOf(Compiler.AmpersandSym);
-                    if (args.count() == sig.count() || (restOffset > -1 && args.count() >= restOffset))
-                    {
-                        sigTag = Compiler.TagOf(sig);
-                        break;
-                    }
-                }
+                Var v = varFexpr.Var;
+
+                object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);
+                object sigTag = SigTag(_args.count(), v);
                 _tag = sigTag ?? varFexpr.Tag;
             }
             else
                 _tag = null;
-
         }
 
         #endregion
@@ -158,6 +149,32 @@ namespace clojure.lang.CljCompiler.Ast
                     Type tval = csexpr.Val as Type;
                     if (tval != null)
                         return new InstanceOfExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tval, Compiler.Analyze(pcon, RT.third(form)));
+                }
+            }
+
+            if ( RT.booleanCast(Compiler.GetCompilerOption(Compiler.DirectLinkingKeyword))
+                && varFexpr != null
+                && pcon.Rhc != RHC.Eval )
+            {
+                Var v = varFexpr.Var;
+                if (RT.get(RT.meta(v), RT.DeclaredKey) != null)
+                    Console.WriteLine("Declared: {0}",v);
+                if ( ! v.isDynamic() ||  RT.get(RT.meta(v), RT.DeclaredKey) == null )
+                {
+                    Symbol formTag = Compiler.TagOf(form);
+                    object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);
+                    int arity = RT.count(form.next());
+                    object sigtag = SigTag(arity, v);
+                    object vtag = RT.get(RT.meta(v), RT.TagKey);
+                    StaticInvokeExpr ret = StaticInvokeExpr.Parse(v, RT.next(form), formTag ?? sigtag ?? vtag) as StaticInvokeExpr;
+                    if (ret != null && !((Compiler.IsCompiling || Compiler.IsCompilingDefType) && ret.Method.DeclaringType.Assembly.GetName().Name == "eval"))
+                    {
+                        if ((Compiler.IsCompiling|| Compiler.IsCompilingDefType) && ret.Method.DeclaringType.Assembly.GetName().Name == "eval")
+                            Console.WriteLine("Bingo: {0} {1}",ret.Method.Name,ret.Method.DeclaringType.Name);
+                        //Console.WriteLine("invoke direct: {0}", v);
+                        return ret;
+                    }
+                    //Console.WriteLine("NOT direct: {0}", v);
                 }
             }
 
@@ -216,7 +233,7 @@ namespace clojure.lang.CljCompiler.Ast
                 IFn fn = (IFn)_fexpr.Eval();
                 IPersistentVector argvs = PersistentVector.EMPTY;
                 for (int i = 0; i < _args.count(); i++)
-                    argvs = (IPersistentVector)argvs.cons(((Expr)_args.nth(i)).Eval());
+                    argvs = argvs.cons(((Expr)_args.nth(i)).Eval());
                 return fn.applyTo(RT.seq(Util.Ret1(argvs, argvs = null)));
             }
             catch (Compiler.CompilerException)
@@ -233,15 +250,32 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
+        static Object SigTag(int argcount, Var v)
+        {
+            Object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);
+            for (ISeq s = RT.seq(arglists); s != null; s = s.next())
+            {
+                APersistentVector sig = (APersistentVector)s.first();
+                int restOffset = sig.IndexOf(Compiler.AmpersandSym);
+                if (argcount == sig.count() || (restOffset > -1 && argcount >= restOffset))
+                    return Compiler.TagOf(sig);
+            }
+            return null;
+        }
+
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            GenContext.EmitDebugInfo(ilg, _spanMap);
+
 
             if (_isProtocol)
+            {
+                GenContext.EmitDebugInfo(ilg, _spanMap);
                 EmitProto(rhc, objx, ilg);
+            }
             else
             {
                 _fexpr.Emit(RHC.Expression, objx, ilg);
+                GenContext.EmitDebugInfo(ilg, _spanMap);
                 ilg.Emit(OpCodes.Castclass, typeof(IFn));
                 EmitArgsAndCall(0, rhc, objx, ilg);
             }

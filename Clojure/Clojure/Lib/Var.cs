@@ -585,7 +585,7 @@ namespace clojure.lang
         /// Unbind the var's root value.
         /// </summary>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        void UnbindRoot()
+        internal void UnbindRoot()
         {
             _root = new Unbound(this);
             ++_rev;

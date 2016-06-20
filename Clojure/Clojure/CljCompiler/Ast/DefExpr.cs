@@ -174,6 +174,18 @@ namespace clojure.lang.CljCompiler.Ast
 
                 mm = (IPersistentMap)Compiler.ElideMeta(mm);
 
+                if (sym.Name == "pr")
+                    Console.WriteLine("FOUND PR");
+                if ( sym.Name == "ns")
+                    Console.WriteLine("FOUND NS");
+                if (sym.Name == "defn")
+                    Console.WriteLine("FOUND DEFN");
+
+
+                //if (RT.get(v.meta(), RT.DeclaredKey) == null && RT.get(v.meta(), Compiler.DynamicKeyword) == null )       // TODO: change this to redef
+                //    v.UnbindRoot();  // in a bootstrap situation (compiling core.clj after loading it, e.g.) we don't want to pick up the core.clj
+
+
                 Expr meta =  mm == null || mm.count() == 0 ? null : Compiler.Analyze(pcon.EvalOrExpr(),mm);
                 Expr init = Compiler.Analyze(pcon.EvalOrExpr(),RT.third(form), v.Symbol.Name);
                 bool initProvided = RT.count(form) == 3;
