@@ -725,14 +725,20 @@ namespace clojure.lang
         {
             if (b != null && method != null)
             {
-                if (RT.get(method.Locals, b) == null)
+                LocalBinding lb = (LocalBinding)RT.get(method.Locals, b);
+                if (lb == null)
                 {
                     method.Objx.Closes = (IPersistentMap)RT.assoc(method.Objx.Closes, b, b);
                     CloseOver(b, method.Parent);
                 }
-                else if (InCatchFinallyVar.deref() != null)
+                else
                 {
-                    method.LocalsUsedInCatchFinally = (PersistentHashSet)method.LocalsUsedInCatchFinally.cons(b.Index);
+                    if (lb.Index == 0)
+                        method.UsesThis = true;
+                    if (InCatchFinallyVar.deref() != null)
+                    {
+                        method.LocalsUsedInCatchFinally = (PersistentHashSet)method.LocalsUsedInCatchFinally.cons(b.Index);
+                    }
                 }
             }
         }
