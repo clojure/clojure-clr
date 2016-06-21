@@ -157,7 +157,7 @@ namespace clojure.lang.CljCompiler.Ast
                                 Var.pushThreadBindings(dynamicBindings);
                                 LocalBinding lb = Compiler.RegisterLocal(sym,
                                     (Symbol)(RT.second(f) is Symbol ? RT.second(f) : null),
-                                    null,false);
+                                    null, typeof(Object), false);
                                 Expr handler = (new BodyExpr.Parser()).Parse(recursePcon, RT.next(RT.next(RT.next(f))));
                                 catches = catches.cons(new CatchClause(t, lb, handler)); ;
                             }

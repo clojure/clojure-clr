@@ -151,7 +151,7 @@ namespace clojure.lang.CljCompiler.Ast
                             }
 
                             // Sequential enhancement of env (like Lisp let*)
-                            LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), init, false);
+                            LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), init, typeof(Object), false);
                             BindingInit bi = new BindingInit(b, init);
                             bindingInits = bindingInits.cons(bi);
 

@@ -98,7 +98,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if (sym.Namespace != null)
                             throw new ParseException("Can't let qualified name: " + sym);
 
-                        LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), null,false);
+                        LocalBinding b = Compiler.RegisterLocal(sym, Compiler.TagOf(sym), null, typeof(Object), false);
                         // b.CanBeCleared = false;
                         lbs = lbs.cons(b);
                     }

@@ -46,11 +46,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         public bool RecurMismatch { get; set; }
 
+        readonly Type _declaredType;
+        public Type DeclaredType { get { return _declaredType; } }
+
         #endregion
 
         #region C-tors
 
-        public LocalBinding(int index, Symbol sym, Symbol tag, Expr init, bool isThis, bool isArg, bool isByRef)
+        public LocalBinding(int index, Symbol sym, Symbol tag, Expr init, Type declaredType, bool isThis, bool isArg, bool isByRef)
         {
             if (Compiler.MaybePrimitiveType(init) != null && tag != null)
                 throw new InvalidOperationException("Can't type hint a local with a primitive initializer");
@@ -63,6 +66,7 @@ namespace clojure.lang.CljCompiler.Ast
             _isThis = isThis;
             _isArg = isArg;
             _isByRef = isByRef;
+            _declaredType = declaredType;
             RecurMismatch = false;
         }
 

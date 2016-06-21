@@ -185,10 +185,10 @@ namespace clojure.lang.CljCompiler.Ast
                             pt = typeof(ISeq);
                         argTypes.Add(pt);
                         LocalBinding b = pt.IsPrimitive
-                            ? Compiler.RegisterLocal(p,null, new MethodParamExpr(pt), true)
+                            ? Compiler.RegisterLocal(p, null, new MethodParamExpr(pt), pt, true)
                             : Compiler.RegisterLocal(p,
                             paramState == ParamParseState.Rest ? Compiler.ISeqSym : Compiler.TagOf(p),
-                            null,true);
+                            null, pt, true);
 
                         argLocals = argLocals.cons(b);
                         switch (paramState)

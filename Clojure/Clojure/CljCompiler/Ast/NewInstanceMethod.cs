@@ -233,7 +233,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 for (int i = 0; i < parms.count(); i++)
                 {
-                    LocalBinding lb = Compiler.RegisterLocal(pSyms[i], null, new MethodParamExpr(pTypes[i]), true, pRefs[i]);
+                    LocalBinding lb = Compiler.RegisterLocal(pSyms[i], null, new MethodParamExpr(pTypes[i]), pTypes[i], true, pRefs[i]);
                     argLocals = argLocals.assocN(i, lb);
                     method._argTypes[i] = pTypes[i];
                 }

@@ -204,8 +204,8 @@ namespace clojure.lang.CljCompiler.Ast
                 if (lb.IsArg)
                 {
                     //ilg.Emit(OpCodes.Starg, lb.Index - (objx.IsStatic ? 0 : 1));
-                    if (lb.HasClrType && lb.ClrType != typeof(Object))
-                        ilg.Emit(OpCodes.Castclass, lb.ClrType);
+                    if (lb.DeclaredType != typeof(Object))
+                        ilg.Emit(OpCodes.Castclass, lb.DeclaredType);
                     ilg.EmitStoreArg(lb.Index);
                 }
                 else

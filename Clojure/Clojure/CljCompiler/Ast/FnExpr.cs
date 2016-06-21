@@ -212,9 +212,9 @@ namespace clojure.lang.CljCompiler.Ast
                                 for (ISeq sl = RT.seq(RT.keys(fm.Locals)); sl != null; sl = sl.next())
                                 {
                                     LocalBinding lb = sl.first() as LocalBinding;
-                                    lb.Index -= 1;
+                                    if ( lb.IsArg)
+                                        lb.Index -= 1;
                                 }
-                                fm.MaxLocal -= 1;
                             }
                         }
                     }
