@@ -1,11 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug 3.5</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug 4.0</Configuration>
     <!--<Platform Condition=" '$(Platform)' == '' ">Any CPU</Platform>-->
     <cljc>Clojure.Compile.exe</cljc>
     <clji>Clojure.Main.exe</clji>
     <Runtime Condition=" '$(Runtime)' == '' ">.Net</Runtime>
+    <DirectLinking Condition=" '$(DirectLinking)' == '' ">true</DirectLinking>
     <!-- 
 	<DefineConstants Condition=" '$(Runtime)' == 'Mono' ">MONO</DefineConstants>
     <DefineConstants Condition=" '$(Runtime)' == '.Net' ">DOTNET</DefineConstants> 
@@ -29,14 +30,13 @@
   </PropertyGroup>
 
   <UsingTask
-   TaskName="SetEnvVar"
+   TaskName="BuildTasks.SetEnvVar"
    AssemblyFile="BuildTasks\bin\Debug\BuildTasks.dll" />
 
   
   <Target Name="Build">
-    <SetEnvVar Name="clojure.compiler.direct-linking" Value="true" />
     <MSBuild Projects="ClojureCLR.sln"
-             Properties="Runtime=$(Runtime);PlatformSym=$(PlatformSym)"/>
+             Properties="Runtime=$(Runtime);PlatformSym=$(PlatformSym);DirectLinking=$(DirectLinking)"/>
   </Target>
   
   <Target Name="CompileTest" DependsOnTargets="Build">

@@ -360,9 +360,6 @@ namespace clojure.lang.CljCompiler.Ast
 
                     CompiledType = TypeBuilder.CreateType();
 
-                    var methods1 = TypeBuilder.GetMethods();
-                    var methods2 = CompiledType.GetMethods();
-
                     if (context.DynInitHelper != null)
                         context.DynInitHelper.FinalizeType();
 
