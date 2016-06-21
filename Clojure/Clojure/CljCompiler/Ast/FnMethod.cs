@@ -355,6 +355,9 @@ namespace clojure.lang.CljCompiler.Ast
                     regIlg.EmitLoadArg(i + 1);
                     HostExpr.EmitUnboxArg(fn, regIlg, _argTypes[i]);
                 }
+
+                GenContext.EmitDebugInfo(baseIlg, SpanMap);
+
                 regIlg.Emit(OpCodes.Call, baseMB);
                 if (ReturnType.IsValueType)
                     regIlg.Emit(OpCodes.Box, ReturnType);
