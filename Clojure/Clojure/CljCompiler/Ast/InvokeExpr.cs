@@ -157,7 +157,7 @@ namespace clojure.lang.CljCompiler.Ast
                 && pcon.Rhc != RHC.Eval )
             {
                 Var v = varFexpr.Var;
-                if ( ! v.isDynamic() ||  RT.get(RT.meta(v), RT.DeclaredKey) == null )
+                if ( ! v.isDynamic() && !RT.booleanCast(RT.get(v.meta(), Compiler.RedefKeyword, false)) && !RT.booleanCast(RT.get(v.meta(), RT.DeclaredKey, false)) )
                 {
                     Symbol formTag = Compiler.TagOf(form);
                     object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);

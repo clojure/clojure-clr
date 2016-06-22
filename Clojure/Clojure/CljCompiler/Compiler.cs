@@ -114,6 +114,7 @@ namespace clojure.lang
         internal static readonly Keyword ProtocolKeyword = Keyword.intern(null,"protocol");
         //static readonly Keyword OnKeyword = Keyword.intern(null, "on");
         internal static readonly Keyword DynamicKeyword = Keyword.intern("dynamic");
+        internal static readonly Keyword RedefKeyword = Keyword.intern("redef");
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]

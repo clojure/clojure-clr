@@ -30,17 +30,17 @@
 
  ;during bootstrap we don't have destructuring let, loop or fn, will redefine later
 (def
- ^{:macro true                        	    :dynamic true   ;;; ADDED :dynamic true -- eventually replace with :redef
+ ^{:macro true                        	    :redef true
    :added "1.0"}
   let (fn* let [&form &env & decl] (cons 'let* decl)))
   
 (def
- ^{:macro true                          	:dynamic true   ;;; ADDED :dynamic true -- eventually replace with :redef
+ ^{:macro true                          	:redef true
    :added "1.0"}
  loop (fn* loop [&form &env & decl] (cons 'loop* decl)))  
  
  (def
- ^{:macro true                           	:dynamic true   ;;; ADDED :dynamic true -- eventually replace with :redef
+ ^{:macro true                           	:redef true
    :added "1.0"}
  fn (fn* fn [&form &env & decl] 
          (.withMeta ^clojure.lang.IObj (cons 'fn* decl) 
