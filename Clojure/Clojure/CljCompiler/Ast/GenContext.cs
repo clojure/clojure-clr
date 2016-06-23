@@ -24,7 +24,8 @@ using System;
 using System.Diagnostics.SymbolStore;
 using clojure.lang.Runtime;
 using AstUtils = Microsoft.Scripting.Ast.Utils;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -76,7 +77,23 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region C-tors & factory methods
 
-        public static ConcurrentDictionary<Assembly, bool> InternalAssemblies = new ConcurrentDictionary<Assembly, bool>();
+        private static Dictionary<Assembly, bool> InternalAssemblies = new Dictionary<Assembly, bool>();
+
+        private static void AddInternalAssembly(Assembly a)
+        {
+            lock (((ICollection)InternalAssemblies).SyncRoot)
+            {
+                InternalAssemblies[a] = true;
+            }
+        }
+
+        public static bool IsInternalAssembly(Assembly a)
+        {
+            lock (((ICollection)InternalAssemblies).SyncRoot)
+            {
+                return InternalAssemblies.ContainsKey(a);
+            }
+        }
 
         public static GenContext CreateWithInternalAssembly(string assyName, bool createDynInitHelper)
         {

@@ -165,7 +165,7 @@ namespace clojure.lang.CljCompiler.Ast
                     object sigtag = SigTag(arity, v);
                     object vtag = RT.get(RT.meta(v), RT.TagKey);
                     StaticInvokeExpr ret = StaticInvokeExpr.Parse(v, RT.next(form), formTag ?? sigtag ?? vtag) as StaticInvokeExpr;
-                    if (ret != null && !((Compiler.IsCompiling || Compiler.IsCompilingDefType) && GenContext.InternalAssemblies.ContainsKey(ret.Method.DeclaringType.Assembly)))
+                    if (ret != null && !((Compiler.IsCompiling || Compiler.IsCompilingDefType) && GenContext.IsInternalAssembly(ret.Method.DeclaringType.Assembly)))
                     {
                         //Console.WriteLine("invoke direct: {0}", v);
                         return ret;
