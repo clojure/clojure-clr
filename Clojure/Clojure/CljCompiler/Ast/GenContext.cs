@@ -99,8 +99,29 @@ namespace clojure.lang.CljCompiler.Ast
         {
             GenContext ctx = CreateGenContext(assyName, assyName, ".dll", null, createDynInitHelper);
             InternalAssemblies[ctx.AssemblyBuilder] = true;
+
+#if CLR2
+            // Massive kludge for .net 3.5 -- the RuntimeAssemblyBuilder yielded by reflection is not the same as AssemblyBuilder.
+            Type t = CreateDummyType(ctx.ModuleBuilder);
+            MethodInfo m = t.GetMethod("test");
+            if (m != null && m.DeclaringType.Assembly != ctx.AssemblyBuilder)
+                InternalAssemblies[m.DeclaringType.Assembly] = true;
+#endif
+
             return ctx;
         }
+
+        private static Type CreateDummyType(ModuleBuilder mb)
+        {
+            TypeBuilder tb = mb.DefineType("AAAAAA.AAAAAAA",TypeAttributes.Public);
+            MethodBuilder mbb = tb.DefineMethod("test",MethodAttributes.Public,typeof(void),Type.EmptyTypes);
+            var ilg = mbb.GetILGenerator();
+            ilg.Emit(OpCodes.Ret);
+            tb.CreateType();
+            return tb;
+        }
+
+
 
         public static GenContext CreateWithExternalAssembly(string sourceName, AssemblyName assemblyName, string extension, bool createDynInitHelper)
         {
