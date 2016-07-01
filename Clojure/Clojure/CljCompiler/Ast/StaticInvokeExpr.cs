@@ -67,7 +67,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Type ClrType
         {
-            get { return _tag != null ? HostExpr.TagToType(_tag) : _retType; }
+            get { return Compiler.RetType((_tag != null ? HostExpr.TagToType(_tag) : _retType), _retType); }
         }
 
         #endregion
