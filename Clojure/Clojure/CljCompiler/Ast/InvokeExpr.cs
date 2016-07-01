@@ -106,7 +106,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 Var v = varFexpr.Var;
 
-                object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);
+                //object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);
                 object sigTag = SigTag(_args.count(), v);
                 _tag = sigTag ?? varFexpr.Tag;
             }
@@ -132,6 +132,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Parsing
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         public static Expr Parse(ParserContext pcon, ISeq form)
         {
             bool tailPosition = Compiler.InTailCall(pcon.Rhc);

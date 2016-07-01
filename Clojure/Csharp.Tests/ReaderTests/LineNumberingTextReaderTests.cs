@@ -24,7 +24,7 @@ using System.IO;
 
 namespace Clojure.Tests.ReaderTests
 {
-    [TestFixture]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable"), TestFixture]
     public class LineNumberingTextReaderTests : AssertionHelper
     {
         const string _sample = "abc\nde\nfghijk\r\nlmnopq\n\nrstuv";

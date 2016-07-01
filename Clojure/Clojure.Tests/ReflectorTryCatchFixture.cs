@@ -37,6 +37,7 @@ namespace clojure.test
         }
   
 
+        [Serializable]
         public sealed class Cookies : Exception
         {
             public Cookies(String msg) : base(msg) { }

@@ -32,7 +32,7 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        readonly Type _target;
+        //readonly Type _target;
         readonly MethodInfo _method;
         readonly Type _retType;
         readonly IPersistentVector _args;
@@ -46,9 +46,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "target")]
         public StaticInvokeExpr(Type target, MethodInfo method, bool variadic, IPersistentVector args, object tag)
         {
-            _target = target;
+            //_target = target;
             _method = method;
             _retType = method.ReturnType;
             _variadic = variadic;
@@ -119,11 +120,6 @@ namespace clojure.lang.CljCompiler.Ast
             IPersistentVector argv = PersistentVector.EMPTY;
             for (ISeq s = RT.seq(args); s != null; s = s.next())
                 argv = argv.cons(Compiler.Analyze(new ParserContext(RHC.Expression), s.first()));
-
-            {
-                string tname = target.Name;
-                //Console.WriteLine("static invoke on type: {0}", tname);
-            }
 
             return new StaticInvokeExpr(target, method, variadic, argv, tag);
         }

@@ -104,6 +104,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         enum ParamParseState { Required, Rest, Done };
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         internal static FnMethod Parse(FnExpr fn, ISeq form, object retTag)
         {
             // ([args] body ... )

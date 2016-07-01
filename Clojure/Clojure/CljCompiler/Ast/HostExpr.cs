@@ -319,6 +319,7 @@ namespace clojure.lang.CljCompiler.Ast
             return t;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "maybe")]
         public static Type maybeSpecialTag(Symbol sym)
         {
             Type t = Compiler.PrimType(sym);

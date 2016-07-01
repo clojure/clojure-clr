@@ -128,6 +128,7 @@ namespace clojure.lang
                 return create(list);
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
             static public object invokeStatic(ISeq args)
             {
                 IArraySeq ias = args as IArraySeq;

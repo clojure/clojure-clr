@@ -79,6 +79,7 @@
     <Compile Include="clojure\samples\attributes\C.cs" />
     <Compile Include="clojure\samples\genclass\C.cs" />
     <Compile Include="clojure\samples\interop\C.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="clojure\core\protocols.clj">

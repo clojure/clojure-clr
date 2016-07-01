@@ -205,8 +205,6 @@ namespace clojure.lang
 
         public static object GetCompilerOption(Keyword k)
         {
-            var val = CompilerOptionsVar.deref();
-            var lu = RT.get(val, k);
             return RT.get(CompilerOptionsVar.deref(), k);
         }
 
