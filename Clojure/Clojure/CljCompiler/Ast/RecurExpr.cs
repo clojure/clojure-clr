@@ -173,7 +173,8 @@ namespace clojure.lang.CljCompiler.Ast
                         else if (primt == typeof(int) && pt == typeof(long))
                         {
                             mpeArg.EmitUnboxed(RHC.Expression, objx, ilg);
-                            ilg.EmitCall(Compiler.Method_RT_intCast_long);
+                            //ilg.EmitCall(Compiler.Method_RT_intCast_long);
+                            ilg.Emit(OpCodes.Conv_I4);
 
                         }
                         else if (primt == typeof(float) && pt == typeof(double))
@@ -204,7 +205,7 @@ namespace clojure.lang.CljCompiler.Ast
                 if (lb.IsArg)
                 {
                     //ilg.Emit(OpCodes.Starg, lb.Index - (objx.IsStatic ? 0 : 1));
-                    if (lb.DeclaredType != typeof(Object))
+                    if (lb.DeclaredType != typeof(Object) && !lb.DeclaredType.IsPrimitive)
                         ilg.Emit(OpCodes.Castclass, lb.DeclaredType);
                     ilg.EmitStoreArg(lb.Index);
                 }
