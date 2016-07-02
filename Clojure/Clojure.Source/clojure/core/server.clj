@@ -24,7 +24,7 @@
 
 (defmacro ^:private thread
   [^String name daemon & body]
-  `(doto (System.Threading.Thread.  ^System.Threading.ThreadStartThreadStart (gen-delegate System.Threading.ThreadStart [] ~@body))          ;;; (doto (Thread. (fn [] ~@body) ~name)
+  `(doto (System.Threading.Thread.  ^System.Threading.ThreadStart (gen-delegate System.Threading.ThreadStart [] ~@body))          ;;; (doto (Thread. (fn [] ~@body) ~name)
     (.set_Name ~name) (.set_IsBackground ~daemon)                                                   ;;; (.setDaemon ~daemon)
     (.Start)))                                                                                      ;;; .start
 
