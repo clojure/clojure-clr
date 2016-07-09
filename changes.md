@@ -222,6 +222,39 @@ See:
 * [CLJ-1868](http://dev.clojure.org/jira/browse/CLJ-1868)
   Avoid compiler NPE when checking class return type
  
+# Changes to ClojureCLR in Version 1.8
+
+We have made all the changes, bug fixes, etc., listed above that are relevant to ClojureCLR.
+
+## Bug fixes / improvements 
+
+* [CLJCLR-72](http://dev.clojure/org/jira/browse/CLJCLR-72)
+  Convert internal task in build.proj to external for sake of xbuild
+* [CLJCLR-71](http://dev.clojure/org/jira/browse/CLJCLR-71)
+  remove duplicate postbuild tasks in clojure.compile.csproj
+* Fix some Csharp tests
+* Make compiler AST node fields public
+* [CLJCLR-70](http://dev.clojure/org/jira/browse/CLJCLR-70)
+  Modify .csproj and .nuget/NuGet targets to support Mac and Linux builds
+* Remove startup diagnostic for tuple create methods
+* Convert from FxCop to Code Analysis
+* More code analysis fixes: Moving from List<> to IList<> in method args
+* More code analysis clean-up: unused code, etc.
+* More code analysis clean-up: static classes, format string errors
+* Fix reflection error string to pass tests
+* Make run_test_i work with clojure.test-clojure.exclude-namespaces env var not set
+* [CLJCLR-74](http://dev.clojure/org/jira/browse/CLJCLR-74)
+  pprint throws exception -- Error in Ref.CompareTo implementation
+* Fix outdated DLR package reference in CSharp.Tests for 3.5 build
+* Fix package reference in CSharp.Tests
+* Fix platform key in reader conditionals
+* [CLJCLR-76](http://dev.clojure/org/jira/browse/CLJCLR-76)
+  Fix reader conditionals to respect :cljr -- reapply reader test patch
+* Make gen-delegate pass along meta from the form
+* Fix bad type tag in core/server.clj
+* Add some type tagging to remove reflection errors in core/server.clj
+* Remove spurious cast on primitive type in RecurExpr
+ 
 # Changes to Clojure in Version 1.7
 
 ## 1 Compatibility Notes
