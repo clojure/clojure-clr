@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Clojure")]
-[assembly: AssemblyCopyright("Copyright © 2009-14")]
+[assembly: AssemblyCopyright("Copyright © 2009-16")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -41,6 +41,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.8.0")]
+[assembly: AssemblyVersion("1.9.0")]
 
 [assembly: System.Resources.NeutralResourcesLanguage("en-US")]
