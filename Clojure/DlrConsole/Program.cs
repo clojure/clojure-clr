@@ -23,6 +23,7 @@ namespace DlrConsole
 {
     class Program
     {
+        //todo[lt3] doesn't work
         static void Main(string[] args)
         {
             //ScriptRuntime env = ScriptRuntime.CreateFromConfiguration();
@@ -41,8 +42,53 @@ namespace DlrConsole
             Console.WriteLine("CurrentEngine: {0}", curEngine.LanguageVersion.ToString());
             ScriptScope scope = curEngine.CreateScope();
             Console.WriteLine("Scope: {0}", scope.GetItems());
-            Console.ReadLine();
+            Console.WriteLine("REPL started, q for quit");
+            var argList = new List<string>(args);
+            string t = "xx";
+            Func<string> getCmd = () =>
+            {
+                Console.Write("> ");
+                if (argList.Count() > 0)
+                {
+                    var r = argList[0];
+                    argList.RemoveAt(0); //lt2 rf Pull
+                    return r;
+                }
+                return Console.ReadLine();
+            };
+            Func<string, object> execute_inner = (tt => scope.Engine.Execute(tt, scope));
+            bool failSafe = false;
+            while ((t = getCmd()) != "q")
+            {
+                object r;
+                if (failSafe)
+                {
+                    try
+                    {
+                        r = (t == "" ? null : execute_inner(t));
+                    }
+                    catch (Exception ex)
+                    {
+                        r = ex;
+                        throw; //xx
+                    }
+                }
+                else
+                {
+                    r = execute_inner(t);
+                }
+                PrintResult(r);
+            }
 
+        }
+
+        private static void PrintResult(object r)
+        {
+            if (r == null) r = "((null))";
+            Console.WriteLine("== result value (DLR):");
+            Console.WriteLine(r);
+            Console.WriteLine("== result type (CLR):");
+            Console.WriteLine(((object)r).GetType());
         }
     }
 }

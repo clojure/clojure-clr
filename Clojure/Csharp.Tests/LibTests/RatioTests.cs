@@ -26,6 +26,12 @@ namespace Clojure.Tests.LibTests
     [TestFixture]
     public class RatioTests : AssertionHelper
     {
+        [SetUp]
+        public void SetUpCultureAware()
+        {
+            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+        }
+
         [Test]
         public void GetsThePiecesFromTheConstructedThing()
         {
