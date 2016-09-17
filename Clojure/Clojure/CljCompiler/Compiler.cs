@@ -1126,9 +1126,25 @@ namespace clojure.lang
             Var v = IsMacro(op);
             if (v != null)
             {
+                ISeq args = RT.cons(form, RT.cons(Compiler.LocalEnvVar.get(), form.next()));
                 try
                 {
-                    return v.applyTo(RT.cons(form, RT.cons(LocalEnvVar.get(), form.next())));
+                    Namespace checkns = Namespace.find(Symbol.intern("clojure.spec"));
+                    if ( checkns != null)
+                    {
+                        Var check = Var.find(Symbol.intern("clojure.spec/macroexpand-check"));
+                        if ((check != null) && (check.isBound))
+                            check.applyTo(RT.cons(v, RT.list(args)));
+                    }
+                    Symbol.intern("clojure.spec");
+                }
+                catch (ArgumentException e)
+                {
+                    throw new CompilerException((String)Compiler.SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), e);
+                }
+                try
+                {
+                    return v.applyTo(args);
                 }
                 catch (ArityException e)
                 {

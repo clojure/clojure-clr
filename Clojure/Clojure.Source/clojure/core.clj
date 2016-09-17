@@ -7515,6 +7515,8 @@ clojure.lang.IKVReduce
                     (reduce load-data-reader-file
                             mappings (data-reader-urls)))))
 
+(load "spec")
+
 (try
  (load-data-readers)
  (catch Exception t                                                                 ;;; Throwable
