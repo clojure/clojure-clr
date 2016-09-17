@@ -8,9 +8,9 @@
 
 (ns clojure.test-clojure.data-structures-interop
   (:require [clojure.test :refer :all]
-            [clojure.test.check.generators :as gen]
-            [clojure.test.check.properties :as prop]
-            [clojure.test.check.clojure-test :refer (defspec)]))
+            #_[clojure.test.check.generators :as gen]                                              ;;; Commented this out.  this namespace disappeared at some point
+            #_[clojure.test.check.properties :as prop]                                             ;;; Commented this out.  this namespace disappeared at some point
+            #_[clojure.test.check.clojure-test :refer (defspec)]))                                 ;;; Commented this out.  this namespace disappeared at some point
 
 ;;; Irrelevant for ClojureCLR
 ;;; We use mostly generated IEnumerators via yield.  These allow Current to be called after MoveNext hits the end (returns false) with no problem.

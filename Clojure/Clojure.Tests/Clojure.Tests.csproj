@@ -80,12 +80,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\clojure.data.generators.0.1.2.0\lib\net35\clojure.data.generators.dll</HintPath>
     </Reference>
-    <Reference Include="clojure.test.check, Version=0.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\clojure.test.check.0.7.0.0\lib\net35\clojure.test.check.dll</HintPath>
+    <Reference Include="clojure.test.check, Version=0.9.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\clojure.test.check.0.9.0.1\lib\net35\clojure.test.check.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="clojure.test.generative">
-      <HintPath>..\packages\clojure.test.generative.0.5.0.1\lib\net35\clojure.test.generative.dll</HintPath>
+    <Reference Include="clojure.test.generative, Version=0.5.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\clojure.test.generative.0.5.2.0\lib\net35\clojure.test.generative.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="clojure.tools.namespace, Version=0.2.10.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -316,6 +317,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="clojure\test_clojure\server.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="clojure\test_clojure\spec.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="clojure\test_clojure\special.clj">
