@@ -3493,6 +3493,11 @@ namespace clojure.lang
 
             var embeddedCljName = relativePath.Replace("/", ".") + ".clj";
             var stream = GetEmbeddedResourceStream(embeddedCljName, out containingAssembly);
+            if ( stream == null )
+            {
+                embeddedCljName = relativePath.Replace("/", ".") + ".cljc";
+                stream = GetEmbeddedResourceStream(embeddedCljName, out containingAssembly);
+            }
             if (stream != null)
             {
                 using (var rdr = new StreamReader(stream))
