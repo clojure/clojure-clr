@@ -125,7 +125,7 @@
 
 (defn fp-str [x]
    (let [s (str x)]
-     (if (or (.Contains s ".") (.Contains s "E"))
+     (if (or (.Contains s ".") (.Contains s "E") (.Contains s "NaN") (.Contains s "Infi"))
        s
        (str s ".0"))))
        
