@@ -147,7 +147,13 @@
     (is (= 'String (-> arglists first meta :tag)))                                                         ;;; java.lang.String
     (is (= 'Exception (-> arglists second meta :tag)))))                                                   ;;; java.lang.Integer
 
-(defn ^String hinting-conflict ^Exception [])                                                                     ;;; ^Integer
+(deftest CLJ-1232-return-type-not-imported
+  (is (thrown-with-msg? Compiler+CompilerException #"Unable to resolve typename: Closeable"               ;;; Compiler$CompilerException  classname
+                        (eval '(defn a ^Closeable []))))
+  (is (thrown-with-msg? Compiler+CompilerException #"Unable to resolve typename: Closeable"               ;;; Compiler$CompilerException  classname
+                        (eval '(defn a (^Closeable []))))))
+ 
+ (defn ^String hinting-conflict ^Exception [])                                                                     ;;; ^Integer
 
 (deftest calls-use-arg-vector-hint
   (should-not-reflect #(.Data (clojure.test-clojure.compilation/hinting-conflict)))                               ;;; .floatValue

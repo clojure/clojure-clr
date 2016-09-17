@@ -244,9 +244,10 @@
                           (if (instance? clojure.lang.Symbol tag)
                             (if (clojure.lang.Util/equiv (.IndexOf (.Name tag) ".") -1)                                              ;;; .indexOf  .getName
                               (if (clojure.lang.Util/equals nil (clojure.lang.CljCompiler.Ast.HostExpr/maybeSpecialTag tag))         ;;; clojure.lang.Compiler$HostExpr
-                                (let [t (.Name (clojure.lang.CljCompiler.Ast.HostExpr/MaybeType tag false))                         ;;; .getName  clojure.lang.Compiler$HostExpr  maybeClass
-                                      resolvedtag (clojure.lang.Symbol/intern t)]
-                                  (with-meta argvec (assoc m :tag resolvedtag)))
+                                (let [c (clojure.lang.CljCompiler.Ast.HostExpr/MaybeType tag false)]                                 ;;; clojure.lang.Compiler$HostExpr  maybeClass
+                                  (if c
+                                    (with-meta argvec (assoc m :tag (clojure.lang.Symbol/intern (.Name c))))                         ;;; .getName
+                                    argvec))
                                 argvec)
                               argvec)
                             argvec)))]
