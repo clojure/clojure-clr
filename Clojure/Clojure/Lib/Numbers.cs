@@ -2566,6 +2566,22 @@ namespace clojure.lang
 
         #region Bit ops
 
+        #region not
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "not")]
+        static public long not(object x)
+        {
+            return not(bitOpsCast(x));
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "not")]
+        static public long not(long x)
+        {
+            return ~x;
+        }
+
+        #endregion
+
         #region and
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "and")]
