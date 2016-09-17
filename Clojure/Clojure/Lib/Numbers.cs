@@ -256,8 +256,8 @@ namespace clojure.lang
             else
             {
                 // bigint quotient
-                object bq = BigDecimal.Create(q).ToBigInteger();
-                return n - ((double)bq) * d;
+                var bq = BigDecimal.Create(q).ToBigInteger();
+                return n - bq.ToDouble(null) * d;
             }
         }
 
