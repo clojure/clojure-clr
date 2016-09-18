@@ -14,7 +14,7 @@
 
 (def even-count? #(even? (count %)))
 
-(deftest conform-explain
+#_(deftest conform-explain
   (let [a (s/and #(> % 5) #(< % 10))
         o (s/or :s string? :k keyword?)
         c (s/cat :a string? :b keyword?)
@@ -126,7 +126,7 @@ its spec for test purposes."
 ;; Note the the complicated equality comparisons below are exactly the
 ;; kind of thing that spec helps you avoid, used here only because we
 ;; are near the bottom, testing spec itself.
-(deftest test-instrument-flip-nums
+#_(deftest test-instrument-flip-nums                                                            ;;; Commented this out because we don't set this variable even when direct linked
   (when-not (= "true" (Environment/GetEnvironmentVariable "clojure.compiler.direct-linking"))   ;;; System/getProperty 
     (binding [*break-flip-nums* true]
       (try
