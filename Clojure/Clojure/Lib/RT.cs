@@ -603,6 +603,7 @@ namespace clojure.lang
             //Stopwatch sw = new Stopwatch();
             //sw.Start();
             load("clojure/core");
+            load("clojure/spec");
             //sw.Stop();
             //Console.WriteLine("Initial clojure/core load: {0} milliseconds.", sw.ElapsedMilliseconds);
 

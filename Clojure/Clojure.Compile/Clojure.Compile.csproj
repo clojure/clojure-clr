@@ -138,6 +138,6 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>set clojure.compiler.direct-linking=$(DirectLinking)
-$(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect clojure.spec clojure.edn</PostBuildEvent>
+$(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect clojure.spec clojure.spec.gen clojure.spec.test clojure.edn</PostBuildEvent>
   </PropertyGroup>
 </Project>

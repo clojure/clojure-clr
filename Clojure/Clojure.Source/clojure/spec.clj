@@ -129,7 +129,7 @@
 
    :else form))
 
-(defn ^:redef describe                                                       ;;;  Added ^:redef -- was getting a load error on repl.clj
+(defn describe
   "returns an abbreviated description of the spec as data"
   [spec]
   (abbrev (form spec)))
