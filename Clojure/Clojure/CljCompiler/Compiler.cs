@@ -1126,7 +1126,6 @@ namespace clojure.lang
             Var v = IsMacro(op);
             if (v != null)
             {
-                ISeq args = RT.cons(form, RT.cons(Compiler.LocalEnvVar.get(), form.next()));
                 try
                 {
                     Namespace checkns = Namespace.find(Symbol.intern("clojure.spec"));
@@ -1134,7 +1133,7 @@ namespace clojure.lang
                     {
                         Var check = Var.find(Symbol.intern("clojure.spec/macroexpand-check"));
                         if ((check != null) && (check.isBound))
-                            check.applyTo(RT.cons(v, RT.list(args)));
+                            check.applyTo(RT.cons(v, RT.list(form.next())));
                     }
                     Symbol.intern("clojure.spec");
                 }
@@ -1144,6 +1143,7 @@ namespace clojure.lang
                 }
                 try
                 {
+                    ISeq args = RT.cons(form, RT.cons(Compiler.LocalEnvVar.get(), form.next()));
                     return v.applyTo(args);
                 }
                 catch (ArityException e)
