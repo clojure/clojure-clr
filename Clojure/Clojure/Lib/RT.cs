@@ -744,6 +744,7 @@ namespace clojure.lang
                 return seqFrom(coll);
         }
 
+        // N.B. canSeq must be kept in sync with this!
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         private static ISeq seqFrom(object coll)
         {
@@ -775,6 +776,15 @@ namespace clojure.lang
             throw new ArgumentException("Don't know how to create ISeq from: " + coll.GetType().FullName);
         }
 
+        static public bool canSeq(object coll)
+        {
+            return coll == null
+                || coll is ISeq
+                || coll is Seqable
+                || coll.GetType().IsArray
+                || coll is String
+                || coll is IEnumerable;
+        }
         static IEnumerable NullIterator()
         {
             yield break;
