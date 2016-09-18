@@ -318,7 +318,7 @@ namespace clojure.lang
         {
             int i = IndexOfKey(key);
             return i >= 0
-                ? (IMapEntry)Tuple.create(_array[i], _array[i + 1])
+                ? (IMapEntry)MapEntry.create(_array[i], _array[i + 1])
                 : null;
         }
 
@@ -525,7 +525,7 @@ namespace clojure.lang
             /// <returns>The first item.</returns>
             public override object first()
             {
-                return Tuple.create(_array[_i], _array[_i + 1]);
+                return MapEntry.create(_array[_i], _array[_i + 1]);
             }
 
             /// <summary>
@@ -741,7 +741,7 @@ namespace clojure.lang
         IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
         {
             for (int i = 0; i < _array.Length; i += 2)
-                yield return (IMapEntry) Tuple.create(_array[i], _array[i + 1]);
+                yield return (IMapEntry)MapEntry.create(_array[i], _array[i + 1]);
         }
 
         #endregion

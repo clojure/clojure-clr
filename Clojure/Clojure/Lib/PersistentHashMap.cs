@@ -275,7 +275,7 @@ namespace clojure.lang
         public override IMapEntry entryAt(object key)
         {
             if (key == null)
-                return _hasNull ? (IMapEntry)Tuple.create(null, _nullValue) : null;
+                return _hasNull ? (IMapEntry)MapEntry.create(null, _nullValue) : null;
             return (_root != null)
                 ? _root.Find(0,Hash(key),key)
                 : null;
@@ -387,7 +387,7 @@ namespace clojure.lang
         public override ISeq seq()
         {
             ISeq s = _root != null ? _root.GetNodeSeq() : null;
-            return _hasNull ? new Cons(Tuple.create(null, _nullValue), s) : s;
+            return _hasNull ? new Cons(MapEntry.create(null, _nullValue), s) : s;
         }
 
         /// <summary>
@@ -617,12 +617,12 @@ namespace clojure.lang
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return MakeEnumeratorT((k, v) => Tuple.create(k,v));
+            return MakeEnumeratorT((k, v) => MapEntry.create(k, v));
         }
 
         IEnumerator<IMapEntry> IEnumerable<IMapEntry>.GetEnumerator()
         {
-            return MakeEnumeratorT((k, v) => (IMapEntry) Tuple.create(k, v));
+            return MakeEnumeratorT((k, v) => (IMapEntry)MapEntry.create(k, v));
         }
 
 
@@ -1295,7 +1295,7 @@ namespace clojure.lang
                 if ( keyOrNull == null )
                     return ((INode)valOrNode).Find(shift+5,hash,key);
                 if ( Util.equiv(key,keyOrNull))
-                    return (IMapEntry) Tuple.create(keyOrNull,valOrNode);
+                    return (IMapEntry)MapEntry.create(keyOrNull, valOrNode);
                 return null;
             }
 
@@ -1577,7 +1577,7 @@ namespace clojure.lang
                 if (idx < 0)
                     return null;
                 if (Util.equiv(key, _array[idx]))
-                    return (IMapEntry) Tuple.create(_array[idx], _array[idx + 1]);
+                    return (IMapEntry)MapEntry.create(_array[idx], _array[idx + 1]);
                 return null;
             }
 
@@ -1823,7 +1823,7 @@ namespace clojure.lang
             {
                 if (_s != null)
                     return _s.first();
-                return Tuple.create(_array[_i], _array[_i + 1]);
+                return MapEntry.create(_array[_i], _array[_i + 1]);
             }
 
             public override ISeq next()

@@ -1430,10 +1430,7 @@
   "Return true if x is a map entry"                              ;;; Given the way it is used, adding KeyValuePair<Object,Object> and DictionaryEntry doesn't seem right
   {:added "1.8"}
   [x]
-  (and (instance? clojure.lang.IMapEntry x)                    ;;;  (instance? java.util.Map$Entry x)
-    (if (instance? clojure.lang.IPersistentVector x)
-      (= 2 (count x))
-      true)))
+  (instance? clojure.lang.IMapEntry x))                          ;;;  (instance? java.util.Map$Entry x)
 
 (defn contains?
   "Returns true if key is present in the given collection, otherwise

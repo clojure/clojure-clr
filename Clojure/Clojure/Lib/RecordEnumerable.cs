@@ -49,7 +49,7 @@ namespace clojure.lang
             for (int i = 0; i < _basecnt; i++)
             {
                 object k = _baseFields.nth(i);
-                yield return Tuple.create(k,_rec.valAt(k));
+                yield return MapEntry.create(k,_rec.valAt(k));
             }
 
             while (_extmap.MoveNext())

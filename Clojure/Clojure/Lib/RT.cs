@@ -1134,7 +1134,7 @@ namespace clojure.lang
 
             IDictionary m = (IDictionary)coll;
             if (m.Contains(key))
-                return Tuple.create(key, m[key]);
+                return MapEntry.create(key, m[key]);
 
             return null;
         }

@@ -54,6 +54,11 @@ namespace clojure.lang
             this._val = val;
         }
 
+        public static MapEntry create(object key, object val)
+        {
+            return new MapEntry(key, val);
+        }
+
         #endregion
 
         #region IMapEntry members
