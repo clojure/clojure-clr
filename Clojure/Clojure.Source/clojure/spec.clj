@@ -129,7 +129,7 @@
 
    :else form))
 
-(defn describe
+(defn ^:redef describe                                                       ;;;  Added ^:redef -- was getting a load error on repl.clj
   "returns an abbreviated description of the spec as data"
   [spec]
   (abbrev (form spec)))
@@ -1161,6 +1161,7 @@ by ns-syms. Idempotent."
                               :via via}})]
     (when p
       (case op
+            ::accept nil
             nil (if (empty? input)
                   (insufficient path form)
                   (explain-1 form p path via x))
