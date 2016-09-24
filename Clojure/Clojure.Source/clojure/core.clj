@@ -1383,38 +1383,41 @@
    :static true}
   [n] (not (even? n)))
 
-(defn long?
-   "Return true if x is a Long"
-   {:added "1.9"}
-   [x] (instance? Int64 x))                             ;;; Long
+(defn int?
+  "Return true if x is a fixed precision integer"          ;;; DM: TODO: determine how or whether to handle unsigned types
+  {:added "1.9"}
+ [x] (or (instance? Int64 x)                               ;;; Long
+         (instance? Int32 x)                               ;;; Integer
+         (instance? Int16 x)                               ;;;	Short
+         (instance? Byte x)))
  
- (defn pos-long?
-   "Return true if x is a positive Long"
-   {:added "1.9"}
-   [x] (and (instance? Int64 x)                         ;;; Long
-            (pos? x)))
+(defn pos-int?
+  "Return true if x is a positive fixed precision integer"
+  {:added "1.9"}
+  [x] (and (int? x)
+           (pos? x)))
  
- (defn neg-long?
-   "Return true if x is a negative Long"
-   {:added "1.9"}
-   [x] (and (instance? Int64 x)                         ;;; Long
-            (neg? x)))
+(defn neg-int?
+  "Return true if x is a negative fixed precision integer"
+  {:added "1.9"}
+  [x] (and (int? x)
+           (neg? x)))
  
- (defn nat-long?
-   "Return true if x is a non-negative Long"
-   {:added "1.9"}
-   [x] (and (instance? Int64 x)                         ;;; Long
-            (not (neg? x))))
+(defn nat-int?
+  "Return true if x is a non-negative fixed precision integer"
+  {:added "1.9"}
+  [x] (and (int? x)
+           (not (neg? x))))
  
- (defn double?
-   "Return true if x is a Double"
-   {:added "1.9"}
-   [x] (instance? Double x))
+(defn double?
+  "Return true if x is a Double"
+  {:added "1.9"}
+  [x] (instance? Double x))
  
- (defn bigdec?
-   "Return true if x is a BigDecimal"
-   {:added "1.9"}
-   [x] (instance? clojure.lang.BigDecimal x))         ;;; java.math.BigDecimal
+(defn bigdec?
+  "Return true if x is a BigDecimal"
+  {:added "1.9"}
+  [x] (instance? clojure.lang.BigDecimal x))         ;;; java.math.BigDecimal
 
 ;;
 
