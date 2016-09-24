@@ -6639,6 +6639,12 @@ Note that read can execute code (controlled by *read-eval*),
   DateTime                                                                                                     ;;; java.util.Date
   (inst-ms* [inst] (long (.TotalMilliseconds (.Subtract ^DateTime inst (DateTime. 1970 1 1))))))               ;;; (.getTime ^java.util.Date inst)
 
+;; conditionally extend to Instant on Java 8+
+;;;(try
+;;;  (Class/forName "java.time.Instant")
+;;;  (load "core_instant18")
+;;;  (catch ClassNotFoundException cnfe))
+
 (defn inst-ms
   "Return the number of milliseconds since January 1, 1970, 00:00:00 GMT"
   {:added "1.9"}
