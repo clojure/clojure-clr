@@ -138,5 +138,37 @@
 ;;
 (deftest test-string?-more
   (are [x] (not (string? x))
-    (new StringBuilder "abc")                  ;;; java.lang.StringBuilder
-    ))                                                   ;;; (new java.lang.StringBuffer "xyz")))
+    (new StringBuilder "abc")                                                          ;;; java.lang.StringBuilder
+    ))                                                                                 ;;; (new java.lang.StringBuffer "xyz")))
+
+(def pred-val-table
+  (let [now (System.DateTime.)                                                         ;;; java.util.Date.
+        uuid (System.Guid.)                                                            ;;; java.util.UUID/randomUUID
+        barray (byte-array 0)
+        uri (System.Uri. "http://clojure.org")]                                      ;;; java.net.URI.
+    ['
+     [identity   long? pos-long? neg-long? nat-long? double? boolean? indexed? seqable? ident? uuid? bigdec? inst? uri?  bytes?]
+     [0          true  false     false     true      false   false    false    false    false  false false   false false false]
+     [1          true  true      false     true      false   false    false    false    false  false false   false false false]
+     [-1         true  false     true      false     false   false    false    false    false  false false   false false false]
+     [1.0        false false     false     false     true    false    false    false    false  false false   false false false]
+     [true       false false     false     false     false   true     false    false    false  false false   false false false]
+     [[]         false false     false     false     false   false    true     true     false  false false   false false false]
+     [nil        false false     false     false     false   false    false    true     false  false false   false false false]
+     [{}         false false     false     false     false   false    false    true     false  false false   false false false]
+     [:foo       false false     false     false     false   false    false    false    true   false false   false false false]
+     ['foo       false false     false     false     false   false    false    false    true   false false   false false false]
+     [0.0M       false false     false     false     false   false    false    false    false  false true    false false false]
+     [0N         false false     false     false     false   false    false    false    false  false false   false false false]
+     [uuid       false false     false     false     false   false    false    false    false  true  false   false false false]
+     [uri        false false     false     false     false   false    false    false    false  false false   false true  false]
+     [now        false false     false     false     false   false    false    false    false  false false   true  false false]
+     [barray     false false     false     false     false   false    false    true     false  false false   false false true]]))
+
+(deftest test-preds
+  (let [[preds & rows] pred-val-table]
+    (doseq [row rows]
+      (let [v (first row)]
+        (dotimes [i (count row)]
+          (is (= ((resolve (nth preds i)) v) (nth row i))
+              (pr-str (list (nth preds i) v))))))))

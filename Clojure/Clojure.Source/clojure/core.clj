@@ -516,7 +516,12 @@
    :static true}
   [x] (clojure.lang.Util/identical x true))
 
-(defn not
+(defn boolean?
+  "Return true if x is a Boolean"
+  {:added "1.9"}
+  [x] (instance? Boolean x))
+
+ (defn not
   "Returns true if x is logical false, false otherwise."
   {:tag Boolean
    :added "1.0"
@@ -1378,6 +1383,38 @@
    :static true}
   [n] (not (even? n)))
 
+(defn long?
+   "Return true if x is a Long"
+   {:added "1.9"}
+   [x] (instance? Int64 x))                             ;;; Long
+ 
+ (defn pos-long?
+   "Return true if x is a positive Long"
+   {:added "1.9"}
+   [x] (and (instance? Int64 x)                         ;;; Long
+            (pos? x)))
+ 
+ (defn neg-long?
+   "Return true if x is a negative Long"
+   {:added "1.9"}
+   [x] (and (instance? Int64 x)                         ;;; Long
+            (neg? x)))
+ 
+ (defn nat-long?
+   "Return true if x is a non-negative Long"
+   {:added "1.9"}
+   [x] (and (instance? Int64 x)                         ;;; Long
+            (not (neg? x))))
+ 
+ (defn double?
+   "Return true if x is a Double"
+   {:added "1.9"}
+   [x] (instance? Double x))
+ 
+ (defn bigdec?
+   "Return true if x is a BigDecimal"
+   {:added "1.9"}
+   [x] (instance? clojure.lang.BigDecimal x))         ;;; java.math.BigDecimal
 
 ;;
 
@@ -1553,7 +1590,42 @@
   [^clojure.lang.Named x]
     (. x (getNamespace)))
   
-(defmacro locking
+(defn ident?
+  "Return true if x is a symbol or keyword"
+  {:added "1.9"}
+  [x] (or (keyword? x) (symbol? x)))
+
+(defn simple-ident?
+  "Return true if x is a symbol or keyword without a namespace"
+  {:added "1.9"}
+  [x] (and (ident? x) (nil? (namespace x))))
+
+(defn qualified-ident?
+  "Return true if x is a symbol or keyword with a namespace"
+  {:added "1.9"}
+  [x] (and (ident? x) (namespace x) true))
+
+(defn simple-symbol?
+  "Return true if x is a symbol without a namespace"
+  {:added "1.9"}
+  [x] (and (symbol? x) (nil? (namespace x))))
+
+(defn qualified-symbol?
+  "Return true if x is a symbol with a namespace"
+  {:added "1.9"}
+  [x] (and (symbol? x) (namespace x) true))
+
+(defn simple-keyword?
+  "Return true if x is a keyword without a namespace"
+  {:added "1.9"}
+  [x] (and (keyword? x) (nil? (namespace x))))
+
+(defn qualified-keyword?
+  "Return true if x is a keyword with a namespace"
+  {:added "1.9"}
+  [x] (and (keyword? x) (namespace x) true))
+
+ (defmacro locking
   "Executes exprs in an implicit do, while holding the monitor of x.
   Will release the monitor of x in all circumstances."
   {:added "1.0"}
@@ -5195,6 +5267,13 @@ Note that read can execute code (controlled by *read-eval*),
   {:added "1.0"}
   [xs] `(. clojure.lang.Numbers longs ~xs))
 
+(defn bytes?
+  "Return true if x is a byte array"
+  {:added "1.9"}
+  [x] (if (nil? x)
+        false
+        (let [t (class x)] (and (.IsArray t) (= (.GetElementType t) Byte)))))                      ;;; (-> x class .getComponentType (= Byte/TYPE))
+
 ;(import '(java.util.concurrent BlockingQueue LinkedBlockingQueue))
 ;;;NOT WORTH THE EFFORT AT THE MOMENT
 ;(defn seque
@@ -6003,7 +6082,12 @@ Note that read can execute code (controlled by *read-eval*),
    :static true}
   [x] (instance? clojure.lang.IPersistentList x))
 
-(defn ifn?
+(defn seqable?
+  "Return true if the seq function is supported for x"
+  {:added "1.9"}
+  [x] (clojure.lang.RT/canSeq x))
+ 
+ (defn ifn?
   "Returns true if x implements IFn. Note that many data structures
   (e.g. sets and maps) implement IFn"
   {:added "1.0"
@@ -6047,6 +6131,11 @@ Note that read can execute code (controlled by *read-eval*),
    :static true}
   [coll] (instance? clojure.lang.Reversible coll))
 
+(defn indexed?
+  "Return true if coll implements Indexed, indicating efficient lookup by index"
+  {:added "1.9"}
+  [coll] (instance? clojure.lang.Indexed coll))
+ 
 (def ^:dynamic 
  ^{:doc "bound in a repl thread to the most recent value printed"
    :added "1.0"}
@@ -6539,8 +6628,33 @@ Note that read can execute code (controlled by *read-eval*),
 (load "core/protocols")
 (load "gvec")
 (load "instant")
+
+(defprotocol Inst
+  (inst-ms* [inst]))
+
+(extend-protocol Inst
+  DateTime                                                                                                     ;;; java.util.Date
+  (inst-ms* [inst] (long (.TotalMilliseconds (.Subtract ^DateTime inst (DateTime. 1970 1 1))))))               ;;; (.getTime ^java.util.Date inst)
+
+(defn inst-ms
+  "Return the number of milliseconds since January 1, 1970, 00:00:00 GMT"
+  {:added "1.9"}
+  [inst]
+  (inst-ms* inst))
+
+(defn inst?
+  "Return true if x satisfies Inst"
+  {:added "1.9"}
+  [x]
+  (satisfies? Inst x))
+
 (load "uuid")
 
+(defn uuid?
+  "Return true if x is a java.util.UUID"
+  {:added "1.9"}
+  [x] (instance? System.Guid x))                                                               ;;; java.util.UUID
+  
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
   returns the result of applying f to the first 2 items in coll, then
@@ -7535,3 +7649,8 @@ clojure.lang.IKVReduce
  (catch Exception t                                                                 ;;; Throwable
    (System.Console/WriteLine (.StackTrace t))                                       ;;; .printStackTrace
    (throw t)))
+
+(defn uri?
+  "Return true if x is a java.net.URI"
+  {:added "1.9"}
+  [x] (instance? System.Uri x))                                                    ;;; java.net.URI
