@@ -149,9 +149,10 @@ gens, each of which should generate something sequential."
       simple-symbol? (symbol)
       qualified-symbol? (such-that qualified? (symbol-ns))
       uuid? (uuid)
+	  uri? (fmap #(System.Uri. (str "http://" % ".com")) (uuid))              ;;; java.net.URI/create 
       bigdec? (fmap #(BigDecimal/Create %)                                    ;;; BigDecimal/valueOf
                     (double* {:infinite? false :NaN? false}))
-      inst? (fmap #(System.DateTime. %)                                 ;;; java.util.Date. 
+      inst? (fmap #(System.DateTime. %)                                       ;;; java.util.Date. 
                   (large-integer))
       seqable? (one-of [(return nil)
                         (list simple)
