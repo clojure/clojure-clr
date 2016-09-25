@@ -57,6 +57,7 @@ namespace clojure.lang
 	        _dispatchMacros['{'] = new SetReader();
 	        _dispatchMacros['<'] = new UnreadableReader();
 	        _dispatchMacros['_'] = new DiscardReader();
+            _dispatchMacros[':'] = new NamespaceMapReader();
         }
 
         static bool isMacro(int ch)
@@ -771,6 +772,109 @@ namespace clojure.lang
                 return r;
             }
         }
+
+        #endregion
+
+        #region NamespaceMapReader
+
+        public sealed class NamespaceMapReader : AFn
+        {
+            public override object invoke(object reader, object colon, object opts)
+            {
+                PushbackTextReader r = reader as PushbackTextReader;
+
+                // Read ns symbol
+                object osym = read(r, true, null, false, opts);
+                Symbol sym = osym as Symbol;
+                if (sym == null || sym.Namespace != null)
+                    throw new Exception("Namespaced map must specify a valid namespace: " + osym);
+                string ns = sym.Name;
+
+                // Read map
+                int nextChar = r.Read();
+                while (isWhitespace(nextChar))
+                    nextChar = r.Read();
+                if ('{' != nextChar)
+                    throw new Exception("Namespaced map must specify a map");
+                List<object> kvs = ReadDelimitedList('}', r, true, opts);
+                if ((kvs.Count & 1) == 1)
+                    throw new Exception("Namespaced map literal must contain an even number of forms");
+
+                // Construct output map
+                IPersistentMap m = RT.map();
+                using ( var iterator = kvs.GetEnumerator())
+                {
+                    while (iterator.MoveNext())
+                    {
+                        var key = iterator.Current;
+                        iterator.MoveNext();
+                        var val = iterator.Current;
+
+                        Keyword kw = key as Keyword;
+                        if ( kw != null )
+                        {
+                            if (kw.Namespace == null)
+                                m = m.assoc(Keyword.intern(ns, kw.Name), val);
+                            else if (kw.Namespace.Equals("_"))
+                                m = m.assoc(Keyword.intern(null, kw.Name), val);
+                            else
+                                m = m.assoc(kw, val);
+                        }
+                        else
+                        {
+                            Symbol s = key as Symbol;
+                            if (s != null)
+                            {
+                                if (s.Namespace == null)
+                                    m = m.assoc(Symbol.intern(ns, s.Name), val);
+                                else if (s.Namespace.Equals("_"))
+                                    m = m.assoc(Symbol.intern(null, s.Name), val);
+                                else
+                                    m = m.assoc(s, val);
+                            }
+                            else m = m.assoc(key, val);
+                        }
+                    }
+                }
+                return m;
+            }
+        }
+
+
+ 
+ //+
+ //+		// Construct output map
+ //+		IPersistentMap m = RT.map();
+ //+		Iterator iter = kvs.iterator();
+ //+		while(iter.hasNext()) {
+ //+			Object key = iter.next();
+ //+			Object val = iter.next();
+ //+
+ //+			if(key instanceof Keyword) {
+ //+				Keyword kw = (Keyword) key;
+ //+				if (kw.getNamespace() == null) {
+ //+					m = m.assoc(Keyword.intern(ns, kw.getName()), val);
+ //+				} else if (kw.getNamespace().equals("_")) {
+ //+					m = m.assoc(Keyword.intern(null, kw.getName()), val);
+ //+				} else {
+ //+					m = m.assoc(kw, val);
+ //+				}
+ //+			} else if(key instanceof Symbol) {
+ //+				Symbol s = (Symbol) key;
+ //+				if (s.getNamespace() == null) {
+ //+					m = m.assoc(Symbol.intern(ns, s.getName()), val);
+ //+				} else if (s.getNamespace().equals("_")) {
+ //+					m = m.assoc(Symbol.intern(null, s.getName()), val);
+ //+				} else {
+ //+					m = m.assoc(s, val);
+ //+				}
+ //+			} else {
+ //+				m = m.assoc(key, val);
+ //+			}
+ //+		}
+ //+		return m;
+ //+	}
+ //+}
 
         #endregion
 

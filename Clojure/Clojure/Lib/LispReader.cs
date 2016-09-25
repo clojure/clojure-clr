@@ -107,6 +107,7 @@ namespace clojure.lang
             _dispatchMacros['<'] = new UnreadableReader();
             _dispatchMacros['_'] = new DiscardReader();
             _dispatchMacros['?'] = new ConditionalReader();
+            _dispatchMacros[':'] = new NamespaceMapReader();
         }
 
         static bool isMacro(int ch)
@@ -1090,6 +1091,130 @@ namespace clojure.lang
             protected override object Read(PushbackTextReader reader, char rightdelim, object opts, object pendingForms)
             {
                 throw new ArgumentException("Unmatched delimiter: " + rightdelim);
+            }
+        }
+
+        #endregion
+
+        #region NamespaceMap reader
+
+        // :a.b{:c 1} => {:a.b/c 1}
+        // ::{:c 1}   => {:a.b/c 1}  (where *ns* = a.b)
+        // ::a{:c 1}  => {:a.b/c 1}  (where a is aliased to a.b)
+        public sealed class NamespaceMapReader : AFn
+        {
+            public override object invoke(object reader, object colon, object opts, object pendingForms)
+            {
+
+                PushbackTextReader r = reader as PushbackTextReader;
+                bool auto = false;
+                int autoChar = r.Read();
+                if (autoChar == ':')
+                    auto = true;
+                else
+                    r.Unread(autoChar);
+
+                object osym = null;
+                int nextChar = r.Read();
+                if (isWhitespace(nextChar))
+                {
+                    // the #:: { } case or an error
+                    if ( auto )
+                    {
+                        while (isWhitespace(nextChar))
+                            nextChar = r.Read();
+                        if ( nextChar != '{')
+                        {
+                            Unread(r, nextChar);
+                            throw new Exception("Namespaced map must specify a namespace");
+                        }
+                    }
+                    else
+                    {
+                        Unread(r, nextChar);
+                        throw new Exception("Namespaced map must specify a namespace");
+                    }
+                }
+                else if ( nextChar != '{')
+                {
+                    // #:foo { } or #::foo { }
+                    Unread(r, nextChar);
+                    osym = read(r, true, null, false, opts,pendingForms);
+                    nextChar = r.Read();
+                    while (isWhitespace(nextChar))
+                        nextChar = r.Read();
+                }
+                if (nextChar != '{')
+                    throw new Exception("Namespaced map must specify a map");
+
+                // Resolve autoresolved ns
+                String ns;
+                Symbol ssym = osym as Symbol;
+                if (auto)
+                {
+                    if (osym == null)
+                        ns = Compiler.CurrentNamespace.Name.Name;
+                    else if (ssym == null || ssym.Namespace != null)
+                        throw new Exception("Namespaced map must specify a valid namespace: " + osym);
+                    else
+                    {
+                        Namespace resolvedNS = Compiler.CurrentNamespace.LookupAlias(ssym);
+                        if (resolvedNS == null)
+                            resolvedNS = Namespace.find(ssym);
+
+                        if (resolvedNS == null)
+                            throw new Exception("Unknown auto-resolved namespace alias: " + osym);
+                        else
+                            ns = resolvedNS.Name.Name;
+                    }
+                }
+                else if (ssym == null || ssym.Namespace != null)
+                    throw new Exception("Namespaced map must specify a valid namespace: " + osym);
+                else
+                    ns = ssym.Name;
+
+                // Read map
+                List<object> kvs = ReadDelimitedList('}', r, true, opts, EnsurePending(pendingForms));
+                if ((kvs.Count & 1) == 1)
+                    throw new Exception("Namespaced map literal must contain an even number of forms");
+
+                // Construct output map
+                IPersistentMap m = RT.map();
+                using (var iterator = kvs.GetEnumerator())
+                {
+                    while (iterator.MoveNext())
+                    {
+                        var key = iterator.Current;
+                        iterator.MoveNext();
+                        var val = iterator.Current;
+
+                        Keyword kw = key as Keyword;
+                        if (kw != null)
+                        {
+                            if (kw.Namespace == null)
+                                m = m.assoc(Keyword.intern(ns, kw.Name), val);
+                            else if (kw.Namespace.Equals("_"))
+                                m = m.assoc(Keyword.intern(null, kw.Name), val);
+                            else
+                                m = m.assoc(kw, val);
+                        }
+                        else
+                        {
+                            Symbol s = key as Symbol;
+                            if (s != null)
+                            {
+                                if (s.Namespace == null)
+                                    m = m.assoc(Symbol.intern(ns, s.Name), val);
+                                else if (s.Namespace.Equals("_"))
+                                    m = m.assoc(Symbol.intern(null, s.Name), val);
+                                else
+                                    m = m.assoc(s, val);
+                            }
+                            else m = m.assoc(key, val);
+                        }
+                    }
+                }
+                return m;
             }
         }
 
