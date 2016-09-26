@@ -604,6 +604,7 @@ namespace clojure.lang
             //sw.Start();
             load("clojure/core");
             load("clojure/spec");
+            load("clojure/core/specs");
             //sw.Stop();
             //Console.WriteLine("Initial clojure/core load: {0} milliseconds.", sw.ElapsedMilliseconds);
 
