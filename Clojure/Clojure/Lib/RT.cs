@@ -541,6 +541,8 @@ namespace clojure.lang
             return Assembly.Load(ReadStreamBytes(stream));
         }
 
+        public static bool checkSpecAsserts = ReadTrueFalseDefault(Environment.GetEnvironmentVariable("clojure.spec.check-asserts"), false);
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static RT()
         {
@@ -2627,6 +2629,15 @@ namespace clojure.lang
         #endregion
 
         #region Reader support
+
+        static bool ReadTrueFalseDefault(string s, bool def)
+        {
+            if ("true".Equals(s))
+                return true;
+            else if ("false".Equals(s))
+                return false;
+            return def;
+        }
 
         static Object ReadTrueFalseUnknown(String s)
         {
