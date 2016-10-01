@@ -79,7 +79,19 @@
            data-top-level :data}
           (Throwable->map (ex-info "ex-info"
                                    {:some "data"}))]
-      (is (= data data-top-level {:some "data"})))))
+      (is (= data data-top-level {:some "data"}))))
+  (testing "nil stack handled"
+    (let [t (Exception. "abc")]                                       ;;; Throwable.
+      ;; simulate what can happen when Java omits stack traces
+                                                                      ;;;(.setStackTrace t (into-array StackTraceElement []))  -- no equivalent, but an unthrown exception has a null stacktrace
+      (let [{:keys [cause via trace]} (Throwable->map t)]
+        (is (= cause "abc"))
+        (is (= trace []))
+
+        ;; fail if printing throws an exception
+        (try
+          (with-out-str (pr t))
+          (catch Exception t (is nil)))))))                          ;;; Throwable
 
 (deftest ex-info-disallows-nil-data
   (is (thrown? Microsoft.Scripting.ArgumentTypeException (ex-info "message" nil)))        ;;; IllegalArgumentException  -- we have an overload on ctors --passing nil makes it impossible to determine which to call.

@@ -511,13 +511,13 @@
   {:added "1.7"}
   [^Exception o]                                                                                                 ;;; ^Throwable
   (let [base (fn [^Exception t]                                                                                  ;;; ^Throwable
-               (let [m {:type (symbol (.FullName (class t)))                                                     ;;; .getName
-                        :message (.Message t)                                                                    ;;; .getLocalizedMessage
-                        :at (StackTraceElement->vec (.GetFrame (System.Diagnostics.StackTrace. t true) 0))}      ;;; (get (.getStackTrace t) 0)
-                     data (ex-data t)]
-                 (if data
-                   (assoc m :data data)
-                   m)))
+               (merge {:type (symbol (.FullName (class t)))                                                      ;;; .getName
+                       :message (.Message t)}                                                                    ;;; .getLocalizedMessage
+                 (when-let [ed (ex-data t)]
+                   {:data ed})
+                 (let [st (.GetFrames (System.Diagnostics.StackTrace. t true))]                                  ;;; (.getStackTrace t)
+                   (when (and st (pos? (alength st)))                                                            ;;; added the 'and st' because we may get a null back instread of an array.
+                     {:at (StackTraceElement->vec (aget st 0))}))))                                              ;;; aget
         via (loop [via [], ^Exception t o]                                                                       ;;; ^Throwable
               (if t
                 (recur (conj via t) (.InnerException t))                                                         ;;; .getCause
@@ -526,7 +526,7 @@
         m {:cause (.Message root)                                                                                ;;; (.getLocalizedMessage root)
            :via (vec (map base via))
           :trace (vec (map StackTraceElement->vec
-		                   (.GetFrames (System.Diagnostics.StackTrace. (or root o) true))))}                      ;;;  .getStackTrace ^Throwable  
+		                   (.GetFrames (System.Diagnostics.StackTrace. (or root o) true))))}                     ;;;  .getStackTrace ^Throwable  
         data (ex-data root)]
     (if data
       (assoc m :data data)
@@ -534,15 +534,21 @@
 
 (defn print-throwable [^Exception o ^System.IO.TextWriter w]                                                     ;;; ^Throwable
   (.Write w "#error {\n :cause ")
-  (let [{:keys [cause via trace]} (Throwable->map o)
+  (let [{:keys [cause data via trace]} (Throwable->map o)
         print-via #(do (.Write w "{:type ")
 		               (print-method (:type %) w)
 					   (.Write w "\n   :message ")
-					   (print-method (:message %) w)
-					   (.Write w "\n   :at ")
-					   (print-method (:at %) w)
-					   (.Write w "}"))]
+             (when-let [data (:data %)]
+               (.Write w "\n   :data ")
+               (print-method data w))
+             (when-let [at (:at %)]
+               (.Write w "\n   :at ")
+               (print-method (:at %) w))
+             (.Write w "}"))]
     (print-method cause w)
+    (when data
+      (.Write w "\n :data ")
+      (print-method data w))
     (when via
       (.Write w "\n :via\n [")
       (when-let [fv (first via)]
