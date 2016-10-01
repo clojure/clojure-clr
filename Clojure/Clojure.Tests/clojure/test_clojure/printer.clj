@@ -118,3 +118,18 @@
        #'pr-str  "#'clojure.core/pr-str"
        #'var-with-meta "#'clojure.test-clojure.printer/var-with-meta"
        #'var-with-type "#'clojure.test-clojure.printer/var-with-type"))
+
+#_(deftest print-throwable                                                  ;;; we don't get stack traces unelss an exception is thrown.
+  (binding [*data-readers* {'error identity}]
+    (are [e] (= (-> e Throwable->map)
+                (-> e pr-str read-string))
+         (Exception. "heyo")
+         (Exception. "I can a throwable"                                  ;;; Throwable
+                     (Exception. "chain 1"
+                                 (Exception. "chan 2")))
+         (ex-info "an ex-info" {:with "its" :data 29})
+         (Exception. "outer"
+                     (ex-info "an ex-info" {:with "data"}
+                              (System.InvalidProgramException. "less outer"                       ;;; Error.
+                                      (ex-info "the root"
+                                               {:with "even" :more 'data})))))))

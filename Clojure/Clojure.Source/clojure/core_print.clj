@@ -495,17 +495,25 @@
 (defmethod print-method clojure.lang.IDeref [o ^System.IO.TextWriter w]
   (print-tagged-object o (deref-as-map o) w))
 
-(defmethod print-method  System.Diagnostics.StackFrame [^System.Diagnostics.StackFrame o ^System.IO.TextWriter w]                            ;;;  StackTraceElement  ^StackTraceElement
+(defmethod print-method  System.Diagnostics.StackFrame [^System.Diagnostics.StackFrame o ^System.IO.TextWriter w]                    ;;;  StackTraceElement  ^StackTraceElement
   (print-method [(symbol (.FullName (.GetType o))) (symbol (.Name (.GetMethod o))) (.GetFileName o) (.GetFileLineNumber o)] w))      ;;; (.getClassName o)  (.getMethodName o) .getFileName .getLineNumber
+
+(defn StackTraceElement->vec
+  "Constructs a data representation for a StackTraceElement"
+  {:added "1.9"}
+  [^System.Diagnostics.StackFrame o]                                                                                                 ;;; ^StackTraceElement
+  (if (nil? o)                                                                                                                       ;;; DM: added -- we don't get a stack trace unless actually thrown
+    nil                                                                                                                              ;;; DM: added
+   [(symbol (.FullName (.GetType o))) (symbol (.Name (.GetMethod o))) (.GetFileName o) (.GetFileLineNumber o)]))                     ;;; (.getClassName o)  (.getMethodName o) .getFileName .getLineNumber
 
 (defn Throwable->map
   "Constructs a data representation for a Throwable."
   {:added "1.7"}
   [^Exception o]                                                                                                 ;;; ^Throwable
   (let [base (fn [^Exception t]                                                                                  ;;; ^Throwable
-                 (let [m {:type (class t)
+               (let [m {:type (symbol (.FullName (class t)))                                                     ;;; .getName
                         :message (.Message t)                                                                    ;;; .getLocalizedMessage
-                        :at (.GetFrame (System.Diagnostics.StackTrace. t true) 0)}                               ;;; (get (.getStackTrace t) 0)
+                        :at (StackTraceElement->vec (.GetFrame (System.Diagnostics.StackTrace. t true) 0))}      ;;; (get (.getStackTrace t) 0)
                      data (ex-data t)]
                  (if data
                    (assoc m :data data)
@@ -515,9 +523,10 @@
                 (recur (conj via t) (.InnerException t))                                                         ;;; .getCause
                 via))
         ^Exception root (peek via)                                                                               ;;; Throwable
-        m {:cause (.Message root)                                                                                   ;;; (.getLocalizedMessage root)
+        m {:cause (.Message root)                                                                                ;;; (.getLocalizedMessage root)
            :via (vec (map base via))
-          :trace (vec (.GetFrames (System.Diagnostics.StackTrace. (or root o) true)))}                           ;;;  .getStackTrace ^Throwable  
+          :trace (vec (map StackTraceElement->vec
+		                   (.GetFrames (System.Diagnostics.StackTrace. (or root o) true))))}                      ;;;  .getStackTrace ^Throwable  
         data (ex-data root)]
     (if data
       (assoc m :data data)
