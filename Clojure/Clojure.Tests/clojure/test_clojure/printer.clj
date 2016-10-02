@@ -133,3 +133,7 @@
                               (System.InvalidProgramException. "less outer"                       ;;; Error.
                                       (ex-info "the root"
                                                {:with "even" :more 'data})))))))
+
+(deftest print-ns-maps
+  (is (= "#:user{:a 1}" (binding [*print-namespace-maps* true] (pr-str {:user/a 1}))))
+  (is (= "{:user/a 1}" (binding [*print-namespace-maps* false] (pr-str {:user/a 1})))))

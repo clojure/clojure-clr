@@ -93,6 +93,7 @@
              *print-meta* *print-meta*
              *print-length* *print-length*
              *print-level* *print-level*
+             *print-namespace-maps* true
 			 *data-readers* *data-readers*
 			 *default-data-reader-fn* *default-data-reader-fn*
              *compile-path* (or (Environment/GetEnvironmentVariable "CLOJURE_COMPILE_PATH") ".")  ;;;(System/getProperty "clojure.compile.path" "classes")

@@ -36,7 +36,13 @@
    :added "1.0"}
  *print-level* nil)
 
- (def ^:dynamic *verbose-defrecords* false)
+(def ^:dynamic *verbose-defrecords* false)
+
+(def ^:dynamic
+ ^{:doc "*print-namespace-maps* controls whether the printer will print
+  namespace map literal syntax. It defaults to true."
+   :added "1.9"}
+ *print-namespace-maps* false)
 
 (defn- print-sequential [^String begin, print-one, ^String sep, ^String end, sequence, ^System.IO.TextWriter w]
   (binding [*print-level* (and (not *print-dup*) *print-level* (dec *print-level*))]
@@ -281,11 +287,12 @@
       [ns lm])))
 
 (defmethod print-method clojure.lang.IPersistentMap [m, ^System.IO.TextWriter w]
-  (print-meta m w)
-  (let [[ns lift-map] (lift-ns m)]
-    (if ns
-      (print-prefix-map (str "#:" ns) lift-map pr-on w)
-      (print-map m pr-on w))))
+  (if *print-namespace-maps*
+    (let [[ns lift-map] (lift-ns m)]
+      (if ns
+        (print-prefix-map (str "#:" ns) lift-map pr-on w)
+        (print-map m pr-on w)))
+    (print-map m pr-on w)))
 
 (defmethod print-dup System.Collections.IDictionary [m, ^System.IO.TextWriter w]    ;;; java.util.Map
   (print-ctor m #(print-map (seq %1) print-method %2) w))
