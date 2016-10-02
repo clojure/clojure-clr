@@ -205,8 +205,8 @@ namespace clojure.lang
             if (count > CHUNK_SIZE)
             { // not last chunk
                 long nextStart = _start + (_step * CHUNK_SIZE);   // cannot overflow, must be < end
-                _chunk = new LongChunk(_start, _step, CHUNK_SIZE);
                 _chunkNext = new LongRange(nextStart, _end, _step, _boundsCheck);
+                _chunk = new LongChunk(_start, _step, CHUNK_SIZE);
             }
             else
             {  // last chunk
