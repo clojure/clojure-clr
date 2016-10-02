@@ -47,7 +47,7 @@
                    [a b])))))
   
   (testing "missing parameter declaration"
-    (is (fails-with-cause? clojure.lang.ExceptionInfoion
+    (is (fails-with-cause? clojure.lang.ExceptionInfo
           #"Call to clojure.core/fn did not conform to spec"
           (eval '(fn a))))
     (is (fails-with-cause? clojure.lang.ExceptionInfo
