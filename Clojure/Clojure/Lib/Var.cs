@@ -1085,7 +1085,7 @@ namespace clojure.lang
 
         public  object applyTo(ISeq arglist)
         {
-            return AFn.ApplyToHelper(this, arglist);
+            return GetFn().applyTo(arglist);
         }
 
         #endregion
