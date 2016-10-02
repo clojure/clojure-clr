@@ -13,7 +13,8 @@
 ;;
 
 (ns clojure.test-clojure.special
-  (:use clojure.test))
+  (:use clojure.test)
+  (:require [clojure.test-helper :refer [should-not-reflect]]))
 
 ; http://clojure.org/special_forms
 
@@ -91,10 +92,16 @@
     (is (= [1 2 3] [x y z]))))
 
 (deftest quote-with-multiple-args
-  (let [ex (is (thrown? clojure.lang.Compiler+CompilerException               ;;; 
+  (let [ex (is (thrown? clojure.lang.Compiler+CompilerException                     ;;; Compiler$CompilerException
                         (eval '(quote 1 2 3))))]
     (is (= '(quote 1 2 3)
            (-> ex
                (.InnerException)                                                    ;;; .getCause
                (ex-data)
                (:form))))))
+
+(deftest typehints-retained-destructuring
+  (should-not-reflect
+    (defn foo
+      [{:keys [^String s]}]
+      (.IndexOf s "boo"))))                                                        ;;; .indexOf 
