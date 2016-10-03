@@ -885,8 +885,7 @@
   ([form mmvar retag gfn]
      (let [id (System.Guid/NewGuid)                                                                                      ;;; java.util.UUID/randomUUID
            predx #(let [^clojure.lang.MultiFn mm @mmvar]
-                    (c/and (contains? (methods mm)
-                                      ((.dispatchFn mm) %))
+                    (c/and (.getMethod mm ((.dispatchFn mm) %))
                            (mm %)))
            dval #((.dispatchFn ^clojure.lang.MultiFn @mmvar) %)
            tag (if (keyword? retag)
