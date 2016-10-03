@@ -162,7 +162,9 @@
         hinted-fields fields
         fields (vec (map #(with-meta % nil) fields))
         base-fields fields
-        fields (conj fields '__meta '__extmap)
+        fields (conj fields '__meta '__extmap
+                     '^:unsynchronized-mutable __hash
+                     '^:unsynchronized-mutable __hasheq)
 		type-hash (hash classname)]
     (when (some #{:volatile-mutable :unsynchronized-mutable} (mapcat (comp keys meta) hinted-fields))
       (throw (ArgumentException. ":volatile-mutable or :unsynchronized-mutable not supported for record fields")))   ;;; IllegalArgumentException
@@ -174,8 +176,18 @@
       (eqhash [[i m]] 
         [(conj i 'clojure.lang.IHashEq)
          (conj m
-               `(hasheq [this#] (bit-xor ~type-hash (clojure.lang.APersistentMap/mapHasheq this#)))                      ;;; .hashCode
-               `(GetHashCode [this#] (clojure.lang.APersistentMap/mapHash this#))               ;;; hashCode
+               `(hasheq [this#] (let [hq# ~'__hasheq]
+                                  (if (zero? hq#)
+                                    (let [h# (int (bit-xor ~type-hash (clojure.lang.APersistentMap/mapHasheq this#)))]
+                                      (set! ~'__hasheq h#)
+                                      h#)
+                                    hq#)))
+               `(GetHashCode [this#] (let [hash# ~'__hash]                                           ;;; hashCode
+                                    (if (zero? hash#)
+                                      (let [h# (clojure.lang.APersistentMap/mapHash this#)]
+                                        (set! ~'__hash h#)
+                                        h#)
+                                      hash#)))
                `(Equals [this# ~gs] (clojure.lang.APersistentMap/mapEquals this# ~gs)))])       ;;; equals
       (iobj [[i m]] 
             [(conj i 'clojure.lang.IObj)
@@ -225,16 +237,16 @@
                    `(^clojure.lang.IPersistentMap assoc [this# k# ~gs]                        ;;; type hint added
                      (condp identical? k#
                        ~@(mapcat (fn [fld]
-                                   [(keyword fld) (list* `new tagname (replace {fld gs} fields))])
+                                   [(keyword fld) (list* `new tagname (replace {fld gs} (remove '#{__hash __hasheq} fields)))])
                                  base-fields)
-                       (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap k# ~gs))))
+                       (new ~tagname ~@(remove '#{__extmap __hash __hasheq} fields) (assoc ~'__extmap k# ~gs))))
                    `(^clojure.lang.IPersistentMap assocEx [this# k# v#]                                       ;;; ADDED
                        (if (.containsKey this# k#)                                                            ;;; ADDED
                            (throw (Exception. "Key already present"))                                         ;;; ADDED
                            (.assoc this# k# v#)))                                                             ;;; ADDED
                    `(without [this# k#] (if (contains? #{~@(map keyword base-fields)} k#)
                                             (dissoc (with-meta (into {} this#) ~'__meta) k#)
-                                            (new ~tagname ~@(remove #{'__extmap} fields) 
+                                            (new ~tagname ~@(remove '#{__extmap __hash __hasheq} fields)
                                                  (not-empty (dissoc ~'__extmap k#))))))])
       (dict [[i m]]
            [(conj i 'System.Collections.IDictionary)
@@ -256,29 +268,32 @@
                   `(System.Collections.IDictionary.GetEnumerator [this#]  (clojure.lang.Runtime.ImmutableDictionaryEnumerator. this#))
 			      `(System.Collections.IEnumerable.GetEnumerator [this#]  (.GetEnumerator (clojure.lang.RecordEnumerable. this# [~@(map keyword base-fields)] (clojure.lang.RT/iter ~'__extmap))))
                   )])
-	  (cntd [[i m]]                                                                                       ;;; ADDED
-	        [(conj i 'clojure.lang.Counted)                                                               ;;; ADDED
-			 (conj m                                                                                      ;;; ADDED
-			      `(clojure.lang.Counted.count [this#] (+ ~(count base-fields) (count ~'__extmap))))])	  ;;; ADDED		                   
-      (ipc [[i m]]                                                                                        ;;; ADDED
-           [(conj i 'clojure.lang.IPersistentCollection)                                                  ;;; ADDED
-            (conj m                                                                                       ;;; ADDED                   
-                  `(clojure.lang.IPersistentCollection.cons [this# e#]                                    ;;; ADDED
-                        ((var imap-cons) this# e#))                                                       ;;; ADDED                   
-			      `(clojure.lang.IPersistentCollection.count [this#] (+ ~(count base-fields) (count ~'__extmap))))])	  ;;; ADDED
-      (associative                                                                                        ;;; ADDED
-            [[i m]]                                                                                       ;;; ADDED
-            [(conj i 'clojure.lang.Associative)                                                           ;;; ADDED
-             (conj m                                                                                      ;;; ADDED
-                   `(clojure.lang.Associative.assoc [this# k# ~gs]                                        ;;; ADDED
-                     (condp identical? k#                                                                 ;;; ADDED
-                       ~@(mapcat (fn [fld]                                                                ;;; ADDED
-                                   [(keyword fld) (list* `new tagname (replace {fld gs} fields))])        ;;; ADDED
-                                 base-fields)                                                             ;;; ADDED
-                       (new ~tagname ~@(remove #{'__extmap} fields) (assoc ~'__extmap k# ~gs)))))])]      ;;; ADDED
+	  (cntd [[i m]]                                                                                                                 ;;; ADDED
+	        [(conj i 'clojure.lang.Counted)                                                                                         ;;; ADDED
+			 (conj m                                                                                                                ;;; ADDED
+			      `(clojure.lang.Counted.count [this#] (+ ~(count base-fields) (count ~'__extmap))))])	                            ;;; ADDED		                   
+      (ipc [[i m]]                                                                                                                  ;;; ADDED
+           [(conj i 'clojure.lang.IPersistentCollection)                                                                            ;;; ADDED
+            (conj m                                                                                                                 ;;; ADDED                   
+                  `(clojure.lang.IPersistentCollection.cons [this# e#]                                                              ;;; ADDED
+                        ((var imap-cons) this# e#))                                                                                 ;;; ADDED                   
+			      `(clojure.lang.IPersistentCollection.count [this#] (+ ~(count base-fields) (count ~'__extmap))))])                ;;; ADDED
+      (associative                                                                                                                  ;;; ADDED
+            [[i m]]                                                                                                                 ;;; ADDED
+            [(conj i 'clojure.lang.Associative)                                                                                     ;;; ADDED
+             (conj m                                                                                                                ;;; ADDED
+                   `(clojure.lang.Associative.assoc [this# k# ~gs]                                                                  ;;; ADDED
+                     (condp identical? k#                                                                                           ;;; ADDED
+                       ~@(mapcat (fn [fld]                                                                                          ;;; ADDED
+                                   [(keyword fld) (list* `new tagname (replace {fld gs} (remove '#{__hash __hasheq} fields)))])     ;;; ADDED
+                                 base-fields)                                                                                       ;;; ADDED
+                       (new ~tagname ~@(remove '#{__extmap __hash __hasheq} fields) (assoc ~'__extmap k# ~gs)))))])]                ;;; ADDED
      (let [[i m] (-> [interfaces methods] irecord eqhash iobj ilookup imap associative cntd ipc dict)]                              ;;; Associative, ipc, cntd added
-       `(deftype* ~(symbol (name (ns-name *ns*)) (name tagname)) ~classname ~(conj hinted-fields '__meta '__extmap)
-	      :implements ~(vec i)
+       `(deftype* ~(symbol (name (ns-name *ns*)) (name tagname)) ~classname
+          ~(conj hinted-fields '__meta '__extmap
+                 '^int ^:unsynchronized-mutable __hash
+                 '^int ^:unsynchronized-mutable __hasheq)
+          :implements ~(vec i)
           ~@(mapcat identity opts)
           ~@m))))))
 
@@ -314,7 +329,7 @@
   [fields name]
   (when-not (vector? fields)
     (throw (Exception. "No fields vector given.")))                                                                             ;;; AssertionError.
-  (let [specials #{'__meta '__extmap}]
+  (let [specials '#{__meta __hash __hasheq __extmap}]
     (when (some specials fields)
       (throw (Exception. (str "The names in " specials " cannot be used as field names for types or records.")))))              ;;; AssertionError.
   (let [non-syms (remove symbol? fields)]
@@ -391,9 +406,9 @@
   Two constructors will be defined, one taking the designated fields
   followed by a metadata map (nil for none) and an extension field
   map (nil for none), and one taking only the fields (using nil for
-  meta and extension fields). Note that the field names __meta
-  and __extmap are currently reserved and should not be used when
-  defining your own records.
+  meta and extension fields). Note that the field names __meta,
+  __extmap, __hash and __hasheq are currently reserved and should not
+  be used when defining your own records.
 
   Given (defrecord TypeName ...), two factory functions will be
   defined: ->TypeName, taking positional parameters for the fields,
@@ -499,8 +514,8 @@
   writes the .class file to the *compile-path* directory.
 
   One constructor will be defined, taking the designated fields.  Note
-  that the field names __meta and __extmap are currently reserved and
-  should not be used when defining your own types.
+  that the field names __meta, __extmap, __hash and __hasheq are currently
+  reserved and should not be used when defining your own types.
 
   Given (deftype TypeName ...), a factory function called ->TypeName
   will be defined, taking positional parameters for the fields"

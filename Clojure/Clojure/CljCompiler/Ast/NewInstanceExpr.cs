@@ -142,7 +142,14 @@ namespace clojure.lang.CljCompiler.Ast
                 // use array map to preserve ctor order
                 ret.Closes = new PersistentArrayMap(closesvec);
                 ret.Fields = fmap;
-                for (int i = fieldSyms.count() - 1; i >= 0 && (((Symbol)fieldSyms.nth(i)).Name.Equals("__meta") || ((Symbol)fieldSyms.nth(i)).Name.Equals("__extmap")); --i)
+
+                for (int i = fieldSyms.count() - 1;
+                         i >= 0 &&
+                         (((Symbol)fieldSyms.nth(i)).Name.Equals("__meta")
+                         || ((Symbol)fieldSyms.nth(i)).Name.Equals("__extmap")
+                         || ((Symbol)fieldSyms.nth(i)).Name.Equals("__hash")
+                         || ((Symbol)fieldSyms.nth(i)).Name.Equals("__hasheq"));
+                        --i)
                     ret.AltCtorDrops++;
             }
 
@@ -288,7 +295,10 @@ namespace clojure.lang.CljCompiler.Ast
 
             BaseClassClosedOverCtor = GetConstructorWithArgCount(t, CtorTypes().Length);
             if (AltCtorDrops > 0)
+            {
                 BaseClassAltCtor = GetConstructorWithArgCount(t, CtorTypes().Length - AltCtorDrops);
+                BaseClassAltCtorNoHash = GetConstructorWithArgCount(t, CtorTypes().Length - 2);
+            }
 
             return t;
         }
@@ -321,21 +331,52 @@ namespace clojure.lang.CljCompiler.Ast
                 if (AltCtorDrops > 0)
                 {
                     Type[] ctorTypes = CtorTypes();
-                    int newLen = ctorTypes.Length - AltCtorDrops;
-                    if (newLen > 0)
+                    Type[] altCtorTypes = null;
+                    int newLen;
                     {
-                        Type[] altCtorTypes = new Type[newLen];
-                        for (int i = 0; i < altCtorTypes.Length; i++)
-                            altCtorTypes[i] = ctorTypes[i];
-                        ConstructorBuilder cb2 = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
-                        CljILGen ilg2 = new CljILGen(cb2.GetILGenerator());
-                        ilg2.EmitLoadArg(0);
-                        for (int i = 0; i < newLen; i++)
-                            ilg2.EmitLoadArg(i + 1);
-                        for (int i = 0; i < AltCtorDrops; i++)
-                            ilg2.EmitNull();
-                        ilg2.Emit(OpCodes.Call, cb);
-                        ilg2.Emit(OpCodes.Ret);
+
+                        newLen = ctorTypes.Length - AltCtorDrops;
+                        if (newLen > 0)
+                        {
+                            altCtorTypes = new Type[newLen];
+                            for (int i = 0; i < altCtorTypes.Length; i++)
+                                altCtorTypes[i] = ctorTypes[i];
+                            ConstructorBuilder cb2 = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
+                            CljILGen ilg2 = new CljILGen(cb2.GetILGenerator());
+                            ilg2.EmitLoadArg(0);
+                            for (int i = 0; i < newLen; i++)
+                                ilg2.EmitLoadArg(i + 1);
+                            //for (int i = 0; i < AltCtorDrops; i++)
+                            //    ilg2.EmitNull();
+                            ilg2.EmitNull();              // __meta
+                            ilg2.EmitNull();              // __extmap
+                            ilg2.Emit(OpCodes.Ldc_I4_0);  // __hash
+                            ilg2.Emit(OpCodes.Ldc_I4_0);  // __hasheq
+
+                            ilg2.Emit(OpCodes.Call, cb);
+                            ilg2.Emit(OpCodes.Ret);
+                        }
+                        {
+                            newLen = ctorTypes.Length - 2;
+                            if (newLen > 0)
+                            {
+                                altCtorTypes = new Type[newLen];
+                                for (int i = 0; i < altCtorTypes.Length; i++)
+                                    altCtorTypes[i] = ctorTypes[i];
+                                ConstructorBuilder cb2 = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
+                                CljILGen ilg2 = new CljILGen(cb2.GetILGenerator());
+                                ilg2.EmitLoadArg(0);
+                                for (int i = 0; i < newLen; i++)
+                                    ilg2.EmitLoadArg(i + 1);
+                                //for (int i = 0; i < AltCtorDrops; i++)
+                                //    ilg2.EmitNull();
+                                ilg2.Emit(OpCodes.Ldc_I4_0);  // __hash
+                                ilg2.Emit(OpCodes.Ldc_I4_0);  // __hasheq
+
+                                ilg2.Emit(OpCodes.Call, cb);
+                                ilg2.Emit(OpCodes.Ret);
+                            }
+                        }
                     }
                 }
             }
@@ -543,9 +584,11 @@ namespace clojure.lang.CljCompiler.Ast
 
                     foreach (LocalBuilder lb in locals)
                         gen.Emit(OpCodes.Ldloc, lb.LocalIndex);
-                    gen.EmitNull();
-                    gen.EmitLoadArg(0);
+                    gen.EmitNull();            // __meta
+                    gen.EmitLoadArg(0);        // __extmap
                     gen.EmitCall(Compiler.Method_RT_seqOrElse);
+                    gen.Emit(OpCodes.Ldc_I4_0);  // __hash
+                    gen.Emit(OpCodes.Ldc_I4_0);  // __hasheq
                     gen.EmitNew(CtorInfo);
 
                     gen.Emit(OpCodes.Ret);

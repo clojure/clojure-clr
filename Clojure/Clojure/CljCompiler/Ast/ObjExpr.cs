@@ -58,7 +58,8 @@ namespace clojure.lang.CljCompiler.Ast
         public TypeBuilder TypeBuilder { get; protected set; }
         public ConstructorInfo CtorInfo { get; protected set; }
         public ConstructorInfo BaseClassClosedOverCtor { get; protected set; }  // needed by NewInstanceExpr
-        public ConstructorInfo BaseClassAltCtor { get; protected set; }          // needed by NewInstanceExpr
+        public ConstructorInfo BaseClassAltCtor { get; protected set; }         // needed by NewInstanceExpr
+        public ConstructorInfo BaseClassAltCtorNoHash { get; protected set; }   // needed by NewInstanceExpr
         public Type BaseClass { get; protected set; }                           // needed by NewInstanceExpr
         public IPersistentVector KeywordCallsites { get; protected set; }
         public IPersistentVector ProtocolCallsites { get; protected set; }
@@ -347,7 +348,7 @@ namespace clojure.lang.CljCompiler.Ast
                     CtorInfo = EmitConstructor(TypeBuilder, superType);
 
                     if (AltCtorDrops > 0)
-                        EmitFieldOnlyConstructor(TypeBuilder, superType);
+                        EmitFieldOnlyConstructors(TypeBuilder, superType);
 
                     if (SupportsMeta)
                     {
@@ -607,7 +608,13 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "baseType")]
-        private ConstructorBuilder EmitFieldOnlyConstructor(TypeBuilder fnTB, Type baseType)
+        private void EmitFieldOnlyConstructors(TypeBuilder fnTB, Type baseType)
+        {
+            EmitFieldOnlyConstructorWithHash(fnTB);
+            EmitFieldOnlyConstructorWithoutHash(fnTB);
+        }
+
+        private void EmitFieldOnlyConstructorWithHash(TypeBuilder fnTB)
         {
             Type[] ctorTypes = CtorTypes();
             Type[] altCtorTypes = new Type[ctorTypes.Length - AltCtorDrops];
@@ -622,13 +629,41 @@ namespace clojure.lang.CljCompiler.Ast
             for (int i = 0; i < altCtorTypes.Length; i++)
                 gen.EmitLoadArg(i + 1);
 
-            for (int i = 0; i < AltCtorDrops; i++)
-                gen.EmitNull();
+            //for (int i = 0; i < AltCtorDrops; i++)
+            //    gen.EmitNull();
+            gen.EmitNull();                    // __meta
+            gen.EmitNull();                    // __extmap
+            gen.Emit(OpCodes.Ldc_I4_0);        // __hash
+            gen.Emit(OpCodes.Ldc_I4_0);        // __hasheq
 
             gen.Emit(OpCodes.Call, CtorInfo);
 
             gen.Emit(OpCodes.Ret);
-            return cb;
+
+        }
+
+        private void EmitFieldOnlyConstructorWithoutHash(TypeBuilder fnTB)
+        {
+            Type[] ctorTypes = CtorTypes();
+            Type[] altCtorTypes = new Type[ctorTypes.Length - 2];
+            for (int i = 0; i < altCtorTypes.Length; i++)
+                altCtorTypes[i] = ctorTypes[i];
+
+            ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, altCtorTypes);
+            CljILGen gen = new CljILGen(cb.GetILGenerator());
+
+            //Call full constructor
+            gen.EmitLoadArg(0);                     // gen.Emit(OpCodes.Ldarg_0);
+            for (int i = 0; i < altCtorTypes.Length; i++)
+                gen.EmitLoadArg(i + 1);
+
+            gen.Emit(OpCodes.Ldc_I4_0);        // __hash
+            gen.Emit(OpCodes.Ldc_I4_0);        // __hasheq
+
+            gen.Emit(OpCodes.Call, CtorInfo);
+
+            gen.Emit(OpCodes.Ret);
+
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "baseType")]
