@@ -779,6 +779,9 @@ namespace clojure.lang
 
         public sealed class NamespaceMapReader : AFn
         {
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#"), 
+             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#"), 
+             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "2#")]
             public override object invoke(object reader, object colon, object opts)
             {
                 PushbackTextReader r = reader as PushbackTextReader;

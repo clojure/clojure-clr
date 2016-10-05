@@ -54,6 +54,7 @@ namespace clojure.lang
             this._val = val;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
         public static MapEntry create(object key, object val)
         {
             return new MapEntry(key, val);
