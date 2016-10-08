@@ -17,8 +17,8 @@
 
 * Make sure ILMERGE is on the PATH
 * Build the ILMERGEd dlls
-** > msbuild build.proj /target:ilmerge /p:Configuration="Release 4.0" /p:Platform="Any CPU"
-** > msbuild build.proj /target:ilmerge /p:Configuration="Release 3.5" /p:Platform="Any CPU"
+** > msbuild build.proj /target:ilmerge /p:Configuration="Release 4.0" /p:Platform="Any CPU" /p:DirectLinking="true"
+** > msbuild build.proj /target:ilmerge /p:Configuration="Release 3.5" /p:Platform="Any CPU" /p:DirectLinking="true"
 * Build the nuget package
 ** > nuget pack Clojure.nuspec
 * Upload the nuget package
@@ -27,10 +27,10 @@
 ## For SourceForge
 
 * Build the distributions:
-** > msbuild build.proj /target:Dist /p:Configuration="Release 4.0" /p:Platform="Any CPU"
-** > msbuild build.proj /target:Dist /p:Configuration="Release 3.5" /p:Platform="Any CPU"
-** > msbuild build.proj /target:Dist /p:Configuration="Debug 4.0" /p:Platform="Any CPU"
-** > msbuild build.proj /target:Dist /p:Configuration="Debug 3.5" /p:Platform="Any CPU"
+** > msbuild build.proj /target:Dist /p:Configuration="Release 4.0" /p:Platform="Any CPU" /p:DirectLinking="true"
+** > msbuild build.proj /target:Dist /p:Configuration="Release 3.5" /p:Platform="Any CPU" /p:DirectLinking="true"
+** > msbuild build.proj /target:Dist /p:Configuration="Debug 4.0" /p:Platform="Any CPU" /p:DirectLinking="true"
+** > msbuild build.proj /target:Dist /p:Configuration="Debug 3.5" /p:Platform="Any CPU" /p:DirectLinking="true"
 * Zip each of the four directories into separate zips. Naming is like "clojure-clr-1.6.0-Release-4.0.zip"
 * Upload to SourceForge
 
