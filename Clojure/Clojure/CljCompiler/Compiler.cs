@@ -213,21 +213,28 @@ namespace clojure.lang
         {
             Object compilerOptions = null;
 
+			string nixPrefix = "CLOJURE_COMPILER_";
+			string winPrefix = "clojure.compiler.";
+
             IDictionary envVars = Environment.GetEnvironmentVariables();
             foreach (DictionaryEntry de in envVars)
             {
                 string name = (string)de.Key;
                 string v = (string)de.Value;
-                if (name.StartsWith("CLOJURE_COMPILER_"))
+				if (name.StartsWith(nixPrefix))
                 {
+					// compiler options on *nix need to be of the form
+					// CLOJURE_COMPILER_DIRECT_LINKING because most shells do not
+					// support hyphens in variable names
+					string optionName = name.Substring(1 + nixPrefix.Length).Replace("_", "-").ToLower();
                     compilerOptions = RT.assoc(compilerOptions,
-                        RT.keyword(null, name.Substring(1 + name.LastIndexOf("_"))),
+                        RT.keyword(null, optionName),
                         RT.readString(v));
                 }
-                if ( name.StartsWith("clojure.compiler."))
+				if ( name.StartsWith(winPrefix))
                 {
                     compilerOptions = RT.assoc(compilerOptions,
-                        RT.keyword(null, name.Substring(1 + name.LastIndexOf("."))),
+                        RT.keyword(null, name.Substring(1 + winPrefix.Length)),
                         RT.readString(v));
                 }
 
