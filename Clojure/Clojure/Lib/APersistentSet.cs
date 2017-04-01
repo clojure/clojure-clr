@@ -200,7 +200,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="o">The object to compare.</param>
         /// <returns><c>true</c> if the object is equivalent; <c>false</c> otherwise.</returns>
-        public bool equiv(object o)
+        public virtual bool equiv(object o)
         {
             return setEquals(this,o);
         }

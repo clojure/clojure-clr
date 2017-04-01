@@ -81,6 +81,39 @@ namespace clojure.lang
 
         #endregion
 
+        #region Equal/equiv overrides
+
+        public override bool Equals(object obj)
+        {
+            try
+            {
+                return base.Equals(obj);
+            }
+            catch (InvalidCastException)
+            {
+                return false;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override bool equiv(Object obj)
+        {
+            try
+            {
+                return base.equiv(obj);
+            }
+            catch (InvalidCastException)
+            {
+                return false;
+            }
+        }
+
+        #endregion
+
         #region IObj members
 
         /// <summary>

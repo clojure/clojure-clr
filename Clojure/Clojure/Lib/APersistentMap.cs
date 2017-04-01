@@ -169,7 +169,7 @@ namespace clojure.lang
         /// In Java Rev 1215, Added equiv.  Same as the definition in Equals, as in they took out the hashcode comparison.
         /// Different, as in Util.Equal above became Util.equals. and below it is Util.equiv.
         /// </remarks> 
-        public bool equiv(object o)
+        public virtual bool equiv(object o)
         {
             //if(!(obj instanceof Map))
             //    return false;
