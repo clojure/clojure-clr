@@ -3302,10 +3302,10 @@ namespace clojure.lang
             return null;
         }
 
-        public static long StopStopwatch()
+        public static double StopStopwatch()
         {
             _stopwatch.Stop();
-            return _stopwatch.ElapsedMilliseconds;
+            return _stopwatch.Elapsed.TotalMilliseconds;
         }
 
 
