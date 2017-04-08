@@ -230,11 +230,6 @@ namespace clojure.lang
             return chunkedNext();
         }
 
-        public new IPersistentCollection cons(object o)
-        {
-            throw new NotImplementedException();
-        }
-
         #endregion
 
         #region Counted methods
