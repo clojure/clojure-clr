@@ -542,3 +542,16 @@
   (is (= (char \a) \a)))
 
 ;; Note: More coercions in numbers.clj
+
+
+(deftest test-by-ref
+  (is
+    (let [d (|System.Collections.Generic.Dictionary`2[System.String,System.String]|.)
+         s ""]
+      (not (.TryGetValue d "foo" (by-ref s)))))
+
+  (is
+    (let [d (|System.Collections.Generic.Dictionary`2[System.String,System.String]|.)
+         s ""]
+      (.Add d "foo" "bar")
+      (and (.TryGetValue d "foo" (by-ref s)) (= s "bar")))))

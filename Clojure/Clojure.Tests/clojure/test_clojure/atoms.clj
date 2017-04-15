@@ -18,3 +18,8 @@
 ; swap! reset!
 ; compare-and-set!
 
+(deftest test-compare-and-set!
+  (is 
+    (let [a (atom 0)]
+      (and (compare-and-set! a 0 1) (= @a 1)))))
+
