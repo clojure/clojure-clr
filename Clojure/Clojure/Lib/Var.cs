@@ -13,8 +13,8 @@
  **/
 
 using System;
-
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Threading;
 
 namespace clojure.lang
@@ -30,7 +30,8 @@ namespace clojure.lang
     /// Every Var can (but needn't) have a root binding, 
     /// which is a binding that is shared by all threads that do not have a per-thread binding."</blockquote>
     /// </remarks>
-    public sealed class Var : ARef, IFn, IRef, Settable
+    [Serializable]
+    public sealed class Var : ARef, IFn, IRef, Settable, ISerializable
     {
         #region class TBox
 
@@ -1232,6 +1233,53 @@ namespace clojure.lang
         /// Used in calls to alterMeta, above.
         /// </summary>
         static IFn _dissoc = new DissocFn();
+
+        #endregion
+
+        #region ISerializable methods
+
+        // note from JVM version:
+        /***
+         * Note - serialization only supports reconnecting the Var identity on the deserializing end
+         * Neither the value in the var nor any of its properties are serialized
+         ***/
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.SetType(typeof(VarSerializationHelper));
+            info.AddValue("_ns", _ns);
+            info.AddValue("_sym", _sym);
+        }
+
+        #endregion
+    }
+
+    [Serializable]
+    sealed class VarSerializationHelper : IObjectReference
+    {
+        #region Data
+
+        readonly Namespace _ns;
+        readonly Symbol _sym;
+
+        #endregion
+
+        #region c-tors
+
+        VarSerializationHelper(SerializationInfo info, StreamingContext context)
+        {
+            _ns = (Namespace)info.GetValue("_ns", typeof(Namespace));
+            _sym = (Symbol)info.GetValue("_sym", typeof(Symbol));
+        }
+
+        #endregion
+
+        #region IObjectReference Members
+
+        public object GetRealObject(StreamingContext context)
+        {
+            return Var.intern(_ns, _sym);
+        }
 
         #endregion
     }
