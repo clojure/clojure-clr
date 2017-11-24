@@ -2,7 +2,73 @@
 
 At present, we've been using lein-clr for managing our libraries.   We use the standard project layout.  Source code is in `<root>/src`.  If the project namespace is something like `clojure.tools.reader`, source code will be under `<root>/src/clojure/tools/reader`.
 
-## Create the C# project and solution.
+(Though lately, I've been playing matching exactly the source code layout in the parent JVM libs, setting the :source-paths and :test-paths properties in project.clj to match.)
+
+There are two ways to create the NuGet packaging.  One uses a C# project and Visual Studio to create the necessary .nuspec file.  The other just creates/edits the .nuspec file by hand.  Once the .nuspec file is in hand, packaging and publishing is the same for either method.
+
+# Method 1: Creating the .nuspec file by hand (preferred/simpler)
+
+## Method 1: Step 1:: Create the .nuspec file by hand 
+
+Create a file called  X.nuspec, where X is named for the project, something like clojure.tools.reader.nuspec.
+You can put the file anywhere; you'll have to adjust the relative paths to the files accordingly.  One possible directory is src/clojure or src/main/clojure, depending on how you have the 
+
+The X.nuspec file should like this:
+
+    <?xml version="1.0" encoding="utf-8"?>
+    <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+        <metadata>
+            <id>clojure.tools.reader</id>
+            <version>1.9.0-alpha15</version>
+    	    <title>clojure.tools.reader</title>
+            <authors>yourself</authors>
+    		<owners>yourself</owners>
+            <requireLicenseAcceptance>false</requireLicenseAcceptance>
+            <licenseUrl>http://opensource.org/licenses/eclipse-1.0.php</licenseUrl>
+            <projectUrl>https://github.com/clojure/clr.tools.reader</projectUrl>
+            <iconUrl>http://clojure.org/file/view/clojure-icon.gif</iconUrl>
+            <description>Something appropriate</description>
+    		<releaseNotes>Something appropriate</releaseNotes>
+    		<copyright>Copyright yourself 2017</copyright>
+            <tags>Clojure ClojureCLR</tags>
+    	<dependencies>
+    	  <dependency id="clojure.tools.namespace" version="0.2.7"/>
+    	  <dependency id="clojure.data.generators" version="0.1.0"/>
+    	</dependencies>
+      </metadata>
+      <files>
+        <file src="path\to\file1.clj" target="lib" />
+        <file src="path\to\file2.clj" target="lib" />
+        <file src="path\to\*.clj" target="lib" />
+      </files>
+    </package>
+
+Notes on elements, from https://docs.microsoft.com/en-us/nuget/schema/nuspec :
+	
+	
+* `<id>` -- package identifier, how it will be referenced on nuget.org
+* `<authors>` -- comma separated, should match profile name on nuget.org.
+* `<version>` -- `major.minor.patch` + optional pre-release suffix.
+
+## Method 1: Step 2::  Pack and publish
+
+
+* From the command line, in whatever directory you've placed the .nuspec file, execute:
+
+    nuget pack clr.tools.reader.nuspec
+	
+This will have created a `clr.tools.reader.1.0.0.0.nupkg` file (whatever the version is).  Given that it is a ZIP, you can inspect it with your favorite ZIP tool.
+
+To publish:
+
+    nuget push clr.tools.reader.1.0.0.0.nupkg -source nuget.org
+
+Go to https://nuget.org to verify.
+
+
+# Method 2: Use a C# project and Visual Studio to create the .nuspec file
+
+## Method 2: Step 1:: Create the C# project
 
 Using Visual Studio (the easiest way), create a project, via `File > New project from existing code`.  
 
@@ -43,7 +109,7 @@ When using this dialog, unclick the COM-visible checkbox.
 * Build the solution.
 * If you want to verify, take some kind of .Net assembly viewer and check it out.  (I used ILSpy.  The files appear as resources.  You can inspect contents.)
 
-## Create the Nuget package.
+### Method 2: step 2:: Create the nuspec file.
 
 From the command line, `cd` into `<root>/src/clojure`.  Execute:
 
@@ -97,7 +163,7 @@ Edit to look something like:
 
 Put in dependencies as required.
 
-# Pack and Publish
+# Method 2: Step 3:: Pack and Publish
 
 * Build the project
 * From the command line, in `<root>/src/clojure`, execute:
