@@ -319,9 +319,6 @@
     <None Include="clojure\test_clojure\server.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="clojure\test_clojure\spec.clj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="clojure\test_clojure\special.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

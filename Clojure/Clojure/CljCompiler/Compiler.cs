@@ -1126,15 +1126,15 @@ namespace clojure.lang
             Var v = IsMacro(op);
             if (v != null)
             {
-                // Do not check specs while inside clojure.spec
-                if (!"clojure/spec.clj".Equals(SourcePathVar.deref()))
+                // Do not check specs while inside clojure.spec.alpha
+                if (!"clojure/spec/alpha.clj".Equals(SourcePathVar.deref()))
                 {
                     try
                     {
-                        Namespace checkns = Namespace.find(Symbol.intern("clojure.spec"));
+                        Namespace checkns = Namespace.find(Symbol.intern("clojure.spec.alpha"));
                         if (checkns != null)
                         {
-                            Var check = Var.find(Symbol.intern("clojure.spec/macroexpand-check"));
+                            Var check = Var.find(Symbol.intern("clojure.spec.alpha/macroexpand-check"));
                             if ((check != null) && (check.isBound))
                                 check.applyTo(RT.cons(v, RT.list(form.next())));
                         }

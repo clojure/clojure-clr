@@ -32,6 +32,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <DirectLinking Condition=" '$(DirectLinking)' == '' ">true</DirectLinking>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug 3.5|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -138,6 +140,13 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>set clojure.compiler.direct-linking=$(DirectLinking)
-$(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.core.specs clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect  clojure.edn  clojure.spec.gen clojure.spec.test clojure.spec clojure.core.specs</PostBuildEvent>
+$(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect  clojure.edn</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
 </Project>

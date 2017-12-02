@@ -100,8 +100,8 @@
              *command-line-args* *command-line-args*
 			 *unchecked-math* *unchecked-math*
              *assert* *assert*
-             clojure.spec/*explain-out* clojure.spec/*explain-out*
-             *1 nil
+             clojure.spec.alpha/*explain-out* clojure.spec.alpha/*explain-out*
+			 *1 nil
              *2 nil
              *3 nil
              *e nil]

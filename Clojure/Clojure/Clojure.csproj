@@ -78,6 +78,14 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="clojure.core.specs.alpha, Version=0.1.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\clojure.core.specs.alpha.0.1.3\lib\net35\clojure.core.specs.alpha.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="clojure.spec.alpha, Version=0.1.97.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\clojure.spec.alpha.0.1.97\lib\net35\clojure.spec.alpha.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Dynamic" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net35\Microsoft.Dynamic.dll</HintPath>
     </Reference>
