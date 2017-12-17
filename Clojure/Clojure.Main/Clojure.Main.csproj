@@ -79,6 +79,14 @@
     <ApplicationIcon>clojure-icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="clojure.core.specs.alpha, Version=0.1.24.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\clojure.core.specs.alpha.0.1.24\lib\net35\clojure.core.specs.alpha.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="clojure.spec.alpha, Version=0.1.143.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\clojure.spec.alpha.0.1.143\lib\net35\clojure.spec.alpha.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Scripting.Core" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0-alpha1\lib\Net35\Microsoft.Scripting.Core.dll</HintPath>
     </Reference>
@@ -129,6 +137,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="clojure-icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
