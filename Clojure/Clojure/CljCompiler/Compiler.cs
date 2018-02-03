@@ -180,6 +180,7 @@ namespace clojure.lang
 
         internal static readonly Var InTryBlockVar = Var.create(null).setDynamic();          //null or not
         internal static readonly Var InCatchFinallyVar = Var.create(null).setDynamic();          //null or not
+        //internal static readonly Var MethodReturnContextVar = Var.create(null).setDynamic();    // null or not
 
         internal static readonly Var NoRecurVar = Var.create(null).setDynamic();
 
@@ -1723,7 +1724,8 @@ namespace clojure.lang
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
         public static object loadFile(string fileName)
-        {            FileInfo finfo = new FileInfo(fileName);
+        {
+            FileInfo finfo = new FileInfo(fileName);
             if (!finfo.Exists)
                 throw new FileNotFoundException("Cannot find file to load", fileName);
 
@@ -2020,9 +2022,8 @@ namespace clojure.lang
 
         internal static bool InTailCall(RHC context)
         {
-            return (context == RHC.Return) && (InTryBlockVar.deref() == null);
+            return (context == RHC.Return) && /* (MethodReturnContextVar.deref() != null) && */ (InTryBlockVar.deref() == null);
         }
-
 
         #endregion
 
