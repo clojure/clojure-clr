@@ -90,6 +90,6 @@
                                         (throw (IndexOutOfRangeException.)))))      ;;; IndexOutOfBoundsException
                          (zipmap (range test-map-count) (repeat :dummy)))))))
 
-(deftest test-closed-over-clearing
+#_(deftest test-closed-over-clearing                                              ;;; Temporarily disable to speed up testing -- SEE CLJCLR-96
   ;; this will throw OutOfMemory without proper reference clearing
   (is (number? (reduce + 0 (r/map identity (range 1e8))))))
