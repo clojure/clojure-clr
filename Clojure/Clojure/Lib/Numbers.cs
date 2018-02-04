@@ -1383,31 +1383,29 @@ namespace clojure.lang
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hasheq")]
         [WarnBoxedMath(false)]
-        public static int hasheq(object x)
+        public static int hasheqFrom(object x, Type xc)
         {
-            Type xc = x.GetType();
-
-            if (xc == typeof(long)
-                || xc == typeof(int)
+            if (   xc == typeof(int)
                 || xc == typeof(short)
                 || xc == typeof(byte)
                 || xc == typeof(ulong)
                 || xc == typeof(uint)
                 || xc == typeof(ushort)
-                || xc == typeof(sbyte))
+                || xc == typeof(sbyte)
+                || (xc == typeof(BigInteger) && lte(x,Int64.MaxValue) && gte(x,Int64.MinValue)))
             {
                 long lpart = Util.ConvertToLong(x);
-                //return (int)(lpart ^ (lpart >> 32));
                 return Murmur3.HashLong(lpart);
+                //return (int)(lpart ^ (lpart >> 32));
             }
 
-            {
-                // Make BigInteger conform with Int64 when in Int64 range
-                long lval;
-                BigInteger bi = x as BigInteger;
-                if (bi != null && bi.AsInt64(out lval))
-                    return Murmur3.HashLong(lval);
-            }
+            //{
+            //    // Make BigInteger conform with Int64 when in Int64 range
+            //    long lval;
+            //    BigInteger bi = x as BigInteger;
+            //    if (bi != null && bi.AsInt64(out lval))
+            //        return Murmur3.HashLong(lval);
+            //}
 
             if (xc == typeof(BigDecimal))
             {
@@ -1425,9 +1423,36 @@ namespace clojure.lang
                 }
             }
 
+            if ( xc == typeof(float) && x.Equals(-0.0f))
+            {
+                return 0; // match 0.0f
+            }
 
             return x.GetHashCode();
         }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hasheq")]
+        [WarnBoxedMath(false)]
+        public static int hasheq(object x)
+        {
+            Type xc = x.GetType();
+
+            if (xc == typeof(long))
+            {
+                long lpart = Util.ConvertToLong(x);
+                //return (int)(lpart ^ (lpart >> 32));
+                return Murmur3.HashLong(lpart);
+            }
+            if (xc == typeof(double))
+            {
+                if (x.Equals(-0.0))
+                    return 0;  // match 0.0
+                return x.GetHashCode();
+            }
+
+            return hasheqFrom(x, xc);
+        }
+
 
         static Category category(object x)
         {

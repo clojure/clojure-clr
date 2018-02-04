@@ -72,6 +72,7 @@
   (all-pairs-equal #'= [(byte 2) (short 2) (int 2) (long 2)
                         (bigint 2) (biginteger 2)])
   (all-pairs-equal #'= [(float 2.0) (double 2.0)])
+  (all-pairs-equal #'= [(float 0.0) (double 0.0) (float -0.0) (double -0.0)])
   (all-pairs-equal #'= [2.0M 2.00M])
   (all-pairs-equal #'= [(float 1.5) (double 1.5)])
   (all-pairs-equal #'= [1.50M 1.500M])
@@ -85,7 +86,7 @@
                                      (bigint 2)
                                      (double 2.0) 2.0M 2.00M])
   (all-pairs-hash-consistent-with-= [(/ 3 2) (double 1.5) 1.50M 1.500M])
-  (all-pairs-hash-consistent-with-= [(double 0.0) 0.0M 0.00M])
+  (all-pairs-hash-consistent-with-= [(double -0.0) (double 0.0) -0.0M -0.00M 0.0M 0.00M (float -0.0) (float 0.0)])
 
   ;; == tests for numerical equality, returning true even for numbers
   ;; in different categories.
