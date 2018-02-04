@@ -30,14 +30,14 @@ namespace clojure.lang
         /// <summary>
         /// Caches the hash code, when computed.
         /// </summary>
-        /// <remarks>The value <value>-1</value> indicates that the hash code has not been computed yet.</remarks>
-        int _hash = -1;
+        /// <remarks>The default value indicates that the hash code has not been computed yet.</remarks>
+        int _hash;
 
         /// <summary>
         /// Caches the hashseq code, when computed.
         /// </summary>
-        /// <remarks>The value <value>-1</value> indicates that the hasheq code has not been computed yet.</remarks>
-        int _hasheq = -1;
+        /// <remarks>The default value indicates that the hasheq code has not been computed yet.</remarks>
+        int _hasheq;
 
         #endregion
 
@@ -105,9 +105,10 @@ namespace clojure.lang
         /// <remarks>Valud-based = relies on all entries.  Once computed, it is cached.</remarks>
         public override int GetHashCode()
         {
-            if (_hash == -1 )
-                _hash = mapHash(this);
-            return _hash;
+            int cached = _hash;
+            if ( cached == 0 )
+                _hash = cached = mapHash(this);
+            return cached;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "map")]
@@ -454,12 +455,13 @@ namespace clojure.lang
 
         public int hasheq()
         {
-            if (_hasheq == -1)
+            int cached = _hasheq;
+            if (cached == 0)
             {
                 //_hasheq = mapHasheq(this);
-                _hasheq = Murmur3.HashUnordered(this);
+                _hasheq = cached = Murmur3.HashUnordered(this);
             }
-            return _hasheq;
+            return cached;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "map")]

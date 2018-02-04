@@ -31,13 +31,13 @@ namespace clojure.lang
         /// <summary>
         ///  Caches the hash code, once computed.
         /// </summary>
-        int _hash = -1;
+        int _hash;
 
         /// <summary>
         /// Caches the hashseq code, when computed.
         /// </summary>
-        /// <remarks>The value <value>-1</value> indicates that the hasheq code has not been computed yet.</remarks>
-        int _hasheq = -1;
+        /// <remarks>The default value indicates that the hasheq code has not been computed yet.</remarks>
+        int _hasheq;
 
         #endregion
 
@@ -133,9 +133,10 @@ namespace clojure.lang
         /// <returns>A hash code for the current object.</returns>
         public override int GetHashCode()
         {
-            if (_hash == -1)
+            int hash = _hash;
+            if (hash == 0)
             {
-                int hash = 1;
+                hash = 1;
                 for (int i = 0; i < count(); i++)
                 {
                     Object obj = nth(i);
@@ -143,7 +144,7 @@ namespace clojure.lang
                 }
                 this._hash = hash;
             }
-            return _hash;
+            return hash;
         } 
 
 
@@ -581,19 +582,20 @@ namespace clojure.lang
 
         public int hasheq()
         {
-            if (_hasheq == -1)
+            int hash = _hasheq;
+            if (hash == 0)
             {
                 int n;
-                int hash = 1;
+                hash = 1;
 
                 for (n = 0; n < count(); ++n)
                 {
                     hash = 31 * hash + Util.hasheq(nth(n));
                 }
 
-                _hasheq = Murmur3.MixCollHash(hash, n);
+                _hasheq = hash = Murmur3.MixCollHash(hash, n);
             }
-            return _hasheq;
+            return hash;
         }
 
         #endregion

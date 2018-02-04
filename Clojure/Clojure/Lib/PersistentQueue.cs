@@ -57,13 +57,13 @@ namespace clojure.lang
         /// <summary>
         /// Cached hash code.
         /// </summary>
-        protected int _hash = -1;
+        protected int _hash;
 
         /// <summary>
         /// Caches the hashseq code, when computed.
         /// </summary>
-        /// <remarks>The value <value>-1</value> indicates that the hasheq code has not been computed yet.</remarks>
-        int _hasheq = -1;
+        /// <remarks>The default value indicates that the hasheq code has not been computed yet.</remarks>
+        int _hasheq;
 
         #endregion
 
@@ -111,14 +111,15 @@ namespace clojure.lang
         /// <remarks>Result is cached.</remarks>
         public override int GetHashCode()
         {
-            if (_hash == -1)
+            int hash = _hash;
+            if (hash == 0)
             {
-                int hash = 1;
+                 hash = 1;
                 for (ISeq s = seq(); s != null; s = s.next())
                     hash = 31 * hash + (s.first() == null ? 0 : s.first().GetHashCode());
                 _hash = hash;
             }
-            return _hash;
+            return hash;
         }
 
         #endregion
@@ -327,7 +328,8 @@ namespace clojure.lang
 
         public int hasheq()
         {
-            if (_hasheq == -1)
+            int cached = _hasheq;
+            if (cached == 0)
             {
                 //int hash = 1;
                 //for (ISeq s = seq(); s != null; s = s.next())
@@ -335,9 +337,9 @@ namespace clojure.lang
                 //    hash = 31 * hash + Util.hasheq(s.first());
                 //}
                 //_hasheq = hash;
-                _hasheq = Murmur3.HashOrdered(this);
+                _hasheq = cached = Murmur3.HashOrdered(this);
             }
-            return _hasheq;
+            return cached;
         }
         #endregion
 
