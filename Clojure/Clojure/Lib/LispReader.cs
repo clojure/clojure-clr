@@ -1183,10 +1183,11 @@ namespace clojure.lang
                     throw new Exception("Namespaced map literal must contain an even number of forms");
 
                 // Construct output map
+                object[] a = new object[kvs.Count];
                 IPersistentMap m = RT.map();
                 using (var iterator = kvs.GetEnumerator())
                 {
-                    while (iterator.MoveNext())
+                    for (int i = 0; iterator.MoveNext(); i += 2)
                     {
                         var key = iterator.Current;
                         iterator.MoveNext();
@@ -1196,11 +1197,9 @@ namespace clojure.lang
                         if (kw != null)
                         {
                             if (kw.Namespace == null)
-                                m = m.assoc(Keyword.intern(ns, kw.Name), val);
+                                key = Keyword.intern(ns, kw.Name);
                             else if (kw.Namespace.Equals("_"))
-                                m = m.assoc(Keyword.intern(null, kw.Name), val);
-                            else
-                                m = m.assoc(kw, val);
+                                key = Keyword.intern(null, kw.Name);
                         }
                         else
                         {
@@ -1208,17 +1207,16 @@ namespace clojure.lang
                             if (s != null)
                             {
                                 if (s.Namespace == null)
-                                    m = m.assoc(Symbol.intern(ns, s.Name), val);
-                                else if (s.Namespace.Equals("_"))
-                                    m = m.assoc(Symbol.intern(null, s.Name), val);
-                                else
-                                    m = m.assoc(s, val);
+                                    key = Symbol.intern(ns, s.Name);
+                                else if ( s.Namespace.Equals("_"))
+                                    key = Symbol.intern(null, s.Name);
                             }
-                            else m = m.assoc(key, val);
                         }
+                        a[i] = key;
+                        a[i + 1] = val;
                     }
                 }
-                return m;
+                return RT.map(a);
             }
         }
 
