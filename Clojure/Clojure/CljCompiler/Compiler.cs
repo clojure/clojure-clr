@@ -1141,7 +1141,7 @@ namespace clojure.lang
                         }
                         Symbol.intern("clojure.spec");
                     }
-                    catch (ArgumentException e)
+                    catch (Exception e)
                     {
                         throw new CompilerException((String)Compiler.SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), e);
                     }
