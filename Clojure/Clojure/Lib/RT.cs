@@ -37,7 +37,7 @@ namespace clojure.lang
         #region Default symbol-to-class map
 
         //simple-symbol->class
-        internal static readonly IPersistentMap DEFAULT_IMPORTS = map(
+        public static readonly IPersistentMap DEFAULT_IMPORTS = map(
             //classes
             Symbol.intern("AccessViolationException"), typeof(AccessViolationException),
             Symbol.intern("ActivationContext"), typeof(ActivationContext),
