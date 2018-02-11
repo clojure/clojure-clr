@@ -1416,8 +1416,9 @@ namespace clojure.lang
                                 rsym = resolver.ResolveVar(sym);
                             if (rsym != null)
                                 sym = rsym;
+                            else sym = Symbol.intern(resolver.CurrentNS().Name, sym.Name);
                         }
-                        // leave alone if no resolution
+                        // leave alone if no qualified
                     }
                     else
                     {
