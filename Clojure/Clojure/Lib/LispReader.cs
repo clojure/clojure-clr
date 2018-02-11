@@ -70,6 +70,18 @@ namespace clojure.lang
 
         #endregion
 
+        #region Interfaces
+
+        public interface Resolver
+        {
+            Symbol CurrentNS();
+            Symbol ResolveClass(Symbol sym);
+            Symbol ResolveAlias(Symbol sym);
+            Symbol ResolveVar(Symbol sym);
+        }
+
+        #endregion
+
         #region Macro characters & #-dispatch
 
         static IFn[] _macros = new IFn[256];
@@ -177,13 +189,13 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object read(PushbackTextReader r, bool eofIsError, object eofValue, bool isRecursive, object opts)
         {
-            return read(r, eofIsError, eofValue, null, null, isRecursive, opts, null);
+            return read(r, eofIsError, eofValue, null, null, isRecursive, opts, null, (Resolver)RT.ReaderResolverVar.deref());
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static private Object read(PushbackTextReader r, bool eofIsError, Object eofValue, bool isRecursive, Object opts, Object pendingForms)
         {
-            return read(r, eofIsError, eofValue, null, null, isRecursive, opts, EnsurePending(pendingForms));
+            return read(r, eofIsError, eofValue, null, null, isRecursive, opts, EnsurePending(pendingForms), (Resolver)RT.ReaderResolverVar.deref());
         }
 
         static Object EnsurePending(object pendingForms)
@@ -209,7 +221,11 @@ namespace clojure.lang
             }
         }
 
-        static private Object read(PushbackTextReader r, bool eofIsError, object eofValue, char? returnOn, object returnOnValue, bool isRecursive, object opts, object pendingForms)
+        static private Object read(PushbackTextReader r, 
+            bool eofIsError, object eofValue, 
+            char? returnOn, object returnOnValue, 
+            bool isRecursive, object opts, object pendingForms,
+            Resolver resolver)
         {
             if (UNKNOWN.Equals(RT.ReadEvalVar.deref()))
                 throw new InvalidOperationException("Reading disallowed - *read-eval* bound to :unknown");
@@ -286,7 +302,7 @@ namespace clojure.lang
                             throw new EndOfStreamException("EOF while reading symbol");
                         return eofValue;
                     }
-                    return InterpretToken(rawToken, token, mask);
+                    return InterpretToken(rawToken, token, mask, resolver);
                 }
             }
             catch (Exception e)
@@ -392,11 +408,12 @@ namespace clojure.lang
             int firstLine = lntr != null ? lntr.LineNumber : -1;
 
             List<Object> a = new List<object>();
+            Resolver resolver = (Resolver)RT.ReaderResolverVar.deref();
 
             for (; ; )
             {
 
-                Object form = read(r, false, READ_EOF, delim, READ_FINISHED, isRecursive, opts, pendingForms);
+                Object form = read(r, false, READ_EOF, delim, READ_FINISHED, isRecursive, opts, pendingForms, resolver);
 
                 if (form == READ_EOF)
                 {
@@ -526,12 +543,12 @@ namespace clojure.lang
             }
         }
 
-        public static object InterpretToken(string token)
+        public static object InterpretToken(string token, Resolver resolver)
         {
-            return InterpretToken(token, token, token);
+            return InterpretToken(token, token, token, resolver);
         }
 
-        public static object InterpretToken(string rawToken, string token, string mask)
+        public static object InterpretToken(string rawToken, string token, string mask, Resolver resolver)
         {
             if (token.Equals("nil"))
                 return null;
@@ -540,7 +557,7 @@ namespace clojure.lang
             else if (token.Equals("false"))
                 return false; // RT.F;
 
-            object ret = matchSymbol(token, mask);
+            object ret = matchSymbol(token, mask, resolver);
 
             if (ret != null)
                 return ret;
@@ -568,7 +585,7 @@ namespace clojure.lang
             }
         }
 
-        static object matchSymbol(string token, string mask)
+        static object matchSymbol(string token, string mask, Resolver resolver)
         {
             Match m = symbolPat.Match(mask);
 
@@ -592,16 +609,33 @@ namespace clojure.lang
                     string name;
                     ExtractNamesUsingMask(token.Substring(2), m2.Groups[1].Value, m2.Groups[2].Value, out ns, out name);
                     Symbol ks = Symbol.intern(ns, name);
-                    Namespace kns;
-                    if (ks.Namespace != null)
-                        kns = Compiler.namespaceFor(ks);
+
+                    if (resolver != null)
+                    {
+                        Symbol nsym;
+                        if (ks.Namespace != null)
+                            nsym = resolver.ResolveAlias(Symbol.intern(ks.Namespace));
+                        else
+                            nsym = resolver.CurrentNS();
+                        // auto-resolving keyword
+                        if (nsym != null)
+                            return Keyword.intern(nsym.Name, ks.Name);
+                        else
+                            return null;
+                    }
                     else
-                        kns = Compiler.CurrentNamespace;
-                    // auto-resolving keyword
-                    if (kns != null)
-                        return Keyword.intern(kns.Name.Name, ks.Name);
-                    else
-                        return null;
+                    {
+                        Namespace kns;
+                        if (ks.Namespace != null)
+                            kns = Compiler.CurrentNamespace.LookupAlias(Symbol.intern(ks.Namespace));
+                        else
+                            kns = Compiler.CurrentNamespace;
+                        // auto-resolving keyword
+                        if (kns != null)
+                            return Keyword.intern(kns.Name.Name, ks.Name);
+                        else
+                            return null;
+                    }
                 }
 
                 bool isKeyword = mask[0] == ':';
@@ -1156,20 +1190,32 @@ namespace clojure.lang
                 Symbol ssym = osym as Symbol;
                 if (auto)
                 {
+                    Resolver resolver = (Resolver)RT.ReaderResolverVar.deref();
+
                     if (osym == null)
-                        ns = Compiler.CurrentNamespace.Name.Name;
+                    {
+                        if (resolver != null)
+                            ns = resolver.CurrentNS().Name;
+                        else
+                            ns = Compiler.CurrentNamespace.Name.Name;
+                    }
                     else if (ssym == null || ssym.Namespace != null)
                         throw new Exception("Namespaced map must specify a valid namespace: " + osym);
                     else
                     {
-                        Namespace resolvedNS = Compiler.CurrentNamespace.LookupAlias(ssym);
-                        if (resolvedNS == null)
-                            resolvedNS = Namespace.find(ssym);
+                        Symbol resolvedNS;
+                        if (resolver != null)
+                            resolvedNS = resolver.ResolveAlias(ssym);
+                        else
+                        {
+                            Namespace rns = Compiler.CurrentNamespace.LookupAlias(ssym);
+                            resolvedNS = rns != null ? rns.Name : null;
+                        }
 
                         if (resolvedNS == null)
                             throw new Exception("Unknown auto-resolved namespace alias: " + osym);
                         else
-                            ns = resolvedNS.Name.Name;
+                            ns = resolvedNS.Name;
                     }
                 }
                 else if (ssym == null || ssym.Namespace != null)
@@ -1315,6 +1361,8 @@ namespace clojure.lang
 
                 if (sym != null)
                 {
+                    Resolver resolver = (Resolver)RT.ReaderResolverVar.deref();
+
                     if (sym.Namespace == null && sym.Name.EndsWith("#"))
                     {
                         IPersistentMap gmap = (IPersistentMap)GENSYM_ENV.deref();
@@ -1330,12 +1378,46 @@ namespace clojure.lang
                     else if (sym.Namespace == null && sym.Name.EndsWith("."))
                     {
                         Symbol csym = Symbol.intern(null, sym.Name.Substring(0, sym.Name.Length - 1));
-                        csym = Compiler.resolveSymbol(csym);
-                        sym = Symbol.intern(null, csym.Name + ".");
+                        if (resolver != null)
+                        {
+                            Symbol rc = resolver.ResolveClass(csym);
+                            if (rc != null)
+                                csym = rc;
+                        }
+                        else
+                        {
+                            csym = Compiler.resolveSymbol(csym);
+                            sym = Symbol.intern(null, csym.Name + ".");
+                        }
                     }
                     else if (sym.Namespace == null && sym.Name.StartsWith("."))
                     {
                         // simply quote method names
+                    }
+                    else if ( resolver != null )
+                    {
+                        Symbol nsym = null;
+                        if ( sym.Namespace != null && sym.Namespace.IndexOf('.') == -1)
+                        {
+                            Symbol alias = Symbol.intern(null, sym.Namespace);
+                            nsym = resolver.ResolveClass(alias);
+                            if (nsym == null)
+                                nsym = resolver.ResolveAlias(alias);
+                        }
+                        if ( nsym != null )
+                        {
+                            //Classname/foo => package.qualified.Classname/foo
+                            sym = Symbol.intern(nsym.Name, sym.Name);
+                        }
+                        else if (sym.Namespace == null)
+                        {
+                            Symbol rsym = resolver.ResolveClass(sym);
+                            if (rsym == null)
+                                rsym = resolver.ResolveVar(sym);
+                            if (rsym != null)
+                                sym = rsym;
+                        }
+                        // leave alone if no resolution
                     }
                     else
                     {
@@ -1682,7 +1764,7 @@ namespace clojure.lang
                 //    return interpretToken(readToken(r, '%'));
                 if (ARG_ENV.deref() == null)
                 {
-                    return InterpretToken(readSimpleToken(r, '%'));
+                    return InterpretToken(readSimpleToken(r, '%'), null);
                 }
 
                 int ch = r.Read();
@@ -1991,7 +2073,7 @@ namespace clojure.lang
                 if (result == READ_STARTED)
                 {
                     // Read the next feature
-                    form = read(r, false, READ_EOF, ')', READ_FINISHED, true, opts, pendingForms);
+                    form = read(r, false, READ_EOF, ')', READ_FINISHED, true, opts, pendingForms, null);
 
                     if (form == READ_EOF)
                     {
@@ -2013,7 +2095,7 @@ namespace clojure.lang
 
                         //Read the form corresponding to the feature, and assign it to result if everything is kosher
 
-                        form = read(r, false, READ_EOF, ')', READ_FINISHED, true, opts, pendingForms);
+                        form = read(r, false, READ_EOF, ')', READ_FINISHED, true, opts, pendingForms, (Resolver) RT.ReaderResolverVar.deref());
 
                         if (form == READ_EOF)
                         {
@@ -2040,7 +2122,7 @@ namespace clojure.lang
                 try
                 {
                     Var.pushThreadBindings(RT.map(RT.SuppressReadVar, true /* RT.T */));
-                    form = read(r, false, READ_EOF, ')', READ_FINISHED, true, opts, pendingForms);
+                    form = read(r, false, READ_EOF, ')', READ_FINISHED, true, opts, pendingForms, (Resolver)RT.ReaderResolverVar.deref());
 
                     if (form == READ_EOF)
                     {

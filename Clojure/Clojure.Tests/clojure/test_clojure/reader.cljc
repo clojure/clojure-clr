@@ -356,7 +356,6 @@
        Exception #"Invalid token: foo:" "foo:"
        Exception #"Invalid token: :bar/" ":bar/"
        Exception #"Invalid token: ::does.not/exist" "::does.not/exist"))
-
 ;; Lists
 
 (deftest t-Lists)
@@ -717,7 +716,6 @@
   (is (= 23 (read {:eof 23} (clojure.lang.LineNumberingTextReader.           ;;; clojure.lang.LineNumberingPushbackReader.
                              (System.IO.StringReader. ""))))))               ;;; java.io.StringReader.
 
-
 (require '[clojure.string :as s])
 (deftest namespaced-maps
   (is (= #:a{1 nil, :b nil, :b/c nil, :_/d nil}
@@ -729,27 +727,20 @@
   (is (= #::s{1 nil, :a nil, :a/b nil, :_/d nil}
          #::s  {1 nil, :a nil, :a/b nil, :_/d nil}
          {1 nil, :clojure.string/a nil, :a/b nil, :d nil}))
-  (is (= #::clojure.core{1 nil, :a nil, :a/b nil, :_/d nil} {1 nil, :clojure.core/a nil, :a/b nil, :d nil}))
   (is (= (read-string "#:a{b 1 b/c 2}") {'a/b 1, 'b/c 2}))
   (is (= (binding [*ns* (the-ns 'clojure.test-clojure.reader)] (read-string "#::{b 1, b/c 2, _/d 3}")) {'clojure.test-clojure.reader/b 1, 'b/c 2, 'd 3}))
-  (is (= (binding [*ns* (the-ns 'clojure.test-clojure.reader)] (read-string "#::s{b 1, b/c 2, _/d 3}")) {'clojure.string/b 1, 'b/c 2, 'd 3}))
-  (is (= (read-string "#::clojure.core{b 1, b/c 2, _/d 3}") {'clojure.core/b 1, 'b/c 2, 'd 3})))
+  (is (= (binding [*ns* (the-ns 'clojure.test-clojure.reader)] (read-string "#::s{b 1, b/c 2, _/d 3}")) {'clojure.string/b 1, 'b/c 2, 'd 3})))
 
 (deftest namespaced-map-errors
   (are [err msg form] (thrown-with-msg? err msg (read-string form))
                       Exception #"Invalid token" "#:::"
                       Exception #"Namespaced map literal must contain an even number of forms" "#:s{1}"
                       Exception #"Namespaced map must specify a valid namespace" "#:s/t{1 2}"
-                      Exception #"Namespaced map literal must contain an even number of forms" "#::clojure.core{1}"
-                      Exception #"Namespaced map must specify a valid namespace" "#::clojure.core/t{1 2}"
                       Exception #"Unknown auto-resolved namespace alias" "#::BOGUS{1 2}"
-                      Exception #"Namespaced map must specify a namespace" "#:: clojure.core{:a 1}"
-                      Exception #"Namespaced map must specify a namespace" "#: clojure.core{:a 1}"
+                      Exception #"Namespaced map must specify a namespace" "#: s{:a 1}"
                       Exception #"Duplicate key: :user/a" "#::{:a 1 :a 2}"
-                      Exception #"Duplicate key: :clojure.core/a" "#::clojure.core{:a 1 :a 2}"
-                      Exception #"Duplicate key: user/a" "#::{a 1 a 2}"
-                      Exception #"Duplicate key: clojure.core/+" "#::clojure.core{+ 1 + 2}"))
-
+                      Exception #"Duplicate key: user/a" "#::{a 1 a 2}"))
+  
 (deftest namespaced-map-edn
   (is (= {1 1, :a/b 2, :b/c 3, :d 4}
          (edn/read-string "#:a{1 1, :b 2, :b/c 3, :_/d 4}")

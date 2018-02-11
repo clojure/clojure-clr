@@ -419,6 +419,9 @@ namespace clojure.lang
             //= Var.intern(CLOJURE_NS, Symbol.intern("*allow-unresolved-vars*"), RT.F);
             = Var.intern(ClojureNamespace, Symbol.intern("*allow-unresolved-vars*"), false).setDynamic();
 
+        public static readonly Var ReaderResolverVar
+            = Var.intern(ClojureNamespace, Symbol.intern("*reader-resolver*"), null).setDynamic();
+
         public static readonly Var WarnOnReflectionVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), RT.F);
             = Var.intern(ClojureNamespace, Symbol.intern("*warn-on-reflection*"), false).setDynamic();
