@@ -1397,7 +1397,7 @@ namespace clojure.lang
                     else if ( resolver != null )
                     {
                         Symbol nsym = null;
-                        if ( sym.Namespace != null && sym.Namespace.IndexOf('.') == -1)
+                        if ( sym.Namespace != null )
                         {
                             Symbol alias = Symbol.intern(null, sym.Namespace);
                             nsym = resolver.ResolveClass(alias);
