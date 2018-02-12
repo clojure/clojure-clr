@@ -56,6 +56,8 @@ namespace clojure.lang.CljCompiler.Ast
         static readonly Keyword _onKey = Keyword.intern("on");
         static readonly Keyword _methodMapKey = Keyword.intern("method-map");
 
+        Type _cachedType;
+
         #endregion
 
         #region Ctors
@@ -125,7 +127,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Type ClrType
         {
-            get { return HostExpr.TagToType(_tag); }
+            get
+            {
+                if (_cachedType == null)
+                    _cachedType = HostExpr.TagToType(_tag);
+                return _cachedType;
+            }
         }
 
         #endregion

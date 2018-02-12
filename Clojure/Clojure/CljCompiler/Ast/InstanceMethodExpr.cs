@@ -25,6 +25,8 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Expr _target;
         public Expr Target { get { return _target; } }
 
+        Type _cachedType;
+
         #endregion
 
         #region Ctors
@@ -77,7 +79,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return Compiler.RetType((_tag != null ? HostExpr.TagToType(_tag) : null), (_method != null) ? _method.ReturnType : null); }
+            get
+            {
+                if (_cachedType == null)
+                    _cachedType = Compiler.RetType((_tag != null ? HostExpr.TagToType(_tag) : null), (_method != null) ? _method.ReturnType : null);
+                return _cachedType;
+            }
         }
 
         #endregion

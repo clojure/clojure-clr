@@ -39,6 +39,8 @@ namespace clojure.lang.CljCompiler.Ast
         private int _dynMethodMapKey = RT.nextID();
         public int DynMethodMapKey { get { return _dynMethodMapKey; } }
 
+        Type _cachedType;
+
         #endregion
 
         #region Ctors
@@ -97,7 +99,9 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                return _tag != null ? HostExpr.TagToType(_tag) : typeof(AFunction);
+                if (_cachedType == null ) 
+                    _cachedType = _tag != null ? HostExpr.TagToType(_tag) : typeof(AFunction);
+                return _cachedType;
             }
         }
 

@@ -181,7 +181,7 @@ namespace clojure.lang.CljCompiler.Ast
             return typeof(object);
         }
 
-
+        Type _cachedType;
         
         #endregion
 
@@ -208,7 +208,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public virtual Type ClrType
         {
-            get { return CompiledType ?? (_tag != null ? HostExpr.TagToType(_tag) : typeof(IFn)); }
+            get
+            {
+                if (_cachedType == null)
+                    _cachedType = CompiledType ?? (_tag != null ? HostExpr.TagToType(_tag) : typeof(IFn));
+                return _cachedType;
+            }
         }
 
         #endregion

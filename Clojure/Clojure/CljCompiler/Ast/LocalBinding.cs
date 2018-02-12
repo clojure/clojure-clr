@@ -49,6 +49,10 @@ namespace clojure.lang.CljCompiler.Ast
         readonly Type _declaredType;
         public Type DeclaredType { get { return _declaredType; } }
 
+        bool _hasTypeCached = false;
+        bool _cachedHasType = false;
+        Type _cachedType;
+
         #endregion
 
         #region C-tors
@@ -78,13 +82,18 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                if (Init != null
+                if (!_hasTypeCached)
+                {
+                    if (Init != null
                     && Init.HasClrType
                     && Util.IsPrimitive(Init.ClrType)
                     && !(Init is MaybePrimitiveExpr))
-                    return false;
-
-                return Tag != null || (Init != null && Init.HasClrType);
+                        _cachedHasType = false;
+                    else
+                        _cachedHasType = Tag != null || (Init != null && Init.HasClrType);
+                    _hasTypeCached = true;
+                }
+                return _cachedHasType;
             }
         }
 
@@ -92,9 +101,9 @@ namespace clojure.lang.CljCompiler.Ast
         {
             get
             {
-                return Tag != null
-                    ? HostExpr.TagToType(Tag)
-                    : Init.ClrType;
+                if (_cachedType == null)
+                    _cachedType = Tag != null ? HostExpr.TagToType(Tag) : Init.ClrType;
+                return _cachedType;
             }
         }
 

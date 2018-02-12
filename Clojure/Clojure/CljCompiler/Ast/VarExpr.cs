@@ -28,6 +28,8 @@ namespace clojure.lang.CljCompiler.Ast
         readonly object _tag;
         public object Tag { get { return _tag; } }
 
+        Type _cachedType;  
+
         #endregion
 
         #region Ctors
@@ -50,7 +52,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Type ClrType
         {
-            get { return HostExpr.TagToType(_tag); }
+            get
+            {
+                if (_cachedType == null)
+                    _cachedType = HostExpr.TagToType(_tag);
+                return _cachedType;
+            }
         }
 
         #endregion

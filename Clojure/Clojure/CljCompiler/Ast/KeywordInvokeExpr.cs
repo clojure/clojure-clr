@@ -38,6 +38,8 @@ namespace clojure.lang.CljCompiler.Ast
         
         readonly int _siteIndex;
         public int SiteIndex { get { return _siteIndex; } }
+
+        Type _cachedType;
         
         #endregion
 
@@ -64,7 +66,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Type ClrType
         {
-            get { return HostExpr.TagToType(_tag); }
+            get
+            {
+                if (_cachedType == null)
+                    _cachedType = HostExpr.TagToType(_tag);
+                return _cachedType;
+            }
         }
 
         #endregion

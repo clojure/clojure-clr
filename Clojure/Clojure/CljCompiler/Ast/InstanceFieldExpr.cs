@@ -44,6 +44,8 @@ namespace clojure.lang.CljCompiler.Ast
         protected readonly Symbol _tag;
         public Symbol Tag { get { return _tag; } }
 
+        protected Type _cachedType;
+
         #endregion
 
         #region Ctors
@@ -190,7 +192,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return _tag != null ? HostExpr.TagToType(_tag) : _tinfo.FieldType; }
+            get
+            {
+                if (_cachedType == null)
+                    _cachedType = _tag != null ? HostExpr.TagToType(_tag) : _tinfo.FieldType;
+                return _cachedType;
+            }
         }
 
         #endregion
@@ -273,7 +280,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public override Type ClrType
         {
-            get { return _tag != null ? HostExpr.TagToType(_tag) : _tinfo.PropertyType; }
+            get
+            {
+                if (_cachedType == null)
+                    _cachedType = _tag != null ? HostExpr.TagToType(_tag) : _tinfo.PropertyType;
+                return _cachedType;
+            }
         }
 
         #endregion

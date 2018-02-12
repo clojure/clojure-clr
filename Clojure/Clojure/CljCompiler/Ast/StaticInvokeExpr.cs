@@ -42,6 +42,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public MethodInfo Method { get { return _method; } }
 
+        Type _cachedType;
+
         #endregion
 
         #region Ctors
@@ -68,7 +70,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public Type ClrType
         {
-            get { return Compiler.RetType((_tag != null ? HostExpr.TagToType(_tag) : _retType), _retType); }
+            get
+            {
+                if (_cachedType == null)
+                    _cachedType = Compiler.RetType((_tag != null ? HostExpr.TagToType(_tag) : _retType), _retType);
+                return _cachedType;
+            }
         }
 
         #endregion
