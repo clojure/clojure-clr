@@ -20,6 +20,7 @@ using System.Reflection.Emit;
 using clojure.lang.CljCompiler;
 using clojure.lang.CljCompiler.Ast;
 using Microsoft.Scripting.Generation;
+using System.Runtime.Serialization;
 
 namespace clojure.lang
 {
@@ -76,18 +77,21 @@ namespace clojure.lang
 
         #region Factory methods
 
-
-
-        public static Type GenerateProxyClass(Type superclass, ISeq interfaces, string className)
+        public static Type GenerateProxyClass(Type superclass, ISeq interfaces,  string className)
         {
-            return new GenProxy(className).Generate(superclass, interfaces,className);
+            return new GenProxy(className).Generate(superclass, interfaces, PersistentHashMap.EMPTY, className);
+        }
+
+        public static Type GenerateProxyClass(Type superclass, ISeq interfaces, IPersistentMap attributes, string className)
+        {
+            return new GenProxy(className).Generate(superclass, interfaces, attributes, className);
         }
 
         #endregion
 
         #region Implementation
 
-        Type Generate(Type superclass, ISeq interfaces, string className)
+        Type Generate(Type superclass, ISeq interfaces, IPersistentMap attributes, string className)
         {
             // define the class
             List<Type> interfaceTypes = new List<Type>();
@@ -101,8 +105,11 @@ namespace clojure.lang
                 TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed,
                 superclass, 
                 interfaceTypes.ToArray());
+
+            GenInterface.SetCustomAttributes(proxyTB, attributes);
     
             DefineCtors(proxyTB, superclass);
+            MaybeImplementISerializable(proxyTB,interfaceTypes);
             FieldBuilder mapField = AddIProxyMethods(proxyTB);
 
             HashSet<Type> allInterfaces = GetAllInterfaces(interfaces);
@@ -142,6 +149,25 @@ namespace clojure.lang
             gen.Emit(OpCodes.Call, ctor);
             gen.Emit(OpCodes.Ret);
         }
+
+
+        private void MaybeImplementISerializable(TypeBuilder proxyTB, List<Type> interfaceTypes)
+        {
+            if (interfaceTypes.Find(t => t is ISerializable) == null)
+                return;
+
+            // Create failing implementation of GetObjectData
+            MethodBuilder godMb = proxyTB.DefineMethod(
+                "GetObjectData",
+                MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
+                typeof(void),
+                new Type[] { typeof(SerializationInfo), typeof(StreamingContext) });
+            CljILGen gen = new CljILGen(godMb.GetILGenerator());
+            gen.EmitString("Serialization of proxy objects not supported");
+            gen.EmitNew(typeof(SerializationException), new Type[] {typeof(string)});
+            gen.Emit(OpCodes.Throw);
+        }
+
 
         private static FieldBuilder AddIProxyMethods(TypeBuilder proxyTB)
         {
