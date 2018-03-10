@@ -5763,7 +5763,7 @@ Note that read can execute code (controlled by *read-eval*),
           exception (Exception. message)     
           ;; can't set the stacktrace ---- raw-trace (.getStackTrace exception)   
           ;;                          ---- boring? #(not= (.getMethodName ^StackTraceElement %) "doInvoke")
-         ];;                          ---- trace (into-array (drop 2 (drop-while boring? raw-trace)))]
+         ];;                          ---- trace (into-array StackTraceElement (drop 2 (drop-while boring? raw-trace)))]
       ;;;                           ---- (.setStackTrace exception trace)
       (throw (clojure.lang.Compiler+CompilerException.                   ;;; Compiler$CompilerException
               *file*
