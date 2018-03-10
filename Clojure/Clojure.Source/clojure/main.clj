@@ -12,6 +12,7 @@
        :author "Stephen C. Gilardi and Rich Hickey"}
   clojure.main
   (:refer-clojure :exclude [with-bindings])
+  (:require [clojure.spec.alpha])
   (:import (clojure.lang Compiler Compiler+CompilerException             ;;;Compiler$CompilerException
                          LineNumberingTextReader RT))                   ;;; LineNumberingPushbackReader
   ;;(:use [clojure.repl :only (demunge root-cause stack-element-str get-stack-trace)])

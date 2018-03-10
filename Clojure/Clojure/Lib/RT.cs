@@ -547,6 +547,8 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible")]
         public static bool checkSpecAsserts = ReadTrueFalseDefault(Environment.GetEnvironmentVariable("clojure.spec.check-asserts"), false);
 
+        internal static volatile bool CHECK_SPECS = false;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static RT()
         {
@@ -604,19 +606,37 @@ namespace clojure.lang
                 DoInit();
         }
 
+        public static void LoadSpecCode()
+        {
+            try
+            {
+                Var.pushThreadBindings(RT.map(Compiler.CompileFilesVar, false));
+                // We need to prevent loading more than once.
+                IFn require = clojure.clr.api.Clojure.var("clojure.core", "require");
+                require.invoke(clojure.clr.api.Clojure.read("clojure.spec.alpha"));
+                require.invoke(clojure.clr.api.Clojure.read("clojure.core.specs.alpha"));
+                //load("clojure/spec/alpha");
+                //load("clojure/core/specs/alpha");
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+        }
+
         static void DoInit()
         {
             //Stopwatch sw = new Stopwatch();
             //sw.Start();
             load("clojure/core");
             Assembly.LoadFrom("clojure.spec.alpha.dll");
-            load("clojure/spec/alpha");
             Assembly.LoadFrom("clojure.core.specs.alpha.dll");
-            load("clojure/core/specs/alpha");
             //sw.Stop();
             //Console.WriteLine("Initial clojure/core load: {0} milliseconds.", sw.ElapsedMilliseconds);
 
             PostBootstrapInit();
+
+            CHECK_SPECS = true;
         }
 
         public static void PostBootstrapInit()

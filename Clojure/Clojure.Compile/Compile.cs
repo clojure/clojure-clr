@@ -44,6 +44,10 @@ namespace BootstrapCompile
                 uncheckedMath = true;
             else if ("warn-on-boxed".Equals(mathVal))
                 uncheckedMath = Keyword.intern("warn-on-boxed");
+            
+
+            // Force load to avoid transitive compilation during lazy load
+            Compiler.EnsureMacroCheck();
 
             try
             {

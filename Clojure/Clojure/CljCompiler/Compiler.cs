@@ -1093,6 +1093,46 @@ namespace clojure.lang
 
         #region Macroexpansion
 
+        private static volatile Var MacroCheckVar = null;
+        private static volatile bool MacroCheckLoading = false;
+        private static readonly Object MacroCheckLock = new object();
+
+        public static Var EnsureMacroCheck()
+        {
+            if ( MacroCheckVar == null)
+            {
+                lock(MacroCheckLock)
+                {
+                    if (MacroCheckVar == null)
+                    {
+                        MacroCheckLoading = true;
+                        RT.LoadSpecCode();
+                        MacroCheckVar = Var.find(Symbol.intern("clojure.spec.alpha", "macroexpand-check"));
+                        MacroCheckLoading = false;
+                    }
+                }
+            }
+
+            return MacroCheckVar;
+        }
+
+        public static void CheckSpecs(Var v, ISeq form)
+        {
+            if ( RT.CHECK_SPECS && !MacroCheckLoading)
+            {
+                try
+                {
+                    EnsureMacroCheck().applyTo(RT.cons(v, RT.list(form.next())));
+                }
+                catch ( Exception e)
+                {
+                    throw new CompilerException((string)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), e);
+                }
+            }
+        }
+
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -1127,25 +1167,7 @@ namespace clojure.lang
             Var v = IsMacro(op);
             if (v != null)
             {
-                // Do not check specs while inside clojure.spec.alpha
-                if (!"clojure/spec/alpha.clj".Equals(SourcePathVar.deref()))
-                {
-                    try
-                    {
-                        Namespace checkns = Namespace.find(Symbol.intern("clojure.spec.alpha"));
-                        if (checkns != null)
-                        {
-                            Var check = Var.find(Symbol.intern("clojure.spec.alpha/macroexpand-check"));
-                            if ((check != null) && (check.isBound))
-                                check.applyTo(RT.cons(v, RT.list(form.next())));
-                        }
-                        Symbol.intern("clojure.spec");
-                    }
-                    catch (Exception e)
-                    {
-                        throw new CompilerException((String)Compiler.SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), e);
-                    }
-                }
+                CheckSpecs(v,form);
                 try
                 {
                     ISeq args = RT.cons(form, RT.cons(Compiler.LocalEnvVar.get(), form.next()));
@@ -1458,7 +1480,7 @@ namespace clojure.lang
             if (CompilePathVar.deref() == null)
                 throw new InvalidOperationException("*compile-path* not set");
 
-            string sourcePath = relativePath;
+             string sourcePath = relativePath;
             GenContext context = GenContext.CreateWithExternalAssembly(sourceName, sourcePath, ".dll", true);
 
             Compile(context, rdr, sourceDirectory, sourceName, relativePath);
@@ -1478,7 +1500,15 @@ namespace clojure.lang
 
             // generate loader class
             ObjExpr objx = new ObjExpr(null);
-            var internalName = sourcePath.Replace(Path.PathSeparator, '/').Substring(0, sourcePath.LastIndexOf('.'));
+
+            var internalName = sourcePath.Replace(Path.PathSeparator, '/');
+                
+            {
+                int lastDotIndex = sourcePath.LastIndexOf('.');
+                if ( lastDotIndex > -1 )
+                    internalName = internalName.Substring(0, lastDotIndex); 
+            }
+                
             objx.InternalName = internalName + "__init";
 
             TypeBuilder initTB = context.AssemblyGen.DefinePublicType(InitClassName(internalName), typeof(object), true);
