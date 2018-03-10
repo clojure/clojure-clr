@@ -27,17 +27,17 @@ namespace clojure.lang
         /// <summary>
         /// The value, after it has been computed.
         /// </summary>
-        object _val;
+        volatile object _val;
 
         /// <summary>
         /// Cached exception, if encountered
         /// </summary>
-        Exception _exception;
+        volatile Exception _exception;
 
         /// <summary>
         /// The function being delayed.
         /// </summary>
-        IFn _fn;
+        volatile IFn _fn;
 
         #endregion
 
@@ -82,20 +82,26 @@ namespace clojure.lang
         /// <returns>The value</returns>
         /// <remarks>Forces the computation if it has not happened yet.</remarks>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public object deref()
         {
             if (_fn != null)
             {
-                try
+                lock (this)
                 {
-                    _val = _fn.invoke();
+                    // double check
+                    if (_fn != null)
+                    {
+                        try
+                        {
+                            _val = _fn.invoke();
+                        }
+                        catch (Exception e)
+                        {
+                            _exception = e;
+                        }
+                        _fn = null;
+                    }
                 }
-                catch (Exception e)
-                {
-                    _exception = e;
-                }
-                _fn = null;
             }
 
             if (_exception != null)

@@ -7,12 +7,34 @@
 ;   You must not remove this notice, or any other, from this software.
 
 (ns clojure.test-clojure.delays
-  (:use clojure.test))
+  (:use clojure.test)
+  (:import [System.Threading Barrier Thread ThreadStart]))                       ;;; [java.util.concurrent CyclicBarrier]
 
 (deftest calls-once
   (let [a (atom 0)
         d (delay (swap! a inc))]
     (is (= 0 @a))
+    (is (= 1 @d))
+    (is (= 1 @d))
+    (is (= 1 @a))))
+
+(deftest calls-once-in-parallel
+  (let [a (atom 0)
+        d (delay (swap! a inc))
+        threads 100
+         ^Barrier barrier (Barrier. (+ threads 1))]    ;;; ^CyclicBarrier   CyclicBarrier. 
+    (is (= 0 @a))
+    (dotimes [_ threads]
+        (->
+            (Thread.
+                (gen-delegate ThreadStart []                                                                 ;;; fn
+                    (.SignalAndWait barrier)                           ;;;  .await
+                    (dotimes [_ 10000]
+                        (is (= 1 @d)))
+                    (.SignalAndWait barrier)))                         ;;;  .await
+        (.Start)))                                  ;;; .start
+    (.SignalAndWait barrier)                        ;;;  .await
+    (.SignalAndWait barrier)                        ;;;  .await
     (is (= 1 @d))
     (is (= 1 @d))
     (is (= 1 @a))))
@@ -27,3 +49,28 @@
         first-result (try-call)]
     (is (instance? Exception first-result))
     (is (identical? first-result (try-call)))))
+
+#_(deftest saves-exceptions-in-parallel                                       ;;; seems to take forewever
+  (let [f #(do (throw (Exception. "broken"))
+               1)
+        d (delay (f))
+        try-call #(try
+                    @d
+                    (catch Exception e e))
+        threads 100
+         ^Barrier barrier (Barrier. (+ threads 1))]                           ;;; ^CyclicBarrier      CyclicBarrier. 
+    (dotimes [_ threads]
+        (->
+            (Thread.
+                (gen-delegate ThreadStart []                                  ;;; fn
+                    (.SignalAndWait barrier)                                  ;;; .await
+                    (let [first-result (try-call)]
+                        (dotimes [_ 10000]
+                            (is (instance? Exception (try-call)))
+                            (is (identical? first-result (try-call)))))
+                    (.SignalAndWait barrier)))                                ;;; .await
+            (.Start)))                                                        ;;; .start
+    (.SignalAndWait barrier)                                                  ;;; .await
+    (.SignalAndWait barrier)                                                  ;;; .await
+    (is (instance? Exception (try-call)))
+    (is (identical? (try-call) (try-call)))))
