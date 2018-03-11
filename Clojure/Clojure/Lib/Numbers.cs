@@ -206,6 +206,11 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "divide")]
         public static object divide(object x, object y)
         {
+            if (IsNaN(x))
+                return x;
+            else if (IsNaN(y))
+                return y;
+
             Ops yops = ops(y);
             if ( yops.isZero(y) )
                 throw new ArithmeticException("Divide by zero");
