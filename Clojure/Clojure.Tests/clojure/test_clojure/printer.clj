@@ -140,3 +140,12 @@
   (let [date-map {:day 3, :date 31, :time 0, :month 11, :seconds 0, :year 69,  :timezoneOffset 360, :hours 18, :minutes 0}]  ;;; (bean (java.util.Date. 0))  -- don't have bean
     (is (= (binding [*print-namespace-maps* true] (pr-str date-map))
            (binding [*print-namespace-maps* false] (pr-str date-map))))))
+
+(deftest print-symbol-values
+  (are [s v] (= s (pr-str v))
+             "##Inf" Double/PositiveInfinity        ;;; Double/POSITIVE_INFINITY
+             "##-Inf" Double/NegativeInfinity       ;;; Double/NEGATIVE_INFINITY
+             "##NaN" Double/NaN
+             "##Inf" Single/PositiveInfinity        ;;; Float/POSITIVE_INFINITY
+             "##-Inf" Single/NegativeInfinity       ;;; Float/NEGATIVE_INFINITY
+             "##NaN" Single/NaN))                   ;;; Float/NaN

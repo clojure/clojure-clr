@@ -52,6 +52,7 @@ namespace clojure.lang
 	        _macros['\\'] = new CharacterReader();
 	        _macros['#'] = new DispatchReader();
 
+            _dispatchMacros['#'] = new SymbolicValueReader();
 	        _dispatchMacros['^'] = new MetaReader();
 	        //_dispatchMacros['"'] = new RegexReader();
 	        _dispatchMacros['{'] = new SetReader();
@@ -1034,6 +1035,31 @@ namespace clojure.lang
             protected override object Read(PushbackTextReader reader, char leftangle, object opts)
             {
                 throw new ArgumentException("Unreadable form");
+            }
+        }
+
+        #endregion
+
+        #region SymbolicValueReader
+
+        public sealed class SymbolicValueReader : ReaderBase
+        {
+            static IPersistentMap _specials = PersistentHashMap.create(
+                Symbol.intern("Inf"), Double.PositiveInfinity,
+                Symbol.intern("-Inf"), Double.NegativeInfinity,
+                Symbol.intern("NaN"), Double.NaN);
+
+            protected override object Read(PushbackTextReader r, char c, object opts)
+            {
+                object o = read(r,true,null,true,opts);
+
+                Symbol oSym = o as Symbol;
+                if (oSym == null)
+                    throw new Exception("Invalid token: ##" + o);
+                if (!_specials.containsKey(oSym))
+                    throw new Exception("Unknown symbolic value: ##" + o);
+
+                return _specials.valAt(oSym);
             }
         }
 
