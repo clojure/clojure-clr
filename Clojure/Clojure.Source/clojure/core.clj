@@ -6688,7 +6688,15 @@ Note that read can execute code (controlled by *read-eval*),
 (load "core_deftype")
 (load "core/protocols")
 (load "gvec")
-(load "instant")
+
+(defmacro ^:private when-class [class-name & body]
+  `(try
+     (clojure.lang.RT/classForNameE ^String ~class-name)                          ;;; Class/forName   -- not sure what else to replace this with
+     ~@body
+     (catch clojure.lang.TypeNotFoundException _#)))                              ;;; ClassNotFoundException
+
+(when-class "System.DateTime"                                                     ;;; "java.sql.Timestamp"
+  (load "instant"))
 
 (defprotocol Inst
   (inst-ms* [inst]))
@@ -6698,10 +6706,8 @@ Note that read can execute code (controlled by *read-eval*),
   (inst-ms* [inst] (long (.TotalMilliseconds (.Subtract ^DateTime inst (DateTime. 1970 1 1))))))               ;;; (.getTime ^java.util.Date inst)
 
 ;; conditionally extend to Instant on Java 8+
-;;;(try
-;;;  (Class/forName "java.time.Instant")
-;;;  (load "core_instant18")
-;;;  (catch ClassNotFoundException cnfe))
+;;;(when-class "java.time.Instant"
+;;;  (load "core_instant18"))
 
 (defn inst-ms
   "Return the number of milliseconds since January 1, 1970, 00:00:00 GMT"
@@ -7665,8 +7671,10 @@ clojure.lang.IKVReduce
 (def ^{:added "1.4"} default-data-readers
   "Default map of data reader functions provided by Clojure. May be
   overridden by binding *data-readers*."
-  {'inst #'clojure.instant/read-instant-datetime                          ;;; read-instant-date
-   'uuid #'clojure.uuid/default-uuid-reader})                
+  (merge
+    {'uuid #'clojure.uuid/default-uuid-reader}
+    (when-class "System.DateTime"                          ;;; "java.sql.Timestamp"
+      {'inst #'clojure.instant/read-instant-datetime})))   ;;; read-instant-date
 
 (def ^{:added "1.4" :dynamic true} *data-readers*
   "Map from reader tag symbols to data reader Vars.
