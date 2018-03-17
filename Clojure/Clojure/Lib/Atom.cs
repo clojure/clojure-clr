@@ -19,7 +19,7 @@ namespace clojure.lang
     /// <summary>
     /// Provides spin-loop synchronized access to a value.  One of the reference types.
     /// </summary>
-    public class Atom : ARef, IAtom
+    public class Atom : ARef, IAtom2
     {
         #region Data
 
@@ -193,6 +193,81 @@ namespace clojure.lang
             return newval;
         }
 
+        public IPersistentVector swapVals(IFn f)
+        {
+            for(;;)
+            {
+                object oldv = deref();
+                object newv = f.invoke(oldv);
+                Validate(newv);
+                if (_state.CompareAndSet(oldv,newv))
+                {
+                    NotifyWatches(oldv, newv);
+                    return LazilyPersistentVector.createOwning(oldv, newv);
+                }
+            }
+        }
+
+        public IPersistentVector swapVals(IFn f, object arg)
+        {
+            for (; ; )
+            {
+                object oldv = deref();
+                object newv = f.invoke(oldv,arg);
+                Validate(newv);
+                if (_state.CompareAndSet(oldv, newv))
+                {
+                    NotifyWatches(oldv, newv);
+                    return LazilyPersistentVector.createOwning(oldv, newv);
+                }
+            }
+        }
+
+        public IPersistentVector swapVals(IFn f, object arg1, object arg2)
+        {
+            for (; ; )
+            {
+                object oldv = deref();
+                object newv = f.invoke(oldv,arg1,arg2);
+                Validate(newv);
+                if (_state.CompareAndSet(oldv, newv))
+                {
+                    NotifyWatches(oldv, newv);
+                    return LazilyPersistentVector.createOwning(oldv, newv);
+                }
+            }
+        }
+
+        public IPersistentVector swapVals(IFn f, object x, object y, ISeq args)
+        {
+            for (; ; )
+            {
+                object oldv = deref();
+                object newv = f.applyTo(RT.listStar(oldv,x,y,args));
+                Validate(newv);
+                if (_state.CompareAndSet(oldv, newv))
+                {
+                    NotifyWatches(oldv, newv);
+                    return LazilyPersistentVector.createOwning(oldv, newv);
+                }
+            }
+        }
+
+        public IPersistentVector resetVals(object newv)
+        {
+            Validate(newv);
+            for (;;)
+            {
+                object oldv = deref();
+                if (_state.CompareAndSet(oldv,newv))
+                {
+                    NotifyWatches(oldv, newv);
+                    return LazilyPersistentVector.createOwning(oldv, newv);
+                }
+            }
+        }
+
         #endregion
+
     }
 }
