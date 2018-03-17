@@ -322,10 +322,11 @@
          (vector-of :double)
          (vector-of :char))
     (testing "with invalid type argument"
-      (are [x] (thrown? NullReferenceException x)                           ;;; NullPointerException
+      (are [x] (thrown? ArgumentException  x)                           ;;; IllegalArgumentException 
            (vector-of nil)
            (vector-of Single)                                             ;;; Float/TYPE
            (vector-of 'int)
+		   (vector-of :integer)
            (vector-of ""))))
   (testing "vector-like (vector-of :type x1 x2 x3 … xn)"
     (are [vec gvec] (and (instance? clojure.core.Vec gvec)
