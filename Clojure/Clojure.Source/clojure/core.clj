@@ -4932,7 +4932,9 @@ Note that read can execute code (controlled by *read-eval*),
   (^String [^String s start end] (. s (Substring start (- end start)))))    ;;; was (substring start end) -- different interpretation of second arg
 
 (defn max-key
-  "Returns the x for which (k x), a number, is greatest."
+  "Returns the x for which (k x), a number, is greatest.
+
+  If there are multiple such xs, the last one is returned."
   {:added "1.0"
    :static true}
   ([k x] x)
@@ -4950,7 +4952,9 @@ Note that read can execute code (controlled by *read-eval*),
          v)))))
 
 (defn min-key
-  "Returns the x for which (k x), a number, is least."
+  "Returns the x for which (k x), a number, is least.
+
+  If there are multiple such xs, the last one is returned."
   {:added "1.0"
    :static true}
   ([k x] x)
