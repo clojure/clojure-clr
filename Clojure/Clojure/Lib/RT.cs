@@ -1055,6 +1055,10 @@ namespace clojure.lang
                 int n = Util.ConvertToInt(key);
                 return n >= 0 && n < count(coll) ? nth(coll, n) : null;
             }
+
+            ITransientSet tset = coll as ITransientSet;
+            if (tset != null)
+                return tset.get(key);
             
             return null;
         }
@@ -1096,6 +1100,14 @@ namespace clojure.lang
             {
                 int n = Util.ConvertToInt(key);
                 return n >= 0 && n < count(coll) ? nth(coll, n) : notFound;
+            }
+
+            ITransientSet tset = coll as ITransientSet;
+            if ( tset != null )
+            {
+                if (tset.contains(key))
+                    return tset.get(key);
+                return notFound;
             }
             
             return notFound;
@@ -1159,6 +1171,14 @@ namespace clojure.lang
                 return n >= 0 && n < count(coll);
             }
 
+            ITransientSet tset = coll as ITransientSet;
+            if (tset != null)
+                return tset.contains(key);  // RT.T, RT.F
+
+            ITransientAssociative2 ta2 = coll as ITransientAssociative2;
+            if (ta2 != null)
+                return ta2.containsKey(key);    // RT.T, RT.F
+
             throw new ArgumentException("contains? not supported on type: " + coll.GetType().Name);
         }
 
@@ -1172,9 +1192,17 @@ namespace clojure.lang
             if (assoc != null)
                 return assoc.entryAt(key);
 
-            IDictionary m = (IDictionary)coll;
-            if (m.Contains(key))
-                return MapEntry.create(key, m[key]);
+            IDictionary m = coll as IDictionary;
+            if (m != null)
+            {
+                if (m.Contains(key))
+                    return MapEntry.create(key, m[key]);
+                return null;
+            }
+
+            ITransientAssociative2 ta2 = coll as ITransientAssociative2;
+            if (ta2 != null)
+                return ta2.entryAt(key);
 
             return null;
         }

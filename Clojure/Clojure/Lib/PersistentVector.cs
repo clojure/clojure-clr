@@ -676,7 +676,7 @@ namespace clojure.lang
 
         #region TransientVector class
 
-        class TransientVector : AFn, ITransientVector, Counted
+        class TransientVector : AFn, ITransientVector, ITransientAssociative2, Counted
         {
             #region Data
 
@@ -981,6 +981,26 @@ namespace clojure.lang
             }
 
             #endregion
+
+            #region ITransientAssociative2 methods
+
+            private static readonly Object NOT_FOUND = new object();
+
+            public bool containsKey(object key)
+            {
+                return valAt(key, NOT_FOUND) != NOT_FOUND;
+            }
+
+            public IMapEntry entryAt(object key)
+            {
+                Object v = valAt(key, NOT_FOUND);
+                if (v != NOT_FOUND)
+                    return MapEntry.create(key, v);
+                return null;
+            }
+
+            #endregion
+
 
             #region ILookup Members
 

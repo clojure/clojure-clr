@@ -17,7 +17,7 @@ using System.Collections;
 
 namespace clojure.lang
 {
-    public abstract class ATransientMap : AFn, ITransientMap
+    public abstract class ATransientMap : AFn, ITransientMap, ITransientAssociative2
     {
         #region Methods to be supplied by derived classes
 
@@ -137,5 +137,19 @@ namespace clojure.lang
             return doCount();
         }
 
+        private static readonly Object NOT_FOUND = new object();
+
+        public bool containsKey(object key)
+        {
+            return valAt(key, NOT_FOUND) != NOT_FOUND;
+        }
+
+        public IMapEntry entryAt(object key)
+        {
+            Object v = valAt(key, NOT_FOUND);
+            if (v != NOT_FOUND)
+                return MapEntry.create(key, v);
+            return null;
+        }
     }
 }
