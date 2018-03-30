@@ -42,16 +42,17 @@
    <PropertyGroup>
        <!-- NuGet command -->
        <NuGetExePath Condition=" '$(NuGetExePath)' == '' ">$(NuGetToolsPath)\NuGet.exe</NuGetExePath>
-       <PackageSources Condition=" $(PackageSources) == '' ">@(PackageSource)</PackageSources>
        
        <NuGetCommand Condition=" '$(OS)' == 'Windows_NT'">"$(NuGetExePath)"</NuGetCommand>
-       <NuGetCommand Condition=" '$(OS)' != 'Windows_NT' ">mono --runtime=v4.0.30319 $(NuGetExePath)</NuGetCommand>
+       <NuGetCommand Condition=" '$(OS)' != 'Windows_NT' ">nuget</NuGetCommand>
 
        <PackageOutputDir Condition="$(PackageOutputDir) == ''">$(TargetDir.Trim('\\'))</PackageOutputDir>
        
        <RequireConsentSwitch Condition=" $(RequireRestoreConsent) == 'true' ">-RequireConsent</RequireConsentSwitch>
+       <PackageSourceSwitch Condition=" $(PackageSources) != '' ">"-source $(PackageSources)"</PackageSourceSwitch>
+       
        <!-- Commands -->
-       <RestoreCommand>$(NuGetCommand) install "$(PackagesConfig)" -source "$(PackageSources)"  $(RequireConsentSwitch) -o "$(PackagesDir)"</RestoreCommand>
+       <RestoreCommand>$(NuGetCommand) install "$(PackagesConfig)"  $(PackageSourceSwitch) $(RequireConsentSwitch) -o "$(PackagesDir)"</RestoreCommand>
        <BuildCommand>$(NuGetCommand) pack "$(ProjectPath)" -p Configuration=$(Configuration) -o "$(PackageOutputDir)" -symbols</BuildCommand>
 
        <!-- We need to ensure packages are restored prior to assembly resolve -->
