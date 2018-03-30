@@ -1,4 +1,4 @@
-ClojureCLR
+ClojureCLR (func.info fork)
 
 This project is a native implementation of Clojure on the Common Language Runtime (CLR),
 the execution engine of Microsoft's .Net Framework.
