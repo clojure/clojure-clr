@@ -1472,7 +1472,7 @@ namespace clojure.lang
 
         internal static string InitClassName(string sourcePath)
         {
-            return "__Init__$" + sourcePath.Replace(".", "/");
+            return "__Init__$" + sourcePath.Replace(".", "/").Replace("/", "$");
         }
         
         public static void PushNS()
