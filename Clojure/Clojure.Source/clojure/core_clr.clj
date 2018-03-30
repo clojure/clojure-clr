@@ -146,7 +146,18 @@
 (defn type-args
   "Supplies type arguments to a generic method interop call
 
-  Should only be used in CLR interop code.  Throws an exception otherwise."
+  Should only be used in CLR interop code.  Throws an exception otherwise.
+  
+  Usage example:
+
+  (.ClrMethod obj (type-args T)) is equal to obj.ClrMethod<T>. 
+
+  Note that type of obj should  be defined explicit, i.e. if obj value is evaluated.
+  Example may look like:
+
+  (.ClrMethod ^O obj (type-args T)) where O is type of obj.
+
+  Read more https://github.com/richhickey/clojure-clr/wiki/CLR-Interop"
   {:added "1.3"}
   [v] (throw (ArgumentException. "type-args not used in interop call")))
 
