@@ -151,7 +151,7 @@ namespace clojure.lang
         }
 
 
-        private void MaybeImplementISerializable(TypeBuilder proxyTB, List<Type> interfaceTypes)
+        private static void MaybeImplementISerializable(TypeBuilder proxyTB, List<Type> interfaceTypes)
         {
             if (interfaceTypes.Find(t => t is ISerializable) == null)
                 return;

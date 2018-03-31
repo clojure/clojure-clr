@@ -30,7 +30,7 @@ namespace clojure.lang
     /// Every Var can (but needn't) have a root binding, 
     /// which is a binding that is shared by all threads that do not have a per-thread binding."</blockquote>
     /// </remarks>
-    [Serializable]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229:ImplementSerializationConstructors"), Serializable]
     public sealed class Var : ARef, IFn, IRef, Settable, ISerializable
     {
         #region class TBox
@@ -1266,6 +1266,7 @@ namespace clojure.lang
 
         #region c-tors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context")]
         VarSerializationHelper(SerializationInfo info, StreamingContext context)
         {
             _ns = (Namespace)info.GetValue("_ns", typeof(Namespace));

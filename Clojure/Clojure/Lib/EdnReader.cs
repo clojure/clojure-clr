@@ -780,7 +780,8 @@ namespace clojure.lang
 
         public sealed class NamespaceMapReader : AFn
         {
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#"),
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes"), 
+             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#"),
              System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#"),
              System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "2#")]
             public override object invoke(object reader, object colon, object opts)
@@ -806,7 +807,7 @@ namespace clojure.lang
 
                 // Construct output map
                 object[] a = new object[kvs.Count];
-                IPersistentMap m = RT.map();
+               // IPersistentMap m = RT.map();
                 using (var iterator = kvs.GetEnumerator())
                 {
                     for (int i = 0; iterator.MoveNext(); i += 2)
@@ -1049,6 +1050,7 @@ namespace clojure.lang
                 Symbol.intern("-Inf"), Double.NegativeInfinity,
                 Symbol.intern("NaN"), Double.NaN);
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes")]
             protected override object Read(PushbackTextReader r, char c, object opts)
             {
                 object o = read(r,true,null,true,opts);

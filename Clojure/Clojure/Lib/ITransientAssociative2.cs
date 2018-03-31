@@ -21,7 +21,9 @@ namespace clojure.lang
 {
     public interface ITransientAssociative2 : ITransientAssociative
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "contains")]
         bool containsKey(Object key);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "entry")]
         IMapEntry entryAt(Object key);
     }
 }
