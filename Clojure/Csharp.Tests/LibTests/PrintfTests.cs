@@ -31,6 +31,12 @@ namespace Clojure.Tests.LibTests
             Expect(Printf.Format(fmt,args),EqualTo(result));
         }
 
+        [SetUp]
+        public void SetUpCultureAware()
+        {
+            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+        }
+
         #region Basic text
 
         [Test]
