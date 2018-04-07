@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("BootstrapCompile")]
-[assembly: AssemblyCopyright("Copyright © 2009-16")]
+[assembly: AssemblyCopyright("Copyright © 2009-18")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

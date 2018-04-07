@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyProduct("DlrConsole")]
-[assembly: AssemblyCopyright("Copyright © 2009-16")]
+[assembly: AssemblyCopyright("Copyright © 2009-18")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
