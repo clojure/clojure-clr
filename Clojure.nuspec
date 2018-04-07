@@ -17,11 +17,15 @@
         <file src="bin\4.0\Release\Microsoft.Scripting.dll" target="lib\net40" />
         <file src="bin\4.0\Release\Clojure.Main.exe" target="tools\net40" />
         <file src="bin\4.0\Release\Clojure.Compile.exe" target="tools\net40" />
+        <file src="bin\4.0\Release\clojure.core.specs.alpha.dll" target="tools\net40" />
+        <file src="bin\4.0\Release\clojure.spec.alpha.dll" target="tools\net40" />
         <file src="bin\3.5\Release\ilmerge\Clojure.dll" target="lib\net35" />
         <file src="bin\3.5\Release\Microsoft.Dynamic.dll" target="lib\net35" />
         <file src="bin\3.5\Release\Microsoft.Scripting.dll" target="lib\net35" />	
         <file src="bin\3.5\Release\Microsoft.Scripting.Core.dll" target="lib\net35" />
         <file src="bin\3.5\Release\Clojure.Main.exe" target="tools\net35" />
         <file src="bin\3.5\Release\Clojure.Compile.exe" target="tools\net35" />
+        <file src="bin\3.5\Release\clojure.core.specs.alpha.dll" target="tools\net35" />
+        <file src="bin\3.5\Release\clojure.spec.alpha.dll" target="tools\net35" />
 	</files>
 </package>
