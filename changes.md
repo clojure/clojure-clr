@@ -176,6 +176,39 @@ If a macro has a spec defined via fdef, that spec will be checked at compile tim
 * [CLJ-700](http://dev.clojure.org/jira/browse/CLJ-700)
   `contains?`, `get`, and `find` broken for transient collections
 
+# Changes to ClojureCLR in Version 1.9
+
+We have made all the changes, bug fixes, etc., listed above that are relevant to ClojureCLR.
+
+## Bug fixes / improvements / enhancements / you name it
+
+* [CLJCLR-91](http://dev.clojure.org/jira/browse/CLJCLR-91)
+  Allow clojure.core.server/start-server to accept :address which is System.Net.IPAddress
+* Fix various code analysis issues
+* Make `Printf` and `Ratio` C# tests culture invariant
+* Improve doc for `type-args`
+* Remove .Net 3.x as a requirement in referenced assemblies
+* Update NuGet.targets to work with Mono
+* Replace slashes in InitClassName with dollar signs
+* Support direct-linking compiler option on *nix
+* [CLJCLR-87](http://dev.clojure.org/jira/browse/CLJCLR-87)
+  remove `UnimplementedException` implementation of `LongRange.cons` and default to `ASeq`'s implmentation
+* [CLJCLR-93](http://dev.clojure.org/jira/browse/CLJCLR-93)
+  Make `(time)` return milliseconds fractional part
+* [CLJCLR-85](http://dev.clojure.org/jira/browse/CLJCLR-85)
+  Fix default month and date for `#inst "1939"`
+* [CLJCLR-84](http://dev.clojure.org/jira/browse/CLJCLR-84)
+  Find .cljc files as embedded resources
+* [CLJCLR-79](http://dev.clojure.org/jira/browse/CLJCLR-79)
+  Add clojure.core.server to ILMerged clojure.dll.
+* [CLJCLR-82](http://dev.clojure.org/jira/browse/CLJCLR-82)
+  remove trailing .0 when printing Double/NaN, PositiveInfinity, NegativeInfinity
+* [CLJCLR-83](http://dev.clojure.org/jira/browse/CLJCLR-83)
+  Fix `Numbers.remainder(double,double)' when n/d out of range
+* [CLJCLR-80](http://dev.clojure.org/jira/browse/CLJCLR-80)
+  Add `clojure.lang.Numbers.not`
+
+
 # Changes to Clojure in Version 1.8
 
 ## 1 New and Improved Features
