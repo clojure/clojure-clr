@@ -56,13 +56,17 @@
 
 (defn stack-element-classname
   [^System.Diagnostics.StackFrame el]
-  (if-let [t (.. el  (GetMethod) ReflectedType)] 
-    (.FullName t) 
-	""))
+  (or (when-let [m (.. el  (GetMethod))]
+        (when-let [t (.ReflectedType m)]
+          (.FullName t)))
+      "<class unknown>"))
 
 (defn stack-element-methodname
   [^System.Diagnostics.StackFrame el]
-  (.. el (GetMethod)  Name))
+  (or (when-let [m (.GetMethod el)]
+        (.Name m))
+      "<method unknown>"))
+
 
 ;;;
 
