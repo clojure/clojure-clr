@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>Clojure</id>
-        <version>1.9.0-beta1</version>
+        <version>1.9.0</version>
         <authors>Rich Hickey, Clojure</authors>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <licenseUrl>http://opensource.org/licenses/eclipse-1.0.php</licenseUrl>
@@ -17,15 +17,15 @@
         <file src="bin\4.0\Release\Microsoft.Scripting.dll" target="lib\net40" />
         <file src="bin\4.0\Release\Clojure.Main.exe" target="tools\net40" />
         <file src="bin\4.0\Release\Clojure.Compile.exe" target="tools\net40" />
-        <file src="bin\4.0\Release\clojure.core.specs.alpha.dll" target="tools\net40" />
-        <file src="bin\4.0\Release\clojure.spec.alpha.dll" target="tools\net40" />
+        <file src="bin\4.0\Release\clojure.core.specs.alpha.dll" target="lib\net40" />
+        <file src="bin\4.0\Release\clojure.spec.alpha.dll" target="lib\net40" />
         <file src="bin\3.5\Release\ilmerge\Clojure.dll" target="lib\net35" />
         <file src="bin\3.5\Release\Microsoft.Dynamic.dll" target="lib\net35" />
         <file src="bin\3.5\Release\Microsoft.Scripting.dll" target="lib\net35" />	
         <file src="bin\3.5\Release\Microsoft.Scripting.Core.dll" target="lib\net35" />
         <file src="bin\3.5\Release\Clojure.Main.exe" target="tools\net35" />
         <file src="bin\3.5\Release\Clojure.Compile.exe" target="tools\net35" />
-        <file src="bin\3.5\Release\clojure.core.specs.alpha.dll" target="tools\net35" />
-        <file src="bin\3.5\Release\clojure.spec.alpha.dll" target="tools\net35" />
+        <file src="bin\3.5\Release\clojure.core.specs.alpha.dll" target="lib\net35" />
+        <file src="bin\3.5\Release\clojure.spec.alpha.dll" target="lib\net35" />
 	</files>
 </package>
