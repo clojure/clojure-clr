@@ -22,7 +22,7 @@
 * Build the nuget package
 ** > nuget pack Clojure.nuspec
 * Upload the nuget package
-** > nuget push whatever.nupkg
+** > nuget push whatever.nupkg -Source nuget.org
 
 ## For SourceForge
 
