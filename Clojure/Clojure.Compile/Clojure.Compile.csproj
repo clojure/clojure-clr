@@ -142,7 +142,7 @@ mono $(TargetPath) clojure.spec.gen clojure.spec.test clojure.spec clojure.core.
     <PostBuildEvent Condition=" '$(Runtime)' == 'Mono' ">CLOJURE_COMPILER_DIRECT_LINKING=$(DirectLinking)
 mono $(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect clojure.edn</PostBuildEvent>
     <PostBuildEvent Condition=" '$(Runtime)' == '.Net' ">set clojure.compiler.direct-linking=$(DirectLinking)
-$(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.core.specs clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect  clojure.edn  clojure.spec.gen clojure.spec.test clojure.spec clojure.core.specs</PostBuildEvent>
+$(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect  clojure.edn</PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
