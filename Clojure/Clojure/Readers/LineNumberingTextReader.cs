@@ -14,6 +14,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 
 namespace clojure.lang
 {
@@ -56,6 +57,8 @@ namespace clojure.lang
         {
             get { return _index; }
         }
+
+        private StringBuilder _sb = null;
 
         bool _disposed = false;
 
@@ -105,6 +108,9 @@ namespace clojure.lang
             if ( ret == '\n' )
                 NoteLineAdvance();
 
+            if (_sb != null)
+                _sb.Append((char)ret);
+
             return ret;
         }
 
@@ -135,6 +141,28 @@ namespace clojure.lang
                 _columnNumber = _prevColumnNumber;
                 _atLineStart = _prevLineStart;
             }
+
+            if (_sb != null)
+                _sb.Remove(_sb.Length - 1, 1);
+        }
+
+        #endregion
+
+        #region String support
+
+        public void CaptureString()
+        {
+            _sb = new StringBuilder();
+        }
+
+        public String GetString()
+        {
+            if (_sb == null)
+                return null;
+
+            String ret = _sb.ToString();
+            _sb = null;
+            return ret;
         }
 
         #endregion
