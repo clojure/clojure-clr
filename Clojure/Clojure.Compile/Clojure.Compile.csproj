@@ -129,7 +129,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
@@ -138,7 +138,9 @@
   -->
   <PropertyGroup>
     <PostBuildEvent Condition=" '$(Runtime)' == 'Mono' ">CLOJURE_COMPILER_DIRECT_LINKING=$(DirectLinking)
-mono $(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.core.specs clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect  clojure.edn  clojure.spec.gen clojure.spec.test clojure.spec clojure.core.specs</PostBuildEvent>
+mono $(TargetPath) clojure.spec.gen clojure.spec.test clojure.spec clojure.core.specs</PostBuildEvent>
+    <PostBuildEvent Condition=" '$(Runtime)' == 'Mono' ">CLOJURE_COMPILER_DIRECT_LINKING=$(DirectLinking)
+mono $(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect clojure.edn</PostBuildEvent>
     <PostBuildEvent Condition=" '$(Runtime)' == '.Net' ">set clojure.compiler.direct-linking=$(DirectLinking)
 $(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.core.specs clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect  clojure.edn  clojure.spec.gen clojure.spec.test clojure.spec clojure.core.specs</PostBuildEvent>
   </PropertyGroup>
@@ -149,8 +151,4 @@ $(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.co
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
-  <PropertyGroup>
-    <PostBuildEvent>set clojure.compiler.direct-linking=$(DirectLinking)
-$(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect  clojure.edn</PostBuildEvent>
-  </PropertyGroup>
 </Project>
