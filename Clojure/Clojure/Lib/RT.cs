@@ -547,12 +547,22 @@ namespace clojure.lang
             return Assembly.Load(ReadStreamBytes(stream));
         }
 
+#if MONO
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible")]
+        public static bool checkSpecAsserts = ReadTrueFalseDefault(Environment.GetEnvironmentVariable("CLOJURE_SPEC_CHECK_ASSERTS"), false);
+#else
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible")]
         public static bool checkSpecAsserts = ReadTrueFalseDefault(Environment.GetEnvironmentVariable("clojure.spec.check-asserts"), false);
+#endif
 
+#if MONO
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible")]
+        public static bool instrumentMacros = !ReadTrueFalseDefault(Environment.GetEnvironmentVariable("CLOJURE_SPEC_SKIP_MACROS"), false);
+#else
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible")]
         public static bool instrumentMacros = !ReadTrueFalseDefault(Environment.GetEnvironmentVariable("clojure.spec.skip-macros"), false);
-
+#endif
+        
         internal static volatile bool CHECK_SPECS = false;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
