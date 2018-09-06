@@ -59,9 +59,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         public LocalBinding(int index, Symbol sym, Symbol tag, Expr init, Type declaredType, bool isThis, bool isArg, bool isByRef)
         {
-            if (Compiler.MaybePrimitiveType(init) != null && tag != null)
-                throw new InvalidOperationException("Can't type hint a local with a primitive initializer");
-
             Index = index;
             _sym = sym;
             Tag = tag;
