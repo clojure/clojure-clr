@@ -3759,6 +3759,21 @@ Note that read can execute code (controlled by *read-eval*),
   ([opts stream]
    (. clojure.lang.LispReader (read stream opts))))
 
+(defn read+string
+  "Like read, and taking the same args. stream must be a LineNumberingPushbackReader.
+  Returns a vector containing the object read and the (whitespace-trimmed) string read."
+  {:added "1.10"}
+  ([] (read+string *in*))
+  ([^clojure.lang.LineNumberingTextReader stream & args]         ;;; LineNumberingPushbackReader
+     (try
+       (.CaptureString stream)                                   ;;; .captureString
+       (let [o (apply read stream args)
+             s (.Trim (.GetString stream))]                      ;;; .trim .getString
+         [o s])       
+       (catch Exception ex                                       ;;; Throwable
+         (.GetString stream)			                         ;;; .getString
+         (throw ex)))))
+		 
 (defn read-line  
   "Reads the next line from stream that is the current value of *in* ."
   {:added "1.0"
@@ -7717,7 +7732,6 @@ clojure.lang.IKVReduce
       (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.clj")))         ;;; (.getResources cl "data_readers.clj")
       (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.clj"))))))      ;;; (.getResources cl "data_readers.cljc")
 
-
 (defn- data-reader-var [sym]
   (intern (create-ns (symbol (namespace sym)))
           (symbol (name sym))))
@@ -7767,3 +7781,43 @@ clojure.lang.IKVReduce
   "Return true if x is a java.net.URI"
   {:added "1.9"}
   [x] (instance? System.Uri x))                                                    ;;; java.net.URI
+
+(defonce ^:private tapset (atom #{}))
+(defonce ^:private ^|System.Collections.Concurrent.BlockingCollection`1[System.Object]| tapq (|System.Collections.Concurrent.BlockingCollection`1[System.Object]|. 1024))    ;;; ^java.util.concurrent.ArrayBlockingQueue   java.util.concurrent.ArrayBlockingQueue.
+
+(defn add-tap
+  "adds f, a fn of one argument, to the tap set. This function will be called with anything sent via tap>.
+  This function may (briefly) block (e.g. for streams), and will never impede calls to tap>,
+  but blocking indefinitely may cause tap values to be dropped.
+  Remember f in order to remove-tap"
+  {:added "1.10"}
+  [f]
+  (swap! tapset conj f)
+  nil)
+
+ (defn remove-tap
+  "remove f from the tap set the tap set."
+  {:added "1.10"}
+  [f]
+  (swap! tapset disj f)
+  nil)
+
+ (defn tap>
+  "sends x to any taps. Will not block. Returns true if there was room in the queue,
+  false if not (dropped)."
+  {:added "1.10"}
+  [x]
+  (.TryAdd tapq x))                                         ;;; .offer
+
+ (defonce ^:private tap-loop
+  (doto (System.Threading.Thread.                                                 ;;; Thread.
+         (gen-delegate System.Threading.ThreadStart [] (let [x (.Take tapq)       ;;; add gen-delegete,  .take
+                taps @tapset]
+            (doseq [tap taps]
+              (try
+                (tap x)
+                (catch Exception ex)))                                            ;;; Throwable
+            (recur)) ))                                                            ;;;    -- add paren
+    (.set_Name "clojure.core/tap-loop")                                                 ;;; convert ctor name arg to an explicit set
+    (.set_IsBackground true)                                                      ;;; setDaemon
+    (.Start)))                                                                    ;;; .start

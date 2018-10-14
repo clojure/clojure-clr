@@ -108,7 +108,7 @@ namespace clojure.lang
             if ( ret == '\n' )
                 NoteLineAdvance();
 
-            if (_sb != null)
+            if (_sb != null && ret != -1)
                 _sb.Append((char)ret);
 
             return ret;
