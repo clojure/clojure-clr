@@ -8,9 +8,7 @@
 
 (ns ^{:doc
       "A library for reduction and parallel folding. Alpha and subject
-      to change.  Note that fold and its derivatives require Java 7+ or
-      Java 6 + jsr166y.jar for fork/join support. See Clojure's pom.xml for the
-      dependency info."
+      to change."
       :author "Rich Hickey"}
   clojure.core.reducers
   (:refer-clojure :exclude [reduce map mapcat filter remove take take-while drop flatten cat])
@@ -34,38 +32,19 @@
     `(do ~then)
     `(do ~else)))
 
-;;;(compile-if
-;;; (Class/forName "java.util.concurrent.ForkJoinTask")
-;;; ;; We're running a JDK 7+
-;;; (do
-;;;   (def pool (delay (java.util.concurrent.ForkJoinPool.)))
+;;;(def pool (delay (java.util.concurrent.ForkJoinPool.)))
 ;;;
-;;;   (defn fjtask [^Callable f]
-;;;     (java.util.concurrent.ForkJoinTask/adapt f))
+;;;(defn fjtask [^Callable f]
+;;;  (java.util.concurrent.ForkJoinTask/adapt f))
 ;;;
-;;;   (defn- fjinvoke [f]
-;;;     (if (java.util.concurrent.ForkJoinTask/inForkJoinPool)
-;;;       (f)
-;;;       (.invoke ^java.util.concurrent.ForkJoinPool @pool ^java.util.concurrent.ForkJoinTask (fjtask f))))
+;;;(defn- fjinvoke [f]
+;;;  (if (java.util.concurrent.ForkJoinTask/inForkJoinPool)
+;;;    (f)
+;;;    (.invoke ^java.util.concurrent.ForkJoinPool @pool ^java.util.concurrent.ForkJoinTask (fjtask f))))
 ;;;
-;;;   (defn- fjfork [task] (.fork ^java.util.concurrent.ForkJoinTask task))
+;;;(defn- fjfork [task] (.fork ^java.util.concurrent.ForkJoinTask task))
 ;;;
-;;;   (defn- fjjoin [task] (.join ^java.util.concurrent.ForkJoinTask task)))
-;;; ;; We're running a JDK <7
-;;; (do
-;;;   (def pool (delay (jsr166y.ForkJoinPool.)))
-;;;
-;;;   (defn fjtask [^Callable f]
-;;;     (jsr166y.ForkJoinTask/adapt f))
-;;;
-;;;   (defn- fjinvoke [f]
-;;;     (if (jsr166y.ForkJoinTask/inForkJoinPool)
-;;;       (f)
-;;;       (.invoke ^jsr166y.ForkJoinPool @pool ^jsr166y.ForkJoinTask (fjtask f))))
-;;;
-;;;   (defn- fjfork [task] (.fork ^jsr166y.ForkJoinTask task))
-;;;
-;;;   (defn- fjjoin [task] (.join ^jsr166y.ForkJoinTask task))))
+;;;(defn- fjjoin [task] (.join ^java.util.concurrent.ForkJoinTask task))
 
 (compile-if 
   (Type/GetType "System.Threading.Tasks.Task`1")
