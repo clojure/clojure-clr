@@ -7807,11 +7807,12 @@ clojure.lang.IKVReduce
   false if not (dropped)."
   {:added "1.10"}
   [x]
-  (.TryAdd tapq x))                                         ;;; .offer
+  (.TryAdd tapq (if (nil? x) ::tap-nil x)))                                         ;;; .offer
 
  (defonce ^:private tap-loop
   (doto (System.Threading.Thread.                                                 ;;; Thread.
-         (gen-delegate System.Threading.ThreadStart [] (let [x (.Take tapq)       ;;; add gen-delegete,  .take
+         (gen-delegate System.Threading.ThreadStart [] (let [t (.Take tapq)       ;;; add gen-delegete,  .take
+		        x (if (identical? ::tap-nil t) nil t)
                 taps @tapset]
             (doseq [tap taps]
               (try
