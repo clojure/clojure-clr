@@ -540,9 +540,14 @@ namespace clojure.lang
         Node Add(Node t, object key, object val, Box found)
         {
             if (t == null)
+            {
+                if (_comp == RT.DefaultComparerInstance && !(key == null || Util.IsNumeric(key) || (key is IComparable)))
+                    throw new InvalidCastException("Default comparator requires nil, Number, or Comparable: " + key);
+
                 return val == null
                     ? new Red(key)
                     : new RedVal(key, val);
+            }
             int c = DoCompare(key, t.Key);
             if (c == 0)
             {
