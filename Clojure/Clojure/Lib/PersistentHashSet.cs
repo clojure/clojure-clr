@@ -152,9 +152,6 @@ namespace clojure.lang
             return (_meta == meta)
                 ? this
                 : new PersistentHashSet(meta, _impl);
-
-            // JAVA: did not follow the usual pattern.
-            // return new PersistentHashSet(meta, _impl);
         }
 
         #endregion

@@ -237,6 +237,9 @@ namespace clojure.lang
         /// <returns>A copy of the object with new metadata attached.</returns>
         public override IObj withMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new PersistentHashMap(meta, _count, _root, _hasNull, _nullValue);
         }
 
@@ -1097,6 +1100,9 @@ namespace clojure.lang
 
                 public override IObj withMeta(IPersistentMap meta)
                 {
+                    if (_meta == meta)
+                        return this;
+
                     return new Seq(meta, _nodes, _i, _s);
                 }
 
@@ -1812,6 +1818,9 @@ namespace clojure.lang
 
             public override IObj withMeta(IPersistentMap meta)
             {
+                if (_meta == meta)
+                    return this;
+
                 return new NodeSeq(meta, _array, _i, _s);
             }
 

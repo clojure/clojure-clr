@@ -71,6 +71,9 @@ namespace clojure.lang
 
         public override IObj withMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
            return new LazySeq(meta,seq());
         }
 

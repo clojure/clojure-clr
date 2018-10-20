@@ -257,7 +257,9 @@ namespace clojure.lang
 
         public IObj withMeta(IPersistentMap meta)
         {
-            // Java version does not do identity check
+            if (_meta == meta)
+                return this;
+
             return new PersistentVector(meta, _cnt, _shift, _root, _tail);
         }
 

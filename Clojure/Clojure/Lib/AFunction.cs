@@ -91,12 +91,16 @@ namespace clojure.lang
 
             public override IObj withMeta(IPersistentMap meta)
             {
+                if (_meta == meta)
+                    return this;
                 return _parent.withMeta(meta);
             }
         }
 
         public virtual IObj withMeta(IPersistentMap meta)
         {
+            if (meta == null)
+                return this;
             return new MetaWrapper(this, meta);
         }
 

@@ -86,6 +86,9 @@ namespace clojure.lang
 
         public override IObj withMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new Repeat(meta, _count, _val);
         }
 

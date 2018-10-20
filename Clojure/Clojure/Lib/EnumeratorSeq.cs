@@ -133,7 +133,6 @@ namespace clojure.lang
 
         public override IObj withMeta(IPersistentMap meta)
         {
-            // Java: no check
             return meta == _meta
                 ? this
                 : new EnumeratorSeq(meta, _enumerator, _state);

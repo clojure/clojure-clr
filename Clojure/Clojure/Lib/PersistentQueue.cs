@@ -133,6 +133,9 @@ namespace clojure.lang
         /// <returns>A copy of the object with new metadata attached.</returns>
         public override IObj withMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new PersistentQueue(meta, _cnt, _f, _r);
         }
 
@@ -400,6 +403,9 @@ namespace clojure.lang
             /// <returns>A copy of the object with new metadata attached.</returns>
             public override IObj withMeta(IPersistentMap meta)
             {
+                if (_meta == meta)
+                    return this;
+
                 return new Seq(meta, _f, _rseq);
             }
 

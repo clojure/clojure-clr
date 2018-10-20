@@ -124,7 +124,6 @@ namespace clojure.lang
         /// <returns>A copy of the object with new metadata attached.</returns>
         public IObj withMeta(IPersistentMap meta)
         {
-            // Java doesn't do identity check
             return meta == _meta
                 ? this
                 : new PersistentTreeSet(meta, _impl);

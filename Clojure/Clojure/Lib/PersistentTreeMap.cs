@@ -215,7 +215,6 @@ namespace clojure.lang
             return meta == _meta
                 ? this
                 : new PersistentTreeMap(meta, _comp, _tree, _count);
-            // Java: return new PersistentTreeMap(meta, _comp, _tree, _count);
         }
 
         #endregion
@@ -1112,6 +1111,9 @@ namespace clojure.lang
 
             public override IObj withMeta(IPersistentMap meta)
             {
+                if (_meta == meta)
+                    return this;
+
                 return new Seq(meta, _stack, _asc, _cnt);
             }
 

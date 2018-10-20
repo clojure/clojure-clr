@@ -847,6 +847,9 @@ namespace clojure.lang
 
         public override IObj withMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             RestFnImpl copy = (RestFnImpl) MemberwiseClone();
             copy._meta = meta;
             return copy;

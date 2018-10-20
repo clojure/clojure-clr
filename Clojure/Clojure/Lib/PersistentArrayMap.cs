@@ -229,10 +229,6 @@ namespace clojure.lang
         /// <returns>A copy of the object with new metadata attached.</returns>
         public override IObj withMeta(IPersistentMap meta)
         {
-            // Java version as follows
-            //return new PersistentArrayMap(meta, _array);
-            // But the usual pattern is this:
-
             return meta == _meta 
                 ? this
                 : new PersistentArrayMap(meta, _array);
@@ -562,6 +558,9 @@ namespace clojure.lang
             /// <returns>A copy of the object with new metadata attached.</returns>
             public override IObj withMeta(IPersistentMap meta)
             {
+                if (_meta == meta)
+                    return this;
+
                 return new Seq(meta, _array, _i);
             }
 

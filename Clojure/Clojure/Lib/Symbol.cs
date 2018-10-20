@@ -216,7 +216,6 @@ namespace clojure.lang
         /// <returns>A copy of the object with new metadata attached.</returns>
         public IObj withMeta(IPersistentMap meta)
         {
-            // Java did not do identity test.
             return meta == _meta
                 ? this
                 : new Symbol(meta, _ns, _name);

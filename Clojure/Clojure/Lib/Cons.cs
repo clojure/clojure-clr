@@ -75,7 +75,6 @@ namespace clojure.lang
         /// <returns>A copy of the object with new metadata attached.</returns>
         public override IObj withMeta(IPersistentMap meta)
         {
-            // Java doesn't make the identity test: return new Cons(meta, _first, _rest);
             return (meta == _meta)
                 ? this
                 : new Cons(meta, _first, _more);

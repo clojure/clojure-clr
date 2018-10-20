@@ -137,6 +137,9 @@ namespace clojure.lang
 
         protected virtual IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new TypedArraySeq<T>(meta, _array, _i);
         }
 
@@ -313,6 +316,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_byte(meta, _array, _i);
         }
 
@@ -344,6 +350,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_sbyte(meta, _array, _i);
         }
     }
@@ -371,6 +380,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_short(meta, _array, _i);
         }
     }
@@ -399,6 +411,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_ushort(meta, _array, _i);
         }
     }
@@ -426,6 +441,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_int(meta, _array, _i);
         }
     }
@@ -454,6 +472,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_uint(meta, _array, _i);
         }
     }
@@ -481,6 +502,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_long(meta, _array, _i);
         }
     }
@@ -509,6 +533,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_ulong(meta, _array, _i);
         }
     }
@@ -536,6 +563,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_float(meta, _array, _i);
         }
     }
@@ -563,6 +593,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_double(meta, _array, _i);
         }
     }
@@ -590,6 +623,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_char(meta, _array, _i);
         }
     }
@@ -617,6 +653,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_bool(meta, _array, _i);
         }
     }
@@ -644,6 +683,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_decimal(meta, _array, _i);
         }
     }
@@ -679,6 +721,9 @@ namespace clojure.lang
 
         protected override IObj DuplicateWithMeta(IPersistentMap meta)
         {
+            if (_meta == meta)
+                return this;
+
             return new ArraySeq_object(meta, _array, _i);
         }
     }

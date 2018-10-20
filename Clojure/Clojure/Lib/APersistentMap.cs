@@ -555,6 +555,9 @@ namespace clojure.lang
 
             public override IObj withMeta(IPersistentMap meta)
             {
+                if (_meta == meta)
+                    return this;
+
                 return new KeySeq(meta, _seq, _enumerable);
             }
 
@@ -677,6 +680,9 @@ namespace clojure.lang
 
             public override IObj withMeta(IPersistentMap meta)
             {
+                if (_meta == meta)
+                    return this;
+
                 return new ValSeq(meta, _seq, _enumerable);
             }
 
