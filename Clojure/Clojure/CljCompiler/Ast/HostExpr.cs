@@ -94,7 +94,7 @@ namespace clojure.lang.CljCompiler.Ast
                             return new StaticPropertyExpr(source, spanMap, tag, t, fieldName, pinfo);
                         if (!isPropName && Reflector.GetArityZeroMethod(t, fieldName, true) != null)
                             return new StaticMethodExpr(source, spanMap, tag, t, fieldName, null, new List<HostArg>(), tailPosition);
-                        throw new MissingMemberException(t.Name, fieldName);
+                        throw new MissingMemberException(String.Format("No field, property, or method taking 0 args named {0} found for {1}", fieldName, t.Name));
                     }
                     else if (instance != null && instance.HasClrType && instance.ClrType != null)
                     {

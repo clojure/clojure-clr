@@ -37,6 +37,12 @@
         (f2:+><->!#%&*b 1 2))                                                                                                                        ;;; f2:+><->!#%&*|b  
         "ArityException messages should demunge function names"))
 
+(deftest compile-error-examples
+  (are [form errtype re] (thrown-with-msg? errtype re (eval form))
+       '(Int32/Parse) Exception #"No field, property, or method.*taking 0 args.*"                    ;;; Long/parseLong  #"No method.*taking 0 args"
+       '(Int32/Parse :a :b :c :d) Exception #"No matching member.*taking 4 args"                    ;;; (Long/parseLong :a :b :c)  #"No matching method.*taking 3 args" 
+       '(.jump "foo" 1) Exception #"No matching member.*taking 1 arg"))                             ;;; #"No matching method.*taking 1 arg"
+
 (deftest assert-arg-messages
   ; used to ensure that error messages properly use local names for macros
   (refer 'clojure.core :rename '{with-open renamed-with-open})

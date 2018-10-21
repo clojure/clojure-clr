@@ -102,7 +102,7 @@ namespace clojure.lang.Runtime.Binding
                 new DynamicMetaObject(
                     Expression.Throw(
                         Expression.New(typeof(MissingMethodException).GetConstructor(new Type[] { typeof(string) }),
-                            Expression.Constant(String.Format("Cannot find member {0} matching args", this.Name))),
+                            Expression.Constant(String.Format("No matching member {0} taking {1} args for {2}", this.Name, args.Length, typeToUse.Name))),
                         typeof(object)),
                     target.Restrictions.Merge(BindingRestrictionsHelpers.GetRuntimeTypeRestriction(target).Merge(BindingRestrictions.Combine(args))));
         }
