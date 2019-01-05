@@ -1079,7 +1079,7 @@ namespace clojure.lang
                 else if ( (form is IType) ||
                     (form is IPersistentCollection && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def"))))
                 {
-                    ObjExpr objx = (ObjExpr)Analyze(pconExpr, RT.list(FnSym, PersistentVector.EMPTY, form), "eval__" + RT.nextID());
+                    ObjExpr objx = (ObjExpr)Analyze(pconExpr, RT.list(FnSym, PersistentVector.EMPTY, form), "eval" + RT.nextID());
                     IFn fn = (IFn)objx.Eval();
                     return fn.invoke();
                 }

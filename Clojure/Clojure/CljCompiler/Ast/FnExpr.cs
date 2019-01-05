@@ -80,7 +80,7 @@ namespace clojure.lang.CljCompiler.Ast
             string simpleName = Compiler.munge(name).Replace(".", "_DOT_");
 
             Name = baseName + simpleName;
-            InternalName = Name.Replace('.', '/');
+            InternalName = Name;  //  Name.Replace('.', '/');
         }
 
         #endregion
