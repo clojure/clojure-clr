@@ -34,6 +34,10 @@ We'll need to edit the `AssemblyInfo.cs`.  One has not been created.  The easies
     [assembly: AssemblyVersion("0.5.0.0")]
     [assembly: AssemblyFileVersion("0.5.0.0")]
 	
+Note: if you want to create a prerelease version (alphaN, betaN), include something like:
+
+	[assembly: AssemblyInformationalVersion("0.5.0-beta")]
+	
 When using this dialog, unclick the COM-visible checkbox.	
 	
 * Remove all references.
