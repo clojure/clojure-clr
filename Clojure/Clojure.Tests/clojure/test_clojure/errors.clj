@@ -38,10 +38,11 @@
         "ArityException messages should demunge function names"))
 
 (deftest compile-error-examples
-  (are [form errtype re] (thrown-with-msg? errtype re (eval form))
+  (are [form errtype re] (thrown-with-cause-msg? errtype re (eval form))
        '(Int32/Parse) Exception #"No field, property, or method.*taking 0 args.*"                    ;;; Long/parseLong  #"No method.*taking 0 args"
-       '(Int32/Parse :a :b :c :d) Exception #"No matching member.*taking 4 args"                    ;;; (Long/parseLong :a :b :c)  #"No matching method.*taking 3 args" 
-       '(.jump "foo" 1) Exception #"No matching member.*taking 1 arg"))                             ;;; #"No matching method.*taking 1 arg"
+       '(Int32/Parse :a :b :c :d) Exception #"No matching member.*taking 4 args")                    ;;; (Long/parseLong :a :b :c)  #"No matching method.*taking 3 args" 
+  (are [form errtype re] (thrown-with-msg? errtype re (eval form))
+       '(.jump "foo" 1) Exception #"No matching member.*taking 1 arg"))                              ;;; #"No matching method.*taking 1 arg"
 
 (deftest assert-arg-messages
   ; used to ensure that error messages properly use local names for macros
@@ -49,9 +50,9 @@
   
   ; would have used `are` here, but :line meta on &form doesn't survive successive macroexpansions
  (doseq [[msg-regex-str form] [["renamed-with-open" "(renamed-with-open [a])"]]]
-    (is (thrown-with-msg? ArgumentException                                                     ;;; IllegalArgumentException
-                          (re-pattern (format msg-regex-str *ns*))
-                          (macroexpand (read-string form))))))
+    (is (thrown-with-cause-msg? clojure.lang.Compiler+CompilerException                              ;;; clojure.lang.Compiler$CompilerException
+                                (re-pattern (format msg-regex-str *ns*))
+                                (macroexpand (read-string form))))))
 
 (deftest extract-ex-data
   (try

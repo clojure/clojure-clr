@@ -148,10 +148,10 @@
     (is (= 'Exception (-> arglists second meta :tag)))))                                                   ;;; java.lang.Integer
 
 (deftest CLJ-1232-return-type-not-imported
-  (is (thrown-with-msg? Compiler+CompilerException #"Unable to resolve typename: Closeable"               ;;; Compiler$CompilerException  classname
-                        (eval '(defn a ^Closeable []))))
-  (is (thrown-with-msg? Compiler+CompilerException #"Unable to resolve typename: Closeable"               ;;; Compiler$CompilerException  classname
-                        (eval '(defn a (^Closeable []))))))
+  (is (thrown-with-cause-msg? Compiler+CompilerException #"Unable to resolve typename: Closeable"               ;;; Compiler$CompilerException  classname
+                              (eval '(defn a ^Closeable []))))
+  (is (thrown-with-cause-msg? Compiler+CompilerException #"Unable to resolve typename: Closeable"               ;;; Compiler$CompilerException  classname
+                              (eval '(defn a (^Closeable []))))))
  
  (defn ^String hinting-conflict ^Exception [])                                                                     ;;; ^Integer
 
@@ -334,12 +334,14 @@
 (deftest clj-1568
   (let [compiler-fails-at?
           (fn [row col source]
-            (try
-              (Compiler/load (System.IO.StringReader. source) "clj-1568.example" (name (gensym "clj-1568.example-")) "clj-1568.example")       ;;; java.io.StringReader, added extra arg
-              nil
-              (catch Compiler+CompilerException e                                                                                              ;;; Compiler$CompilerException
-                (re-find (re-pattern (str ".*:" row ":" col "\\)\\z"))                                                                          ;;; "^.*:" row ":" col "\\)$"
-                         (.Message e)))))]                                                                                                     ;;; .getMessage
+            (let [path (name (gensym "clj-1568.example-"))]
+              (try
+                (Compiler/load (System.IO.StringReader. source) path "clj-1568.example" "clj-1568.example")   ;;; java.io.StringReader, added extra arg
+                nil
+                (catch Compiler+CompilerException e                                                           ;;; Compiler$CompilerException
+                  (let [data (ex-data e)]
+                    (= [path row col]
+                      [(:clojure.error/source data) (:clojure.error/line data) (:clojure.error/column data)]))))))]
     (testing "with error in the initial form"
       (are [row col source] (compiler-fails-at? row col source)
            ;; note that the spacing of the following string is important
@@ -408,7 +410,7 @@
 ;; See CLJ-1846
 (deftest incorrect-primitive-type-hint-throws
   ;; invalid primitive type hint
-  (is (thrown-with-msg? Compiler+CompilerException #"Cannot coerce System.Int64 to System.Int32"                     ;;; Compiler$CompilerException  "Cannot coerce long to int
+  (is (thrown-with-cause-msg? Compiler+CompilerException #"Cannot coerce System.Int64 to System.Int32"               ;;; Compiler$CompilerException  "Cannot coerce long to int
         (load-string "(defn returns-long ^long [] 1) (Math/Sign ^int (returns-long))")))                             ;;; Integer/bitCount
   ;; correct casting instead
   (is (= 1 (load-string "(defn returns-long ^long [] 1) (Math/Sign (int (returns-long)))"))))                        ;;; Integer/bitCount

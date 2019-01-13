@@ -1133,7 +1133,7 @@ namespace clojure.lang
                 }
                 catch ( Exception e)
                 {
-                    throw new CompilerException((string)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), e);
+                    throw new CompilerException((string)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), v.ToSymbol(), CompilerException.PhaseMacroExpandKeyword, e);
                 }
             }
         }
@@ -1184,6 +1184,20 @@ namespace clojure.lang
                 {
                     // hide the 2 extra params for a macro
                     throw new ArityException(e.Actual - 2, e.Name);
+                }
+                catch (Exception e)
+                {
+                    if (e is CompilerException)
+                    {
+                        throw (CompilerException)e;
+                    }
+                    else
+                    {
+                        throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(),
+                                (op is Symbol ? (Symbol)op : null),
+                                CompilerException.PhaseMacroExpandKeyword,
+                                e);
+                    }
                 }
             }
             else
@@ -1854,7 +1868,7 @@ namespace clojure.lang
             }
             catch (LispReader.ReaderException e)
             {
-                throw new CompilerException(sourcePath, e.Line, e.Column, e.InnerException);
+                throw new CompilerException(sourcePath, e.Line, e.Column, null, CompilerException.PhaseReadKeyword, e.InnerException);
             }
             catch (CompilerException)
             {
@@ -2018,7 +2032,7 @@ namespace clojure.lang
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
 
             Var.pushThreadBindings(RT.map(LineVar, line, ColumnVar, column, SourceSpanVar, sourceSpan));
-
+            Object op = null;
             try
             {
 
@@ -2026,9 +2040,9 @@ namespace clojure.lang
                 if (me != form)
                     return Analyze(pcon, me, name);
 
-                object op = RT.first(form);
+                op = RT.first(form);
                 if (op == null)
-                    throw new ArgumentNullException("form","Can't call nil");
+                    throw new ArgumentNullException("form", "Can't call nil");
 
                 IFn inline = IsInline(op, RT.count(RT.next(form)));
 
@@ -2049,7 +2063,8 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), e);
+                Symbol s = (op != null && op is Symbol) ? (Symbol)op : null;
+                throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), s, e);
             }
             finally
             {
@@ -2067,12 +2082,32 @@ namespace clojure.lang
         #region CompilerException
 
         [Serializable]
-        public sealed class CompilerException : Exception
+        public sealed class CompilerException : Exception, IExceptionInfo
         {
-            #region Data
-            
+            #region static constants
+
+            // Error keys
+            public static readonly String ErrorNamespaceStr = "clojure.error";
+            public static readonly Keyword ErrorSourceKeyword = Keyword.intern(ErrorNamespaceStr, "source"); // :clojure.error/source
+            public static readonly Keyword ErrorLineKeyword = Keyword.intern(ErrorNamespaceStr, "line");     // :clojure.error/line
+            public static readonly Keyword ErrorColumnKeyword = Keyword.intern(ErrorNamespaceStr, "column"); // :clojure.error/column
+            public static readonly Keyword ErrorPhaseKeyword = Keyword.intern(ErrorNamespaceStr, "phase");   // :clojure.error/phase
+            public static readonly Keyword ErrorSymbolKeyword = Keyword.intern(ErrorNamespaceStr, "symbol"); // :clojure.error/symbol
+
+           // Compile error phases
+            public static readonly Keyword PhaseReadKeyword = Keyword.intern(null, "read");                // :read
+            public static readonly Keyword PhaseMacroExpandKeyword = Keyword.intern(null, "macroexpand");  // :macroexpand
+            public static readonly Keyword PhaseCompileKeyword = Keyword.intern(null, "compile");          // :compile
+
+            public static readonly Keyword SpecProblemsKeyword = Keyword.intern("clojure.spec.alpha", "problems");
+
+            #endregion
+
+            #region data
+
             public string FileSource { get; private set; }
             public int Line { get; private set; }
+            public IPersistentMap MyData { get; private set; }
             
             #endregion
 
@@ -2096,10 +2131,24 @@ namespace clojure.lang
             }
 
             public CompilerException(string source, int line, int column, Exception cause)
-                : base(ErrorMsg(source, line, column, cause.ToString()), cause)
+                :this(source,line,column, null, cause)
+            {
+            }
+
+            public CompilerException(string source, int line, int column, Symbol sym, Exception cause)
+                :this(source,line,column,sym,PhaseCompileKeyword,cause)
+            {
+            }
+
+            public CompilerException(String source, int line, int column, Symbol sym, Keyword phase, Exception cause)
+                : base(MakeMsg(source, line, column, sym, phase, cause), cause)
             {
                 FileSource = source;
                 Line = line;
+                Associative m = RT.map(ErrorLineKeyword, line, ErrorColumnKeyword, column, ErrorPhaseKeyword, phase);
+                if (source != null) m = RT.assoc(m, ErrorSourceKeyword, source);
+                if (sym != null) m = RT.assoc(m, ErrorSymbolKeyword, sym);
+                MyData = (IPersistentMap)m;
             }
 
             private CompilerException(SerializationInfo info, StreamingContext context)
@@ -2109,21 +2158,71 @@ namespace clojure.lang
                     throw new ArgumentNullException("info");
 
                 FileSource = info.GetString("FileSource");
+                Line = info.GetInt32("Line");
+                MyData = (IPersistentMap)info.GetValue("MyData",typeof(IPersistentMap));
             }
 
             #endregion
 
             #region Support
 
-            public override string ToString()
-            {
-                return Message;
+            private static String Verb(Keyword phase) 
+            {   
+                if(PhaseCompileKeyword.Equals(phase))   
+			        return "compiling";
+                else if(PhaseReadKeyword.Equals(phase))
+			        return "reading source";
+                else 
+			        return "macroexpanding";
             }
 
-            static string ErrorMsg(string source, int line, int column, string s)
+            private static bool IsMacroSyntaxCheck(Exception e)
             {
-                return string.Format("{0}, compiling: ({1}:{2}:{3})", s, source, line,column);
+                return e is ArgumentException ||
+                       e is InvalidOperationException ||
+                       e is ExceptionInfo ||
+                       e.GetType().Equals(typeof(Exception));
             }
+
+            public static String MakeMsg(String source, int line, int column, Symbol sym, Keyword phase, Exception cause)
+            {
+                return (phase == PhaseMacroExpandKeyword && !IsMacroSyntaxCheck(cause) ? "Unexpected error " : "Syntax error ") +
+                        Verb(phase) + " " + (sym != null ? sym + " " : "") +
+                        "at (" + (source != null && !source.Equals("NO_SOURCE_PATH") ? (source + ":") : "") +
+                        line + ":" + column + ").";
+            }
+
+            private static bool IsSpecError(Exception t)
+            {
+                return (t is IExceptionInfo) && RT.get(((IExceptionInfo)t).getData(), SpecProblemsKeyword) != null;
+            }
+
+            public override string ToString()
+            {
+                Exception cause = InnerException;
+                if (cause != null)
+                {
+                    String delim = (RT.get(Data, ErrorPhaseKeyword) == PhaseMacroExpandKeyword && IsSpecError(cause)) ? " " : "\n";
+                    if (RT.get(Data, ErrorPhaseKeyword) == PhaseMacroExpandKeyword && !IsMacroSyntaxCheck(cause))
+                    {
+                        return String.Format("{0}{1}Cause: {2} {3}", Message, delim, cause.GetType().Name, cause.Message);
+                    }
+                    else
+                    {
+                        return String.Format("{0}{1}Cause: {2}", Message, delim, cause.Message);
+                    }
+                }
+                else
+                {
+                    return Message;
+                }
+            }
+
+            // JVM has this deprecated
+            //static string ErrorMsg(string source, int line, int column, string s)
+            //{
+            //    return string.Format("{0}, compiling: ({1}:{2}:{3})", s, source, line,column);
+            //}
 
             public override void GetObjectData(SerializationInfo info, StreamingContext context)
             {
@@ -2131,9 +2230,16 @@ namespace clojure.lang
                     throw new System.ArgumentNullException("info");
                 base.GetObjectData(info, context);
                 info.AddValue("FileSource", FileSource);
+                info.AddValue("Line", Line);
+                info.AddValue("Data", Data);
             }
 
             #endregion
+
+            public IPersistentMap getData()
+            {
+                return MyData;
+            }
         }
 
         #endregion

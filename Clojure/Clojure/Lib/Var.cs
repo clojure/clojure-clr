@@ -1234,6 +1234,15 @@ namespace clojure.lang
         /// </summary>
         static IFn _dissoc = new DissocFn();
 
+        /// <summary>
+        /// Return a symbol naming this Var
+        /// </summary>
+        /// <returns></returns>
+        public Symbol ToSymbol()
+        {
+            return Symbol.create((ns == null ? null : ns.Name.Name), sym.Name);
+        }
+
         #endregion
 
         #region ISerializable methods

@@ -97,9 +97,9 @@
             (refer temp-ns :only '(hidden-var)))))))   
 
 (deftest test-defrecord-deftype-err-msg
-  (is (thrown-with-msg? clojure.lang.Compiler+CompilerException                                                                ;;; Compiler$CompilerException
-                        #"defrecord and deftype fields must be symbols, [\w|\p{P}]*\.MyRecord had: :shutdown-fn, compiling:"   ;;;  user\.MyRecord
+  (is (thrown-with-cause-msg? clojure.lang.Compiler+CompilerException                                                 ;;; Compiler$CompilerException
+                        #"defrecord and deftype fields must be symbols, [\w|\p{P}]*\.MyRecord had: :shutdown-fn"       ;;;  user\.MyRecord
                         (eval '(defrecord MyRecord [:shutdown-fn]))))
-  (is (thrown-with-msg? clojure.lang.Compiler+CompilerException                                                               ;;; Compiler$CompilerException
-                        #"defrecord and deftype fields must be symbols, [\w|\p{P}]*\.MyType had: :key1, compiling:"           ;;;  user\.MyRecord
+  (is (thrown-with-cause-msg? clojure.lang.Compiler+CompilerException                                                  ;;; Compiler$CompilerException
+                        #"defrecord and deftype fields must be symbols, [\w|\p{P}]*\.MyType had: :key1"                ;;;  user\.MyRecord
                         (eval '(deftype MyType [:key1])))))              

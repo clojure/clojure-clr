@@ -209,7 +209,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             catch (Exception e)
             {
-                throw new Compiler.CompilerException(_source, _line, _column, e);
+                throw new Compiler.CompilerException(_source, _line, _column, Compiler.DefSym, e);
             }
         }
 

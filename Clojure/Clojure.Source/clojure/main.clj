@@ -12,9 +12,9 @@
        :author "Stephen C. Gilardi and Rich Hickey"}
   clojure.main
   (:refer-clojure :exclude [with-bindings])
-  (:require [clojure.spec.alpha])
-  (:import (clojure.lang Compiler Compiler+CompilerException             ;;;Compiler$CompilerException
-                         LineNumberingTextReader RT))                   ;;; LineNumberingPushbackReader
+  (:require [clojure.spec.alpha :as spec])
+  (:import (clojure.lang Compiler Compiler+CompilerException                                   ;;;Compiler$CompilerException
+                         LineNumberingTextReader RT  LispReader+ReaderException))              ;;; LineNumberingPushbackReader LispReader$ReaderException
   ;;(:use [clojure.repl :only (demunge root-cause stack-element-str get-stack-trace)])
   )
 
@@ -169,17 +169,59 @@
   [throwable]
   (root-cause throwable))
 
+(defn- init-cause
+  "Returns initial root cause exception (deepest cause in the exception chain)."
+  ^Exception [t]                                          ;;; Throwable 
+  (loop [^Exception cause t]                              ;;; Throwable
+    (if-let [cause (.InnerException cause)]               ;;; .getCause
+      (recur cause)
+      cause)))
+
+(defn ex-str
+  "Returns a string from an exception for printing at the repl.
+  The first line summarizes data from the exception instance: phase, location,
+  cause message, etc. The subsequent lines contain ex-data info if available."
+  [^Exception e]                                                                        ;;; Throwable
+  (let [msg (.Message e)                                                                ;;; .getMessage 
+        cause (init-cause e)
+        tr (.GetFrames (System.Diagnostics.StackTrace. cause true))                     ;;; (.getStackTrace cause)
+        el (when-not (zero? (count tr)) (aget tr 0))
+        top-data (ex-data e)
+        data (ex-data cause)]
+    (str
+      (case (:clojure.error/phase top-data)
+        :read
+        (if (instance? Compiler+CompilerException e)                                    ;;; Compiler$CompilerException
+          (.ToString e)                                                                 ;;; toString
+          (format "%s. Cause: %s" (.Message e) (.Message (init-cause e))))              ;;; .getMessage  .getMessage 
+
+        (:compile :macroexpand)
+        (.ToString e)                                                                   ;;; .toString
+
+        :print
+        (format "Error printing return value at %s. %s %s"
+          (if el (stack-element-str el) "[trace missing]") ;; jvm may omit stack
+          (.. cause GetType Name)                                                       ;;;  getClass   getSimpleName
+          (.Message cause))                                                             ;;; .getMessage 
+
+        ;; eval
+        (format "Evaluation error at %s. %s %s"
+          (if el (stack-element-str el) "[trace missing]") ;; jvm may omit stack
+          (.. cause GetType Name)                                                       ;;;  getClass   getSimpleName
+          (.Message cause)))                                                            ;;; .getMessage 
+
+      (if data
+        (if (contains? data :clojure.spec.alpha/problems)
+          (format "%n%s" (with-out-str (spec/explain-out data)))
+          (System.Environment/NewLine))                                                       ;;; System/lineSeparator
+        (System.Environment/NewLine)))))                                                      ;;; System/lineSeparator
+
 (defn repl-caught
   "Default :caught hook for repl"
   [e]
-  (let [ex (repl-exception e)
-        tr (get-stack-trace ex)
-        el (when-not (zero? (count tr)) (aget tr 0))]
-	(binding [*out* *err*]
-      (println (str (-> ex class .Name)           ;;; .getSimpleName
-				    " " (.Message ex) " "         ;;;  .getMessage
-				    (when-not (instance? clojure.lang.Compiler+CompilerException ex)
-                      (str " " (if el (stack-element-str el) "[trace missing]"))))))))
+  (binding [*out* *err*]
+    (print (ex-str e))
+    (flush)))
 
 (def ^{:doc "A sequence of lib specs that are applied to `require`
 by default when a new command-line REPL is started."} repl-requires
@@ -258,13 +300,26 @@ by default when a new command-line REPL is started."} repl-requires
         (fn []
           (try
             (let [read-eval *read-eval*
-                  input (with-read-known (read request-prompt request-exit))]
+                  input (try
+                          (with-read-known (read request-prompt request-exit))
+                          (catch LispReader+ReaderException e                                                         ;;; LispReader$ReaderException
+                            (throw (ex-info
+                                     (str "Syntax error reading source at (" (.-line e) ":" (.-column e) ")")
+                                     {:clojure.error/phase :read
+                                      :clojure.error/line (.-line e)
+                                      :clojure.error/column (.-column e)}
+                                     e))))]
              (or (#{request-prompt request-exit} input)
                  (let [value (binding [*read-eval* read-eval] (eval input))]
-                   (print value)
                    (set! *3 *2)
                    (set! *2 *1)
-                   (set! *1 value))))
+                   (set! *1 value)
+                   (try
+                     (print value)
+                     (catch Exception e                                                                               ;;; Throwable
+                       (throw (ex-info (format "Error printing return value. Cause: " (.Message e))                   ;;; getMessage
+                                {:clojure.error/phase :print}
+                                e)))))))
            (catch Exception e           ;;; Throwable
              (caught e)
              (set! *e e))))]
