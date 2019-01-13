@@ -1163,6 +1163,20 @@ namespace clojure.lang
             return form;
         }
 
+        //public static Regex UnpackFnNameRE = new Regex("^(.+)/$([^_]+)(__[0-9]+)*$");
+        public static Regex FnNameSuffixRE = new Regex("__[0-9]+$");
+        static String RemoveFnSuffix(string s)
+        {
+            while (true)
+            {
+                Match m = FnNameSuffixRE.Match(s);
+                if (m.Success)
+                    s = s.Substring(0, s.Length - m.Groups[0].Length);
+                else return s;
+            }
+        }
+
+
         private static object MacroexpandSeq1(ISeq form)
         {
             object op = RT.first(form);
@@ -1183,7 +1197,18 @@ namespace clojure.lang
                 catch (ArityException e)
                 {
                     // hide the 2 extra params for a macro
-                    throw new ArityException(e.Actual - 2, e.Name);
+                    // This simple test is used in the JVM:   if (e.Name.Equals(munge(v.ns.Name.Name) + "$" + munge(v.sym.Name)))
+                    // Does not work for us because have to append a __1234 to the type name for functions in order to avoid name collisiions in the eval assembly.
+                    // So we have to see if the name is of the form   namespace$name__xxxx  where the __xxxx can be repeated.
+                    String reducedName = RemoveFnSuffix(e.Name);
+                    if ( reducedName.Equals(munge(v.ns.Name.Name) + "$" + munge(v.sym.Name)))
+                    {
+                        throw new ArityException(e.Actual - 2, e.Name);
+                    }
+                    else
+                    {
+                        throw e;
+                    }
                 }
                 catch (Exception e)
                 {

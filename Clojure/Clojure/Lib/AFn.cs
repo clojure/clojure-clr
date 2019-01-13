@@ -464,10 +464,8 @@ namespace clojure.lang
 
         public Exception WrongArityException(int reqArity)
         {
-            string name = Util.NameForType(GetType()); 
-            return new ArityException(
-                reqArity,
-                Compiler.demunge(name));
+            string name = GetType().FullName;
+            return new ArityException(reqArity,name);
         }
 
         #endregion

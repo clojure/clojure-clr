@@ -9,7 +9,7 @@
 ;; Tests for error handling and messages
 
 (ns clojure.test-clojure.errors
-  (:use clojure.test)
+  (:use clojure.test clojure.test-helper)               ;;; DM: Added clojure.test-helper -- not sure why this being missing wasn't causing an error (did so on individual file load)
   (:import clojure.lang.ArityException))
 
 (defn f0 [] 0)
@@ -23,6 +23,8 @@
 
 (defmacro m1 [a] `(inc ~a))
 
+(defmacro m2 [] (assoc))
+
 (deftest arity-exception
   ;; IllegalArgumentException is pre-1.3
   (is (thrown-with-msg? ArgumentException #"Wrong number of args \(1\) passed to"  ;;; IllegalArgumentException
@@ -35,7 +37,17 @@
         (macroexpand `(m1 1 2))))
   (is (thrown-with-msg? ArityException  (System.Text.RegularExpressions.Regex. (System.Text.RegularExpressions.Regex/Escape "f2:+><->!#%&*b"))       ;;;  We don't have \Q... \E :  #"\Q/f2:+><->!#%&*|b\E"
         (f2:+><->!#%&*b 1 2))                                                                                                                        ;;; f2:+><->!#%&*|b  
-        "ArityException messages should demunge function names"))
+      "ArityException messages should demunge function names")
+  (is (try
+        (macroexpand `(m2))
+        (throw (Exception. "fail"))           ;;; RuntimeException.
+        (catch ArityException e
+          (is (= 0 (.-Actual e))))))
+ (is (try
+       (macroexpand `(m2 5))
+       (throw (Exception. "fail"))            ;;; RuntimeException.
+       (catch ArityException e
+         (is (= 1 (.-Actual e)))))))
 
 (deftest compile-error-examples
   (are [form errtype re] (thrown-with-cause-msg? errtype re (eval form))
