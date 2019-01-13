@@ -73,10 +73,10 @@
   (is (re-find #"ab" "abbabba") "Should pass")
   (is (re-find #"cd" "abbabba") "Should fail"))
 
-#_ (deftest clj-1102-empty-stack-trace-should-not-throw-exceptions                           ;;; I don';t know any way to do the equivalent of .setStraceTrace on an exception in CLR-land.
-  (let [empty-stack (into-array (Type/GetType "System.Diagnostics.StackFrame" false)         ;;; (Class/forName "java.lang.StackTraceElement")
+(deftest clj-1102-empty-stack-trace-should-not-throw-exceptions                           ;;; I don';t know any way to do the equivalent of .setStraceTrace on an exception, in CLR-land.
+  (let [empty-stack (into-array (Type/GetType "System.Diagnostics.StackFrame" false)      ;;; (Class/forName "java.lang.StackTraceElement")  -- not needed
                                 [])
-        t (doto (Exception.) (.setStackTrace empty-stack))]
+        t (Exception.)]                                                                   ;;; (doto (Exception.) (.setStackTrace empty-stack)) -- however, an unthrown exception has an empty stack trace
     (is (map? (#'clojure.test/file-and-line t 0)) "Should pass")
     (is (map? (#'clojure.test/stacktrace-file-and-line empty-stack)) "Should pass")
 	(is (string? (with-out-str (stack/print-stack-trace t))) "Should pass")))
