@@ -5811,11 +5811,11 @@ Note that read can execute code (controlled by *read-eval*),
   [pred fmt & args]
   (when pred
     (let [ ^String message (apply format fmt args)
-          exception (Exception. message)     
-          ;; can't set the stacktrace ---- raw-trace (.getStackTrace exception)   
-          ;;                          ---- boring? #(not= (.getMethodName ^StackTraceElement %) "doInvoke")
-         ];;                          ---- trace (into-array StackTraceElement (drop 2 (drop-while boring? raw-trace)))]
-      ;;;                           ---- (.setStackTrace exception trace)
+           exception (Exception. message)
+           raw-trace  (.GetFrames (System.Diagnostics.StackTrace.))                                      ;;; (.getStackTrace exception)  unthrown exception has null stacktrace -- use diagnostics to get the stacktrace
+           boring? #(not= (.Name (.GetMethod ^System.Diagnostics.StackFrame %)) "doInvoke")              ;;; ^StackTraceElement
+           trace (into-array System.Diagnostics.StackFrame (drop 2 (drop-while boring? raw-trace)))]     ;;; .getMethodName => .Name .GetMethod StackTraceElement
+           (.Add (.Data exception) "StackTrace" trace)                                                                   ;;; (.setStackTrace exception trace)  - can't set stack trace, so store the filtered trace on the Data element'
       (throw (clojure.lang.Compiler+CompilerException.                   ;;; Compiler$CompilerException
               *file*
               (.deref clojure.lang.Compiler/LineVar)                     ;;; LINE
