@@ -4751,14 +4751,24 @@ Note that read can execute code (controlled by *read-eval*),
      (apply println xs)))
 
 (import clojure.lang.ExceptionInfo clojure.lang.IExceptionInfo)
+
+(defn ^:private elide-top-frames                                                                              ;;; we can't actually modify the stack trace of an exception.  we will just store the modified stack trace under the "StackTrace" key in the Data map
+  [^Exception ex class-name]                                                                                  ;;; Throwable
+  (let [tr (.GetFrames (or (System.Diagnostics.StackTrace. ex true) (System.Diagnostics.StackTrace.)))]        ;;; (.getStackTrace ex)  if the exception has not been thrown, it will not have a stack trace, so we create one from the current stack
+    (.Add (.Data ex)                                                                                          ;;;  (doto ex
+      "StackTrace"                                                                                            ;;; (.setStackTrace
+        (when tr
+          (into-array System.Diagnostics.StackFrame                                                           ;;; StackTraceElement
+            (drop-while #(= class-name (.Name (.GetMethod ^System.Diagnostics.StackFrame %1))) tr))))) ex)    ;;; .getMethodName => .Name .GetMethod StackTraceElement
+
 (defn ex-info
   "Create an instance of ExceptionInfo, a RuntimeException subclass
    that carries a map of additional data."
   {:added "1.4"}
   ([msg map]
-     (ExceptionInfo. msg map))
+    (elide-top-frames (ExceptionInfo. msg map) "clojure.core$ex_info"))
   ([msg map cause]
-     (ExceptionInfo. msg map cause)))
+    (elide-top-frames (ExceptionInfo. msg map cause) "clojure.core$ex_info")))
 
 (defn ex-data
   "Returns exception data (a map) if ex is an IExceptionInfo.
