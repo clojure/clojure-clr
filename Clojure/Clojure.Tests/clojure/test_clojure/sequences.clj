@@ -598,7 +598,6 @@
   (is (thrown? ArgumentOutOfRangeException (nth (System.Collections.ArrayList. []) -1)))       ; ???   ;;; ArrayIndexOutOfBoundsException, java.util.ArrayList
   (is (thrown? ArgumentOutOfRangeException (nth (System.Collections.ArrayList. [1 2 3]) -1)))  ; ???   ;;; ArrayIndexOutOfBoundsException, java.util.ArrayList
 
-
   (are [x y] (= x y)
       (nth '(1) 0) 1
       (nth '(1 2 3) 0) 1
@@ -651,6 +650,7 @@
     (is (thrown? InvalidOperationException (nth m 0)))          ;;; IllegalStateException
     (is (thrown? InvalidOperationException (nth m 2)))          ;;; IllegalStateException
     (is (thrown? InvalidOperationException (nth m -1)))))       ;;; IllegalStateException
+
 
 ; distinct was broken for nil & false:
 ;   fixed in rev 1278:
@@ -997,7 +997,9 @@
 
 (deftest test-range
   (are [x y] (= x y)
-      (range 0) ()   ; exclusive end!
+      (take 100 (range)) (range 100)
+      
+	  (range 0) ()   ; exclusive end!
       (range 1) '(0)
       (range 5) '(0 1 2 3 4)
 
@@ -1285,7 +1287,10 @@
        ["a" "bb" "cccc" "dd" "eee" "f" "" "hh"]
        '("a" "bb" "cccc" "dd" "eee" "f" "" "hh"))
   (is (=(partition-by #{\a \e \i \o \u} "abcdefghijklm")
-       [[\a] [\b \c \d] [\e] [\f \g \h] [\i] [\j \k \l \m]])))
+        [[\a] [\b \c \d] [\e] [\f \g \h] [\i] [\j \k \l \m]]))
+  ;; CLJ-1764 regression test
+  (is (=(first (second (partition-by zero? (range))))
+        1)))
 
 (deftest test-frequencies
   (are [expected test-seq] (= (frequencies test-seq) expected)
