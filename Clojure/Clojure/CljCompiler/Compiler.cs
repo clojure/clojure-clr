@@ -533,7 +533,7 @@ namespace clojure.lang
             }
             else if (symbol.Name.IndexOf('.') > 0 && !symbol.Name.EndsWith(".")
                 || symbol.Name[symbol.Name.Length - 1] == ']')              /// JAVA: symbol.Name[0] == '[')
-                return RT.classForNameE(symbol.Name);
+                return RT.classForName(symbol.Name);
             else if (symbol.Equals(NsSym))
                 return RT.NSVar;
             else if (symbol.Equals(InNsSym))
