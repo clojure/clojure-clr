@@ -2227,8 +2227,9 @@ namespace clojure.lang
                 Exception cause = InnerException;
                 if (cause != null)
                 {
-                    String delim = (RT.get(Data, ErrorPhaseKeyword) == PhaseMacroExpandKeyword && IsSpecError(cause)) ? " " : "\n";
-                    if (RT.get(Data, ErrorPhaseKeyword) == PhaseMacroExpandKeyword && !IsMacroSyntaxCheck(cause))
+                    // We can use ReferenceEquals here because the same Keyword is used everywehre.
+                    String delim = (Object.ReferenceEquals(RT.get(Data, ErrorPhaseKeyword),PhaseMacroExpandKeyword)  && IsSpecError(cause)) ? " " : "\n";
+                    if (Object.ReferenceEquals(RT.get(Data, ErrorPhaseKeyword), PhaseMacroExpandKeyword) && !IsMacroSyntaxCheck(cause))
                     {
                         return String.Format("{0}{1}Cause: {2} {3}", Message, delim, cause.GetType().Name, cause.Message);
                     }
