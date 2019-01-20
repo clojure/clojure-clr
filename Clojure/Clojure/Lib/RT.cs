@@ -2398,7 +2398,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IPersistentMap map(params object[] init)
         {
-            if (init == null)
+            if (init == null || init.Length == 0)
                 return PersistentArrayMap.EMPTY;
             else if (init.Length <= PersistentArrayMap.HashtableThreshold)
                 return PersistentArrayMap.createWithCheck(init);
