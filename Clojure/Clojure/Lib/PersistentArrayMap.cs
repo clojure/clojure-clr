@@ -401,7 +401,7 @@ namespace clojure.lang
             else
             {
                 // new key, grow
-                if (_array.Length > HashtableThreshold)
+                if (_array.Length >= HashtableThreshold)
                     return createHT(_array).assoc(key, val);
                 newArray = new object[_array.Length + 2];
                 if (_array.Length > 0)
