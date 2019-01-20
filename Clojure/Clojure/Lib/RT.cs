@@ -3486,21 +3486,25 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static void load(String relativePath, Boolean failIfNotFound)
         {
-            string cljname = relativePath + ".clj";
-            string assemblyname = relativePath.Replace('/', '.') + ".clj.dll";
+            string cljsourcename = relativePath + ".clj";
+            string cljcsourcename = relativePath + ".cljc";
+            string cljassemblyname = relativePath.Replace('/', '.') + ".clj.dll";
+            string cljcassemblyname = relativePath.Replace('/', '.') + ".cljc.dll";
+            string sourcename = cljsourcename;
+            string assemblyname = cljassemblyname;
 
             if (!RuntimeBootstrapFlag.DisableFileLoad)
             {
-                FileInfo cljInfo = FindFile(cljname);
+                FileInfo cljInfo = FindFile(sourcename);
                 if (cljInfo == null )
                 {
-                    cljname = relativePath + ".cljc";
-                    cljInfo = FindFile(cljname);
+                    sourcename = cljcsourcename;
+                    cljInfo = FindFile(sourcename);
                 }
                 FileInfo assyInfo = FindFile(assemblyname);
                 if ( assyInfo == null )
                 {
-                    assemblyname = relativePath.Replace('/', '.') + ".cljc.dll";
+                    assemblyname = cljcassemblyname;
                     assyInfo = FindFile(assemblyname);
                 }
 
@@ -3525,9 +3529,9 @@ namespace clojure.lang
                 if (cljInfo != null)
                 {
                     if (booleanCast(Compiler.CompileFilesVar.deref()))
-                        Compile(cljInfo, cljname);
+                        Compile(cljInfo, sourcename);
                     else
-                        LoadScript(cljInfo, cljname);
+                        LoadScript(cljInfo, sourcename);
                     return;
                 }
             }
@@ -3550,9 +3554,11 @@ namespace clojure.lang
 
 
             if (!loaded && failIfNotFound)
-                throw new FileNotFoundException(String.Format("Could not locate {0} or {1} on load path.{2}", 
-                    assemblyname, 
-                    cljname,
+                throw new FileNotFoundException(String.Format("Could not locate {0}, {1}, {2} or {3] on load path.{4}", 
+                    cljassemblyname, 
+                    cljcassemblyname,
+                    cljsourcename,
+                    cljcsourcename,
                     relativePath.Contains("_") ? " Please check that namespaces with dashes use underscores in the Clojure file name." : ""));
         }
 
