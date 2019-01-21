@@ -360,7 +360,8 @@
     :fail (merge (stacktrace-file-and-line (drop-while
                                               #(let [cl-name (.FullName (.DeclaringType (.GetMethod ^System.Diagnostics.StackFrame %)))]    ;;; .getClassName ^StackTraceElement
                                                  (or (str/starts-with? cl-name "System.")                                                   ;;; "java.lang.""
-                                                     (str/starts-with? cl-name "clojure.test$")))
+                                                    (str/starts-with? cl-name "clojure.test$")
+                                                    (str/starts-with? cl-name "clojure.core$ex_info")))
                                               (.GetFrames (System.Diagnostics.StackTrace.)))) m)                                            ;;; (.getStackTrace (Thread/currentThread))
      :error (merge (stacktrace-file-and-line (.GetFrames (System.Diagnostics.StackTrace. ^Exception (:actual m) true))) m)                  ;;; (.getStackTrace ^Throwable (:actual m))
     m)))
