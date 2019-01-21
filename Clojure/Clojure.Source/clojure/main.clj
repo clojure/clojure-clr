@@ -310,10 +310,10 @@ by default when a new command-line REPL is started."} repl-requires
                           (with-read-known (read request-prompt request-exit))
                           (catch LispReader+ReaderException e                                                         ;;; LispReader$ReaderException
                             (throw (ex-info
-                                     (str "Syntax error reading source at (" (.-line e) ":" (.-column e) ")")
+                                     (str "Syntax error reading source at (" (.-Line e) ":" (.-Column e) ")")         ;;; .-line .-column
                                      {:clojure.error/phase :read
-                                      :clojure.error/line (.-line e)
-                                      :clojure.error/column (.-column e)}
+                                      :clojure.error/line (.-Line e)                                                  ;;; .-line
+                                      :clojure.error/column (.-Column e)}                                             ;;; .-column
                                      e))))]
              (or (#{request-prompt request-exit} input)
                  (let [value (binding [*read-eval* read-eval] (eval input))]
