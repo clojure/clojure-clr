@@ -42,7 +42,8 @@ the sorting function."}
   [inner outer form]
   (cond
    (list? form) (outer (apply list (map inner form)))
-   (instance? clojure.lang.IMapEntry form) (outer (vec (map inner form)))  
+   (instance? clojure.lang.IMapEntry form)
+   (outer (clojure.lang.MapEntry/create (inner (key form)) (inner (val form))))
    (instance? System.Collections.DictionaryEntry form) (outer [(inner (.Key ^System.Collections.DictionaryEntry form)) (inner (.Value ^System.Collections.DictionaryEntry form))])
    (seq? form) (outer (doall (map inner form)))
    (instance? clojure.lang.IRecord form)
