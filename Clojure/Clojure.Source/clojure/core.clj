@@ -4789,6 +4789,22 @@ Note that read can execute code (controlled by *read-eval*),
   (when (instance? IExceptionInfo ex)
     (.getData ^IExceptionInfo ex)))
 
+(defn ex-message
+  "Returns the message attached to ex if ex is a Throwable.
+  Otherwise returns nil."
+  {:added "1.10"}
+  [ex]
+  (when (instance? Exception ex)                                   ;;; Throwable
+    (.Message ^Exception ex)))                                     ;;; .getMessage Throwable
+
+(defn ex-cause
+  "Returns the cause of ex if ex is a Throwable.
+  Otherwise returns nil."
+  {:added "1.10"}
+  [ex]
+  (when (instance? Exception ex)                                   ;;; Throwable
+    (.InnerException ^Exception ex)))                              ;;; .getCause Throwable
+
 (defmacro assert
   "Evaluates expr and throws an exception if it does not evaluate to
   logical true."
