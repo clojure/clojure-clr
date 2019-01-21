@@ -1078,16 +1078,19 @@ namespace clojure.lang
                 IObj s = (IObj)PersistentList.create((IList)list);
                 if (startLine != -1)
                 {
-                    return s.withMeta(RT.map(
-                        RT.LineKey, startLine, // This is what is supported by the JVM version
-                        RT.ColumnKey, startCol,
-                        // We add a :source-span key, value is map with the other values.
-                        // A map is used here so that we are print-dup--serializable.
-                        RT.SourceSpanKey, RT.map(
+                    Object meta = RT.meta(s);
+                    meta = RT.assoc(meta, RT.LineKey, RT.get(meta, RT.LineKey, startLine));
+                    meta = RT.assoc(meta, RT.ColumnKey, RT.get(meta, RT.ColumnKey, startCol));
+                    // We add a :source-span key, value is map with the other values.
+                    // A map is used here so that we are print-dup--serializable.
+                    meta = RT.assoc(meta, RT.SourceSpanKey, RT.get(meta, RT.SourceSpanKey, RT.map(
                             RT.StartLineKey, startLine,
                             RT.StartColumnKey, startCol,
                             RT.EndLineKey, lntr.LineNumber,
                             RT.EndColumnKey, lntr.ColumnNumber)));
+
+                    return s.withMeta((IPersistentMap)meta);
+
                 }
                 else
                     return s;
@@ -1659,13 +1662,15 @@ namespace clojure.lang
                 if (o is IMeta)
                 {
                     if (startLine != -1 && o is ISeq)
-                        metaAsMap = metaAsMap.assoc(RT.LineKey, startLine)
-                            .assoc(RT.ColumnKey, startCol)
-                            .assoc(RT.SourceSpanKey, RT.map(
+                    {
+                        metaAsMap = metaAsMap.assoc(RT.LineKey, RT.get(metaAsMap,RT.LineKey, startLine));
+                        metaAsMap = metaAsMap.assoc(RT.ColumnKey, RT.get(metaAsMap,RT.ColumnKey,startCol));
+                        metaAsMap = metaAsMap.assoc(RT.SourceSpanKey, RT.get(metaAsMap, RT.SourceSpanKey, RT.map(
                                 RT.StartLineKey, startLine,
                                 RT.StartColumnKey, startCol,
                                 RT.EndLineKey, lntr.LineNumber,
-                                RT.EndColumnKey, lntr.ColumnNumber));
+                                RT.EndColumnKey, lntr.ColumnNumber)));
+                    }
 
                     IReference iref = o as IReference;
                     if (iref != null)
