@@ -7806,7 +7806,7 @@ clojure.lang.IKVReduce
   nil)
 
  (defn remove-tap
-  "remove f from the tap set the tap set."
+  "remove f from the tap set."
   {:added "1.10"}
   [f]
   (swap! tapset disj f)
