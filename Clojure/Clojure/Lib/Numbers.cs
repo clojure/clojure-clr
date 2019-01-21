@@ -455,46 +455,6 @@ namespace clojure.lang
             return x;
         }
 
-        static public BigInteger numerator(Ratio x)
-        {
-            return x.numerator;
-        }
-
-        static public BigInteger numerator(long x)
-        {
-            return BigInteger.Create(x);
-        }
-
-        static public BigInteger numerator(BigInt x)
-        {
-            return x.toBigInteger();
-        }
-
-        static public BigInteger numerator(BigInteger x)
-        {
-            return x;
-        }
-
-        static public BigInteger denominator(Ratio x)
-        {
-            return x.denominator;
-        }
-
-        static public BigInteger denominator(long x)
-        {
-            return BigInteger.One;
-        }
-
-        static public BigInteger denominator(BigInt x)
-        {
-            return BigInteger.One;
-        }
-
-        static public BigInteger denominator(BigInteger x)
-        {
-            return BigInteger.One;
-        }
-
         #endregion
 
         #region Boxing
