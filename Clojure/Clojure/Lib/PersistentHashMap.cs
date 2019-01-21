@@ -1284,9 +1284,12 @@ namespace clojure.lang
                         return null;
                     return new BitmapIndexedNode(null,_bitmap^bit,RemovePair(_array,idx));
                 }
-                if ( Util.equiv(key,keyOrNull))
-                    // TODO: Collapse  (TODO in Java code)
-                    return new BitmapIndexedNode(null,_bitmap^bit,RemovePair(_array,idx));
+                if (Util.equiv(key, keyOrNull))
+                {
+                    if (_bitmap == bit)
+                        return null;
+                    return new BitmapIndexedNode(null, _bitmap ^ bit, RemovePair(_array, idx));
+                }
                 return this;
             }
 
