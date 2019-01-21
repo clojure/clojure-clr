@@ -1582,9 +1582,8 @@ namespace clojure.lang
                 int idx = FindIndex(key);
                 if (idx < 0)
                     return null;
-                if (Util.equiv(key, _array[idx]))
-                    return (IMapEntry)MapEntry.create(_array[idx], _array[idx + 1]);
-                return null;
+                return (IMapEntry)MapEntry.create(_array[idx], _array[idx + 1]);
+
             }
 
             public Object Find(int shift, int hash, Object key, Object notFound)
@@ -1592,9 +1591,7 @@ namespace clojure.lang
                 int idx = FindIndex(key);
                 if (idx < 0)
                     return notFound;
-                if (Util.equiv(key, _array[idx]))
-                    return _array[idx + 1];
-                return notFound;
+                return _array[idx + 1];
             }
 
             public ISeq GetNodeSeq()
