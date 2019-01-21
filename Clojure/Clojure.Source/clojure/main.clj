@@ -186,6 +186,7 @@
         cause (init-cause e)
         tr (.GetFrames (System.Diagnostics.StackTrace. cause true))                     ;;; (.getStackTrace cause)
         el (when-not (zero? (count tr)) (aget tr 0))
+        st (if el (stack-element-str el) "[trace missing]") ;; jvm may omit stack
         top-data (ex-data e)
         data (ex-data cause)]
     (str
@@ -193,22 +194,29 @@
         :read
         (if (instance? Compiler+CompilerException e)                                    ;;; Compiler$CompilerException
           (.ToString e)                                                                 ;;; toString
-          (format "%s. Cause: %s" (.Message e) (.Message (init-cause e))))              ;;; .getMessage  .getMessage 
+          (format "%s.%n%s" (.Message e) (.Message (init-cause e))))                    ;;; .getMessage  .getMessage 
 
         (:compile :macroexpand)
         (.ToString e)                                                                   ;;; .toString
 
         :print
-        (format "Error printing return value at %s. %s %s"
-          (if el (stack-element-str el) "[trace missing]") ;; jvm may omit stack
+        (format "Error printing return value (%s) at %s.%n%s"
           (.. cause GetType Name)                                                       ;;;  getClass   getSimpleName
+		  st
           (.Message cause))                                                             ;;; .getMessage 
 
         ;; eval
-        (format "Evaluation error at %s. %s %s"
-          (if el (stack-element-str el) "[trace missing]") ;; jvm may omit stack
-          (.. cause GetType Name)                                                       ;;;  getClass   getSimpleName
-          (.Message cause)))                                                            ;;; .getMessage 
+        (if (and data (contains? data :clojure.spec.alpha/problems))
+          (let [{:clojure.spec.alpha/keys [fn]} data]
+            (format "Evaluation error - invalid arguments to %s at %s."
+              fn
+              (if-let [{:keys [file line]} (:clojure.spec.test.alpha/caller data)]
+                (format "(%s:%s)" file line)
+                st)))
+          (format "Evaluation error (%s) at %s.%n%s"
+            (.. cause GetType Name)                                                       ;;;  getClass   getSimpleName
+            st
+            (.Message cause))))                                                           ;;; .getMessage 
 
       (if data
         (if (contains? data :clojure.spec.alpha/problems)

@@ -2228,14 +2228,21 @@ namespace clojure.lang
                 if (cause != null)
                 {
                     // We can use ReferenceEquals here because the same Keyword is used everywehre.
-                    String delim = (Object.ReferenceEquals(RT.get(Data, ErrorPhaseKeyword),PhaseMacroExpandKeyword)  && IsSpecError(cause)) ? " " : "\n";
-                    if (Object.ReferenceEquals(RT.get(Data, ErrorPhaseKeyword), PhaseMacroExpandKeyword) && !IsMacroSyntaxCheck(cause))
+                    if (Object.ReferenceEquals(RT.get(MyData, ErrorPhaseKeyword), PhaseMacroExpandKeyword))
                     {
-                        return String.Format("{0}{1}Cause: {2} {3}", Message, delim, cause.GetType().Name, cause.Message);
+                        if (IsSpecError(cause))
+                        {
+                            return String.Format("{0}", Message);
+                        }
+                        else
+                        {
+                            return String.Format("{0}/n{1}", Message, cause.Message);
+                        }
                     }
+
                     else
                     {
-                        return String.Format("{0}{1}Cause: {2}", Message, delim, cause.Message);
+                        return String.Format("{0}/n{1}", Message, cause.Message);
                     }
                 }
                 else
@@ -2243,6 +2250,8 @@ namespace clojure.lang
                     return Message;
                 }
             }
+            
+            
 
             // JVM has this deprecated
             //static string ErrorMsg(string source, int line, int column, string s)
