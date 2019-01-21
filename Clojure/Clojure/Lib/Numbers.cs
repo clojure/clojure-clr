@@ -34,8 +34,10 @@ namespace clojure.lang
             bool isNeg(object x);
             object add(object x, object y);
             object addP(object x, object y);
+            object unchecked_add(object x, object y);
             object multiply(object x, object y);
             object multiplyP(object x, object y);
+            object unchecked_multiply(object x, object y);
             object divide(object x, object y);
             object quotient(object x, object y);
             object remainder(object x, object y);
@@ -45,19 +47,27 @@ namespace clojure.lang
             bool gte(object x, object y);
             object negate(object x);
             object negateP(object x);
+            object unchecked_negate(object x);
             object inc(object x);
             object incP(object x);
+            object unchecked_inc(object x);
             object dec(object x);
             object decP(object x);
+            object unchecked_dec(object x);
         }
 
         #endregion
 
-        #region OpsP interface
+        #region OpsP class
 
         abstract class OpsP : Ops
         {
             public object addP(object x, object y)
+            {
+                return add(x, y);
+            }
+
+            public object unchecked_add(object x, object y)
             {
                 return add(x, y);
             }
@@ -67,7 +77,17 @@ namespace clojure.lang
                 return multiply(x, y);
             }
 
+            public object unchecked_multiply(object x, object y)
+            {
+                return multiply(x, y);
+            }
+
             public object negateP(object x)
+            {
+                return negate(x);
+            }
+
+            public object unchecked_negate(object x)
             {
                 return negate(x);
             }
@@ -76,8 +96,19 @@ namespace clojure.lang
             {
                 return inc(x);
             }
+            
+            public object unchecked_inc(object x)
+            {
+                return inc(x);
+            }
 
             public object decP(object x)
+            {
+                return dec(x);
+            }
+
+
+            public object unchecked_dec(object x)
             {
                 return dec(x);
             }
@@ -702,6 +733,11 @@ namespace clojure.lang
                 return num(ret);
             }
 
+            public object unchecked_add(object x, object y)
+            {
+                return num(Numbers.unchecked_add(Util.ConvertToLong(x), Util.ConvertToLong(y)));
+            }
+
             public object multiply(object x, object y)
             {
                 return num(Numbers.multiply(Util.ConvertToLong(x), Util.ConvertToLong(y)));
@@ -719,6 +755,12 @@ namespace clojure.lang
                 if (ly != 0 && ret / ly != lx)
                     return BIGINT_OPS.multiply(x, y);
                 return num(ret);
+            }
+
+            public object unchecked_multiply(object x, object y)
+            {
+                return num(Numbers.unchecked_multiply(Util.ConvertToLong(x), Util.ConvertToLong(y)));
+
             }
 
             static long gcd(long u, long v)
@@ -797,6 +839,13 @@ namespace clojure.lang
                 return BigInt.fromBigInteger(-BigInteger.Create(val));
             }
 
+            public object unchecked_negate(object x)
+            {
+                long val = Util.ConvertToLong(x);
+                return num(Numbers.unchecked_minus(val));
+            }
+
+
             public object inc(object x)
             {
                 long val = Util.ConvertToLong(x);
@@ -810,6 +859,12 @@ namespace clojure.lang
                 if (val < Int64.MaxValue)
                     return num(val + 1);
                 return BIGINT_OPS.inc(x);
+            }
+
+            public object unchecked_inc(object x)
+            {
+                long val = Util.ConvertToLong(x);
+                return num(Numbers.unchecked_inc(val));
             }
 
             public object dec(object x)
@@ -827,6 +882,11 @@ namespace clojure.lang
                 return BIGINT_OPS.dec(x);
             }
 
+            public object unchecked_dec(object x)
+            {
+                long val = Util.ConvertToLong(x);
+                return num(Numbers.unchecked_dec(val));
+            }
             #endregion
         }
 
@@ -2345,22 +2405,29 @@ namespace clojure.lang
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static object unchecked_add(object x, object y) { return add(x, y); }
+        public static object unchecked_add(object x, object y)
+        { 
+            return ops(x).combine(ops(y)).unchecked_add(x, y); 
+        }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static object unchecked_minus(object x, object y) { return minus(x, y); }
+        public static object unchecked_minus(object x, object y)
+        {
+            Ops yops = ops(y);
+            return ops(x).combine(yops).unchecked_add(x, yops.unchecked_negate(y));
+        }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static object unchecked_multiply(object x, object y) { return multiply(x, y); }
+        public static object unchecked_multiply(object x, object y) { return ops(x).combine(ops(y)).unchecked_multiply(x, y); }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static object unchecked_minus(object x) { return minus(x); }
+        public static object unchecked_minus(object x) { return ops(x).unchecked_negate(x); }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static object unchecked_inc(object x) { return inc(x); }
+        public static object unchecked_inc(object x) { return ops(x).unchecked_inc(x); }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static object unchecked_dec(object x) { return dec(x); }
+        public static object unchecked_dec(object x) { return ops(x).unchecked_dec(x); }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
@@ -2422,22 +2489,22 @@ namespace clojure.lang
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static object unchecked_add(long x, object y) { return add(x, y); }
+        public static object unchecked_add(long x, object y) { return unchecked_add((Object)x, y); }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static object unchecked_minus(long x, object y) { return minus(x, y); }
+        public static object unchecked_minus(long x, object y) { return unchecked_minus((Object)x, y); }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static object unchecked_multiply(long x, object y) { return multiply(x, y); }
+        public static object unchecked_multiply(long x, object y) { return unchecked_multiply((Object)x, y); }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static object unchecked_add(object x, long y) { return add(x, y); }
+        public static object unchecked_add(object x, long y) { return unchecked_add(x, (Object)y); }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static object unchecked_minus(object x, long y) { return minus(x, y); }
+        public static object unchecked_minus(object x, long y) { return unchecked_minus(x, (Object)y); }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        public static object unchecked_multiply(object x, long y) { return multiply(x, y); }
+        public static object unchecked_multiply(object x, long y) { return unchecked_multiply(x, (Object)y); }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
         public static object quotient(double x, Object y) { return quotient((Object)x, y); }

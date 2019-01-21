@@ -742,6 +742,57 @@ Math/pow overflows to Infinity."
                  (+ (* q d) r)
                  (unchecked-add (unchecked-multiply q d) r))))))
 
+(deftest unchecked-inc-overflow
+  (testing "max value overflows to min value"
+    (is (= Int64/MinValue (unchecked-inc Int64/MaxValue)))                                      ;;; Long/MIN_VALUE  Long/MAX_VALUE
+    (is (= Int64/MinValue (unchecked-inc ^Object Int64/MaxValue)))))                            ;;; Long/MIN_VALUE  (Long/valueOf Long/MAX_VALUE)
+
+(deftest unchecked-dec-overflow
+  (testing "min value overflows to max value"
+    (is (= Int64/MaxValue (unchecked-dec Int64/MinValue)))                                      ;;;  Long/MAX_VALUE Long/MIN_VALUE
+    (is (= Int64/MaxValue (unchecked-dec ^Object Int64/MinValue)))))                            ;;;  Long/MAX_VALUE (Long/valueOf Long/MIN_VALUE)
+
+(deftest unchecked-negate-overflow
+  (testing "negating min value overflows to min value itself"
+    (is (= Int64/MinValue (unchecked-negate Int64/MinValue)))                                   ;;; Long/MIN_VALUE Long/MIN_VALUE
+    (is (= Int64/MinValue (unchecked-negate ^Object Int64/MinValue)))))                         ;;; Long/MIN_VALUE (Long/valueOf Long/MIN_VALUE)
+
+(deftest unchecked-add-overflow
+  (testing "max value overflows to min value"
+    (is (= Int64/MinValue (unchecked-add Int64/MaxValue 1)))				                    ;;; Long/MIN_VALUE  Long/MAX_VALUE
+    (is (= Int64/MinValue (unchecked-add Int64/MaxValue ((fn [] 1)))))                            ;;; Long/MIN_VALUE  (Long/valueOf Long/MAX_VALUE)
+    (is (= Int64/MinValue (unchecked-add ^Object Int64/MaxValue 1)))                            ;;; Long/MIN_VALUE  (Long/valueOf 1)
+    (is (= Int64/MinValue (unchecked-add ^Object Int64/MaxValue ((fn [] 1))))))                   ;;; Long/MIN_VALUE  (Long/valueOf Long/MAX_VALUE)   (Long/valueOf 1)
+  (testing "adding min value to min value results in zero"
+    (is (= 0 (unchecked-add Int64/MinValue Int64/MinValue)))                                    ;;; Long/MIN_VALUE  Long/MIN_VALUE
+    (is (= 0 (unchecked-add Int64/MinValue ^Object Int64/MinValue)))                            ;;; Long/MIN_VALUE (Long/valueOf Long/MIN_VALUE)
+    (is (= 0 (unchecked-add ^Object Int64/MinValue Int64/MinValue)))                            ;;; (Long/valueOf Long/MIN_VALUE) Long/MIN_VALUE
+    (is (= 0 (unchecked-add ^Object Int64/MinValue ^Object Int64/MinValue)))))            ;;; (Long/valueOf Long/MIN_VALUE) (Long/valueOf Long/MIN_VALUE)
+
+(deftest unchecked-subtract-overflow
+  (testing "min value overflows to max-value"                                                   ;;; etc
+    (is (= Int64/MaxValue (unchecked-subtract Int64/MinValue 1)))
+    (is (= Int64/MaxValue (unchecked-subtract Int64/MinValue ((fn [] 1)))))
+    (is (= Int64/MaxValue (unchecked-subtract ^Object Int64/MinValue 1)))
+    (is (= Int64/MaxValue (unchecked-subtract ^Object Int64/MinValue ((fn [] 1))))))
+  (testing "negating min value overflows to min value itself"
+    (is (= Int64/MinValue (unchecked-subtract 0 Int64/MinValue)))
+    (is (= Int64/MinValue (unchecked-subtract 0 ^Object Int64/MinValue)))
+    (is (= Int64/MinValue (unchecked-subtract ((fn [] 0)) Int64/MinValue)))
+    (is (= Int64/MinValue (unchecked-subtract ((fn [] 0)) ^Object Int64/MinValue)))))
+
+(deftest unchecked-multiply-overflow
+  (testing "two times max value results in -2"
+    (is (= -2 (unchecked-multiply Int64/MaxValue 2)))
+    (is (= -2 (unchecked-multiply Int64/MaxValue ((fn [] 2)))))
+    (is (= -2 (unchecked-multiply ^Object Int64/MaxValue 2)))
+    (is (= -2 (unchecked-multiply ^Object Int64/MaxValue ((fn [] 2))))))
+  (testing "two times min value results in 0"
+    (is (= 0 (unchecked-multiply Int64/MinValue 2)))
+    (is (= 0 (unchecked-multiply Int64/MinValue ((fn [] 2)))))
+    (is (= 0 (unchecked-multiply ^Object Int64/MinValue 2)))
+    (is (= 0 (unchecked-multiply ^Object Int64/MinValue ((fn [] 2)))))))
+
 (defmacro check-warn-on-box [warn? form]
   `(do (binding [*unchecked-math* :warn-on-boxed]
                 (is (= ~warn?
