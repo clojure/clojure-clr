@@ -7822,6 +7822,21 @@ clojure.lang.IKVReduce
 (defonce ^:private tapset (atom #{}))
 (defonce ^:private ^|System.Collections.Concurrent.BlockingCollection`1[System.Object]| tapq (|System.Collections.Concurrent.BlockingCollection`1[System.Object]|. 1024))    ;;; ^java.util.concurrent.ArrayBlockingQueue   java.util.concurrent.ArrayBlockingQueue.
 
+(defonce ^:private tap-loop
+  (delay
+    (doto (System.Threading.Thread.                                                 ;;; Thread.
+           (gen-delegate System.Threading.ThreadStart [] (let [t (.Take tapq)       ;;; add gen-delegete,  .take
+	  	          x (if (identical? ::tap-nil t) nil t)
+                  taps @tapset]
+              (doseq [tap taps]
+                (try
+                  (tap x)
+                  (catch Exception ex)))                                            ;;; Throwable
+              (recur)) ))                                                            ;;;    -- add paren
+      (.set_Name "clojure.core/tap-loop")                                                 ;;; convert ctor name arg to an explicit set
+      (.set_IsBackground true)                                                      ;;; setDaemon
+      (.Start))))                                                                    ;;; .start
+
 (defn add-tap
   "adds f, a fn of one argument, to the tap set. This function will be called with anything sent via tap>.
   This function may (briefly) block (e.g. for streams), and will never impede calls to tap>,
@@ -7829,6 +7844,7 @@ clojure.lang.IKVReduce
   Remember f in order to remove-tap"
   {:added "1.10"}
   [f]
+  (force tap-loop)
   (swap! tapset conj f)
   nil)
 
@@ -7845,17 +7861,3 @@ clojure.lang.IKVReduce
   {:added "1.10"}
   [x]
   (.TryAdd tapq (if (nil? x) ::tap-nil x)))                                         ;;; .offer
-
- (defonce ^:private tap-loop
-  (doto (System.Threading.Thread.                                                 ;;; Thread.
-         (gen-delegate System.Threading.ThreadStart [] (let [t (.Take tapq)       ;;; add gen-delegete,  .take
-		        x (if (identical? ::tap-nil t) nil t)
-                taps @tapset]
-            (doseq [tap taps]
-              (try
-                (tap x)
-                (catch Exception ex)))                                            ;;; Throwable
-            (recur)) ))                                                            ;;;    -- add paren
-    (.set_Name "clojure.core/tap-loop")                                                 ;;; convert ctor name arg to an explicit set
-    (.set_IsBackground true)                                                      ;;; setDaemon
-    (.Start)))                                                                    ;;; .start
