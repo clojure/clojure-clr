@@ -41,10 +41,14 @@
   (printf " (%s:%d)" (or (.GetFileName e) "") (.GetFileLineNumber e)))
 
 (defn print-throwable1
-  "Prints the class and message of a Throwable."
+  "Prints the class and message of a Throwable. Prints the ex-data map
+  if present."
   {:added "1.1"} 
   [tr]
-  (print (str (.FullName (class tr)) ": " (.Message tr))))              ;;;  use when we have printf:  (printf "%s: %s" (.getName (class tr)) (.getMessage tr)))
+  (printf "%s: %s" (.FullName (class tr)) (.Message tr))      ;;; .getName .getMessage
+  (when-let [info (ex-data tr)]
+    (newline)
+    (pr info)))
 
 (defn print-stack-trace
   "Prints a Clojure-oriented stack trace of tr, a Throwable.
