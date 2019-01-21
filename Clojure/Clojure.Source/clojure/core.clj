@@ -3764,15 +3764,26 @@ Note that read can execute code (controlled by *read-eval*),
   Returns a vector containing the object read and the (whitespace-trimmed) string read."
   {:added "1.10"}
   ([] (read+string *in*))
-  ([^clojure.lang.LineNumberingTextReader stream & args]         ;;; LineNumberingPushbackReader
-     (try
-       (.CaptureString stream)                                   ;;; .captureString
-       (let [o (apply read stream args)
-             s (.Trim (.GetString stream))]                      ;;; .trim .getString
-         [o s])       
-       (catch Exception ex                                       ;;; Throwable
-         (.GetString stream)			                         ;;; .getString
-         (throw ex)))))
+  ([stream] (read+string stream true nil))
+  ([stream eof-error? eof-value] (read+string stream eof-error? eof-value false))
+  ([^clojure.lang.LineNumberingTextReader stream eof-error? eof-value recursive?]           ;;; LineNumberingPushbackReader
+   (try
+     (.CaptureString stream)                                                                ;;; .captureString
+     (let [o (read stream eof-error? eof-value recursive?)
+           s (.Trim (.GetString stream))]                                                   ;;; .trim .getString
+       [o s])
+     (catch Exception ex                                                                    ;;; Throwable
+       (.GetString stream)			                                                        ;;; .getString
+       (throw ex))))
+  ([opts ^clojure.lang.LineNumberingTextReader stream]                                      ;;; LineNumberingPushbackReader
+   (try
+     (.CaptureString stream)                                                                ;;; .captureString
+     (let [o (read opts stream)
+           s (.Trim (.GetString stream))]                                                   ;;; .trim .getString
+       [o s])
+     (catch Exception ex                                                                    ;;; Throwable
+       (.GetString stream)			                                                        ;;; .getString
+       (throw ex)))))
 		 
 (defn read-line  
   "Reads the next line from stream that is the current value of *in* ."
