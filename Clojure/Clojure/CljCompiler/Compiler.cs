@@ -1050,20 +1050,33 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "eval")]
         public static object eval(object form)
         {
-            object line = LineVarDeref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
-                line = RT.meta(form).valAt(RT.LineKey);
-            object column = ColumnVarDeref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.ColumnKey))
-                column = RT.meta(form).valAt(RT.ColumnKey);
-            IPersistentMap sourceSpan = (IPersistentMap)SourceSpanVar.deref();
-            if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
-                sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
+            IPersistentMap meta = RT.meta(form);
+            object line = (meta != null ? meta.valAt(RT.LineKey,LineVarDeref()) : LineVarDeref());
+            object column = (meta != null ? meta.valAt(RT.ColumnKey, ColumnVarDeref()) : ColumnVarDeref());
+            object sourceSpan = (meta != null ? meta.valAt(RT.SourceSpanKey, SourceSpanVar.deref()) : SourceSpanVar.deref());
+
+            IPersistentMap bindings = RT.mapUniqueKeys(LineVar, line, ColumnVar, column, SourceSpanVar, sourceSpan, CompilerContextVar, null);
+            if ( meta != null )
+            {
+                object eval_file = meta.valAt(RT.EvalFileKey);
+                if ( eval_file != null )
+                {
+                    bindings = bindings.assoc(SourcePathVar, eval_file);
+                    try
+                    {
+                        bindings  = bindings.assoc(SourceVar,new FileInfo((string)eval_file).Name);
+                    }
+                    catch (Exception e)
+                    {
+                    }
+                }
+
+            }
 
             ParserContext pconExpr = new ParserContext(RHC.Expression);
             ParserContext pconEval = new ParserContext(RHC.Eval);
 
-            Var.pushThreadBindings(RT.map(LineVar, line, ColumnVar, column, SourceSpanVar, sourceSpan, CompilerContextVar, null));
+            Var.pushThreadBindings(bindings);
             try
             {
                 form = Macroexpand(form);
@@ -1133,7 +1146,7 @@ namespace clojure.lang
                 }
                 catch ( Exception e)
                 {
-                    throw new CompilerException((string)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), v.ToSymbol(), CompilerException.PhaseMacroExpandKeyword, e);
+                    throw new CompilerException((string)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), v.ToSymbol(), CompilerException.PhaseMacroSyntaxCheckKeyword, e);
                 }
             }
         }
@@ -1188,7 +1201,7 @@ namespace clojure.lang
             Var v = IsMacro(op);
             if (v != null)
             {
-                CheckSpecs(v,form);
+                CheckSpecs(v, form);
                 try
                 {
                     ISeq args = RT.cons(form, RT.cons(Compiler.LocalEnvVar.get(), form.next()));
@@ -1201,7 +1214,7 @@ namespace clojure.lang
                     // Does not work for us because have to append a __1234 to the type name for functions in order to avoid name collisiions in the eval assembly.
                     // So we have to see if the name is of the form   namespace$name__xxxx  where the __xxxx can be repeated.
                     String reducedName = RemoveFnSuffix(e.Name);
-                    if ( reducedName.Equals(munge(v.ns.Name.Name) + "$" + munge(v.sym.Name)))
+                    if (reducedName.Equals(munge(v.ns.Name.Name) + "$" + munge(v.sym.Name)))
                     {
                         throw new ArityException(e.Actual - 2, e.Name);
                     }
@@ -1210,18 +1223,28 @@ namespace clojure.lang
                         throw e;
                     }
                 }
+                catch (CompilerException e)
+                {
+                    throw;
+                }
+                // in C# 6, could use ...  catch ( Exception ex )   when (e is ArgumentException || e is InvalidOperationException || e is ExceptionInfo e)
                 catch (Exception e)
                 {
-                    if (e is CompilerException)
+
+                    if (e is ArgumentException || e is InvalidOperationException || e is ExceptionInfo)
                     {
-                        throw (CompilerException)e;
+                        throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(),
+                            (op is Symbol ? (Symbol)op : null),
+                            CompilerException.PhaseMacroSyntaxCheckKeyword,
+                            e);
                     }
                     else
                     {
+
                         throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(),
-                                (op is Symbol ? (Symbol)op : null),
-                                CompilerException.PhaseMacroExpandKeyword,
-                                e);
+                            (op is Symbol ? (Symbol)op : null),
+                            (e.GetType().Equals(typeof(Exception)) ? CompilerException.PhaseMacroSyntaxCheckKeyword : CompilerException.PhaseMacroExpandKeyword),
+                            e);
                     }
                 }
             }
@@ -2113,16 +2136,18 @@ namespace clojure.lang
 
             // Error keys
             public static readonly String ErrorNamespaceStr = "clojure.error";
-            public static readonly Keyword ErrorSourceKeyword = Keyword.intern(ErrorNamespaceStr, "source"); // :clojure.error/source
-            public static readonly Keyword ErrorLineKeyword = Keyword.intern(ErrorNamespaceStr, "line");     // :clojure.error/line
-            public static readonly Keyword ErrorColumnKeyword = Keyword.intern(ErrorNamespaceStr, "column"); // :clojure.error/column
-            public static readonly Keyword ErrorPhaseKeyword = Keyword.intern(ErrorNamespaceStr, "phase");   // :clojure.error/phase
-            public static readonly Keyword ErrorSymbolKeyword = Keyword.intern(ErrorNamespaceStr, "symbol"); // :clojure.error/symbol
+            public static readonly Keyword ErrorSourceKeyword = Keyword.intern(ErrorNamespaceStr, "source");
+            public static readonly Keyword ErrorLineKeyword = Keyword.intern(ErrorNamespaceStr, "line");
+            public static readonly Keyword ErrorColumnKeyword = Keyword.intern(ErrorNamespaceStr, "column");
+            public static readonly Keyword ErrorPhaseKeyword = Keyword.intern(ErrorNamespaceStr, "phase");
+            public static readonly Keyword ErrorSymbolKeyword = Keyword.intern(ErrorNamespaceStr, "symbol");
 
            // Compile error phases
-            public static readonly Keyword PhaseReadKeyword = Keyword.intern(null, "read");                // :read
-            public static readonly Keyword PhaseMacroExpandKeyword = Keyword.intern(null, "macroexpand");  // :macroexpand
-            public static readonly Keyword PhaseCompileKeyword = Keyword.intern(null, "compile");          // :compile
+            public static readonly Keyword PhaseReadKeyword = Keyword.intern(null, "read-source");
+            public static readonly Keyword PhaseMacroSyntaxCheckKeyword = Keyword.intern(null, "macro-syntax-check");
+            public static readonly Keyword PhaseMacroExpandKeyword = Keyword.intern(null, "macroexpand");
+            public static readonly Keyword PhaseCompileSyntaxCheckKeyword = Keyword.intern(null, "compile-syntax-check"); 
+            public static readonly Keyword PhaseCompilationKeyword = Keyword.intern(null, "compilation");
 
             public static readonly Keyword SpecProblemsKeyword = Keyword.intern("clojure.spec.alpha", "problems");
 
@@ -2161,7 +2186,7 @@ namespace clojure.lang
             }
 
             public CompilerException(string source, int line, int column, Symbol sym, Exception cause)
-                :this(source,line,column,sym,PhaseCompileKeyword,cause)
+                :this(source,line,column,sym,PhaseCompileSyntaxCheckKeyword,cause)
             {
             }
 
@@ -2170,7 +2195,7 @@ namespace clojure.lang
             {
                 FileSource = source;
                 Line = line;
-                Associative m = RT.map(ErrorLineKeyword, line, ErrorColumnKeyword, column, ErrorPhaseKeyword, phase);
+                Associative m = RT.map(ErrorPhaseKeyword, phase, ErrorLineKeyword, line, ErrorColumnKeyword, column);
                 if (source != null) m = RT.assoc(m, ErrorSourceKeyword, source);
                 if (sym != null) m = RT.assoc(m, ErrorSymbolKeyword, sym);
                 MyData = (IPersistentMap)m;
@@ -2193,25 +2218,17 @@ namespace clojure.lang
 
             private static String Verb(Keyword phase) 
             {   
-                if(PhaseCompileKeyword.Equals(phase))   
-			        return "compiling";
-                else if(PhaseReadKeyword.Equals(phase))
+                if (PhaseReadKeyword.Equals(phase))
 			        return "reading source";
+                else if (PhaseCompileSyntaxCheckKeyword.Equals(phase))   
+			        return "compiling";
                 else 
 			        return "macroexpanding";
             }
 
-            private static bool IsMacroSyntaxCheck(Exception e)
-            {
-                return e is ArgumentException ||
-                       e is InvalidOperationException ||
-                       e is ExceptionInfo ||
-                       e.GetType().Equals(typeof(Exception));
-            }
-
             public static String MakeMsg(String source, int line, int column, Symbol sym, Keyword phase, Exception cause)
             {
-                return (phase == PhaseMacroExpandKeyword && !IsMacroSyntaxCheck(cause) ? "Unexpected error " : "Syntax error ") +
+                return (PhaseMacroExpandKeyword.Equals(phase) ? "Unexpected error " : "Syntax error ") +
                         Verb(phase) + " " + (sym != null ? sym + " " : "") +
                         "at (" + (source != null && !source.Equals("NO_SOURCE_PATH") ? (source + ":") : "") +
                         line + ":" + column + ").";
@@ -2228,17 +2245,10 @@ namespace clojure.lang
                 if (cause != null)
                 {
                     // We can use ReferenceEquals here because the same Keyword is used everywehre.
-                    if (Object.ReferenceEquals(RT.get(MyData, ErrorPhaseKeyword), PhaseMacroExpandKeyword))
-                    {
-                        if (IsSpecError(cause))
+                    if (Object.ReferenceEquals(RT.get(MyData, ErrorPhaseKeyword), PhaseMacroSyntaxCheckKeyword) && IsSpecError(cause))
                         {
                             return String.Format("{0}", Message);
                         }
-                        else
-                        {
-                            return String.Format("{0}/n{1}", Message, cause.Message);
-                        }
-                    }
 
                     else
                     {

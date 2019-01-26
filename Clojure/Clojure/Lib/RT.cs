@@ -326,6 +326,9 @@ namespace clojure.lang
         public static readonly Keyword ConstKey
             = Keyword.intern(null, "const");
 
+        public static readonly Keyword EvalFileKey
+            = Keyword.intern("clojure.core", "eval-file");
+
         public static readonly Keyword LineKey 
             = Keyword.intern(null, "line");
 
