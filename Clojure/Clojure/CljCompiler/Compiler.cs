@@ -1066,7 +1066,7 @@ namespace clojure.lang
                     {
                         bindings  = bindings.assoc(SourceVar,new FileInfo((string)eval_file).Name);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                     }
                 }
@@ -1223,7 +1223,7 @@ namespace clojure.lang
                         throw e;
                     }
                 }
-                catch (CompilerException e)
+                catch (CompilerException)
                 {
                     throw;
                 }
