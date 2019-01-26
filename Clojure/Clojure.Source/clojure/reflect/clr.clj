@@ -9,7 +9,8 @@
 ;; Java-specific parts of clojure.reflect
 (in-ns 'clojure.reflect)
 
-(require '[clojure.set :as set]
+(require '[clojure.datafy :refer (datafy)]
+         '[clojure.set :as set]
          '[clojure.string :as str])
 
 (import '[System.Reflection TypeAttributes MethodAttributes FieldAttributes PropertyAttributes BindingFlags])
@@ -31,9 +32,12 @@
   "Given a typeref, create a legal Clojure symbol version of the
    type's name."
   [t]
-  (-> (typename t)
-      ;;;(str/replace "[]" "<>")
-      (symbol)))
+  (cond->
+   (-> (typename t)
+       ;;;(str/replace "[]" "<>")
+       (symbol))
+   (class? t) (with-meta {'clojure.core.protocols/datafy
+                          (fn [_] (datafy t))})))
 
 
 (def class-flags
@@ -206,11 +210,17 @@
         property->map
         (.GetProperties (cast Type cls) basic-binding-flags))))
 
+(defn- typeref->class
+  [typeref ]                                                            ;;; classloader arg 
+  (if (class? typeref)
+    typeref
+   (clojure.lang.RT/classForName (typename typeref))))                  ;;;  false classloader
+
 
 (deftype ClrReflector [a]
   Reflector
   (do-reflect [_ typeref]
-           (let [cls (clojure.lang.RT/classForName (typename typeref))]
+           (let [cls (typeref->class typeref)]                          ;;; classloader arg
              {:bases (not-empty (set (map typesym (bases cls))))
               :flags (parse-attributes (.Attributes cls) class-flags)
               :members (set/union (declared-fields cls)
