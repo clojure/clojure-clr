@@ -2234,35 +2234,24 @@ namespace clojure.lang
                         line + ":" + column + ").";
             }
 
-            private static bool IsSpecError(Exception t)
-            {
-                return (t is IExceptionInfo) && RT.get(((IExceptionInfo)t).getData(), SpecProblemsKeyword) != null;
-            }
-
             public override string ToString()
             {
                 Exception cause = InnerException;
                 if (cause != null)
                 {
-                    // We can use ReferenceEquals here because the same Keyword is used everywehre.
-                    if (Object.ReferenceEquals(RT.get(MyData, ErrorPhaseKeyword), PhaseMacroSyntaxCheckKeyword) && IsSpecError(cause))
-                        {
-                            return String.Format("{0}", Message);
-                        }
-
-                    else
+                    IExceptionInfo eInfo = cause as IExceptionInfo;
+                    if (eInfo != null)
                     {
-                        return String.Format("{0}/n{1}", Message, cause.Message);
+                        IPersistentMap data = (IPersistentMap)eInfo.getData();
+                        if (PhaseMacroSyntaxCheckKeyword.Equals(data.valAt(ErrorPhaseKeyword)) && data.valAt(SpecProblemsKeyword) != null)
+                            return String.Format("{0}", Message);
                     }
+                    else
+                        return String.Format("{0}\n{1}", Message, cause.Message);
                 }
-                else
-                {
-                    return Message;
-                }
+                return Message;
             }
             
-            
-
             // JVM has this deprecated
             //static string ErrorMsg(string source, int line, int column, string s)
             //{
