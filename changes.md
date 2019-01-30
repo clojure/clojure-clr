@@ -63,7 +63,9 @@ clojure.main also contains two new functions: `ex-triage` and `ex-str` that can 
   CompilerException.toString() can throw if making message during initialization
 * [CLJ-2430](http://dev.clojure.org/jira/browse/CLJ-2430)
   Elevate phase in throwable data and conveyance for prepl
-    
+* [CLJ-2435](http://dev.clojure.org/jira/browse/CLJ-2435)
+  Include root cause class name in compilation and macroexpansion error phases
+  
 ### 2.2 Protocol extension by metadata
 
 `defprotocol` has a new option `:extend-via-metadata`. When :extend-via-metadata is true, values can extend protocols by adding metadata where keys are fully-qualified protocol function symbols and values are function implementations. Protocol implementations are checked first for direct definitions (defrecord, deftype, reify), then metadata definitions, then external extensions (extend, extend-type, extend-protocol).
@@ -110,6 +112,10 @@ These functions have been added to match existing functions in ClojureScript to 
 This function has been added to construct a PrintWriter implementation whose behavior on flush and close is provided as functions:
 
 * `PrintWriter-on` - create a PrintWriter from flush-fn and close-fn
+
+The following function has been added, extending `resolve`:
+
+* `requiring-resolve` - resolve or, if needed, require symbol's namespace, then resolve
 
 ## 3 Enhancements
 
