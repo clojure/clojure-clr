@@ -286,6 +286,9 @@ namespace clojure.lang
         public const string ClojureLoadPathString = "CLOJURE_LOAD_PATH";
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "LOCK")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "REQUIRE")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         static public readonly Object REQUIRE_LOCK = new Object();
 
         #endregion
@@ -3570,7 +3573,7 @@ namespace clojure.lang
 
 
             if (!loaded && failIfNotFound)
-                throw new FileNotFoundException(String.Format("Could not locate {0}, {1}, {2} or {3] on load path.{4}", 
+                throw new FileNotFoundException(String.Format("Could not locate {0}, {1}, {2} or {3} on load path.{4}", 
                     cljassemblyname, 
                     cljcassemblyname,
                     cljsourcename,

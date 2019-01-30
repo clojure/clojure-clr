@@ -1047,7 +1047,8 @@ namespace clojure.lang
         /// <param name="form"></param>
         /// <returns></returns>
         /// <remarks>Initial lowercase for core.clj compatibility</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "eval")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes"), 
+         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "eval")]
         public static object eval(object form)
         {
             IPersistentMap meta = RT.meta(form);
@@ -1177,7 +1178,8 @@ namespace clojure.lang
         }
 
         //public static Regex UnpackFnNameRE = new Regex("^(.+)/$([^_]+)(__[0-9]+)*$");
-        public static Regex FnNameSuffixRE = new Regex("__[0-9]+$");
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
+        public readonly static Regex FnNameSuffixRE = new Regex("__[0-9]+$");
         static String RemoveFnSuffix(string s)
         {
             while (true)
@@ -1220,7 +1222,7 @@ namespace clojure.lang
                     }
                     else
                     {
-                        throw e;
+                        throw;
                     }
                 }
                 catch (CompilerException)
@@ -2226,6 +2228,7 @@ namespace clojure.lang
 			        return "macroexpanding";
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "cause")]
             public static String MakeMsg(String source, int line, int column, Symbol sym, Keyword phase, Exception cause)
             {
                 return (PhaseMacroExpandKeyword.Equals(phase) ? "Unexpected error " : "Syntax error ") +

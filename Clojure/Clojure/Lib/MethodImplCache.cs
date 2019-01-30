@@ -75,6 +75,7 @@ namespace clojure.lang
        }
 
        private readonly Symbol _sym;
+       [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "sym")]
        public Symbol sym
        {
            get { return _sym; }
