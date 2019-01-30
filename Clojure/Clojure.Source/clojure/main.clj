@@ -268,7 +268,10 @@
     :as triage-data}]
   (let [loc (str (or source "REPL") ":" (or line 1) (if column (str ":" column) ""))
         class-name (name (or class ""))
-        simple-class (if class (or (first (re-find #"([^.])+$" class-name)) class-name))]
+        simple-class (if class (or (first (re-find #"([^.])+$" class-name)) class-name))          ;;;  #"([^.])++$"
+        cause-type (if (contains? #{"Exception" "RuntimeException"} simple-class)
+                     "" ;; omit, not useful
+                     (str " (" simple-class ")"))]
     (case phase
       :read-source
       (format "Syntax error reading source at (%s).%n%s%n" loc cause)
@@ -287,28 +290,31 @@
                 (format "%s%n" cause)))
 
       :macroexpansion
-      (format "Unexpected error macroexpanding %sat (%s).%n%s%n"
+      (format "Unexpected error%s macroexpanding %sat (%s).%n%s%n"
+              cause-type
               (if symbol (str symbol " ") "")
               loc
               cause)
 
       :compile-syntax-check
-      (format "Syntax error compiling %sat (%s).%n%s%n"
+      (format "Syntax error%s compiling %sat (%s).%n%s%n"
+              cause-type
               (if symbol (str symbol " ") "")
               loc
               cause)
 
       :compilation
-      (format "Unexpected error compiling %sat (%s).%n%s%n"
+      (format "Unexpected error%s compiling %sat (%s).%n%s%n"
+              cause-type
               (if symbol (str symbol " ") "")
               loc
               cause)
 
       :read-eval-result
-      (format "Error reading eval result (%s) at %s (%s).%n%s%n" simple-class symbol loc cause)
+      (format "Error reading eval result%s at %s (%s).%n%s%n" cause-type symbol loc cause)
 
       :print-eval-result
-      (format "Error printing return value (%s) at %s (%s).%n%s%n" simple-class symbol loc cause)
+      (format "Error printing return value%s at %s (%s).%n%s%n" cause-type symbol loc cause)
 
       :execution
       (if spec
@@ -321,8 +327,8 @@
                       (update spec :clojure.spec.alpha/problems
                               (fn [probs] (map #(dissoc % :in) probs)))
                       spec))))
-        (format "Execution error (%s) at %s(%s).%n%s%n"
-                simple-class
+        (format "Execution error%s at %s(%s).%n%s%n"
+                cause-type
                 (if symbol (str symbol " ") "")
                 loc
                 cause)))))
