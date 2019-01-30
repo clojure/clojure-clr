@@ -201,6 +201,16 @@
       (.Name (System.IO.FileInfo. full-path))                                              ;;; .getName java.io.File.
       (catch Exception t))))                                                               ;;; Throwable
 
+(defn- java-loc->source
+  "Convert Java class name and method symbol to source symbol, either a
+  Clojure function or Java class and method."
+  [clazz method]
+  (if (#{'invoke 'invokeStatic} method)
+    (let [degen #(.Replace #"--.*$" ^String %  "")                                                                    ;;; #(.replaceAll ^String % "--.*$" "") 
+          [ns-name fn-name & nested] (->> (str clazz) (.Split #"\$") (map demunge) (map degen))]                    ;;; .split
+      (symbol ns-name (String/Join "$" ^|System.String[]| (into-array String (cons fn-name nested)))))                ;;; String/join   ^"[Ljava.lang.String;"
+    (symbol (name clazz) (name method))))
+
 (defn ex-triage
   "Returns an analysis of the phase, error, cause, and location of an error that occurred
   based on Throwable data, as returned by Throwable->map. All attributes other than phase
@@ -243,7 +253,7 @@
           (cond-> top-data
             line (assoc :clojure.error/line line)
             file (assoc :clojure.error/source file)
-            (and source method) (assoc :clojure.error/symbol (symbol (-> source name) (-> method name demunge)))
+            (and source method) (assoc :clojure.error/symbol (java-loc->source source method))
             type (assoc :clojure.error/class type)
             message (assoc :clojure.error/cause message)))
 
@@ -254,7 +264,7 @@
           (cond-> {:clojure.error/class type}
             err-line (assoc :clojure.error/line err-line)
             message (assoc :clojure.error/cause message)
-            (or fn (and source method)) (assoc :clojure.error/symbol (or fn (symbol (-> source name) (-> method name demunge))))
+            (or fn (and source method)) (assoc :clojure.error/symbol (or fn (java-loc->source source method)))
             file (assoc :clojure.error/source file)
             problems (assoc :clojure.error/spec data))))
       :clojure.error/phase phase)))
