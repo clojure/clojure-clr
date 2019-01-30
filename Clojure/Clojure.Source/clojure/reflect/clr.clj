@@ -19,6 +19,8 @@
 ;         '[java.lang.reflect Modifier]
 ;         java.io.InputStream)
 
+(set! *warn-on-reflection* true)
+
 (extend-protocol TypeReference
   clojure.lang.Symbol
   (typename [s]  (str s))    ;;;  (str/replace (str s) "<>" "[]")) -- we keep them as-is
@@ -153,7 +155,7 @@
   [cls]
   (set (map
         constructor->map
-        (.GetConstructors (cast Type cls) basic-binding-flags)))) 
+        (.GetConstructors ^Type (cast Type cls) basic-binding-flags)))) 
 
 (defrecord Method
   [name return-type declaring-class parameter-types flags])
@@ -172,7 +174,7 @@
   [cls]
   (set (map
         method->map
-        (.GetMethods (cast Type cls) basic-binding-flags))))
+        (.GetMethods ^Type (cast Type cls) basic-binding-flags))))
 
 (defrecord Field
   [name type declaring-class flags])
@@ -190,7 +192,7 @@
   [cls]
   (set (map
         field->map
-        (.GetFields (cast Type cls) basic-binding-flags))))
+        (.GetFields ^Type (cast Type cls) basic-binding-flags))))
 
 (defrecord Property
   [name type declaring-class flags])
@@ -208,13 +210,13 @@
   [cls]
   (set (map
         property->map
-        (.GetProperties (cast Type cls) basic-binding-flags))))
+        (.GetProperties ^Type (cast Type cls) basic-binding-flags))))
 
 (defn- typeref->class
-  [typeref ]                                                            ;;; classloader arg 
+  ^Type [typeref ]                                                            ;;; classloader arg removed    ^Class 
   (if (class? typeref)
     typeref
-   (clojure.lang.RT/classForName (typename typeref))))                  ;;;  false classloader
+  (clojure.lang.RT/classForName (typename typeref))))                  ;;;  false classloader
 
 
 (deftype ClrReflector [a]
