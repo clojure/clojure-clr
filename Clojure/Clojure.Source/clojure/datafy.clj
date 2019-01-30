@@ -8,8 +8,7 @@
 
 (ns clojure.datafy
   ^{:doc "Functions to turn objects into data. Alpha, subject to change"}
-  (:require [clojure.core.protocols :as p]
-            [clojure.reflect :as refl]))
+  (:require [clojure.core.protocols :as p]))
 
 (set! *warn-on-reflection* true)
 
@@ -57,7 +56,7 @@
                       :interns (-> n ns-interns sortmap)}
             (meta n)))
 
-  System.Type                                                                       ;;; java.lang.Class
+  System.Type                                                                                            ;;; java.lang.Class
   (datafy [c]
-          (let [{:keys [members] :as ret} (refl/reflect c)]
-            (assoc ret :name (-> c .Name symbol) :members (->> members (group-by :name) sortmap)))))    ;;; .getName
+          (let [{:keys [members] :as ret} ((requiring-resolve 'clojure.reflect/reflect) c)]
+            (assoc ret :name (-> c .Name symbol) :members (->> members (group-by :name) sortmap)))))     ;;; .getName

@@ -610,6 +610,7 @@
   ([] (gensym "G__"))
   ([prefix-string] (. clojure.lang.Symbol (intern (str prefix-string (str (. clojure.lang.RT (nextID))))))))
 
+
 (defn keyword
   "Returns a Keyword with the given namespace and name.  Do not use :
   in the keyword strings, it will be added automatically."
@@ -6068,6 +6069,17 @@ Note that read can execute code (controlled by *read-eval*),
   
   [& args]
   (apply load-libs :require args))
+
+(defn requiring-resolve
+  "Resolves namespace-qualified sym per 'resolve'. If initial resolve
+fails, attempts to require sym's namespace and retries."
+  {:added "1.10"}
+  [sym]
+  (if (qualified-symbol? sym)
+    (or (resolve sym)
+        (do (-> sym namespace symbol require)
+            (resolve sym)))
+    (throw (ArgumentException. (str "Not a qualified symbol: " sym)))))       ;;; IllegalArgumentException.
 
 (defn use
   "Like 'require, but also refers to each lib's namespace using
