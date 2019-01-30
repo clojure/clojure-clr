@@ -515,7 +515,7 @@
   (print-method [(symbol (.FullName (.GetType o))) (symbol (.Name (.GetMethod o))) (.GetFileName o) (.GetFileLineNumber o)] w))      ;;; (.getClassName o)  (.getMethodName o) .getFileName .getLineNumber
 
 (defn StackTraceElement->vec
-  "Constructs a data representation for a StackTraceElement"
+  "Constructs a data representation for a StackTraceElement: [class method file line]"
   {:added "1.9"}
   [^System.Diagnostics.StackFrame o]
   (if (nil? o)
@@ -528,12 +528,21 @@
      (.GetFileLineNumber o)]))
 
 (defn Throwable->map
-  "Constructs a data representation for a Throwable."
+  "Constructs a data representation for a Throwable with keys:
+    :cause - root cause message
+    :phase - error phase
+    :via - cause chain, with cause keys:
+             :type - exception class symbol
+             :message - exception message
+             :data - ex-data
+             :at - top stack element
+    :trace - root cause stack elements"
   {:added "1.7"}
   [^Exception o]                                                                                                 ;;; ^Throwable
   (let [base (fn [^Exception t]                                                                                  ;;; ^Throwable
-               (merge {:type (symbol (.FullName (class t)))                                                      ;;; .getName
-                       :message (.Message t)}                                                                    ;;; .getLocalizedMessage
+               (merge {:type (symbol (.FullName (class t)))}                                                     ;;; .getName
+                 (when-let [msg (.Message t)]                                                                    ;;; .getLocalizedMessage
+                   {:message msg})
                  (when-let [ed (ex-data t)]
                    {:data ed})
                  (let [st (.GetFrames (System.Diagnostics.StackTrace. t true))]                                  ;;; (.getStackTrace t)
@@ -543,15 +552,16 @@
               (if t
                 (recur (conj via t) (.InnerException t))                                                         ;;; .getCause
                 via))
-        ^Exception root (peek via)                                                                               ;;; Throwable
-        m {:cause (.Message root)                                                                                ;;; (.getLocalizedMessage root)
-           :via (vec (map base via))
-          :trace (vec (map StackTraceElement->vec
-		                   (.GetFrames (System.Diagnostics.StackTrace. (or root o) true))))}                     ;;;  .getStackTrace ^Throwable  
-        data (ex-data root)]
-    (if data
-      (assoc m :data data)
-      m)))
+        ^Exception root (peek via)]                                                                              ;;; Throwable
+    (merge {:via (vec (map base via))
+            :trace (vec (map StackTraceElement->vec
+		                     (.GetFrames (System.Diagnostics.StackTrace. (or root o) true))))}                   ;;;  .getStackTrace ^Throwable  
+      (when-let [root-msg (.Message root)]                                                                       ;;; (.getLocalizedMessage root)
+        {:cause root-msg})
+      (when-let [data (ex-data root)]
+        {:data data})
+      (when-let [phase (-> o ex-data :clojure.error/phase)]
+        {:phase phase}))))
 
 (defn print-throwable [^Exception o ^System.IO.TextWriter w]                                                     ;;; ^Throwable
   (.Write w "#error {\n :cause ")

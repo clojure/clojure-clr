@@ -2220,8 +2220,13 @@ namespace clojure.lang
         #region ReaderException
 
         [Serializable]
-        public sealed class ReaderException : Exception
+        public sealed class ReaderException : Exception, IExceptionInfo
         {
+
+            public const String ERR_NS = "clojure.error";
+            public static readonly Keyword ERR_LINE = Keyword.intern(ERR_NS, "line");
+            public static readonly Keyword ERR_COLUMN = Keyword.intern(ERR_NS, "column");
+
             readonly int _line;
 
             public int Line
@@ -2236,17 +2241,21 @@ namespace clojure.lang
                 get { return _column; }
             }
 
+            readonly IPersistentMap _data;
+
             public ReaderException(int line, int column, Exception e)
                 : base(null, e)
             {
                 _line = line;
                 _column = column;
+                _data = RT.map(ERR_LINE, line, ERR_COLUMN, column);
             }
 
             public ReaderException()
             {
                 _line = -1;
                 _column = -1;
+                _data = null;
             }
 
             public ReaderException(string msg)
@@ -2254,6 +2263,7 @@ namespace clojure.lang
             {
                 _line = -1;
                 _column = -1;
+                _data = null;
             }
 
             public ReaderException(string msg, Exception innerException)
@@ -2261,6 +2271,7 @@ namespace clojure.lang
             {
                 _line = -1;
                 _column = -1;
+                _data = null;
             }
 
             private ReaderException(SerializationInfo info, StreamingContext context)
@@ -2268,6 +2279,7 @@ namespace clojure.lang
             {
                 _line = info.GetInt32("Line");
                 _column = info.GetInt32("Column");
+                _data = (IPersistentMap)info.GetValue("Data", typeof(IPersistentMap));
             }
 
             [System.Security.SecurityCritical]
@@ -2280,6 +2292,12 @@ namespace clojure.lang
                 base.GetObjectData(info, context);
                 info.AddValue("Line", this._line, typeof(int));
                 info.AddValue("Column", this._column, typeof(int));
+                info.AddValue("Data", this._data, typeof(IPersistentMap));
+            }
+
+            public IPersistentMap getData()
+            {
+                return _data;
             }
         }
 

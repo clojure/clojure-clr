@@ -177,6 +177,10 @@
           :repl/quit request-exit
           input))))
 
+(defn- ex->data
+  [ex phase]
+  (assoc (Throwable->map ex) :phase phase))
+
 (defn repl
   "REPL with predefined hooks for attachable socket server."
   []
@@ -242,15 +246,15 @@
                               true)))
                         (catch Exception ex                                                                  ;;; Throwable
                           (set! *e ex)
-                          (out-fn {:tag :ret :val (Throwable->map ex)
+                          (out-fn {:tag :ret :val (ex->data ex (or (-> ex ex-data :clojure.error/phase) :execution))
                                    :ns (str (.Name *ns*)) :form s                                            ;;; .name
-                                   :clojure.error/phase :execution})
+                                   :exception true})
                           true)))
                     (catch Exception ex                                                                      ;;; Throwable
                       (set! *e ex)
-                      (out-fn {:tag :ret :val (Throwable->map ex)
+                      (out-fn {:tag :ret :val (ex->data ex :read-source)
                                :ns (str (.Name *ns*))                                                        ;;; .name
-                               :clojure.error/phase :read-source})
+                               :exception true})
                       true))
               (recur)))
           (finally
@@ -284,8 +288,8 @@
                         (try
                           (assoc m :val (valf (:val m)))
                           (catch Exception ex                                        ;;; Throwable
-                            (assoc m :val (Throwable->map ex)
-                                   :clojure.error/phase :print-eval-result)))
+                            (assoc m :val (ex->data ex :print-eval-result)
+                                     :exception true)))
                         m))))))))
 
  (defn remote-prepl
@@ -317,8 +321,8 @@
                           (try
                             (assoc m :val (valf val))
                             (catch Exception ex                                                     ;;; Throwable
-                              (assoc m :val (Throwable->map ex)
-                                     :clojure.error/phase :read-eval-result)))
+                              (assoc m :val (ex->data ex :read-eval-result)
+                                       :exception true)))
                           m))
                        (recur))))
                  (finally

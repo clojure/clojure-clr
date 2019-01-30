@@ -33,6 +33,7 @@
 (defn root-cause
   "Returns the initial cause of an exception or error by peeling off all of
   its wrappers"
+  {:added "1.3"}
   [ ^Exception t]                     ;;; ^Throwable
   (loop [cause t]
     (if (and (instance? clojure.lang.Compiler+CompilerException cause)
@@ -51,7 +52,7 @@
     "clojure.string" "clojure.template" "clojure.uuid" "clojure.walk" "clojure.xml" "clojure.zip"})
 
 (defn- core-class?
-  [class-name]
+  [^String class-name]
   (and (not (nil? class-name))
        (or (.StartsWith class-name "clojure.lang.")                                            ;;; .startsWith
            (contains? core-namespaces (second (re-find #"^([^$]+)\$" class-name))))))
@@ -204,7 +205,9 @@
   "Returns an analysis of the phase, error, cause, and location of an error that occurred
   based on Throwable data, as returned by Throwable->map. All attributes other than phase
   are optional:
-    :clojure.error/phase - keyword phase indicator
+    :clojure.error/phase - keyword phase indicator, one of:
+      :read-source :compile-syntax-check :compilation :macro-syntax-check :macroexpansion
+      :execution :read-eval-result :print-eval-result
     :clojure.error/source - file name (no path)
     :clojure.error/line - integer line number
     :clojure.error/column - integer column number
@@ -214,39 +217,47 @@
     :clojure.error/spec - explain-data for spec error"
   {:added "1.10"}
   [datafied-throwable]
-  (let [{:keys [via trace]} datafied-throwable
+  (let [{:keys [via trace phase] :or {phase :execution}} datafied-throwable
         {:keys [type message data]} (last via)
         {:clojure.spec.alpha/keys [problems fn], :clojure.spec.test.alpha/keys [caller]} data
         {:clojure.error/keys [source] :as top-data} (:data (first via))]
-    (case (:clojure.error/phase top-data)
-      (:read-source :compile-syntax-check :compilation :macro-syntax-check :macroexpansion)
-      (cond-> top-data
-        source (assoc :clojure.error/source (file-name source))
-        (#{"NO_SOURCE_FILE" "NO_SOURCE_PATH"} source) (dissoc :clojure.error/source)
-        type (assoc :clojure.error/class type)
-        message (assoc :clojure.error/cause message)
-        problems (assoc :clojure.error/spec data))
+    (assoc
+      (case phase
+        :read-source
+        (let [{:clojure.error/keys [line column]} data]
+          (cond-> (merge (-> via second :data) top-data)
+            source (assoc :clojure.error/source (file-name source))
+            (#{"NO_SOURCE_FILE" "NO_SOURCE_PATH"} source) (dissoc :clojure.error/source)
+            message (assoc :clojure.error/cause message)))
 
-      :print-eval-result
-      (let [[source method file line] (-> trace first)]
+        (:compile-syntax-check :compilation :macro-syntax-check :macroexpansion)
         (cond-> top-data
-          line (assoc :clojure.error/line line)
-          file (assoc :clojure.error/source file)
-          (and source method) (assoc :clojure.error/symbol (symbol (-> source name) (-> method name demunge)))
+          source (assoc :clojure.error/source (file-name source))
+          (#{"NO_SOURCE_FILE" "NO_SOURCE_PATH"} source) (dissoc :clojure.error/source)
           type (assoc :clojure.error/class type)
-          message (assoc :clojure.error/cause message)))
-
-      ;; execution
-      (let [[source method file line] (->> trace (drop-while #(core-class? (name (first %)))) first)
-            file (first (remove #(or (nil? %) (#{"NO_SOURCE_FILE" "NO_SOURCE_PATH"} %)) [(:file caller) file]))
-            err-line (or (:line caller) line)]
-        (cond-> {:clojure.error/phase :execution
-                 :clojure.error/class type}
-          err-line (assoc :clojure.error/line err-line)
           message (assoc :clojure.error/cause message)
-          (or fn (and source method)) (assoc :clojure.error/symbol (or fn (symbol (-> source name) (-> method name demunge))))
-          file (assoc :clojure.error/source file)
-          problems (assoc :clojure.error/spec data))))))
+          problems (assoc :clojure.error/spec data))
+
+        (:read-eval-result :print-eval-result)
+        (let [[source method file line] (-> trace first)]
+          (cond-> top-data
+            line (assoc :clojure.error/line line)
+            file (assoc :clojure.error/source file)
+            (and source method) (assoc :clojure.error/symbol (symbol (-> source name) (-> method name demunge)))
+            type (assoc :clojure.error/class type)
+            message (assoc :clojure.error/cause message)))
+
+        :execution
+        (let [[source method file line] (->> trace (drop-while #(core-class? (name (first %)))) first)
+              file (first (remove #(or (nil? %) (#{"NO_SOURCE_FILE" "NO_SOURCE_PATH"} %)) [(:file caller) file]))
+              err-line (or (:line caller) line)]
+          (cond-> {:clojure.error/class type}
+            err-line (assoc :clojure.error/line err-line)
+            message (assoc :clojure.error/cause message)
+            (or fn (and source method)) (assoc :clojure.error/symbol (or fn (symbol (-> source name) (-> method name demunge))))
+            file (assoc :clojure.error/source file)
+            problems (assoc :clojure.error/spec data))))
+      :clojure.error/phase phase)))
 
 (defn ex-str
   "Returns a string from exception data, as produced by ex-triage.
@@ -292,6 +303,9 @@
               (if symbol (str symbol " ") "")
               loc
               cause)
+
+      :read-eval-result
+      (format "Error reading eval result (%s) at %s (%s).%n%s%n" simple-class symbol loc cause)
 
       :print-eval-result
       (format "Error printing return value (%s) at %s (%s).%n%s%n" simple-class symbol loc cause)
@@ -400,12 +414,7 @@ by default when a new command-line REPL is started."} repl-requires
                   input (try
                           (with-read-known (read request-prompt request-exit))
                           (catch LispReader+ReaderException e                                                         ;;; LispReader$ReaderException
-                            (throw (ex-info
-                                     (str "Syntax error reading source at (" (.-Line e) ":" (.-Column e) ")")         ;;; .-line .-column
-                                     {:clojure.error/phase :read-source
-                                      :clojure.error/line (.-Line e)                                                  ;;; .-line
-                                      :clojure.error/column (.-Column e)}                                             ;;; .-column
-                                     e))))]
+                            (throw (ex-info nil {:clojure.error/phase :read-source} e))))]
              (or (#{request-prompt request-exit} input)
                (let [value (binding [*read-eval* read-eval] (eval input))]
                    (set! *3 *2)
@@ -414,9 +423,7 @@ by default when a new command-line REPL is started."} repl-requires
                    (try
                      (print value)
                      (catch Exception e                                                                               ;;; Throwable
-                       (throw (ex-info (format "Error printing return value. Cause: " (.Message e))                   ;;; getMessage
-                                {:clojure.error/phase :print-eval-result}
-                                e)))))))
+                       (throw (ex-info nil {:clojure.error/phase :print-eval-result} e)))))))
            (catch Exception e           ;;; Throwable
              (caught e)
              (set! *e e))))]
