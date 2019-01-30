@@ -285,6 +285,9 @@ namespace clojure.lang
         // for folks using Cygwin and its ilk.
         public const string ClojureLoadPathString = "CLOJURE_LOAD_PATH";
 
+
+        static public readonly Object REQUIRE_LOCK = new Object();
+
         #endregion
 
         #region  It's true (or not)
