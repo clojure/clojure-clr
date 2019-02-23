@@ -2386,7 +2386,7 @@
   {:added "1.9"}
   ^clojure.lang.IPersistentVector [^clojure.lang.IAtom2 atom newval] (.resetVals atom newval))
 
-(defn set-validator
+(defn set-validator!
   "Sets the validator-fn for a var/ref/agent/atom. validator-fn must be nil or a
   side-effect-free fn of one argument, which will be passed the intended
   new state on any state change. If the new state is unacceptable, the
