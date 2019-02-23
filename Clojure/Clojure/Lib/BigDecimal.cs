@@ -1114,11 +1114,45 @@ namespace clojure.lang
             throw new InvalidCastException();
         }
 
+        static BigDecimal ClrDecimalMin = Create(Decimal.MinValue);
+        static BigDecimal ClrDecimalMax = Create(Decimal.MaxValue);
+            
         public decimal ToDecimal(IFormatProvider provider)
         {
-            // TODO: improve this.
-            // Ideally, we create a string with no exponent, provided we are in decimal range.
-            return Convert.ToDecimal(ToDouble(provider), provider);
+            if (this < ClrDecimalMin || this > ClrDecimalMax)
+                throw new ArgumentOutOfRangeException("BigDecimal value out of decimal range");
+
+            if ( IsZero )
+                return Decimal.Zero;
+
+            uint[] data = _coeff.GetMagnitude();
+            int length = data.Length;
+
+            if (length <= 3 && -28 <= _exp && _exp <= 0)
+            {
+                int lo = 0, mi = 0, hi = 0;
+
+                switch (length)
+                {
+                    case 1:
+                        lo = (int)data[0];
+                        break;
+                    case 2:
+                        lo = (int)data[1];
+                        mi = (int)data[0];
+                        break;
+                    case 3:
+                        lo = (int)data[2];
+                        mi = (int)data[1];
+                        hi = (int)data[0];
+                        break;
+                }
+
+                return new Decimal(lo, mi, hi, IsNegative, (byte)(-_exp));
+            }
+
+            // do it the dumb way
+            return Decimal.Parse(ToString());
         }
 
         public double ToDouble(IFormatProvider provider)
