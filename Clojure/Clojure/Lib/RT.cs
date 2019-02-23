@@ -652,13 +652,21 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.Reflection.Assembly.LoadFrom")]
         static void DoInit()
         {
+            // Load clojure.core
+
             //Stopwatch sw = new Stopwatch();
             //sw.Start();
             load("clojure/core");
-            Assembly.LoadFrom("clojure.spec.alpha.dll");
-            Assembly.LoadFrom("clojure.core.specs.alpha.dll");
             //sw.Stop();
             //Console.WriteLine("Initial clojure/core load: {0} milliseconds.", sw.ElapsedMilliseconds);
+
+            // load spec
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+
+                Assembly.LoadFile(Path.Combine(baseDir, "clojure.spec.alpha.dll"));
+                Assembly.LoadFile(Path.Combine(baseDir, "clojure.core.specs.alpha.dll"));
+            }
 
             PostBootstrapInit();
 
