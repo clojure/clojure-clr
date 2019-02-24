@@ -18,14 +18,152 @@ namespace clojure.lang
 {
     public static class Numbers
     {
+        /* 
+         * Random notes so I don't forget this stuff when I return here.
+         * 
+         * Interface Ops provides the basic arithmetic operations.
+         * It has specialized implementations based on the type of arguments.
+         * For these notes, we will designate these implentations as follows:
+         *   L (Long, for signed integer types)
+         *   D (Double, for floating point types)
+         *   R (Ratio)
+         *   BI (BigInteger)
+         *   BD (BigDouble)
+         *   
+         * The categories listed above are in the JVM version.  
+         * I'm writing down this analysis in part so I can figure
+         * out how to add in some some types that the CLR has and the JVM doesn't:
+         * 
+         *   UL (ULong, for unsigned integer types)
+         *   CD (CLR decimal type)
+         *   
+         * Ops works with objects, so the primitive arguments  are going to be boxed.
+         * This inefficiency is reduced by an analysis done at a compile time that 
+         * looks at argument types and uses CLR-intrinsic ops directly to avoid boxing.
+         * Here, we are concerned with the versions that get invoked with generally 
+         * incomplete type information or operations/types that do not map to CLR intrinsics.
+         * 
+         * Ops has operations in the following categories:
+         * 
+         *    value:  isZero, isPos, isNeg
+         *    basic arithmetic, checked, non-promoting:  add, multiply, negate, inc, dec
+         *    basic artithmetic, unchecked, non-promoting: unchecked_add, unchecked_multiply, unchecked_negate, unchecked_inc, unchecked_dec
+         *    basic arithmetic, promoting: addP, multiplyP, negateP, incP, decP
+         *    other arithmetic: divide, quotient, remainder
+         *    comparisons:  equiv, lt, lte gte
+         * 
+         * The abstract class OpsP is the base class for promoting types.
+         * It provides implementations for the unchecked and promoting ops that default to the standard ones:
+         *     addP,      unchecked_add          => add
+         *     multiplyP, unchecked_multiply     => multiply
+         *     negateP,   unchecked_negate       => negate
+         *     incP,      unchecked_inc          => inc
+         *     decP,      unchecked_dec          => dec
+         *  
+         * The implementations for D, R, BI, BD build on OpsP.
+         * The implementation for L implements Ops directly, so it has to provide implementations for the 10 methods listed above.
+         * 
+         * By analogy, we will make UL implement Ops directly.
+         * As for CD, the question is more interesting.  
+         * Ignoring D, the others--R, BI, BD--effectivly cannot overflow -- they do not have max or min values.
+         * In this respect, CD is more like L and UL.  It can overflow.
+         * However, unlike L/UL, it does not have checked primitve ops.
+         * We have to do our own detection.
+         * At any rate, CD implements Ops and does not use OpsP as a base.
+         * 
+         * 
+         * Promotion/contagion are handled by 'combining.
+         * Ops provides the methods:
+         * 
+         *             Ops combine(Ops y);
+         *             Ops opsWith(LongOps x);
+         *             Ops opsWith(ULongOps x);
+         *             Ops opsWith(DoubleOps x);
+         *             Ops opsWith(RatioOps x);
+         *             Ops opsWith(ClrDecimalOps x); 
+         *             Ops opsWith(BigIntOps x);
+         *             Ops opsWith(BigDecimalOps x);
+         * 
+         * A unary operation dispatches on the type of the argument and defers to the appropriate implentaton.
+         * For example: 
+         * 
+         *          public static bool isZero(object x)
+         *          {
+         *              return  ops(x).isZero(x);
+         *          }
+
+         * A binary operation gets the appropriate implementation for the type of each argument, 
+         * then combines them to get the contagion/promotion implementation type
+         * 
+         *         public static object add(object x, object y)
+         *         {
+         *             return ops(x).combine(ops(y)).add(x, y);
+         *         }
+         *         
+         * So each implementation encodes the promotion/contagion against the second argument, via the combine method.
+         * Fortunately, as implemented, this is symmetric.
+         * For the types shared with the JVM, we have this:
+         * 
+         *         |  L |  D |  R | BI | BD |
+         *    ===============================
+         *     L   |  L |  D |  R | BI | BD |
+         *    ===============================
+         *     D   |  D |  D |  D |  D |  D |
+         *    ===============================
+         *     R   |  R |  D |  R |  R | BD |
+         *    ===============================
+         *     BI  | BI |  D |  R | BI | BD |
+         *    ===============================
+         *     BD  | BD |  D | BD | BD | BD |
+         *    ===============================
+         *    
+         * We can that Double contaminates everything.
+         * The other conversions are promotions according to:
+         *    L => BI => R => BD
+         * which makes sense in terms of convertibility/representation of values,
+         * i.e., these are widening conversion.
+         * 
+         * To add UL and CD to this, we should follow this pattern as much as possible.Neither conversion is widening.
+         * Each has values that cannot be represented in the other.
+         * A more sophisticated analysis might look at unsigned short and say it could be converted to either unsigned long or to long.
+         * However, as this code has been constructed, that's a bridge too far.  We will consider unsigned as one category, signed as another.
+         * That means that a L/UL combination should go to the type that can represent both of them, which is BI.
+         * L, UL to CD is a widening conversion, so that is okay.  Other combinations with CD should go up into BD.
+         * And D is still fatally contagious.  
+         * 
+         * That leads us to this completion:
+         * 
+         *      *  |  L |  D |  R | BI | BD | UL | CD |
+         *    =========================================
+         *     L   |  L |  D |  R | BI | BD | BI | CD |
+         *    =========================================
+         *     D   |  D |  D |  D |  D |  D |  D |  D |
+         *    =========================================
+         *     R   |  R |  D |  R |  R | BD |  R | BD |
+         *    =========================================
+         *     BI  | BI |  D |  R | BI | BD | BI | BD |
+         *    =========================================
+         *     BD  | BD |  D | BD | BD | BD | BD | BD |
+         *    =========================================
+         *     UL  | BI |  D |  R | BI | BD | UL | CD |
+         *    =========================================
+         *     CD  | CD |  D | BD | BD | BD | CD | CD |
+         *    =========================================
+         * 
+         * 
+         * 
+         */
+
         #region Ops interface
 
         interface Ops
         {
             Ops combine(Ops y);
             Ops opsWith(LongOps x);
+            Ops opsWith(ULongOps x); 
             Ops opsWith(DoubleOps x);
             Ops opsWith(RatioOps x);
+            Ops opsWith(ClrDecimalOps x); 
             Ops opsWith(BigIntOps x);
             Ops opsWith(BigDecimalOps x);
 
@@ -115,8 +253,10 @@ namespace clojure.lang
 
             public abstract Ops combine(Ops y);
             public abstract Ops opsWith(LongOps x);
+            public abstract Ops opsWith(ULongOps x);
             public abstract Ops opsWith(DoubleOps x);
             public abstract Ops opsWith(RatioOps x);
+            public abstract Ops opsWith(ClrDecimalOps x);
             public abstract Ops opsWith(BigIntOps x);
             public abstract Ops opsWith(BigDecimalOps x);
             public abstract bool isZero(object x);
@@ -663,6 +803,16 @@ namespace clojure.lang
                 return BIGDECIMAL_OPS;
             }
 
+            public Ops opsWith(ULongOps x)
+            {
+                return BIGINT_OPS;
+            }
+
+            public Ops opsWith(ClrDecimalOps x)
+            {
+                return CLRDECIMAL_OPS;
+            }
+
             public bool isZero(object x)
             {
                 return Util.ConvertToLong(x) == 0;
@@ -852,6 +1002,232 @@ namespace clojure.lang
 
         #endregion
 
+        #region ULongOps
+
+        sealed class ULongOps : Ops
+        {
+            #region Ops Members
+
+            public Ops combine(Ops y)
+            {
+                return y.opsWith(this);
+            }
+
+            public Ops opsWith(LongOps x)
+            {
+                return BIGINT_OPS;
+            }
+
+            public Ops opsWith(DoubleOps x)
+            {
+                return DOUBLE_OPS;
+            }
+
+            public Ops opsWith(RatioOps x)
+            {
+                return RATIO_OPS;
+            }
+
+            public Ops opsWith(BigIntOps x)
+            {
+                return BIGINT_OPS;
+            }
+
+            public Ops opsWith(BigDecimalOps x)
+            {
+                return BIGDECIMAL_OPS;
+            }
+
+            public Ops opsWith(ULongOps x)
+            {
+                return this;
+            }
+
+            public Ops opsWith(ClrDecimalOps x)
+            {
+                return CLRDECIMAL_OPS;
+            }
+
+            public bool isZero(object x)
+            {
+                return Util.ConvertToULong(x) == 0;
+            }
+
+            public bool isPos(object x)
+            {
+                return Util.ConvertToULong(x) > 0;
+            }
+
+            public bool isNeg(object x)
+            {
+                return Util.ConvertToULong(x) < 0;
+            }
+
+            public object add(object x, object y)
+            {
+                return num(Numbers.add(Util.ConvertToULong(x), Util.ConvertToULong(y)));
+            }
+
+            public object addP(object x, object y)
+            {
+                ulong ulx = Util.ConvertToULong(x);
+                ulong uly = Util.ConvertToULong(y);
+                if ( ulx > ulong.MaxValue - uly )
+                    return BIGINT_OPS.add(x, y);
+                return num(ulx+uly);
+            }
+
+            public object unchecked_add(object x, object y)
+            {
+                return num(Numbers.unchecked_add(Util.ConvertToULong(x), Util.ConvertToULong(y)));
+            }
+
+            public object multiply(object x, object y)
+            {
+                return num(Numbers.multiply(Util.ConvertToULong(x), Util.ConvertToULong(y)));
+            }
+
+            public object multiplyP(object x, object y)
+            {
+                ulong ulx = Util.ConvertToULong(x);
+                ulong uly = Util.ConvertToULong(y);
+
+                ulong ret = ulx * uly;
+                if (uly != 0 && ret / uly != ulx)
+                    return BIGINT_OPS.multiply(x, y);
+                return num(ret);
+            }
+
+            public object unchecked_multiply(object x, object y)
+            {
+                return num(Numbers.unchecked_multiply(Util.ConvertToULong(x), Util.ConvertToULong(y)));
+
+            }
+
+            static ulong gcd(ulong u, ulong v)
+            {
+                while (v != 0)
+                {
+                    ulong r = u % v;
+                    u = v;
+                    v = r;
+                }
+                return u;
+            }
+
+            public object divide(object x, object y)
+            {
+                ulong n = Util.ConvertToULong(x);
+                ulong val = Util.ConvertToULong(y);
+                ulong gcd1 = gcd(n, val);
+                if (gcd1 == 0)
+                    return num(0);
+
+                n = n / gcd1;
+                ulong d = val / gcd1;
+                if (d == 1)
+                    return num(n);
+ 
+                return new Ratio(BigInteger.Create(n), BigInteger.Create(d));
+            }
+
+            public object quotient(object x, object y)
+            {
+                return num(Util.ConvertToULong(x) / Util.ConvertToULong(y));
+            }
+
+            public object remainder(object x, object y)
+            {
+                return num(Util.ConvertToULong(x) % Util.ConvertToULong(y));
+            }
+
+            public bool equiv(object x, object y)
+            {
+                return Util.ConvertToULong(x) == Util.ConvertToULong(y);
+            }
+
+            public bool lt(object x, object y)
+            {
+                return Util.ConvertToULong(x) < Util.ConvertToULong(y);
+            }
+
+            public bool lte(object x, object y)
+            {
+                return Util.ConvertToULong(x) <= Util.ConvertToULong(y);
+            }
+
+            public bool gte(object x, object y)
+            {
+                return Util.ConvertToULong(x) >= Util.ConvertToULong(y);
+            }
+
+            public object negate(object x)
+            {
+                ulong val = Util.ConvertToULong(x);
+                if (val == 0)
+                    return x;
+                throw new ArithmeticException("Checked operation error: negation of non-zero unsigned");
+            }
+
+            public object negateP(object x)
+            {
+                ulong val = Util.ConvertToULong(x);
+                return BigInt.fromBigInteger(-BigInteger.Create(val));
+            }
+
+            public object unchecked_negate(object x)
+            {
+                ulong val = Util.ConvertToULong(x);
+                return num(Numbers.unchecked_minus(val));
+            }
+
+
+            public object inc(object x)
+            {
+                ulong val = Util.ConvertToULong(x);
+                return num(Numbers.inc(val));
+            }
+
+            public object incP(object x)
+            {
+                ulong val = Util.ConvertToULong(x);
+
+                if (val < UInt64.MaxValue)
+                    return num(val + 1);
+                return BIGINT_OPS.inc(x);
+            }
+
+            public object unchecked_inc(object x)
+            {
+                ulong val = Util.ConvertToULong(x);
+                return num(Numbers.unchecked_inc(val));
+            }
+
+            public object dec(object x)
+            {
+                ulong val = Util.ConvertToULong(x);
+                return num(Numbers.dec(val));
+            }
+
+            public object decP(object x)
+            {
+                ulong val = Util.ConvertToULong(x);
+
+                if (val > 0)
+                    return num(val - 1);
+                return BIGINT_OPS.dec(x);
+            }
+
+            public object unchecked_dec(object x)
+            {
+                ulong val = Util.ConvertToULong(x);
+                return num(Numbers.unchecked_dec(val));
+            }
+            #endregion
+        }
+
+        #endregion
+
         #region DoubleOps
 
         sealed class DoubleOps : OpsP
@@ -884,6 +1260,16 @@ namespace clojure.lang
             }
 
             public override Ops opsWith(BigDecimalOps x)
+            {
+                return this;
+            }
+
+            public override Ops opsWith(ULongOps x)
+            {
+                return this;
+            }
+
+            public override Ops opsWith(ClrDecimalOps x)
             {
                 return this;
             }
@@ -1004,6 +1390,17 @@ namespace clojure.lang
             {
                 return BIGDECIMAL_OPS;
             }
+
+            public override Ops opsWith(ULongOps x)
+            {
+                return this;
+            }
+
+            public override Ops opsWith(ClrDecimalOps x)
+            {
+                return BIGDECIMAL_OPS;
+            }
+
 
             //static object NormalizeRet(object ret, object x, object y)
             //{
@@ -1140,6 +1537,258 @@ namespace clojure.lang
 
         #endregion
 
+        #region ClrDecimalOps
+
+        class ClrDecimalOps : Ops
+        {
+            #region Ops Members
+
+            public Ops combine(Ops y)
+            {
+                return y.opsWith(this);
+            }
+
+            public Ops opsWith(LongOps x)
+            {
+                return this;
+            }
+
+            public Ops opsWith(DoubleOps x)
+            {
+                return DOUBLE_OPS;
+            }
+
+            public Ops opsWith(RatioOps x)
+            {
+                return BIGDECIMAL_OPS;
+            }
+
+            public Ops opsWith(BigIntOps x)
+            {
+                return BIGDECIMAL_OPS;
+            }
+
+            public Ops opsWith(BigDecimalOps x)
+            {
+                return BIGDECIMAL_OPS;
+            }
+
+            public Ops opsWith(ULongOps x)
+            {
+                return this;
+            }
+
+            public Ops opsWith(ClrDecimalOps x)
+            {
+                return this;
+            }
+
+            public bool isZero(object x)
+            {
+                return Util.ConvertToDecimal(x) == 0;
+            }
+
+            public bool isPos(object x)
+            {
+                return Util.ConvertToDecimal(x) > 0;
+            }
+
+            public bool isNeg(object x)
+            {
+                return Util.ConvertToDecimal(x) < 0;
+            }
+
+            public object add(object x, object y)
+            {
+                decimal dx = Util.ConvertToDecimal(x);
+                decimal dy = Util.ConvertToDecimal(y);
+                return dx + dy;
+            }
+
+            public object addP(object x, object y)
+            {
+                decimal dx = Util.ConvertToDecimal(x);
+                decimal dy = Util.ConvertToDecimal(y);
+
+                try
+                {
+                    decimal ret = dx + dy;
+                    return ret;
+                }
+                catch (OverflowException)
+                {
+                    return BIGDECIMAL_OPS.add(x, y);
+                }
+            }
+
+            public object unchecked_add(object x, object y)
+            {
+                return addP(x, y);
+            }
+
+            public object multiply(object x, object y)
+            {
+                decimal dx = Util.ConvertToDecimal(x);
+                decimal dy = Util.ConvertToDecimal(y);
+                return dx * dy;
+            }
+
+            public object multiplyP(object x, object y)
+            {
+                decimal dx = Util.ConvertToDecimal(x);
+                decimal dy = Util.ConvertToDecimal(y);
+
+                try
+                {
+                    decimal ret = dx * dy;
+                    return ret;
+                }
+                catch (OverflowException)
+                {
+                    return BIGDECIMAL_OPS.multiply(x, y);
+                }
+            }
+
+            public object unchecked_multiply(object x, object y)
+            {
+                return multiplyP(x, y);
+
+            }
+
+            static long gcd(long u, long v)
+            {
+                while (v != 0)
+                {
+                    long r = u % v;
+                    u = v;
+                    v = r;
+                }
+                return u;
+            }
+
+            public object divide(object x, object y)
+            {
+                decimal dx = Util.ConvertToDecimal(x);
+                decimal dy = Util.ConvertToDecimal(y);
+
+                try
+                {
+                    decimal ret = dx / dy;
+                    return ret;
+                }
+                catch (OverflowException)
+                {
+                    return BigDecimal.Create(dx).Divide(BigDecimal.Create(dy));
+                }
+          
+            }
+
+            public object quotient(object x, object y)
+            {
+                decimal dx = Util.ConvertToDecimal(x);
+                decimal dy = Util.ConvertToDecimal(y);
+                return dx / dy;
+            }
+
+            public object remainder(object x, object y)
+            {
+                decimal dx = Util.ConvertToDecimal(x);
+                decimal dy = Util.ConvertToDecimal(y);
+                return dx % dy;
+            }
+
+            public bool equiv(object x, object y)
+            {
+                return Util.ConvertToDecimal(x) == Util.ConvertToDecimal(y);
+            }
+
+            public bool lt(object x, object y)
+            {
+                return Util.ConvertToDecimal(x) < Util.ConvertToDecimal(y);
+            }
+
+            public bool lte(object x, object y)
+            {
+                return Util.ConvertToDecimal(x) <= Util.ConvertToDecimal(y);
+            }
+
+            public bool gte(object x, object y)
+            {
+                return Util.ConvertToDecimal(x) >= Util.ConvertToDecimal(y);
+            }
+
+            public object negate(object x)
+            {
+                decimal val = Util.ConvertToDecimal(x);
+                return -val;
+            }
+
+            public object negateP(object x)
+            {
+                decimal val = Util.ConvertToDecimal(x);
+                return -val; 
+            }
+
+            public object unchecked_negate(object x)
+            {
+                decimal val = Util.ConvertToDecimal(x);
+                return -val; 
+            }
+
+
+            public object inc(object x)
+            {
+                decimal val = Util.ConvertToDecimal(x);
+                return val + 1; 
+            }
+
+            public object incP(object x)
+            {
+                decimal val = Util.ConvertToDecimal(x);
+                try
+                {
+                    return val + 1;
+                }
+                catch (OverflowException)
+                {
+                    return BIGDECIMAL_OPS.inc(x);
+                }
+            }
+
+            public object unchecked_inc(object x)
+            {
+                return incP(x);
+            }
+
+            public object dec(object x)
+            {
+                decimal val = Util.ConvertToDecimal(x);
+                return val - 1; 
+            }
+
+            public object decP(object x)
+            {
+                decimal val = Util.ConvertToDecimal(x);
+                try
+                {
+                    return val - 1;
+                }
+                catch (OverflowException)
+                {
+                    return BIGDECIMAL_OPS.inc(x);
+                }
+            }
+
+            public object unchecked_dec(object x)
+            {
+                return decP(x);
+            }
+
+            #endregion
+        }
+
+        #endregion
+
         #region BigIntOps
 
         class BigIntOps : OpsP
@@ -1175,6 +1824,17 @@ namespace clojure.lang
             {
                 return BIGDECIMAL_OPS;
             }
+
+            public override Ops opsWith(ULongOps x)
+            {
+                return this;
+            }
+
+            public override Ops opsWith(ClrDecimalOps x)
+            {
+                return BIGDECIMAL_OPS;
+            }
+
 
             public override bool isZero(object x)
             {
@@ -1301,6 +1961,16 @@ namespace clojure.lang
                 return this;
             }
 
+            public override Ops opsWith(ULongOps x)
+            {
+                return this;
+            }
+
+            public override Ops opsWith(ClrDecimalOps x)
+            {
+                return this;
+            }
+
             public override bool isZero(object x)
             {
                 BigDecimal bx = (BigDecimal)x;
@@ -1414,35 +2084,52 @@ namespace clojure.lang
         #region Ops/BitOps dispatching
 
         static readonly LongOps LONG_OPS = new LongOps();
+        static readonly ULongOps ULONG_OPS = new ULongOps();
         static readonly DoubleOps DOUBLE_OPS = new DoubleOps();
         static readonly RatioOps RATIO_OPS = new RatioOps();
+        static readonly ClrDecimalOps CLRDECIMAL_OPS = new ClrDecimalOps();
         static readonly BigIntOps BIGINT_OPS = new BigIntOps();
         static readonly BigDecimalOps BIGDECIMAL_OPS = new BigDecimalOps();
 
-        public enum Category { Integer, Floating, Decimal, Ratio }
+        public enum Category { Integer, Floating, Decimal, Ratio }  // TODO
 
         static Ops ops(Object x)
         {
             Type xc = x.GetType();
 
-            if (xc == typeof(long))
-                return LONG_OPS;
-            else if (xc == typeof(double))
-                return DOUBLE_OPS;
-            else if (xc == typeof(int))
-                return LONG_OPS;
-            else if (xc == typeof(float))
-                return DOUBLE_OPS;
-            else if (xc == typeof(BigInt))
-                return BIGINT_OPS;
-            else if (xc == typeof(BigInteger))
-                return BIGINT_OPS;
-            else if (xc == typeof(Ratio))
-                return RATIO_OPS;
-            else if (xc == typeof(BigDecimal))
-                return BIGDECIMAL_OPS;
-            else
-                return LONG_OPS;
+            switch (Type.GetTypeCode(xc))
+            {
+                case TypeCode.SByte:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                    return LONG_OPS;
+
+                case TypeCode.Byte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return ULONG_OPS;
+
+                case TypeCode.Single:
+                case TypeCode.Double:
+                    return DOUBLE_OPS;
+
+                case TypeCode.Decimal:
+                    return CLRDECIMAL_OPS;
+
+                default:
+                    if (xc == typeof(BigInt))
+                        return BIGINT_OPS;
+                    else if (xc == typeof(BigInteger))
+                        return BIGINT_OPS;
+                    else if (xc == typeof(Ratio))
+                        return RATIO_OPS;
+                    else if (xc == typeof(BigDecimal))
+                        return BIGDECIMAL_OPS;
+                    else
+                        return LONG_OPS;
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "hasheq")]
@@ -2654,6 +3341,196 @@ namespace clojure.lang
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
         public static bool isZero(long x)
+        {
+            return x == 0;
+        }
+
+        #endregion
+
+        #region ULong overloads for basic ops
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "num")]
+        public static object num(ulong x)
+        {
+            return x;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ulong unchecked_add(ulong x, ulong y) { return x + y; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ulong unchecked_minus(ulong x, ulong y) { return x - y; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ulong unchecked_multiply(ulong x, ulong y) { return x * y; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ulong unchecked_minus(ulong x) { if (x == 0) return x; throw new ArithmeticException("Minus not supported on unsigned integer types"); }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ulong unchecked_inc(ulong x) { return x + 1; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        public static ulong unchecked_dec(ulong x) { return x - 1; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
+        public static ulong add(ulong x, ulong y)
+        {
+            ulong ret = x + y;
+            if ( x > UInt64.MaxValue - y)
+                throw new ArithmeticException("integer overflow");
+            return ret;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
+        public static object addP(ulong x, ulong y)
+        {
+            ulong ret = x + y;
+            if (x > UInt64.MaxValue - y)
+                return addP((object)x, (object)y);
+            return num(ret);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
+        public static ulong minus(ulong x, ulong y)
+        {
+            if ( y > x)
+                throw new ArithmeticException("integer overflow");
+            return x-y;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
+        public static object minusP(ulong x, ulong y)
+        {
+            if (y > x)
+                return minusP((object)x, (object)y);
+            ulong ret = x - y;
+            return num(ret);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
+        public static ulong minus(ulong x)
+        {
+            if (x == 0)
+                return x;
+            throw new ArithmeticException("integer overflow");
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
+        public static object minusP(ulong x)
+        {
+            if (x == 0)
+                return x;
+            return BigInt.fromBigInteger(BigInteger.Create(x).Negate());
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "inc")]
+        public static ulong inc(ulong x)
+        {
+            if ( x == UInt64.MaxValue)
+                throw new ArithmeticException("integer overflow");
+            return x + 1;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "inc")]
+        public static object incP(ulong x)
+        {
+            if (x == UInt64.MaxValue)
+                return BIGINT_OPS.inc((object)x);
+            return num(x + 1);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dec")]
+        public static ulong dec(ulong x)
+        {
+            if (x == 0)
+                throw new ArithmeticException("integer overflow");
+            return x - 1;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dec")]
+        public static object decP(ulong x)
+        {
+            if (x == 0)
+                return BIGINT_OPS.dec((object)x);
+            return num(x - 1);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
+        public static ulong multiply(ulong x, ulong y)
+        {
+            ulong ret = x * y;
+            if (y != 0 && ret / y != x)
+                throw new ArithmeticException("integer overflow");
+            return ret;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
+        public static object multiplyP(ulong x, ulong y)
+        {
+            ulong ret = x * y;
+            if (y != 0 && ret / y != x)
+                return BIGINT_OPS.multiply(x, y);
+            return num(ret);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
+        public static ulong quotient(ulong x, ulong y)
+        {
+            return x / y;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remainder")]
+        public static ulong remainder(ulong x, ulong y)
+        {
+            return x % y;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "equiv")]
+        public static bool equiv(ulong x, ulong y)
+        {
+            return x == y;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lt")]
+        public static bool lt(ulong x, ulong y)
+        {
+            return x < y;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lte")]
+        public static bool lte(ulong x, ulong y)
+        {
+            return x <= y;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gt")]
+        public static bool gt(ulong x, ulong y)
+        {
+            return x > y;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "gte")]
+        public static bool gte(ulong x, ulong y)
+        {
+            return x >= y;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
+        public static bool isPos(ulong x)
+        {
+            return x > 0;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
+        public static bool isNeg(ulong x)
+        {
+            return false;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "is")]
+        public static bool isZero(ulong x)
         {
             return x == 0;
         }
