@@ -161,8 +161,8 @@ namespace clojure.lang.CljCompiler.Ast
                     case TypeCode.Single: ilg.EmitSingle((float)value); break;
                     case TypeCode.String: ilg.EmitString((string)value); break;
                     case TypeCode.UInt16: ilg.EmitInt((int)(ushort)value); break;
-                    case TypeCode.UInt32: ilg.Emit(OpCodes.Ldc_I4, (uint)value); break;
-                    case TypeCode.UInt64: ilg.Emit(OpCodes.Ldc_I8, (ulong)value); break;
+                    case TypeCode.UInt32: ilg.Emit(OpCodes.Ldc_I4, (int)(uint)value); break;
+                    case TypeCode.UInt64: ilg.Emit(OpCodes.Ldc_I8, (long)(ulong)value); break;
                 }
             }
             else
