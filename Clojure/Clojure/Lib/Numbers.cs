@@ -3377,19 +3377,17 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static ulong add(ulong x, ulong y)
         {
-            ulong ret = x + y;
             if ( x > UInt64.MaxValue - y)
                 throw new ArithmeticException("integer overflow");
-            return ret;
+            return x + y;;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
         public static object addP(ulong x, ulong y)
         {
-            ulong ret = x + y;
             if (x > UInt64.MaxValue - y)
                 return addP((object)x, (object)y);
-            return num(ret);
+            return num(x + y);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "minus")]
