@@ -62,49 +62,70 @@ namespace clojure.lang.CljCompiler.Ast
         {
             Type nt = typeof(Numbers);
             Type rtt = typeof(RT);
-            Type ut = typeof(Util);
+            Type utilt = typeof(Util);
 
             Type it = typeof(int);
             Type dt = typeof(double);
             Type lt = typeof(long);
+            Type ut = typeof(ulong);
 
             Type boolt = typeof(bool);
 
             Type[] ddta = new Type[] { dt, dt };
             Type[] llta = new Type[] { lt, lt };
             Type[] iita = new Type[] { it, it };
+            Type[] uuta = new Type[] { ut, ut };
             Type[] bbta = new Type[] { boolt, boolt };
 
             Type[] dta = new Type[] { dt };
             Type[] lta = new Type[] { lt };
             Type[] ita = new Type[] { it };
+            Type[] uta = new Type[] { ut };
 
             Type[] fta = new Type[] { typeof(float) };
             Type[] sta = new Type[] {typeof(short) };
             Type[] bta = new Type[] {typeof(byte) }; 
-            Type[] ulta = new Type[] {typeof(ulong) };
             Type[] uita = new Type[] {typeof(uint) };
             Type[] usta = new Type[] {typeof(ushort) };
             Type[] sbta = new Type[] {typeof(sbyte) };
 
-            AddOp(nt, "add", ddta, OpCodes.Add);
+            // bitwise
             AddOp(nt, "and", llta, OpCodes.And);
             AddOp(nt, "or", llta, OpCodes.Or);
             AddOp(nt, "xor", llta, OpCodes.Xor);
+            AddOp(nt, "shiftLeft", llta, OpCodes.Shl);
+            AddOp(nt, "shiftRight", llta, OpCodes.Shr);
+            AddOp(nt, "unsignedShiftRight", llta, OpCodes.Shr_Un);
+            AddOp(nt, "shiftLeftInt", iita, OpCodes.Shl);
+            AddOp(nt, "shiftRightInt", iita, OpCodes.Shr);
+            AddOp(nt, "unsignedShiftRightInt", iita, OpCodes.Shr_Un);
+            // TODO: add ulong overloads in Numbers.
+            //AddOp(nt, "and", uuta, OpCodes.And);
+            //AddOp(nt, "or", uuta, OpCodes.Or);
+            //AddOp(nt, "xor", uuta, OpCodes.Xor);
+            //AddOp(nt, "shiftLeft", uuta, OpCodes.Shl);
+            //AddOp(nt, "shiftRight", uuta, OpCodes.Shr);
+            //AddOp(nt, "unsignedShiftRight", uuta, OpCodes.Shr_Un);
+
+            // arithmetic on doubles
+            AddOp(nt, "add", ddta, OpCodes.Add);
             AddOp(nt, "multiply", ddta, OpCodes.Mul);
             AddOp(nt, "divide", ddta, OpCodes.Div);
-            AddOp(nt, "remainder", llta, OpCodes.Rem);
-            AddOp(nt, "shiftLeft", llta,  OpCodes.Shl);
-            AddOp(nt, "shiftRight", llta,  OpCodes.Shr);
-            AddOp(nt, "unsignedShiftRight", llta, OpCodes.Shr_Un);
             AddOp(nt, "minus", dta, OpCodes.Neg);
             AddOp(nt, "minus", ddta, OpCodes.Sub);
             AddOp(nt, "inc", dta, OpCodes.Ldc_I4_1, OpCodes.Conv_R8, OpCodes.Add);
             AddOp(nt, "dec", dta, OpCodes.Ldc_I4_1, OpCodes.Conv_R8, OpCodes.Sub);
+
+
+            // integer ops
+            AddOp(nt, "remainder", llta, OpCodes.Rem);
+            AddOp(nt, "remainder", uuta, OpCodes.Rem_Un);
+
             AddOp(nt, "quotient", llta, OpCodes.Div);
-            AddOp(nt, "shiftLeftInt", iita, OpCodes.Shl);
-            AddOp(nt, "shiftRightInt", iita, OpCodes.Shr);
-            AddOp(nt, "unsignedShiftRightInt", iita, OpCodes.Shr_Un);
+            AddOp(nt, "quotient", uuta, OpCodes.Div_Un);
+
+
+            // unchecked int ops
             AddOp(nt, "unchecked_int_add", iita, OpCodes.Add );
             AddOp(nt, "unchecked_int_subtract", iita, OpCodes.Sub );
             AddOp(nt, "unchecked_int_negate", ita, OpCodes.Neg );
@@ -113,19 +134,35 @@ namespace clojure.lang.CljCompiler.Ast
             AddOp(nt, "unchecked_int_multiply", iita, OpCodes.Mul );
             AddOp(nt, "unchecked_int_divide", iita, OpCodes.Div );
             AddOp(nt, "unchecked_int_remainder", iita, OpCodes.Rem );
-            AddOp(nt, "unchecked_add", llta, OpCodes.Add );
-            AddOp(nt, "unchecked_add", ddta, OpCodes.Add );
-            AddOp(nt, "unchecked_minus", lta, OpCodes.Neg );
-            AddOp(nt, "unchecked_minus", dta, OpCodes.Neg );
-            AddOp(nt, "unchecked_minus", ddta, OpCodes.Sub );
-            AddOp(nt, "unchecked_minus", llta, OpCodes.Sub );
-            AddOp(nt, "unchecked_multiply", llta, OpCodes.Mul );
-            AddOp(nt, "unchecked_multiply", llta, OpCodes.Mul );
-            AddOp(nt, "unchecked_inc", lta, OpCodes.Ldc_I4_1, OpCodes.Conv_I8, OpCodes.Add );
-            AddOp(nt, "unchecked_inc", dta, OpCodes.Ldc_I4_1, OpCodes.Conv_R8, OpCodes.Add );
-            AddOp(nt, "unchecked_dec", lta, OpCodes.Ldc_I4_1, OpCodes.Conv_I8, OpCodes.Sub );
-            AddOp(nt, "unchecked_dec", dta, OpCodes.Ldc_I4_1, OpCodes.Conv_R8, OpCodes.Sub );
 
+            // long/ulong/double unchecked ops
+            AddOp(nt, "unchecked_add", llta, OpCodes.Add );
+            AddOp(nt, "unchecked_add", uuta, OpCodes.Add);
+            AddOp(nt, "unchecked_add", ddta, OpCodes.Add);
+
+            AddOp(nt, "unchecked_minus", lta, OpCodes.Neg );
+            AddOp(nt, "unchecked_minus", uta, OpCodes.Neg);
+            AddOp(nt, "unchecked_minus", dta, OpCodes.Neg);
+
+            AddOp(nt, "unchecked_minus", ddta, OpCodes.Sub );
+            AddOp(nt, "unchecked_minus", uuta, OpCodes.Sub);
+            AddOp(nt, "unchecked_minus", llta, OpCodes.Sub);
+
+
+            AddOp(nt, "unchecked_multiply", llta, OpCodes.Mul );
+            AddOp(nt, "unchecked_multiply", uuta, OpCodes.Mul);
+            AddOp(nt, "unchecked_multiply", llta, OpCodes.Mul);
+
+
+            AddOp(nt, "unchecked_inc", lta, OpCodes.Ldc_I4_1, OpCodes.Conv_I8, OpCodes.Add );
+            AddOp(nt, "unchecked_inc", uta, OpCodes.Ldc_I4_1, OpCodes.Conv_U8, OpCodes.Add);
+            AddOp(nt, "unchecked_inc", dta, OpCodes.Ldc_I4_1, OpCodes.Conv_R8, OpCodes.Add);
+
+            AddOp(nt, "unchecked_dec", lta, OpCodes.Ldc_I4_1, OpCodes.Conv_I8, OpCodes.Sub );
+            AddOp(nt, "unchecked_dec", uta, OpCodes.Ldc_I4_1, OpCodes.Conv_U8, OpCodes.Sub);
+            AddOp(nt, "unchecked_dec", dta, OpCodes.Ldc_I4_1, OpCodes.Conv_R8, OpCodes.Sub);
+
+            // Array ops
             AddOp(rtt, "aget", new Type[] { typeof(float[]), typeof(int) }, OpCodes.Ldelem_R4 );
             AddOp(rtt, "aget", new Type[] { typeof(double[]), typeof(int) }, OpCodes.Ldelem_R8 );
             AddOp(rtt, "aget", new Type[] { typeof(byte[]), typeof(int) }, OpCodes.Ldelem_U1 );
@@ -162,7 +199,7 @@ namespace clojure.lang.CljCompiler.Ast
             AddOp(rtt, "doubleCast", ita, OpCodes.Conv_R8 );
             AddOp(rtt, "doubleCast", sta, OpCodes.Conv_R8 );
             AddOp(rtt, "doubleCast", bta, OpCodes.Conv_R8 );
-            AddOp(rtt, "doubleCast", ulta, OpCodes.Conv_R8 );
+            AddOp(rtt, "doubleCast", uta, OpCodes.Conv_R8 );
             AddOp(rtt, "doubleCast", uita, OpCodes.Conv_R8 );
             AddOp(rtt, "doubleCast", usta, OpCodes.Conv_R8 );
             AddOp(rtt, "doubleCast", sbta, OpCodes.Conv_R8 );
@@ -173,7 +210,7 @@ namespace clojure.lang.CljCompiler.Ast
             AddOp(rtt, "uncheckedDoubleCast", ita, OpCodes.Conv_R8 );
             AddOp(rtt, "uncheckedDoubleCast", sta, OpCodes.Conv_R8 );
             AddOp(rtt, "uncheckedDoubleCast", bta, OpCodes.Conv_R8 );
-            AddOp(rtt, "uncheckedDoubleCast", ulta, OpCodes.Conv_R8 );
+            AddOp(rtt, "uncheckedDoubleCast", uta, OpCodes.Conv_R8 );
             AddOp(rtt, "uncheckedDoubleCast", uita, OpCodes.Conv_R8 );
             AddOp(rtt, "uncheckedDoubleCast", usta, OpCodes.Conv_R8 );
             AddOp(rtt, "uncheckedDoubleCast", sbta, OpCodes.Conv_R8 );
@@ -182,10 +219,12 @@ namespace clojure.lang.CljCompiler.Ast
             AddOp(rtt, "longCast", ita, OpCodes.Conv_I8 );
             AddOp(rtt, "longCast", sta, OpCodes.Conv_I8 );
             AddOp(rtt, "longCast", bta, OpCodes.Conv_I8 );
-            AddOp(rtt, "longCast", ulta, OpCodes.Conv_I8 );
+            AddOp(rtt, "longCast", uta, OpCodes.Conv_I8 );
             AddOp(rtt, "longCast", uita, OpCodes.Conv_I8 );
             AddOp(rtt, "longCast", usta, OpCodes.Conv_I8 );
             AddOp(rtt, "longCast", sbta, OpCodes.Conv_I8 );
+
+            // Todo:  reimplement RT.ulongCast and implement these intrinsics
 
             AddOp(rtt, "uncheckedIntCast", lta, OpCodes.Conv_I4 );
             AddOp(rtt, "uncheckedIntCast", dta, OpCodes.Conv_I4 );
@@ -193,7 +232,7 @@ namespace clojure.lang.CljCompiler.Ast
             AddOp(rtt, "uncheckedIntCast", ita, OpCodes.Nop );
             AddOp(rtt, "uncheckedIntCast", sta, OpCodes.Conv_I4 );
             AddOp(rtt, "uncheckedIntCast", bta, OpCodes.Conv_I4 );
-            AddOp(rtt, "uncheckedIntCast", ulta, OpCodes.Conv_I4 );
+            AddOp(rtt, "uncheckedIntCast", uta, OpCodes.Conv_I4 );
             AddOp(rtt, "uncheckedIntCast", uita, OpCodes.Conv_I4 );
             AddOp(rtt, "uncheckedIntCast", usta, OpCodes.Conv_I4 );
             AddOp(rtt, "uncheckedIntCast", sbta, OpCodes.Conv_I4 );
@@ -204,32 +243,60 @@ namespace clojure.lang.CljCompiler.Ast
             AddOp(rtt, "uncheckedLongCast", ita, OpCodes.Conv_I8 );
             AddOp(rtt, "uncheckedLongCast", sta, OpCodes.Conv_I8 );
             AddOp(rtt, "uncheckedLongCast", bta, OpCodes.Conv_I8 );
-            AddOp(rtt, "uncheckedLongCast", ulta, OpCodes.Conv_I8 );
+            AddOp(rtt, "uncheckedLongCast", uta, OpCodes.Conv_I8 );
             AddOp(rtt, "uncheckedLongCast", uita, OpCodes.Conv_I8 );
             AddOp(rtt, "uncheckedLongCast", usta, OpCodes.Conv_I8 );
             AddOp(rtt, "uncheckedLongCast", sbta, OpCodes.Conv_I8 );
 
+            AddOp(rtt, "uncheckedULongCast", lta, OpCodes.Conv_U8);
+            AddOp(rtt, "uncheckedULongCast", dta, OpCodes.Conv_U8);
+            AddOp(rtt, "uncheckedULongCast", fta, OpCodes.Conv_U8);
+            AddOp(rtt, "uncheckedULongCast", ita, OpCodes.Conv_U8);
+            AddOp(rtt, "uncheckedULongCast", sta, OpCodes.Conv_U8);
+            AddOp(rtt, "uncheckedULongCast", bta, OpCodes.Conv_U8);
+            AddOp(rtt, "uncheckedULongCast", uta, OpCodes.Nop);
+            AddOp(rtt, "uncheckedULongCast", uita, OpCodes.Conv_U8);
+            AddOp(rtt, "uncheckedULongCast", usta, OpCodes.Conv_U8);
+            AddOp(rtt, "uncheckedULongCast", sbta, OpCodes.Conv_U8);
+
+            // Predicates
+
             AddPred(nt, "lt", ddta, OpCodes.Bge );
+            AddPred(nt, "lt", uuta, OpCodes.Bge_Un );
             AddPred(nt, "lt", llta, OpCodes.Bge );
+
             AddPred(nt, "equiv", ddta, OpCodes.Ceq, OpCodes.Brfalse  );
+            AddPred(nt, "equiv", uuta, OpCodes.Ceq, OpCodes.Brfalse  );
             AddPred(nt, "equiv", llta, OpCodes.Ceq, OpCodes.Brfalse  );
+
             AddPred(nt, "lte", ddta, OpCodes.Bgt );
+            AddPred(nt, "lte", uuta, OpCodes.Bgt_Un );
             AddPred(nt, "lte", llta, OpCodes.Bgt );
+
             AddPred(nt, "gt", ddta, OpCodes.Ble );
+            AddPred(nt, "gt", uuta, OpCodes.Ble_Un);
             AddPred(nt, "gt", llta, OpCodes.Ble );
+            
             AddPred(nt, "gte", ddta, OpCodes.Blt );
+            AddPred(nt, "gte", uuta, OpCodes.Blt_Un );
             AddPred(nt, "gte", llta, OpCodes.Blt );
 
-            AddPred(ut, "equiv", llta, OpCodes.Ceq, OpCodes.Brfalse);
-            AddPred(ut, "equiv", ddta, OpCodes.Ceq, OpCodes.Brfalse);
-            AddPred(ut, "equiv", bbta, OpCodes.Ceq, OpCodes.Brfalse);
+            AddPred(utilt, "equiv", llta, OpCodes.Ceq, OpCodes.Brfalse);
+            AddPred(utilt, "equiv", uuta, OpCodes.Ceq, OpCodes.Brfalse);
+            AddPred(utilt, "equiv", ddta, OpCodes.Ceq, OpCodes.Brfalse);
+            AddPred(utilt, "equiv", bbta, OpCodes.Ceq, OpCodes.Brfalse);
 
             AddPred(nt, "isZero", dta, OpCodes.Ldc_I4_0, OpCodes.Conv_R8, OpCodes.Ceq, OpCodes.Brfalse );
+            AddPred(nt, "isZero", uta,OpCodes.Ldc_I4_0, OpCodes.Conv_U8, OpCodes.Ceq, OpCodes.Brfalse );
             AddPred(nt, "isZero", lta,OpCodes.Ldc_I4_0, OpCodes.Conv_I8, OpCodes.Ceq, OpCodes.Brfalse );
+            
             AddPred(nt, "isPos", dta, OpCodes.Ldc_I4_0, OpCodes.Conv_R8, OpCodes.Ble );
+            AddPred(nt, "isPos", uta, OpCodes.Ldc_I4_0, OpCodes.Conv_U8, OpCodes.Ble );
             AddPred(nt, "isPos", lta, OpCodes.Ldc_I4_0, OpCodes.Conv_I8, OpCodes.Ble );
+            
             AddPred(nt, "isNeg", dta, OpCodes.Ldc_I4_0, OpCodes.Conv_R8, OpCodes.Bge );
-            AddPred(nt, "isNeg", lta, OpCodes.Ldc_I4_0, OpCodes.Conv_I8, OpCodes.Bge );
+            AddPred(nt, "isNeg", uta, OpCodes.Ldc_I4_0, OpCodes.Conv_U8, OpCodes.Bge );
+            AddPred(nt, "isNeg", lta, OpCodes.Ldc_I4_0, OpCodes.Conv_I8, OpCodes.Bge );        
         }
 
         #endregion
