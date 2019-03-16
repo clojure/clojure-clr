@@ -405,33 +405,33 @@ namespace clojure.lang.Runtime
                         case TypeCode.Int16:
                         case TypeCode.Int32:
                         case TypeCode.Int64:
-                        case TypeCode.Single:
-                        case TypeCode.Double:
-                        case TypeCode.Decimal:
+                        //case TypeCode.Single:
+                        //case TypeCode.Double:
+                        //case TypeCode.Decimal:
                             return true;
                         default:
                             if (toType == BigIntegerType) return true;
                             if (toType == BigIntType) return true;
-                            if (toType == BigDecimalType) return true;
+                            //if (toType == BigDecimalType) return true;
                             return false;
                     }
                 case TypeCode.Byte:
                     switch (Type.GetTypeCode(toType))
                     {
-                        case TypeCode.Int16:
+                        //case TypeCode.Int16:
                         case TypeCode.UInt16:
-                        case TypeCode.Int32:
+                        //case TypeCode.Int32:
                         case TypeCode.UInt32:
-                        case TypeCode.Int64:
+                        //case TypeCode.Int64:
                         case TypeCode.UInt64:
-                        case TypeCode.Single:
-                        case TypeCode.Double:
-                        case TypeCode.Decimal:
+                        //case TypeCode.Single:
+                        //case TypeCode.Double:
+                        //case TypeCode.Decimal:
                             return true;
                         default:
                             if (toType == BigIntegerType) return true;
                             if (toType == BigIntType) return true;
-                            if (toType == BigDecimalType) return true;
+                            //if (toType == BigDecimalType) return true;
                             return false;
                     }
                 case TypeCode.Int16:
@@ -439,9 +439,9 @@ namespace clojure.lang.Runtime
                     {
                         case TypeCode.Int32:
                         case TypeCode.Int64:
-                        case TypeCode.Single:
-                        case TypeCode.Double:
-                        case TypeCode.Decimal:
+                        //case TypeCode.Single:
+                        //case TypeCode.Double:
+                        //case TypeCode.Decimal:
                             return true;
                         default:
                             if (toType == BigIntegerType) return true;
@@ -452,91 +452,91 @@ namespace clojure.lang.Runtime
                 case TypeCode.UInt16:
                     switch (Type.GetTypeCode(toType))
                     {
-                        case TypeCode.Int32:
+                        //case TypeCode.Int32:
                         case TypeCode.UInt32:
-                        case TypeCode.Int64:
+                        //case TypeCode.Int64:
                         case TypeCode.UInt64:
-                        case TypeCode.Single:
-                        case TypeCode.Double:
-                        case TypeCode.Decimal:
+                        //case TypeCode.Single:
+                        //case TypeCode.Double:
+                        //case TypeCode.Decimal:
                             return true;
                         default:
                             if (toType == BigIntegerType) return true;
                             if (toType == BigIntType) return true;
-                            if (toType == BigDecimalType) return true;
+                            //if (toType == BigDecimalType) return true;
                             return false;
                     }
                 case TypeCode.Int32:
                     switch (Type.GetTypeCode(toType))
                     {
                         case TypeCode.Int64:
-                        case TypeCode.Single:
-                        case TypeCode.Double:
-                        case TypeCode.Decimal:
+                        //case TypeCode.Single:
+                        //case TypeCode.Double:
+                        //case TypeCode.Decimal:
                             return true;
                         default:
                             if (toType == BigIntegerType) return true;
                             if (toType == BigIntType) return true;
-                            if (toType == BigDecimalType) return true;
+                            //if (toType == BigDecimalType) return true;
                             return false;
                     }
                 case TypeCode.UInt32:
                     switch (Type.GetTypeCode(toType))
                     {
-                        case TypeCode.Int64:
+                        //case TypeCode.Int64:
                         case TypeCode.UInt64:
-                        case TypeCode.Single:
-                        case TypeCode.Double:
-                        case TypeCode.Decimal:
+                        //case TypeCode.Single:
+                        //case TypeCode.Double:
+                        //case TypeCode.Decimal:
                             return true;
                         default:
                             if (toType == BigIntegerType) return true;
                             if (toType == BigIntType) return true;
-                            if (toType == BigDecimalType) return true;
+                            //if (toType == BigDecimalType) return true;
                             return false;
                     }
                 case TypeCode.Int64:
                     switch (Type.GetTypeCode(toType))
                     {
-                        case TypeCode.Single:
-                        case TypeCode.Double:
-                        case TypeCode.Decimal:
-                            return true;
+                        //case TypeCode.Single:
+                        //case TypeCode.Double:
+                        //case TypeCode.Decimal:
+                        //    return true;
                         default:
                             if (toType == BigIntegerType) return true;
                             if (toType == BigIntType) return true;
-                            if (toType == BigDecimalType) return true;
+                            //if (toType == BigDecimalType) return true;
                             return false;
                     }
                 case TypeCode.UInt64:
                     switch (Type.GetTypeCode(toType))
                     {
-                        case TypeCode.Single:
-                        case TypeCode.Double:
-                        case TypeCode.Decimal:
-                            return true;
+                        //case TypeCode.Single:
+                        //case TypeCode.Double:
+                        //case TypeCode.Decimal:
+                        //    return true;
                         default:
                             if (toType == BigIntegerType) return true;
                             if (toType == BigIntType) return true;
-                            if (toType == BigDecimalType) return true;
+                            //if (toType == BigDecimalType) return true;
                             return false;
                     }
                 case TypeCode.Char:
                     switch (Type.GetTypeCode(toType))
                     {
-                        case TypeCode.UInt16:
-                        case TypeCode.Int32:
-                        case TypeCode.UInt32:
-                        case TypeCode.Int64:
-                        case TypeCode.UInt64:
-                        case TypeCode.Single:
-                        case TypeCode.Double:
-                        case TypeCode.Decimal:
-                            return true;
+                        //case TypeCode.UInt16:
+                        //case TypeCode.Int32:
+                        //case TypeCode.UInt32:
+                        //case TypeCode.Int64:
+                        //case TypeCode.UInt64:
+                        //case TypeCode.Single:
+                        //case TypeCode.Double:
+                        //case TypeCode.Decimal:
+                        //    return true;
                         default:
-                            if (toType == BigIntegerType) return true;
-                            if (toType == BigIntType) return true;
-                            if (toType == BigDecimalType) return true;
+                            //if (toType == BigIntegerType) return true;
+                            //if (toType == BigIntType) return true;
+                            //if (toType == BigDecimalType) return true;
                             return false;
                     }
                 case TypeCode.Single:
