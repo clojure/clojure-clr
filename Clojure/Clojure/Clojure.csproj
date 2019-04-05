@@ -76,7 +76,28 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup> 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug 4.5|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\4.5\Debug\</OutputPath>
+    <DefineConstants>$(PlatformSym);TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>ClojureBasic.ruleset</CodeAnalysisRuleSet>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release 4.5|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\4.5\Release\</OutputPath>
+    <DefineConstants>$(PlatformSym);TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>  
   <ItemGroup>
     <Reference Include="clojure.core.specs.alpha, Version=0.2.44.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\clojure.core.specs.alpha.0.2.44\lib\net35\clojure.core.specs.alpha.dll</HintPath>
@@ -93,12 +114,20 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net40\Microsoft.Dynamic.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Dynamic, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net45\Microsoft.Dynamic.dll</HintPath>
+    </Reference>	
     <Reference Include="Microsoft.Scripting" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net35\Microsoft.Scripting.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net40\Microsoft.Scripting.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net45\Microsoft.Scripting.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Scripting.AspNet" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net35\Microsoft.Scripting.AspNet.dll</HintPath>
@@ -107,8 +136,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net40\Microsoft.Scripting.AspNet.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Scripting.AspNet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net45\Microsoft.Scripting.AspNet.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Scripting.Metadata" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
-      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net35\Microsoft.Scripting.Metadata.dll</HintPath>
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net35\Micosoft.Scripting.Metadata.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Scripting.Core" Condition=" '$(TargetFrameworkVersion)' == 'v3.5' ">
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net35\Microsoft.Scripting.Core.dll</HintPath>
@@ -116,6 +149,10 @@
     <Reference Include="Microsoft.Scripting.Metadata, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net40\Microsoft.Scripting.Metadata.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.Metadata, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL" Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\DynamicLanguageRuntime.1.1.0\lib\Net45\Microsoft.Scripting.Metadata.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ServiceModel">

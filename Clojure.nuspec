@@ -12,6 +12,13 @@
         <tags>clojure clojureclr</tags>
     </metadata>
     <files>
+        <file src="bin\4.5\Release\ilmerge\Clojure.dll" target="lib\net45" />
+        <file src="bin\4.5\Release\Microsoft.Dynamic.dll" target="lib\net45" />
+        <file src="bin\4.5\Release\Microsoft.Scripting.dll" target="lib\net45" />
+        <file src="bin\4.5\Release\Clojure.Main.exe" target="tools\net45" />
+        <file src="bin\4.5\Release\Clojure.Compile.exe" target="tools\net45" />
+        <file src="bin\4.5\Release\clojure.core.specs.alpha.dll" target="lib\net45" />
+        <file src="bin\4.5\Release\clojure.spec.alpha.dll" target="lib\net45" />		
         <file src="bin\4.0\Release\ilmerge\Clojure.dll" target="lib\net40" />
         <file src="bin\4.0\Release\Microsoft.Dynamic.dll" target="lib\net40" />
         <file src="bin\4.0\Release\Microsoft.Scripting.dll" target="lib\net40" />
