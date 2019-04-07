@@ -642,7 +642,8 @@
   [flush-fn close-fn]
   (proxy [System.IO.StringWriter] []  
     (Flush [] 
-	      (proxy-super Flush)
+	      (let [^System.IO.StringWriter this this]
+	       (proxy-super Flush))
 	      (let [sb (.GetStringBuilder ^System.IO.StringWriter this)]
             (when (pos? (.Length sb))
               (flush-fn (.ToString sb)))
@@ -650,7 +651,8 @@
    (Close []
           (.Flush ^System.IO.StringWriter this)
           (when close-fn (close-fn))
-		  (proxy-super Close)
+		  (let [^System.IO.StringWriter this this]
+		    (proxy-super Close))
 		  nil)))
 
 
