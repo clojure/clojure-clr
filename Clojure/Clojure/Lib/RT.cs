@@ -37,238 +37,36 @@ namespace clojure.lang
         #region Default symbol-to-class map
 
         //simple-symbol->class
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "DEFAULT")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "IMPORTS")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
-        public static readonly IPersistentMap DEFAULT_IMPORTS = map(
-            //classes
-            Symbol.intern("AccessViolationException"), typeof(AccessViolationException),
-            Symbol.intern("ActivationContext"), typeof(ActivationContext),
-            Symbol.intern("Activator"), typeof(Activator),
-            Symbol.intern("AppDomain"), typeof(AppDomain),
-            Symbol.intern("AppDomainManager"), typeof(AppDomainManager),
-            Symbol.intern("AppDomainSetup"), typeof(AppDomainSetup),
-            Symbol.intern("AppDomainUnloadedException"), typeof(AppDomainUnloadedException),
-            Symbol.intern("ApplicationException"), typeof(ApplicationException),
-            Symbol.intern("ApplicationId"), typeof(ApplicationId),
-            Symbol.intern("ApplicationIdentity"), typeof(ApplicationIdentity),
-            Symbol.intern("ArgumentException"), typeof(ArgumentException),
-            Symbol.intern("ArgumentNullException"), typeof(ArgumentNullException),
-            Symbol.intern("ArgumentOutOfRangeException"), typeof(ArgumentOutOfRangeException),
-            Symbol.intern("ArithmeticException"), typeof(ArithmeticException),
-            Symbol.intern("Array"), typeof(Array),
-            Symbol.intern("ArrayTypeMismatchException"), typeof(ArrayTypeMismatchException),
-            Symbol.intern("AssemblyLoadEventArgs"), typeof(AssemblyLoadEventArgs),
-            Symbol.intern("Attribute"), typeof(Attribute),
-            Symbol.intern("AttributeUsageAttribute"), typeof(AttributeUsageAttribute),
-            Symbol.intern("BadImageFormatException"), typeof(BadImageFormatException),
-            Symbol.intern("BitConverter"), typeof(BitConverter),
-            Symbol.intern("Buffer"), typeof(Buffer),
-            Symbol.intern("CannotUnloadAppDomainException"), typeof(CannotUnloadAppDomainException),
-            Symbol.intern("CharEnumerator"), typeof(CharEnumerator),
-            Symbol.intern("CLSCompliantAttribute"), typeof(CLSCompliantAttribute),
-            Symbol.intern("Console"), typeof(Console),
-            Symbol.intern("ConsoleCancelEventArgs"), typeof(ConsoleCancelEventArgs),
-            Symbol.intern("ContextBoundObject"), typeof(ContextBoundObject),
-            //Symbol.intern("ContextMarshalException"), typeof(ContextMarshalException), -- obsolete
-            Symbol.intern("ContextStaticAttribute"), typeof(ContextStaticAttribute),
-            Symbol.intern("Convert"), typeof(Convert),
-            Symbol.intern("DataMisalignedException"), typeof(DataMisalignedException),
-            Symbol.intern("DBNull"), typeof(DBNull),
-            Symbol.intern("Delegate"), typeof(Delegate),
-            Symbol.intern("DivideByZeroException"), typeof(DivideByZeroException),
-            Symbol.intern("DllNotFoundException"), typeof(DllNotFoundException),
-            Symbol.intern("DuplicateWaitObjectException"), typeof(DuplicateWaitObjectException),
-            Symbol.intern("EntryPointNotFoundException"), typeof(EntryPointNotFoundException),
-            Symbol.intern("Enum"), typeof(Enum),
-            Symbol.intern("Environment"), typeof(Environment),
-            Symbol.intern("EventArgs"), typeof(EventArgs),
-            Symbol.intern("Exception"), typeof(Exception),
-#pragma warning disable 618
-            Symbol.intern("ExecutionEngineException"), typeof(ExecutionEngineException),
-#pragma warning restore 618
-            Symbol.intern("FieldAccessException"), typeof(FieldAccessException),
-            Symbol.intern("FileStyleUriParser"), typeof(FileStyleUriParser),
-            Symbol.intern("FlagsAttribute"), typeof(FlagsAttribute),
-            Symbol.intern("FormatException"), typeof(FormatException),
-            Symbol.intern("FtpStyleUriParser"), typeof(FtpStyleUriParser),
-            Symbol.intern("GC"), typeof(GC),
-            Symbol.intern("GenericUriParser"), typeof(GenericUriParser),
-            Symbol.intern("GopherStyleUriParser"), typeof(GopherStyleUriParser),
-            Symbol.intern("HttpStyleUriParser"), typeof(HttpStyleUriParser),
-            Symbol.intern("IndexOutOfRangeException"), typeof(IndexOutOfRangeException),
-            Symbol.intern("InsufficientMemoryException"), typeof(InsufficientMemoryException),
-            Symbol.intern("InvalidCastException"), typeof(InvalidCastException),
-            Symbol.intern("InvalidOperationException"), typeof(InvalidOperationException),
-            Symbol.intern("InvalidProgramException"), typeof(InvalidProgramException),
-            Symbol.intern("InvalidTimeZoneException"), typeof(InvalidTimeZoneException),
-            Symbol.intern("LdapStyleUriParser"), typeof(LdapStyleUriParser),
-            Symbol.intern("LoaderOptimizationAttribute"), typeof(LoaderOptimizationAttribute),
-            Symbol.intern("LocalDataStoreSlot"), typeof(LocalDataStoreSlot),
-            Symbol.intern("MarshalByRefObject"), typeof(MarshalByRefObject),
-            Symbol.intern("Math"), typeof(Math),
-            Symbol.intern("MemberAccessException"), typeof(MemberAccessException),
-            Symbol.intern("MethodAccessException"), typeof(MethodAccessException),
-            Symbol.intern("MissingFieldException"), typeof(MissingFieldException),
-            Symbol.intern("MissingMemberException"), typeof(MissingMemberException),
-            Symbol.intern("MTAThreadAttribute"), typeof(MTAThreadAttribute),
-            Symbol.intern("MulticastDelegate"), typeof(MulticastDelegate),
-            Symbol.intern("MulticastNotSupportedException"), typeof(MulticastNotSupportedException),
-            Symbol.intern("NetPipeStyleUriParser"), typeof(NetPipeStyleUriParser),
-            Symbol.intern("NetTcpStyleUriParser"), typeof(NetTcpStyleUriParser),
-            Symbol.intern("NewsStyleUriParser"), typeof(NewsStyleUriParser),
-            Symbol.intern("NonSerializedAttribute"), typeof(NonSerializedAttribute),
-            Symbol.intern("NotFiniteNumberException"), typeof(NotFiniteNumberException),
-            Symbol.intern("NotImplementedException"), typeof(NotImplementedException),
-            Symbol.intern("NotSupportedException"), typeof(NotSupportedException),
-            Symbol.intern("Nullable"), typeof(Nullable),
-            Symbol.intern("NullReferenceException"), typeof(NullReferenceException),
-            Symbol.intern("Object"), typeof(Object),
-            Symbol.intern("ObjectDisposedException"), typeof(ObjectDisposedException),
-            Symbol.intern("ObsoleteAttribute"), typeof(ObsoleteAttribute),
-            Symbol.intern("OperatingSystem"), typeof(OperatingSystem),
-            Symbol.intern("OperationCanceledException"), typeof(OperationCanceledException),
-            Symbol.intern("OutOfMemoryException"), typeof(OutOfMemoryException),
-            Symbol.intern("OverflowException"), typeof(OverflowException),
-            Symbol.intern("ParamArrayAttribute"), typeof(ParamArrayAttribute),
-            Symbol.intern("PlatformNotSupportedException"), typeof(PlatformNotSupportedException),
-            Symbol.intern("Random"), typeof(Random),
-            Symbol.intern("RankException"), typeof(RankException),
-            Symbol.intern("ResolveEventArgs"), typeof(ResolveEventArgs),
-            Symbol.intern("SerializableAttribute"), typeof(SerializableAttribute),
-            Symbol.intern("StackOverflowException"), typeof(StackOverflowException),
-            Symbol.intern("STAThreadAttribute"), typeof(STAThreadAttribute),
-            Symbol.intern("String"), typeof(String),
-            Symbol.intern("StringComparer"), typeof(StringComparer),
-            Symbol.intern("SystemException"), typeof(SystemException),
-            Symbol.intern("ThreadStaticAttribute"), typeof(ThreadStaticAttribute),
-            Symbol.intern("TimeoutException"), typeof(TimeoutException),
-            Symbol.intern("TimeZone"), typeof(TimeZone),
-            Symbol.intern("TimeZoneInfo"), typeof(TimeZoneInfo),
-            Symbol.intern("TimeZoneNotFoundException"), typeof(TimeZoneNotFoundException),
-            // Symbol.intern("TimeZoneInfo.AdjustmentRule"),typeof(TimeZoneInfo.AdjustmentRule),
-            Symbol.intern("Type"), typeof(Type),
-            Symbol.intern("TypeInitializationException"), typeof(TypeInitializationException),
-            Symbol.intern("TypeLoadException"), typeof(TypeLoadException),
-            Symbol.intern("TypeUnloadedException"), typeof(TypeUnloadedException),
-            Symbol.intern("UnauthorizedAccessException"), typeof(UnauthorizedAccessException),
-            Symbol.intern("UnhandledExceptionEventArgs"), typeof(UnhandledExceptionEventArgs),
-            Symbol.intern("Uri"), typeof(Uri),
-            Symbol.intern("UriBuilder"), typeof(UriBuilder),
-            Symbol.intern("UriFormatException"), typeof(UriFormatException),
-            Symbol.intern("UriParser"), typeof(UriParser),
-            // Symbol.intern(""),typeof(UriTemplate),
-            // Symbol.intern(""),typeof(UriTemplateEquivalenceComparer),
-            // Symbol.intern(""),typeof(UriTemplateMatch),
-            // Symbol.intern(""),typeof(UriTemplateMatchException),
-            // Symbol.intern(""),typeof(UriTemplateTable),
-            Symbol.intern("UriTypeConverter"), typeof(UriTypeConverter),
-            Symbol.intern("ValueType"), typeof(ValueType),
-            Symbol.intern("Version"), typeof(Version),
-            Symbol.intern("WeakReference"), typeof(WeakReference),
-            // structures/
-            Symbol.intern("ArgIterator"), typeof(ArgIterator),
-            // Symbol.intern(""),typeof(ArraySegment<T>),
-            Symbol.intern("Boolean"), typeof(Boolean),
-            Symbol.intern("Byte"), typeof(Byte),
-            Symbol.intern("Char"), typeof(Char),
-            Symbol.intern("ConsoleKeyInfo"), typeof(ConsoleKeyInfo),
-            Symbol.intern("DateTime"), typeof(DateTime),
-            Symbol.intern("DateTimeOffset"), typeof(DateTimeOffset),
-            Symbol.intern("Decimal"), typeof(Decimal),
-            Symbol.intern("Double"), typeof(Double),
-            Symbol.intern("Guid"), typeof(Guid),
-            Symbol.intern("Int16"), typeof(Int16),
-            Symbol.intern("Int32"), typeof(Int32),
-            Symbol.intern("Int64"), typeof(Int64),
-            Symbol.intern("IntPtr"), typeof(IntPtr),
-            Symbol.intern("ModuleHandle"), typeof(ModuleHandle),
-            // Symbol.intern(""),typeof(Nullable<T>),
-            Symbol.intern("RuntimeArgumentHandle"), typeof(RuntimeArgumentHandle),
-            Symbol.intern("RuntimeFieldHandle"), typeof(RuntimeFieldHandle),
-            Symbol.intern("RuntimeMethodHandle"), typeof(RuntimeMethodHandle),
-            Symbol.intern("RuntimeTypeHandle"), typeof(RuntimeTypeHandle),
-            Symbol.intern("SByte"), typeof(SByte),
-            Symbol.intern("Single"), typeof(Single),
-            Symbol.intern("TimeSpan"), typeof(TimeSpan),
-            Symbol.intern("TimeZoneInfo.TransitionTime"), typeof(TimeZoneInfo.TransitionTime),
-            Symbol.intern("TypedReference"), typeof(TypedReference),
-            Symbol.intern("UInt16"), typeof(UInt16),
-            Symbol.intern("UInt32"), typeof(UInt32),
-            Symbol.intern("UInt64"), typeof(UInt64),
-            Symbol.intern("UIntPtr"), typeof(UIntPtr),
-            // Symbol.intern(""),typeof(Void),
-            // interfaces/
-            //Symbol.intern("AppDomain"), typeof(AppDomain),
-            Symbol.intern("IAppDomainSetup"), typeof(IAppDomainSetup),
-            Symbol.intern("IAsyncResult"), typeof(IAsyncResult),
-            Symbol.intern("ICloneable"), typeof(ICloneable),
-            Symbol.intern("IComparable"), typeof(IComparable),
-            //Symbol.intern(""),typeof(IComparable<T>),
-            Symbol.intern("IConvertible"), typeof(IConvertible),
-            Symbol.intern("ICustomFormatter"), typeof(ICustomFormatter),
-            Symbol.intern("IDisposable"), typeof(IDisposable),
-            //Symbol.intern(""),typeof(IEquatable<T>),
-            Symbol.intern("IFormatProvider"), typeof(IFormatProvider),
-            Symbol.intern("IFormattable"), typeof(IFormattable),
-            Symbol.intern("IServiceProvider"), typeof(IServiceProvider),
-            // delegates/
-            Symbol.intern("Action"), typeof(Action),
-            // Symbol.intern(""),typeof(Action<T>/
-            // Symbol.intern(""),typeof(Action<T1,T2>/
-            // Symbol.intern(""),typeof(Action<T1,T2,T3>/
-            // Symbol.intern(""),typeof(Action<T1,T2,T3,T4>/
-            Symbol.intern("AppDomainInitializer"), typeof(AppDomainInitializer),
-            Symbol.intern("AssemblyLoadEventHandler"), typeof(AssemblyLoadEventHandler),
-            Symbol.intern("AsyncCallback"), typeof(AsyncCallback),
-            // Symbol.intern(""),typeof(Comparison<T>),
-            Symbol.intern("ConsoleCancelEventHandler"), typeof(ConsoleCancelEventHandler),
-            //Symbol.intern(""),typeof(Converter<TInput,TOutput>),
-            Symbol.intern("CrossAppDomainDelegate"), typeof(CrossAppDomainDelegate),
-            Symbol.intern("EventHandler"), typeof(EventHandler),
-            // Symbol.intern(""),typeof(EventHandler<TEventArgs>),
-            // Symbol.intern(""),typeof(Func<TResult>),
-            // Symbol.intern(""),typeof(Func<T,TResult>/
-            // Symbol.intern(""),typeof(Func<T1, T2, TResult>/
-            // Symbol.intern(""),typeof(Func<T1, T2, T3, TResult>/
-            // FSymbol.intern(""),typeof(Func<T1, T2, T3, T4, TResult>/
-            // Symbol.intern(""),typeof(Predicate<T>),
-            Symbol.intern("ResolveEventHandler"), typeof(ResolveEventHandler),
-            Symbol.intern("UnhandledExceptionEventHandler"), typeof(UnhandledExceptionEventHandler),
-            // Enumerations/
-            Symbol.intern("ActivationContext.ContextForm"), typeof(ActivationContext.ContextForm),
-            Symbol.intern("AppDomainManagerInitializationOptions"), typeof(AppDomainManagerInitializationOptions),
-            Symbol.intern("AttributeTargets"), typeof(AttributeTargets),
-            Symbol.intern("Base64FormattingOptions"), typeof(Base64FormattingOptions),
-            Symbol.intern("ConsoleColor"), typeof(ConsoleColor),
-            Symbol.intern("ConsoleKey"), typeof(ConsoleKey),
-            Symbol.intern("ConsoleModifiers"), typeof(ConsoleModifiers),
-            Symbol.intern("ConsoleSpecialKey"), typeof(ConsoleSpecialKey),
-            Symbol.intern("DateTimeKind"), typeof(DateTimeKind),
-            Symbol.intern("DayOfWeek"), typeof(DayOfWeek),
-            Symbol.intern("Environment.SpecialFolder"), typeof(Environment.SpecialFolder),
-            Symbol.intern("EnvironmentVariableTarget"), typeof(EnvironmentVariableTarget),
-            Symbol.intern("GCCollectionMode"), typeof(GCCollectionMode),
-            Symbol.intern("GenericUriParserOptions"), typeof(GenericUriParserOptions),
-            Symbol.intern("LoaderOptimization"), typeof(LoaderOptimization),
-            Symbol.intern("MidpointRounding"), typeof(MidpointRounding),
-            Symbol.intern("PlatformID"), typeof(PlatformID),
-            Symbol.intern("StringComparison"), typeof(StringComparison),
-            Symbol.intern("StringSplitOptions"), typeof(StringSplitOptions),
-            Symbol.intern("TypeCode"), typeof(TypeCode),
-            Symbol.intern("UriComponents"), typeof(UriComponents),
-            Symbol.intern("UriFormat"), typeof(UriFormat),
-            Symbol.intern("UriHostNameType"), typeof(UriHostNameType),
-            Symbol.intern("UriIdnScope"), typeof(UriIdnScope),
-            Symbol.intern("UriKind"), typeof(UriKind),
-            Symbol.intern("UriPartial"), typeof(UriPartial),
-            // ADDED THESE TO SUPPORT THE BOOTSTRAPPING IN THE JAVA CORE.CLJ
-            Symbol.intern("StringBuilder"), typeof(StringBuilder),
-            Symbol.intern("BigInteger"), typeof(clojure.lang.BigInteger),
-            Symbol.intern("BigDecimal"), typeof(clojure.lang.BigDecimal)
-            //Symbol.intern("Environment"), typeof(System.Environment)
-     );
+        public static readonly IPersistentMap DefaultImports = PersistentHashMap.create((IDictionary)CreateDefaultImportDictionary());
 
+        static Dictionary<Symbol,Type> CreateDefaultImportDictionary()
+        {
+            var q = GetAllTypesInNamespace("System");
+            var d = q.ToDictionary(keySelector: t => Symbol.intern(t.Name));
+
+            // ADDED THESE TO SUPPORT THE BOOTSTRAPPING IN THE JAVA CORE.CLJ
+            d.Add(Symbol.intern("StringBuilder"), typeof(StringBuilder));
+            d.Add(Symbol.intern("BigInteger"), typeof(clojure.lang.BigInteger));
+            d.Add(Symbol.intern("BigDecimal"), typeof(clojure.lang.BigDecimal));
+
+            return d;
+        }
+
+        static IEnumerable<Type> GetAllTypesInNamespace(string nspace)
+        {
+            var q = AppDomain.CurrentDomain.GetAssemblies()
+                       .SelectMany(t => t.GetTypes())
+                       .Where(t => (t.IsClass || t.IsInterface || t.IsValueType) &&
+                                    t.Namespace == nspace &&
+                                    t.IsPublic &&
+                                    !t.IsGenericTypeDefinition &&
+                                    !t.Name.StartsWith("_") &&
+                                    !t.Name.StartsWith("<"));
+           
+            return q; 
+        }
+
+     
         #endregion
 
         #region Some misc. goodies

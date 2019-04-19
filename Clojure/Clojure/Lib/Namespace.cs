@@ -152,7 +152,7 @@ namespace clojure.lang
             : base(name.meta())
         {
             _name = name;
-            _mappings.Set(RT.DEFAULT_IMPORTS);
+            _mappings.Set(RT.DefaultImports);
             _aliases.Set(RT.map());
         }
 
