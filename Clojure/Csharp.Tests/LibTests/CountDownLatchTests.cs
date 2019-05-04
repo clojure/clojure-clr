@@ -13,17 +13,15 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using NUnit.Framework;
+using static NUnit.StaticExpect.Expectations;
 using clojure.lang;
 using System.Threading;
 
 namespace Clojure.Tests.LibTests
 {
     [TestFixture]
-    public class CountDownLatchTests : AssertionHelper
+    public class CountDownLatchTests
     {
 
         static int _count = 0;

@@ -13,11 +13,9 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using NUnit.Framework;
+using static NUnit.StaticExpect.Expectations;
 
 using clojure.lang;
 
@@ -26,7 +24,7 @@ namespace Clojure.Tests.LibTests
     /// <summary>
     /// Base class for testing the IMeta interface functionality.
     /// </summary>
-    public abstract class IObjTests : AssertionHelper
+    public abstract class IObjTests
     {
         /// <summary>
         /// Object to test for null meta.  Set null if no test.  Initialize in Setup.

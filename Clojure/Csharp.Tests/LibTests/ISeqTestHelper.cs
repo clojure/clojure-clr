@@ -14,14 +14,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
+using static NUnit.StaticExpect.Expectations;
 using clojure.lang;
 
 namespace Clojure.Tests.LibTests
 {
-    public class ISeqTestHelper : AssertionHelper
+    public class ISeqTestHelper
     {
         public void VerifyISeqContents(ISeq s, IList<object> values)
         {

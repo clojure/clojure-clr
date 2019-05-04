@@ -13,11 +13,9 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using NUnit.Framework;
+using static NUnit.StaticExpect.Expectations;
 
 using clojure.lang;
 
@@ -28,7 +26,7 @@ namespace Clojure.Tests.LibTests
     // TODO: Add tests for APersistentVector.SubVector
 
     [TestFixture]
-    public class APersistentVectorTests : AssertionHelper
+    public class APersistentVectorTests
     {
         #region Concrete persistent vector
 

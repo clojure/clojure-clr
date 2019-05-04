@@ -12,19 +12,15 @@
  *   Author: David Miller
  **/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using NUnit.Framework;
-
+using static NUnit.StaticExpect.Expectations;
 using clojure.lang;
 
 
 namespace Clojure.Tests.LibTests
 {
-    public abstract class RangeTestHelper : AssertionHelper
+    public abstract class RangeTestHelper
     {
         #region Data
 

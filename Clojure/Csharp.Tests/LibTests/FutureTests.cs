@@ -1,8 +1,6 @@
-﻿﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using System.Threading;
+using static NUnit.StaticExpect.Expectations;
 
 using NUnit.Framework;
 
@@ -11,7 +9,7 @@ using clojure.lang;
 namespace Clojure.Tests.LibTests
 {
     [TestFixture]
-    public class FutureTests : AssertionHelper
+    public class FutureTests
     {
         [Test]
         public void ComputesTheValueOnAnotherThread()

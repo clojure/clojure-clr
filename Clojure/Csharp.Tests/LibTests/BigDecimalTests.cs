@@ -13,15 +13,11 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 
 using NUnit.Framework;
+using static NUnit.StaticExpect.Expectations;
 using clojure.lang;
-
-using System.Text.RegularExpressions;
 
 namespace Clojure.Tests.LibTests
 {
@@ -54,7 +50,7 @@ namespace Clojure.Tests.LibTests
     /// </code>
     /// </remarks>
     [TestFixture]
-    public class BigDecimalTests : AssertionHelper
+    public class BigDecimalTests
     {
         #region test parsing support
 

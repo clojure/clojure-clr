@@ -13,14 +13,11 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 
 using NUnit.Framework;
-
+using static NUnit.StaticExpect.Expectations;
 using clojure.lang;
 //using BigDecimal = java.math.BigDecimal;
 
@@ -28,7 +25,7 @@ using clojure.lang;
 namespace Clojure.Tests.LibTests
 {
     [TestFixture]
-    public class LispReaderTests : AssertionHelper
+    public class LispReaderTests
     {
         #region matchNumber tests
 

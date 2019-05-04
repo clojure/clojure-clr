@@ -13,18 +13,16 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using NUnit.Framework;
+using static NUnit.StaticExpect.Expectations;
 using clojure.lang;
 
 
 namespace Clojure.Tests.LibTests
 {
     [TestFixture]
-    public class BigIntegerTests : AssertionHelper
+    public class BigIntegerTests
     {
 
         #region Basic accessor tests

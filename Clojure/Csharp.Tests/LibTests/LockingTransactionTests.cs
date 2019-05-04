@@ -12,21 +12,14 @@
  *   Author: David Miller
  **/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 
 using NUnit.Framework;
-
-using clojure.lang;
 
 namespace Clojure.Tests.LibTests
 {
     // TODO: Add tests for LockingTransaction
     [TestFixture]
-    public class LockingTransactionTests : AssertionHelper
+    public class LockingTransactionTests
     {
         //// TODO: Make this work.
 

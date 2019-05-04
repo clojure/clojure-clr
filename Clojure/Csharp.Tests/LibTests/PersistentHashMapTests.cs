@@ -14,19 +14,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
 
 using NUnit.Framework;
-
+using static NUnit.StaticExpect.Expectations;
 using clojure.lang;
 
 
 namespace Clojure.Tests.LibTests
 {
     [TestFixture]
-    public class PersistentHashMapTests : AssertionHelper
+    public class PersistentHashMapTests
     {
         #region C-tor tests
 

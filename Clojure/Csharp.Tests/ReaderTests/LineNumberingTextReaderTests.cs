@@ -12,20 +12,16 @@
  *   Author: David Miller
  **/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using NUnit.Framework;
-
+using static NUnit.StaticExpect.Expectations;
 using clojure.lang;
 using System.IO;
 
 namespace Clojure.Tests.ReaderTests
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable"), TestFixture]
-    public class LineNumberingTextReaderTests : AssertionHelper
+    public class LineNumberingTextReaderTests
     {
         const string _sample = "abc\nde\nfghijk\r\nlmnopq\n\nrstuv";
         StringReader _sr;

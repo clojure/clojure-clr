@@ -13,24 +13,19 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using NUnit.Framework;
-
+using static NUnit.StaticExpect.Expectations;
 using clojure.lang;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.IO;
-using System.Diagnostics;
 
 
 namespace Clojure.Tests.LibTests
 {
 
     [TestFixture]
-    public class GenProxyObjectOnlyTests : AssertionHelper
+    public class GenProxyObjectOnlyTests
     {
         Type _proxyType;
 
@@ -58,7 +53,7 @@ namespace Clojure.Tests.LibTests
     }
 
     [TestFixture]
-    public class GenProxyBasicSuperNoInterfaceTests : AssertionHelper
+    public class GenProxyBasicSuperNoInterfaceTests
     {
         public class Impl1
         {
@@ -122,7 +117,7 @@ namespace Clojure.Tests.LibTests
     }
 
     [TestFixture]
-    public class GenProxyBasicSuperOneInterfaceTests : AssertionHelper
+    public class GenProxyBasicSuperOneInterfaceTests
     {
         public class Impl1
         {
@@ -188,7 +183,7 @@ namespace Clojure.Tests.LibTests
     }
 
     [TestFixture]
-    public class GenProxyBasicSuperOneInterfaceMethodOverlapTests : AssertionHelper
+    public class GenProxyBasicSuperOneInterfaceMethodOverlapTests
     {
         public class Impl1
         {
@@ -248,7 +243,7 @@ namespace Clojure.Tests.LibTests
     }
 
     [TestFixture]
-    public class GenProxyBasicSuperTwoInterfacesTests : AssertionHelper
+    public class GenProxyBasicSuperTwoInterfacesTests
     {
         public class Impl1
         {
@@ -294,7 +289,7 @@ namespace Clojure.Tests.LibTests
     }
 
     [TestFixture]
-    public class GenProxyIProxyTests : AssertionHelper
+    public class GenProxyIProxyTests
     {
         public class Impl1
         {
@@ -537,7 +532,7 @@ namespace Clojure.Tests.LibTests
     }
 
     [TestFixture]
-    public class GenProxyMultipleBaseCtorsTests : AssertionHelper
+    public class GenProxyMultipleBaseCtorsTests
     {
         public class Impl1
         {
@@ -607,7 +602,7 @@ namespace Clojure.Tests.LibTests
     }
 
     [TestFixture]
-    public class GenProxyInheritedInterfaceTests : AssertionHelper
+    public class GenProxyInheritedInterfaceTests
     {
 
         public class Impl1
@@ -659,7 +654,7 @@ namespace Clojure.Tests.LibTests
     }
 
     [TestFixture]
-    public class GenProxyRealisticTests : AssertionHelper
+    public class GenProxyRealisticTests
     {
         // This example sets up a proxy for System.IO.TextWriter that converts all characters to upper case.
         // The original code (in Clojure) from clojure-contrib is here:
@@ -793,7 +788,7 @@ namespace Clojure.Tests.LibTests
     #region A little test for myself
 
     //[TestFixture]
-    public class SanityCheck : AssertionHelper
+    public class SanityCheck
     {
         public interface I1
         {
@@ -909,7 +904,7 @@ namespace Clojure.Tests.LibTests
     }
 
     //[TestFixture]
-    public class SanityCheck2 : AssertionHelper
+    public class SanityCheck2
     {
         public abstract class C1
         {

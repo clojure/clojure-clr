@@ -13,18 +13,16 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using NUnit.Framework;
+using static NUnit.StaticExpect.Expectations;
 
 using clojure.lang;
 
 namespace Clojure.Tests.LibTests
 {
     [TestFixture]
-    public class LazilyPersistentVectorTests : AssertionHelper
+    public class LazilyPersistentVectorTests
     {
         #region C-tor tests
 

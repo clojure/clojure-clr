@@ -14,23 +14,20 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
 using NUnit.Framework;
-
+using static NUnit.StaticExpect.Expectations;
 using clojure.lang;
 
 
 namespace Clojure.Tests.LibTests
 {
     [TestFixture]
-    public class SymbolTests : AssertionHelper
-    {
-
+    public class SymbolTests
+    { 
         #region c-tor tests
 
         [Test]
