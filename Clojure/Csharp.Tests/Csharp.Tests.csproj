@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -15,7 +15,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Clojure.Source\Clojure.Source.csproj" />
     <ProjectReference Include="..\Clojure\Clojure.csproj" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="dotnet publish &quot;$(ProjectFileName)&quot; --no-build -o pub&#xD;&#xA;xcopy /C /Y &quot;$(ProjectDir)\pub\*.dll&quot; &quot;$(OutDir)&quot;&#xD;&#xA;" />
+  </Target>
 
 </Project>
