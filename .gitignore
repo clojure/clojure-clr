@@ -360,4 +360,4 @@ MigrationBackup/
 *~
 # Java artifacts
 *.class
-
+pub/
