@@ -245,7 +245,7 @@ namespace clojure.lang
         public static readonly Var AgentVar
             = Var.intern(ClojureNamespace, Symbol.intern("*agent*"), null).setDynamic();
 
-        static Object _readeval = ReadTrueFalseUnknown(Environment.GetEnvironmentVariable("CLOJURE_READ_EVAL") ?? Environment.GetEnvironmentVariable("clojure.read.eval") ?? "true");
+        static readonly Object _readeval = ReadTrueFalseUnknown(Environment.GetEnvironmentVariable("CLOJURE_READ_EVAL") ?? Environment.GetEnvironmentVariable("clojure.read.eval") ?? "true");
             
         public static readonly Var ReadEvalVar
             = Var.intern(ClojureNamespace, Symbol.intern("*read-eval*"),_readeval).setDynamic();
@@ -340,10 +340,9 @@ namespace clojure.lang
 
         static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
         {
-            Assembly containingAsm;
-            var asmName = new AssemblyName(args.Name);
+            AssemblyName asmName = new AssemblyName(args.Name);
             var name = asmName.Name;
-            var stream = GetEmbeddedResourceStream(name, out containingAsm);
+            var stream = GetEmbeddedResourceStream(name, out Assembly containingAsm);
             if(stream == null)
             {
                 name = name + ".dll";
@@ -594,15 +593,10 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq seq(object coll)
         {
-            ASeq aseq = coll as ASeq;
-            if (aseq != null)
+            if (coll is ASeq aseq)
                 return aseq;
 
-            LazySeq lseq = coll as LazySeq;
-            if (lseq != null)
-                return lseq.seq();
-            else
-                return seqFrom(coll);
+            return coll is LazySeq lseq ? lseq.seq() : seqFrom(coll);
         }
 
         // N.B. canSeq must be kept in sync with this!
@@ -612,19 +606,16 @@ namespace clojure.lang
             if (coll == null)
                 return null;
 
-            Seqable seq = coll as Seqable;
-            if (seq != null)
+            if (coll is Seqable seq)
                 return seq.seq();
 
             if (coll.GetType().IsArray)
                 return ArraySeq.createFromObject(coll);
 
-            String str = coll as String;
-            if (str != null)
+            if (coll is string str)
                 return StringSeq.create(str);
 
-            IEnumerable ie = coll as IEnumerable;
-            if (ie != null)  // java: Iterable  -- reordered clauses so others take precedence.
+            if (coll is IEnumerable ie)  // java: Iterable  -- reordered clauses so others take precedence.
                 return chunkEnumeratorSeq(ie.GetEnumerator());            // chunkIteratorSeq
 
             // The equivalent for Java:Map is IDictionary.  IDictionary is IEnumerable, so is handled above.
@@ -665,16 +656,14 @@ namespace clojure.lang
                 return NullIterator().GetEnumerator();
 
             // handled by IEnumerable case above
-            IDictionary dict = coll as IDictionary;
-            if (dict != null)
+            if (coll is IDictionary dict)
                 return dict.GetEnumerator();
 
-            IEnumerable able = coll as IEnumerable;  // reordered
-            if (able != null)
-                return able.GetEnumerator();
+            // reordered
+            if (coll is IEnumerable ie)
+                return ie.GetEnumerator();
 
-            string str = coll as string;
-            if (str != null)
+            if (coll is string str)
                 return StringIterator(str).GetEnumerator();
 
             if (coll.GetType().IsArray)
@@ -692,8 +681,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq keys(object coll)
         {
-            IPersistentMap ipm = coll as IPersistentMap;
-            if (ipm != null)
+            if (coll is IPersistentMap ipm)
                 return APersistentMap.KeySeq.createFromMap(ipm);
             return APersistentMap.KeySeq.create(seq(coll));
         }
@@ -701,8 +689,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static ISeq vals(object coll)
         {
-            IPersistentMap ipm = coll as IPersistentMap;
-            if (ipm != null)
+            if (coll is IPersistentMap ipm)
                 return APersistentMap.ValSeq.createFromMap(ipm);
             return APersistentMap.ValSeq.create(seq(coll));
         }
@@ -710,15 +697,13 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static IPersistentMap meta(object x)
         {
-            IMeta m = x as IMeta;
-            return m != null ? m.meta() : null;
+            return x is IMeta m ? m.meta() : null;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public static int count(object o)
         {
-            Counted c = o as Counted;
-            return c != null ? c.count() : CountFrom(Util.Ret1(o,o=null));
+            return o is Counted c ? c.count() : CountFrom(Util.Ret1(o, o = null));
         }
 
         static int CountFrom(object o)
@@ -740,16 +725,13 @@ namespace clojure.lang
                 return i;
             }
 
-            String str = o as string;
-            if (str != null)
+            if (o is string str)
                 return str.Length;
 
-            ICollection c = o as ICollection;
-            if (c != null)
+            if (o is ICollection c)
                 return c.Count;
 
-            IDictionary d = o as IDictionary;
-            if (d != null)
+            if (o is IDictionary d)
                 return d.Count;
 
             if (o is DictionaryEntry)
@@ -758,8 +740,7 @@ namespace clojure.lang
             if (o.GetType().IsGenericType && o.GetType().Name == "KeyValuePair`2")
                 return 2;
 
-            Array a = o as Array;
-            if (a != null)
+            if (o is Array a)
                 return a.GetLength(0);
 
             throw new InvalidOperationException("count not supported on this type: " + Util.NameForType(o.GetType()));
@@ -779,9 +760,8 @@ namespace clojure.lang
             if (coll == null)
                 return new PersistentList(x);
 
-            ISeq s = coll as ISeq;
 
-            if (s != null)
+            if (coll is ISeq s)
                 return new Cons(x, s);
 
             return new Cons(x, seq(coll));
@@ -859,9 +839,8 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object get(Object coll, Object key)
         {
-            ILookup ilu = coll as ILookup;
 
-            if (ilu != null)
+            if (coll is ILookup ilu)
                 return ilu.valAt(key);
 
             return GetFrom(coll, key);
@@ -872,15 +851,13 @@ namespace clojure.lang
             if (coll == null)
                 return null;
 
-            IDictionary m = coll as IDictionary;
-            if (m != null)
+            if (coll is IDictionary m)
                 return m[key];
 
 
-            IPersistentSet set = coll as IPersistentSet;
-            if (set != null)
+            if (coll is IPersistentSet set)
                 return set.get(key);
-            
+
 
             if (Util.IsNumeric(key) && (coll is string || coll.GetType().IsArray))
             {
@@ -888,20 +865,17 @@ namespace clojure.lang
                 return n >= 0 && n < count(coll) ? nth(coll, n) : null;
             }
 
-            ITransientSet tset = coll as ITransientSet;
-            if (tset != null)
+            if (coll is ITransientSet tset)
                 return tset.get(key);
-            
+
             return null;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object get(Object coll, Object key, Object notFound)
         {
-            ILookup ilu = coll as ILookup;
-
-             if (ilu != null)
-                return ilu.valAt(key,notFound);
+            if (coll is ILookup ilu)
+                return ilu.valAt(key, notFound);
 
             return GetFrom(coll, key, notFound);
         }
@@ -911,37 +885,34 @@ namespace clojure.lang
            if (coll == null)
                 return notFound;
 
-                IDictionary m = coll as IDictionary;
 
-            if (m != null)
+            if (coll is IDictionary m)
             {
                 if (m.Contains(key))
                     return m[key];
                 return notFound;
             }
 
-            IPersistentSet set = coll as IPersistentSet;
-            if (set != null)
+            if (coll is IPersistentSet set)
             {
                 if (set.contains(key))
                     return set.get(key);
                 return notFound;
             }
-            
+
             if (Util.IsNumeric(key) && (coll is string || coll.GetType().IsArray))
             {
                 int n = Util.ConvertToInt(key);
                 return n >= 0 && n < count(coll) ? nth(coll, n) : notFound;
             }
 
-            ITransientSet tset = coll as ITransientSet;
-            if ( tset != null )
+            if (coll is ITransientSet tset)
             {
                 if (tset.contains(key))
                     return tset.get(key);
                 return notFound;
             }
-            
+
             return notFound;
         }
 
@@ -960,24 +931,21 @@ namespace clojure.lang
                 //return RT.F;
                 return false;
 
-            Associative assoc = coll as Associative;
-            if (assoc != null)
+            if (coll is Associative assoc)
                 //return ((Associative)coll).containsKey(key) ? RT.T : RT.F;
                 return assoc.containsKey(key);
 
-            IPersistentSet set = coll as IPersistentSet;
-            if (set != null)
+            if (coll is IPersistentSet set)
                 //return ((IPersistentSet)coll).contains(key) ? RT.T : RT.F;
                 return set.contains(key);
 
 
-            IDictionary m = coll as IDictionary;
-            if (m != null)
+            if (coll is IDictionary m)
             {
                 //return m.Contains(key) ? RT.T : RT.F;
                 return key != null && m.Contains(key);
             }
-            
+
 #if CLR2
             // ISet<T> does not exist for CLR2
             // TODO: Make this work for HashSet<T> no matter the T
@@ -989,8 +957,7 @@ namespace clojure.lang
             }
 #else
             // TODO: Make this work for ISet<T> no matter the T
-            ISet<Object> iso = coll as ISet<Object>;
-            if (iso != null )
+            if (coll is ISet<object> iso)
             {
                 // return  iso.Contains(key) ? RT.T : RT.F;
                 return iso.Contains(key);
@@ -1003,12 +970,10 @@ namespace clojure.lang
                 return n >= 0 && n < count(coll);
             }
 
-            ITransientSet tset = coll as ITransientSet;
-            if (tset != null)
+            if (coll is ITransientSet tset)
                 return tset.contains(key);  // RT.T, RT.F
 
-            ITransientAssociative2 ta2 = coll as ITransientAssociative2;
-            if (ta2 != null)
+            if (coll is ITransientAssociative2 ta2)
                 return ta2.containsKey(key);    // RT.T, RT.F
 
             throw new ArgumentException("contains? not supported on type: " + coll.GetType().Name);
@@ -1020,20 +985,17 @@ namespace clojure.lang
             if (coll == null)
                 return null;
 
-            Associative assoc = coll as Associative;
-            if (assoc != null)
+            if (coll is Associative assoc)
                 return assoc.entryAt(key);
 
-            IDictionary m = coll as IDictionary;
-            if (m != null)
+            if (coll is IDictionary m)
             {
                 if (m.Contains(key))
                     return MapEntry.create(key, m[key]);
                 return null;
             }
 
-            ITransientAssociative2 ta2 = coll as ITransientAssociative2;
-            if (ta2 != null)
+            if (coll is ITransientAssociative2 ta2)
                 return ta2.entryAt(key);
 
             return null;
@@ -1069,9 +1031,8 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object nth(object coll, int n)
         {
-            Indexed indexed = coll as Indexed;
 
-            if (indexed != null)
+            if (coll is Indexed indexed)
                 return indexed.nth((int)n);
 
             return NthFrom(Util.Ret1(coll, coll = null), (int)n);
@@ -1082,8 +1043,7 @@ namespace clojure.lang
             if (coll == null)
                 return null;
 
-            String str = coll as String; 
-            if (str != null)
+            if (coll is string str)
                 return str[n];
 
             if (coll.GetType().IsArray)
@@ -1092,28 +1052,24 @@ namespace clojure.lang
             // Java has RandomAccess here.  CLR has no equiv.
             // Trying to replace it with IList caused some real problems,  See the fix in ASeq.
 
-            IList ilist = coll as IList;
-            if (ilist != null)
+            if (coll is IList ilist)
                 return ilist[n];
 
-            JReMatcher jrem = coll as JReMatcher;
-            if (jrem != null)
+            if (coll is JReMatcher jrem)
                 return jrem.group(n);
 
-            Match match = coll as Match;
-            if (match != null)
+            if (coll is Match match)
                 return match.Groups[n];
-            
-            if (coll is DictionaryEntry)
+
+            if (coll is DictionaryEntry e)
             {
-                DictionaryEntry e = (DictionaryEntry)coll;
                 if (n == 0)
                     return e.Key;
                 else if (n == 1)
                     return e.Value;
                 throw new ArgumentOutOfRangeException("n");
             }
-            
+
             if (coll.GetType().IsGenericType && coll.GetType().Name == "KeyValuePair`2")
             {
                 if (n == 0)
@@ -1123,8 +1079,7 @@ namespace clojure.lang
                 throw new ArgumentOutOfRangeException("n");
             }
 
-            IMapEntry me = coll as IMapEntry;
-            if (me != null)
+            if (coll is IMapEntry me)
             {
                 if (n == 0)
                     return me.key();
@@ -1157,10 +1112,9 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         static public Object nth(Object coll, int n, Object notFound)
         {
-            Indexed v = coll as Indexed;
 
-            if (v != null)
-                return v.nth(n,notFound);
+            if (coll is Indexed v)
+                return v.nth(n, notFound);
 
             return NthFrom(coll, n, notFound);
         }
@@ -1174,9 +1128,7 @@ namespace clojure.lang
             if (n < 0)
                 return notFound;
 
-            String s = coll as String;
-
-            if (s != null)
+            if (coll is string s)
             {
                 if (n < s.Length)
                     return s[n];
@@ -1203,8 +1155,7 @@ namespace clojure.lang
             //    return notFound;
             //}
 
-            JReMatcher jrem = coll as JReMatcher;
-            if (jrem != null)
+            if (coll is JReMatcher jrem)
             {
                 if (jrem.IsUnrealizedOrFailed)
                     return notFound;
@@ -1213,25 +1164,23 @@ namespace clojure.lang
                 return notFound;
             }
 
-            Match m = coll as Match;
-            if ( m != null)
+            if (coll is Match m)
             {
                 if (n < m.Groups.Count)
                     return m.Groups[n];
                 return notFound;
             }
-            
-            
-            if (coll is DictionaryEntry)
+
+
+            if (coll is DictionaryEntry e)
             {
-                DictionaryEntry e = (DictionaryEntry)coll;
                 if (n == 0)
                     return e.Key;
                 else if (n == 1)
                     return e.Value;
                 return notFound;
             }
-            
+
             if (coll.GetType().IsGenericType && coll.GetType().Name == "KeyValuePair`2")
             {
                 if (n == 0)
@@ -1241,8 +1190,7 @@ namespace clojure.lang
                 return notFound;
             }
 
-            IMapEntry me = coll as IMapEntry;
-            if (me != null)
+            if (coll is IMapEntry me)
             {
                 if (n == 0)
                     return me.key();
@@ -1263,8 +1211,7 @@ namespace clojure.lang
                 return notFound;
             }
 
-            IList list = coll as IList;
-            if (list != null)  
+            if (coll is IList list)
             {
                 if (n < list.Count)
                     return list[n];
@@ -1590,8 +1537,7 @@ namespace clojure.lang
             if (x is int)
                 return (long)(int)x;
 
-            BigInt bi = x as BigInt;
-            if (bi != null)
+            if (x is BigInt bi)
             {
                 if (bi.Bipart == null)
                     return bi.Lpart;
@@ -1602,27 +1548,24 @@ namespace clojure.lang
             BigInteger big = x as BigInteger;
             if (big != null)
             {
-                long n;
-                if (big.AsInt64(out n))
+                if (big.AsInt64(out long n))
                     return n;
                 else
                     throw new ArgumentException("Value out of range for long: " + x);
             }
-            
-            if (x is ulong)
+
+            if (x is ulong ux)
             {
-                ulong ux = (ulong)x;
                 if (ux > long.MaxValue)
                     throw new ArgumentException("Value out of range for long: " + x);
                 return (long)x;
             }
-            
+
             if (x is byte || x is short || x is uint || x is sbyte || x is ushort)
                 return Util.ConvertToLong(x);
 
 
-            Ratio r = x as Ratio;
-            if (r != null)
+            if (x is Ratio r)
                 return longCast(r.BigIntegerValue());
 
             if (x is Char)
@@ -2375,8 +2318,7 @@ namespace clojure.lang
             if (coll == null)
                 return EmptyObjectArray;
 
-            object[] objArray = coll as object[];
-            if (objArray != null)
+            if (coll is object[] objArray)
                 return objArray;
 
             // In CLR, ICollection does not have a toArray.  
@@ -2385,14 +2327,12 @@ namespace clojure.lang
             //  return ((Collection)coll).toArray();
             //  TODO: List has a toArray -- generic -- need type. 
 
-            IEnumerable ie = coll as IEnumerable;
-            if (ie != null)
+            if (coll is IEnumerable ie)
                 return IEnumToArray(ie);
 
             // Java has Map here, but IDictionary is IEnumerable, so it will be handled by previous clause.
 
-            String s = coll as string;
-            if (s != null)
+            if (coll is string s)
             {
                 char[] chars = s.ToCharArray();
                 // TODO: Determine if we need to make a copy (Java version does, not sure if CLR requires it)
@@ -2407,7 +2347,7 @@ namespace clojure.lang
             //    return toArray((ISeq)coll);
             //else if (coll is IPersistentCollection)
             //    return toArray(((IPersistentCollection)coll).seq());
-            
+
             if (coll.GetType().IsArray)
             {
                 ISeq iseq = (seq(coll));
@@ -2751,9 +2691,8 @@ namespace clojure.lang
                 Var v = x as Var;
                 w.Write("#=(var {0}/{1})", v.Namespace.Name, v.Symbol);
             }
-            else if (x is Regex)
+            else if (x is Regex r)
             {
-                Regex r = (Regex)x;
                 w.Write("#\"{0}\"", r.ToString());
             }
             //else
@@ -3389,8 +3328,7 @@ namespace clojure.lang
 
         private static bool TryLoadFromEmbeddedResource(string relativePath, string assemblyname)
         {
-            Assembly containingAssembly;
-            var asmStream = GetEmbeddedResourceStream(assemblyname, out containingAssembly);
+            var asmStream = GetEmbeddedResourceStream(assemblyname, out Assembly containingAssembly);
             if (asmStream != null)
             {
                 try
@@ -3521,15 +3459,13 @@ namespace clojure.lang
 
         public static FileInfo FindRemappedFile(string fileName)
         {
-            var nsLoadMappings = NSLoadMappings.deref() as Atom;
-            if (nsLoadMappings == null) return null;
+            if (!(NSLoadMappings.deref() is Atom nsLoadMappings)) return null;
+
             var nsLoadMappingsVal = nsLoadMappings.deref() as PersistentVector;
             foreach (var x in nsLoadMappingsVal)
             {
-                var mapping = x as PersistentVector;
-                if (mapping == null || mapping.length() < 2) continue;
-                var nsRoot = mapping[0] as string;
-                if (nsRoot == null) continue;
+                if (!(x is PersistentVector mapping) || mapping.length() < 2) continue;
+                if (!(mapping[0] is string nsRoot)) continue;
                 nsRoot = nsRoot.Replace('.', '/');
                 if(fileName.StartsWith(nsRoot))
                 {
@@ -3619,14 +3555,10 @@ namespace clojure.lang
         {
             object w = ErrVar.deref();
 
-            TextWriter tw = w as TextWriter;
-
-            if (tw != null)
+            if (w is TextWriter tw)
                 return tw;
 
-            Stream s = w as Stream;
-
-            if (s != null)
+            if (w is Stream s)
                 return new StreamWriter(s);
 
             throw new ArgumentException("Unknown type for *err*");

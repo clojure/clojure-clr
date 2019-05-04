@@ -153,9 +153,11 @@ namespace Clojure.Tests.LibTests
             Keyword k1 = Keyword.intern(Symbol.intern("abc"));
             Keyword k2 = Keyword.intern(Symbol.intern("ab"));
 
-            IDictionary dict = new Hashtable();
-            dict[k1] = 7;
-            dict["abc"] = 8;
+            IDictionary dict = new Hashtable
+            {
+                [k1] = 7,
+                ["abc"] = 8
+            };
 
             Expect(k1.invoke(dict), EqualTo(7));
             Expect(k2.invoke(dict), Null);
@@ -167,9 +169,11 @@ namespace Clojure.Tests.LibTests
             Keyword k1 = Keyword.intern(Symbol.intern("abc"));
             Keyword k2 = Keyword.intern(Symbol.intern("ab"));
 
-            IDictionary dict = new Hashtable();
-            dict[k1] = 7;
-            dict["abc"] = 8;
+            IDictionary dict = new Hashtable
+            {
+                [k1] = 7,
+                ["abc"] = 8
+            };
 
             Expect(k1.invoke(dict, 20), EqualTo(7));
             Expect(k2.invoke(dict, 20), EqualTo(20));
@@ -188,9 +192,11 @@ namespace Clojure.Tests.LibTests
         public void InvokeOnTooManyArgsFails()
         {
             Keyword k1 = Keyword.intern(Symbol.intern("abc"));
-            IDictionary dict = new Hashtable();
-            dict[k1] = 7;
-            dict["abc"] = 8;
+            IDictionary dict = new Hashtable
+            {
+                [k1] = 7,
+                ["abc"] = 8
+            };
 
             k1.invoke(dict, 20, null);
         }
@@ -245,11 +251,13 @@ namespace Clojure.Tests.LibTests
 
             Keyword k1 = Keyword.intern("def", "abc");
             Keyword k2 = Keyword.intern("def", "xyz");
-            List<Keyword> keywords = new List<Keyword>();
-            keywords.Add(k1);
-            keywords.Add(k2);
-            keywords.Add(k1);
-            keywords.Add(k2);
+            List<Keyword> keywords = new List<Keyword>
+            {
+                k1,
+                k2,
+                k1,
+                k2
+            };
 
             BinaryFormatter bf = new BinaryFormatter();
 

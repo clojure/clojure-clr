@@ -40,7 +40,7 @@ namespace clojure.lang.CljCompiler.Ast
         TypeBuilder _typeBuilder =  null;
         TypeGen _typeGen = null;
 
-        string _typeName;
+        readonly string _typeName;
 
 
         List<SiteInfo> _siteInfos = null;
@@ -84,8 +84,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             MaybeInit();
 
-            Type delegateType;
-            if (RewriteDelegate(node.DelegateType, out delegateType))
+            if (RewriteDelegate(node.DelegateType, out Type delegateType))
             {
                 node = Expression.MakeDynamic(delegateType, node.Binder, node.Arguments);
             }
@@ -124,8 +123,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private Expression RewriteCallSite(CallSite site, TypeGen tg, Type delegateType, out SiteInfo siteInfo)
         {
-            IExpressionSerializable serializer = site.Binder as IExpressionSerializable;
-            if (serializer == null)
+            if (!(site.Binder is IExpressionSerializable serializer))
             {
                 throw new ArgumentException("Generating code from non-serializable CallSiteBinder.");
             }
@@ -176,7 +174,7 @@ namespace clojure.lang.CljCompiler.Ast
             return true;
         }
 
-        static Type _internalModuleBuilderType = Type.GetType("System.Reflection.Emit.InternalModuleBuilder");
+        static readonly Type _internalModuleBuilderType = Type.GetType("System.Reflection.Emit.InternalModuleBuilder");
 
         // From Microsoft.Scripting.Generation.ToDiskRewriter
         private bool ShouldRewriteDelegate(Type delegateType)
@@ -288,8 +286,7 @@ namespace clojure.lang.CljCompiler.Ast
                 //initL.CompileToMethod(mbSetter);
                 CljILGen setterIlg = new CljILGen(mbSetter.GetILGenerator());
 
-                IClojureBinder b = si.Binder as IClojureBinder;
-                if (b == null)
+                if (!(si.Binder is IClojureBinder b))
                     throw new InvalidOperationException("Binder of unknown type");
                 b.GenerateCreationIL(mbSetter.GetILGenerator());
 

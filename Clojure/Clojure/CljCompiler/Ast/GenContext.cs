@@ -62,7 +62,7 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _isDebuggable; }
         }
 
-        readonly ISymbolDocumentWriter _docWriter;
+        readonly ISymbolDocumentWriter _docWriter = null;
         public ISymbolDocumentWriter DocWriter
         {
             get { return _docWriter; }
@@ -224,22 +224,17 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static Expression AddDebugInfo(Expression expr, IPersistentMap spanMap)
         {
-            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
-            if (context == null)
+            if (Compiler.CompilerContextVar.deref() is GenContext context)
+                return context.MaybeAddDebugInfo(expr, spanMap);
+            else
                 return expr;
-
-            return context.MaybeAddDebugInfo(expr, spanMap);
         }
 
         public Expression MaybeAddDebugInfo(Expression expr, IPersistentMap spanMap)
         {
             if (_isDebuggable && spanMap != null & _docInfo != null)
             {
-                int startLine;
-                int startCol;
-                int finishLine;
-                int finishCol;
-                if (Compiler.GetLocations(spanMap, out startLine, out startCol, out finishLine, out finishCol))
+                if (Compiler.GetLocations(spanMap, out int startLine, out int startCol, out int finishLine, out int finishCol))
                     return AstUtils.AddDebugInfo(expr,
                         _docInfo,
                         new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.StartLineKey), (int)spanMap.valAt(RT.StartColumnKey)),
@@ -250,11 +245,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static void EmitDebugInfo(ILGen ilg, IPersistentMap spanMap)
         {
-            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
-            if (context == null)
-                return;
-
-            context.MaybeEmitDebugInfo(ilg, spanMap);
+            if (Compiler.CompilerContextVar.deref() is GenContext context)
+                context.MaybeEmitDebugInfo(ilg, spanMap);
         }
 
         public void MaybeEmitDebugInfo(ILGen ilg, IPersistentMap spanMap)
@@ -283,11 +275,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static void SetLocalName(LocalBuilder lb, string name)
         {
-            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
-            if (context == null)
-                return;
-
-            context.MaybSetLocalName(lb, name);
+            if (Compiler.CompilerContextVar.deref() is GenContext context)
+                context.MaybSetLocalName(lb, name);
         }
 
         public void MaybSetLocalName(LocalBuilder lb, string name)

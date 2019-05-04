@@ -255,8 +255,10 @@ namespace clojure.lang.CljCompiler.Ast
             // Unfortunately, the Expression.Dynamic method does not respect byRef parameters.
             // The workaround appears to be to roll your delegate type and then use Expression.MakeDynamic, as below.
 
-            List<Type> callsiteParamTypes = new List<Type>(paramTypes.Count + 1);
-            callsiteParamTypes.Add(typeof(System.Runtime.CompilerServices.CallSite));
+            List<Type> callsiteParamTypes = new List<Type>(paramTypes.Count + 1)
+            {
+                typeof(System.Runtime.CompilerServices.CallSite)
+            };
             callsiteParamTypes.AddRange(paramTypes);
             Type dynType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, callsiteParamTypes.ToArray());
  
@@ -268,14 +270,10 @@ namespace clojure.lang.CljCompiler.Ast
 #else
             DynamicExpression dyn = Expression.MakeDynamic(dynType, binder, paramExprs);
 #endif
-            LambdaExpression lambda;
-            Type delType;
-            MethodBuilder mbLambda;
-
-            EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _methodName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out lambda, out delType, out mbLambda);
+            EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _methodName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda);
 
             //  Emit target + args
-            
+
             EmitTargetExpression(objx, ilg);
 
             i = 0;
@@ -416,9 +414,8 @@ namespace clojure.lang.CljCompiler.Ast
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "lambda")]
         static public void EmitDynamicCallPostlude(LambdaExpression lambda, Type delType, MethodBuilder mbLambda, CljILGen ilg)
         {
-               GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
- 
-            if ( context == null )
+
+            if (!(Compiler.CompilerContextVar.deref() is GenContext context))
             {
                 // light compile
 

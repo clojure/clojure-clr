@@ -102,7 +102,7 @@ namespace Clojure.Tests.LibTests
                 return _values.Length;
             }
 
-            private static CPV EMPTY = new CPV(new object[0]);
+            private static readonly CPV EMPTY = new CPV(new object[0]);
             public override IPersistentCollection empty()
             {
                 return EMPTY;
