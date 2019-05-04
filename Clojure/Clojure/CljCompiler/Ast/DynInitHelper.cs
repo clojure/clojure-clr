@@ -26,7 +26,7 @@ using Microsoft.Scripting.Generation;
 using System.Runtime.CompilerServices;
 using Microsoft.Scripting.Utils;
 using Microsoft.Scripting.Runtime;
-
+using clojure.lang.Runtime.Binding;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -42,8 +42,24 @@ namespace clojure.lang.CljCompiler.Ast
 
         string _typeName;
 
-        List<FieldBuilder> _fieldBuilders = null;
-        List<Expression> _fieldInits = null;
+
+        List<SiteInfo> _siteInfos = null;
+
+        public class SiteInfo
+        {
+            public FieldBuilder FieldBuilder { get; set; }
+            public Type SiteType { get; set; }
+            public CallSiteBinder Binder { get; set; }
+            public Type DelegateType { get; set; }
+
+            public SiteInfo(FieldBuilder fb, Type st, CallSiteBinder binder, Type delegateType)
+            {
+                FieldBuilder = fb;
+                SiteType = st;
+                Binder = binder;
+                DelegateType = delegateType;
+            }
+        }
 
         Dictionary<Type, Type> _delegateTypes;
 
@@ -64,7 +80,7 @@ namespace clojure.lang.CljCompiler.Ast
         /// <summary>
         /// Reduces the provided DynamicExpression into site.Target(site, *args).
         /// </summary>
-        public Expression ReduceDyn(DynamicExpression node)
+        public Expression ReduceDyn(DynamicExpression node, out SiteInfo siteInfo)
         {
             MaybeInit();
 
@@ -75,8 +91,9 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             CallSite cs = CallSite.Create(node.DelegateType, node.Binder);
-            Expression access = RewriteCallSite(cs, _typeGen);
+            // TODO: fix this eventually to return the SiteInfo and not the Expression
 
+            Expression access = RewriteCallSite(cs, _typeGen, delegateType ?? node.DelegateType, out siteInfo);
 
             // ($site = siteExpr).Target.Invoke($site, *args)
             ParameterExpression site = Expression.Variable(cs.GetType(), "$site");
@@ -100,13 +117,12 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 _typeBuilder = _assemblyGen.DefinePublicType(_typeName, typeof(object), true);
                 _typeGen = new TypeGen(_assemblyGen, _typeBuilder);
-                _fieldBuilders = new List<FieldBuilder>();
-                _fieldInits = new List<Expression>();
+                _siteInfos = new List<SiteInfo>();
             }
         }
 
 
-        private Expression RewriteCallSite(CallSite site, TypeGen tg)
+        private Expression RewriteCallSite(CallSite site, TypeGen tg, Type delegateType, out SiteInfo siteInfo)
         {
             IExpressionSerializable serializer = site.Binder as IExpressionSerializable;
             if (serializer == null)
@@ -115,12 +131,9 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             Type siteType = site.GetType();
-
             FieldBuilder fb = tg.AddStaticField(siteType, "sf" + (_id++).ToString());
-            Expression init = Expression.Call(siteType.GetMethod("Create"), serializer.CreateExpression());
-
-            _fieldBuilders.Add(fb);
-            _fieldInits.Add(init);
+            siteInfo = new SiteInfo(fb, siteType, site.Binder, delegateType);
+            _siteInfos.Add(siteInfo);
 
             // rewrite the node...
             return Expression.Field(null, fb);
@@ -188,11 +201,12 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 return false;
             }
-
+#if NET45
             if (module.IsTransient())
             {
                 return true;
             }
+#endif
 
             if (Snippets.Shared.SaveSnippets && module.Assembly != _assemblyGen.AssemblyBuilder)
             {
@@ -242,7 +256,7 @@ namespace clojure.lang.CljCompiler.Ast
         private const TypeAttributes DelegateAttributes = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass;
         private static readonly Type[] _DelegateCtorSignature = new Type[] { typeof(object), typeof(IntPtr) };
 
-        #endregion
+#endregion
 
         #region Finalizing
 
@@ -260,20 +274,32 @@ namespace clojure.lang.CljCompiler.Ast
             ConstructorBuilder ctorB = _typeBuilder.DefineConstructor(MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
             CljILGen gen = new CljILGen(ctorB.GetILGenerator());
 
-            for (int i = 0; i < _fieldBuilders.Count; i++)
+            foreach (SiteInfo si in _siteInfos)
             {
-                FieldBuilder fb = _fieldBuilders[i];
-                Expression fbInit = _fieldInits[i];
-                string setterName = String.Format("{0}_setter", fb.Name);
+                string setterName = String.Format("{0}_setter", si.FieldBuilder.Name);
 
                 MethodBuilder mbSetter = _typeBuilder.DefineMethod(
                     setterName,
                     MethodAttributes.Public | MethodAttributes.Static,
                     CallingConventions.Standard,
-                    fbInit.Type,
+                    si.SiteType,
                     Type.EmptyTypes);
-                LambdaExpression initL = Expression.Lambda(Expression.Assign(Expression.Field(null, fb), fbInit));
-                initL.CompileToMethod(mbSetter);
+                //LambdaExpression initL = Expression.Lambda(Expression.Assign(Expression.Field(null, fb), fbInit));
+                //initL.CompileToMethod(mbSetter);
+                CljILGen setterIlg = new CljILGen(mbSetter.GetILGenerator());
+
+                IClojureBinder b = si.Binder as IClojureBinder;
+                if (b == null)
+                    throw new InvalidOperationException("Binder of unknown type");
+                b.GenerateCreationIL(mbSetter.GetILGenerator());
+
+                setterIlg.EmitCall(si.SiteType.GetMethod("Create"));
+                setterIlg.Emit(OpCodes.Dup);
+                LocalBuilder v0 = setterIlg.DeclareLocal(typeof(Object));
+                setterIlg.Emit(OpCodes.Stloc, v0);
+                setterIlg.Emit(OpCodes.Stsfld, si.FieldBuilder);
+                setterIlg.Emit(OpCodes.Ldloc,v0);
+                setterIlg.Emit(OpCodes.Ret);
 
                 gen.EmitCall(mbSetter);
                 gen.Emit(OpCodes.Pop);

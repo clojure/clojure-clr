@@ -419,8 +419,10 @@ namespace clojure.lang
             gen.MarkLabel(endLabel);
             gen.Emit(OpCodes.Ret);
 
+#if NET45
             //context.AssyBldr.SetEntryPoint(cb);
             context.AssemblyBuilder.SetEntryPoint(cb);
+#endif
         }
 
         private static void EmitMethods(TypeBuilder proxyTB, 
@@ -643,9 +645,9 @@ namespace clojure.lang
         }
 
 
-        #endregion
+#endregion
 
-        #region Miscellaneous
+#region Miscellaneous
 
         private static string GetStaticVarName(string var)
         {
@@ -820,7 +822,7 @@ namespace clojure.lang
         }
         
 
-        #endregion
+#endregion
 
     }
 }

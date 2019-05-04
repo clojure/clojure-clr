@@ -21,10 +21,9 @@ using NUnit.Framework;
 using clojure.lang;
 
 
-    [SetUpFixture]    
     public class FixtureSetupClass
     {
-        [SetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             RuntimeBootstrapFlag._doRTBootstrap = false;

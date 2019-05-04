@@ -26,16 +26,21 @@ using System.Dynamic;
 using Microsoft.Scripting.Runtime;
 using Microsoft.Scripting.Actions.Calls;
 using System.Reflection;
+using Microsoft.Scripting.Generation;
+using clojure.lang.CljCompiler.Ast;
+using System.Reflection.Emit;
 
 namespace clojure.lang.Runtime.Binding
 {
 
 
-    public class ClojureCreateInstanceBinder : CreateInstanceBinder, IExpressionSerializable, IClojureSite
+    public class ClojureCreateInstanceBinder : CreateInstanceBinder, IExpressionSerializable, IClojureBinder
     {
         #region Data
 
         readonly ClojureContext _context;
+
+        static readonly MethodInfo MI_CreateMe = typeof(ClojureCreateInstanceBinder).GetMethod("CreateMe");
 
         #endregion
 
@@ -89,7 +94,7 @@ namespace clojure.lang.Runtime.Binding
 
         public Expression CreateExpression()
         {
-            return Expression.Call(typeof(ClojureCreateInstanceBinder).GetMethod("CreateMe"),
+            return Expression.Call(MI_CreateMe,
                 BindingHelpers.CreateBinderStateExpression(),
                 Expression.Constant(this.CallInfo.ArgumentCount));
         }
@@ -101,11 +106,20 @@ namespace clojure.lang.Runtime.Binding
 
         #endregion
 
-        #region IClojureSite members
+        #region IClojureBinder members
 
         public ClojureContext Context
         {
             get { return _context; }
+        }
+
+        // Should match CreateExpression
+        public void GenerateCreationIL(ILGenerator ilg)
+        {
+            CljILGen ilg2 = new CljILGen(ilg);
+            ilg2.EmitCall(BindingHelpers.Method_ClojureContext_GetDefault);
+            ilg2.EmitInt(this.CallInfo.ArgumentCount);
+            ilg2.EmitCall(MI_CreateMe);
         }
 
         #endregion

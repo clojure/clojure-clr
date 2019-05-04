@@ -327,8 +327,11 @@ namespace clojure.lang.CljCompiler.Ast
             Expression call = dyn;
 
             GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
+            DynInitHelper.SiteInfo siteInfo;
             if (context != null && context.DynInitHelper != null)
-                call = context.DynInitHelper.ReduceDyn(dyn);
+                call = context.DynInitHelper.ReduceDyn(dyn, out siteInfo);
+            else
+                throw new InvalidOperationException("Don't know how to handle callsite in this case");
 
             if (returnType == typeof(void))
             {
@@ -362,7 +365,50 @@ namespace clojure.lang.CljCompiler.Ast
             else
             {
                 mbLambda = context.TB.DefineMethod(methodName, MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, paramTypes);
-                lambda.CompileToMethod(mbLambda);
+                //lambda.CompileToMethod(mbLambda);
+                // Now we get to do all this code create by hand.
+                // the primary code is
+                // (loc1 = fb).Target.Invoke(loc1,*args);
+                // if return type if void, pop the value and push a null
+                // if return type does not match the call site, add a conversion
+                CljILGen ilg2 = new CljILGen(mbLambda.GetILGenerator());
+                ilg2.EmitFieldGet(siteInfo.FieldBuilder);
+                ilg2.Emit(OpCodes.Dup);
+                LocalBuilder siteVar = ilg2.DeclareLocal(siteInfo.DelegateType);
+                ilg2.Emit(OpCodes.Stloc, siteVar);
+                ilg2.EmitFieldGet(siteInfo.SiteType.GetField("Target"));
+                ilg2.Emit(OpCodes.Ldloc, siteVar);
+                for (int i = 0; i < paramExprs.Count; i++)
+                    ilg2.EmitLoadArg(i);
+
+                ilg2.EmitCall(siteInfo.DelegateType.GetMethod("Invoke"));
+                if (returnType == typeof(void))
+                {
+                    ilg2.Emit(OpCodes.Pop);
+                    ilg2.EmitNull();
+                }
+                else if (returnType != call.Type)
+                {
+                    EmitConvertToType(ilg2, call.Type, returnType, false);
+                }
+
+                ilg2.Emit(OpCodes.Ret);
+
+
+                    /*
+                     *             return Expression.Block(
+                new[] { site },
+                Expression.Call(
+                    Expression.Field(
+                        Expression.Assign(site, access),
+                        cs.GetType().GetField("Target")
+                    ),
+                    node.DelegateType.GetMethod("Invoke"),
+                    ClrExtensions.ArrayInsert(site, node.Arguments)
+                )
+                */
+
+
             }
         }
 
@@ -420,7 +466,9 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         EmitTypedArg(objx, ilg, parms[i].ParameterType, args[i].ArgExpr);
                         LocalBuilder loc = ilg.DeclareLocal(pi.ParameterType);
-                        loc.SetLocalSymInfo("_byRef_temp" + i);
+#if NET45
+                        loc.SetLocalSymInfo("_byRef_temp" + i
+#endif
                         ilg.Emit(OpCodes.Stloc, loc);
                         ilg.Emit(OpCodes.Ldloca, loc);
                     }
@@ -496,6 +544,6 @@ namespace clojure.lang.CljCompiler.Ast
             MI_EmitConvertToType.Invoke(ilg, new Object[] {typeFrom, typeTo, isChecked});
         }
 
-        #endregion
+#endregion
     }
 }

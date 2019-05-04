@@ -44,9 +44,10 @@ namespace clojure.lang.CljCompiler.Ast
             get { return _assyGen.AssemblyBuilder; }
         }
 
+        readonly ModuleBuilder _moduleBuilder;
         public ModuleBuilder ModuleBuilder
         {
-            get { return _assyGen.AssemblyBuilder.GetDynamicModule(_assyGen.AssemblyBuilder.GetName().Name); }
+            get { return _moduleBuilder; }
         }
 
         DynInitHelper _dynInitHelper;
@@ -163,11 +164,15 @@ namespace clojure.lang.CljCompiler.Ast
 #endif
 
             _assyGen = new AssemblyGen(aname, directory, extension, _isDebuggable);
-            if ( createDynInitHelper )
+            if (createDynInitHelper)
                 _dynInitHelper = new DynInitHelper(_assyGen, GenerateName());
+#if NET45
             if (_isDebuggable)
                 _docWriter = ModuleBuilder.DefineDocument(sourceName, ClojureContext.Default.LanguageGuid, ClojureContext.Default.VendorGuid, Guid.Empty);
+#endif
             _docInfo = Expression.SymbolDocument(sourceName);
+
+            _moduleBuilder = _assyGen.ModuleBuilder;
         }
 
         internal GenContext WithNewDynInitHelper()
@@ -201,7 +206,7 @@ namespace clojure.lang.CljCompiler.Ast
             return newContext;
         }
 
-        #endregion
+#endregion
 
         #region Other
 
@@ -254,6 +259,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void MaybeEmitDebugInfo(ILGen ilg, IPersistentMap spanMap)
         {
+#if NET45
             if ( _docWriter != null && spanMap != null )
             {
                 int startLine;
@@ -272,6 +278,7 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
             }
+#endif
         }
 
         public static void SetLocalName(LocalBuilder lb, string name)
@@ -285,8 +292,10 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void MaybSetLocalName(LocalBuilder lb, string name)
         {
+#if NET45
             if (_isDebuggable)
                 lb.SetLocalSymInfo(name);
+#endif
         }
 
         #endregion

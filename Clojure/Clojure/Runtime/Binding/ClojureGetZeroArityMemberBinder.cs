@@ -23,16 +23,20 @@ using System.Dynamic;
 using Microsoft.Scripting.Runtime;
 using Microsoft.Scripting.Actions;
 using System.Reflection;
+using clojure.lang.CljCompiler.Ast;
+using System.Reflection.Emit;
 
 namespace clojure.lang.Runtime.Binding
 {
 
-    public class ClojureGetZeroArityMemberBinder : GetMemberBinder, IExpressionSerializable, IClojureSite
+    public class ClojureGetZeroArityMemberBinder : GetMemberBinder, IExpressionSerializable, IClojureBinder
     {
         #region Data
 
         readonly bool _isStatic;
         readonly ClojureContext _context;
+
+        static readonly MethodInfo MI_CreateMe = typeof(ClojureGetZeroArityMemberBinder).GetMethod("CreateMe");
 
         #endregion
 
@@ -106,7 +110,7 @@ namespace clojure.lang.Runtime.Binding
 
         public Expression CreateExpression()
         {
-            return Expression.Call(typeof(ClojureGetZeroArityMemberBinder).GetMethod("CreateMe"),
+            return Expression.Call(MI_CreateMe,
                 BindingHelpers.CreateBinderStateExpression(),
                 Expression.Constant(this.Name),
                 Expression.Constant(this._isStatic));
@@ -119,11 +123,22 @@ namespace clojure.lang.Runtime.Binding
 
         #endregion
 
-        #region IClojureSite members
+        #region IClojureBinder members
 
         public ClojureContext Context
         {
             get { return _context; }
+        }
+
+        // Should match CreateExpression
+        public void GenerateCreationIL(ILGenerator ilg)
+        {
+            CljILGen ilg2 = new CljILGen(ilg);
+
+            ilg2.EmitCall(BindingHelpers.Method_ClojureContext_GetDefault);
+            ilg2.EmitString(Name);
+            ilg2.EmitBoolean(IsStatic);
+            ilg2.EmitCall(MI_CreateMe);
         }
 
         #endregion

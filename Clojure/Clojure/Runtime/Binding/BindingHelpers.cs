@@ -27,8 +27,11 @@ namespace clojure.lang.Runtime.Binding
 {
     static class BindingHelpers
     {
+        // TODO: I think I can get rid of this now
         static readonly PropertyInfo Property_ClojureContext_Default = typeof(ClojureContext).GetProperty("Default");
         static readonly Expression _contextExpr = Expression.Property(null,Property_ClojureContext_Default);
+
+        public static readonly MethodInfo Method_ClojureContext_GetDefault = typeof(ClojureContext).GetMethod("get_Default");
 
         internal static Expression CreateBinderStateExpression()
         {

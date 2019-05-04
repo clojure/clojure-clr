@@ -34,7 +34,7 @@ namespace Clojure.Tests.LibTests
     {
         Type _proxyType;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupFixture()
         {
             _proxyType = GenProxy.GenerateProxyClass(
@@ -70,7 +70,7 @@ namespace Clojure.Tests.LibTests
 
         Type _proxyType;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupFixture()
         {
             _proxyType = GenProxy.GenerateProxyClass(
@@ -140,7 +140,7 @@ namespace Clojure.Tests.LibTests
 
         Type _proxyType;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupFixture()
         {
             _proxyType = GenProxy.GenerateProxyClass(
@@ -206,7 +206,7 @@ namespace Clojure.Tests.LibTests
 
         Type _proxyType;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupFixture()
         {
             _proxyType = GenProxy.GenerateProxyClass(
@@ -274,7 +274,7 @@ namespace Clojure.Tests.LibTests
 
         Type _proxyType;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupFixture()
         {
             _proxyType = GenProxy.GenerateProxyClass(
@@ -439,7 +439,7 @@ namespace Clojure.Tests.LibTests
         Type _proxyType;
         Object _obj;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupFixture()
         {
             _proxyType = GenProxy.GenerateProxyClass(
@@ -568,7 +568,7 @@ namespace Clojure.Tests.LibTests
 
         Type _proxyType;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupFixture()
         {
             _proxyType = GenProxy.GenerateProxyClass(
@@ -634,7 +634,7 @@ namespace Clojure.Tests.LibTests
         Type _proxyType;
         Object _obj;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupFixture()
         {
             _proxyType = GenProxy.GenerateProxyClass(
@@ -740,7 +740,7 @@ namespace Clojure.Tests.LibTests
         Type _proxyType;
         Object _obj;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void SetupFixture()
         {
             _proxyType = GenProxy.GenerateProxyClass(
@@ -821,7 +821,7 @@ namespace Clojure.Tests.LibTests
         {
         }
 
-
+#if NET45
         [Test]
         public void FindTypeInAssembly()
         {
@@ -839,6 +839,7 @@ namespace Clojure.Tests.LibTests
             Expect(rtFound, Not.Null);
            
         }
+#endif
 
         //[Test]
         //public void TestThis()
@@ -921,7 +922,7 @@ namespace Clojure.Tests.LibTests
             int m2(int x);
         }
 
-
+#if NET45
         [Test]
         public void CanCreateConcreteImplementationOverAbstractProperty()
         {
@@ -974,7 +975,7 @@ namespace Clojure.Tests.LibTests
             I1 i1 = (I1)o;
             Expect(i1.m2(12), EqualTo(15));
         }
-
+#endif
         //[Test]
         //public void BoxingHurts()
         //{
@@ -1111,6 +1112,6 @@ namespace Clojure.Tests.LibTests
 
     }
 
-    #endregion
+#endregion
 
 }
