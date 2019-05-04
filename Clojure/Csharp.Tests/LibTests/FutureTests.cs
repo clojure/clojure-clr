@@ -75,6 +75,9 @@ namespace Clojure.Tests.LibTests
             }
         }
 
+#if NET45
+        // Thread.Abort not supported in .Net Core
+
         [Test]
         public void CancelAbortsTheTask()
         {
@@ -97,7 +100,7 @@ namespace Clojure.Tests.LibTests
             Expect(f.cancel(true), EqualTo(true));
             Expect(f.cancel(true), EqualTo(false));
         }
-
+#endif
         [Test]
         public void CancelFailsAfterSuccessfulCompletion()
         {
@@ -110,6 +113,8 @@ namespace Clojure.Tests.LibTests
             Expect(f.isCancelled(), EqualTo(false));
         }
 
+#if NET45
+        // Thread.Abort not supported in .Net Core
         [Test]
         [ExpectedException(typeof(FutureAbortedException))]
         public void DerefThrowsAfterCancellation()
@@ -121,5 +126,6 @@ namespace Clojure.Tests.LibTests
             f.cancel(true);
             f.deref();
         }
+#endif
     }
 }
