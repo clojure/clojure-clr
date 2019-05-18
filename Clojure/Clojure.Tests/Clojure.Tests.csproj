@@ -5,6 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="clojure.data.generators" Version="0.1.2" />
+    <PackageReference Include="clojure.test.check" Version="0.9.0.1" />
+    <PackageReference Include="clojure.test.generative" Version="0.5.2" />
+    <PackageReference Include="clojure.tools.namespace" Version="0.2.10" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="clojure\run_test.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
