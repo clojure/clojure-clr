@@ -361,3 +361,6 @@ MigrationBackup/
 # Java artifacts
 *.class
 **/pub/
+
+# testing directories
+testing/
