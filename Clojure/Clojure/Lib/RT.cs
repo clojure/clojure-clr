@@ -213,7 +213,7 @@ namespace clojure.lang
             = Var.intern(ClojureNamespace, Symbol.intern("*flush-on-newline*"), true).setDynamic();
 
         static readonly Var PrintInitializedVar 
-            = Var.intern(ClojureNamespace, Symbol.intern("print-initialized"));
+            = Var.intern(ClojureNamespace, Symbol.intern("print-initialized")).setDynamic();
         
         static readonly Var PrOnVar 
             = Var.intern(ClojureNamespace, Symbol.intern("pr-on"));

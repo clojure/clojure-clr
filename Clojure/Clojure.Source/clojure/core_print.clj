@@ -612,7 +612,7 @@
   (when (:splicing? o) (.Write w "@"))
   (print-method (:form o) w))
 
-(def ^{:private true} print-initialized true)  
+(def ^{:private true :dynamic true} print-initialized true)  
 
 ;;;(defn ^java.io.PrintWriter PrintWriter-on
 ;;;  "implements java.io.PrintWriter given flush-fn, which will be called
