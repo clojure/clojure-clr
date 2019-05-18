@@ -2751,7 +2751,11 @@ namespace clojure.lang
             // e.g. "UnityEngine.Transform, UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
             t = Type.GetType(p, false);
 
-            if (t != null)
+            // Added the IsPublic check to deal with shadowed types in .Net Core,
+            // e.g. System.Environment in assemblies System.Private.CoreLib and System.Runtime.Exceptions.
+            // It is private in the former and public in the latter.
+            // Unfortunately, Type.GetType was finding the former.
+            if (t != null && t.IsPublic)
                 return t;
 
             t = Compiler.FindDuplicateType(p);
@@ -2767,7 +2771,7 @@ namespace clojure.lang
             foreach (Assembly assy in assys)
             {
                   Type t1 = assy.GetType(p, false);
-                  if(t1 != null)
+                  if(t1 != null && t1.IsPublic)
                         return t1;
             }
 
