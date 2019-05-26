@@ -17,11 +17,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection.Emit;
 using System.Reflection;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
 using System.Linq.Expressions;
-#endif
 using Microsoft.Scripting.Generation;
 using System.Runtime.CompilerServices;
 using Microsoft.Scripting.Utils;
@@ -326,14 +322,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Stolen from the DLR
 
-        // From Microsoft.Scripting.Utils.CollectionExtensions
-        // Name needs to be different so it doesn't conflict with Enumerable.Select
-#if CLR2
-        internal static U[] Map<T, U>(this ICollection<T> collection, FFunc<T,U> select)
-#else
-        internal static U[] Map<T, U>(this ICollection<T> collection, System.Func<T, U> select)
-#endif
 
+        internal static U[] Map<T, U>(this ICollection<T> collection, System.Func<T, U> select)
         {
             int count = collection.Count;
             U[] result = new U[count];

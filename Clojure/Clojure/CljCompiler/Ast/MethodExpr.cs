@@ -14,12 +14,7 @@
 
 using System;
 using System.Collections.Generic;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
 using System.Linq.Expressions;
-#endif
 using System.Dynamic;
 using System.Reflection;
 using clojure.lang.Runtime.Binding;
@@ -261,15 +256,7 @@ namespace clojure.lang.CljCompiler.Ast
             };
             callsiteParamTypes.AddRange(paramTypes);
             Type dynType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, callsiteParamTypes.ToArray());
- 
-#if CLR2
-            // Not covariant. Sigh.
-            List<Expression> paramsAsExprs = new List<Expression>(paramExprs.Count);
-            paramsAsExprs.AddRange(paramExprs.ToArray());
-            DynamicExpression dyn = Expression.MakeDynamic(dynType, binder, paramsAsExprs);
-#else
             DynamicExpression dyn = Expression.MakeDynamic(dynType, binder, paramExprs);
-#endif
             EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _methodName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda);
 
             //  Emit target + args

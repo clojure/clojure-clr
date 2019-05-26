@@ -13,15 +13,9 @@
  **/
 
 using System;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
 using System.Linq.Expressions;
-#endif
 using System.Dynamic;
 using Microsoft.Scripting.Runtime;
-using Microsoft.Scripting.Actions;
 using System.Reflection;
 using clojure.lang.CljCompiler.Ast;
 using System.Reflection.Emit;

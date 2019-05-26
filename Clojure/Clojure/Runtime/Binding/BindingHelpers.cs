@@ -12,16 +12,8 @@
  *   Author: David Miller
  **/
 
-using System;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
 using System.Linq.Expressions;
-#endif
 using System.Reflection;
-using Microsoft.Scripting.Actions;
-using System.Dynamic;
 
 namespace clojure.lang.Runtime.Binding
 {

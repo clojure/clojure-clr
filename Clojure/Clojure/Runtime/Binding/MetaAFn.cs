@@ -1,21 +1,11 @@
 ﻿using System;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
 using System.Linq.Expressions;
-#endif
 using System.Dynamic;
 using Microsoft.Scripting.Actions.Calls;
 using System.Reflection;
 
 namespace clojure.lang.Runtime.Binding
 {
-    using Ast = Expression;
-    using AstUtils = Microsoft.Scripting.Ast.Utils;
-    using System.Diagnostics;
-    using Microsoft.Scripting.Runtime;
-    using System.Runtime.CompilerServices;
-
     class MetaAFn : DynamicMetaObject, IInferableInvokable
     {
 

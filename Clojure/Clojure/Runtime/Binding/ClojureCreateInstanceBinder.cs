@@ -15,18 +15,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
 using System.Linq.Expressions;
-#endif
 using Microsoft.Scripting.Actions;
 using System.Dynamic;
 using Microsoft.Scripting.Runtime;
 using Microsoft.Scripting.Actions.Calls;
 using System.Reflection;
-using Microsoft.Scripting.Generation;
 using clojure.lang.CljCompiler.Ast;
 using System.Reflection.Emit;
 

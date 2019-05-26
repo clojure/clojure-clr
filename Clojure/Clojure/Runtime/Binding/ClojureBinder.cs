@@ -15,18 +15,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
 using System.Linq.Expressions;
-#endif
 using Microsoft.Scripting.Actions;
 using Microsoft.Scripting.Actions.Calls;
-using Microsoft.Scripting.Utils;
 using Microsoft.Scripting.Generation;
-using System.Dynamic;
-using Microsoft.Scripting.Runtime;
 
 namespace clojure.lang.Runtime.Binding
 {

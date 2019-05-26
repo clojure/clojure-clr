@@ -1806,11 +1806,7 @@ namespace clojure.lang
             Type initType = null;
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
-#if CLR2
-                if(asm.ManifestModule is ModuleBuilder)
-#else
                 if (asm.IsDynamic)
-#endif
                     continue;
                 initType = asm.GetType(initClassName);
                 if (initType != null)

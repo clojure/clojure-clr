@@ -15,11 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
 using System.Linq.Expressions;
-#endif
 using System.Dynamic;
 using clojure.lang.Runtime.Binding;
 using clojure.lang.Runtime;
@@ -240,16 +236,7 @@ namespace clojure.lang.CljCompiler.Ast
             // Build dynamic call and lambda
             Type returnType = HasClrType ? ClrType : typeof(object);
             CreateInstanceBinder binder = new ClojureCreateInstanceBinder(ClojureContext.Default, _args.Count);
-
-#if CLR2
-            // Not covariant. Sigh.
-            List<Expression> paramsAsExprs = new List<Expression>(paramExprs.Count);
-            paramsAsExprs.AddRange(paramExprs.ToArray());
-            DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramsAsExprs);
-#else
-           DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
-
-#endif
+            DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
 
             LambdaExpression lambda;
             Type delType;

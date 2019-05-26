@@ -14,15 +14,10 @@
 
 using System;
 using System.Dynamic;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
 using System.Linq.Expressions;
-#endif
 using clojure.lang.Runtime.Binding;
 using clojure.lang.Runtime;
 using System.Reflection.Emit;
-using System.Reflection;
 using System.Collections.Generic;
 
 namespace clojure.lang.CljCompiler.Ast
@@ -134,17 +129,7 @@ namespace clojure.lang.CljCompiler.Ast
             Type returnType = HasClrType ? ClrType : typeof(object);
 
             GetMemberBinder binder = new ClojureGetZeroArityMemberBinder(ClojureContext.Default, _memberName, false);
-#if CLR2
-            // Not covariant. Sigh.
-            List<Expression> paramsAsExprs = new List<Expression>(paramExprs.Count);
-            paramsAsExprs.AddRange(paramExprs.ToArray());
-            DynamicExpression dyn = Expression.Dynamic(binder, returnType, paramsAsExprs);
-#else
-           DynamicExpression dyn = Expression.Dynamic(binder, returnType, paramExprs);
-
-#endif
-
-
+            DynamicExpression dyn = Expression.Dynamic(binder, returnType, paramExprs);
 
             LambdaExpression lambda;
             Type delType;

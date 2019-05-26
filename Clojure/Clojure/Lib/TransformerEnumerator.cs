@@ -17,12 +17,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-#if !CLR2
 using System.Collections.Concurrent;
-#endif
 
 namespace clojure.lang
 {
@@ -275,12 +270,7 @@ namespace clojure.lang
 
         private class Many : IBuffer
         {
-
-#if CLR2
-            readonly Queue _vals = Queue.Synchronized(new Queue());
-#else
             readonly ConcurrentQueue<Object> _vals = new ConcurrentQueue<object>();
-#endif
 
             public Many(Object o1, Object o2)
             {
@@ -296,30 +286,15 @@ namespace clojure.lang
 
             public Object Remove()
             {
-#if CLR2
-                try
-                {
-                    return _vals.Dequeue();
-                }
-                catch (InvalidOperationException)
-                {
-                    // continue
-                }
-#else
                 object val;
                 if (_vals.TryDequeue(out val))
                     return val;
-#endif
                 return null;
             }
 
             public bool IsEmpty()
             {
-#if CLR2
-                return _vals.Count == 0;
-#else
                 return _vals.IsEmpty;
-#endif
             }
 
             public override String ToString()

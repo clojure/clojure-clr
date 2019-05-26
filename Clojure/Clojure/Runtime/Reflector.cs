@@ -16,11 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
 using System.Linq.Expressions;
-#endif
 using Microsoft.Scripting.Actions;
 using System.Dynamic;
 using Microsoft.Scripting.Actions.Calls;
@@ -293,12 +289,7 @@ namespace clojure.lang
                 switch (ha.ParamType)
                 {
                     case HostArg.ParameterType.ByRef:
-#if CLR2
                         t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
-#else
-                        t = typeof(System.Runtime.CompilerServices.StrongBox<>).MakeGenericType(argType);
-#endif
-
                         break;
                     case HostArg.ParameterType.Standard:
                         t = argType;

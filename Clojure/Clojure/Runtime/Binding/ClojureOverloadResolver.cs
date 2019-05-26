@@ -12,19 +12,12 @@
  *   Author: David Miller
  **/
 
-using System;
 using System.Collections.Generic;
 using System.Dynamic;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-#endif
 using Microsoft.Scripting.Actions.Calls;
 using Microsoft.Scripting.Utils;
 using Microsoft.Scripting.Actions;
 using Microsoft.Scripting.Runtime;
-using System.Reflection;
 
 
 namespace clojure.lang.Runtime.Binding

@@ -19,7 +19,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -27,7 +26,7 @@ using System.Threading;
 using clojure.lang.Runtime;
 using Microsoft.Scripting.Hosting;
 using RTProperties = clojure.runtime.Properties;
-//using BigDecimal = java.math.BigDecimal;
+
 
 namespace clojure.lang
 {
@@ -946,23 +945,12 @@ namespace clojure.lang
                 return key != null && m.Contains(key);
             }
 
-#if CLR2
-            // ISet<T> does not exist for CLR2
-            // TODO: Make this work for HashSet<T> no matter the T
-            HashSet<Object> hs = coll as HashSet<Object>;
-            if ( hs != null) 
-            {
-                // return  hs.Contains(key) ? RT.T : RT.F;
-                return hs.Contains(key);
-            }
-#else
             // TODO: Make this work for ISet<T> no matter the T
             if (coll is ISet<object> iso)
             {
                 // return  iso.Contains(key) ? RT.T : RT.F;
                 return iso.Contains(key);
             }
-#endif
 
             if (Util.IsNumeric(key) && (coll is String || coll.GetType().IsArray))
             {
@@ -2786,11 +2774,7 @@ namespace clojure.lang
                     // I do not know why Assembly.GetType fails to find types in our assemblies in Mono
                     if (t1 == null)
                     {
-#if CLR2
-					if (!(assy1 is AssemblyBuilder))
-#else
                         if (!assy1.IsDynamic)
-#endif
                         {
                             try
                             {
@@ -3501,11 +3485,7 @@ namespace clojure.lang
             containingAssembly = null;
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
             {
-#if CLR2
-                if (!(asm is AssemblyBuilder))
-#else
                 if (!asm.IsDynamic)
-#endif
                 {
                     try
                     {

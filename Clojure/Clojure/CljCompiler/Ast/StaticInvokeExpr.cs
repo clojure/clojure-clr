@@ -13,15 +13,6 @@
  **/
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-#if CLR2
-using Microsoft.Scripting.Ast;
-#else
-using System.Linq.Expressions;
-using Microsoft.Scripting.Ast;
-#endif
-using System.Text;
 using System.Reflection;
 using System.Reflection.Emit;
 

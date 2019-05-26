@@ -109,9 +109,6 @@ namespace clojure.lang
             if (s1 == obj)
                 return true;
 
-#if CLR2
-            // No System.Collections.Generic.ISet<T>
-#else
             ISet<Object> is2 = obj as ISet<Object>;
             if (is2 != null)
             {
@@ -122,7 +119,6 @@ namespace clojure.lang
                         return false;
                 return true;
             }
-#endif
 
             IPersistentSet s2 = obj as IPersistentSet;
             if (s2 == null)
