@@ -10,7 +10,7 @@
 
 (defn- default-uuid-reader [form]
   {:pre [(string? form)]}
-  (System.Guid. form))                                                ;;; (java.util.UUID/fromString form)
+  (System.Guid. ^String form))                                                ;;; (java.util.UUID/fromString form)
 
 (defmethod print-method System.Guid [uuid ^System.IO.TextWriter w]    ;;; java.util.UUID ^java.io.Writer
   (.Write w (str "#uuid \"" (str uuid) "\"")))                        ;;; .write
