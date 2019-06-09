@@ -16,7 +16,8 @@ Goals:
 --------------------------------------------------------------------------------------
 
 Docs: http://clojure.org
-Mailing list: http://groups.google.com/group/clojure-clr
+Gitter: https://gitter.im/clojure-clr/community
+Slack: https://join.slack.com/t/clojureclr/shared_invite/enQtNTc3MTAwMzE4MTI4LTQ4NDkyMzU0OTViM2VmNzliY2E3NzhjZDAzZWQwNTIwYjM5ZmVmMWM1ZGE1MjhiZjY1ZGM5YTU5ZjY4ZGYyM2U / clojureclr.slack.com
 Getting Started (general): http://dev.clojure.org/display/doc/Getting+Started
 Google+ community: https://plus.google.com/u/0/communities/106235975067046753407
 Bug reports: http://dev.clojure.org/jira/browse/CLJCLR
