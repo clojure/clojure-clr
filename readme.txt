@@ -18,7 +18,6 @@ Goals:
 Docs: http://clojure.org
 Mailing list: http://groups.google.com/group/clojure-clr
 Getting Started (general): http://dev.clojure.org/display/doc/Getting+Started
-Google+ community: https://plus.google.com/u/0/communities/106235975067046753407
 Bug reports: http://dev.clojure.org/jira/browse/CLJCLR
 
 
