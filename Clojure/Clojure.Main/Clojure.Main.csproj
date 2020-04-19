@@ -21,9 +21,5 @@
     <ProjectReference Include="..\Clojure\Clojure.csproj" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy $(ProjectDir)$(OutDir). $(SolutionDir)$(OutDir)  /i /s /e /y" />
-  </Target>
-
 
 </Project>

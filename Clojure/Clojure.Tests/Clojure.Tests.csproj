@@ -11,10 +11,6 @@
     <PackageReference Include="clojure.tools.namespace" Version="0.2.10" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy $(ProjectDir)$(OutDir). $(SolutionDir)$(OutDir)  /i /s /e /y" />
-  </Target>
-
   <ItemGroup>
     <None Update="clojure\run_test.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
