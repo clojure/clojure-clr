@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.1;net461</TargetFrameworks>
     <Authors>David Miller</Authors>
     <Company />
     <Copyright>Copyright © 2009-19</Copyright>
@@ -17,7 +17,7 @@
   <ItemGroup>
     <PackageReference Include="clojure.core.specs.alpha" Version="0.2.44" />
     <PackageReference Include="clojure.spec.alpha" Version="0.1.176" />
-    <PackageReference Include="DynamicLanguageRuntime" Version="1.2.2" />
+    <PackageReference Include="DynamicLanguageRuntime" Version="1.2.3-candidate1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,5 +25,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy $(ProjectDir)$(OutDir). $(SolutionDir)$(OutDir)  /i /s /e /y" />
+  </Target>
 
 </Project>

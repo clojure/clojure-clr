@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.1;net461</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,6 +10,10 @@
     <PackageReference Include="clojure.test.generative" Version="0.5.2" />
     <PackageReference Include="clojure.tools.namespace" Version="0.2.10" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy $(ProjectDir)$(OutDir). $(SolutionDir)$(OutDir)  /i /s /e /y" />
+  </Target>
 
   <ItemGroup>
     <None Update="clojure\run_test.clj">

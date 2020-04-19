@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.1;net461</TargetFrameworks>
     <Version>1.10.0</Version>
     <Authors>David Miller</Authors>
     <Company />
@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="clojure.core.specs.alpha" Version="0.2.44" />
     <PackageReference Include="clojure.spec.alpha" Version="0.1.176" />
+    <PackageReference Include="DynamicLanguageRuntime" Version="1.2.3-candidate1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,7 +22,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="dotnet publish &quot;$(ProjectFileName)&quot; --no-build -o pub&#xD;&#xA;xcopy /C /Y &quot;$(ProjectDir)\pub\*.dll&quot; &quot;$(OutDir)&quot;&#xD;&#xA;" />
+    <Exec Command="xcopy $(ProjectDir)$(OutDir). $(SolutionDir)$(OutDir)  /i /s /e /y" />
   </Target>
 
 

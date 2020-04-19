@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.1;net461</TargetFrameworks>
     <Copyright>Copyright ©  2019</Copyright>
     <Authors>David Miller -- and anyone else who has built this exact same thing</Authors>
     <Description>The traditional Build Task to set an environment variable.</Description>

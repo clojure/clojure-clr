@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.1;net461</TargetFrameworks>
     <Authors>David Miller</Authors>
     <Company />
     <Copyright>Copyright © 2009-19</Copyright>
@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DynamicLanguageRuntime" Version="1.2.3-candidate1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="NUnit" Version="3.11.0" />
     <PackageReference Include="NUnit.StaticExpect" Version="1.0.7" />
@@ -20,8 +21,10 @@
     <ProjectReference Include="..\Clojure\Clojure.csproj" />
   </ItemGroup>
 
+<!--
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="dotnet publish &quot;$(ProjectFileName)&quot; --no-build -o pub&#xD;&#xA;xcopy /C /Y &quot;$(ProjectDir)\pub\*.dll&quot; &quot;$(OutDir)&quot;&#xD;&#xA;" />
+    <Exec Command="dotnet publish &quot;$(ProjectFileName)&quot; -no-build -o pub&#xD;&#xA;xcopy /C /Y &quot;$(ProjectDir)\pub\*.dll&quot; &quot;$(OutDir)&quot;&#xD;&#xA;" />
   </Target>
+  -->
 
 </Project>
