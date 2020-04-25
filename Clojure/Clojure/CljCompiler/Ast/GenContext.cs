@@ -70,6 +70,9 @@ namespace clojure.lang.CljCompiler.Ast
         TypeBuilder _tb;
         public TypeBuilder TB { get { return _tb; } }
 
+
+        public String Path { get; set; }
+
         #endregion
 
         #region C-tors & factory methods
@@ -147,8 +150,21 @@ namespace clojure.lang.CljCompiler.Ast
             _docInfo = Expression.SymbolDocument(sourceName);
 
             _moduleBuilder = _assyGen.ModuleBuilder;
+
+            Path = ComputeAssemblyPath(directory, aname.Name, extension);
+            Console.WriteLine("gencontext path = {0}", Path);
         }
 
+        private string ComputeAssemblyPath(string directory, string name, string extension)
+        {
+            directory = directory ?? ".";
+            directory = System.IO.Path.GetFullPath(directory);
+            extension = extension ?? ".dll";
+            return System.IO.Path.Combine(directory, name + extension);
+
+        }
+
+         
         internal GenContext WithNewDynInitHelper()
         {
             return WithNewDynInitHelper(GenerateName());
@@ -189,12 +205,21 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if ( _dynInitHelper != null  )
                 _dynInitHelper.FinalizeType();
+
+#if NET461
+            Console.WriteLine("Writing assembly {0} in 461", Path);                     
             _assyGen.SaveAssembly();
+#else
+            Console.WriteLine("Writing assembly {0} in Core!",Path);
+            var assembly = AssemblyBuilder;
+            var generator = new Lokad.ILPack.AssemblyGenerator();
+            generator.GenerateAssembly(assembly,Path);
+#endif
         }
 
         #endregion
 
-        #region Debug info
+#region Debug info
 
         public static Expression AddDebugInfo(Expression expr, IPersistentMap spanMap)
         {
@@ -261,6 +286,6 @@ namespace clojure.lang.CljCompiler.Ast
 #endif
         }
 
-        #endregion
+#endregion
     }
 }

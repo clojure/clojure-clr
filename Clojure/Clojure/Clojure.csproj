@@ -18,6 +18,7 @@
     <PackageReference Include="clojure.core.specs.alpha" Version="0.2.44" />
     <PackageReference Include="clojure.spec.alpha" Version="0.1.176" />
     <PackageReference Include="DynamicLanguageRuntime" Version="1.2.3-candidate1" />
+    <PackageReference Include="Lokad.ILPack" Version="0.1.4" Condition="'$(TargetFramework)' != 'net461'"/>
   </ItemGroup>
 
   <ItemGroup>
