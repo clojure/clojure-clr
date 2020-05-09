@@ -288,7 +288,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 setterIlg.EmitCall(si.SiteType.GetMethod("Create"));
                 setterIlg.Emit(OpCodes.Dup);
-                LocalBuilder v0 = setterIlg.DeclareLocal(typeof(Object));
+                LocalBuilder v0 = setterIlg.DeclareLocal(si.FieldBuilder.FieldType);
                 setterIlg.Emit(OpCodes.Stloc, v0);
                 setterIlg.Emit(OpCodes.Stsfld, si.FieldBuilder);
                 setterIlg.Emit(OpCodes.Ldloc,v0);

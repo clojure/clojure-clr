@@ -359,22 +359,23 @@ namespace clojure.lang.CljCompiler.Ast
                 CljILGen ilg2 = new CljILGen(mbLambda.GetILGenerator());
                 ilg2.EmitFieldGet(siteInfo.FieldBuilder);
                 ilg2.Emit(OpCodes.Dup);
-                LocalBuilder siteVar = ilg2.DeclareLocal(siteInfo.DelegateType);
+                LocalBuilder siteVar = ilg2.DeclareLocal(siteInfo.SiteType);
                 ilg2.Emit(OpCodes.Stloc, siteVar);
                 ilg2.EmitFieldGet(siteInfo.SiteType.GetField("Target"));
                 ilg2.Emit(OpCodes.Ldloc, siteVar);
                 for (int i = 0; i < paramExprs.Count; i++)
                     ilg2.EmitLoadArg(i);
 
-                ilg2.EmitCall(siteInfo.DelegateType.GetMethod("Invoke"));
+                var invokeMethod = siteInfo.DelegateType.GetMethod("Invoke");
+                ilg2.EmitCall(invokeMethod);
                 if (returnType == typeof(void))
                 {
                     ilg2.Emit(OpCodes.Pop);
                     ilg2.EmitNull();
                 }
-                else if (returnType != call.Type)
+                else if (returnType != invokeMethod.ReturnType)
                 {
-                    EmitConvertToType(ilg2, call.Type, returnType, false);
+                    EmitConvertToType(ilg2, invokeMethod.ReturnType, returnType, false);
                 }
 
                 ilg2.Emit(OpCodes.Ret);
