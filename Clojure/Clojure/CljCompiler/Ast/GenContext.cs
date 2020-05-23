@@ -152,7 +152,6 @@ namespace clojure.lang.CljCompiler.Ast
             _moduleBuilder = _assyGen.ModuleBuilder;
 
             Path = ComputeAssemblyPath(directory, aname.Name, extension);
-            Console.WriteLine("gencontext path = {0}", Path);
         }
 
         private string ComputeAssemblyPath(string directory, string name, string extension)
@@ -206,14 +205,13 @@ namespace clojure.lang.CljCompiler.Ast
             if ( _dynInitHelper != null  )
                 _dynInitHelper.FinalizeType();
 
-#if NET461
-            Console.WriteLine("Writing assembly {0} in 461", Path);                     
+#if NET461                 
             _assyGen.SaveAssembly();
 #else
-            Console.WriteLine("Writing assembly {0} in Core!",Path);
-            var assembly = AssemblyBuilder;
-            var generator = new Lokad.ILPack.AssemblyGenerator();
-            generator.GenerateAssembly(assembly,Path);
+            Console.WriteLine("AOT-compilation not available");
+            //var assembly = AssemblyBuilder;
+            //var generator = new Lokad.ILPack.AssemblyGenerator();
+            //generator.GenerateAssembly(assembly,Path);
 #endif
         }
 
