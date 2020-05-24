@@ -3,10 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;netstandard2.1;net461</TargetFrameworks>
     <RootNamespace>clojure.lang</RootNamespace>
-    <Version>1.10.0</Version>
-    <Copyright>Copyright © 2009-19</Copyright>
-    <Authors>David Miller</Authors>
-    <Company></Company>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

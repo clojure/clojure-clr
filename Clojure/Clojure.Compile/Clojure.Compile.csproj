@@ -3,9 +3,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1;netstandard2.1;net461</TargetFrameworks>
-    <Version>1.10.0</Version>
-    <Authors>David Miller</Authors>
-    <Company />
     <StartupObject>BootstrapCompile.Compile</StartupObject>
   </PropertyGroup>
 

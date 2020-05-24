@@ -2,10 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;netstandard2.1;net461</TargetFrameworks>
-    <Authors>David Miller</Authors>
-    <Company />
-    <Copyright>Copyright © 2009-19</Copyright>
-    <Version>1.10.0</Version>
     <NeutralLanguage></NeutralLanguage>
     <RootNamespace>clojure.lang</RootNamespace>
   </PropertyGroup>
