@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
+
+  <!-- Took a number of ideas from:  https://github.com/IronLanguages/dlr/blob/master/Directory.Build.props -->
+  
   <Import Project="$(MSBuildThisFileDirectory)\CurrentVersion.props" />
 
+  
 
   <PropertyGroup>
+
+    <ClojureCLRBuildDir>$(DlrRootDir)\Build</ClojureCLRBuildDir>
 
     <AssemblyFileRevision Condition="'$(ReleaseLevel)' == 'alpha'">000$(ReleaseSerial)</AssemblyFileRevision>
     <AssemblyFileRevision Condition="'$(ReleaseLevel)' == 'beta'">00$(ReleaseSerial)0</AssemblyFileRevision>
@@ -26,7 +32,7 @@
   
   <!-- Signing -->
   <PropertyGroup>
-    <PublicKey>$(DlrBuildDir)\Key.snk</PublicKey>
+    <PublicKey>$(ClojureCLRBuildDir)\Key.snk</PublicKey>
   </PropertyGroup>
 
   <PropertyGroup Condition="Exists('$(PublicKey)') and '$(AssemblyOriginatorKeyFile)'==''">
