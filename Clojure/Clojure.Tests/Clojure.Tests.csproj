@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;netstandard2.1;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="clojure.data.generators" Version="0.1.2" />
-    <PackageReference Include="clojure.test.check" Version="0.9.0.1" />
-    <PackageReference Include="clojure.test.generative" Version="0.5.2" />
-    <PackageReference Include="clojure.tools.namespace" Version="0.2.10" />
+    <PackageReference Include="clojure.data.generators" Version="1.0.1" />
+    <PackageReference Include="clojure.test.check" Version="1.0.0" />
+    <PackageReference Include="clojure.test.generative" Version="1.0.0" />
+    <PackageReference Include="clojure.tools.namespace" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

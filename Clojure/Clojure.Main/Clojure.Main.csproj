@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp3.1;netstandard2.1;net461</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
     <StartupObject>Clojure.CljMain</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="clojure.core.specs.alpha" Version="0.2.44" />
-    <PackageReference Include="clojure.spec.alpha" Version="0.1.176" />
-    <PackageReference Include="DynamicLanguageRuntime" Version="1.2.3-candidate1" />
+    <PackageReference Include="clojure.core.specs.alpha" Version="0.2.45" />
+    <PackageReference Include="clojure.spec.alpha" Version="0.1.187" />
+    <PackageReference Include="DynamicLanguageRuntime" Version="1.2.3" />
   </ItemGroup>
 
   <ItemGroup>

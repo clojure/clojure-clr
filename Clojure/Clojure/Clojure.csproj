@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;netstandard2.1;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
     <NeutralLanguage></NeutralLanguage>
     <RootNamespace>clojure.lang</RootNamespace>
   </PropertyGroup>
@@ -11,9 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="clojure.core.specs.alpha" Version="0.2.44" />
-    <PackageReference Include="clojure.spec.alpha" Version="0.1.176" />
-    <PackageReference Include="DynamicLanguageRuntime" Version="1.2.3-candidate1" />
+    <PackageReference Include="clojure.core.specs.alpha" Version="0.2.45" />
+    <PackageReference Include="clojure.spec.alpha" Version="0.1.187" />
+    <PackageReference Include="DynamicLanguageRuntime" Version="1.2.3" />
   </ItemGroup>
 
   <ItemGroup>
