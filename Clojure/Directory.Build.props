@@ -9,7 +9,7 @@
 
   <PropertyGroup>
 
-    <ClojureCLRBuildDir>$(DlrRootDir)\Build</ClojureCLRBuildDir>
+    <ClojureCLRBuildDir>$(MSBuildThisFileDirectory)\Build</ClojureCLRBuildDir>
 
     <AssemblyFileRevision Condition="'$(ReleaseLevel)' == 'alpha'">000$(ReleaseSerial)</AssemblyFileRevision>
     <AssemblyFileRevision Condition="'$(ReleaseLevel)' == 'beta'">00$(ReleaseSerial)0</AssemblyFileRevision>

@@ -1,67 +1,127 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug 4.0</Configuration>
-    <!--<Platform Condition=" '$(Platform)' == '' ">Any CPU</Platform>-->
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Mono Condition="'$(OS)' != 'Windows_NT'">true</Mono>
+	
+	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">netcoreapp3.1</TestTargetFramework>
+	
+	<RootDir>$(MSBuildThisFileDirectory)</RootDir>
+	<Solution>$(RootDir)Clojure.sln</Solution>
+	
+	<BuildSysDir>$(RootDir)Build</BuildSysDir>
+	<TestDir>$(RootDir)Test\$(Configuration)\$(TestTargetFramework)</TestDir>
+	<ClojureMainBinDir>$(RootDir)Clojure.Main\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
+	<ClojureCompileBinDir>$(RootDir)Clojure.Compile\bin\$(Configuration)\$(TestTargetFramework)</ClojureCompileBinDir>
+	<ClojureSourceBinDir>$(RootDir)Clojure.Source\bin\$(Configuration)\$(TestTargetFramework)</ClojureSourceBinDir>
+	<ClojureTestBinDir>$(RootDir)Clojure.Test\bin\$(Configuration)\$(TestTargetFramework)</ClojureTestBinDir>
+	
+  </PropertyGroup>
+  
+
+  <Import Project="$(BuildSysDir)\Tasks.Targets" />
+  <Import Project="$(RootDir)CurrentVersion.props" />
+
+  <PropertyGroup>
+  
     <cljc>Clojure.Compile.exe</cljc>
     <clji>Clojure.Main.exe</clji>
-    <Runtime Condition=" '$(Runtime)' == '' ">.Net</Runtime>
+
     <DirectLinking Condition=" '$(DirectLinking)' == '' ">true</DirectLinking>
-    <!-- 
-	<DefineConstants Condition=" '$(Runtime)' == 'Mono' ">MONO</DefineConstants>
-    <DefineConstants Condition=" '$(Runtime)' == '.Net' ">DOTNET</DefineConstants> 
-	-->	
+
+    <Runtime Condition=" '$(Runtime)' == '' ">.Net</Runtime>
 	<PlatformSym Condition=" '$(Runtime)' == 'Mono' ">MONO</PlatformSym>
 	<PlatformSym Condition=" '$(Runtime)' == '.Net' ">DOTNET</PlatformSym>
-  </PropertyGroup>
-  
-  <!--Is there a way to avoid this duplication? This is also encoded in the project files, although relative to a different path -->
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug 3.5' ">
-    <OutputPath>..\bin\3.5\Debug\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release 3.5' ">
-    <OutputPath>..\bin\3.5\Release\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug 4.0' ">
-    <OutputPath>..\bin\4.0\Debug\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release 4.0' ">
-    <OutputPath>..\bin\4.0\Release\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug 4.5' ">
-    <OutputPath>..\bin\4.5\Debug\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release 4.5' ">
-    <OutputPath>..\bin\4.5\Release\</OutputPath>
-  </PropertyGroup>
-  
-  <UsingTask
-   TaskName="BuildTasks.SetEnvVar"
-   AssemblyFile="BuildTasks\bin\Debug\BuildTasks.dll" />
 
-  
-  <Target Name="Build">
-    <MSBuild Projects="ClojureCLR.sln"
-             Properties="Runtime=$(Runtime);PlatformSym=$(PlatformSym);DirectLinking=$(DirectLinking)"/>
+  </PropertyGroup>
+	
+  <Target Name="ListParams">
+  	<Message Text="RootDir = $(RootDir)" />
+	<Message Text="Solution = $(Solution)" />
+	<Message Text="BuildSysDir = $(BuildSysDir)" />
+    <Message Text="TestTargetFramework = $(TestTargetFramework)" />
+	<Message Text="Configuration = $(Configuration)" />
+	<Message Text="Mono = $(Mono)" />
+
+	<Message Text="TestDir = $(TestDir)" />
+	<Message Text="ClojureTestBinDir = $(ClojureTestBinDir)" />
+	<Message Text="DirectLinking = $(DirectLinking)" />
+	<Message Text="PlatformSym = $(PlatformSym)" />
   </Target>
   
-  <Target Name="CompileTest" DependsOnTargets="Build">
+  <Target Name="RestoreReferences">
+    <MSBuild Projects="$(Solution)" Targets="Restore" />
+  </Target>
+ 
+   <PropertyGroup>
+	<BuildProperties>
+	  RootDir=$(RootDir);
+	  Configuration=$(Configuration);
+	  Runtime=$(Runtime);
+	  PlatformSym=$(PlatformSym);
+	  DirectLinking=$(DirectLinking);
+	  Mono=$(Mono)	  
+	</BuildProperties>
+   </PropertyGroup>
+ 
+   <Target Name="Build" DependsOnTargets="RestoreReferences">
+    <MSBuild Projects="$(Solution)"
+			 Targets="Build"
+             Properties="$(BuildProperties)"/>
+  </Target>
+  
+   <Target Name="Rebuild" DependsOnTargets="RestoreReferences">
+    <MSBuild Projects="$(Solution)"
+			 Targets="Rebuild"
+             Properties="$(BuildProperties)"/>
+  </Target>
+  
+    <Target Name="Clean" DependsOnTargets="RestoreReferences">
+    <MSBuild Projects="$(Solution)"
+			 Targets="Clean"
+             Properties="$(BuildProperties)"/>
+  </Target> 
+  
+
+  <Target Name="StageTest">
+    <ItemGroup>
+		<ClojureCompileAssets Include="$(ClojureCompileBinDir)\**\*" />
+		<ClojureMainAssets Include="$(ClojureMainBinDir)\Clojure.Main.*" />
+		<ClojureTestAssets Include="$(ClojureTestBinDir)\**\*" />
+	</ItemGroup>
+  
+	<Copy SkipUnchangedFiles="true"
+		  SourceFiles="@(ClojureCompileAssets)"
+		  DestinationFolder="$(TestDir)" />
+		<Copy SkipUnchangedFiles="true"
+		  SourceFiles="@(ClojureMainAssets)"
+		  DestinationFolder="$(TestDir)" />	  
+		<Copy SkipUnchangedFiles="true"
+		  SourceFiles="@(ClojureTestAssets)"
+		  DestinationFolder="$(TestDir)" />	  
+  </Target>  
+  
+  <Target Name="CompileTest" DependsOnTargets="StageTest">
     <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes clojure.test-clojure.compilation.load-ns clojure.test-clojure.compilation.line-number-examples" 
-          WorkingDirectory="$(OutputPath)"
+          WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == '.Net' "/>
     <Exec Command="mono $(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes  clojure.test-clojure.compilation.load-ns clojure.test-clojure.compilation.line-number-examples" 
-          WorkingDirectory="$(OutputPath)"
+          WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
   
-  <Target Name="Test" DependsOnTargets="Build;CompileTest">
-    <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test.clj" DestinationFolder="$(OutputPath)" />
-    <SetEnvVar Name="clojure.test-clojure.exclude-namespaces" Value="#{clojure.test-clojure.compilation.load-ns}" />
+  
+
+  
+  <Target Name="Test" DependsOnTargets="CompileTest">
+    <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test.clj" DestinationFolder="$(TestDir)" />
+    <SetEnvVarTask Name="clojure.test-clojure.exclude-namespaces" Value="#{clojure.test-clojure.compilation.load-ns}" />
     <Exec Command="$(clji) clojure\run_test.clj"
-          WorkingDirectory="$(OutputPath)"
+          WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == '.Net' "/>
     <Exec Command="mono $(clji) clojure\run_test.clj"
-          WorkingDirectory="$(OutputPath)"
+          WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
 
