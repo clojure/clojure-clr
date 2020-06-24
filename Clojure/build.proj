@@ -15,7 +15,7 @@
 	<ClojureMainBinDir>$(RootDir)Clojure.Main\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
 	<ClojureCompileBinDir>$(RootDir)Clojure.Compile\bin\$(Configuration)\$(TestTargetFramework)</ClojureCompileBinDir>
 	<ClojureSourceBinDir>$(RootDir)Clojure.Source\bin\$(Configuration)\$(TestTargetFramework)</ClojureSourceBinDir>
-	<ClojureTestBinDir>$(RootDir)Clojure.Test\bin\$(Configuration)\$(TestTargetFramework)</ClojureTestBinDir>
+	<ClojureTestsBinDir>$(RootDir)Clojure.Tests\bin\$(Configuration)\$(TestTargetFramework)</ClojureTestsBinDir>
 	
   </PropertyGroup>
   
@@ -45,7 +45,10 @@
 	<Message Text="Mono = $(Mono)" />
 
 	<Message Text="TestDir = $(TestDir)" />
-	<Message Text="ClojureTestBinDir = $(ClojureTestBinDir)" />
+	<Message Text="ClojureCompileBinDir = $(ClojureCompileBinDir)" />
+	<Message Text="ClojureMainBinDir = $(ClojureMainBinDir)" />
+	<Message Text="ClojureSourceBinDir = $(ClojureSourceBinDir)" />
+	<Message Text="ClojureTestsBinDir = $(ClojureTestsBinDir)" />
 	<Message Text="DirectLinking = $(DirectLinking)" />
 	<Message Text="PlatformSym = $(PlatformSym)" />
   </Target>
@@ -88,18 +91,24 @@
     <ItemGroup>
 		<ClojureCompileAssets Include="$(ClojureCompileBinDir)\**\*" />
 		<ClojureMainAssets Include="$(ClojureMainBinDir)\Clojure.Main.*" />
-		<ClojureTestAssets Include="$(ClojureTestBinDir)\**\*" />
+		<ClojureTestsAssets Include="$(ClojureTestsBinDir)\**\*" />
 	</ItemGroup>
-  
+	<Message Text="ClojureCompileAssets=@(ClojureCompileAssets)"/>
+	<Message Text=" " />
+	<Message Text="ClojureMainAssets=@(ClojureMainAssets)"/>	
+	<Message Text=" " />
+	<Message Text="ClojureTestsAssets=@(ClojureTestsAssets)"/>
+	<Message Text=" " />
+	
 	<Copy SkipUnchangedFiles="true"
 		  SourceFiles="@(ClojureCompileAssets)"
-		  DestinationFolder="$(TestDir)" />
+		  DestinationFolder="$(TestDir)\%(RecursiveDir)" />
 		<Copy SkipUnchangedFiles="true"
 		  SourceFiles="@(ClojureMainAssets)"
-		  DestinationFolder="$(TestDir)" />	  
+		  DestinationFolder="$(TestDir)\%(RecursiveDir)" />	  
 		<Copy SkipUnchangedFiles="true"
-		  SourceFiles="@(ClojureTestAssets)"
-		  DestinationFolder="$(TestDir)" />	  
+		  SourceFiles="@(ClojureTestsAssets)"
+		  DestinationFolder="$(TestDir)\%(RecursiveDir)" />	  
   </Target>  
   
   <Target Name="CompileTest" DependsOnTargets="StageTest">
@@ -116,7 +125,7 @@
   
   <Target Name="Test" DependsOnTargets="CompileTest">
     <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test.clj" DestinationFolder="$(TestDir)" />
-    <SetEnvVarTask Name="clojure.test-clojure.exclude-namespaces" Value="#{clojure.test-clojure.compilation.load-ns}" />
+    <SetEnvironmentVariable Name="clojure.test-clojure.exclude-namespaces" Value="#{clojure.test-clojure.compilation.load-ns}" />
     <Exec Command="$(clji) clojure\run_test.clj"
           WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == '.Net' "/>

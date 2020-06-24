@@ -1,3 +1,4 @@
+(assembly-load-from "clojure.tools.reader.dll")
 (assembly-load-from "clojure.tools.namespace.dll")
 (assembly-load-from "clojure.data.generators.dll")
 (assembly-load-from "clojure.test.generative.dll")

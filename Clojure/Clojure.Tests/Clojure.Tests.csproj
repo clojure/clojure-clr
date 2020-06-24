@@ -6,9 +6,9 @@
 
   <ItemGroup>
     <PackageReference Include="clojure.data.generators" Version="1.0.1" />
-    <PackageReference Include="clojure.test.check" Version="1.0.0" />
+    <PackageReference Include="clojure.test.check" Version="1.0.0.1" />
     <PackageReference Include="clojure.test.generative" Version="1.0.0" />
-    <PackageReference Include="clojure.tools.namespace" Version="1.0.0" />
+    <PackageReference Include="clojure.tools.namespace" Version="1.0.0.3" />
   </ItemGroup>
 
   <ItemGroup>
