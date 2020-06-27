@@ -2651,7 +2651,7 @@ namespace Clojure.Tests.LibTests
                 true, Decimal.Zero);
 
             AsDecimalTest(new BigInteger(1, 0x1, 0x0, 0x0, 0x0),
-                false, default(Decimal));
+                false, default);
 
             AsDecimalTest(BigInteger.Create(1234),
                 true, 1234M);
