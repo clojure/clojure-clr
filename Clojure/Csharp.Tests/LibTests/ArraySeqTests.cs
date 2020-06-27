@@ -14,9 +14,9 @@
 
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -31,7 +31,7 @@ namespace Clojure.Tests.LibTests
         {
             IArraySeq a = ArraySeq.create();
             
-            Expect(a, Null);
+            Expect(a).To.Be.Null();
         }
 
         [Test]
@@ -40,7 +40,7 @@ namespace Clojure.Tests.LibTests
             object[] array = new object[] { 1, 2, 3 };
             IArraySeq a = ArraySeq.create(array);
 
-            Expect(a, Not.Null);
+            Expect(a).Not.To.Be.Null();
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace Clojure.Tests.LibTests
         {
             IArraySeq a = ArraySeq.create(null);
             
-            Expect(a, Null);
+            Expect(a).To.Be.Null();
         }
 
         [Test]
@@ -57,7 +57,7 @@ namespace Clojure.Tests.LibTests
             object[] array = new object[] { 1, 2, 3 };
             IArraySeq a = ArraySeq.create(array);
 
-            Expect(a.meta(), Null);
+            Expect(a.meta()).To.Be.Null();
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace Clojure.Tests.LibTests
             object[] array = new object[] { 1, 2, 3 };
             IArraySeq a = ArraySeq.create(array,0);
 
-            Expect(a, Not.Null);
+            Expect(a).Not.To.Be.Null();
         }
 
         [Test]
@@ -75,7 +75,7 @@ namespace Clojure.Tests.LibTests
             object[] array = new object[] { 1, 2, 3 };
             IArraySeq a = ArraySeq.create(array, 10);
 
-            Expect(a, Null);
+            Expect(a).To.Be.Null();
         }
 
         [Test]
@@ -84,7 +84,7 @@ namespace Clojure.Tests.LibTests
             object[] array = new object[] { 1, 2, 3 };
             IArraySeq a = ArraySeq.create(array,0);
 
-            Expect(a.meta(), Null);
+            Expect(a.meta()).To.Be.Null();
         }  
 
         #endregion
@@ -97,7 +97,7 @@ namespace Clojure.Tests.LibTests
             object[] array = new object[] { 1, 2, 3 };
             IArraySeq a = ArraySeq.create(array);
 
-            Expect(((Counted)a).count(), EqualTo(3));
+            Expect(((Counted)a).count()).To.Equal(3);
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace Clojure.Tests.LibTests
             object[] array = new object[] { 1, 2, 3 };
             IArraySeq a = ArraySeq.create(array,1);
 
-            Expect(((Counted)a).count(), EqualTo(2));
+            Expect(((Counted)a).count()).To.Equal(2);
         }
 
         #endregion
@@ -122,7 +122,8 @@ namespace Clojure.Tests.LibTests
             IArraySeq a = ArraySeq.create(array);
             object ret = a.reduce(fn);
 
-            Expect(ret, EqualTo(9));
+            Expect(ret).To.Be.An.Instance.Of<long>();
+            Expect((long)ret).To.Equal(9);
         }
 
         [Test]
@@ -134,7 +135,8 @@ namespace Clojure.Tests.LibTests
             IArraySeq a = ArraySeq.create(array);
             object ret = a.reduce(fn, 20);
 
-            Expect(ret, EqualTo(29));
+            Expect(ret).To.Be.An.Instance.Of<long>();
+            Expect((long)ret).To.Equal(29);
         }
         #endregion
     }

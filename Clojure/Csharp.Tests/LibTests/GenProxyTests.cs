@@ -15,11 +15,11 @@
 using System;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
 using System.Reflection;
 using System.IO;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -41,14 +41,14 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void GeneratedProxyHasCorrectName()
         {
-            Expect(_proxyType.Name, EqualTo("Object_"));
+            Expect(_proxyType.Name).To.Equal("Object_");
         }
 
 
         [Test]
         public void ImplementsIProxy()
         {
-            Expect(_proxyType.GetInterface("IProxy"), Not.Null);
+            Expect(_proxyType.GetInterface("IProxy")).Not.To.Be.Null();
         }
     }
 
@@ -77,42 +77,42 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void HasCorrectBaseType()
         {
-            Expect(_proxyType.BaseType, SameAs(typeof(Impl1)));
+            Expect(_proxyType.BaseType).To.Equal(typeof(Impl1));
         }
 
         [Test]
         public void ImplementsPublicMethods()
         {
-            Expect(_proxyType.GetMethod("im1",new Type[]{typeof(int)}),Not.Null);
-            Expect(_proxyType.GetMethod("im1", new Type[] { typeof(string) }), Not.Null);
+            Expect(_proxyType.GetMethod("im1",new Type[]{typeof(int)})).Not.To.Be.Null();
+            Expect(_proxyType.GetMethod("im1", new Type[] { typeof(string) })).Not.To.Be.Null();
         }
 
         [Test]
         public void DoesNotImplementsPrivateMethods()
         {
-            Expect(_proxyType.GetMethod("im2", new Type[] { typeof(int) }), Null);
+            Expect(_proxyType.GetMethod("im2", new Type[] { typeof(int) })).To.Be.Null();
         }
 
         [Test]
         public void CanBeConstructedFromDefaultCtor()
         {
             object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
-            Expect(o, Not.Null);
+            Expect(o).Not.To.Be.Null();
         }
 
         [Test]
         public void CanCallBaseClassReflectedMethods()
         {
             object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
-            Expect(_proxyType.GetMethod("im1",new Type[] {typeof(int)}).Invoke(o, new object[] { 21 }), EqualTo(42));
-            Expect(_proxyType.GetMethod("im1", new Type[] { typeof(string) }).Invoke(o, new object[] { "test" }), EqualTo(4));
+            Expect(_proxyType.GetMethod("im1",new Type[] {typeof(int)}).Invoke(o, new object[] { 21 })).To.Equal(42);
+            Expect(_proxyType.GetMethod("im1", new Type[] { typeof(string) }).Invoke(o, new object[] { "test" })).To.Equal(4);
         }
 
         [Test]
         public void HandlesVoidReturnTypeMethods()
         {
             object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
-            Expect(_proxyType.GetMethod("im3", new Type[] { typeof(int) }).Invoke(o, new object[] { 21 }), Null);
+            Expect(_proxyType.GetMethod("im3", new Type[] { typeof(int) }).Invoke(o, new object[] { 21 })).To.Be.Null();
         }
     }
 
@@ -147,8 +147,8 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ImplementsAppropriateInterfaces()
         {
-            Expect(_proxyType.GetInterface("IProxy"), Not.Null);
-            Expect(_proxyType.GetInterface("I1"), Not.Null);
+            Expect(_proxyType.GetInterface("IProxy")).Not.To.Be.Null();
+            Expect(_proxyType.GetInterface("I1")).Not.To.Be.Null();
         }
 
         [Test]
@@ -213,16 +213,16 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ImplementsAppropriateInterfaces()
         {
-            Expect(_proxyType.GetInterface("IProxy"), Not.Null);
-            Expect(_proxyType.GetInterface("I1"), Not.Null);
+            Expect(_proxyType.GetInterface("IProxy")).Not.To.Be.Null();
+            Expect(_proxyType.GetInterface("I1")).Not.To.Be.Null();
         }
 
         [Test]
         public void CanCallBaseClassReflectedMethods()
         {
             object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
-            Expect(_proxyType.GetMethod("m1", new Type[] { typeof(int) }).Invoke(o, new object[] { 21 }), EqualTo(42));
-            Expect(_proxyType.GetMethod("m1", new Type[] { typeof(string) }).Invoke(o, new object[] { "test" }), EqualTo(4));
+            Expect(_proxyType.GetMethod("m1", new Type[] { typeof(int) }).Invoke(o, new object[] { 21 })).To.Equal(42);
+            Expect(_proxyType.GetMethod("m1", new Type[] { typeof(string) }).Invoke(o, new object[] { "test" })).To.Equal(4);
         }
 
         [Test]
@@ -281,9 +281,9 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ImplementsAppropriateInterfaces()
         {
-            Expect(_proxyType.GetInterface("IProxy"), Not.Null);
-            Expect(_proxyType.GetInterface("I1"), Not.Null);
-            Expect(_proxyType.GetInterface("I2"), Not.Null);
+            Expect(_proxyType.GetInterface("IProxy")).Not.To.Be.Null();
+            Expect(_proxyType.GetInterface("I1")).Not.To.Be.Null();
+            Expect(_proxyType.GetInterface("I2")).Not.To.Be.Null();
         }
 
     }
@@ -473,30 +473,30 @@ namespace Clojure.Tests.LibTests
             //SanityCheck.PrintMethods(_obj.GetType());
            
             Impl1 impl1 = _obj as Impl1;
-            Expect(impl1.m1(21), EqualTo(100));
+            Expect(impl1.m1(21)).To.Equal(100);
 
             MethodInfo m1Method = _proxyType.GetMethod("m1", new Type[] { typeof(int) });
-            Expect(m1Method,Not.Null);
-            Expect(m1Method.Invoke(_obj, new object[] { 21 }), EqualTo(100));
+            Expect(m1Method).Not.To.Be.Null();
+            Expect(m1Method.Invoke(_obj, new object[] { 21 })).To.Equal(100);
 
             I1 i1 = _obj as I1;
-            Expect(i1, Not.Null);
-            Expect(i1.m1(42), EqualTo(100));
-            Expect(i1.m2("help"), EqualTo(200));
+            Expect(i1).Not.To.Be.Null();
+            Expect(i1.m1(42)).To.Equal(100);
+            Expect(i1.m2("help")).To.Equal(200);
             // just hoping the next one doesn't blow up
             // We set a flag to test
             Fn2V._called = false;
             i1.m2v("abcd");
             Expect(Fn2V._called);
 
-            Expect(i1.m2s("job"), EqualTo("nice job"));
+            Expect(i1.m2s("job")).To.Equal("nice job");
 
             I2 i2 = _obj as I2;
-            Expect(i2, Not.Null);
-            Expect(i2.m1(25), EqualTo(100));
-            Expect(i2.m3(60), EqualTo(300));
-            Expect(i2.m3("test"), EqualTo(300));
-            Expect(i2.m4("junk"), EqualTo(400));
+            Expect(i2).Not.To.Be.Null();
+            Expect(i2.m1(25)).To.Equal(100);
+            Expect(i2.m3(60)).To.Equal(300);
+            Expect(i2.m3("test")).To.Equal(300);
+            Expect(i2.m4("junk")).To.Equal(400);
         }
 
         [Test]
@@ -504,7 +504,7 @@ namespace Clojure.Tests.LibTests
         {
             IProxy ip = _obj as IProxy;
             IPersistentMap map = ip.__getClojureFnMappings();
-            Expect(map.count(), EqualTo(6));
+            Expect(map.count()).To.Equal(6);
             Expect(map.containsKey("m1"));
             Expect(map.containsKey("m2"));
             Expect(map.containsKey("m2s"));
@@ -521,11 +521,11 @@ namespace Clojure.Tests.LibTests
                 PersistentHashMap.create("m3", new Fn3(500), "m4", new Fn4(600)));
 
             I2 i2 = _obj as I2;
-            Expect(i2, Not.Null);
-            Expect(i2.m1(25), EqualTo(100));
-            Expect(i2.m3(60), EqualTo(500));
-            Expect(i2.m3("test"), EqualTo(500));
-            Expect(i2.m4("junk"), EqualTo(600));
+            Expect(i2).Not.To.Be.Null();
+            Expect(i2.m1(25)).To.Equal(100);
+            Expect(i2.m3(60)).To.Equal(500);
+            Expect(i2.m3("test")).To.Equal(500);
+            Expect(i2.m4("junk")).To.Equal(600);
 
 
         }
@@ -576,8 +576,8 @@ namespace Clojure.Tests.LibTests
         public void TestIntCtor()
         {
             object obj = _proxyType.GetConstructor(new Type[] { typeof(int)}).Invoke(new object[] { 42 });
-            Expect(obj.GetType().GetField("F1").GetValue(obj),EqualTo(42));
-            Expect(obj.GetType().GetField("F2").GetValue(obj),EqualTo(String.Empty));
+            Expect(obj.GetType().GetField("F1").GetValue(obj)).To.Equal(42);
+            Expect(obj.GetType().GetField("F2").GetValue(obj)).To.Equal(String.Empty);
         }
 
 
@@ -585,8 +585,8 @@ namespace Clojure.Tests.LibTests
         public void TestStringCtor()
         {
             object obj = _proxyType.GetConstructor(new Type[] { typeof(string)}).Invoke(new object[] { "help" });
-            Expect(obj.GetType().GetField("F1").GetValue(obj),EqualTo(0));
-            Expect(obj.GetType().GetField("F2").GetValue(obj),EqualTo("help"));
+            Expect(obj.GetType().GetField("F1").GetValue(obj)).To.Equal(0);
+            Expect(obj.GetType().GetField("F2").GetValue(obj)).To.Equal("help");
         }
 
         
@@ -594,8 +594,8 @@ namespace Clojure.Tests.LibTests
         public void TestIntStringCtor()
         {
             object obj = _proxyType.GetConstructor(new Type[] { typeof(int), typeof(string)}).Invoke(new object[] { 42, "help" });
-            Expect(obj.GetType().GetField("F1").GetValue(obj),EqualTo(42));
-            Expect(obj.GetType().GetField("F2").GetValue(obj),EqualTo("help"));
+            Expect(obj.GetType().GetField("F1").GetValue(obj)).To.Equal(42);
+            Expect(obj.GetType().GetField("F2").GetValue(obj)).To.Equal("help");
         }
 
        
@@ -649,7 +649,7 @@ namespace Clojure.Tests.LibTests
         public void JustSeeIfEverythingGetsCreated()
         {
             Impl1 impl1 = _obj as Impl1;
-            Expect(impl1.m1(21), EqualTo(42));
+            Expect(impl1.m1(21)).To.Equal(42);
         }
     }
 
@@ -764,14 +764,14 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ProxyObjectCanBeCreated()
         {
-            Expect(_obj, Not.Null);
+            Expect(_obj).Not.To.Be.Null();
         }
 
         [Test]
         public void ProxyObjectUppercasesString()
         {
             _proxyType.GetMethod("Write", new Type[] { typeof(String) }).Invoke(_obj, new object[] { "testing" });
-            Expect(_tw.ToString(), EqualTo("TESTING"));
+            Expect(_tw.ToString()).To.Equal("TESTING");
         }
 
 
@@ -780,7 +780,7 @@ namespace Clojure.Tests.LibTests
         {
             MethodInfo mi = _proxyType.GetMethod("Write", new Type[] { typeof(int) });
             mi.Invoke(_obj, new object[] { 65 });
-            Expect(_tw.ToString(), EqualTo("A"));
+            Expect(_tw.ToString()).To.Equal("A");
         }
 
     }
@@ -829,9 +829,9 @@ namespace Clojure.Tests.LibTests
             Type[] allTypes = assyBldr.GetTypes();
             Expect(allTypes.Contains<Type>(myType));
             Type findType = assyBldr.GetType("clojure.proxy.LongName.MyType", false);
-            Expect(findType, Not.Null);
+            Expect(findType).Not.To.Be.Null();
             Type rtFound = RT.classForName("clojure.proxy.LongName.MyType");
-            Expect(rtFound, Not.Null);
+            Expect(rtFound).Not.To.Be.Null();
            
         }
 #endif
@@ -956,19 +956,19 @@ namespace Clojure.Tests.LibTests
             Type myType = tb.CreateType();
             MethodInfo[] minfos = myType.GetMethods();
 
-            Expect(minfos, Not.Null);
+            Expect(minfos).Not.To.Be.Null();
 
             ConstructorInfo ctor = myType.GetConstructor(Type.EmptyTypes);
             object o = ctor.Invoke(new object[0]);
 
             MethodInfo getter = myType.GetMethod("get_Prop1");
-            Expect(getter.Invoke(o, new object[0]), EqualTo(2));
+            Expect(getter.Invoke(o, new object[0])).To.Equal(2));
 
             MethodInfo m1i = myType.GetMethod("m1");
-            Expect(m1i.Invoke(o, new object[] { 12 }), EqualTo(15));
+            Expect(m1i.Invoke(o, new object[] { 12 })).To.Equal(15));
 
             I1 i1 = (I1)o;
-            Expect(i1.m2(12), EqualTo(15));
+            Expect(i1.m2(12)).To.Equal(15));
         }
 #endif
         //[Test]

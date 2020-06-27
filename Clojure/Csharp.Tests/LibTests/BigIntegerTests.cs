@@ -15,9 +15,9 @@
 using System;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -31,7 +31,7 @@ namespace Clojure.Tests.LibTests
         public void Signum_is_zero_for_zero()
         {
             BigInteger i = BigInteger.Create(0);
-            Expect(i.Signum, EqualTo(0));
+            Expect(i.Signum).To.Equal(0);
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace Clojure.Tests.LibTests
         public void Magnitude_is_zero_length_for_zero()
         {
             BigInteger i = BigInteger.Create(0);
-            Expect(i.GetMagnitude().Length, EqualTo(0));
+            Expect(i.GetMagnitude().Length).To.Equal(0);
         }
 
 
@@ -56,40 +56,40 @@ namespace Clojure.Tests.LibTests
         public void Signum_is_m1_for_negative()
         {
             BigInteger i = BigInteger.Create(-100);
-            Expect(i.Signum, EqualTo(-1));
+            Expect(i.Signum).To.Equal(-1);
         }
 
         [Test]
         public void Signum_is_1_for_negative()
         {
             BigInteger i = BigInteger.Create(+100);
-            Expect(i.Signum, EqualTo(1));
+            Expect(i.Signum).To.Equal(1);
         }
 
         [Test]
         public void IsPositive_works()
         {
             BigInteger i = BigInteger.Create(0);
-            Expect(i.IsPositive, False);
+            Expect(i.IsPositive).To.Be.False();
 
             i = BigInteger.Create(100);
             Expect(i.IsPositive);
 
             i = BigInteger.Create(-100);
-            Expect(i.IsPositive, False);
+            Expect(i.IsPositive).To.Be.False();
         }
 
         [Test]
         public void IsNegative_works()
         {
             BigInteger i = BigInteger.Create(0);
-            Expect(i.IsNegative, False);
+            Expect(i.IsNegative).To.Be.False();
 
             i = BigInteger.Create(-100);
             Expect(i.IsNegative);
 
             i = BigInteger.Create(100);
-            Expect(i.IsNegative, False);
+            Expect(i.IsNegative).To.Be.False();
         }
 
         [Test]
@@ -99,10 +99,10 @@ namespace Clojure.Tests.LibTests
             Expect(i.IsZero);
 
             i = BigInteger.Create(-100);
-            Expect(i.IsZero, False);
+            Expect(i.IsZero).To.Be.False();
 
             i = BigInteger.Create(100);
-            Expect(i.IsZero, False);
+            Expect(i.IsZero).To.Be.False();
         }
 
 
@@ -384,7 +384,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i;
             bool result = BigInteger.TryParse("0", 1, out i);
-            Expect(result, False);
+            Expect(result).To.Be.False();
         }
 
         [Test]
@@ -392,7 +392,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i;
             bool result = BigInteger.TryParse("0", 37, out i);
-            Expect(result, False);
+            Expect(result).To.Be.False();
         }
 
         [Test]
@@ -436,7 +436,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i;
             bool result = BigInteger.TryParse("-123-4", 10, out i);
-            Expect(result,False);
+            Expect(result).To.Be.False();
         }
 
         [Test]
@@ -444,7 +444,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i;
             bool result = BigInteger.TryParse("--1234", 10, out i);
-            Expect(result, False);
+            Expect(result).To.Be.False();
         }
 
         [Test]
@@ -452,7 +452,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i;
             bool result = BigInteger.TryParse("--", 10, out i);
-            Expect(result, False);
+            Expect(result).To.Be.False();
         }
 
         [Test]
@@ -460,7 +460,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i;
             bool result = BigInteger.TryParse("-", 10, out i);
-            Expect(result, False);
+            Expect(result).To.Be.False();
         }
 
         [Test]
@@ -468,7 +468,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i;
             bool result = BigInteger.TryParse("123.56", 10, out i);
-            Expect(result, False);
+            Expect(result).To.Be.False();
         }
 
         [Test]
@@ -476,7 +476,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i;
             bool result = BigInteger.TryParse("01010120101", 2, out i);
-            Expect(result, False);
+            Expect(result).To.Be.False();
         }
 
 
@@ -485,7 +485,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i;
             bool result = BigInteger.TryParse("01234567875", 8, out i);
-            Expect(result, False);
+            Expect(result).To.Be.False();
         }
 
         [Test]
@@ -493,7 +493,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i;
             bool result = BigInteger.TryParse("CabBaGe", 16, out i);
-            Expect(result, False);
+            Expect(result).To.Be.False();
         }
 
         [Test]
@@ -501,7 +501,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i;
             bool result = BigInteger.TryParse("AAAAAAAAAAAAAAAAAAAAAAACabBaGe", 16, out i);
-            Expect(result, False);
+            Expect(result).To.Be.False();
         }
 
         [Test]
@@ -611,7 +611,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i = new BigInteger(0, new uint[0]);
             for (uint radix = BigInteger.MinRadix; radix <= BigInteger.MaxRadix; radix++)
-                Expect(i.ToString(radix),EqualTo("0"));
+                Expect(i.ToString(radix)).To.Equal("0");
         }
 
         [Test]
@@ -619,7 +619,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i = new BigInteger(1, new uint[] { 4 });
             string result = i.ToString(2);
-            Expect(result,EqualTo("100"));
+            Expect(result).To.Equal("100");
         }
 
         [Test]
@@ -627,7 +627,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i = new BigInteger(1, new uint[] { 927 });
             string result = i.ToString(10);
-            Expect(result, EqualTo("927"));
+            Expect(result).To.Equal("927");
         }
 
         [Test]
@@ -635,7 +635,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i = new BigInteger(1, new uint[] { 0xa20f5 });
             string result = i.ToString(16);
-            Expect(result, EqualTo("A20F5"));
+            Expect(result).To.Equal("A20F5");
         }
 
         [Test]
@@ -643,7 +643,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i = new BigInteger(1, new uint[] { 23*26*26 + 12*26 + 15 });
             string result = i.ToString(26);
-            Expect(result, EqualTo("NCF"));
+            Expect(result).To.Equal("NCF");
         }
 
         [Test]
@@ -651,7 +651,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i = new BigInteger(-1, new uint[] { 0x00FEDCBA, 0x12345678, 0x87654321 });
             string result = i.ToString(16);
-            Expect(result, EqualTo("-FEDCBA1234567887654321"));
+            Expect(result).To.Equal("-FEDCBA1234567887654321");
         }
 
         [Test]
@@ -659,7 +659,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i = new BigInteger(1, new uint[] { 0x1, 0x8ee90ff6, 0xc373e0ee, 0x4e3f0ad2 });
             string result = i.ToString(10);
-            Expect(result, EqualTo("123456789012345678901234567890"));
+            Expect(result).To.Equal("123456789012345678901234567890");
         }
 
         [Test]
@@ -667,7 +667,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i = new BigInteger(1, new uint[] { 0x37, 0x82dacf8b, 0xfb280400 });
             string result = i.ToString(10);
-            Expect(result, EqualTo("1024000001024000001024"));
+            Expect(result).To.Equal("1024000001024000001024");
         }
 
         #endregion
@@ -679,98 +679,98 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger x = new BigInteger(0, new uint[0]);
             BigInteger y = new BigInteger(0, new uint[0]);
-            Expect(BigInteger.Compare(x, y), EqualTo(0));
+            Expect(BigInteger.Compare(x, y)).To.Equal(0);
         }
 
         public void Compare_neg_pos_is_minus1()
         {
             BigInteger x = new BigInteger(-1, new uint[]{0xffffffff, 0xffffffff});
             BigInteger y = new BigInteger(1, new uint[]{ 0x1 });
-            Expect(BigInteger.Compare(x, y), EqualTo(-1));
+            Expect(BigInteger.Compare(x, y)).To.Equal(-1);
         }
 
         public void Compare_pos_neg_is_plus1()
         {
             BigInteger x = new BigInteger(1, new uint[] { 0x1 });
             BigInteger y = new BigInteger(-1, new uint[] { 0xffffffff, 0xffffffff });
-            Expect(BigInteger.Compare(x, y), EqualTo(1));
+            Expect(BigInteger.Compare(x, y)).To.Equal(1);
         }
 
         public void Compare_negs_smaller_len_first_is_plus1()
         {
             BigInteger x = new BigInteger(-1, new uint[] { 0xffffffff });
             BigInteger y = new BigInteger(-1, new uint[] { 0xffffffff, 0xffffffff });
-            Expect(BigInteger.Compare(x, y), EqualTo(1));
+            Expect(BigInteger.Compare(x, y)).To.Equal(1);
         }
 
         public void Compare_negs_larger_len_first_is_minus1()
         {
             BigInteger x = new BigInteger(-1, new uint[] { 0xffffffff, 0xffffffff });
             BigInteger y = new BigInteger(-1, new uint[] { 0xffffffff });
-            Expect(BigInteger.Compare(x, y), EqualTo(-1));
+            Expect(BigInteger.Compare(x, y)).To.Equal(-1);
         }
 
         public void Compare_pos_smaller_len_first_is_minus1()
         {
             BigInteger x = new BigInteger(1, new uint[] { 0xffffffff });
             BigInteger y = new BigInteger(1, new uint[] { 0xffffffff, 0xffffffff });
-            Expect(BigInteger.Compare(x, y), EqualTo(-1));
+            Expect(BigInteger.Compare(x, y)).To.Equal(-1);
         }
 
         public void Compare_pos_larger_len_first_is_plus1()
         {
             BigInteger x = new BigInteger(1, new uint[] { 0xffffffff, 0xffffffff });
             BigInteger y = new BigInteger(1, new uint[] { 0xffffffff });
-            Expect(BigInteger.Compare(x, y), EqualTo(1));
+            Expect(BigInteger.Compare(x, y)).To.Equal(1);
         }
 
         public void Compare_same_len_smaller_first_diff_in_MSB_is_minus1()
         {
             BigInteger x = new BigInteger(1, new uint[] { 0xfffffffe, 0x12345678, 0xffffffff });
             BigInteger y = new BigInteger(1, new uint[] { 0xffffffff, 0x12345678, 0xffffffff });
-            Expect(BigInteger.Compare(x, y), EqualTo(-1));
+            Expect(BigInteger.Compare(x, y)).To.Equal(-1);
         }
 
         public void Compare_same_len_smaller_first_diff_in_LSB_is_minus1()
         {
             BigInteger x = new BigInteger(1, new uint[] { 0xffffffff, 0x12345678, 0xfffffffe });
             BigInteger y = new BigInteger(1, new uint[] { 0xffffffff, 0x12345678, 0xffffffff });
-            Expect(BigInteger.Compare(x, y), EqualTo(-1));
+            Expect(BigInteger.Compare(x, y)).To.Equal(-1);
         }
 
         public void Compare_same_len_smaller_first_diff_in_middle_is_minus1()
         {
             BigInteger x = new BigInteger(1, new uint[] { 0xffffffff, 0x12335678, 0xffffffff });
             BigInteger y = new BigInteger(1, new uint[] { 0xffffffff, 0x12345678, 0xffffffff });
-            Expect(BigInteger.Compare(x, y), EqualTo(-1));
+            Expect(BigInteger.Compare(x, y)).To.Equal(-1);
         }
 
         public void Compare_same_len_larger_first_diff_in_MSB_is_plus1()
         {
             BigInteger x = new BigInteger(1, new uint[] { 0xfffffffe, 0x12345678, 0xffffffff });
             BigInteger y = new BigInteger(1, new uint[] { 0xffffffff, 0x12345678, 0xffffffff });
-            Expect(BigInteger.Compare(x, y), EqualTo(-1));
+            Expect(BigInteger.Compare(x, y)).To.Equal(-1);
         }
 
         public void Compare_same_len_larger_first_diff_in_LSB_is_plus1()
         {
             BigInteger x = new BigInteger(1, new uint[] { 0xffffffff, 0x12345678, 0xfffffffe });
             BigInteger y = new BigInteger(1, new uint[] { 0xffffffff, 0x12345678, 0xffffffff });
-            Expect(BigInteger.Compare(x, y), EqualTo(-1));
+            Expect(BigInteger.Compare(x, y)).To.Equal(-1);
         }
 
         public void Compare_same_len_larger_first_diff_in_middle_is_plus1()
         {
             BigInteger x = new BigInteger(1, new uint[] { 0xffffffff, 0x12335678, 0xffffffff });
             BigInteger y = new BigInteger(1, new uint[] { 0xffffffff, 0x12345678, 0xffffffff });
-            Expect(BigInteger.Compare(x, y), EqualTo(-1));
+            Expect(BigInteger.Compare(x, y)).To.Equal(-1);
         }
 
         public void Compare_same_is_0()
         {
             BigInteger x = new BigInteger(1, new uint[] { 0xffffffff, 0x12345678, 0xffffffff });
             BigInteger y = new BigInteger(1, new uint[] { 0xffffffff, 0x12345678, 0xffffffff });
-            Expect(BigInteger.Compare(x, y), EqualTo(0));
+            Expect(BigInteger.Compare(x, y)).To.Equal(0);
         }
 
         #endregion
@@ -938,7 +938,7 @@ namespace Clojure.Tests.LibTests
             BigInteger x = new BigInteger(0, new uint[0]);
             BigInteger y = new BigInteger(1, new uint[] { 0x3 });
             BigInteger z = x.Add(y);
-            Expect(z,EqualTo(y));
+            Expect(z).To.Equal(y);
         }
 
 
@@ -949,7 +949,7 @@ namespace Clojure.Tests.LibTests
             BigInteger y = new BigInteger(0, new uint[0]);
             BigInteger z = x.Subtract(y);
 
-            Expect(z, EqualTo(x));
+            Expect(z).To.Equal(x);
         }
 
         [Test]
@@ -1194,17 +1194,17 @@ namespace Clojure.Tests.LibTests
             uint[] xn = new uint[3];
 
             BigInteger.Normalize(xn, 3, x, 2, 0);
-            Expect(xn[2], EqualTo(x[1]));
-            Expect(xn[1], EqualTo(x[0]));
-            Expect(xn[0], EqualTo(0));
+            Expect(xn[2]).To.Equal(x[1]);
+            Expect(xn[1]).To.Equal(x[0]);
+            Expect(xn[0]).To.Equal(0);
 
             for ( int i=1; i<32; i++ )
             {
                 int rshift = 32-i;
                 BigInteger.Normalize(xn,3, x,2,i);
-                Expect(xn[2], EqualTo(x[1] << i));
-                Expect(xn[1],EqualTo(x[0]<<i | x[1]>>rshift));
-                Expect(xn[0],EqualTo(x[0]>>rshift));
+                Expect(xn[2]).To.Equal(x[1] << i);
+                Expect(xn[1]).To.Equal(x[0]<<i | x[1]>>rshift);
+                Expect(xn[0]).To.Equal(x[0]>>rshift);
             }
         }
 
@@ -1215,15 +1215,15 @@ namespace Clojure.Tests.LibTests
             uint[] xn = new uint[2];
 
             BigInteger.Normalize(xn, 2, x, 2, 0);
-            Expect(xn[1], EqualTo(x[1]));
-            Expect(xn[0], EqualTo(x[0]));
+            Expect(xn[1]).To.Equal(x[1]);
+            Expect(xn[0]).To.Equal(x[0]);
 
             for (int i = 1; i < 5; i++)
             {
                 int rshift = 32 - i;
                 BigInteger.Normalize(xn, 2, x, 2, i);
-                Expect(xn[1], EqualTo(x[1] << i));
-                Expect(xn[0], EqualTo(x[0] << i | x[1] >> rshift));
+                Expect(xn[1]).To.Equal(x[1] << i);
+                Expect(xn[0]).To.Equal(x[0] << i | x[1] >> rshift);
             }
         }
 
@@ -1574,18 +1574,18 @@ namespace Clojure.Tests.LibTests
             BigInteger x12 = new BigInteger(1, new uint[] { 0x2, 0x2 });
             BigInteger x13 = new BigInteger(1, new uint[] { 0x1, 0x1 });
 
-            Expect(x1.IsOdd, False);
+            Expect(x1.IsOdd).To.Be.False();
             Expect(x2.IsOdd);
             Expect(x3.IsOdd);
-            Expect(x4.IsOdd, False);
-            Expect(x5.IsOdd, False);
-            Expect(x6.IsOdd, False);
-            Expect(x7.IsOdd, False);
+            Expect(x4.IsOdd).To.Be.False();
+            Expect(x5.IsOdd).To.Be.False();
+            Expect(x6.IsOdd).To.Be.False();
+            Expect(x7.IsOdd).To.Be.False();
             Expect(x8.IsOdd);
             Expect(x9.IsOdd);
-            Expect(x10.IsOdd, False);
+            Expect(x10.IsOdd).To.Be.False();
             Expect(x11.IsOdd);
-            Expect(x12.IsOdd, False);
+            Expect(x12.IsOdd).To.Be.False();
             Expect(x13.IsOdd);
         }
 
@@ -2056,7 +2056,7 @@ namespace Clojure.Tests.LibTests
             BigInteger x = new BigInteger(1, 0xAAAAAAAA, 0xAAAAAAAA);
 
             for ( int i=0; i<64; i++ )
-                Expect(x.TestBit(i),EqualTo( i % 2 != 0  ));
+                Expect(x.TestBit(i)).To.Equal( i % 2 != 0  );
         }
 
         [Test]
@@ -2064,18 +2064,18 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger x = new BigInteger(-1, 0xAAAAAAAA, 0xAAAAAAAA);
 
-            Expect(x.TestBit(0), False);
-            Expect(x.TestBit(1), True);
+            Expect(x.TestBit(0)).To.Be.False();
+            Expect(x.TestBit(1)).To.Be.True();
 
             for (int i = 2; i < 64; i++)
-                Expect(x.TestBit(i), EqualTo(i % 2 == 0));
+                Expect(x.TestBit(i)).To.Equal(i % 2 == 0);
         }
 
         [Test]
         public void TestBit_pos_outside()
         {
             BigInteger x = new BigInteger(1, 0xAAAAAAAA, 0xAAAAAAAA);
-            Expect(x.TestBit(1000), False);
+            Expect(x.TestBit(1000)).To.Be.False();
         }
 
         [Test]
@@ -2090,7 +2090,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger x = new BigInteger(1, 0xFFFF0000, 0xFFFF0000);
             BigInteger y = x.SetBit(56);
-            Expect(y, SameAs(x));
+            Expect(Object.ReferenceEquals(y, x));
         }
 
         [Test]
@@ -2115,7 +2115,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger x = new BigInteger(-1, 0xFFFF0000, 0xFFFF0000);
             BigInteger y = x.SetBit(39);
-            Expect(y, SameAs(x));
+            Expect(Object.ReferenceEquals(y, x));
         }
 
         [Test]
@@ -2149,7 +2149,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger x = new BigInteger(1, 0xFFFF0000, 0xFFFF0000);
             BigInteger y = x.ClearBit(39);
-            Expect(y, SameAs(x));
+            Expect(Object.ReferenceEquals(y, x));
         }
 
         [Test]
@@ -2157,7 +2157,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger x = new BigInteger(1, 0xFFFF0000, 0xFFFF0000);
             BigInteger y = x.ClearBit(99);
-            Expect(y, SameAs(x));
+            Expect(Object.ReferenceEquals(y, x));
         }
 
         [Test]
@@ -2173,7 +2173,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger x = new BigInteger(-1, 0xFFFF0000, 0xFFFF0000);
             BigInteger y = x.ClearBit(56);
-            Expect(y, SameAs(x));
+            Expect(Object.ReferenceEquals(y, x));
         }
 
         [Test]
@@ -2268,7 +2268,7 @@ namespace Clojure.Tests.LibTests
             uint digit3 = 0x1234678;
             BigInteger x = new BigInteger(1, digit1, digit2, digit3);
             BigInteger y = x.LeftShift(0);
-            Expect(y, SameAs(x));
+            Expect(Object.ReferenceEquals(y, x));
         }
 
         public void LeftShift_pos_whole_digit_shift_adds_zeros_at_end()
@@ -2403,7 +2403,7 @@ namespace Clojure.Tests.LibTests
             uint digit3 = 0x1234678;
             BigInteger x = new BigInteger(1, digit1, digit2, digit3);
             BigInteger y = x.RightShift(0);
-            Expect(y, SameAs(x));
+            Expect(Object.ReferenceEquals(y, x));
         }
 
         public void RightShift_pos_whole_digit_shift_loses_whole_digits()
@@ -2506,8 +2506,8 @@ namespace Clojure.Tests.LibTests
         {
             int v;
             bool b = i.AsInt32(out v);
-            Expect(b, EqualTo(expRet));
-            Expect(v, EqualTo(expInt));
+            Expect(b).To.Equal(expRet);
+            Expect(v).To.Equal(expInt);
         }
 
         [Test]
@@ -2540,8 +2540,8 @@ namespace Clojure.Tests.LibTests
         {
             long v;
             bool b = i.AsInt64(out v);
-            Expect(b, EqualTo(expRet));
-            Expect(v, EqualTo(expInt));
+            Expect(b).To.Equal(expRet);
+            Expect(v).To.Equal(expInt);
         }
 
         [Test]
@@ -2588,8 +2588,8 @@ namespace Clojure.Tests.LibTests
         {
             uint v;
             bool b = i.AsUInt32(out v);
-            Expect(b, EqualTo(expRet));
-            Expect(v, EqualTo(expInt));
+            Expect(b).To.Equal(expRet);
+            Expect(v).To.Equal(expInt);
         }
 
         [Test]
@@ -2612,8 +2612,8 @@ namespace Clojure.Tests.LibTests
         {
             ulong v;
             bool b = i.AsUInt64(out v);
-            Expect(b, EqualTo(expRet));
-            Expect(v, EqualTo(expInt));
+            Expect(b).To.Equal(expRet);
+            Expect(v).To.Equal(expInt);
         }
 
         [Test]
@@ -2640,8 +2640,8 @@ namespace Clojure.Tests.LibTests
         {
             decimal v;
             bool b = i.AsDecimal(out v);
-            Expect(b, EqualTo(expRet));
-            Expect(v, EqualTo(expDec));
+            Expect(b).To.Equal(expRet);
+            Expect(v).To.Equal(expDec);
         }
 
         [Test]
@@ -2680,7 +2680,7 @@ namespace Clojure.Tests.LibTests
         public void Equals_BI_on_null_is_false()
         {
             BigInteger i = new BigInteger(1, 0x1, 0x2, 0x3);
-            Expect(i.Equals(null), False);
+            Expect(i.Equals(null)).To.Be.False();
         }
 
         [Test]
@@ -2696,7 +2696,7 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger i = new BigInteger(1, 0x1, 0x2, 0x3);
             BigInteger j = new BigInteger(1, 0x1, 0x2, 0x4);
-            Expect(i.Equals(j),False);
+            Expect(i.Equals(j)).To.Be.False();
         }
 
         #endregion
@@ -2709,7 +2709,7 @@ namespace Clojure.Tests.LibTests
             for (int i = -9; i <= 9; i++)
             {
                 BigInteger bi = BigInteger.Create(i);
-                Expect(bi.Precision, EqualTo(1));
+                Expect(bi.Precision).To.Equal(1);
             }
         }
 
@@ -2720,7 +2720,7 @@ namespace Clojure.Tests.LibTests
             foreach (int v in values )
             {
                 BigInteger bi = BigInteger.Create(v);
-                Expect(bi.Precision,EqualTo(2));
+                Expect(bi.Precision).To.Equal(2);
             }
         }
 
@@ -2731,7 +2731,7 @@ namespace Clojure.Tests.LibTests
             foreach (int v in values)
             {
                 BigInteger bi = BigInteger.Create(v);
-                Expect(bi.Precision, EqualTo(3));
+                Expect(bi.Precision).To.Equal(3);
             }
         }
 
@@ -2747,8 +2747,8 @@ namespace Clojure.Tests.LibTests
                 tenpow += "0";
                 BigInteger bi9 = BigInteger.Parse(nines);
                 BigInteger bi0 = BigInteger.Parse(tenpow);
-                Expect(bi9.Precision,EqualTo(i));
-                Expect(bi0.Precision,EqualTo(i+1));
+                Expect(bi9.Precision).To.Equal(i);
+                Expect(bi0.Precision).To.Equal(i+1);
             }
         }
 
@@ -2757,8 +2757,8 @@ namespace Clojure.Tests.LibTests
         {
             BigInteger x = new BigInteger(1, new uint[] { 0xFFFFFFFF });
             BigInteger y = new BigInteger(1, new uint[] { 0x1, 0x0  });
-            Expect(x.Precision, EqualTo(10));
-            Expect(y.Precision, EqualTo(10));
+            Expect(x.Precision).To.Equal(10);
+            Expect(y.Precision).To.Equal(10);
         }
 
         #endregion

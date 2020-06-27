@@ -14,10 +14,10 @@
 
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -43,7 +43,7 @@ namespace Clojure.Tests.LibTests
         public void Default_ctor_creates_with_null_metadata()
         {
             ConcreteAReference c = new ConcreteAReference();
-            Expect(c.meta(), Null);
+            Expect(c.meta()).To.Be.Null();
         }
 
         [Test]
@@ -52,7 +52,7 @@ namespace Clojure.Tests.LibTests
             IPersistentMap meta = new DummyMeta();
 
             ConcreteAReference c = new ConcreteAReference(meta);
-            Expect(c.meta(), SameAs(meta));
+            Expect(object.ReferenceEquals(c.meta(), meta));
         }
 
         #endregion
@@ -68,7 +68,7 @@ namespace Clojure.Tests.LibTests
             ConcreteAReference c = new ConcreteAReference();
             c.alterMeta(fn, null);
 
-            Expect(c.meta(), SameAs(meta));
+            Expect(object.ReferenceEquals(c.meta(), meta));
         }
 
         [Test]
@@ -79,7 +79,7 @@ namespace Clojure.Tests.LibTests
             ConcreteAReference c = new ConcreteAReference();
             c.resetMeta(meta);
 
-            Expect(c.meta(), EqualTo(meta));
+            Expect(c.meta()).To.Equal(meta);
         }
 
 

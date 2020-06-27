@@ -38,8 +38,8 @@ namespace Clojure.Tests.LibTests
             Symbol sym = Symbol.intern("abc");
             Namespace ns = Namespace.findOrCreate(sym);
 
-            Expect(ns, Not.Null);
-            Expect(ns.Name, EqualTo(sym));
+            Expect(ns).Not.To.Be.Null();
+            Expect(ns.Name).To.Equal(sym));
         }
 
         [Test]
@@ -59,7 +59,7 @@ namespace Clojure.Tests.LibTests
             Symbol sym = Symbol.intern("abc");
             Namespace ns = Namespace.find(sym);
 
-            Expect(ns, Null);
+            Expect(ns).To.Be.Null();
         }
 
         [Test]
@@ -83,7 +83,7 @@ namespace Clojure.Tests.LibTests
             Namespace ns3 = Namespace.find(sym1);
 
             Expect(object.ReferenceEquals(ns1, ns2));
-            Expect(ns3, Null);
+            Expect(ns3).To.Be.Null();
         }
 
 
@@ -93,7 +93,7 @@ namespace Clojure.Tests.LibTests
             Symbol sym2 = Symbol.intern("abc");
             Namespace ns2 = Namespace.remove(sym2);
 
-            Expect(ns2, Null);
+            Expect(ns2).To.Be.Null();
         }
 
         [Test]
@@ -116,7 +116,7 @@ namespace Clojure.Tests.LibTests
         {
             // do we care all that much?
             Namespace ns = Namespace.findOrCreate(Symbol.intern("abc"));
-            Expect(ns.ToString(),EqualTo("#<Namespace: abc>"));
+            Expect(ns.ToString()).To.Equal("#<Namespace: abc>"));
         }
         
         #endregion
@@ -140,8 +140,8 @@ namespace Clojure.Tests.LibTests
 
             Var v = ns.intern(sym);
 
-            Expect(v, Not.Null);
-            Expect(v.Namespace, EqualTo(ns));
+            Expect(v).Not.To.Be.Null();
+            Expect(v.Namespace).To.Equal(ns));
 
         }
 
@@ -243,7 +243,7 @@ namespace Clojure.Tests.LibTests
 
             Var v = ns.findInternedVar(sym);
 
-            Expect(v, Null);
+            Expect(v).To.Be.Null();
         }
    
 

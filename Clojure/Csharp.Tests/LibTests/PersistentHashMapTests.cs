@@ -17,9 +17,9 @@ using System.Collections.Generic;
 using System.Collections;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -34,7 +34,7 @@ namespace Clojure.Tests.LibTests
             Dictionary<int, string> d = new Dictionary<int, string>();
             IPersistentMap m = PersistentHashMap.create(d);
 
-            Expect(m.count(), EqualTo(0));
+            Expect(m.count()).To.Equal(0);
         }
 
         [Test]
@@ -46,10 +46,10 @@ namespace Clojure.Tests.LibTests
 
             IPersistentMap m = PersistentHashMap.create(d);
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
-            Expect(m.containsKey(3), False);
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
+            Expect(m.containsKey(3)).To.Be.False();
         }
 
         [Test]
@@ -58,7 +58,7 @@ namespace Clojure.Tests.LibTests
             ArrayList a = new ArrayList();
             IPersistentMap m = PersistentHashMap.create1(a);
 
-            Expect(m.count(), EqualTo(0));
+            Expect(m.count()).To.Equal(0);
         }
 
         [Test]
@@ -69,10 +69,10 @@ namespace Clojure.Tests.LibTests
          
             IPersistentMap m = PersistentHashMap.create1(a);
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
-            Expect(m.containsKey(3), False);
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
+            Expect(m.containsKey(3)).To.Be.False();
         }
 
         [Test]
@@ -83,7 +83,7 @@ namespace Clojure.Tests.LibTests
             ISeq s = PersistentList.create(a).seq();
             IPersistentMap m = PersistentHashMap.create(s);
 
-            Expect(m.count(), EqualTo(0));
+            Expect(m.count()).To.Equal(0);
         }
 
         [Test]
@@ -94,10 +94,10 @@ namespace Clojure.Tests.LibTests
             ISeq s = PersistentList.create(a).seq();
             IPersistentMap m = PersistentHashMap.create(s);
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
-            Expect(m.containsKey(3), False);
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
+            Expect(m.containsKey(3)).To.Be.False();
         }
 
         [Test]
@@ -105,8 +105,8 @@ namespace Clojure.Tests.LibTests
         {
             PersistentHashMap m = PersistentHashMap.create();
 
-            Expect(m.count(), EqualTo(0));
-            Expect(m.meta(), Null);
+            Expect(m.count()).To.Equal(0);
+            Expect(m.meta()).To.Be.Null();
         }
 
         [Test]
@@ -114,11 +114,11 @@ namespace Clojure.Tests.LibTests
         {
             PersistentHashMap m = PersistentHashMap.create(1, "a", 2, "b");
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
-            Expect(m.containsKey(3), False);
-            Expect(m.meta(), Null);
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
+            Expect(m.containsKey(3)).To.Be.False();
+            Expect(m.meta()).To.Be.Null();
         }
 
         [Test]
@@ -128,8 +128,8 @@ namespace Clojure.Tests.LibTests
 
             PersistentHashMap m = PersistentHashMap.create(meta);
 
-            Expect(m.count(), EqualTo(0));
-            Expect(m.meta(), SameAs(meta));
+            Expect(m.count()).To.Equal(0);
+            Expect(Object.ReferenceEquals(m.meta(), meta));
         }
 
         [Test]
@@ -139,11 +139,11 @@ namespace Clojure.Tests.LibTests
 
             PersistentHashMap m = PersistentHashMap.create(meta,1, "a", 2, "b");
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
-            Expect(m.containsKey(3), False);
-            Expect(m.meta(), SameAs(meta));
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
+            Expect(m.containsKey(3)).To.Be.False();
+            Expect(Object.ReferenceEquals(m.meta(), meta));
         }
 
         #endregion
@@ -184,12 +184,12 @@ namespace Clojure.Tests.LibTests
             }
             PersistentHashMap m = (PersistentHashMap) PersistentHashMap.create(dict);
 
-            Expect(m.count(),EqualTo(dict.Count));
+            Expect(m.count()).To.Equal(dict.Count);
             
             foreach ( int key in dict.Keys )
             {
                 Expect(m.containsKey(key));
-                Expect(m.valAt(key),EqualTo(key));
+                Expect(m.valAt(key)).To.Equal(key);
             }
 
             for ( ISeq s = m.seq(); s != null; s = s.next() )

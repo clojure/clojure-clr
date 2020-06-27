@@ -15,10 +15,9 @@
 using System;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
-
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -33,7 +32,7 @@ namespace Clojure.Tests.LibTests
         {
             StringSeq s = StringSeq.create(String.Empty);
 
-            Expect(s, Null);
+            Expect(s).To.Be.Null();
         }
 
         [Test]
@@ -41,7 +40,7 @@ namespace Clojure.Tests.LibTests
         {
             StringSeq s = StringSeq.create("abcde");
 
-            Expect(s, Not.Null);
+            Expect(s).Not.To.Be.Null();
         }
 
         #endregion
@@ -53,7 +52,7 @@ namespace Clojure.Tests.LibTests
         {
             StringSeq s = StringSeq.create("abcde");
             
-            Expect(s.count(),EqualTo(5));
+            Expect(s.count()).To.Equal(5);
         }
 
         #endregion
@@ -65,7 +64,7 @@ namespace Clojure.Tests.LibTests
         {
             StringSeq s = StringSeq.create("abc");
 
-            Expect(s.index(), EqualTo(0));
+            Expect(s.index()).To.Equal(0);
         }
 
         [Test]
@@ -74,7 +73,7 @@ namespace Clojure.Tests.LibTests
             StringSeq s = StringSeq.create("abc");
             IndexedSeq i = (IndexedSeq)s.next();
 
-            Expect(i.index(), EqualTo(1));
+            Expect(i.index()).To.Equal(1);
         }
 
         #endregion

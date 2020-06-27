@@ -15,9 +15,9 @@
 using System;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
-
+using static NExpect.Expectations;
 using clojure.lang;
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -30,34 +30,34 @@ namespace Clojure.Tests.LibTests
         public void CreateOwningOnNoParamsReturnsEmptyVector()
         {
             IPersistentVector v = LazilyPersistentVector.createOwning();
-            Expect(v.count(),EqualTo(0));
+            Expect(v.count()).To.Equal(0);
         }
 
         [Test]
         public void CreatingOwningOnParamsReturnsVector()
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
-            Expect(v.count(), EqualTo(3));
-            Expect(v.nth(0), EqualTo(1));
-            Expect(v.nth(1), EqualTo(2));
-            Expect(v.nth(2), EqualTo(3));
+            Expect(v.count()).To.Equal(3);
+            Expect(v.nth(0)).To.Equal(1);
+            Expect(v.nth(1)).To.Equal(2);
+            Expect(v.nth(2)).To.Equal(3);
         }
 
         [Test]
         public void CreateOnEmptySeqReturnsEmptyVector()
         {
             IPersistentVector v = LazilyPersistentVector.create(new object[] {});
-            Expect(v.count(), EqualTo(0));
+            Expect(v.count()).To.Equal(0);
         }
 
         [Test]
         public void CreateOnNonEmptyCollectionReturnsVector()
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(new object[] {1, 2, 3});
-            Expect(v.count(), EqualTo(3));
-            Expect(v.nth(0), EqualTo(1));
-            Expect(v.nth(1), EqualTo(2));
-            Expect(v.nth(2), EqualTo(3));
+            Expect(v.count()).To.Equal(3);
+            Expect(v.nth(0)).To.Equal(1);
+            Expect(v.nth(1)).To.Equal(2);
+            Expect(v.nth(2)).To.Equal(3);
         }
 
 
@@ -70,10 +70,10 @@ namespace Clojure.Tests.LibTests
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
  
-            Expect(v.count(), EqualTo(3));
-            Expect(v.nth(0), EqualTo(1));
-            Expect(v.nth(1), EqualTo(2));
-            Expect(v.nth(2), EqualTo(3));
+            Expect(v.count()).To.Equal(3);
+            Expect(v.nth(0)).To.Equal(1);
+            Expect(v.nth(1)).To.Equal(2);
+            Expect(v.nth(2)).To.Equal(3);
         }
 
         [Test]
@@ -82,7 +82,7 @@ namespace Clojure.Tests.LibTests
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
             
-            Expect(v.nth(-4), EqualTo(1));
+            Expect(v.nth(-4)).To.Equal(1);
         }
 
         [Test]
@@ -91,7 +91,7 @@ namespace Clojure.Tests.LibTests
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
 
-            Expect(v.nth(4), EqualTo(1));
+            Expect(v.nth(4)).To.Equal(1);
         }
 
         [Test]
@@ -100,15 +100,15 @@ namespace Clojure.Tests.LibTests
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
             IPersistentVector v2 = v.assocN(1, 4);
 
-            Expect(v.count(), EqualTo(3));
-            Expect(v.nth(0), EqualTo(1));
-            Expect(v.nth(1), EqualTo(2));
-            Expect(v.nth(2), EqualTo(3));
+            Expect(v.count()).To.Equal(3);
+            Expect(v.nth(0)).To.Equal(1);
+            Expect(v.nth(1)).To.Equal(2);
+            Expect(v.nth(2)).To.Equal(3);
 
-            Expect(v2.count(), EqualTo(3));
-            Expect(v2.nth(0), EqualTo(1));
-            Expect(v2.nth(1), EqualTo(4));
-            Expect(v2.nth(2), EqualTo(3));
+            Expect(v2.count()).To.Equal(3);
+            Expect(v2.nth(0)).To.Equal(1);
+            Expect(v2.nth(1)).To.Equal(4);
+            Expect(v2.nth(2)).To.Equal(3);
         }
 
         [Test]
@@ -117,16 +117,16 @@ namespace Clojure.Tests.LibTests
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
             IPersistentVector v2 = v.assocN(3, 4);
 
-            Expect(v.count(), EqualTo(3));
-            Expect(v.nth(0), EqualTo(1));
-            Expect(v.nth(1), EqualTo(2));
-            Expect(v.nth(2), EqualTo(3));
+            Expect(v.count()).To.Equal(3);
+            Expect(v.nth(0)).To.Equal(1);
+            Expect(v.nth(1)).To.Equal(2);
+            Expect(v.nth(2)).To.Equal(3);
 
-            Expect(v2.count(), EqualTo(4));
-            Expect(v2.nth(0), EqualTo(1));
-            Expect(v2.nth(1), EqualTo(2));
-            Expect(v2.nth(2), EqualTo(3));
-            Expect(v2.nth(3), EqualTo(4));
+            Expect(v2.count()).To.Equal(4);
+            Expect(v2.nth(0)).To.Equal(1);
+            Expect(v2.nth(1)).To.Equal(2);
+            Expect(v2.nth(2)).To.Equal(3);
+            Expect(v2.nth(3)).To.Equal(4);
         }
 
         [Test]
@@ -152,16 +152,16 @@ namespace Clojure.Tests.LibTests
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
             IPersistentVector v2 = v.cons(4);
 
-            Expect(v.count(), EqualTo(3));
-            Expect(v.nth(0), EqualTo(1));
-            Expect(v.nth(1), EqualTo(2));
-            Expect(v.nth(2), EqualTo(3));
+            Expect(v.count()).To.Equal(3);
+            Expect(v.nth(0)).To.Equal(1);
+            Expect(v.nth(1)).To.Equal(2);
+            Expect(v.nth(2)).To.Equal(3);
 
-            Expect(v2.count(), EqualTo(4));
-            Expect(v2.nth(0), EqualTo(1));
-            Expect(v2.nth(1), EqualTo(2));
-            Expect(v2.nth(2), EqualTo(3));
-            Expect(v2.nth(3), EqualTo(4));
+            Expect(v2.count()).To.Equal(4);
+            Expect(v2.nth(0)).To.Equal(1);
+            Expect(v2.nth(1)).To.Equal(2);
+            Expect(v2.nth(2)).To.Equal(3);
+            Expect(v2.nth(3)).To.Equal(4);
         }
 
         [Test]
@@ -169,7 +169,7 @@ namespace Clojure.Tests.LibTests
         {
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
 
-            Expect(v.length(), EqualTo(3));
+            Expect(v.length()).To.Equal(3);
         }
 
         #endregion
@@ -182,14 +182,14 @@ namespace Clojure.Tests.LibTests
             IPersistentVector v = LazilyPersistentVector.createOwning(1, 2, 3);
             IPersistentVector v2 = (IPersistentVector)((IPersistentStack)v).pop();
 
-            Expect(v.count(), EqualTo(3));
-            Expect(v.nth(0), EqualTo(1));
-            Expect(v.nth(1), EqualTo(2));
-            Expect(v.nth(2), EqualTo(3));
+            Expect(v.count()).To.Equal(3);
+            Expect(v.nth(0)).To.Equal(1);
+            Expect(v.nth(1)).To.Equal(2);
+            Expect(v.nth(2)).To.Equal(3);
 
-            Expect(v2.count(), EqualTo(2));
-            Expect(v2.nth(0), EqualTo(1));
-            Expect(v2.nth(1), EqualTo(2));
+            Expect(v2.count()).To.Equal(2);
+            Expect(v2.nth(0)).To.Equal(1);
+            Expect(v2.nth(1)).To.Equal(2);
         }
 
         [Test]

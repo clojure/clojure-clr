@@ -14,9 +14,10 @@
 
 using System;
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
 using System.Threading;
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -57,10 +58,10 @@ namespace Clojure.Tests.LibTests
             thr1.Start(handle);
             
             Thread.Sleep(100);
-            Expect(_count,EqualTo(0));
+            Expect(_count).To.Equal(0);
             latch.CountDown();
             handle.WaitOne();
-            Expect(_count,EqualTo(NumThreads));
+            Expect(_count).To.Equal(NumThreads);
         }
 
         [Test]
@@ -81,7 +82,7 @@ namespace Clojure.Tests.LibTests
             }
 
             latch.Await();
-            Expect(latch.Count, EqualTo(0));
+            Expect(latch.Count).To.Equal(0);
         }
 
 
@@ -92,7 +93,7 @@ namespace Clojure.Tests.LibTests
             CountDownLatch latch = new CountDownLatch(NumThreads);
 
             bool result = latch.Await(50);
-            Expect(result, False);
+            Expect(result).To.Be.False();
         }
 
 

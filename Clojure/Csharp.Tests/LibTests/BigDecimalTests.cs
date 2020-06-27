@@ -16,8 +16,9 @@ using System;
 
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -91,27 +92,27 @@ namespace Clojure.Tests.LibTests
         public void ParsingEmptyStringFails()
         {
             BigDecimal bd;
-            Expect(BigDecimal.TryParse("",out bd), False);
+            Expect(BigDecimal.TryParse("",out bd)).To.Be.False();
         }
 
         [Test]
         public void ParsingOnlySignFails()
         {
             BigDecimal bd;
-            Expect(BigDecimal.TryParse("+", out bd), False);
-            Expect(BigDecimal.TryParse("-", out bd), False);
+            Expect(BigDecimal.TryParse("+", out bd)).To.Be.False();
+            Expect(BigDecimal.TryParse("-", out bd)).To.Be.False();
         }
 
         [Test]
         public void ParsingWithMissingExponentAfterEFails()
         {
             BigDecimal bd;
-            Expect(BigDecimal.TryParse("0E", out bd), False);
-            Expect(BigDecimal.TryParse("0e", out bd), False);
-            Expect(BigDecimal.TryParse("0E+", out bd), False);
-            Expect(BigDecimal.TryParse("0E-", out bd), False);
-            Expect(BigDecimal.TryParse("0e+", out bd), False);
-            Expect(BigDecimal.TryParse("0e-", out bd), False);
+            Expect(BigDecimal.TryParse("0E", out bd)).To.Be.False();
+            Expect(BigDecimal.TryParse("0e", out bd)).To.Be.False();
+            Expect(BigDecimal.TryParse("0E+", out bd)).To.Be.False();
+            Expect(BigDecimal.TryParse("0E-", out bd)).To.Be.False();
+            Expect(BigDecimal.TryParse("0e+", out bd)).To.Be.False();
+            Expect(BigDecimal.TryParse("0e-", out bd)).To.Be.False();
         }
 
         [Test]
@@ -120,8 +121,8 @@ namespace Clojure.Tests.LibTests
             BigDecimal bd;
             Expect(BigDecimal.TryParse("0", out bd));
             Expect(bd.Coefficient.IsZero);
-            Expect(bd.Exponent, EqualTo(0));
-            Expect(bd.GetPrecision(), EqualTo(1));
+            Expect(bd.Exponent).To.Equal(0);
+            Expect(bd.GetPrecision()).To.Equal(1);
         }
 
         [Test]
@@ -130,8 +131,8 @@ namespace Clojure.Tests.LibTests
             BigDecimal bd;
             Expect(BigDecimal.TryParse("0000", out bd));
             Expect(bd.Coefficient.IsZero);
-            Expect(bd.Exponent, EqualTo(0));
-            Expect(bd.GetPrecision(), EqualTo(1));
+            Expect(bd.Exponent).To.Equal(0);
+            Expect(bd.GetPrecision()).To.Equal(1);
         }
 
         [Test]
@@ -140,8 +141,8 @@ namespace Clojure.Tests.LibTests
             BigDecimal bd;
             Expect(BigDecimal.TryParse("00.00", out bd));
             Expect(bd.Coefficient.IsZero);
-            Expect(bd.Exponent, EqualTo(-2));
-            Expect(bd.GetPrecision(), EqualTo(1));
+            Expect(bd.Exponent).To.Equal(-2);
+            Expect(bd.GetPrecision()).To.Equal(1);
         }
 
         [Test]
@@ -233,9 +234,9 @@ namespace Clojure.Tests.LibTests
         {
             BigDecimal bd;
             Expect(BigDecimal.TryParse(decString, out bd));
-            Expect(bd.Coefficient, EqualTo(BigInteger.Parse(intString)));
-            Expect(bd.Exponent, EqualTo(exponent));
-            Expect(bd.GetPrecision(), EqualTo(precision));
+            Expect(bd.Coefficient).To.Equal(BigInteger.Parse(intString));
+            Expect(bd.Exponent).To.Equal(exponent);
+            Expect(bd.GetPrecision()).To.Equal(precision);
         }
 
         [Test]
@@ -313,7 +314,7 @@ namespace Clojure.Tests.LibTests
             BigInteger bi = BigInteger.Parse(biStr);
             BigDecimal bd = new BigDecimal(bi, exp);
             string result = bd.ToScientificString();
-            Expect(result, EqualTo(outStr));
+            Expect(result).To.Equal(outStr);
         }
         
 
@@ -469,13 +470,13 @@ namespace Clojure.Tests.LibTests
         {
             BigDecimal d = BigDecimal.Create(v, c);
             string gotStr = d.ToScientificString();
-            Expect(gotStr, EqualTo(expectStr));
+            Expect(gotStr).To.Equal(expectStr);
 
             if ( v != 0.0 )
             {
                  d = BigDecimal.Create(-v,c);
                  gotStr = d.ToScientificString();
-                Expect(gotStr,EqualTo("-"+expectStr));
+                Expect(gotStr).To.Equal("-"+expectStr);
             }
         }
 
@@ -598,13 +599,13 @@ namespace Clojure.Tests.LibTests
         {
             BigDecimal d = BigDecimal.Create(v, c);
             string gotStr = d.ToScientificString();
-            Expect(gotStr, EqualTo(expectStr));
+            Expect(gotStr).To.Equal(expectStr);
 
             if (v != 0M)
             {
                 d = BigDecimal.Create(-v, c);
                 gotStr = d.ToScientificString();
-                Expect(gotStr, EqualTo("-" + expectStr));
+                Expect(gotStr).To.Equal("-" + expectStr);
             }
         }
 
@@ -629,7 +630,7 @@ namespace Clojure.Tests.LibTests
         {
 
             BigDecimal bd = new BigDecimal(BigInteger.Parse(s), exponent);
-            Expect(bd.GetPrecision(), EqualTo(precision));
+            Expect(bd.GetPrecision()).To.Equal(precision);
         }
 
         #endregion
@@ -639,17 +640,17 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void NamedConstantsHaveCorrectValues()
         {
-            Expect(BigDecimal.Zero.Coefficient, EqualTo(BigInteger.Zero));
-            Expect(BigDecimal.Zero.Exponent, EqualTo(0));
-            Expect(BigDecimal.Zero.GetPrecision(), EqualTo(1));
+            Expect(BigDecimal.Zero.Coefficient).To.Equal(BigInteger.Zero);
+            Expect(BigDecimal.Zero.Exponent).To.Equal(0);
+            Expect(BigDecimal.Zero.GetPrecision()).To.Equal(1);
 
-            Expect(BigDecimal.One.Coefficient, EqualTo(BigInteger.One));
-            Expect(BigDecimal.One.Exponent, EqualTo(0));
-            Expect(BigDecimal.One.GetPrecision(), EqualTo(1));
+            Expect(BigDecimal.One.Coefficient).To.Equal(BigInteger.One);
+            Expect(BigDecimal.One.Exponent).To.Equal(0);
+            Expect(BigDecimal.One.GetPrecision()).To.Equal(1);
 
-            Expect(BigDecimal.Ten.Coefficient, EqualTo(BigInteger.Ten));
-            Expect(BigDecimal.Ten.Exponent, EqualTo(0));
-            Expect(BigDecimal.Ten.GetPrecision(), EqualTo(2));
+            Expect(BigDecimal.Ten.Coefficient).To.Equal(BigInteger.Ten);
+            Expect(BigDecimal.Ten.Exponent).To.Equal(0);
+            Expect(BigDecimal.Ten.GetPrecision()).To.Equal(2);
         }
 
         #endregion
@@ -662,9 +663,9 @@ namespace Clojure.Tests.LibTests
         //    BigDecimal.Context mc = new BigDecimal.Context(0,BigDecimal.RoundingMode.Up);
         //    BigDecimal bd;
         //    bd = new BigDecimal(BigInteger.Parse("123"), -3);
-        //    Expect(bd, EqualTo(BigDecimal.Round(bd,mc)));
+        //    Expect(bd).To.Equal(BigDecimal.Round(bd,mc)));
         //    bd = new BigDecimal(BigInteger.Parse("999"), -1);
-        //    Expect(bd, EqualTo(BigDecimal.Round(bd,mc)));
+        //    Expect(bd).To.Equal(BigDecimal.Round(bd,mc)));
         //}
 
         [Test]
@@ -685,8 +686,8 @@ namespace Clojure.Tests.LibTests
             BigDecimal.Context mc = new BigDecimal.Context(precision,mode);
             BigDecimal bd = BigDecimal.Parse(bdStr);
             BigDecimal br = BigDecimal.Round(bd,mc);
-            Expect(br.Coefficient, EqualTo(BigInteger.Parse(biStr)));
-            Expect(br.Exponent, EqualTo(exponent));
+            Expect(br.Coefficient).To.Equal(BigInteger.Parse(biStr));
+            Expect(br.Exponent).To.Equal(exponent);
         }
 
         [Test]
@@ -1319,7 +1320,7 @@ namespace Clojure.Tests.LibTests
             BigDecimal rhs = BigDecimal.Parse(rhsStr);
             BigDecimal result = BigDecimal.Quantize(lhs, rhs, m);
             string resultStr = result.ToScientificString();
-            Expect(resultStr, EqualTo(shouldStr));
+            Expect(resultStr).To.Equal(shouldStr);
         }
 
         #endregion
@@ -1411,7 +1412,7 @@ namespace Clojure.Tests.LibTests
             BigDecimal arg = BigDecimal.Parse(argStr);
             BigDecimal result = BigDecimal.Abs(arg,c);
             string resultStr = result.ToScientificString();
-            Expect(resultStr, EqualTo(shouldStr));
+            Expect(resultStr).To.Equal(shouldStr);
         }
 
 
@@ -1437,8 +1438,8 @@ namespace Clojure.Tests.LibTests
         //    BigDecimal y = BigDecimal.Parse(yStr);
         //    BigDecimal z = x.Add(y);
         //    BigInteger bi = BigInteger.Parse(biStr);
-        //    Expect(z.Coefficient, EqualTo(bi));
-        //    Expect(z.Exponent, EqualTo(exponent));
+        //    Expect(z.Coefficient).To.Equal(bi));
+        //    Expect(z.Exponent).To.Equal(exponent));
         //}
 
         [Test]
@@ -1950,7 +1951,7 @@ namespace Clojure.Tests.LibTests
             BigDecimal arg2 = BigDecimal.Parse(arg2Str);
             BigDecimal val = arg1.Add(arg2, c);
             string valStr = val.ToScientificString();
-            Expect(valStr, EqualTo(resultStr));
+            Expect(valStr).To.Equal(resultStr);
         }
 
         #endregion
@@ -2854,7 +2855,7 @@ namespace Clojure.Tests.LibTests
             BigDecimal arg2 = BigDecimal.Parse(arg2Str);
             BigDecimal val = arg1.Subtract(arg2, c);
             string valStr = val.ToScientificString();
-            Expect(valStr, EqualTo(resultStr));
+            Expect(valStr).To.Equal(resultStr);
         }
 
         #endregion
@@ -3257,7 +3258,7 @@ namespace Clojure.Tests.LibTests
             BigDecimal arg2 = BigDecimal.Parse(arg2Str);
             BigDecimal val = arg1.Multiply(arg2, c);
             string valStr = val.ToScientificString();
-            Expect(valStr, EqualTo(resultStr));
+            Expect(valStr).To.Equal(resultStr);
         }
 
         #endregion
@@ -3986,7 +3987,7 @@ namespace Clojure.Tests.LibTests
             BigDecimal arg2 = BigDecimal.Parse(arg2Str);
             BigDecimal val = arg1.Divide(arg2, c);
             string valStr = val.ToScientificString();
-            Expect(valStr, EqualTo(resultStr));
+            Expect(valStr).To.Equal(resultStr);
         }
 
 
@@ -4351,7 +4352,7 @@ namespace Clojure.Tests.LibTests
             BigDecimal arg2 = BigDecimal.Parse(arg2Str);
             BigDecimal val = arg1.DivideInteger(arg2, c);
             string valStr = val.ToScientificString();
-            Expect(valStr, EqualTo(resultStr));
+            Expect(valStr).To.Equal(resultStr);
         }
 
         void TDivIEx(string test, BigDecimal.Context c)
@@ -4536,7 +4537,7 @@ namespace Clojure.Tests.LibTests
             int arg2 = Int32.Parse(arg2Str);
             BigDecimal val = arg1.Power(arg2, c);
             string valStr = val.ToScientificString();
-            Expect(valStr, EqualTo(resultStr));
+            Expect(valStr).To.Equal(resultStr);
         }
         #endregion
 
@@ -4614,7 +4615,7 @@ namespace Clojure.Tests.LibTests
             BigDecimal d = BigDecimal.Parse(strVal);
             BigDecimal m = d.MovePointLeft(n);
             string resultStr = m.ToScientificString();
-            Expect(resultStr, EqualTo(expectedString));
+            Expect(resultStr).To.Equal(expectedString);
         }
 
 
@@ -4623,7 +4624,7 @@ namespace Clojure.Tests.LibTests
             BigDecimal d = BigDecimal.Parse(strVal);
             BigDecimal m = d.MovePointRight(n);
             string resultStr = m.ToScientificString();
-            Expect(resultStr, EqualTo(expectedString));
+            Expect(resultStr).To.Equal(expectedString);
         }
 
         #endregion

@@ -14,9 +14,9 @@
 
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -35,7 +35,7 @@ namespace Clojure.Tests.LibTests
         public void Basic_ctor_has_no_meta()
         {
             IObj r = (IObj)_createFn(2L, 5L);
-            Expect(r.meta(), Null);
+            Expect(r.meta()).To.Be.Null();
         }
 
         [Test]
@@ -43,7 +43,7 @@ namespace Clojure.Tests.LibTests
         {
             IPersistentMap meta = new DummyMeta();
             IObj r = ((IObj)_createFn(2L, 5L)).withMeta(meta);
-            Expect(r.meta(), EqualTo(meta));
+            Expect(r.meta()).To.Equal(meta);
         }
 
         #endregion
@@ -54,7 +54,7 @@ namespace Clojure.Tests.LibTests
         public void Range_has_correct_count()
         {
             ISeq r = (ISeq)_createFn(2L, 20L);
-            Expect(r.count(), EqualTo(18));
+            Expect(r.count()).To.Equal(18);
         }
 
         #endregion
@@ -67,7 +67,8 @@ namespace Clojure.Tests.LibTests
             IFn fn = DummyFn.CreateForReduce();
             IReduce r = (IReduce)_createFn(2L, 5L);
             object ret = r.reduce(fn);
-            Expect(ret, EqualTo(9));
+            Expect(ret).To.Be.An.Instance.Of<long>();
+            Expect((long)ret).To.Equal(9);
         }
 
         [Test]
@@ -77,7 +78,8 @@ namespace Clojure.Tests.LibTests
 
             IReduce r = (IReduce)_createFn(2L, 5L);
             object ret = r.reduce(fn, 20);
-            Expect(ret, EqualTo(29));
+            Expect(ret).To.Be.An.Instance.Of<long>();
+            Expect((long)ret).To.Equal(29);
         }
 
         #endregion
@@ -125,7 +127,7 @@ namespace Clojure.Tests.LibTests
 
             _r = (Range)Range.create(2L, 5L);
             _rWithMeta = (Range)_r.withMeta(meta);
-            _values = new object[] { 2, 3, 4 };
+            _values = new object[] { 2L, 3L, 4L };
         }
 
         #endregion

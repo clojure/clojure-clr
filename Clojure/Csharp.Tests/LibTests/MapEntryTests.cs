@@ -15,9 +15,9 @@
 using System;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -31,8 +31,8 @@ namespace Clojure.Tests.LibTests
         {
             MapEntry me = new MapEntry(1, "abc");
 
-            Expect(me.key(), EqualTo(1));
-            Expect(me.val(), EqualTo("abc"));
+            Expect(me.key()).To.Equal(1);
+            Expect(me.val()).To.Equal("abc");
         }
 
         #endregion
@@ -45,7 +45,7 @@ namespace Clojure.Tests.LibTests
             MapEntry me = new MapEntry(1, "abc");
             PersistentVector v = PersistentVector.create(1, "abc");
 
-            Expect(me.GetHashCode(), EqualTo(v.GetHashCode()));
+            Expect(me.GetHashCode()).To.Equal(v.GetHashCode());
         }
 
         [Test]
@@ -54,7 +54,7 @@ namespace Clojure.Tests.LibTests
             MapEntry me = new MapEntry(1, "abc");
             PersistentVector v = PersistentVector.create(1, "abcd");
 
-            Expect(me.GetHashCode(), Not.EqualTo(v.GetHashCode()));
+            Expect(me.GetHashCode()).To.Not.Equal(v.GetHashCode());
         }
 
         [Test]
@@ -72,7 +72,7 @@ namespace Clojure.Tests.LibTests
             MapEntry me = new MapEntry(1, "abc");
             PersistentVector v = PersistentVector.create(1, "abcd");
 
-            Expect(me.Equals(v),False);
+            Expect(me.Equals(v)).To.Be.False();
         }
 
         
@@ -89,7 +89,7 @@ namespace Clojure.Tests.LibTests
         {
             MapEntry me = new MapEntry(1, "abc");
 
-            Expect(me.length(), EqualTo(2));
+            Expect(me.length()).To.Equal(2);
         }
 
         [Test]
@@ -98,8 +98,8 @@ namespace Clojure.Tests.LibTests
 
             MapEntry me = new MapEntry(1, "abc");
 
-            Expect(me.nth(0), EqualTo(1));
-            Expect(me.nth(1), EqualTo("abc"));
+            Expect(me.nth(0)).To.Equal(1);
+            Expect(me.nth(1)).To.Equal("abc");
         }
 
         [Test]
@@ -126,22 +126,22 @@ namespace Clojure.Tests.LibTests
             IPersistentVector v2 = me.assocN(1, "def");
             IPersistentVector v3 = me.assocN(2, "ghi");
 
-            Expect(me.count(), EqualTo(2));
-            Expect(me.key(), EqualTo(1));
-            Expect(me.val(), EqualTo("abc"));
+            Expect(me.count()).To.Equal(2);
+            Expect(me.key()).To.Equal(1);
+            Expect(me.val()).To.Equal("abc");
 
-            Expect(v1.count(), EqualTo(2));
-            Expect(v1.nth(0), EqualTo(2));
-            Expect(v1.nth(1), EqualTo("abc"));
+            Expect(v1.count()).To.Equal(2);
+            Expect(v1.nth(0)).To.Equal(2);
+            Expect(v1.nth(1)).To.Equal("abc");
 
-            Expect(v2.count(), EqualTo(2));
-            Expect(v2.nth(0), EqualTo(1));
-            Expect(v2.nth(1), EqualTo("def"));
+            Expect(v2.count()).To.Equal(2);
+            Expect(v2.nth(0)).To.Equal(1);
+            Expect(v2.nth(1)).To.Equal("def");
 
-            Expect(v3.count(), EqualTo(3));
-            Expect(v3.nth(0), EqualTo(1));
-            Expect(v3.nth(1), EqualTo("abc"));
-            Expect(v3.nth(2), EqualTo("ghi"));
+            Expect(v3.count()).To.Equal(3);
+            Expect(v3.nth(0)).To.Equal(1);
+            Expect(v3.nth(1)).To.Equal("abc");
+            Expect(v3.nth(2)).To.Equal("ghi");
         }
 
         [Test]
@@ -166,15 +166,15 @@ namespace Clojure.Tests.LibTests
             MapEntry me = new MapEntry(1, "abc");
             IPersistentVector v1 = me.cons(2);
 
-            Expect(me.count(), EqualTo(2));
-            Expect(me.key(), EqualTo(1));
-            Expect(me.val(), EqualTo("abc"));
+            Expect(me.count()).To.Equal(2);
+            Expect(me.key()).To.Equal(1);
+            Expect(me.val()).To.Equal("abc");
 
 
-            Expect(v1.count(), EqualTo(3));
-            Expect(v1.nth(0), EqualTo(1));
-            Expect(v1.nth(1), EqualTo("abc"));
-            Expect(v1.nth(2), EqualTo(2));
+            Expect(v1.count()).To.Equal(3);
+            Expect(v1.nth(0)).To.Equal(1);
+            Expect(v1.nth(1)).To.Equal("abc");
+            Expect(v1.nth(2)).To.Equal(2);
         }
 
         #endregion
@@ -195,8 +195,8 @@ namespace Clojure.Tests.LibTests
         {
             MapEntry me = new MapEntry(1, "abc");
 
-            Expect(me.containsKey(-4),False);
-            Expect(me.containsKey(4), False);
+            Expect(me.containsKey(-4)).To.Be.False();
+            Expect(me.containsKey(4)).To.Be.False();
         }
 
 
@@ -207,10 +207,10 @@ namespace Clojure.Tests.LibTests
             IMapEntry me1 = me.entryAt(0);
             IMapEntry me2 = me.entryAt(1);
 
-            Expect(me1.key(), EqualTo(0));
-            Expect(me1.val(), EqualTo(1));
-            Expect(me2.key(), EqualTo(1));
-            Expect(me2.val(), EqualTo("abc"));
+            Expect(me1.key()).To.Equal(0);
+            Expect(me1.val()).To.Equal(1);
+            Expect(me2.key()).To.Equal(1);
+            Expect(me2.val()).To.Equal("abc");
         }
 
         [Test]
@@ -219,7 +219,7 @@ namespace Clojure.Tests.LibTests
             MapEntry me = new MapEntry(1, "abc");
             IMapEntry me1 = me.entryAt(-4);
 
-            Expect(me1,Null);
+            Expect(me1).To.Be.Null();
         }
 
         [Test]
@@ -228,7 +228,7 @@ namespace Clojure.Tests.LibTests
             MapEntry me = new MapEntry(1, "abc");
             IMapEntry me1 = me.entryAt(4);
 
-            Expect(me1, Null);
+            Expect(me1).To.Be.Null();
         }
 
         [Test]
@@ -236,8 +236,8 @@ namespace Clojure.Tests.LibTests
         {
             MapEntry me = new MapEntry(1, "abc");
 
-            Expect(me.valAt(0), EqualTo(1));
-            Expect(me.valAt(1), EqualTo("abc"));
+            Expect(me.valAt(0)).To.Equal(1);
+            Expect(me.valAt(1)).To.Equal("abc");
         }
 
         [Test]
@@ -245,8 +245,8 @@ namespace Clojure.Tests.LibTests
         {
             MapEntry me = new MapEntry(1, "abc");
 
-            Expect(me.valAt(-4), Null);
-            Expect(me.valAt(4), Null);
+            Expect(me.valAt(-4)).To.Be.Null();
+            Expect(me.valAt(4)).To.Be.Null();
         }
 
         [Test]
@@ -254,8 +254,8 @@ namespace Clojure.Tests.LibTests
         {
             MapEntry me = new MapEntry(1, "abc");
 
-            Expect(me.valAt(0,7), EqualTo(1));
-            Expect(me.valAt(1,7), EqualTo("abc"));
+            Expect(me.valAt(0,7)).To.Equal(1);
+            Expect(me.valAt(1,7)).To.Equal("abc");
         }
 
         [Test]
@@ -263,8 +263,8 @@ namespace Clojure.Tests.LibTests
         {
             MapEntry me = new MapEntry(1, "abc");
 
-            Expect(me.valAt(-4,7), EqualTo(7));
-            Expect(me.valAt(4, 7), EqualTo(7));
+            Expect(me.valAt(-4,7)).To.Equal(7);
+            Expect(me.valAt(4, 7)).To.Equal(7);
         }
 
         #endregion
@@ -278,10 +278,10 @@ namespace Clojure.Tests.LibTests
 
             ISeq s = me.rseq();
 
-            Expect(s.count(), EqualTo(2));
-            Expect(s.first(), EqualTo("abc"));
-            Expect(s.next().first(), EqualTo(1));
-            Expect(s.next().next(), Null);
+            Expect(s.count()).To.Equal(2);
+            Expect(s.first()).To.Equal("abc");
+            Expect(s.next().first()).To.Equal(1);
+            Expect(s.next().next()).To.Be.Null();
         }
         
         #endregion
@@ -292,7 +292,7 @@ namespace Clojure.Tests.LibTests
         public void CountIs2()
         {
             MapEntry me = new MapEntry(1, "abc");
-            Expect(me.count(), EqualTo(2));
+            Expect(me.count()).To.Equal(2);
         }
 
         [Test]
@@ -301,10 +301,10 @@ namespace Clojure.Tests.LibTests
             MapEntry me = new MapEntry(1, "abc");
             ISeq s = me.seq();
 
-            Expect(s.count(), EqualTo(2));
-            Expect(s.first(), EqualTo(1));
-            Expect(s.next().first(), EqualTo("abc"));
-            Expect(s.next().next(), Null);
+            Expect(s.count()).To.Equal(2);
+            Expect(s.first()).To.Equal(1);
+            Expect(s.next().first()).To.Equal("abc");
+            Expect(s.next().next()).To.Be.Null();
         }
 
         [Test]
@@ -312,7 +312,7 @@ namespace Clojure.Tests.LibTests
         {
             MapEntry me = new MapEntry(1, "abc");
 
-            Expect(me.empty(), Null);
+            Expect(me.empty()).To.Be.Null();
         }
 
 
@@ -323,15 +323,15 @@ namespace Clojure.Tests.LibTests
             IPersistentCollection c = (IPersistentCollection)me;
             ISeq s = c.cons(2).seq();
 
-            Expect(me.count(), EqualTo(2));
-            Expect(me.key(), EqualTo(1));
-            Expect(me.val(), EqualTo("abc"));
+            Expect(me.count()).To.Equal(2);
+            Expect(me.key()).To.Equal(1);
+            Expect(me.val()).To.Equal("abc");
 
-            Expect(s.count(), EqualTo(3));
-            Expect(s.first(), EqualTo(1));
-            Expect(s.next().first(), EqualTo("abc"));
-            Expect(s.next().next().first(), EqualTo(2));
-            Expect(s.next().next().next(), Null);
+            Expect(s.count()).To.Equal(3);
+            Expect(s.first()).To.Equal(1);
+            Expect(s.next().first()).To.Equal("abc");
+            Expect(s.next().next().first()).To.Equal(2);
+            Expect(s.next().next().next()).To.Be.Null();
         }
         
         #endregion
@@ -343,10 +343,10 @@ namespace Clojure.Tests.LibTests
         {
             MapEntry me = new MapEntry(1, "abc");
 
-            Expect(me.peek(), EqualTo("abc"));
-            Expect(me.count(), EqualTo(2));
-            Expect(me.key(), EqualTo(1));
-            Expect(me.val(), EqualTo("abc"));
+            Expect(me.peek()).To.Equal("abc");
+            Expect(me.count()).To.Equal(2);
+            Expect(me.key()).To.Equal(1);
+            Expect(me.val()).To.Equal("abc");
         }
 
         [Test]
@@ -355,8 +355,8 @@ namespace Clojure.Tests.LibTests
             MapEntry me = new MapEntry(1, "abc");
             IPersistentVector v = (IPersistentVector)me.pop();
 
-            Expect(v.length(), EqualTo(1));
-            Expect(v.nth(0), EqualTo(1));
+            Expect(v.length()).To.Equal(1);
+            Expect(v.nth(0)).To.Equal(1);
         }
     
 

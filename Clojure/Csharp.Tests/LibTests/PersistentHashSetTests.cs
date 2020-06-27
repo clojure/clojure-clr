@@ -18,9 +18,9 @@ using System.Linq;
 using System.Collections;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -36,7 +36,7 @@ namespace Clojure.Tests.LibTests
             ArrayList a = new ArrayList();
             IPersistentSet m = PersistentHashSet.createWithCheck(a);
 
-            Expect(m.count(), EqualTo(0));
+            Expect(m.count()).To.Equal(0);
         }
 
         [Test]
@@ -47,10 +47,10 @@ namespace Clojure.Tests.LibTests
 
             IPersistentSet m = PersistentHashSet.createWithCheck(a);
 
-            Expect(m.count(), EqualTo(2));
+            Expect(m.count()).To.Equal(2);
             Expect(m.contains(1));
             Expect(m.contains("a"));
-            Expect(m.contains(3), False);
+            Expect(m.contains(3)).To.Be.False();
         }
 
         [Test]
@@ -61,7 +61,7 @@ namespace Clojure.Tests.LibTests
             ISeq s = PersistentList.create(a).seq();
             IPersistentSet m = PersistentHashSet.create(s);
 
-            Expect(m.count(), EqualTo(0));
+            Expect(m.count()).To.Equal(0);
         }
 
         [Test]
@@ -72,10 +72,10 @@ namespace Clojure.Tests.LibTests
             ISeq s = PersistentList.create(a).seq();
             IPersistentSet m = PersistentHashSet.create(s);
 
-            Expect(m.count(), EqualTo(2));
+            Expect(m.count()).To.Equal(2);
             Expect(m.contains(1));
             Expect(m.contains("a"));
-            Expect(m.contains(3), False);
+            Expect(m.contains(3)).To.Be.False();
         }
 
         [Test]
@@ -83,8 +83,8 @@ namespace Clojure.Tests.LibTests
         {
             PersistentHashSet m = PersistentHashSet.create();
 
-            Expect(m.count(), EqualTo(0));
-            Expect(m.meta(), Null);
+            Expect(m.count()).To.Equal(0);
+            Expect(m.meta()).To.Be.Null();
         }
 
         [Test]
@@ -92,11 +92,11 @@ namespace Clojure.Tests.LibTests
         {
             PersistentHashSet m = PersistentHashSet.create(1, "a");
 
-            Expect(m.count(), EqualTo(2));
+            Expect(m.count()).To.Equal(2);
             Expect(m.contains(1));
             Expect(m.contains("a"));
-            Expect(m.contains(3), False);
-            Expect(m.meta(), Null);
+            Expect(m.contains(3)).To.Be.False();
+            Expect(m.meta()).To.Be.Null();
         }
 
 
@@ -142,7 +142,7 @@ namespace Clojure.Tests.LibTests
 
             PersistentHashSet m = (PersistentHashSet)PersistentHashSet.create(items);
 
-            Expect(m.count(), EqualTo(dict.Count));
+            Expect(m.count()).To.Equal(dict.Count);
 
             foreach (int key in dict.Keys)
             {

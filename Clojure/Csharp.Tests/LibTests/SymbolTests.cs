@@ -19,9 +19,9 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -35,9 +35,9 @@ namespace Clojure.Tests.LibTests
         {
             Symbol sym = Symbol.intern(null, "abc");
 
-            Expect(sym.Name, EqualTo("abc"));
-            Expect(sym.Namespace, Null);
-            Expect(sym.meta(), Null);
+            Expect(sym.Name).To.Equal("abc");
+            Expect(sym.Namespace).To.Be.Null();
+            Expect(sym.meta()).To.Be.Null();
         }
 
         [Test]
@@ -45,9 +45,9 @@ namespace Clojure.Tests.LibTests
         {
             Symbol sym = Symbol.intern("def", "abc");
 
-            Expect(sym.Name, EqualTo("abc"));
-            Expect(sym.Namespace, EqualTo("def"));
-            Expect(sym.meta(), Null);
+            Expect(sym.Name).To.Equal("abc");
+            Expect(sym.Namespace).To.Equal("def");
+            Expect(sym.meta()).To.Be.Null();
         }
 
 
@@ -56,9 +56,9 @@ namespace Clojure.Tests.LibTests
         {
             Symbol sym = Symbol.intern("abc");
 
-            Expect(sym.Name, EqualTo("abc"));
-            Expect(sym.Namespace, Null);
-            Expect(sym.meta(), Null);
+            Expect(sym.Name).To.Equal("abc");
+            Expect(sym.Namespace).To.Be.Null();
+            Expect(sym.meta()).To.Be.Null();
         }
 
         [Test]
@@ -66,9 +66,9 @@ namespace Clojure.Tests.LibTests
         {
             Symbol sym = Symbol.intern("def/abc");
 
-            Expect(sym.Name, EqualTo("abc"));
-            Expect(sym.Namespace, EqualTo("def"));
-            Expect(sym.meta(), Null);
+            Expect(sym.Name).To.Equal("abc");
+            Expect(sym.Namespace).To.Equal("def");
+            Expect(sym.meta()).To.Be.Null();
         }
 
         #endregion
@@ -79,14 +79,14 @@ namespace Clojure.Tests.LibTests
         public void SymToStringWithNoNSIsJustName()
         {
             Symbol sym = Symbol.intern("abc");
-            Expect(sym.ToString(), EqualTo("abc"));
+            Expect(sym.ToString()).To.Equal("abc");
         }
 
         [Test]
         public void SymToStringWithNsConcatenatesNames()
         {
             Symbol sym = Symbol.intern("def", "abc");
-            Expect(sym.ToString(), EqualTo("def/abc"));
+            Expect(sym.ToString()).To.Equal("def/abc");
         }
 
         [Test]
@@ -100,7 +100,7 @@ namespace Clojure.Tests.LibTests
         public void EqualsOnNonSymbolIsFalse()
         {
             Symbol sym = Symbol.intern("abc");
-            Expect(sym.Equals("abc"), False);
+            Expect(sym.Equals("abc")).To.Be.False();
         }
 
         [Test]
@@ -111,9 +111,9 @@ namespace Clojure.Tests.LibTests
             Symbol sym3 = Symbol.intern("def", "abc");
             Symbol sym4 = Symbol.intern("de","abc");
 
-            Expect(sym1.Equals(sym2), False);
-            Expect(sym1.Equals(sym3), False);
-            Expect(sym3.Equals(sym4), False);
+            Expect(sym1.Equals(sym2)).To.Be.False();
+            Expect(sym1.Equals(sym3)).To.Be.False();
+            Expect(sym3.Equals(sym4)).To.Be.False();
         }
 
         [Test]
@@ -139,11 +139,11 @@ namespace Clojure.Tests.LibTests
             Symbol sym5 = Symbol.intern("ab");
             Symbol sym6 = Symbol.intern("de", "abc");
 
-            Expect(sym1.GetHashCode(), EqualTo(sym2.GetHashCode()));
-            Expect(sym3.GetHashCode(), EqualTo(sym4.GetHashCode()));
-            Expect(sym1.GetHashCode(), Not.EqualTo(sym3.GetHashCode()));
-            Expect(sym1.GetHashCode(), Not.EqualTo(sym5.GetHashCode()));
-            Expect(sym3.GetHashCode(), Not.EqualTo(sym6.GetHashCode()));
+            Expect(sym1.GetHashCode()).To.Equal(sym2.GetHashCode());
+            Expect(sym3.GetHashCode()).To.Equal(sym4.GetHashCode());
+            Expect(sym1.GetHashCode()).To.Not.Equal(sym3.GetHashCode());
+            Expect(sym1.GetHashCode()).To.Not.Equal(sym5.GetHashCode());
+            Expect(sym3.GetHashCode()).To.Not.Equal(sym6.GetHashCode());
         }
 
         #endregion
@@ -167,9 +167,9 @@ namespace Clojure.Tests.LibTests
             dict[sym1] = 7;
             dict["abc"] = 8;
 
-            Expect(sym1.invoke(dict), EqualTo(7));
-            Expect(sym2.invoke(dict), EqualTo(7));
-            Expect(sym3.invoke(dict), Null);
+            Expect(sym1.invoke(dict)).To.Equal(7);
+            Expect(sym2.invoke(dict)).To.Equal(7);
+            Expect(sym3.invoke(dict)).To.Be.Null();
         }
 
         [Test]
@@ -183,9 +183,9 @@ namespace Clojure.Tests.LibTests
             dict[sym1] = 7;
             dict["abc"] = 8;
 
-            Expect(sym1.invoke(dict,20), EqualTo(7));
-            Expect(sym2.invoke(dict,20), EqualTo(7));
-            Expect(sym3.invoke(dict,20), EqualTo(20));
+            Expect(sym1.invoke(dict,20)).To.Equal(7);
+            Expect(sym2.invoke(dict,20)).To.Equal(7);
+            Expect(sym3.invoke(dict,20)).To.Equal(20);
         }
 
         [Test]
@@ -226,7 +226,7 @@ namespace Clojure.Tests.LibTests
             Symbol sym1 = Symbol.intern("abc");
             Symbol sym2 = Symbol.intern("abc");
 
-            Expect(sym1.CompareTo(sym2), EqualTo(0));
+            Expect(sym1.CompareTo(sym2)).To.Equal(0);
         }
 
         [Test]
@@ -235,8 +235,8 @@ namespace Clojure.Tests.LibTests
             Symbol sym1 = Symbol.intern("abc");
             Symbol sym2 = Symbol.intern("a", "abc");
 
-            Expect(sym1.CompareTo(sym2), LessThan(0));
-            Expect(sym2.CompareTo(sym1), GreaterThan(0));
+            Expect(sym1.CompareTo(sym2)).To.Be.Less.Than(0);
+            Expect(sym2.CompareTo(sym1)).To.Be.Greater.Than(0);
         }
 
         [Test]
@@ -245,8 +245,8 @@ namespace Clojure.Tests.LibTests
             Symbol sym1 = Symbol.intern("a", "abc");
             Symbol sym2 = Symbol.intern("b", "abc");
 
-            Expect(sym1.CompareTo(sym2), LessThan(0));
-            Expect(sym2.CompareTo(sym1), GreaterThan(0));
+            Expect(sym1.CompareTo(sym2)).To.Be.Less.Than(0);
+            Expect(sym2.CompareTo(sym1)).To.Be.Greater.Than(0);
         }
 
         #endregion

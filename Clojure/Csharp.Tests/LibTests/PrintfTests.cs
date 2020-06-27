@@ -15,9 +15,9 @@
 using System;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -26,7 +26,7 @@ namespace Clojure.Tests.LibTests
     {
         void Test(string result, string fmt, params object[] args)
         {
-            Expect(Printf.Format(fmt,args),EqualTo(result));
+            Expect(Printf.Format(fmt,args)).To.Equal(result);
         }
 
         [SetUp]

@@ -15,9 +15,10 @@
 using System;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 
 using clojure.lang;
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -61,7 +62,7 @@ namespace Clojure.Tests.LibTests
         {
             InitMocks();
             IObj obj2 = _obj.withMeta(_meta);
-            Expect(obj2.meta(), SameAs(_meta));
+            Expect(Object.ReferenceEquals(obj2.meta(), _meta));
         }
 
         [Test]
@@ -72,7 +73,7 @@ namespace Clojure.Tests.LibTests
 
             InitMocks();
             IObj obj2 = _obj.withMeta(_meta);
-            Expect(obj2, TypeOf(_expectedType));
+            Expect(obj2.GetType()).To.Equal(_expectedType);
         }
 
         [Test]
@@ -81,7 +82,7 @@ namespace Clojure.Tests.LibTests
             if (_testNoChange)
             {
                 IObj obj2 = _obj.withMeta(_obj.meta());
-                Expect(obj2, SameAs(_obj));
+                Expect(Object.ReferenceEquals(obj2, _obj));
             }
         }
 
@@ -90,7 +91,7 @@ namespace Clojure.Tests.LibTests
         {
             if (_objWithNullMeta == null)
                 return;
-            Expect(_objWithNullMeta.meta(), Null);
+            Expect(_objWithNullMeta.meta()).To.Be.Null();
         }
     }
 }

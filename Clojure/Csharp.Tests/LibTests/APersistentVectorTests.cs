@@ -15,10 +15,10 @@
 using System;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -135,7 +135,7 @@ namespace Clojure.Tests.LibTests
 
         //    CPV v = new CPV(meta,new object[] { 1, 2, 3 });
 
-        //    Expect(v.meta(), SameAs(meta));
+        //    Expect(v.meta(), meta));
         //    mocks.VerifyAll();
         //}
 
@@ -157,7 +157,7 @@ namespace Clojure.Tests.LibTests
         {
             CPV v = new CPV(new object[] { 1, 2, 3 });
 
-            Expect(v.GetHashCode(), EqualTo(v.GetHashCode()));
+            Expect(v.GetHashCode()).To.Equal(v.GetHashCode());
         }
 
         [Test]
@@ -166,7 +166,7 @@ namespace Clojure.Tests.LibTests
             CPV v1 = new CPV(new object[] { 1, 2, 3 });
             CPV v2 = new CPV(new object[] { 1, 2, 4 });
 
-            Expect(v1.GetHashCode(), Not.EqualTo(v2.GetHashCode()));
+            Expect(v1.GetHashCode()).To.Not.Equal(v2.GetHashCode());
         }
 
         [Test]
@@ -174,7 +174,7 @@ namespace Clojure.Tests.LibTests
         {
             CPV v1 = new CPV(new object[] { 1, 2, 3 });
 
-            Expect(v1.equiv(7), False);
+            Expect(v1.equiv(7)).To.Be.False();
         }
 
         [Test]
@@ -185,9 +185,9 @@ namespace Clojure.Tests.LibTests
             CPV v3 = new CPV(new object[] { 1, 2 });
             CPV v4 = new CPV(new object[] { 1, 2, 3, 4 });
 
-            Expect(v1.equiv(v2), False);
-            Expect(v1.equiv(v3), False);
-            Expect(v1.equiv(v4), False);
+            Expect(v1.equiv(v2)).To.Be.False();
+            Expect(v1.equiv(v3)).To.Be.False();
+            Expect(v1.equiv(v4)).To.Be.False();
         }
 
         [Test]
@@ -222,9 +222,9 @@ namespace Clojure.Tests.LibTests
             StringSeq s2 = StringSeq.create("abd");
             StringSeq s3 = StringSeq.create("abcd");
 
-            Expect(v1.equiv(s1), False);
-            Expect(v1.equiv(s2), False);
-            Expect(v1.equiv(s3), False);
+            Expect(v1.equiv(s1)).To.Be.False();
+            Expect(v1.equiv(s2)).To.Be.False();
+            Expect(v1.equiv(s3)).To.Be.False();
         }
 
 
@@ -237,14 +237,14 @@ namespace Clojure.Tests.LibTests
         {
             CPV v = new CPV(new object[] { 5, 6, 7 });
 
-            Expect(v.invoke(0),EqualTo(5));
-            Expect(v.invoke(1),EqualTo(6));
-            Expect(v.invoke(2),EqualTo(7));
-            Expect(v.invoke("1"), EqualTo(6));
-            Expect(v.invoke(1.0), EqualTo(6));
-            Expect(v.invoke(1.2), EqualTo(6));
-            Expect(v.invoke(1.8), EqualTo(6)); // Rounds or not-- should it?
-            Expect(v.invoke(1.4M), EqualTo(6));
+            Expect(v.invoke(0)).To.Equal(5);
+            Expect(v.invoke(1)).To.Equal(6);
+            Expect(v.invoke(2)).To.Equal(7);
+            Expect(v.invoke("1")).To.Equal(6);
+            Expect(v.invoke(1.0)).To.Equal(6);
+            Expect(v.invoke(1.2)).To.Equal(6);
+            Expect(v.invoke(1.8)).To.Equal(6); // Rounds or not-- should it?
+            Expect(v.invoke(1.4M)).To.Equal(6);
         }
 
 
@@ -257,7 +257,7 @@ namespace Clojure.Tests.LibTests
         {
             CPV v = new CPV(new object[0]);
 
-            Expect(v.seq(), Null);
+            Expect(v.seq()).To.Be.Null();
         }
 
         [Test]
@@ -265,7 +265,7 @@ namespace Clojure.Tests.LibTests
         {
             CPV v = new CPV(new object[]{ 1,2,3});
 
-            Expect(v.seq(), Not.Null);
+            Expect(v.seq()).Not.To.Be.Null();
         }
 
         [Test]
@@ -274,10 +274,10 @@ namespace Clojure.Tests.LibTests
             CPV v = new CPV(new object[] { 1, 2, 3 });
             ISeq s = v.seq();
 
-            Expect(s.first(), EqualTo(1));
-            Expect(s.next().first(), EqualTo(2));
-            Expect(s.next().next().first(), EqualTo(3));
-            Expect(s.next().next().next(), Null);
+            Expect(s.first()).To.Equal(1);
+            Expect(s.next().first()).To.Equal(2);
+            Expect(s.next().next().first()).To.Equal(3);
+            Expect(s.next().next().next()).To.Be.Null();
         }
 
         [Test]
@@ -286,17 +286,17 @@ namespace Clojure.Tests.LibTests
             CPV v = new CPV(new object[] { 1, 2 });
             IPersistentCollection c = v as IPersistentCollection;
 
-            Expect(c, Not.Null);
+            Expect(c).Not.To.Be.Null();
 
             IPersistentCollection c2 = c.cons(3);
-            Expect(c2.count(), EqualTo(3));
+            Expect(c2.count()).To.Equal(3);
 
             ISeq s2 = c2.seq();
 
-            Expect(s2.first(), EqualTo(1));
-            Expect(s2.next().first(), EqualTo(2));
-            Expect(s2.next().next().first(), EqualTo(3));
-            Expect(s2.next().next().next(), Null);
+            Expect(s2.first()).To.Equal(1);
+            Expect(s2.next().first()).To.Equal(2);
+            Expect(s2.next().next().first()).To.Equal(3);
+            Expect(s2.next().next().next()).To.Be.Null();
         }
 
         #endregion
@@ -308,7 +308,7 @@ namespace Clojure.Tests.LibTests
         {
             CPV v = new CPV(new object[0]);
 
-            Expect(v.rseq(), Null);
+            Expect(v.rseq()).To.Be.Null();
         }
 
         [Test]
@@ -316,7 +316,7 @@ namespace Clojure.Tests.LibTests
         {
             CPV v = new CPV(new object[] { 1, 2, 3 });
 
-            Expect(v.rseq(), Not.Null);
+            Expect(v.rseq()).Not.To.Be.Null();
         }
 
         [Test]
@@ -325,10 +325,10 @@ namespace Clojure.Tests.LibTests
             CPV v = new CPV(new object[] { 1, 2, 3 });
             ISeq s = v.rseq();
 
-            Expect(s.first(), EqualTo(3));
-            Expect(s.next().first(), EqualTo(2));
-            Expect(s.next().next().first(), EqualTo(1));
-            Expect(s.next().next().next(), Null);
+            Expect(s.first()).To.Equal(3);
+            Expect(s.next().first()).To.Equal(2);
+            Expect(s.next().next().first()).To.Equal(1);
+            Expect(s.next().next().next()).To.Be.Null();
         }
 
 
@@ -341,7 +341,7 @@ namespace Clojure.Tests.LibTests
         {
             CPV v = new CPV(new object[] { 4, 5, 6 });
 
-            Expect(v.containsKey("a"), False);
+            Expect(v.containsKey("a")).To.Be.False();
         }
 
         [Test]
@@ -358,7 +358,7 @@ namespace Clojure.Tests.LibTests
         {
             CPV v = new CPV(new object[] { 4, 5, 6 });
 
-            Expect(v.containsKey(5),False);
+            Expect(v.containsKey(5)).To.Be.False();
         }
 
         [Test]
@@ -368,7 +368,7 @@ namespace Clojure.Tests.LibTests
 
             IMapEntry me = v.entryAt("a");
 
-            Expect(me, Null);
+            Expect(me).To.Be.Null();
         }
 
         [Test]
@@ -378,8 +378,8 @@ namespace Clojure.Tests.LibTests
 
             IMapEntry me = v.entryAt(1);
 
-            Expect(me.key(), EqualTo(1));
-            Expect(me.val(),EqualTo(5));
+            Expect(me.key()).To.Equal(1);
+            Expect(me.val()).To.Equal(5);
         }
 
 
@@ -390,7 +390,7 @@ namespace Clojure.Tests.LibTests
 
             IMapEntry me = v.entryAt(5);
 
-            Expect(me, Null);
+            Expect(me).To.Be.Null();
         }
 
         [Test]
@@ -408,10 +408,10 @@ namespace Clojure.Tests.LibTests
             CPV v = new CPV(new object[] { 4, 5, 6 });
             Associative a = v.assoc(1, 10);
 
-            Expect(a.valAt(0), EqualTo(4));
-            Expect(a.valAt(1), EqualTo(10));
-            Expect(a.valAt(2), EqualTo(6));
-            Expect(a.count(), EqualTo(3));
+            Expect(a.valAt(0)).To.Equal(4);
+            Expect(a.valAt(1)).To.Equal(10);
+            Expect(a.valAt(2)).To.Equal(6);
+            Expect(a.count()).To.Equal(3);
         }
 
         [Test]
@@ -421,11 +421,11 @@ namespace Clojure.Tests.LibTests
             CPV v = new CPV(new object[] { 4, 5, 6 });
             Associative a = v.assoc(3, 10);
 
-            Expect(a.valAt(0), EqualTo(4));
-            Expect(a.valAt(1), EqualTo(5));
-            Expect(a.valAt(2), EqualTo(6));
-            Expect(a.valAt(3), EqualTo(10));
-            Expect(a.count(), EqualTo(4));
+            Expect(a.valAt(0)).To.Equal(4);
+            Expect(a.valAt(1)).To.Equal(5);
+            Expect(a.valAt(2)).To.Equal(6);
+            Expect(a.valAt(3)).To.Equal(10);
+            Expect(a.count()).To.Equal(4);
         }
 
         [Test]
@@ -454,8 +454,8 @@ namespace Clojure.Tests.LibTests
             object val1 = v.valAt("a");
             object val2 = v.valAt("a", "abc");
 
-            Expect(val1, Null);
-            Expect(val2, EqualTo("abc"));
+            Expect(val1).To.Be.Null();
+            Expect(val2).To.Equal("abc");
         }
 
         [Test]
@@ -466,8 +466,8 @@ namespace Clojure.Tests.LibTests
             object val1 = v.valAt(1);
             object val2 = v.valAt(1, "abc");
 
-            Expect(val1, EqualTo(5));
-            Expect(val2, EqualTo(5));
+            Expect(val1).To.Equal(5);
+            Expect(val2).To.Equal(5);
         }
 
 
@@ -479,8 +479,8 @@ namespace Clojure.Tests.LibTests
             object val1 = v.valAt(4);
             object val2 = v.valAt(4, "abc");
 
-            Expect(val1, Null);
-            Expect(val2, EqualTo("abc"));
+            Expect(val1).To.Be.Null();
+            Expect(val2).To.Equal("abc");
         }
 
 
@@ -494,7 +494,7 @@ namespace Clojure.Tests.LibTests
         {
             CPV v = new CPV(new object[] {});
 
-            Expect(v.peek(), Null);
+            Expect(v.peek()).To.Be.Null();
         }
 
         [Test]
@@ -502,7 +502,7 @@ namespace Clojure.Tests.LibTests
         {
             CPV v = new CPV(new object[] { 1, 2, 3 });
 
-            Expect(v.peek(), EqualTo(3));
+            Expect(v.peek()).To.Equal(3);
         }
 
         #endregion
@@ -517,10 +517,10 @@ namespace Clojure.Tests.LibTests
             CPV v = new CPV(new object[] { 4, 5, 6 }); 
             ISeq s = v.seq();
 
-            Expect(s.first(), EqualTo(4));
-            Expect(s.next().first(), EqualTo(5));
-            Expect(s.next().next().first(), EqualTo(6));
-            Expect(s.next().next().next(), Null);
+            Expect(s.first()).To.Equal(4);
+            Expect(s.next().first()).To.Equal(5);
+            Expect(s.next().next().first()).To.Equal(6);
+            Expect(s.next().next().next()).To.Be.Null();
         }
 
         [Test]
@@ -533,8 +533,8 @@ namespace Clojure.Tests.LibTests
             ISeq s1 = s0.next();
             IndexedSeq i1 = s1 as IndexedSeq;
 
-            Expect(i0.index(), EqualTo(0));
-            Expect(i1.index(), EqualTo(1));
+            Expect(i0.index()).To.Equal(0);
+            Expect(i1.index()).To.Equal(1);
         }
 
         [Test]
@@ -543,9 +543,9 @@ namespace Clojure.Tests.LibTests
             CPV v = new CPV(new object[] { 4, 5, 6 });
             ISeq s = v.seq();
 
-            Expect(s.count(), EqualTo(3));
-            Expect(s.next().count(), EqualTo(2));
-            Expect(s.next().next().count(), EqualTo(1));
+            Expect(s.count()).To.Equal(3);
+            Expect(s.next().count()).To.Equal(2);
+            Expect(s.next().next().count()).To.Equal(1);
         }
 
         [Test]
@@ -557,7 +557,7 @@ namespace Clojure.Tests.LibTests
             IObj s = (IObj)v.seq();
             IObj obj = s.withMeta(meta);
 
-            Expect(obj.meta(), SameAs(meta));
+            Expect(Object.ReferenceEquals(obj.meta(),meta));
         }
 
         [Test]
@@ -569,7 +569,8 @@ namespace Clojure.Tests.LibTests
             IReduce r = (IReduce)v.seq();
             object ret = r.reduce(fn);
 
-            Expect(ret, EqualTo(6));
+            Expect(ret).To.Be.An.Instance.Of<long>();
+            Expect((long)ret).To.Equal(6);
         }
 
         [Test]
@@ -581,7 +582,8 @@ namespace Clojure.Tests.LibTests
             IReduce r = (IReduce)v.seq();
             object ret = r.reduce(fn, 20);
 
-            Expect(ret, EqualTo(26));
+            Expect(ret).To.Be.An.Instance.Of<long>();
+            Expect((long)ret).To.Equal(26);
         }
 
         #endregion
@@ -596,10 +598,10 @@ namespace Clojure.Tests.LibTests
             CPV v = new CPV(new object[] { 4, 5, 6 });
             ISeq s = v.rseq();
 
-            Expect(s.first(), EqualTo(6));
-            Expect(s.next().first(), EqualTo(5));
-            Expect(s.next().next().first(), EqualTo(4));
-            Expect(s.next().next().next(), Null);
+            Expect(s.first()).To.Equal(6);
+            Expect(s.next().first()).To.Equal(5);
+            Expect(s.next().next().first()).To.Equal(4);
+            Expect(s.next().next().next()).To.Be.Null();
         }
 
         [Test]
@@ -612,8 +614,8 @@ namespace Clojure.Tests.LibTests
             ISeq s1 = s0.next();
             IndexedSeq i1 = s1 as IndexedSeq;
 
-            Expect(i0.index(), EqualTo(2));
-            Expect(i1.index(), EqualTo(1));
+            Expect(i0.index()).To.Equal(2);
+            Expect(i1.index()).To.Equal(1);
         }
 
         [Test]
@@ -622,9 +624,9 @@ namespace Clojure.Tests.LibTests
             CPV v = new CPV(new object[] { 4, 5, 6 });
             ISeq s = v.rseq();
 
-            Expect(s.count(), EqualTo(3));
-            Expect(s.next().count(), EqualTo(2));
-            Expect(s.next().next().count(), EqualTo(1));
+            Expect(s.count()).To.Equal(3);
+            Expect(s.next().count()).To.Equal(2);
+            Expect(s.next().next().count()).To.Equal(1);
         }
 
         [Test]
@@ -636,7 +638,7 @@ namespace Clojure.Tests.LibTests
             IObj s = (IObj)v.rseq();
             IObj obj = s.withMeta(meta);
 
-            Expect(obj.meta(), SameAs(meta));
+            Expect(Object.ReferenceEquals(obj.meta(), meta));
         }
 
         [Test]
@@ -648,7 +650,8 @@ namespace Clojure.Tests.LibTests
             IReduce r = (IReduce)v.rseq();
             object ret = r.reduce(fn);
 
-            Expect(ret, EqualTo(6));
+            Expect(ret).To.Be.An.Instance.Of<long>();
+            Expect((long)ret).To.Equal(6);
         }
 
         [Test]
@@ -660,7 +663,8 @@ namespace Clojure.Tests.LibTests
             IReduce r = (IReduce)v.rseq();
             object ret = r.reduce(fn, 20);
 
-            Expect(ret, EqualTo(26));
+            Expect(ret).To.Be.An.Instance.Of<long>();
+            Expect((long)ret).To.Equal(26);
         }
 
         #endregion

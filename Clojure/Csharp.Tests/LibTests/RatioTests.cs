@@ -15,9 +15,9 @@
 using System;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
-
+using static NExpect.Expectations;
 using clojure.lang;
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -36,8 +36,8 @@ namespace Clojure.Tests.LibTests
             BigInteger n = BigInteger.Create(30);
             BigInteger d = BigInteger.Create(60);
             Ratio r = new Ratio(n, d);
-            Expect(r.numerator, SameAs(n));
-            Expect(r.denominator, SameAs(d));
+            Expect(Object.ReferenceEquals(r.numerator, n));
+            Expect(Object.ReferenceEquals(r.denominator, d));
         }
 
         [Test]
@@ -61,7 +61,7 @@ namespace Clojure.Tests.LibTests
             BigInteger n2 = BigInteger.Create(31);
             BigInteger d2 = BigInteger.Create(60);
             Ratio r2 = new Ratio(n2, d2);
-            Expect(r1.Equals(r2),False);
+            Expect(r1.Equals(r2)).To.Be.False();
         }
 
         [Test]
@@ -70,7 +70,7 @@ namespace Clojure.Tests.LibTests
             BigInteger n1 = BigInteger.Create(30);
             BigInteger d1 = BigInteger.Create(60);
             Ratio r1 = new Ratio(n1, d1);
-            Expect(r1.ToString(), EqualTo("30/60"));
+            Expect(r1.ToString()).To.Equal("30/60");
         }
 
         [Test]
@@ -81,7 +81,7 @@ namespace Clojure.Tests.LibTests
             Ratio r1 = new Ratio(n1, d1);
             BigDecimal bd = r1.ToBigDecimal();
 
-            Expect(bd, EqualTo(BigDecimal.Parse("0.25")));
+            Expect(bd).To.Equal(BigDecimal.Parse("0.25"));
         }
 
         [Test]
@@ -102,7 +102,7 @@ namespace Clojure.Tests.LibTests
             Ratio r1 = new Ratio(n1, d1);
             BigDecimal.Context c = new BigDecimal.Context(6, BigDecimal.RoundingMode.HalfUp);
             BigDecimal bd = r1.ToBigDecimal(c);
-            Expect(bd, EqualTo(BigDecimal.Parse("0.333333")));
+            Expect(bd).To.Equal(BigDecimal.Parse("0.333333"));
         }
 
 
@@ -113,7 +113,7 @@ namespace Clojure.Tests.LibTests
             BigInteger d1 = BigInteger.Create(3);
             Ratio r1 = new Ratio(n1, d1);
             double d = r1.ToDouble(null);
-            Expect(d, EqualTo(0.3333333333333333));  // precision = 16
+            Expect(d).To.Equal(0.3333333333333333);  // precision = 16
         }
     }
 }

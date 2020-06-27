@@ -15,10 +15,9 @@
 using System;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
-
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -29,17 +28,17 @@ namespace Clojure.Tests.LibTests
 
         private void ExpectInt32(object x)
         {
-            Expect(x, TypeOf(typeof(Int32)));
+            Expect(x).To.Be.An.Instance.Of<Int32>();
         }
 
         private void ExpectSameObject(object x, object y)
         {
-            Expect(x, SameAs(y));
+            Expect(Object.ReferenceEquals(x, y));
         }
 
         private void ExpectEqualObject(object x, object y)
         {
-            Expect(x, EqualTo(y));
+            Expect(x).To.Equal(y);
         }
 
         #endregion
@@ -126,7 +125,7 @@ namespace Clojure.Tests.LibTests
         public void DivideReducesToIntOnDenomOne()
         {
             object o = Numbers.BIDivide(BigInteger.Create(75), BigInteger.Create(25));
-            Expect(o, EqualTo(BigInt.fromLong(3)));
+            Expect(o).To.Equal(BigInt.fromLong(3));
         }
 
         [Test]
@@ -134,8 +133,8 @@ namespace Clojure.Tests.LibTests
         {
             object o = Numbers.BIDivide(BigInteger.Create(42), BigInteger.Create(30));
             
-            Expect(o, TypeOf(typeof(Ratio)));
-            
+            Expect(o).To.Be.An.Instance.Of<Ratio>();
+
             Ratio r = o as Ratio;
             Expect(r.numerator==BigInteger.Create(7));
             Expect(r.denominator==BigInteger.Create(5));
@@ -150,9 +149,9 @@ namespace Clojure.Tests.LibTests
         {
             BigDecimal bd = BigDecimal.Parse("12345");
             object r = Numbers.rationalize(bd);
-            Expect(r,InstanceOf(typeof(BigInt)));
+            Expect(r).To.Be.An.Instance.Of<BigInt>();
             BigInt bi = (BigInt)r;
-            Expect(bi,EqualTo(BigInt.fromBigInteger(BigInteger.Parse("12345"))));
+            Expect(bi).To.Equal(BigInt.fromBigInteger(BigInteger.Parse("12345")));
         }
 
         [Test]
@@ -160,20 +159,20 @@ namespace Clojure.Tests.LibTests
         {
             BigDecimal bd = BigDecimal.Parse("123.45");
             object r = Numbers.rationalize(bd);
-            Expect(r, InstanceOf(typeof(Ratio)));
+            Expect(r).To.Be.An.Instance.Of<Ratio>();
             Ratio rr = (Ratio)r;
             Ratio ratio = new Ratio(BigInteger.Create(12345/5), BigInteger.Create(100/5));
-            Expect(rr, EqualTo(ratio));
+            Expect(rr).To.Equal(ratio);
         }
 
         [Test]
         public void RaionalizeWorksOnDoubles()
         {
             object r = Numbers.rationalize(0.0625);
-            Expect(r, InstanceOf(typeof(Ratio)));
+            Expect(r).To.Be.An.Instance.Of<Ratio>();
             Ratio rr = (Ratio)r;
             Ratio ratio = new Ratio(BigInteger.Create(1), BigInteger.Create(16));
-            Expect(rr, EqualTo(ratio));
+            Expect(rr).To.Equal(ratio);
 
         }
 

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 
 using NUnit.Framework;
 
 using clojure.lang;
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -23,8 +24,8 @@ namespace Clojure.Tests.LibTests
                 };
 
             Future f = new Future(fn);
-            Expect(f.deref(), EqualTo(42));
-            Expect(workerID, Not.EqualTo(Thread.CurrentThread.ManagedThreadId));
+            Expect(f.deref()).To.Equal(42);
+            Expect(workerID).To.Not.Equal(Thread.CurrentThread.ManagedThreadId);
         }
 
         [Test]
@@ -35,9 +36,9 @@ namespace Clojure.Tests.LibTests
             fn._fn0 = () => Interlocked.Increment(ref i);
 
             Future f = new Future(fn);
-            Expect(f.deref(), EqualTo(1));
-            Expect(f.deref(), EqualTo(1));
-            Expect(i, EqualTo(1));
+            Expect(f.deref()).To.Equal(1);
+            Expect(f.deref()).To.Equal(1);
+            Expect(i).To.Equal(1);
         }
 
         [Test]
@@ -54,9 +55,9 @@ namespace Clojure.Tests.LibTests
             }
             catch (Exception ex)
             {
-                Expect(ex.Message, EqualTo("Future has an error"));
-                Expect(ex.InnerException, Is.Not.Null);
-                Expect(ex.InnerException.Message, EqualTo("future exception"));
+                Expect(ex.Message).To.Equal("Future has an error");
+                Expect(ex.InnerException).Not.To.Be.Null();
+                Expect(ex.InnerException.Message).To.Equal("future exception");
             }
 
             // Same result for subsequent derefs.
@@ -67,9 +68,9 @@ namespace Clojure.Tests.LibTests
             }
             catch (Exception ex)
             {
-                Expect(ex.Message, EqualTo("Future has an error"));
-                Expect(ex.InnerException, Is.Not.Null);
-                Expect(ex.InnerException.Message, EqualTo("future exception"));
+                Expect(ex.Message).To.Equal("Future has an error");
+                Expect(ex.InnerException).Not.To.Be.Null();
+                Expect(ex.InnerException.Message).To.Equal("future exception");
             }
         }
 
@@ -83,9 +84,9 @@ namespace Clojure.Tests.LibTests
             fn._fn0 = () => { while (true); };
 
             Future f = new Future(fn);
-            Expect(f.isCancelled(), EqualTo(false));
-            Expect(f.cancel(true), EqualTo(true));
-            Expect(f.isCancelled(), EqualTo(true));
+            Expect(f.isCancelled()).To.Equal(false));
+            Expect(f.cancel(true)).To.Equal(true));
+            Expect(f.isCancelled()).To.Equal(true));
         }
 
         [Test]
@@ -95,8 +96,8 @@ namespace Clojure.Tests.LibTests
             fn._fn0 = () => { while (true); };
 
             Future f = new Future(fn);
-            Expect(f.cancel(true), EqualTo(true));
-            Expect(f.cancel(true), EqualTo(false));
+            Expect(f.cancel(true)).To.Equal(true));
+            Expect(f.cancel(true)).To.Equal(false));
         }
 #endif
         [Test]
@@ -106,9 +107,9 @@ namespace Clojure.Tests.LibTests
             fn._fn0 = () => { return 42; };
 
             Future f = new Future(fn);
-            Expect(f.deref(), EqualTo(42));
-            Expect(f.cancel(true), EqualTo(false));
-            Expect(f.isCancelled(), EqualTo(false));
+            Expect(f.deref()).To.Equal(42);
+            Expect(f.cancel(true)).To.Equal(false);
+            Expect(f.isCancelled()).To.Equal(false);
         }
 
 #if NET45

@@ -14,8 +14,9 @@
 
 using System;
 using System.Collections.Generic;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -26,23 +27,23 @@ namespace Clojure.Tests.LibTests
             int i=0;
 
             for (; s != null; s = s.next(), i++)
-                Expect(s.first(), EqualTo(values[i]));
+                Expect(s.first()).To.Equal(values[i]);
 
-            Expect(i, EqualTo(values.Count));
+            Expect(i).To.Equal(values.Count);
         }
 
         public void VerifyISeqCons(ISeq s, object newVal, IList<object> values)
         {
             ISeq newSeq = s.cons(newVal);
 
-            Expect(newSeq.first(), EqualTo(newVal));
+            Expect(newSeq.first()).To.Equal(newVal);
             VerifyISeqContents(newSeq.next(), values);
         }
 
         public void VerifyISeqRestTypes(ISeq s, Type type)
         {
             for ( ; s.next() != null; s = s.next())
-                Expect(s.next(), InstanceOf(type));
+                Expect(s.next().GetType()).To.Equal(type);
         }
 
         public void VerifyISeqRestMaintainsMeta(ISeq s)
@@ -50,7 +51,7 @@ namespace Clojure.Tests.LibTests
             IPersistentMap meta = ((IMeta)s).meta();
 
             for (; s.next() != null; s = s.next())
-                Expect(((IMeta)s.next()).meta(), EqualTo(meta));
+                Expect(((IMeta)s.next()).meta()).To.Equal(meta);
         }
     }
 }

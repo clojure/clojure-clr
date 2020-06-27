@@ -17,10 +17,9 @@ using System.Collections.Generic;
 using System.Collections;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
-
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -35,7 +34,7 @@ namespace Clojure.Tests.LibTests
             Dictionary<int, string> d = new Dictionary<int, string>();
             IPersistentMap m = PersistentArrayMap.create(d);
 
-            Expect(m.count(), EqualTo(0));
+            Expect(m.count()).To.Equal(0);
         }
 
         [Test]
@@ -47,10 +46,10 @@ namespace Clojure.Tests.LibTests
 
             IPersistentMap m = PersistentArrayMap.create(d);
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
-            Expect(m.containsKey(3), False);
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
+            Expect(m.containsKey(3)).To.Be.False();
         }
 
         // other c-tors are not public.
@@ -69,7 +68,7 @@ namespace Clojure.Tests.LibTests
 
             IPersistentMap m = PersistentArrayMap.create(d);
 
-            Expect(m.containsKey(3), False);
+            Expect(m.containsKey(3)).To.Be.False();
         }
 
 
@@ -95,7 +94,7 @@ namespace Clojure.Tests.LibTests
 
             IPersistentMap m = PersistentArrayMap.create(d);
 
-            Expect(m.containsKey("a"), False);
+            Expect(m.containsKey("a")).To.Be.False();
         }
 
         [Test]
@@ -107,7 +106,7 @@ namespace Clojure.Tests.LibTests
 
             IPersistentMap m = PersistentArrayMap.create(d);
 
-            Expect(m.entryAt(3), Null);
+            Expect(m.entryAt(3)).To.Be.Null();
         }
 
         [Test]
@@ -120,8 +119,8 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m = PersistentArrayMap.create(d);
             IMapEntry me = m.entryAt(1);
 
-            Expect(me.key(), EqualTo(1));
-            Expect(me.val(), EqualTo("a"));
+            Expect(me.key()).To.Equal(1);
+            Expect(me.val()).To.Equal("a");
         }
 
         [Test]
@@ -133,7 +132,7 @@ namespace Clojure.Tests.LibTests
 
             IPersistentMap m = PersistentArrayMap.create(d);
 
-            Expect(m.valAt(3), Null);
+            Expect(m.valAt(3)).To.Be.Null();
         }
 
         [Test]
@@ -145,7 +144,7 @@ namespace Clojure.Tests.LibTests
 
             IPersistentMap m = PersistentArrayMap.create(d);
 
-            Expect(m.valAt(1), EqualTo("a"));
+            Expect(m.valAt(1)).To.Equal("a");
         }
 
 
@@ -158,7 +157,7 @@ namespace Clojure.Tests.LibTests
 
             IPersistentMap m = PersistentArrayMap.create(d);
 
-            Expect(m.valAt(3,99), EqualTo(99));
+            Expect(m.valAt(3,99)).To.Equal(99);
         }
 
         [Test]
@@ -170,7 +169,7 @@ namespace Clojure.Tests.LibTests
 
             IPersistentMap m = PersistentArrayMap.create(d);
 
-            Expect(m.valAt(1,99), EqualTo("a"));
+            Expect(m.valAt(1,99)).To.Equal("a");
         }
         
         #endregion
@@ -183,7 +182,7 @@ namespace Clojure.Tests.LibTests
             Dictionary<int, string> d = new Dictionary<int, string>();
             IPersistentMap m = PersistentArrayMap.create(d);
 
-            Expect(m.count(), EqualTo(0));
+            Expect(m.count()).To.Equal(0);
         }
 
         [Test]
@@ -194,7 +193,7 @@ namespace Clojure.Tests.LibTests
             d[2] = "b";
             IPersistentMap m = PersistentArrayMap.create(d);
 
-            Expect(m.count(), EqualTo(2));
+            Expect(m.count()).To.Equal(2);
         }
 
         [Test]
@@ -206,8 +205,8 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m = PersistentArrayMap.create(d);
             IPersistentCollection c = m.empty();
 
-            Expect(c.count(), EqualTo(0));
-            Expect(c.seq(), Null);
+            Expect(c.count()).To.Equal(0);
+            Expect(c.seq()).To.Be.Null();
         }
 
 
@@ -218,7 +217,7 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m = PersistentArrayMap.create(d);
             ISeq s = m.seq();
 
-            Expect(s, Null);
+            Expect(s).To.Be.Null();
         }
 
         [Test]
@@ -233,12 +232,12 @@ namespace Clojure.Tests.LibTests
             IMapEntry me2 = (IMapEntry)s.next().first();
             ISeq end = s.next().next();
 
-            Expect(s.count(), EqualTo(2));
-            Expect(me1.key(), EqualTo(1) | EqualTo(2));
-            Expect(me1.val(), EqualTo(((int)me1.key()==1 ? "a" : "b")));
-            Expect(me2.key(), EqualTo(1) | EqualTo(2));
-            Expect(me2.val(), EqualTo(((int)me2.key() == 1 ? "a" : "b")));
-            Expect(end, Null);            
+            Expect(s.count()).To.Equal(2);
+            //Expect(me1.key()).To.Equal(1) | EqualTo(2);
+            Expect(me1.val()).To.Equal(((int)me1.key()==1 ? "a" : "b"));
+            //Expect(me2.key()).To.Equal(1) | EqualTo(2);
+            Expect(me2.val()).To.Equal(((int)me2.key() == 1 ? "a" : "b"));
+            Expect(end).To.Be.Null();            
         }
 
         #endregion
@@ -255,10 +254,10 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m1 = PersistentArrayMap.create(d);
             IPersistentMap m2 = m1.assoc(2, "c");
 
-            Expect(m1.count(), EqualTo(2));
-            Expect(m1.valAt(2), EqualTo("b"));
-            Expect(m2.count(), EqualTo(2));
-            Expect(m2.valAt(2), EqualTo("c"));
+            Expect(m1.count()).To.Equal(2);
+            Expect(m1.valAt(2)).To.Equal("b");
+            Expect(m2.count()).To.Equal(2);
+            Expect(m2.valAt(2)).To.Equal("c");
         }
 
 
@@ -272,10 +271,10 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m1 = PersistentArrayMap.create(d);
             IPersistentMap m2 = m1.assoc(3, "c");
 
-            Expect(m1.count(), EqualTo(2));
-            Expect(m1.containsKey(3), False);
-            Expect(m2.count(), EqualTo(3));
-            Expect(m2.valAt(3), EqualTo("c"));
+            Expect(m1.count()).To.Equal(2);
+            Expect(m1.containsKey(3)).To.Be.False();
+            Expect(m2.count()).To.Equal(3);
+            Expect(m2.valAt(3)).To.Equal("c");
         }
 
 
@@ -303,10 +302,10 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m1 = PersistentArrayMap.create(d);
             IPersistentMap m2 = m1.assocEx(3, "c");
 
-            Expect(m1.count(), EqualTo(2));
-            Expect(m1.containsKey(3), False);
-            Expect(m2.count(), EqualTo(3));
-            Expect(m2.valAt(3), EqualTo("c"));
+            Expect(m1.count()).To.Equal(2);
+            Expect(m1.containsKey(3)).To.Be.False();
+            Expect(m2.count()).To.Equal(3);
+            Expect(m2.valAt(3)).To.Equal("c");
         }
 
         [Test]
@@ -320,10 +319,10 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m1 = PersistentArrayMap.create(d);
             IPersistentMap m2 = m1.without(5);
 
-            Expect(m1.count(), EqualTo(3));
-            Expect(m1.valAt(5), EqualTo("b"));
-            Expect(m2.count(), EqualTo(2));
-            Expect(m2.containsKey(5), False);
+            Expect(m1.count()).To.Equal(3);
+            Expect(m1.valAt(5)).To.Equal("b");
+            Expect(m2.count()).To.Equal(2);
+            Expect(m2.containsKey(5)).To.Be.False();
         }
 
         [Test]
@@ -337,7 +336,7 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m1 = PersistentArrayMap.create(d);
             IPersistentMap m2 = m1.without(4);
 
-            Expect(m2, SameAs(m1));
+            Expect(Object.ReferenceEquals(m2, m1));
         }
 
         #endregion
@@ -367,7 +366,7 @@ namespace Clojure.Tests.LibTests
 
             d[2] = "c";
 
-            Expect(m.Equals(d),False);
+            Expect(m.Equals(d)).To.Be.False();
         }
 
 
@@ -382,7 +381,7 @@ namespace Clojure.Tests.LibTests
 
             d[3] = "c";
 
-            Expect(m.Equals(d), False);
+            Expect(m.Equals(d)).To.Be.False();
         }
 
         [Test]
@@ -397,7 +396,7 @@ namespace Clojure.Tests.LibTests
             d[3] = "c";
             IPersistentMap m2 = PersistentArrayMap.create(d);
 
-            Expect(m1.GetHashCode(), Not.EqualTo(m2.GetHashCode()));
+            Expect(m1.GetHashCode()).To.Not.Equal(m2.GetHashCode());
         }
 
         [Test]
@@ -413,20 +412,20 @@ namespace Clojure.Tests.LibTests
             Associative a1 = a.assoc(3, "c");
             Associative a2 = a.assoc(2, "c");
 
-            Expect(a.count(), EqualTo(2));
-            Expect(a.valAt(1), EqualTo("a"));
-            Expect(a.valAt(2), EqualTo("b"));
-            Expect(a.containsKey(3), False);
+            Expect(a.count()).To.Equal(2);
+            Expect(a.valAt(1)).To.Equal("a");
+            Expect(a.valAt(2)).To.Equal("b");
+            Expect(a.containsKey(3)).To.Be.False();
 
-            Expect(a1.count(), EqualTo(3));
-            Expect(a1.valAt(1), EqualTo("a"));
-            Expect(a1.valAt(2), EqualTo("b"));
-            Expect(a1.valAt(3), EqualTo("c"));
+            Expect(a1.count()).To.Equal(3);
+            Expect(a1.valAt(1)).To.Equal("a");
+            Expect(a1.valAt(2)).To.Equal("b");
+            Expect(a1.valAt(3)).To.Equal("c");
 
-            Expect(a2.count(), EqualTo(2));
-            Expect(a2.valAt(1), EqualTo("a"));
-            Expect(a2.valAt(2), EqualTo("c"));
-            Expect(a2.containsKey(3), False);
+            Expect(a2.count()).To.Equal(2);
+            Expect(a2.valAt(1)).To.Equal("a");
+            Expect(a2.valAt(2)).To.Equal("c");
+            Expect(a2.containsKey(3)).To.Be.False();
         }
 
         [Test]
@@ -439,14 +438,14 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m = PersistentArrayMap.create(d);
             IPersistentMap c = m.cons(new MapEntry(3, "c"));
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
 
-            Expect(c.count(), EqualTo(3));
-            Expect(c.valAt(1), EqualTo("a"));
-            Expect(c.valAt(2), EqualTo("b"));
-            Expect(c.valAt(3), EqualTo("c"));
+            Expect(c.count()).To.Equal(3);
+            Expect(c.valAt(1)).To.Equal("a");
+            Expect(c.valAt(2)).To.Equal("b");
+            Expect(c.valAt(3)).To.Equal("c");
         }
 
         [Test]
@@ -459,13 +458,13 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m = PersistentArrayMap.create(d);
             IPersistentMap c = m.cons(new MapEntry(2, "c"));
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
 
-            Expect(c.count(), EqualTo(2));
-            Expect(c.valAt(1), EqualTo("a"));
-            Expect(c.valAt(2), EqualTo("c"));
+            Expect(c.count()).To.Equal(2);
+            Expect(c.valAt(1)).To.Equal("a");
+            Expect(c.valAt(2)).To.Equal("c");
         }
 
 
@@ -479,14 +478,14 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m = PersistentArrayMap.create(d);
             IPersistentMap c = m.cons(new DictionaryEntry(3, "c"));
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
 
-            Expect(c.count(), EqualTo(3));
-            Expect(c.valAt(1), EqualTo("a"));
-            Expect(c.valAt(2), EqualTo("b"));
-            Expect(c.valAt(3), EqualTo("c"));
+            Expect(c.count()).To.Equal(3);
+            Expect(c.valAt(1)).To.Equal("a");
+            Expect(c.valAt(2)).To.Equal("b");
+            Expect(c.valAt(3)).To.Equal("c");
         }
 
         [Test]
@@ -499,13 +498,13 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m = PersistentArrayMap.create(d);
             IPersistentMap c = m.cons(new DictionaryEntry(2, "c"));
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
 
-            Expect(c.count(), EqualTo(2));
-            Expect(c.valAt(1), EqualTo("a"));
-            Expect(c.valAt(2), EqualTo("c"));
+            Expect(c.count()).To.Equal(2);
+            Expect(c.valAt(1)).To.Equal("a");
+            Expect(c.valAt(2)).To.Equal("c");
         }
 
         [Test]
@@ -518,14 +517,14 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m = PersistentArrayMap.create(d);
             IPersistentMap c = m.cons(new KeyValuePair<int,string>(3, "c"));
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
 
-            Expect(c.count(), EqualTo(3));
-            Expect(c.valAt(1), EqualTo("a"));
-            Expect(c.valAt(2), EqualTo("b"));
-            Expect(c.valAt(3), EqualTo("c"));
+            Expect(c.count()).To.Equal(3);
+            Expect(c.valAt(1)).To.Equal("a");
+            Expect(c.valAt(2)).To.Equal("b");
+            Expect(c.valAt(3)).To.Equal("c");
         }
 
         [Test]
@@ -538,13 +537,13 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m = PersistentArrayMap.create(d);
             IPersistentMap c = m.cons(new KeyValuePair<int,string>(2, "c"));
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
 
-            Expect(c.count(), EqualTo(2));
-            Expect(c.valAt(1), EqualTo("a"));
-            Expect(c.valAt(2), EqualTo("c"));
+            Expect(c.count()).To.Equal(2);
+            Expect(c.valAt(1)).To.Equal("a");
+            Expect(c.valAt(2)).To.Equal("c");
         }
 
         [Test]
@@ -559,14 +558,14 @@ namespace Clojure.Tests.LibTests
             IPersistentVector v = PersistentVector.create(3, "c");
             IPersistentMap c = m.cons(v);
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
 
-            Expect(c.count(), EqualTo(3));
-            Expect(c.valAt(1), EqualTo("a"));
-            Expect(c.valAt(2), EqualTo("b"));
-            Expect(c.valAt(3), EqualTo("c"));
+            Expect(c.count()).To.Equal(3);
+            Expect(c.valAt(1)).To.Equal("a");
+            Expect(c.valAt(2)).To.Equal("b");
+            Expect(c.valAt(3)).To.Equal("c");
         }
 
         [Test]
@@ -581,13 +580,13 @@ namespace Clojure.Tests.LibTests
             IPersistentVector v = PersistentVector.create(2, "c");
             IPersistentMap c = m.cons(v);
 
-            Expect(m.count(), EqualTo(2));
-            Expect(m.valAt(1), EqualTo("a"));
-            Expect(m.valAt(2), EqualTo("b"));
+            Expect(m.count()).To.Equal(2);
+            Expect(m.valAt(1)).To.Equal("a");
+            Expect(m.valAt(2)).To.Equal("b");
 
-            Expect(c.count(), EqualTo(2));
-            Expect(c.valAt(1), EqualTo("a"));
-            Expect(c.valAt(2), EqualTo("c"));
+            Expect(c.count()).To.Equal(2);
+            Expect(c.valAt(1)).To.Equal("a");
+            Expect(c.valAt(2)).To.Equal("c");
         }
 
         [Test]
@@ -623,18 +622,18 @@ namespace Clojure.Tests.LibTests
             IPersistentMap m3 = m1.cons(m2);
 
 
-            Expect(m1.count(), EqualTo(2));
-            Expect(m1.valAt(1), EqualTo("a"));
-            Expect(m1.valAt(2), EqualTo("b"));
+            Expect(m1.count()).To.Equal(2);
+            Expect(m1.valAt(1)).To.Equal("a");
+            Expect(m1.valAt(2)).To.Equal("b");
 
-            Expect(m2.count(), EqualTo(2));
-            Expect(m2.valAt(2), EqualTo("c"));
-            Expect(m2.valAt(3), EqualTo("d"));
+            Expect(m2.count()).To.Equal(2);
+            Expect(m2.valAt(2)).To.Equal("c");
+            Expect(m2.valAt(3)).To.Equal("d");
 
-            Expect(m3.count(), EqualTo(3));
-            Expect(m3.valAt(1), EqualTo("a"));
-            Expect(m3.valAt(2), EqualTo("c"));
-            Expect(m3.valAt(3), EqualTo("d"));
+            Expect(m3.count()).To.Equal(3);
+            Expect(m3.valAt(1)).To.Equal("a");
+            Expect(m3.valAt(2)).To.Equal("c");
+            Expect(m3.valAt(3)).To.Equal("d");
         }
 
         [Test]
@@ -646,8 +645,8 @@ namespace Clojure.Tests.LibTests
 
             IFn f = (IFn)PersistentArrayMap.create(d);
 
-            Expect(f.invoke(1), EqualTo("a"));
-            Expect(f.invoke(7),Null);
+            Expect(f.invoke(1)).To.Equal("a");
+            Expect(f.invoke(7)).To.Be.Null();
 
         }
         [Test]
@@ -659,8 +658,8 @@ namespace Clojure.Tests.LibTests
 
             IFn f = (IFn)PersistentArrayMap.create(d);
 
-            Expect(f.invoke(1,99), EqualTo("a"));
-            Expect(f.invoke(7,99), EqualTo(99));
+            Expect(f.invoke(1,99)).To.Equal("a");
+            Expect(f.invoke(7,99)).To.Equal(99);
         }
 
         [Test]
@@ -721,7 +720,7 @@ namespace Clojure.Tests.LibTests
 
             IDictionary id = (IDictionary)PersistentArrayMap.create(d);
             
-            Expect(id.Contains(3),False);
+            Expect(id.Contains(3)).To.Be.False();
         }
 
         [Test]
@@ -756,8 +755,8 @@ namespace Clojure.Tests.LibTests
             d[2] = "b";
 
             IDictionary id = (IDictionary)PersistentArrayMap.create(d);
-            Expect(id[2], EqualTo("b"));
-            Expect(id[3], Null);
+            Expect(id[2]).To.Equal("b");
+            Expect(id[3]).To.Be.Null();
         }
 
         [Test]
@@ -770,12 +769,12 @@ namespace Clojure.Tests.LibTests
             IDictionary id = (IDictionary)PersistentArrayMap.create(d);
             ICollection keys = id.Keys;
 
-            Expect(keys.Count, EqualTo(2));
+            Expect(keys.Count).To.Equal(2);
             int[] akeys = new int[2];
             keys.CopyTo(akeys, 0);
             Array.Sort(akeys);
-            Expect(akeys[0], EqualTo(1));
-            Expect(akeys[1], EqualTo(2));           
+            Expect(akeys[0]).To.Equal(1);
+            Expect(akeys[1]).To.Equal(2);           
         }
 
         [Test]
@@ -788,12 +787,12 @@ namespace Clojure.Tests.LibTests
             IDictionary id = (IDictionary)PersistentArrayMap.create(d);
             ICollection vals = id.Values;
 
-            Expect(vals.Count, EqualTo(2));
+            Expect(vals.Count).To.Equal(2);
             string[] avals = new string[2];
             vals.CopyTo(avals, 0);
             Array.Sort(avals);
-            Expect(avals[0], EqualTo("a"));
-            Expect(avals[1], EqualTo("b"));
+            Expect(avals[0]).To.Equal("a");
+            Expect(avals[1]).To.Equal("b");
         }
 
 
@@ -813,12 +812,12 @@ namespace Clojure.Tests.LibTests
             IMapEntry de1 = (IMapEntry)e.Current;
             Expect(e.MoveNext());
             IMapEntry de2 = (IMapEntry)e.Current;
-            Expect(e.MoveNext(), False);
+            Expect(e.MoveNext()).To.Be.False();
 
-            Expect(de1.key(), EqualTo(1) | EqualTo(2));
-            Expect(de2.key(), EqualTo(1) | EqualTo(2));
-            Expect(de1.val(), EqualTo(((int)de1.key()) == 1 ? "a" : "b"));
-            Expect(de2.val(), EqualTo(((int)de2.key()) == 1 ? "a" : "b"));
+            //Expect(de1.key()).To.Equal(1) | EqualTo(2);
+            //Expect(de2.key()).To.Equal(1) | EqualTo(2);
+            Expect(de1.val()).To.Equal(((int)de1.key()) == 1 ? "a" : "b");
+            Expect(de2.val()).To.Equal(((int)de2.key()) == 1 ? "a" : "b");
         }
 
         [Test]
@@ -837,10 +836,10 @@ namespace Clojure.Tests.LibTests
             string val0 = (string)a[0].val();
             string val1 = (string)a[1].val();
 
-            Expect(key0, EqualTo(1) | EqualTo(2));
-            Expect(key1, EqualTo(key0 == 1 ? 2 : 1));
-            Expect(val0, EqualTo(key0 == 1 ? "a" : "b"));
-            Expect(val1, EqualTo(key1 == 1 ? "a" : "b"));
+            //Expect(key0).To.Equal(1) | EqualTo(2);
+            Expect(key1).To.Equal(key0 == 1 ? 2 : 1);
+            Expect(val0).To.Equal(key0 == 1 ? "a" : "b");
+            Expect(val1).To.Equal(key1 == 1 ? "a" : "b");
         }
 
 
@@ -853,7 +852,7 @@ namespace Clojure.Tests.LibTests
 
             ICollection c = (ICollection)PersistentArrayMap.create(d);
 
-            Expect(c.Count, EqualTo(2));
+            Expect(c.Count).To.Equal(2);
         }
 
         [Test]
@@ -879,7 +878,7 @@ namespace Clojure.Tests.LibTests
             ICollection c = (ICollection)PersistentArrayMap.create(d);
 
             object s = c.SyncRoot;
-            Expect(s, SameAs(c));
+            Expect(Object.ReferenceEquals(s, c));
         }
 
 

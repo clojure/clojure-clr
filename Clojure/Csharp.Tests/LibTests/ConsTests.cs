@@ -16,9 +16,9 @@ using System;
 using System.Collections;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -31,7 +31,7 @@ namespace Clojure.Tests.LibTests
         public void NoMetaCtorHasNoMeta()
         {
             Cons c = new Cons("abc",null);
-            Expect(c.meta(),Null);
+            Expect(c.meta()).To.Be.Null();
         }
 
         [Test]
@@ -39,7 +39,7 @@ namespace Clojure.Tests.LibTests
         {
             IPersistentMap meta = new DummyMeta();
             Cons c = new Cons(meta, "abc", null);
-            Expect(c.meta(), SameAs(meta));
+            Expect(Object.ReferenceEquals(c.meta(), meta));
         }
 
         #endregion
@@ -51,7 +51,7 @@ namespace Clojure.Tests.LibTests
         {
             Cons c = new Cons("abc", null);
 
-            Expect(c.count(), EqualTo(1));
+            Expect(c.count()).To.Equal(1);
         }
 
         [Test]
@@ -60,7 +60,7 @@ namespace Clojure.Tests.LibTests
             Cons c1 = new Cons("abc", null);
             Cons c2 = new Cons("def", c1);
 
-            Expect(c2.count(), EqualTo(2));
+            Expect(c2.count()).To.Equal(2);
         }
 
         [Test]
@@ -68,7 +68,7 @@ namespace Clojure.Tests.LibTests
         {
             Cons c1 = new Cons("abc", null);
 
-            Expect(c1.seq(), SameAs(c1));
+            Expect(Object.ReferenceEquals(c1.seq(), c1));
         }
 
         [Test]
@@ -77,7 +77,7 @@ namespace Clojure.Tests.LibTests
             // Test of ASeq
             Cons c = new Cons("abc", null);
             IPersistentCollection empty = c.empty();
-            Expect(empty, SameAs(PersistentList.EMPTY));
+            Expect(Object.ReferenceEquals(empty, PersistentList.EMPTY));
         }
 
         [Test]
@@ -89,8 +89,8 @@ namespace Clojure.Tests.LibTests
             IPersistentCollection ipc2 = ipc1.cons("def");
             ISeq s = ipc2.seq();
 
-            Expect(s.first(), EqualTo("def"));
-            Expect(s.next(), SameAs(c1));
+            Expect(s.first()).To.Equal("def");
+            Expect(Object.ReferenceEquals(s.next(), c1));
         }
 
         #endregion
@@ -118,7 +118,7 @@ namespace Clojure.Tests.LibTests
             Cons b = CreateComplicatedCons();
 
             Expect(a.Equals(b));
-            Expect(a, EqualTo(b));
+            Expect(a).To.Equal(b);
         }
 
         [Test]
@@ -127,7 +127,7 @@ namespace Clojure.Tests.LibTests
             Cons a = CreateComplicatedCons();
             Cons b = CreateComplicatedCons();
 
-            Expect(a.GetHashCode(), EqualTo(b.GetHashCode()));
+            Expect(a.GetHashCode()).To.Equal(b.GetHashCode());
         }
 
 
@@ -186,10 +186,10 @@ namespace Clojure.Tests.LibTests
             int[] arr = new int[4];
             ic.CopyTo(arr, 0);
 
-            Expect(arr[0], EqualTo(1));
-            Expect(arr[1], EqualTo(2));
-            Expect(arr[2], EqualTo(3));
-            Expect(arr[3], EqualTo(0));
+            Expect(arr[0]).To.Equal(1);
+            Expect(arr[1]).To.Equal(2);
+            Expect(arr[2]).To.Equal(3);
+            Expect(arr[3]).To.Equal(0);
         }
 
         [Test]
@@ -199,10 +199,10 @@ namespace Clojure.Tests.LibTests
             int[] arr = new int[4];
             ic.CopyTo(arr, 1);
 
-            Expect(arr[0], EqualTo(0));
-            Expect(arr[1], EqualTo(1));
-            Expect(arr[2], EqualTo(2));
-            Expect(arr[3], EqualTo(3));
+            Expect(arr[0]).To.Equal(0);
+            Expect(arr[1]).To.Equal(1);
+            Expect(arr[2]).To.Equal(2);
+            Expect(arr[3]).To.Equal(3);
         }
 
         [Test]
@@ -210,7 +210,7 @@ namespace Clojure.Tests.LibTests
         {
             ICollection ic = new Cons(1, new Cons(2, new Cons(3, null)));
 
-            Expect(ic.Count, EqualTo(3));
+            Expect(ic.Count).To.Equal(3);
         }
 
         [Test]
@@ -225,7 +225,7 @@ namespace Clojure.Tests.LibTests
         {
             ICollection ic = new Cons(1, new Cons(2, new Cons(3, null)));
             Object o = ic.SyncRoot;
-            Expect(o, SameAs(ic));
+            Expect(Object.ReferenceEquals(o, ic));
         }
 
         [Test]
@@ -235,12 +235,12 @@ namespace Clojure.Tests.LibTests
             IEnumerator e = ic.GetEnumerator();
 
             Expect(e.MoveNext());
-            Expect(e.Current, EqualTo(1));
+            Expect(e.Current).To.Equal(1);
             Expect(e.MoveNext());
-            Expect(e.Current, EqualTo(2));
+            Expect(e.Current).To.Equal(2);
             Expect(e.MoveNext());
-            Expect(e.Current, EqualTo(3));
-            Expect(e.MoveNext(),False); 
+            Expect(e.Current).To.Equal(3);
+            Expect(e.MoveNext()).To.Be.False(); 
         }
 
 
@@ -253,7 +253,7 @@ namespace Clojure.Tests.LibTests
         {
             SeqEnumerator s = new SeqEnumerator(null);
 
-            Expect(s.MoveNext(), False);
+            Expect(s.MoveNext()).To.Be.False();
         }
 
         [Test]
@@ -274,11 +274,11 @@ namespace Clojure.Tests.LibTests
             SeqEnumerator s = new SeqEnumerator(c);
 
             Expect(s.MoveNext());
-            Expect(s.Current, EqualTo(1));
+            Expect(s.Current).To.Equal(1);
             Expect(s.MoveNext());
-            Expect(s.Current, EqualTo(2));
-            Expect(s.Current, EqualTo(2));
-            Expect(s.MoveNext(), False);
+            Expect(s.Current).To.Equal(2);
+            Expect(s.Current).To.Equal(2);
+            Expect(s.MoveNext()).To.Be.False();
         }
 
         [Test]
@@ -306,11 +306,11 @@ namespace Clojure.Tests.LibTests
             s.Reset();
 
             Expect(s.MoveNext());
-            Expect(s.Current, EqualTo(1));
+            Expect(s.Current).To.Equal(1);
             Expect(s.MoveNext());
-            Expect(s.Current, EqualTo(2));
-            Expect(s.Current, EqualTo(2));
-            Expect(s.MoveNext(), False);
+            Expect(s.Current).To.Equal(2);
+            Expect(s.Current).To.Equal(2);
+            Expect(s.MoveNext()).To.Be.False();
         }
 
         [Test]
@@ -323,11 +323,11 @@ namespace Clojure.Tests.LibTests
             s.Reset();
 
             Expect(s.MoveNext());
-            Expect(s.Current, EqualTo(1));
+            Expect(s.Current).To.Equal(1);
             Expect(s.MoveNext());
-            Expect(s.Current, EqualTo(2));
-            Expect(s.Current, EqualTo(2));
-            Expect(s.MoveNext(), False);
+            Expect(s.Current).To.Equal(2);
+            Expect(s.Current).To.Equal(2);
+            Expect(s.MoveNext()).To.Be.False();
         }
 
         [Test]
@@ -341,11 +341,11 @@ namespace Clojure.Tests.LibTests
             s.Reset();
 
             Expect(s.MoveNext());
-            Expect(s.Current, EqualTo(1));
+            Expect(s.Current).To.Equal(1);
             Expect(s.MoveNext());
-            Expect(s.Current, EqualTo(2));
-            Expect(s.Current, EqualTo(2));
-            Expect(s.MoveNext(), False);
+            Expect(s.Current).To.Equal(2);
+            Expect(s.Current).To.Equal(2);
+            Expect(s.MoveNext()).To.Be.False();
         }
 
         [Test]
@@ -360,11 +360,11 @@ namespace Clojure.Tests.LibTests
             s.Reset();
 
             Expect(s.MoveNext());
-            Expect(s.Current, EqualTo(1));
+            Expect(s.Current).To.Equal(1);
             Expect(s.MoveNext());
-            Expect(s.Current, EqualTo(2));
-            Expect(s.Current, EqualTo(2));
-            Expect(s.MoveNext(), False);
+            Expect(s.Current).To.Equal(2);
+            Expect(s.Current).To.Equal(2);
+            Expect(s.MoveNext()).To.Be.False();
         }
 
         #endregion

@@ -15,9 +15,9 @@
 using System;
 
 using NUnit.Framework;
-using static NUnit.StaticExpect.Expectations;
+using static NExpect.Expectations;
 using clojure.lang;
-
+using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
@@ -31,9 +31,9 @@ namespace Clojure.Tests.LibTests
         {
             PersistentList p = new PersistentList("abc");
 
-            Expect(p.first(), EqualTo("abc"));
-            Expect(p.next(), Null);
-            Expect(p.count(), EqualTo(1));
+            Expect(p.first()).To.Equal("abc");
+            Expect(p.next()).To.Be.Null();
+            Expect(p.count()).To.Equal(1);
         }
 
         [Test]
@@ -42,14 +42,14 @@ namespace Clojure.Tests.LibTests
             object[] items = new object[] { 1, "abc", 2, "def" };
             IPersistentList p = PersistentList.create(items);
 
-            Expect(p.count(), EqualTo(4));
+            Expect(p.count()).To.Equal(4);
 
             ISeq s = p.seq();
-            Expect(s.first(), EqualTo(1));
-            Expect(s.next().first(), EqualTo("abc"));
-            Expect(s.next().next().first(), EqualTo(2));
-            Expect(s.next().next().next().first(), EqualTo("def"));
-            Expect(s.next().next().next().next(), Null);
+            Expect(s.first()).To.Equal(1);
+            Expect(s.next().first()).To.Equal("abc");
+            Expect(s.next().next().first()).To.Equal(2);
+            Expect(s.next().next().next().first()).To.Equal("def");
+            Expect(s.next().next().next().next()).To.Be.Null();
         }
 
 
@@ -62,8 +62,8 @@ namespace Clojure.Tests.LibTests
         {
             PersistentList p = (PersistentList)PersistentList.create(new object[] { "abc", 1, "def" });
 
-            Expect(p.peek(), EqualTo("abc"));
-            Expect(p.count(), EqualTo(3));
+            Expect(p.peek()).To.Equal("abc");
+            Expect(p.count()).To.Equal(3);
         }
 
         [Test]
@@ -71,8 +71,8 @@ namespace Clojure.Tests.LibTests
         {
             PersistentList p = (PersistentList)PersistentList.create(new object[]{"abc", 1, "def"});
             PersistentList p2 = (PersistentList)p.pop();
-            Expect(p2.count(), EqualTo(2));
-            Expect(p2.peek(), EqualTo(1));
+            Expect(p2.count()).To.Equal(2);
+            Expect(p2.peek()).To.Equal(1);
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace Clojure.Tests.LibTests
         {
             PersistentList p = new PersistentList("abc");
             IPersistentStack s = p.pop();
-            Expect(s.count(), EqualTo(0));
+            Expect(s.count()).To.Equal(0);
         }
 
         [Test]
@@ -101,7 +101,7 @@ namespace Clojure.Tests.LibTests
             PersistentList p = new PersistentList("abc");
             IPersistentCollection c = p.empty();
 
-            Expect(c.count(), EqualTo(0));
+            Expect(c.count()).To.Equal(0);
         }
 
         [Test]
@@ -112,7 +112,7 @@ namespace Clojure.Tests.LibTests
             IPersistentCollection p = (IPersistentCollection)new PersistentList("abc").withMeta(meta);
             IObj obj = (IObj) p.empty();
 
-            Expect(obj.meta(), SameAs(meta));
+            Expect(Object.ReferenceEquals(obj.meta(), meta));
         }
 
         #endregion
@@ -127,7 +127,8 @@ namespace Clojure.Tests.LibTests
             PersistentList p = (PersistentList)PersistentList.create(new object[] { 1, 2, 3 });
             object ret = p.reduce(fn);
 
-            Expect(ret, EqualTo(6));
+            Expect(ret).To.Be.An.Instance.Of<long>();
+            Expect((long)ret).To.Equal(6);
         }
 
         [Test]
@@ -138,7 +139,8 @@ namespace Clojure.Tests.LibTests
             PersistentList p = (PersistentList)PersistentList.create(new object[] { 1, 2, 3 });
             object ret = p.reduce(fn, 20);
 
-            Expect(ret, EqualTo(26));
+            Expect(ret).To.Be.An.Instance.Of<long>(); 
+            Expect((long)ret).To.Equal(26);
         }
 
 
@@ -197,7 +199,7 @@ namespace Clojure.Tests.LibTests
         public void ConsPreservesMeta()
         {
             PersistentList p2 = (PersistentList)_plWithMeta.cons("def");
-            Expect(p2.meta(), SameAs(_plWithMeta.meta()));
+            Expect(Object.ReferenceEquals(p2.meta(), _plWithMeta.meta()));
         }
 
         #endregion
