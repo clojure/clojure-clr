@@ -12,4 +12,5 @@
                         (ns/find-namespaces-in-dir (System.IO.DirectoryInfo. "clojure/test_clojure"))))                                   ;;; (java.io.File. "test")(doseq [ns namespaces] (require ns))
 (doseq [ns namespaces] (require ns))
 (let [summary (apply test/run-tests namespaces)]
+  (print summary)
   (Environment/Exit (if (test/successful? summary) 0 -1)))   ;;; System/exit

@@ -6,6 +6,8 @@
     <Mono Condition="'$(OS)' != 'Windows_NT'">true</Mono>
 	
 	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">netcoreapp3.1</TestTargetFramework>
+	<TestLibraryFramework Condition=" '$(TestTargetFramework)' == 'netcoreapp3.1' ">netstandard2.1</TestLibraryFramework>
+	<TestLibraryFramework Condition=" '$(TestTargetFramework)' != 'netcoreapp3.1' ">$(TestTargetFramework)</TestLibraryFramework>
 	
 	<RootDir>$(MSBuildThisFileDirectory)</RootDir>
 	<Solution>$(RootDir)Clojure.sln</Solution>
@@ -14,8 +16,8 @@
 	<TestDir>$(RootDir)Test\$(Configuration)\$(TestTargetFramework)</TestDir>
 	<ClojureMainBinDir>$(RootDir)Clojure.Main\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
 	<ClojureCompileBinDir>$(RootDir)Clojure.Compile\bin\$(Configuration)\$(TestTargetFramework)</ClojureCompileBinDir>
-	<ClojureSourceBinDir>$(RootDir)Clojure.Source\bin\$(Configuration)\$(TestTargetFramework)</ClojureSourceBinDir>
-	<ClojureTestsBinDir>$(RootDir)Clojure.Tests\bin\$(Configuration)\$(TestTargetFramework)</ClojureTestsBinDir>
+	<ClojureSourceBinDir>$(RootDir)Clojure.Source\bin\$(Configuration)\$(TestLibraryFramework)</ClojureSourceBinDir>
+	<ClojureTestsBinDir>$(RootDir)Clojure.Tests\bin\$(Configuration)\$(TestLibraryFramework)</ClojureTestsBinDir>
 	
   </PropertyGroup>
   
@@ -41,6 +43,8 @@
 	<Message Text="Solution = $(Solution)" />
 	<Message Text="BuildSysDir = $(BuildSysDir)" />
     <Message Text="TestTargetFramework = $(TestTargetFramework)" />
+	<Message Text="TestLibraryFramework = $(TestLibraryFramework)" />
+	
 	<Message Text="Configuration = $(Configuration)" />
 	<Message Text="Mono = $(Mono)" />
 
@@ -111,7 +115,7 @@
 		  DestinationFolder="$(TestDir)\%(RecursiveDir)" />	  
   </Target>  
   
-  <Target Name="CompileTest" DependsOnTargets="StageTest">
+  <Target Name="CompileTest" DependsOnTargets="StageTest" Condition="'$(TestTargetFramework)' == 'net461'">
     <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes clojure.test-clojure.compilation.load-ns clojure.test-clojure.compilation.line-number-examples" 
           WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == '.Net' "/>
@@ -123,24 +127,32 @@
   
 
   
-  <Target Name="Test" DependsOnTargets="CompileTest">
+  <Target Name="Test" DependsOnTargets="StageTest;CompileTest">
     <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test.clj" DestinationFolder="$(TestDir)" />
-    <SetEnvironmentVariable Name="clojure.test-clojure.exclude-namespaces" Value="#{clojure.test-clojure.compilation.load-ns}" />
-    <Exec Command="$(clji) clojure\run_test.clj"
+    <SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'net461'"
+							Name="clojure.test-clojure.exclude-namespaces" 
+							Value="#{clojure.test-clojure.compilation.load-ns}" />
+	    <SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'netcoreapp3.1'"
+							Name="clojure.test-clojure.exclude-namespaces" 
+							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.attributes clojure.test-clojure.compilation clojure.test-clojure.genclass}" />						
+    <Exec Command="$(clji) run_test.clj"
           WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == '.Net' "/>
-    <Exec Command="mono $(clji) clojure\run_test.clj"
+    <Exec Command="mono $(clji) run_test.clj"
           WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
 
   <Target Name="TestGen" DependsOnTargets="Build;CompileTest">
-    <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test_generative.clj" DestinationFolder="$(OutputPath)" />
-    <Exec Command="$(clji) clojure\run_test_generative.clj"
-          WorkingDirectory="$(OutputPath)"
+    <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test_generative.clj" DestinationFolder="$(TestDir)" />
+	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'netcoreapp3.1'"
+							Name="clojure.test-clojure.exclude-namespaces" 
+							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.attributes clojure.test-clojure.compilation clojure.test-clojure.genclass}" />						
+    <Exec Command="$(clji) run_test_generative.clj"
+          WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == '.Net' "/>
-    <Exec Command="mono $(clji) clojure\run_test_generative.clj"
-          WorkingDirectory="$(OutputPath)"
+    <Exec Command="mono $(clji)run_test_generative.clj"
+          WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
 
