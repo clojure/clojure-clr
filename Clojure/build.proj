@@ -19,8 +19,14 @@
 	<ClojureSourceBinDir>$(RootDir)Clojure.Source\bin\$(Configuration)\$(TestLibraryFramework)</ClojureSourceBinDir>
 	<ClojureTestsBinDir>$(RootDir)Clojure.Tests\bin\$(Configuration)\$(TestLibraryFramework)</ClojureTestsBinDir>
 	
+	<StageDir>$(RootDir)Stage\</StageDir>
+	
   </PropertyGroup>
   
+  <PropertyGroup>
+	<ClojureCLRBuildDir>$(MSBuildThisFileDirectory)\Build</ClojureCLRBuildDir>
+    <PublicKey>$(ClojureCLRBuildDir)\Key.snk</PublicKey>
+  </PropertyGroup>
 
   <Import Project="$(BuildSysDir)\Tasks.Targets" />
   <Import Project="$(RootDir)CurrentVersion.props" />
@@ -55,7 +61,11 @@
 	<Message Text="ClojureTestsBinDir = $(ClojureTestsBinDir)" />
 	<Message Text="DirectLinking = $(DirectLinking)" />
 	<Message Text="PlatformSym = $(PlatformSym)" />
+	<Message Text="StageDir = $(StageDir)" />
+	<Message Text="ClojureCLRBuildDir = $(ClojureCLRBuildDir)" />
+	<Message Text="PublicKey = $(PublicKey)" />
   </Target>
+  
   
   <Target Name="RestoreReferences">
     <MSBuild Projects="$(Solution)" Targets="Restore" />
@@ -96,14 +106,7 @@
 		<ClojureCompileAssets Include="$(ClojureCompileBinDir)\**\*" />
 		<ClojureMainAssets Include="$(ClojureMainBinDir)\Clojure.Main.*" />
 		<ClojureTestsAssets Include="$(ClojureTestsBinDir)\**\*" />
-	</ItemGroup>
-	<Message Text="ClojureCompileAssets=@(ClojureCompileAssets)"/>
-	<Message Text=" " />
-	<Message Text="ClojureMainAssets=@(ClojureMainAssets)"/>	
-	<Message Text=" " />
-	<Message Text="ClojureTestsAssets=@(ClojureTestsAssets)"/>
-	<Message Text=" " />
-	
+	</ItemGroup>	
 	<Copy SkipUnchangedFiles="true"
 		  SourceFiles="@(ClojureCompileAssets)"
 		  DestinationFolder="$(TestDir)\%(RecursiveDir)" />
@@ -132,7 +135,7 @@
     <SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'net461'"
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns}" />
-	    <SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'netcoreapp3.1'"
+	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'netcoreapp3.1'"
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.attributes clojure.test-clojure.compilation clojure.test-clojure.genclass}" />						
     <Exec Command="$(clji) run_test.clj"
@@ -156,6 +159,16 @@
            Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
 
+
+ <!--  Need to update whenever more DLLs are added to basic build -->
+    <Target Name="Ilmerge" DependsOnTargets="Build" Condition="'$(TestTargetFramework)' == 'net461'">
+    <MakeDir Directories="$(StageDir)\ilmerge\$(TestTargetFramework)" /> 
+    <Exec WorkingDirectory="$(ClojureCompileBinDir)" 
+          Command="ilmerge /keyfile:$(PublicKey) /out:$(StageDir)\ilmerge\$(TestTargetFramework)\Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll"
+          />
+
+  </Target>
+  
 
   <!-- RJ: Reworked Dist target to work around Mono bug related to embeding ItemGroup inside a Target tag -->
   <Target Name="Dist" DependsOnTargets="Build">
@@ -183,20 +196,7 @@
     <Copy SourceFiles="@(CljFiles)" DestinationFolder="..\dist\$(Configuration)\clojure\%(RecursiveDir)" SkipUnchangedFiles="true" />
   </Target>
   
- <!--  Need to update whenever more DLLs are added to basic build -->
-    <Target Name="Ilmerge" DependsOnTargets="Build">
-    <MakeDir Directories="$(OutputPath)\ilmerge" /> 
-    <Exec Condition=" '$(Configuration)' == 'Release 4.0' "
-          Command="ilmerge /keyfile:%CLOJURE_SNK% /targetplatform:&quot;v4,C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0&quot; /out:ilmerge/Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll"
-          WorkingDirectory="$(OutputPath)" />
-    <Exec Condition=" '$(Configuration)' == 'Release 4.5' "
-          Command="ilmerge /keyfile:%CLOJURE_SNK% /targetplatform:&quot;v4,C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5.2&quot; /out:ilmerge/Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll"
-          WorkingDirectory="$(OutputPath)" />
-    <Exec Condition=" '$(Configuration)' == 'Release 3.5' "
-          Command="ilmerge /keyfile:%CLOJURE_SNK% /out:ilmerge/Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll"
-          WorkingDirectory="$(OutputPath)" />
-  </Target>
-  
+
 
   
 </Project>
