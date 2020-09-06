@@ -28,7 +28,7 @@
     <PublicKey>$(ClojureCLRBuildDir)\Key.snk</PublicKey>
   </PropertyGroup>
 
-  <Import Project="$(BuildSysDir)\Tasks.Targets" />
+  <Import Project="$(BuildSysDir)\Tasks.targets" />
   <Import Project="$(RootDir)CurrentVersion.props" />
 
   <PropertyGroup>
