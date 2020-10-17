@@ -185,12 +185,6 @@ namespace clojure.lang
 
             public static bool operator ==(Context c1, Context c2)
             {
-                if ( ReferenceEquals(c1,c2) )
-                    return true;
-
-                if (((object)c1 == null) || ((object)c2 == null))
-                    return false;
-
                 return c1.Equals(c2);
             }
 
