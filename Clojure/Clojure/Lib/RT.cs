@@ -183,15 +183,15 @@ namespace clojure.lang
         #region Vars (I/O-related)
 
         public static readonly Var OutVar 
-            = Var.intern(ClojureNamespace, Symbol.intern("*out*"), System.Console.Out).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*out*"), new StreamWriter(System.Console.OpenStandardOutput())).setDynamic();
         
         public static readonly Var ErrVar
-            = Var.intern(ClojureNamespace, Symbol.intern("*err*"), System.Console.Error).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*err*"), new StreamWriter(System.Console.OpenStandardError())).setDynamic();
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly")]
         public static readonly Var InVar =
             Var.intern(ClojureNamespace, Symbol.intern("*in*"),
-            new clojure.lang.LineNumberingTextReader(System.Console.In)).setDynamic();
+            new clojure.lang.LineNumberingTextReader(new StreamReader(System.Console.OpenStandardInput()))).setDynamic();
 
         static readonly Var PrintReadablyVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*print-readably*"), RT.T);
