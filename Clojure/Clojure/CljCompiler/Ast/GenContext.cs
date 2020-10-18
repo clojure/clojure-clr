@@ -143,15 +143,17 @@ namespace clojure.lang.CljCompiler.Ast
             _assyGen = new AssemblyGen(aname, directory, extension, _isDebuggable);
             if (createDynInitHelper)
                 _dynInitHelper = new DynInitHelper(_assyGen, GenerateName());
-#if NET45
-            if (_isDebuggable)
-                _docWriter = ModuleBuilder.DefineDocument(sourceName, ClojureContext.Default.LanguageGuid, ClojureContext.Default.VendorGuid, Guid.Empty);
-#endif
+
             _docInfo = Expression.SymbolDocument(sourceName);
 
             _moduleBuilder = _assyGen.ModuleBuilder;
 
             Path = ComputeAssemblyPath(directory, aname.Name, extension);
+
+#if NET461
+            if (_isDebuggable)
+                _docWriter = ModuleBuilder.DefineDocument(sourceName, ClojureContext.Default.LanguageGuid, ClojureContext.Default.VendorGuid, Guid.Empty);
+#endif
         }
 
         private string ComputeAssemblyPath(string directory, string name, string extension)
@@ -248,7 +250,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void MaybeEmitDebugInfo(ILGen ilg, IPersistentMap spanMap)
         {
-#if NET45
+#if NET461
             if ( _docWriter != null && spanMap != null )
             {
                 int startLine;
@@ -278,12 +280,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void MaybSetLocalName(LocalBuilder lb, string name)
         {
-#if NET45
+#if NET461
             if (_isDebuggable)
                 lb.SetLocalSymInfo(name);
 #endif
         }
 
-#endregion
+        #endregion
     }
 }

@@ -816,7 +816,7 @@ namespace Clojure.Tests.LibTests
         {
         }
 
-#if NET45
+#if NET461
         [Test]
         public void FindTypeInAssembly()
         {
@@ -846,7 +846,7 @@ namespace Clojure.Tests.LibTests
         //    PrintInterfaceMaps(typeof(Impl1));
         //    PrintInterfaceMaps(typeof(Impl2));
         //    PrintInterfaceMaps(typeof(Impl3));
-            
+
         //    Expect(true);
         //}
 
@@ -917,7 +917,7 @@ namespace Clojure.Tests.LibTests
             int m2(int x);
         }
 
-#if NET45
+#if NET461
         [Test]
         public void CanCreateConcreteImplementationOverAbstractProperty()
         {
@@ -1107,6 +1107,6 @@ namespace Clojure.Tests.LibTests
 
     }
 
-#endregion
+    #endregion
 
 }

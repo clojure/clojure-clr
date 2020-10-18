@@ -419,7 +419,7 @@ namespace clojure.lang
             gen.MarkLabel(endLabel);
             gen.Emit(OpCodes.Ret);
 
-#if NET45
+#if NET461
             //context.AssyBldr.SetEntryPoint(cb);
             context.AssemblyBuilder.SetEntryPoint(cb);
 #endif
