@@ -34,7 +34,6 @@ namespace clojure.lang.CljCompiler.Ast
         protected readonly string _memberName;
         public string MemberName { get { return _memberName; } }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         protected readonly string _source;
         public string Source { get { return _source; } }
         

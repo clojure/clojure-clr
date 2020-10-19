@@ -197,7 +197,7 @@ namespace clojure.lang
             get { return _minHistory; }
             set { _minHistory = value; }
         }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public Ref setMinHistory(int minHistory)
         {
             _minHistory = minHistory;
@@ -211,7 +211,7 @@ namespace clojure.lang
             get { return _maxHistory; }
             set { _maxHistory = value; }
         }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public Ref setMaxHistory(int maxHistory)
         {
             _maxHistory = maxHistory;
@@ -293,7 +293,7 @@ namespace clojure.lang
 
         #region History counts
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public int getHistoryCount()
         {
             try
@@ -340,6 +340,7 @@ namespace clojure.lang
             return t.DoGet(this);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         object currentVal()
         {
             try
@@ -458,7 +459,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="val">The new value.</param>
         /// <returns>The new value.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object set(object val)
         {
             return LockingTransaction.GetEx().DoSet(this, val);
@@ -470,7 +471,7 @@ namespace clojure.lang
         /// <param name="fn">The function to apply to the current state and additional arguments.</param>
         /// <param name="args">Additional arguments.</param>
         /// <returns>The computed value.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "commute")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object commute(IFn fn, ISeq args)
         {
             return LockingTransaction.GetEx().DoCommute(this, fn, args);
@@ -482,7 +483,7 @@ namespace clojure.lang
         /// <param name="fn">The function to apply to the current state and additional arguments.</param>
         /// <param name="args">Additional arguments.</param>
         /// <returns>The computed value.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "alter")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object alter(IFn fn, ISeq args)
         {
             LockingTransaction t = LockingTransaction.GetEx();
@@ -492,7 +493,7 @@ namespace clojure.lang
         /// <summary>
         /// Touch the reference.  (Add to the tracking list in the current transaction.)
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "touch")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public void touch()
         {
             LockingTransaction.GetEx().DoEnsure(this);
@@ -503,7 +504,7 @@ namespace clojure.lang
         #region IFn Members
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "fn")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public IFn fn()
         {
             return (IFn)deref();

@@ -42,7 +42,6 @@ namespace clojure.lang.CljCompiler.Ast
             get { return false; }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
         public Type ClrType
         {
             get { throw new ArgumentException("ImportExpr has no CLR type"); }
@@ -54,7 +53,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#")]
+
             public Expr Parse(ParserContext pcon, object frm)
             {
                 return new ImportExpr((string)RT.second(frm));

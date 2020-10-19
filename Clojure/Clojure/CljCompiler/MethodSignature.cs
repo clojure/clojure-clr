@@ -67,7 +67,6 @@ namespace clojure.lang.CljCompiler
 
         readonly PropertyInfo _property;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public PropertyInfo Property
         {
             get { return _property; }

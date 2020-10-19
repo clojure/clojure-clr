@@ -26,7 +26,6 @@ namespace clojure.lang
     /// i.e., add/remove etc return new values.</para>
     /// <para>See Okasaki, Kahrs, Larsen et al</para>
     /// </remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentTreeMap : APersistentMap, IObj, Reversible, Sorted, IEnumerable<IMapEntry>, IDictionary, IKVReduce
     {
@@ -52,7 +51,6 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentTreeMap">PersistentTreeMap</see>.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "EMPTY")]
         public static readonly PersistentTreeMap EMPTY = new PersistentTreeMap();
 
         #endregion
@@ -64,7 +62,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="other">The dictionary to initialize from.</param>
         /// <returns>A <see cref="PersistentTreeMap">PersistentTreeMap</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static IPersistentMap create(IDictionary other)
         {
             IPersistentMap ret = EMPTY;
@@ -79,7 +77,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items">The <see cref="ISeq">ISeq</see>  of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentTreeMap">PersistentTreeMap</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentTreeMap create(ISeq items)
         {
             IPersistentMap ret = EMPTY;
@@ -99,7 +97,7 @@ namespace clojure.lang
         /// <param name="comp">A comparison method.</param>
         /// <param name="items">The <see cref="ISeq">ISeq</see>  of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentTreeMap">PersistentTreeMap</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentTreeMap create(IComparer comp, ISeq items)
         {
             IPersistentMap ret = new PersistentTreeMap(comp);
@@ -188,7 +186,6 @@ namespace clojure.lang
             return base.GetHashCode();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#")]
         public override bool equiv(Object obj)
         {
             try
@@ -717,7 +714,6 @@ namespace clojure.lang
 
         #region kvreduce
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "kvreduce")]
         public object kvreduce(IFn f, object init)
         {
             if (_tree != null)
@@ -853,7 +849,7 @@ namespace clojure.lang
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1501:AvoidExcessiveInheritance"), Serializable]
+        [Serializable]
         class BlackVal : Black
         {
             protected readonly object _val;
@@ -879,7 +875,7 @@ namespace clojure.lang
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1501:AvoidExcessiveInheritance"), Serializable]
+        [Serializable]
         class BlackBranch : Black
         {
 
@@ -902,7 +898,7 @@ namespace clojure.lang
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1501:AvoidExcessiveInheritance"), Serializable]
+        [Serializable]
         class BlackBranchVal : BlackBranch
         {
             readonly object _val;
@@ -972,7 +968,7 @@ namespace clojure.lang
 
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1501:AvoidExcessiveInheritance"), Serializable]
+        [Serializable]
         class RedVal : Red
         {
             protected readonly object _val;
@@ -997,7 +993,7 @@ namespace clojure.lang
 
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1501:AvoidExcessiveInheritance"), Serializable]
+        [Serializable]
         class RedBranch : Red
         {
 
@@ -1044,7 +1040,7 @@ namespace clojure.lang
 
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1501:AvoidExcessiveInheritance"), Serializable]
+        [Serializable]
         class RedBranchVal : RedBranch
         {
             readonly object _val;
@@ -1104,6 +1100,7 @@ namespace clojure.lang
                 _cnt = cnt;
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             internal static Seq create(Node t, bool asc, int cnt)
             {
                 return new Seq(push(t, null, asc), asc, cnt);
@@ -1126,6 +1123,7 @@ namespace clojure.lang
 
             #region details
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             static ISeq push(Node t, ISeq stack, bool asc)
             {
                 while (t != null)

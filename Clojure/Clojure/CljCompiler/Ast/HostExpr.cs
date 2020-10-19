@@ -32,7 +32,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
             public Expr Parse(ParserContext pcon, object form)
             {
                 ISeq sform = (ISeq)form;
@@ -228,7 +227,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region MaybePrimitiveExpr 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2119:SealMethodsThatSatisfyPrivateInterfaces")]
         public abstract bool CanEmitPrimitive { get; }
 
         public abstract void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg);
@@ -272,8 +270,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Tags and types
         
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         public static Type MaybeType(object form, bool stringOk)
         {
             if (form is Type)
@@ -319,7 +315,7 @@ namespace clojure.lang.CljCompiler.Ast
             return t;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "maybe")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Type maybeSpecialTag(Symbol sym)
         {
             Type t = Compiler.PrimType(sym);
@@ -343,7 +339,6 @@ namespace clojure.lang.CljCompiler.Ast
             return t;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         internal static Type TagToType(object tag)
         {
             Type t = null;
@@ -370,7 +365,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "objx")]
         internal static void EmitBoxReturn(ObjExpr objx, CljILGen ilg, Type returnType)
 
         {
@@ -380,13 +374,11 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Box, returnType);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "objx")]
         internal static void EmitUnboxArg(ObjExpr objx, CljILGen ilg, Type paramType)
         {
             EmitUnboxArg(ilg, paramType);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         internal static void EmitUnboxArg(CljILGen ilg, Type paramType)
         {
             if (paramType.IsPrimitive)

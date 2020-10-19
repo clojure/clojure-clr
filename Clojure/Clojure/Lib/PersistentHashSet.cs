@@ -22,7 +22,6 @@ namespace clojure.lang
     /// <summary>
     /// A persistent set built on a <see cref="IPersistentMap">IPersistentMap</see>.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentHashSet: APersistentSet, IObj, IEditableCollection
     {
@@ -33,7 +32,7 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentHashSet">PersistentHashSet</see>.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static readonly PersistentHashSet EMPTY = new PersistentHashSet(null, PersistentHashMap.EMPTY);
 
         #endregion
@@ -45,7 +44,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="init">An array of items.</param>
         /// <returns>A <see cref="PersistentHashSet">PersistentHashSet</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashSet create(params object[] init)
         {
             ITransientSet ret = (ITransientSet)EMPTY.asTransient();
@@ -61,7 +60,7 @@ namespace clojure.lang
         /// <returns>A <see cref="PersistentHashSet">PersistentHashSet</see>.</returns>
         /// <remarks>This is called just 'create' in the Java version.  CLR can't handle this overload when called on something that is 
         /// both an IList and an ISeq, such as any ASeq.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashSet create(IList init)
         {
             ITransientSet ret = (ITransientSet)EMPTY.asTransient();
@@ -75,7 +74,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items">An <see cref="ISeq">ISeq</see> of items</param>
         /// <returns>A <see cref="PersistentHashSet">PersistentHashSet</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashSet create(ISeq items)
         {
             ITransientSet ret = (ITransientSet)EMPTY.asTransient(); 
@@ -84,7 +83,7 @@ namespace clojure.lang
             return (PersistentHashSet)ret.persistent();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashSet createWithCheck(params object[] init)
         {
             ITransientSet ret = (ITransientSet)EMPTY.asTransient(); 
@@ -97,7 +96,7 @@ namespace clojure.lang
             return (PersistentHashSet)ret.persistent();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashSet createWithCheck(IList init)
         {
             ITransientSet ret = (ITransientSet)EMPTY.asTransient(); 
@@ -112,7 +111,7 @@ namespace clojure.lang
             return (PersistentHashSet)ret.persistent();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashSet createWithCheck(ISeq items)
         {
             ITransientSet ret = (ITransientSet)EMPTY.asTransient(); 

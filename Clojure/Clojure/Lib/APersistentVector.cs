@@ -21,8 +21,6 @@ namespace clojure.lang
     /// <summary>
     /// Provides a basic implementation of <see cref="IPersistentVector">IPersistentVector</see> functionality.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public abstract class APersistentVector: AFn, IPersistentVector, IList, IComparable, IList<Object>, IComparable<Object>, IHashEq
     {
@@ -74,7 +72,7 @@ namespace clojure.lang
         /// <returns><value>true</value> if the specified Object is equal to the current Object; 
         /// otherwise, <value>false</value>.
         /// </returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public bool doEquals(IPersistentVector v, object obj)
         {
             if (v == obj)
@@ -200,6 +198,7 @@ namespace clojure.lang
 
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static bool doEquiv(IPersistentVector v, object obj)
         {
             IPersistentVector ipv = obj as IPersistentVector;
@@ -602,14 +601,12 @@ namespace clojure.lang
 
         #region Ranged iterator
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "End")]
         public virtual IEnumerator RangedIterator(int start, int end)
         {
             for (int i = start; i < end; i++)
                 yield return nth(i);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "End")]
         public virtual IEnumerator<object> RangedIteratorT(int start, int end)
         {
             for (int i = start; i < end; i++)

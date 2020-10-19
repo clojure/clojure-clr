@@ -35,8 +35,8 @@ namespace clojure.lang
 
            readonly IFn _fn;
 
-           [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
-           public IFn Fn
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+            public IFn Fn
            {
                get { return _fn; }
            }
@@ -60,23 +60,23 @@ namespace clojure.lang
 
        private readonly IPersistentMap _protocol;
 
-       [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "protocol")]
-       public IPersistentMap protocol
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        public IPersistentMap protocol
        {
            get { return _protocol; }
        }
 
        private readonly Keyword _methodk;
 
-       [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "methodk")]
-       public Keyword methodk
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        public Keyword methodk
        {
            get { return _methodk; }
        }
 
        private readonly Symbol _sym;
-       [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "sym")]
-       public Symbol sym
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        public Symbol sym
        {
            get { return _sym; }
        }
@@ -86,16 +86,16 @@ namespace clojure.lang
        private readonly object[] _table;    //[class, entry. class, entry ...]
        public readonly IDictionary _map;
 
-       [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "map")]
-       public IDictionary map
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        public IDictionary map
        {
            get { return _map; }
        }
 
        Entry _mre = null;
 
-       [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "table")]
-       [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
        public object[] table
         {
             get { return _table; }
@@ -151,13 +151,13 @@ namespace clojure.lang
             _table = null;
             _map = map;
         }
-       #endregion
+        #endregion
 
 
-       #region Implementation
-        
-       // initial lowercase for core.clj compatibility
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "fn")]
+        #region Implementation
+
+        // initial lowercase for core.clj compatibility
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public IFn fnFor(Type t)
        {
            Entry last = _mre;

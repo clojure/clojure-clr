@@ -64,7 +64,7 @@ namespace clojure.lang
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "map")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static bool mapEquals(IPersistentMap m1, Object obj)
         {
             if (m1 == obj)
@@ -111,7 +111,7 @@ namespace clojure.lang
             return cached;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "map")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static int mapHash(IPersistentMap m)
         {
             int hash = 0;
@@ -208,7 +208,7 @@ namespace clojure.lang
 
         #region IObj members
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "with")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         abstract public IObj withMeta(IPersistentMap meta);
 
         #endregion
@@ -464,7 +464,7 @@ namespace clojure.lang
             return cached;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "map")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static int mapHasheq(IPersistentMap m)
         {
             int hash = 0;
@@ -495,7 +495,7 @@ namespace clojure.lang
 
             #region C-tors & factory methods
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             static public KeySeq create(ISeq seq)
             {
                 if (seq == null)
@@ -504,7 +504,7 @@ namespace clojure.lang
             }
 
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             static public KeySeq createFromMap(IPersistentMap map)
             {
                 if (map == null)
@@ -616,7 +616,7 @@ namespace clojure.lang
 
             #region C-tors & factory methods
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             static public ValSeq create(ISeq seq)
             {
                 if (seq == null)
@@ -625,7 +625,7 @@ namespace clojure.lang
             }
 
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             static public ValSeq createFromMap(IPersistentMap map)
             {
                 if (map == null)

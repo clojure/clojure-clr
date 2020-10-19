@@ -22,7 +22,6 @@ namespace clojure.lang
     /// <summary>
     /// Provides a basic implementation of <see cref="IFn">IFn</see> interface methods.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn"), Serializable]
     public abstract class AFn : IFn, IDynamicMetaObjectProvider, IFnArity
     {
         #region IFn Members
@@ -167,7 +166,7 @@ namespace clojure.lang
             throw WrongArityException(21);
         }
 
-
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
 
         public virtual object applyTo(ISeq arglist)
         {
@@ -457,7 +456,7 @@ namespace clojure.lang
             }
         }
 
-
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
         public Exception WrongArityException(int reqArity)
         {
             string name = GetType().FullName;

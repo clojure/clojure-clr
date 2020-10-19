@@ -129,7 +129,7 @@ namespace clojure.lang
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static ISeq create(long end)
         {
             if (end > 0)
@@ -137,7 +137,7 @@ namespace clojure.lang
             return PersistentList.EMPTY;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static ISeq create(long start, long end)
         {
             if (start >= end)
@@ -145,7 +145,7 @@ namespace clojure.lang
             return new LongRange(start, end, 1L, PositiveStep(end));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static ISeq create(long start, long end, long step)
         {
             if (step > 0)
@@ -236,7 +236,6 @@ namespace clojure.lang
 
         // fallback count mechanism for pathological cases
         // returns either exact count or CHUNK_SIZE+1
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "end")]
         long SteppingCount(long start, long end, long step)
         {
             long count = 1;
@@ -326,7 +325,7 @@ namespace clojure.lang
 
         #region IReduce methods
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object reduce(IFn f)
         {
             Object acc = _start;
@@ -342,8 +341,8 @@ namespace clojure.lang
             return acc;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+
         public object reduce(IFn f, object val)
         {
             Object acc = val;
@@ -411,6 +410,7 @@ namespace clojure.lang
 
             #region Misc
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             public long first()
             {
                 return _start;

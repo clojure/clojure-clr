@@ -23,19 +23,16 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         protected readonly string _memberName;
         public string MemberName { get { return _memberName; } }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         protected readonly Type _type;
         public Type MemberType { get { return _type; } }
 
         protected readonly TInfo _tinfo;
         public TInfo MemberInfo { get { return _tinfo; } }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         protected readonly string _source;
         public string Source { get { return _source; } }
 

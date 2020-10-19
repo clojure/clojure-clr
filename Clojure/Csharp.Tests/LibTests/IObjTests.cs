@@ -22,6 +22,8 @@ using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
+#pragma warning disable IDE1006 // Naming Styles
+
     /// <summary>
     /// Base class for testing the IMeta interface functionality.
     /// </summary>
@@ -94,4 +96,5 @@ namespace Clojure.Tests.LibTests
             Expect(_objWithNullMeta.meta()).To.Be.Null();
         }
     }
+#pragma warning restore IDE1006 // Naming Styles
 }

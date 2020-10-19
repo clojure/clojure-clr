@@ -18,13 +18,14 @@ namespace clojure.lang
     /// <summary>
     /// Represents a sequence that can be traversed in reverse.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
     public interface Reversible
     {
         /// <summary>
         /// Gets an <see cref="ISeq">ISeq</see> to travers the sequence in reverse.
         /// </summary>
         /// <returns>An <see cref="ISeq">ISeq</see> .</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "rseq")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         ISeq rseq();
     }
 }

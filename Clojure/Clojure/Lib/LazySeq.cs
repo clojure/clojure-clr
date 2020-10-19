@@ -101,6 +101,7 @@ namespace clojure.lang
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         object sval()
         {
             if (_fn != null)

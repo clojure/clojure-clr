@@ -21,7 +21,6 @@ namespace clojure.lang
     /// <summary>
     /// Represents a rational number.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes")]
     [Serializable]
     public sealed class Ratio: IComparable, IConvertible
     {
@@ -35,7 +34,7 @@ namespace clojure.lang
         /// <summary>
         /// Get the numerator.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "numerator")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public BigInteger numerator
         {
             get { return _numerator; }
@@ -49,7 +48,7 @@ namespace clojure.lang
         /// <summary>
         /// Get the denominator.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "denominator")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public BigInteger denominator
         {
             get { return _denominator; }

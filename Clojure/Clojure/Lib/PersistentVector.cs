@@ -22,7 +22,6 @@ namespace clojure.lang
     /// <summary>
     /// Implements a persistent vector using a specialized form of array-mapped hash trie.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentVector: APersistentVector, IObj, IEditableCollection, IEnumerable, IReduce, IKVReduce
     {
@@ -43,7 +42,6 @@ namespace clojure.lang
 
             readonly object[] _array;
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
             public object[] Array
             {
                 get { return _array; }
@@ -90,7 +88,6 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentVector">PersistentVector</see>.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "EMPTY")]
         static public readonly PersistentVector EMPTY = new PersistentVector(0,5,EmptyNode, new object[0]);
 
         #endregion
@@ -116,7 +113,7 @@ namespace clojure.lang
 
         #region C-tors and factory methods
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "adopt")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentVector adopt(Object[] items)
         {
             return new PersistentVector(items.Length, 5, EmptyNode, items);
@@ -127,7 +124,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public PersistentVector create(IReduceInit items)
         {
             TransientVector ret = (TransientVector)EMPTY.asTransient();
@@ -140,7 +137,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items">A sequence of items.</param>
         /// <returns>An initialized vector.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public PersistentVector create(ISeq items)
         {
             Object[] arr = new Object[32];
@@ -177,7 +174,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public PersistentVector create(params object[] items)
         {
             ITransientCollection ret = EMPTY.asTransient();
@@ -191,7 +188,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public PersistentVector create1(IEnumerable items)
         {
             // optimize common case
@@ -276,6 +273,7 @@ namespace clojure.lang
 
         #region IPersistentVector members
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         int tailoff()
         {
             if (_cnt < 32)
@@ -344,6 +342,7 @@ namespace clojure.lang
             throw new ArgumentOutOfRangeException("i");
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static private Node doAssoc(int level, Node node, int i, object val)
         {
             Node ret = new Node(node.Edit, (object[])node.Array.Clone());
@@ -364,7 +363,7 @@ namespace clojure.lang
         /// <returns>A new (immutable) vector with the objected added at the end.</returns>
         /// <remarks>Overrides <c>cons</c> in <see cref="IPersistentCollection">IPersistentCollection</see> to specialize the return value.</remarks>
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "cons")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public override IPersistentVector cons(object o)
         {
             //if (_tail.Length < 32)
@@ -396,6 +395,7 @@ namespace clojure.lang
             return new PersistentVector(meta(), _cnt + 1, newshift, newroot, new object[] { o });
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         private Node pushTail(int level, Node parent, Node tailnode)
         {
             // if parent is leaf, insert node,
@@ -419,6 +419,7 @@ namespace clojure.lang
             return ret;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static Node newPath(AtomicReference<Thread> edit, int level, Node node)
         {
             if (level == 0)
@@ -428,7 +429,7 @@ namespace clojure.lang
             ret.Array[0] = newPath(edit, level - 5, node);
             return ret;
         }
-        
+
         #endregion
 
         #region IPersistentCollection members
@@ -437,7 +438,7 @@ namespace clojure.lang
         /// Gets the number of items in the collection.
         /// </summary>
         /// <returns>The number of items in the collection.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "count")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public override int count()
         {
             return _cnt;
@@ -447,7 +448,6 @@ namespace clojure.lang
         /// Gets an empty collection of the same type.
         /// </summary>
         /// <returns>An emtpy collection.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
         public override IPersistentCollection empty()
         {
             return (IPersistentCollection)EMPTY.withMeta(meta());
@@ -488,6 +488,7 @@ namespace clojure.lang
             return new PersistentVector(meta(), _cnt - 1, newshift, newroot, newtail);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         private Node popTail(int level, Node node)
         {
             int subidx = ((_cnt - 2) >> level) & 0x01f;
@@ -533,7 +534,7 @@ namespace clojure.lang
 
         #region ChunkedSeq
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "chunked")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public IChunkedSeq chunkedSeq()
         {
             if (count() == 0)
@@ -656,7 +657,7 @@ namespace clojure.lang
 
             #region Counted members
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "count")]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             public override int count()
             {
                 return _vec._cnt - (_i + _offset);
@@ -841,6 +842,7 @@ namespace clojure.lang
                 throw new ArgumentOutOfRangeException("i");
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             Node doAssoc(int level, Node node, int i, Object val)
             {
                 node = EnsureEditable(node);
@@ -1072,7 +1074,7 @@ namespace clojure.lang
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "kvreduce")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object kvreduce(IFn f, object init)
         {
             int step = 0;

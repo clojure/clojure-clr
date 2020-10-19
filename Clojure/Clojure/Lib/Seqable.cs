@@ -18,13 +18,14 @@ namespace clojure.lang
     /// <summary>
     /// Represents an object that can produce an <see cref="ISeq"/>.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
     public interface Seqable
     {
         /// <summary>
         /// Gets an <see cref="ISeq"/>to allow first/rest/next iteration through the collection.
         /// </summary>
         /// <returns>An <see cref="ISeq"/> for iteration.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         ISeq seq();
     }
 }

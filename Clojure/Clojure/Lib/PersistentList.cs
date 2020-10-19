@@ -47,7 +47,7 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="IPersistentList">IPersistentList</see>.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "EMPTY")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static readonly EmptyList EMPTY = new EmptyList(null);
 
         #endregion
@@ -64,13 +64,13 @@ namespace clojure.lang
             this._rest = null;
             this._count = 1;
         }
-        
+
         /// <summary>
         /// Create a list initialized from a given IList.
         /// </summary>
         /// <param name="init">The list to initialize from.</param>
         /// <returns>A list.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static IPersistentList create(IList init)
         {
             IPersistentList ret = EMPTY;
@@ -128,7 +128,7 @@ namespace clojure.lang
                 return create(list);
             }
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "invoke")]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             static public object invokeStatic(ISeq args)
             {
                 IArraySeq ias = args as IArraySeq;
@@ -154,7 +154,7 @@ namespace clojure.lang
         /// An <see cref="IFn">IFn</see> to create a list from a sequence of items.
         /// </summary>
         /// <remarks>The name is without our usual leading underscore for compatiblity with core.clj.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "creator")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static IFn creator { get { return _creator; } }
 
 

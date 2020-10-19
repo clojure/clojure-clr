@@ -78,7 +78,6 @@ namespace clojure.lang.CljCompiler.Ast
         public abstract int RequiredArity { get; }
         public abstract string MethodName { get; }
         public abstract Type ReturnType { get; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
         public abstract Type[] ArgTypes { get; }
 
         #endregion

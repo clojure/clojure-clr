@@ -245,7 +245,6 @@ namespace clojure.lang
         /// <param name="args"></param>
         /// <param name="ctorCount"></param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "spanMap")]
         internal static ConstructorInfo GetMatchingConstructor(IPersistentMap spanMap, Type targetType, IList<HostArg> args, out int ctorCount)
         {
             IList<MethodBase> methods = Reflector.GetConstructors(targetType, args.Count);
@@ -443,7 +442,6 @@ namespace clojure.lang
             return CallMethod(methodName, typeArgs, true, t, null, args);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "typeArgs")]
         public static object CallMethod(string methodName, IList<Type> typeArgs, bool isStatic, Type t, object target, params object[] args)
         {
             Expression targetExpr = isStatic ? Expression.Constant(t, typeof(Type)) : Expression.Constant(target);
@@ -656,7 +654,7 @@ namespace clojure.lang
             return AreAssignable(paramType, argType);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "t"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "prep")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Object prepRet(Type t, Object x)
         {
             //if (!t.IsPrimitive)

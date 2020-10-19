@@ -26,7 +26,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns>The number of items.</returns>
         /// <remarks>Not sure why you wouldn't use <c>count()</c> intead.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "length")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         int length();
 
         /// <summary>
@@ -35,8 +35,9 @@ namespace clojure.lang
         /// <param name="i">The index of the item to set.</param>
         /// <param name="val">The new value</param>
         /// <returns>A new (immutable) vector v with v[i] == val.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "assoc")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         IPersistentVector assocN(int i, object val);
+
 
         /// <summary>
         /// Creates a new vector with a new item at the end.
@@ -44,6 +45,7 @@ namespace clojure.lang
         /// <param name="o">The item to add to the vector.</param>
         /// <returns>A new (immutable) vector with the objected added at the end.</returns>
         /// <remarks>Overrides <c>cons</c> in <see cref="IPersistentCollection">IPersistentCollection</see> to specialize the return value.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         new IPersistentVector cons(Object o);
 
         /// <summary>
@@ -52,6 +54,7 @@ namespace clojure.lang
         /// <returns>The number of items in the collection.</returns>
         /// <remarks>Overrides <c>count()</c> in both <see cref="IPersistentCollection">IPersistentCollection</see> 
         /// and <see cref="Counted">Counted</see> to resolve ambiguity for callers.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         new int count();
     }
 }

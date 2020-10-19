@@ -17,6 +17,7 @@ using System;
 namespace clojure.lang.CljCompiler.Ast
 {
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
     public interface Expr
     {
         bool HasClrType { get; }

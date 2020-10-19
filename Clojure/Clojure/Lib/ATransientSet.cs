@@ -79,13 +79,13 @@ namespace clojure.lang
 
         #region IFn overrides
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#")]
+
         public override object invoke(object key)
         {
             return _impl.valAt(key);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration")]
+
         public override object invoke(object key, object notFound)
         {
             return _impl.valAt(key, notFound);

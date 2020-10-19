@@ -17,7 +17,6 @@ namespace clojure.lang.CljCompiler.Ast
 {
     // RHC = Rich Hickey Context -- same enum as Compiler.C in the Java version
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "RHC")]
     public enum RHC
     {
         Statement, // value ignored

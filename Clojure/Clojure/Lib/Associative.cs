@@ -18,6 +18,7 @@ namespace clojure.lang
     /// <summary>
     /// Represents an immutable key/value mapping.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
     public interface Associative: IPersistentCollection, ILookup
     {
         /// <summary>
@@ -25,16 +26,14 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The key to test for membership</param>
         /// <returns>True if the key is in this map.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "contains")]
-        bool containsKey(object key);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")] bool containsKey(object key);
 
         /// <summary>
         /// Returns the key/value pair for this key.
         /// </summary>
         /// <param name="key">The key to retrieve</param>
         /// <returns>The key/value pair for the key, or null if the key is not in the map.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "entry")]
-        IMapEntry entryAt(object key);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")] IMapEntry entryAt(object key);
 
         /// <summary>
         /// Add a new key/value pair.
@@ -42,8 +41,7 @@ namespace clojure.lang
         /// <param name="key">The key</param>
         /// <param name="val">The value</param>
         /// <returns>A new map with the key/value added.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "assoc")]
-        Associative assoc(object key, object val);
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")] Associative assoc(object key, object val);
 
     }
 }

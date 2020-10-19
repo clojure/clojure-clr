@@ -27,7 +27,7 @@ namespace clojure.lang
         /// <param name="args">Arguments to apply the function to.</param>
         /// <returns>The new metadata map.</returns>
         /// <remarks>The new value will be the result of <c>(apply alter (cons currentMeta args))</c>.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "alter")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         IPersistentMap alterMeta(IFn alter, ISeq args);
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="m">The new metadata map</param>
         /// <returns>The new metadata map.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "reset")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         IPersistentMap resetMeta(IPersistentMap m);
     }
 }

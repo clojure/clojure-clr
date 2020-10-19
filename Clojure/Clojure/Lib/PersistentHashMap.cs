@@ -34,7 +34,6 @@ namespace clojure.lang
     /// <para>No sub-tree pools or root-resizing</para>
     /// <para>Any errors are Rich Hickey's (so he says), except those that I introduced.</para>
     /// </remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentHashMap : APersistentMap, IEditableCollection, IObj, IMapEnumerable, IMapEnumerableTyped<Object, Object>, IEnumerable, IEnumerable<IMapEntry>, IKVReduce
     {
@@ -65,7 +64,7 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentHashMap">PersistentHashMap</see>.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "EMPTY")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static readonly PersistentHashMap EMPTY = new PersistentHashMap(0, null, false, null);
 
 
@@ -80,7 +79,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="other">The dictionary to copy from.</param>
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static IPersistentMap create(IDictionary other)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -94,7 +93,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="init">An array of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashMap create(params object[] init)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -104,7 +103,7 @@ namespace clojure.lang
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashMap createWithCheck(params object[] init)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -122,7 +121,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="init">An IList of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashMap create1(IList init)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -137,7 +136,7 @@ namespace clojure.lang
             return (PersistentHashMap)ret.persistent();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public PersistentHashMap createWithCheck(ISeq items)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -158,7 +157,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="items">An <see cref="ISeq">ISeq</see> of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashMap create(ISeq items)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -178,7 +177,7 @@ namespace clojure.lang
         /// <param name="meta">The metadata to attach.</param>
         /// <param name="init">An array of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentHashMap">PersistentHashMap</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentHashMap create(IPersistentMap meta, params object[] init)
         {
             return (PersistentHashMap)create(init).withMeta(meta);
@@ -633,7 +632,7 @@ namespace clojure.lang
 
         #region kvreduce & fold
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "kvreduce")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object kvreduce(IFn f, object init)
         {
             init = _hasNull ? f.invoke(init,null,_nullValue) : init;
@@ -650,7 +649,7 @@ namespace clojure.lang
             return init;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "n"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "fold")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object fold(long n, IFn combinef, IFn reducef, IFn fjinvoke, IFn fjtask, IFn fjfork, IFn fjjoin)
         {
             // JVM: we are ignoring n for now
@@ -1028,6 +1027,7 @@ namespace clojure.lang
                 return editable;
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             INode pack(AtomicReference<Thread> edit, int idx)
             {
                 Object[] newArray = new Object[2 * (_count - 1)];
@@ -1067,11 +1067,13 @@ namespace clojure.lang
 
                 #region C-tors
 
+                [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
                 static public ISeq create(INode[] nodes)
                 {
                     return create(null, nodes, 0, null);
                 }
 
+                [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
                 static ISeq create(IPersistentMap meta, INode[] nodes, int i, ISeq s)
                 {
                     if (s != null)

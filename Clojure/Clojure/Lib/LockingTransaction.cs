@@ -545,7 +545,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns><value>true</value> if there is a transaction running on this thread; <value>false</value> otherwise.</returns>
         /// <remarks>Initial lowercase in name for core.clj compatibility.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static bool isRunning()
         {
             return GetRunning() != null;
@@ -557,7 +557,7 @@ namespace clojure.lang
         /// <param name="fn">The function to invoke.</param>
         /// <returns>The value computed by the function.</returns>
         /// <remarks>Initial lowercase in name for core.clj compatibility.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object runInTransaction(IFn fn)
         {
             // TODO: This can be called on something more general than  an IFn.
@@ -609,7 +609,6 @@ namespace clojure.lang
         /// </summary>
         /// <param name="fn">The function to invoke.</param>
         /// <returns>The value computed by the function.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         object Run(IFn fn)
         {
             // TODO: Define an overload called on ThreadStartDelegate or something equivalent.

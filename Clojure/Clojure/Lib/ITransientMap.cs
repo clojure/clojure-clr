@@ -24,6 +24,7 @@ namespace clojure.lang
         /// <param name="val">The value</param>
         /// <returns>A new map with key+value added.</returns>
         /// <remarks>Overwrites an exising value for the <paramref name="key"/>, if present.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         new ITransientMap assoc(object key, object val);
 
         /// <summary>
@@ -31,9 +32,10 @@ namespace clojure.lang
         /// </summary>
         /// <param name="key">The key to remove</param>
         /// <returns>A new map with the key removed (or the same map if the key is not contained).</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         ITransientMap without(object key);
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         new IPersistentMap persistent();
 
 

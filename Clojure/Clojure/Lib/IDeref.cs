@@ -24,7 +24,7 @@ namespace clojure.lang
         /// Gets the (immutable) value the reference is holding.
         /// </summary>
         /// <returns>The value</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "deref")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         object deref();
     }
 }

@@ -20,7 +20,6 @@ using System.Reflection;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
     public class FnExpr : ObjExpr
     {
         #region Data
@@ -109,7 +108,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Parsing
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public static Expr Parse(ParserContext pcon, ISeq form, string name)
         {
             ISeq origForm = form;

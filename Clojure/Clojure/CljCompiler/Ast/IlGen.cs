@@ -106,7 +106,6 @@ namespace clojure.lang.CljCompiler.Ast
                 return types;
             }
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
             public static IList<int> GetCustomModMetadataTokens(FieldInfo fi)
             {
                 byte[] sig = fi.Module.ResolveSignature(fi.MetadataToken);

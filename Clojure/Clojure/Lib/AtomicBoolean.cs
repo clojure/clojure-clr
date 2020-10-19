@@ -74,7 +74,7 @@ namespace clojure.lang
         /// Gets the current value.
         /// </summary>
         /// <returns>The current value.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public bool get()
         {
             return IntToBool(_val);
@@ -86,7 +86,7 @@ namespace clojure.lang
         /// <param name="oldVal">The expected value.</param>
         /// <param name="newVal">The new value.</param>
         /// <returns><value>true</value> if the value was set; <value>false</value> otherwise.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "compare")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public bool compareAndSet(bool oldVal, bool newVal)
         {
             int ioldVal = BoolToInt(oldVal);
@@ -101,7 +101,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="newVal">The new value.</param>
         /// <returns>The new value.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public bool set(bool newVal)
         {
             int inewVal = BoolToInt(newVal); ;

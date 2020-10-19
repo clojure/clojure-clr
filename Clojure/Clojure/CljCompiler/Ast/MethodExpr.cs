@@ -148,8 +148,6 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 ilg.Emit(OpCodes.Call, _method);
         }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         public static readonly MethodInfo Method_MethodExpr_GetDelegate = typeof(MethodExpr).GetMethod("GetDelegate");
  
         public static readonly Dictionary<int, Delegate> DelegatesMap = new Dictionary<int, Delegate>();
@@ -277,9 +275,9 @@ namespace clojure.lang.CljCompiler.Ast
                         break;
 
                     case HostArg.ParameterType.Standard:
-                        if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr)
+                        if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr mpe)
                         {
-                            ((MaybePrimitiveExpr)ha.ArgExpr).EmitUnboxed(RHC.Expression, objx, ilg);
+                            mpe.EmitUnboxed(RHC.Expression, objx, ilg);
                         }
                         else
                         {
@@ -294,8 +292,6 @@ namespace clojure.lang.CljCompiler.Ast
 
             EmitDynamicCallPostlude(lambda, delType, mbLambda, ilg);
         }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "objx")]
         public static void EmitByRefArg(HostArg ha, ObjExpr objx, CljILGen ilg)
         {
             if (ha.LocalBinding.IsArg)
@@ -306,7 +302,6 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
         static public void EmitDynamicCallPreamble(DynamicExpression dyn, IPersistentMap spanMap, string methodName, Type returnType, IList<ParameterExpression> paramExprs, Type[] paramTypes, CljILGen ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda)
         {
             Expression call = dyn;
@@ -398,8 +393,6 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "lambda")]
         static public void EmitDynamicCallPostlude(LambdaExpression lambda, Type delType, MethodBuilder mbLambda, CljILGen ilg)
         {
 
@@ -460,8 +453,6 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
         }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
         public static void EmitTypedArgs(ObjExpr objx, CljILGen ilg, ParameterInfo[] parms, IPersistentVector args)
         {
             for (int i = 0; i < parms.Length; i++)

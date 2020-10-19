@@ -37,7 +37,6 @@ namespace clojure.lang
         static IFn[] _macros = new IFn[256];
         static IFn[] _dispatchMacros = new IFn[256];
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static EdnReader()
         {
             _macros['"'] = new StringReader();
@@ -61,16 +60,19 @@ namespace clojure.lang
             _dispatchMacros[':'] = new NamespaceMapReader();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static bool isMacro(int ch)
         {
             return ch < _macros.Length && _macros[ch] != null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static IFn getMacro(int ch)
         {
             return ch < _macros.Length ? _macros[ch] : null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static bool isTerminatingMacro(int ch)
         {
             return (ch != '#' && ch != '\'' && ch < _macros.Length && _macros[ch] != null);
@@ -80,20 +82,20 @@ namespace clojure.lang
 
         #region main entry points - readString, read
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "read")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public Object readString(String s, IPersistentMap opts)
         {
             PushbackTextReader r = new PushbackTextReader(new System.IO.StringReader(s));
             return read(r, opts);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "read")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Object read(PushbackTextReader r, IPersistentMap opts)
         {
             return read(r, !opts.containsKey(EOF), opts.valAt(EOF), false, opts);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object read(PushbackTextReader r,
             bool eofIsError,
             object eofValue,
@@ -190,6 +192,7 @@ namespace clojure.lang
                 r.Unread(ch);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static bool isWhitespace(int ch)
         {
             return Char.IsWhiteSpace((char)ch) || ch == ',';
@@ -217,6 +220,7 @@ namespace clojure.lang
             return -1;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static int readUnicodeChar(string token, int offset, int length, int radix)
         {
             if (token.Length != offset + length)
@@ -232,6 +236,7 @@ namespace clojure.lang
             return (char)uc;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static int readUnicodeChar(PushbackTextReader r, int initch, int radix, int length, bool exact)
         {
 
@@ -312,6 +317,7 @@ namespace clojure.lang
 
         #region Reading tokens
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static string readSimpleToken(PushbackTextReader r, char initch, bool leadConstituent)
         {
             if (leadConstituent && NonConstituent(initch))
@@ -332,6 +338,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static void readToken(PushbackTextReader r, char initch, bool leadConstituent, out String rawToken, out String token, out String mask, out bool eofSeen)
         {
             if (leadConstituent && NonConstituent(initch))
@@ -454,7 +461,6 @@ namespace clojure.lang
         static Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
         static Regex keywordPat = new Regex("^[:]?([^/].*/)?(/|[^/][^/]*)$");
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "maskName")]
         private static void ExtractNamesUsingMask(string token, string maskNS, string maskName, out string ns, out string name)
         {
             if (String.IsNullOrEmpty(maskNS))
@@ -469,6 +475,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static object matchSymbol(string token, string mask)
          {
             Match m = symbolPat.Match(mask);
@@ -517,6 +524,7 @@ namespace clojure.lang
         static Regex ratioRE = new Regex("^([-+]?[0-9]+)/([0-9]+)$");
         static Regex floatRE = new Regex("^([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?$");
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static object readNumber(PushbackTextReader r, char initch)
         {
             StringBuilder sb = new StringBuilder();
@@ -780,10 +788,6 @@ namespace clojure.lang
 
         public sealed class NamespaceMapReader : AFn
         {
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes"), 
-             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#"),
-             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#"),
-             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "2#")]
             public override object invoke(object reader, object colon, object opts)
             {
                 PushbackTextReader r = reader as PushbackTextReader;
@@ -1050,7 +1054,6 @@ namespace clojure.lang
                 Symbol.intern("-Inf"), Double.NegativeInfinity,
                 Symbol.intern("NaN"), Double.NaN);
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes")]
             protected override object Read(PushbackTextReader r, char c, object opts)
             {
                 object o = read(r,true,null,true,opts);

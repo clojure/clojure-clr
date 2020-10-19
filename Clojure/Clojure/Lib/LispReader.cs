@@ -72,6 +72,7 @@ namespace clojure.lang
 
         #region Interfaces
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public interface Resolver
         {
             Symbol CurrentNS();
@@ -87,7 +88,6 @@ namespace clojure.lang
         static IFn[] _macros = new IFn[256];
         static IFn[] _dispatchMacros = new IFn[256];
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static LispReader()
         {
             _macros['"'] = new StringReader();
@@ -123,16 +123,19 @@ namespace clojure.lang
             _dispatchMacros[':'] = new NamespaceMapReader();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
         static bool isMacro(int ch)
         {
             return ch < _macros.Length && _macros[ch] != null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static IFn getMacro(int ch)
         {
             return ch < _macros.Length ? _macros[ch] : null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static bool isTerminatingMacro(int ch)
         {
             return (ch != '#' && ch != '\'' && ch != '%' && isMacro(ch));
@@ -160,7 +163,7 @@ namespace clojure.lang
         internal static readonly Keyword COND_ALLOW = Keyword.intern(null, "allow");
         internal static readonly Keyword COND_PRESERVE = Keyword.intern(null, "preserve");
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public Object read(PushbackTextReader r, Object opts)
         {
             bool eofIsError = true;
@@ -177,8 +180,8 @@ namespace clojure.lang
             }
             return read(r, eofIsError, eofValue, false, opts);
         }
-        
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object read(PushbackTextReader r,
             bool eofIsError,
             object eofValue,
@@ -187,13 +190,13 @@ namespace clojure.lang
             return read(r, eofIsError, eofValue, isRecursive, PersistentHashMap.EMPTY);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public Object read(PushbackTextReader r, bool eofIsError, object eofValue, bool isRecursive, object opts)
         {
             return read(r, eofIsError, eofValue, null, null, isRecursive, opts, null, (Resolver)RT.ReaderResolverVar.deref());
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static private Object read(PushbackTextReader r, bool eofIsError, Object eofValue, bool isRecursive, Object opts, Object pendingForms)
         {
             return read(r, eofIsError, eofValue, null, null, isRecursive, opts, EnsurePending(pendingForms), (Resolver)RT.ReaderResolverVar.deref());
@@ -222,6 +225,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static private Object read(PushbackTextReader r, 
             bool eofIsError, object eofValue, 
             char? returnOn, object returnOnValue, 
@@ -334,6 +338,7 @@ namespace clojure.lang
                 r.Unread(ch);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static internal bool isWhitespace(int ch)
         {
             return Char.IsWhiteSpace((char)ch) || ch == ',';
@@ -355,6 +360,7 @@ namespace clojure.lang
             return -1;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static int readUnicodeChar(string token, int offset, int length, int radix)
         {
             if (token.Length != offset + length)
@@ -370,6 +376,7 @@ namespace clojure.lang
             return (char)uc;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static int readUnicodeChar(PushbackTextReader r, int initch, int radix, int length, bool exact)
         {
 
@@ -432,6 +439,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static Symbol garg(int n)
         {
             return Symbol.intern(null, (n == -1 ? "rest" : ("p" + n)) + "__" + RT.nextID() + "#");
@@ -442,6 +450,7 @@ namespace clojure.lang
 
         #region Reading tokens
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static string readSimpleToken(PushbackTextReader r, char initch)
         {
             StringBuilder sb = new StringBuilder();
@@ -460,6 +469,7 @@ namespace clojure.lang
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static void readToken(PushbackTextReader r, char initch, out String rawToken, out String token, out String mask, out bool eofSeen)
         {
             bool allowSymEscape = RT.booleanCast(RT.AllowSymbolEscapeVar.deref());
@@ -571,7 +581,6 @@ namespace clojure.lang
         static Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
         static Regex keywordPat = new Regex("^[:]?([^/].*/)?(/|[^/][^/]*)$");
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "maskName")]
         private static void ExtractNamesUsingMask(string token, string maskNS, string maskName, out string ns, out string name)
         {
             if (String.IsNullOrEmpty(maskNS))
@@ -586,6 +595,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static object matchSymbol(string token, string mask, Resolver resolver)
         {
             Match m = symbolPat.Match(mask);
@@ -792,10 +802,14 @@ namespace clojure.lang
 
         #region Reading numbers
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static Regex intRE = new Regex("^([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?$");
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static Regex ratioRE = new Regex("^([-+]?[0-9]+)/([0-9]+)$");
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static Regex floatRE = new Regex("^([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?$");
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static object readNumber(PushbackTextReader r, char initch)
         {
             StringBuilder sb = new StringBuilder();
@@ -907,8 +921,6 @@ namespace clojure.lang
 
         public abstract class ReaderBase : AFn
         {
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "2#")]
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "3#")]
             public override object invoke(object arg1, object arg2, object opts, object pendingForms)
             {
                 return Read((PushbackTextReader)arg1, (Char)arg2, opts, pendingForms);
@@ -1141,11 +1153,6 @@ namespace clojure.lang
         // ::a{:c 1}  => {:a.b/c 1}  (where a is aliased to a.b)
         public sealed class NamespaceMapReader : AFn
         {
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"), 
-             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#"), 
-             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "2#"), 
-             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "3#"),
-             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "1#")]
             public override object invoke(object reader, object colon, object opts, object pendingForms)
             {
 
@@ -1282,7 +1289,6 @@ namespace clojure.lang
                 Symbol.intern("-Inf"), Double.NegativeInfinity,
                 Symbol.intern("NaN"), Double.NaN);
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2201:DoNotRaiseReservedExceptionTypes")]
             protected override object Read(PushbackTextReader r, char c, object opts, object pendingForms)
             {
                 object o = read(r, true, null, true, opts, EnsurePending(pendingForms));
@@ -1359,6 +1365,7 @@ namespace clojure.lang
                 }
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             static object syntaxQuote(object form)
             {
                 bool checkMeta;
@@ -1380,7 +1387,6 @@ namespace clojure.lang
                 return ret;
             }
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
             private static object AnalyzeSyntaxQuote(object form, out bool checkMeta)
             {
                 checkMeta = true;
@@ -1525,6 +1531,7 @@ namespace clojure.lang
             }
 
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             private static ISeq sqExpandList(ISeq seq)
             {
                 IPersistentVector ret = PersistentVector.EMPTY;
@@ -1544,6 +1551,7 @@ namespace clojure.lang
                 return ret.seq();
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             private static IPersistentVector flattenMap(object form)
             {
                 IPersistentVector keyvals = PersistentVector.EMPTY;
@@ -1586,11 +1594,13 @@ namespace clojure.lang
         #region Unquote helpers
 
         // Per rev 1184
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static bool isUnquote(object form)
         {
             return form is ISeq && Util.equals(RT.first(form), UNQUOTE);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static bool isUnquoteSplicing(object form)
         {
             return form is ISeq && Util.equals(RT.first(form), UNQUOTE_SPLICING);
@@ -1741,7 +1751,6 @@ namespace clojure.lang
 
         #region Fn and Arg readers
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
         public sealed class FnReader : ReaderBase
         {
             //static ListReader _listReader = new ListReader();
@@ -1817,6 +1826,7 @@ namespace clojure.lang
                 return registerArg(Util.ConvertToInt(n));
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             static Symbol registerArg(int n)
             {
                 PersistentTreeMap argsyms = (PersistentTreeMap)ARG_ENV.deref();
@@ -1918,8 +1928,6 @@ namespace clojure.lang
             }
 
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "opts"), 
-             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "pendingForms")]
             static object ReadTagged(object o, Symbol tag, object opts, object pendingForms)
             {
                 ILookup dataReaders = (ILookup)RT.DataReadersVar.deref();
@@ -1940,8 +1948,6 @@ namespace clojure.lang
                 return dataReader.invoke(o);
             }
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "opts"), 
-             System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "pendingForms")]
             static object ReadRecord(object form, Symbol recordName, object opts, object pendingForms)
             {
                 bool readeval = RT.booleanCast(RT.ReadEvalVar.deref());
@@ -2090,7 +2096,7 @@ namespace clojure.lang
 
         static readonly object READ_STARTED = new object();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "read")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Object readCondDelimited(PushbackTextReader r, bool splicing, object opts, object pendingForms)
         {
             object result = READ_STARTED;
@@ -2207,6 +2213,7 @@ namespace clojure.lang
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         private static void checkConditionalAllowed(Object opts)
         {
             IPersistentMap mopts = (IPersistentMap)opts;
@@ -2223,16 +2230,8 @@ namespace clojure.lang
         public sealed class ReaderException : Exception, IExceptionInfo
         {
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ERR")]
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
             public const String ERR_NS = "clojure.error";
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ERR")]
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "LINE")]
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
             public static readonly Keyword ERR_LINE = Keyword.intern(ERR_NS, "line");
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "COLUMN")]
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ERR")]
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
             public static readonly Keyword ERR_COLUMN = Keyword.intern(ERR_NS, "column");
 
             readonly int _line;

@@ -21,16 +21,19 @@ namespace clojure.test
 
     public class ReflectorTryCatchFixture
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static void fail(long x)
         {
             throw new Cookies("Long");
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static void fail(double y)
         {
             throw new Cookies("Double");
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public void failWithCause(Double y)
         {
             throw new Cookies("Wrapped", new Cookies("Cause"));

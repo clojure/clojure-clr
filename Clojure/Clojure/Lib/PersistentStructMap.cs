@@ -111,7 +111,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="keys">The set of fixed keys.</param>
         /// <returns>A struct definition.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Def createSlotMap(ISeq keys)
         {
             if (keys == null)
@@ -133,7 +133,7 @@ namespace clojure.lang
         /// <param name="def">The struct definition</param>
         /// <param name="keyvals">A sequence of alternating keys and values.</param>
         /// <returns>A <see cref="PersistentStructMap">PersistentStructMap</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentStructMap create(Def def, ISeq keyvals)
         {
             object[] vals = new object[def.Keyslots.count()];
@@ -159,7 +159,7 @@ namespace clojure.lang
         /// <param name="def">A struct definition</param>
         /// <param name="valseq">A sequence of values for the fixed keys (in definition order).</param>
         /// <returns>A <see cref="PersistentStructMap">PersistentStructMap</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "construct")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentStructMap construct(Def def, ISeq valseq)
         {
             object[] vals = new object[def.Keyslots.count()];
@@ -202,7 +202,7 @@ namespace clojure.lang
         /// to allow subclasses to override this method to return instances of their own class from 
         /// all PersistentStructMap methods.
         /// </remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "make")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         protected virtual PersistentStructMap makeNew(IPersistentMap meta, Def def, object[] vals, IPersistentMap ext)
         {
             return new PersistentStructMap(meta, def, vals, ext);
@@ -265,7 +265,7 @@ namespace clojure.lang
         /// <param name="def">The struct definition.</param>
         /// <param name="key">The fixed key to access.</param>
         /// <returns>An accessor function.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static IFn getAccessor(Def def, object key)
         {
             IMapEntry e = def.Keyslots.entryAt(key);

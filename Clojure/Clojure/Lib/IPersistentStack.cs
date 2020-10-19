@@ -24,14 +24,14 @@ namespace clojure.lang
         /// Peek at the top (first) element in the stack.
         /// </summary>
         /// <returns>The top (first) element.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "peek")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         object peek();
 
         /// <summary>
         /// Returns a new stack with the top element popped.
         /// </summary>
         /// <returns>The new stack.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "pop")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         IPersistentStack pop();
     }
 }

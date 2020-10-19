@@ -18,7 +18,7 @@ namespace clojure.lang
 {
     public interface IBlockingDeref
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "deref")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         object deref(long ms, Object timeoutValue);
     }
 }

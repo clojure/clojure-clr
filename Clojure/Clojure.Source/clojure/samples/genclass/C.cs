@@ -5,12 +5,15 @@ using System.Text;
 
 namespace dm
 {
+#pragma warning disable IDE1006 // Naming Styles
     public class C1
     {
         protected int x = 0;
         protected string y = String.Empty;
 
+
         public void m1(int x) { Message("m1", x.ToString()); }
+
 
         public int m2(int x, string y) { Message("m2", x.ToString(), y); return x + y.Length; }
         public int m2(int x) { Message("m2", x.ToString()); return 2 * x; }
@@ -38,4 +41,6 @@ namespace dm
         int m2(string x);
         int m2(int x);
     }
+    
+#pragma warning restore IDE1006 // Naming Styles
 }

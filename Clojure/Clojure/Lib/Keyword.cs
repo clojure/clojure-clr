@@ -21,7 +21,6 @@ namespace clojure.lang
     /// <summary>
     /// Represents a keyword
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229:ImplementSerializationConstructors", Justification = "Not needed")]
     [Serializable]
     public sealed class Keyword: AFn, Named, IComparable, ISerializable, IHashEq // ??JAVA only used IFn, not AFn.  NOt sure why.
     {
@@ -63,7 +62,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="sym">The symbol giving the keyword's namespace/name.</param>
         /// <returns>A keyword</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Keyword intern(Symbol sym)
         {
             Keyword k = null;
@@ -95,7 +94,7 @@ namespace clojure.lang
         /// <param name="ns">The keyword's namespace name.</param>
         /// <param name="name">The keyword's name.</param>
         /// <returns>A keyword</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Keyword intern(string ns, string name)
         {
             return intern(Symbol.intern(ns, name));
@@ -106,7 +105,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="nsname">The keyword's name</param>
         /// <returns>A keyword</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Keyword intern(String nsname)
         {
             return intern(Symbol.intern(nsname));
@@ -234,7 +233,7 @@ namespace clojure.lang
         /// <param name="arg1">The object to access.</param>
         /// <param name="arg2">Default value if not found.</param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration")]
+
         public sealed override object invoke(object arg1, object notFound)
         {
             ILookup ilu = arg1 as ILookup;
@@ -330,7 +329,7 @@ namespace clojure.lang
 
         #region other
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Keyword find(Symbol sym)
         {
             WeakReference wr = _symKeyMap.Get(sym);
@@ -340,13 +339,13 @@ namespace clojure.lang
                 return null;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Keyword find(String ns, String name)
         {
             return find(Symbol.intern(ns, name));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Keyword find(String nsname)
         {
             return find(Symbol.intern(nsname));
@@ -376,7 +375,6 @@ namespace clojure.lang
 
         #region c-tors
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context")]
         KeywordSerializationHelper(SerializationInfo info, StreamingContext context)
         {
             _sym = (Symbol)info.GetValue("_sym", typeof(Symbol));

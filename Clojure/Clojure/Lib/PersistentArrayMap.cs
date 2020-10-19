@@ -30,7 +30,6 @@ namespace clojure.lang
     /// but you won't be able to distinguish a <value>null</value> value via <see cref="valAt">valAt</see> --
     /// use <see cref="contains">contains</see> or <see cref="entryAt">entryAt</see>.</para>
     /// </remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentArrayMap : APersistentMap, IObj, IEditableCollection, IMapEnumerable, IMapEnumerableTyped<Object,Object>, IEnumerable, IEnumerable<IMapEntry>, IKVReduce
     {
@@ -55,7 +54,6 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentArrayMap">PersistentArrayMap</see>. Constant.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "EMPTY")]
         public static readonly PersistentArrayMap EMPTY = new PersistentArrayMap();
 
 
@@ -70,7 +68,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="other">The BCL map to initialize from</param>
         /// <returns>A new persistent map.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static IPersistentMap create(IDictionary other)
         {
             ITransientMap ret = (ITransientMap)EMPTY.asTransient();
@@ -86,14 +84,14 @@ namespace clojure.lang
         /// <param name="init">The new key/value array</param>
         /// <returns>A new <see cref="PersistentArrayMap">PersistentArrayMap</see>.</returns>
         /// <remarks>The array is used directly.  Do not modify externally or immutability is sacrificed.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         PersistentArrayMap create(params object[] init)
         {
             return new PersistentArrayMap(meta(), init);
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentArrayMap createWithCheck(Object[] init)
         {
             for (int i = 0; i < init.Length; i += 2)
@@ -108,8 +106,7 @@ namespace clojure.lang
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "AsIf"), 
-         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentArrayMap createAsIfByAssoc(Object[] init)
         {
             if ((init.Length & 1) == 1)
@@ -418,6 +415,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="init">The array of key/value pairs.</param>
         /// <returns>A new <see cref="IPersistentMap">IPersistentMap</see>.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         private IPersistentMap createHT(object[] init)
         {
             return PersistentHashMap.create(meta(), init);
@@ -687,7 +685,7 @@ namespace clojure.lang
 
         #region kvreduce
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "kvreduce")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object kvreduce(IFn f, object init)
         {
             for (int i = 0; i < _array.Length; i += 2)

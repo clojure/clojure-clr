@@ -22,7 +22,7 @@ namespace clojure.runtime
     /// <summary>
     /// Implements part of the functionaligy of java.util.Properties.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces"), Serializable]
+    [Serializable]
     public sealed class Properties : Dictionary<string,string>
     {
 
@@ -36,7 +36,7 @@ namespace clojure.runtime
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public string getProperty(string key)
         {
             string value = null;

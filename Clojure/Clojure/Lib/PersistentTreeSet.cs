@@ -20,7 +20,6 @@ namespace clojure.lang
     /// <summary>
     /// Implements an persistent, ordered set.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentTreeSet : APersistentSet, IObj, Reversible, Sorted
     {
@@ -31,7 +30,6 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentTreeSet">PersistentTreeSet</see>.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "EMPTY")]
         public static readonly PersistentTreeSet EMPTY = new PersistentTreeSet(null, PersistentTreeMap.EMPTY);
 
         #endregion
@@ -43,7 +41,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="init">A sequence of elements.</param>
         /// <returns>A <see cref="PersistentTreeSet">PersistentTreeSet</see>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentTreeSet create(ISeq init)
         {
             PersistentTreeSet ret = EMPTY;
@@ -59,7 +57,7 @@ namespace clojure.lang
         /// <param name="comp"></param>
         /// <param name="init"></param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static PersistentTreeSet create(IComparer comp, ISeq init)
         {
             PersistentTreeSet ret = new PersistentTreeSet(null, new PersistentTreeMap(null, comp));
@@ -100,7 +98,7 @@ namespace clojure.lang
             return base.GetHashCode();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#")]
+
         public override bool equiv(Object obj)
         {
             try

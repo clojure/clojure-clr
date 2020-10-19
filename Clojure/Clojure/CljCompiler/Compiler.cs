@@ -27,8 +27,6 @@ using System.Collections;
 
 namespace clojure.lang
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces"), 
-     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     public static class Compiler
     {
         #region other constants
@@ -66,9 +64,9 @@ namespace clojure.lang
         public static readonly Symbol LetSym = Symbol.intern("let*");
         public static readonly Symbol LetfnSym = Symbol.intern("letfn*");
         public static readonly Symbol DoSym = Symbol.intern("do");
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
+    
         public static readonly Symbol FnSym = Symbol.intern("fn*");
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
+    
         public static readonly Symbol FnOnceSym = (Symbol) Symbol.intern("fn*").withMeta(RT.map(Keyword.intern(null, "once"), true));
         public static readonly Symbol QuoteSym = Symbol.intern("quote");
         public static readonly Symbol TheVarSym = Symbol.intern("var");
@@ -117,7 +115,6 @@ namespace clojure.lang
         internal static readonly Keyword RedefKeyword = Keyword.intern("redef");
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
         internal static readonly Keyword DisableLocalsClearingKeyword = Keyword.intern("disable-locals-clearing");
 
         internal static readonly Keyword DirectLinkingKeyword = Keyword.intern("direct-linking");
@@ -201,7 +198,6 @@ namespace clojure.lang
         internal static readonly Var CompilerContextVar = Var.create(null).setDynamic();
         internal static readonly Var CompilerActiveVar = Var.create(false).setDynamic();
         
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible")]  
         public static Var CompilerOptionsVar;
 
         public static object GetCompilerOption(Keyword k)
@@ -259,7 +255,6 @@ namespace clojure.lang
 
         #region Special forms
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "specials")]
         public static readonly IPersistentMap specials = PersistentHashMap.create(
             DefSym, new DefExpr.Parser(),
             LoopSym, new LetExpr.Parser(),
@@ -387,7 +382,6 @@ namespace clojure.lang
 
         #region C-tors & factory methods
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static Compiler()
         {
             for (int i = 0; i <= Compiler.MaxPositionalArity; i++)
@@ -408,7 +402,7 @@ namespace clojure.lang
 
         // TODO: we have duplicate code below.
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "resolve")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Symbol resolveSymbol(Symbol sym)
         {
             //already qualified or classname?
@@ -441,13 +435,13 @@ namespace clojure.lang
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "namespace")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Namespace namespaceFor(Symbol sym)
         {
             return namespaceFor(CurrentNamespace, sym);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "namespace")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Namespace namespaceFor(Namespace inns, Symbol sym)
         {
             //note, presumes non-nil sym.ns
@@ -516,7 +510,7 @@ namespace clojure.lang
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "maybe")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object maybeResolveIn(Namespace n, Symbol symbol)
         {
             // note: ns-qualified vars must already exist
@@ -767,7 +761,6 @@ namespace clojure.lang
             return null;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         internal static Type MaybeClrType(ICollection<Expr> exprs)
         {
             Type match = null;
@@ -936,12 +929,8 @@ namespace clojure.lang
              '?', "_QMARK_"
              );
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         public static IPersistentMap CHAR_MAP { get { return _charMap; } }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         static readonly public IPersistentMap DEMUNGE_MAP = CreateDemungeMap();
 
         private static IPersistentMap CreateDemungeMap()
@@ -968,9 +957,7 @@ namespace clojure.lang
                 return ((String)y).Length - ((String)x).Length;
             }
         }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+    
         static readonly public Regex DEMUNGE_PATTERN = CreateDemungePattern();
 
         private static Regex CreateDemungePattern()
@@ -999,9 +986,9 @@ namespace clojure.lang
             return new Regex(sb.ToString());
         }
 
-        
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "munge")]
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static string munge(string name)
         {
             StringBuilder sb = new StringBuilder();
@@ -1016,7 +1003,7 @@ namespace clojure.lang
             return sb.ToString();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "demunge")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static String demunge(string mungedNamed)
         {
             StringBuilder sb = new StringBuilder();
@@ -1047,8 +1034,7 @@ namespace clojure.lang
         /// <param name="form"></param>
         /// <returns></returns>
         /// <remarks>Initial lowercase for core.clj compatibility</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes"), 
-         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "eval")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object eval(object form)
         {
             IPersistentMap meta = RT.meta(form);
@@ -1160,7 +1146,7 @@ namespace clojure.lang
         /// <param name="form"></param>
         /// <returns></returns>
         /// <remarks>Initial lowercase for core.clj compatibility</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "macroexpand")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object macroexpand1(object form)
         {
             ISeq s = form as ISeq;
@@ -1178,7 +1164,7 @@ namespace clojure.lang
         }
 
         //public static Regex UnpackFnNameRE = new Regex("^(.+)/$([^_]+)(__[0-9]+)*$");
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
+    
         public readonly static Regex FnNameSuffixRE = new Regex("__[0-9]+$");
         static String RemoveFnSuffix(string s)
         {
@@ -1499,12 +1485,10 @@ namespace clojure.lang
                 && GetLocation(spanMap, RT.EndColumnKey, out finishCol);
         }
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "name")]
         static GenContext CreateEvalContext(string name, bool createDynInitHelper)
         {
-            GenContext c = GenContext.CreateWithInternalAssembly("eval", createDynInitHelper);
-            //GenContext c = GenContext.CreateWithExternalAssembly("eval", ".dll", true);  // for debugging use with SaveEvalContext
+            GenContext c = GenContext.CreateWithInternalAssembly(name, createDynInitHelper);
+            //GenContext c = GenContext.CreateWithExternalAssembly(name, ".dll", true);  // for debugging use with SaveEvalContext
             return c;
         }
 
@@ -1561,7 +1545,6 @@ namespace clojure.lang
             return null;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "sourceDirectory")]
         public static object Compile(GenContext context,TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
         {
             object eofVal = new object();
@@ -1706,7 +1689,6 @@ namespace clojure.lang
         
         #region Loading
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.Reflection.Assembly.LoadFrom")]
         internal static void LoadAssembly(FileInfo assyInfo, string relativePath)
         {
             Assembly assy;
@@ -1773,7 +1755,6 @@ namespace clojure.lang
                 return assy.GetType(typeName);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private static void InitAssembly(Assembly assy, string relativePath)
         {
             Type initType = GetTypeFromAssy(assy,InitClassName(relativePath));
@@ -1819,7 +1800,7 @@ namespace clojure.lang
             return true;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object loadFile(string fileName)
         {
             FileInfo finfo = new FileInfo(fileName);
@@ -1830,13 +1811,13 @@ namespace clojure.lang
                 return load(rdr, finfo.FullName, finfo.Name, fileName);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object load(TextReader rdr)
         {
             return load(rdr, null, "NO_SOURCE_FILE", null);  // ?
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object load(TextReader rdr, string relativePath)
         {
             return load(rdr, null, "NO_SOURCE_FILE", relativePath);  // ?
@@ -1863,7 +1844,7 @@ namespace clojure.lang
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "relativePath"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "load")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object load(TextReader rdr, string sourcePath, string sourceName, string relativePath)
         {
             object ret = null;
@@ -1945,7 +1926,6 @@ namespace clojure.lang
             return Analyze(pcontext, form, null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         public static Expr Analyze(ParserContext pcontext, object form, string name)
         {
             try
@@ -2224,7 +2204,6 @@ namespace clojure.lang
 			        return "macroexpanding";
             }
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "cause")]
             public static String MakeMsg(String source, int line, int column, Symbol sym, Keyword phase, Exception cause)
             {
                 return (PhaseMacroExpandKeyword.Equals(phase) ? "Unexpected error " : "Syntax error ") +

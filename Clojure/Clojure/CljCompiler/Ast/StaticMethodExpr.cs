@@ -25,7 +25,6 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Type _type;
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods")]
         public Type Type { get { return _type; } }
 
         static readonly Keyword warnOnBoxedKeyword = Keyword.intern("warn-on-boxed");
@@ -134,8 +133,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return _method != null && Intrinsics.HasPred(_method);
         }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "rhc")]
         internal void EmitIntrinsicPredicate(RHC rhc, ObjExpr objx, CljILGen ilg, Label falseLabel)
         {
             GenContext.EmitDebugInfo(ilg, _spanMap);

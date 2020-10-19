@@ -18,6 +18,7 @@ namespace clojure.lang
     /// <summary>
     ///  Represents an object with a value that can be set.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
     public interface Settable
     {
         /// <summary>
@@ -26,7 +27,7 @@ namespace clojure.lang
         /// <param name="val">The new value</param>
         /// <returns>The new value.</returns>
         /// <remarks>Can only be called in a transaction or with a binding on the stack, else throws an exception.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         object doSet(object val);
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="val">The new value</param>
         /// <returns>The new value.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "do")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         object doReset(object val);
     }
 }

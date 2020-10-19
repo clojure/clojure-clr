@@ -5,6 +5,8 @@ using System.Text;
 
 namespace dm.interop
 {
+#pragma warning disable IDE1006 // Naming Styles
+#pragma warning disable CA1822 // Mark members as static
     public class C1
     {
         // Testing property/field/0-arity-method
@@ -192,5 +194,6 @@ namespace dm.interop
 
     }
 
-
+#pragma warning restore IDE1006 // Naming Styles
+#pragma warning restore CA1822 // Mark members as static
 }

@@ -19,20 +19,21 @@ namespace clojure.lang
     /// Represents an object that has a namespace/name.
     /// </summary>
     /// <remarks>Lowercase-named methods for compatibility with the JVM implementation.</remarks>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
     public interface Named
     {
         /// <summary>
         /// Gets the namespace name for the object.
         /// </summary>
         /// <returns>The namespace name.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         string getNamespace();
 
         /// <summary>
         /// Gets the name of the object
         /// </summary>
         /// <returns>The name.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         string getName();
     }
 }

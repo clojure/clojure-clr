@@ -26,7 +26,7 @@ namespace clojure.lang
         /// <param name="f">The function to apply.</param>
         /// <returns>The reduced value</returns>
         /// <remarks>Computes f(...f(f(f(i0,i1),i2),i3),...).</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "reduce")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         object reduce(IFn f);
     }
 }

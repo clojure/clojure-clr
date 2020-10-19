@@ -447,7 +447,6 @@ namespace clojure.lang
         /// </para>
         /// <para>The Java and the DLR code are very similar.</para>
         /// </remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object,System.Object)")]
         public string ToString(uint radix)
         {
             if ( radix < MinRadix || radix > MaxRadix )
@@ -1662,7 +1661,6 @@ namespace clojure.lang
         /// <param name="provider">(Ignored)</param>
         /// <returns>The converted value</returns>
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a Decimal.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "clojure.lang.BigInteger.ToDecimal")]
         public decimal ToDecimal(IFormatProvider provider)
         {
             return ToDecimal();
@@ -1699,7 +1697,6 @@ namespace clojure.lang
         /// <param name="provider">(Ignored)</param>
         /// <returns>The converted value</returns>
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a Int32.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "clojure.lang.BigInteger.ToInt32")]
         public int ToInt32(IFormatProvider provider)
         {
             return ToInt32();
@@ -1711,7 +1708,6 @@ namespace clojure.lang
         /// <param name="provider">(Ignored)</param>
         /// <returns>The converted value</returns>
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a Int64.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "clojure.lang.BigInteger.ToInt64")]
         public long ToInt64(IFormatProvider provider)
         {
             return ToInt64();
@@ -1789,7 +1785,6 @@ namespace clojure.lang
         /// <param name="provider">(Ignored)</param>
         /// <returns>The converted value</returns>
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a UInt32.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "clojure.lang.BigInteger.ToUInt32")]
         public uint ToUInt32(IFormatProvider provider)
         {
             return ToUInt32();
@@ -1801,7 +1796,6 @@ namespace clojure.lang
         /// <param name="provider">(Ignored)</param>
         /// <returns>The converted value</returns>
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a UInt64.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "clojure.lang.BigInteger.ToUInt64")]      
         public ulong ToUInt64(IFormatProvider provider)
         {
             return ToUInt64();

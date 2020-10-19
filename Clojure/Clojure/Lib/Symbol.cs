@@ -56,18 +56,18 @@ namespace clojure.lang
 
         // the create thunks preserve binary compatibility with code compiled
         // against earlier version of Clojure and can be removed (at some point).
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Symbol create(String ns, String name)
         {
             return Symbol.intern(ns, name);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Symbol create(String nsname)
         {
             return Symbol.intern(nsname);
         }
-    
+
 
         /// <summary>
         /// Intern a symbol with the given name  and namespace-name.
@@ -79,7 +79,7 @@ namespace clojure.lang
         /// Interning here does not imply uniquifying.  
         /// The strings for the namespace-name and the symbol-name are uniquified.
         /// </remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "intern")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public Symbol intern(string ns, string name)
         {
             return new Symbol(ns, name);
@@ -90,7 +90,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="nsname">The (possibly qualified) name</param>
         /// <returns>A new symbol.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "intern")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public Symbol intern(string nsname)
         {
             int i = nsname.IndexOf('/');
@@ -276,13 +276,13 @@ namespace clojure.lang
 
         #region IFn members
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#")]
+
         public override object invoke(Object obj)
         {
             return RT.get(obj, this);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration")]
+
         public override object invoke(Object obj, Object notFound)
         {
             return RT.get(obj, this, notFound);

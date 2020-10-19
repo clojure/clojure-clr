@@ -18,7 +18,7 @@ namespace clojure.lang
     /// <summary>
     /// Marks an object that can be used in a functional position in a Clojure form.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM compatability")]
     public interface Fn
     {
         // marker interface

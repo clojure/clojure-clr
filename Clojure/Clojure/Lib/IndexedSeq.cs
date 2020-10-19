@@ -18,13 +18,14 @@ namespace clojure.lang
     /// <summary>
     /// Indicates a sequence that has a current index.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM compatability")]
     public interface IndexedSeq : ISeq, Sequential, Counted
     {
         /// <summary>
         /// Gets the index associated with this sequence.
         /// </summary>
         /// <returns>The index associated with this sequence.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "index")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         int index();
     }
 }

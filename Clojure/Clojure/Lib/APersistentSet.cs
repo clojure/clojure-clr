@@ -99,7 +99,7 @@ namespace clojure.lang
             return setEquals(this, obj);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static bool setEquals(IPersistentSet s1, object obj)
         {
             // I really can't do what the Java version does.

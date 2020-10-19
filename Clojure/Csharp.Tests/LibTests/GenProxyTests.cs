@@ -23,6 +23,10 @@ using NExpect;
 
 namespace Clojure.Tests.LibTests
 {
+#pragma warning disable IDE1006 // Naming Styles
+#pragma warning disable CA1822 // Mark members as static
+#pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable IDE0060 // Remove unused parameter
 
     [TestFixture]
     public class GenProxyObjectOnlyTests
@@ -57,6 +61,7 @@ namespace Clojure.Tests.LibTests
     {
         public class Impl1
         {
+
             public int im1(int s) { return 2 * s; }
             public int im1(string s) { return s.Length; }
             int im2(int s) { return 3 * s; }
@@ -1108,5 +1113,8 @@ namespace Clojure.Tests.LibTests
     }
 
     #endregion
-
+#pragma warning restore IDE1006 // Naming Styles
+#pragma warning restore CA1822 // Mark members as static
+#pragma warning restore CA1822 // Mark members as static
+#pragma warning restore IDE0060 // Remove unused parameter
 }

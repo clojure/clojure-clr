@@ -16,6 +16,7 @@
 namespace clojure.lang
 {
     // marker interface
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
     public interface MapEquivalence
     {
     }

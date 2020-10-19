@@ -22,7 +22,7 @@ namespace clojure.lang
     /// Represents a multifunction.
     /// </summary>
     /// <remarks>See the Clojure documentation for more details.</remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
     public class MultiFn : AFn, IDisposable
     {
         #region Data
@@ -103,7 +103,7 @@ namespace clojure.lang
         /// <param name="dispatchFn">The dispatch function.</param>
         /// <param name="defaultDispatchVal">The default dispatch value.</param>
         /// <param name="hierarchy">The hierarchy for this multifunction</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public MultiFn(string name, IFn dispatchFn, object defaultDispatchVal, IRef hierarchy)
         {
             _name = name;
@@ -127,7 +127,7 @@ namespace clojure.lang
         /// <param name="dispatchVal">The discriminator value for this method.</param>
         /// <param name="method">The method code.</param>
         /// <returns>This multifunction.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public MultiFn addMethod(object dispatchVal, IFn method)
         {
             _rw.EnterWriteLock();
@@ -149,7 +149,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="dispatchVal">The dispatch value for the multimethod.</param>
         /// <returns>This multifunction.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remove")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public MultiFn removeMethod(object dispatchVal)
         {
             _rw.EnterWriteLock();
@@ -171,7 +171,7 @@ namespace clojure.lang
         /// <param name="dispatchValX">The more preferred dispatch value.</param>
         /// <param name="dispatchValY">The less preferred dispatch value.</param>
         /// <returns>This multifunction.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "prefer")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public MultiFn preferMethod(object dispatchValX, object dispatchValY)
         {
             _rw.EnterWriteLock();
@@ -263,7 +263,7 @@ namespace clojure.lang
         /// <param name="dispatchVal">The dispatch value.</param>
         /// <returns>The preferred method for the value.</returns>
         /// <remarks>lower initial letter for core.clj compatibility</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public IFn getMethod(object dispatchVal)
         {
             if (_cachedHierarchy != _hierarchy.deref())
@@ -358,7 +358,7 @@ namespace clojure.lang
         /// Get the map of dispatch values to dispatch fns.
         /// </summary>
         /// <returns>The map of dispatch values to dispatch fns.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public IPersistentMap getMethodTable()
         {
             return MethodTable;
@@ -369,13 +369,13 @@ namespace clojure.lang
         /// Get the map of preferred value to set of other values.
         /// </summary>
         /// <returns>The map of preferred value to set of other values.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public IPersistentMap getPreferTable()
         {
             return PreferTable;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "reset")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public MultiFn reset()
         {
             _rw.EnterWriteLock();
@@ -391,9 +391,7 @@ namespace clojure.lang
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Fn"), 
-         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dispatch"), 
-         System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dispatchFn")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public IFn dispatchFn()
         {
             return _dispatchFn;
@@ -403,6 +401,7 @@ namespace clojure.lang
 
         #region IFn members
 
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
 
         public override object invoke()
         {
@@ -780,7 +779,7 @@ namespace clojure.lang
                              Util.Ret1(arg20, arg20 = null),
                             args);
         }
-
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
 
         #endregion
 

@@ -32,7 +32,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         int _id = 0;
-        AssemblyGen _assemblyGen = null;
+        readonly AssemblyGen _assemblyGen = null;
         TypeBuilder _typeBuilder =  null;
         TypeGen _typeGen = null;
 
@@ -119,7 +119,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private Expression RewriteCallSite(CallSite site, TypeGen tg, Type delegateType, out SiteInfo siteInfo)
         {
-            if (!(site.Binder is IExpressionSerializable serializer))
+            if (!(site.Binder is IExpressionSerializable))
             {
                 throw new ArgumentException("Generating code from non-serializable CallSiteBinder.");
             }

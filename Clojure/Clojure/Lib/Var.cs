@@ -30,7 +30,7 @@ namespace clojure.lang
     /// Every Var can (but needn't) have a root binding, 
     /// which is a binding that is shared by all threads that do not have a per-thread binding."</blockquote>
     /// </remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229:ImplementSerializationConstructors"), Serializable]
+    [Serializable]
     public sealed class Var : ARef, IFn, IRef, Settable, ISerializable
     {
         #region class TBox
@@ -235,7 +235,7 @@ namespace clojure.lang
             get { return _sym; }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public Symbol sym
         {
             get { return _sym; }
@@ -265,7 +265,7 @@ namespace clojure.lang
         /// <param name="sym">The name.</param>
         /// <param name="root">The root value.</param>
         /// <returns>The var that was found or created.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Var intern(Namespace ns, Symbol sym, object root)
         {
             return intern(ns, sym, root, true);
@@ -279,7 +279,7 @@ namespace clojure.lang
         /// <param name="root">The root value.</param>
         /// <param name="replaceRoot">Replace an existing root value if <value>true</value>.</param>
         /// <returns>The var that was found or created.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Var intern(Namespace ns, Symbol sym, object root, bool replaceRoot)
         {
             Var dvout = ns.intern(sym);
@@ -294,7 +294,7 @@ namespace clojure.lang
         /// <param name="nsName">The name of the namespace.  (A namespace with this name will be created if not existing already.)</param>
         /// <param name="sym">The name of the var.</param>
         /// <returns>The var that was found or created.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Var intern(Symbol nsName, Symbol sym)
         {
             Namespace ns = Namespace.findOrCreate(nsName);
@@ -308,7 +308,7 @@ namespace clojure.lang
         /// <param name="sym">The name of the var.</param>
         /// <returns>The var that was found or created.</returns>
         /// <remarks>Added in Java Rev 1110.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Var internPrivate(string nsName, String sym)
         {
             Namespace ns = Namespace.findOrCreate(Symbol.intern(nsName));
@@ -323,7 +323,7 @@ namespace clojure.lang
         /// <param name="ns">The namespace.</param>
         /// <param name="sym">The name.</param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Var intern(Namespace ns, Symbol sym)
         {
             return ns.intern(sym);
@@ -333,7 +333,7 @@ namespace clojure.lang
         /// Create an uninterned var.
         /// </summary>
         /// <returns>An uninterned var.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Var create()
         {
             return new Var(null, null);
@@ -344,7 +344,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="root">The root value.</param>
         /// <returns>An uninterned var.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Var create(object root)
         {
             return new Var(null, null, root);
@@ -397,19 +397,19 @@ namespace clojure.lang
 
         #region Frame management
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Object getThreadBindingFrame()
         {
             return CurrentFrame;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Object cloneThreadBindingFrame()
         {
             return CurrentFrame.Clone();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static void resetThreadBindingFrame(Object frame)
         {
             CurrentFrame = (Frame)frame;
@@ -419,21 +419,21 @@ namespace clojure.lang
 
         #region Dynamic flag management
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public Var setDynamic()
         {
             _dynamic = true;
             return this;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public Var setDynamic(bool b)
         {
             _dynamic = b;
             return this;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public bool isDynamic()
         {
             return _dynamic;
@@ -449,7 +449,7 @@ namespace clojure.lang
         /// <param name="m">The metadata to attach.</param>
         /// <remarks>The metadata must contain entries for the namespace and name.
         /// <para>Lowercase name for core.clj compatability.</para></remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public void setMeta(IPersistentMap m)
         { 
             // ensure these basis keys
@@ -460,7 +460,7 @@ namespace clojure.lang
         /// Add a macro=true flag to the metadata.
         /// </summary>
         /// <remarks>Lowercase name for core.clj compatability.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public void setMacro()
         {
             //alterMeta(_assoc, RT.list(_macroKey, RT.T));
@@ -478,7 +478,7 @@ namespace clojure.lang
         /// <summary>
         /// Is the var public?
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public bool isPublic
         {
             get { return !RT.booleanCast(meta().valAt(_privateKey)); }
@@ -501,7 +501,7 @@ namespace clojure.lang
         /// <summary>
         /// Does the var have value?
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public bool isBound
         {
             get { return hasRoot() || (_threadBound.get() && CurrentFrame.Bindings.containsKey(this)); }
@@ -512,19 +512,19 @@ namespace clojure.lang
         /// Does the var have a root value?
         /// </summary>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public bool hasRoot()
         {
             return !(_root is Unbound);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object getRawRoot()
         {
             return _root;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object alter(IFn fn, ISeq args)
         {
             set(fn.applyTo(RT.cons(deref(), args)));
@@ -537,7 +537,7 @@ namespace clojure.lang
         /// <param name="val">The new value.</param>
         /// <returns>the new value.</returns>
         /// <remarks>It is an error to set the root binding with this method.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object set(object val)
         {
             Validate(getValidator(), val);
@@ -556,7 +556,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="root">The new value.</param>
         /// <remarks>binding root clears macro flag
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void bindRoot(object root)
         {
@@ -573,6 +573,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="root">The new value.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         void swapRoot(object root)
         {
             Validate(getValidator(), root);
@@ -614,7 +615,7 @@ namespace clojure.lang
         /// <param name="args">Additional arguments.</param>
         /// <returns>The new value.</returns>
         /// <remarks> initial lowercase in name needed for core.clj</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public object alterRoot(IFn fn, ISeq args)
         {
@@ -637,8 +638,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="bindings">The new bindings.</param>
         /// <remarks>Lowercase name for core.clj compatability.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static void pushThreadBindings(Associative bindings)
         {
             Frame f = CurrentFrame;
@@ -660,7 +660,7 @@ namespace clojure.lang
         /// Pop the topmost binding frame from the stack.
         /// </summary>
         /// <remarks>Lowercase name for core.clj compatability.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static void popThreadBindings()
         {
             Frame f = CurrentFrame.Prev;
@@ -677,7 +677,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns></returns>
         /// <remarks>Lowercase name for core.clj compatability.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Associative getThreadBindings()
         {
             Frame f = CurrentFrame;
@@ -697,7 +697,7 @@ namespace clojure.lang
         /// Get the box of the current binding on the stack for this var, or null if no binding.
         /// </summary>
         /// <returns>The box of the current binding on the stack (or null if no binding).</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public TBox getThreadBinding()
         {
             if (_threadBound.get())
@@ -720,7 +720,7 @@ namespace clojure.lang
             return (IFn)deref();
         }
 
-
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
         public object invoke()
         {
             return GetFn().invoke();
@@ -962,8 +962,8 @@ namespace clojure.lang
                 Util.Ret1(arg2,arg2=null),
                 Util.Ret1(arg3,arg3=null), 
                 Util.Ret1(arg4,arg4=null), 
-                Util.Ret1(arg5,arg5=null), 
-                Util.Ret1(arg6,arg6=null), 
+                Util.Ret1(arg5,arg5=null),
+                Util.Ret1(arg6,arg6=null),
                 Util.Ret1(arg7,arg7=null), 
                 Util.Ret1(arg8,arg8=null), 
                 Util.Ret1(arg9,arg9=null), 
@@ -1083,8 +1083,8 @@ namespace clojure.lang
                 Util.Ret1(arg20,arg20=null), 
                 (Object[])Util.Ret1(args,args=null));
         }
-
-        public  object applyTo(ISeq arglist)
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
+        public object applyTo(ISeq arglist)
         {
             return GetFn().applyTo(arglist);
         }
@@ -1101,7 +1101,7 @@ namespace clojure.lang
         /// Why?  Perhaps to avoid having to change Var.get() references all over.  
         /// For example, core.clj still has var-get calling this.
         /// But then they rename all uses anyway.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object get()
         {
             if (!_threadBound.get())
@@ -1145,7 +1145,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="nsQualifiedSym">A namespace-qualified symbol.</param>
         /// <returns>The var, if found.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Var find(Symbol nsQualifiedSym)
         {
             if (nsQualifiedSym.Namespace == null)
@@ -1160,19 +1160,19 @@ namespace clojure.lang
         /// The namespace this var is interned in.
         /// </summary>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public Namespace ns
         {
             get { return Namespace; }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object getTag()
         {
             return Tag;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public void setTag(Symbol tag)
         {
             Tag = tag;
@@ -1275,7 +1275,6 @@ namespace clojure.lang
 
         #region c-tors
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "context")]
         VarSerializationHelper(SerializationInfo info, StreamingContext context)
         {
             _ns = (Namespace)info.GetValue("_ns", typeof(Namespace));

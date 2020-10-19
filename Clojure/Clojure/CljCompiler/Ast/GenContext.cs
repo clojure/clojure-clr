@@ -77,7 +77,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region C-tors & factory methods
 
-        private static Dictionary<Assembly, bool> InternalAssemblies = new Dictionary<Assembly, bool>();
+        private readonly static Dictionary<Assembly, bool> InternalAssemblies = new Dictionary<Assembly, bool>();
 
         private static void AddInternalAssembly(Assembly a)
         {
@@ -236,8 +236,8 @@ namespace clojure.lang.CljCompiler.Ast
                 if (Compiler.GetLocations(spanMap, out int startLine, out int startCol, out int finishLine, out int finishCol))
                     return AstUtils.AddDebugInfo(expr,
                         _docInfo,
-                        new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.StartLineKey), (int)spanMap.valAt(RT.StartColumnKey)),
-                        new Microsoft.Scripting.SourceLocation(0, (int)spanMap.valAt(RT.EndLineKey), (int)spanMap.valAt(RT.EndColumnKey)));
+                        new Microsoft.Scripting.SourceLocation(0, startLine, startCol),
+                        new Microsoft.Scripting.SourceLocation(0, finishLine, finishCol));
             }
             return expr;
         }
@@ -253,11 +253,7 @@ namespace clojure.lang.CljCompiler.Ast
 #if NET461
             if ( _docWriter != null && spanMap != null )
             {
-                int startLine;
-                int startCol;
-                int finishLine;
-                int finishCol;
-                if (Compiler.GetLocations(spanMap, out startLine, out startCol, out finishLine, out finishCol))
+                if (Compiler.GetLocations(spanMap, out int startLine, out int startCol, out int finishLine, out int finishCol))
                 {
                     try
                     {

@@ -50,9 +50,9 @@ namespace clojure.clr.api
     /// map.invoke(inc, Clojure.read("[1 2 3]"));
     /// </code>
     /// </remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces")]
     public static class Clojure
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         private static Symbol asSym(object o)
         {
             String str = o as String;
@@ -65,7 +65,7 @@ namespace clojure.clr.api
         /// </summary>
         /// <param name="qualifiedName">a String or clojure.lang.Symbol</param>
         /// <returns>a clojure.lang.IFn</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "var")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static IFn var(object qualifiedName)
         {
             Symbol s = asSym(qualifiedName);
@@ -78,7 +78,7 @@ namespace clojure.clr.api
         /// <param name="ns">a String or clojure.lang.Symbol</param>
         /// <param name="name">a String or clojure.lang.Symbol</param>
         /// <returns>a clojure.lang.IFn</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "var")] 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static IFn var(object ns, object name)
         {
             return Var.intern(asSym(ns), asSym(name));
@@ -89,13 +89,12 @@ namespace clojure.clr.api
         /// </summary>
         /// <param name="s">a string</param>
         /// <returns>an Object or nil</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "read")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object read(string s)
         {
             return EdnReadString.invoke(s);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static Clojure()
         {
             Symbol edn = (Symbol)var("clojure.core", "symbol").invoke("clojure.edn");

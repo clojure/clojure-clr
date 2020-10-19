@@ -54,7 +54,7 @@ namespace clojure.lang
             this._val = val;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static MapEntry create(object key, object val)
         {
             return new MapEntry(key, val);

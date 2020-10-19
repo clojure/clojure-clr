@@ -30,7 +30,7 @@ namespace clojure.lang
 
         #region Ctors and factories
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static TaggedLiteral create(Symbol tag, Object form)
         {
             return new TaggedLiteral(tag, form);

@@ -39,7 +39,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "target")]
         public StaticInvokeExpr(Type target, MethodInfo method, bool variadic, IPersistentVector args, object tag)
         {
             //_target = target;

@@ -63,7 +63,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="x">The object to force.</param>
         /// <returns>The computed valued (if a delay); the object itself (if not a delay).</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "force")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object force(object x)
         {
             Delay delay = x as Delay;
@@ -81,7 +81,6 @@ namespace clojure.lang
         /// </summary>
         /// <returns>The value</returns>
         /// <remarks>Forces the computation if it has not happened yet.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public object deref()
         {
             if (_fn != null)

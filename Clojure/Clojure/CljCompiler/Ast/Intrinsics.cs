@@ -21,7 +21,6 @@ using Microsoft.Scripting.Generation;
 
 namespace clojure.lang.CljCompiler.Ast
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
     public static class Intrinsics
     {
         #region Data
@@ -57,7 +56,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region c-tors
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static Intrinsics()
         {
             Type nt = typeof(Numbers);

@@ -23,7 +23,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Data
 
         readonly Keyword _kw;
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Kw")]
+
         public Keyword Kw { get { return _kw; } }
 
         #endregion

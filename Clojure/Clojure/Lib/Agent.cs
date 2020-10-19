@@ -83,7 +83,7 @@ namespace clojure.lang
         /// Number of items in the queue.  For core.clj compatibility.
         /// </summary>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public int getQueueCount()
         {
             return QueueCount;
@@ -176,7 +176,7 @@ namespace clojure.lang
 
         #region Agent methods
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public Exception getError()
         {
             return _aq.Get()._error;
@@ -191,31 +191,31 @@ namespace clojure.lang
         //    _errors = null;
         //}
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public void setErrorMode(Keyword k)
         {
             _errorMode = k;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public Keyword getErrorMode()
         {
             return _errorMode;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "set")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public void setErrorHandler(IFn f)
         {
             _errorHandler = f;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "get")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public IFn getErrorHandler()
         {
             return _errorHandler;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "restart")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         [MethodImpl(MethodImplOptions.Synchronized)]
         public object restart(object newState, bool clearActions)
         {
@@ -254,7 +254,7 @@ namespace clojure.lang
         /// <param name="solo"><value>true</value> means execute on its own thread (send-off); 
         /// <value>false</value> means use a thread pool thread (send).</param>
         /// <returns>This agent.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "dispatch")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object dispatch(IFn fn, ISeq args, Boolean solo)
         {
             Exception error = getError();
@@ -329,7 +329,7 @@ namespace clojure.lang
         /// Shutdown all threads executing.
         /// </summary>
         /// <remarks>We need to work on this.</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "shutdown")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static void shutdown()
         {
             // JAVA: soloExecutor.shutdown();
@@ -400,7 +400,7 @@ namespace clojure.lang
             /// <summary>
             /// Send the message.
             /// </summary>
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             public void execute()
             {
                 try
@@ -436,7 +436,6 @@ namespace clojure.lang
             /// </summary>
             /// <param name="state">(not used)</param>
             /// <remarks>corresponds to doRun in Java version</remarks>
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
             void ExecuteAction(object state)
             {
                 try
@@ -503,7 +502,7 @@ namespace clojure.lang
         /// </summary>
         /// <returns></returns>
         /// <remarks>lowercase for core.clj compatibility</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "release")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static int releasePendingSends()
         {
             IPersistentVector sends = Agent.Nested;

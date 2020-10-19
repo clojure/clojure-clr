@@ -37,10 +37,8 @@ namespace clojure.lang
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ZERO")]
         public static readonly BigInt ZERO = new BigInt(0, null);
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "ONE")]
         public static readonly BigInt ONE = new BigInt(1, null);
 
         #endregion
@@ -53,7 +51,7 @@ namespace clojure.lang
             _bipart = bipart;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "from")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static BigInt fromBigInteger(BigInteger val)
         {
             long n;
@@ -62,13 +60,13 @@ namespace clojure.lang
             return new BigInt(0, val);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "from")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static BigInt fromLong(long val)
         {
             return new BigInt(val, null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "value")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static BigInt valueOf(long val)
         {
             return new BigInt(val, null);
@@ -195,7 +193,7 @@ namespace clojure.lang
 
         #region Conversions
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "to")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public BigInteger toBigInteger()
         {
             if (_bipart == null)
@@ -204,7 +202,7 @@ namespace clojure.lang
                 return _bipart;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "int")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public int intValue()
         {
             if (_bipart == null)
@@ -213,7 +211,7 @@ namespace clojure.lang
                 return _bipart.ToInt32();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "long")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public long longValue()
         {
             if (_bipart == null)
@@ -222,7 +220,7 @@ namespace clojure.lang
                 return _bipart.ToInt64();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "float")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public float floatValue()
         {
             if (_bipart == null)
@@ -231,7 +229,7 @@ namespace clojure.lang
                 return _bipart.ToSingle(null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "double")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public double doubleValue()
         {
             if (_bipart == null)
@@ -240,7 +238,7 @@ namespace clojure.lang
                 return _bipart.ToDouble(null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "byte")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public byte byteValue()
         {
             if (_bipart == null)
@@ -249,7 +247,7 @@ namespace clojure.lang
                 return _bipart.ToByte(null);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "short")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public short shortValue()
         {
             if (_bipart == null)
@@ -625,7 +623,7 @@ namespace clojure.lang
 
         #region Arithmetic operations
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "add")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public BigInt add(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))
@@ -637,7 +635,7 @@ namespace clojure.lang
             return BigInt.fromBigInteger(this.toBigInteger().Add(y.toBigInteger()));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "multiply")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public BigInt multiply(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))
@@ -650,7 +648,7 @@ namespace clojure.lang
             return BigInt.fromBigInteger(this.toBigInteger().Multiply(y.toBigInteger()));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "quotient")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public BigInt quotient(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))
@@ -662,7 +660,7 @@ namespace clojure.lang
             return BigInt.fromBigInteger(this.toBigInteger().Divide(y.toBigInteger()));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "remainder")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public BigInt remainder(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))
@@ -672,7 +670,7 @@ namespace clojure.lang
             return BigInt.fromBigInteger(this.toBigInteger().Mod(y.toBigInteger()));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "lt")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public bool lt(BigInt y)
         {
             if ((_bipart == null) && (y._bipart == null))

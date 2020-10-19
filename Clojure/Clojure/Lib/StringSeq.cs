@@ -43,7 +43,7 @@ namespace clojure.lang
         public int I
         {
             get { return _i; }
-        } 
+        }
 
 
 
@@ -57,7 +57,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "create")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public StringSeq create(string s)
         {
             return s.Length == 0

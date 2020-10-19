@@ -48,7 +48,7 @@ namespace clojure.lang
             _next = next;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static ISeq create(IFn f, Object seed)
         {
             return new Iterate(f, null, seed);
@@ -91,7 +91,7 @@ namespace clojure.lang
 
         #region IReduce
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#")]
+
         public object reduce(IFn rf)
         {
             Object ff = first();
@@ -106,7 +106,7 @@ namespace clojure.lang
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#")]
+
         public object reduce(IFn rf, object start)
         {
             Object ret = start;

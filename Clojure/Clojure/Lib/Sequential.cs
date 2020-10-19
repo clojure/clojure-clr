@@ -18,6 +18,7 @@ namespace clojure.lang
     /// <summary>
     /// Marks the object as being a sequential collection.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
     public interface Sequential
     {
         //empty

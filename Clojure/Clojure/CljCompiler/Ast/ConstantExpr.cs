@@ -69,7 +69,6 @@ namespace clojure.lang.CljCompiler.Ast
         {
             static Keyword FormKey = Keyword.intern("form");
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
             public Expr Parse(ParserContext pcon, object form)
             {
                 int argCount = RT.count(form) - 1;

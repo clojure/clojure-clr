@@ -136,7 +136,8 @@ namespace clojure.lang
         const int FIXED_TEXT_INDEX = -2;
         const int PREV_ARG_INDEX = -1;
         const int REGULAR_ARG_INDEX = 0;
-        
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         interface FormatChunk
         {
             int Index { get; }
@@ -223,21 +224,18 @@ namespace clojure.lang
             }
 
             int _precision;
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
             public int Precision
             {
                 get { return _precision; }
             }
 
             bool _isDateTime;
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
             public bool IsDateTime
             {
                 get { return _isDateTime; }
             }
 
             char _conversion;
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
             public char Conversion
             {
                 get { return _conversion; }
@@ -259,7 +257,6 @@ namespace clojure.lang
             #region C-tors
 
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
             public FormatSpecificierChunk(GroupCollection groups)
             {
                 ComputeIndex(groups[(int)FormatGroup.Index]);
@@ -533,13 +530,11 @@ namespace clojure.lang
 
             #region Text spec printing
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "arg")]
             private void PrintPercentSign(StringBuilder sb, object arg)
             {
                 PrintWithJustification(sb, "%");
             }
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "arg")]
             private static void PrintLineSeparator(StringBuilder sb, object arg)
             {
                 sb.Append('\n');
@@ -650,7 +645,6 @@ namespace clojure.lang
 
             }
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "p"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "sb"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
             private void PrintDecimal(StringBuilder sb, decimal p)
             {
                 throw new NotImplementedException();
@@ -993,7 +987,6 @@ namespace clojure.lang
 
             static readonly DateTime Epoch = new DateTime(1970,1,1);
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
             private void PrintDateTime(StringBuilder sb, DateTime dt)
             {
                 string format = "";
@@ -1499,7 +1492,7 @@ namespace clojure.lang
 
     #region Exceptions
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flags"), Serializable]
+    [Serializable]
     public class UnknownFormatFlagsException : ArgumentException
     {
         public UnknownFormatFlagsException()
@@ -1522,7 +1515,7 @@ namespace clojure.lang
         }
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flags"), Serializable]
+    [Serializable]
     public class IllegalFormatFlagsException : ArgumentException
     {
         public IllegalFormatFlagsException()
@@ -1575,7 +1568,7 @@ namespace clojure.lang
         }
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flags"), Serializable]
+    [Serializable]
     public class FormatFlagsConversionMismatchException : ArgumentException
     {
         public FormatFlagsConversionMismatchException()
@@ -1587,7 +1580,6 @@ namespace clojure.lang
         {
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "flags")]
         public FormatFlagsConversionMismatchException(string flags, char c)
             : base(String.Format("Mismatch between flags {0} and conversion character {1}",flags,c))
         {
@@ -1605,7 +1597,7 @@ namespace clojure.lang
     }
 
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flags"), Serializable]
+    [Serializable]
     public class DuplicateFormatFlagsException : ArgumentException
     {
         public DuplicateFormatFlagsException()

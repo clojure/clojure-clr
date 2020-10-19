@@ -21,7 +21,6 @@ using NExpect;
 
 namespace Clojure.Tests.ReaderTests
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable"), TestFixture]
     public class LineNumberingTextReaderTests
     {
         const string _sample = "abc\nde\nfghijk\r\nlmnopq\n\nrstuv";
