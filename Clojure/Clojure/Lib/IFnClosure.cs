@@ -22,10 +22,8 @@ namespace clojure.lang
     [Serializable]
     public sealed class Closure
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly")]
         public readonly object[] Constants;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly")]
         public readonly object[] Locals;
 
         public Closure(object[] constants, object[] locals)

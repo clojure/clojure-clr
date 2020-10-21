@@ -27,7 +27,6 @@ namespace clojure.lang
     /// as the rear, which is in-order,
     /// so no reversing or suspensions required for persistent use.</para>
     /// </remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentQueue : Obj, IPersistentList, ICollection, ICollection<Object>, Counted, IHashEq
     {
@@ -36,7 +35,6 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentQueue">PersistentQueue</see>.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static readonly PersistentQueue EMPTY = new PersistentQueue(null, 0, null, null);
 
         /// <summary>

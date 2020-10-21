@@ -93,8 +93,8 @@ namespace clojure.lang
             {
                 object ls = _sv;
                 _sv = null;
-                while (ls is LazySeq)
-                    ls = ((LazySeq)ls).sval();
+                while (ls is LazySeq lseq)
+                    ls = lseq.sval();
                 _s = RT.seq(ls);
             }
             return _s;

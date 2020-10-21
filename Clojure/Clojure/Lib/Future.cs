@@ -40,8 +40,10 @@ namespace clojure.lang
         public Future(IFn fn)
         {
             // TODO: Use a cached thread pool when agents have one.
-            _t = new Thread(new ParameterizedThreadStart(ComputeFuture));
-            _t.Name = "Future";
+            _t = new Thread(new ParameterizedThreadStart(ComputeFuture))
+            {
+                Name = "Future"
+            };
             _t.Start(fn);
         }
 

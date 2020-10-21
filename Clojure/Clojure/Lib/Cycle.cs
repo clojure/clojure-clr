@@ -65,7 +65,7 @@ namespace clojure.lang
             if (_current == null)
             {
                 ISeq c = _prev.next();
-                _current = (c == null) ? _all : c;
+                _current = c ?? _all;
             }
             return _current;
         }

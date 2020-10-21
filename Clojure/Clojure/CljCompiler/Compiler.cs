@@ -1458,6 +1458,7 @@ namespace clojure.lang
             return false;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value", Justification = "not actually redundant -- rule checker fail")]
         public static bool GetLocations(IPersistentMap spanMap, out int startLine, out int startCol, out int finishLine, out int finishCol)
         {
             startLine = -1;

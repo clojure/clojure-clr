@@ -106,9 +106,7 @@ namespace clojure.lang
 
          public override ISeq more()
         {
-            return (_more == null )
-             ? PersistentList.EMPTY
-             : _more;
+            return _more ?? PersistentList.EMPTY;
         }
 
         #endregion

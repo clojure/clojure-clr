@@ -78,8 +78,8 @@ namespace clojure.lang
 
         class SimpleThunk : ILookupThunk
         {
-            Type _type;
-            Keyword _kw;
+            readonly Type _type;
+            readonly Keyword _kw;
 
             public SimpleThunk(Type type, Keyword kw)
             {

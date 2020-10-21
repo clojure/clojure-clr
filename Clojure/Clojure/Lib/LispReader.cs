@@ -66,7 +66,7 @@ namespace clojure.lang
         // Dynamic var set to true in a read-cond context
         static readonly Var READ_COND_ENV = Var.create(null).setDynamic();
 
-        static IFn _ctorReader = new CtorReader();
+        static readonly IFn _ctorReader = new CtorReader();
 
         #endregion
 
@@ -85,8 +85,8 @@ namespace clojure.lang
 
         #region Macro characters & #-dispatch
 
-        static IFn[] _macros = new IFn[256];
-        static IFn[] _dispatchMacros = new IFn[256];
+        static readonly IFn[] _macros = new IFn[256];
+        static readonly IFn[] _dispatchMacros = new IFn[256];
 
         static LispReader()
         {
@@ -168,8 +168,7 @@ namespace clojure.lang
         {
             bool eofIsError = true;
             object eofValue = null;
-            IPersistentMap optsMap = opts as IPersistentMap;
-            if (optsMap != null)
+            if (opts is IPersistentMap optsMap)
             {
                 Object eof = optsMap.valAt(OPT_EOF, EOFTHROW);
                 if (!EOFTHROW.Equals(eof))
@@ -241,8 +240,7 @@ namespace clojure.lang
             {
                 for (; ; )
                 {
-                    var pfl = pendingForms as LinkedList<Object>;
-                    if (pfl != null && pfl.Count != 0)
+                    if (pendingForms is LinkedList<Object> pfl && pfl.Count != 0)
                     {
                         object val = pfl.First.Value;
                         pfl.RemoveFirst();
@@ -296,11 +294,7 @@ namespace clojure.lang
 
                     //string token = readToken(r, (char)ch);
                     //return RT.suppressRead() ? null : interpretToken(token);
-                    string rawToken;
-                    string token;
-                    string mask;
-                    bool eofSeen;
-                    readToken(r, (char)ch, out rawToken, out token, out mask, out eofSeen);
+                    readToken(r, (char)ch, out string rawToken, out string token, out string mask, out bool eofSeen);
                     if (eofSeen)
                     {
                         if (eofIsError)
@@ -315,8 +309,7 @@ namespace clojure.lang
                 if (isRecursive)
                     throw;
 
-                LineNumberingTextReader lntr = r as LineNumberingTextReader;
-                if (lntr == null)
+                if (!(r is LineNumberingTextReader lntr))
                     throw;
 
                 throw new ReaderException(lntr.LineNumber, lntr.ColumnNumber, e);
@@ -412,8 +405,7 @@ namespace clojure.lang
 
         static List<Object> ReadDelimitedList(char delim, PushbackTextReader r, bool isRecursive, object opts, object pendingForms)
         {
-            LineNumberingTextReader lntr = r as LineNumberingTextReader;
-            int firstLine = lntr != null ? lntr.LineNumber : -1;
+            int firstLine = r is LineNumberingTextReader lntr ? lntr.LineNumber : -1;
 
             List<Object> a = new List<object>();
             Resolver resolver = (Resolver)RT.ReaderResolverVar.deref();
@@ -578,8 +570,8 @@ namespace clojure.lang
 
 
         //static Regex symbolPat = new Regex("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
-        static Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
-        static Regex keywordPat = new Regex("^[:]?([^/].*/)?(/|[^/][^/]*)$");
+        static readonly Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
+        static readonly Regex keywordPat = new Regex("^[:]?([^/].*/)?(/|[^/][^/]*)$");
 
         private static void ExtractNamesUsingMask(string token, string maskNS, string maskName, out string ns, out string name)
         {
@@ -616,9 +608,7 @@ namespace clojure.lang
                         return null;
 
 
-                    string ns;
-                    string name;
-                    ExtractNamesUsingMask(token.Substring(2), m2.Groups[1].Value, m2.Groups[2].Value, out ns, out name);
+                    ExtractNamesUsingMask(token.Substring(2), m2.Groups[1].Value, m2.Groups[2].Value, out string ns, out string name);
                     Symbol ks = Symbol.intern(ns, name);
 
                     if (resolver != null)
@@ -656,16 +646,12 @@ namespace clojure.lang
                     Match m2 = keywordPat.Match(mask.Substring(1));
                     if (!m2.Success)
                         return null;
-                    string ns;
-                    string name;
-                    ExtractNamesUsingMask(token.Substring(1), m2.Groups[1].Value, m2.Groups[2].Value, out ns, out name);
+                    ExtractNamesUsingMask(token.Substring(1), m2.Groups[1].Value, m2.Groups[2].Value, out string ns, out string name);
                     return Keyword.intern(ns, name);
                 }
                 else
                 {
-                    string ns;
-                    string name;
-                    ExtractNamesUsingMask(token, maskNS, maskName, out ns, out name);
+                    ExtractNamesUsingMask(token, maskNS, maskName, out string ns, out string name);
                     return Symbol.intern(ns, name);
                 }
             }
@@ -878,8 +864,7 @@ namespace clojure.lang
                 if (m.Groups[8].Success) // N suffix
                     return BigInt.fromBigInteger(bn);
 
-                long ln;
-                if (bn.AsInt64(out ln))
+                if (bn.AsInt64(out long ln))
                     return Numbers.num(ln);
 
                 return BigInt.fromBigInteger(bn);
@@ -1368,14 +1353,11 @@ namespace clojure.lang
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             static object syntaxQuote(object form)
             {
-                bool checkMeta;
-                object ret = AnalyzeSyntaxQuote(form, out checkMeta);
+                object ret = AnalyzeSyntaxQuote(form, out bool checkMeta);
 
                 if (checkMeta)
                 {
-                    IObj formAsIobj = form as IObj;
-
-                    if (formAsIobj != null && formAsIobj.meta() != null)
+                    if (form is IObj formAsIobj && formAsIobj.meta() != null)
                     {
                         //filter line numbers & source span info
                         IPersistentMap newMeta = formAsIobj.meta().without(RT.LineKey).without(RT.ColumnKey).without(RT.SourceSpanKey);
@@ -1496,14 +1478,12 @@ namespace clojure.lang
                         return RT.list(APPLY, HASHMAP, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(keyvals.seq()))));
                     }
 
-                    IPersistentVector v = form as IPersistentVector;
-                    if (v != null)
+                    if (form is IPersistentVector v)
                     {
                         return RT.list(APPLY, VECTOR, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(v.seq()))));
                     }
 
-                    IPersistentSet s = form as IPersistentSet;
-                    if (s != null)
+                    if (form is IPersistentSet s)
                     {
                         return RT.list(APPLY, HASHSET, RT.list(SEQ, RT.cons(CONCAT, sqExpandList(s.seq()))));
                     }
@@ -1682,8 +1662,7 @@ namespace clojure.lang
                                 RT.EndColumnKey, lntr.ColumnNumber)));
                     }
 
-                    IReference iref = o as IReference;
-                    if (iref != null)
+                    if (o is IReference iref)
                     {
                         iref.resetMeta(metaAsMap);
                         return o;
@@ -1955,14 +1934,10 @@ namespace clojure.lang
                     throw new InvalidOperationException("Record construction syntax can only be used when *read-eval* == true ");
 
                 Type recordType = RT.classForNameE(recordName.ToString());
-
-                IPersistentVector recordEntries;
-                IPersistentMap vals;
-
-                object ret = null;
                 ConstructorInfo[] allCtors = recordType.GetConstructors();
 
-                if ((recordEntries = form as IPersistentVector) != null)
+                object ret;
+                if (form is IPersistentVector recordEntries)
                 {
                     // shortForm
                     bool ctorFound = false;
@@ -1975,7 +1950,7 @@ namespace clojure.lang
 
                     ret = Reflector.InvokeConstructor(recordType, RT.toArray(recordEntries));
                 }
-                else if ((vals = form as IPersistentMap) != null)
+                else if (form is IPersistentMap vals)
                 {
                     for (ISeq s = RT.keys(vals); s != null; s = s.next())
                     {
@@ -2016,8 +1991,7 @@ namespace clojure.lang
         {
             if (RT.booleanCast(READ_COND_ENV.deref()))
             {
-                IPersistentMap optsMap = opts as IPersistentMap;
-                if (optsMap != null)
+                if (opts is IPersistentMap optsMap)
                 {
                     Object readCond = optsMap.valAt(OPT_READ_COND);
                     return COND_PRESERVE.Equals(readCond);
@@ -2104,8 +2078,7 @@ namespace clojure.lang
             Boolean toplevel = (pendingForms == null);
             pendingForms = EnsurePending(pendingForms);
 
-            LineNumberingTextReader lntr = r as LineNumberingTextReader;
-            int firstLine = lntr != null ? lntr.LineNumber : -1;
+            int firstLine = r is LineNumberingTextReader lntr ? lntr.LineNumber : -1;
 
             for (; ; )
             {
@@ -2188,9 +2161,7 @@ namespace clojure.lang
 
             if (splicing)
             {
-                IList<Object> resultAsList = result as IList<object>;
-
-                if (resultAsList == null)
+                if (!(result is IList<object> resultAsList))
                     throw new ArgumentException("Spliced form list in read-cond-splicing must implement IList<Object>");
 
                 if (toplevel)

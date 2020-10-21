@@ -690,8 +690,7 @@ namespace clojure.lang
         /// <returns></returns>
         public static BigDecimal Parse(char[] buf)
         {
-            BigDecimal v;
-            DoParse(buf, 0, buf.Length, true, out v);
+            DoParse(buf, 0, buf.Length, true, out BigDecimal v);
             return v;
         }
 
@@ -703,8 +702,7 @@ namespace clojure.lang
         /// <returns></returns>
         public static BigDecimal Parse(char[] buf, Context c)
         {
-            BigDecimal v;
-            DoParse(buf, 0, buf.Length,true, out v);
+            DoParse(buf, 0, buf.Length, true, out BigDecimal v);
             v.RoundInPlace(c);
             return v;
         }
@@ -745,8 +743,7 @@ namespace clojure.lang
         /// <returns></returns>
         public static BigDecimal Parse(char[] buf, int offset, int len)
         {
-            BigDecimal v;
-            DoParse(buf, offset, len, true, out v);
+            DoParse(buf, offset, len, true, out BigDecimal v);
             return v;
         }
 
@@ -760,8 +757,7 @@ namespace clojure.lang
         /// <returns></returns>
         public static BigDecimal Parse(char[] buf, int offset, int len, Context c)
         {
-            BigDecimal v;
-            DoParse(buf, offset, len, true, out v);
+            DoParse(buf, offset, len, true, out BigDecimal v);
             v.RoundInPlace(c);
             return v;
         }
@@ -1042,12 +1038,9 @@ namespace clojure.lang
             if (obj == null)
                 return 1;
 
-            BigDecimal d = obj as BigDecimal;
-
-            if (Object.ReferenceEquals(d, null))
-                throw new ArgumentException("Expected a BigDecimal to compare against");
-
-            return CompareTo(d);
+            if (obj is BigDecimal d)
+                return CompareTo(d);
+            throw new ArgumentException("Expected a BigDecimal to compare against");
         }
 
         #endregion
@@ -1068,7 +1061,7 @@ namespace clojure.lang
 
         public bool Equals(BigDecimal other)
         {
-            if ( Object.ReferenceEquals(other,null) )
+            if ( other is null)
                 return false;
             if (_exp != other._exp)
                 return false;
@@ -1225,10 +1218,7 @@ namespace clojure.lang
             if (ReferenceEquals(x, y))
                 return true;
 
-            if (((object)x == null) || ((object)y == null))
-                return false; 
-
-            return x.Equals(y);
+            return !(x is null) && !(y is null) && x.Equals(y);
         }
 
         public static bool operator !=(BigDecimal x, BigDecimal y)
@@ -1900,8 +1890,7 @@ namespace clojure.lang
         /// <returns>The modulus</returns>
         public BigDecimal Mod(BigDecimal y)
         {
-            BigDecimal r;
-            DivRem(y,out r);
+            DivRem(y, out BigDecimal r);
             return r;
         }
 
@@ -1913,8 +1902,7 @@ namespace clojure.lang
         /// <returns>The modulus</returns>
         public BigDecimal Mod(BigDecimal y, Context c)
         {
-            BigDecimal r;
-            DivRem(y, c, out r);
+            DivRem(y, c, out BigDecimal r);
             return r;
         }
 
@@ -2309,9 +2297,7 @@ namespace clojure.lang
         /// <returns>The exponent to use</returns>
         static int CheckExponent(long candidate, bool isZero)
         {
-            int exponent;
-
-            bool result = CheckExponent(candidate, isZero, out exponent);
+            bool result = CheckExponent(candidate, isZero, out int exponent);
             if (result)
                 return exponent;
 
@@ -2322,7 +2308,7 @@ namespace clojure.lang
                 throw new ArithmeticException("Underflow in scale");
         }
 
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "for consistency?")]
         bool CheckExponent(long candidate, out int exponent)
         {
             return CheckExponent(candidate, _coeff.IsZero, out exponent);
@@ -2348,7 +2334,7 @@ namespace clojure.lang
             return BigInteger.Parse(new String(buf));
         }
 
-        static BigInteger[] _biPowersOfTen = new BigInteger[] {
+        static readonly BigInteger[] _biPowersOfTen = new BigInteger[] {
             BigInteger.One,
             BigInteger.Ten,
             BigInteger.Create(100),

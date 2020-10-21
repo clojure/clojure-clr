@@ -41,7 +41,7 @@ namespace clojure.lang
         /// </summary>
         /// <remarks>Why introduce the JavaConcurrentDictionary?  
         /// We really only need a synchronized hash table with one operation: PutIfAbsent.</remarks>
-        private static JavaConcurrentDictionary<Symbol,WeakReference> _symKeyMap
+        private static readonly JavaConcurrentDictionary<Symbol,WeakReference> _symKeyMap
             = new JavaConcurrentDictionary<Symbol, WeakReference>();
 
         internal Symbol Symbol
@@ -73,8 +73,10 @@ namespace clojure.lang
                     sym = (Symbol)sym.withMeta(null);
                 k = new Keyword(sym);
 
-                WeakReference wr = new WeakReference(k);
-                wr.Target = k;
+                WeakReference wr = new WeakReference(k)
+                {
+                    Target = k
+                };
                 existingRef = _symKeyMap.PutIfAbsent(sym, wr);
             }
             if (existingRef == null)
@@ -147,9 +149,7 @@ namespace clojure.lang
             if ( ReferenceEquals(this,obj) ) 
                 return true;
 
-            Keyword keyword = obj as Keyword;
-
-            if (ReferenceEquals(keyword,null))
+            if (!(obj is Keyword keyword))
                 return false;
 
             return _sym.Equals(keyword.Symbol);
@@ -218,11 +218,9 @@ namespace clojure.lang
         /// <returns>The value mapped to the keyword.</returns>
         public sealed override object invoke(object arg1)
         {
-            ILookup ilu = arg1 as ILookup;
-
-            if (ilu != null) 
+            if (arg1 is ILookup ilu)
                 return ilu.valAt(this);
-            
+
             return RT.get(arg1, this);
         }
 
@@ -236,10 +234,8 @@ namespace clojure.lang
 
         public sealed override object invoke(object arg1, object notFound)
         {
-            ILookup ilu = arg1 as ILookup;
-
-            if (ilu != null )
-                return ilu.valAt(this,notFound);
+            if (arg1 is ILookup ilu)
+                return ilu.valAt(this, notFound);
 
             return RT.get(arg1, this, notFound);
         }
@@ -256,8 +252,7 @@ namespace clojure.lang
         /// <returns>neg,zero,pos for &lt; = &gt;</returns>
         public int CompareTo(object obj)
         {
-            Keyword k = obj as Keyword;
-            if (ReferenceEquals(k,null))
+            if (!(obj is Keyword k))
                 throw new ArgumentException("Cannot compare to null or non-Keyword", "obj");
 
             return _sym.CompareTo(k._sym);
@@ -272,7 +267,7 @@ namespace clojure.lang
             if (ReferenceEquals(k1, k2))
                 return true;
 
-            if (ReferenceEquals(k1, null)||ReferenceEquals(k2,null))
+            if (k1 is null || k2 is null)
                 return false;
 
             return k1.CompareTo(k2) == 0;
@@ -283,7 +278,7 @@ namespace clojure.lang
             if (ReferenceEquals(k1, k2))
                 return false;
 
-            if (ReferenceEquals(k1, null) || ReferenceEquals(k2,null))
+            if (k1 is null || k2 is null)
                 return true;
 
             return k1.CompareTo(k2) != 0;
@@ -294,7 +289,7 @@ namespace clojure.lang
             if (ReferenceEquals(k1, k2))
                 return false;
 
-            if (ReferenceEquals(k1, null))
+            if (k1 is null)
                 throw new ArgumentNullException("k1");
 
             return k1.CompareTo(k2) < 0;
@@ -305,7 +300,7 @@ namespace clojure.lang
             if (ReferenceEquals(k1, k2))
                 return false;
 
-            if (ReferenceEquals(k1, null))
+            if (k1 is null)
                 throw new ArgumentNullException("k1");
 
             return k1.CompareTo(k2) > 0;
@@ -315,7 +310,6 @@ namespace clojure.lang
 
         #region ISerializable Members
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2135:SecurityRuleSetLevel2MethodsShouldNotBeProtectedWithLinkDemandsFxCopRule")]
         [System.Security.SecurityCritical]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -375,6 +369,8 @@ namespace clojure.lang
 
         #region c-tors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Standard API")]
         KeywordSerializationHelper(SerializationInfo info, StreamingContext context)
         {
             _sym = (Symbol)info.GetValue("_sym", typeof(Symbol));

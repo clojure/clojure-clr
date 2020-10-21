@@ -54,8 +54,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static BigInt fromBigInteger(BigInteger val)
         {
-            long n;
-            if (val.AsInt64(out n))
+            if (val.AsInt64(out long n))
                 return new BigInt(n, null);
             return new BigInt(0, val);
         }
@@ -396,8 +395,7 @@ namespace clojure.lang
         /// <returns>The equivalent sbyte</returns>
         public static explicit operator sbyte(BigInt self)
         {
-            int tmp;
-            if (self.AsInt32(out tmp))
+            if (self.AsInt32(out int tmp))
             {
                 return checked((sbyte)tmp);
             }
@@ -411,8 +409,7 @@ namespace clojure.lang
         /// <returns>The equivalent UInt16</returns>
         public static explicit operator UInt16(BigInt self)
         {
-            int tmp;
-            if (self.AsInt32(out tmp))
+            if (self.AsInt32(out int tmp))
             {
                 return checked((UInt16)tmp);
             }
@@ -426,8 +423,7 @@ namespace clojure.lang
         /// <returns>The equivalent Int16</returns>
         public static explicit operator Int16(BigInt self)
         {
-            int tmp;
-            if (self.AsInt32(out tmp))
+            if (self.AsInt32(out int tmp))
             {
                 return checked((Int16)tmp);
             }
@@ -441,8 +437,7 @@ namespace clojure.lang
         /// <returns>The equivalent UInt32</returns>
         public static explicit operator UInt32(BigInt self)
         {
-            uint tmp;
-            if (self.AsUInt32(out tmp))
+            if (self.AsUInt32(out uint tmp))
             {
                 return tmp;
             }
@@ -456,8 +451,7 @@ namespace clojure.lang
         /// <returns>The equivalent Int32</returns>
         public static explicit operator Int32(BigInt self)
         {
-            int tmp;
-            if (self.AsInt32(out tmp))
+            if (self.AsInt32(out int tmp))
             {
                 return tmp;
             }
@@ -471,8 +465,7 @@ namespace clojure.lang
         /// <returns>The equivalent Int64</returns>
         public static explicit operator Int64(BigInt self)
         {
-            long tmp;
-            if (self.AsInt64(out tmp))
+            if (self.AsInt64(out long tmp))
             {
                 return tmp;
             }
@@ -486,8 +479,7 @@ namespace clojure.lang
         /// <returns>The equivalent UInt64</returns>
         public static explicit operator UInt64(BigInt self)
         {
-            ulong tmp;
-            if (self.AsUInt64(out tmp))
+            if (self.AsUInt64(out ulong tmp))
             {
                 return tmp;
             }
@@ -511,8 +503,7 @@ namespace clojure.lang
         /// <returns>The equivalent decimal</returns>
         public static explicit operator decimal(BigInt self)
         {
-            decimal res;
-            if (self.AsDecimal(out res))
+            if (self.AsDecimal(out decimal res))
             {
                 return res;
             }

@@ -21,14 +21,13 @@ namespace clojure.lang
     /// </summary>
     public class JavaConcurrentDictionary<TKey, TValue>
     {
-        Dictionary<TKey, TValue> _dict = new Dictionary<TKey, TValue>();
+        readonly Dictionary<TKey, TValue> _dict = new Dictionary<TKey, TValue>();
 
         public TValue Get(TKey key)
         {
             lock (_dict)
             {
-                TValue val;
-                return _dict.TryGetValue(key, out val) ? val : default(TValue);
+                return _dict.TryGetValue(key, out TValue val) ? val : default;
             }
         }
 
@@ -36,13 +35,12 @@ namespace clojure.lang
         {
             lock (_dict)
             {
-                TValue existingVal;
-                if (_dict.TryGetValue(key, out existingVal))
+                if (_dict.TryGetValue(key, out TValue existingVal))
                     return existingVal;
                 else
                 {
                     _dict[key] = val;
-                    return default(TValue);
+                    return default;
                 }
             }
         }
@@ -51,18 +49,16 @@ namespace clojure.lang
         {
             lock ( _dict )
             {
-                TValue existingVal;
-                if ( _dict.TryGetValue(key,out existingVal) )
+                if (_dict.TryGetValue(key, out TValue existingVal))
                 {
                     _dict.Remove(key);
                     return existingVal;
                 }
                 else
-                    return default(TValue);
+                    return default;
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
         public TValue[] Values
         {
             get

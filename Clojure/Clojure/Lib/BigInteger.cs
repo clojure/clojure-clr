@@ -292,8 +292,7 @@ namespace clojure.lang
         /// or if one of the digits in the string is noat valid for the given radix.</exception>
         public static BigInteger Parse(string s, int radix)
         {
-            BigInteger v;
-            if ( TryParse(s, radix, out v) )
+            if (TryParse(s, radix, out BigInteger v))
                 return v;
             throw new FormatException();
         }
@@ -411,8 +410,7 @@ namespace clojure.lang
             uint mult = SuperRadix[radix];
             for (; index < len; index += groupSize)
             {
-                uint u;
-                if (!TryParseUInt(s, index, groupSize, radix, out u))
+                if (!TryParseUInt(s, index, groupSize, radix, out uint u))
                 {
                     v = null;
                     return false;
@@ -528,7 +526,7 @@ namespace clojure.lang
         /// <para>RadixDigitsPerDigit[i] = floor(log_i (2^32 - 1))</para>
         /// <para>See the radix.xlsx spreadsheet.</para>
         /// </remarks>
-        static int[] RadixDigitsPerDigit = { 0, 0, 
+        static readonly int[] RadixDigitsPerDigit = { 0, 0, 
             31, 20, 15, 13, 12,
             11, 10, 10, 9, 9, 
             8, 8, 8, 8, 7,
@@ -545,7 +543,7 @@ namespace clojure.lang
         /// <para>SuperRadix[i] = 2 ^ RadixDigitsPerDigit[i]</para>
         /// <para>See the radix.xlsx spreadsheet.</para>
         /// </remarks>
-        static uint[] SuperRadix = { 0,0,
+        static readonly uint[] SuperRadix = { 0,0,
            0x80000000, 0xCFD41B91, 0x40000000, 0x48C27395, 0x81BF1000, 
            0x75DB9C97, 0x40000000, 0xCFD41B91, 0x3B9ACA00, 0x8C8B6D2B,
            0x19A10000, 0x309F1021, 0x57F6C100, 0x98C29B81, 0x10000000,
@@ -564,7 +562,7 @@ namespace clojure.lang
         /// <para>The value is multiplied by 1024 to avoid fractions.  Users will need to divide by 1024.</para>
         /// <para>See the radix.xlsx spreadsheet.</para>
         /// </remarks>
-        static int[] BitsPerRadixDigit = { 0, 0,
+        static readonly int[] BitsPerRadixDigit = { 0, 0,
             1024, 1624, 2048, 2378, 2648, 
             2875, 3072, 3247, 3402, 3543, 
             3672, 3790, 3899, 4001, 4096,
@@ -592,8 +590,7 @@ namespace clojure.lang
             ulong result = 0;
             for (int i = 0; i < len; i++)
             {
-                uint v;
-                if (!TryComputeDigitVal(val[startIndex + i], radix, out v))
+                if (!TryComputeDigitVal(val[startIndex + i], radix, out uint v))
                     return false;
                 result = result * (uint)radix + v;
                 if (result > UInt32.MaxValue)
@@ -750,8 +747,7 @@ namespace clojure.lang
         /// <returns>The equivalent byte</returns>
         public static explicit operator byte(BigInteger self)
         {
-            int tmp;
-            if (self.AsInt32(out tmp))
+            if (self.AsInt32(out int tmp))
             {
                 return checked((byte)tmp);
             }
@@ -765,8 +761,7 @@ namespace clojure.lang
         /// <returns>The equivalent sbyte</returns>
         public static explicit operator sbyte(BigInteger self)
         {
-            int tmp;
-            if (self.AsInt32(out tmp))
+            if (self.AsInt32(out int tmp))
             {
                 return checked((sbyte)tmp);
             }
@@ -780,8 +775,7 @@ namespace clojure.lang
         /// <returns>The equivalent UInt16</returns>
         public static explicit operator UInt16(BigInteger self)
         {
-            int tmp;
-            if (self.AsInt32(out tmp))
+            if (self.AsInt32(out int tmp))
             {
                 return checked((UInt16)tmp);
             }
@@ -795,8 +789,7 @@ namespace clojure.lang
         /// <returns>The equivalent Int16</returns>
         public static explicit operator Int16(BigInteger self)
         {
-            int tmp;
-            if (self.AsInt32(out tmp))
+            if (self.AsInt32(out int tmp))
             {
                 return checked((Int16)tmp);
             }
@@ -810,8 +803,7 @@ namespace clojure.lang
         /// <returns>The equivalent UInt32</returns>
         public static explicit operator UInt32(BigInteger self)
         {
-            uint tmp;
-            if (self.AsUInt32(out tmp))
+            if (self.AsUInt32(out uint tmp))
             {
                 return tmp;
             }
@@ -825,8 +817,7 @@ namespace clojure.lang
         /// <returns>The equivalent Int32</returns>
         public static explicit operator Int32(BigInteger self)
         {
-            int tmp;
-            if (self.AsInt32(out tmp))
+            if (self.AsInt32(out int tmp))
             {
                 return tmp;
             }
@@ -840,8 +831,7 @@ namespace clojure.lang
         /// <returns>The equivalent Int64</returns>
         public static explicit operator Int64(BigInteger self)
         {
-            long tmp;
-            if (self.AsInt64(out tmp))
+            if (self.AsInt64(out long tmp))
             {
                 return tmp;
             }
@@ -855,8 +845,7 @@ namespace clojure.lang
         /// <returns>The equivalent UInt64</returns>
         public static explicit operator UInt64(BigInteger self)
         {
-            ulong tmp;
-            if (self.AsUInt64(out tmp))
+            if (self.AsUInt64(out ulong tmp))
             {
                 return tmp;
             }
@@ -880,8 +869,7 @@ namespace clojure.lang
         /// <returns>The equivalent decimal</returns>
         public static explicit operator decimal(BigInteger self)
         {
-            decimal res;
-            if (self.AsDecimal(out res))
+            if (self.AsDecimal(out decimal res))
             {
                 return res;
             }
@@ -1147,12 +1135,14 @@ namespace clojure.lang
             return x.ModPow(power, mod);
         }
 
+
         /// <summary>
         /// Returns the greatest common divisor.
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns>The greatest common divisor</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
         private static BigInteger Gcd(BigInteger x, BigInteger y)
         {
             return x.Gcd(y);
@@ -1472,10 +1462,8 @@ namespace clojure.lang
             }
 
             int length = _data.Length;
-
-
-            int lo = 0, mi = 0, hi = 0;
-
+            int mi = 0, hi = 0;
+            int lo;
             switch (length)
             {
                 case 1:
@@ -1491,7 +1479,7 @@ namespace clojure.lang
                     hi = (int)_data[0];
                     break;
                 default:
-                    ret = default(Decimal);
+                    ret = default;
                     return false;
             }
 
@@ -1510,8 +1498,7 @@ namespace clojure.lang
         /// <exception cref="System.OverflowException">Thrown if the magnitude is too large for the conversion</exception>
         public uint ToUInt32()
         {
-            uint ret;
-            if (AsUInt32(out ret)) return ret;
+            if (AsUInt32(out uint ret)) return ret;
             throw new OverflowException("BigInteger magnitude too large for UInt32");
         }
 
@@ -1522,8 +1509,7 @@ namespace clojure.lang
         /// <exception cref="System.OverflowException">Thrown if the magnitude is too large for the conversion</exception>
         public int ToInt32()
         {
-            int ret;
-            if (AsInt32(out ret)) return ret;
+            if (AsInt32(out int ret)) return ret;
             throw new OverflowException("BigInteger magnitude too large for Int32");
         }
 
@@ -1534,8 +1520,7 @@ namespace clojure.lang
         /// <exception cref="System.OverflowException">Thrown if the magnitude is too large for the conversion</exception>
         public decimal ToDecimal()
         {
-            decimal ret;
-            if (AsDecimal(out ret)) return ret;
+            if (AsDecimal(out decimal ret)) return ret;
             throw new OverflowException("BigInteger magnitude too large for Decimal");
         }
 
@@ -1546,8 +1531,7 @@ namespace clojure.lang
         /// <exception cref="System.OverflowException">Thrown if the magnitude is too large for the conversion</exception>
         public ulong ToUInt64()
         {
-            ulong ret;
-            if (AsUInt64(out ret)) return ret;
+            if (AsUInt64(out ulong ret)) return ret;
             throw new OverflowException("BigInteger magnitude too large for UInt64");
         }
 
@@ -1558,8 +1542,7 @@ namespace clojure.lang
         /// <exception cref="System.OverflowException">Thrown if the magnitude is too large for the conversion</exception>
         public long ToInt64()
         {
-            long ret;
-            if (AsInt64(out ret)) return ret;
+            if (AsInt64(out long ret)) return ret;
             throw new OverflowException("BigInteger magnitude too large for Int64");
         }
 
@@ -1591,9 +1574,8 @@ namespace clojure.lang
             if (obj == null)
                 return 1;
 
-            BigInteger o = obj as BigInteger;
-            
-            if (object.ReferenceEquals(o, null))
+
+            if (!(obj is BigInteger o))
                 throw new ArgumentException("Expected a BigInteger to compare against");
 
             return Compare(this, o);
@@ -1630,8 +1612,7 @@ namespace clojure.lang
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a byte.</exception>
         public byte ToByte(IFormatProvider provider)
         {
-            uint ret;
-            if (AsUInt32(out ret) && ret <= 0xFF)
+            if (AsUInt32(out uint ret) && ret <= 0xFF)
                 return (byte)ret;
             throw new OverflowException("BigInteger value won't fit in byte");
         }
@@ -1644,8 +1625,7 @@ namespace clojure.lang
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a char.</exception>
         public char ToChar(IFormatProvider provider)
         {
-            int ret;
-            if (AsInt32(out ret) && Char.MinValue <= ret && ret <= Char.MaxValue)
+            if (AsInt32(out int ret) && Char.MinValue <= ret && ret <= Char.MaxValue)
                 return (char)ret;
             throw new OverflowException("BigInteger value won't fit in char");
         }
@@ -1685,8 +1665,7 @@ namespace clojure.lang
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a Int16.</exception>
         public short ToInt16(IFormatProvider provider)
         {
-            int ret;
-            if (AsInt32(out ret) && short.MinValue <= ret && ret <= short.MaxValue)
+            if (AsInt32(out int ret) && short.MinValue <= ret && ret <= short.MaxValue)
                 return (short)ret;
             throw new OverflowException("BigInteger value won't fit in an Int16");
         }
@@ -1721,8 +1700,7 @@ namespace clojure.lang
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a sbyte.</exception>
         public sbyte ToSByte(IFormatProvider provider)
         {
-            int ret;
-            if (AsInt32(out ret) && sbyte.MinValue <= ret && ret <= sbyte.MaxValue)
+            if (AsInt32(out int ret) && sbyte.MinValue <= ret && ret <= sbyte.MaxValue)
                 return (sbyte)ret;
             throw new OverflowException("BigInteger value won't fit in sbyte");
         }
@@ -1772,8 +1750,7 @@ namespace clojure.lang
         /// <exception cref="System.OverflowException">Thrown if the value cannot be represented in a UInt16.</exception>
         public ushort ToUInt16(IFormatProvider provider)
         {
-            uint ret;
-            if (AsUInt32(out ret) && ret <= ushort.MaxValue)
+            if (AsUInt32(out uint ret) && ret <= ushort.MaxValue)
                 return (ushort)ret;
             throw new OverflowException("BigInteger value won't fit in UInt16");
 
@@ -1812,7 +1789,7 @@ namespace clojure.lang
         /// <returns><value>true</value> if equivalent; <value>false</value> otherwise</returns>
         public bool Equals(BigInteger other)
         {
-            if (object.ReferenceEquals(other, null)) 
+            if (other is null) 
                 return false;
             return this == other;
         }
@@ -1851,10 +1828,10 @@ namespace clojure.lang
             if (ReferenceEquals(x,y))
                 return 0;
 
-            if (ReferenceEquals(x,null))
+            if (x is null)
                 return -1;
 
-            if (ReferenceEquals(y,null))
+            if (y is null)
                 return 1;
 
             return x._sign == y._sign 
@@ -1986,8 +1963,7 @@ namespace clojure.lang
         /// <returns>The quotient</returns>
         public BigInteger Divide(BigInteger y)
         {
-            BigInteger rem;
-            return DivRem(y, out rem);
+            return DivRem(y, out _);
         }
 
         /// <summary>
@@ -1997,8 +1973,7 @@ namespace clojure.lang
         /// <returns>The modulus</returns>
         public BigInteger Mod(BigInteger y)
         {
-            BigInteger rem;
-            DivRem(y, out rem);
+            DivRem(y, out BigInteger rem);
             return rem;
         }
 
@@ -2010,9 +1985,7 @@ namespace clojure.lang
         /// <returns>The quotient</returns>
         public BigInteger DivRem(BigInteger y, out BigInteger remainder)
         {
-            uint[] q;
-            uint[] r;
-            DivMod(_data, y._data, out q, out r);
+            DivMod(_data, y._data, out uint[] q, out uint[] r);
 
             remainder = new BigInteger(_sign, r);
             return new BigInteger(_sign * y._sign, q);
@@ -2050,10 +2023,10 @@ namespace clojure.lang
             while (exp != 0)
             {
                 if ((exp & 1) != 0)
-                    result = result * mult;
+                    result *= mult;
                 if (exp == 1)
                     break;
-                mult = mult * mult;
+                mult *= mult;
                 exp >>= 1;
             }
             return result;
@@ -2085,13 +2058,13 @@ namespace clojure.lang
             {
                 if (power.IsOdd)
                 {
-                    result = result * mult;
-                    result = result % mod;
+                    result *= mult;
+                    result %= mod;
                 }
                 if (power == One)
                     break;
-                mult = mult * mult;
-                mult = mult % mod;
+                mult *= mult;
+                mult %= mod;
                 power >>= 1;
             }
             return result;
@@ -2129,8 +2102,7 @@ namespace clojure.lang
             {
                 if ( Math.Abs(a._data.Length - b._data.Length ) < 2 )
                     return BinaryGcd(a,b);
-                BigInteger r;
-                a.DivRem(b, out r);
+                a.DivRem(b, out BigInteger r);
                 a = b;
                 b = r;
             }
@@ -2187,9 +2159,7 @@ namespace clojure.lang
                     b = t;
 
                 //  One word?
-                uint x;
-                uint y;
-                if (a.AsUInt32(out x) && b.AsUInt32(out y))
+                if (a.AsUInt32(out uint x) && b.AsUInt32(out uint y))
                 {
                     x = BinaryGcd(x, y);
                     t = BigInteger.Create(x);
@@ -3096,7 +3066,6 @@ namespace clojure.lang
             const ulong SuperB = 0x100000000u;
 
             q = new uint[xlen - ylen + 1];
-            r = null;
 
             // Main loop: 
             //  D2: Initialize j
@@ -3127,7 +3096,7 @@ namespace clojure.lang
                 // It sucks.
 
                 long borrow = 0;
-                long temp = 0;
+                long temp;
                 for (int k = ylen - 1; k >= 0; k--)
                 {
                     int i = j + k + 1;
@@ -3441,7 +3410,7 @@ namespace clojure.lang
             }
         }
 
-        static uint[] UIntLogTable = 
+        static readonly uint[] UIntLogTable = 
         {
             0,
             9,

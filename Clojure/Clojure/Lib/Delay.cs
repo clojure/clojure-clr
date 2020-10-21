@@ -66,8 +66,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object force(object x)
         {
-            Delay delay = x as Delay;
-            return delay != null
+            return x is Delay delay
                 ? delay.deref()
                 : x;
         }

@@ -34,7 +34,6 @@ namespace clojure.lang
         protected readonly IPersistentMap data;
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public IPersistentMap getData()
         {
             return data;

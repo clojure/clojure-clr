@@ -73,16 +73,12 @@ namespace clojure.lang
             //    && fcount(obj) <= Tuple.MAX_SIZE)
             //    return Tuple.createFromColl(obj);
 
-            IReduceInit ri = obj as IReduceInit;
-            if (ri != null)
+            if (obj is IReduceInit ri)
                 return PersistentVector.create(ri);
-
-            ISeq iseq = obj as ISeq;
-            if (iseq != null)
+            if (obj is ISeq)
                 return PersistentVector.create(RT.seq(obj));
 
-            IEnumerable ie = obj as IEnumerable;
-            if (ie != null)
+            if (obj is IEnumerable ie)
                 return PersistentVector.create1(ie);
 
             return createOwning(RT.toArray(obj));

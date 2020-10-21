@@ -32,10 +32,10 @@ namespace clojure.lang
 
         #region Macro characters & #-dispatch
 
-        static IFn _taggedReader = new TaggedReader();
+        static readonly IFn _taggedReader = new TaggedReader();
 
-        static IFn[] _macros = new IFn[256];
-        static IFn[] _dispatchMacros = new IFn[256];
+        static readonly IFn[] _macros = new IFn[256];
+        static readonly IFn[] _dispatchMacros = new IFn[256];
 
         static EdnReader()
         {
@@ -150,11 +150,7 @@ namespace clojure.lang
 
                     //string token = readToken(r, (char)ch);
                     //return RT.suppressRead() ? null : interpretToken(token);
-                    string rawToken;
-                    string token;
-                    string mask;
-                    bool eofSeen;
-                    readToken(r, (char)ch, true, out rawToken, out token, out mask, out eofSeen);
+                    readToken(r, (char)ch, true, out string rawToken, out string token, out string mask, out bool eofSeen);
                     if (eofSeen)
                     {
                         if (eofIsError)
@@ -169,8 +165,7 @@ namespace clojure.lang
                 if (isRecursive)
                     throw;
 
-                LineNumberingTextReader lntr = r as LineNumberingTextReader;
-                if (lntr == null)
+                if (!(r is LineNumberingTextReader lntr))
                     throw;
 
                 throw new ReaderException(lntr.LineNumber, lntr.ColumnNumber, e);
@@ -268,8 +263,7 @@ namespace clojure.lang
 
         static List<Object> ReadDelimitedList(char delim, PushbackTextReader r, bool isRecursive, object opts)
         {
-            LineNumberingTextReader lntr = r as LineNumberingTextReader;
-            int firstLine = lntr != null ? lntr.LineNumber : -1;
+            int firstLine = r is LineNumberingTextReader lntr ? lntr.LineNumber : -1;
 
             List<Object> a = new List<object>();
 
@@ -458,9 +452,10 @@ namespace clojure.lang
         }
 
 
-        static Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
-        static Regex keywordPat = new Regex("^[:]?([^/].*/)?(/|[^/][^/]*)$");
+        static readonly Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
+        static readonly Regex keywordPat = new Regex("^[:]?([^/].*/)?(/|[^/][^/]*)$");
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         private static void ExtractNamesUsingMask(string token, string maskNS, string maskName, out string ns, out string name)
         {
             if (String.IsNullOrEmpty(maskNS))
@@ -499,16 +494,12 @@ namespace clojure.lang
                     Match m2 = keywordPat.Match(mask.Substring(1));
                     if (!m2.Success)
                         return null;
-                    string ns;
-                    string name;
-                    ExtractNamesUsingMask(token.Substring(1), m2.Groups[1].Value, m2.Groups[2].Value, out ns, out name);
+                    ExtractNamesUsingMask(token.Substring(1), m2.Groups[1].Value, m2.Groups[2].Value, out string ns, out string name);
                     return Keyword.intern(ns, name); 
                 }
                 else
                 {
-                    string ns;
-                    string name;
-                    ExtractNamesUsingMask(token, maskNS, maskName, out ns, out name);
+                    ExtractNamesUsingMask(token, maskNS, maskName, out string ns, out string name);
                     return Symbol.intern(ns, name);
                 }
             }
@@ -520,9 +511,9 @@ namespace clojure.lang
 
         #region Reading numbers
 
-        static Regex intRE = new Regex("^([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?$");
-        static Regex ratioRE = new Regex("^([-+]?[0-9]+)/([0-9]+)$");
-        static Regex floatRE = new Regex("^([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?$");
+        static readonly Regex intRE = new Regex("^([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?$");
+        static readonly Regex ratioRE = new Regex("^([-+]?[0-9]+)/([0-9]+)$");
+        static readonly Regex floatRE = new Regex("^([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?$");
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static object readNumber(PushbackTextReader r, char initch)
@@ -593,8 +584,7 @@ namespace clojure.lang
                 if (m.Groups[8].Success) // N suffix
                     return BigInt.fromBigInteger(bn);
 
-                long ln;
-                if (bn.AsInt64(out ln))
+                if (bn.AsInt64(out long ln))
                     return Numbers.num(ln);
 
                 return BigInt.fromBigInteger(bn);
@@ -952,8 +942,7 @@ namespace clojure.lang
                                 RT.EndLineKey, lntr.LineNumber,
                                 RT.EndColumnKey, lntr.ColumnNumber));
 
-                    IReference iref = o as IReference;
-                    if (iref != null)
+                    if (o is IReference iref)
                     {
                         iref.resetMeta(metaAsMap);
                         return o;
@@ -1049,7 +1038,7 @@ namespace clojure.lang
 
         public sealed class SymbolicValueReader : ReaderBase
         {
-            static IPersistentMap _specials = PersistentHashMap.create(
+            static readonly IPersistentMap _specials = PersistentHashMap.create(
                 Symbol.intern("Inf"), Double.PositiveInfinity,
                 Symbol.intern("-Inf"), Double.NegativeInfinity,
                 Symbol.intern("NaN"), Double.NaN);

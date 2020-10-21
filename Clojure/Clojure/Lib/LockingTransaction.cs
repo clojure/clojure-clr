@@ -481,7 +481,6 @@ namespace clojure.lang
         /// <summary>
         /// Kill this transaction.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         void Abort()
         {
             Stop(KILLED);
