@@ -81,9 +81,8 @@ namespace clojure.lang
             if (this == obj)
                 return true;
 
-            BigInt bi = obj as BigInt;
 
-            if (bi != null)
+            if (obj is BigInt bi)
             {
                 if (_bipart == null)
                     return bi._bipart == null && _lpart == bi._lpart;
@@ -383,8 +382,7 @@ namespace clojure.lang
         /// <returns>The equivalent byte</returns>
         public static explicit operator byte(BigInt self)
         {
-            int tmp;
-            if (self.AsInt32(out tmp))
+            if (self.AsInt32(out int tmp))
             {
                 return checked((byte)tmp);
             }

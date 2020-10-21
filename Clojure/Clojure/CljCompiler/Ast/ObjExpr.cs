@@ -160,7 +160,7 @@ namespace clojure.lang.CljCompiler.Ast
         private Type ConstantType(int i)
         {
             object o = Constants.nth(i);
-            Type t = o == null ? null : o.GetType();
+            Type t = o?.GetType();
             if (t != null && t.IsPublic)
             {
                 // Java: can't emit derived fn types due to visibility
@@ -299,6 +299,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Fn class construction
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public Type Compile(Type superType, Type stubType, IPersistentVector interfaces, bool onetimeUse, GenContext context)
         {
             if (CompiledType != null)
@@ -539,6 +540,7 @@ namespace clojure.lang.CljCompiler.Ast
                 return EmitConstructorForNonDefType(fnTB, baseType);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         private ConstructorBuilder EmitConstructorForDefType(TypeBuilder fnTB, Type baseType)
         {
             ConstructorBuilder cb = fnTB.DefineConstructor(MethodAttributes.Public, CallingConventions.HasThis, CtorTypes());
@@ -609,6 +611,7 @@ namespace clojure.lang.CljCompiler.Ast
             return cb;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         private void EmitFieldOnlyConstructors(TypeBuilder fnTB, Type baseType)
         {
             EmitFieldOnlyConstructorWithHash(fnTB);
@@ -667,6 +670,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         private ConstructorBuilder EmitNonMetaConstructor(TypeBuilder fnTB, Type baseType)
         {
             Type[] ctorTypes = CtorTypes();
@@ -766,8 +770,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 for (int i = 0; i < Constants.count(); i++)
                 {
-                    FieldBuilder fb;
-                    if (ConstantFields.TryGetValue(i, out fb))
+                    if (ConstantFields.TryGetValue(i, out FieldBuilder fb))
                     {
                         EmitValue(Constants.nth(i), ilg);
                         if (Constants.nth(i).GetType() != ConstantType(i))
@@ -816,11 +819,11 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (value == null)
                 ilg.Emit(OpCodes.Ldnull);
-            else if (value is String)
-                ilg.Emit(OpCodes.Ldstr, (String)value);
-            else if (value is Boolean)
+            else if (value is String str)
+                ilg.Emit(OpCodes.Ldstr, str);
+            else if (value is Boolean b)
             {
-                ilg.EmitBoolean((Boolean)value);
+                ilg.EmitBoolean(b);
                 ilg.Emit(OpCodes.Box,typeof(bool));
             }
             else if (value is Int32)
@@ -843,9 +846,8 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.EmitChar((char)value);
                 ilg.Emit(OpCodes.Box,typeof(char));
             }
-            else if (value is Type)
+            else if (value is Type t)
             {
-                Type t = (Type)value;
                 if (t.IsValueType)
                     ilg.EmitType(t);
                 else
@@ -855,9 +857,8 @@ namespace clojure.lang.CljCompiler.Ast
                     ilg.EmitCall(Compiler.Method_RT_classForName);
                 }
             }
-            else if (value is Symbol)
+            else if (value is Symbol sym)
             {
-                Symbol sym = (Symbol)value;
                 if (sym.Namespace == null)
                     ilg.EmitNull();
                 else
@@ -865,9 +866,8 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.EmitString(sym.Name);
                 ilg.EmitCall(Compiler.Method_Symbol_intern2);
             }
-            else if (value is Keyword)
+            else if (value is Keyword keyword)
             {
-                Keyword keyword = (Keyword)value;
                 if (keyword.Namespace == null)
                     ilg.EmitNull();
                 else
@@ -875,9 +875,8 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.EmitString(keyword.Name);
                 ilg.EmitCall(Compiler.Method_RT_keyword);
             }
-            else if (value is Var)
+            else if (value is Var var)
             {
-                Var var = (Var)value;
                 ilg.EmitString(var.Namespace.Name.ToString());
                 ilg.EmitString(var.Symbol.Name.ToString());
                 ilg.EmitCall(Compiler.Method_RT_var2);
@@ -910,9 +909,8 @@ namespace clojure.lang.CljCompiler.Ast
                 MethodInfo createMI = value.GetType().GetMethod("create", BindingFlags.Static | BindingFlags.Public, null, CallingConventions.Standard, new Type[] { typeof(IPersistentMap) }, null);
                 ilg.EmitCall(createMI);
             }
-            else if (value is IPersistentMap)
+            else if (value is IPersistentMap map)
             {
-                IPersistentMap map = (IPersistentMap)value;
                 List<object> entries = new List<object>(map.count() * 2);
                 foreach (IMapEntry entry in map)
                 {
@@ -922,9 +920,8 @@ namespace clojure.lang.CljCompiler.Ast
                 EmitListAsObjectArray(entries, ilg);
                 ilg.EmitCall(Compiler.Method_RT_map);
             }
-            else if (value is IPersistentVector)
+            else if (value is IPersistentVector args)
             {
-                IPersistentVector args = (IPersistentVector)value;
                 if (args.count() <= Tuple.MAX_SIZE)
                 {
                     for (int i = 0; i < args.count(); i++)
@@ -953,14 +950,14 @@ namespace clojure.lang.CljCompiler.Ast
                 EmitListAsObjectArray(value, ilg);
                 ilg.EmitCall(Compiler.Method_PersistentList_create);
             }
-            else if (value is Regex)
+            else if (value is Regex regex)
             {
-                ilg.EmitString(((Regex)value).ToString());
+                ilg.EmitString(regex.ToString());
                 ilg.EmitNew(Compiler.Ctor_Regex_1);
             }
             else
             {
-                string cs = null;
+                string cs;
                 try
                 {
                     cs = RT.printString(value);
@@ -981,10 +978,10 @@ namespace clojure.lang.CljCompiler.Ast
 
             if (partial)
             {
-                if (value is IObj && RT.count(((IObj)value).meta()) > 0)
+                if (value is IObj obj && RT.count(obj.meta()) > 0)
                 {
                     ilg.Emit(OpCodes.Castclass, typeof(IObj));
-                    Object m = ((IObj)value).meta();
+                    Object m = obj.meta();
                     EmitValue(Compiler.ElideMeta(m), ilg);
                     ilg.Emit(OpCodes.Castclass, typeof(IPersistentMap));
                     ilg.Emit(OpCodes.Callvirt, Compiler.Method_IObj_withMeta);
@@ -1012,8 +1009,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         internal void EmitConstant(CljILGen ilg, int id, object val)
         {
-            FieldBuilder fb = null;
-            if ( ConstantFields != null && ConstantFields.TryGetValue(id, out fb))
+            if (ConstantFields != null && ConstantFields.TryGetValue(id, out FieldBuilder fb))
             {
                 ilg.MaybeEmitVolatileOp(fb);
                 ilg.Emit(OpCodes.Ldsfld, fb);
@@ -1149,16 +1145,14 @@ namespace clojure.lang.CljCompiler.Ast
             if (!IsMutable(lb))
                 throw new ArgumentException("Cannot assign to non-mutable: ", lb.Name);
 
-            FieldBuilder fb = null;
-            bool hasField = ClosedOverFieldsMap.TryGetValue(lb, out fb);
+            bool hasField = ClosedOverFieldsMap.TryGetValue(lb, out FieldBuilder fb);
 
             ilg.Emit(OpCodes.Ldarg_0);  // this
 
             Type primt = lb.PrimitiveType;
             if (primt != null)
             {
-                MaybePrimitiveExpr mbe = val as MaybePrimitiveExpr;
-                if (!(mbe != null && mbe.CanEmitPrimitive))
+                if (!(val is MaybePrimitiveExpr mbe && mbe.CanEmitPrimitive))
                     throw new ArgumentException("Must assign primitive to primitive mutable", lb.Name);
                 mbe.EmitUnboxed(RHC.Expression, this, ilg);
 
@@ -1178,6 +1172,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         internal void EmitLetFnInits(CljILGen ilg, LocalBuilder localBuilder, ObjExpr objx, IPersistentSet letFnLocals)
         {
             if (TypeBuilder != null)
@@ -1190,8 +1185,7 @@ namespace clojure.lang.CljCompiler.Ast
                     LocalBinding lb = (LocalBinding)s.first();
                     if (letFnLocals.contains(lb))
                     {
-                        FieldBuilder fb;
-                        ClosedOverFieldsMap.TryGetValue(lb, out fb);
+                        ClosedOverFieldsMap.TryGetValue(lb, out FieldBuilder fb);
 
                         Type primt = lb.PrimitiveType;
                         ilg.Emit(OpCodes.Dup);  // this

@@ -114,8 +114,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             static IList<int> ReadCustomMods(byte[] sig)
             {
-                int start = 0;
-                return ReadCustomMods(sig, start + 1, out start);
+                return ReadCustomMods(sig, 1, out _);
             }
 
             static IList<int> ReadCustomMods(byte[] sig, int pos, out int nextPos)
@@ -158,9 +157,9 @@ namespace clojure.lang.CljCompiler.Ast
 
             static int ReadCompressedInteger(byte[] data, int pos, out int nextPos)
             {
-                int val = 0;
                 nextPos = pos;
 
+                int val;
                 if ((data[pos] & 0x80) == 0)
                 {
                     val = data[pos];

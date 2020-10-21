@@ -156,8 +156,7 @@ namespace clojure.lang.CljCompiler
 
         public int CompareTo(object obj)
         {
-            MethodSignature sig = obj as MethodSignature;
-            if ( sig == null )
+            if (!(obj is MethodSignature sig))
                 throw new ArgumentException("Must compare to a Sig");
 
             return CompareTo(sig);
@@ -169,8 +168,7 @@ namespace clojure.lang.CljCompiler
 
         public override bool Equals(object obj)
         {
-            MethodSignature sig = obj as MethodSignature;
-            if (sig == null)
+            if (!(obj is MethodSignature sig))
                 return false;
 
             return CompareTo(sig) == 0;

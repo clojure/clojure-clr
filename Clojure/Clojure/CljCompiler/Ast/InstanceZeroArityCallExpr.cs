@@ -130,11 +130,8 @@ namespace clojure.lang.CljCompiler.Ast
             GetMemberBinder binder = new ClojureGetZeroArityMemberBinder(ClojureContext.Default, _memberName, false);
             DynamicExpression dyn = Expression.Dynamic(binder, returnType, paramExprs);
 
-            LambdaExpression lambda;
-            Type delType;
-            MethodBuilder mbLambda;
 
-            MethodExpr.EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _memberName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out lambda, out delType, out mbLambda);
+            MethodExpr.EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _memberName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda);
 
             //  Emit target + args (no args, actually)
 

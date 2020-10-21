@@ -292,6 +292,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             EmitDynamicCallPostlude(lambda, delType, mbLambda, ilg);
         }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public static void EmitByRefArg(HostArg ha, ObjExpr objx, CljILGen ilg)
         {
             if (ha.LocalBinding.IsArg)
@@ -304,10 +305,9 @@ namespace clojure.lang.CljCompiler.Ast
 
         static public void EmitDynamicCallPreamble(DynamicExpression dyn, IPersistentMap spanMap, string methodName, Type returnType, IList<ParameterExpression> paramExprs, Type[] paramTypes, CljILGen ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda)
         {
-            Expression call = dyn;
-
             GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
             DynInitHelper.SiteInfo siteInfo;
+            Expression call;
             if (context != null && context.DynInitHelper != null)
                 call = context.DynInitHelper.ReduceDyn(dyn, out siteInfo);
             else
@@ -393,10 +393,10 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         static public void EmitDynamicCallPostlude(LambdaExpression lambda, Type delType, MethodBuilder mbLambda, CljILGen ilg)
         {
-
-            if (!(Compiler.CompilerContextVar.deref() is GenContext context))
+            if (!(Compiler.CompilerContextVar.deref() is GenContext))
             {
                 // light compile
 
@@ -511,7 +511,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        static MethodInfo MI_EmitConvertToType = typeof(Microsoft.Scripting.Generation.ILGen).GetMethod("EmitConvertToType",BindingFlags.Instance|BindingFlags.NonPublic|BindingFlags.Public);
+        static readonly MethodInfo MI_EmitConvertToType = typeof(Microsoft.Scripting.Generation.ILGen).GetMethod("EmitConvertToType",BindingFlags.Instance|BindingFlags.NonPublic|BindingFlags.Public);
         internal static void EmitConvertToType(CljILGen ilg, Type typeFrom, Type typeTo, bool isChecked)
         {
             //  If the DLR folks had made this method public (instead of internal), I could call it directly.

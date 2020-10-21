@@ -82,7 +82,7 @@ namespace clojure.lang.CljCompiler.Ast
             get
             {
                 if (_cachedType == null)
-                    _cachedType = Compiler.RetType((_tag != null ? HostExpr.TagToType(_tag) : null), (_method != null) ? _method.ReturnType : null);
+                    _cachedType = Compiler.RetType((_tag != null ? HostExpr.TagToType(_tag) : null), _method?.ReturnType);
                 return _cachedType;
             }
         }

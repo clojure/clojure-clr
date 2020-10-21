@@ -35,7 +35,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         bool _hasEnclosingMethod;
 
-        private int _dynMethodMapKey = RT.nextID();
+        private readonly int _dynMethodMapKey = RT.nextID();
         public int DynMethodMapKey { get { return _dynMethodMapKey; } }
 
         Type _cachedType;
@@ -112,8 +112,10 @@ namespace clojure.lang.CljCompiler.Ast
         {
             ISeq origForm = form;
 
-            FnExpr fn = new FnExpr(Compiler.TagOf(form));
-            fn.Src = form;
+            FnExpr fn = new FnExpr(Compiler.TagOf(form))
+            {
+                Src = form
+            };
 
             Keyword retKey = Keyword.intern(null, "rettag");  // TODO: make static
             object retTag = RT.get(RT.meta(form), retKey);
@@ -145,11 +147,8 @@ namespace clojure.lang.CljCompiler.Ast
                 form = RT.list(Compiler.FnSym, RT.next(form));
 
             fn.SpanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();
-
-            GenContext newContext = null;
-
             GenContext context = Compiler.CompilerContextVar.deref() as GenContext ?? Compiler.EvalContext;
-            newContext = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
+            GenContext newContext = context.WithNewDynInitHelper(fn.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
             Var.pushThreadBindings(RT.map(Compiler.CompilerContextVar, newContext));
 
 
@@ -274,17 +273,17 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
 
-        static bool HasPrimDecls(ISeq forms)
-        {
-            for (ISeq s = forms; s != null; s = RT.next(s))
-                if (FnMethod.HasPrimInterface((ISeq)RT.first(s)))
-                    return true;
+        //static bool HasPrimDecls(ISeq forms)
+        //{
+        //    for (ISeq s = forms; s != null; s = RT.next(s))
+        //        if (FnMethod.HasPrimInterface((ISeq)RT.first(s)))
+        //            return true;
 
-            return false;
-        }
+        //    return false;
+        //}
 
-        static readonly MethodInfo Method_FnExpr_GetDynMethod = typeof(FnExpr).GetMethod("GetDynMethod");
-        static readonly MethodInfo Method_FnExpr_GetCompiledConstants = typeof(FnExpr).GetMethod("GetCompiledConstants");
+        //static readonly MethodInfo Method_FnExpr_GetDynMethod = typeof(FnExpr).GetMethod("GetDynMethod");
+        //static readonly MethodInfo Method_FnExpr_GetCompiledConstants = typeof(FnExpr).GetMethod("GetCompiledConstants");
 
         static readonly Dictionary<int, Dictionary<int, DynamicMethod > > DynMethodMap = new Dictionary<int,Dictionary<int,DynamicMethod>>();
         static readonly Dictionary<int, object[]> ConstantsMap = new Dictionary<int, object[]>();
@@ -307,27 +306,27 @@ namespace clojure.lang.CljCompiler.Ast
             //return (object[])wr.Target;
         }
 
-        private static int GetMethodKey(FnMethod method)
-        {
-            int arity = method.IsVariadic 
-                ? method.RequiredArity + 1  // to avoid the non-variadics, the last of which may have NumParams == this method RequireArity
-                : method.NumParams;
+        //private static int GetMethodKey(FnMethod method)
+        //{
+        //    int arity = method.IsVariadic 
+        //        ? method.RequiredArity + 1  // to avoid the non-variadics, the last of which may have NumParams == this method RequireArity
+        //        : method.NumParams;
 
-            return arity;
-        }
+        //    return arity;
+        //}
 
-        private void EmitGetDynMethod(int arity, CljILGen ilg)
-        {            
-            ilg.EmitInt(DynMethodMapKey);
-            ilg.EmitInt(arity);
-            ilg.Emit(OpCodes.Call,Method_FnExpr_GetDynMethod);
-        }
+        //private void EmitGetDynMethod(int arity, CljILGen ilg)
+        //{            
+        //    ilg.EmitInt(DynMethodMapKey);
+        //    ilg.EmitInt(arity);
+        //    ilg.Emit(OpCodes.Call,Method_FnExpr_GetDynMethod);
+        //}
 
-        private void EmitGetCompiledConstants(CljILGen ilg)
-        {
-            ilg.EmitInt(DynMethodMapKey);
-            ilg.Emit(OpCodes.Call, Method_FnExpr_GetCompiledConstants);
-        }
+        //private void EmitGetCompiledConstants(CljILGen ilg)
+        //{
+        //    ilg.EmitInt(DynMethodMapKey);
+        //    ilg.Emit(OpCodes.Call, Method_FnExpr_GetCompiledConstants);
+        //}
 
         #endregion
 

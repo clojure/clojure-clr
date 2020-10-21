@@ -67,7 +67,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public sealed class Parser : IParser
         {
-            static Keyword FormKey = Keyword.intern("form");
+            static readonly Keyword FormKey = Keyword.intern("form");
 
             public Expr Parse(ParserContext pcon, object form)
             {
@@ -95,7 +95,7 @@ namespace clojure.lang.CljCompiler.Ast
                     return NumberExpr.Parse(v);
                 else if (v is string)
                     return new StringExpr((String)v);
-                else if (v is IPersistentCollection && ((IPersistentCollection)v).count() == 0)
+                else if (v is IPersistentCollection collection && collection.count() == 0)
                     return new EmptyExpr(v);
                 else
                     return new ConstantExpr(v);

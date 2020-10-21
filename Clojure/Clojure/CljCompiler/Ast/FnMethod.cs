@@ -112,8 +112,10 @@ namespace clojure.lang.CljCompiler.Ast
 
             try
             {
-                FnMethod method = new FnMethod(fn, (ObjMethod)Compiler.MethodVar.deref());
-                method.SpanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();
+                FnMethod method = new FnMethod(fn, (ObjMethod)Compiler.MethodVar.deref())
+                {
+                    SpanMap = (IPersistentMap)Compiler.SourceSpanVar.deref()
+                };
 
                 Var.pushThreadBindings(RT.mapUniqueKeys(
                     Compiler.MethodVar, method,
@@ -284,9 +286,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public static bool HasPrimInterface(ISeq form)
         {
-            IPersistentVector parms = RT.first(form) as IPersistentVector;
-
-            return parms != null && IsPrimInterface(parms);
+            return RT.first(form) is IPersistentVector parms && IsPrimInterface(parms);
         }
          
         #endregion

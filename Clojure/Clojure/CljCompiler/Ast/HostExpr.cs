@@ -67,8 +67,8 @@ namespace clojure.lang.CljCompiler.Ast
 
                 if (isZeroArityCall)
                 {
-                    PropertyInfo pinfo = null;
-                    FieldInfo finfo = null;
+                    PropertyInfo pinfo;
+                    FieldInfo finfo;
 
                     // TODO: Figure out if we want to handle the -propname otherwise.
 
@@ -133,7 +133,7 @@ namespace clojure.lang.CljCompiler.Ast
                 List<Type> typeArgs = null;
 
                 object fourth = RT.fourth(sform);
-                if (fourth is ISeq && RT.first(fourth) is Symbol && ((Symbol)RT.first(fourth)).Equals(TypeArgsSym))
+                if (fourth is ISeq && RT.first(fourth) is Symbol symbol && symbol.Equals(TypeArgsSym))
                  {
                     // We have a type args supplied for a generic method call
                     // (. thing methodname (type-args type1 ... ) args ...)
@@ -141,7 +141,7 @@ namespace clojure.lang.CljCompiler.Ast
                     call = RT.listStar(RT.third(sform), RT.next(RT.next(RT.next(RT.next(sform)))));
                 }
                 else
-                    call = RT.third(sform) is ISeq ? (ISeq)RT.third(sform) : RT.next(RT.next(sform));
+                    call = RT.third(sform) is ISeq seq ? seq : RT.next(RT.next(sform));
 
                 if (!(RT.first(call) is Symbol))
                     throw new ParseException("Malformed member exception");
@@ -185,8 +185,7 @@ namespace clojure.lang.CljCompiler.Ast
                 HostArg.ParameterType paramType = HostArg.ParameterType.Standard;
                 LocalBinding lb = null;
 
-                ISeq argAsSeq = arg as ISeq;
-                if (argAsSeq != null)
+                if (arg is ISeq argAsSeq)
                 {
                     Symbol op = RT.first(argAsSeq) as Symbol;
                     if (op != null && op.Equals(ByRefSym))
@@ -272,13 +271,12 @@ namespace clojure.lang.CljCompiler.Ast
         
         public static Type MaybeType(object form, bool stringOk)
         {
-            if (form is Type)
-                return (Type)form;
+            if (form is Type type)
+                return type;
 
             Type t = null;
-            if (form is Symbol)
+            if (form is Symbol sym)
             {
-                Symbol sym = (Symbol)form;
                 if (sym.Namespace == null) // if ns-qualified, can't be classname
                 {
                     if (Util.equals(sym, Compiler.CompileStubSymVar.get()))
@@ -289,8 +287,8 @@ namespace clojure.lang.CljCompiler.Ast
                     else
                     {
                         object o = Compiler.CurrentNamespace.GetMapping(sym);
-                        if (o is Type)
-                            t = (Type)o;
+                        if (o is Type type1)
+                            t = type1;
                         else if (Compiler.LocalEnvVar.deref() != null && ((IPersistentMap)Compiler.LocalEnvVar.deref()).containsKey(form))  // JVM casts to java.util.Map
                             return null;
                         else
@@ -309,8 +307,8 @@ namespace clojure.lang.CljCompiler.Ast
 
                 }
             }
-            else if (stringOk && form is string)
-                t = RT.classForNameE((string)form);
+            else if (stringOk && form is string str)
+                t = RT.classForNameE(str);
 
             return t;
         }
@@ -365,6 +363,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Code generation
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         internal static void EmitBoxReturn(ObjExpr objx, CljILGen ilg, Type returnType)
 
         {
@@ -374,6 +373,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Box, returnType);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         internal static void EmitUnboxArg(ObjExpr objx, CljILGen ilg, Type paramType)
         {
             EmitUnboxArg(ilg, paramType);
@@ -383,8 +383,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if (paramType.IsPrimitive)
             {
-                MethodInfo m = null;
-
+                MethodInfo m;
                 if (paramType == typeof(bool))
                 {
                     m = HostExpr.Method_RT_booleanCast;

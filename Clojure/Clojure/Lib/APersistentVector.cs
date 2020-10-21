@@ -78,9 +78,7 @@ namespace clojure.lang
             if (v == obj)
                 return true;
 
-            IPersistentVector ipv = obj as IPersistentVector;
-
-            if (ipv != null)
+            if (obj is IPersistentVector ipv)
             {
                 if (ipv.count() != v.count())
                     return false;
@@ -93,9 +91,7 @@ namespace clojure.lang
                 return true;
             }
 
-            IList ilist = obj as IList;
-
-            if (ilist != null)
+            if (obj is IList ilist)
             {
                 if (ilist.Count != v.count())   // THis test in the JVM code can't be right:  || ma.GetHashCode() != v.GetHashCode())
                     return false;
@@ -201,9 +197,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static bool doEquiv(IPersistentVector v, object obj)
         {
-            IPersistentVector ipv = obj as IPersistentVector;
-
-            if (ipv != null)
+            if (obj is IPersistentVector ipv)
             {
                 if (ipv.count() != v.count())
                     return false;
@@ -216,9 +210,7 @@ namespace clojure.lang
                 return true;
             }
 
-            IList ilist = obj as IList;
-
-            if (ilist != null)
+            if (obj is IList ilist)
             {
                 if (ilist.Count != v.count())   // THis test in the JVM code can't be right:  || ma.GetHashCode() != v.GetHashCode())
                     return false;
@@ -994,8 +986,7 @@ namespace clojure.lang
             {
                 _meta = meta;
 
-                SubVector sv = v as SubVector;
-                if (sv != null)
+                if (v is SubVector sv)
                 {
                     start += sv._start;
                     end += sv._start;
@@ -1137,16 +1128,14 @@ namespace clojure.lang
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                APersistentVector av = _v as APersistentVector;
-                if ( av != null )
+                if (_v is APersistentVector av)
                     return av.RangedIterator(_start, _end);
                 return base.GetEnumerator();    
             }
 
             public override IEnumerator<object> GetEnumerator()
             {
-                APersistentVector av = _v as APersistentVector;
-                if (av != null)
+                if (_v is APersistentVector av)
                     return av.RangedIteratorT(_start, _end);
                 return base.GetEnumerator();    
             }

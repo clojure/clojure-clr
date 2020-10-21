@@ -39,7 +39,7 @@ namespace clojure.lang
 
         #region Duplicate types
 
-        static Dictionary<String, Type> _duplicateTypeMap = new Dictionary<string, Type>();
+        static readonly Dictionary<String, Type> _duplicateTypeMap = new Dictionary<string, Type>();
 
         internal static void RegisterDuplicateType(Type type)
         {
@@ -48,8 +48,7 @@ namespace clojure.lang
 
         internal static Type FindDuplicateType(string typename)
         {
-            Type type;
-            _duplicateTypeMap.TryGetValue(typename, out type);
+            _duplicateTypeMap.TryGetValue(typename, out Type type);
             return type;
         }
 
@@ -426,9 +425,7 @@ namespace clojure.lang
              if (ot != null)
                 return Symbol.intern(null, Util.NameForType(ot));
 
-             Var ov = o as Var;
-             if (ov != null)
-
+            if (o is Var ov)
                 return Symbol.intern(ov.Namespace.Name.Name, ov.Symbol.Name);
 
             return null;
@@ -609,8 +606,7 @@ namespace clojure.lang
                 return -1;
             PersistentVector v = (PersistentVector)ConstantsVar.deref();
             IdentityHashMap ids = (IdentityHashMap)ConstantIdsVar.deref();
-            int i;
-            if (ids.TryGetValue(o, out i))
+            if (ids.TryGetValue(o, out int i))
                 return i;
             ConstantsVar.set(RT.conj(v, o));
             ids[o] = v.count();
@@ -750,9 +746,7 @@ namespace clojure.lang
 
         internal static Type MaybePrimitiveType(Expr e)
         {
-            MaybePrimitiveExpr mpe = e as MaybePrimitiveExpr;
-
-            if (mpe != null && mpe.HasClrType && mpe.CanEmitPrimitive)
+            if (e is MaybePrimitiveExpr mpe && mpe.HasClrType && mpe.CanEmitPrimitive)
             {
                 Type t = e.ClrType;
                 if (Util.IsPrimitive(t))
@@ -1077,7 +1071,7 @@ namespace clojure.lang
                     return eval(RT.first(s));
                 }
                 else if ( (form is IType) ||
-                    (form is IPersistentCollection && !(RT.first(form) is Symbol && ((Symbol)RT.first(form)).Name.StartsWith("def"))))
+                    (form is IPersistentCollection && !(RT.first(form) is Symbol symbol && symbol.Name.StartsWith("def"))))
                 {
                     ObjExpr objx = (ObjExpr)Analyze(pconExpr, RT.list(FnSym, PersistentVector.EMPTY, form), "eval" + RT.nextID());
                     IFn fn = (IFn)objx.Eval();
@@ -1149,8 +1143,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object macroexpand1(object form)
         {
-            ISeq s = form as ISeq;
-            return s != null 
+            return form is ISeq s
                 ? MacroexpandSeq1(s)
                 : form;
         }
@@ -1222,7 +1215,7 @@ namespace clojure.lang
                     if (e is ArgumentException || e is InvalidOperationException || e is ExceptionInfo)
                     {
                         throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(),
-                            (op is Symbol ? (Symbol)op : null),
+                            op is Symbol symbol ? symbol : null,
                             CompilerException.PhaseMacroSyntaxCheckKeyword,
                             e);
                     }
@@ -1230,7 +1223,7 @@ namespace clojure.lang
                     {
 
                         throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(),
-                            (op is Symbol ? (Symbol)op : null),
+                            op is Symbol symbol ? symbol : null,
                             (e.GetType().Equals(typeof(Exception)) ? CompilerException.PhaseMacroSyntaxCheckKeyword : CompilerException.PhaseMacroExpandKeyword),
                             e);
                     }
@@ -1332,12 +1325,10 @@ namespace clojure.lang
 
         static object MaybeTransferSourceInfo(object newForm, object oldForm)
         {
-            IObj newObj = newForm as IObj;
-            if (newObj == null)
+            if (!(newForm is IObj newObj))
                 return newForm;
 
-            IObj oldObj = oldForm as IObj;
-            if (oldObj == null)
+            if (!(oldForm is IObj oldObj))
                 return newForm;
 
             IPersistentMap oldMeta = oldObj.meta();
@@ -1364,8 +1355,7 @@ namespace clojure.lang
             Symbol tag = TagOf(src);
             if (tag != null )
             {
-                IObj iobj = dst as IObj;
-                if (iobj != null)
+                if (dst is IObj iobj)
                 {
                     IPersistentMap meta = iobj.meta();
                     return iobj.withMeta((IPersistentMap)RT.assoc(meta, RT.TagKey, tag));
@@ -1382,7 +1372,7 @@ namespace clojure.lang
             return ts;
         }
 
-        static Dictionary<Type, Symbol> TypeToTagDict = new Dictionary<Type, Symbol>()
+        static readonly Dictionary<Type, Symbol> TypeToTagDict = new Dictionary<Type, Symbol>()
         {
             { typeof(bool), Symbol.create(null,"bool") },
             { typeof(char), Symbol.create(null,"char") },
@@ -1409,15 +1399,13 @@ namespace clojure.lang
             }
 
             {
-                string str = tag as String;
-                if (str != null)
+                if (tag is String str)
                     return Symbol.intern(null, str);
             }
 
             {
                 Type t = tag as Type;
-                Symbol sym;
-                if ( t != null && TypeToTagDict.TryGetValue(t, out sym))
+                if (t != null && TypeToTagDict.TryGetValue(t, out Symbol sym))
                 {
                     return sym;
                 }
@@ -1440,8 +1428,7 @@ namespace clojure.lang
             if (spanMap == null )
                 return 0;
 
-            int line;
-            if (GetLocation(spanMap,RT.StartLineKey,out line) )
+            if (GetLocation(spanMap, RT.StartLineKey, out int line))
                 return line;
 
             return 0;
@@ -1453,8 +1440,7 @@ namespace clojure.lang
             if (spanMap == null)
                 return 0;
 
-            int line;
-            if (GetLocation(spanMap, RT.StartColumnKey, out line))
+            if (GetLocation(spanMap, RT.StartColumnKey, out int line))
                 return line;
 
             return 0;
@@ -1463,9 +1449,9 @@ namespace clojure.lang
         static bool GetLocation(IPersistentMap spanMap, Keyword key, out int val)
         {
             object oval = spanMap.valAt(key);
-            if (oval != null && oval is int)
+            if (oval != null && oval is int ioval)
             {
-                val = (int)oval;
+                val = ioval;
                 return true;
             }
             val = -1;
@@ -1545,6 +1531,7 @@ namespace clojure.lang
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public static object Compile(GenContext context,TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
         {
             object eofVal = new object();
@@ -1845,6 +1832,7 @@ namespace clojure.lang
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public static object load(TextReader rdr, string sourcePath, string sourceName, string relativePath)
         {
             object ret = null;
@@ -1953,23 +1941,23 @@ namespace clojure.lang
                     return NumberExpr.Parse(form);
                 else if (type == typeof(String))
                     return new StringExpr(String.Intern((String)form));
-                else if (form is IPersistentCollection
+                else if (form is IPersistentCollection collection
                     && ! (form is IRecord)
                     && ! (form is IType)
-                    && ((IPersistentCollection)form).count() == 0)
+                    && collection.count() == 0)
                     return OptionallyGenerateMetaInit(pcontext, form, new EmptyExpr(form));
-                else if (form is ISeq)
-                    return AnalyzeSeq(pcontext, (ISeq)form, name);
-                else if (form is IPersistentVector)
-                    return VectorExpr.Parse(pcontext, (IPersistentVector)form);
+                else if (form is ISeq seq)
+                    return AnalyzeSeq(pcontext, seq, name);
+                else if (form is IPersistentVector vector)
+                    return VectorExpr.Parse(pcontext, vector);
                 else if (form is IRecord)
                     return new ConstantExpr(form);
                 else if (form is IType)
                     return new ConstantExpr(form);
-                else if (form is IPersistentMap)
-                    return MapExpr.Parse(pcontext, (IPersistentMap)form);
-                else if (form is IPersistentSet)
-                    return SetExpr.Parse(pcontext, (IPersistentSet)form);
+                else if (form is IPersistentMap map)
+                    return MapExpr.Parse(pcontext, map);
+                else if (form is IPersistentSet set)
+                    return SetExpr.Parse(pcontext, set);
                 else
                     return new ConstantExpr(form);
             }
@@ -2026,9 +2014,8 @@ namespace clojure.lang
             object o = Compiler.Resolve(symbol);
 
            Symbol oAsSymbol;
-           Var oAsVar = o as Var;
- 
-            if (oAsVar != null)
+
+            if (o is Var oAsVar)
             {
                 if (IsMacro(oAsVar) != null)
                     throw new InvalidOperationException("Can't take the value of a macro: " + oAsVar);
@@ -2039,7 +2026,7 @@ namespace clojure.lang
             }
             else if (o is Type)
                 return new ConstantExpr(o);
-            else if ( (oAsSymbol = o as Symbol) != null)
+            else if ((oAsSymbol = o as Symbol) != null)
                 return new UnresolvedVarExpr(oAsSymbol);
 
             throw new InvalidOperationException(string.Format("Unable to resolve symbol: {0} in this context", symbol));
@@ -2089,7 +2076,7 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                Symbol s = (op != null && op is Symbol) ? (Symbol)op : null;
+                Symbol s = (op != null && op is Symbol symbol) ? symbol : null;
                 throw new CompilerException((String)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), s, e);
             }
             finally
@@ -2204,6 +2191,7 @@ namespace clojure.lang
 			        return "macroexpanding";
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
             public static String MakeMsg(String source, int line, int column, Symbol sym, Keyword phase, Exception cause)
             {
                 return (PhaseMacroExpandKeyword.Equals(phase) ? "Unexpected error " : "Syntax error ") +
@@ -2217,8 +2205,7 @@ namespace clojure.lang
                 Exception cause = InnerException;
                 if (cause != null)
                 {
-                    IExceptionInfo eInfo = cause as IExceptionInfo;
-                    if (eInfo != null)
+                    if (cause is IExceptionInfo eInfo)
                     {
                         IPersistentMap data = (IPersistentMap)eInfo.getData();
                         if (PhaseMacroSyntaxCheckKeyword.Equals(data.valAt(ErrorPhaseKeyword)) && data.valAt(SpecProblemsKeyword) != null)

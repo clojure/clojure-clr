@@ -54,9 +54,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         internal static IArraySeq createFromObject(Object array)
         {
-            Array aa = array as Array;
-
-            if (aa == null || aa.Length == 0)
+            if (!(array is Array aa) || aa.Length == 0)
                 return null;
 
             Type elementType = array.GetType().GetElementType();

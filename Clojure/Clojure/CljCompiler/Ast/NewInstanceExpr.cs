@@ -93,15 +93,15 @@ namespace clojure.lang.CljCompiler.Ast
                 rform = RT.next(rform);
 
                 ObjExpr ret = Build(interfaces, null, null, className, Symbol.intern(className), null, rform,frm, null);
-                IObj iobj = frm as IObj;
 
-                if (iobj != null && iobj.meta() != null)
-                    return new MetaExpr(ret, MapExpr.Parse(pcon.EvalOrExpr(),iobj.meta()));
+                if (frm is IObj iobj && iobj.meta() != null)
+                    return new MetaExpr(ret, MapExpr.Parse(pcon.EvalOrExpr(), iobj.meta()));
                 else
                     return ret;
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         internal static ObjExpr Build(
             IPersistentVector interfaceSyms, 
             IPersistentVector fieldSyms, 
@@ -113,10 +113,12 @@ namespace clojure.lang.CljCompiler.Ast
             Object frm,
             IPersistentMap opts)
         {
-            NewInstanceExpr ret = new NewInstanceExpr(null);
-            ret.Src = frm;
-            ret.Name = className.ToString();
-            ret.ClassMeta = GenInterface.ExtractAttributes(RT.meta(className));
+            NewInstanceExpr ret = new NewInstanceExpr(null)
+            {
+                Src = frm,
+                Name = className.ToString(),
+                ClassMeta = GenInterface.ExtractAttributes(RT.meta(className))
+            };
             ret.InternalName = ret.Name;  // ret.Name.Replace('.', '/');
             // Java: ret.objtype = Type.getObjectType(ret.internalName);
             ret.Opts = opts;
@@ -164,9 +166,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
             Type superClass = typeof(Object);
 
-            Dictionary<IPersistentVector, IList<MethodInfo>> overrideables;
-            Dictionary<IPersistentVector, IList<MethodInfo>> explicits;
-            GatherMethods(superClass, RT.seq(interfaces), out overrideables, out explicits);
+            GatherMethods(superClass, RT.seq(interfaces), out Dictionary<IPersistentVector, IList<MethodInfo>> overrideables, out Dictionary<IPersistentVector, IList<MethodInfo>> explicits);
 
             ret._methodMap = overrideables;
 
@@ -277,6 +277,7 @@ namespace clojure.lang.CljCompiler.Ast
          *   
          * */
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         Type CompileBaseClass(GenContext context, Type super, Type[] interfaces, Object frm)
         {
             //TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.CompileStubPrefix + "." + InternalName + RT.nextID(), TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
@@ -328,11 +329,11 @@ namespace clojure.lang.CljCompiler.Ast
                 if (AltCtorDrops > 0)
                 {
                     Type[] ctorTypes = CtorTypes();
-                    Type[] altCtorTypes = null;
                     int newLen;
                     {
 
                         newLen = ctorTypes.Length - AltCtorDrops;
+                        Type[] altCtorTypes;
                         if (newLen > 0)
                         {
                             altCtorTypes = new Type[newLen];
@@ -401,8 +402,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
         private static bool HasShadowedMethod(MethodInfo mi, Dictionary<string, List<MethodInfo>> impled)
         {
-            List<MethodInfo> possibles;
-            if (! impled.TryGetValue(mi.Name,out possibles) && possibles == null)
+            if (!impled.TryGetValue(mi.Name, out List<MethodInfo> possibles) && possibles == null)
                 return false;
 
             foreach (MethodInfo m in possibles)
@@ -488,8 +488,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         static void AddMethod(Dictionary<IPersistentVector, IList<MethodInfo>> mm, IPersistentVector sig, MethodInfo m)
         {
-            IList<MethodInfo> value;
-            if (!mm.TryGetValue(sig, out value))
+            if (!mm.TryGetValue(sig, out IList<MethodInfo> value))
             {
                 value = new List<MethodInfo>();
                 mm[sig] = value;
@@ -501,9 +500,8 @@ namespace clojure.lang.CljCompiler.Ast
         {
             foreach (MethodInfo m in type.GetMethods(BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
-                IList<MethodInfo> value;
                 IPersistentVector mk = MSig(m);
-                if ( ! explicits.TryGetValue(mk,out value) )
+                if ( ! explicits.TryGetValue(mk,out IList<MethodInfo> value) )
                 {
                     value = new List<MethodInfo>();
                     explicits[mk] = value;

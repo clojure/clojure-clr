@@ -66,7 +66,7 @@ namespace clojure.lang
         /// <summary>
         /// A queue of pending actions.
         /// </summary>
-        private AtomicReference<ActionQueue> _aq = new AtomicReference<ActionQueue>(ActionQueue.EMPTY);
+        private readonly AtomicReference<ActionQueue> _aq = new AtomicReference<ActionQueue>(ActionQueue.EMPTY);
 
         /// <summary>
         /// Number of items in the queue.

@@ -25,8 +25,8 @@ namespace clojure.lang
 
         #region Data
 
-        int _dimensions;
-        bool _isBound;
+        private readonly int _dimensions;
+        private readonly bool _isBound;
 
         #endregion
 

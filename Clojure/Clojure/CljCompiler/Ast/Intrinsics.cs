@@ -25,8 +25,8 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        static Dictionary<MethodInfo, OpCode[]> _ops = new Dictionary<MethodInfo, OpCode[]>();
-        static Dictionary<MethodInfo, OpCode[]> _preds = new Dictionary<MethodInfo, OpCode[]>();
+        static readonly Dictionary<MethodInfo, OpCode[]> _ops = new Dictionary<MethodInfo, OpCode[]>();
+        static readonly Dictionary<MethodInfo, OpCode[]> _preds = new Dictionary<MethodInfo, OpCode[]>();
 
         static void AddOp(MethodInfo mi, params OpCode[] opcodes)
         {

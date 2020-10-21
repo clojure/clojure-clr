@@ -124,7 +124,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 // register 'this' as local 0
                 //method._thisBinding = Compiler.RegisterLocalThis(((thisName == null) ? dummyThis : thisName), thisTag, null);
-                Compiler.RegisterLocalThis(((thisName == null) ? dummyThis : thisName), thisTag, null);
+                Compiler.RegisterLocalThis((thisName ?? dummyThis), thisTag, null);
 
                 IPersistentVector argLocals = PersistentVector.EMPTY;
                 method._retType = Compiler.TagType(Compiler.TagOf(name));
@@ -141,14 +141,13 @@ namespace clojure.lang.CljCompiler.Ast
                     bool isByRef = false;
 
                     object pobj = parms.nth(i);
-                    if (pobj is Symbol)
-                        p = (Symbol)pobj;
-                    else if (pobj is ISeq)
+                    if (pobj is Symbol symbol)
+                        p = symbol;
+                    else if (pobj is ISeq pseq)
                     {
-                        ISeq pseq = (ISeq)pobj;
                         object first = RT.first(pseq);
                         object second = RT.second(pseq);
-                        if (!(first is Symbol && ((Symbol)first).Equals(HostExpr.ByRefSym)))
+                        if (!(first is Symbol symbol1 && symbol1.Equals(HostExpr.ByRefSym)))
                             throw new ParseException("First element in parameter pair must be by-ref");
                         if (!(second is Symbol))
                             throw new ParseException("Params must be Symbols");
@@ -289,8 +288,7 @@ namespace clojure.lang.CljCompiler.Ast
                 foreach (MethodInfo mi in kv.Value)
                     if (name.Equals(mi.Name) && mi.GetParameters().Length == arity && mi.DeclaringType == explicitInterface)
                     {
-                        IList<MethodInfo> list;
-                        if (!ret.TryGetValue(kv.Key, out list))
+                        if (!ret.TryGetValue(kv.Key, out IList<MethodInfo> list))
                         {
                             list = new List<MethodInfo>();
                             ret[kv.Key] = list;

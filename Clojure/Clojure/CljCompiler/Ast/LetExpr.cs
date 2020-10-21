@@ -71,9 +71,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 bool isLoop = RT.first(form).Equals(Compiler.LoopSym);
 
-                IPersistentVector bindings = RT.second(form) as IPersistentVector;
-
-                if (bindings == null)
+                if (!(RT.second(form) is IPersistentVector bindings))
                     throw new ParseException("Bad binding form, expected vector");
 
                 if ((bindings.count() % 2) != 0)
@@ -129,22 +127,28 @@ namespace clojure.lang.CljCompiler.Ast
                                 if (recurMismatches != null && RT.booleanCast(recurMismatches.nth(i / 2)) )
                                 {
                                     HostArg ha = new HostArg(HostArg.ParameterType.Standard, init, null);
-                                    List<HostArg> has = new List<HostArg>(1);
-                                    has.Add(ha);
+                                    List<HostArg> has = new List<HostArg>(1)
+                                    {
+                                        ha
+                                    };
                                     init = new StaticMethodExpr("", PersistentArrayMap.EMPTY, null, typeof(RT), "box", null, has, false);
                                     if (RT.booleanCast(RT.WarnOnReflectionVar.deref()))
                                         RT.errPrintWriter().WriteLine("Auto-boxing loop arg: " + sym);
                                 }
                                 else if (Compiler.MaybePrimitiveType(init) == typeof(int))
                                 {
-                                    List<HostArg> args = new List<HostArg>();
-                                    args.Add(new HostArg(HostArg.ParameterType.Standard, init, null));
+                                    List<HostArg> args = new List<HostArg>
+                                    {
+                                        new HostArg(HostArg.ParameterType.Standard, init, null)
+                                    };
                                     init = new StaticMethodExpr("", null, null, typeof(RT), "longCast", null, args, false);
                                 }
                                 else if (Compiler.MaybePrimitiveType(init) == typeof(float))
                                 {
-                                    List<HostArg> args = new List<HostArg>();
-                                    args.Add(new HostArg(HostArg.ParameterType.Standard, init, null));
+                                    List<HostArg> args = new List<HostArg>
+                                    {
+                                        new HostArg(HostArg.ParameterType.Standard, init, null)
+                                    };
                                     init = new StaticMethodExpr("", null, null, typeof(RT), "doubleCast", null, args, false);
                                 }
                             }
@@ -275,7 +279,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public bool CanEmitPrimitive
         {
-            get { return _body is MaybePrimitiveExpr && ((MaybePrimitiveExpr)_body).CanEmitPrimitive; }
+            get { return _body is MaybePrimitiveExpr expr && expr.CanEmitPrimitive; }
         }
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)

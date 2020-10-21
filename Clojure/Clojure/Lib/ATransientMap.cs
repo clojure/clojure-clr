@@ -56,20 +56,17 @@ namespace clojure.lang
             EnsureEditable();
 
             {
-                IMapEntry e = val as IMapEntry;
-                if (e != null)
+                if (val is IMapEntry e)
                     return assoc(e.key(), e.val());
             }
 
-            if (val is DictionaryEntry)
+            if (val is DictionaryEntry de)
             {
-                DictionaryEntry de = (DictionaryEntry)val;
                 return assoc(de.Key, de.Value);
             }
 
             {
-                IPersistentVector v = val as IPersistentVector;
-                if (v != null)
+                if (val is IPersistentVector v)
                 {
                     if (v.count() != 2)
                         throw new ArgumentException("Vector arg to map conj must be a pair");

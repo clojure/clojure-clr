@@ -34,8 +34,7 @@ namespace clojure.lang
         static readonly MethodInfo Method_IPersistentMap_Cons = typeof(IPersistentMap).GetMethod("cons");
         static readonly MethodInfo Method_RT_get = typeof(RT).GetMethod("get",new Type[]{ typeof(object), typeof(object) });
         static readonly ConstructorInfo CtorInfo_NotImplementedException_1 = typeof(NotImplementedException).GetConstructor(new Type[] { typeof(string) });
-
-        GenContext _context;
+        readonly GenContext _context;
 
         #endregion
 
@@ -54,6 +53,7 @@ namespace clojure.lang
 
         #region C-tors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         GenProxy(string className)
         {
             if (Compiler.IsCompiling)
@@ -93,8 +93,10 @@ namespace clojure.lang
         Type Generate(Type superclass, ISeq interfaces, IPersistentMap attributes, string className)
         {
             // define the class
-            List<Type> interfaceTypes = new List<Type>();
-            interfaceTypes.Add(typeof(IProxy));
+            List<Type> interfaceTypes = new List<Type>
+            {
+                typeof(IProxy)
+            };
 
             for (ISeq s = interfaces; s != null; s = s.next())
                 interfaceTypes.Add((Type)s.first());

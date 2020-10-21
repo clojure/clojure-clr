@@ -22,7 +22,6 @@ namespace clojure.lang
     /// <summary>
     /// Represents a persistent list.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1708:IdentifiersShouldDifferByMoreThanCase")]
     [Serializable]
     public class PersistentList : ASeq, IPersistentList, IReduce, IList, IList<Object>, Counted
     {

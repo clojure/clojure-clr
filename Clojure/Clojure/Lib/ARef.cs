@@ -84,8 +84,7 @@ namespace clojure.lang
             if (vf == null)
                 return;
 
-            bool ret = false;
-
+            bool ret;
             try
             {
                ret = RT.booleanCast(vf.invoke(val));

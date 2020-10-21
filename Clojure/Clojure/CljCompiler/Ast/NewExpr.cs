@@ -61,8 +61,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             int numArgs = _args.Count;
 
-            int numCtors;
-            ConstructorInfo ctor = Reflector.GetMatchingConstructor(_spanMap, _type, _args, out numCtors);
+            ConstructorInfo ctor = Reflector.GetMatchingConstructor(_spanMap, _type, _args, out int numCtors);
 
             if (numCtors == 0)
             {
@@ -161,6 +160,7 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Pop);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         private void EmitForMethod(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             EmitParamsForMethod(objx,ilg);
@@ -175,7 +175,8 @@ namespace clojure.lang.CljCompiler.Ast
             MethodExpr.EmitTypedArgs(objx, ilg, pis, _args);
         }
 
-       private void EmitForNoArgValueTypeCtor(RHC rhc, ObjExpr objx, CljILGen ilg)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
+        private void EmitForNoArgValueTypeCtor(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             LocalBuilder loc = ilg.DeclareLocal(_type);
             ilg.Emit(OpCodes.Ldloca, loc);
@@ -184,6 +185,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.Emit(OpCodes.Box, _type);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         private void EmitComplexCall(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             // See the notes on MethodExpr.EmitComplexCall on why this is so complicated
@@ -234,14 +236,10 @@ namespace clojure.lang.CljCompiler.Ast
             CreateInstanceBinder binder = new ClojureCreateInstanceBinder(ClojureContext.Default, _args.Count);
             DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
 
-            LambdaExpression lambda;
-            Type delType;
-            MethodBuilder mbLambda;
-
-            MethodExpr.EmitDynamicCallPreamble(dyn, _spanMap, "__interop_ctor_" + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out lambda, out delType, out mbLambda);
+            MethodExpr.EmitDynamicCallPreamble(dyn, _spanMap, "__interop_ctor_" + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda);
 
             //  Emit target + args
-  
+
             EmitTargetExpression(objx, ilg);
 
             i = 0;
@@ -258,9 +256,9 @@ namespace clojure.lang.CljCompiler.Ast
                         break;
 
                     case HostArg.ParameterType.Standard:
-                        if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr)
+                        if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr expr)
                         {
-                            ((MaybePrimitiveExpr)ha.ArgExpr).EmitUnboxed(RHC.Expression, objx, ilg);
+                            expr.EmitUnboxed(RHC.Expression, objx, ilg);
                         }
                         else
                         {

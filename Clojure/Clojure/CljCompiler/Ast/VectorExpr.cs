@@ -66,13 +66,12 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             Expr ret = new VectorExpr(args);
-            IObj iobjForm = form as IObj;
-            if (iobjForm != null && iobjForm.meta() != null)
-                return Compiler.OptionallyGenerateMetaInit(pcon,form, ret);
-            else if ( constant )
+            if (form is IObj iobjForm && iobjForm.meta() != null)
+                return Compiler.OptionallyGenerateMetaInit(pcon, form, ret);
+            else if (constant)
             {
                 IPersistentVector rv = PersistentVector.EMPTY;
-                for ( int i=0; i<args.count(); i++ )
+                for (int i = 0; i < args.count(); i++)
                 {
                     LiteralExpr ve = (LiteralExpr)args.nth(i);
                     rv = (IPersistentVector)rv.cons(ve.Val);

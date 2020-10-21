@@ -39,6 +39,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public StaticInvokeExpr(Type target, MethodInfo method, bool variadic, IPersistentVector args, object tag)
         {
             //_target = target;
@@ -86,14 +87,12 @@ namespace clojure.lang.CljCompiler.Ast
             bool variadic = false;
             int argcount = RT.count(args);
             MethodInfo method = null;
-            ParameterInfo[] pInfos = null;
-
             foreach (MethodInfo m in allMethods)
             {
                 //Console.WriteLine("Method {0}", m.Name);
                 if (m.IsStatic && m.Name.Equals("invokeStatic"))
                 {
-                    pInfos = m.GetParameters();
+                    ParameterInfo[] pInfos = m.GetParameters();
                     if (argcount == pInfos.Length)
                     {
                         method = m;

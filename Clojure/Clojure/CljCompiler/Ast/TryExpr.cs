@@ -57,6 +57,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public TryExpr(Expr tryExpr, IPersistentVector catchExprs, Expr finallyExpr, int retLocal, int finallyLocal)
         {
             _tryExpr = tryExpr;
@@ -112,8 +113,7 @@ namespace clojure.lang.CljCompiler.Ast
                 for (ISeq fs = form.next(); fs != null; fs = fs.next())
                 {
                     object f = fs.first();
-                    ISeq fSeq = f as ISeq;
-                    object op = fSeq != null ? fSeq.first() : null;
+                    object op = f is ISeq fSeq ? fSeq.first() : null;
                     if (!Util.equals(op, Compiler.CatchSym) && !Util.equals(op, Compiler.FinallySym))
                     {
                         if (caught)

@@ -74,8 +74,7 @@ namespace clojure.lang
             //    return false;
             //Map m = (Map) obj;
 
-            IDictionary d = obj as IDictionary;
-            if (d == null)
+            if (!(obj is IDictionary d))
                 return false;
 
             // Java had the following.
@@ -179,8 +178,7 @@ namespace clojure.lang
             if (o is IPersistentMap && !(o is MapEquivalence))
                 return false;
 
-            IDictionary d = o as IDictionary;
-            if (d == null)
+            if (!(o is IDictionary d))
                 return false;
 
             // Java had the following.
@@ -226,13 +224,11 @@ namespace clojure.lang
         /// <returns>A new map with key+value pair added.</returns>
         public IPersistentMap cons(object o)
         {
-            IMapEntry e = o as IMapEntry;
-            if (e != null)
+            if (o is IMapEntry e)
                 return assoc(e.key(), e.val());
 
-            if (o is DictionaryEntry)
+            if (o is DictionaryEntry de)
             {
-                DictionaryEntry de = (DictionaryEntry)o;
                 return assoc(de.Key, de.Value);
             }
 
@@ -247,8 +243,7 @@ namespace clojure.lang
                 }
             }
 
-            IPersistentVector v = o as IPersistentVector;
-            if (v != null)
+            if (o is IPersistentVector v)
             {
                 if (v.count() != 2)
                     throw new ArgumentException("Vector arg to map cons must be a pair");
@@ -299,8 +294,7 @@ namespace clojure.lang
 
         public bool Contains(KeyValuePair<object, object> item)
         {
-            object value;
-            if (!TryGetValue(item.Key, out value))
+            if (!TryGetValue(item.Key, out object value))
                 return false;
 
             if (value == null)
@@ -535,12 +529,11 @@ namespace clojure.lang
             public override object first()
             {
                 object entry = _seq.first();
-                IMapEntry me = entry as IMapEntry;
 
-                if (me != null)
+                if (entry is IMapEntry me)
                     return me.key();
-                else if (entry is DictionaryEntry)
-                    return ((DictionaryEntry)entry).Key;
+                else if (entry is DictionaryEntry de)
+                    return de.Key;
                 throw new InvalidCastException("Cannot convert hashtable entry to IMapEntry or DictionaryEntry");
             }
 
@@ -576,13 +569,11 @@ namespace clojure.lang
                 if (_enumerable == null)
                     return base.GetEnumerator();
 
-                IMapEnumerableTyped<Object,Object> imit = _enumerable as IMapEnumerableTyped<Object,Object>;
-                if (imit != null)
+                if (_enumerable is IMapEnumerableTyped<Object, Object> imit)
                     return (IEnumerator<object>)imit.tkeyEnumerator();
 
 
-                IMapEnumerable imi = _enumerable as IMapEnumerable;
-                if (imi != null)
+                if (_enumerable is IMapEnumerable imi)
                     return (IEnumerator<object>)imi.keyEnumerator();
 
                 return KeyIteratorT(_enumerable);
@@ -658,13 +649,12 @@ namespace clojure.lang
                 object entry = _seq.first();
 
                 {
-                    IMapEntry me = entry as IMapEntry;
-                    if (me != null)
+                    if (entry is IMapEntry me)
                         return me.val();
                 }
 
-                if (entry is DictionaryEntry)
-                    return ((DictionaryEntry)entry).Value;
+                if (entry is DictionaryEntry de)
+                    return de.Value;
 
                 throw new InvalidCastException("Cannot convert hashtable entry to IMapEntry or DictionaryEntry");
             }
@@ -701,13 +691,11 @@ namespace clojure.lang
                 if (_enumerable == null)
                     return base.GetEnumerator();
 
-                IMapEnumerableTyped<Object, Object> imit = _enumerable as IMapEnumerableTyped<Object, Object>;
-                if (imit != null)
+                if (_enumerable is IMapEnumerableTyped<Object, Object> imit)
                     return (IEnumerator<object>)imit.tvalEnumerator();
 
 
-                IMapEnumerable imi = _enumerable as IMapEnumerable;
-                if (imi != null)
+                if (_enumerable is IMapEnumerable imi)
                     return (IEnumerator<object>)imi.valEnumerator();
 
                 return KeyIteratorT(_enumerable);

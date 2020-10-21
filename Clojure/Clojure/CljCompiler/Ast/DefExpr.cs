@@ -91,9 +91,9 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 // (def x) or (def x initexpr) or (def x "docstring" initexpr)
                 string docstring = null;
-                if (RT.count(form) == 4 && (RT.third(form) is String))
+                if (RT.count(form) == 4 && (RT.third(form) is String str))
                 {
-                    docstring = (String)RT.third(form);
+                    docstring = str;
                     form = RT.list(RT.first(form), RT.second(form), RT.fourth(form));
                 }
 
@@ -263,8 +263,8 @@ namespace clojure.lang.CljCompiler.Ast
             if (_initProvided)
             {
                 ilg.Emit(OpCodes.Dup);
-                if (_init is FnExpr)
-                    ((FnExpr)_init).EmitForDefn(objx, ilg);
+                if (_init is FnExpr expr)
+                    expr.EmitForDefn(objx, ilg);
                 else
                     _init.Emit(RHC.Expression, objx, ilg);
                 ilg.Emit(OpCodes.Call,Compiler.Method_Var_bindRoot);

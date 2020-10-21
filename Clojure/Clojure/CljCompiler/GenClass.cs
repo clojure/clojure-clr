@@ -118,13 +118,9 @@ namespace clojure.lang
             FieldBuilder stateFB = String.IsNullOrEmpty(stateName) ? null : DefineStateField(proxyTB, stateName);
             DefineStaticCtor(proxyTB,prefix,varMap,loadImplNamespace,implNamespace,implCname);
 
-            FieldBuilder initFB = null;
-            FieldBuilder postInitFB = null;
-            FieldBuilder mainFB = null;
-
-            varMap.TryGetValue(initName, out initFB);
-            varMap.TryGetValue(postInitName, out postInitFB);
-            varMap.TryGetValue(_mainName, out mainFB);
+            varMap.TryGetValue(initName, out FieldBuilder initFB);
+            varMap.TryGetValue(postInitName, out FieldBuilder postInitFB);
+            varMap.TryGetValue(_mainName, out FieldBuilder mainFB);
 
             DefineCtors(proxyTB, superclass, 
                 implNamespace + "." + prefix + initName, 
@@ -658,7 +654,7 @@ namespace clojure.lang
         {
             List<Type> types = new List<Type>();
 
-            for (ISeq s = seq == null ? null : seq.seq(); s != null; s = s.next())
+            for (ISeq s = seq?.seq(); s != null; s = s.next())
             {
                 Object o = s.first();
                 Type oAsType = o as Type;

@@ -65,8 +65,8 @@ namespace clojure.lang
 
         private class MetaWrapper : RestFn
         {
-            AFunction _parent;
-            IPersistentMap _meta;
+            readonly AFunction _parent;
+            readonly IPersistentMap _meta;
 
             public MetaWrapper(AFunction parent, IPersistentMap meta)
             {

@@ -55,8 +55,7 @@ namespace clojure.clr.api
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         private static Symbol asSym(object o)
         {
-            String str = o as String;
-            Symbol s = str != null ? Symbol.intern(str) : (Symbol)o;
+            Symbol s = o is String str ? Symbol.intern(str) : (Symbol)o;
             return s;
         }
 

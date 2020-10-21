@@ -112,7 +112,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public bool CanEmitPrimitive
         {
-            get { return LastExpr is MaybePrimitiveExpr && ((MaybePrimitiveExpr)LastExpr).CanEmitPrimitive; }
+            get { return LastExpr is MaybePrimitiveExpr expr && expr.CanEmitPrimitive; }
         }
 
         public void EmitUnboxed(RHC rhc, ObjExpr objx, CljILGen ilg)

@@ -109,8 +109,7 @@ namespace clojure.lang
             if (s1 == obj)
                 return true;
 
-            ISet<Object> is2 = obj as ISet<Object>;
-            if (is2 != null)
+            if (obj is ISet<Object> is2)
             {
                 if (is2.Count != s1.count())
                     return false;
@@ -120,8 +119,7 @@ namespace clojure.lang
                 return true;
             }
 
-            IPersistentSet s2 = obj as IPersistentSet;
-            if (s2 == null)
+            if (!(obj is IPersistentSet s2))
                 return false;
 
             if (s2.count() != s1.count())   
@@ -282,8 +280,7 @@ namespace clojure.lang
 
         public IEnumerator<object> GetEnumerator()
         {
-            var ime = _impl as IMapEnumerableTyped<Object,Object>;
-            if (ime != null)
+            if (_impl is IMapEnumerableTyped<Object, Object> ime)
                 return ime.tkeyEnumerator();
 
             return DirectEnumerator();

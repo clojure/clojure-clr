@@ -79,7 +79,7 @@ namespace clojure.lang.CljCompiler.Ast
             get
             {
                 if (_cachedType == null)
-                    _cachedType = Compiler.RetType((_tag != null) ? HostExpr.TagToType(_tag) : null, (_method != null) ? _method.ReturnType : null);
+                    _cachedType = Compiler.RetType((_tag != null) ? HostExpr.TagToType(_tag) : null, _method?.ReturnType);
                 return _cachedType;
             }
         }
@@ -133,6 +133,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             return _method != null && Intrinsics.HasPred(_method);
         }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         internal void EmitIntrinsicPredicate(RHC rhc, ObjExpr objx, CljILGen ilg, Label falseLabel)
         {
             GenContext.EmitDebugInfo(ilg, _spanMap);

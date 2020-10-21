@@ -52,7 +52,7 @@ namespace clojure.lang
             }
 
 
-            Type[] interfaceTypes = GenClass.CreateTypeArray(extends == null ? null : extends.seq());
+            Type[] interfaceTypes = GenClass.CreateTypeArray(extends?.seq());
 
             TypeBuilder proxyTB = context.ModuleBuilder.DefineType(
                 iName,
@@ -233,7 +233,7 @@ namespace clojure.lang
 
         private static void DefineMethods(TypeBuilder proxyTB, ISeq methods)
         {
-            for (ISeq s = methods == null ? null : methods.seq(); s != null; s = s.next())
+            for (ISeq s = methods?.seq(); s != null; s = s.next())
                 DefineMethod(proxyTB, (IPersistentVector)s.first());
         }
 

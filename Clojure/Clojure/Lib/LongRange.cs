@@ -236,6 +236,7 @@ namespace clojure.lang
 
         // fallback count mechanism for pathological cases
         // returns either exact count or CHUNK_SIZE+1
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         long SteppingCount(long start, long end, long step)
         {
             long count = 1;
@@ -325,7 +326,6 @@ namespace clojure.lang
 
         #region IReduce methods
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object reduce(IFn f)
         {
             Object acc = _start;

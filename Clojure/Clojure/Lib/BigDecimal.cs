@@ -207,6 +207,7 @@ namespace clojure.lang
 
             #region other
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
             public bool RoundingNeeded(BigInteger bi)
             {
                 // TODO: Really
@@ -341,7 +342,7 @@ namespace clojure.lang
                 coeff = BigInteger.Create(significand);
                 // TODO: avoid extra allocation
                 if (v < 0.0)
-                    coeff = coeff * -1;
+                    coeff *= -1;
             }
 
             // at this point v = coeff * 2 ** exp
@@ -354,7 +355,7 @@ namespace clojure.lang
                 expToUse = leftShift;
             }
             else if (leftShift > 0)
-                coeff = coeff << leftShift;
+                coeff <<= leftShift;
 
             return new BigDecimal(coeff, expToUse);
         }
@@ -578,6 +579,7 @@ namespace clojure.lang
         /// <param name="copy">A copy of the given BigDecimal</param>
         /// <remarks>Really only needed internally.  BigDecimals are immutable, so why copy?  
         /// Internally, we sometimes need to copy and modify before releasing into the wild.</remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
         BigDecimal(BigDecimal copy)
             : this(copy._coeff,copy._exp,copy._precision)
         {
@@ -637,8 +639,7 @@ namespace clojure.lang
         /// <returns></returns>
         public static BigDecimal Parse(string s)
         {
-            BigDecimal v;
-            DoParse(s.ToCharArray(), 0, s.Length, true, out v);
+            DoParse(s.ToCharArray(), 0, s.Length, true, out BigDecimal v);
             return v;
         }
 
@@ -650,8 +651,7 @@ namespace clojure.lang
         /// <returns></returns>
         public static BigDecimal Parse(string s, Context c)
         {
-            BigDecimal v;
-            DoParse(s.ToCharArray(), 0, s.Length, true, out v);
+            DoParse(s.ToCharArray(), 0, s.Length, true, out BigDecimal v);
             v.RoundInPlace(c);
             return v;
         }
@@ -1104,8 +1104,8 @@ namespace clojure.lang
             throw new InvalidCastException();
         }
 
-        static BigDecimal ClrDecimalMin = Create(Decimal.MinValue);
-        static BigDecimal ClrDecimalMax = Create(Decimal.MaxValue);
+        static readonly BigDecimal ClrDecimalMin = Create(Decimal.MinValue);
+        static readonly BigDecimal ClrDecimalMax = Create(Decimal.MaxValue);
             
         public decimal ToDecimal(IFormatProvider provider)
         {
@@ -2381,8 +2381,7 @@ namespace clojure.lang
             {
                 if (_coeff.IsOdd)
                     break;                  // odd number.  cannot end in 0
-                BigInteger rem;
-                BigInteger quo = _coeff.DivRem(BigInteger.Ten, out rem);
+                BigInteger quo = _coeff.DivRem(BigInteger.Ten, out BigInteger rem);
                 if (!rem.IsZero)
                     break;   // non-0 remainder
                 _coeff = quo;
@@ -2476,8 +2475,7 @@ namespace clojure.lang
         /// <returns></returns>
         static BigInteger RoundingDivide2(BigInteger x, BigInteger y, RoundingMode mode)
         {
-            BigInteger r;
-            BigInteger q = x.DivRem(y, out r);
+            BigInteger q = x.DivRem(y, out BigInteger r);
 
             bool increment = false;
             if (!r.IsZero)  // we need to pay attention
@@ -2523,9 +2521,9 @@ namespace clojure.lang
 
                 if (increment)
                     if (q.IsNegative || (q.IsZero && x.IsNegative))
-                        q = q - BigInteger.One;
+                        q -= BigInteger.One;
                     else
-                        q = q + BigInteger.One;
+                        q += BigInteger.One;
             }
 
             return q;

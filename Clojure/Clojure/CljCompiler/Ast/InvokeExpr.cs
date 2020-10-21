@@ -40,17 +40,17 @@ namespace clojure.lang.CljCompiler.Ast
         
         readonly bool _tailPosition;
         public bool TailPosition { get { return _tailPosition; } }
-        
-        bool _isProtocol = false;
+
+        readonly bool _isProtocol = false;
         public bool IsProtocol { get { return _isProtocol; } }
-        
-        int _siteIndex = -1;
+
+        readonly int _siteIndex = -1;
         public int SiteIndex { get { return _siteIndex; } }
-        
-        Type _protocolOn;
+
+        readonly Type _protocolOn;
         public Type ProtocolOn { get { return _protocolOn; } }
-        
-        MethodInfo _onMethod;
+
+        readonly MethodInfo _onMethod;
         public MethodInfo OnMethod { get { return _onMethod; } }
 
         static readonly Keyword _onKey = Keyword.intern("on");
@@ -150,8 +150,7 @@ namespace clojure.lang.CljCompiler.Ast
             if (varFexpr != null && varFexpr.Var.Equals(Compiler.InstanceVar) && RT.count(form) == 3)
             {
                 Expr sexpr = Compiler.Analyze(pcon.SetRhc(RHC.Expression), RT.second(form));
-                ConstantExpr csexpr = sexpr as ConstantExpr;
-                if (csexpr != null)
+                if (sexpr is ConstantExpr csexpr)
                 {
                     Type tval = csexpr.Val as Type;
                     if (tval != null)
@@ -167,12 +166,11 @@ namespace clojure.lang.CljCompiler.Ast
                 if ( ! v.isDynamic() && !RT.booleanCast(RT.get(v.meta(), Compiler.RedefKeyword, false)) && !RT.booleanCast(RT.get(v.meta(), RT.DeclaredKey, false)) )
                 {
                     Symbol formTag = Compiler.TagOf(form);
-                    object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);
+                    //object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);
                     int arity = RT.count(form.next());
                     object sigtag = SigTag(arity, v);
                     object vtag = RT.get(RT.meta(v), RT.TagKey);
-                    StaticInvokeExpr ret = StaticInvokeExpr.Parse(v, RT.next(form), formTag ?? sigtag ?? vtag) as StaticInvokeExpr;
-                    if (ret != null && !((Compiler.IsCompiling || Compiler.IsCompilingDefType) && GenContext.IsInternalAssembly(ret.Method.DeclaringType.Assembly)))
+                    if (StaticInvokeExpr.Parse(v, RT.next(form), formTag ?? sigtag ?? vtag) is StaticInvokeExpr ret && !((Compiler.IsCompiling || Compiler.IsCompilingDefType) && GenContext.IsInternalAssembly(ret.Method.DeclaringType.Assembly)))
                     {
                         //Console.WriteLine("invoke direct: {0}", v);
                         return ret;
@@ -202,9 +200,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            KeywordExpr kwFexpr = fexpr as KeywordExpr;
-
-            if (kwFexpr != null && RT.count(form) == 2 && Compiler.KeywordCallsitesVar.isBound)
+            if (fexpr is KeywordExpr kwFexpr && RT.count(form) == 2 && Compiler.KeywordCallsitesVar.isBound)
             {
                 Expr target = Compiler.Analyze(pcon, RT.second(form));
                 return new KeywordInvokeExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), Compiler.TagOf(form), kwFexpr, target);
@@ -353,6 +349,7 @@ namespace clojure.lang.CljCompiler.Ast
             ilg.MarkLabel(endLabel);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         void EmitArgsAndCall(int firstArgToEmit, RHC rhc, ObjExpr objx, CljILGen ilg)
         {
             for ( int i=firstArgToEmit; i< Math.Min(Compiler.MaxPositionalArity,_args.count()); i++ )

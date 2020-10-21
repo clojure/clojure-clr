@@ -91,8 +91,10 @@ namespace clojure.lang.CljCompiler.Ast
                 throw new ArgumentException("Unexpected test type: " + testType);
             _testType = testType;
             _skipCheck = skipCheck;
-            ICollection<Expr> returns = new List<Expr>(thens.Values);
-            returns.Add(defaultExpr);
+            ICollection<Expr> returns = new List<Expr>(thens.Values)
+            {
+                defaultExpr
+            };
             _returnType = Compiler.MaybeClrType(returns);
             if (RT.count(skipCheck) > 0 && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
             {
@@ -394,8 +396,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private static void EmitExpr(ObjExpr objx, CljILGen ilg, Expr expr, bool emitUnboxed)
         {
-            MaybePrimitiveExpr mbe = expr as MaybePrimitiveExpr;
-            if (emitUnboxed && mbe != null)
+            if (emitUnboxed && expr is MaybePrimitiveExpr mbe)
                 mbe.EmitUnboxed(RHC.Expression, objx, ilg);
             else
                 expr.Emit(RHC.Expression, objx, ilg);

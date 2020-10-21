@@ -66,9 +66,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 // form => (letfn*  [var1 (fn [args] body) ... ] body ... )
 
-                IPersistentVector bindings = RT.second(form) as IPersistentVector;
-
-                if (bindings == null)
+                if (!(RT.second(form) is IPersistentVector bindings))
                     throw new ParseException("Bad binding form, expected vector");
 
                 if ((bindings.count() % 2) != 0)

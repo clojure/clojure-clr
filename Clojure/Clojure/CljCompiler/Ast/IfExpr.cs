@@ -132,8 +132,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             GenContext.EmitDebugInfo(ilg, _sourceSpan);
 
-            StaticMethodExpr sme = _testExpr as StaticMethodExpr;
-            if (sme != null && sme.CanEmitIntrinsicPredicate())
+            if (_testExpr is StaticMethodExpr sme && sme.CanEmitIntrinsicPredicate())
                 sme.EmitIntrinsicPredicate(RHC.Expression, objx, ilg, falseLabel);
             else if (Compiler.MaybePrimitiveType(_testExpr) == typeof(bool))
             {
@@ -193,11 +192,11 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 try
                 {
-                    return _thenExpr is MaybePrimitiveExpr
-                        && _elseExpr is MaybePrimitiveExpr
+                    return _thenExpr is MaybePrimitiveExpr tExpr
+                        && _elseExpr is MaybePrimitiveExpr eExpr
                         && _thenExpr.ClrType == _elseExpr.ClrType
-                        && ((MaybePrimitiveExpr)_thenExpr).CanEmitPrimitive
-                        && ((MaybePrimitiveExpr)_elseExpr).CanEmitPrimitive;
+                        && tExpr.CanEmitPrimitive
+                        && eExpr.CanEmitPrimitive;
                 }
                 catch ( Exception )
                 {
