@@ -64,7 +64,7 @@ namespace clojure.lang.Runtime.Binding
 
 
 
-            Type typeToUse = _isStatic && target.Value is Type ? (Type)target.Value : target.LimitType;
+            Type typeToUse = _isStatic && target.Value is Type type ? type : target.LimitType;
 
 
             IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(args.Length + (_isStatic ? 0 : 1));
@@ -81,15 +81,14 @@ namespace clojure.lang.Runtime.Binding
 
             if (methods.Count > 0)
             {
-                BindingTarget bt;
                 DynamicMetaObject dmo = _context.Binder.CallMethod(
-                    res, 
+                    res,
                     methods,
                     target.Restrictions.Merge(BindingRestrictionsHelpers.GetRuntimeTypeRestriction(target).Merge(BindingRestrictions.Combine(args))),
-                    Name, 
-                    NarrowingLevel.None, 
-                    NarrowingLevel.All, 
-                    out bt);
+                    Name,
+                    NarrowingLevel.None,
+                    NarrowingLevel.All,
+                    out BindingTarget bt);
                 dmo = DynUtils.MaybeBoxReturnValue(dmo);
 
                 //; Console.WriteLine(dmo.Expression.DebugView);

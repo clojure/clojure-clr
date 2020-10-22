@@ -27,7 +27,7 @@ namespace clojure.lang.Runtime
 
     public class ListGenericWrapper<T> : IList<T>
     {
-        private IList<object> _value;
+        private readonly IList<object> _value;
 
         public ListGenericWrapper(IList<object> value) { this._value = value; }
 
@@ -126,7 +126,7 @@ namespace clojure.lang.Runtime
 
     public class DictionaryGenericWrapper<K, V> : IDictionary<K, V>
     {
-        private IDictionary<object, object> self;
+        private readonly IDictionary<object, object> self;
 
         public DictionaryGenericWrapper(IDictionary<object, object> self)
         {
@@ -165,13 +165,12 @@ namespace clojure.lang.Runtime
 
         public bool TryGetValue(K key, out V value)
         {
-            object outValue;
-            if (self.TryGetValue(key, out outValue))
+            if (self.TryGetValue(key, out object outValue))
             {
                 value = (V)outValue;
                 return true;
             }
-            value = default(V);
+            value = default;
             return false;
         }
 
@@ -269,8 +268,8 @@ namespace clojure.lang.Runtime
 
     public class IEnumeratorOfTWrapper<T> : IEnumerator<T>
     {
-        IEnumerator _enumerable;
-        bool _disposed = false;
+        readonly IEnumerator _enumerable;
+        bool _disposed;
 
 
         public IEnumeratorOfTWrapper(IEnumerator enumerable)
@@ -332,8 +331,8 @@ namespace clojure.lang.Runtime
 
     public class IEnumerableOfTWrapper<T> : IEnumerable<T>, IEnumerable, IDisposable
     {
-        IEnumerable _enumerable;
-        bool _disposed = false;
+        readonly IEnumerable _enumerable;
+        bool _disposed;
 
         public IEnumerableOfTWrapper(IEnumerable enumerable)
         {

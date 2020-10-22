@@ -57,7 +57,7 @@ namespace clojure.lang
         [Serializable]
         private class PositiveStepCheck: IBoundsCheck
         {
-            long _end;
+            readonly long _end;
 
             public PositiveStepCheck(long end)
             {
@@ -72,7 +72,7 @@ namespace clojure.lang
         [Serializable]
         private class NegativeStepCheck : IBoundsCheck
         {
-            long _end;
+            readonly long _end;
 
             public NegativeStepCheck(long end)
             {
@@ -333,15 +333,12 @@ namespace clojure.lang
             while (!_boundsCheck.ExceededBounds(i))
             {
                 acc = f.invoke(acc, i);
-                Reduced accRed = acc as Reduced;
-                if (accRed != null)
+                if (acc is Reduced accRed)
                     return accRed.deref();
                 i += _step;
             }
             return acc;
         }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
 
         public object reduce(IFn f, object val)
         {

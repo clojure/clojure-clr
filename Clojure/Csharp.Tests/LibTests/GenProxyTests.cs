@@ -101,14 +101,14 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void CanBeConstructedFromDefaultCtor()
         {
-            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
+            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
             Expect(o).Not.To.Be.Null();
         }
 
         [Test]
         public void CanCallBaseClassReflectedMethods()
         {
-            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
+            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
             Expect(_proxyType.GetMethod("im1",new Type[] {typeof(int)}).Invoke(o, new object[] { 21 })).To.Equal(42);
             Expect(_proxyType.GetMethod("im1", new Type[] { typeof(string) }).Invoke(o, new object[] { "test" })).To.Equal(4);
         }
@@ -116,7 +116,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void HandlesVoidReturnTypeMethods()
         {
-            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
+            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
             Expect(_proxyType.GetMethod("im3", new Type[] { typeof(int) }).Invoke(o, new object[] { 21 })).To.Be.Null();
         }
     }
@@ -159,7 +159,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ThrowsNotImplementedExceptionOnInterfaceMethod1()
         {
-            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
+            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
             try
             {
                 _proxyType.GetMethod("m1").Invoke(o, new object[] { 21 });
@@ -173,7 +173,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ThrowsNotImplementedExceptionOnInterfaceMethod2()
         {
-            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
+            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
            try
            {
                _proxyType.GetMethod("m2").Invoke(o, new object[] { "test" });
@@ -225,7 +225,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void CanCallBaseClassReflectedMethods()
         {
-            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
+            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
             Expect(_proxyType.GetMethod("m1", new Type[] { typeof(int) }).Invoke(o, new object[] { 21 })).To.Equal(42);
             Expect(_proxyType.GetMethod("m1", new Type[] { typeof(string) }).Invoke(o, new object[] { "test" })).To.Equal(4);
         }
@@ -233,7 +233,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ThrowsNotImplementedExceptionOnInterfaceMethod2()
         {
-            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
+            object o = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
             try
             {
                 _proxyType.GetMethod("m2").Invoke(o, new object[] { "test" });
@@ -383,7 +383,7 @@ namespace Clojure.Tests.LibTests
 
         public class Fn2V : AFunctionMeta
         {
-            public static bool _called = false;
+            public static bool _called;
 
             public override object invoke(object arg1, object arg2)
             {
@@ -451,7 +451,7 @@ namespace Clojure.Tests.LibTests
         [SetUp]
         public void Setup()
         {
-            _obj = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
+            _obj = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
 
             IProxy ip = _obj as IProxy;
             ip.__initClojureFnMappings(
@@ -542,7 +542,7 @@ namespace Clojure.Tests.LibTests
         public class Impl1
         {
 
-            public int F1 = 0;
+            public int F1;
             public string F2 = String.Empty;
 
             public virtual int m1(int s) { return 2 * s; }
@@ -647,7 +647,7 @@ namespace Clojure.Tests.LibTests
         [SetUp]
         public void Setup()
         {
-            _obj = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
+            _obj = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
         }
 
         [Test]
@@ -753,7 +753,7 @@ namespace Clojure.Tests.LibTests
         public void Setup()
         {
             _tw = new StringWriter();
-            _obj = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
+            _obj = _proxyType.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
 
             IProxy ip = _obj as IProxy;
             ip.__initClojureFnMappings(

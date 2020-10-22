@@ -51,7 +51,7 @@ namespace Clojure.Tests.LibTests
         protected bool _testNoChange = true;
 
 
-        IPersistentMap _meta = null;
+        IPersistentMap _meta;
 
         void InitMocks()
         {

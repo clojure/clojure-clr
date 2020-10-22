@@ -478,9 +478,11 @@ namespace clojure.lang
             }
         }
 
+
         /// <summary>
         /// Kill this transaction.
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
         void Abort()
         {
             Stop(KILLED);
@@ -885,8 +887,7 @@ namespace clojure.lang
                 }
                 _vals[r] = val;
             }
-            List<CFn> fns;
-            if (! _commutes.TryGetValue(r, out fns))
+            if (!_commutes.TryGetValue(r, out List<CFn> fns))
                 _commutes[r] = fns = new List<CFn>();
             fns.Add(new CFn(fn, args));
             object ret = fn.applyTo(RT.cons(_vals[r], args));

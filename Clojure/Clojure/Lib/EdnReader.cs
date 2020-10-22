@@ -165,10 +165,9 @@ namespace clojure.lang
                 if (isRecursive)
                     throw;
 
-                if (!(r is LineNumberingTextReader lntr))
-                    throw;
-
-                throw new ReaderException(lntr.LineNumber, lntr.ColumnNumber, e);
+                if (r is LineNumberingTextReader lntr)
+                    throw new ReaderException(lntr.LineNumber, lntr.ColumnNumber, e);
+                throw;
             }
         }
 
@@ -1158,7 +1157,7 @@ namespace clojure.lang
             {
                 if (info == null)
                 {
-                    throw new ArgumentNullException("info");
+                    throw new ArgumentNullException(nameof(info));
                 }
                 base.GetObjectData(info, context);
                 info.AddValue("Line", this._line, typeof(int));

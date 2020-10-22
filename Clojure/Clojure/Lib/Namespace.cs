@@ -66,7 +66,7 @@ namespace clojure.lang
         /// <summary>
         /// All namespaces, keyed by <see cref="Symbol">Symbol</see>.
         /// </summary>
-        private static JavaConcurrentDictionary<Symbol, Namespace> _namespaces
+        private static readonly JavaConcurrentDictionary<Symbol, Namespace> _namespaces
             = new JavaConcurrentDictionary<Symbol, Namespace>();
 
    
@@ -113,7 +113,7 @@ namespace clojure.lang
                 return ns;
             Namespace newns = new Namespace(name);
             ns = _namespaces.PutIfAbsent(name, newns);
-            return ns == null ? newns : ns;
+            return ns ?? newns;
         }
 
         /// <summary>
@@ -227,9 +227,7 @@ namespace clojure.lang
                 map = Mappings;
             }
 
-            Var ovar = o as Var;
-
-            if (ovar != null && ovar.Namespace == this)
+            if (o is Var ovar && ovar.Namespace == this)
                 return ovar;
 
             if (v == null)
@@ -245,9 +243,7 @@ namespace clojure.lang
 
         private void WarnOrFailOnReplace(Symbol sym, object o, object v)
         {
-            Var ovar = o as Var;
-
-            if (ovar != null)
+            if (o is Var ovar)
             {
                 Namespace ns = ovar.Namespace;
                 Var vv = v as Var;
@@ -373,8 +369,7 @@ namespace clojure.lang
         /// <returns>The mapped var.</returns>
         public Var FindInternedVar(Symbol sym)
         {
-            Var v = Mappings.valAt(sym) as Var;
-            return (v != null && v.Namespace == this) ? v : null;
+            return (Mappings.valAt(sym) is Var v && v.Namespace == this) ? v : null;
         }
 
         #endregion
@@ -401,9 +396,9 @@ namespace clojure.lang
         public void addAlias(Symbol alias, Namespace ns)
         {
             if (alias == null)
-                throw new ArgumentNullException("alias","Expecting Symbol + Namespace");
+                throw new ArgumentNullException(nameof(alias),"Expecting Symbol + Namespace");
             if ( ns == null )
-                throw new ArgumentNullException("ns", "Expecting Symbol + Namespace");
+                throw new ArgumentNullException(nameof(ns), "Expecting Symbol + Namespace");
 
             IPersistentMap map = Aliases;
 
@@ -488,7 +483,7 @@ namespace clojure.lang
         class NamespaceSerializationHelper : IObjectReference
         {
 #pragma warning disable 649
-            Symbol _name;
+            readonly Symbol _name;
 #pragma warning restore 649
 
             #region IObjectReference Members

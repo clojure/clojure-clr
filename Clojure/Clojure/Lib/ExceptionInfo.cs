@@ -54,7 +54,7 @@ namespace clojure.lang
             if (data != null)
                 this.data = data;
             else
-                throw new ArgumentException("Additional data must be non-nil.", "data");
+                throw new ArgumentException("Additional data must be non-nil.", nameof(data));
         }
 
         public ExceptionInfo()
@@ -86,7 +86,7 @@ namespace clojure.lang
         {
             if (info == null)
             {
-                throw new ArgumentNullException("info");
+                throw new ArgumentNullException(nameof(info));
             }
             base.GetObjectData(info, context);
             info.AddValue("data", this.data, typeof(IPersistentMap));

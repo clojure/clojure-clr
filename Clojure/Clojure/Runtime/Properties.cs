@@ -39,8 +39,7 @@ namespace clojure.runtime
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public string getProperty(string key)
         {
-            string value = null;
-            TryGetValue(key, out value);
+            TryGetValue(key, out string value);
             return value;
         }
 

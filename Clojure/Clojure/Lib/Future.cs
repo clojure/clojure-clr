@@ -31,7 +31,7 @@ namespace clojure.lang
         object _value;
         Exception _error;
         bool _cancelled;
-        bool _disposed = false;
+        bool _disposed;
 
         #endregion
 

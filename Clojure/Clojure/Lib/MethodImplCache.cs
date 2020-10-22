@@ -35,7 +35,6 @@ namespace clojure.lang
 
            readonly IFn _fn;
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             public IFn Fn
            {
                get { return _fn; }
@@ -92,10 +91,9 @@ namespace clojure.lang
            get { return _map; }
        }
 
-       Entry _mre = null;
+       Entry _mre;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
        public object[] table
         {
             get { return _table; }
@@ -172,7 +170,7 @@ namespace clojure.lang
            {
                Entry e = (Entry)_map[t];
                _mre = e;
-               return e != null ? e.Fn : null;
+               return e?.Fn;
            }
            else
            {
@@ -181,7 +179,7 @@ namespace clojure.lang
                {
                    Entry e = ((Entry)table[idx + 1]);
                    _mre = e;
-                   return e != null ? e.Fn : null;
+                   return e?.Fn;
                }
                return null;
            }

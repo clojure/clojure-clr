@@ -42,7 +42,7 @@ namespace clojure.lang
         /// <summary>
         /// Detects % formatting codes:  %[argument_index$][flags][width][.precision][t]conversion
         /// </summary>
-        static Regex FormatSpecifier =
+        static readonly Regex FormatSpecifier =
             new Regex(@"%(\d+\$)?([-#+ 0,(\<]*)?(\d+)?(\.\d+)?([tT])?([a-zA-Z%])");
 
         #endregion
@@ -69,7 +69,7 @@ namespace clojure.lang
                     case PREV_ARG_INDEX:
                            if ( args != null && lastIndex > args.Length -1 )
                             throw new MissingFormatArgumentException(chunk.ToString());
-                        chunk.Print(sb,args==null ? null : args[lastIndex]);
+                        chunk.Print(sb,args?[lastIndex]);
                         break;
 
                     case REGULAR_ARG_INDEX:
@@ -77,14 +77,14 @@ namespace clojure.lang
                         lastIndex = lastOrdinaryIndex;
                        if ( args != null && lastOrdinaryIndex > args.Length -1 )
                             throw new MissingFormatArgumentException(chunk.ToString());
-                        chunk.Print(sb,args==null ? null : args[lastOrdinaryIndex]);
+                        chunk.Print(sb,args?[lastOrdinaryIndex]);
                         break;
 
                     default:
                         lastIndex = index-1;
                         if ( args != null && lastIndex > args.Length -1 )
                             throw new MissingFormatArgumentException(chunk.ToString());
-                        chunk.Print(sb,args==null ? null : args[lastIndex]);
+                        chunk.Print(sb,args?[lastIndex]);
                         break;
 
                 }
@@ -152,7 +152,7 @@ namespace clojure.lang
         {
             #region Data
 
-            string _s;
+            readonly string _s;
 
             #endregion
 
@@ -530,11 +530,13 @@ namespace clojure.lang
 
             #region Text spec printing
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
             private void PrintPercentSign(StringBuilder sb, object arg)
             {
                 PrintWithJustification(sb, "%");
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
             private static void PrintLineSeparator(StringBuilder sb, object arg)
             {
                 sb.Append('\n');
@@ -546,18 +548,16 @@ namespace clojure.lang
 
             private void PrintString(StringBuilder sb, object arg)
             {
-                IFormattable f;
-
                 if (arg == null)
                     PrintString(sb, "null");
-                else if ( (f = arg as IFormattable) != null)
+                else if (arg is IFormattable f)
                 {
                     string s = f.ToString();
                     // TODO: figure out what formatting spec to use for strings)
                     PrintString(sb, s);
                 }
                 else
-                    PrintString(sb,arg.ToString());
+                    PrintString(sb, arg.ToString());
             }
 
             private void PrintHashCode(StringBuilder sb, object arg)
@@ -572,7 +572,7 @@ namespace clojure.lang
                 if (arg == null)
                     s = false.ToString();
                 else
-                    s = arg is Boolean ? ((Boolean)arg).ToString() : true.ToString();
+                    s = arg is Boolean b ? b.ToString() : true.ToString();
                 PrintString(sb, s);
             }
 
@@ -967,16 +967,16 @@ namespace clojure.lang
                     return;
                 }
 
-                if (arg is DateTimeOffset)
-                    PrintDateTimeOffset(sb, (DateTimeOffset)arg);
+                if (arg is DateTimeOffset offset)
+                    PrintDateTimeOffset(sb, offset);
                 else
                 {
 
                     DateTime dt = DateTime.Now;
-                    if (arg is long)
-                        dt = DateTime.FromBinary((long)arg);
-                    else if (arg is DateTime)
-                        dt = (DateTime)arg;
+                    if (arg is long ll)
+                        dt = DateTime.FromBinary(ll);
+                    else if (arg is DateTime dtt)
+                        dt = dtt;
                      else
                         FailConversion(_conversion, arg);
 

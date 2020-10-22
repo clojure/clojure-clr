@@ -259,13 +259,13 @@ namespace clojure.lang
             get
             {
                 if (index < 0)
-                    throw new ArgumentOutOfRangeException("index","Index must be non-negative.");
+                    throw new ArgumentOutOfRangeException(nameof(index),"Index must be non-negative.");
 
                 ISeq s = seq();
                 for (int i = 0; s != null; s = s.next(), i++)
                     if (i == index)
                         return s.first();
-                throw new ArgumentOutOfRangeException("index", "Index past end of sequence.");
+                throw new ArgumentOutOfRangeException(nameof(index), "Index past end of sequence.");
             }
             set
             {
@@ -280,13 +280,13 @@ namespace clojure.lang
         public void CopyTo(object[] array, int arrayIndex)
         {
             if (array == null)
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             if (arrayIndex < 0)
-                throw new ArgumentOutOfRangeException("arrayIndex", "must be non-negative.");
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), "must be non-negative.");
             if (array.Rank > 1)
-                throw new ArgumentException("must not be multidimensional","array" );
+                throw new ArgumentException("must not be multidimensional",nameof(array));
             if (arrayIndex >= array.Length)
-                throw new ArgumentException("must be less than the length", "arrayIndex");
+                throw new ArgumentException("must be less than the length", nameof(arrayIndex));
             if (count() > array.Length - arrayIndex)
                 throw new InvalidOperationException("Not enough available space from index to end of the array.");
 
@@ -298,13 +298,13 @@ namespace clojure.lang
         public void CopyTo(Array array, int index)
         {
             if (array == null)
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             if (index < 0)
-                throw new ArgumentOutOfRangeException("index","must be non-negative.");
+                throw new ArgumentOutOfRangeException(nameof(index),"must be non-negative.");
             if (array.Rank > 1)
-                throw new ArgumentException("must not be multidimensional.", "array");
+                throw new ArgumentException("must not be multidimensional.", nameof(array));
             if (index >= array.Length)
-                throw new ArgumentException("must be less than the length", "index");
+                throw new ArgumentException("must be less than the length", nameof(index));
             if (count() > array.Length - index)
                 throw new InvalidOperationException("Not enough available space from index to end of the array.");
 

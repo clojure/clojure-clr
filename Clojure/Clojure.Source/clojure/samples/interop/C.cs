@@ -40,6 +40,7 @@ namespace dm.interop
         public string m6(ref int x) { x += 111; return x.ToString(); }
         public string m6(ref string x) { x += "abc"; return x; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
         public void m7(string format, params object[] args) { Console.WriteLine("Count is {0}", args.Length); }
     }
 
@@ -65,8 +66,12 @@ namespace dm.interop
     // For playing with c-tors
     public class C5
     {
+#pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable IDE0052 // Remove unread private members
         string _msg;
         object _data;
+#pragma warning restore IDE0052 // Remove unread private members
+#pragma warning restore IDE0044 // Add readonly modifier
 
         public override string ToString()
         {

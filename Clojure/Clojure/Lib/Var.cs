@@ -107,7 +107,7 @@ namespace clojure.lang
             /// <summary>
             /// A mapping from <see cref="Var">Var</see>s to <see cref="TBox"/>es holding their values.
             /// </summary>
-            Associative _bindings;
+            readonly Associative _bindings;
 
             /// <summary>
             /// Get mapping from <see cref="Var">Var</see>s to <see cref="TBox"/>es holding their values.
@@ -166,7 +166,7 @@ namespace clojure.lang
         /// <summary>
         /// Revision counter
         /// </summary>
-        static volatile int _rev = 0;
+        static volatile int _rev;
 
         public static int Rev
         {
@@ -206,19 +206,20 @@ namespace clojure.lang
         /// <summary>
         /// If true, supports dynamic binding.
         /// </summary>
-        volatile bool _dynamic = false;
+        volatile bool _dynamic;
 
-        static Keyword _privateKey = Keyword.intern(null, "private");
+        static readonly Keyword _privateKey = Keyword.intern(null, "private");
         //static IPersistentMap _privateMeta = new PersistentArrayMap(new object[] { _privateKey, RT.T });
-        static IPersistentMap _privateMeta = new PersistentArrayMap(new object[] { _privateKey, true });
-        static Keyword _macroKey = Keyword.intern(null, "macro");
-        static Keyword _nameKey = Keyword.intern(null, "name");
-        static Keyword _nsKey = Keyword.intern(null, "ns");
+        static readonly IPersistentMap _privateMeta = new PersistentArrayMap(new object[] { _privateKey, true });
+        static readonly Keyword _macroKey = Keyword.intern(null, "macro");
+        static readonly Keyword _nameKey = Keyword.intern(null, "name");
+        static readonly Keyword _nsKey = Keyword.intern(null, "ns");
 
         /// <summary>
         /// The number of bindings for this var on the binding stack.
         /// </summary>
         [NonSerialized]
+        readonly
         //AtomicInteger _count;       
         AtomicBoolean _threadBound;
         
@@ -574,6 +575,7 @@ namespace clojure.lang
         /// <param name="root">The new value.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
         void swapRoot(object root)
         {
             Validate(getValidator(), root);
@@ -598,6 +600,7 @@ namespace clojure.lang
         /// </summary>
         /// <param name="fn">The function to apply to the current value to get the new value.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
         void CommuteRoot(IFn fn)
         {
             object newRoot = fn.invoke(_root);
@@ -1219,7 +1222,7 @@ namespace clojure.lang
         /// <summary>
         /// Used in calls to alterMeta, above.
         /// </summary>
-        static IFn _assoc = new AssocFn();
+        static readonly IFn _assoc = new AssocFn();
 
         class DissocFn : AFn
         {
@@ -1232,7 +1235,7 @@ namespace clojure.lang
         /// <summary>
         /// Used in calls to alterMeta, above.
         /// </summary>
-        static IFn _dissoc = new DissocFn();
+        static readonly IFn _dissoc = new DissocFn();
 
         /// <summary>
         /// Return a symbol naming this Var
@@ -1240,7 +1243,7 @@ namespace clojure.lang
         /// <returns></returns>
         public Symbol ToSymbol()
         {
-            return Symbol.create((ns == null ? null : ns.Name.Name), sym.Name);
+            return Symbol.create((ns?.Name.Name), sym.Name);
         }
 
         #endregion
@@ -1275,6 +1278,8 @@ namespace clojure.lang
 
         #region c-tors
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         VarSerializationHelper(SerializationInfo info, StreamingContext context)
         {
             _ns = (Namespace)info.GetValue("_ns", typeof(Namespace));

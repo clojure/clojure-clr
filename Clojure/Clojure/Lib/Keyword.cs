@@ -149,10 +149,7 @@ namespace clojure.lang
             if ( ReferenceEquals(this,obj) ) 
                 return true;
 
-            if (!(obj is Keyword keyword))
-                return false;
-
-            return _sym.Equals(keyword.Symbol);
+            return obj is Keyword keyword && _sym.Equals(keyword.Symbol);
         }
 
         /// <summary>
@@ -252,10 +249,9 @@ namespace clojure.lang
         /// <returns>neg,zero,pos for &lt; = &gt;</returns>
         public int CompareTo(object obj)
         {
-            if (!(obj is Keyword k))
-                throw new ArgumentException("Cannot compare to null or non-Keyword", "obj");
-
-            return _sym.CompareTo(k._sym);
+            return obj is Keyword k
+                ? _sym.CompareTo(k._sym)
+                : throw new ArgumentException("Cannot compare to null or non-Keyword", nameof(obj));
         }
 
         #endregion
@@ -290,7 +286,7 @@ namespace clojure.lang
                 return false;
 
             if (k1 is null)
-                throw new ArgumentNullException("k1");
+                throw new ArgumentNullException(nameof(k1));
 
             return k1.CompareTo(k2) < 0;
         }
@@ -301,7 +297,7 @@ namespace clojure.lang
                 return false;
 
             if (k1 is null)
-                throw new ArgumentNullException("k1");
+                throw new ArgumentNullException(nameof(k1));
 
             return k1.CompareTo(k2) > 0;
         }

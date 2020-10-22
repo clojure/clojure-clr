@@ -24,9 +24,9 @@ namespace clojure.lang
         protected Stream BaseStream { get; set; }
 
         protected byte _unreadByte;
-        protected bool _hasUnread = false;
+        protected bool _hasUnread;
 
-        bool _disposed = false;
+        bool _disposed;
 
         #endregion
 
@@ -111,7 +111,6 @@ namespace clojure.lang
         }
 
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2233:OperationsShouldNotOverflow", MessageId = "offset+1")]
         public override int Read(byte[] buffer, int offset, int count)
         {
 
@@ -122,7 +121,7 @@ namespace clojure.lang
 
             if (buffer == null)
             {
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             if (count + offset > buffer.Length)

@@ -25,7 +25,7 @@ namespace Clojure.Tests.LibTests
     public class CountDownLatchTests
     {
 
-        static int _count = 0;
+        static int _count;
 
         [Test]
         public void BasicTest_StartWaiters()
@@ -39,12 +39,15 @@ namespace Clojure.Tests.LibTests
             {
                 handles[i] = new EventWaitHandle(false, EventResetMode.ManualReset);
 
-                Thread thr = new Thread(delegate(object x) { 
+                Thread thr = new Thread(delegate (object x)
+                {
                     latch.Await();
                     Interlocked.Increment(ref _count);
                     ((EventWaitHandle)x).Set();
-                });
-                thr.Name = String.Format("Thread {0}",i);
+                })
+                {
+                    Name = String.Format("Thread {0}", i)
+                };
                 thr.Start(handles[i]);
             }
             EventWaitHandle handle = new EventWaitHandle(false, EventResetMode.ManualReset);
@@ -72,12 +75,14 @@ namespace Clojure.Tests.LibTests
 
             for (int i = 0; i < NumThreads; i++)
             {
-                Thread thr = new Thread(delegate()
+                Thread thr = new Thread(delegate ()
                 {
                     Thread.Sleep(100);
                     latch.CountDown();
-                });
-                thr.Name = String.Format("Thread {0}", i);
+                })
+                {
+                    Name = String.Format("Thread {0}", i)
+                };
                 thr.Start();
             }
 

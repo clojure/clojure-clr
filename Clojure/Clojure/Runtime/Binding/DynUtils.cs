@@ -23,12 +23,11 @@ namespace clojure.lang.Runtime.Binding
     {
         #region Argument names
 
-        static Dictionary<int, string[]> _argNamesCache = new Dictionary<int, string[]>();
+        static readonly Dictionary<int, string[]> _argNamesCache = new Dictionary<int, string[]>();
 
         public static string[] GetArgNames(int argCount)
         {
-            string[] names;
-            if (!_argNamesCache.TryGetValue(argCount, out names))
+            if (!_argNamesCache.TryGetValue(argCount, out string[] names))
             {
                 names = CreateArgNames(argCount);
                 _argNamesCache[argCount] = names;

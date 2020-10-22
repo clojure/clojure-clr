@@ -29,8 +29,8 @@ namespace clojure.lang.Runtime
 
         internal static bool CanConvertFrom(Type fromType, Type toType, NarrowingLevel level)
         {
-            ContractUtils.RequiresNotNull(fromType, "fromType");
-            ContractUtils.RequiresNotNull(toType, "toType");
+            ContractUtils.RequiresNotNull(fromType, nameof(fromType));
+            ContractUtils.RequiresNotNull(toType, nameof(toType));
 
             // NarrowingLevel.Zero
 
@@ -711,11 +711,7 @@ namespace clojure.lang.Runtime
         // TODO:  Cache created delegates
         public static object ConvertToDelegate(object value, Type to)
         {
-            IFn fn = value as IFn;
-            if (fn == null) 
-                return null;
-
-            return GenDelegate.Create(to, fn);
+            return value is IFn fn ? (object)GenDelegate.Create(to, fn) : null;
         }
 
         #endregion

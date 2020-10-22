@@ -6,9 +6,11 @@ using System.Text;
 namespace dm
 {
 #pragma warning disable IDE1006 // Naming Styles
+#pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable CA1822 // mark as static
     public class C1
     {
-        protected int x = 0;
+        protected int x;
         protected string y = String.Empty;
 
 
@@ -23,6 +25,7 @@ namespace dm
         protected int m3(int x) { Message("m3", x.ToString()); return x + 1; }
 
         protected int m4(int x) { Message("m4", x.ToString()); return x + 1; }
+
         private int m5(int x) { Message("m5", x.ToString()); return x + 1; }
 
         public C1(int x, string y) { Message("ctor1", x.ToString(), y); this.x = x; this.y = y; }
@@ -41,6 +44,8 @@ namespace dm
         int m2(string x);
         int m2(int x);
     }
-    
+
 #pragma warning restore IDE1006 // Naming Styles
+#pragma warning restore IDE0051 // Remove unused private members
+#pragma warning restore CA1822 // mark as static
 }

@@ -1646,8 +1646,8 @@ namespace clojure.lang
 
         static bool IsNaN(object x)
         {
-            return (x is double && Double.IsNaN((double)x))
-                || (x is float && float.IsNaN((float)x));
+            return (x is double d && double.IsNaN(d))
+                || (x is float f && float.IsNaN(f));
         }
 
 
@@ -2098,8 +2098,7 @@ namespace clojure.lang
         [WarnBoxedMath(false)]
         static BigInt ToBigInt(Object x)
         {
-            BigInt bigInt = x as BigInt;
-            if (bigInt != null)
+            if (x is BigInt bigInt)
                 return bigInt;
 
             BigInteger bigInteger = x as BigInteger;
@@ -2116,8 +2115,7 @@ namespace clojure.lang
             if (bigInteger != null)
                 return bigInteger;
 
-            BigInt bigInt = x as BigInt;
-            if ( bigInt != null )
+            if (x is BigInt bigInt)
                 return bigInt.toBigInteger();
 
             return BigInteger.Create(Util.ConvertToLong(x));
@@ -2130,37 +2128,34 @@ namespace clojure.lang
             if (bigDec != null)
                 return bigDec;
 
-            BigInt bigInt = x as BigInt;
-            if (bigInt != null)
+            if (x is BigInt bigInt)
             {
                 if (bigInt.Bipart == null)
                     return BigDecimal.Create(bigInt.Lpart);
                 else
                     return BigDecimal.Create(bigInt.Bipart);
             }
- 
+
             BigInteger bigInteger = x as BigInteger;
             if (bigInteger != null)
                 return BigDecimal.Create(bigInteger);
 
-            if (x is double)
-                return BigDecimal.Create((double)x);
+            if (x is double d)
+                return BigDecimal.Create(d);
 
-            if (x is float)
-                return BigDecimal.Create((double)(float)x);
-            
-            Ratio r = x as Ratio;
-            if ( r != null )
+            if (x is float f)
+                return BigDecimal.Create((double)f);
+
+            if (x is Ratio r)
                 return (BigDecimal)divide(BigDecimal.Create(r.numerator), r.denominator);
-           
+
             return BigDecimal.Create(Util.ConvertToLong(x));
         }
 
         [WarnBoxedMath(false)]
         public static Ratio ToRatio(object x)
         {
-            Ratio r = x as Ratio;
-            if (r != null)
+            if (x is Ratio r)
                 return r;
 
             BigDecimal bx = x as BigDecimal;
@@ -2180,11 +2175,11 @@ namespace clojure.lang
         [WarnBoxedMath(false)]
         public static object rationalize(object x)
         {
-            if (x is float)                              
-                return rationalize(BigDecimal.Create((float)x));
+            if (x is float f)                              
+                return rationalize(BigDecimal.Create(f));
 
-            if (x is double)                        
-                return rationalize(BigDecimal.Create((double)x));
+            if (x is double d)                        
+                return rationalize(BigDecimal.Create(d));
 
             BigDecimal bx = (BigDecimal)x;
             if (bx != null)
@@ -2218,8 +2213,8 @@ namespace clojure.lang
             BigInteger gcd = n.Gcd(d);
             if (gcd.Equals(BigInteger.Zero))
                 return BigInt.ZERO;
-            n = n / gcd;
-            d = d / gcd;
+            n /= gcd;
+            d /= gcd;
 
             if (d.Equals(BigInteger.One))
                 return BigInt.fromBigInteger(n);
@@ -2316,7 +2311,7 @@ namespace clojure.lang
             return (int)((uint)x >> n);
         }
 
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
         static long unsignedShiftRight(Object x, Object y)
         {
             return unsignedShiftRight(bitOpsCast(x), bitOpsCast(y));
@@ -2467,7 +2462,7 @@ namespace clojure.lang
                 if (gcd1 == 0)
                     return num(0);
 
-                n = n / gcd1;
+                n /= gcd1;
                 long d = val / gcd1;
                 if (d == 1)
                     return num(n);
@@ -2698,7 +2693,7 @@ namespace clojure.lang
                 if (gcd1 == 0)
                     return num(0);
 
-                n = n / gcd1;
+                n /= gcd1;
                 ulong d = val / gcd1;
                 if (d == 1)
                     return num(n);
@@ -3230,6 +3225,7 @@ namespace clojure.lang
 
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
             static long gcd(long u, long v)
             {
                 while (v != 0)
@@ -4251,9 +4247,8 @@ namespace clojure.lang
         public static bool[] boolean_array(int size, Object init)
         {
             bool[] ret = new bool[size];
-            if (init is bool)
+            if (init is bool f)
             {
-                bool f = (bool)init;
                 for (int i = 0; i < ret.Length; i++)
                     ret[i] = f;
             }

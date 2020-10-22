@@ -31,15 +31,15 @@ namespace clojure.lang.CljCompiler.Ast
     {
         #region Data
 
-        int _id = 0;
-        readonly AssemblyGen _assemblyGen = null;
-        TypeBuilder _typeBuilder =  null;
-        TypeGen _typeGen = null;
+        int _id;
+        readonly AssemblyGen _assemblyGen;
+        TypeBuilder _typeBuilder;
+        TypeGen _typeGen;
 
         readonly string _typeName;
 
 
-        List<SiteInfo> _siteInfos = null;
+        List<SiteInfo> _siteInfos;
 
         public class SiteInfo
         {
@@ -225,14 +225,14 @@ namespace clojure.lang.CljCompiler.Ast
         //private int _index;
         internal TypeBuilder DefineType(string name, Type parent, TypeAttributes attr, bool preserveName)
         {
-            ContractUtils.RequiresNotNull(name, "name");
-            ContractUtils.RequiresNotNull(parent, "parent");
+            ContractUtils.RequiresNotNull(name, nameof(name));
+            ContractUtils.RequiresNotNull(parent, nameof(parent));
 
             StringBuilder sb = new StringBuilder(name);
             if (!preserveName)
             {
                 int index = RT.nextID(); //Interlocked.Increment(ref _index);
-                sb.Append("$");
+                sb.Append('$');
                 sb.Append(index);
             }
 

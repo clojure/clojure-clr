@@ -60,7 +60,7 @@ namespace clojure.lang
         /// </remarks>
         private readonly uint[] _data;
 
-        private static readonly BigInteger _zero = new BigInteger(0, new uint[] { });
+        private static readonly BigInteger _zero = new BigInteger(0, Array.Empty<uint>());
         private static readonly BigInteger _one = new BigInteger(1, new uint[] { 1 });
         private static readonly BigInteger _two = new BigInteger(1, new uint[] { 2 });
         private static readonly BigInteger _five = new BigInteger(1, new uint[] { 5 });
@@ -472,7 +472,7 @@ namespace clojure.lang
             StringBuilder sb = new StringBuilder(rems.Count * RadixDigitsPerDigit[radix] + 1);
 
             if (_sign < 0)
-                sb.Append("-");
+                sb.Append('-');
 
             char[] charBuf = new char[RadixDigitsPerDigit[radix]];
 
@@ -1575,10 +1575,7 @@ namespace clojure.lang
                 return 1;
 
 
-            if (!(obj is BigInteger o))
-                throw new ArgumentException("Expected a BigInteger to compare against");
-
-            return Compare(this, o);
+            return obj is BigInteger o ? Compare(this, o) : throw new ArgumentException("Expected a BigInteger to compare against");
         }
 
         #endregion
@@ -2009,7 +2006,7 @@ namespace clojure.lang
         public BigInteger Power(int exp)
         {
             if (exp < 0)
-                throw new ArgumentOutOfRangeException("exp","Exponent must be non-negative");
+                throw new ArgumentOutOfRangeException(nameof(exp),"Exponent must be non-negative");
 
             if (exp == 0)
                 return One;
@@ -2043,7 +2040,7 @@ namespace clojure.lang
         {
             // TODO: Look at Java implementation for a more efficient version
             if (power < 0)
-                throw new ArgumentOutOfRangeException("power","must be non-negative");
+                throw new ArgumentOutOfRangeException(nameof(power),"must be non-negative");
 
             if (power._sign == 0)
                 return One;
@@ -3014,8 +3011,8 @@ namespace clojure.lang
             // Special case: dividend == 0
             if (xlen == 0)
             {
-                q = new uint[0];
-                r = new uint[0];
+                q = Array.Empty<uint>();
+                r = Array.Empty<uint>();
                 return;
             }
 
@@ -3032,7 +3029,7 @@ namespace clojure.lang
             // Special case: dividend < divisor
             if (cmp < 0 )
             {
-                q = new uint[0];
+                q = Array.Empty<uint>();
                 r = (uint[])x.Clone();
                 return;
             }

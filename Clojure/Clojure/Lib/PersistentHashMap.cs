@@ -64,7 +64,6 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentHashMap">PersistentHashMap</see>.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static readonly PersistentHashMap EMPTY = new PersistentHashMap(0, null, false, null);
 
 
@@ -264,9 +263,7 @@ namespace clojure.lang
         {
             if (key == null)
                 return _hasNull;
-            return (_root != null) 
-                ? _root.Find(0, Hash(key), key, NotFoundValue) != NotFoundValue 
-                : false;
+            return (_root != null) && _root.Find(0, Hash(key), key, NotFoundValue) != NotFoundValue;
         }
 
         /// <summary>
@@ -278,9 +275,7 @@ namespace clojure.lang
         {
             if (key == null)
                 return _hasNull ? (IMapEntry)MapEntry.create(null, _nullValue) : null;
-            return (_root != null)
-                ? _root.Find(0,Hash(key),key)
-                : null;
+            return _root?.Find(0,Hash(key),key);
         }
 
         /// <summary>
@@ -329,7 +324,7 @@ namespace clojure.lang
                 return new PersistentHashMap(meta(), _hasNull ? _count : _count + 1, _root, true, val);
             }
             Box addedLeaf = new Box(null);
-            INode newroot = (_root == null ? BitmapIndexedNode.EMPTY : _root)
+            INode newroot = (_root ?? BitmapIndexedNode.EMPTY)
                 .Assoc(0, Hash(key), key, val, addedLeaf);
             return newroot == _root
                 ? this
@@ -388,7 +383,7 @@ namespace clojure.lang
         /// <returns>An ISeq for iteration.</returns>
         public override ISeq seq()
         {
-            ISeq s = _root != null ? _root.GetNodeSeq() : null;
+            ISeq s = _root?.GetNodeSeq();
             return _hasNull ? new Cons(MapEntry.create(null, _nullValue), s) : s;
         }
 
@@ -461,7 +456,7 @@ namespace clojure.lang
                     return this;
                 }
                 _leafFlag.Val = null;
-                INode n = (_root == null ? BitmapIndexedNode.EMPTY : _root)
+                INode n = (_root ?? BitmapIndexedNode.EMPTY)
                     .Assoc(_edit, 0, Hash(key), key, val, _leafFlag);
                 if (n != _root)
                     _root = n;
@@ -632,7 +627,6 @@ namespace clojure.lang
 
         #region kvreduce & fold
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object kvreduce(IFn f, object init)
         {
             init = _hasNull ? f.invoke(init,null,_nullValue) : init;
@@ -650,6 +644,7 @@ namespace clojure.lang
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public object fold(long n, IFn combinef, IFn reducef, IFn fjinvoke, IFn fjtask, IFn fjfork, IFn fjjoin)
         {
             // JVM: we are ignoring n for now
@@ -1172,7 +1167,7 @@ namespace clojure.lang
         {
             #region Data
 
-            internal static readonly BitmapIndexedNode EMPTY = new BitmapIndexedNode(null, 0, new object[0]);
+            internal static readonly BitmapIndexedNode EMPTY = new BitmapIndexedNode(null, 0, Array.Empty<object>());
 
             int _bitmap;
             object[] _array;
@@ -1776,7 +1771,7 @@ namespace clojure.lang
 
             #region Ctors
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
             NodeSeq(object[] array, int i)
                 : this(null, array, i, null)
             {

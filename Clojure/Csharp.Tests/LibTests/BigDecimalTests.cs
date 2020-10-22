@@ -55,24 +55,24 @@ namespace Clojure.Tests.LibTests
     {
         #region test parsing support
 
-        void GetThreeArgs(string test, out string arg1, out string arg2, out string result)
+        static void GetThreeArgs(string test, out string arg1, out string arg2, out string result)
         {
-            string[] atoms = test.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+            string[] atoms = test.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries);
             arg1 = StripSingleQuotes(atoms[2]);
             arg2 = StripSingleQuotes(atoms[3]);
             result = StripSingleQuotes(atoms[5]);
         }
 
-        void GetTwoArgs(string test, out string arg, out string result)
+        static void GetTwoArgs(string test, out string arg, out string result)
         {
-            string[] atoms = test.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+            string[] atoms = test.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries);
             arg = StripSingleQuotes(atoms[2]);
             result = StripSingleQuotes(atoms[4]);
         }
 
-        string StripSingleQuotes(string str)
+        static string StripSingleQuotes(string str)
         {
-            int len = str[str.Length - 1] == '\'' ? str.Length - 1 : str.Length;
+            int len = str[^1] == '\'' ? str.Length - 1 : str.Length;
             int start = 0;
 
             if ( str[0] == '\'' )
@@ -91,35 +91,31 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ParsingEmptyStringFails()
         {
-            BigDecimal bd;
-            Expect(BigDecimal.TryParse("",out bd)).To.Be.False();
+            Expect(BigDecimal.TryParse("", out _)).To.Be.False();
         }
 
         [Test]
         public void ParsingOnlySignFails()
         {
-            BigDecimal bd;
-            Expect(BigDecimal.TryParse("+", out bd)).To.Be.False();
-            Expect(BigDecimal.TryParse("-", out bd)).To.Be.False();
+            Expect(BigDecimal.TryParse("+", out _)).To.Be.False();
+            Expect(BigDecimal.TryParse("-", out _)).To.Be.False();
         }
 
         [Test]
         public void ParsingWithMissingExponentAfterEFails()
         {
-            BigDecimal bd;
-            Expect(BigDecimal.TryParse("0E", out bd)).To.Be.False();
-            Expect(BigDecimal.TryParse("0e", out bd)).To.Be.False();
-            Expect(BigDecimal.TryParse("0E+", out bd)).To.Be.False();
-            Expect(BigDecimal.TryParse("0E-", out bd)).To.Be.False();
-            Expect(BigDecimal.TryParse("0e+", out bd)).To.Be.False();
-            Expect(BigDecimal.TryParse("0e-", out bd)).To.Be.False();
+            Expect(BigDecimal.TryParse("0E", out _)).To.Be.False();
+            Expect(BigDecimal.TryParse("0e", out _)).To.Be.False();
+            Expect(BigDecimal.TryParse("0E+", out _)).To.Be.False();
+            Expect(BigDecimal.TryParse("0E-", out _)).To.Be.False();
+            Expect(BigDecimal.TryParse("0e+", out _)).To.Be.False();
+            Expect(BigDecimal.TryParse("0e-", out _)).To.Be.False();
         }
 
         [Test]
         public void ParsingZeroWorks()
         {
-            BigDecimal bd;
-            Expect(BigDecimal.TryParse("0", out bd));
+            Expect(BigDecimal.TryParse("0", out BigDecimal bd));
             Expect(bd.Coefficient.IsZero);
             Expect(bd.Exponent).To.Equal(0);
             Expect(bd.GetPrecision()).To.Equal(1);
@@ -128,8 +124,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ParsingMultipleZeroWorks()
         {
-            BigDecimal bd;
-            Expect(BigDecimal.TryParse("0000", out bd));
+            Expect(BigDecimal.TryParse("0000", out BigDecimal bd));
             Expect(bd.Coefficient.IsZero);
             Expect(bd.Exponent).To.Equal(0);
             Expect(bd.GetPrecision()).To.Equal(1);
@@ -138,8 +133,7 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void ParsingZeroWithDecimalPointWorks()
         {
-            BigDecimal bd;
-            Expect(BigDecimal.TryParse("00.00", out bd));
+            Expect(BigDecimal.TryParse("00.00", out BigDecimal bd));
             Expect(bd.Coefficient.IsZero);
             Expect(bd.Exponent).To.Equal(-2);
             Expect(bd.GetPrecision()).To.Equal(1);
@@ -181,7 +175,7 @@ namespace Clojure.Tests.LibTests
             SimpleIntTest("-.123456789123456789", "-123456789123456789", -18, 18);
         }
 
-        public void ParsingWithPositiveExponentWorks()
+        static public void ParsingWithPositiveExponentWorks()
         {
             SimpleIntTest("1E0", "1", 0, 1);
             SimpleIntTest("1E1", "1", 1, 1);
@@ -230,10 +224,9 @@ namespace Clojure.Tests.LibTests
             SimpleIntTest("1.000E-20", "1000", -23, 4);
         }
 
-        void SimpleIntTest(string decString, string intString, int exponent, int precision)
+        static void SimpleIntTest(string decString, string intString, int exponent, int precision)
         {
-            BigDecimal bd;
-            Expect(BigDecimal.TryParse(decString, out bd));
+            Expect(BigDecimal.TryParse(decString, out BigDecimal bd));
             Expect(bd.Coefficient).To.Equal(BigInteger.Parse(intString));
             Expect(bd.Exponent).To.Equal(exponent);
             Expect(bd.GetPrecision()).To.Equal(precision);
@@ -303,13 +296,13 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        public void NegativeNonExponentialPointPlacement()
+        static public void NegativeNonExponentialPointPlacement()
         {
             TestScientificString("123456789", -2, "1234567.89");
             TestScientificString("-123456789", -2, "-1234567.89");
         }
 
-        private void TestScientificString(string biStr, int exp, string outStr)
+        static private void TestScientificString(string biStr, int exp, string outStr)
         {
             BigInteger bi = BigInteger.Parse(biStr);
             BigDecimal bd = new BigDecimal(bi, exp);
@@ -466,7 +459,7 @@ namespace Clojure.Tests.LibTests
 
         }
 
-        private void TestDouble(double v,string expectStr, BigDecimal.Context c)
+        static private void TestDouble(double v,string expectStr, BigDecimal.Context c)
         {
             BigDecimal d = BigDecimal.Create(v, c);
             string gotStr = d.ToScientificString();
@@ -595,7 +588,7 @@ namespace Clojure.Tests.LibTests
         }
 
 
-        private void TestDecimal(decimal v, string expectStr, BigDecimal.Context c)
+        static private void TestDecimal(decimal v, string expectStr, BigDecimal.Context c)
         {
             BigDecimal d = BigDecimal.Create(v, c);
             string gotStr = d.ToScientificString();
@@ -626,7 +619,7 @@ namespace Clojure.Tests.LibTests
             TestPrecision("123456789123456789", 40, 18);
         }
 
-        void TestPrecision(string s, int exponent, int precision)
+        static void TestPrecision(string s, int exponent, int precision)
         {
 
             BigDecimal bd = new BigDecimal(BigInteger.Parse(s), exponent);
@@ -669,7 +662,7 @@ namespace Clojure.Tests.LibTests
         //}
 
         [Test]
-        public void TestBasicRounding()
+        static public void TestBasicRounding()
         {
             TestBasicRounding("123.456", 0, BigDecimal.RoundingMode.HalfUp, "0", 3);
             TestBasicRounding("123.456", 1, BigDecimal.RoundingMode.HalfUp, "1", 2);
@@ -681,7 +674,7 @@ namespace Clojure.Tests.LibTests
             TestBasicRounding("123.456", 7, BigDecimal.RoundingMode.HalfUp, "123456", -3);
         }
 
-        void TestBasicRounding(string bdStr,uint precision, BigDecimal.RoundingMode mode, string biStr, int exponent)
+        static void TestBasicRounding(string bdStr,uint precision, BigDecimal.RoundingMode mode, string biStr, int exponent)
         {
             BigDecimal.Context mc = new BigDecimal.Context(precision,mode);
             BigDecimal bd = BigDecimal.Parse(bdStr);
@@ -691,7 +684,7 @@ namespace Clojure.Tests.LibTests
         }
 
         [Test]
-        public void TestJavaDocRoundingTests()
+        static public void TestJavaDocRoundingTests()
         {
             TestBasicRounding("5.5", 1, BigDecimal.RoundingMode.Up, "6", 0);
             TestBasicRounding("5.5", 1, BigDecimal.RoundingMode.Down, "5", 0);
@@ -1304,17 +1297,14 @@ namespace Clojure.Tests.LibTests
 
 
 
-        void TQ(string test, BigDecimal.RoundingMode mode)
+        static void TQ(string test, BigDecimal.RoundingMode mode)
         {
 
-            string lhsStr;
-            string rhsStr;
-            string resultStr;
-            GetThreeArgs(test, out lhsStr, out rhsStr, out resultStr);
+            GetThreeArgs(test, out string lhsStr, out string rhsStr, out string resultStr);
             TestQuantize(lhsStr, rhsStr, mode, resultStr);
         }
 
-        void TestQuantize(string lhsStr, string rhsStr, BigDecimal.RoundingMode m, string shouldStr)
+        static void TestQuantize(string lhsStr, string rhsStr, BigDecimal.RoundingMode m, string shouldStr)
         {
             BigDecimal lhs = BigDecimal.Parse(lhsStr);
             BigDecimal rhs = BigDecimal.Parse(rhsStr);
@@ -1399,15 +1389,13 @@ namespace Clojure.Tests.LibTests
 
         }
 
-        void TAbs(string test, BigDecimal.Context c)
+        static void TAbs(string test, BigDecimal.Context c)
         {
-            string argStr;
-            string resultStr;
-            GetTwoArgs(test, out argStr, out resultStr);
+            GetTwoArgs(test, out string argStr, out string resultStr);
             TestAbs(argStr, c, resultStr);
         }
 
-        void TestAbs(string argStr, BigDecimal.Context c, string shouldStr)
+        static void TestAbs(string argStr, BigDecimal.Context c, string shouldStr)
         {
             BigDecimal arg = BigDecimal.Parse(argStr);
             BigDecimal result = BigDecimal.Abs(arg,c);
@@ -1936,16 +1924,13 @@ namespace Clojure.Tests.LibTests
 
         }
 
-        void TAdd(string test, BigDecimal.Context c)
+        static void TAdd(string test, BigDecimal.Context c)
         {
-            string arg1Str;
-            string arg2Str;
-            string resultStr;
-            GetThreeArgs(test, out arg1Str, out arg2Str, out resultStr);
+            GetThreeArgs(test, out string arg1Str, out string arg2Str, out string resultStr);
             TestAddition(arg1Str, arg2Str, c, resultStr);
         }
 
-        void TestAddition(string arg1Str, string arg2Str, BigDecimal.Context c, string resultStr)
+        static void TestAddition(string arg1Str, string arg2Str, BigDecimal.Context c, string resultStr)
         {
             BigDecimal arg1 = BigDecimal.Parse(arg1Str);
             BigDecimal arg2 = BigDecimal.Parse(arg2Str);
@@ -2840,16 +2825,13 @@ namespace Clojure.Tests.LibTests
         }
 
 
-        void TSub(string test, BigDecimal.Context c)
+        static void TSub(string test, BigDecimal.Context c)
         {
-            string arg1Str;
-            string arg2Str;
-            string resultStr;
-            GetThreeArgs(test, out arg1Str, out arg2Str, out resultStr);
+            GetThreeArgs(test, out string arg1Str, out string arg2Str, out string resultStr);
             TestSubtraction(arg1Str, arg2Str, c, resultStr);
         }
 
-        void TestSubtraction(string arg1Str, string arg2Str, BigDecimal.Context c, string resultStr)
+        static void TestSubtraction(string arg1Str, string arg2Str, BigDecimal.Context c, string resultStr)
         {
             BigDecimal arg1 = BigDecimal.Parse(arg1Str);
             BigDecimal arg2 = BigDecimal.Parse(arg2Str);
@@ -3243,16 +3225,13 @@ namespace Clojure.Tests.LibTests
 
         }
 
-        void TMul(string test, BigDecimal.Context c)
+        static void TMul(string test, BigDecimal.Context c)
         {
-            string arg1Str;
-            string arg2Str;
-            string resultStr;
-            GetThreeArgs(test, out arg1Str, out arg2Str, out resultStr);
+            GetThreeArgs(test, out string arg1Str, out string arg2Str, out string resultStr);
             TestMultiply(arg1Str, arg2Str, c, resultStr);
         }
 
-        void TestMultiply(string arg1Str, string arg2Str, BigDecimal.Context c, string resultStr)
+        static void TestMultiply(string arg1Str, string arg2Str, BigDecimal.Context c, string resultStr)
         {
             BigDecimal arg1 = BigDecimal.Parse(arg1Str);
             BigDecimal arg2 = BigDecimal.Parse(arg2Str);
@@ -3954,14 +3933,11 @@ namespace Clojure.Tests.LibTests
             TDiv("divx011 divide  2.4   -1   ->  -2.4", c0u);
         }
 
-        void TDivEx(string test, BigDecimal.Context c)
+        static void TDivEx(string test, BigDecimal.Context c)
         {
             try
             {
-                string arg1Str;
-                string arg2Str;
-                string resultStr;
-                GetThreeArgs(test, out arg1Str, out arg2Str, out resultStr);
+                GetThreeArgs(test, out string arg1Str, out string arg2Str, out string resultStr);
                 TestDivide(arg1Str, arg2Str, c, "1");  // result irrelevant
                 Expect(false);
             }
@@ -3971,17 +3947,14 @@ namespace Clojure.Tests.LibTests
             }
         }
 
-        void TDiv(string test, BigDecimal.Context c)
+        static void TDiv(string test, BigDecimal.Context c)
         {
-            string arg1Str;
-            string arg2Str;
-            string resultStr;
-            GetThreeArgs(test, out arg1Str, out arg2Str, out resultStr);
+            GetThreeArgs(test, out string arg1Str, out string arg2Str, out string resultStr);
             TestDivide(arg1Str, arg2Str, c, resultStr);
         }
 
 
-        void TestDivide(string arg1Str, string arg2Str, BigDecimal.Context c, string resultStr)
+        static void TestDivide(string arg1Str, string arg2Str, BigDecimal.Context c, string resultStr)
         {
             BigDecimal arg1 = BigDecimal.Parse(arg1Str);
             BigDecimal arg2 = BigDecimal.Parse(arg2Str);
@@ -4336,17 +4309,14 @@ namespace Clojure.Tests.LibTests
 
         }
 
-        void TDivI(string test, BigDecimal.Context c)
+        static void TDivI(string test, BigDecimal.Context c)
         {
-            string arg1Str;
-            string arg2Str;
-            string resultStr;
-            GetThreeArgs(test, out arg1Str, out arg2Str, out resultStr);
+            GetThreeArgs(test, out string arg1Str, out string arg2Str, out string resultStr);
             TestDivideInt(arg1Str, arg2Str, c, resultStr);
         }
 
 
-        void TestDivideInt(string arg1Str, string arg2Str, BigDecimal.Context c, string resultStr)
+        static void TestDivideInt(string arg1Str, string arg2Str, BigDecimal.Context c, string resultStr)
         {
             BigDecimal arg1 = BigDecimal.Parse(arg1Str);
             BigDecimal arg2 = BigDecimal.Parse(arg2Str);
@@ -4355,14 +4325,11 @@ namespace Clojure.Tests.LibTests
             Expect(valStr).To.Equal(resultStr);
         }
 
-        void TDivIEx(string test, BigDecimal.Context c)
+        static void TDivIEx(string test, BigDecimal.Context c)
         {
             try
             {
-                string arg1Str;
-                string arg2Str;
-                string resultStr;
-                GetThreeArgs(test, out arg1Str, out arg2Str, out resultStr);
+                GetThreeArgs(test, out string arg1Str, out string arg2Str, out string resultStr);
                 BigDecimal arg1 = BigDecimal.Parse(arg1Str);
                 BigDecimal arg2 = BigDecimal.Parse(arg2Str);
                 arg1.DivideInteger(arg2, c);
@@ -4522,16 +4489,13 @@ namespace Clojure.Tests.LibTests
             //TPow("powx129 power   -0   '-2'   -> Infinity", c9he);
         }
 
-        void TPow(string test, BigDecimal.Context c)
+        static void TPow(string test, BigDecimal.Context c)
         {
-            string arg1Str;
-            string arg2Str;
-            string resultStr;
-            GetThreeArgs(test, out arg1Str, out arg2Str, out resultStr);
+            GetThreeArgs(test, out string arg1Str, out string arg2Str, out string resultStr);
             TestPower(arg1Str, arg2Str, c, resultStr);
         }
 
-        void TestPower(string arg1Str, string arg2Str, BigDecimal.Context c, string resultStr)
+        static  void TestPower(string arg1Str, string arg2Str, BigDecimal.Context c, string resultStr)
         {
             BigDecimal arg1 = BigDecimal.Parse(arg1Str);
             int arg2 = Int32.Parse(arg2Str);
@@ -4610,7 +4574,7 @@ namespace Clojure.Tests.LibTests
             TestMoveRight("123456789000", 4, "1.23456789000E+15");
         }
 
-        void TestMoveLeft(string strVal, int n, string expectedString)
+        static void TestMoveLeft(string strVal, int n, string expectedString)
         {
             BigDecimal d = BigDecimal.Parse(strVal);
             BigDecimal m = d.MovePointLeft(n);
@@ -4619,7 +4583,7 @@ namespace Clojure.Tests.LibTests
         }
 
 
-        void TestMoveRight(string strVal, int n, string expectedString)
+        static void TestMoveRight(string strVal, int n, string expectedString)
         {
             BigDecimal d = BigDecimal.Parse(strVal);
             BigDecimal m = d.MovePointRight(n);

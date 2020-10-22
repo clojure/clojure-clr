@@ -32,9 +32,7 @@ namespace clojure.lang.Runtime.Binding
             MethodInfo invoke = delegateType.GetMethod("Invoke");
             ParameterInfo[] pis = invoke.GetParameters();
 
-            IFnArity fn = Value as IFnArity;
-
-            if (fn != null && fn.HasArity(pis.Length))
+            if (Value is IFnArity fn && fn.HasArity(pis.Length))
             {
                 return new InferenceResult(
                     typeof(object),

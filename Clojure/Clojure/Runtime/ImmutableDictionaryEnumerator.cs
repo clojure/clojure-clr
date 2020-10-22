@@ -13,8 +13,8 @@ namespace clojure.lang.Runtime
     {
         #region Data
 
-        IDictionary _dict;
-        object[] _keys;
+        readonly IDictionary _dict;
+        readonly object[] _keys;
         Int32 _index = -1;
 
         #endregion

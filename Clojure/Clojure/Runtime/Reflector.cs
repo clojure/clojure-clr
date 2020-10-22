@@ -52,8 +52,10 @@ namespace clojure.lang
             else
                 flags |= BindingFlags.Instance;
 
-            List<Type> typesToCheck = new List<Type>();
-            typesToCheck.Add(t);
+            List<Type> typesToCheck = new List<Type>
+            {
+                t
+            };
 
             if (t.IsInterface && !getStatics)
                 typesToCheck.AddRange(t.GetInterfaces());
@@ -104,7 +106,7 @@ namespace clojure.lang
             PropertyInfo prop = GetProperty(t, fieldName, false);
             if (prop != null)
             {
-                prop.SetValue(target, val, new object[0]);
+                prop.SetValue(target, val, Array.Empty<object>());
                 return val;
             }
             throw new ArgumentException(String.Format("No matching field/property found: {0} for {1}", fieldName, t));
@@ -121,12 +123,12 @@ namespace clojure.lang
 
             PropertyInfo prop = GetProperty(t, fieldName, false);
             if (prop != null)
-                return Reflector.prepRet(prop.PropertyType,prop.GetValue(target, new object[0]));
+                return Reflector.prepRet(prop.PropertyType,prop.GetValue(target, Array.Empty<object>()));
 
             MethodInfo method = GetArityZeroMethod(t, fieldName, false);
 
             if (method != null)
-                return Reflector.prepRet(method.ReturnType, method.Invoke(target, new object[0]));
+                return Reflector.prepRet(method.ReturnType, method.Invoke(target, Array.Empty<object>()));
 
             throw new ArgumentException(String.Format("No matching instance field/property found: {0} for {1}", fieldName, t));
         }
@@ -216,8 +218,10 @@ namespace clojure.lang
         {
             BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod;
 
-            List<Type> interfaces = new List<Type>();
-            interfaces.Add(targetType);
+            List<Type> interfaces = new List<Type>
+            {
+                targetType
+            };
             interfaces.AddRange(targetType.GetInterfaces());
 
             List<MethodBase> infos = new List<MethodBase>();
@@ -245,6 +249,7 @@ namespace clojure.lang
         /// <param name="args"></param>
         /// <param name="ctorCount"></param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         internal static ConstructorInfo GetMatchingConstructor(IPersistentMap spanMap, Type targetType, IList<HostArg> args, out int ctorCount)
         {
             IList<MethodBase> methods = Reflector.GetConstructors(targetType, args.Count);
@@ -310,6 +315,7 @@ namespace clojure.lang
             return null;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
         private static MethodBase GetMatchingMethodAux(Type targetType, object[] actualArgs, IList<MethodBase> methods, string methodName, bool isStatic)
         {
             int argCount = actualArgs.Length;
@@ -403,7 +409,7 @@ namespace clojure.lang
 
             IList<MethodBase> infos = GetMethods(t, name, null, 0, getStatics);
 
-            if (infos.Count() == 1)
+            if (infos.Count == 1)
                 return (MethodInfo)infos[0];
             else if (getStatics && infos.Count > 1)
             {
@@ -442,6 +448,7 @@ namespace clojure.lang
             return CallMethod(methodName, typeArgs, true, t, null, args);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public static object CallMethod(string methodName, IList<Type> typeArgs, bool isStatic, Type t, object target, params object[] args)
         {
             Expression targetExpr = isStatic ? Expression.Constant(t, typeof(Type)) : Expression.Constant(target);
@@ -638,7 +645,7 @@ namespace clojure.lang
                 for (int i = 0; ret && i < pinfos.Length; i++)
                 {
                     object arg = args[i];
-                    Type argType = (arg == null ? null : arg.GetType());
+                    Type argType = (arg?.GetType());
                     Type paramType = pinfos[i].ParameterType;
                     ret = ParamArgTypeMatch(paramType, argType);
                 }
@@ -655,6 +662,7 @@ namespace clojure.lang
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public static Object prepRet(Type t, Object x)
         {
             //if (!t.IsPrimitive)

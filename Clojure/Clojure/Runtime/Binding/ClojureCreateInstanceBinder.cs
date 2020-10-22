@@ -52,7 +52,7 @@ namespace clojure.lang.Runtime.Binding
 
         public override DynamicMetaObject FallbackCreateInstance(DynamicMetaObject target, DynamicMetaObject[] args, DynamicMetaObject errorSuggestion)
         {
-            Type typeToUse = target.Value is Type ? (Type)target.Value : target.LimitType;
+            Type typeToUse = target.Value is Type type ? type : target.LimitType;
 
             IList<DynamicMetaObject> argsPlus = new List<DynamicMetaObject>(args.Length);
 
@@ -67,8 +67,7 @@ namespace clojure.lang.Runtime.Binding
 
             if (methods.Count > 0)
             {
-                BindingTarget bt;
-                DynamicMetaObject dmo = _context.Binder.CallMethod(res, methods, BindingRestrictions.Empty, "_ctor", NarrowingLevel.None, NarrowingLevel.All, out bt);
+                DynamicMetaObject dmo = _context.Binder.CallMethod(res, methods, BindingRestrictions.Empty, "_ctor", NarrowingLevel.None, NarrowingLevel.All, out BindingTarget bt);
                 dmo = DynUtils.MaybeBoxReturnValue(dmo);
                 return dmo;
             }

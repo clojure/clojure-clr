@@ -20,6 +20,8 @@ using System.Text;
 using NUnit.Framework;
 using clojure.lang;
 
+namespace Clojure.Tests.LibTests
+{
 
     public class FixtureSetupClass
     {
@@ -29,4 +31,5 @@ using clojure.lang;
             RuntimeBootstrapFlag._doRTBootstrap = false;
         }
     }
+}
 

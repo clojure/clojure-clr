@@ -309,10 +309,9 @@ namespace clojure.lang
                 if (isRecursive)
                     throw;
 
-                if (!(r is LineNumberingTextReader lntr))
-                    throw;
-
-                throw new ReaderException(lntr.LineNumber, lntr.ColumnNumber, e);
+                if (r is LineNumberingTextReader lntr)
+                    throw new ReaderException(lntr.LineNumber, lntr.ColumnNumber, e);
+                throw;
             }
         }
 
@@ -573,6 +572,7 @@ namespace clojure.lang
         static readonly Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
         static readonly Regex keywordPat = new Regex("^[:]?([^/].*/)?(/|[^/][^/]*)$");
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         private static void ExtractNamesUsingMask(string token, string maskNS, string maskName, out string ns, out string name)
         {
             if (String.IsNullOrEmpty(maskNS))
@@ -772,7 +772,7 @@ namespace clojure.lang
         public static string VbarEscape(string s)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("|");
+            sb.Append('|');
 
             foreach (char c in s)
             {
@@ -780,7 +780,7 @@ namespace clojure.lang
                 if (c == '|')
                     sb.Append('|');
             }
-            sb.Append("|");
+            sb.Append('|');
             return sb.ToString();
         }
 
@@ -788,12 +788,9 @@ namespace clojure.lang
 
         #region Reading numbers
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
-        static Regex intRE = new Regex("^([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?$");
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
-        static Regex ratioRE = new Regex("^([-+]?[0-9]+)/([0-9]+)$");
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
-        static Regex floatRE = new Regex("^([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?$");
+        static readonly Regex intRE = new Regex("^([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?$");
+        static readonly Regex ratioRE = new Regex("^([-+]?[0-9]+)/([0-9]+)$");
+        static readonly Regex floatRE = new Regex("^([-+]?[0-9]+(\\.[0-9]*)?([eE][-+]?[0-9]+)?)(M)?$");
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static object readNumber(PushbackTextReader r, char initch)
@@ -1206,7 +1203,7 @@ namespace clojure.lang
                         else
                         {
                             Namespace rns = Compiler.CurrentNamespace.LookupAlias(ssym);
-                            resolvedNS = rns != null ? rns.Name : null;
+                            resolvedNS = rns?.Name;
                         }
 
                         if (resolvedNS == null)
@@ -1269,7 +1266,7 @@ namespace clojure.lang
 
         public sealed class SymbolicValueReader : ReaderBase
         {
-            static IPersistentMap _specials = PersistentHashMap.create(
+            static readonly IPersistentMap _specials = PersistentHashMap.create(
                 Symbol.intern("Inf"), Double.PositiveInfinity,
                 Symbol.intern("-Inf"), Double.NegativeInfinity,
                 Symbol.intern("NaN"), Double.NaN);
@@ -1403,11 +1400,10 @@ namespace clojure.lang
                             if (rc != null)
                                 csym = rc;
                         }
-                        else
-                        {
+                        else                        
                             csym = Compiler.resolveSymbol(csym);
-                            sym = Symbol.intern(null, csym.Name + ".");
-                        }
+                        sym = Symbol.intern(null, csym.Name + ".");
+                        
                     }
                     else if (sym.Namespace == null && sym.Name.StartsWith("."))
                     {
@@ -1907,6 +1903,7 @@ namespace clojure.lang
             }
 
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
             static object ReadTagged(object o, Symbol tag, object opts, object pendingForms)
             {
                 ILookup dataReaders = (ILookup)RT.DataReadersVar.deref();
@@ -1927,6 +1924,7 @@ namespace clojure.lang
                 return dataReader.invoke(o);
             }
 
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
             static object ReadRecord(object form, Symbol recordName, object opts, object pendingForms)
             {
                 bool readeval = RT.booleanCast(RT.ReadEvalVar.deref());
@@ -2265,7 +2263,7 @@ namespace clojure.lang
             {
                 if (info == null)
                 {
-                    throw new ArgumentNullException("info");
+                    throw new ArgumentNullException(nameof(info));
                 }
                 base.GetObjectData(info, context);
                 info.AddValue("Line", this._line, typeof(int));

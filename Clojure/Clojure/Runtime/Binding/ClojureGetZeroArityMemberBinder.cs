@@ -68,7 +68,7 @@ namespace clojure.lang.Runtime.Binding
                             BindingRestrictions.GetInstanceRestriction(target.Expression, null));
 
             Expression instanceExpr = _isStatic ? null : Expression.Convert(target.Expression, target.LimitType);
-            Type typeToUse = _isStatic && target.Value is Type ? (Type)target.Value : target.LimitType;
+            Type typeToUse = _isStatic && target.Value is Type type ? type : target.LimitType;
 
             BindingRestrictions restrictions = target.Restrictions.Merge(BindingRestrictions.GetTypeRestriction(target.Expression, target.LimitType));
             BindingFlags flags = BindingFlags.Public;
@@ -85,7 +85,7 @@ namespace clojure.lang.Runtime.Binding
             if (pinfo != null)
                 return DynUtils.MaybeBoxReturnValue(new DynamicMetaObject(Expression.Property(instanceExpr, pinfo), restrictions));
 
-            MethodInfo minfo = typeToUse.GetMethod(Name, flags, Type.DefaultBinder, Type.EmptyTypes, new ParameterModifier[0]);
+            MethodInfo minfo = typeToUse.GetMethod(Name, flags, Type.DefaultBinder, Type.EmptyTypes, Array.Empty<ParameterModifier>());
             if (minfo != null)
                 return DynUtils.MaybeBoxReturnValue(new DynamicMetaObject(Expression.Call(instanceExpr, minfo), restrictions));
 
