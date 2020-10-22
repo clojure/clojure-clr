@@ -37,7 +37,7 @@ namespace clojure.test
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Part of API")]
-        public static void failWithCause(Double y)
+        public void failWithCause(Double y)
         {
             throw new Cookies("Wrapped", new Cookies("Cause"));
         }
