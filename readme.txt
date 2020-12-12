@@ -17,9 +17,9 @@ Goals:
 
 Docs: http://clojure.org
 Mailing list: http://groups.google.com/group/clojure-clr
-Getting Started (general): http://dev.clojure.org/display/doc/Getting+Started
-Google+ community: https://plus.google.com/u/0/communities/106235975067046753407
-Bug reports: http://dev.clojure.org/jira/browse/CLJCLR
+Getting Started (general): https://clojure.org/guides/getting_started
+Gitter CLR chat room: https://gitter.im/clojure-clr/community
+Bug reports: https://clojure.atlassian.net/jira/software/c/projects/CLJCLR/issues
 
 
 For more information on ClojureCLR: https://github.com/clojure/clojure-clr/wiki
