@@ -41,7 +41,7 @@ namespace Clojure.Tests.LibTests
         // This class just has an underlying  List<int> to hold values.
         class CPV : APersistentVector
         {
-            object[] _values;
+            readonly object[] _values;
 
             public CPV(object[] values)
             {

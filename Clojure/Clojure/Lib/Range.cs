@@ -50,7 +50,7 @@ namespace clojure.lang
         [Serializable]
         private class PositiveStepCheck : IBoundsCheck
         {
-            object _end;
+            readonly object _end;
 
             public PositiveStepCheck(object end)
             {
@@ -66,7 +66,7 @@ namespace clojure.lang
         [Serializable]
         private class NegativeStepCheck : IBoundsCheck
         {
-            object _end;
+            readonly object _end;
 
             public NegativeStepCheck(object end)
             {
@@ -101,7 +101,6 @@ namespace clojure.lang
             _boundsCheck = boundsCheck;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         private Range(Object start, Object end, Object step, IBoundsCheck boundsCheck, IChunk chunk, ISeq chunkNext)
         {
             _end = end;
@@ -271,7 +270,6 @@ namespace clojure.lang
         /// <param name="start">An initial value to get started.</param>
         /// <returns>The reduced value</returns>
         /// <remarks>Computes f(...f(f(f(start,i0),i1),i2),...).</remarks>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object reduce(IFn f, object val)
         {
             Object acc = val;

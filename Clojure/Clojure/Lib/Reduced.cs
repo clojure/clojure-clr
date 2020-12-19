@@ -18,7 +18,7 @@ namespace clojure.lang
 {
     public sealed class Reduced : IDeref
     {
-        Object _val;
+        readonly Object _val;
 
         public Reduced(object val)
         {

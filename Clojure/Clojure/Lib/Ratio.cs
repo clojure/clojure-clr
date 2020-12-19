@@ -81,8 +81,7 @@ namespace clojure.lang
         /// <returns><value>true</value> if the object is equal to this object; <value>false</value> otherwise.</returns>
         public override bool Equals(object obj)
         {
-            Ratio r = obj as Ratio;
-            return r != null && r._numerator.Equals(_numerator) && r._denominator.Equals(_denominator);
+            return obj is Ratio r && r._numerator.Equals(_numerator) && r._denominator.Equals(_denominator);
         }
 
         /// <summary>

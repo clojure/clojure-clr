@@ -77,8 +77,7 @@ namespace clojure.lang
                 return true;
             //if (o == null || GetType() != o.GetType()) return false;
 
-            TaggedLiteral that = obj as TaggedLiteral;
-            if (that == null)
+            if (!(obj is TaggedLiteral that))
                 return false;
 
             if (_form != null ? !_form.Equals(that._form) : that._form != null) 

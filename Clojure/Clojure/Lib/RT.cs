@@ -72,7 +72,7 @@ namespace clojure.lang
 
         public static readonly object[] EmptyObjectArray = new Object[] { };
 
-        static RTProperties _versionProperties = new RTProperties();
+        static readonly RTProperties _versionProperties = new RTProperties();
 
         public static RTProperties GetVersionProperties() { return _versionProperties; }
 
@@ -100,8 +100,8 @@ namespace clojure.lang
         {
             if (o == null)
                 return false;
-            if (o is Boolean)
-                return (Boolean)o;
+            if (o is Boolean boolean)
+                return boolean;
             else
                 return true;
         }
@@ -333,11 +333,11 @@ namespace clojure.lang
         {
             AssemblyName asmName = new AssemblyName(args.Name);
             var name = asmName.Name;
-            var stream = GetEmbeddedResourceStream(name, out Assembly containingAsm);
-            if(stream == null)
+            var stream = GetEmbeddedResourceStream(name, out _);
+            if (stream == null)
             {
-                name = name + ".dll";
-                stream = GetEmbeddedResourceStream(name, out containingAsm);
+                name += ".dll";
+                stream = GetEmbeddedResourceStream(name, out _);
                 if (stream == null)
                     return null;
             }
@@ -551,7 +551,7 @@ namespace clojure.lang
 
         private class ChunkEnumeratorSeqHelper : AFn
         {
-            IEnumerator _iter;
+            readonly IEnumerator _iter;
 
             public ChunkEnumeratorSeqHelper(IEnumerator iter)
             {
@@ -1213,8 +1213,8 @@ namespace clojure.lang
 
         public static char charCast(object x)
         {
-            if (x is char)
-                return (char)x;
+            if (x is char ch)
+                return ch;
 
             long n = Util.ConvertToLong(x);
             if (n < Char.MinValue || n > char.MaxValue)
@@ -1300,9 +1300,7 @@ namespace clojure.lang
 
         public static char charCast(double x)
         {
-            if (x >= Char.MinValue && x <= char.MaxValue)
-                return (char)x;
-            throw new ArgumentException("Value out of range for char: " + x);
+            return x >= Char.MinValue && x <= char.MaxValue ? (char)x : throw new ArgumentException("Value out of range for char: " + x);
         }
 
         #endregion
@@ -1312,9 +1310,7 @@ namespace clojure.lang
 
         static public bool booleanCast(object x)
         {
-            if (x is Boolean)
-                return ((Boolean)x);
-            return x != null;
+            return x is Boolean b ? b : x != null;
         }
 
 
@@ -1330,8 +1326,8 @@ namespace clojure.lang
 
         public static byte byteCast(object x)
         {
-            if (x is byte)
-                return (byte)x;
+            if (x is byte b)
+                return b;
 
             long n = Util.ConvertToLong(x);
             if (n < Byte.MinValue || n > Byte.MaxValue)
@@ -1343,8 +1339,8 @@ namespace clojure.lang
 
         public static sbyte sbyteCast(object x)
         {
-            if (x is sbyte)
-                return (sbyte)x;
+            if (x is sbyte b)
+                return b;
 
             long n = Util.ConvertToLong(x);
             if (n < SByte.MinValue || n > SByte.MaxValue)
@@ -1357,8 +1353,8 @@ namespace clojure.lang
 
         public static short shortCast(object x)
         {
-            if (x is short)
-                return (short)x;
+            if (x is short s)
+                return s;
             long n = Util.ConvertToLong(x);
             if (n < short.MinValue || n > short.MaxValue)
                 throw new ArgumentException("Value out of range for short: " + x);
@@ -1369,8 +1365,8 @@ namespace clojure.lang
 
         public static ushort ushortCast(object x)
         {
-            if (x is ushort)
-                return (ushort)x;
+            if (x is ushort u)
+                return u;
             long n = Util.ConvertToLong(x);
             if (n < ushort.MinValue || n > ushort.MaxValue)
                 throw new ArgumentException("Value out of range for ushort: " + x);
@@ -1381,8 +1377,8 @@ namespace clojure.lang
 
         public static uint uintCast(object x)
         {
-            if (x is uint)
-                return (uint)x;
+            if (x is uint u)
+                return u;
             long n = Util.ConvertToLong(x);
             if (n < uint.MinValue || n > uint.MaxValue)
                 throw new ArgumentException("Value out of range for uint: " + x);
@@ -1408,8 +1404,8 @@ namespace clojure.lang
 
         public static int intCast(object x)
         {
-            if (x is int)
-                return (int)x;
+            if (x is int i)
+                return i;
             return intCast(longCast(x));
         }
 
@@ -1503,11 +1499,11 @@ namespace clojure.lang
 
         public static long longCast(object x)
         {
-            if (x is long)
-                return (long)x;
+            if (x is long lng)
+                return lng;
 
-            if (x is int)
-                return (long)(int)x;
+            if (x is int i)
+                return (long)i;
 
             if (x is BigInt bi)
             {
@@ -1603,8 +1599,8 @@ namespace clojure.lang
 
         public static float floatCast(object x)
         {
-            if (x is float)
-                return (float)x;
+            if (x is float f)
+                return f;
 
             double n = Util.ConvertToDouble(x);
             if (n < float.MinValue || n > float.MaxValue)
@@ -2066,9 +2062,7 @@ namespace clojure.lang
 
         static public char uncheckedCharCast(Object x)
         {
-            if (x is char)
-                return (char)x;
-            return (char)Util.ConvertToLong(x);
+            return x is char c ? c : (char)Util.ConvertToLong(x);
         }
 
 
@@ -2103,8 +2097,8 @@ namespace clojure.lang
 
         static public IntPtr intPtrCast(object x)
         {
-            if(x is IntPtr)
-                return (IntPtr) x;
+            if(x is IntPtr ptr)
+                return ptr;
             return IntPtr.Zero;
         }
         #endregion
@@ -2114,8 +2108,8 @@ namespace clojure.lang
 
         static public UIntPtr uintPtrCast(object x)
         {
-            if(x is UIntPtr)
-                return (UIntPtr) x;
+            if(x is UIntPtr ptr)
+                return ptr;
             return UIntPtr.Zero;
         }
         #endregion
@@ -2620,9 +2614,9 @@ namespace clojure.lang
                     }
                 }
             }
-            else if (x is Type)
+            else if (x is Type type)
             {
-                string tName = ((Type)x).AssemblyQualifiedName;
+                string tName = type.AssemblyQualifiedName;
                 if (LispReader.NameRequiresEscaping(tName))
                     tName = LispReader.VbarEscape(tName);
                 w.Write("#=");
@@ -2665,7 +2659,7 @@ namespace clojure.lang
             {
                 string s = x.ToString();
                 if (!s.Contains('.') && !s.Contains('E'))
-                    s = s + ".0";
+                    s += ".0";
                 w.Write(s);
             }
             else
@@ -2700,12 +2694,11 @@ namespace clojure.lang
         
         public static Type classForName(string p)
         {
-            Type t = null;
 
             // fastest path, will succeed for assembly qualified names (returned by Type.AssemblyQualifiedName)
             // or namespace qualified names (returned by Type.FullName) in the executing assembly or mscorlib
             // e.g. "UnityEngine.Transform, UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
-            t = Type.GetType(p, false);
+            Type t = Type.GetType(p, false);
 
             // Added the IsPublic check to deal with shadowed types in .Net Core,
             // e.g. System.Environment in assemblies System.Private.CoreLib and System.Runtime.Exceptions.
@@ -3283,7 +3276,7 @@ namespace clojure.lang
 
         private static bool TryLoadFromEmbeddedResource(string relativePath, string assemblyname)
         {
-            var asmStream = GetEmbeddedResourceStream(assemblyname, out Assembly containingAssembly);
+            var asmStream = GetEmbeddedResourceStream(assemblyname, out _);
             if (asmStream != null)
             {
                 try
@@ -3301,7 +3294,7 @@ namespace clojure.lang
             }
 
             var embeddedCljName = relativePath.Replace("/", ".") + ".clj";
-            var stream = GetEmbeddedResourceStream(embeddedCljName, out containingAssembly);
+            var stream = GetEmbeddedResourceStream(embeddedCljName, out Assembly containingAssembly);
             if ( stream == null )
             {
                 embeddedCljName = relativePath.Replace("/", ".") + ".cljc";

@@ -581,8 +581,6 @@ namespace clojure.lang
                 : MakeRed(t.Key, t.Val, t.Left, del);
         }
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         static Node Append(Node left, Node right)
         {
             if (left == null)
@@ -1171,9 +1169,9 @@ namespace clojure.lang
         {
             #region Data
 
-            Stack<Node> _stack = new Stack<Node>();
-            bool _asc;
-            Node _startNode;
+            readonly Stack<Node> _stack = new Stack<Node>();
+            readonly bool _asc;
+            readonly Node _startNode;
 
             bool _beforeStart = true;
 

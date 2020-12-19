@@ -77,8 +77,7 @@ namespace clojure.lang
                 return true;
             //if (o == null || GetType() != o.GetType()) return false;
 
-            ReaderConditional that = obj as ReaderConditional;
-            if (that == null)
+            if (!(obj is ReaderConditional that))
                 return false;
 
             if (_form != null ? !_form.Equals(that._form) : that._form != null) return false;

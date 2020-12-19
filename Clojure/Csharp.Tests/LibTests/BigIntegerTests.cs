@@ -382,16 +382,14 @@ namespace Clojure.Tests.LibTests
         [Test]
         public void Parse_detects_radix_too_small()
         {
-            BigInteger i;
-            bool result = BigInteger.TryParse("0", 1, out i);
+            bool result = BigInteger.TryParse("0", 1, out _);
             Expect(result).To.Be.False();
         }
 
         [Test]
         public void Parse_detects_radix_too_large()
         {
-            BigInteger i;
-            bool result = BigInteger.TryParse("0", 37, out i);
+            bool result = BigInteger.TryParse("0", 37, out _);
             Expect(result).To.Be.False();
         }
 

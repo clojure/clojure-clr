@@ -7,7 +7,6 @@ namespace dm
 {
 #pragma warning disable IDE1006 // Naming Styles
 #pragma warning disable IDE0051 // Remove unused private members
-#pragma warning disable CA1822 // mark as static
     public class C1
     {
         protected int x;
@@ -47,5 +46,4 @@ namespace dm
 
 #pragma warning restore IDE1006 // Naming Styles
 #pragma warning restore IDE0051 // Remove unused private members
-#pragma warning restore CA1822 // mark as static
 }

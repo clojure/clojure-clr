@@ -46,7 +46,6 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="IPersistentList">IPersistentList</see>.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static readonly EmptyList EMPTY = new EmptyList(null);
 
         #endregion
@@ -111,8 +110,7 @@ namespace clojure.lang
             /// <returns>A new list.</returns>
             protected override object doInvoke(object args)
             {
-                IArraySeq ias = args as IArraySeq;
-                if (ias != null)
+                if (args is IArraySeq ias)
                 {
                     object[] argsarray = (object[])ias.ToArray();
                     IPersistentList ret = EMPTY;
@@ -130,8 +128,7 @@ namespace clojure.lang
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             static public object invokeStatic(ISeq args)
             {
-                IArraySeq ias = args as IArraySeq;
-                if (ias != null)
+                if (args is IArraySeq ias)
                 {
                     object[] argsarray = (object[])ias.ToArray();
                     IPersistentList ret = EMPTY;
@@ -222,9 +219,7 @@ namespace clojure.lang
         /// <returns>The new stack</returns>
         public IPersistentStack pop()
         {
-            return _rest == null
-                ? (IPersistentList)EMPTY.withMeta(_meta)
-                : _rest;
+            return _rest ?? (IPersistentList)EMPTY.withMeta(_meta);
         }
 
         #endregion

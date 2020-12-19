@@ -424,7 +424,7 @@ namespace clojure.lang
         /// <returns>The value if it has been set; <value>null</value> otherwise.</returns>
         public object TryGetVal()
         {
-            return _tvals == null ? null : _tvals.Val;
+            return _tvals?.Val;
         }
 
         /// <summary>
@@ -664,7 +664,7 @@ namespace clojure.lang
         /// <returns><value>true</value> if they are identical; <value>false</value> otherwise.</returns>
         public int CompareTo(Ref other)
         {
-            if ( ReferenceEquals(other,null ) )
+            if ( other is null)
                 return 1;
     
             return _id.CompareTo(other._id);
@@ -679,11 +679,7 @@ namespace clojure.lang
             if (ReferenceEquals(this, obj))
                 return true;
 
-            Ref r = obj as Ref;
-            if (ReferenceEquals(r,null))
-                return false;
-
-            return _id == r._id;
+            return obj is Ref r && _id == r._id;
         }
 
         public override int GetHashCode()
@@ -699,7 +695,7 @@ namespace clojure.lang
             if (ReferenceEquals(x, y))
                 return true;
 
-            if (ReferenceEquals(x,null))
+            if (x is null)
                 return false;
 
             return x.CompareTo(y) == 0;
@@ -715,7 +711,7 @@ namespace clojure.lang
             if (ReferenceEquals(x, y))
                 return false;
 
-            if ( ReferenceEquals(x,null) )
+            if ( x is null)
                 throw new ArgumentException("Cannot compare null","x");
 
             return x.CompareTo(y) < 0;
@@ -726,7 +722,7 @@ namespace clojure.lang
             if (ReferenceEquals(x, y))
                 return false;
 
-            if ( ReferenceEquals(x,null) )
+            if ( x is null)
                 throw new ArgumentException("Cannot compare null","x");
 
             return x.CompareTo(y) > 0;

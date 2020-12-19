@@ -188,9 +188,7 @@ namespace clojure.lang
             if (ReferenceEquals(this,obj))
                 return true;
 
-            Symbol sym = obj as Symbol;
-
-            if (ReferenceEquals(sym,null))
+            if (!(obj is Symbol sym))
                 return false;
 
             return Util.equals(_ns, sym._ns) && _name.Equals(sym._name);
@@ -299,9 +297,8 @@ namespace clojure.lang
         /// <returns>neg,zero,pos semantics.</returns>
         public int CompareTo(object obj)
         {
-            Symbol s = obj as Symbol;
-            if ( ReferenceEquals(s,null) )
-                throw new ArgumentException("Must compare to non-null Symbol","obj");
+            if (!(obj is Symbol s))
+                throw new ArgumentException("Must compare to non-null Symbol", "obj");
 
             if (Equals(s))
                 return 0;
@@ -327,7 +324,7 @@ namespace clojure.lang
             if (ReferenceEquals(x, y))
                 return true;
 
-            if (((object)x == null) || ((object)y == null))
+            if ((x is null) || (y is null))
                 return false;
 
             return x.CompareTo(y) == 0;
@@ -338,7 +335,7 @@ namespace clojure.lang
             if (ReferenceEquals(x,y))
                 return false;
 
-            if (((object)x == null) || ((object)y == null))
+            if ((x is null) || (y is null))
                 return true;
 
             return x.CompareTo(y) != 0;
@@ -349,7 +346,7 @@ namespace clojure.lang
             if (ReferenceEquals(x, y))
                 return false; 
             
-            if (ReferenceEquals(x, null))
+            if (x is null)
                 throw new ArgumentNullException("x");
 
             return x.CompareTo(y) < 0;
@@ -360,7 +357,7 @@ namespace clojure.lang
             if (ReferenceEquals(x, y))
                 return false;
 
-            if (ReferenceEquals(x, null))
+            if (x is null)
                 throw new ArgumentNullException("x");
 
             return x.CompareTo(y) > 0;

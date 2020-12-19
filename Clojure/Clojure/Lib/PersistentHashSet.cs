@@ -32,7 +32,6 @@ namespace clojure.lang
         /// <summary>
         /// An empty <see cref="PersistentHashSet">PersistentHashSet</see>.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static readonly PersistentHashSet EMPTY = new PersistentHashSet(null, PersistentHashMap.EMPTY);
 
         #endregion

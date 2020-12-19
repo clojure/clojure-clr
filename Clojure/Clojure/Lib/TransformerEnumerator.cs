@@ -38,7 +38,7 @@ namespace clojure.lang
 
         private class TransformHelper : AFn
         {
-            Action<Object> _f;
+            readonly Action<Object> _f;
 
             public TransformHelper(Action<Object> f)
             {
@@ -125,7 +125,7 @@ namespace clojure.lang
                     }
                     else if (_sourceEnum.MoveNext())
                     {
-                        Object iter = null;
+                        object iter;
                         if (_multi)
                             iter = _xf.applyTo(RT.cons(null, _sourceEnum.Current));
                         else
@@ -167,7 +167,6 @@ namespace clojure.lang
             return Step();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         public void Reset()
         {
             throw new NotImplementedException();
@@ -286,8 +285,7 @@ namespace clojure.lang
 
             public Object Remove()
             {
-                object val;
-                if (_vals.TryDequeue(out val))
+                if (_vals.TryDequeue(out object val))
                     return val;
                 return null;
             }

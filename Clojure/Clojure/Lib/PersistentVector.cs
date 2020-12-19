@@ -107,7 +107,7 @@ namespace clojure.lang
             }
         }
 
-        static IFn _transientVectorConj = new TransientVectorConjer();
+        static readonly IFn _transientVectorConj = new TransientVectorConjer();
 
         #endregion
 
@@ -192,8 +192,7 @@ namespace clojure.lang
         static public PersistentVector create1(IEnumerable items)
         {
             // optimize common case
-            IList ilist = items as IList;
-            if (ilist != null)
+            if (items is IList ilist)
             {
                 int size = ilist.Count;
                 if (size <= 32)
@@ -363,7 +362,6 @@ namespace clojure.lang
         /// <returns>A new (immutable) vector with the objected added at the end.</returns>
         /// <remarks>Overrides <c>cons</c> in <see cref="IPersistentCollection">IPersistentCollection</see> to specialize the return value.</remarks>
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public override IPersistentVector cons(object o)
         {
             //if (_tail.Length < 32)
@@ -438,7 +436,6 @@ namespace clojure.lang
         /// Gets the number of items in the collection.
         /// </summary>
         /// <returns>The number of items in the collection.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public override int count()
         {
             return _cnt;
@@ -657,7 +654,6 @@ namespace clojure.lang
 
             #region Counted members
 
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
             public override int count()
             {
                 return _vec._cnt - (_i + _offset);
@@ -1041,7 +1037,7 @@ namespace clojure.lang
                 init = ArrayFor(0)[0];
             else
                 return f.invoke();
-            int step = 0;
+            int step;
             for (int i = 0; i < _cnt; i += step)
             {
                 Object[] array = ArrayFor(i);
@@ -1058,7 +1054,7 @@ namespace clojure.lang
 
         public object reduce(IFn f, object start)
         {
-            int step = 0;
+            int step;
             for (int i = 0; i < _cnt; i += step)
             {
                 Object[] array = ArrayFor(i);
@@ -1073,11 +1069,9 @@ namespace clojure.lang
             return start;
         }
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object kvreduce(IFn f, object init)
         {
-            int step = 0;
+            int step;
             for (int i = 0; i < _cnt; i += step)
             {
                 object[] array = ArrayFor(i);

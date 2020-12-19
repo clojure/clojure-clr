@@ -34,15 +34,13 @@ namespace clojure.lang
             if (o == null)
                 return 0;
 
-            IHashEq ihe = o as IHashEq;
-            if (ihe != null)
+            if (o is IHashEq ihe)
                 return dohasheq(ihe);
 
             if (Util.IsNumeric(o))
                 return Numbers.hasheq(o);
 
-            String s = o as string;
-            if (s != null)
+            if (o is string s)
                 return Murmur3.HashInt(s.GetHashCode());
 
             return o.GetHashCode();
@@ -81,15 +79,15 @@ namespace clojure.lang
 
         public delegate bool EquivPred(object k1, object k2);
 
-        static EquivPred _equivNull = (k1, k2) => { return k2 == null; };
-        static EquivPred _equivEquals = (k1, k2) => { return k1.Equals(k2); };
-        static EquivPred _equivNumber = (k1, k2) =>
+        static readonly EquivPred _equivNull = (k1, k2) => { return k2 == null; };
+        static readonly EquivPred _equivEquals = (k1, k2) => { return k1.Equals(k2); };
+        static readonly EquivPred _equivNumber = (k1, k2) =>
         {
             if (IsNumeric(k2))
                 return Numbers.equal(k1, k2);
             return false;
         };
-        static EquivPred _equivColl = (k1, k2) =>
+        static readonly EquivPred _equivColl = (k1, k2) =>
             {
                 if (k1 is IPersistentCollection || k2 is IPersistentCollection)
                     return pcequiv(k1, k2);
@@ -181,9 +179,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static bool pcequiv(object k1, object k2)
         {
-            IPersistentCollection ipc1 = k1 as IPersistentCollection;
-
-            if (ipc1 != null)
+            if (k1 is IPersistentCollection ipc1)
                 return ipc1.equiv(k2);
             return ((IPersistentCollection)k2).equiv(k1);
         }

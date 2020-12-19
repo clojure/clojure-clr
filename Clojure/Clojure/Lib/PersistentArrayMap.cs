@@ -685,7 +685,6 @@ namespace clojure.lang
 
         #region kvreduce
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public object kvreduce(IFn f, object init)
         {
             for (int i = 0; i < _array.Length; i += 2)
