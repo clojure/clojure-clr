@@ -1,15 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="clojure.data.generators" Version="1.0.1" />
-    <PackageReference Include="clojure.test.check" Version="1.0.0.1" />
-    <PackageReference Include="clojure.test.generative" Version="1.0.0" />
-    <PackageReference Include="clojure.tools.namespace" Version="1.0.0.3" />
+    <PackageReference Include="clojure.test.check" Version="1.1.0" />
+    <PackageReference Include="clojure.test.generative" Version="1.0.1" />
+    <PackageReference Include="clojure.tools.namespace" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
