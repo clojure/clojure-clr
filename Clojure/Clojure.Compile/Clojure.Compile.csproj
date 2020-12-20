@@ -13,7 +13,7 @@
   <ItemGroup>
     <PackageReference Include="clojure.core.specs.alpha" Version="0.2.45" />
     <PackageReference Include="clojure.spec.alpha" Version="0.1.187" />
-    <PackageReference Include="DynamicLanguageRuntime" Version="1.2.3" />
+    <PackageReference Include="DynamicLanguageRuntime" Version="1.3.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition =" '$(TargetFramework)' == 'net461'">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(TargetFramework)' == 'net461'">
     <Exec Command="$(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect  clojure.edn clojure.datafy" WorkingDirectory="$(OutDir)" />
     <Exec Command="xcopy $(ProjectDir)$(OutDir)clojure*.dll $(SolutionDir)Clojure.Main\$(OutDir)  /i /s /e /y" />
   </Target>
