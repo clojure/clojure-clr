@@ -18,7 +18,7 @@
 (defn root-cause
   "Returns the last 'cause' Throwable in a chain of Throwables."
   {:added "1.1"} 
-  [tr]
+  [^Exception tr]
   (if-let [cause (.InnerException tr)]                              ;;; .getCause
     (recur cause)
     tr))
@@ -26,7 +26,7 @@
 (defn print-trace-element
   "Prints a Clojure-oriented view of one element in a stack trace."
   {:added "1.1"} 
-  [e]                   ;;; in CLR, e will be a StackFrame
+  [^System.Diagnostics.StackFrame e]                   ;;; in CLR, e will be a StackFrame
   (let [class (or (when-let [m (.. e  (GetMethod))]
                     (when-let [t (.ReflectedType m)]
                       (.FullName t)))
