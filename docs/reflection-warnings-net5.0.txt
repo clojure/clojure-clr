@@ -1,0 +1,59 @@
+
+
+D:\work\clr.test.check>..\lein.bat clr test
+Running ClojureCLR tests
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\stacktrace.clj:48:44 - reference to field/property Message can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\stacktrace.clj:81:24 - reference to field/property InnerException can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:351:124 - reference to field/property GetType can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:351:113 - reference to field/property ToString can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:600:46 - reference to field/property Symbol on clojure.lang.Keyword can't be resolved.
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:1372:10 - call to static method unsignedShiftRight on clojure.lang.Numbers can't be resolved (argument types: unknown, unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:1801:3 - call to method removeMethod can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:1809:4 - call to method preferMethod can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:2475:5 - reference to field/property getMinHistory on clojure.lang.Ref can't be resolved.
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:2484:5 - reference to field/property getMaxHistory on clojure.lang.Ref can't be resolved.
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3659:16 - call to static method Create on clojure.lang.BigDecimal can't be resolved (argument types: unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3919:69 - call to method GetValue can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3921:17 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3930:5 - call to method SetValue can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3933:17 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3946:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3951:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3956:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3961:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3966:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3971:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3976:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3981:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:3997:15 - call to static method CreateInstance on System.Array can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:4000:12 - call to static method aset on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32, unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:4014:12 - call to static method aset on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32, System.Object[]).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:4196:41 - reference to field/property ns can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:4197:35 - reference to field/property isPublic can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:4788:24 - call to clojure.lang.ExceptionInfo ctor can't be resolved.
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core.clj:5107:12 - call to method compare on System.Collections.IComparer can't be resolved (no such method).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core_clr.clj:57:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core_clr.clj:62:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core_clr.clj:67:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core_clr.clj:72:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core_clr.clj:77:2 - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, System.Int32).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core_clr.clj:123:5 - call to static method Parse on System.Enum can't be resolved (argument types: unknown, unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core_proxy.clj:55:13 - call to method ToString can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\genclass.clj:25:26 - reference to field/property ParameterType can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\genclass.clj:25:26 - reference to field/property ParameterType can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core_deftype.clj:675:38 - reference to field/property sym can't be resolved (target class is unknown).
+Reflection warning, d:\work\clojure-clr\Clojure\Clojure.Main\bin\Debug\net5.0\clojure\core_deftype.clj:675:63 - reference to field/property sym can't be resolved (target class is unknown).
+Reflection warning, d:true
+
+Testing clojure.test.check.random-test
+{:result true, :num-tests 100, :seed 986808218, :time-elapsed-ms 32, :test-var "determinism-spec"}
+{:result true, :num-tests 100, :seed 986808265, :time-elapsed-ms 63, :test-var "different-states-spec"}
+{:result true, :num-tests 40, :seed 986808328, :time-elapsed-ms 0, :test-var "split-n-spec"}
+
+Testing clojure.test.check.test-specs
+
+Ran 3 tests containing 3 assertions.
+0 failures, 0 errors.
+{:test 3, :pass 3, :fail 0, :error 0, :type :summary}
+
+D:\work\clr.test.check>

@@ -44,7 +44,7 @@
   "Prints the class and message of a Throwable. Prints the ex-data map
   if present."
   {:added "1.1"} 
-  [tr]
+  [^Exception tr]
   (printf "%s: %s" (.FullName (class tr)) (.Message tr))      ;;; .getName .getMessage
   (when-let [info (ex-data tr)]
     (newline)
@@ -75,8 +75,8 @@
 (defn print-cause-trace
   "Like print-stack-trace but prints chained exceptions (causes)."
   {:added "1.1"} 
-  ([tr] (print-cause-trace tr nil))
-  ([tr n]
+  ([^Exception tr] (print-cause-trace tr nil))
+  ([^Exception tr n]
      (print-stack-trace tr n)
      (when-let [cause (.InnerException tr)]                              ;; (.getTrace tr)]
        (print "Caused by: " )
