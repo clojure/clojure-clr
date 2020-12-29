@@ -135,7 +135,7 @@
     <SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'net461'"
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns}" />
-	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'netcoreapp3.1'"
+	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net461'"
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.attributes clojure.test-clojure.compilation clojure.test-clojure.genclass}" />						
     <Exec Command="$(clji) run_test.clj"
