@@ -14,6 +14,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clojure.Tests", "Clojure.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Csharp.Tests", "Csharp.Tests\Csharp.Tests.csproj", "{61481CDA-14FA-4153-82AB-BFA56658232C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clojure.Main461", "Clojure.Main461\Clojure.Main461.csproj", "{1A87935F-20E0-4C15-A09B-B8A7B5110019}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{61481CDA-14FA-4153-82AB-BFA56658232C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61481CDA-14FA-4153-82AB-BFA56658232C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61481CDA-14FA-4153-82AB-BFA56658232C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A87935F-20E0-4C15-A09B-B8A7B5110019}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A87935F-20E0-4C15-A09B-B8A7B5110019}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A87935F-20E0-4C15-A09B-B8A7B5110019}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A87935F-20E0-4C15-A09B-B8A7B5110019}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

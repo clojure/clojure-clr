@@ -2,8 +2,9 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp3.1;net461;net5.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
     <StartupObject>Clojure.CljMain</StartupObject>
+	 <PackAsTool>true</PackAsTool>
   </PropertyGroup>
 
   <ItemGroup>
