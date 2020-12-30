@@ -7,6 +7,11 @@
 	 <PackAsTool>true</PackAsTool>
   </PropertyGroup>
 
+	<PropertyGroup>
+		<Title>ClojureCLR-REPL</Title>
+		<Description>Standard REPL for ClojureCLR.</Description>
+	</PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="clojure.core.specs.alpha" Version="0.2.45" />
     <PackageReference Include="clojure.spec.alpha" Version="0.1.187" />

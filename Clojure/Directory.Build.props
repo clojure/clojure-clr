@@ -22,6 +22,7 @@
     <AssemblyVersion>$(MajorVersion).$(MinorVersion).$(MicroVersion).$(AssemblyRevision)</AssemblyVersion>
     <FileVersion>$(MajorVersion).$(MinorVersion).$(MicroVersion).$(AssemblyFileRevision)</FileVersion>
     <InformationalVersion>$(MSBuildProjectName) $(MajorVersion).$(MinorVersion).$(MicroVersion) $(ReleaseLevel) $(ReleaseSerial)</InformationalVersion>
+	<PackageLicenseExpression>EPL-1.0</PackageLicenseExpression>
 
     <!-- DLR version has these. Do we need/care?  -->
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>

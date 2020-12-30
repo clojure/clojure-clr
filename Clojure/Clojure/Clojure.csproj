@@ -1,25 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
-    <NeutralLanguage></NeutralLanguage>
-    <RootNamespace>clojure.lang</RootNamespace>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.1;net461</TargetFrameworks>
+		<NeutralLanguage></NeutralLanguage>
+		<RootNamespace>clojure.lang</RootNamespace>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="clojure.core.specs.alpha" Version="0.2.45" />
-    <PackageReference Include="clojure.spec.alpha" Version="0.1.187" />
-    <PackageReference Include="DynamicLanguageRuntime" Version="1.3.0" />
-  </ItemGroup>
+	<PropertyGroup>
+		<Title>ClojureCLR</Title>
+		<Description>A port of Clojure to the CLR.</Description>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="clojure.core.specs.alpha" Version="0.2.45" />
+		<PackageReference Include="clojure.spec.alpha" Version="0.1.187" />
+		<PackageReference Include="DynamicLanguageRuntime" Version="1.3.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</EmbeddedResource>
+	</ItemGroup>
 
 </Project>
