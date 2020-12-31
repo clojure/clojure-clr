@@ -10,6 +10,7 @@
 
 
   <Import Project="$(BuildSysDir)\Tasks.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)\CurrentVersion.props" />
   
   
   <PropertyGroup>
@@ -45,7 +46,10 @@
 	<ClojureSourceBinDir>$(RootDir)Clojure.Source\bin\$(Configuration)\$(TestLibraryFramework)</ClojureSourceBinDir>
 	<ClojureTestsBinDir>$(RootDir)Clojure.Tests\bin\$(Configuration)\$(TestLibraryFramework)</ClojureTestsBinDir>
 	
-	<StageDir>$(RootDir)Stage\</StageDir>
+	<StageDir>$(RootDir)Stage</StageDir>
+
+    <ZipVersion Condition=" '$(VersionSuffix)' == '' ">$(MajorVersion).$(MinorVersion).$(PatchVersion))</ZipVersion>
+    <ZipVersion Condition=" '$(VersionSuffix)' != '' ">$(MajorVersion).$(MinorVersion).$(PatchVersion)-$(VersionSuffix)</ZipVersion>
 	
   </PropertyGroup>
 
@@ -74,6 +78,11 @@
 	<Message Text="StageDir = $(StageDir)" />
 	<Message Text="ClojureCLRBuildDir = $(ClojureCLRBuildDir)" />
 	<Message Text="PublicKey = $(PublicKey)" />
+	<Message Text="MajorVersion = $(MajorVersion)" />
+	<Message Text="MinorVersion = $(MinorVersion)" />
+	<Message Text="PatchVersion = $(PatchVersion)" />
+	<Message Text="ZipVersion = $(ZipVersion)" />
+	
   </Target>
  
    <PropertyGroup>
@@ -160,6 +169,52 @@
     <Exec Command="mono $(clji) run_test_generative.clj" WorkingDirectory="$(TestDir)"  Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
 
+  <Target Name="CreateStageDir">
+     <MakeDir Directories="$(StageDir)"/>
+  </Target>
+
+  <Target Name="PackAll" DependsOnTargets="Build;CreateStageDir">
+    <Exec Command="dotnet pack" WorkingDirectory="$(RootDir)\Clojure"/>
+	<Exec Command="dotnet pack" WorkingDirectory="$(Rootdir)\Clojure.Main"/>
+	
+	<ItemGroup>
+		<ClojureAsset Include="$(RootDir)Clojure\bin\$(Configuration)\*.nupkg" />
+		<ClojureMainAsset Include="$(RootDir)Clojure.Main\bin\$(Configuration)\*.nupkg" />
+	</ItemGroup>
+	<Copy SkipUnchangedFiles="true"
+		  SourceFiles="@(ClojureAsset)"
+		  DestinationFolder="$(StageDir)\%(RecursiveDir)" />
+	<Copy SkipUnchangedFiles="true"
+		  SourceFiles="@(ClojureMainAsset)"
+		  DestinationFolder="$(StageDir)\%(RecursiveDir)" />		  
+  </Target>
+  
+
+  
+  <Target Name="ZipAll" DependsOnTargets="PackAll">
+   
+    <ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\netcoreapp3.1\publish"
+	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-core3.1.zip"
+				  Overwrite="true"/>
+	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net5.0\publish"
+	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net5.0.zip"
+				  Overwrite="true"/>	
+				  
+	<ItemGroup>
+		<ClojureCompileAssets Include="$(RootDir)Clojure.Compile\bin\$(Configuration)\net461\Clojure.Compile.*" />
+		<ClojureMain461Assets Include="$(RootDir)Clojure.Main461\bin\$(Configuration)\net461\**\*" />
+	</ItemGroup>	
+	<Copy SkipUnchangedFiles="true"
+		  SourceFiles="@(ClojureMain461Assets)"
+		  DestinationFolder="$(StageDir)\net461\%(RecursiveDir)" />	
+	<Copy SkipUnchangedFiles="true"
+		  SourceFiles="@(ClojureCompileAssets)"
+		  DestinationFolder="$(StageDir)\net461\%(RecursiveDir)" />			  
+	  
+	<ZipDirectory SourceDirectory="$(StageDir)\net461"
+	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net4.6.1.zip"
+				  Overwrite="true"/>
+  </Target>				  
 
   <!-- $$$$$$$$$$$$$$$$$$$$$$$$$$ -->
 	
