@@ -10,20 +10,17 @@
   <PropertyGroup>
 
     <ClojureCLRBuildDir>$(MSBuildThisFileDirectory)\Build</ClojureCLRBuildDir>
-
-    <AssemblyFileRevision Condition="'$(ReleaseLevel)' == 'alpha'">000$(ReleaseSerial)</AssemblyFileRevision>
-    <AssemblyFileRevision Condition="'$(ReleaseLevel)' == 'beta'">00$(ReleaseSerial)0</AssemblyFileRevision>
-    <AssemblyFileRevision Condition="'$(ReleaseLevel)' == 'candidate'">0$(ReleaseSerial)00</AssemblyFileRevision>
-    <AssemblyFileRevision Condition="'$(ReleaseLevel)' == 'final'">1000</AssemblyFileRevision>
   
     <Product>ClojureCLR</Product>
     <Company>ClojureCLR Open Source Team</Company>
     <Copyright>© Rich Hickey</Copyright>
-    <AssemblyVersion>$(MajorVersion).$(MinorVersion).$(MicroVersion).$(AssemblyRevision)</AssemblyVersion>
-    <FileVersion>$(MajorVersion).$(MinorVersion).$(MicroVersion).$(AssemblyFileRevision)</FileVersion>
-    <InformationalVersion>$(MSBuildProjectName) $(MajorVersion).$(MinorVersion).$(MicroVersion) $(ReleaseLevel) $(ReleaseSerial)</InformationalVersion>
 	<PackageLicenseExpression>EPL-1.0</PackageLicenseExpression>
+	
+	<VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
 
+    <InformationalVersion Condition=" '$(VersionSuffix)' == '' ">$(MSBuildProjectName) $(VersionPrefix)</InformationalVersion>
+    <InformationalVersion Condition=" '$(VersionSuffix)' != '' ">$(MSBuildProjectName) $(VersionPrefix)-$(VersionSuffix)</InformationalVersion>
+	
     <!-- DLR version has these. Do we need/care?  -->
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <!-- Don't include SourceRevisionId in InformationalVersion (SourceLink) -->

@@ -3,9 +3,7 @@
   <PropertyGroup>
     <MajorVersion>1</MajorVersion>
     <MinorVersion>10</MinorVersion>
-    <MicroVersion>0</MicroVersion>
-    <ReleaseSerial>0</ReleaseSerial>
-    <ReleaseLevel>alpha</ReleaseLevel>
-    <AssemblyRevision>0</AssemblyRevision>
+    <PatchVersion>0</PatchVersion>
+    <VersionSuffix>alpha1</VersionSuffix>
   </PropertyGroup>
 </Project>
