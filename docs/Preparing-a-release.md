@@ -5,37 +5,50 @@
 ## Preparation
 
 * Modify Clojure\Clojure\Bootstrap\version.properties to desired release version
-* Modify Clojure.nuspec to desired release version
-* Make sure CLOJURE_SNK is set to the .snk file to use
-** > set CLOJURE_SNK=d:\work\ClojureClr.snk
-* Build and test all of {Release, Debug} X {3.5, 4.0}
+* Set the version info in Clojure\CurrentVersion.props
+* Build and test.  From the Clojure directory with X in {net461, netcoreapp3.1, net5.0} (for now, this will be Debug builds only):
+** Clojure>  msbuild build.proj -t:Test -p:TestTargetFramework=X 
+** Clojure>  msbuild build.proj -t:TestGet -p:TestTargetFramework=X
+** Clojure>  msbuild build.proj -t:ZipAll 
+* At this point, you will the artifacts for distribution in the Clojure\Stage directory.  Something along the lines of (with version/release adjusted suitably):
+** Clojure.1.10.0-alpha1.nupkg
+** Clojure.Main.1.10.0-alpha1.nupkg
+** clojure-clr-1.10.0-alpha1-Debug-core3.1.zip
+** clojure-clr-1.10.0-alpha1-Debug-net5.0.zip
+** clojure-clr-1.10.0-alpha1-Debug-net4.6.1.zip
+* Validate these by any manner of your choosing.  I moved the zips somewhere, unzipped them, and checked that the following start up:
+** in core3.1 and net5.0:
+*** > Clojure.Main.exe          
+*** > dotnet Clojure.Main.dll
+** in net461:
+*** > Clojure.Main461.exe
+*** > Clojure.Compile.exe     (Without command-line args, will just exit after the startup delay)
+** I test the tool install via:
+*** > dotnet tool list -g                        # to see if already installed
+*** > dotnet tool uninstall clojure.main -g      # if so, do this
+*** > dotnet tool install -g -add-source . --version 1.10.0-alpha1  Clojure.Main    # version needed only if pre-release.
+
+
+## Repo
+
+In git:
+
 * Commit the changed version  (Prepare release ...)
 * Tag this commit.
-* Push the change and the tag to github.
+* Push the change and the tag to the github repo.
 
-## For NuGet
+## Nuget distribution
 
-* Make sure ILMERGE is on the PATH
-* Build the ILMERGEd dlls
-** > msbuild build.proj /target:ilmerge /p:Configuration="Release 4.0" /p:Platform="Any CPU" /p:DirectLinking="true"
-** > msbuild build.proj /target:ilmerge /p:Configuration="Release 3.5" /p:Platform="Any CPU" /p:DirectLinking="true"
-* Build the nuget package
-** > nuget pack Clojure.nuspec
-* Upload the nuget package
-** > nuget push whatever.nupkg -Source nuget.org
+** Clojure\Stage> dotnet nuget push Clojure.Main<whatever>.nupkg -Source nuget.org
+** Clojure\Stage> dotnet nuget push Clojure<whatever>.nupkg  -Source nuget.org
 
-## For SourceForge
 
-* Build the distributions:
-** > msbuild build.proj /target:Dist /p:Configuration="Release 4.0" /p:Platform="Any CPU" /p:DirectLinking="true"
-** > msbuild build.proj /target:Dist /p:Configuration="Release 3.5" /p:Platform="Any CPU" /p:DirectLinking="true"
-** > msbuild build.proj /target:Dist /p:Configuration="Debug 4.0" /p:Platform="Any CPU" /p:DirectLinking="true"
-** > msbuild build.proj /target:Dist /p:Configuration="Debug 3.5" /p:Platform="Any CPU" /p:DirectLinking="true"
-* Zip each of the four directories into separate zips. Naming is like "clojure-clr-1.6.0-Release-4.0.zip"
+## SourceForge distribution
+
 * Upload to SourceForge
 
 # Preparing for next release
 
-* Modify Clojure\Clojure\Bootstrap\version.properties to desired development version  (master-SNAPSHOT)
-* If next iteration is a new point release, modify the version in the AssemblyInfo of all projects
+* Modify Clojure\Clojure\Bootstrap\version.properties to desired development version  ( usually master-SNAPSHOT)
+* Set the version info in Clojure\CurrentVersion.props to match.
 * Commit the change (Prepare for next development iteration ...)

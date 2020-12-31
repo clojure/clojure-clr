@@ -1,0 +1,86 @@
+Subject: [Ann]: Alpha release of ClojureCLR 1.10
+
+To close out 2020 on what I hope is a small note of joy for a few, I am happy to announce an alpha release of version 1.10 for ClojureCLR.
+
+
+
+What: ClojureCLR, Version 1.10.0, alpha1
+Platforms:  
+   net461
+   netcoreapp3.1
+   net5.0
+Status: 
+   feature complete match to ClojureJVM 1.10
+   this release is alpha to test deployment
+   netcoreapp3.1 and net5.0 do not support saving assemblies, so there is no AOT-compilation.  As a result, startup times are slower on these platforms and some features, such as genclass, do not work. But that is about it.
+   
+
+The code itself seems solid.  However, distribution and modes of running have changed, so if some hardy individuals would like to do a little testing, I'd be grateful.
+   
+Because of the distinctions between net461 and the other two frameworks, there are some differences in how to get things going.
+
+Getting a REPL for netcoreapp3.1 and net5.0:
+--------------------------------------------
+
+Two possibilities here: a zip from sourceforge or installing a dotnet tool.
+
+SourceForge:
+From https://sourceforge.net/projects/clojureclr/, download one of 
+   clojure-clr-1.10.0-alpha1-Debug-netcoreapp3.1.zip 
+   clojure-clr-1.10.0-alpha1-Debug-net5.0.zip 
+
+Unzip it somewhere, put that place in your path if you like.  You can the REPL via either one of these
+  Clojure.Main.exe                    -- this is a Windows-only executable  
+  dotnet Clojure.Main.dll             -- should work in all platforms
+   
+dotnet tool:
+There is a nuget package of Clojure.Main as an installable tool.
+Tools can be installed globally or locally.  I'll discuss global installation here.
+
+  dotnet tool install --global --version 1.10.0-alpha1 Clojure.Main
+
+(The --version is needed only because this is pre-release.)
+
+At this point you can invoke the REPL by
+
+   Clojure.Main
+
+See https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools-how-to-use and  https://docs.microsoft.com/en-us/dotnet/core/tools/local-tools-how-to-use for more details on installing, updating, local vs global, etc. for dotnet tools.
+
+Note that there is no Clojure.Compile.exe for these frameworks.
+
+
+Getting a REPL for net461:
+--------------------------
+
+From https://sourceforge.net/projects/clojureclr/, download clojure-clr-1.10.0-alpha1-Debug-net4.6.1.zip.  Unzip it somewhere, put that in your path if you like.  You can run either of
+  Clojure.Main461.exe  
+  Clojure.Compile.exe              -- compile the clj files on the command line.
+  
+
+Project dependency only:
+------------------------
+
+If you just want Clojure.dll and supporting files, say as dependency for C# project, you can just download the nuget package for Clojure. (https://www.nuget.org/packages/Clojure/).   Clojure.dll and related are targeted for netstandard2.0 and netstandard2.1 and so should run on .Net Framework 4.6.1 and above, .Net Core 3.1, and .Net 5.0  (Remember to search for pre-release versions in order to pick up this alpha release).
+
+Unlike past distributions, this package no longer has Clojure.Main.exe and Clojure.Compile.exe in a tools subdirectory that you have to move around. See above.
+
+
+Next steps
+----------
+
+I hope to proceed quickly to a final release.  While waiting for feedback on these deployment options, I will be working to bring the code up to the about-to-be-released clojure-1.10.2.  And then a short beta release for testing.  Updating the wiki pages. Then 1.10 will be done.
+
+With 1.10 out of the way, I'd like to turn attention to other critical tasks to make ClojureCLR better.  Among them:
+
+(a) a rewrite of the compiler to do a better job handling CLR-specific constructs, such as value types and generics.
+(b) reproduce the functionality of CLI and deps.edn, including figuring out project structure, artifact management, and related items.
+    I'm still using lein-clr to handle the libraries that support ClojureCLR.  My heart aches every time I go to a new maching and have to download Java and ClojureJVM just to do my work.  Independence!
+(c) VS Code support, anyone?
+(d) Suggestions welcomed....
+
+
+-David
+
+
+
