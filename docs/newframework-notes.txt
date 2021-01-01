@@ -43,7 +43,7 @@ Tools can be installed globally or locally.  I'll discuss global installation he
 
 At this point you can invoke the REPL by
 
-   Clojure.Main
+   clojure.main
 
 See https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools-how-to-use and  https://docs.microsoft.com/en-us/dotnet/core/tools/local-tools-how-to-use for more details on installing, updating, local vs global, etc. for dotnet tools.
 

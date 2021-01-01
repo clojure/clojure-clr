@@ -39,8 +39,8 @@ In git:
 
 ## Nuget distribution
 
-** Clojure\Stage> dotnet nuget push Clojure.Main<whatever>.nupkg -Source nuget.org
-** Clojure\Stage> dotnet nuget push Clojure<whatever>.nupkg  -Source nuget.org
+** Clojure\Stage> dotnet nuget push Clojure.Main<whatever>.nupkg -s nuget.org
+** Clojure\Stage> dotnet nuget push Clojure<whatever>.nupkg  -s nuget.org
 
 
 ## SourceForge distribution
