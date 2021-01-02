@@ -4810,7 +4810,8 @@ Note that read can execute code (controlled by *read-eval*),
 (defn ex-cause
   "Returns the cause of ex if ex is a Throwable.
   Otherwise returns nil."
-  {:added "1.10"}
+  {:tag Exception                                                 ;;;Throwable
+   :added "1.10"}
   [ex]
   (when (instance? Exception ex)                                   ;;; Throwable
     (.InnerException ^Exception ex)))                              ;;; .getCause Throwable
