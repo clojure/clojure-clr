@@ -630,7 +630,7 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
                      (catch Exception _)))] ;; ignore, fallback to stderr                                                  ;;; Throwable
     (binding [*out* *err*]
       (if err-path
-        (println (str message "Full report at: " err-path))
+        (println (str message (Environment/NewLine) "Full report at: " (Environment/NewLine) err-path))
         (println (str report-str (Environment/NewLine) message))))                                                         ;;; System/lineSeparator
     (when exit
       (Environment/Exit exit))))                                                                                           ;;; System/exit
