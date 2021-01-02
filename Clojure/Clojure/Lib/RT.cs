@@ -19,6 +19,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -411,7 +412,7 @@ namespace clojure.lang
             //    arglistskw, list(vector(Symbol.intern("x"), Symbol.intern("y")))));
 
             if ( RuntimeBootstrapFlag._doRTBootstrap )
-                DoInit();
+                load("clojure/core");
         }
 
         public static void LoadSpecCode()
@@ -432,15 +433,18 @@ namespace clojure.lang
             }
         }
 
+        public static void Init()
+        {
+            DoInit();
+        }
+
+        private static bool INIT = false; // init guard
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
         static void DoInit()
         {
-            // Load clojure.core
+            if (INIT) { return; } else { INIT = true; }
 
-            //Stopwatch sw = new Stopwatch();
-            //sw.Start();
-            load("clojure/core");
-            //sw.Stop();
-            //Console.WriteLine("Initial clojure/core load: {0} milliseconds.", sw.ElapsedMilliseconds);
 
             // load spec
             {

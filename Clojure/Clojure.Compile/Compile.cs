@@ -28,6 +28,8 @@ namespace BootstrapCompile
 
         static void Main(string[] args)
         {
+            RT.Init();
+
             TextWriter outTW = (TextWriter)RT.OutVar.deref();
             TextWriter errTW = RT.errPrintWriter();
 

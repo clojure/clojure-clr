@@ -96,6 +96,8 @@ namespace clojure.clr.api
 
         static Clojure()
         {
+            RT.Init();
+
             Symbol edn = (Symbol)var("clojure.core", "symbol").invoke("clojure.edn");
             var("clojure.core", "require").invoke(edn);
         }
