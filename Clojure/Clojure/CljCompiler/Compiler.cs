@@ -767,6 +767,8 @@ namespace clojure.lang
                     if (!e.HasClrType)
                         return null;
                     Type t = e.ClrType;
+                    if (t == null)
+                        return null;
                     if (match == null)
                         match = t;
                     else if (match != t)
