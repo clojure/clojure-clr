@@ -15,10 +15,12 @@
        :author "Stuart Sierra"}
   clojure.stacktrace)
 
+(set! *warn-on-reflection* true)
+
 (defn root-cause
   "Returns the last 'cause' Throwable in a chain of Throwables."
   {:added "1.1"} 
-  [^Exception tr]
+  [^Exception tr]                                                   ;;; Throwable
   (if-let [cause (.InnerException tr)]                              ;;; .getCause
     (recur cause)
     tr))
@@ -26,7 +28,7 @@
 (defn print-trace-element
   "Prints a Clojure-oriented view of one element in a stack trace."
   {:added "1.1"} 
-  [^System.Diagnostics.StackFrame e]                   ;;; in CLR, e will be a StackFrame
+  [^System.Diagnostics.StackFrame e]                                ;;; StackTraceElement
   (let [class (or (when-let [m (.. e  (GetMethod))]
                     (when-let [t (.ReflectedType m)]
                       (.FullName t)))
@@ -44,7 +46,7 @@
   "Prints the class and message of a Throwable. Prints the ex-data map
   if present."
   {:added "1.1"} 
-  [^Exception tr]
+  [^Exception tr]                                             ;;; Throwable
   (printf "%s: %s" (.FullName (class tr)) (.Message tr))      ;;; .getName .getMessage
   (when-let [info (ex-data tr)]
     (newline)
@@ -76,9 +78,9 @@
   "Like print-stack-trace but prints chained exceptions (causes)."
   {:added "1.1"} 
   ([^Exception tr] (print-cause-trace tr nil))
-  ([^Exception tr n]
+  ([^Exception tr n]                                                     ;;; Throwable
      (print-stack-trace tr n)
-     (when-let [cause (.InnerException tr)]                              ;; (.getTrace tr)]
+     (when-let [cause (.InnerException tr)]                              ;;; (.getTrace tr)]
        (print "Caused by: " )
        (recur cause n))))
 
