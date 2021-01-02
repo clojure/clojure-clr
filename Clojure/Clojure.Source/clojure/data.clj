@@ -12,6 +12,8 @@
   clojure.data
   (:require [clojure.set :as set]))
 
+(set! *warn-on-reflection* true)
+
 (declare diff)
 
 (defn- atom-diff
@@ -78,9 +80,11 @@
 
 (extend Object
         Diff
-        {:diff-similar (fn [a b] ((if (.. a GetType IsArray) diff-sequential atom-diff) a b))}    ;;; (.. a getClass isArray)
+        {:diff-similar (fn [^Object a b] 
+                         ((if (.. a GetType IsArray) diff-sequential atom-diff) a b))}    ;;; (.. a getClass isArray)
         EqualityPartition
-        {:equality-partition (fn [x] (if (.. x GetType IsArray) :sequential :atom))})    ;;; (.. x getClass isArray)
+        {:equality-partition (fn [^Object x] 
+                               (if (.. x GetType IsArray) :sequential :atom))})           ;;; (.. x getClass isArray)
 
 (extend-protocol EqualityPartition
   nil
