@@ -604,36 +604,36 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
     (null-opt args (map vector (repeat "-i") inits))))
 
 (defn report-error
-  "Create and output an exception report for a Throwable to target,
-  and optionally exit.
+  "Create and output an exception report for a Throwable to target.
+
   Options:
-    :target - either :temp-file or :stderr, default to :temp-file
-    :exit - if set will System/exit with this code on err, default to 1
-  If temp file is specified but cannot be completed, falls back to stderr."
-  [^Exception t & {:keys [target exit]                                                     ;;; Throwable
-                   :or {target :temp-file, exit 1} :as opts}]
-  (let [trace (Throwable->map t)
-        triage (ex-triage trace)
-        message (ex-str triage)
-        report (array-map :clojure.main/message message
-                          :clojure.main/triage triage
-                          :clojure.main/trace trace)
-        report-str (with-out-str
-                     (binding [*print-namespace-maps* false]
-                       ((requiring-resolve 'clojure.pprint/pprint) report)))
-        err-path (when (= target :temp-file)
-                   (try
-                     (let [f (FileInfo. (Path/Join (Path/GetTempPath) (str "clojure-" (System.Guid/NewGuid) ".edn")))]     ;;; (.toFile (Files/createTempFile "clojure-" ".edn" (into-array FileAttribute [])))
-                       (with-open [w (StreamWriter. (.OpenWrite f))]                                                                       ;;; [w (BufferedWriter. (FileWriter. f))
-                         (binding [*out* w] (println report-str)))
-                       (.FullName f))                                                                                      ;;; .getAbsolutePath
-                     (catch Exception _)))] ;; ignore, fallback to stderr                                                  ;;; Throwable
-    (binding [*out* *err*]
-      (if err-path
-        (println (str message (Environment/NewLine) "Full report at: " (Environment/NewLine) err-path))
-        (println (str report-str (Environment/NewLine) message))))                                                         ;;; System/lineSeparator
-    (when exit
-      (Environment/Exit exit))))                                                                                           ;;; System/exit
+    :target - \"file\" (default), \"stderr\", \"none\"
+
+  If file is specified but cannot be written, falls back to stderr."
+  [^Exception t & {:keys [target]                                                       ;;; Throwable
+                   :or {target "file"} :as opts}]
+  (when-not (= target "none")
+    (let [trace (Throwable->map t)
+          triage (ex-triage trace)
+          message (ex-str triage)
+          report (array-map
+                   :clojure.main/message message
+                   :clojure.main/triage triage
+                   :clojure.main/trace trace)
+          report-str (with-out-str
+                       (binding [*print-namespace-maps* false]
+                         ((requiring-resolve 'clojure.pprint/pprint) report)))
+          err-path (when (= target "file")
+                     (try
+                       (let [f (FileInfo. (Path/Join (Path/GetTempPath) (str "clojure-" (System.Guid/NewGuid) ".edn")))]     ;;; (.toFile (Files/createTempFile "clojure-" ".edn" (into-array FileAttribute [])))
+                         (with-open [w (StreamWriter. (.OpenWrite f))]                                                                       ;;; [w (BufferedWriter. (FileWriter. f))
+                           (binding [*out* w] (println report-str)))
+                         (.FullName f))                                                                                      ;;; .getAbsolutePath
+                       (catch Exception _)))] ;; ignore, fallback to stderr                                                  ;;; Throwable
+      (binding [*out* *err*]
+        (if err-path
+          (println (str message (Environment/NewLine) "Full report at:" (Environment/NewLine) err-path))                     ;;; System/lineSeparator
+          (println (str report-str (Environment/NewLine) message)))))))                                                      ;;; System/lineSeparator
 
 (defn main
   "Usage: java -cp clojure.jar clojure.main [init-opt*] [main-opt] [arg*]
@@ -643,7 +643,8 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
   init options:
     -i, --init path     Load a file or resource
     -e, --eval string   Evaluate expressions in string; print non-nil values
-    --report-stderr     Print uncaught exception report to stderr
+    --report target     Report uncaught exception to \"file\" (default), \"stderr\",
+                        or \"none\", overrides System property clojure.main.report
 
   main options:
     -r, --repl          Run a repl
@@ -673,8 +674,8 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
      (loop [[opt arg & more :as args] args, inits [], flags nil]
        (cond
          ;; flag
-         (contains? #{"--report-stderr"} opt)
-         (recur (rest args) inits (merge flags {(subs opt 2) true}))
+         (contains? #{"--report"} opt)
+         (recur more inits (merge flags {(subs opt 2) arg}))
 
          ;; init opt
          (init-dispatch opt)
@@ -683,12 +684,14 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
          :main-opt
          (try
            ((main-dispatch opt) args inits)
-           (catch Exception t                                                                                  ;;; Throwable
-             (report-error t :target (if (contains? flags "report-stderr") :stderr :temp-file))))))
+           (catch Exception t                                                                                                         ;;; Throwable
+             (report-error t :target (get flags "report" (System.Environment/GetEnvironmentVariable "clojure.main.report" "file")))   ;;; System/getProperty
+             (Environment/Exit 1)))))                                                                                                 ;;; System/exit                 
      (try
        (repl-opt nil nil)
-       (catch Exception t                                                                                      ;;; Throwable
-         (report-error :target :temp-file))))
+       (catch Exception t                                                                                                             ;;; Throwable
+         (report-error t :target "file")
+         (Environment/Exit 1))))                                                                                                      ;;; System/exit
    (finally 
      (flush))))
 
