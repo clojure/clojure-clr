@@ -2114,6 +2114,7 @@ namespace clojure.lang
             public static readonly Keyword PhaseMacroExpandKeyword = Keyword.intern(null, "macroexpand");
             public static readonly Keyword PhaseCompileSyntaxCheckKeyword = Keyword.intern(null, "compile-syntax-check"); 
             public static readonly Keyword PhaseCompilationKeyword = Keyword.intern(null, "compilation");
+            public static readonly Keyword PhaseExecutionKeyword = Keyword.intern(null, "execution");
 
             public static readonly Keyword SpecProblemsKeyword = Keyword.intern("clojure.spec.alpha", "problems");
 
