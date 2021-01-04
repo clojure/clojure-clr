@@ -684,14 +684,14 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
          :main-opt
          (try
            ((main-dispatch opt) args inits)
-           (catch Exception t                                                                                                         ;;; Throwable
-             (report-error t :target (get flags "report" (System.Environment/GetEnvironmentVariable "clojure.main.report") "file"))   ;;; System/getProperty
-             (Environment/Exit 1)))))                                                                                                 ;;; System/exit                 
+           (catch Exception t                                                                                                              ;;; Throwable
+             (report-error t :target (get flags "report" (or (System.Environment/GetEnvironmentVariable "clojure.main.report") "file")))   ;;; System/getProperty
+             (Environment/Exit 1)))))                                                                                                      ;;; System/exit                 
      (try
        (repl-opt nil nil)
-       (catch Exception t                                                                                                             ;;; Throwable
+       (catch Exception t                                                                                                                  ;;; Throwable
          (report-error t :target "file")
-         (Environment/Exit 1))))                                                                                                      ;;; System/exit
+         (Environment/Exit 1))))                                                                                                           ;;; System/exit
    (finally 
      (flush))))
 
