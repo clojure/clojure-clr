@@ -95,7 +95,9 @@ namespace clojure.lang.CljCompiler.Ast
                     return NumberExpr.Parse(v);
                 else if (v is string)
                     return new StringExpr((String)v);
-                else if (v is IPersistentCollection collection && collection.count() == 0)
+                else if (v is IPersistentCollection collection
+                    && collection.count() == 0
+                    && (!(v is  IObj ov) || (ov.meta() == null)))
                     return new EmptyExpr(v);
                 else
                     return new ConstantExpr(v);
