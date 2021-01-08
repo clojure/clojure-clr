@@ -10,7 +10,8 @@
 
 (in-ns 'clojure.core)
 
-(import '(clojure.lang Murmur3))
+(import '(clojure.lang Murmur3 IHashEq Sequential Util SeqEnumerator)               ;;; SeqIterator
+        )                                               '(java.util List)
 
 (set! *warn-on-reflection* true)
 
@@ -131,7 +132,38 @@
 
   clojure.lang.IObj
   (withMeta [_ m]
-    (new VecSeq am vec anode i offset m)))
+    (new VecSeq am vec anode i offset m))
+
+Object
+  (GetHashCode [this]                                                                                   ;;; hashCode
+    (loop [hash 1
+           s (seq this)]
+      (if s
+        (let [v (first s)]
+          (if (nil? v)
+            (recur (unchecked-multiply-int 31 hash) (next s))
+            (recur (unchecked-add-int (unchecked-multiply-int 31 hash) (.GetHashCode v)) (next s))))    ;;; .hashCode
+        hash)))
+  (Equals [this other]                                                                                  ;;; equals
+    (cond (identical? this other) true
+          (or (instance? Sequential other) (instance? System.Collections.IList other))                  ;;; List
+          (loop [s this
+                 os (seq other)]
+            (if (nil? s)
+              (nil? os)
+              (if (Util/equals (first s) (first os))
+                (recur (next s) (next os))
+                false)))
+          :else false))
+
+  IHashEq
+  (hasheq [this]
+    (Murmur3/HashOrdered this))
+
+  System.Collections.IEnumerable                                                                          ;;; Iterable
+  (GetEnumerator [this]                                                                                   ;;; iterator
+    (SeqEnumerator. this)))                                                                               ;;; SeqIterator
+
 
 (defmethod print-method ::VecSeq [v w]
   ((get (methods print-method) clojure.lang.ISeq) v w))

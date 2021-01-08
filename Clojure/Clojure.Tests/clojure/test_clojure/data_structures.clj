@@ -14,7 +14,8 @@
         [clojure.test.generative :exclude (is)])
   (:require [clojure.test-clojure.generators :as cgen]
             [clojure.data.generators :as gen]
-			[clojure.string :as string]))
+            [clojure.string :as string])
+  (:import [System.Collections ICollection]))                       ;;; java.util Collection
 
 
 ;; *** Helper functions ***
@@ -1106,7 +1107,11 @@
   (defn is-same-collection [a b]
   (let [msg (format "(class a)=%s (class b)=%s a=%s b=%s"
                     (.Name (class a)) (.Name (class b)) a b)]               ;;; .getName .getName
-    (is (= (count a) (count b) (.get_Count a) (.get_Count b)) msg)          ;;; .size .size
+    (is (= (count a) (count b)) msg)
+    (when (instance? ICollection a)                                         ;;; Collection
+      (is (= (count a) (.get_Count a)) msg))                                ;;; .size 
+    (when (instance? ICollection b)                                         ;;; Collection
+      (is (= (count b) (.get_Count b)) msg))                                ;;; .size 
     (is (= a b) msg)
     (is (= b a) msg)
     (is (.Equals ^Object a b) msg)                                          ;;; .equals
@@ -1132,7 +1137,13 @@
                  (sequence (map identity) [-3 :a "7th"]) ]]
     (doseq [c1 colls1, c2 colls1]
       (is-same-collection c1 c2)))
-  (is-same-collection [-3 1 7] (vector-of :long -3 1 7)))
+  (let [long-colls [ [2 3 4]
+                     '(2 3 4)
+                     (vector-of :long 2 3 4)
+                     (seq (vector-of :long 2 3 4))
+                     (range 2 5)]]
+    (doseq [c1 long-colls, c2 long-colls]
+      (is-same-collection c1 c2))))
 
 (defn case-indendent-string-cmp [s1 s2]
   (compare (string/lower-case s1) (string/lower-case s2)))
