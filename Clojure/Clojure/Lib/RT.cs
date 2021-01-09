@@ -1136,7 +1136,8 @@ namespace clojure.lang
             {
                 if (jrem.IsUnrealizedOrFailed)
                     return notFound;
-                if (n < jrem.groupCount())
+                int groups = jrem.groupCount();
+                if (groups > 0 && n <= jrem.groupCount())
                     return jrem.group(n);
                 return notFound;
             }
