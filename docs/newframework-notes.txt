@@ -1,28 +1,27 @@
 Subject: [Ann]: Alpha release of ClojureCLR 1.10
 
-To close out 2020 on what I hope is a small note of joy for a few, I am happy to announce an alpha release of version 1.10 for ClojureCLR.
-
-
+To get 2021 off to a good start, I am pleased to announce an alpha release of version 1.10 for ClojureCLR.
 
 What: ClojureCLR, Version 1.10.0, alpha1
-Platforms:  
+Platforms supported:  
    net461
    netcoreapp3.1
    net5.0
 Status: 
    feature complete match to ClojureJVM 1.10
    this release is alpha to test deployment
-   netcoreapp3.1 and net5.0 do not support saving assemblies, so there is no AOT-compilation.  As a result, startup times are slower on these platforms and some features, such as genclass, do not work. But that is about it.
+   netcoreapp3.1 and net5.0 do not support saving assemblies, so there is no AOT-compilation.  
+       As a result, startup times are slower on these platforms and some features, such as genclass, do not work. 
    
-
 The code itself seems solid.  However, distribution and modes of running have changed, so if some hardy individuals would like to do a little testing, I'd be grateful.
    
 Because of the distinctions between net461 and the other two frameworks, there are some differences in how to get things going.
 
+
 Getting a REPL for netcoreapp3.1 and net5.0:
 --------------------------------------------
 
-Two possibilities here: a zip from sourceforge or installing a dotnet tool.
+Two possibilities here: a zip from sourceforge or installing ClojureCLR as a dotnet tool.
 
 SourceForge:
 From https://sourceforge.net/projects/clojureclr/, download one of 
@@ -55,7 +54,7 @@ Getting a REPL for net461:
 
 From https://sourceforge.net/projects/clojureclr/, download clojure-clr-1.10.0-alpha1-Debug-net4.6.1.zip.  Unzip it somewhere, put that in your path if you like.  You can run either of
   Clojure.Main461.exe  
-  Clojure.Compile.exe              -- compile the clj files on the command line.
+  Clojure.Compile.exe              -- compiles the clj files on the command line.
   
 
 Project dependency only:
