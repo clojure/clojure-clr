@@ -1,0 +1,256 @@
+abstract class AFn: IDynamicMetaObjectProvider, IFn, IFnArity
+class AFnImpl :  AFunction, Fn, IFnClosure
+abstract class AFunction : AFn, IObj, Fn, IComparer
+class AFunction.MetaWrapper : RestFn
+class Agent : ARef
+abstract class AMapEntry: APersistentVector, IMapEntry
+abstract class APersistentMap: AFn, IPersistentMap, IDictionary, IEnumerable<IMapEntry>, MapEquivalence, IDictionary<Object,Object>, IHashEq
+abstract class APersistentSet : AFn, IPersistentSet, ICollection, ICollection<Object>, IHashEq
+abstract class APersistentVector: AFn, IPersistentVector, IList, IComparable, IList<Object>, IComparable<Object>, IHashEq
+abstract class ARef : AReference, IRef
+abstract class AReference : IReference
+class ArityException : ArgumentException
+class ArrayChunk : IChunk
+static class ArrayHelper
+interface IArraySeq : IObj, ISeq, IList, IndexedSeq, IReduce
+static class ArraySeq
+class ASeq: Obj, ISeq, Sequential, IList, IList<Object>, IHashEq
+interface Associative: IPersistentCollection, ILookup
+class Atom : ARef, IAtom2
+class AtomicBoolean
+class AtomicInteger
+class AtomicLong
+class AtomicReference<T>
+abstract class ATransientMap : AFn, ITransientMap, ITransientAssociative2
+abstract class ATransientSet : AFn, ITransientSet
+class BigDecimal : IComparable, IComparable<BigDecimal>, IEquatable<BigDecimal>, IConvertible
+class BigInt : IConvertible, IHashEq
+class BigInteger: IComparable, IConvertible, IEquatable<BigInteger>
+class Box
+class ChunkBuffer : Counted
+class ChunkedCons : ASeq, IChunkedSeq
+class ClojureException : Exception
+class ClrArraySpec
+class ClrTypeSpec
+class Cons: ASeq
+class CountDownLatch
+interface Counted
+class Cycle : ASeq, IReduce, IPending
+class Delay : IDeref, IPending
+static class EdnReader
+class EnumeratorSeq : ASeq, ISerializabl
+class ExceptionInfo : Exception, IExceptionInfo
+interface Fn
+class Future : IDeref, IBlockingDeref, IPending, IDisposable
+interface IAtom
+interface IAtom2 : IAtom
+interface IBlockingDeref
+interface IChunk : Indexed
+interface IChunkedSeq : ISeq, Sequential
+interface IDeref
+interface IEditableCollection
+interface IExceptionInfo
+interface IFn
+interface IFnArity
+class Closure
+interface IFnClosure
+interface IHashEq
+interface IKeywordLookup
+interface IKVReduce
+interface ILookup
+interface ILookupSite
+interface ILookupThunk
+interface IMapEntry
+interface IMapEnumerable
+interface IMapEnumerableTyped<TK, TV>
+interface IMeta
+interface Indexed : Counted
+interface IndexedSeq : ISeq, Sequential, Counted
+interface IObj : IMeta
+interface IPending
+interface IPersistentCollection : Seqable
+interface IPersistentList: Sequential, IPersistentStack
+interface IPersistentMap:  Associative, IEnumerable<IMapEntry>, Counted
+interface IPersistentSet: IPersistentCollection, Counted
+interface IPersistentStack: IPersistentCollection
+interface IPersistentVector: Associative, Sequential, IPersistentStack, Reversible, Indexed
+interface IProxy
+interface IRecord
+interface IReduce : IReduceInit
+interface IReduceInit
+interface IRef : IDeref
+interface IReference : IMeta
+interface ISeq: IPersistentCollection
+class Iterate : ASeq, IReduce, IPending
+interface ITransientAssociative : ITransientCollection, ILookup
+interface ITransientAssociative2 : ITransientAssociative
+interface ITransientCollection
+interface ITransientMap : ITransientAssociative, Counted
+interface ITransientSet : ITransientCollection, Counted
+interface ITransientVector : ITransientAssociative, Indexed
+interface IType
+class JavaConcurrentDictionary<TKey, TValue>
+class JReMatcher
+class Keyword: AFn, Named, IComparable, ISerializable, IHashEq
+KeywordLookupSite: ILookupSite, ILookupThunk
+class LazilyPersistentVector 
+class LazySeq : Obj, ISeq, Sequential, ICollection, IList, IList<Object>, IPending, IHashEq
+static class LispReader
+class LockingTransaction
+class LongRange: ASeq, Counted, IChunkedSeq, IReduce, IEnumerable, IEnumerable<Object>
+class MapEntry: AMapEntry
+class MapEnumerator : IDictionaryEnumerator, IDisposable, IEnumerator, IEnumerator<IMapEntry>
+interface MapEquivalence
+class MethodImplCache
+class MultiFn : AFn, IDisposable
+static class Murmur3
+interface Named
+class Namespace : AReference, ISerializable
+static class Numbers
+abstract class Obj: IObj
+class PersistentArrayMap : APersistentMap, IObj, IEditableCollection, IMapEnumerable, IMapEnumerableTyped<Object,Object>, IEnumerable, IEnumerable<IMapEntry>, IKVReduce
+class PersistentHashMap : APersistentMap, IEditableCollection, IObj, IMapEnumerable, IMapEnumerableTyped<Object, Object>, IEnumerable, IEnumerable<IMapEntry>, IKVReduce
+class PersistentHashSet: APersistentSet, IObj, IEditableCollection
+class PersistentList : ASeq, IPersistentList, IReduce, IList, IList<Object>, Counted
+class PersistentQueue : Obj, IPersistentList, ICollection, ICollection<Object>, Counted, IHashEq
+class PersistentStructMap : APersistentMap, IObj, IEnumerable<IMapEntry>, IDictionary<Object, Object>
+class PersistentTreeMap : APersistentMap, IObj, Reversible, Sorted, IEnumerable<IMapEntry>, IDictionary, IKVReduce
+class PersistentTreeSet : APersistentSet, IObj, Reversible, Sorted
+class PersistentVector: APersistentVector, IObj, IEditableCollection, IEnumerable, IReduce, IKVReduce
+class Range : ASeq, IChunkedSeq, IReduce, IEnumerable, IEnumerable<object>
+class Ratio: IComparable, IConvertible
+class ReaderConditional : ILookup
+class RecordEnumerable: IEnumerable<Object>, IEnumerable
+class Reduced : IDeref
+class Ref : ARef, IFn, IComparable<Ref>, IRef, IDisposable
+class Repeat : ASeq, IReduce
+abstract class RestFn : AFunction
+class RestFnImpl : RestFn, IFnClosure
+interface Reversible
+static class RT
+interface Seqable
+class TypedSeqEnumerator<T> : IEnumerator, IEnumerator<T>
+class SeqEnumerator : TypedSeqEnumerator<Object>
+class IMapEntrySeqEnumerator : TypedSeqEnumerator<IMapEntry>
+interface Sequential
+interface Settable
+interface Sorted
+class StringSeq : ASeq, IndexedSeq
+class Symbol: AFn, IObj, Named, IComparable, ISerializable, IHashEq
+class TaggedLiteral : ILookup
+class TransformerEnumerator : IEnumerator, IEnumerator<Object>
+static class Tuple
+class TypeNotFoundException : Exception
+static class Util
+class Var : ARef, IFn, IRef, Settable, ISerializable
+class Volatile : IDeref
+class WarnBoxedMathAttribute : Attribute
+
+static class Clojure
+
+class LineNumberingTextReader : PushbackTextReader, IDisposable
+class PushbackInputStream : Stream, IDisposable
+class PushbackTextReader : TextReader, IDisposable
+
+static class BindingHelpers
+class ClojureBinder : DefaultBinder
+class ClojureCreateInstanceBinder : CreateInstanceBinder, IExpressionSerializable, IClojureBinder
+class ClojureGetZeroArityMemberBinder : GetMemberBinder, IExpressionSerializable, IClojureBinder
+class ClojureInvokeMemberBinder : InvokeMemberBinder, IExpressionSerializable, IClojureBinder
+class ClojureOverloadResolverFactory : OverloadResolverFactory
+class ClojureOverloadResolver : DefaultOverloadResolver
+static class DynUtils
+interface IClojureBinder
+class MetaAFn : DynamicMetaObject, IInferableInvokable
+class ClojureContext : LanguageContext
+static class ClojureOps
+class ClojureOptions : LanguageOptions
+class ListGenericWrapper<T> : IList<T>
+class DictionaryGenericWrapper<K, V> : IDictionary<K, V>
+class IEnumeratorOfTWrapper<T> : IEnumerator<T>
+class IEnumerableOfTWrapper<T> : IEnumerable<T>, IEnumerable, IDisposable
+static class Converter
+class ImmutableDictionaryEnumerator : IDictionaryEnumerato
+static class Printf
+class Properties : Dictionary<string,string>
+static class Reflector
+
+interface AssignableExpr
+class AssignExpr : Expr
+struct BindingInit
+class BodyExpr : Expr, MaybePrimitiveExpr
+class BooleanExpr : LiteralExpr
+class CaseExpr : Expr, MaybePrimitiveExpr
+class ConstantExpr : LiteralExpr
+class DefExpr : Expr
+class DynInitHelper
+class EmptyExpr : Expr
+interface Expr
+abstract class FieldOrPropertyExpr : HostExpr, AssignableExpr
+class FnExpr : ObjExpr
+class FnMethod : ObjMethod
+class GenContext
+class HostArg
+class HostExpr : Expr, MaybePrimitiveExpr
+class IdentityHashMap : Dictionary<Object,int>
+class IfExpr : Expr, MaybePrimitiveExpr
+class CljILGen : ILGen
+class ImportExpr : Expr
+abstract class InstanceFieldOrPropertyExpr<TInfo> : FieldOrPropertyExpr
+class InstanceMethodExpr : MethodExpr
+class InstanceOfExpr : Expr, MaybePrimitiveExpr
+class InstanceZeroArityCallExpr : HostExpr
+static class Intrinsics
+class InvokeExpr : Expr
+interface IParser
+class KeywordExpr : LiteralExpr
+class KeywordInvokeExpr : Expr
+class LetExpr : Expr, MaybePrimitiveExpr
+class LetFnExpr : Expr
+abstract class LiteralExpr : Expr
+class LocalBinding
+class LocalBindingExpr : Expr, MaybePrimitiveExpr, AssignableExpr
+class MapExpr : Expr
+interface MaybePrimitiveExpr : Expr
+class MetaExpr : Expr
+class MethodExpr : HostExpr
+class MethodParamExpr : Expr, MaybePrimitiveExpr
+class MonitorEnterExpr : UntypedExpr
+class MonitorExitExpr : UntypedExpr
+class NewExpr : Expr
+class NewInstanceExpr : ObjExpr
+class NewInstanceMethod : ObjMethod
+class NilExpr : LiteralExpr
+class NumberExpr : LiteralExpr, MaybePrimitiveExpr
+class ObjExpr : Expr
+abstract class ObjMethod
+class ParseException : Exception
+enum RHC
+class ParserContext
+class RecurExpr : Expr, MaybePrimitiveExpr
+class SetExpr : Expr
+abstract class StaticFieldOrPropertyExpr<TInfo> : FieldOrPropertyExpr
+class StaticFieldExpr : StaticFieldOrPropertyExpr<FieldInfo>
+class StaticPropertyExpr : StaticFieldOrPropertyExpr<PropertyInfo>
+class StaticInvokeExpr : Expr, MaybePrimitiveExpr
+class StaticMethodExpr : MethodExpr
+class StringExpr : LiteralExpr
+class TheVarExpr : Expr
+class ThrowExpr : UntypedExpr
+class TryExpr : Expr
+class UnresolvedVarExpr : Expr
+abstract class UntypedExpr : Expr
+class VarExpr : Expr, AssignableExpr
+class VectorExpr : Expr
+
+static class ArrayIter
+static class Compiler
+static class GenClass
+static class GenDelegate
+static class GenInterface
+class GenProxy
+class MethodSignature : IComparable<MethodSignature>, IComparable
+
+
+
+

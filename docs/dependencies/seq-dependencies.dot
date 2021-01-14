@@ -1,0 +1,91 @@
+strict digraph G {
+
+rankdir = RL;
+
+/* here start the interfaces */
+
+
+
+subgraph clusterinterface {
+
+	node [shape=box];
+	
+	Seqable;
+	IPersistentCollection  -> {  Seqable };
+	ISeq -> {  IPersistentCollection };
+	Sequential;
+	ILookup;
+	IMapEnumerable;
+	Associative -> { IPersistentCollection, ILookup };
+		IArraySeq  -> { ISeq };
+	}
+	
+subgraph clusterinterface2 {
+
+	IPersistentList -> {  Sequential, IPersistentStack };
+	IPersistentMap -> { Associative};
+	IPersistentSet -> {  IPersistentCollection };
+	IPersistentStack -> {  IPersistentCollection };
+	IPersistentVector -> {  Associative, Sequential, IPersistentStack };
+
+
+
+
+
+
+	node [shape=egg];
+	
+	AMapEntry -> {  APersistentVector };
+	APersistentMap -> {  IPersistentMap };
+	APersistentSet  -> {  IPersistentSet};
+	APersistentVector -> { IPersistentVector};
+}
+
+
+subgraph clusterclassP {
+	node [shape=ellipse]
+	PersistentArrayMap  -> {  APersistentMap, IMapEnumerable };
+	PersistentHashMap  -> {  APersistentMap, IMapEnumerable    };
+	PersistentHashSet -> {  APersistentSet };
+
+	PersistentQueue  -> {  IPersistentList };
+	PersistentStructMap  -> {  APersistentMap   };
+	PersistentTreeMap  -> {  APersistentMap };
+	PersistentTreeSet  -> {  APersistentSet };
+	PersistentVector -> {  APersistentVector };
+	}
+
+subgraph clusterclass {
+
+	node [shape=box]
+
+
+
+
+	node [shape=egg]
+	
+
+	ASeq -> {   ISeq, Sequential };
+	
+	node [shape=ellipse]
+
+
+	PersistentList  -> {  ASeq, IPersistentList };
+	ChunkedCons  -> {  ASeq };
+	Cons -> {  ASeq };
+	Cycle  -> {  ASeq };
+
+	EnumeratorSeq  -> {  ASeq };
+
+	Iterate  -> {  ASeq };
+
+	LazySeq  -> {   ISeq, Sequential};
+	LongRange -> {  ASeq };
+
+
+	Range  -> {  ASeq  };
+	Repeat  -> {  ASeq };
+	StringSeq  -> {  ASeq };
+	}
+
+}

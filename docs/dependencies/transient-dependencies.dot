@@ -1,0 +1,68 @@
+strict digraph G {
+
+rankdir = RL;
+
+/* here start the interfaces */
+
+
+
+subgraph clusterroot {
+
+	node [shape=box];
+	
+	ILookup;
+	Counted;
+	Indexed  -> {  Counted };
+
+
+
+}
+
+subgraph clusterinterface {
+
+	node [shape=box];
+
+	ITransientCollection;
+	ITransientAssociative  -> {  ITransientCollection, ILookup };
+	ITransientAssociative2  -> {  ITransientAssociative };
+	ITransientMap  -> {  ITransientAssociative, Counted };
+	ITransientSet  -> {  ITransientCollection, Counted };
+	ITransientVector  -> {  ITransientAssociative, Indexed };
+}
+
+subgraph clusterabstract {
+
+	node [shape=egg];
+	
+	ATransientMap  -> {  ITransientMap, ITransientAssociative2 };
+	ATransientSet  -> {  ITransientSet };
+  
+}
+
+subgraph clusterconcrete {
+
+	node [shape=ellipse]
+	
+	"PersistentArrayMap.TransientArrayMap" -> ATransientMap;
+	"PersistentHashMap.TransientArrayMap" -> ATransientMap;
+	"PersistentHashSet.TransientArraySet" -> ATransientSet;
+	"PersistentVector.TransientVector" -> { ITransientVector, ITransientAssociative2 };
+
+}
+
+subgraph clusterconcrete2 {	
+
+	node [shape=box]
+	
+	IEditableCollection;
+		
+	node [shape=ellipse]
+	
+	PersistentArrayMap  -> {  APersistentMap, IEditableCollection, IMapEnumerable };
+	PersistentHashMap  -> {  APersistentMap, IEditableCollection, IMapEnumerable };
+	PersistentHashSet -> {  APersistentSet, IEditableCollection };
+	PersistentVector -> {  APersistentVector, IEditableCollection};
+ 
+}
+
+}

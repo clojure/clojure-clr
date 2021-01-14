@@ -1,0 +1,143 @@
+strict digraph G {
+
+rankdir = RL;
+
+/* here start the interfaces */
+
+
+
+{
+	node [shape=box];
+	
+	Associative -> { IPersistentCollection, ILookup };
+	Counted;
+	Fn;
+	IArraySeq  -> {  IObj, ISeq, IList, IndexedSeq, IReduce };
+	IAtom;
+	IAtom2  -> {  IAtom };
+	IBlockingDeref;
+	IChunk  -> {  Indexed };
+	IChunkedSeq  -> {  ISeq, Sequential };
+	IDeref;
+	IEditableCollection;
+	IFn;
+	IFnArity;
+	IFnClosure;
+	IHashEq;
+	IKVReduce;
+	IKeywordLookup;
+	ILookup;
+	ILookupSite;
+	ILookupThunk;
+	IMapEntry;
+	IMapEnumerable;
+	IMeta;
+	IObj  -> {  IMeta };
+	IPending;
+	IPersistentCollection  -> {  Seqable };
+	IPersistentList -> {  Sequential, IPersistentStack };
+	IPersistentMap -> {   Associative, Counted };
+	IPersistentSet -> {  IPersistentCollection, Counted };
+	IPersistentStack -> {  IPersistentCollection };
+	IPersistentVector -> {  Associative, Sequential, IPersistentStack, Reversible, Indexed };
+	IProxy;
+	IRecord;
+	IReduce  -> {  IReduceInit };
+	IReduceInit;
+	IRef  -> {  IDeref };
+	IReference  -> {  IMeta };
+	ISeq -> {  IPersistentCollection };
+	ITransientAssociative  -> {  ITransientCollection, ILookup };
+	ITransientAssociative2  -> {  ITransientAssociative };
+	ITransientCollection;
+	ITransientMap  -> {  ITransientAssociative, Counted };
+	ITransientSet  -> {  ITransientCollection, Counted };
+	ITransientVector  -> {  ITransientAssociative, Indexed };
+	IType;
+	Indexed  -> {  Counted };
+	IndexedSeq  -> {  ISeq, Sequential, Counted };
+	MapEquivalence;
+	Named;
+	Reversible;
+	Seqable;
+	Sequential;
+	Settable;
+	Sorted;
+}
+
+/* here start the abstract classes */
+
+{
+	node [shape=egg];
+
+	AFn -> { IFn, IFnArity };
+	AFunction  -> {  AFn, IObj, Fn, IComparer };
+	AMapEntry -> {  APersistentVector, IMapEntry };
+	APersistentMap -> {  AFn, IPersistentMap,  MapEquivalence, IHashEq };
+	APersistentSet  -> {  AFn, IPersistentSet, IHashEq };
+	APersistentVector -> {  AFn, IPersistentVector, IList, IHashEq };
+	ARef  -> {  AReference, IRef };
+	AReference  -> {  IReference };
+	ATransientMap  -> {  AFn, ITransientMap, ITransientAssociative2 };
+	ATransientSet  -> {  AFn, ITransientSet };
+	Obj -> {  IObj };
+	RestFn  -> {  AFunction };
+	}
+
+/* Here start (mostly) the classes */
+
+{
+	node [shape=ellipse]
+	AFnImpl  -> {   AFunction, Fn, IFnClosure };
+	ASeq -> {  Obj, ISeq, Sequential, IList,  IHashEq };
+	Agent  -> {  ARef };
+	ArrayChunk  -> {  IChunk };
+	Atom  -> {  ARef, IAtom2 };
+	ChunkBuffer  -> {  Counted };
+	ChunkedCons  -> {  ASeq, IChunkedSeq };
+	Cons -> {  ASeq };
+	Cycle  -> {  ASeq, IReduce, IPending };
+	Delay  -> {  IDeref, IPending };
+	EnumeratorSeq  -> {  ASeq };
+	Future  -> {  IDeref, IBlockingDeref, IPending  };
+	Iterate  -> {  ASeq, IReduce, IPending };
+	Keyword -> {  AFn, Named, IHashEq };
+	KeywordLookupSite -> {  ILookupSite, ILookupThunk };
+	LazySeq  -> {  Obj, ISeq, Sequential, ICollection, IPending, IHashEq };
+	LongRange -> {  ASeq, Counted, IChunkedSeq, IReduce };
+	MapEntry -> {  AMapEntry };
+	MultiFn  -> {  AFn  };
+	Namespace  -> {  AReference  };
+	PersistentArrayMap  -> {  APersistentMap, IObj, IEditableCollection, IMapEnumerable, IKVReduce };
+	PersistentHashMap  -> {  APersistentMap, IEditableCollection, IObj, IMapEnumerable,  IKVReduce };
+	PersistentHashSet -> {  APersistentSet, IObj, IEditableCollection };
+	PersistentList  -> {  ASeq, IPersistentList, IReduce, IList, Counted };
+	PersistentQueue  -> {  Obj, IPersistentList,   Counted, IHashEq };
+	PersistentStructMap  -> {  APersistentMap, IObj   };
+	PersistentTreeMap  -> {  APersistentMap, IObj, Reversible, Sorted, IKVReduce };
+	PersistentTreeSet  -> {  APersistentSet, IObj, Reversible, Sorted };
+	PersistentVector -> {  APersistentVector, IObj, IEditableCollection, IReduce, IKVReduce };
+	Range  -> {  ASeq, IChunkedSeq, IReduce  };
+	ReaderConditional  -> {  ILookup };
+	Reduced  -> {  IDeref };
+	Ref  -> {  ARef, IFn, IRef  };
+	Repeat  -> {  ASeq, IReduce };
+	RestFnImpl  -> {  RestFn, IFnClosure };
+	StringSeq  -> {  ASeq, IndexedSeq };
+	Symbol -> {  AFn, IObj, Named, IHashEq };
+	TaggedLiteral  -> {  ILookup };
+	Var  -> {  ARef, IFn, IRef, Settable  };
+	Volatile  -> {  IDeref };
+
+	"PersistentArrayMap.TransientArrayMap" -> ATransientMap;
+	"PersistentHashMap.TransientArrayMap" -> ATransientMap;
+	"PersistentHashSet.TransientArraySet" -> ATransientSet;
+	"PersistentVector.TransientVector" -> { ITransientVector, ITransientAssociative2 };
+
+	"(deftype ...)" -> IType;
+	"(proxy ...}" -> IProxy;
+	"(defrecord ... )" -> IRecord;
+	"(defprotocol ...)" -> MethodImplCache
+}
+
+}

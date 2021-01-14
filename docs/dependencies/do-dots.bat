@@ -1,0 +1,10 @@
+dot -Tpng       all-dependencies.dot -o       all-dependencies.png
+dot -Tpng defthings-dependencies.dot -o defthings-dependencies.png
+dot -Tpng        fn-dependencies.dot -o        fn-dependencies.png
+dot -Tpng      meta-dependencies.dot -o      meta-dependencies.png
+dot -Tpng    reduce-dependencies.dot -o    reduce-dependencies.png
+dot -Tpng       seq-dependencies.dot -o       seq-dependencies.png
+dot -Tpng      seq2-dependencies.dot -o      seq2-dependencies.png
+dot -Tpng transient-dependencies.dot -o transient-dependencies.png
+dot -Tpng  compiler-dependencies.dot -o  compiler-dependencies.png
+dot -Tpng     idref-dependencies.dot -o     idref-dependencies.png

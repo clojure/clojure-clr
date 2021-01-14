@@ -1,0 +1,49 @@
+strict digraph G {
+
+rankdir = RL;
+concentrate=true;
+
+/* here start the interfaces */
+
+
+{
+    node [shape=box];
+
+	ILookup;
+	Associative -> {  ILookup };
+	Counted;
+	IArraySeq  -> {   IndexedSeq };
+	IChunk  -> {  Indexed };
+	IPersistentMap -> {   Associative, Counted };
+	IPersistentSet -> {	Counted };
+	IPersistentVector -> {  Associative,  IPersistentStack, Reversible, Indexed };
+	Indexed  -> {  Counted };
+	IndexedSeq  -> { Counted };
+	Reversible;
+	Sorted;
+	APersistentMap -> { IPersistentMap };
+
+}
+
+
+
+{
+	node [shape=ellipse]
+
+	ArrayChunk  -> {  IChunk };
+	ChunkBuffer  -> {  Counted };
+	ChunkedCons  -> {  IChunkedSeq };
+	LongRange -> {   Counted, IChunkedSeq };
+	PersistentList  -> {   Counted };
+	PersistentQueue  -> {   Counted };
+	PersistentTreeMap  -> {  Reversible, Sorted };
+	PersistentTreeSet  -> {  Reversible, Sorted };
+	Range  -> {  IChunkedSeq };
+	StringSeq  -> {  IndexedSeq };
+	PersistentArrayMap  -> {  APersistentMap };
+	PersistentHashMap  -> {  APersistentMap};
+	PersistentStructMap  -> {  APersistentMap	};
+	PersistentTreeMap  -> {  APersistentMap, Reversible, Sorted };
+}
+
+}

@@ -1,0 +1,48 @@
+strict digraph G {
+
+rankdir = RL;
+concentrate=true;
+
+/* here start the interfaces */
+
+node [shape=box];
+
+{
+
+	IKVReduce;
+	IReduce  -> {  IReduceInit };
+	IReduceInit;
+
+}
+
+
+{
+	node [shape=ellipse]
+
+
+	Cycle  -> {  IReduce };
+
+	Iterate  -> { IReduce };
+
+	LongRange -> {  IReduce };
+
+
+	PersistentArrayMap  -> {    IKVReduce };
+	PersistentHashMap  -> {    IKVReduce };
+
+	PersistentList  -> {    IReduce };
+
+
+	PersistentTreeMap  -> {   IKVReduce };
+
+	PersistentVector -> {   IReduce, IKVReduce };
+	Range  -> {   IReduce  };
+
+	Reduced  -> {  IDeref };
+	Repeat  -> {  IReduce };
+
+
+ }
+ 
+
+}

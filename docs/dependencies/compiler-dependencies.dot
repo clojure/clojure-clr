@@ -1,0 +1,86 @@
+strict digraph G {
+
+rankdir = RL;
+
+ RHC
+ AssignableExpr
+ Expr
+ IParser
+ MaybePrimitiveExpr -> {Expr }
+ BindingInit
+
+
+FieldOrPropertyExpr -> {HostExpr, AssignableExpr }
+"InstanceFieldOrPropertyExpr<T>" -> {FieldOrPropertyExpr }
+LiteralExpr -> {Expr }
+ObjMethod
+"StaticFieldOrPropertyExpr<T>" -> {FieldOrPropertyExpr }
+UntypedExpr -> {Expr }
+
+
+AssignExpr -> {Expr }
+BodyExpr -> {Expr, MaybePrimitiveExpr }
+BooleanExpr -> {LiteralExpr }
+CaseExpr -> {Expr, MaybePrimitiveExpr }
+CljILGen -> {ILGen }
+ConstantExpr -> {LiteralExpr }
+DefExpr -> {Expr }
+DynInitHelper
+EmptyExpr -> {Expr }
+FnExpr -> {ObjExpr }
+FnMethod -> {ObjMethod }
+GenContext
+GenProxy
+HostArg
+HostExpr -> {Expr, MaybePrimitiveExpr }
+IdentityHashMap -> {"Dictionary<K,V>" }
+IfExpr -> {Expr, MaybePrimitiveExpr }
+ImportExpr -> {Expr }
+InstanceMethodExpr -> {MethodExpr }
+InstanceOfExpr -> {Expr, MaybePrimitiveExpr }
+InstanceZeroArityCallExpr -> {HostExpr }
+InvokeExpr -> {Expr }
+KeywordExpr -> {LiteralExpr }
+KeywordInvokeExpr -> {Expr }
+LetExpr -> {Expr, MaybePrimitiveExpr }
+LetFnExpr -> {Expr }
+LocalBinding
+LocalBindingExpr -> {Expr, MaybePrimitiveExpr, AssignableExpr }
+MapExpr -> {Expr }
+MetaExpr -> {Expr }
+MethodExpr -> {HostExpr }
+MethodParamExpr -> {Expr, MaybePrimitiveExpr }
+MethodSignature
+MonitorEnterExpr -> {UntypedExpr }
+MonitorExitExpr -> {UntypedExpr }
+NewExpr -> {Expr }
+NewInstanceExpr -> {ObjExpr }
+NewInstanceMethod -> {ObjMethod }
+NilExpr -> {LiteralExpr }
+NumberExpr -> {LiteralExpr, MaybePrimitiveExpr }
+ObjExpr -> {Expr }
+ParseException -> {Exception }
+ParserContext
+RecurExpr -> {Expr, MaybePrimitiveExpr }
+SetExpr -> {Expr }
+StaticFieldExpr -> {"StaticFieldOrPropertyExpr<T>" }
+StaticInvokeExpr -> {Expr, MaybePrimitiveExpr }
+StaticMethodExpr -> {MethodExpr }
+StaticPropertyExpr -> {"StaticFieldOrPropertyExpr<T>" }
+StringExpr -> {LiteralExpr }
+TheVarExpr -> {Expr }
+ThrowExpr -> {UntypedExpr }
+TryExpr -> {Expr }
+UnresolvedVarExpr -> {Expr }
+VarExpr -> {Expr, AssignableExpr }
+VectorExpr -> {Expr }
+
+
+ ArrayIter
+ Compiler
+ GenClass
+ GenDelegate
+ GenInterface
+ Intrinsics
+ 
+ }

@@ -1,0 +1,52 @@
+strict digraph G {
+
+rankdir = RL;
+concentrate=true;
+
+/* here start the interfaces */
+
+node [shape=box];
+
+{
+	IAtom;
+	IAtom2  -> {  IAtom };
+	IBlockingDeref;
+	IDeref;
+	IPending;
+	IRef  -> {  IDeref };
+	IReference;
+	Settable;
+}
+
+{
+	node [shape=egg];
+
+	ARef  -> {  AReference, IRef };
+	AReference  -> {  IReference };
+}
+
+{
+	node [shape=ellipse]
+
+	Agent  -> {  ARef };
+
+	Atom  -> {  ARef, IAtom2 };
+
+	Cycle  -> { IPending };
+	Delay  -> {  IDeref, IPending };
+	Future  -> {  IDeref, IBlockingDeref, IPending  };
+	Iterate  -> { IPending };
+
+	LazySeq  -> {  IPending };
+
+	Namespace  -> {  AReference  };
+
+	Reduced  -> {  IDeref };
+	Ref  -> {  ARef  };
+
+	Var  -> {  ARef, Settable  };
+	Volatile  -> {  IDeref };
+ }
+ 
+
+}

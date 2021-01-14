@@ -1,0 +1,56 @@
+strict digraph G {
+
+rankdir = RL;
+
+/* here start the interfaces */
+
+node [shape=box];
+
+subgraph clusterinterface {	
+
+	node [shape=ellipse];
+	
+	Fn;
+	IFn;
+	IFnArity;
+	IFnClosure;
+	AFn -> { IFn, IFnArity };  		
+	AFunction  -> {  AFn,  Fn };
+	RestFn  -> {  AFunction };
+	}
+
+
+subgraph clusterabstract
+{
+	node [shape=egg];
+
+	APersistentMap -> {  AFn  };
+	APersistentSet  -> {  AFn };
+	APersistentVector -> {  AFn };
+	ATransientMap  -> {  AFn };
+	ATransientSet  -> {  AFn };
+
+	}
+
+subgraph clusterclass {
+
+	node [shape=ellipse]
+
+	AFnImpl  -> {   AFunction, IFnClosure };
+	Keyword -> {  AFn};
+	MultiFn  -> {  AFn  };
+	Symbol -> {  AFn };
+	Var  -> {  IFn  };
+	PersistentArrayMap  -> {  APersistentMap };
+	PersistentHashMap  -> {  APersistentMap };
+	PersistentHashSet -> {  APersistentSet};
+	PersistentStructMap  -> {  APersistentMap};
+	PersistentTreeMap  -> {  APersistentMap };
+	PersistentTreeSet  -> {  APersistentSet};
+	PersistentVector -> {  APersistentVector };
+	"PersistentArrayMap.TransientArrayMap" -> ATransientMap;
+	"PersistentHashMap.TransientArrayMap" -> ATransientMap;
+	"PersistentHashSet.TransientArraySet" -> ATransientSet;
+	}
+
+}

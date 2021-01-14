@@ -1,0 +1,63 @@
+strict digraph G {
+
+rankdir = RL;
+concentrate=true;
+
+/* here start the interfaces */
+
+
+
+{
+	node [shape=box];
+	
+	IReference  -> {  IMeta };
+	IMeta;
+	IObj  -> {  IMeta };
+	IArraySeq  -> {  IObj };
+	Named;
+}
+
+{
+	node [shape=egg];
+	
+	AFunction  -> {  IObj };
+	ARef  -> {  AReference };
+	AReference  -> {  IReference };
+	Obj -> {  IObj };
+	RestFn  -> {  AFunction }; 
+	AFnImpl  -> {   AFunction };
+	ASeq -> {  Obj };}
+
+{
+	node [shape=ellipse]
+
+	Agent  -> {  ARef };
+	Atom  -> {  ARef};
+	ChunkedCons  -> {  ASeq };
+	Cons -> {  ASeq };
+	Cycle  -> {  ASeq };
+	EnumeratorSeq  -> {  ASeq };
+	Iterate  -> {  ASeq };
+	Keyword -> {  Named };
+	LazySeq  -> {  Obj };
+	LongRange -> {  ASeq };
+	Namespace  -> {  AReference  };
+	PersistentArrayMap  -> {  IObj };
+	PersistentHashMap  -> {   IObj };
+	PersistentHashSet -> {  IObj  };
+	PersistentList  -> {  ASeq };
+	PersistentQueue  -> {  Obj };
+	PersistentStructMap  -> {  IObj   };
+	PersistentTreeMap  -> {   IObj };
+	PersistentTreeSet  -> {  IObj };
+	PersistentVector -> {  IObj };
+	Range  -> {  ASeq };
+	Ref  -> {  ARef  };
+	Repeat  -> {  ASeq };
+	StringSeq  -> {  ASeq};
+	Symbol -> { IObj, Named };
+	Var  -> {  ARef  };
+ }
+ 
+
+}

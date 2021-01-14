@@ -1,0 +1,41 @@
+strict digraph G {
+
+rankdir = RL;
+
+subgraph clusterlookup {
+
+	node [shape=box];
+	
+	ILookupSite;
+	ILookupThunk;
+
+	node [shape=ellipse];
+
+	KeywordLookupSite -> {  ILookupSite, ILookupThunk };
+	}
+
+subgraph clustertypes {
+
+	node [shape=box];	 
+
+	IType;
+	IProxy;
+	IRecord;
+	
+	node [shape=ellipse];
+
+	"(deftype ...)" -> IType;
+	"(proxy ...}" -> IProxy;
+	"(defrecord ... )" -> IRecord;
+	}
+	
+subgraph clusterprotocol {
+	
+	node [shape=ellipse];
+
+	MethodImplCache;
+	
+	"(defprotocol ...)" -> MethodImplCache
+	}
+}
+	 
