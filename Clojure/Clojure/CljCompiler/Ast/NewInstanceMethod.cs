@@ -116,7 +116,8 @@ namespace clojure.lang.CljCompiler.Ast
                         Compiler.MethodVar, method,
                         Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
                         Compiler.LoopLocalsVar, null,
-                        Compiler.NextLocalNumVar, 0
+                        Compiler.NextLocalNumVar, 0,
+                        Compiler.MethodReturnContextVar, true
                     // CLEAR_PATH, pnode,
                     // CLEAR_ROOT, pnode,
                     // CLEAR_SITES, PersistentHashMap.EMPTY

@@ -170,8 +170,10 @@ namespace clojure.lang.CljCompiler.Ast
                         {
                             if (isLoop)
                             {
+                                object methodReturnContext = pcon.Rhc == RHC.Return ? Compiler.MethodReturnContextVar.deref() : null; 
                                 // stuff with clear paths,
-                                Var.pushThreadBindings(RT.map(Compiler.NoRecurVar, null));
+                                Var.pushThreadBindings(RT.map(Compiler.NoRecurVar, null,
+                                                              Compiler.MethodReturnContextVar, methodReturnContext));
                             }
                             bodyExpr = new BodyExpr.Parser().Parse(isLoop ? pcon.SetRhc(RHC.Return) : pcon, body);
                         }

@@ -176,7 +176,7 @@ namespace clojure.lang
 
         internal static readonly Var InTryBlockVar = Var.create(null).setDynamic();          //null or not
         internal static readonly Var InCatchFinallyVar = Var.create(null).setDynamic();          //null or not
-        //internal static readonly Var MethodReturnContextVar = Var.create(null).setDynamic();    // null or not
+        internal static readonly Var MethodReturnContextVar = Var.create(null).setDynamic();    // null or not
 
         internal static readonly Var NoRecurVar = Var.create(null).setDynamic();
 
@@ -523,7 +523,7 @@ namespace clojure.lang
                 return v;
             }
             else if (symbol.Name.IndexOf('.') > 0 && !symbol.Name.EndsWith(".")
-                || symbol.Name[symbol.Name.Length - 1] == ']')              /// JAVA: symbol.Name[0] == '[')
+                || (symbol.Name.Length > 0 && symbol.Name[symbol.Name.Length - 1] == ']'))              /// JAVA: symbol.charAt[0] == '[')
                 return RT.classForName(symbol.Name);
             else if (symbol.Equals(NsSym))
                 return RT.NSVar;
@@ -2090,7 +2090,7 @@ namespace clojure.lang
 
         internal static bool InTailCall(RHC context)
         {
-            return (context == RHC.Return) && /* (MethodReturnContextVar.deref() != null) && */ (InTryBlockVar.deref() == null);
+            return (context == RHC.Return) && (MethodReturnContextVar.deref() != null) &&  (InTryBlockVar.deref() == null);
         }
 
         #endregion

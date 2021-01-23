@@ -121,7 +121,8 @@ namespace clojure.lang.CljCompiler.Ast
                     Compiler.MethodVar, method,
                     Compiler.LocalEnvVar, Compiler.LocalEnvVar.deref(),
                     Compiler.LoopLocalsVar, null,
-                    Compiler.NextLocalNumVar, 0));
+                    Compiler.NextLocalNumVar, 0,
+                    Compiler.MethodReturnContextVar,true));
 
                 method._prim = PrimInterface(parms);
                 //if (method._prim != null)

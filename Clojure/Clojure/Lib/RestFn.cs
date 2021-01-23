@@ -197,6 +197,7 @@ namespace clojure.lang
                     return doInvoke(arglist.first()
                             , Util.Ret1(arglist.next(), arglist = null));
                 case 2:
+                    
                     return doInvoke(arglist.first()
                             , (arglist = arglist.next()).first()
                             , Util.Ret1(arglist.next(), arglist = null));
