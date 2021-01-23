@@ -30,6 +30,7 @@ namespace Clojure
 
         static void Main(string[] args)
         {
+            RT.Init();
             REQUIRE.invoke(CLOJURE_MAIN);
             MAIN.applyTo(RT.seq(args));
         }
@@ -37,6 +38,7 @@ namespace Clojure
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static void legacy_repl(string[] args)
         {
+            RT.Init();
             REQUIRE.invoke(CLOJURE_MAIN);
             LEGACY_REPL.invoke(RT.seq(args));
 
@@ -45,6 +47,7 @@ namespace Clojure
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static void legacy_script(string[] args)
         {
+            RT.Init();
             REQUIRE.invoke(CLOJURE_MAIN);
             LEGACY_SCRIPT.invoke(RT.seq(args));
         }
