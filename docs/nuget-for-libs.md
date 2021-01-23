@@ -1,124 +1,91 @@
 # Creating NuGet packaging for ClojureCLR libs
 
-At present, we've been using lein-clr for managing our libraries.   We use the standard project layout.  Source code is in `<root>/src`.  If the project namespace is something like `clojure.tools.reader`, source code will be under `<root>/src/clojure/tools/reader`.
+At present, we've been using lein-clr for managing our libraries.   We use the standard project layout.  Source code is in `<root>/src`.  If the project namespace is something like `clojure.tools.namespace`, source code will be under `<root>/src/clojure/tools/namespace`.
 
 (Though lately, I've been playing matching exactly the source code layout in the parent JVM libs, setting the :source-paths and :test-paths properties in project.clj to match.)
 
 
-## Step 1:: Create the C# project
+## Step 1: Create the C# project
 
-Using Visual Studio (the easiest way), create a project, via `File > New project from existing code`.  
+From the command line, change directory to `<root>\src\clojure`, and then execute
 
-* Project type: Visual C# / Class Library
-* Name = `clr.tools.reader`  
-* Location of existing items: `<root>/src/clojure`
-
-This will create C# project `<root>/src/clojure/clr.tools.reader.csproj` and a solution `<root>/src/clojure/clr.tools.reader.sln`.
-
-
-Edit the solution properties:
-
-* Assembly name: clojure.tools.reader
-* Default namespace = clojure
-* Target framework  = .NET Framework 3.5
-
-We'll need to edit the `AssemblyInfo.cs`.  One has not been created.  The easiest way to do so is to click the "Assembly Information" button on the solution properties (application tab) page.  Like the following, adjusted to the circumstances.
-
-    [assembly: AssemblyTitle("clojure.tools.reader")]
-    [assembly: AssemblyDescription("Does something for someone.")]
-    [assembly: AssemblyConfiguration("")]
-    [assembly: AssemblyCompany("Whatever")]
-    [assembly: AssemblyProduct("clojure.tools.reader")]
-    [assembly: AssemblyCopyright("Copyright © Someone 2049")]
+	dotnet new classlib clojure.tools.namespace -o .
 	
-    [assembly: AssemblyVersion("0.5.0.0")]
-    [assembly: AssemblyFileVersion("0.5.0.0")]
+## Step 2: Edit the project
+	
+The following tasks can be done either with a text editor or by going into Visual Studio (or maybe VS Code) and taking the appropriate actions.
+	
+In the clojure.tools.namespace.csproj file:
+
+* Change `<TargetFramework>net5.0</TargetFramework>` to `<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>`
+* Remove the reference to Class1.cs.  Also you can delete this file.  (Accomplish both by deleting from the Server Explorer in VS.)
+* Add attributes to identify the project:
+
+	<PropertyGroup>
+		<PackageId>clojure.tools.namespace</PackageId>
+		<Title>clojure.tools.namespace</Title>
+		<Product>clojure.tools.namespace</Product>
+		<AssemblyTitle>clojure.tools.namespace</AssemblyTitle>
+		<Authors>YOU!!!</Authors>
+		<Description>Something appropriate.</Description>
+		<Copyright>Copyright © Rich Hickey, You 202X</Copyright>
+		<PackageLicenseExpression>EPL-1.0</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/clojure/clojure.tools.namesapce</RepositoryUrl>
+		<Company>ClojureCLR contributors</Company>
+		<PackageTags>Clojure;ClojureCLR</PackageTags>
+		<Version>1.1.0</Version> 
+	</PropertyGroup>
+
 	
 Note: if you want to create a prerelease version (alphaN, betaN), include something like:
 
-	[assembly: AssemblyInformationalVersion("0.5.0-beta")]
+	    <Version>1.1.0-beta1</Version> 
 	
-When using this dialog, unclick the COM-visible checkbox.	
-	
-* Remove all references.
-* You should see all the files in the <root>/src/clojure directory and below.  Remove any files you do not want in the solution.  For the rest, set properties:
+
+* Add all the source .clj files to the project.  If you are working in VS, you should see all the files in the <root>/src/clojure directory and below.  Remove any files you do not want in the solution.  For the rest, set properties:
 
     Build Action: Embedded Resource
 	Copy to Output Directory: Do not copy
 
-    
-* Build the solution.
-* If you want to verify, take some kind of .Net assembly viewer and check it out.  (I used ILSpy.  The files appear as resources.  You can inspect contents.)
+* Or you can go in by hand and put into your .csproj file lines of the form
 
-## Step 2:: Create the nuspec file.
+	<ItemGroup>
+		<EmbeddedResource Include="tools\namespace\dependency.cljc" />
+		<EmbeddedResource Include="tools\namespace\dir.clj" />
+		...
+	</ItemGroup>
 
-From the command line, `cd` into `<root>/src/clojure`.  Execute:
+If other libraries are required, use the nuget tool in VS to add those dependencies to the project, or hand-edit the .csproj file to add 
 
-    nuget spec
+	<ItemGroup>
+		<PackageReference Include="clr.tools.reader" Version="1.3.4" />
+	</ItemGroup>
 	
-This will find `clr.tools.reader.csproj` and create a tokenized `clr.tools.reader.nuspec` file.  That file will look something like this:
+		
+* Build the project.
 
-    <?xml version="1.0"?>
-    <package >
-      <metadata>
-        <id>$id$</id>
-            <version>$version$</version>
-        <title>$title$</title>
-        <authors>$author$</authors>
-        <owners>$author$</owners>
-        <licenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</licenseUrl>
-        <projectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</projectUrl>
-        <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>
-        <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>$description$</description>
-        <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
-        <copyright>Copyright 2016</copyright>
-        <tags>Tag1 Tag2</tags>
-      </metadata>
-    </package>
-
-Edit to look something like:
-
-
-    <?xml version="1.0"?>
-    <package >
-      <metadata>
-        <id>$id$</id>
-        <version>$version$</version>
-        <title>$title$</title>
-        <authors>$author$</authors>
-        <owners>$author$</owners>
-        <licenseUrl>http://opensource.org/licenses/eclipse-1.0.php</licenseUrl>
-        <projectUrl>https://github.com/clojure/clr.tools.reader</projectUrl>
-        <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>$description$</description>
-        <releaseNotes>First version packaged for NuGet.</releaseNotes>
-        <copyright>Copyright David Miller 2049</copyright>
-        <tags>Clojure ClojureCLR</tags>
-    	<dependencies>
-    	  <dependency id="clojure.tools.namespace" version="0.2.7"/>
-    	  <dependency id="clojure.data.generators" version="0.1.0"/>
-    	</dependencies>
-      </metadata>
-    </package>
-
-Put in dependencies as required.
 
 ## Step 3:: Pack and Publish
 
-* Build the project
-* From the command line, in `<root>/src/clojure`, execute:
-
-    nuget pack clr.tools.reader.csproj -Prop Platform=AnyCPU
+    dotnet pack 
 	
-The -Prop is needed only because we built on the 3.5 runtime.  It's a nuget bug, perhaps fixed in a later release.
-
-This will have created a `clr.tools.reader.1.0.0.0.nupkg` file (whatever the version is).  Given that it is a ZIP, you can inspect it with your favorite ZIP tool.
+This will create a file such `clojure.tools.namespace.1.0.0.nupkg`.  It is zip format, so you can inspect it with your favorite Zip tool.  Or use a tool such as Nuget Package Explorer that will also parse out the metadata.
 
 To publish:
 
-    nuget push clr.tools.reader.1.0.0.0.nupkg -source nuget.org
+    dotnet nuget push clr.tools.namespace.1.0.0.nupkg -source nuget.org
 
 Go to https://nuget.org to verify.
+
+If you are using lein/clojars, don't forget to
+
+* edit the project.clj file to update the version and any library dependencies.
+* do `lein deploy clojars`
+* You might need to updated version info on your readme.
+
+
+
+
+
 
 	
