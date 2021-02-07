@@ -14,7 +14,8 @@
 ;;  Created 29 October 2008
 
 (ns clojure.test-clojure.printer
-  (:use clojure.test [clojure.test-helper :only [platform-newlines]])   ;;; added the :use for clojure.test-helper/platform-newlines
+  (:use clojure.test 
+        [clojure.test-helper :only [platform-newlines]])
   (:require [clojure.pprint :refer [pprint]]))
 
 (deftest print-length-empty-seq

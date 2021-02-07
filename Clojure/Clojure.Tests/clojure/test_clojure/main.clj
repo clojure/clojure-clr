@@ -52,11 +52,11 @@
             "(proxy [Object] [] (Equals [o] (.ToString nil)))")))))    ;;; equals .toString
 
 (deftest null-stack-error-reporting
-  (let [e (ArgumentException. "xyz")                                           ;;;  -- Unthrown exception already has null stacktrace  (doto (Error. "xyz")
-                                                                       ;;;          (.setStackTrace (into-array java.lang.StackTraceElement nil)))
+  (let [e (ArgumentException. "xyz")                                                                              ;;;  -- Unthrown exception already has null stacktrace  (doto (Error. "xyz")
+                                                                                                                  ;;;          (.setStackTrace (into-array java.lang.StackTraceElement nil)))
         tr-data (-> e Throwable->map main/ex-triage)]
-    (is (= tr-data #:clojure.error{:phase :execution, :class 'System.ArgumentException, :cause "xyz"}))   ;;; 'java.lang.Error
-    (is (= (main/ex-str tr-data) "Execution error (ArgumentException) at (REPL:1).\nxyz\n"))))                ;;; (Error)
+    (is (= tr-data #:clojure.error{:phase :execution, :class 'System.ArgumentException, :cause "xyz"}))                           ;;; 'java.lang.Error
+    (is (= (main/ex-str tr-data) "Execution error (ArgumentException) at (REPL:1).\nxyz\n"))))                    ;;; (Error)  Took out call to platform-newlines.  Turns out main/ex-str does not create \n\r
 
 (defn s->lpr
   [s]
