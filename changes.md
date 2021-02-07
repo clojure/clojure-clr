@@ -1,5 +1,68 @@
 ﻿<!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to ClojureCLR in Version 1.10
+
+The 1.10 release of ClojureCLR corresponds to the 1.10.2 version of Clojure(JVM).
+We have made all the changes, bug fixes, etc., listed below that are relevant to ClojureCLR.
+
+## Platform
+
+The most significant change in 1.10 is updating support to the more recent .Net platforms.  
+In this release, we have dropped support for .Net 3.5.  Supported platforms are:
+
+* .Net Framework 4.6.1 (and later)
+* .Net Core 3.1
+* .Net 5.0
+
+Libraries are written toArray
+
+* .Net Standard 2.0
+* .Net Standard 2.1
+
+Because of the limititions of System.Reflection.Emit, in particular, AssemblyBuilder.Save() not being implemented, there is no compilation of Clojure source (.clj) to assemblies (.dll).  This means we cannot AOT-compile the Clojure core code, resulting in lengthier startup initialization.  (We hope to fix that in a future release.)  Features that rely on AOT-compilation, gen-class in particular, will not function.  Other than that, the effect is minimal.  CLJ code that is loaded will be compiled to IL and JITted to machine code as always.
+
+## Other fixes/updates/etc.
+
+* Expose environment variables that control spec to Mono platforms
+* Stop throwing exceptions on locals with primitive type hints (to support better type analysis in Arcadia/Unity)
+* Change naming for certain FnExpr to support spec fn-name demunging
+* Fix import call in core_print.clj
+* Enable test clj-1102-empty-stack-trace-should-not-throw-excpetions (test_clojure/test.clj)
+* Enable clojure.core/throw-if to record the filtered stack trace in the Data dictionary of the Exception
+* Fix warning on comparison to phase keywords
+* Fix typo in field names introduced in fix CLJ-2372
+* [CLJCLR-102](https://clojure.atlassian.net/browse/CLJCLR-102)
+  On init, load spec DLLs from application base directory
+* [CLJCLR-98](https://clojure.atlassian.net/browse/CLJCLR-98)
+  fix name of clojure.core/set-validator!  (missing !)
+* [CLJCLR-101](https://clojure.atlassian.net/browse/CLJCLR-101)
+  Fix handling of .Net decimal type in Numbers operations
+* Improve support for unsigned integer types  
+* [CLJCLR-100](https://clojure.atlassian.net/browse/CLJCLR-100)
+  Add build targeting .Net 4.5 (that didn't last long)
+* [CLJCLR-104](https://clojure.atlassian.net/browse/CLJCLR-104)
+  fix proxy-super reflection warning in core_print
+* [CLJCLR-81](https://clojure.atlassian.net/browse/CLJCLR-81)
+  Compute RT.DEFAULT_IMPORTS at startup
+* In name->type lookup, ignore non-public types (to deal with shadowed types in .Net Core)
+* Make sure all defs of print-initialized set isDynamic=true
+* Remove SimpleConsole and DlrConsole
+* Fix IL generation for certain interop (PEVerify showed wrong types on stack)
+* [CLJCLR-33](https://clojure.atlassian.net/browse/CLJCLR-33)
+  Fix behavior of "standard input" on *nix OSes.  (was not doing backspace handling and related)
+* Remove unnecessary checks in Bigdecimal.Context.Equals
+* [CLJCLR-103](https://clojure.atlassian.net/browse/CLJCLR-103) 
+  Add gitter.im link to README
+* [CLJCLR-105](https://clojure.atlassian.net/browse/CLJCLR-105) 
+  Update README to point bug reporting to clojure.atlassian.net/projects/CLJCLR
+* [CLJCLR-106](https://clojure.atlassian.net/browse/CLJCLR-106)
+  Fix rendering of #error map
+* [CLJCLR-108](https://clojure.atlassian.net/browse/CLJCLR-108)
+  Fix error in TryExpr parsing -- set! of mutable bidning in protocol fn fails when embedded in a locking expression
+* [CLJCLR-107](https://clojure.atlassian.net/browse/CLJCLR-107)
+  Fix Compiler.maybeResolveIn for when the symbol name is empty
+
+
 # Changes to Clojure in Version 1.10.2
 
 ## 1 Dependencies
