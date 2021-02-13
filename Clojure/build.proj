@@ -174,8 +174,8 @@
   </Target>
 
   <Target Name="PackAll" DependsOnTargets="Build;CreateStageDir">
-    <Exec Command="dotnet pack" WorkingDirectory="$(RootDir)\Clojure"/>
-	<Exec Command="dotnet pack" WorkingDirectory="$(Rootdir)\Clojure.Main"/>
+    <Exec Command="dotnet pack -c $(Configuration)" WorkingDirectory="$(RootDir)\Clojure"/>
+	<Exec Command="dotnet pack -c $(Configuration)" WorkingDirectory="$(Rootdir)\Clojure.Main"/>
 	
 	<ItemGroup>
 		<ClojureAsset Include="$(RootDir)Clojure\bin\$(Configuration)\*.nupkg" />
