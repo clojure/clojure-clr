@@ -3,37 +3,31 @@ ClojureCLR
 This project is a native implementation of Clojure on the Common Language Runtime (CLR),
 the execution engine of Microsoft's .Net Framework.
 
-ClojureCLR is programmed in C# (and Clojure itself) and makes use of Microsoft's
-Dynamic Language Runtime (DLR).
+ClojureCLR is programmed in C# (and Clojure itself).
 
 
 Goals:
 
- -- Implement a feature-complete Clojure on top of CLR/DLR.
+ -- Implement a feature-complete Clojure on top of CLR.
  -- Stay as close as possible to the JVM implementation.
  -- Have some fun. 
+ 
+ 
 
 --------------------------------------------------------------------------------------
 
-Docs: http://clojure.org
-Mailing list: http://groups.google.com/group/clojure-clr
-Getting Started (general): https://clojure.org/guides/getting_started
+
+ClojureCLR Google group: https://groups.google.com/g/clojure-clr
+Getting Started (ClojureCLR): https://github.com/clojure/clojure-clr/wiki/Getting-started
 Gitter CLR chat room: https://gitter.im/clojure-clr/community
 Bug reports: https://clojure.atlassian.net/jira/software/c/projects/CLJCLR/issues
 
+Main Clojure site: https://clojure.org/
 
 For more information on ClojureCLR: https://github.com/clojure/clojure-clr/wiki
 
 
-Installing ClojureCLR: 
 
-To just run ClojureCLR, use the binary distribution:
-
-  https://github.com/clojure/clojure-clr/wiki/Getting-binaries
-
-For a deeper look, get a source distribution:
-
-  https://github.com/clojure/clojure-clr/wiki/Getting-source
 
 
  
