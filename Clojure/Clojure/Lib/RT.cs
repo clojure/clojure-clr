@@ -411,6 +411,25 @@ namespace clojure.lang
             //v.setMeta(map(dockw, "tests if 2 arguments are the same object",
             //    arglistskw, list(vector(Symbol.intern("x"), Symbol.intern("y")))));
 
+            // load Clojure.Source.dll to pick up all the clojure source files as embedded resources.
+            // If not found, we hope that the source files core.clj, etc. are available on the standard file search path
+
+
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+
+            try
+            {
+                Assembly.LoadFile(Path.Combine(baseDir, "Clojure.Source.dll"));
+            }
+            catch (FileLoadException)
+            {
+                // this is okay.  It just means that the assets clojure/core.clj and company are going to be somewhere else
+            }
+            catch (FileNotFoundException)
+            {
+                // this is okay.  It just means that the assets clojure/core.clj and company are going to be somewhere else
+            }
+
             if ( RuntimeBootstrapFlag._doRTBootstrap )
                 load("clojure/core");
         }

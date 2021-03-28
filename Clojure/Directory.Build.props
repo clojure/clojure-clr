@@ -14,6 +14,7 @@
     <Product>ClojureCLR</Product>
     <Company>ClojureCLR Open Source Team</Company>
     <Copyright>© Rich Hickey</Copyright>
+	<Authors>ClojureCLR Contributors</Authors>
 	<PackageLicenseExpression>EPL-1.0</PackageLicenseExpression>
 	
 	<VersionPrefix>$(MajorVersion).$(MinorVersion).$(PatchVersion)</VersionPrefix>
@@ -21,10 +22,6 @@
     <InformationalVersion Condition=" '$(VersionSuffix)' == '' ">$(MSBuildProjectName) $(VersionPrefix)</InformationalVersion>
     <InformationalVersion Condition=" '$(VersionSuffix)' != '' ">$(MSBuildProjectName) $(VersionPrefix)-$(VersionSuffix)</InformationalVersion>
 	
-    <!-- DLR version has these. Do we need/care?  -->
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <!-- Don't include SourceRevisionId in InformationalVersion (SourceLink) -->
-    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
   </PropertyGroup>
   

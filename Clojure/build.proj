@@ -112,11 +112,23 @@
              Properties="$(BuildProperties)"/>
   </Target>
   
-    <Target Name="Clean" DependsOnTargets="RestoreReferences">
+  <Target Name="Clean" DependsOnTargets="RestoreReferences">
     <MSBuild Projects="$(Solution)"
 			 Targets="Clean"
              Properties="$(BuildProperties)"/>
   </Target> 
+  
+  <Target Name="DeepClean" DependsOnTargets="Clean">
+	<RemoveDir Directories="$(TestDir);$(StageDir)"/>
+	<RemoveDir Directories="$(RootDir)Clojure\bin;$(RootDir)Clojure.Main\bin\obj"/>
+	<RemoveDir Directories="$(RootDir)Clojure.Source\bin;$(RootDir)Clojure.Source\obj"/>
+	<RemoveDir Directories="$(RootDir)Clojure.Main\bin;$(RootDir)Clojure.Main\obj"/>
+	<RemoveDir Directories="$(RootDir)Clojure.Main461\bin;$(RootDir)Clojure.Main461\obj"/>
+	<RemoveDir Directories="$(RootDir)Clojure.Compile\bin;$(RootDir)Clojure.Compile\obj"/>
+	<RemoveDir Directories="$(RootDir)Clojure.Tests\bin;$(RootDir)Clojure.Tests\obj"/>
+	<RemoveDir Directories="$(RootDir)Clojure.Samples\bin;$(RootDir)Clojure.Samples\obj"/>
+	<RemoveDir Directories="$(RootDir)CSharp.Tests\bin;$(RootDir)CSharp.Tests\obj"/>
+  </Target>
   
 
   <Target Name="StageTest" DependsOnTargets="Build">
