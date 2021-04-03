@@ -6,16 +6,16 @@
 
 * Modify Clojure\Clojure\Bootstrap\version.properties to desired release version
 * Set the version info in Clojure\CurrentVersion.props
-* Build and test.  From the Clojure directory with X in {net461, netcoreapp3.1, net5.0} (for now, this will be Debug builds only):
-** Clojure>  msbuild build.proj -t:Test -p:TestTargetFramework=X 
-** Clojure>  msbuild build.proj -t:TestGet -p:TestTargetFramework=X
-** Clojure>  msbuild build.proj -t:ZipAll 
+* Build and test.  From the Clojure directory with X in {net461, netcoreapp3.1, net5.0} (Configuration will default to Debug. Substitute in names accordingly if that is case.)
+** Clojure>  msbuild build.proj -t:Test -p:TestTargetFramework=X -p:Configuration=Release
+** Clojure>  msbuild build.proj -t:TestGen -p:TestTargetFramework=X -p:Configuration=Release
+** Clojure>  msbuild build.proj -t:ZipAll  -p:Configuration=Release
 * At this point, you will the artifacts for distribution in the Clojure\Stage directory.  Something along the lines of (with version/release adjusted suitably):
 ** Clojure.1.10.0-alpha1.nupkg
 ** Clojure.Main.1.10.0-alpha1.nupkg
-** clojure-clr-1.10.0-alpha1-Debug-core3.1.zip
-** clojure-clr-1.10.0-alpha1-Debug-net5.0.zip
-** clojure-clr-1.10.0-alpha1-Debug-net4.6.1.zip
+** clojure-clr-1.10.0-alpha1-Release-core3.1.zip
+** clojure-clr-1.10.0-alpha1-Release-net5.0.zip
+** clojure-clr-1.10.0-alpha1-Release-net4.6.1.zip
 * Validate these by any manner of your choosing.  I moved the zips somewhere, unzipped them, and checked that the following start up:
 ** in core3.1 and net5.0:
 *** > Clojure.Main.exe          
@@ -26,7 +26,7 @@
 ** I test the tool install via:
 *** > dotnet tool list -g                        # to see if already installed
 *** > dotnet tool uninstall clojure.main -g      # if so, do this
-*** > dotnet tool install -g -add-source . --version 1.10.0-alpha1  Clojure.Main    # version needed only if pre-release.
+*** > dotnet tool install -g --add-source . --version 1.10.0-alpha1  Clojure.Main    # version needed only if pre-release.
 
 
 ## Repo
