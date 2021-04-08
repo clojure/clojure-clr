@@ -24,7 +24,11 @@
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(TargetFramework)' == 'net461'">
     <Exec Command="$(TargetPath) clojure.core clojure.core.protocols clojure.core.server clojure.core.reducers clojure.main clojure.set clojure.zip  clojure.walk clojure.stacktrace clojure.template clojure.test clojure.test.tap clojure.test.junit clojure.pprint clojure.clr.io clojure.repl clojure.clr.shell clojure.string clojure.data clojure.reflect  clojure.edn clojure.datafy" WorkingDirectory="$(OutDir)" />
-    <Exec Command="xcopy $(ProjectDir)$(OutDir)clojure*.dll $(SolutionDir)Clojure.Main461\$(OutDir)  /i /s /e /y" />
+    <ItemGroup>
+      <CljCoreBin Include="$(ProjectDir)$(OutDir)clojure*.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(CljCoreBin)"
+      DestinationFolder="$(SolutionDir)Clojure.Main461\$(OutDir)" />
   </Target>
   
 
