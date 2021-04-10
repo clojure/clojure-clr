@@ -6,6 +6,7 @@
 
 * Modify Clojure\Clojure\Bootstrap\version.properties to desired release version
 * Set the version info in Clojure\CurrentVersion.props
+** Please note that you should lowercase letters only in the pre-release designation in order to avoid problems on non-Windows systems, i.e., beta1 instead of Beta1, rc1 instead of RC1.
 * Build and test.  From the Clojure directory with X in {net461, netcoreapp3.1, net5.0} (Configuration will default to Debug. Substitute in names accordingly if that is case.)
 ** Clojure>  msbuild build.proj -t:Test -p:TestTargetFramework=X -p:Configuration=Release
 ** Clojure>  msbuild build.proj -t:TestGen -p:TestTargetFramework=X -p:Configuration=Release
@@ -18,7 +19,7 @@
 ** clojure-clr-1.10.0-alpha1-Release-net4.6.1.zip
 * Validate these by any manner of your choosing.  I moved the zips somewhere, unzipped them, and checked that the following start up:
 ** in core3.1 and net5.0:
-*** > Clojure.Main.exe          
+*** > Clojure.Main.exe          (This might not be created on non-Windows builds.)
 *** > dotnet Clojure.Main.dll
 ** in net461:
 *** > Clojure.Main461.exe
