@@ -39,6 +39,7 @@
 	<ClojureMainBinDir Condition=" '$(TestTargetFramework)' != 'net461' ">$(RootDir)Clojure.Main\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
     <clji Condition=" '$(TestTargetFramework)' == 'net461' ">Clojure.Main461.exe</clji>
     <clji Condition=" '$(TestTargetFramework)' != 'net461' ">Clojure.Main.exe</clji>		
+    <clji Condition=" '$(TestTargetFramework)' != 'net461' And '$(MSBuildRuntimeType)' == 'Core' ">dotnet run -p $(RootDir)Clojure.Main --framework $(TestTargetFramework) -c $(Configuration) --</clji>		
 	
 	<ClojureCompileBinDir>$(RootDir)Clojure.Compile\bin\$(Configuration)\$(TestTargetFramework)</ClojureCompileBinDir>
 	<cljc>Clojure.Compile.exe</cljc>
