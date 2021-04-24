@@ -49,7 +49,7 @@
 	
 	<StageDir>$(RootDir)Stage</StageDir>
 
-    <ZipVersion Condition=" '$(VersionSuffix)' == '' ">$(MajorVersion).$(MinorVersion).$(PatchVersion))</ZipVersion>
+    <ZipVersion Condition=" '$(VersionSuffix)' == '' ">$(MajorVersion).$(MinorVersion).$(PatchVersion)</ZipVersion>
     <ZipVersion Condition=" '$(VersionSuffix)' != '' ">$(MajorVersion).$(MinorVersion).$(PatchVersion)-$(VersionSuffix)</ZipVersion>
 	
   </PropertyGroup>
