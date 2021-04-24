@@ -61,6 +61,10 @@ Because of the limititions of System.Reflection.Emit, in particular, AssemblyBui
   Fix error in TryExpr parsing -- set! of mutable bidning in protocol fn fails when embedded in a locking expression
 * [CLJCLR-107](https://clojure.atlassian.net/browse/CLJCLR-107)
   Fix Compiler.maybeResolveIn for when the symbol name is empty
+ * [CLJCLR-110](https://clojure.atlassian.net/browse/CLJCLR-110)
+Use Copy directive instead of xcopy in Clojure.Compile.csproj, fixing Linux build
+ * [CLJCLR-111](https://clojure.atlassian.net/browse/CLJCLR-111)
+  Run Clojure.Compile.exe with mono on *nix.
 
 
 # Changes to Clojure in Version 1.10.2
