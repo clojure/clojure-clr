@@ -13,7 +13,7 @@
   <ItemGroup>
     <PackageReference Include="clojure.core.specs.alpha" Version="0.2.56" />
     <PackageReference Include="clojure.spec.alpha" Version="0.2.194" />
-    <PackageReference Include="DynamicLanguageRuntime" Version="1.3.0" />
+    <PackageReference Include="DynamicLanguageRuntime" Version="1.3.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,8 +31,7 @@
     <ItemGroup>
       <CljCoreBin Include="$(ProjectDir)$(OutDir)clojure*.dll" />
     </ItemGroup>
-    <Copy SourceFiles="@(CljCoreBin)"
-      DestinationFolder="$(SolutionDir)Clojure.Main461\$(OutDir)" />
+    <Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main461\$(OutDir)" />
   </Target>
   
 
