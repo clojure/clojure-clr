@@ -8014,3 +8014,20 @@ clojure.lang.IKVReduce
       "false" false
       nil)
     (throw (ArgumentException. (parsing-err s)))))                          ;;; IllegalArgumentException
+
+(defn NaN?
+  {:doc "Returns true if num is NaN, else false"
+   :inline-arities #{1}
+   :inline (fn [num] `(Double/IsNaN ~num))                                  ;;; isNaN
+   :added "1.11"}
+
+  [^double num]
+  (Double/IsNaN num))                                                       ;;; isNaN
+
+(defn infinite?
+  {:doc "Returns true if num is negative or positive infinity, else false"
+   :inline-arities #{1}
+   :inline (fn [num] `(Double/IsInfinity ~num))                             ;;; isInfinite
+   :added "1.11"}
+  [^double num]
+  (Double/IsInfinity num))                                                  ;;; isInfinite
