@@ -6870,13 +6870,19 @@ fails, attempts to require sym's namespace and retries."
   init)
 
  ;;slow path default
- clojure.lang.IPersistentMap
- (kv-reduce 
+ System.Object
+ (kv-reduce
   [amap f init]
-  (reduce (fn [ret [k v]] (f ret k v)) init amap))
+  (reduce (fn [ret ^clojure.lang.IMapEntry me]        ;;; ^java.util.Map$Entry  -- THe problem here is that we don't have an equivalent to java.util.Map$Entry.  We will settle on IMapEntry
+            (f ret
+               (.key me)                              ;;; .getKey
+               (.val me)))                          ;;; .getValue
+          init
+          amap))
+
 
 clojure.lang.IKVReduce
- (kv-reduce 
+ (kv-reduce
   [amap f init]
   (.kvreduce amap f init)))
 
