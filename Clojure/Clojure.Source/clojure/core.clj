@@ -7951,6 +7951,7 @@ clojure.lang.IKVReduce
 
 (defn update-keys
   "m f => {(f k) v ...}
+  
   Given a map m and a function f of 1-argument, returns a new map whose
   keys are the result of applying f to the keys of m, mapped to the
   corresponding values of m.
@@ -7962,3 +7963,54 @@ clojure.lang.IKVReduce
                         (transient {})
                         m))]
     (with-meta ret (meta m))))
+
+(defn- parsing-err
+  "Construct message for parsing for non-string parsing error"
+  ^String [val]
+  (str "Expected string, got " (if (nil? val) "nil" (-> val class .Name))))      ;;; .getName
+
+(defn parse-long
+  {:doc "Parse string of decimal digits with optional leading -/+ and return a
+  Long value, or nil if parse fails"
+   :added "1.11"}
+  [^String s]                                                                ;;; ^Long  -- no equivalent since this can return nil  -- at least until we can return Nullable<long>
+  (if (string? s)
+    (try
+      (Int64/Parse s)                                                        ;;; Long/Parse
+      (catch FormatException _ nil)(catch OverflowException _ nil))          ;;; NumberFormatException  -- and added other cases
+    (throw (ArgumentException. (parsing-err s)))))                           ;;; IllegalArgumentException
+
+(defn parse-double
+  {:doc "Parse string with floating point components and return a Double value,
+  or nil if parse fails.
+
+  Grammar: https://docs.oracle.com/javase/8/docs/api/java/lang/Double.html#valueOf-java.lang.String-"
+   :added "1.11"}
+  [^String s]                                                                ;;; ^Double  -- no equivalent since this can return nil  -- at least until we can return Nullable<double>
+  (if (string? s)
+    (try
+      (Double/Parse s)                                                       ;;; Double/valueOf
+      (catch FormatException _ nil)(catch OverflowException _ nil))          ;;; NumberFormatException  -- and added other cases
+    (throw (ArgumentException. (parsing-err s)))))                           ;;; IllegalArgumentException
+
+(defn parse-uuid
+  {:doc "Parse a string representing a UUID and return a java.util.UUID instance,
+  or nil if parse fails.
+
+  Grammar: https://docs.oracle.com/javase/8/docs/api/java/util/UUID.html#toString--"
+   :added "1.11"}
+  ^System.Guid [^String s]                                                   ;;; java.util.UUID
+  (try
+    (System.Guid/Parse s)                                                    ;;; java.util.UUID/fromString
+    (catch ArgumentException _ nil)(catch FormatException _ nil)))           ;;; IllegalArgumentException  -- and added other cases
+
+(defn parse-boolean
+  {:doc "Parse strings \"true\" or \"false\" and return a boolean, or nil if invalid"
+   :added "1.11"}
+  [^String s]
+  (if (string? s)
+    (case s
+      "true" true
+      "false" false
+      nil)
+    (throw (ArgumentException. (parsing-err s)))))                          ;;; IllegalArgumentException
