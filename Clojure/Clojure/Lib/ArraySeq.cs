@@ -248,12 +248,9 @@ namespace clojure.lang
 
         public object[] ToArray()
         {
-            if (typeof(T) == typeof(object))
-                return (object[])(object)_array;
-
-            object[] items = new object[_array.Length];
-            for (int i = 0; i < _array.Length; i++)
-                items[i] = _array[i];
+            int sz = _array.Length - _i;
+            object[] items = new object[sz];
+            System.Array.Copy(_array, _i, items, 0, sz);
             return items;
         }
 
