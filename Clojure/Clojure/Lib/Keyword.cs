@@ -22,8 +22,14 @@ namespace clojure.lang
     /// Represents a keyword
     /// </summary>
     [Serializable]
-    public sealed class Keyword: AFn, Named, IComparable, ISerializable, IHashEq // ??JAVA only used IFn, not AFn.  NOt sure why.
+    public sealed class Keyword: IFn, Named, IComparable, ISerializable, IHashEq
     {
+
+        // Originally, ClojureJVM had this implementing IFn, while I had it based on AFn.
+        // I changed it to match when updating to fix for CLJ-2350 (commit bd4c42d, 2021.09.14) in order to get consistency in arity error messages.
+        // Sigh.
+
+
         #region Data
 
         /// <summary>
@@ -208,12 +214,17 @@ namespace clojure.lang
 
         #region IFn Members
 
+        Object ThrowArity(int n)
+        {
+            throw new ArityException(n, ToString());
+        }
+
         /// <summary>
         /// (:keyword arg)  => (get arg :keyword)
         /// </summary>
         /// <param name="arg1">The object to access.</param>
         /// <returns>The value mapped to the keyword.</returns>
-        public sealed override object invoke(object arg1)
+        public object invoke(object arg1)
         {
             if (arg1 is ILookup ilu)
                 return ilu.valAt(this);
@@ -229,7 +240,7 @@ namespace clojure.lang
         /// <param name="arg2">Default value if not found.</param>
         /// <returns></returns>
 
-        public sealed override object invoke(object arg1, object notFound)
+        public object invoke(object arg1, object notFound)
         {
             if (arg1 is ILookup ilu)
                 return ilu.valAt(this, notFound);
@@ -237,6 +248,141 @@ namespace clojure.lang
             return RT.get(arg1, this, notFound);
         }
 
+
+        public object invoke()
+        {
+            return ThrowArity(0);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3)
+        {
+            return ThrowArity(3);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4)
+        {
+            return ThrowArity(4);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5)
+        {
+            return ThrowArity(5);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6)
+        {
+            return ThrowArity(6);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7)
+        {
+            return ThrowArity(7);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8)
+        {
+            return ThrowArity(8);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9)
+        {
+            return ThrowArity(9);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10)
+        {
+            return ThrowArity(10);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11)
+        {
+            return ThrowArity(11);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12)
+        {
+            return ThrowArity(12);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13)
+        {
+            return ThrowArity(13);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13, object arg14)
+        {
+            return ThrowArity(14);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13, object arg14, object arg15)
+        {
+            return ThrowArity(15);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13, object arg14, object arg15, object arg16)
+        {
+            return ThrowArity(16);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17)
+        {
+            return ThrowArity(17);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17,
+            object arg18)
+        {
+            return ThrowArity(18);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17,
+            object arg18, object arg19)
+        {
+            return ThrowArity(19);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17,
+            object arg18, object arg19, object arg20)
+        {
+            return ThrowArity(20);
+        }
+
+        public object invoke(object arg1, object arg2, object arg3, object arg4, object arg5,
+            object arg6, object arg7, object arg8, object arg9, object arg10, object arg11,
+            object arg12, object arg13, object arg14, object arg15, object arg16, object arg17,
+            object arg18, object arg19, object arg20, params object[] args)
+        {
+            return ThrowArity(20 + args.Length);
+        }
+
+        public Object applyTo(ISeq arglist)
+        {
+            return AFn.ApplyToHelper(this, arglist);
+        }
 
         #endregion
 
