@@ -7088,7 +7088,7 @@ clojure.lang.IKVReduce
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; clojure version number ;;;;;;;;;;;;;;;;;;;;;;
 ;;; THIS EXPOSES WAY TOO MUCH JVM INTERNALS!
-(let [properties (. clojure.lang.RT GetVersionProperties)                   ;;; properties (with-open [version-stream (.getResourceAsStream 
+(let [^clojure.runtime.Properties properties (. clojure.lang.RT GetVersionProperties)                   ;;; properties (with-open [version-stream (.getResourceAsStream 
                                                                             ;;;                                          (clojure.lang.RT/baseLoader) 
                                                                             ;;;                                          "clojure/version.properties")]
                                                                             ;;;               (doto (new java.util.Properties) 
