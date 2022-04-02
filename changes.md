@@ -1,5 +1,141 @@
 ﻿<!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.10.3
+
+## 1 Changes reverted
+
+* [CLJ-2564](https://clojure.atlassian.net/browse/CLJ-2564)
+  Improve error message for case
+
+## 2 Fixes
+
+* [CLJ-2453](https://clojure.atlassian.net/browse/CLJ-2453)
+  Enable reader conditionals in Clojure prepl
+
+# Changes to Clojure in Version 1.10.2
+
+## 1 Dependencies
+
+Updated dependencies:
+
+* spec.alpha dependency to 0.2.194 - [changes](https://github.com/clojure/spec.alpha/blob/master/CHANGES.md)
+* core.specs.alpha dependency to 0.2.56 - [changes](https://github.com/clojure/core.specs.alpha/blob/master/CHANGES.md)
+
+## 2 Fixes
+
+## 2.1 Interop / JVM
+
+* [CLJ-1472](https://clojure.atlassian.net/browse/CLJ-1472)
+  Ensure monitor object is on stack, for verifiers
+* [CLJ-2517](https://clojure.atlassian.net/browse/CLJ-2517)
+  More fixes for invocation of static interface methods with primitive args
+* [CLJ-2492](https://clojure.atlassian.net/browse/CLJ-2492)
+  Remove uses of deprecated Class.newInstance()
+* [CLJ-2534](https://clojure.atlassian.net/browse/CLJ-2534)
+  Fix javadoc urls for JDK 11+
+* [CLJ-2571](https://clojure.atlassian.net/browse/CLJ-2571)
+  Add Throwable return type hint to ex-cause
+* [CLJ-2572](https://clojure.atlassian.net/browse/CLJ-2572)
+  Avoid reflection in clojure.data
+* [CLJ-2502](https://clojure.atlassian.net/browse/CLJ-2502)
+  Fix reflection warnings in clojure.stacktrace/print-stack-trace
+* [CLJ-2597](https://clojure.atlassian.net/browse/CLJ-2597)
+  proxy should emit Java 1.8 bytecode
+
+## 2.2 Core
+
+* [CLJ-2580](https://clojure.atlassian.net/browse/CLJ-2580)
+  Fix case expression branch analysis that resulted in compilation error
+* [CLJ-2564](https://clojure.atlassian.net/browse/CLJ-2564)
+  Improve error message for case
+* [CLJ-2585](https://clojure.atlassian.net/browse/CLJ-2585)
+  nth with not-found on regex matcher returns not-found on last group index
+* [CLJ-1364](https://clojure.atlassian.net/browse/CLJ-1364)
+  vector-of does not implement equals or hashing methods
+* [CLJ-2549](https://clojure.atlassian.net/browse/CLJ-2549)
+  vector-of does not implement IObj for metadata
+* [CLJ-1187](https://clojure.atlassian.net/browse/CLJ-1187)
+  quoted metadata on empty literal colls is lost
+* [CLJ-2459](https://clojure.atlassian.net/browse/CLJ-2459)
+  ExceptionInInitializerError if jars executed with java -jar
+
+## 2.3 Printing
+
+* [CLJ-2469](https://clojure.atlassian.net/browse/CLJ-2469)
+  Fix errors in printing some maps with namespace syntax
+* [CLJ-1445](https://clojure.atlassian.net/browse/CLJ-1445)
+  pprint doesn't print collection metadata when `*print-meta*` is true
+
+## 2.4 Docstrings
+
+* [CLJ-2295](https://clojure.atlassian.net/browse/CLJ-2295)
+  Eliminate duplicate doc string printing for special forms
+* [CLJ-2495](https://clojure.atlassian.net/browse/CLJ-2495)
+  prepl docstring is incorrect
+* [CLJ-2169](https://clojure.atlassian.net/browse/CLJ-2169)
+  conj has out-of-date :arglists
+
+## 3 Performance
+
+* [CLJ-1005](https://clojure.atlassian.net/browse/CLJ-1005)
+  Use transient map in zipmap
+
+# Changes to Clojure in Version 1.10.1
+
+## 1 Features and Major Changes
+
+### 1.1 Workaround Java Performance Regression When Loading user.clj
+
+Recent builds of Java 8 (u202), 11 (11.0.2), 12, and 13 included
+some changes that [drastically affect](https://bugs.openjdk.java.net/browse/JDK-8219233)
+optimization performance of calls from static initializers to static fields.
+Clojure provides support for loading code on startup from a user.clj file and this
+occurred in the static initializer of the Clojure runtime (RT) class and was thus
+affected.
+
+This issue may eventually be resolved in Java, but in Clojure we have
+modified runtime initialization to avoid loading user.clj in a static
+initializer, which mitigates the case where this caused a performance
+degradation.
+
+* [CLJ-2484](https://clojure.atlassian.net/browse/CLJ-2484)
+  Significant performance regression of code loaded in user.clj in Java 8u202/11.0.
+
+### 1.2 clojure.main Error Reporting
+
+clojure.main is frequently used as a Clojure program launcher by external tools.
+Previously, uncaught exceptions would be automatically printed by the JVM, which
+would also print the stack trace.
+
+This release will now catch exceptions and use the same error triage and printing
+functionality as the Clojure repl. The full stack trace, ex-info, and other
+information will be printed to a target specified by the configuration.
+
+The three available error targets are:
+
+* file - write to a temp file (default, falls back to stderr)
+* stderr - write to stderr stream
+* none - don't write
+
+These error targets can be specified either as options to clojure.main, or as
+Java system properties (flags take precedence). When invoking clojure.main
+(or using the clj tool), use `--report <target>`. For Java system property,
+use `-Dclojure.main.report=<target>`.
+
+* [CLJ-2463](https://clojure.atlassian.net/browse/CLJ-2463)
+  Improve error printing in clojure.main with -m, -e, etc
+* [CLJ-2497](https://clojure.atlassian.net/browse/CLJ-2497)
+  Put error report location on its own line
+* [CLJ-2504](https://clojure.atlassian.net/browse/CLJ-2504)
+  Provide more options for error reporting in clojure.main
+
+## 2 Fixes
+
+* [CLJ-2499](http://dev.clojure.org/jira/browse/CLJ-2499)
+  Some compiler expr evals report as wrong error phase
+* [CLJ-2491](https://clojure.atlassian.net/browse/CLJ-2491)
+  Updated fragile tests so Clojure test suite runs on Java 12
+
 # Changes to ClojureCLR in Version 1.10
 
 The 1.10 release of ClojureCLR corresponds to the 1.10.2 version of Clojure(JVM).
