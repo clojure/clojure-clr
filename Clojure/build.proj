@@ -165,10 +165,10 @@
     <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test.clj" DestinationFolder="$(TestDir)" />
     <SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'net461'"
 							Name="clojure.test-clojure.exclude-namespaces" 
-							Value="#{clojure.test-clojure.compilation.load-ns}" />
+							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.ns-libs-load-later}" />
 	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net461'"
 							Name="clojure.test-clojure.exclude-namespaces" 
-							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.attributes clojure.test-clojure.compilation clojure.test-clojure.genclass}" />						
+							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.ns-libs-load-later clojure.test-clojure.attributes clojure.test-clojure.compilation clojure.test-clojure.genclass}" />						
     <Exec Command="$(clji) run_test.clj"       WorkingDirectory="$(TestDir)" Condition=" '$(Runtime)' == '.Net' "/>
     <Exec Command="mono $(clji) run_test.clj"  WorkingDirectory="$(TestDir)" Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
