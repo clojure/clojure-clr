@@ -8,12 +8,13 @@
 
 ; Author: Frantisek Sodomka
 
-(assembly-load-with-partial-name "System.Drawing")         ;;; DM: Added
+(assembly-load-with-partial-name "System.Drawing")                           ;;; DM: Added
 (ns clojure.test-clojure.java-interop
   (:use clojure.test)
-  (:require                                                ;;; [clojure.inspector]
+  (:require                                                                  ;;; [clojure.inspector]
             [clojure.set :as set])                            
-  )                                                         ;;; (:import java.util.Base64)
+  (:import                                                                   ;;; java.util.Base64
+           (clojure.lang AtomicLong AtomicInteger)))                         ;;; java.util.concurrent.atomic
 
 ; http://clojure.org/java_interop
 ; http://clojure.org/compilation
@@ -590,3 +591,18 @@
   (is (= (char \a) \a)))
 
 ;; Note: More coercions in numbers.clj
+
+; Test that primitive boxing elision in statement context works
+; correctly (CLJ-2621)
+
+(defn inc-atomic-int [^AtomicInteger l]
+  (.incrementAndGet l)
+  nil)
+
+(defn inc-atomic-long [^AtomicLong l]
+  (.incrementAndGet l)
+  nil)
+
+(deftest test-boxing-prevention-when-compiling-statements
+  (is (= 1 (.get (doto (AtomicInteger. 0) inc-atomic-int))))
+  (is (= 1 (.get (doto (AtomicLong. 0) inc-atomic-long)))))
