@@ -11,6 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="clojure\clr\math.clj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="clojure\clr\math.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="clojure\core.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
