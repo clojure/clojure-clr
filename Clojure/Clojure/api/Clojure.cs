@@ -43,7 +43,7 @@ namespace clojure.clr.api
     /// require.invoke(Clojure.read("clojure.set"));
     /// </code>
     /// <para><c>IFn</c>s can be passed to higher order functions, e.g. the
-    /// example below passes <c>plus</c> to <c>read</c>:</para>
+    /// example below passes <c>inc</c> to <c>map</c>:</para>
     /// <code>
     /// IFn map = Clojure.var("clojure.core", "map");
     /// IFn inc = Clojure.var("clojure.core", "inc");
