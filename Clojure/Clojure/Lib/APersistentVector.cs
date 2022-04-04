@@ -212,15 +212,18 @@ namespace clojure.lang
 
             if (obj is IList ilist)
             {
-                if (ilist.Count != v.count())   // THis test in the JVM code can't be right:  || ma.GetHashCode() != v.GetHashCode())
+                if ((!(ilist is IPersistentCollection) || (ilist is Counted)) && (ilist.Count != v.count()))
                     return false;
 
-                for (int i = 0; i < v.count(); i++)
+                var i2 = ilist.GetEnumerator();
+
+                for (var i1 = ((IList)v).GetEnumerator(); i1.MoveNext();)
                 {
-                    if (!Util.equiv(v.nth(i), ilist[i]))
+                    if (!i2.MoveNext() || !Util.equiv(i1.Current,i2.Current))
                         return false;
                 }
-                return true;
+
+                return !i2.MoveNext();
             }
 
             if (!(obj is Sequential))

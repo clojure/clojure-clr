@@ -226,6 +226,9 @@ namespace clojure.lang
 
             ISeq ms = RT.seq(o);
 
+            if (this is Counted tc && o is Counted oc && (tc.count() != oc.count()))
+                return false;
+
             for (ISeq s = seq(); s != null; s = s.next(), ms = ms.next())
             {
                 if (ms == null || !Util.equiv(s.first(), ms.first()))
