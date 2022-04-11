@@ -9,13 +9,17 @@
 (ns
   ^{:author "David Miller",
     :doc "Clojure wrapper functions for System.Math static methods.
+
   Function calls are inlined for performance, and type hinted for primitive
   long or double parameters where appropriate. In general, Math methods are
   optimized for performance and have bounds for error tolerance. 
+
   For more complete information, see:
   https://docs.microsoft.com/en-us/dotnet/api/system.math?view=net-6.0"}
-  clojure.clr.math
-  (:refer-clojure :exclude [min max]))
+  clojure.math)
+
+  (set! *warn-on-reflection* true)
+
 
   ;;; I followed the overall style of clojure.java.math, but the java.lang.math and System.Math do not have the methods defined.
   ;;; Given that this is about giving performant access, I stuck with matching what is in System.Math.
@@ -164,6 +168,8 @@
   ^double [^double x]
   (Math/Tanh x))
 
+(compile-when (contains? #{:dotnet :core} dotnet-platform)
+
 (defn asinh
   {:doc "Returns the angle whose hyperbolic sine is the specified number.
   If x is ##NaN => ##NaN
@@ -194,6 +200,7 @@
   ^double [^double x]
   (Math/Atanh x))
 
+) ;; compile-when
 
 ;;; Exponentials and logarithms
 
@@ -233,6 +240,8 @@
   ^double [^double a]
   (Math/Log10 a))
 
+(compile-when (contains? #{:dotnet :core} dotnet-platform)
+
 (defn log2
   {:doc "Returns the logarithm (base 2) of a.
   If a is ##NaN or negative => ##NaN
@@ -254,6 +263,7 @@
   [^double a]
   (Math/ILogB a))
 
+  ) ;; compile-when
 
 (defn sqrt
   {:doc "Returns the positive square root of a.
@@ -267,6 +277,8 @@
   ^double [^double a]
   (Math/Sqrt a))
 
+(compile-when (contains? #{:dotnet :core} dotnet-platform)
+
 (defn cbrt
   {:doc "Returns the cube root of a.
   If a is ##NaN => ##NaN
@@ -278,6 +290,8 @@
    :added "1.11"}
   ^double [^double a]
   (Math/Cbrt a))
+
+) ;; compile-when
 
   (defn pow
   {:doc "Returns the value of a raised to the power of b.
@@ -345,6 +359,8 @@
   [x]
   (Math/Truncate x))
 
+  (compile-when (contains? #{:dotnet :core} dotnet-platform)
+
   (defn scaleb
   {:doc "Returns d * 2^scaleFactor, scaling by a factor of 2.
   See: https://docs.microsoft.com/en-us/dotnet/api/system.math.scaleb?view=net-6.0"
@@ -354,37 +370,24 @@
   ^double [^double d scaleFactor]
   (Math/ScaleB d scaleFactor))
 
-
+  ) ;; compile-when
 
 
   ;;; abs, max,min and related
 
-  (defn abs
-  {:doc "Returns the absolute value of a specified number.
-  See: https://docs.microsoft.com/en-us/dotnet/api/system.math.abs?view=net-6.0"
+  ;;; abs, min, max implement math-polymorphically in clojure.lang.Numbers
+  
+(defn sign
+  {:doc "Returns an integer that indicates the sign of a number.
+  See: https://docs.microsoft.com/en-us/dotnet/api/system.math.sign?view=net-6.0"
    :inline-arities #{1}
-   :inline (fn [a] `(Math/Abs ~a))
+   :inline (fn [d] `(Math/Sign ~d))
    :added "1.11"}
-  [a]
-  (Math/Abs a))
+  [d]
+  (Math/Sign d))
 
-(defn max
-  {:doc "Returns the larger of two specified numbers.
-  See: https://docs.microsoft.com/en-us/dotnet/api/system.math.max?view=net-6.0"
-   :inline-arities #{2}
-   :inline (fn [a b] `(Math/Max ~a ~b))
-   :added "1.11"}
-  [a b]
-  (Math/Max a b))
 
-(defn min
-  {:doc "Returns the smaller of two numbers.
-  See: https://docs.microsoft.com/en-us/dotnet/api/system.math.min?view=net-6.0"
-   :inline-arities #{2}
-   :inline (fn [p0 p1] `(Math/Min ~p0 ~p1))
-   :added "1.11"}
-  [p0 p1]
-  (Math/Min p0 p1))
+(compile-when (contains? #{:dotnet :core} dotnet-platform)
 
 (defn max-magnitude
   {:doc "Returns the larger magnitude of two double-precision floating-point numbers.
@@ -404,7 +407,6 @@
   ^double [^double a ^double b]
   (Math/MinMagnitude a b))
 
-
 (defn clamp
   {:doc "Returns value clamped to the inclusive range of min and max.
   See: https://docs.microsoft.com/en-us/dotnet/api/system.math.clamp?view=net-6.0"
@@ -413,16 +415,6 @@
    :added "1.11"}
   [val min max]
   (Math/Clamp val min max))
-
-
-(defn sign
-  {:doc "Returns an integer that indicates the sign of a number.
-  See: https://docs.microsoft.com/en-us/dotnet/api/system.math.sign?view=net-6.0"
-   :inline-arities #{1}
-   :inline (fn [d] `(Math/Sign ~d))
-   :added "1.11"}
-  [d]
-  (Math/Sign d))
 
 (defn copy-sign
   {:doc "Returns a double with the magnitude of the first argument and the sign of
@@ -473,6 +465,8 @@
    :added "1.11"}
   ^double [^double d]
   (Math/BitIncrement d))
+
+) ;; compile-when
 
 (defn fused-multiply-add
   {:doc "Returns (x * y) + z, rounded as one ternary operation.

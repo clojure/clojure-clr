@@ -14,11 +14,11 @@
 
 ;; DM: Added
 ;; Copied from reducers.clj, modified compile-if to compile-when
-(defmacro ^:private compile-when
-  [exp & body]
-  (when (try (eval exp)
-           (catch Exception _ false))                      ;;; Throwable
-    `(do ~@body)))
+;;(defmacro ^:private compile-when
+;;  [exp & body]
+;;  (when (try (eval exp)
+;;           (catch Exception _ false))                      ;;; Throwable
+;;    `(do ~@body)))
 
 (deftest calls-once
   (let [a (atom 0)

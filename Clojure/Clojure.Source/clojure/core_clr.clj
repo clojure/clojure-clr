@@ -329,3 +329,24 @@
   [^String ns-root ^String fs-root]
   (swap! *ns-load-mappings* conj
 	[(.Replace ns-root "." "/") fs-root]))
+
+
+;; Framework version -- alpha
+
+(def framework-description (System.Runtime.InteropServices.RuntimeInformation/FrameworkDescription))
+
+(defn- parse-framework-description [] 
+    (let [descr framework-description
+          prefixes '(( ".NET Framework " :framework)  (".NET Native "  :native) (".NET Core " :core)  (".NET " :dotnet))          
+          try-parse (fn [[^String s k]] (when (.StartsWith descr s) [k (.Substring descr (.Length s))]))]
+        (some try-parse prefixes)))
+
+(def dotnet-platform (first (parse-framework-description)))
+(def dotnet-version (second (parse-framework-description)))
+
+(defmacro compile-when
+  {:added "1.11"}
+  [exp & body]
+  (when (try (eval exp)
+           (catch Exception _ false))                      ;;; Throwable
+    `(do ~@body)))
