@@ -193,6 +193,8 @@ namespace clojure.lang
             object dec(object x);
             object decP(object x);
             object unchecked_dec(object x);
+
+            object abs(object x);
         }
 
         #endregion
@@ -275,6 +277,7 @@ namespace clojure.lang
             public abstract object negate(object x);
             public abstract object inc(object x);
             public abstract object dec(object x);
+            public abstract object abs(object x);
         }
 
         #endregion
@@ -1670,28 +1673,19 @@ namespace clojure.lang
 
         public static long max(long x, long y)
         {
-            if (x > y)
-                return x;
-            else
-                return y;
+            return Math.Max(x, y);
         }
 
 
         public static ulong max(ulong x, ulong y)
         {
-            if (x > y)
-                return x;
-            else
-                return y;
+            return Math.Max(x, y);
         }
 
 
         public static decimal max(decimal x, decimal y)
         {
-            if (x > y)
-                return x;
-            else
-                return y;
+            return Math.Max(x, y);
         }
 
 
@@ -1858,28 +1852,19 @@ namespace clojure.lang
 
         public static long min(long x, long y)
         {
-            if (x < y)
-                return x;
-            else
-                return y;
+            return Math.Min(x, y);
         }
 
 
         public static ulong min(ulong x, ulong y)
         {
-            if (x < y)
-                return x;
-            else
-                return y;
+            return Math.Min(x, y);      
         }
 
 
         public static decimal min(decimal x, decimal y)
         {
-            if (x < y)
-                return x;
-            else
-                return y;
+            return Math.Min(x, y);
         }
 
 
@@ -2024,6 +2009,33 @@ namespace clojure.lang
             else
                 return y;
         }
+
+
+        public static long abs(long x)
+        {
+            return Math.Abs(x);
+        }
+
+        public static double abs(double x)
+        {
+            return Math.Abs(x);
+        }
+
+        public static ulong abs(ulong x)
+        {
+            return x;
+        }
+
+        public static decimal abs(decimal x)
+        {
+            return Math.Abs(x);
+        }
+
+        static public object abs(object x)
+        {
+            return ops(x).abs(x);
+        }
+
 
         #endregion
 
@@ -2567,6 +2579,12 @@ namespace clojure.lang
                 long val = Util.ConvertToLong(x);
                 return num(Numbers.unchecked_dec(val));
             }
+
+            public object abs(object x)
+            {
+                long val = Util.ConvertToLong(x);
+                return num(Math.Abs(val));
+            }
             #endregion
         }
 
@@ -2793,6 +2811,12 @@ namespace clojure.lang
                 ulong val = Util.ConvertToULong(x);
                 return num(Numbers.unchecked_dec(val));
             }
+
+            public object abs(object x)
+            {
+                ulong val = Util.ConvertToULong(x);
+                return val;   // well, we are unsigned, after all
+            }
             #endregion
         }
 
@@ -2918,6 +2942,11 @@ namespace clojure.lang
             public override object dec(object x)
             {
                 return Util.ConvertToDouble(x) - 1;
+            }
+
+            public override object abs(object x)
+            {
+                return Math.Abs(Util.ConvertToDouble(x));
             }
 
             #endregion
@@ -3100,6 +3129,12 @@ namespace clojure.lang
             public override object dec(object x)
             {
                 return Numbers.add(x, -1);
+            }
+
+            public override object abs(object x)
+            {
+                Ratio rx = (Ratio)(x);
+                return new Ratio(rx.numerator.Abs(), rx.denominator); ;
             }
 
             #endregion
@@ -3355,6 +3390,12 @@ namespace clojure.lang
                 return decP(x);
             }
 
+            public object abs(object x)
+            {
+                decimal val = Util.ConvertToDecimal(x);
+                return Math.Abs(val);
+            }
+
             #endregion
         }
 
@@ -3491,6 +3532,10 @@ namespace clojure.lang
                 return BigInt.fromBigInteger(ToBigInteger(x) - BigInteger.One);
             }
 
+            public override object abs(object x)
+            {
+                return BigInt.fromBigInteger(ToBigInteger(x).Abs());
+            }
             #endregion
         }
 
@@ -3644,6 +3689,15 @@ namespace clojure.lang
                 return c == null
                     ? bx.Subtract(BigDecimal.One)
                     : bx.Subtract(BigDecimal.One, c.Value);
+            }
+
+            public override object abs(object x)
+            {
+                BigDecimal.Context? c = (BigDecimal.Context?)RT.MathContextVar.deref();
+                BigDecimal bx = (BigDecimal)x;
+                return c == null
+                        ? bx.Abs()
+                        : bx.Abs(c.Value);
             }
 
             #endregion

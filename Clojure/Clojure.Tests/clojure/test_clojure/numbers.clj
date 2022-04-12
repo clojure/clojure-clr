@@ -644,6 +644,20 @@ Math/pow overflows to Infinity."
     (is (= Int64 (class (min 1.0 2.0 -10))))                        ;;; java.lang.Long
     (is (= Double (class (min 1 2 -10.0 3 4 5))))))                 ;;; java.lang.Double
 
+(deftest test-abs
+  (are [in ex] (= ex (abs in))
+    -1 1
+    1 1
+    ;;;  Int64/MinValue Int64/MinValue   ;; special case!    Long/MIN_VALUE Long/MIN_VALUE  -- in CLR, taking abs of Int64/MaxValue throws
+    -1.0 1.0
+    -0.0 0.0
+    ##-Inf ##Inf
+    ##Inf ##Inf
+    -123.456M 123.456M
+    -123N 123N
+    -1/5 1/5)
+  (is (NaN? (abs ##NaN))))
+
 (deftest clj-868
   (testing "min/max: NaN is contagious"
     (letfn [(fnan? [x] (Single/IsNaN x))                           ;;; ^Float  Float/isNaN                   
