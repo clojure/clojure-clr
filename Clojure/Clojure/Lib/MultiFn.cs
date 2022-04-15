@@ -174,7 +174,7 @@ namespace clojure.lang
             _rw.EnterWriteLock();
             try
             {
-                if (Prefers(dispatchValY, dispatchValX))
+                if (Prefers(_hierarchy.deref(),dispatchValY, dispatchValX))
                     throw new InvalidOperationException(String.Format("Preference conflict in multimethod {0}: {1} is already preferred to {2}", _name, dispatchValY, dispatchValX));
                 _preferTable = PreferTable.assoc(dispatchValX,
                     RT.conj((IPersistentCollection)RT.get(_preferTable, dispatchValX, PersistentHashSet.EMPTY),
@@ -198,16 +198,16 @@ namespace clojure.lang
         /// <param name="x">The first dispatch value.</param>
         /// <param name="y">The second dispatch value.</param>
         /// <returns><value>true</value> if <paramref name="x"/> is preferred over <paramref name="y"/></returns>
-        private bool Prefers(object x, object y)
+        private bool Prefers(object hierarchy, object x, object y)
         {
             IPersistentSet xprefs = (IPersistentSet)PreferTable.valAt(x);
             if (xprefs != null && xprefs.contains(y))
                 return true;
-            for (ISeq ps = RT.seq(_parents.invoke(y)); ps != null; ps = ps.next())
-                if (Prefers(x, ps.first()))
+            for (ISeq ps = RT.seq(_parents.invoke(hierarchy,y)); ps != null; ps = ps.next())
+                if (Prefers(hierarchy, x, ps.first()))
                     return true;
-            for (ISeq ps = RT.seq(_parents.invoke(x)); ps != null; ps = ps.next())
-                if (Prefers(ps.first(), y))
+            for (ISeq ps = RT.seq(_parents.invoke(hierarchy, x)); ps != null; ps = ps.next())
+                if (Prefers(hierarchy, ps.first(), y))
                     return true;
             return false;
         }
@@ -218,9 +218,9 @@ namespace clojure.lang
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        private bool IsA(object x, object y)
+        private bool IsA(object hierarchy, object x, object y)
         {
-            return RT.booleanCast(_isa.invoke(_hierarchy.deref(),x, y));
+            return RT.booleanCast(_isa.invoke(hierarchy, x, y));
         }
 
         /// <summary>
@@ -229,9 +229,9 @@ namespace clojure.lang
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        private bool Dominates(object x, object y)
+        private bool Dominates(object hierarchy, object x, object y)
         {
-            return Prefers(x, y) || IsA(x, y);
+            return Prefers(hierarchy, x, y) || IsA(hierarchy, x, y);
         }
 
 
@@ -299,11 +299,11 @@ namespace clojure.lang
 
                 foreach (IMapEntry me in MethodTable)
                 {
-                    if (IsA(dispatchVal, me.key()))
+                    if (IsA(ch, dispatchVal, me.key()))
                     {
-                        if (bestEntry == null || Dominates(me.key(), bestEntry.key()))
+                        if (bestEntry == null || Dominates(ch, me.key(), bestEntry.key()))
                             bestEntry = me;
-                        if (!Dominates(bestEntry.key(), me.key()))
+                        if (!Dominates(ch, bestEntry.key(), me.key()))
                             throw new ArgumentException(String.Format("Multiple methods in multimethod {0} match dispatch value: {1} -> {2} and {3}, and neither is preferred",
                                 _name, dispatchVal, me.key(), bestEntry.key()));
                     }
