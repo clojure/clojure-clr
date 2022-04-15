@@ -125,6 +125,18 @@ Halloway."}
         (.WaitForExit proc)
         {:exit (.ExitCode proc) :out @out :err @err}))))
 
+(defn launch
+  "Same as sh except the I/O channels of the sub-process are ignored.
+  Use when you want the sub-process to take an action, but do not want to wait
+  for the I/O channels to close. Example: Launching a browser with xdg-open.
+  "
+  {:added "1.11"}
+  [& args]
+  (let [[cmd opts] (parse-args args)
+        proc (Process/Start
+              (make-process-info cmd "UTF-8" (:env opts) (:dir opts)))]
+    {:exit (.ExitCode proc)}))
+
 (comment
 
 (println (sh "ls" "-l"))
@@ -140,4 +152,10 @@ Halloway."}
 (println (sh "cmd" "/c dir"))
 (println (sh "cmd" "/c dir 1>&2"))
 (println (sh "cmd" "/c dir" :dir "/"))
+
+(println (launch "touch" "my-test-file"))
+(println (sh "ls" "-l" "my-test-file"))
+(println (launch "rm" "my-test-file"))
+(println (sh "ls" "-l" "my-test-file"))
+
 )
