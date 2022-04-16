@@ -16,3 +16,6 @@
 (definterface ExampleInterface
   (hinted [^int i])
   (hinted [^String s]))
+
+(defprotocol LongsHintedProto
+  (^longs longs-hinted [_]))
