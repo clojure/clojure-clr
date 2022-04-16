@@ -182,6 +182,9 @@
     <None Update="clojure\test_clojure\protocols\more_examples.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="clojure\test_clojure\proxy\examples.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="clojure\test_clojure\reader.cljc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

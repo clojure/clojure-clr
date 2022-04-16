@@ -150,10 +150,10 @@
   </Target>  
   
   <Target Name="CompileTest" DependsOnTargets="StageTest" Condition="'$(TestTargetFramework)' == 'net461'">
-    <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes clojure.test-clojure.compilation.load-ns clojure.test-clojure.compilation.line-number-examples" 
+    <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.proxy.examples clojure.test-clojure.attributes clojure.test-clojure.compilation.load-ns clojure.test-clojure.compilation.line-number-examples" 
           WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == '.Net' "/>
-    <Exec Command="mono $(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.attributes  clojure.test-clojure.compilation.load-ns clojure.test-clojure.compilation.line-number-examples" 
+    <Exec Command="mono $(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.proxy.examples clojure.test-clojure.attributes  clojure.test-clojure.compilation.load-ns clojure.test-clojure.compilation.line-number-examples" 
           WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == 'Mono' "/>
   </Target>
