@@ -867,7 +867,7 @@ namespace clojure.lang
             //{
                 switch (Type.GetTypeCode(type))
                 {
-                    case TypeCode.Char:
+                    //case TypeCode.Char:
                     case TypeCode.SByte:
                     case TypeCode.Byte:
                     case TypeCode.Int16:
@@ -890,7 +890,7 @@ namespace clojure.lang
         {
             switch (Type.GetTypeCode(type))
             {
-                case TypeCode.Char:
+                //case TypeCode.Char:
                 case TypeCode.SByte:
                 case TypeCode.Byte:
                 case TypeCode.Int16:

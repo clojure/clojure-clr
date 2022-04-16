@@ -204,21 +204,21 @@ namespace clojure.lang.Runtime
 
             switch (fromTC)
             {
-                case TypeCode.Char:
-                    switch (toTC)
-                    {
-                        case TypeCode.Char:
-                        case TypeCode.UInt16:
-                        case TypeCode.UInt32:
-                        case TypeCode.UInt64:
-                        case TypeCode.Int32:
-                        case TypeCode.Int64:
-                            return true;
-                        case TypeCode.Object:
-                            return toBigInt;
-                        default:
-                            return false;
-                    }
+                //case TypeCode.Char:
+                //    switch (toTC)
+                //    {
+                //        case TypeCode.Char:
+                //        case TypeCode.UInt16:
+                //        case TypeCode.UInt32:
+                //        case TypeCode.UInt64:
+                //        case TypeCode.Int32:
+                //        case TypeCode.Int64:
+                //            return true;
+                //        case TypeCode.Object:
+                //            return toBigInt;
+                //        default:
+                //            return false;
+                //    }
 
                 case TypeCode.Byte:
                     switch (toTC)
