@@ -3534,6 +3534,33 @@ namespace clojure.lang
 
 #pragma warning restore IDE1006 // Naming Styles
         #endregion
+
+        #region Completely misc
+
+        // I needed a ULP (unit of least precision) to implement in some tests.
+        // JVM has this in java.lang.Math.  CLR's System.Math does not have this method.
+        // So I'm defining it here.  Variations of this code all over StackOverflow.
+
+        public static double Ulp(double x)
+        {
+            if (Double.IsNaN(x))
+                return double.NaN;
+            else if (Double.IsInfinity(x))
+                return double.PositiveInfinity;
+            else if (x == 0.0 || x == -0.0)
+                return double.Epsilon;
+            else
+            {
+                double absX = Math.Abs(x);
+                var bits = BitConverter.DoubleToInt64Bits(absX);
+                if (absX == Double.MaxValue)
+                    return BitConverter.Int64BitsToDouble(bits) - BitConverter.Int64BitsToDouble(bits - 1);
+                double nextValue = BitConverter.Int64BitsToDouble(bits + 1);
+                return nextValue - absX;
+            }
+        }
+
+        #endregion
     }
 
     public static class RuntimeBootstrapFlag
