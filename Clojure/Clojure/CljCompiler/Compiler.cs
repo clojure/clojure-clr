@@ -1894,7 +1894,7 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                throw new CompilerException(sourcePath, lineBefore, columnBefore, e);
+                throw new CompilerException(sourcePath, lineBefore, columnBefore, null, CompilerException.PhaseExecutionKeyword, e);
             }
             finally
             {
