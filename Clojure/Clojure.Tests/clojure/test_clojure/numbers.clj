@@ -184,6 +184,9 @@
                        (catch ArgumentException e :error)))]           ;;; IllegalArgumentException
         (is (= vals (map wrapped inputs)))))))
 
+(deftest test-prim-with-matching-hint
+  (is (= 1.0 (let [x 1.2] (Math/Round ^double x)))))                     ;;; 1 round
+
 ;; *** Functions ***
 
 (defonce DELTA 1e-12)

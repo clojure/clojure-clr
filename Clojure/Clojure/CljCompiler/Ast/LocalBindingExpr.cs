@@ -35,10 +35,12 @@ namespace clojure.lang.CljCompiler.Ast
 
         public LocalBindingExpr(LocalBinding b, Symbol tag)
         {
-            if (b.PrimitiveType != null && _tag != null)
-                throw new InvalidOperationException("Can't type hint a primitive local");
+            if (b.PrimitiveType != null && tag != null)
+                if (!b.PrimitiveType.Equals(Compiler.TagType(tag)))
+                    throw new InvalidOperationException("Can't type hint a primitive local with a diffent type");
+                else _tag = null;
+            else _tag = tag;
             _b = b;
-            _tag = tag;
         }
 
         #endregion
