@@ -1393,7 +1393,7 @@
   (or (instance? Int32 n)      (instance? UInt32 n)     ;;; Integer -> Int32, added UInt32
       (instance? Int64 n)      (instance? UInt64 n)     ;;; Long -> Int64, added UInt64
 	  (instance? clojure.lang.BigInt n)
-      (instance? BigInteger n) (instance? Char n)       ;;; added Char test
+      (instance? BigInteger n)
       (instance? Int16 n)      (instance? UInt16 n)     ;;; Short -> Int16, added UInt16
       (instance? Byte n)  (instance? SByte n)))         ;;; Added SByte test
 

@@ -75,12 +75,12 @@
   false? [:bool-false]
   ; boolean?
 
-  integer?  [:byte :short :int :long :bigint :character]                                  ;;; Added :character, because Char is integer type in CLR
+  integer?  [:byte :short :int :long :bigint]
   float?    [:float :double]
   decimal?  [:bigdec]
   ratio?    [:ratio]
-  rational? [:byte :short :int :long :bigint :ratio :bigdec :character]                   ;;; Added :character, because Char is integer type in CLR
-  number?   [:byte :short :int :long :bigint :ratio :bigdec :float :double :character]    ;;; Added :character, because Char is integer type in CLR
+  rational? [:byte :short :int :long :bigint :ratio :bigdec]
+  number?   [:byte :short :int :long :bigint :ratio :bigdec :float :double]
 
   ; character?
   symbol?  [:symbol]

@@ -4181,7 +4181,7 @@ namespace clojure.lang
         public static char[] char_array(int size, Object init)
         {
             char[] ret = new char[size];
-            if (Util.IsNumeric(init))
+            if (Util.IsNumeric(init) || init is Char)
             {
                 char f = Util.ConvertToChar(init);
                 for (int i = 0; i < ret.Length; i++)
