@@ -49,15 +49,18 @@
     "-0.0" -0.0
     "0.0" 0.0
     "5" 5.0
-    ;;;"Infinity" Double/PositiveInfinity                     ;;; POSITIVE_INFINITY  -- this is culture dependent
-    ;;;"-Infinity" Double/NegativeInfinity                    ;;; NEGATIVE_INFINITY  -- this is culture dependent
-    "1.7976931348623157E308" Double/MaxValue               ;;; MAX_VALUE
-    "4.9E-324" Double/Epsilon)                             ;;; MIN_VALUE
-  (is (Double/IsNaN (parse-double "NaN")))                 ;;; isNaN
+    ;;;"Infinity" Double/PositiveInfinity                                         ;;; POSITIVE_INFINITY  -- this is culture dependent
+    ;;;"-Infinity" Double/NegativeInfinity                                        ;;; NEGATIVE_INFINITY  -- this is culture dependent
+    "1.7976931348623157E308" Double/MaxValue                                      ;;; MAX_VALUE
+    "4.9E-324" Double/Epsilon                                                     ;;; MIN_VALUE
+    "1.7976931348623157E309" Double/PositiveInfinity  ;; past max double          ;;;/POSITIVE_INFINITY
+    "2.5e-324" Double/Epsilon  ;; past min double, above half minimum             ;;; MIN_VALUE
+    "2.4e-324" 0.0)  ;; below minimum double
+  (is (Double/IsNaN (parse-double "NaN")))                                        ;;; isNaN
   (are [s] ;; nil on invalid string
-    (nil? (parse-long s))
-    "1.7976931348623157E309" ;; past max double
-    "9.9E-324")) ;; past min double
+    (nil? (parse-double s))
+    "double" ;; invalid string
+    "1.7976931348623157G309")) ;; invalid, but similar to valid
 
 ;; generative test - gen double -> str -> parse, compare
 (deftest test-gen-parse-double
