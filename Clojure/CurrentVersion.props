@@ -2,8 +2,8 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MajorVersion>1</MajorVersion>
-    <MinorVersion>10</MinorVersion>
-    <PatchVersion>3</PatchVersion>
-    <VersionSuffix>alpha1</VersionSuffix>
+    <MinorVersion>11</MinorVersion>
+    <PatchVersion>0</PatchVersion>
+    <VersionSuffix>beta1</VersionSuffix>
   </PropertyGroup>
 </Project>

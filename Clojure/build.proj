@@ -212,7 +212,9 @@
 	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net5.0\publish"
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net5.0.zip"
 				  Overwrite="true"/>	
-				  
+	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net6.0\publish"
+	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net6.0.zip"
+				  Overwrite="true"/>			  
 	<ItemGroup>
 		<ClojureCompileAssets Include="$(RootDir)Clojure.Compile\bin\$(Configuration)\net461\Clojure.Compile.*" />
 		<ClojureMain461Assets Include="$(RootDir)Clojure.Main461\bin\$(Configuration)\net461\**\*" />
@@ -251,7 +253,17 @@
     <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net5.0 -o clojure-clr-release5" 
           WorkingDirectory="$(OutputPath)" />
   </Target>
+  
+  <Target Name="BuildD6">
+    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net6.0 -o clojure-clr-debug5" 
+          WorkingDirectory="$(OutputPath)" />
+  </Target>
 
+  <Target Name="BuildR6">
+    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net6.0 -o clojure-clr-release5" 
+          WorkingDirectory="$(OutputPath)" />  
+  </Target>
+  
   <Target Name="CleanD3">
     <Exec Command="dotnet clean Clojure.sln -p:Platform=&quot;Any CPU&quot; -o clojure-clr-debug3" 
           WorkingDirectory="$(OutputPath)" />
