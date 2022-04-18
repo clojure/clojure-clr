@@ -26,7 +26,7 @@
   [x y ^double m]
   (let [mu (* (clojure.lang.RT/Ulp x) m)]         ;;; m/ulp
     (<= (- x mu) y (+ x mu))))
-
+(compile-when (contains? #{:dotnet :core} dotnet-platform)   ;;; 4.6.1 is variant on a number of these
 (deftest test-sin
   (is (NaN? (m/sin ##NaN)))
   (is (NaN? (m/sin ##-Inf)))
@@ -67,7 +67,7 @@
   (is (pos-zero? (m/atan 0.0)))
   (is (neg-zero? (m/atan -0.0)))
   (is (ulp= (m/atan 1) 0.7853981633974483 1)))
-
+) ;; compile-when
 ;;;(deftest test-radians-degrees-roundtrip
 ;;;  (doseq [d (range 0.0 360.0 5.0)]
 ;;;    (is (ulp= (m/round d) (m/round (-> d m/to-radians m/to-degrees)) 1))))
@@ -138,7 +138,7 @@
 ;;;  (is (= ##-Inf (m/rint ##-Inf)))
 ;;;  (is (= 1.0 (m/rint 1.2)))
 ;;;  (is (neg-zero? (m/rint -0.01))))
-
+(compile-when (contains? #{:dotnet :core} dotnet-platform)   ;;; 4.6.1 is variant on a number of these
 (deftest test-atan2
   (is (NaN? (m/atan2 ##NaN 1.0)))
   (is (NaN? (m/atan2 1.0 ##NaN)))
@@ -179,7 +179,7 @@
   (is (= 4.0 (m/pow -2.0 2.0)))
   (is (= -8.0 (m/pow -2.0 3.0)))
   (is (= 8.0 (m/pow 2.0 3.0))))
-
+) ;; compile-when
 (deftest test-round
   (is (NaN? (m/round ##NaN)))                                          ;;; (= 0 (m/round ##NaN)))
   (is (= ##-Inf (m/round ##-Inf)))                                     ;;; Long/MIN_VALUE
@@ -291,10 +291,14 @@
 ;;;  (is (pos-zero? (m/log1p 0.0)))
 ;;;  (is (neg-zero? (m/log1p -0.0))))
 
+(compile-when (contains? #{:dotnet :core} dotnet-platform)
+
 (deftest test-copy-sign
   (is (= 1.0 (m/copy-sign 1.0 42.0)))
   (is (= -1.0 (m/copy-sign 1.0 -42.0)))
   (is (= -1.0 (m/copy-sign 1.0 ##-Inf))))
+
+) ;; compile-when
 
 ;;;(deftest test-get-exponent
 ;;;  (is (= (inc Double/MAX_EXPONENT) (m/get-exponent ##NaN)))
@@ -311,6 +315,9 @@
 ;;;  (is (neg-zero? (m/next-after -0.0 -0.0)))
 ;;;  (is (= Double/MAX_VALUE (m/next-after ##Inf 1.0)))
 ;;;  (is (pos-zero? (m/next-after Double/MIN_VALUE -1.0))))
+
+
+(compile-when (contains? #{:dotnet :core} dotnet-platform)
 
 (deftest test-bit-increment                                  ;;; test-next-up
   (is (NaN? (m/bit-increment ##NaN)))                        ;;; m/next-up
@@ -330,6 +337,7 @@
   (is (neg-zero? (m/scaleb -0.0 2)))                         ;;; m/scalb
   (is (= 32.0 (m/scaleb 2.0 4))))                            ;;; m/scalb
 
+) ;; compile-when
 
   ;;; need tests for asinh, acosh, atanh  (so does ClojureJVM)
   ;;; need tests for:

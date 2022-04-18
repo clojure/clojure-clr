@@ -1457,6 +1457,7 @@
            (vec (iteration api
                            :kf #(some-> % :k #{0 1 2})
                            :vf :item))))))
+(compile-when (>= (.CompareTo dotnet-version "6") 0)
 
 (defspec iteration-seq-equals-reduce 1000
   (prop/for-all [initk gen/int
@@ -1469,3 +1470,5 @@
                              :initk initk)))]
       (= (into [] (src))
          (into [] (seq (src)))))))
+
+) ;; compile-when

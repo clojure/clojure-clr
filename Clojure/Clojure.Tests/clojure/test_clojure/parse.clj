@@ -38,7 +38,7 @@
     (if (:result res)
       (is true) ;; pass
       (is (:result res) (pr-str res)))))
-
+(compile-when (contains? #{:dotnet :core} dotnet-platform)   ;;; 4.6.1 is variant on a number of these
 (deftest test-parse-double
   (are [s expected]
     (= expected (parse-double s))
@@ -61,7 +61,7 @@
     (nil? (parse-double s))
     "double" ;; invalid string
     "1.7976931348623157G309")) ;; invalid, but similar to valid
-
+) ;; compile-when
 ;; generative test - gen double -> str -> parse, compare
 (deftest test-gen-parse-double
   (let [res (chk/quick-check
