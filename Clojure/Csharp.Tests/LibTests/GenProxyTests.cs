@@ -821,7 +821,7 @@ namespace Clojure.Tests.LibTests
         {
         }
 
-#if NET461
+#if NET462
         [Test]
         public void FindTypeInAssembly()
         {
@@ -922,7 +922,7 @@ namespace Clojure.Tests.LibTests
             int m2(int x);
         }
 
-#if NET461
+#if NET462
         [Test]
         public void CanCreateConcreteImplementationOverAbstractProperty()
         {

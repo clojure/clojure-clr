@@ -195,7 +195,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 return false;
             }
-#if NET461
+#if NET462
             if (module.IsTransient())
             {
                 return true;

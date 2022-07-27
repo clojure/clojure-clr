@@ -26,20 +26,20 @@
 	
 	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">net5.0</TestTargetFramework>
 	
-	<Error Condition=" '$(TestTargetFramework)' != 'net461' AND '$(TestTargetFramework)' != 'netcoreapp3.1' AND '$(TestTargetFramework)' != 'net5.0'" />
+	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'netcoreapp3.1' AND '$(TestTargetFramework)' != 'net5.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
 		
 		
-	<TestLibraryFramework Condition=" '$(TestTargetFramework)' == 'net461' ">netstandard2.0</TestLibraryFramework>
-	<TestLibraryFramework Condition=" '$(TestTargetFramework)' != 'net461' ">netstandard2.1</TestLibraryFramework>
+	<TestLibraryFramework Condition=" '$(TestTargetFramework)' == 'net462' ">netstandard2.0</TestLibraryFramework>
+	<TestLibraryFramework Condition=" '$(TestTargetFramework)' != 'net462' ">netstandard2.1</TestLibraryFramework>
 	
 
 	<TestDir>$(RootDir)Test\$(Configuration)\$(TestTargetFramework)</TestDir>
 	
-	<ClojureMainBinDir Condition=" '$(TestTargetFramework)' == 'net461' ">$(RootDir)Clojure.Main461\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
-	<ClojureMainBinDir Condition=" '$(TestTargetFramework)' != 'net461' ">$(RootDir)Clojure.Main\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
-    <clji Condition=" '$(TestTargetFramework)' == 'net461' ">Clojure.Main461.exe</clji>
-    <clji Condition=" '$(TestTargetFramework)' != 'net461' ">Clojure.Main.exe</clji>		
-    <clji Condition=" '$(TestTargetFramework)' != 'net461' And '$(MSBuildRuntimeType)' == 'Core' ">dotnet run -p $(RootDir)Clojure.Main --framework $(TestTargetFramework) -c $(Configuration) --</clji>		
+	<ClojureMainBinDir Condition=" '$(TestTargetFramework)' == 'net462' ">$(RootDir)Clojure.Main461\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
+	<ClojureMainBinDir Condition=" '$(TestTargetFramework)' != 'net462' ">$(RootDir)Clojure.Main\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
+    <clji Condition=" '$(TestTargetFramework)' == 'net462' ">Clojure.Main461.exe</clji>
+    <clji Condition=" '$(TestTargetFramework)' != 'net462' ">Clojure.Main.exe</clji>		
+    <clji Condition=" '$(TestTargetFramework)' != 'net462' And '$(MSBuildRuntimeType)' == 'Core' ">dotnet run -p $(RootDir)Clojure.Main --framework $(TestTargetFramework) -c $(Configuration) --</clji>		
 	
 	<ClojureCompileBinDir>$(RootDir)Clojure.Compile\bin\$(Configuration)\$(TestTargetFramework)</ClojureCompileBinDir>
 	<cljc>Clojure.Compile.exe</cljc>
@@ -149,7 +149,7 @@
 		  DestinationFolder="$(TestDir)\%(RecursiveDir)" />	  
   </Target>  
   
-  <Target Name="CompileTest" DependsOnTargets="StageTest" Condition="'$(TestTargetFramework)' == 'net461'">
+  <Target Name="CompileTest" DependsOnTargets="StageTest" Condition="'$(TestTargetFramework)' == 'net462'">
     <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.proxy.examples clojure.test-clojure.attributes clojure.test-clojure.compilation.load-ns clojure.test-clojure.compilation.line-number-examples" 
           WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == '.Net' "/>
@@ -163,10 +163,10 @@
   
   <Target Name="Test" DependsOnTargets="StageTest;CompileTest">
     <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test.clj" DestinationFolder="$(TestDir)" />
-    <SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'net461'"
+    <SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'net462'"
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.ns-libs-load-later}" />
-	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net461'"
+	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net462'"
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.ns-libs-load-later clojure.test-clojure.attributes clojure.test-clojure.compilation clojure.test-clojure.genclass}" />						
     <Exec Command="$(clji) run_test.clj"       WorkingDirectory="$(TestDir)" Condition=" '$(Runtime)' == '.Net' "/>
@@ -175,7 +175,7 @@
 
   <Target Name="TestGen" DependsOnTargets="StageTest;CompileTest">
     <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test_generative.clj" DestinationFolder="$(TestDir)" />
-	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net461'"
+	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net462'"
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.attributes clojure.test-clojure.compilation clojure.test-clojure.genclass}" />						
     <Exec Command="$(clji) run_test_generative.clj"      WorkingDirectory="$(TestDir)"  Condition=" '$(Runtime)' == '.Net' "/>
@@ -216,18 +216,18 @@
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net6.0.zip"
 				  Overwrite="true"/>			  
 	<ItemGroup>
-		<ClojureCompileAssets Include="$(RootDir)Clojure.Compile\bin\$(Configuration)\net461\Clojure.Compile.*" />
-		<ClojureMain461Assets Include="$(RootDir)Clojure.Main461\bin\$(Configuration)\net461\**\*" />
+		<ClojureCompileAssets Include="$(RootDir)Clojure.Compile\bin\$(Configuration)\net462\Clojure.Compile.*" />
+		<ClojureMain462Assets Include="$(RootDir)Clojure.Main461\bin\$(Configuration)\net462\**\*" />
 	</ItemGroup>	
 	<Copy SkipUnchangedFiles="true"
-		  SourceFiles="@(ClojureMain461Assets)"
-		  DestinationFolder="$(StageDir)\net461\%(RecursiveDir)" />	
+		  SourceFiles="@(ClojureMain462Assets)"
+		  DestinationFolder="$(StageDir)\net462\%(RecursiveDir)" />	
 	<Copy SkipUnchangedFiles="true"
 		  SourceFiles="@(ClojureCompileAssets)"
-		  DestinationFolder="$(StageDir)\net461\%(RecursiveDir)" />			  
+		  DestinationFolder="$(StageDir)\net462\%(RecursiveDir)" />			  
 	  
-	<ZipDirectory SourceDirectory="$(StageDir)\net461"
-	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net4.6.1.zip"
+	<ZipDirectory SourceDirectory="$(StageDir)\net462"
+	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net4.6.2.zip"
 				  Overwrite="true"/>
   </Target>				  
 
@@ -296,7 +296,7 @@
 <!-- Targets below are part of the pre-Core build, haven't been updated yet. -->
 
  <!--  Need to update whenever more DLLs are added to basic build -->
-    <Target Name="Ilmerge" DependsOnTargets="Build" Condition="'$(TestTargetFramework)' == 'net461'">
+    <Target Name="Ilmerge" DependsOnTargets="Build" Condition="'$(TestTargetFramework)' == 'net462'">
     <MakeDir Directories="$(StageDir)\ilmerge\$(TestTargetFramework)" /> 
     <Exec WorkingDirectory="$(ClojureCompileBinDir)" 
           Command="ilmerge /keyfile:$(PublicKey) /out:$(StageDir)\ilmerge\$(TestTargetFramework)\Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.clr.math.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll"
