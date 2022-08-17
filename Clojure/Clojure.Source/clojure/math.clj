@@ -320,22 +320,22 @@
   {:doc "Returns the smallest integral value greater than or equal to the specified number.
   mathematical integer.
   See: https://docs.microsoft.com/en-us/dotnet/api/system.math.ceiling?view=net-6.0
-  This has overloads for decimal and double, hence is not type-hinted."
+  We pick the overload for the double argument."
    :inline-arities #{1}
    :inline (fn [a] `(Math/Ceiling ~a))
    :added "1.11"}
-  [a]
+  [^double a]
   (Math/Ceiling a))
 
 (defn floor
   {:doc "Returns the largest integral value less than or equal to the specified number.
   mathematical integer.
   See: https://docs.microsoft.com/en-us/dotnet/api/system.math.floor?view=net-6.0
-  This has overloads for decimal and double, hence is not type-hinted."
+  We pick the overload for the double argument."
    :inline-arities #{1}
    :inline (fn [a] `(Math/Floor ~a))
    :added "1.11"}
-  [a]
+  [^double a]
   (Math/Floor a))
 
 (defn round
@@ -344,9 +344,9 @@
    :inline-arities #{1 2 3}
    :inline (fn [& args] `(Math/Round ~@args))
    :added "1.11"}
-  ([a] (Math/Round a))
-  ([a b] (Math/Round a b))
-  ([a b c] (Math/Round a b c)))
+  ([^double a] (Math/Round a))
+  ([^double a b] (Math/Round a (int b)))
+  ([^double a b c] (Math/Round a (int b) c)))
 
   (defn truncate
   {:doc "Integer division that rounds to negative infinity (as opposed to zero).
@@ -356,7 +356,7 @@
    :inline-arities #{1}
    :inline (fn [x] `(Math/Truncate ~x))
    :added "1.11"}
-  [x]
+  [^double x]
   (Math/Truncate x))
 
   (compile-when (contains? #{:dotnet :core} dotnet-platform)
