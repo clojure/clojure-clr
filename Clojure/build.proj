@@ -24,7 +24,7 @@
   
   <PropertyGroup>	
 	
-	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">net5.0</TestTargetFramework>
+	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">net6.0</TestTargetFramework>
 	
 	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'netcoreapp3.1' AND '$(TestTargetFramework)' != 'net5.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
 		
@@ -120,11 +120,11 @@
   </Target> 
   
   <Target Name="DeepClean" DependsOnTargets="Clean">
-	<RemoveDir Directories="$(TestDir);$(StageDir)"/>
-	<RemoveDir Directories="$(RootDir)Clojure\bin;$(RootDir)Clojure.Main\bin\obj"/>
+	<RemoveDir Directories="$(RootDir)Test;$(StageDir)"/>
+	<RemoveDir Directories="$(RootDir)Clojure\bin;$(RootDir)Clojure\obj"/>
 	<RemoveDir Directories="$(RootDir)Clojure.Source\bin;$(RootDir)Clojure.Source\obj"/>
 	<RemoveDir Directories="$(RootDir)Clojure.Main\bin;$(RootDir)Clojure.Main\obj"/>
-	<RemoveDir Directories="$(RootDir)Clojure.Main461\bin;$(RootDir)Clojure.Main461\obj"/>
+	<RemoveDir Directories="$(RootDir)Clojure.Main461\bin;$(RootDir)Clojure.Main461\obj;$(RootDir)Clojure.Main461\Content"/>
 	<RemoveDir Directories="$(RootDir)Clojure.Compile\bin;$(RootDir)Clojure.Compile\obj"/>
 	<RemoveDir Directories="$(RootDir)Clojure.Tests\bin;$(RootDir)Clojure.Tests\obj"/>
 	<RemoveDir Directories="$(RootDir)Clojure.Samples\bin;$(RootDir)Clojure.Samples\obj"/>
@@ -186,7 +186,7 @@
      <MakeDir Directories="$(StageDir)"/>
   </Target>
 
-  <Target Name="PackAll" DependsOnTargets="Build;CreateStageDir">
+  <Target Name="PackAll" DependsOnTargets="CreateStageDir">
     <Exec Command="dotnet pack -c $(Configuration)" WorkingDirectory="$(RootDir)\Clojure"/>
 	<Exec Command="dotnet pack -c $(Configuration)" WorkingDirectory="$(Rootdir)\Clojure.Main"/>
 	
@@ -203,8 +203,50 @@
   </Target>
   
 
+ <!--  Need to update whenever more DLLs are added to basic build 
+       THis is the original version, before Core - keeping it here for now for reference.
+    <Target Name="Ilmerge" DependsOnTargets="Build" Condition="'$(TestTargetFramework)' == 'net462'">
+    <MakeDir Directories="$(StageDir)\ilmerge\$(TestTargetFramework)" /> 
+    <Exec WorkingDirectory="$(ClojureCompileBinDir)" 
+          Command="ilmerge /keyfile:$(PublicKey) /out:$(StageDir)\ilmerge\$(TestTargetFramework)\Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.math.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll"
+          />
+
+  </Target>
   
-  <Target Name="ZipAll" DependsOnTargets="PackAll">
+ --> 
+
+  <!-- We want to run ILMerge on th Clojure.dll for the 462 version prior to doing the pack.  Sneaking this in after the build   -->
+  <Target Name="ILMerge462" DependsOnTargets="CreateStageDir">
+  
+	<PropertyGroup>
+		<ILMergeStageDir>$(StageDir)\ilmerge\</ILMergeStageDir>
+		<UnzippedDir>$(ILMergeStageDir)\unzipped</UnzippedDir>
+		<SourceDir>$(RootDir)\Clojure.Compile\bin\$(Configuration)\net462</SourceDir>
+		
+	</PropertyGroup>
+    <MakeDir Directories="$(ILMergeStageDir)" /> 
+    <Exec WorkingDirectory="$(SourceDir)" 
+          Command="ilmerge /keyfile:$(PublicKey) /out:$(ILMergeStageDir)\Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.math.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll"
+          />
+	
+	<Unzip
+		SourceFiles="$(StageDir)\Clojure.$(ZipVersion).nupkg"
+		DestinationFolder="$(UnzippedDir)"
+		OverwriteReadOnlyFiles="true"
+		/>
+	<Copy SkipUnchangedFiles="true"
+		  SourceFiles="$(ILMergeStageDir)\Clojure.dll"
+		  DestinationFolder="$(UnzippedDir)\lib\net462" 
+		  />
+
+    <ZipDirectory SourceDirectory="$(UnzippedDir)"
+	              DestinationFile ="$(StageDir)\Clojure.$(ZipVersion).nupkg"
+				  Overwrite="true"
+				  />		
+  </Target>
+   
+  
+  <Target Name="ZipAll" DependsOnTargets="PackAll;ILMerge462">
    
     <ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\netcoreapp3.1\publish"
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-core3.1.zip"
@@ -295,14 +337,7 @@
 
 <!-- Targets below are part of the pre-Core build, haven't been updated yet. -->
 
- <!--  Need to update whenever more DLLs are added to basic build -->
-    <Target Name="Ilmerge" DependsOnTargets="Build" Condition="'$(TestTargetFramework)' == 'net462'">
-    <MakeDir Directories="$(StageDir)\ilmerge\$(TestTargetFramework)" /> 
-    <Exec WorkingDirectory="$(ClojureCompileBinDir)" 
-          Command="ilmerge /keyfile:$(PublicKey) /out:$(StageDir)\ilmerge\$(TestTargetFramework)\Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.clr.math.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll"
-          />
 
-  </Target>
   
 
   <!-- RJ: Reworked Dist target to work around Mono bug related to embeding ItemGroup inside a Target tag -->

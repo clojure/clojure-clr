@@ -19,5 +19,11 @@
     <ProjectReference Include="..\Clojure\Clojure.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<Content Include ="Content/**/*.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
 
 </Project>

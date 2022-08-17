@@ -47,5 +47,22 @@
 			<BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
 		</ItemGroup>
 	</Target>
+	
+	<!-- The following is required to get the AOT-compiled DLLs into the 462 lib -->
 
+	<!-- 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+		<Content Include="$(SolutionDir)Clojure.Compile\$(OutDir)\clojure.*.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
+	-->
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+		<Parent Include="$(SolutionDir)Clojure.Compile\$(OutDir)\clojure.*.dll"/> 
+		<EmbeddedResource Include="@(Parent)">
+			<Link>%(Filename)$(Extension)</Link>
+		</EmbeddedResource>
+	</ItemGroup>
 </Project>
