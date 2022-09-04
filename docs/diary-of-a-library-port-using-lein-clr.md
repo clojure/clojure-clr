@@ -398,6 +398,41 @@ So, #2 (use the system thread pool) is good enough to get us started.
 
 And away we go.
 
+## The process	
+
+1. Pick a namespace with no unsatisfied dependencies.
+2. Copy the file over and edit to fix interops.
+3. use `lein clr repl` to load the file.  If it fails to load, go to 2.
+4. Try some hand tests.
+5. If there are unit tests available, port that code, and use `lein clr test`.
+6. Repeat.
+
+## Diary
+
+- `clojure.core.async.impl.protocols`: Easy enough.  All protocols. 
+The only hiccup is a conflict between the `Buffer` protocol and the imported `System.Buffer`.  Renamed `Buffer` as `ABuffer`.  (Is there a better solution?  How would we exclude the mapping `Buffer` -> `System.Buffer`?)
+
+- ` clojure.core.async.impl.mutex`: Also easy.
+In the original, one function, `mutex`, that just wraps a `ReentrantLock` and provides `Lock` semantics for it.
+Not having the direct equivalent of `java.util.concurrent.locks.Lock`, 
+I defined a protocol `ILock`  with `lock` and `unlock` methods, 
+defined a type `Lock` that wraps a `System.Threading.Mutex` and implements `ILock`, and defined `mutex` to create a `Lock`.
+
+- `clojure.core.async.impl.concurrent`: No real point in doing this -- it implements a function that reifies `java.util.concurrent.ThreadFactory` and we are not going to be creating threads like this.
+But what the heck, might has well have some fun.  
+I defined a protocol named `ThreadFactory` with the one method `newThread`, then did the equivalent `reify` -- just some minor changes to the thread creation code to accommodate the JVM/CLR API differences.
+This came a test suite (okay, just one test), but it ported easily -- and passed.
+
+- `clojure.core.async.impl.buffers`: Pretty easy.  For `java.util.LinkedList`, we substitute `System.Collections.Generic.LinkedList<Object>`, change the method names  (`.addFirst` to `.AddFirst`, e.g.), and off we go.
+The test suite ran the first ... nope.  One nasty little API difference. `RemoveLast` has void return value; `removeLast` in Java returns the value removed.  So we have to get the last _node_, do the remove, then return the value from the node.  Sigh.
+Then the tests work just fine. 
+
+- `clojure.core.async.impl.exec.threadpool`: Here is one place where we hit threads directly.  The only function is `thread-pool-executor`; it takes an optional initialization function
+
+- `clojure.core.async.impl.dispatch`: Another short one.  Mostly just uses what we just implemented in `threadpool.clj`.  Except for the use of ThreadLocal to set a flag indicating the thread is in our special thread pool.
+Since we are not using a special thread pool, we have no good way to prevent threads spawning threads.  So it goes.  We're just going to ignore it.
+
+
 
 
 
