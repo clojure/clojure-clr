@@ -333,11 +333,74 @@ First, we need to understandthe model of computation that `core.async` is implem
 Second, we need to consider our options under the CLR.
 Third, we need to pick an option and go for it.
 
+I won't go into details on `core.async`'s rationale, guiding principles.  Go here: 
+ 
+- [Rationale](https://clojure.org/news/2013/06/28/clojure-clore-async-channels)
+- [API docs](https://clojure.github.io/core.async/)
+- [Github repo](https://clojure.github.io/core.async/index.html)
+ 
+Let me hit the salient points for our work here.  Quoting from the aforementioned Rationale:
 
-`core.async` 
- 
- [Rationale](https://clojure.org/news/2013/06/28/clojure-clore-async-channels)
- [API docs](https://clojure.github.io/core.async/)
- [Github repo](https://clojure.github.io/core.async/index.html)
- 
+> The objectives of core.async are:
+> - To provide facilities for independent threads of activity, communicating via queue-like _channels_
+> - To support both real threads and shared use of thread pools (in any combination), as well as ClojureScript on JS engines
+> - To build upon the work done on CSP and its derivatives
+
+Channels are a communication and coordination device.  Think of them primarily as buffers than can lock a thread on reading/writing if empty/full.
+As such, the implementation is mostly about locks (mutexes).  
+No explicit thread manipulation.  
+They can be accessed from 'regular' threads or from _go blocks_ (see next) -- "i.e. the channel is oblivious to the nature of the threads which use it."
+
+However, the code to take/put from/to channels is not oblivious.  
+The primary channel operators for code not in a go block are `>!!` ( _put blocking_ ) and `<!!` ( _take blocking_ ).
+The equivalent operators inside go blocks (and only there) are `>! ( _put_ ) and `<!` ( _take_ ).
+
+For go blocks, let us quote:
+
+> `go` is a macro that takes its body and examines it for any channel operations. 
+> It will turn the body into a state machine. 
+> Upon reaching any blocking operation, the state machine will be 'parked' 
+> and the actual thread of control will be released. 
+> This approach is similar to that used in _C# async_. 
+> When the blocking operation completes, the code will be resumed 
+> (on a thread-pool thread, or the sole thread in a JS VM).
+
+The `go` macro itself does code analysis and rewriting.  
+It relies on the library `clojure.tools.analyzer`, fortunately a library I ported many years ago.
+(Though I will need to check it for updates.)
+
+The only thread manipulation involved is the use of a limited size thread pool.  
+There are some little details about not being able to start another thread-pool thread from within a thread-pool thread, 
+and some details about unhandled exceptions. 
+
+How can we implement this on the CLR?  There is not a defined limited-size bespoke-use thread pool mechanism.
+Three possible solutions come to mind.
+
+1. Implement our own thread-pool having the appropriate characteristics.
+2. Use the system thread pool.
+3. Use the system thread pool, but implement everything in terms of the task library, the "modern" approach taken by the C# async model mentioned above.
+
+Implementing one's own thread pool is generally discouraged.  
+(I remember a series of articles, probably in MSDN Magazine, in the early days of .Net 
+in which Stephen Toub stepped through an implementation of thread pooling.  
+I think there were followups for correction of edge cases 
+and a final conclusion that you shouldn't do this.  But I'm working from memory here.)
+What is called for here is a very simple example of a thread pool, given that it has fixed size, 
+but still one perhaps should heed the cautions.
+
+Using the system thread pool should make most of the threading interaction very simple to implement.  But it lacks having a reserved pool of threads with a limited count.  How important is that?
+Perhaps not important enough to overcome the warnings above and the inertia of rolling one's own.
+
+Doing things with tasks would be interesting, but would require more thought than I care to put into it right now. 
+Something to consider for the future perhaps.
+
+So, #2 (use the system thread pool) is good enough to get us started.
+
+And away we go.
+
+
+
+
+
+
  
