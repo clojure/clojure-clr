@@ -114,6 +114,8 @@ clojure.tools.namespace.dependency.clj
 	</ItemGroup>
 ```
 
+The number of `..\`s required will depend on the relative placement of your project to the Clojure source code.  If you are working in Visual Studio, it is easy to tell when you have it right:  a list of the files will appear in the Solution Explorer.
+
 * If other libraries are required, use the NuGet package manager tool in VS to add those dependencies to the project, or hand-edit the .csproj file to add something like
 
 	<ItemGroup>
