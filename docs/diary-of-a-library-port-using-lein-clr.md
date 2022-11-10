@@ -432,6 +432,11 @@ Then the tests work just fine.
 - `clojure.core.async.impl.dispatch`: Another short one.  Mostly just uses what we just implemented in `threadpool.clj`.  Except for the use of ThreadLocal to set a flag indicating the thread is in our special thread pool.
 Since we are not using a special thread pool, we have no good way to prevent threads spawning threads.  So it goes.  We're just going to ignore it.
 
+- `clojure.core.async.impl.channels`: the largest of the `impl` files.  This one is a bit problematic, from an unusual direction.  There are multiple iterations through lists that delete via the iterator.
+Deletions via an iterator are not possible in C#/.Net.   So all those loops had to be rewritten.  And there is one semantic difference.  the JVM can set up uncaught exception handlers per thread.  Doesn't happen in the CLR.  
+I just bypassed that code completely.  (And the test suite dedicated to it.)
+
+
 
 
 
