@@ -131,7 +131,7 @@ The number of `..\`s required will depend on the relative placement of your proj
 Create the package by executing
 
 ```
-    dotnet pack 
+    dotnet pack -p Configuration=Release
 ```	
 
 This will create a file such as `clojure.tools.namespace.1.1.0.nupkg`.  It is zip format, so you can inspect it with your favorite Zip tool.  Or use a tool such as Nuget Package Explorer that will also parse out the metadata.
@@ -139,7 +139,7 @@ This will create a file such as `clojure.tools.namespace.1.1.0.nupkg`.  It is zi
 To publish, change directory to the `bin\Release` subdirectory and execute
 
 ```
-dotnet nuget push clr.tools.namespace.1.1.0.nupkg -source nuget.org
+dotnet nuget push clojure.tools.namespace.1.1.0.nupkg -s nuget.org
 ```
 
 Go to https://nuget.org to verify.
