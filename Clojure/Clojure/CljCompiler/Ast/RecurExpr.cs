@@ -13,6 +13,7 @@
  **/
 
 using System;
+using System.CodeDom;
 using System.Reflection.Emit;
 
 
@@ -204,8 +205,14 @@ namespace clojure.lang.CljCompiler.Ast
                 //Type primt = lb.PrimitiveType;
                 if (lb.IsArg)
                 {
-                    //ilg.Emit(OpCodes.Starg, lb.Index - (objx.IsStatic ? 0 : 1));
-                    if (lb.DeclaredType != typeof(Object) && !lb.DeclaredType.IsPrimitive)
+
+                    if (lb.DeclaredType == typeof(ISeq) && i == _loopLocals.count() - 1)
+                    {
+                        // This special case is in response to an odd situation that the JVM accepts and the CLR does not.
+                        // See https://clojure.atlassian.net/browse/CLJCLR-113
+                        ilg.EmitCall(Compiler.Method_RT_seq);
+                    }
+                    else if (lb.DeclaredType != typeof(Object) && !lb.DeclaredType.IsPrimitive)
                         ilg.Emit(OpCodes.Castclass, lb.DeclaredType);
                     ilg.EmitStoreArg(lb.Index);
                 }
