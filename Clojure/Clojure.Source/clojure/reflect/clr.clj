@@ -203,7 +203,11 @@
    (symbol (.Name property))
    (typesym (.PropertyType property))
    (typesym (.DeclaringType property))
-   (parse-attributes (.Attributes property) property-flags)))
+   (let [property-attributes  (parse-attributes (.Attributes property) property-flags)
+		 getter (.GetGetMethod property true)
+         method-attributes (when getter (parse-attributes (.Attributes getter) method-flags))]
+	 (set/union property-attributes method-attributes))))
+  
 
 (defn- declared-properties
   "Return a set of the declared fields of class as a Clojure map."
