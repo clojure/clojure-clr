@@ -184,7 +184,7 @@ namespace clojure.lang
                 throw new ArgumentException("Can't intern namespace-qualified symbol");
             }
             IPersistentMap map = getMappings();
-            Type c = (Type)map.valAt(sym);
+            Type c = map.valAt(sym) as Type;
             while ((c == null) || (AreDifferentInstancesOfSameClassName(c, val)))
             {
                 IPersistentMap newMap = map.assoc(sym, val);
