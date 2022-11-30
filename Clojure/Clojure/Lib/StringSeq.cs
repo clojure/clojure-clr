@@ -20,7 +20,7 @@ namespace clojure.lang
     /// A sequence of characters from a string.
     /// </summary>
     [Serializable]
-    public class StringSeq : ASeq, IndexedSeq
+    public class StringSeq : ASeq, IndexedSeq, IDrop, IReduceInit
     {
         #region Data
 
@@ -142,6 +142,35 @@ namespace clojure.lang
          public int index()
         {
             return _i;
+        }
+
+        #endregion
+
+        #region IDrop members
+
+        public Sequential drop(int n)
+        {
+            int ii = _i + n;
+            if (ii < _s.Length)
+                return new StringSeq(_meta, _s, ii);
+            else
+                return null;
+        }
+
+        #endregion
+
+        #region IReduceInit members
+
+        public object reduce(IFn f, object start)
+        {
+            object acc = start;
+            for (int ii = _i; ii < _s.Length; ii++)
+            {
+                acc=f.invoke(acc, _s[ii]);
+                if (RT.isReduced(acc))
+                    return ((IDeref)acc).deref();
+            }
+            return acc;
         }
 
         #endregion

@@ -23,7 +23,7 @@ namespace clojure.lang
     /// Implements a persistent vector using a specialized form of array-mapped hash trie.
     /// </summary>
     [Serializable]
-    public class PersistentVector: APersistentVector, IObj, IEditableCollection, IEnumerable, IReduce, IKVReduce
+    public class PersistentVector: APersistentVector, IObj, IEditableCollection, IEnumerable, IReduce, IKVReduce, IDrop
     {
         #region Node class
 
@@ -540,7 +540,7 @@ namespace clojure.lang
         }
 
         [Serializable]
-        sealed public class ChunkedSeq : ASeq, IChunkedSeq, Counted
+        sealed public class ChunkedSeq : ASeq, IChunkedSeq, Counted, IReduce, IDrop, IEnumerable
         {
             #region Data
 
@@ -552,12 +552,12 @@ namespace clojure.lang
             public int Offset
             {
                 get { return _offset; }
-            } 
+            }
 
             public PersistentVector Vec
             {
                 get { return _vec; }
-            } 
+            }
 
             #endregion
 
@@ -571,7 +571,7 @@ namespace clojure.lang
                 _node = vec.ArrayFor(i);
             }
 
-            ChunkedSeq(IPersistentMap meta, PersistentVector vec, object[] node,  int i, int offset)
+            ChunkedSeq(IPersistentMap meta, PersistentVector vec, object[] node, int i, int offset)
                 : base(meta)
             {
                 _vec = vec;
@@ -580,7 +580,7 @@ namespace clojure.lang
                 _offset = offset;
             }
 
-            public ChunkedSeq(PersistentVector vec, object[] node,  int i, int offset)
+            public ChunkedSeq(PersistentVector vec, object[] node, int i, int offset)
             {
                 _vec = vec;
                 _node = node;
@@ -658,8 +658,110 @@ namespace clojure.lang
             {
                 return _vec._cnt - (_i + _offset);
             }
-           
+
             #endregion
+
+            #region IReduce members
+
+            public object reduce(IFn f)
+            {
+                object acc;
+                if (_i + _offset < _vec._cnt)
+                    acc = _node[_offset];
+                else
+                    return f.invoke();
+
+                for (int j = _offset + 1; j < _node.Length; j++)
+                {
+                    acc = f.invoke(acc, _node[j]);
+                    if (RT.isReduced(acc))
+                        return ((IDeref)acc).deref();
+                }
+
+                int step = 0;
+                for (int ii = _i + _node.Length; ii < _vec._cnt; ii += step)
+                {
+                    object[] array = _vec.ArrayFor(ii);
+                    for (int j = 0; j < array.Length; j++)
+                    {
+                        acc = f.invoke(acc, array[j]);
+                        if (RT.isReduced(acc))
+                            return ((IDeref)acc).deref();
+                    }
+                    step = array.Length;
+                }
+
+                return acc;
+            }
+       
+
+            public object reduce(IFn f, object start)
+            {
+                object acc = start;
+
+                for (int j = _offset; j < _node.Length; j++)
+                {
+                    acc = f.invoke(acc, _node[j]);
+                    if (RT.isReduced(acc))
+                        return ((IDeref)acc).deref();
+                }
+
+                int step = 0;
+                for (int ii = _i + _node.Length; ii < _vec._cnt; ii += step)
+                {
+                    object[] array = _vec.ArrayFor(ii);
+                    for (int j = 0; j < array.Length; j++)
+                    {
+                        acc = f.invoke(acc, array[j]);
+                        if (RT.isReduced(acc))
+                            return ((IDeref)acc).deref();
+                    }
+                    step = array.Length;
+                }
+
+                return acc;
+            }
+
+            #endregion
+
+            #region IDrop members
+
+            public Sequential drop(int n)
+            {
+                int o = _offset + n;
+                if (o < _node.Length)   // in current array
+                    return new ChunkedSeq(_vec, _node, _i, o);
+                else
+                {
+                    int i = _i + o;
+                    if (i < _vec._cnt) // in vec
+                    {
+                        var array = _vec.ArrayFor(i);
+                        int newOffset = i % 32;
+                        return new ChunkedSeq(_vec, array, i - newOffset, newOffset);
+                    }
+                    else
+                        return null;
+                }
+            }
+
+            #endregion
+
+            #region IEnumerable
+
+            public override IEnumerator<object> GetEnumerator()
+            {
+                return _vec.RangedIteratorT(_i+_offset,_vec._cnt );
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            #endregion
+
+
         }
 
         #endregion
@@ -1084,6 +1186,23 @@ namespace clojure.lang
                 step = array.Length;
             }
             return init;
+        }
+
+        #endregion
+
+        #region IDrop members
+
+        public Sequential drop(int n)
+        {
+            if (n < 0)
+                return this;
+            else if (n < _cnt)
+            {
+                int offset = n % 32;
+                return new ChunkedSeq(this, this.ArrayFor(n), n - offset, offset);
+            }
+            else
+                return null;
         }
 
         #endregion

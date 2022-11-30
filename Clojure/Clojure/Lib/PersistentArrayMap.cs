@@ -31,7 +31,7 @@ namespace clojure.lang
     /// use <see cref="contains">contains</see> or <see cref="entryAt">entryAt</see>.</para>
     /// </remarks>
     [Serializable]
-    public class PersistentArrayMap : APersistentMap, IObj, IEditableCollection, IMapEnumerable, IMapEnumerableTyped<Object,Object>, IEnumerable, IEnumerable<IMapEntry>, IKVReduce
+    public class PersistentArrayMap : APersistentMap, IObj, IEditableCollection, IMapEnumerable, IMapEnumerableTyped<Object,Object>, IEnumerable, IEnumerable<IMapEntry>, IKVReduce, IDrop
     {
         #region Data
 
@@ -151,6 +151,7 @@ namespace clojure.lang
         //
         // If a trailing element is found then will attempt to add it to the resulting map as if by conj.
         // NO guarantees about the order of the keys in the trailing element are made.
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
         private static PersistentArrayMap createAsIfByAssocComplexPath(object[] init, bool hasTrailing)
         {
             if (hasTrailing)
@@ -515,7 +516,7 @@ namespace clojure.lang
         /// for <see cref="PersistentArrayMap">PersistentArrayMap</see>s.
         /// </summary>
         [Serializable]
-        protected sealed class Seq : ASeq, Counted
+        protected class Seq : ASeq, Counted, IReduce, IDrop, IEnumerable
         {
             #region Data
 
@@ -612,6 +613,64 @@ namespace clojure.lang
 
             #endregion
 
+            #region IReduce members
+
+            public object reduce(IFn f)
+            {
+                if (_i < _array.Length)
+                {
+                    Object acc = MapEntry.create(_array[_i], _array[_i + 1]);
+                    for (int j = _i + 2; j < _array.Length; j += 2)
+                    {
+                        acc = f.invoke(acc, MapEntry.create(_array[j], _array[j + 1]));
+                        if (RT.isReduced(acc))
+                            return ((IDeref)acc).deref();
+                    }
+                    return acc;
+                }
+                else
+                    return f.invoke();
+            }
+
+            public object reduce(IFn f, object start)
+            {
+                Object acc = start;
+                for (int j = _i; j < _array.Length; j += 2)
+                {
+                    acc = f.invoke(acc, MapEntry.create(_array[j], _array[j + 1]));
+                    if (RT.isReduced(acc))
+                        return ((IDeref)acc).deref();
+                }
+                return acc;
+            }
+
+            #endregion
+
+            #region IDrop members
+
+            public Sequential drop(int n)
+            {
+                if (n < count())
+                    return new Seq(_array, _i + 2 * n);
+                else
+                    return null;
+            }
+
+            #endregion
+
+            #region IEnumerable
+
+            public override IEnumerator<object> GetEnumerator()
+            {
+                for (int j=_i; j < _array.Length; j+=2 )
+                    yield return MapEntry.create(_array[j], _array[j+1]);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+            #endregion
         }
 
         #region IEditableCollection Members
@@ -745,6 +804,16 @@ namespace clojure.lang
         }
 
         #endregion
+
+        #region IDrop members
+
+        public Sequential drop(int n)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
 
         #region IMapEnumerable, IMapEnumerableTyped, IEnumerable ...
 
