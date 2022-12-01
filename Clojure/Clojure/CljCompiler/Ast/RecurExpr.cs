@@ -115,9 +115,12 @@ namespace clojure.lang.CljCompiler.Ast
                         {
                             lb.RecurMismatch = true;
                             if (RT.booleanCast(RT.WarnOnReflectionVar.deref()))
+                            {
                                 RT.errPrintWriter().WriteLine("{0}:{1} recur arg for primitive local: {2} is not matching primitive, had: {3}, needed {4}",
                                     source, spanMap != null ? (int)spanMap.valAt(RT.StartLineKey, 0) : 0,
                                     lb.Name, pt != null ? pt.Name : "Object", primt.Name);
+                                RT.errPrintWriter().Flush();
+                            }
                         }
                     }
                 }

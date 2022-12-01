@@ -141,6 +141,7 @@ namespace clojure.lang.CljCompiler.Ast
                     RT.errPrintWriter().WriteLine("Warning: {0} not declared dynamic and thus is not dynamically rebindable, "
                                           + "but its name suggests otherwise. Please either indicate ^:dynamic {0} or change the name. ({1}:{2}\n",
                                            sym,Compiler.SourcePathVar.get(),Compiler.LineVar.get());
+                    RT.errPrintWriter().Flush();
                 }
 
                 if (RT.booleanCast(RT.get(mm, Compiler.ArglistsKeyword)))

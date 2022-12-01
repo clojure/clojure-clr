@@ -44,6 +44,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 RT.errPrintWriter().WriteLine("Boxed math warning, {0}:{1}:{2} - call {3}.",
                     Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap), _method.ToString());
+                RT.errPrintWriter().Flush();
             }
         }
 

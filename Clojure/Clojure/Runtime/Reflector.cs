@@ -376,6 +376,7 @@ namespace clojure.lang
                     RT.errPrintWriter().WriteLine(string.Format("Reflection warning, {0}:{1}:{2} - call to {3}method {4} on {5} can't be resolved (no such method).",
                         Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(spanMap), Compiler.GetColumnFromSpanMap(spanMap), (isStatic ? "static " : ""), methodName, targetType.FullName));
                 }
+                RT.errPrintWriter().Flush();
             }
         }
 

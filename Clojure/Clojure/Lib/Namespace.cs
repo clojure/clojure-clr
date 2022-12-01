@@ -278,6 +278,7 @@ namespace clojure.lang
                     {
                         RT.errPrintWriter().WriteLine("REJECTED: attempt to replace interned var {0} with {1} in {2}, you must ns-unmap first",
                             old, neu, _name);
+                        RT.errPrintWriter().Flush();
                         return false;
                     }
                     else
@@ -287,6 +288,8 @@ namespace clojure.lang
 
             RT.errPrintWriter().WriteLine("WARNING: {0} already refers to: {1} in namespace: {2}, being replaced by: {3}",
                 sym, old, _name, neu);
+            RT.errPrintWriter().Flush();
+
             return true;
         }
 

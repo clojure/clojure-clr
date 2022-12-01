@@ -75,6 +75,7 @@ namespace BootstrapCompile
             catch (Exception e)
             {
                 errTW.WriteLine(e.ToString());
+                errTW.Flush();
                 Environment.Exit(1);
             }
             finally
@@ -86,6 +87,7 @@ namespace BootstrapCompile
                 catch ( IOException e)
                 {
                     errTW.WriteLine(e.StackTrace);
+                    errTW.Flush();
                 }
             }
 

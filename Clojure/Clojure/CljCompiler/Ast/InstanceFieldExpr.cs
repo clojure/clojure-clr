@@ -68,11 +68,13 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1}:{2} - reference to field/property {3} can't be resolved.",
                         Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap), Compiler.GetColumnFromSpanMap(_spanMap), _memberName);
+                    RT.errPrintWriter().Flush();
                 }
                 else
                 {
                     RT.errPrintWriter().WriteLine("Reflection warning, {0}:{1}:{2} - reference to field/property {3} on {4} can't be resolved.",
                        Compiler.SourcePathVar.deref(), Compiler.GetLineFromSpanMap(_spanMap), Compiler.GetColumnFromSpanMap(_spanMap), _memberName, _targetType.FullName);
+                    RT.errPrintWriter().Flush();
                 }
             }
         }
