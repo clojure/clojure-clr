@@ -473,24 +473,6 @@
   ^double [^double magnitude ^double sign]
   (Math/CopySign magnitude sign))
 
-(defn reciprocal-estimate
-  {:doc "Returns an estimate of the reciprocal of a specified number.
-  See: https://docs.microsoft.com/en-us/dotnet/api/system.math.reciprocalestimate?view=net-6.0"
-   :inline-arities #{1}
-   :inline (fn [a] `(Math/ReciprocalEstimate (double ~a)))
-   :added "1.11"}
-  ^double [^double a]
-  (Math/ReciprocalEstimate a))
-
-(defn reciprocal-sqrt-estimate
-  {:doc "Returns an estimate of the reciprocal square root of a specified number.
-  See: https://docs.microsoft.com/en-us/dotnet/api/system.math.reciprocalsqrtestimate?view=net-6.0"
-   :inline-arities #{1}
-   :inline (fn [a] `(Math/ReciprocalSqrtEstimate (double ~a)))
-   :added "1.11"}
-  ^double [^double a]
-  (Math/ReciprocalSqrtEstimate a))
-
 (defn bit-decrement
   {:doc "Returns the next smallest value that compares less than d.
   If d is ##NaN => ##NaN
@@ -522,4 +504,26 @@
   ^double [^double x ^double y ^double z]
   (Math/FusedMultiplyAdd x y z))
   
+) ;; compile-when
+
+(compile-when (>= (.CompareTo ^String dotnet-version "6") 0)
+
+(defn reciprocal-estimate
+  {:doc "Returns an estimate of the reciprocal of a specified number.
+  See: https://docs.microsoft.com/en-us/dotnet/api/system.math.reciprocalestimate?view=net-6.0"
+   :inline-arities #{1}
+   :inline (fn [a] `(Math/ReciprocalEstimate (double ~a)))
+   :added "1.11"}
+  ^double [^double a]
+  (Math/ReciprocalEstimate a))
+
+(defn reciprocal-sqrt-estimate
+  {:doc "Returns an estimate of the reciprocal square root of a specified number.
+  See: https://docs.microsoft.com/en-us/dotnet/api/system.math.reciprocalsqrtestimate?view=net-6.0"
+   :inline-arities #{1}
+   :inline (fn [a] `(Math/ReciprocalSqrtEstimate (double ~a)))
+   :added "1.11"}
+  ^double [^double a]
+  (Math/ReciprocalSqrtEstimate a))
+
 ) ;; compile-when
