@@ -246,12 +246,12 @@
 ;;;  (is (= (m/pow 2 971) (m/ulp Double/MAX_VALUE)))
 ;;;  (is (= (m/pow 2 971) (m/ulp (- Double/MAX_VALUE)))))
 
-(deftest test-sign                         ;;; test-signum
-  ;;;(is (NaN? (m/sign ##NaN)))            ;;; m/sign  -- in CLR, sign #NaN throws an ArithmeticException
-  (is (zero? (m/sign 0.0)))                ;;; m/sign
-  (is (zero? (m/sign -0.0)))               ;;; m/sign
-  (is (= 1 (m/sign 42.0)))                 ;;; 1.0 m/sign
-  (is (= -1 (m/sign -42.0))))              ;;; -1. m/sign
+(deftest test-sign                                                             ;;; test-signum
+  ;;;(is (NaN? (m/sign ##NaN)))                                                ;;; m/sign  -- in CLR, sign #NaN throws an ArithmeticException
+  (is (zero? (m/sign-double 0.0)))   (is (zero? (m/sign-long 0)))              ;;; m/sign and added long versions
+  (is (zero? (m/sign-double  -0.0)))                                           ;;; m/sign
+  (is (= 1 (m/sign-double  42.0)))   (is (= 1 (m/sign-long  42)))              ;;; 1.0 m/sign
+  (is (= -1 (m/sign-double  -42.0)))  (is (= -1 (m/sign-long  -42))))          ;;; -1. m/sign
 
 (deftest test-sinh
   (is (NaN? (m/sinh ##NaN)))
@@ -341,5 +341,5 @@
 
   ;;; need tests for asinh, acosh, atanh  (so does ClojureJVM)
   ;;; need tests for:
-  ;;;    log2, ilogb, truncate, max-magnitude, min-magnitude, clamp,
+  ;;;    log2, ilogb, truncate, max-magnitude, min-magnitude, clamp-long, clamp-double,
   ;;;    reciprocal-estimate, reciprocal-sqrt-estimate, fused-multiply-add
