@@ -198,6 +198,17 @@ namespace clojure.lang
             throw new InvalidOperationException(sym + " already refers to: " + c + " in namespace: " + Name);
         }
 
+        /// <summary>
+        /// Determine if a mapping is interned
+        /// </summary>
+        /// <remarks>
+        /// An interned mapping is one where a var's ns matches the current ns and its sym matches the mapping key.
+        /// Once established, interned mappings should never change.
+        /// </remarks>
+        private bool IsInternedMapping(Symbol sym, Object o)
+        {
+            return o is Var v && v.ns == this && v.sym.Equals(sym);
+        }
 
         /// <summary>
         /// Intern a <see cref="Symbol">Symbol</see> in the namespace, with a (new) <see cref="Var">Var</see> as its value.
@@ -227,33 +238,56 @@ namespace clojure.lang
                 map = Mappings;
             }
 
-            if (o is Var ovar && ovar.Namespace == this)
-                return ovar;
+            if (IsInternedMapping(sym,o))
+                return o as Var;
 
             if (v == null)
                 v = new Var(this, sym);
 
-            WarnOrFailOnReplace(sym, o, v);
+            if (CheckReplacement(sym, o, v))
+            {
+                while (!_mappings.CompareAndSet(map, map.assoc(sym, v)))
+                    map = Mappings;
 
-            while (!_mappings.CompareAndSet(map, map.assoc(sym, v)))
-                map = Mappings;
+                return v;
+            }
 
-            return v;
+            return o as Var;
         }
 
-        private void WarnOrFailOnReplace(Symbol sym, object o, object v)
+
+        /*
+         This method checks if a namespace's mapping is applicable and warns on problematic cases.
+         It will return a boolean indicating if a mapping is replaceable.
+         The semantics of what constitutes a legal replacement mapping is summarized as follows:
+        | classification | in namespace ns        | newval = anything other than ns/name | newval = ns/name                    |
+        |----------------+------------------------+--------------------------------------+-------------------------------------|
+        | native mapping | name -> ns/name        | no replace, warn-if newval not-core  | no replace, warn-if newval not-core |
+        | alias mapping  | name -> other/whatever | warn + replace                       | warn + replace                      |
+        */
+        private bool CheckReplacement(Symbol sym, Object old, Object neu)
         {
-            if (o is Var ovar)
+            if (old is Var ovar)
             {
-                Namespace ns = ovar.Namespace;
-                Var vv = v as Var;
-                if (ns == this || (vv != null && vv.ns == RT.ClojureNamespace))
-                    return;
-                if (ns != RT.ClojureNamespace)
-                    throw new InvalidOperationException(sym + " already refers to: " + o + " in namespace: " + _name);
+                Namespace ons = ovar.Namespace;
+                Namespace nns = (neu is Var nvar) ? nvar.ns : null;
+
+                if (IsInternedMapping(sym, old))
+                {
+                    if (nns != RT.ClojureNamespace)
+                    {
+                        RT.errPrintWriter().WriteLine("REJECTED: attempt to replace interned var {0} with {1} in {2}, you must ns-unmap first",
+                            old, neu, _name);
+                        return false;
+                    }
+                    else
+                        return false;
+                }
             }
+
             RT.errPrintWriter().WriteLine("WARNING: {0} already refers to: {1} in namespace: {2}, being replaced by: {3}",
-                sym, o, _name, v);
+                sym, old, _name, neu);
+            return true;
         }
 
         /// <summary>
@@ -282,12 +316,14 @@ namespace clojure.lang
             if ( o == val )
                 return o;
 
-            WarnOrFailOnReplace(sym, o, val);
+            if (CheckReplacement(sym, o, val))
+            {
+                while (!_mappings.CompareAndSet(map, map.assoc(sym, val)))
+                    map = Mappings;
+                return val;
+            }
 
-            while (!_mappings.CompareAndSet(map, map.assoc(sym, val)))
-                map = Mappings;
-
-            return val;
+            return o;
         }
 
         /// <summary>
