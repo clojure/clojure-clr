@@ -26,7 +26,7 @@
 	
 	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">net6.0</TestTargetFramework>
 	
-	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'netcoreapp3.1' AND '$(TestTargetFramework)' != 'net5.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
+	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'netcoreapp3.1' AND '$(TestTargetFramework)' != 'net7.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
 		
 		
 	<TestLibraryFramework Condition=" '$(TestTargetFramework)' == 'net462' ">netstandard2.0</TestLibraryFramework>
@@ -251,8 +251,8 @@
     <ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\netcoreapp3.1\publish"
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-core3.1.zip"
 				  Overwrite="true"/>
-	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net5.0\publish"
-	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net5.0.zip"
+	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net7.0\publish"
+	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net7.0.zip"
 				  Overwrite="true"/>	
 	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net6.0\publish"
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net6.0.zip"
@@ -286,13 +286,13 @@
           WorkingDirectory="$(OutputPath)" />
   </Target>
 
-  <Target Name="BuildD5">
-    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net5.0 -o clojure-clr-debug5" 
+  <Target Name="BuildD7">
+    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net7.0 -o clojure-clr-debug5" 
           WorkingDirectory="$(OutputPath)" />
   </Target>
 
-  <Target Name="BuildR5">
-    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net5.0 -o clojure-clr-release5" 
+  <Target Name="BuildR7">
+    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net7.0 -o clojure-clr-release5" 
           WorkingDirectory="$(OutputPath)" />
   </Target>
   

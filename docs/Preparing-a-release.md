@@ -7,7 +7,7 @@
 * Modify `Clojure\Clojure\Bootstrap\version.properties` to desired release version.
 * Set the version info in `Clojure\CurrentVersion.props`.
     * Please note that you should use lowercase letters only in the pre-release designation in order to avoid problems on non-Windows systems, i.e., `beta1` instead of `Beta1`, `rc1` instead of `RC1`.
-* Build and test.  From the `Clojure` directory with X in {net462, netcoreapp3.1, net5.0, net6.0} (Configuration will default to Debug. Substitute in names accordingly if that is case.)
+* Build and test.  From the `Clojure` directory with X in {net462, netcoreapp3.1, net6.0, net7.0} (Configuration will default to Debug. Substitute in names accordingly if that is case.)
     * `msbuild build.proj -t:Test -p:TestTargetFramework=X -p:Configuration=Release`
     * `msbuild build.proj -t:TestGen -p:TestTargetFramework=X -p:Configuration=Release`
 * Package.  From the `Clojure` directory, run
