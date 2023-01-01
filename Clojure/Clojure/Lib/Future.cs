@@ -60,10 +60,9 @@ namespace clojure.lang
 
                 _value = ((IFn)state).invoke();
             }
-            catch (ThreadAbortException)
+            catch (ThreadInterruptedException)
             {
                 _cancelled = true;
-                Thread.ResetAbort();
             }
             catch (Exception ex)
             {
@@ -103,7 +102,7 @@ namespace clojure.lang
                 // Don't abort until the task thread has established its ThreadAbortException catch block.
                 _started.WaitOne();
 
-                _t.Abort();
+                _t.Interrupt();
             }
             _t.Join();
             return _cancelled;
