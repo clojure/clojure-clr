@@ -18,7 +18,7 @@ using System;
 
 namespace clojure.lang
 {
-    public class Repeat : ASeq, IReduce
+    public class Repeat : ASeq, IReduce, IDrop
     {
         #region Data
 
@@ -144,6 +144,30 @@ namespace clojure.lang
                 return ret;
             }
         }
+
+        #endregion
+
+        #region IDrop methods
+
+        public Sequential drop(int n)
+        {
+            if (_count == INFINITE)
+            {
+                return this;
+            }
+            else
+            {
+                long droppedCount = _count - n;
+                if (droppedCount > 0)
+                {
+                    return new Repeat(droppedCount, _val);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+    }
 
         #endregion
     }
