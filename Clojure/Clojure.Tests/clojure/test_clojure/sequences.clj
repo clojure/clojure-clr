@@ -1075,6 +1075,15 @@
       (reduce + (iterator-seq (.GetEnumerator (range 100)))) 4950                             ;;; .iterator 
       (reduce + (iterator-seq (.GetEnumerator (range 0.0 100.0 1.0)))) 4950.0 ))              ;;; .iterator 
 
+(deftest range-meta
+  (are [r] (= r (with-meta r {:a 1}))
+    (range 10)
+    (range 5 10)
+    (range 5 10 1)
+    (range 10.0)
+    (range 5.0 10.0)
+    (range 5.0 10.0 1.0)))
+
 (deftest range-test
   (let [threads 10
         n       1000
