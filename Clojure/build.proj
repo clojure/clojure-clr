@@ -287,22 +287,22 @@
   </Target>
 
   <Target Name="BuildD7">
-    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net7.0 -o clojure-clr-debug5" 
+    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net7.0 -o clojure-clr-debug7" 
           WorkingDirectory="$(OutputPath)" />
   </Target>
 
   <Target Name="BuildR7">
-    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net7.0 -o clojure-clr-release5" 
+    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net7.0 -o clojure-clr-release7" 
           WorkingDirectory="$(OutputPath)" />
   </Target>
   
   <Target Name="BuildD6">
-    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net6.0 -o clojure-clr-debug5" 
+    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net6.0 -o clojure-clr-debug6" 
           WorkingDirectory="$(OutputPath)" />
   </Target>
 
   <Target Name="BuildR6">
-    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net6.0 -o clojure-clr-release5" 
+    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net6.0 -o clojure-clr-release6" 
           WorkingDirectory="$(OutputPath)" />  
   </Target>
   
