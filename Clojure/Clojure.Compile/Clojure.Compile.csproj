@@ -31,7 +31,6 @@
     <ItemGroup>
       <CljCoreBin Include="$(ProjectDir)$(OutDir)clojure*.dll" />
     </ItemGroup>
-	  <Message Text="DMDMDMDMDM -- Copying @(CljCoreBin) to $(SolutionDir)Clojure.Main461\$(OutDir) " Importance="high" />
     <Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main461\$(OutDir)" />
 	<Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main461\Content\$(OutDir)" />  
   </Target>

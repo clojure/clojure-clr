@@ -7962,7 +7962,8 @@ clojure.lang.IKVReduce
   (let []                                                          ;;; cl (.. Thread currentThread getContextClassLoader)
     (concat
       (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.clj")))         ;;; (.getResources cl "data_readers.clj")
-      (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.clj"))))))      ;;; (.getResources cl "data_readers.cljc")
+      (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.cljc")))        ;;; (.getResources cl "data_readers.cljc")
+      (enumeration-seq (.GetEnumerator ^System.Collections.IEnumerable (clojure.lang.RT/FindFiles "data_readers.cljr"))))))     ;;; DM: Added
 
 (defn- data-reader-var [sym]
   (intern (create-ns (symbol (namespace sym)))

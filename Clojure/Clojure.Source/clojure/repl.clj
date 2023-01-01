@@ -247,9 +247,9 @@ str-or-pattern."
   "Returns a (possibly unmunged) string representation of a StackTraceElement"
   {:added "1.3"}
   [^System.Diagnostics.StackFrame el]                                                   ;;; StackTraceElement
-  (let [file (.GetFileName el)                                       ;;; getFileName
-        clojure-fn? (and file (or (.EndsWith file ".clj")            ;;; endsWith
-		                          (.EndsWith file ".cljc")           ;;; endsWith
+  (let [file (.GetFileName el)                                                          ;;; getFileName
+        clojure-fn? (and file (or (.EndsWith file ".clj")                               ;;; endsWith
+		                          (.EndsWith file ".cljc") (.EndsWith ".cljr")          ;;; endsWith  + DM: Added .cljr
                                   (= file "NO_SOURCE_FILE")))]
     (str (if clojure-fn?
            (demunge (stack-element-classname el))                              ;;; (.getClassName el))
