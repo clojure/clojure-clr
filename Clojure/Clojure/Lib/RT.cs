@@ -3171,7 +3171,10 @@ namespace clojure.lang
 
         public static string CultureToString(object x)
         {
-            return String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", x);
+            if (Util.IsNumeric(x))
+                return String.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}", x);
+            else
+                return x.ToString();
         }
 
 
