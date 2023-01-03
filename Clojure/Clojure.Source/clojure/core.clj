@@ -317,7 +317,7 @@
               fdecl (if (map? (last fdecl))
                       (butlast fdecl)
                       fdecl)
-              m (conj {:arglists (list 'quote (sigs fdecl))} m)
+              m (conj {:arglists (list 'quote (.applyTo list (sigs fdecl)))} m)  ;;; Added the .applyTo list   -- something made sigs return a PersistentVector+ChunkedSeq instead of a list, failing a test -- need to figure out what changed.
               m (let [inline (:inline m)
                       ifn (first inline)
                       iname (second inline)]
