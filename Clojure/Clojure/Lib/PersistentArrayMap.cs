@@ -809,7 +809,14 @@ namespace clojure.lang
 
         public Sequential drop(int n)
         {
-            throw new NotImplementedException();
+            if (_array.Length > 0)
+            {
+                return ((Seq)seq()).drop(n);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         #endregion
