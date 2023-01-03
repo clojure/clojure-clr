@@ -3224,14 +3224,14 @@ namespace clojure.lang
         }
 
         static IList<string> sourceExtensions = new List<string>() { ".cljr", ".cljc", ".clj" };
-        static IList<string> assemblyExtensions = sourceExtensions.Map(x => x + ".dll");
+        static IList<string> assemblyExtensions = sourceExtensions.Map((x) => { return x + ".dll"; });
 
         public static void load(String relativePath, Boolean failIfNotFound)
         {
             if (!RuntimeBootstrapFlag.DisableFileLoad)
             {
-                FileInfo cljInfo = sourceExtensions.Map((ext) => FindFile(relativePath + ext)).Where(fi => !(fi is null)).FirstOrDefault();
-                FileInfo assyInfo = assemblyExtensions.Map((ext) => FindFile(relativePath + ext)).Where(fi => !(fi is null)).FirstOrDefault();
+                FileInfo cljInfo = sourceExtensions.Map((ext) => FindFile(relativePath + ext)).Where((fi) => !(fi is null)).FirstOrDefault();
+                FileInfo assyInfo = assemblyExtensions.Map((ext) => FindFile(relativePath + ext)).Where((fi) => !(fi is null)).FirstOrDefault();
 
                 if ((assyInfo != null &&
                      (cljInfo == null || assyInfo.LastWriteTime >= cljInfo.LastWriteTime)))
@@ -3252,10 +3252,13 @@ namespace clojure.lang
 
                 if (cljInfo != null)
                 {
+                    // Need to know the actual extension
+                    string ext = cljInfo.Name.Substring(cljInfo.Name.LastIndexOf('.'));
+                    string sourceName = relativePath + ext;
                     if (booleanCast(Compiler.CompileFilesVar.deref()))
-                        Compile(cljInfo, cljInfo.Name);
+                        Compile(cljInfo, sourceName);
                     else
-                        LoadScript(cljInfo, cljInfo.Name);
+                        LoadScript(cljInfo, sourceName);
                     return;
                 }
             }
