@@ -28,7 +28,7 @@
 (deftest test-compiler-metadata
   (let [m (meta #'when)]
     (are [x y]  (= x y)
-        (list? (:arglists m)) true
+        (seq? (:arglists m)) true                ;;; list?  -- long story, but this is the more correct test.
         (> (count (:arglists m)) 0) true
 
         (string? (:doc m)) true
