@@ -7009,7 +7009,7 @@ clojure.lang.IKVReduce
 
 (defn- normalize-slurp-opts
   [opts]
-  (if (not (keyword? (first opts)))                                              ;;; (string? (first opts))
+  (if (string? (first opts))
     (do
       (println "WARNING: (slurp f enc) is deprecated, use (slurp f :encoding enc).")
       [:encoding (first opts)])

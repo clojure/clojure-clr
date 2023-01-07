@@ -61,7 +61,7 @@
         (is (=
               (platform-newlines "WARNING: (slurp f enc) is deprecated, use (slurp f :encoding enc).\n")
               (with-out-str
-                (is (= content (slurp f utf16))))))))))
+                (is (= content (slurp f "utf-16"))))))))))
   
 (deftest test-streams-defaults
   (let [f (temp-file "test-reader-writer")
