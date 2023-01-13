@@ -55,8 +55,11 @@ namespace clojure.lang
 
         static IEnumerable<Type> GetAllTypesInNamespace(string nspace)
         {
+            Func<Assembly, IEnumerable<Type>> getTypes = (Assembly a) => {
+                try { return a.GetTypes(); } catch (Exception) { return new Type[0]; }
+            };
             var q = AppDomain.CurrentDomain.GetAssemblies()
-                       .SelectMany(t => t.GetTypes())
+                       .SelectMany(t => getTypes(t))
                        .Where(t => (t.IsClass || t.IsInterface || t.IsValueType) &&
                                     t.Namespace == nspace &&
                                     t.IsPublic &&
