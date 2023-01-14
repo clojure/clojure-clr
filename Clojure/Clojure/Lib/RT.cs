@@ -471,7 +471,7 @@ namespace clojure.lang
 
             // load spec
             {
-                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
                 Assembly.LoadFile(Path.Combine(baseDir, "clojure.spec.alpha.dll"));
                 Assembly.LoadFile(Path.Combine(baseDir, "clojure.core.specs.alpha.dll"));
