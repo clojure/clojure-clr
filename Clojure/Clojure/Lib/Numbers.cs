@@ -605,15 +605,25 @@ namespace clojure.lang
         public static decimal minusP(decimal x) { return -x; }
 
 
-        // TODO TODO TODO -- unsigned long does not support negate. Need to special case.
-        // Two choices:  Add a predicate supportsNegation and special case here somehow.
-        //  or add a minus op to Ops.
+        public static object minus(object x, object y)
+        {
+            Ops yops = ops(y);
+            Ops xyops = ops(x).combine(yops);
 
-        public static object minus(object x, object y) { Ops yops = ops(y); return ops(x).combine(yops).add(x, yops.negate(y)); }
+            if (yops is ULongOps && xyops is ULongOps)
+                return Numbers.minus(Util.ConvertToULong(x), Util.ConvertToULong(y));
+            else if (yops is ULongOps)
+            {
+                object negativeY = xyops.negate(y);
+                Ops negativeYOps = ops(negativeY);
+                return ops(x).combine(negativeYOps).add(x, negativeY);
+            }
 
+            else
+                return xyops.add(x, yops.negate(y));
+        }
 
         public static double minus(double x, double y) { return x - y; }
-
 
         public static long minus(long x, long y)
         {
@@ -674,12 +684,26 @@ namespace clojure.lang
 
         public static object minusP(object x, object y)
         {
+
             Ops yops = ops(y);
-            object negativeY = yops.negateP(y);
-            Ops negativeYOps = ops(negativeY);
-            return ops(x).combine(negativeYOps).addP(x, negativeY);
+            Ops xyops = ops(x).combine(yops);
+
+            if (yops is ULongOps && xyops is ULongOps)
+                return Numbers.minusP(Util.ConvertToULong(x), Util.ConvertToULong(y));
+            else if (yops is ULongOps)
+            {
+                object negativeY = xyops.negateP(y);
+                Ops negativeYOps = ops(negativeY);
+                return ops(x).combine(negativeYOps).addP(x, negativeY);
+            }
+            else
+            {
+                object negativeY = yops.negateP(y);
+                Ops negativeYOps = ops(negativeY);
+                return ops(x).combine(negativeYOps).addP(x, negativeY);
+            }
         }
-        
+
 
         public static double minusP(double x, double y) { return x - y; }
 
@@ -774,7 +798,19 @@ namespace clojure.lang
         public static object unchecked_minus(object x, object y)
         {
             Ops yops = ops(y);
-            return ops(x).combine(yops).unchecked_add(x, yops.unchecked_negate(y));
+            Ops xyops = ops(x).combine(yops);
+
+            if (yops is ULongOps && xyops is ULongOps)
+                return Numbers.unchecked_minus(Util.ConvertToULong(x), Util.ConvertToULong(y));
+            else if (yops is ULongOps)
+            {
+                object negativeY = xyops.unchecked_negate(y);
+                Ops negativeYOps = ops(negativeY);
+                return ops(x).combine(negativeYOps).unchecked_add(x, negativeY);
+            }
+
+            else
+                return ops(x).combine(yops).unchecked_add(x, yops.unchecked_negate(y));
         }
 
 
