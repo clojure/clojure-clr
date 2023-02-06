@@ -14,6 +14,7 @@
 
 using System;
 
+
 namespace clojure.lang
 {
     public static class Numbers
@@ -604,7 +605,9 @@ namespace clojure.lang
         public static decimal minusP(decimal x) { return -x; }
 
 
-
+        // TODO TODO TODO -- unsigned long does not support negate. Need to special case.
+        // Two choices:  Add a predicate supportsNegation and special case here somehow.
+        //  or add a minus op to Ops.
 
         public static object minus(object x, object y) { Ops yops = ops(y); return ops(x).combine(yops).add(x, yops.negate(y)); }
 
@@ -702,10 +705,10 @@ namespace clojure.lang
         public static object minusP(decimal x, decimal y)
         {
             if (x > 0m && y < 0m && x > Decimal.MaxValue + y)
-                return addP((object)x, (object)y);
+                return minusP((object)x, (object)y);
             else if (x < 0m && y > 0m && x < Decimal.MinValue + y)
-                return addP((object)x, (object)y);
-            return num(x + y);
+                return minusP((object)x, (object)y);
+            return num(x - y);
         }
 
 
@@ -1352,7 +1355,7 @@ namespace clojure.lang
         
 
 
-        public static decimal unchecked_dec(decimal x) { return inc(x); }  
+        public static decimal unchecked_dec(decimal x) { return dec(x); }  
 
         #endregion
 
@@ -2107,6 +2110,9 @@ namespace clojure.lang
 
         #region  utility methods
 
+        // TODO: ToBigInt, ToBigInteger, ToBigDecimal will fail on unsigned long, e.g.
+        // FIX!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
         [WarnBoxedMath(false)]
         static BigInt ToBigInt(Object x)
         {
@@ -2132,6 +2138,7 @@ namespace clojure.lang
 
             return BigInteger.Create(Util.ConvertToLong(x));
         }
+
 
         [WarnBoxedMath(false)]
         static BigDecimal ToBigDecimal(object x)
@@ -2160,6 +2167,9 @@ namespace clojure.lang
 
             if (x is Ratio r)
                 return (BigDecimal)divide(BigDecimal.Create(r.numerator), r.denominator);
+
+            if (x is decimal cd)
+                return BigDecimal.Create(cd);
 
             return BigDecimal.Create(Util.ConvertToLong(x));
         }
@@ -2760,6 +2770,8 @@ namespace clojure.lang
             public object negateP(object x)
             {
                 ulong val = Util.ConvertToULong(x);
+                if (val == 0)
+                    return x;
                 return BigInt.fromBigInteger(-BigInteger.Create(val));
             }
 
