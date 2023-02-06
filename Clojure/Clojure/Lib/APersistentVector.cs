@@ -913,6 +913,8 @@ namespace clojure.lang
                 object ret = _v.nth(_i);
                 for (int x = _i-1; x >= 0; x--)
                     ret = f.invoke(ret, _v.nth(x));
+                    if (RT.isReduced(ret))
+                        return ((IDeref)ret).deref();
                 return ret;
             }
 
@@ -926,7 +928,9 @@ namespace clojure.lang
             {
                 object ret = start;
                 for (int x = _i; x >= 0; x--)
-                   ret = f.invoke(ret, _v.nth(x));
+                    ret = f.invoke(ret, _v.nth(x));
+                if (RT.isReduced(ret))
+                    return ((IDeref)ret).deref();
                 return ret;
             }
 
