@@ -3862,9 +3862,8 @@ namespace clojure.lang
 
             if (xc == typeof(long))
             {
-                long lpart = Util.ConvertToLong(x);
                 //return (int)(lpart ^ (lpart >> 32));
-                return Murmur3.HashLong(lpart);
+                return Murmur3.HashLong((long) x);
             }
             if (xc == typeof(double))
             {
