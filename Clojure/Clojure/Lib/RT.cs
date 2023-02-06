@@ -497,6 +497,8 @@ namespace clojure.lang
                 Var refer = var("clojure.core", "refer");
                 in_ns.invoke(USER);
                 refer.invoke(CLOJURE);
+                MaybeLoadCljScript("user.cljr");
+                MaybeLoadCljScript("user.cljc");
                 MaybeLoadCljScript("user.clj");
 
                 // start socket servers
