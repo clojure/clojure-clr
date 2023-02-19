@@ -15,7 +15,7 @@
   (:import
    [clojure.lang LineNumberingTextReader]                                                    ;;; LineNumberingPushbackReader
    [System.Net.Sockets Socket SocketException TcpListener TcpClient]                         ;;; [java.net InetAddress Socket ServerSocket SocketException]
-   [System.IO StreamReader StreamWriter TextReader]                                                     ;;; [java.io Reader Writer PrintWriter BufferedWriter BufferedReader InputStreamReader OutputStreamWriter]
+   [System.IO StreamReader StreamWriter TextReader  IOException]                              ;;; [java.io Reader Writer PrintWriter BufferedWriter BufferedReader InputStreamReader OutputStreamWriter]
    [System.Net Dns IPAddress]))                                                              ;;;  [java.util.concurrent.locks ReentrantLock]
 
 (set! *warn-on-reflection* true)
@@ -75,12 +75,12 @@
       (require (symbol (namespace accept)))
       (let [accept-fn (resolve accept)]
         (apply accept-fn args)))
+    (catch IOException _disconnect)
     (catch SocketException _disconnect)
     (finally
       (with-lock lock
         (alter-var-root #'servers update-in [name :sessions] dissoc client-id))
-      (.Close ^System.IO.TextReader in) (.Close conn))))                                                                 ;;; .close  DM: Added (.Close in)
-
+      (.Close ^System.IO.TextReader in) (.Close conn))))                                  ;;; .close  DM: Added (.Close in) 
 (defn start-server
   "Start a socket server given the specified opts:
     :address Host or address, string, defaults to loopback address
