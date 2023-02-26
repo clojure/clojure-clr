@@ -31,7 +31,7 @@ namespace clojure.lang
         /// Caches the hash code, when computed.
         /// </summary>
         /// <remarks>The default value indicates that the hash code has not been computed yet.</remarks>
-        int _hash;
+        //int _hash;
 
         /// <summary>
         /// Caches the hashseq code, when computed.
@@ -104,24 +104,25 @@ namespace clojure.lang
         /// <remarks>Valud-based = relies on all entries.  Once computed, it is cached.</remarks>
         public override int GetHashCode()
         {
-            int cached = _hash;
-            if ( cached == 0 )
-                _hash = cached = mapHash(this);
-            return cached;
+            return hasheq();
+            //int cached = _hash;
+            //if ( cached == 0 )
+            //    _hash = cached = mapHash(this);
+            //return cached;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
-        public static int mapHash(IPersistentMap m)
-        {
-            int hash = 0;
-            for (ISeq s = m.seq(); s != null; s = s.next())
-            {
-                IMapEntry me = (IMapEntry)s.first();
-                hash += (me.key() == null ? 0 : me.key().GetHashCode())
-                    ^ (me.val() == null ? 0 : me.val().GetHashCode());
-            }
-            return hash;
-        }
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        //public static int mapHash(IPersistentMap m)
+        //{
+        //    int hash = 0;
+        //    for (ISeq s = m.seq(); s != null; s = s.next())
+        //    {
+        //        IMapEntry me = (IMapEntry)s.first();
+        //        hash += (me.key() == null ? 0 : me.key().GetHashCode())
+        //            ^ (me.val() == null ? 0 : me.val().GetHashCode());
+        //    }
+        //    return hash;
+        //}
 
 
         #endregion

@@ -185,7 +185,7 @@
                                     hq#)))
                `(GetHashCode [this#] (let [hash# ~'__hash]                                           ;;; hashCode
                                     (if (zero? hash#)
-                                      (let [h# (clojure.lang.APersistentMap/mapHash this#)]
+                                      (let [h# (clojure.lang.APersistentMap/mapHasheq this#)]        ;;; mapHash
                                         (set! ~'__hash h#)
                                         h#)
                                       hash#)))

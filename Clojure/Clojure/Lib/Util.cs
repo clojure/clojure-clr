@@ -25,7 +25,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         static public int hash(object o)
         {
-            return o == null ? 0 : o.GetHashCode();
+            return hasheq(o);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
@@ -41,7 +41,7 @@ namespace clojure.lang
                 return Numbers.hasheq(o);
 
             if (o is string s)
-                return Murmur3.HashInt(s.GetHashCode());
+                return Murmur3.HashString(s);
 
             return o.GetHashCode();
         }

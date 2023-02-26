@@ -74,17 +74,18 @@ namespace clojure.lang
         /// Once computed, the value is cached.</remarks>
         public override int GetHashCode()
         {
-            int hash = _hash;
-            if (hash == 0)
-            {
-                for (ISeq s = seq(); s != null; s = s.next())
-                {
-                    object e = s.first();
-                    hash += Util.hash(e);
-                }
-                _hash = hash;
-            }
-            return hash;
+            return hasheq();
+            //int hash = _hash;
+            //if (hash == 0)
+            //{
+            //    for (ISeq s = seq(); s != null; s = s.next())
+            //    {
+            //        object e = s.first();
+            //        hash += Util.hash(e);
+            //    }
+            //    _hash = hash;
+            //}
+            //return hash;
         }
 
         /// <summary>

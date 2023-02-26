@@ -164,7 +164,8 @@ namespace clojure.lang
         /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
-            return (int)(_sym.GetHashCode() + 0x9e3779b9);
+            return _hasheq;
+            //return (int)(_sym.GetHashCode() + 0x9e3779b9);
         }
 
         #endregion

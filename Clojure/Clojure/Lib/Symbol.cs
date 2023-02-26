@@ -200,7 +200,7 @@ namespace clojure.lang
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            return Util.hashCombine(_name.GetHashCode(), Util.hash(_ns));
+            return Util.hashCombine(Murmur3.HashString(_name),Util.hash(_ns));  // _name.GetHashCode()
         }
 
         #endregion

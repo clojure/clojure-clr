@@ -326,7 +326,8 @@ namespace clojure.lang
             /// <returns>The hash code</returns>
             public override int GetHashCode()
             {
-                return 1;
+                return _hasheq;
+                //  return 1;
             }
 
             /// <summary>

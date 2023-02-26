@@ -29,7 +29,7 @@ namespace clojure.lang
         /// <summary>
         ///  Caches the hash code, once computed.
         /// </summary>
-        int _hash;
+        //int _hash;
 
         /// <summary>
         /// Caches the hashseq code, when computed.
@@ -127,18 +127,19 @@ namespace clojure.lang
         /// <returns>A hash code for the current object.</returns>
         public override int GetHashCode()
         {
-            int hash = _hash;
-            if (hash == 0)
-            {
-                hash = 1;
-                for (int i = 0; i < count(); i++)
-                {
-                    Object obj = nth(i);
-                    hash = 31 * hash + (obj == null ? 0 : obj.GetHashCode());
-                }
-                this._hash = hash;
-            }
-            return hash;
+            return hasheq();
+            //int hash = _hash;
+            //if (hash == 0)
+            //{
+            //    hash = 1;
+            //    for (int i = 0; i < count(); i++)
+            //    {
+            //        Object obj = nth(i);
+            //        hash = 31 * hash + (obj == null ? 0 : obj.GetHashCode());
+            //    }
+            //    this._hash = hash;
+            //}
+            //return hash;
         } 
 
 

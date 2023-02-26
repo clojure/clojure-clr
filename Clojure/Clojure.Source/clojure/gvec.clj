@@ -142,7 +142,7 @@ Object
         (let [v (first s)]
           (if (nil? v)
             (recur (unchecked-multiply-int 31 hash) (next s))
-            (recur (unchecked-add-int (unchecked-multiply-int 31 hash) (.GetHashCode  ^Object  v)) (next s))))    ;;; .hashCode
+            (recur (unchecked-add-int (unchecked-multiply-int 31 hash) (clojure.lang.Util/hasheq ^Object  v)) (next s))))    ;;; .hashCode
         hash)))
   (Equals [this other]                                                                                  ;;; equals
     (cond (identical? this other) true

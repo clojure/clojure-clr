@@ -684,7 +684,7 @@ namespace clojure.lang
 
         public override int GetHashCode()
         {
-            return _id.GetHashCode();
+            return Murmur3.HashLong(_id) ;    // _id.GetHashCode()
         }
         #endregion
 
