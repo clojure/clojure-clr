@@ -823,7 +823,7 @@ namespace clojure.lang
         {
             int key1hash = Hash(key1);
             if (key1hash == key2hash)
-                return new HashCollisionNode(null, key1hash, 2, new Object[] { key1, val1, key2, val2 });
+                return new HashCollisionNode(edit, key1hash, 2, new Object[] { key1, val1, key2, val2 });
             Box _ = new Box(null);
             return BitmapIndexedNode.EMPTY
                 .Assoc(edit, shift, key1hash, key1, val1, _)
