@@ -20,6 +20,7 @@ using System.Reflection;
 using clojure.lang.Runtime.Binding;
 using clojure.lang.Runtime;
 using System.Reflection.Emit;
+using System.Linq;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -241,7 +242,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             // Build dynamic call and lambda
             Type returnType = HasClrType ? ClrType : typeof(object);
-            InvokeMemberBinder binder = new ClojureInvokeMemberBinder(ClojureContext.Default, _methodName, paramExprs.Count, IsStaticCall);
+            InvokeMemberBinder binder = new ClojureInvokeMemberBinder(ClojureContext.Default, _methodName, paramExprs.Count, _typeArgs?.ToArray<Type>(), IsStaticCall);
 
             // This is what I want to do.
             //DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);

@@ -33,6 +33,7 @@ namespace clojure.lang.Runtime.Binding
 
         readonly ClojureContext _context;
         readonly bool _isStatic;
+        readonly Type[] _typeArgs;
 
         static readonly MethodInfo MI_CreateMe = typeof(ClojureInvokeMemberBinder).GetMethod("CreateMe");
 
@@ -40,11 +41,12 @@ namespace clojure.lang.Runtime.Binding
 
         #region C-tors
 
-        public ClojureInvokeMemberBinder(ClojureContext context, string name, int argCount, bool isStatic)
+        public ClojureInvokeMemberBinder(ClojureContext context, string name, int argCount, Type[] typeArgs, bool isStatic)
             : base(name, false, new CallInfo(argCount, DynUtils.GetArgNames(argCount)))
         {
             _context = context;
             _isStatic = isStatic;
+            _typeArgs = typeArgs ?? new Type[0];
         }
 
         #endregion
@@ -77,7 +79,14 @@ namespace clojure.lang.Runtime.Binding
             DefaultOverloadResolver res = factory.CreateOverloadResolver(argsPlus, new CallSignature(args.Length), _isStatic ? CallTypes.None : CallTypes.ImplicitInstance);
 
             BindingFlags flags = BindingFlags.InvokeMethod | BindingFlags.Public | (_isStatic ? BindingFlags.Static : BindingFlags.Instance);
-            IList<MethodBase> methods = new List<MethodBase>(typeToUse.GetMethods(flags).Where<MethodBase>(x => x.Name == Name && x.GetParameters().Length == args.Length));
+            IList<MethodInfo> minfos = new List<MethodInfo>(typeToUse.GetMethods(flags).Where<MethodInfo>(x => x.Name == Name && x.GetParameters().Length == args.Length));
+
+            IList<MethodBase> methods;
+
+            if (_typeArgs.Length > 0)
+                methods = minfos.Map(mi => mi.ContainsGenericParameters ? mi.MakeGenericMethod(_typeArgs) : mi).Cast<MethodBase>().ToList();
+            else
+                methods = minfos.Cast<MethodBase>().ToList();
 
             if (methods.Count > 0)
             {
@@ -114,17 +123,18 @@ namespace clojure.lang.Runtime.Binding
         #region IExpressionSerializable Members
 
         public Expression CreateExpression()
-        {
+        {            
             return Expression.Call(MI_CreateMe,
                 BindingHelpers.CreateBinderStateExpression(),
                 Expression.Constant(this.Name),
                 Expression.Constant(this.CallInfo.ArgumentCount),
+                Expression.NewArrayInit(typeof(Type), _typeArgs.Map(v => Expression.Constant(v)).ToList()),
                 Expression.Constant(this._isStatic));
         }
 
-        public static ClojureInvokeMemberBinder CreateMe(ClojureContext context, string name, int argCount, bool isStatic)
+        public static ClojureInvokeMemberBinder CreateMe(ClojureContext context, string name, int argCount, Type[] typeArgs, bool isStatic)
         {
-            return new ClojureInvokeMemberBinder(context, name, argCount, isStatic);
+            return new ClojureInvokeMemberBinder(context, name, argCount, typeArgs, isStatic);
         }
 
         #endregion
@@ -143,6 +153,24 @@ namespace clojure.lang.Runtime.Binding
             ilg2.EmitCall(BindingHelpers.Method_ClojureContext_GetDefault);
             ilg2.EmitString(Name);
             ilg2.EmitInt(this.CallInfo.ArgumentCount);
+
+            ilg2.EmitInt(_typeArgs.Length);
+            ilg2.Emit(OpCodes.Newarr, typeof(Type));
+
+            for (int i=0; i<this._typeArgs.Length; i++)
+            {
+                ilg2.Emit(OpCodes.Dup);
+                ilg2.EmitInt(i);
+                ilg2.EmitType(_typeArgs[i]);
+                ilg2.Emit(OpCodes.Stelem_Ref);
+            }
+
+            //ilg2.EmitInt(1);
+            //ilg2.Emit(OpCodes.Newarr, typeof(Type));
+            //ilg2.Emit(OpCodes.Dup);
+            //ilg2.EmitInt(0);
+            //ilg2.EmitType(typeof(Int32));
+            //ilg2.Emit(OpCodes.Stelem_Ref);
             ilg2.EmitBoolean(_isStatic);
             ilg2.EmitCall(MI_CreateMe);
         }

@@ -461,7 +461,7 @@ namespace clojure.lang
 
             CallSiteBinder binder = args.Length == 0 
                 ? (CallSiteBinder) new ClojureGetZeroArityMemberBinder(ClojureContext.Default, methodName, isStatic) 
-                : (CallSiteBinder) new ClojureInvokeMemberBinder(ClojureContext.Default, methodName, argExprs.Length, isStatic);
+                : (CallSiteBinder) new ClojureInvokeMemberBinder(ClojureContext.Default, methodName, argExprs.Length, typeArgs?.ToArray<Type>(), isStatic);
 
             Expression dyn = Expression.Dynamic(binder, typeof(object), argExprs);
 
