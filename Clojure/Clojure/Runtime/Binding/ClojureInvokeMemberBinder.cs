@@ -165,12 +165,6 @@ namespace clojure.lang.Runtime.Binding
                 ilg2.Emit(OpCodes.Stelem_Ref);
             }
 
-            //ilg2.EmitInt(1);
-            //ilg2.Emit(OpCodes.Newarr, typeof(Type));
-            //ilg2.Emit(OpCodes.Dup);
-            //ilg2.EmitInt(0);
-            //ilg2.EmitType(typeof(Int32));
-            //ilg2.Emit(OpCodes.Stelem_Ref);
             ilg2.EmitBoolean(_isStatic);
             ilg2.EmitCall(MI_CreateMe);
         }
