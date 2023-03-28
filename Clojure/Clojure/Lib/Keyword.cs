@@ -50,7 +50,7 @@ namespace clojure.lang
         private static readonly JavaConcurrentDictionary<Symbol,WeakReference> _symKeyMap
             = new JavaConcurrentDictionary<Symbol, WeakReference>();
 
-        internal Symbol Symbol
+        public Symbol Symbol
         {
           get { return _sym; }
         }
