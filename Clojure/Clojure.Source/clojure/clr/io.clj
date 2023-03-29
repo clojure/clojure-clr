@@ -12,9 +12,10 @@
      This file defines polymorphic I/O utility functions for Clojure."}
     clojure.clr.io
     (:import 
-     (System.IO 
+     (System.IO
+       FileInfo DirectoryInfo FileSystemInfo Path
        Stream  BufferedStream 
-       FileInfo  FileStream  MemoryStream
+       FileStream  MemoryStream
        FileMode FileShare FileAccess FileOptions
        BinaryReader BinaryWriter
        StreamReader StreamWriter
@@ -31,23 +32,33 @@
 (defprotocol ^{:added "1.2"} Coercions
   "Coerce between various 'resource-namish' things."
   (^{:tag System.IO.FileInfo, :added "1.2"} as-file [x] "Coerce argument to a file.")
+  (^{:tag System.IO.DirInfo, :added "1.2"} as-dir [x] "Coerce argument to a directory.")
   (^{:tag System.Uri, :added "1.2"} as-uri [x] "Coerce argument to a URI."))
 
 (extend-protocol Coercions
   nil
   (as-file [_] nil)
+  (as-dir [_] nil)
   (as-uri [_] nil)
   
   String
   (as-file [s] (FileInfo. s))
+  (as-dir [s] (DirectoryInfo. s))
   (as-uri [s] (Uri. s))
     
   FileInfo
   (as-file [f] f)
+  (as-dir [f] (DirectoryInfo. (.FullName f)))
   (as-uri [f] (Uri. (str "file://" (.FullName f))))
+
+  DirectoryInfo
+  (as-file [d] (FileInfo. (.FullName d)))
+  (as-dir [d] d)
+  (as-uri [d] (Uri. (str "file://" (.FullName d))))
 
   Uri
   (as-uri [u] u)
+  (as-dir [u] (as-dir (as-file u)))
   (as-file [u] 
 	(if (.IsFile u)
 	  (as-file (.LocalPath u))
@@ -466,3 +477,33 @@
   {:added "1.2"}
   [input output & opts]
   (do-copy input output (when opts (apply hash-map opts))))
+
+  (defn- concatenate-path-segments [segments]
+     (reduce #(Path/Join %1 %2) 
+       ""
+       (map #(.Replace (str %1) 
+                       Path/AltDirectorySeparatorChar 
+                       Path/DirectorySeparatorChar) 
+            segments)))
+
+
+  (defn file-info 
+    "Returns a System.IO.FileInfo. If only one argument is given, calls as-file on it.
+     If there are more than argument, applies str to each arg, 
+     replaces the alternate directory separating character by the primary one,
+     joins the strings with the diretory separating character, and creates a FileInfo from that."
+    {:added "1.12"}
+    ([x] (as-file x))
+    ([x & more] (FileInfo. (concatenate-path-segments (cons x more)))))
+
+  (defn dir-info 
+    "Returns a System.IO.DiretoryInfo. If only one argument is given, calls as-file on it.
+     If there are more than argument, applies str to each arg, 
+     replaces the alternate directory separating character by the primary one,
+     joins the strings with the diretory separating character, and creates a DirectoryInfo from that."
+    {:added "1.12"}
+    ([x] (as-dir x))
+    ([x & more] (DirectoryInfo. (concatenate-path-segments (cons x more)))))
+
+
+      
