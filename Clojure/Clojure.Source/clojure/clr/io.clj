@@ -487,7 +487,7 @@
             segments)))
 
 
-  (defn file-info 
+  (defn ^FileInfo file-info 
     "Returns a System.IO.FileInfo. If only one argument is given, calls as-file on it.
      If there are more than argument, applies str to each arg, 
      replaces the alternate directory separating character by the primary one,
@@ -496,7 +496,7 @@
     ([x] (as-file x))
     ([x & more] (FileInfo. (concatenate-path-segments (cons x more)))))
 
-  (defn dir-info 
+  (defn ^DirectoryInfo dir-info 
     "Returns a System.IO.DiretoryInfo. If only one argument is given, calls as-file on it.
      If there are more than argument, applies str to each arg, 
      replaces the alternate directory separating character by the primary one,
