@@ -1566,7 +1566,7 @@ namespace clojure.lang
             LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
 
             Var.pushThreadBindings(RT.mapUniqueKeys(
-                SourcePathVar, sourcePath,
+                SourcePathVar, relativePath,
                 SourceVar, sourceName,
                 MethodVar, null,
                 LocalEnvVar, null,
@@ -1848,8 +1848,9 @@ namespace clojure.lang
             ConsumeWhitespaces(lntr);
 
             Var.pushThreadBindings(RT.mapUniqueKeys(
+
                 //LOADER, RT.makeClassLoader(),
-                SourcePathVar, sourcePath,
+                SourcePathVar, relativePath,
                 SourceVar, sourceName,
                 RT.ReadEvalVar, true /* RT.T */,
                 RT.CurrentNSVar, RT.CurrentNSVar.deref(),
