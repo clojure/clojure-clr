@@ -146,8 +146,8 @@
 
 (deftest CLJ-1232-qualify-hints
   (let [arglists (-> #'clojure.test-clojure.compilation/hinted meta :arglists)]
-    (is (= 'String (-> arglists first meta :tag)))                                                         ;;; java.lang.String
-    (is (= 'Exception (-> arglists second meta :tag)))))                                                   ;;; java.lang.Integer
+    (is (= 'System.String (-> arglists first meta :tag)))                                                         ;;; java.lang.String
+    (is (= 'System.Exception (-> arglists second meta :tag)))))                                                   ;;; java.lang.Integer
 
 (deftest CLJ-1232-return-type-not-imported
   (is (thrown-with-cause-msg? Compiler+CompilerException #"Unable to resolve typename: Closeable"               ;;; Compiler$CompilerException  classname
