@@ -221,10 +221,10 @@ Design notes for clojure.string:
   the maximum number of parts. Not lazy. Returns vector of the parts.
   Trailing empty strings are not returned - pass limit of -1 to return all."
   {:added "1.2"}
-  ([^String s ^Regex re]                                                   ;;; ^Pattern 
-     (LazilyPersistentVector/createOwning (.Split re s)))                  ;;; .split
-  ([^String s ^Regex re limit]                                             ;;; ^Pattern 
-     (LazilyPersistentVector/createOwning (.Split re s limit))))           ;;; .split
+  ([^String s ^Regex re]                                                                                              ;;; ^Pattern 
+     (LazilyPersistentVector/createOwning (clojure.lang.RT/TrimTrailingEmptyStrings (.Split re s))))                  ;;; .split
+  ([^String s ^Regex re limit]                                                                                        ;;; ^Pattern 
+     (LazilyPersistentVector/createOwning (clojure.lang.RT/TrimTrailingEmptyStrings (.Split re s limit)))))           ;;; .split
  
 (defn split-lines
   "Splits s on \\n or \\r\\n. Trailing empty lines are not returned."

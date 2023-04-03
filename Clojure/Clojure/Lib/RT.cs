@@ -3557,6 +3557,20 @@ namespace clojure.lang
             }
         }
 
+        // I needed a way to remove empty strings/nulls from the end of an array.
+        public static string[] TrimTrailingEmptyStrings(string[] arr)
+        {
+            int i = arr.Length - 1;
+            while (i >= 0)
+            {
+                if (!String.IsNullOrEmpty(arr[i]))
+                    break;
+                i--;
+            }
+            Array.Resize(ref arr,i + 1);
+            return arr;
+        }
+
         #endregion
     }
 
