@@ -381,7 +381,7 @@ It is implemented with a number of custom enlive templates.\"
                                                                                                    ;;;     (.setTimeZone (java.util.TimeZone/getTimeZone "GMT")))
         calendar-str (with-out-str (pprint calendar))]
     (is (= (str/split-lines calendar-str)
-	       ["#inst \"2014-03-29T14:00:00.000-00:00\"" ""])                                            ;;;  "#inst \"2014-04-29T14:00:00.000+00:00\""  Added ""
+	       ["#inst \"2014-03-29T14:00:00.000-00:00\""])                                            ;;;  "#inst \"2014-04-29T14:00:00.000+00:00\""
         "calendar object pretty prints")))
 
 (deftest test-print-meta
