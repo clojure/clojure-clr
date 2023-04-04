@@ -224,7 +224,7 @@ Design notes for clojure.string:
   ([^String s ^Regex re]                                                                                              ;;; ^Pattern 
      (LazilyPersistentVector/createOwning (clojure.lang.RT/TrimTrailingEmptyStrings (.Split re s))))                  ;;; .split
   ([^String s ^Regex re limit]                                                                                        ;;; ^Pattern 
-     (LazilyPersistentVector/createOwning (clojure.lang.RT/TrimTrailingEmptyStrings (.Split re s limit)))))           ;;; .split
+     (LazilyPersistentVector/createOwning (if (< limit 0) (.Split re s) (.Split re s limit)))))                       ;;; .split
  
 (defn split-lines
   "Splits s on \\n or \\r\\n. Trailing empty lines are not returned."
