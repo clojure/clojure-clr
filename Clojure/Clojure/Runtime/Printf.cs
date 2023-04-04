@@ -557,7 +557,10 @@ namespace clojure.lang
                     PrintString(sb, s);
                 }
                 else
-                    PrintString(sb, arg.ToString());
+                {
+                    string s = arg is Boolean b ? b.ToString().ToLower() : arg.ToString();
+                    PrintString(sb, s);
+                }
             }
 
             private void PrintHashCode(StringBuilder sb, object arg)
@@ -570,9 +573,9 @@ namespace clojure.lang
             {
                 string s;
                 if (arg == null)
-                    s = false.ToString();
+                    s = "false";
                 else
-                    s = arg is Boolean b ? b.ToString() : true.ToString();
+                    s = arg is Boolean b ? b.ToString().ToLower() : "true";
                 PrintString(sb, s);
             }
 
