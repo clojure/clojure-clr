@@ -15,7 +15,7 @@
   (:require [clojure.spec.alpha :as spec])
   )   ;;;(:import (java.io LineNumberReader InputStreamReader PushbackReader)
       ;;;         (clojure.lang RT Reflector)))
-
+(set! *warn-on-reflection* true)  ;; DM: Added -- let's see what we can catch
 (def ^:private special-doc-map
   '{. {:url "java_interop#dot"
        :forms [(.instanceMember instance args*)
@@ -160,7 +160,7 @@ Example: (source-fn 'filter)"
           (dotimes [_ (dec (:line (meta v)))] (.ReadLine rdr))                      ;;; .readLine
           (let [text (StringBuilder.)
                 pbr (proxy [clojure.lang.PushbackTextReader] [rdr]                  ;;; [PushbackReader] [rdr]
-                      (Read [] (let [i (proxy-super Read)]                          ;;; read read
+                      (Read [] (let [this ^clojure.lang.PushbackTextReader this i (proxy-super Read)]                          ;;; read read  -- add typed binding for this to avoid reflection warning
                                  (.Append text (char i))                            ;;; .append
                                  i)))
                 read-opts (if (.EndsWith ^String filepath "cljc") {:read-cond :allow} {})]                   ;;; .endsWith
@@ -249,7 +249,7 @@ str-or-pattern."
   [^System.Diagnostics.StackFrame el]                                                   ;;; StackTraceElement
   (let [file (.GetFileName el)                                                          ;;; getFileName
         clojure-fn? (and file (or (.EndsWith file ".clj")                               ;;; endsWith
-		                          (.EndsWith file ".cljc") (.EndsWith ".cljr")          ;;; endsWith  + DM: Added .cljr
+		                          (.EndsWith file ".cljc") (.EndsWith file ".cljr")     ;;; endsWith  + DM: Added .cljr
                                   (= file "NO_SOURCE_FILE")))]
     (str (if clojure-fn?
            (demunge (stack-element-classname el))                              ;;; (.getClassName el))
