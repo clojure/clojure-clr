@@ -69,7 +69,7 @@ In the `.csproj` file:
 		<Description>Something appropriate.</Description>
 		<Copyright>Copyright © Rich Hickey, You 202X</Copyright>
 		<PackageLicenseExpression>EPL-1.0</PackageLicenseExpression>
-		<RepositoryUrl>https://github.com/clojure/clojure.tools.namesapce</RepositoryUrl>
+		<RepositoryUrl>https://github.com/clojure/clr.tools.namesapce</RepositoryUrl>
 		<Company>ClojureCLR contributors</Company>
 		<PackageTags>Clojure;ClojureCLR</PackageTags>
 		<Version>1.1.0</Version> 
