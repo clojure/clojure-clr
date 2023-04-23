@@ -8,9 +8,8 @@
   <ItemGroup>
     <PackageReference Include="clojure.data.generators" Version="1.0.1.1" />
     <PackageReference Include="clojure.test.check" Version="1.1.1" />
-    <PackageReference Include="clojure.test.generative" Version="1.0.1.1" />
-    <PackageReference Include="clojure.tools.namespace" Version="1.2.0" />
-    <PackageReference Include="clr.tools.reader" Version="1.3.6" />
+    <PackageReference Include="clojure.test.generative" Version="1.0.2" />
+    <PackageReference Include="clojure.tools.namespace" Version="1.4.4" />
   </ItemGroup>
 
   <ItemGroup>

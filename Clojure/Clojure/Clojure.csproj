@@ -18,7 +18,8 @@
 	<ItemGroup>
 		<PackageReference Include="clojure.core.specs.alpha" Version="0.2.62" />
 		<PackageReference Include="clojure.spec.alpha" Version="0.3.218" />
-		<PackageReference Include="DynamicLanguageRuntime" Version="1.3.2" />
+		<PackageReference Include="clojure.tools.reader" Version="1.3.7" />
+		<PackageReference Include="DynamicLanguageRuntime" Version="1.3.3" />
 	</ItemGroup>
 
 
@@ -60,7 +61,7 @@
 	-->
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net462'">
-		<Parent Include="$(SolutionDir)Clojure.Compile\$(OutDir)\clojure.*.dll"/> 
+		<Parent Include="$(SolutionDir)Clojure.Compile\$(OutDir)\clojure.*.dll" /> 
 		<EmbeddedResource Include="@(Parent)">
 			<Link>%(Filename)$(Extension)</Link>
 		</EmbeddedResource>
