@@ -154,16 +154,11 @@
    (is (nil? (as-file nil)))                                               ;;; added test
 )
 
-(println (dir-info "abc" "def"))
-(println (file-info "abc" "def"))
-(println (apply file-info ["pqr" "stu"]))
-
 (deftest test-file-info
   (are [result args] (= (.FullName (FileInfo. result)) (.FullName (apply file-info args)))    ;;; Added .FullName   File.
        "foo" ["foo"]
        "foo/bar" ["foo" "bar"]
        "foo/bar/baz" ["foo" "bar" "baz"]))
-
 
 (deftest test-as-dir                                                       ;;; Added test
   (are [result input] (= (.FullName result) (.FullName (as-file input))) 
