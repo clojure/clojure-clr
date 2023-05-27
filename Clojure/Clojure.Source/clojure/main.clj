@@ -625,7 +625,7 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
                          ((requiring-resolve 'clojure.pprint/pprint) report)))
           err-path (when (= target "file")
                      (try
-                       (let [f (FileInfo. (Path/Join (Path/GetTempPath) (str "clojure-" (System.Guid/NewGuid) ".edn")))]     ;;; (.toFile (Files/createTempFile "clojure-" ".edn" (into-array FileAttribute [])))
+                       (let [f (FileInfo. (Path/Combine (Path/GetTempPath) (str "clojure-" (System.Guid/NewGuid) ".edn")))]     ;;; (.toFile (Files/createTempFile "clojure-" ".edn" (into-array FileAttribute [])))
                          (with-open [w (StreamWriter. (.OpenWrite f))]                                                                       ;;; [w (BufferedWriter. (FileWriter. f))
                            (binding [*out* w] (println report-str)))
                          (.FullName f))                                                                                      ;;; .getAbsolutePath

@@ -12,8 +12,8 @@
   (:use clojure.test clojure.clr.io
         [clojure.test-helper :only [platform-newlines]])
   (:import 
-    (System.IO FileInfo FileMode FileStream StreamReader StreamWriter MemoryStream Path)
-    (System.Text Encoding UTF8Encoding UnicodeEncoding UTF32Encoding)
+    (System.IO DirectoryInfo FileInfo FileMode FileStream StreamReader StreamWriter MemoryStream Path)
+    (System.Text Encoding UTF8Encoding UnicodeEncoding UTF32Encoding) (System Uri)
   ))
 
 (def utf8 (UTF8Encoding.))
@@ -143,19 +143,39 @@
         (copy r o :encoding enc :buffer-size 16)
         (bytes-should-equal (get-bytes s enc) (.ToArray o) "")))))
 
-;(deftest test-as-file
-;  (are [result input] (= result (as-file input))
-;       (File. "foo") "foo"
-;       (File. "bar") (File. "bar")
-;       (File. "baz") (URL. "file:baz")
-;       (File. "quux") (URI. "file:quux")
-;       nil nil))
+(deftest test-as-file
+  (are [result input] (= (.FullName result) (.FullName (as-file input)))   ;;; added .FullName 
+       (FileInfo. "foo")  "foo"                                            ;;; File. 
+       (FileInfo. "bar") (FileInfo. "bar")                                 ;;; File. File.
+       (FileInfo. "fff")  (DirectoryInfo. "fff")                           ;;; added test
+                                                                           ;;; (File. "baz") (URL. "file:baz")
+       (FileInfo. "\\\\quux\\what") (Uri. "file://quux/what")                             ;;; File. URI. "file:quux"
+   )                                                                       ;;; nil nil -- can't do this with the calls to .FullName
+   (is (nil? (as-file nil)))                                               ;;; added test
+)
 
-;(deftest test-file
-;  (are [result args] (= (File. result) (apply file args))
-;       "foo" ["foo"]
-;       "foo/bar" ["foo" "bar"]
-;       "foo/bar/baz" ["foo" "bar" "baz"]))
+(deftest test-file-info
+  (are [result args] (= (.FullName (FileInfo. result)) (.FullName (apply file-info args)))    ;;; Added .FullName   File.
+       "foo" ["foo"]
+       "foo/bar" ["foo" "bar"]
+       "foo/bar/baz" ["foo" "bar" "baz"]))
+
+(deftest test-as-dir                                                       ;;; Added test
+  (are [result input] (= (.FullName result) (.FullName (as-file input))) 
+       (DirectoryInfo. "foo")  "foo"  
+       (DirectoryInfo. "bar") (FileInfo. "bar")
+       (DirectoryInfo. "fff")  (DirectoryInfo. "fff")
+       (DirectoryInfo. "\\\\quux\\what") (Uri. "file://quux/what"))
+   (is (nil? (as-file nil)))
+)
+
+(deftest test-dir-info
+  (are [result args] (= (.FullName (DirectoryInfo. result)) (.FullName (apply dir-info args)))
+       "foo" ["foo"]
+       "foo/bar" ["foo" "bar"]
+       "foo/bar/baz" ["foo" "bar" "baz"]))
+
+
 ;(deftest test-as-url
 ;  (are [file-part input] (= (URL. (str "file:" file-part)) (as-url input))
 ;       "foo" "file:foo"

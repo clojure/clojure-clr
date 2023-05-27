@@ -32,7 +32,7 @@
 (defprotocol ^{:added "1.2"} Coercions
   "Coerce between various 'resource-namish' things."
   (^{:tag System.IO.FileInfo, :added "1.2"} as-file [x] "Coerce argument to a file.")
-  (^{:tag System.IO.DirInfo, :added "1.2"} as-dir [x] "Coerce argument to a directory.")
+  (^{:tag System.IO.DirectoryInfo, :added "1.2"} as-dir [x] "Coerce argument to a directory.")
   (^{:tag System.Uri, :added "1.2"} as-uri [x] "Coerce argument to a URI."))
 
 (extend-protocol Coercions
@@ -479,7 +479,7 @@
   (do-copy input output (when opts (apply hash-map opts))))
 
   (defn- concatenate-path-segments [segments]
-     (reduce #(Path/Join %1 %2) 
+     (reduce #(Path/Combine %1 %2) 
        ""
        (map #(.Replace (str %1) 
                        Path/AltDirectorySeparatorChar 
