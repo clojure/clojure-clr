@@ -3314,11 +3314,17 @@ namespace clojure.lang
                 }
             }
 
-            var embeddedCljName = relativePath.Replace("/", ".") + ".clj";
+
+            var embeddedCljName = relativePath.Replace("/", ".") + ".cljr";
             var stream = GetEmbeddedResourceStream(embeddedCljName, out Assembly containingAssembly);
             if ( stream == null )
             {
                 embeddedCljName = relativePath.Replace("/", ".") + ".cljc";
+                stream = GetEmbeddedResourceStream(embeddedCljName, out containingAssembly);
+            }
+            if (stream == null)
+            {
+                embeddedCljName = relativePath.Replace("/", ".") + ".clj";
                 stream = GetEmbeddedResourceStream(embeddedCljName, out containingAssembly);
             }
             if (stream != null)
