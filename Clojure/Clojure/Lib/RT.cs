@@ -3290,7 +3290,7 @@ namespace clojure.lang
 
 
             if (!loaded && failIfNotFound)
-                throw new FileNotFoundException(String.Format("Could not locate {0} with extensions .cljr, .cljc, .cljr, .cljr.dll, .cljc.dll, or .clj.dll on load path.{1}",
+                throw new FileNotFoundException(String.Format("Could not locate {0} with extensions .cljr, .cljc, .clj, .cljr.dll, .cljc.dll, or .clj.dll on load path.{1}",
                         relativePath,
                         relativePath.Contains("_") ? " Please check that namespaces with dashes use underscores in the Clojure file name." : ""));
         }
