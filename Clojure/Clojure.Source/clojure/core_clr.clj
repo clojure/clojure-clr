@@ -207,7 +207,9 @@
   "Translates to a gen-delegate for a System.Action<,...> call"
   {:added "1.3"}
   [typesyms & body]
-  (generate-generic-delegate "System.Action" typesyms body))  
+  (if (= (count typesyms) 0)
+    `(gen-delegate System.Action [] ~@body)
+    (generate-generic-delegate "System.Action" typesyms body)))  
 
 
 ; Attribute handling
