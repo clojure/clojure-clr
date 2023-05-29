@@ -314,6 +314,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit", new Type[] { typeof(Object) });
 
         internal static readonly MethodInfo Method_Namespace_importClass1 = typeof(Namespace).GetMethod("importClass", new Type[] { typeof(Type) });
+        internal static readonly MethodInfo Method_Namespace_importClass2 = typeof(Namespace).GetMethod("importClass", new Type[] { typeof(Symbol), typeof(Type) });
 
         internal static readonly MethodInfo Method_PersistentList_create = typeof(PersistentList).GetMethod("create", new Type[] { typeof(System.Collections.IList) });
         internal static readonly MethodInfo Method_PersistentHashSet_create = typeof(PersistentHashSet).GetMethod("create", new Type[] { typeof(Object[]) });
