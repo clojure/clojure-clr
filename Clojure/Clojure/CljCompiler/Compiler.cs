@@ -1797,7 +1797,7 @@ namespace clojure.lang
         {
             FileInfo finfo = new FileInfo(fileName);
             if (!finfo.Exists)
-                throw new FileNotFoundException("Cannot find file to load", fileName);
+                throw new FileNotFoundException($"Cannot find file to load: {fileName}", fileName);
 
             using (TextReader rdr = finfo.OpenText())
                 return load(rdr, finfo.FullName, finfo.Name, fileName);
