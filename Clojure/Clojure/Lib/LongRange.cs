@@ -184,19 +184,24 @@ namespace clojure.lang
 
         #region IChunkedSeq methods
 
+        const int CHUNK_SIZE = 32;
+
         public IChunk chunkedFirst()
         {
-            return new LongChunk(_start, _step, _count);
+            return new LongChunk(_start, _step, Math.Min(_count, CHUNK_SIZE));
         }
 
         public ISeq chunkedNext()
         {
-            return null;
+            return chunkedMore().seq();
         }
 
         public ISeq chunkedMore()
         {
-            return PersistentList.EMPTY;
+            if ( _count <= CHUNK_SIZE)
+                return PersistentList.EMPTY;
+            else
+                return LongRange.create(_start + (_step * CHUNK_SIZE), _end, _step);
         }
 
         #endregion
