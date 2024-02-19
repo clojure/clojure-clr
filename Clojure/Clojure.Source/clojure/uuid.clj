@@ -9,11 +9,12 @@
 (ns clojure.uuid)
 
 (defn- default-uuid-reader [form]
-  {:pre [(string? form)]}
-  (System.Guid. ^String form))                                                ;;; (java.util.UUID/fromString form)
+  (if (string? form)
+    (System.Guid. ^String form)                                             ;;; (java.util.UUID/fromString form)
+    (throw (ArgumentException. "#uuid data reader expected string"))))      ;;; IllegalArgumentException.
 
-(defmethod print-method System.Guid [uuid ^System.IO.TextWriter w]    ;;; java.util.UUID ^java.io.Writer
-  (.Write w (str "#uuid \"" (str uuid) "\"")))                        ;;; .write
+(defmethod print-method System.Guid [uuid ^System.IO.TextWriter w]          ;;; java.util.UUID ^java.io.Writer
+  (.Write w (str "#uuid \"" (str uuid) "\"")))                              ;;; .write
 
-(defmethod print-dup System.Guid [o w]                                ;;; java.util.UUID
+(defmethod print-dup System.Guid [o w]                                      ;;; java.util.UUID
   (print-method o w))
