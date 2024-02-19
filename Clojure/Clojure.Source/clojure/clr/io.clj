@@ -28,6 +28,7 @@
      (System 
        Uri UriFormatException)))
      
+(set! *warn-on-reflection* true)
 
 (defprotocol ^{:added "1.2"} Coercions
   "Coerce between various 'resource-namish' things."
@@ -305,7 +306,7 @@
                      (file-mode :read opts) 
                      (file-access :read opts) 
                      (file-share opts) 
-                     (buffer-size opts) 
+                     (int (buffer-size opts)) 
                      (file-options opts)) 
          opts))
     :make-output-stream (fn [^FileInfo x opts] 
@@ -314,7 +315,7 @@
                      (file-mode :write opts) 
                      (file-access :write opts) 
                      (file-share opts) 
-                     (buffer-size opts) 
+                     (int (buffer-size opts)) 
                      (file-options opts)) 
          opts))))
         
@@ -395,9 +396,9 @@
       (let [size (.Read input buffer 0 len)]
         (when (pos? size)
           (let [ cnt (.GetCharCount decoder buffer 0 size)
-                 chbuf (make-array Char cnt)]
-            (do (.GetChars decoder buffer 0 size chbuf 0)
-                (.Write output chbuf 0 cnt)
+                 ^chars chbuf (make-array Char cnt)]
+            (do (.GetChars decoder buffer (int 0) size chbuf (int 0))
+                (.Write output chbuf (int 0) cnt)
                 (recur))))))))
 
 (defmethod do-copy [Stream FileInfo] [^Stream input ^FileInfo output opts]
