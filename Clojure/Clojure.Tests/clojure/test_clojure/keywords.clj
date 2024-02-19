@@ -25,7 +25,7 @@
            nil (str absent-keyword-sym)))))
 
 (deftest arity-exceptions
-  (is (thrown-with-msg? ArgumentException #"Wrong number of args \(0\) passed to: :kw" (:kw)))                                ;;; IllegalArgumentException
-  (is (thrown-with-msg? ArgumentException #"Wrong number of args \(20\) passed to: :foo/bar" (apply :foo/bar (range 20))))    ;;;IllegalArgumentException
-  (is (thrown-with-msg? ArgumentException #"Wrong number of args \(21\) passed to: :foo/bar" (apply :foo/bar (range 21))))    ;;;IllegalArgumentException
-  (is (thrown-with-msg? ArgumentException #"Wrong number of args \(22\) passed to: :foo/bar" (apply :foo/bar (range 22)))))   ;;;IllegalArgumentException
+  (is (thrown-with-msg? ArgumentException #"Wrong number of args \(0\) passed to: :kw" (:kw)))                                              ;;; IllegalArgumentException
+  (is (thrown-with-msg? ArgumentException #"Wrong number of args \(20\) passed to: :foo/bar" (apply :foo/bar (range 20))))                  ;;;IllegalArgumentException
+  (is (thrown-with-msg? clojure.lang.ArityException #"Wrong number of args \(> 20\) passed to: :foo/bar" (apply :foo/bar (range 21))))      ;;;IllegalArgumentException
+  (is (thrown-with-msg? clojure.lang.ArityException #"Wrong number of args \(> 20\) passed to: :foo/bar" (apply :foo/bar (range 22)))))     ;;;IllegalArgumentException

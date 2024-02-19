@@ -46,7 +46,7 @@ namespace clojure.lang
         }
 
         public ArityException(int actual, string name, Exception cause)
-            : base("Wrong number of args (" + actual + ") passed to: " + Compiler.demunge(name), cause)
+            : base("Wrong number of args (" + (actual <= 20 ? actual.ToString() : "> 20") + ") passed to: " + Compiler.demunge(name), cause)
         {
             _actual = actual;
             _name = name;
