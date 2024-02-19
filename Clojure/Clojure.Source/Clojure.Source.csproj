@@ -11,10 +11,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="clojure\clr\basis.cljc" />
+    <None Remove="clojure\clr\basis\impl.cljc" />
     <None Remove="clojure\clr\math.clj" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="clojure\clr\basis.cljc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="clojure\clr\basis\impl.cljc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="clojure\math.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
