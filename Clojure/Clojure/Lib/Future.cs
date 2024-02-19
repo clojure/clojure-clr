@@ -149,6 +149,24 @@ namespace clojure.lang
             return _value;      
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        public object get(int millis, object timeoutValue)
+        {
+            if (!_t.Join(millis))
+                return timeoutValue;
+            if (_cancelled)
+            {
+                throw new FutureAbortedException();
+            }
+            if (_error != null)
+            {
+                throw new InvalidOperationException("Future has an error", _error);
+            }
+            return _value;
+        }
+
+
+
         #endregion
 
         #region IDeref Members
