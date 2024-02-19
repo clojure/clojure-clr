@@ -3045,15 +3045,15 @@
   ([]
    (iterate inc' 0))
   ([end]
-   (if (instance? Int64 end)                                                             ;;; Long
+   (if (int? end)
      (clojure.lang.LongRange/create end)
      (clojure.lang.Range/create end)))
   ([start end]
-   (if (and (instance? Int64 start) (instance? Int64 end))                               ;;; Long Long
+   (if (and (int? start) (int? end))
      (clojure.lang.LongRange/create start end)
      (clojure.lang.Range/create start end)))
   ([start end step]
-   (if (and (instance? Int64 start) (instance? Int64 end) (instance? Int64 step))        ;;; Long Long Long
+   (if (and (int? start) (int? end) (int? step))
      (clojure.lang.LongRange/create start end step)
      (clojure.lang.Range/create start end step))))
 
