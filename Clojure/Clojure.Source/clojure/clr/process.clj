@@ -31,7 +31,7 @@
 (def ^:private ^FileInfo null-file
   (delay
     (cio/file-info
-     (if (System.OperatingSystem/IsWindows)
+     (if (= (.Platform Environment/OSVersion) PlatformID/Win32NT)
        "NUL"
        "/dev/null"))))
 
