@@ -3,7 +3,7 @@
   (:require [clojure.string :as str]
             [clojure.repl.deps :as deps]
             [clojure.main :as main]))
-           ;; TODO: We are not a in a place to do this yet
+
 #_(defmacro with-dynamic-loader
   "Ensure or install a DynamicClassLoader as the current thread's
   context classloader and execute the body."
@@ -18,13 +18,13 @@
          (finally
            (.setContextClassLoader t# cl#))))))
 
-#_(deftest test-no-add-libs-outside-repl
-  (try
-    (deps/add-lib 'org.clojure/data.json {:mvn/version "2.4.0"})
-    (is false "add-libs outside repl should throw")
-    (catch Throwable t (str/includes? (ex-message t) "add-libs")))
-
-  (with-dynamic-loader
-    (binding [*repl* true]
-      (is (some #{'org.clojure/data.json} (deps/add-lib 'org.clojure/data.json {:mvn/version "2.4.0"})))))
-  )
+;(deftest test-no-add-libs-outside-repl
+;  (try
+;    (deps/add-lib 'org.clojure/data.json {:mvn/version "2.4.0"})
+;    (is false "add-libs outside repl should throw")
+;    (catch Throwable t (str/includes? (ex-message t) "add-libs")))
+;
+;  (with-dynamic-loader
+;    (binding [*repl* true]
+;      (is (some #{'org.clojure/data.json} (deps/add-lib 'org.clojure/data.json {:mvn/version "2.4.0"})))))
+;  )
