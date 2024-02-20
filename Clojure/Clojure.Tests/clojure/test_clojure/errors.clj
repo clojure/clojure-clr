@@ -107,9 +107,9 @@
           (with-out-str (pr t))
           (catch Exception t (is nil)))))))                          ;;; Throwable
 
-(deftest ex-info-disallows-nil-data
-  (is (thrown? Microsoft.Scripting.ArgumentTypeException (ex-info "message" nil)))        ;;; IllegalArgumentException  -- we have an overload on ctors --passing nil makes it impossible to determine which to call.
-  (is (thrown? ArgumentException (ex-info "message" nil (Exception. "cause")))))          ;;; IllegalArgumentException  Throwable.
+(deftest ex-info-allows-nil-data
+  (is (thrown? Microsoft.Scripting.ArgumentTypeException (ex-info "message" nil)))        ;;; (is (= {} (ex-data (ex-info "message" nil))))    we have an overload on ctors --passing nil makes it impossible to determine which to call
+  (is (= {} (ex-data (ex-info "message" nil (Exception. "cause"))))))     ;;; Throwable.
 
 (deftest ex-info-arities-construct-equivalent-exceptions
   (let [ex1 (ex-info "message" {:foo "bar"})

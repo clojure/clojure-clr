@@ -51,10 +51,7 @@ namespace clojure.lang
         public ExceptionInfo(String s, IPersistentMap data, Exception innerException)
             : base(s, innerException)
         {
-            if (data != null)
-                this.data = data;
-            else
-                throw new ArgumentException("Additional data must be non-nil.", nameof(data));
+            this.data = (data == null) ? PersistentArrayMap.EMPTY : data;
         }
 
         public ExceptionInfo()
