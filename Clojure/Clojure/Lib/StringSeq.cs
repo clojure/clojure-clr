@@ -152,7 +152,7 @@ namespace clojure.lang
         {
             int ii = _i + n;
             if (ii < _s.Length)
-                return new StringSeq(_meta, _s, ii);
+                return new StringSeq(null, _s, ii);
             else
                 return null;
         }
