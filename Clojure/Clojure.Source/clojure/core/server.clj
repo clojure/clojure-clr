@@ -15,8 +15,9 @@
   (:import
    [clojure.lang LineNumberingTextReader]                                                    ;;; LineNumberingPushbackReader
    [System.Net.Sockets Socket SocketException TcpListener TcpClient]                         ;;; [java.net InetAddress Socket ServerSocket SocketException]
-   [System.IO StreamReader StreamWriter TextReader  IOException]                              ;;; [java.io Reader Writer PrintWriter BufferedWriter BufferedReader InputStreamReader OutputStreamWriter]
-   [System.Net Dns IPAddress]))                                                              ;;;  [java.util.concurrent.locks ReentrantLock]
+   [System.IO StreamReader StreamWriter TextReader  IOException]                             ;;; [java.io Reader Writer PrintWriter BufferedWriter BufferedReader InputStreamReader OutputStreamWriter]
+                                                                                             ;;; [java.util Properties]
+   [System.Net Dns IPAddress]))                                                              ;;; [java.util.concurrent.locks ReentrantLock]
 
 (set! *warn-on-reflection* true)
 
@@ -145,14 +146,16 @@
 
 (defn- parse-props
   "Parse clojure.server.* from properties to produce a map of server configs."
-  [props]
+  [props]                                                                                          ;;; ^Properties  -- our props are a Dictionary
   (reduce
-    (fn [acc [^String k ^String v]]
+    (fn [acc [^String k ^String v]]                                                                ;;; fn [acc ^String k]
       (let [[k1 k2 k3] (str/split k #"\.")]
         (if (and (= k1 "clojure") (= k2 "server"))
-          (conj acc (merge {:name k3} (edn/read-string v)))
+                                                                                                   ;;; (let [v (get props k)]
+          (conj acc (merge {:name k3} (edn/read-string v)))                                        ;;;  )
           acc)))
-    [] props))
+    [] 
+    props))                                                                                       ;;; (.stringPropertyNames props)
 
 (defn start-servers
   "Start all servers specified in the system properties."

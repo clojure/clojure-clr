@@ -9,8 +9,17 @@
 ; Author: Alex Miller
 
 (ns clojure.test-clojure.server
+    (:import System.Random)                                                                   ;;; java.util.Random
     (:require [clojure.test :refer :all])
     (:require [clojure.core.server :as s]))
+
+#_(defn create-random-thread                                                                  ;;; commented out
+  []
+  (Thread.
+    (fn []
+      (let [random (new Random)]
+      (while (not (.isInterrupted (Thread/currentThread)))
+        (System/setProperty (Integer/toString (.nextInt random)) (Integer/toString (.nextInt random))))))))
 
 (defn check-invalid-opts
   [opts msg]
@@ -27,3 +36,12 @@
   (doseq [port [-1 "5" 999999]]
     (check-invalid-opts {:name "a" :port port :accept 'clojure.core/+} (str "Invalid socket server port: " port)))
   (check-invalid-opts {:name "a" :port 5555} "Missing required socket server property :accept"))
+
+#_(deftest test-parse-props                                                              ;;; commented out -- I don't think we have the same concerns
+  (let [thread (create-random-thread)]
+    (.start thread)
+    (Thread/sleep 1000)
+    (try
+      (is (>= (count
+        (#'s/parse-props (System/getProperties))) 0))
+      (finally (.interrupt thread)))))
