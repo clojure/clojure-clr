@@ -115,6 +115,7 @@
 			 *unchecked-math* *unchecked-math*
              *assert* *assert*
              clojure.spec.alpha/*explain-out* clojure.spec.alpha/*explain-out*
+             *repl* true
 			 *1 nil
              *2 nil
              *3 nil
@@ -377,7 +378,8 @@
 by default when a new command-line REPL is started."} repl-requires
   '[[clojure.repl :refer (source apropos dir pst doc find-doc)]
     ;;;[clojure.java.javadoc :refer (javadoc)]                            ;;; commented out
-    [clojure.pprint :refer (pp pprint)]])
+    [clojure.pprint :refer (pp pprint)]
+    [clojure.repl.deps :refer (add-libs add-lib sync-deps)]])
 
 (defmacro with-read-known
   "Evaluates body with *read-eval* set to a \"known\" value,

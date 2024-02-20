@@ -15,6 +15,7 @@
     <None Remove="clojure\clr\basis\impl.cljc" />
     <None Remove="clojure\clr\math.clj" />
     <None Remove="clojure\clr\process.clj" />
+    <None Remove="clojure\repl\deps.cljc" />
     <None Remove="clojure\tools\deps\interop.cljc" />
   </ItemGroup>
 
@@ -74,6 +75,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="clojure\main.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="clojure\repl\deps.cljc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="clojure\set.clj">
