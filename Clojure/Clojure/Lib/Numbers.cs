@@ -2516,6 +2516,10 @@ namespace clojure.lang
             {
                 long n = Util.ConvertToLong(x);
                 long val = Util.ConvertToLong(y);
+
+                if ( n == long.MinValue || val == long.MinValue )
+                    return BIGINT_OPS.divide(x, y);
+
                 long gcd1 = gcd(n, val);
                 if (gcd1 == 0)
                     return num(0);
