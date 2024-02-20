@@ -25,11 +25,8 @@ namespace clojure.lang
           * useful if the returned coll implements IDrop for subsequent use in a
           * partition-like scenario.
           *
-          * If n is <= 0, return this.
-          * If n drops to or past the end of the collection, return null.
-          *
-          * @param n Items to drop
-          * @return Collection that is Sequential, ISeq, and IReduceInit
+          * @param n Items to drop, must be > 0
+          * @return Collection that is Sequential, ISeq, and IReduceInit, or null if past the end
           */
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         Sequential drop(int n);

@@ -1194,9 +1194,7 @@ namespace clojure.lang
 
         public Sequential drop(int n)
         {
-            if (n < 0)
-                return this;
-            else if (n < _cnt)
+            if (n < _cnt)
             {
                 int offset = n % 32;
                 return new ChunkedSeq(this, this.ArrayFor(n), n - offset, offset);
