@@ -6839,7 +6839,7 @@ fails, attempts to require sym's namespace and retries."
 (load "core/protocols")
 (load "gvec")
 
-#_(defn stream-reduce!
+(defn stream-reduce!
   "Works like reduce but takes a java.util.stream.BaseStream as its source.
   Honors 'reduced', is a terminal operation on the stream"
   {:added "1.12"}
@@ -6848,24 +6848,24 @@ fails, attempts to require sym's namespace and retries."
   ([f init ^System.Collections.IEnumerable s]                                                    ;;; ^java.util.stream.BaseStream
    (clojure.core.protocols/iterator-reduce! (.GetEnumerator s) f init)))                         ;;; .iterator
 
-#_(defn stream-seq!
+(defn stream-seq!
   "Takes a java.util.stream.BaseStream instance s and returns a seq of its
   contents. This is a terminal operation on the stream."
   {:added "1.12"}
   [^System.Collections.IEnumerable stream]                                                       ;;; ^java.util.stream.BaseStream
   (iterator-seq (.GetEnumerator stream)))                                                        ;;; .iterator
 
-#_(defn stream-transduce!
+(defn stream-transduce!
   "Works like transduce but takes a java.util.stream.BaseStream as its source.
   This is a terminal operation on the stream."
   {:added "1.12"}
   ([xform f ^System.Collections.IEnumerable stream] (stream-transduce! xform f (f) stream))      ;;; ^java.util.stream.BaseStream
-  ([xform f init ^jSystem.Collections.IEnumerable stream]
+  ([xform f init ^System.Collections.IEnumerable stream]                                         ;;; ^java.util.stream.BaseStream
    (let [f (xform f)
          ret (stream-reduce! f init stream)]
      (f ret))))
 
-#_(defn stream-into!
+(defn stream-into!
   "Returns a new coll consisting of coll with all of the items of the
   stream conjoined. This is a terminal operation on the stream."
   {:added "1.12"}
