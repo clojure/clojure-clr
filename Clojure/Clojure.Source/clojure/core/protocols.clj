@@ -30,27 +30,26 @@
      (let [s (seq coll)]
        (internal-reduce s f val))))
 
+;; mutates the iterator, respects reduced
+(defn iterator-reduce!
+  ([^System.Collections.IEnumerator iter f]               ;;; ^java.lang.Iterator
+   (if (.MoveNext iter)                                   ;;; .hasNext
+     (iterator-reduce! iter f (.Current iter))            ;;; .next
+     (f)))
+  ([^System.Collections.IEnumerator iter f val]           ;;; ^java.lang.Iterator
+   (loop [ret val]
+     (if (.MoveNext iter)                                 ;;; .hasNext
+       (let [ret (f ret (.Current iter))]                 ;;; .next
+         (if (reduced? ret)
+           @ret
+           (recur ret)))
+       ret))))
+
 (defn- iter-reduce
-  ([^System.Collections.IEnumerable coll f]                      ;;; ^java.lang.Iterable
-   (let [iter (.GetEnumerator coll)]                             ;;; .iterator
-     (if (.MoveNext iter)                                        ;;; .hasNext
-       (loop [ret (.Current iter)]                               ;;; .next
-         (if (.MoveNext iter)                                    ;;; .hasNext 
-           (let [ret (f ret (.Current iter))]                    ;;; .next
-             (if (reduced? ret)
-               @ret
-               (recur ret)))
-           ret))
-       (f))))
-  ([^System.Collections.IEnumerable coll f val]                 ;;; ^java.lang.Iterable
-   (let [iter (.GetEnumerator coll)]                            ;;; .iterator
-     (loop [ret val]
-       (if (.MoveNext iter)                                     ;;; .hasNext
-         (let [ret (f ret (.Current iter))]                     ;;; .next
-           (if (reduced? ret)
-             @ret
-             (recur ret)))
-         ret)))))
+  ([^System.Collections.IEnumerable coll f]               ;;;  ^Iterable
+   (iterator-reduce! (.GetEnumerator coll) f))            ;;; .iterator
+  ([^System.Collections.IEnumerable coll f val]           ;;;  ^Iterable
+   (iterator-reduce! (.GetEnumerator coll) f val)))       ;;; .iterator
 
 (defn- naive-seq-reduce
   "Reduces a seq, ignoring any opportunities to switch to a more
