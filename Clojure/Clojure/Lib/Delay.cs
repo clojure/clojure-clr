@@ -14,6 +14,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace clojure.lang
 {
@@ -27,17 +28,19 @@ namespace clojure.lang
         /// <summary>
         /// The value, after it has been computed.
         /// </summary>
-        volatile object _val;
+        object _val;
 
         /// <summary>
         /// Cached exception, if encountered
         /// </summary>
-        volatile Exception _exception;
+        Exception _exception;
 
         /// <summary>
         /// The function being delayed.
         /// </summary>
-        volatile IFn _fn;
+        IFn _fn;
+
+        ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
         #endregion
 
@@ -75,6 +78,37 @@ namespace clojure.lang
 
         #region IDeref Members
 
+        private void Realize()
+        {
+            var lk = _lock;
+            if ( lk != null )
+            {
+                lk.EnterWriteLock();
+                {
+                    try
+                    {
+                        if (_fn != null)
+                        {
+                            try
+                            {
+                                _val = _fn.invoke();
+                            }
+                            catch (Exception e)
+                            {
+                                _exception = e;
+                            }
+                            _fn = null;
+                            _lock = null;
+                        }
+                    }
+                    finally
+                    {
+                        lk.ExitWriteLock();
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Get the value.
         /// </summary>
@@ -82,25 +116,8 @@ namespace clojure.lang
         /// <remarks>Forces the computation if it has not happened yet.</remarks>
         public object deref()
         {
-            if (_fn != null)
-            {
-                lock (this)
-                {
-                    // double check
-                    if (_fn != null)
-                    {
-                        try
-                        {
-                            _val = _fn.invoke();
-                        }
-                        catch (Exception e)
-                        {
-                            _exception = e;
-                        }
-                        _fn = null;
-                    }
-                }
-            }
+            if (_lock != null)
+                Realize();
 
             if (_exception != null)
                 throw _exception;
@@ -115,7 +132,7 @@ namespace clojure.lang
 
         public bool isRealized()
         {
-            return _fn == null;
+            return _lock == null;
         }
 
         #endregion

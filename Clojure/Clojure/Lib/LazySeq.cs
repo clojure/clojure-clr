@@ -16,6 +16,7 @@ using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace clojure.lang
 {
@@ -27,6 +28,7 @@ namespace clojure.lang
         private IFn _fn;
         private object _sv;
         private ISeq _s;
+        private ReaderWriterLockSlim _lock;
 
         #endregion
 
@@ -35,13 +37,91 @@ namespace clojure.lang
         public LazySeq(IFn fn)
         {
             _fn = fn;
+            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         }
 
-        private LazySeq(IPersistentMap meta, ISeq s)
+        private LazySeq(IPersistentMap meta, ISeq seq)
             : base(meta)
         {
             _fn = null;
-            _s = s;
+            _s = seq;
+        }
+
+        #endregion
+
+        #region Implementation details
+
+        // MUST be locked when called
+        private void Force()
+        {
+            if ( _fn != null )
+            {
+                _sv = _fn.invoke();
+                _fn = null;
+            }
+        }
+
+        private void LockAndForce()
+        {
+            var lk = _lock;
+            if (lk != null)
+            {
+                lk.EnterWriteLock();
+                try
+                {
+                    Force();
+                }
+                finally
+                {
+                    lk.ExitWriteLock();
+                }
+            }
+        }
+
+        object Sval()
+        {
+            if (_fn != null)
+                LockAndForce();
+
+            if (_sv != null)
+                return _sv;
+
+            return _s;
+        }
+
+        private object Unwrap(Object ls)
+        {
+            while (ls is LazySeq lseq)
+                ls = lseq.Sval();
+
+            return ls;
+        }
+
+        private void Realize()
+        {
+            var lk = _lock;
+            if ( lk != null)
+            {
+                lk.EnterWriteLock();
+                try
+                {
+                    // must re-examine under lock
+                    if (_lock != null)
+                    {
+                        Force();
+                        object ls = _sv;
+                        _sv = null;
+                        if (ls is LazySeq)
+                            ls = Unwrap(ls);
+                        _s = RT.seq(ls);
+                        _lock = null;
+                    }
+                }
+                finally
+                {
+                    lk.ExitWriteLock();
+                }
+            }
         }
 
         #endregion
@@ -85,33 +165,10 @@ namespace clojure.lang
         /// Gets an <see cref="ISeq"/>to allow first/rest/next iteration through the collection.
         /// </summary>
         /// <returns>An <see cref="ISeq"/> for iteration.</returns>
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public ISeq seq()
         {
-            sval();
-            if (_sv != null)
-            {
-                object ls = _sv;
-                _sv = null;
-                while (ls is LazySeq lseq)
-                    ls = lseq.sval();
-                _s = RT.seq(ls);
-            }
-            return _s;
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
-        object sval()
-        {
-            if (_fn != null)
-            {
-                    _sv = _fn.invoke();
-                    _fn = null;
-            }
-            if ( _sv != null )
-                return _sv;
-
+            if (_lock != null)
+                Realize();
             return _s;
         }
 
@@ -185,7 +242,24 @@ namespace clojure.lang
 
         public bool isRealized()
         {
-            return _fn == null;
+            if (_lock != null)
+            {
+                var lk = _lock;
+                if (lk != null)
+                {
+                    lk.EnterWriteLock();
+                    try
+                    {
+                        return _lock == null;
+                    }
+                    finally
+                    {
+                        lk.ExitWriteLock();
+                    }
+                }
+            }
+
+            return true;
         }
 
         #endregion
