@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp3.1;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
     <StartupObject>Clojure.CljMain</StartupObject>
 	 <PackAsTool>true</PackAsTool>
   </PropertyGroup>

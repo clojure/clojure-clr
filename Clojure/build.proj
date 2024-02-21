@@ -26,7 +26,7 @@
 	
 	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">net6.0</TestTargetFramework>
 	
-	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'netcoreapp3.1' AND '$(TestTargetFramework)' != 'net7.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
+	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net8.0' AND '$(TestTargetFramework)' != 'net7.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
 		
 		
 	<TestLibraryFramework Condition=" '$(TestTargetFramework)' == 'net462' ">netstandard2.0</TestLibraryFramework>
