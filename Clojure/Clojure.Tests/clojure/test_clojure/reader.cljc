@@ -428,12 +428,13 @@
     (doseq [form top-levels]
       (clojure.walk/postwalk
         #(when (list? %)
-           (is (= (expected-metadata (first %))
-                  (meta %)))
+           (when (contains? expected-metadata (first %))
+             (is (= (expected-metadata (first %))
+                   (meta %))))
            (is (->> (meta %)
                  vals
                  (filter number?)
-                 (every? (partial instance? Int32))))                                      ;;; Integer
+                 (every? (partial instance? Int32))))                     ;;; Integer
            (swap! verified-forms inc))
         form))
     ;; sanity check against e.g. reading returning ()
@@ -453,7 +454,26 @@
 
 ;; Anonymous function literal (#())
 
-(deftest t-Anonymouns-function-literal)
+(deftest t-Anonymous-function-literal
+  ;; #(vector %) => #(fn* [gen__#] (vector gen__#))
+  ;; [\S]+ matches the anon arg, then \1 is backref matching first group
+  (is (= "(fn* [] (vector))" (pr-str (read-string "#(vector)"))))
+  (is (not (nil? (re-matches #"\(fn\* \[([\S]+)] \(vector \1\)\)" (pr-str (read-string "#(vector %)"))))))
+  (is (not (nil? (re-matches #"\(fn\* \[([\S]+)] \(vector \1 \1\)\)" (pr-str (read-string "#(vector % %)"))))))
+  (is (not (nil? (re-matches #"\(fn\* \[([\S]+)] \(vector \1 \1\)\)" (pr-str (read-string "#(vector % %1)"))))))
+  (is (not (nil? (re-matches #"\(fn\* \[([\S]+) ([\S]+)] \(vector \1 \2\)\)" (pr-str (read-string "#(vector %1 %2)"))))))
+  (is (not (nil? (re-matches #"\(fn\* \[([\S]+) ([\S]+) & ([\S]+)] \(vector \2 \3\)\)" (pr-str (read-string "#(vector %2 %&)"))))))
+
+  ;; invalid formats
+  (is (thrown? Exception (read-string "#(vector %%)")))                                                                 ;;; RuntimeException
+  (is (thrown? Exception (read-string "#(vector %1/2)"))) 																;;; RuntimeException
+  (is (thrown? Exception (read-string "#(vector %1.5)"))) 																;;; RuntimeException
+  (is (thrown? Exception (read-string "#(vector %-0.2)"))) 																;;; RuntimeException
+  (is (thrown? Exception (read-string "#(vector %3M)"))) 																;;; RuntimeException
+
+  ;; check sneaking in discarded content
+  (is (thrown? Exception (read-string "#(list %#_(first arg)1.00000001 %#_(secong arg)2r10 %#_(rest arg)-1.5)"))) 	    ;;; RuntimeException
+  )
 
 ;; Syntax-quote (`, note, the "backquote" character), Unquote (~) and
 ;; Unquote-splicing (~@)

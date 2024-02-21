@@ -571,6 +571,7 @@ namespace clojure.lang
         //static Regex symbolPat = new Regex("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
         static readonly Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
         static readonly Regex keywordPat = new Regex("^[:]?([^/].*/)?(/|[^/][^/]*)$");
+        static readonly Regex argPat = new Regex("^%(?:(&)|([1-9][0-9]*))?$");
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         private static void ExtractNamesUsingMask(string token, string maskNS, string maskName, out string ns, out string name)
@@ -1778,27 +1779,21 @@ namespace clojure.lang
         {
             protected override object Read(PushbackTextReader r, char pct, object opts, object pendingForms)
             {
-                //if (ARG_ENV.deref() == null)
-                //    return interpretToken(readToken(r, '%'));
+                var token = readSimpleToken(r, '%');
+
                 if (ARG_ENV.deref() == null)
                 {
-                    return InterpretToken(readSimpleToken(r, '%'), null);
+                    return InterpretToken(token, null);
                 }
 
-                int ch = r.Read();
-                Unread(r, ch);
-                //% alone is first arg
-                if (ch == -1 || isWhitespace(ch) || isTerminatingMacro(ch))
-                {
-                    return registerArg(1);
-                }
-                //object n = ReadAux(r, true, null, true, opts, pendingForms);
-                object n = ReadAux(r, opts, EnsurePending(pendingForms));
-                if (n.Equals(Compiler.AmpersandSym))
-                    return registerArg(-1);
-                if (!Util.IsNumeric(n))
+                Match m = argPat.Match(token);
+                if (!m.Success)
                     throw new ArgumentException("arg literal must be %, %& or %integer");
-                return registerArg(Util.ConvertToInt(n));
+
+                if (m.Groups[1].Success) // %&
+                    return registerArg(-1);
+
+                return registerArg(m.Groups[2].Success ? int.Parse(m.Groups[2].Value) : 1);
             }
 
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
