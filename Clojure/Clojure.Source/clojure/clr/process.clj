@@ -58,7 +58,7 @@
                          [{} opts+args])
         {:keys [redirect-in redirect-out redirect-err dir env clear-env]
          :or {redirect-in false, redirect-out false, redirect-err false, dir "."}} opts
-        si (ProcessStartInfo. (first command) (str/join " " (rest command)))
+        si (ProcessStartInfo. ^String (first command) ^String (str/join " " (rest command)))
         si-env (.EnvironmentVariables si)
         process (Process.)]
 
