@@ -208,7 +208,7 @@
     <Target Name="Ilmerge" DependsOnTargets="Build" Condition="'$(TestTargetFramework)' == 'net462'">
     <MakeDir Directories="$(StageDir)\ilmerge\$(TestTargetFramework)" /> 
     <Exec WorkingDirectory="$(ClojureCompileBinDir)" 
-          Command="ilmerge /keyfile:$(PublicKey) /out:$(StageDir)\ilmerge\$(TestTargetFramework)\Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.math.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll clojure.clr.basis.impl clojure.clr.basis clojure.clr.process clojure.tools.deps.interop clojure.repl.deps"
+          Command="ilmerge /keyfile:$(PublicKey) /out:$(StageDir)\ilmerge\$(TestTargetFramework)\Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.math.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll clojure.clr.basis.impl.cljc.dll clojure.clr.basis.cljc.dll clojure.clr.process.clj.dll clojure.tools.deps.interop.cljc.cll clojure.repl.deps.cljc.dll"
           />
 
   </Target>
@@ -226,7 +226,7 @@
 	</PropertyGroup>
     <MakeDir Directories="$(ILMergeStageDir)" /> 
     <Exec WorkingDirectory="$(SourceDir)" 
-          Command="ilmerge /keyfile:$(PublicKey) /out:$(ILMergeStageDir)\Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.math.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll clojure.clr.basis.impl clojure.clr.basis clojure.clr.process clojure.tools.deps.interop  clojure.repl.deps"
+          Command="ilmerge /keyfile:$(PublicKey) /out:$(ILMergeStageDir)\Clojure.dll Clojure.dll clojure.clr.io.clj.dll clojure.math.clj.dll clojure.clr.shell.clj.dll clojure.core.clj.dll clojure.core.protocols.clj.dll clojure.core.reducers.clj.dll clojure.core.server.clj.dll clojure.core_clr.clj.dll clojure.core_deftype.clj.dll clojure.core_print.clj.dll clojure.core_proxy.clj.dll clojure.data.clj.dll clojure.edn.clj.dll clojure.genclass.clj.dll clojure.gvec.clj.dll clojure.instant.clj.dll clojure.main.clj.dll clojure.pprint.clj.dll clojure.pprint.cl_format.clj.dll clojure.pprint.column_writer.clj.dll clojure.pprint.dispatch.clj.dll clojure.pprint.pprint_base.clj.dll clojure.pprint.pretty_writer.clj.dll clojure.pprint.print_table.clj.dll clojure.pprint.utilities.clj.dll clojure.reflect.clj.dll clojure.reflect.clr.clj.dll clojure.repl.clj.dll clojure.set.clj.dll clojure.stacktrace.clj.dll clojure.string.clj.dll clojure.template.clj.dll clojure.test.clj.dll clojure.test.junit.clj.dll clojure.test.tap.clj.dll clojure.uuid.clj.dll clojure.walk.clj.dll clojure.zip.clj.dll clojure.datafy.clj.dll clojure.clr.basis.impl.cljc.dll clojure.clr.basis.cljc.dll clojure.clr.process.clj.dll clojure.tools.deps.interop.cljc.dll  clojure.repl.deps.cljc.dll"
           />
 	
 	<Unzip
@@ -247,10 +247,11 @@
    
   
   <Target Name="ZipAll" DependsOnTargets="PackAll;ILMerge462">
+
+	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net8.0\publish"
+	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net8.0.zip"
+				  Overwrite="true"/>	
    
-    <ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\netcoreapp3.1\publish"
-	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-core3.1.zip"
-				  Overwrite="true"/>
 	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net7.0\publish"
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net7.0.zip"
 				  Overwrite="true"/>	
@@ -276,15 +277,6 @@
   <!-- $$$$$$$$$$$$$$$$$$$$$$$$$$ -->
 	
   <!-- RJ: New build and clean targets for .Net Core 3.X and .Net 5-->
-  <Target Name="BuildD3">
-    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f netcoreapp3.1 -o clojure-clr-debug3" 
-          WorkingDirectory="$(OutputPath)" />
-  </Target>
-
-  <Target Name="BuildR3">
-    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f netcoreapp3.1 -o clojure-clr-release3" 
-          WorkingDirectory="$(OutputPath)" />
-  </Target>
 
   <Target Name="BuildD7">
     <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net7.0 -o clojure-clr-debug7" 
@@ -304,34 +296,6 @@
   <Target Name="BuildR6">
     <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net6.0 -o clojure-clr-release6" 
           WorkingDirectory="$(OutputPath)" />  
-  </Target>
-  
-  <Target Name="CleanD3">
-    <Exec Command="dotnet clean Clojure.sln -p:Platform=&quot;Any CPU&quot; -o clojure-clr-debug3" 
-          WorkingDirectory="$(OutputPath)" />
-    <RemoveDir
-          Directories="clojure-clr-debug3" />
-  </Target>
-
-  <Target Name="CleanR3">
-    <Exec Command="dotnet clean Clojure.sln -p:Platform=&quot;Any CPU&quot; -o clojure-clr-release3" 
-          WorkingDirectory="$(OutputPath)" />
-    <RemoveDir
-          Directories="clojure-clr-release3" />
-  </Target>
-
-  <Target Name="CleanD5">
-    <Exec Command="dotnet clean Clojure.sln -p:Platform=&quot;Any CPU&quot; -o clojure-clr-debug5" 
-          WorkingDirectory="$(OutputPath)" />
-    <RemoveDir
-          Directories="clojure-clr-debug5" />
-  </Target>
-
-  <Target Name="CleanR5">
-    <Exec Command="dotnet clean Clojure.sln -p:Platform=&quot;Any CPU&quot; -o clojure-clr-release5" 
-          WorkingDirectory="$(OutputPath)" />
-    <RemoveDir
-          Directories="clojure-clr-release5" />
   </Target>
   
 
