@@ -17,6 +17,7 @@ using System;
 using System.Collections;
 using System.Threading;
 using System.Collections.Generic;
+using System.Text;
 
 namespace clojure.lang
 {
@@ -765,6 +766,9 @@ namespace clojure.lang
 
             IEnumerator Iterator(KVMangleDel<Object> d);
             IEnumerator<T> IteratorT<T>(KVMangleDel<T> d);
+
+            // For debugging only
+            void PrintContents(string prefix);
         }
 
         #endregion
@@ -1002,6 +1006,30 @@ namespace clojure.lang
                 object forked = fjfork.invoke(fjtask.invoke(new Func<object>(() => { return FoldTasks(t2, combinef, fjtask, fjfork, fjjoin); })));
 
                 return combinef.invoke(FoldTasks(t1, combinef, fjtask, fjfork, fjjoin), fjjoin.invoke(forked));
+            }
+
+            public void PrintContents(string prefix)
+            {
+                var sb = new StringBuilder(prefix);
+
+                for (int i = 0; i < _array.Length; i++)
+                {
+                    INode node = _array[i];
+                    if (node != null)
+                        sb.AppendFormat(" {0}:{1}", i, PersistentHashMap.NodeTypeDesignator(node));
+                }
+
+                Console.WriteLine(sb.ToString());
+
+                for (int i = 0; i < _array.Length; i++)
+                {
+                    INode node = _array[i];
+                    if (node != null)
+                    {
+                        var newPrefix = prefix + "-" + i.ToString() + ":" + PersistentHashMap.NodeTypeDesignator(node) + ":";
+                        node.PrintContents(newPrefix);
+                    }
+                }
             }
 
             #endregion
@@ -1438,6 +1466,50 @@ namespace clojure.lang
             }
 
 
+            public void PrintContents(string prefix)
+            {
+                var sb = new StringBuilder(prefix);
+
+                int j = 0;
+
+                for (int i = 0; i < 32; i++)
+                {
+                    if ((_bitmap & (1 << i)) != 0)
+                    {
+                        var keyOrNull = _array[j];
+                        var valOrNode = _array[j + 1];
+                        if (keyOrNull == null)
+                            sb.AppendFormat(" {0}:{1}", i, PersistentHashMap.NodeTypeDesignator((INode)valOrNode));
+                        else
+                            sb.AppendFormat(" {0} = Key {1}", i, keyOrNull);
+
+                        j += 2;
+                    }
+                }
+
+                Console.WriteLine(sb.ToString());
+
+
+                j = 0;
+
+                for (int i = 0; i < 32; i++)
+                {
+                    if ((_bitmap & (1 << i)) != 0)
+                    {
+                        var keyOrNull = _array[j];
+                        var valOrNode = _array[j + 1];
+                        if (keyOrNull == null)
+                        {
+                            var newPrefix = prefix + "-" + i.ToString() + ":" + PersistentHashMap.NodeTypeDesignator((INode)valOrNode) + ":";
+                            ((INode)valOrNode).PrintContents(newPrefix);
+                        }
+
+
+                        j += 2;
+                    }
+                }
+            }
+
             #endregion
 
             #region Implementation
@@ -1655,6 +1727,18 @@ namespace clojure.lang
                 return NodeSeq.KvReduce(_array, reducef, combinef.invoke());
             }
 
+            public void PrintContents(string prefix)
+            {
+                var sb = new StringBuilder(prefix);
+
+                for (int i = 0; i < _array.Length; i += 2)
+                {
+                    sb.AppendFormat(" {0} = Key {1}", i, _array[i]);
+                }
+
+                Console.WriteLine(sb.ToString());
+            }
+
             #endregion
 
             #region Implementation
@@ -1862,6 +1946,29 @@ namespace clojure.lang
 
             #endregion
         }
+
+        #endregion
+
+        #region debugging
+
+        public static string NodeTypeDesignator(INode node)
+        {
+            if (node is BitmapIndexedNode)
+                return "B";
+            if (node is ArrayNode)
+                return "A";
+            if (node is HashCollisionNode)
+                return "H";
+            return "?";
+        }
+
+        public void PrintContents()
+        {
+            Console.WriteLine($"PersistentHashMap: count={_count}, hashNull={_hasNull}");
+            if (_root != null)
+                _root.PrintContents("*" + NodeTypeDesignator(_root));
+        }
+
 
         #endregion
     }

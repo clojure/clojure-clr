@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30002.166
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34601.278
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clojure", "Clojure\Clojure.csproj", "{F3D54017-088E-44E1-9395-7F92145E094C}"
 EndProject
@@ -16,7 +16,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Csharp.Tests", "Csharp.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clojure.Main461", "Clojure.Main461\Clojure.Main461.csproj", "{1A87935F-20E0-4C15-A09B-B8A7B5110019}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clojure.Samples", "Clojure.Samples\Clojure.Samples.csproj", "{08563A3D-D4F1-45DB-84BD-000EEC94C55C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clojure.Samples", "Clojure.Samples\Clojure.Samples.csproj", "{08563A3D-D4F1-45DB-84BD-000EEC94C55C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{EB8B9CB5-4820-4F7F-9AA2-058C2A080235}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +58,10 @@ Global
 		{08563A3D-D4F1-45DB-84BD-000EEC94C55C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08563A3D-D4F1-45DB-84BD-000EEC94C55C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08563A3D-D4F1-45DB-84BD-000EEC94C55C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB8B9CB5-4820-4F7F-9AA2-058C2A080235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB8B9CB5-4820-4F7F-9AA2-058C2A080235}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB8B9CB5-4820-4F7F-9AA2-058C2A080235}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB8B9CB5-4820-4F7F-9AA2-058C2A080235}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
