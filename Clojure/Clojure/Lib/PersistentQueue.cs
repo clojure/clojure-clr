@@ -284,7 +284,7 @@ namespace clojure.lang
 
         public object SyncRoot
         {
-            get { return true; }
+            get { return this; }
         }
 
         public bool Remove(object item)
