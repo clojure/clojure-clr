@@ -2429,7 +2429,7 @@ namespace clojure.lang
             //if (c.Precision == 0)
             //    return v;
 
-            if (v.GetPrecision() < c.Precision)
+             if (v.GetPrecision() < c.Precision)
                 return v;
 
             int drop = (int)(v._precision - c.Precision);
@@ -2547,10 +2547,10 @@ namespace clojure.lang
                 int decrease = -delta;
                 uint p = lhs.GetPrecision();
                 
-                if  ( p < decrease )
-                    return new BigDecimal(BigInteger.Zero,newExponent);
+                //if  ( p < decrease )
+                //    return new BigDecimal(BigInteger.Zero,newExponent);
 
-                uint newPrecision = (uint)(p - decrease);
+                uint newPrecision = p < decrease ? 0 : (uint)(p - decrease);
 
                 BigDecimal r = lhs.Round(new Context(newPrecision, mode));
                 if (r._exp == newExponent)
