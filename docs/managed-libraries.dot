@@ -4,38 +4,42 @@ rankdir = RL;
 
 {
 	node [shape=box];
-	
-	"clr.core.async" -> {"tools.analyzer.clr"};
-	"clr.core.cache" -> {"clr.data.priority-map"};
-	"clr.core.logic";
-	"clr.core.memoize" -> {"clr.core.cache"}
-
-	"clr.core.specs.alpha" -> {"clr.spec.alpha"};
-	"clr.spec.alpha" -> {"clr.test.check"};
-
-	"clr.data.generators";
-	"clr.data.json";
-	"clr.data.priority-map";
 
 	"clr.test.check";
-	"clr.test.generative" -> {"clr.tools.namespace", "clr.data.generators"};
+	"clr.spec.alpha" -> {"clr.test.check"};
+	"clr.core.specs.alpha" -> {"clr.spec.alpha"};
 
-	"clr.tools.namespace" -> {"clr.tools.reader"};
-	"clr.tools.nrepl";
-	"clr.tools.reader";
+	
+	"clr.core.async" -> {"tools.analyzer.clr"};
+
+	"clr.data.priority-map";
+	"clr.core.cache" -> {"clr.data.priority-map"};
+	"clr.core.memoize" -> {"clr.core.cache"}
 
 	"tools.cli*"
+	"clr.tools.gitlibs";
 	"clr.tools.deps" ->  {"clr.tools.gitlibs", "tools.cli*"};
 	"clr.tools.deps.cli" -> {"clr.tools.deps"}
-	"clr.tools.gitlibs";
-	"clr.tools.tools" -> {"clr.tools.deps",  "clr.tools.gitlibs"};
-	"clr.tools.build" -> {"clr.tools.deps"};
-    "clr.brew-install"
-	"clr.tools.nuget"
 
+	"clr.tools.reader";
+	"clr.tools.namespace" -> {"clr.tools.reader"};
 
-	"clr.tools.analyzer";
+	"clr.data.generators";
+
+	"clr.test.generative" -> {"clr.tools.namespace", "clr.data.generators"};
 	"tools.analyzer.clr" -> {"tools.analyzer*", "clr.core.memoize", "clr.tools.reader"};
+
+	"clr.cli";
+
+	"cognitect-labs/test-runner*" -> {"clr.tools.namespace", "tools.cli*"};
+
 	"tools.analyzer*";
+	"clr.tools.analyzer";
+
+	"clr.data.json";
+	"clr.core.logic";
+	"clr.tools.nrepl";
+	"clr.tools.nuget?";
+	
 }
 }

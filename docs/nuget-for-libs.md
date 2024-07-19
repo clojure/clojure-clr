@@ -5,7 +5,7 @@ We suggest what seems to be the standard project layout in Clojure libraries.  S
 
  We will put our .Net-related source in `<root>\src\main\dotnet`.
 
-(You might run into older libraries that were developed before we standardized on this approach.  They might have the clojure source directly under `<root>/src/clojure` and the .Net-related code under there also.}
+(You might run into older libraries that were developed before we standardized on this approach.  They might have the clojure source directly under `<root>/src/clojure` and the .Net-related code under there also.)
 
 The sample code below uses `clojure.tools.namespace` as the name of the library.  You should substitute appropriately.
 
