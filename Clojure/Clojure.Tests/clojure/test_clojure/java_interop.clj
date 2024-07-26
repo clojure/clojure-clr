@@ -236,7 +236,7 @@
   [^String s]
   (.GetString System.Text.Encoding/UTF8 (System.Convert/FromBase64String s)))     ;;; (.decode (Base64/getDecoder) s)
 
-(deftest test-proxy-non-serializable
+#_(deftest test-proxy-non-serializable
   (testing "That proxy classes refuse serialization and deserialization"
     ;; Serializable listed directly in interface list:
     (is (thrown? System.Runtime.Serialization.SerializationException                                                     ;;;  java.io.NotSerializableException

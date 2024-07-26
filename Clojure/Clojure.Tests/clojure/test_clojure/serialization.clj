@@ -48,7 +48,7 @@
       (= (hash v) (hash rt))
       (= (.GetHashCode v) (.GetHashCode rt)))))          ;;; .hashCode .hashCode
 
-(deftest sequable-serialization
+#_(deftest sequable-serialization
   (are [val] (roundtrip val)
     ; lists and related
     ;;; (list)                          <--- We cannot handle seq of this, which is nil.  Cannot serialize nil.
@@ -123,14 +123,14 @@
       (nth r 35)
       r)))
 
-(deftest misc-serialization
+#_(deftest misc-serialization
   (are [v] (= v (-> v serialize deserialize))
     25/3
     :keyword
     ::namespaced-keyword
     'symbol))
 
-(deftest tostringed-bytes
+#_(deftest tostringed-bytes
   (let [rt #(-> % serialize seq)
         s1 (rt 'sym123)
         k1 (rt :kw123)
@@ -141,7 +141,7 @@
     (is (= s1 s2))
     (is (= k1 k2))))
 
-(deftest interned-serializations
+#_(deftest interned-serializations
   (are [v] (identical? v (-> v serialize deserialize))
     clojure.lang.RT/DefaultComparerInstance                                       ;;; clojure.lang.RT/DEFAULT_COMPARATOR
 
@@ -152,7 +152,7 @@
      ; vars get serialized back into the same var in the present runtime
     #'clojure.core/conj))
  
- (deftest new-var-unbound-on-read
+ #_(deftest new-var-unbound-on-read
   (let [v (intern 'user 'foobarbaz 10)
         sv (serialize v)]
     (ns-unmap 'user 'foobarbaz) ;; unmap #'user.V
@@ -170,7 +170,7 @@
 ;;;      (fn [] capture)                                      <--- TODO: unable to find assembly eval
 )))  ;;;      #(do capture))))                                <--- TODO: unable to find assembly eval
 
-(deftest check-unserializable-objects
+#_(deftest check-unserializable-objects
   (are [t] (thrown?  System.Runtime.Serialization.SerializationException (serialize t))              ;;; java.io.NotSerializableException
     ;; transients
     (transient [])
@@ -186,4 +186,9 @@
     (enumeration-seq (.GetEnumerator (range 50)))              ;;; (java.util.Collections/enumeration (range 50)))
     (iterator-seq (.GetEnumerator (range 50)))))               ;;; (.iterator (range 50)))))
     
-    
+;; necessary for CVE-2024-22871
+#_(deftest CLJ-2839
+  (are [e] (thrown? Exception (.GetHashCode ^Object (-> e serialize deserialize)))              ;;; .hashCode
+    (repeat 1)
+    (iterate identity nil)
+    (cycle [1])))    

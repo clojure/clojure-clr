@@ -60,6 +60,28 @@ namespace clojure.lang
         }
 
         #endregion
+        #region Object overrides
+
+        public override int GetHashCode()
+        {
+            if ( _count <= 0 ) 
+                throw new NotSupportedException("Repeat: hash not supported");
+            else
+                return base.GetHashCode();
+        }
+
+        #endregion
+
+        #region IHashEq methods
+        public override int hasheq()
+        {
+            if (_count <= 0)
+                throw new NotSupportedException("Repeat: hasheq not supported");
+            else
+                return base.hasheq();
+        }
+
+        #endregion
 
         #region ISeq methods
 

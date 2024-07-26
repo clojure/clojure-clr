@@ -421,7 +421,7 @@ namespace clojure.lang
 
         #region IHashEq
 
-        public int hasheq()
+        public virtual int hasheq()
         {
             if (_hasheq == 0)
             {

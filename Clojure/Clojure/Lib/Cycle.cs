@@ -57,6 +57,23 @@ namespace clojure.lang
 
         #endregion
 
+        #region Object overrides
+
+        public override int GetHashCode()
+        {
+            throw new NotSupportedException("Cycle: hash not supported");
+        }
+
+        #endregion
+
+        #region IHashEq methods
+        public override int hasheq()
+        {
+            throw new NotSupportedException("Cycle: hasheq not supported");
+        }
+
+        #endregion
+
         #region ISeq methods
 
         // realization for use of current
