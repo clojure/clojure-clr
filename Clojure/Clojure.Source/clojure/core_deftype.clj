@@ -687,15 +687,17 @@
             [opts sigs]))
         sigs (when sigs
                (reduce1 (fn [m s]
-                          (let [tag-to-class (fn [tag]
-                                               (if-let [c (and (instance? clojure.lang.Symbol tag)
-                                                            (= (.IndexOf (.Name ^clojure.lang.Symbol tag) ".") -1)                                                              ;;; .indexOf   .getName
-                                                            (not (contains? '#{int long float double char short byte boolean void uint ulong ushort sbyte                       ;;; add unsigned types
-                                                                               ints longs floats doubles chars shorts bytes booleans objects uints ulongs ushorts sbytes} tag))
-                                                            (resolve tag))]
-                                                 (symbol (.FullName c))                             ;;; .getName 
-                                                 tag))
-                                name-meta (update-in (meta (first s)) [:tag] tag-to-class)
+                          (let [disallowed? '#{int long float double char short byte boolean void uint ulong ushort sbyte}                           ;;; Added unsigned types
+                                array-tag? '#{ints longs floats doubles chars shorts bytes booleans objects uints ulongs ushorts sbytes}             ;;; Added unsigned types
+                                resolve-class-symbol (fn [tag]
+                                                       (when-not (disallowed? tag)
+                                                         (if-let [c (and (instance? clojure.lang.Symbol tag)
+                                                                         (= (.IndexOf (.Name ^clojure.lang.Symbol tag) ".") -1)                       ;;; .indexOf   .getName
+                                                                         (not (array-tag? tag))
+                                                                         (resolve tag))]
+                                                           (symbol (.FullName c))                                                                     ;;; .getName
+                                                           tag)))
+                                name-meta (update-in (meta (first s)) [:tag] resolve-class-symbol)
                                 mname (with-meta (first s) nil)
                                 [arglists doc]
                                 (loop [as [] rs (rest s)]
