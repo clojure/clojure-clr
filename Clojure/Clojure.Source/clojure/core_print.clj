@@ -471,7 +471,7 @@
                    (if qmode
                       (recur r2 (not= c2 \E))
                       (recur r2 (= c2 \Q))))
-        (= c \") (do
+        (= c \") (do;;; "   (Just to keep the display happy in the editor)
                    (if qmode
                      (.Write w "\\E\\\"\\Q")
                      (.Write w "\\\""))
@@ -479,7 +479,7 @@
         :else    (do
                    (.Write w c)
                    (recur r qmode)))))
-  (.Write w \"))
+  (.Write w \"))                                ;;; "   (Just to keep the display happy in the editor)
 
 (defmethod print-dup System.Text.RegularExpressions.Regex [p ^System.IO.TextWriter w] (print-method p w))  ;;; java.util.regex.Pattern =>
   
@@ -621,10 +621,13 @@
 ;;;(defn ^java.io.PrintWriter PrintWriter-on
 ;;;  "implements java.io.PrintWriter given flush-fn, which will be called
 ;;;  when .flush() is called, with a string built up since the last call to .flush().
-;;;  if not nil, close-fn will be called with no arguments when .close is called"
+;;;  if not nil, close-fn will be called with no arguments when .close is called.
+;;;  autoflush? determines if the PrintWriter will autoflush, false by default."
 ;;;  {:added "1.10"}
-;;;  [flush-fn close-fn]
-;;;  (let [sb (StringBuilder.)]
+;;;  ([flush-fn close-fn]
+;;;   (PrintWriter-on flush-fn close-fn false))
+;;;  ([flush-fn close-fn autoflush?]
+;;;   (let [sb (StringBuilder.)]
 ;;;    (-> (proxy [Writer] []
 ;;;          (flush []
 ;;;                 (when (pos? (.length sb))
@@ -643,20 +646,22 @@
 ;;;        java.io.PrintWriter.)))
 
 (defn ^System.IO.TextWriter PrintWriter-on
-  [flush-fn close-fn]
-  (proxy [System.IO.StringWriter] []  
-    (Flush [] 
+  ([flush-fn close-fn]
+   (PrintWriter-on flush-fn close-fn false))
+  ([flush-fn close-fn autoflush?]                       ;;; there is no autflush property for StringWriter
+   (proxy [System.IO.StringWriter] []  
+     (Flush [] 
 	      (let [^System.IO.StringWriter this this]
 	       (proxy-super Flush))
 	      (let [sb (.GetStringBuilder ^System.IO.StringWriter this)]
             (when (pos? (.Length sb))
               (flush-fn (.ToString sb)))
             (.set_Length sb 0)))
-   (Close []
+     (Close []
           (.Flush ^System.IO.StringWriter this)
           (when close-fn (close-fn))
 		  (let [^System.IO.StringWriter this this]
 		    (proxy-super Close))
-		  nil)))
+		  nil))))
 
 
