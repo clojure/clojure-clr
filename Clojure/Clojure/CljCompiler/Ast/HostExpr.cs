@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -344,9 +345,13 @@ namespace clojure.lang.CljCompiler.Ast
             Symbol sym = tag as Symbol;
             if (sym != null)
             {
-                if (sym.Namespace == null) // if ns-qualified, can't be classname
+                if (sym.Namespace == null)
                 {
                     t = maybeSpecialTag(sym);
+                }
+                if (t == null)
+                {
+                    t = HostExpr.MaybeArrayType(sym);
                 }
             }
            
@@ -357,6 +362,31 @@ namespace clojure.lang.CljCompiler.Ast
                 return t;
 
             throw new ArgumentException("Unable to resolve typename: " + tag);
+        }
+
+        public static Type MaybeArrayType(Symbol sym)
+        {
+            if (sym.Namespace == null || !Util.IsPosDigit(sym.Name))
+                return null;
+
+            int dim = sym.Name[0] - '0';
+            Symbol componentTypeName = Symbol.intern(null, sym.Namespace);
+            Type componentType = Compiler.PrimType(componentTypeName);
+            if (componentType == null)
+                componentType = HostExpr.MaybeType(componentTypeName, false);
+
+            if (componentType == null)
+                throw new TypeNotFoundException("Unable to resolve component typename: " + componentTypeName);
+
+            // componentType.MakeArrayType(dim) is not what you want.  This creates .IsVariableBound designed for multiple dimensions.
+            // We are matching Java which means we have jagged arrays.
+            // Without an argument, MakeArrayType returns an SZ array -- one-dimensional, zero-based.
+            // we need to nest.
+
+            for (int i = 0; i < dim; i++)
+                componentType = componentType.MakeArrayType();
+
+            return componentType;
         }
 
         #endregion

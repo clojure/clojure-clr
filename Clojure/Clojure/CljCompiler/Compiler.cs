@@ -24,6 +24,7 @@ using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization;
 using System.Collections;
+using System.Net;
 
 namespace clojure.lang
 {
@@ -414,8 +415,12 @@ namespace clojure.lang
             {
                 Namespace ns = namespaceFor(sym);
                 if (ns == null || (ns.Name.Name == null ? sym.Namespace == null : ns.Name.Name.Equals(sym.Namespace)))
-
+                {
+                    Type at = HostExpr.MaybeArrayType(sym);
+                    if (at != null)
+                        return Util.arrayTypeToSymbol(at);
                     return sym;
+                }
                 return Symbol.intern(ns.Name.Name, sym.Name);
             }
 
@@ -477,7 +482,12 @@ namespace clojure.lang
             {
                 Namespace ns = namespaceFor(n, symbol);
                 if (ns == null)
+                {
+                    Type at = HostExpr.MaybeArrayType(symbol);
+                    if ( at != null)
+                        return at;
                     throw new InvalidOperationException("No such namespace: " + symbol.Namespace);
+                }
 
                 Var v = ns.FindInternedVar(Symbol.intern(symbol.Name));
                 if (v == null)
@@ -517,7 +527,7 @@ namespace clojure.lang
             {
                 Namespace ns = namespaceFor(n, symbol);
                 if (ns == null)
-                    return null;
+                    return HostExpr.MaybeArrayType(symbol);
 
                 Var v = ns.FindInternedVar(Symbol.intern(symbol.Name));
                 if (v == null)
@@ -809,6 +819,28 @@ namespace clojure.lang
                 throw new InvalidOperationException(String.Format("Cannot coerce {0} to {1}, use a cast instead", ret, tc));
             }
             return tc;
+        }
+
+        private static Dictionary<Type,string> primTypeNamesMap = new Dictionary<Type,string>
+        {
+            { typeof(int), "int" },
+            { typeof(long), "long" },
+            { typeof(float), "float" },
+            { typeof(double), "double" },
+            { typeof(char), "char" },
+            { typeof(short), "short" },
+            { typeof(byte), "byte" },
+            { typeof(bool), "bool" },
+            { typeof(uint), "uint" },
+            { typeof(ulong), "ulong" },
+            { typeof(ushort), "ushort" },
+            { typeof(sbyte), "sbyte" },
+            { typeof(void), "void" }
+        };
+
+        public static bool TryPrimTypeToName(Type type, out string name)
+        {
+            return primTypeNamesMap.TryGetValue(type, out name);
         }
 
         public static Type PrimType(Symbol sym)
@@ -1999,7 +2031,7 @@ namespace clojure.lang
             }
             else
             {
-                if (namespaceFor(symbol) == null)
+                if (namespaceFor(symbol) == null && !Util.IsPosDigit(symbol.Name))
                 {
                     Symbol nsSym = Symbol.intern(symbol.Namespace);
                     Type t = HostExpr.MaybeType(nsSym, false);

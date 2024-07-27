@@ -567,9 +567,15 @@ namespace clojure.lang
             throw new ArgumentException("Invalid token: " + rawToken);
         }
 
+        // Java originals, for comparison
+        //static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
+        //static Pattern arraySymbolPat = Pattern.compile("([\\D&&[^/:]].*)/([1-9])");
 
         //static Regex symbolPat = new Regex("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
+        //static readonly Regex arraySymbolPat = new Regex("([\\D&&[^/:]].*)/([1-9])");
+
         static readonly Regex symbolPat = new Regex("^[:]?([^\\p{Nd}/].*/)?(/|[^\\p{Nd}/][^/]*)$");
+        static readonly Regex arraySymbolPat = new Regex("^([^\\p{Nd}/].*/)([1-9])$");
         static readonly Regex keywordPat = new Regex("^[:]?([^/].*/)?(/|[^/][^/]*)$");
         static readonly Regex argPat = new Regex("^%(?:(&)|([1-9][0-9]*))?$");
 
@@ -652,6 +658,17 @@ namespace clojure.lang
                 }
                 else
                 {
+                    ExtractNamesUsingMask(token, maskNS, maskName, out string ns, out string name);
+                    return Symbol.intern(ns, name);
+                }
+            }
+            else
+            {
+                Match m3 = arraySymbolPat.Match(mask);
+                if ( m3.Success)
+                {
+                    string maskNS = m3.Groups[1].Value;
+                    string maskName = m3.Groups[2].Value;
                     ExtractNamesUsingMask(token, maskNS, maskName, out string ns, out string name);
                     return Symbol.intern(ns, name);
                 }

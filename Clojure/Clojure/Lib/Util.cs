@@ -810,6 +810,37 @@ namespace clojure.lang
             return false;
         }
 
+        public static bool IsPosDigit(string s)
+        {
+            if (s.Length != 1)
+                return false;
+            char c = s[0];
+            return c >= '1' && c <= '9';
+        }
+
+        public static Symbol arrayTypeToSymbol(Type t)
+        {
+            int dim = 0;
+            Type componentType = t;
+            while (componentType.IsArray)
+            {
+                dim++;
+                if (dim > 9)
+                    break;
+                componentType = componentType.GetElementType();
+            }
+
+            if (dim <= 9 && dim >= 1)
+            {
+                if (Compiler.TryPrimTypeToName(componentType, out string name))
+                    return Symbol.intern(name, dim.ToString());
+                else
+                    return Symbol.intern(componentType.FullName, dim.ToString());
+            }
+            else
+                return Symbol.intern(null, t.FullName);
+        }
+
 
         // I can hardly claim this is original.
         public static void Shuffle(IList list)

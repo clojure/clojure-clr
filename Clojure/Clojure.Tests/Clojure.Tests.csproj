@@ -31,6 +31,9 @@
     <None Update="clojure\test_clojure\api.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="clojure\test_clojure\array_symbols.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="clojure\test_clojure\atoms.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

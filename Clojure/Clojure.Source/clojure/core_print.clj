@@ -432,21 +432,24 @@
    Decimal "System.Decimal" })  ;; ADDED
   
 (defmethod print-method Type [^Type c, ^System.IO.TextWriter w]
-  (.Write w (.FullName c)))   ;;; .getName => .FullName
+  (if (.IsArray c)                                                   ;;; .isArray
+    (print-method (clojure.lang.Util/arrayTypeToSymbol c) w)
+    (.Write w (.FullName c))))                                       ;;; .getName => .FullName
+  
 
 (defmethod print-dup Type [^Type c, ^System.IO.TextWriter w]
   (cond
-    (.IsPrimitive c) (do                                             ;; .isPrimitive
+    (.IsPrimitive c) (do                                             ;;; .isPrimitive
                        (.Write w "#=(identity ")
                        (.Write w ^String (primitives-classnames c))
                        (.Write w ")"))
-    (.IsArray c) (do                                                 ;; .isArray ,  java.lang.Class/forName =>
+    (.IsArray c) (do                                                 ;;; .isArray ,  java.lang.Class/forName =>
                    (.Write w "#=(clojure.lang.RT/classForName \"")
-                   (.Write w (.FullName c))                           ;; .getName => .FullName
+                   (.Write w (.FullName c))                          ;;; .getName => .FullName
                    (.Write w "\")"))
     :else (do
             (.Write w "#=")
-            (.Write w (.FullName c)))))    ;;; .getName => .FullName
+            (.Write w (.FullName c)))))                              ;;; .getName => .FullName
 
 (defmethod print-method clojure.lang.BigDecimal [b, ^System.IO.TextWriter w]    ;;; java.math.BigDecimal
   (.Write w (str b))
