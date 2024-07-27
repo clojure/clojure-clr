@@ -17,10 +17,10 @@
 
 (ns clojure.test-helper
     (:use clojure.test)
-	(:import (System.Reflection BindingFlags)))        ;;; added import
+	(:import (System.Reflection BindingFlags)))                    ;;; added import
 
-(let [nl Environment/NewLine]                         ;;; (System/getProperty "line.separator")] 
-  (defn platform-newlines [s] (.Replace s "\n" nl)))  ;;; .replace
+(let [nl Environment/NewLine]                                       ;;; (System/getProperty "line.separator")] 
+  (defn platform-newlines [s] (.Replace ^String s "\n" nl)))        ;;; .replace, add type hint
 
 (defn temp-ns
   "Create and return a temporary ns, using clojure.core + uses"
@@ -68,7 +68,7 @@
   ([klass field-name]
      (get-field klass field-name nil))
   ([klass field-name inst]
-     (-> klass  (.GetField (name field-name) (enum-or BindingFlags/Public BindingFlags/NonPublic BindingFlags/DeclaredOnly BindingFlags/Instance BindingFlags/Static))  ;;; (.getDeclaredField (name field-name))
+     (-> ^Type klass  (.GetField (name field-name) (enum-or BindingFlags/Public BindingFlags/NonPublic BindingFlags/DeclaredOnly BindingFlags/Instance BindingFlags/Static))  ;;; (.getDeclaredField (name field-name))  add type hint
          ;;;(doto (.setAccessible true))
          (.GetValue inst))))                                       ;;; .get
          
