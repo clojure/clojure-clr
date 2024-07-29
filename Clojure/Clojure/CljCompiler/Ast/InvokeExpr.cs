@@ -243,7 +243,11 @@ namespace clojure.lang.CljCompiler.Ast
                 switch (qmfexpr.Kind)
                 {
                     case QualifiedMethodExpr.EMethodKind.CTOR:
-                        return new NewExpr(qmfexpr.MethodType, (ConstructorInfo)method, HostExpr.ParseArgs(pcon, RT.seq(args)), (IPersistentMap)Compiler.SourceSpanVar.deref());
+                        return new NewExpr(
+                            qmfexpr.MethodType, 
+                            (ConstructorInfo)method, 
+                            HostExpr.ParseArgs(pcon, RT.seq(args)), 
+                            (IPersistentMap)Compiler.SourceSpanVar.deref());
 
                     case QualifiedMethodExpr.EMethodKind.INSTANCE:
                         return new InstanceMethodExpr(
@@ -255,7 +259,7 @@ namespace clojure.lang.CljCompiler.Ast
                             Compiler.munge(qmfexpr.MethodName), 
                             (MethodInfo)method,
                             null,                  // TODO: is there a way to pass type args here?
-                            HostExpr.ParseArgs(pcon, RT.seq(RT.next(args))),
+                            HostExpr.ParseArgs(pcon, RT.next(args)),
                             tailPosition);
 
                     default:
@@ -276,7 +280,10 @@ namespace clojure.lang.CljCompiler.Ast
                 switch (qmfexpr.Kind)
                 {
                     case QualifiedMethodExpr.EMethodKind.CTOR:
-                        return new NewExpr(qmfexpr.MethodType, HostExpr.ParseArgs(pcon, RT.seq(args)), (IPersistentMap)Compiler.SourceSpanVar.deref());
+                        return new NewExpr(
+                            qmfexpr.MethodType, 
+                            HostExpr.ParseArgs(pcon, RT.seq(args)), 
+                            (IPersistentMap)Compiler.SourceSpanVar.deref());
 
                     case QualifiedMethodExpr.EMethodKind.INSTANCE:
                         return new InstanceMethodExpr(
