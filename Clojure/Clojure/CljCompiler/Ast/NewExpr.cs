@@ -46,6 +46,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
+        public NewExpr(Type type, ConstructorInfo ctor, IList<HostArg> args, IPersistentMap spanMap)
+        {
+            _args = args;
+            _type = type;
+            _spanMap = spanMap;
+            _ctor = ctor;
+        }
+
         public NewExpr(Type type, IList<HostArg> args, IPersistentMap spanMap)
         {
             _args = args;
@@ -71,7 +79,7 @@ namespace clojure.lang.CljCompiler.Ast
                     _isNoArgValueTypeCtor = true;
                     return null;
                 }
-                throw new InvalidOperationException(string.Format("No constructor in type: {0} with {1} arguments", _type.Name, numArgs));
+                throw new ArgumentException(string.Format("No constructor in type: {0} with {1} arguments", _type.Name, numArgs));
             }
 
             if (ctor == null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))

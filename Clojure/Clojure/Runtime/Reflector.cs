@@ -357,7 +357,7 @@ namespace clojure.lang
             return infos;
         }
 
-        private static void MaybeReflectionWarn(IPersistentMap spanMap, Type targetType, bool isStatic, bool hasMethods, MethodBase method, string methodName, IList<HostArg> args)
+        internal static void MaybeReflectionWarn(IPersistentMap spanMap, Type targetType, bool isStatic, bool hasMethods, MethodBase method, string methodName, IList<HostArg> args)
         {
             if (method == null && RT.booleanCast(RT.WarnOnReflectionVar.deref()))
             {
@@ -443,7 +443,13 @@ namespace clojure.lang
             return CallMethod(methodName, typeArgs, false, t, target, args);
         }
 
-  
+
+        public static object CallInstanceMethod(Type type, string methodName, IList<Type> typeArgs, object target, params object[] args)
+        {
+            return CallMethod(methodName, typeArgs, false, type, target, args);
+        }
+
+
         public static object CallStaticMethod(string methodName, IList<Type> typeArgs, Type t, params object[] args)
         {
             return CallMethod(methodName, typeArgs, true, t, null, args);

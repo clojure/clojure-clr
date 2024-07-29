@@ -1658,8 +1658,10 @@ namespace clojure.lang
                         metaAsMap = RT.map(RT.TagKey, meta);
                     else if (meta is Keyword)
                         metaAsMap = RT.map(meta, true);
+                    else if (meta is IPersistentVector)
+                        metaAsMap = RT.map(RT.ParamTagsKey, meta);
                     else if ((metaAsMap = meta as IPersistentMap) == null)
-                        throw new ArgumentException("Metadata must be Symbol,Keyword,String or Map");
+                        throw new ArgumentException("Metadata must be Symbol,Keyword,String,Vector or Map");
                 }
 
                 object o = ReadAux(r, opts, pendingForms);

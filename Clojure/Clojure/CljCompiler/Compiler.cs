@@ -382,6 +382,80 @@ namespace clojure.lang
 
         #endregion
 
+        #region QME, param-tag suport
+
+        internal readonly static Symbol ParamTagAny = Symbol.intern(null, "_");
+
+        internal static IPersistentVector ParamTagsOf(Symbol sym)
+        {
+            var paramTags = RT.get(RT.meta(sym),RT.ParamTagsKey);
+
+            if (paramTags != null && !(paramTags is IPersistentVector))
+                throw new ArgumentException($"param-tags of symbol {sym} should be a vector.");
+
+            return (IPersistentVector)paramTags;
+        }
+
+        // calls TagToType on every element, unless it encounters _ which becomes null
+        internal static List<Type> TagsToClasses(IPersistentVector paramTags)
+        {
+            if (paramTags == null)
+                return null;
+
+            var sig = new List<Type>();
+
+            for (ISeq s = RT.seq(paramTags); s != null; s = s.next())
+            {
+                var t = s.first();
+                if (t.Equals(ParamTagAny))
+                    sig.Add(null);
+                else
+                    sig.Add(HostExpr.TagToType(t));
+            }
+    
+            return sig;
+        }
+
+        internal static bool SignatureMatches(List<Type> sig, MethodBase method)
+        {
+            ParameterInfo[] methodSig = method.GetParameters();
+
+            for ( int i=0; i<methodSig.Length; i++ )
+            {
+                if (sig[i] != null && !sig[i].Equals(methodSig[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        static bool IsStaticMethod(MethodBase method) => method is MethodInfo mi && method.IsStatic;
+        static bool IsInstanceMethod(MethodBase method) => !(method is MethodInfo) || method.IsStatic;
+        static bool IsConstructor(MethodBase method) => method is ConstructorInfo;
+
+        static void CheckMethodArity(MethodBase method, int argCount)
+        {
+            ParameterInfo[] methodSig = method.GetParameters();
+            if (methodSig.Length != argCount)
+            {
+                string name = method is ConstructorInfo ? "new" : method.Name;
+                string description = MethodDescription(method.DeclaringType, name);
+                throw new ArgumentException($"Invocation of {description} expected {methodSig.Length} arguments, but received {argCount}.");
+            }
+        }
+
+        public static string MethodDescription(Type t, string name)
+        {
+            bool isCtor = t != null && name.Equals("new");
+            string type = isCtor ? "constructor" : "method";
+            return $"{type}{(isCtor ? "" : name)} in class {t.Name}";
+        }
+      
+
+
+        #endregion
+
+
         #region C-tors & factory methods
 
         static Compiler()
@@ -1272,7 +1346,8 @@ namespace clojure.lang
                 {
                     string sname = sym.Name;
                     // (.substring s 2 5) => (. x substring 2 5)
-                    if (sname[0] == '.')
+                    // ns == null ensures that Class/.instanceMethod isn't expanded to . form
+                    if (sname[0] == '.' && sym.Namespace == null)
                     {
                         if (form.count() < 2)
                             throw new ArgumentException("Malformed member expression, expecting (.member target ...)");
@@ -1283,17 +1358,17 @@ namespace clojure.lang
                         // We need to make sure source information gets transferred
                         return MaybeTransferSourceInfo(PreserveTag(form, RT.listStar(DotSym, target, method, form.next().next())), form);
                     }
-                    else if (NamesStaticMember(sym))
-                    {
-                        Symbol target = Symbol.intern(sym.Namespace);
-                        Type t = HostExpr.MaybeType(target, false);
-                        if (t != null)
-                        {
-                            Symbol method = Symbol.intern(sym.Name);
-                            // We need to make sure source information gets transferred
-                            return MaybeTransferSourceInfo(PreserveTag(form, RT.listStar(Compiler.DotSym, target, method, form.next())), form);
-                        }
-                    }
+                    //else if (NamesStaticMember(sym))
+                    //{
+                    //    Symbol target = Symbol.intern(sym.Namespace);
+                    //    Type t = HostExpr.MaybeType(target, false);
+                    //    if (t != null)
+                    //    {
+                    //        Symbol method = Symbol.intern(sym.Name);
+                    //        // We need to make sure source information gets transferred
+                    //        return MaybeTransferSourceInfo(PreserveTag(form, RT.listStar(Compiler.DotSym, target, method, form.next())), form);
+                    //    }
+                    //}
                     else
                     {
                         // (x.substring 2 5) =>  (. x substring 2 5)
@@ -2041,11 +2116,12 @@ namespace clojure.lang
                         PropertyInfo pinfo;
 
                         if ((finfo = Reflector.GetField(t, symbol.Name, true)) != null)
-                            return new StaticFieldExpr((string)SourceVar.deref(),(IPersistentMap)Compiler.SourceSpanVar.deref(), tag, t, symbol.Name, finfo);
+                            return new StaticFieldExpr((string)SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tag, t, symbol.Name, finfo);
                         else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) != null)
                             return new StaticPropertyExpr((string)SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tag, t, symbol.Name, pinfo);
+                        //else return new QualifiedMethodExpr(t, symbol);
                     }
-                    throw new InvalidOperationException(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
+                    //throw new InvalidOperationException(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
                 }
             }
 
@@ -2070,7 +2146,7 @@ namespace clojure.lang
             throw new InvalidOperationException(string.Format("Unable to resolve symbol: {0} in this context", symbol));
         }
 
-        private static Expr AnalyzeSeq(ParserContext pcon, ISeq form, string name )
+        internal static Expr AnalyzeSeq(ParserContext pcon, ISeq form, string name )
         {
             object line = LineVarDeref();
             object column = ColumnVarDeref();

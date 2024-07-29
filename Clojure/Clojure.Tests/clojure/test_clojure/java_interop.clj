@@ -409,7 +409,7 @@
       (to-array [1 2 3]) ))
 
 (defn queue [& contents]
-  (apply conj (clojure.lang.PersistentQueue/EMPTY) contents))
+  (apply conj clojure.lang.PersistentQueue/EMPTY contents))
 
 #_(defn array-typed-equals [expected actual]
   (and (= (class expected) (class actual))

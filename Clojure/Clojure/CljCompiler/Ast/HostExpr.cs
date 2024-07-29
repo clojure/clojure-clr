@@ -104,7 +104,7 @@ namespace clojure.lang.CljCompiler.Ast
                         if ((pinfo = Reflector.GetProperty(instanceType, fieldName, false)) != null)
                             return new InstancePropertyExpr(source, spanMap, tag, instance, fieldName, pinfo);
                         if (!isPropName && Reflector.GetArityZeroMethod(instanceType, fieldName, false) != null)
-                            return new InstanceMethodExpr(source, spanMap, tag, instance, fieldName, null, new List<HostArg>(), tailPosition);
+                            return new InstanceMethodExpr(source, spanMap, tag, instance, instanceType, fieldName, null, new List<HostArg>(), tailPosition);
                         if (pcon.IsAssignContext)
                             return new InstanceFieldExpr(source, spanMap, tag, instance, fieldName, null); // same as InstancePropertyExpr when last arg is null
                         else
@@ -153,7 +153,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 return t != null
                     ? (MethodExpr)(new StaticMethodExpr(source, spanMap, tag, t, methodName, typeArgs, args, tailPosition))
-                    : (MethodExpr)(new InstanceMethodExpr(source, spanMap, tag, instance, methodName, typeArgs, args, tailPosition));
+                    : (MethodExpr)(new InstanceMethodExpr(source, spanMap, tag, instance, t, methodName, typeArgs, args, tailPosition));
             }
         }
 

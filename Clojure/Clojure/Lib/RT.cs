@@ -126,6 +126,9 @@ namespace clojure.lang
         public static readonly Keyword TagKey
             = Keyword.intern(null, "tag");
 
+        public static readonly Keyword ParamTagsKey 
+            = Keyword.intern(null, "param-tags");
+
         public static readonly Keyword ConstKey
             = Keyword.intern(null, "const");
 

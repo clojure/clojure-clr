@@ -206,9 +206,23 @@ namespace clojure.lang.CljCompiler.Ast
                 return new KeywordInvokeExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), Compiler.TagOf(form), kwFexpr, target);
             }
 
+            // Preserving the existing static field bug that replaces a reference in parens with
+            // the field itself rather than trying to invoke the value in the field. This is
+            // an exception to the uniform Class/member qualification per CLJ-2806 ticket.
+
+            if (fexpr is StaticFieldExpr)
+                return fexpr;
+
             IPersistentVector args = PersistentVector.EMPTY;
             for ( ISeq s = RT.seq(form.next()); s != null; s = s.next())
                 args = args.cons(Compiler.Analyze(pcon,s.first()));
+
+            if (fexpr is QualifiedMethodExpr qmfexpr)
+                return ToHostExpr(pcon,
+                    qmfexpr,
+                    Compiler.TagOf(form),
+                    tailPosition,
+                    args);
 
             //if (args.count() > Compiler.MAX_POSITIONAL_ARITY)
             //    throw new ArgumentException(String.Format("No more than {0} args supported", Compiler.MAX_POSITIONAL_ARITY));
@@ -220,6 +234,76 @@ namespace clojure.lang.CljCompiler.Ast
                 args,
                 tailPosition);
         }
+        
+        static Expr ToHostExpr(ParserContext pcon, QualifiedMethodExpr qmfexpr, Symbol tag, bool tailPosition, IPersistentVector args)
+        {
+            if (qmfexpr.HintedSig != null )
+            {
+                MethodBase method = QualifiedMethodExpr.ResolveHintedMethod(qmfexpr.MethodType, qmfexpr.MethodName, qmfexpr.Kind, qmfexpr.HintedSig);
+                switch (qmfexpr.Kind)
+                {
+                    case QualifiedMethodExpr.EMethodKind.CTOR:
+                        return new NewExpr(qmfexpr.MethodType, (ConstructorInfo)method, HostExpr.ParseArgs(pcon, RT.seq(args)), (IPersistentMap)Compiler.SourceSpanVar.deref());
+
+                    case QualifiedMethodExpr.EMethodKind.INSTANCE:
+                        return new InstanceMethodExpr(
+                            (string)Compiler.SourceVar.deref(),
+                            (IPersistentMap)Compiler.SourceSpanVar.deref(),
+                            tag, 
+                            (Expr)RT.first(args),
+                            qmfexpr.MethodType,
+                            Compiler.munge(qmfexpr.MethodName), 
+                            (MethodInfo)method,
+                            null,                  // TODO: is there a way to pass type args here?
+                            HostExpr.ParseArgs(pcon, RT.seq(RT.next(args))),
+                            tailPosition);
+
+                    default:
+                        return new StaticMethodExpr(
+                            (string)Compiler.SourceVar.deref(),
+                            (IPersistentMap)Compiler.SourceSpanVar.deref(),
+                            tag, 
+                             qmfexpr.MethodType,
+                             Compiler.munge(qmfexpr.MethodName), 
+                             (MethodInfo)method, 
+                             null,
+                             HostExpr.ParseArgs(pcon, RT.seq(args)),
+                             tailPosition);
+                }
+            }
+            else
+            {
+                switch (qmfexpr.Kind)
+                {
+                    case QualifiedMethodExpr.EMethodKind.CTOR:
+                        return new NewExpr(qmfexpr.MethodType, HostExpr.ParseArgs(pcon, RT.seq(args)), (IPersistentMap)Compiler.SourceSpanVar.deref());
+
+                    case QualifiedMethodExpr.EMethodKind.INSTANCE:
+                        return new InstanceMethodExpr(
+                            (string)Compiler.SourceVar.deref(),
+                            (IPersistentMap)Compiler.SourceSpanVar.deref(),
+                            tag, 
+                            (Expr)RT.first(args),
+                            qmfexpr.MethodType,
+                            Compiler.munge(qmfexpr.MethodName),
+                            null,
+                            HostExpr.ParseArgs(pcon, RT.seq(RT.next(args))),
+                            tailPosition);
+
+                    default:
+                        return new StaticMethodExpr(
+                            (string)Compiler.SourceVar.deref(),
+                            (IPersistentMap)Compiler.SourceSpanVar.deref(),
+                            tag, 
+                            qmfexpr.MethodType,
+                            Compiler.munge(qmfexpr.MethodName),
+                            null,
+                            HostExpr.ParseArgs(pcon, RT.seq(args)),
+                            tailPosition);
+                }
+            }
+        }
+
 
         #endregion
 

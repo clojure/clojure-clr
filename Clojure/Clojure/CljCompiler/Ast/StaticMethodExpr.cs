@@ -48,6 +48,13 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
+        public StaticMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string methodName, MethodInfo resolvedMethod, IList<Type> typeArgs, IList<HostArg> args, bool tailPosition)
+            : base(source, spanMap, tag, methodName, typeArgs, args, tailPosition)
+        {
+            _type = type;
+            _method = resolvedMethod;
+        }
+
         public static bool IsBoxedMath(MethodBase m)
         {
             Type t = m.DeclaringType;
