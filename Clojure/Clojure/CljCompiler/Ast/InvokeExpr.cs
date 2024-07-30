@@ -270,8 +270,8 @@ namespace clojure.lang.CljCompiler.Ast
                         return new InstanceMethodExpr(
                             (string)Compiler.SourceVar.deref(),
                             (IPersistentMap)Compiler.SourceSpanVar.deref(),
-                            tag, 
-                            (Expr)RT.first(processedArgs),
+                            tag,
+                            Compiler.Analyze(pcon.EvalOrExpr(), RT.first(processedArgs)),
                             qmfexpr.MethodType,
                             Compiler.munge(qmfexpr.MethodName), 
                             (MethodInfo)method,
@@ -306,8 +306,8 @@ namespace clojure.lang.CljCompiler.Ast
                         return new InstanceMethodExpr(
                             (string)Compiler.SourceVar.deref(),
                             (IPersistentMap)Compiler.SourceSpanVar.deref(),
-                            tag, 
-                            (Expr)RT.first(processedArgs),
+                            tag,
+                            Compiler.Analyze(pcon.EvalOrExpr(), RT.first(processedArgs)),
                             qmfexpr.MethodType,
                             Compiler.munge(qmfexpr.MethodName),
                             genericTypeArgs,

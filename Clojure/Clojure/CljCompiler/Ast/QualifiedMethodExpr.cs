@@ -202,7 +202,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private static ArgumentException NoMethodWithNameException(Type t, string methodName, EMethodKind kind)
         {
-            string kindStr = kind == EMethodKind.CTOR ? "" : kind.ToString().ToLower() + " ";
+            string kindStr = kind == EMethodKind.CTOR ? "" : kind.ToString().ToLower();
             return new ArgumentException($"Error - no matches found for {kindStr} {Compiler.MethodDescription(t, methodName)}");
         }
 

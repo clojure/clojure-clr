@@ -422,7 +422,7 @@ namespace clojure.lang
 
             for ( int i=0; i<methodSig.Length; i++ )
             {
-                if (sig[i] != null && !sig[i].Equals(methodSig[i]))
+                if (sig[i] != null && !sig[i].Equals(methodSig[i].ParameterType))
                     return false;
             }
 
@@ -448,7 +448,7 @@ namespace clojure.lang
         {
             bool isCtor = t != null && name.Equals("new");
             string type = isCtor ? "constructor" : "method";
-            return $"{type}{(isCtor ? "" : name)} in class {t.Name}";
+            return $"{type} {(isCtor ? "" : name)} in class {t.Name}";
         }
       
 
