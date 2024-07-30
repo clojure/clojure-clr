@@ -630,12 +630,12 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
                        (let [f (FileInfo. (Path/Combine (Path/GetTempPath) (str "clojure-" (System.Guid/NewGuid) ".edn")))]     ;;; (.toFile (Files/createTempFile "clojure-" ".edn" (into-array FileAttribute [])))
                          (with-open [w (StreamWriter. (.OpenWrite f))]                                                                       ;;; [w (BufferedWriter. (FileWriter. f))
                            (binding [*out* w] (println report-str)))
-                         (.FullName f))                                                                                      ;;; .getAbsolutePath
-                       (catch Exception _)))] ;; ignore, fallback to stderr                                                  ;;; Throwable
+                         (.FullName f))                                                                                         ;;; .getAbsolutePath
+                       (catch Exception _)))] ;; ignore, fallback to stderr                                                     ;;; Throwable
       (binding [*out* *err*]
         (if err-path
-          (println (str message (Environment/NewLine) "Full report at:" (Environment/NewLine) err-path))                     ;;; System/lineSeparator
-          (println (str report-str (Environment/NewLine) message)))))))                                                      ;;; System/lineSeparator
+          (println (str message Environment/NewLine "Full report at:" (Environment/NewLine) err-path))                          ;;; System/lineSeparator
+          (println (str report-str Environment/NewLine message)))))))                                                           ;;; System/lineSeparator
 
 (defn main
   "Usage: java -cp clojure.jar clojure.main [init-opt*] [main-opt] [arg*]

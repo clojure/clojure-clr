@@ -359,7 +359,7 @@
 
 ;; Framework version -- alpha
 
-(def framework-description (System.Runtime.InteropServices.RuntimeInformation/FrameworkDescription))
+(def framework-description System.Runtime.InteropServices.RuntimeInformation/FrameworkDescription)
 
 (defn- parse-framework-description [] 
     (let [descr framework-description

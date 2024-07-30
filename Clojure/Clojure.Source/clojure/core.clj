@@ -3718,7 +3718,7 @@
      (apply pr more))))
    
 (def ^:private ^String system-newline
-     (Environment/NewLine))                        ;;; (System/getProperty "line.separator")
+     Environment/NewLine)                        ;;; (System/getProperty "line.separator")
 
 (defn newline
   "Writes a platform-specific newline to *out*"
