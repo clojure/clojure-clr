@@ -144,7 +144,7 @@ namespace clojure.lang.CljCompiler.Ast
             bool tailPosition = Compiler.InTailCall(pcon.Rhc);
             pcon = pcon.EvalOrExpr();
 
-            Expr fexpr = Compiler.Analyze(pcon,form.first());
+            Expr fexpr = Compiler.Analyze(pcon, form.first());
             VarExpr varFexpr = fexpr as VarExpr;
 
             if (varFexpr != null && varFexpr.Var.Equals(Compiler.InstanceVar) && RT.count(form) == 3)
@@ -158,12 +158,12 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            if ( RT.booleanCast(Compiler.GetCompilerOption(Compiler.DirectLinkingKeyword))
+            if (RT.booleanCast(Compiler.GetCompilerOption(Compiler.DirectLinkingKeyword))
                 && varFexpr != null
-                && pcon.Rhc != RHC.Eval )
+                && pcon.Rhc != RHC.Eval)
             {
                 Var v = varFexpr.Var;
-                if ( ! v.isDynamic() && !RT.booleanCast(RT.get(v.meta(), Compiler.RedefKeyword, false)) && !RT.booleanCast(RT.get(v.meta(), RT.DeclaredKey, false)) )
+                if (!v.isDynamic() && !RT.booleanCast(RT.get(v.meta(), Compiler.RedefKeyword, false)) && !RT.booleanCast(RT.get(v.meta(), RT.DeclaredKey, false)))
                 {
                     Symbol formTag = Compiler.TagOf(form);
                     //object arglists = RT.get(RT.meta(v), Compiler.ArglistsKeyword);
@@ -210,7 +210,7 @@ namespace clojure.lang.CljCompiler.Ast
             // the field itself rather than trying to invoke the value in the field. This is
             // an exception to the uniform Class/member qualification per CLJ-2806 ticket.
 
-            if (fexpr is StaticFieldExpr)
+            if (fexpr is StaticFieldExpr || fexpr is StaticPropertyExpr)
                 return fexpr;
 
 
@@ -239,6 +239,21 @@ namespace clojure.lang.CljCompiler.Ast
         
         static Expr ToHostExpr(ParserContext pcon, QualifiedMethodExpr qmfexpr, Symbol tag, bool tailPosition, ISeq args)
         {
+            // Let's see if we have generic type parameters.  We'll ignore this if we are a constructor -- constructors can't be generic.
+
+
+            object firstArg = RT.first(args);
+            List<Type> genericTypeArgs = null;
+            ISeq processedArgs = args;
+
+            if (firstArg is ISeq && RT.first(firstArg) is Symbol symbol && symbol.Equals(HostExpr.TypeArgsSym))
+            {
+                // We have a type args supplied for a generic method call
+                // (. thing methodname (type-args type1 ... ) args ...)
+                genericTypeArgs = HostExpr.ParseGenericMethodTypeArgs(RT.next(firstArg));
+                processedArgs = RT.next(args);
+            }
+
             if (qmfexpr.HintedSig != null )
             {
                 MethodBase method = QualifiedMethodExpr.ResolveHintedMethod(qmfexpr.MethodType, qmfexpr.MethodName, qmfexpr.Kind, qmfexpr.HintedSig);
@@ -256,12 +271,12 @@ namespace clojure.lang.CljCompiler.Ast
                             (string)Compiler.SourceVar.deref(),
                             (IPersistentMap)Compiler.SourceSpanVar.deref(),
                             tag, 
-                            (Expr)RT.first(args),
+                            (Expr)RT.first(processedArgs),
                             qmfexpr.MethodType,
                             Compiler.munge(qmfexpr.MethodName), 
                             (MethodInfo)method,
-                            null,                  // TODO: is there a way to pass type args here?
-                            HostExpr.ParseArgs(pcon, RT.next(args)),
+                            genericTypeArgs,                 
+                            HostExpr.ParseArgs(pcon, RT.next(processedArgs)),
                             tailPosition);
 
                     default:
@@ -271,9 +286,9 @@ namespace clojure.lang.CljCompiler.Ast
                             tag, 
                              qmfexpr.MethodType,
                              Compiler.munge(qmfexpr.MethodName), 
-                             (MethodInfo)method, 
-                             null,
-                             HostExpr.ParseArgs(pcon,args),
+                             (MethodInfo)method,
+                             genericTypeArgs,
+                             HostExpr.ParseArgs(pcon,processedArgs),
                              tailPosition);
                 }
             }
@@ -292,11 +307,11 @@ namespace clojure.lang.CljCompiler.Ast
                             (string)Compiler.SourceVar.deref(),
                             (IPersistentMap)Compiler.SourceSpanVar.deref(),
                             tag, 
-                            (Expr)RT.first(args),
+                            (Expr)RT.first(processedArgs),
                             qmfexpr.MethodType,
                             Compiler.munge(qmfexpr.MethodName),
-                            null,
-                            HostExpr.ParseArgs(pcon, RT.seq(RT.next(args))),
+                            genericTypeArgs,
+                            HostExpr.ParseArgs(pcon, RT.seq(RT.next(processedArgs))),
                             tailPosition);
 
                     default:
@@ -306,8 +321,8 @@ namespace clojure.lang.CljCompiler.Ast
                             tag, 
                             qmfexpr.MethodType,
                             Compiler.munge(qmfexpr.MethodName),
-                            null,
-                            HostExpr.ParseArgs(pcon, args),
+                            genericTypeArgs,
+                            HostExpr.ParseArgs(pcon, processedArgs),
                             tailPosition);
                 }
             }

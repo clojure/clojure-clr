@@ -151,7 +151,7 @@ namespace clojure.lang
             IList<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, getStatics);
 
             MethodBase method = GetMatchingMethodAux(targetType, args, methods, methodName, getStatics);
-            MaybeReflectionWarn(spanMap, targetType, true, methods.Count > 0,  method, methodName, args);
+            MaybeReflectionWarn(spanMap, targetType, getStatics, methods.Count > 0,  method, methodName, args);
             return (MethodInfo)method;
         }
 

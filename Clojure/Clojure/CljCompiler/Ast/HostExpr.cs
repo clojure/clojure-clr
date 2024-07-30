@@ -41,9 +41,10 @@ namespace clojure.lang.CljCompiler.Ast
                 //  (. x fieldname-sym)
                 //  (. x 0-ary-method)
                 //  (. x propertyname-sym)
-                //  (. x methodname-sym args)+
+                //  (. x methodname-sym args+)
                 //  (. x (methodname-sym args?))
-                //  (. x (generic-m 
+                //
+                //  args might have a first element of the form (type-args t1 ...) to supply types for generic method calls
 
                 if (RT.Length(sform) < 3)
                     throw new ParseException("Malformed member expression, expecting (. target member ... )");
@@ -157,7 +158,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        static List<Type> ParseGenericMethodTypeArgs(ISeq targs)
+        public static List<Type> ParseGenericMethodTypeArgs(ISeq targs)
         {
             List<Type> types = new List<Type>();
 
