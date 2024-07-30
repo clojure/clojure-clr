@@ -146,11 +146,11 @@ namespace clojure.lang
         /// <param name="methodName"></param>
         /// <param name="typeArgs"></param>
         /// <returns></returns>
-        public static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, IList<HostArg> args, string methodName, IList<Type> typeArgs)
+        public static MethodInfo GetMatchingMethod(IPersistentMap spanMap, Type targetType, IList<HostArg> args, string methodName, IList<Type> typeArgs, bool getStatics)
         {
-            IList<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, true);
+            IList<MethodBase> methods = GetMethods(targetType, methodName, typeArgs, args.Count, getStatics);
 
-            MethodBase method = GetMatchingMethodAux(targetType, args, methods, methodName, true);
+            MethodBase method = GetMatchingMethodAux(targetType, args, methods, methodName, getStatics);
             MaybeReflectionWarn(spanMap, targetType, true, methods.Count > 0,  method, methodName, args);
             return (MethodInfo)method;
         }

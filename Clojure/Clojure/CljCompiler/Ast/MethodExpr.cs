@@ -276,7 +276,7 @@ namespace clojure.lang.CljCompiler.Ast
                         break;
 
                     case HostArg.ParameterType.Standard:
-                        if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr mpe)
+                        if (argType.IsPrimitive && ha.ArgExpr is MaybePrimitiveExpr mpe && mpe.CanEmitPrimitive)
                         {
                             mpe.EmitUnboxed(RHC.Expression, objx, ilg);
                         }

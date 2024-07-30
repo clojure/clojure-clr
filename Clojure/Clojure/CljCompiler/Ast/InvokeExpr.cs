@@ -213,16 +213,18 @@ namespace clojure.lang.CljCompiler.Ast
             if (fexpr is StaticFieldExpr)
                 return fexpr;
 
-            IPersistentVector args = PersistentVector.EMPTY;
-            for ( ISeq s = RT.seq(form.next()); s != null; s = s.next())
-                args = args.cons(Compiler.Analyze(pcon,s.first()));
 
             if (fexpr is QualifiedMethodExpr qmfexpr)
                 return ToHostExpr(pcon,
                     qmfexpr,
                     Compiler.TagOf(form),
                     tailPosition,
-                    args);
+                    form.next());
+
+
+            IPersistentVector args = PersistentVector.EMPTY;
+            for (ISeq s = RT.seq(form.next()); s != null; s = s.next())
+                args = args.cons(Compiler.Analyze(pcon, s.first()));
 
             //if (args.count() > Compiler.MAX_POSITIONAL_ARITY)
             //    throw new ArgumentException(String.Format("No more than {0} args supported", Compiler.MAX_POSITIONAL_ARITY));
@@ -235,7 +237,7 @@ namespace clojure.lang.CljCompiler.Ast
                 tailPosition);
         }
         
-        static Expr ToHostExpr(ParserContext pcon, QualifiedMethodExpr qmfexpr, Symbol tag, bool tailPosition, IPersistentVector args)
+        static Expr ToHostExpr(ParserContext pcon, QualifiedMethodExpr qmfexpr, Symbol tag, bool tailPosition, ISeq args)
         {
             if (qmfexpr.HintedSig != null )
             {
@@ -246,7 +248,7 @@ namespace clojure.lang.CljCompiler.Ast
                         return new NewExpr(
                             qmfexpr.MethodType, 
                             (ConstructorInfo)method, 
-                            HostExpr.ParseArgs(pcon, RT.seq(args)), 
+                            HostExpr.ParseArgs(pcon, args), 
                             (IPersistentMap)Compiler.SourceSpanVar.deref());
 
                     case QualifiedMethodExpr.EMethodKind.INSTANCE:
@@ -271,7 +273,7 @@ namespace clojure.lang.CljCompiler.Ast
                              Compiler.munge(qmfexpr.MethodName), 
                              (MethodInfo)method, 
                              null,
-                             HostExpr.ParseArgs(pcon, RT.seq(args)),
+                             HostExpr.ParseArgs(pcon,args),
                              tailPosition);
                 }
             }
@@ -282,7 +284,7 @@ namespace clojure.lang.CljCompiler.Ast
                     case QualifiedMethodExpr.EMethodKind.CTOR:
                         return new NewExpr(
                             qmfexpr.MethodType, 
-                            HostExpr.ParseArgs(pcon, RT.seq(args)), 
+                            HostExpr.ParseArgs(pcon, args), 
                             (IPersistentMap)Compiler.SourceSpanVar.deref());
 
                     case QualifiedMethodExpr.EMethodKind.INSTANCE:
@@ -305,7 +307,7 @@ namespace clojure.lang.CljCompiler.Ast
                             qmfexpr.MethodType,
                             Compiler.munge(qmfexpr.MethodName),
                             null,
-                            HostExpr.ParseArgs(pcon, RT.seq(args)),
+                            HostExpr.ParseArgs(pcon, args),
                             tailPosition);
                 }
             }

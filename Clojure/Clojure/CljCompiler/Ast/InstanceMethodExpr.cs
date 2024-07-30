@@ -52,7 +52,7 @@ namespace clojure.lang.CljCompiler.Ast
                 throw new ArgumentException(String.Format("Attempt to call instance method {0} on nil", methodName));
 
             if (_qualifyingType != null)
-                _method = Reflector.GetMatchingMethod(spanMap, _qualifyingType, _args, _methodName, _typeArgs);
+                _method = Reflector.GetMatchingMethod(spanMap, _qualifyingType, _args, _methodName, _typeArgs, false);
             else
             {
                 _method = null;

@@ -39,7 +39,7 @@ namespace clojure.lang.CljCompiler.Ast
             : base(source,spanMap,tag,methodName,typeArgs, args, tailPosition)
         {
             _type = type;
-            _method  = Reflector.GetMatchingMethod(spanMap, _type, _args, _methodName, typeArgs);
+            _method  = Reflector.GetMatchingMethod(spanMap, _type, _args, _methodName, typeArgs,true);
             if ( _method != null && warnOnBoxedKeyword.Equals(RT.UncheckedMathVar.deref()) && IsBoxedMath(_method))
             {
                 RT.errPrintWriter().WriteLine("Boxed math warning, {0}:{1}:{2} - call {3}.",
