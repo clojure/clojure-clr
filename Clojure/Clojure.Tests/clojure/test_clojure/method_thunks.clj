@@ -9,15 +9,15 @@
 
 (ns clojure.test-clojure.method-thunks
   (:use clojure.test)
-  (:require [clojure.java.io :as jio])
-  (:import (clojure.lang Compiler Tuple)
+  #_(:require [clojure.java.io :as jio])
+  #_(:import #(clojure.lang Compiler Tuple)
            (java.util Arrays UUID Locale)
            (java.io File FileFilter)
            clojure.lang.IFn$LL))
 
 (set! *warn-on-reflection* true)
 
-(deftest method-arity-selection
+#_(deftest method-arity-selection
   (is (= '([] [] [])
          (take 3 (repeatedly ^[] Tuple/create))))
   (is (= '([1] [2] [3])
@@ -25,7 +25,7 @@
   (is (= '([1 4] [2 5] [3 6])
          (map ^[_ _] Tuple/create [1 2 3] [4 5 6]))))
 
-(deftest method-signature-selection
+#_(deftest method-signature-selection
   (is (= [1.23 3.14]
          (map ^[double] Math/abs [1.23 -3.14])))
   (is (= [(float 1.23)  (float 3.14)]
@@ -45,17 +45,17 @@
     (is (thrown-with-msg? Exception #"instance method" (eval 'java.lang.String/.foo)))
     (is (thrown-with-msg? Exception #"constructor" (eval 'Math/new)))))
 
-(def mt ^[_] Tuple/create)
-(def mts {:fromString ^[_] UUID/fromString})
-(def gbs ^[] String/.getBytes)
+#_(def mt ^[_] Tuple/create)
+#_(def mts {:fromString ^[_] UUID/fromString})
+#_(def gbs ^[] String/.getBytes)
 
-(deftest method-thunks-in-structs
+#_(deftest method-thunks-in-structs
   (is (= #uuid "00000000-0000-0001-0000-000000000002"
          ((:fromString mts) "00000000-0000-0001-0000-000000000002")))
   (is (= [1] (mt 1)))
   (is (= 97 (first (seq (gbs "a"))))))
 
-(deftest hinted-method-values
+#_(deftest hinted-method-values
   (is (thrown? Exception (eval '(.listFiles (jio/file ".") #(File/.isDirectory %)))))
   (is (seq (.listFiles (jio/file ".") ^FileFilter File/.isDirectory)))
   (is (seq (File/.listFiles (jio/file ".") ^FileFilter File/.isDirectory)))

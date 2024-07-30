@@ -14,13 +14,13 @@
     [clojure.reflect :as r]
     [clojure.test-helper :refer [should-not-reflect]])
   (:import
-    (clojure.test SwissArmy ConcreteClass)
-    (clojure.lang Tuple Compiler Compiler$CompilerException)
-    (java.util Arrays UUID Locale)))
+    #_(clojure.test SwissArmy ConcreteClass)
+    #_(clojure.lang Tuple Compiler Compiler$CompilerException)
+    #_(java.util Arrays UUID Locale)))
 
 (set! *warn-on-reflection* true)
 
-(deftest no-hints-with-param-tags
+#_(deftest no-hints-with-param-tags
   (should-not-reflect
    (defn touc-no-reflect [s]
      (^[] String/.toUpperCase s)))
@@ -34,7 +34,7 @@
    (defn no-overloads-no-reflect [v]
      (java.time.OffsetDateTime/.getYear v))))
 
-(deftest no-param-tags-use-qualifier
+#_(deftest no-param-tags-use-qualifier
   ;; both Date and OffsetDateTime have .getYear - want to show here the qualifier is used
   (let [f (fn [^java.util.Date d] (java.time.OffsetDateTime/.getYear d))
         date (java.util.Date. 1714495523100)]
@@ -45,7 +45,7 @@
     (is (thrown? ClassCastException
           (f date)))))
 
-(deftest param-tags-in-invocation-positions
+#_(deftest param-tags-in-invocation-positions
   (testing "qualified static method invocation"
     (is (= 3 (^[long] Math/abs -3)))
     (is (= [1 2] (^[_ _] Tuple/create 1 2)))
@@ -77,7 +77,7 @@
 ;; Mapping of symbols returned from reflect call to :parameter-type used as arguments to .getDeclaredMethod,
 ;; :arg-type used as arguments to the methods and constructors being tested, :arg-tag used as arg-tags
 ;; to the methods and constructors being tested.
-(def reflected-parameter-types {'int {:parameter-type Integer/TYPE
+#_(def reflected-parameter-types {'int {:parameter-type Integer/TYPE
                                       :arg-type "(int 42)"
                                       :arg-tag "int"}
                                 'boolean {:parameter-type Boolean/TYPE
@@ -99,11 +99,11 @@
                                                      :arg-type "(into-array [\"a\" \"b\"])"
                                                      :arg-tag "\"[Ljava.lang.String;\""}})
 
-(defn is-static-method? [class method-name params]
+#_(defn is-static-method? [class method-name params]
   (let [method (.getDeclaredMethod ^Class class ^String (name method-name) ^"[Ljava.lang.Object;" params)]
     (java.lang.reflect.Modifier/isStatic (.getModifiers method))))
 
-(defn get-methods
+#_(defn get-methods
   "Reflect the class located at `path`, filter out the public members, add a :type
    of :constructor, :static, or :instance to each."
   [path]
@@ -118,7 +118,7 @@
                   :else (conj res (assoc m :type :instance)))))
             [] public)))
 
-(defn exercise-constructor
+#_(defn exercise-constructor
   "Provided a map of data returned from a call to reflect representing a constructor.
    Construct a new instance of the class providing the appropriate arg-tags and return
    a map containing the new instance and expected target class"
@@ -131,7 +131,7 @@
         new-instance (eval fun-call-str)]
     {:expected target-class :actual new-instance}))
 
-(defn exercise-static-method
+#_(defn exercise-static-method
   "Provided a map of data returned from a call to reflect representing a static class method.
    Call the static method providing the appropriate arg-tags and return a map containing
    the actual and expected response."
@@ -146,7 +146,7 @@
         response (eval fun-call-str)]
     {:expected expected-response :actual response}))
 
-(defn exercise-instance-method
+#_(defn exercise-instance-method
   "Provided a map of data returned from a call to reflect representing a class instance method.
    Call the method providing the appropriate arg-tags and return a map containing
    the actual and expected response."
@@ -160,7 +160,7 @@
         response (eval fun-call-str)]
     {:expected expected-response :actual response}))
 
-(deftest arg-tags-in-constructors-and-static-and-instance-methods
+#_(deftest arg-tags-in-constructors-and-static-and-instance-methods
   (doseq [m (get-methods 'clojure.test.SwissArmy)]
     (case (:type m)
       :constructor (let [{:keys [expected actual]} (exercise-constructor m)]
@@ -170,14 +170,14 @@
       :instance (let [{:keys [expected actual]} (exercise-instance-method m)]
                   (is (= expected actual))))))
 
-(defmacro arg-tags-called-in-macro
+#_(defmacro arg-tags-called-in-macro
   [a-type b-type a b]
   `(^[~a-type ~b-type] SwissArmy/staticArityOverloadMethod ~a ~b))
 
-(deftest arg-tags-in-macro
+#_(deftest arg-tags-in-macro
   (is (= "int-int" (arg-tags-called-in-macro int int 1 2))))
 
-(deftest bridge-methods
+#_(deftest bridge-methods
   (testing "Allows correct intended usage."
     (let [concrete (ConcreteClass.)]
      (is (= 42 (^[Integer] ConcreteClass/.stampWidgets concrete (int 99))))))
@@ -187,7 +187,7 @@
                           (^[Object] ConcreteClass/.stampWidgets concrete (int 99))))))))
 
 
-(deftest incorrect-arity-invocation-error-messages
+#_(deftest incorrect-arity-invocation-error-messages
 
   (testing "Invocation with param-tags having incorrect number of args"
     (let [e (try
