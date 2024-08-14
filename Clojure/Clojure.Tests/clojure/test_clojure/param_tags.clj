@@ -20,19 +20,19 @@
 
 (set! *warn-on-reflection* true)
 
-#_(deftest no-hints-with-param-tags
+(deftest no-hints-with-param-tags
   (should-not-reflect
    (defn touc-no-reflect [s]
-     (^[] String/.toUpperCase s)))
+     (^[] String/.ToUpper s)))                                                                                        ;;; .toUpperCase
   (should-not-reflect
    (defn touc-no-reflectq [s]
-     (^[] java.lang.String/.toUpperCase s)))
+     (^[] System.String/.ToUpper s)))                                                                                 ;;; .toUpperCase
   (should-not-reflect
    (defn touc-no-reflect-arg-tags [s]
-     (^[java.util.Locale] String/.toUpperCase s java.util.Locale/ENGLISH)))
+     (^[System.Globalization.CultureInfo] String/.ToUpper s System.Globalization.CultureInfo/CurrentCulture)))        ;;; java.util.Locale]  .toUpperCase  java.util.Locale/ENGLISH
   (should-not-reflect
    (defn no-overloads-no-reflect [v]
-     (java.time.OffsetDateTime/.getYear v))))
+     (DateTimeOffset/.Year v))))                                                                                      ;;; java.time.OffsetDateTime/.getYear
 
 #_(deftest no-param-tags-use-qualifier
   ;; both Date and OffsetDateTime have .getYear - want to show here the qualifier is used
