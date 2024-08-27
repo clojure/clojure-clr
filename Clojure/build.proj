@@ -24,9 +24,9 @@
   
   <PropertyGroup>	
 	
-	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">net6.0</TestTargetFramework>
+	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">net8.0</TestTargetFramework>
 	
-	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net8.0' AND '$(TestTargetFramework)' != 'net7.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
+	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net8.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
 		
 		
 	<TestLibraryFramework Condition=" '$(TestTargetFramework)' == 'net462' ">netstandard2.0</TestLibraryFramework>
@@ -251,10 +251,7 @@
 	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net8.0\publish"
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net8.0.zip"
 				  Overwrite="true"/>	
-   
-	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net7.0\publish"
-	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net7.0.zip"
-				  Overwrite="true"/>	
+
 	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net6.0\publish"
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net6.0.zip"
 				  Overwrite="true"/>			  
@@ -278,13 +275,13 @@
 	
   <!-- RJ: New build and clean targets for .Net Core 3.X and .Net 5-->
 
-  <Target Name="BuildD7">
-    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net7.0 -o clojure-clr-debug7" 
+  <Target Name="BuildD8">
+    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net8.0 -o clojure-clr-debug7" 
           WorkingDirectory="$(OutputPath)" />
   </Target>
 
-  <Target Name="BuildR7">
-    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net7.0 -o clojure-clr-release7" 
+  <Target Name="BuildR8">
+    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net8.0 -o clojure-clr-release7" 
           WorkingDirectory="$(OutputPath)" />
   </Target>
   
