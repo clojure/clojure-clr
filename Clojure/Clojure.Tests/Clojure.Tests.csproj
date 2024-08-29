@@ -13,6 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Clojure.Tests.Support\Clojure.Tests.Support.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="clojure\run_test.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -53,6 +57,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="clojure\test_clojure\clr\added.clj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="clojure\test_clojure\clr\generic_interop.cljr">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="clojure\test_clojure\clr\io.clj">
