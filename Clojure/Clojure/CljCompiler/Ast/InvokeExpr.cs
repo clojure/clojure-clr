@@ -239,20 +239,76 @@ namespace clojure.lang.CljCompiler.Ast
         
         static Expr ToHostExpr(ParserContext pcon, QualifiedMethodExpr qmfexpr, Symbol tag, bool tailPosition, ISeq args)
         {
-            // Let's see if we have generic type parameters.  We'll ignore this if we are a constructor -- constructors can't be generic.
+            var source = (string)Compiler.SourceVar.deref();
+            var spanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();
+
+
+            // we have the form (qmfexpr ...args...)
+            // We need to decide what the pieces are in ...args...
+
+            Expr instance = null;
+            if (qmfexpr.Kind == QualifiedMethodExpr.EMethodKind.INSTANCE)
+            {
+                instance = Compiler.Analyze(pcon.EvalOrExpr(), RT.first(args));
+                args = RT.next(args);
+            }
+
+            // We handle zero-arity calls separately, similarly to how HostExpr handles them.
+            // Constructors not included here.
+            // We are trying to discriminate field access, property access, and method calls on zero arguments.
+            // 
+            // One special case here:  Suppose we have a zero-arity _generic_method call, with type-args provided.
+            // THis will look like:   (Type/StaticMethod (type-args type1 ..))  or (Type/InstanceMEthod instance-expression (type-args type1 ..))
+            // We check for the arg count before removing the type-args, so these will be handled by the non-zero-arity code.
+            // That is okay -- because this is generic, it can't be a field or property access, so we can treat it as a method call.
+
+            bool isZeroArity = RT.count(args) == 0 && qmfexpr.Kind != QualifiedMethodExpr.EMethodKind.CTOR;
+
+            if (isZeroArity)
+            {
+                PropertyInfo pinfo;
+                FieldInfo finfo;
+
+                switch (qmfexpr.Kind)
+                {
+                    case QualifiedMethodExpr.EMethodKind.INSTANCE:
+                        if ( (finfo = Reflector.GetField(qmfexpr.MethodType, qmfexpr.MethodName,false)) != null)
+                            return new InstanceFieldExpr(source, spanMap, tag, instance, qmfexpr.MethodName, finfo, true);
+                        if ((pinfo = Reflector.GetProperty(qmfexpr.MethodType, qmfexpr.MethodName, false)) != null)
+                            return new InstancePropertyExpr(source, spanMap, tag, instance, qmfexpr.MethodName, pinfo, true);
+                        if (Reflector.GetArityZeroMethod(qmfexpr.MethodType, qmfexpr.MethodName, false) != null)
+                            return new InstanceMethodExpr(source, spanMap, tag, instance, qmfexpr.MethodType, qmfexpr.MethodName, null, new List<HostArg>(), tailPosition);
+                        throw new MissingMemberException(String.Format("No instance field, property, or method taking 0 args named {0} found for {1}", qmfexpr.MethodName, qmfexpr.MethodType.Name));
+
+                    case QualifiedMethodExpr.EMethodKind.STATIC:
+                        if ((finfo = Reflector.GetField(qmfexpr.MethodType, qmfexpr.MethodName, true)) != null)
+                            return new StaticFieldExpr(source, spanMap, tag, qmfexpr.MethodType, qmfexpr.MethodName, finfo);
+                        if ((pinfo = Reflector.GetProperty(qmfexpr.MethodType, qmfexpr.MethodName, true)) != null)
+                            return new StaticPropertyExpr(source, spanMap, tag, qmfexpr.MethodType, qmfexpr.MethodName, pinfo);
+                        if (Reflector.GetArityZeroMethod(qmfexpr.MethodType, qmfexpr.MethodName, true) != null)
+                            return new StaticMethodExpr(source, spanMap, tag, qmfexpr.MethodType, qmfexpr.MethodName, null, new List<HostArg>(), tailPosition);
+                        throw new MissingMemberException(String.Format("No static field, property, or method taking 0 args named {0} found for {1}", qmfexpr.MethodName, qmfexpr.MethodType.Name));
+
+                    default:
+                        // Constructor -- this won't happen, we fall through to the code below.
+                        break;
+                }
+            }
 
 
             object firstArg = RT.first(args);
             List<Type> genericTypeArgs = null;
-            ISeq processedArgs = args;
 
             if (firstArg is ISeq && RT.first(firstArg) is Symbol symbol && symbol.Equals(HostExpr.TypeArgsSym))
             {
                 // We have a type args supplied for a generic method call
                 // (. thing methodname (type-args type1 ... ) args ...)
                 genericTypeArgs = HostExpr.ParseGenericMethodTypeArgs(RT.next(firstArg));
-                processedArgs = RT.next(args);
+                args = RT.next(args);
             }
+
+
+
 
             if (qmfexpr.HintedSig != null )
             {
@@ -264,31 +320,31 @@ namespace clojure.lang.CljCompiler.Ast
                             qmfexpr.MethodType, 
                             (ConstructorInfo)method, 
                             HostExpr.ParseArgs(pcon, args), 
-                            (IPersistentMap)Compiler.SourceSpanVar.deref());
+                            spanMap);
 
                     case QualifiedMethodExpr.EMethodKind.INSTANCE:
                         return new InstanceMethodExpr(
-                            (string)Compiler.SourceVar.deref(),
-                            (IPersistentMap)Compiler.SourceSpanVar.deref(),
+                            source, 
+                            spanMap,
                             tag,
-                            Compiler.Analyze(pcon.EvalOrExpr(), RT.first(processedArgs)),
+                            instance,
                             qmfexpr.MethodType,
                             Compiler.munge(qmfexpr.MethodName), 
                             (MethodInfo)method,
                             genericTypeArgs,                 
-                            HostExpr.ParseArgs(pcon, RT.next(processedArgs)),
+                            HostExpr.ParseArgs(pcon, args),
                             tailPosition);
 
                     default:
                         return new StaticMethodExpr(
-                            (string)Compiler.SourceVar.deref(),
-                            (IPersistentMap)Compiler.SourceSpanVar.deref(),
+                            source,
+                            spanMap,
                             tag, 
                              qmfexpr.MethodType,
                              Compiler.munge(qmfexpr.MethodName), 
                              (MethodInfo)method,
                              genericTypeArgs,
-                             HostExpr.ParseArgs(pcon,processedArgs),
+                             HostExpr.ParseArgs(pcon,args),
                              tailPosition);
                 }
             }
@@ -307,11 +363,11 @@ namespace clojure.lang.CljCompiler.Ast
                             (string)Compiler.SourceVar.deref(),
                             (IPersistentMap)Compiler.SourceSpanVar.deref(),
                             tag,
-                            Compiler.Analyze(pcon.EvalOrExpr(), RT.first(processedArgs)),
+                            instance,
                             qmfexpr.MethodType,
                             Compiler.munge(qmfexpr.MethodName),
                             genericTypeArgs,
-                            HostExpr.ParseArgs(pcon, RT.seq(RT.next(processedArgs))),
+                            HostExpr.ParseArgs(pcon, args),
                             tailPosition);
 
                     default:
@@ -322,12 +378,11 @@ namespace clojure.lang.CljCompiler.Ast
                             qmfexpr.MethodType,
                             Compiler.munge(qmfexpr.MethodName),
                             genericTypeArgs,
-                            HostExpr.ParseArgs(pcon, processedArgs),
+                            HostExpr.ParseArgs(pcon, args),
                             tailPosition);
                 }
             }
         }
-
 
         #endregion
 
