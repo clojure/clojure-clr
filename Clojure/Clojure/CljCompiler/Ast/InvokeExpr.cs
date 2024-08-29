@@ -310,7 +310,7 @@ namespace clojure.lang.CljCompiler.Ast
 
 
 
-            if (qmfexpr.HintedSig != null )
+            if (!qmfexpr.HintedSig.IsEmpty )
             {
                 MethodBase method = QualifiedMethodExpr.ResolveHintedMethod(qmfexpr.MethodType, qmfexpr.MethodName, qmfexpr.Kind, qmfexpr.HintedSig);
                 switch (qmfexpr.Kind)

@@ -30,12 +30,54 @@ namespace clojure.lang.CljCompiler.Ast
             CTOR, INSTANCE, STATIC
         }
 
+        public class SignatureHint
+        {
+            public List<Type> GenericTypeArgs {  get; private set; }
+            public List<Type> Args { get; private set; }
+            public bool IsEmpty { get; private set; }
+
+            public int ArgCount => Args?.Count ?? 0;
+
+            public SignatureHint(IPersistentVector tagV)
+            {
+                if ( tagV == null || tagV.count() == 0)
+                {
+                    GenericTypeArgs = null;
+                    Args = null;
+                    IsEmpty = true;
+                    return;
+                }
+
+                var firstItem = tagV.nth(0);
+                ISeq remainingTags = null;
+
+                if (firstItem is ISeq && RT.first(firstItem) is Symbol symbol && symbol.Equals(HostExpr.TypeArgsSym))
+                {
+                    GenericTypeArgs = HostExpr.ParseGenericMethodTypeArgs(RT.next(firstItem));
+                    remainingTags = RT.next(tagV);
+                }
+                else
+                {
+                    GenericTypeArgs = null;
+                    remainingTags = RT.seq(tagV);
+                }
+
+
+                Args = Compiler.TagsToClasses(remainingTags);
+
+                IsEmpty = Args is null && GenericTypeArgs is null;
+            }
+
+
+        }
+
+
         #endregion
 
         #region Data
 
         public Type MethodType { get; private set; }
-        public List<Type> HintedSig { get; private set; }
+        public SignatureHint HintedSig { get; private set; }
         readonly Symbol _methodSymbol;
         public string MethodName { get; private set; }
         public EMethodKind Kind { get; private set; }
@@ -50,7 +92,7 @@ namespace clojure.lang.CljCompiler.Ast
             MethodType = methodType;
             _methodSymbol = sym;
             _tagClass = Compiler.TagOf(sym) != null ? HostExpr.TagToType(Compiler.TagOf(sym)) : typeof(AFn);
-            HintedSig = Compiler.TagsToClasses(Compiler.ParamTagsOf(sym));
+            HintedSig = new SignatureHint(Compiler.ParamTagsOf(sym));
 
             if (sym.Name.StartsWith("."))
             {
@@ -116,10 +158,10 @@ namespace clojure.lang.CljCompiler.Ast
 
             HashSet<int> arities;
 
-            if (qmexpr.HintedSig != null)
+            if (!qmexpr.HintedSig.IsEmpty )
             {
                 arities = new HashSet<int>();
-                arities.Add(qmexpr.HintedSig.Count);
+                arities.Add(qmexpr.HintedSig.ArgCount);
             }
             else
                 arities = AritySet(qmexpr.MethodType, qmexpr.MethodName, qmexpr.Kind);
@@ -182,21 +224,36 @@ namespace clojure.lang.CljCompiler.Ast
             return methods;
         }
 
-        internal static MethodBase ResolveHintedMethod(Type t, string methodName, EMethodKind kind, List<Type> hintedSig)
+        internal static MethodBase ResolveHintedMethod(Type t, string methodName, EMethodKind kind, SignatureHint hint)
         {
+            // hint is non-null and hint.IsEmpty is false;
+            // It might have generic type args, and/or args
+
             List<MethodBase> methods = MethodsWithName(t, methodName, kind);
 
-            int arity = hintedSig.Count;
+            // If we have generic type args and the list is non-empty, we need to choose only methods that have the same number of generic type args, fully instantiated.
+
+            int gtaCount = hint.GenericTypeArgs?.Count ?? 0;
+            if ( gtaCount > 0)
+            {
+                methods = methods
+                    .Where(m => m.IsGenericMethod && m.GetGenericArguments().Length == gtaCount)
+                    .Select(m => ((MethodInfo)m).MakeGenericMethod(hint.GenericTypeArgs.ToArray()))
+                    .Cast<MethodBase>()
+                    .ToList();
+            }
+
+            int arity = hint.Args?.Count ?? 0;
 
             var filteredMethods = methods
                 .Where(m => m.GetParameters().Length == arity)
-                .Where(m => Compiler.SignatureMatches(hintedSig, m))
+                .Where(m => Compiler.SignatureMatches(hint.Args, m))
                 .ToList();
 
             if (filteredMethods.Count == 1)
                 return filteredMethods[0];
             else
-                throw ParamTagsDontResolveException(t, methodName, hintedSig);
+                throw ParamTagsDontResolveException(t, methodName, hint);
          
         }
 
@@ -206,11 +263,16 @@ namespace clojure.lang.CljCompiler.Ast
             return new ArgumentException($"Error - no matches found for {kindStr} {Compiler.MethodDescription(t, methodName)}");
         }
 
-        private static ArgumentException ParamTagsDontResolveException(Type t, string methodName, List<Type> hintedSig)
+        private static ArgumentException ParamTagsDontResolveException(Type t, string methodName, SignatureHint hint)
         {
+            List<Type> hintedSig = hint.Args;
+
             IEnumerable<Object> tagNames = hintedSig.Cast<Object>().Select(tag => tag == null ? Compiler.ParamTagAny : tag);
             IPersistentVector paramTags = PersistentVector.create(tagNames);
-            return new ArgumentException($"Error - param-tags {paramTags} insufficient to resolve {Compiler.MethodDescription(t, methodName)}");
+
+            string genericTypeArgs = hint.GenericTypeArgs == null ? "" : $"<{hint.GenericTypeArgs}>";
+
+            return new ArgumentException($"Error - param-tags {genericTypeArgs}{paramTags} insufficient to resolve {Compiler.MethodDescription(t, methodName)}");
         }
 
 

@@ -397,14 +397,14 @@ namespace clojure.lang
         }
 
         // calls TagToType on every element, unless it encounters _ which becomes null
-        internal static List<Type> TagsToClasses(IPersistentVector paramTags)
+        internal static List<Type> TagsToClasses(ISeq paramTags)
         {
             if (paramTags == null)
                 return null;
 
             var sig = new List<Type>();
 
-            for (ISeq s = RT.seq(paramTags); s != null; s = s.next())
+            for (ISeq s = paramTags; s != null; s = s.next())
             {
                 var t = s.first();
                 if (t.Equals(ParamTagAny))
