@@ -16,7 +16,8 @@
   (:import
     #_(clojure.test SwissArmy ConcreteClass)
     (clojure.lang #_Tuple Compiler Compiler+CompilerException)            ;;; Compiler$CompilerException  +  commented out Tuple (overlap with System.Tuple)
-    #_(java.util Arrays UUID Locale)))
+    (System.Globalization CultureInfo)
+    (System.Text Encoding)))                                              ;;; (java.util Arrays UUID Locale)
 
 (assembly-load-from "Clojure.Tests.Support.dll")
 (import '[clojure.test SwissArmy])
@@ -39,7 +40,7 @@
 
 #_(deftest no-param-tags-use-qualifier
   ;; both Date and OffsetDateTime have .getYear - want to show here the qualifier is used
-  (let [f (fn [^java.util.Date d] (java.time.OffsetDateTime/.getYear d))
+  (let [f (fn [^java.util.Date d] (java.time.OffsetDateTime/.getYear d))                                         
         date (java.util.Date. 1714495523100)]
     ;; works when passed OffsetDateTime
     (is (= 2024 (f (-> date .toInstant (.atOffset java.time.ZoneOffset/UTC)))))
@@ -48,22 +49,26 @@
     (is (thrown? ClassCastException
           (f date)))))
 
-#_(deftest param-tags-in-invocation-positions
+(deftest param-tags-in-invocation-positions
   (testing "qualified static method invocation"
-    (is (= 3 (^[long] Math/abs -3)))
-    (is (= [1 2] (^[_ _] Tuple/create 1 2)))
-    (is (= "42" (Long/toString 42))))
-  (testing "qualified ctor invocation"
+    (is (= 3 (^[long] Math/Abs -3)))                                                                        ;;; Math/abs
+    (is (= [1 2] (^[_ _] clojure.lang.Tuple/create 1 2)))                                                   ;;; Tuple/creat
+    #_(is (= "42" (Long/toString 42))))                                                                     ;;; THis doesn't have param-tags, so not sure what the point is.
+  #_(testing "qualified ctor invocation"                                                                    ;;; Can't match against CLR types, so we'll roll our own below.
     (is (= (^[long long] UUID/new 1 2) #uuid "00000000-0000-0001-0000-000000000002"))
     (is (= (^[long long] java.util.UUID/new 1 2) #uuid "00000000-0000-0001-0000-000000000002"))
     (is (= "a" (^[String] String/new "a"))))
+  (testing "qualified ctor invocation"
+    (is (= (^[char int] String/new \a 2) "aa"))
+    (is (= (^[char int] System.String/new \a 2) "aa"))
+    (is (= (^[chars] System.String/new (String/.ToCharArray "abc")) "abc")))
   (testing "qualified instance method invocation"
-    (is (= \A (String/.charAt "A" 0)))
-    (is (= "A" (^[java.util.Locale] String/.toUpperCase "a" java.util.Locale/ENGLISH)))
-    (is (= "A" (^[Locale] String/.toUpperCase "a" java.util.Locale/ENGLISH)))
-    (is (= 65 (aget (^[String] String/.getBytes "A" "US-ASCII") 0)))
-    (is (= "42" (^[] Long/.toString 42))))
-  (testing "string repr array type resolutions"
+    (is (= \A (String/.get_Chars "A" 0)))                                                                    ;;; String/.charAt
+    (is (= "A" (^[System.Globalization.CultureInfo] String/.ToUpper "a" CultureInfo/InvariantCulture)))      ;;; (^[java.util.Locale] String/.toUpperCase "a" java.util.Locale/ENGLISH)
+    (is (= "A" (^[CultureInfo] String/.ToUpper "a" CultureInfo/InvariantCulture)))                           ;;; (^[Locale] String/.toUpperCase "a" java.util.Locale/ENGLISH)
+    (is (= 65 (aget (^[String] Encoding/.GetBytes Encoding/UTF8 "A") 0)))                                    ;;; (^[String] String/.getBytes "A" "US-ASCII")
+    (is (= "42" (^[] Int64/.ToString 42))))                                                                  ;;; (^[] Long/.toString 42)
+  #_(testing "string repr array type resolutions"                                                            ;;; no equivalent in CLR
      (let [lary (long-array [1 2 3 4 99 100])
            oary (into-array [1 2 3 4 99 100])
            sary (into-array String ["a" "b" "c"])]
@@ -72,8 +77,8 @@
        (is (= 4 (^["[Ljava.lang.Object;" _] Arrays/binarySearch oary 99)))
        (is (= 1 (^["[Ljava.lang.Object;" _] Arrays/binarySearch sary "b")))))
   (testing "bad method names"
-    (is (thrown? Exception (eval '(^[] java.lang.String/foo "a"))))
-    (is (thrown? Exception (eval '(^[] java.lang.String/.foo "a"))))
+    (is (thrown? Exception (eval '(^[] System.String/foo "a"))))                                             ;;; java.lang.String
+    (is (thrown? Exception (eval '(^[] System.String/.foo "a"))))                                            ;;; java.lang.String
     (is (thrown? Exception (eval '(^[] Math/new "a"))))))
 
 
