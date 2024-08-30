@@ -74,6 +74,8 @@ namespace clojure.lang.CljCompiler.Ast
             bool tailPosition)
     : base(source, spanMap, tag, methodName, typeArgs, args, tailPosition)
         {
+            Compiler.CheckMethodArity(resolvedMethod, RT.count(args));
+
             _target = target;
             _qualifyingType = qualifyingType;
             _method = resolvedMethod;

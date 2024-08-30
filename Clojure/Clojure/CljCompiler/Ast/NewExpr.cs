@@ -48,6 +48,8 @@ namespace clojure.lang.CljCompiler.Ast
 
         public NewExpr(Type type, ConstructorInfo ctor, IList<HostArg> args, IPersistentMap spanMap)
         {
+            Compiler.CheckMethodArity(ctor, RT.count(args));
+
             _args = args;
             _type = type;
             _spanMap = spanMap;

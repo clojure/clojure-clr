@@ -15,8 +15,11 @@
     [clojure.test-helper :refer [should-not-reflect]])
   (:import
     #_(clojure.test SwissArmy ConcreteClass)
-    #_(clojure.lang Tuple Compiler Compiler$CompilerException)
+    (clojure.lang #_Tuple Compiler Compiler+CompilerException)            ;;; Compiler$CompilerException  +  commented out Tuple (overlap with System.Tuple)
     #_(java.util Arrays UUID Locale)))
+
+(assembly-load-from "Clojure.Tests.Support.dll")
+(import '[clojure.test SwissArmy])
 
 (set! *warn-on-reflection* true)
 
@@ -77,33 +80,33 @@
 ;; Mapping of symbols returned from reflect call to :parameter-type used as arguments to .getDeclaredMethod,
 ;; :arg-type used as arguments to the methods and constructors being tested, :arg-tag used as arg-tags
 ;; to the methods and constructors being tested.
-#_(def reflected-parameter-types {'int {:parameter-type Integer/TYPE
+(def reflected-parameter-types {'System.Int32 {:parameter-type Int32                                              ;;;    'int Integer/TYPE
                                       :arg-type "(int 42)"
                                       :arg-tag "int"}
-                                'boolean {:parameter-type Boolean/TYPE
+                                 'System.Boolean {:parameter-type Boolean                                         ;;; 'boolean Boolean/TYPE
                                           :arg-type "true"
                                           :arg-tag "boolean"}
-                                'long {:parameter-type Long/TYPE
+                                'System.Int64 {:parameter-type Int64                                              ;;; 'long  Long/TYPE
                                        :arg-type "42"
                                        :arg-tag "long"}
-                                'long<> {:parameter-type (Class/forName "[J")
+                                '|System.Int64[]|  {:parameter-type |System.Int64[]|                              ;;; 'long<> (Class/forName "[J")
                                          :arg-type "(long-array [1 2])"
-                                         :arg-tag "long*"}
-                                'int<><> {:parameter-type (Class/forName "[[I")
-                                          :arg-type "(make-array Integer/TYPE 1 2)"
-                                          :arg-tag "int**"}
-                                'java.lang.Object<> {:parameter-type (Class/forName "[Ljava.lang.Object;")
-                                                     :arg-type "(into-array [1 2])"
-                                                     :arg-tag "\"[Ljava.lang.Object;\""}
-                                'java.lang.String<> {:parameter-type (Class/forName "[Ljava.lang.String;")
+                                         :arg-tag "longs"}                                                        ;;; "long*"
+                                ;;;'int<><> {:parameter-type (Class/forName "[[I")
+                                ;;;          :arg-type "(make-array Integer/TYPE 1 2)"
+                                ;;;          :arg-tag "int**"}
+                                 '|System.Object[]| {:parameter-type |System.Object[]|                            ;;; 'System.Object<> java.lang.Object<>  (Class/forName "[Ljava.lang.Object;")
+                                                     :arg-type "(into-array Object [1 2])"                        ;;;  "(into-array [1 2])"
+                                                     :arg-tag "|System.Object[]|"}                                ;;; "\"[Ljava.lang.Object;\""
+                                '|System.String[]| {:parameter-type |System.String[]|                             ;;;  'System.String<> java.lang.String<> (Class/forName "[Ljava.lang.String;")
                                                      :arg-type "(into-array [\"a\" \"b\"])"
-                                                     :arg-tag "\"[Ljava.lang.String;\""}})
+                                                     :arg-tag "|System.String[]|"}})                              ;;;  "\"[Ljava.lang.String;\"
 
-#_(defn is-static-method? [class method-name params]
-  (let [method (.getDeclaredMethod ^Class class ^String (name method-name) ^"[Ljava.lang.Object;" params)]
-    (java.lang.reflect.Modifier/isStatic (.getModifiers method))))
+(defn is-static-method? [class method-name params]  
+  (let [method (.GetMethod ^Type class ^String (name method-name)  ^|System.Type[]| params)]                      ;;;  getDeclaredMethod ^Class ^"[Ljava.lang.Object;"
+    (.IsStatic method)))                                                                                          ;;; (java.lang.reflect.Modifier/isStatic (.getModifiers method))
 
-#_(defn get-methods
+(defn get-methods
   "Reflect the class located at `path`, filter out the public members, add a :type
    of :constructor, :static, or :instance to each."
   [path]
@@ -111,19 +114,19 @@
         public (filter #(contains? (:flags %) :public) (:members reflected-class))]
     (reduce (fn [res m]
               (let [class (-> m :declaring-class resolve)
-                    params (into-array Class (map #(-> % reflected-parameter-types :parameter-type) (:parameter-types m)))]
+                    params (into-array Type (map #(-> % reflected-parameter-types :parameter-type) (:parameter-types m)))]      ;;;  Class
                 (cond
                   (not (contains? m :return-type)) (conj res (assoc m :type :constructor))
                   (is-static-method? class (:name m) params) (conj res (assoc m :type :static))
                   :else (conj res (assoc m :type :instance)))))
             [] public)))
 
-#_(defn exercise-constructor
+(defn exercise-constructor
   "Provided a map of data returned from a call to reflect representing a constructor.
    Construct a new instance of the class providing the appropriate arg-tags and return
    a map containing the new instance and expected target class"
   [{:keys [declaring-class parameter-types] :as m}]
-  (let [target-class (-> declaring-class str Class/forName)
+  (let [target-class (-> declaring-class str clojure.lang.RT/classForName)                                     ;;; Class/forName
         args (str/join " " (map #(-> % reflected-parameter-types :arg-type) parameter-types))
         arg-tags (str/join " " (map #(-> % reflected-parameter-types :arg-tag) parameter-types))
         fun-call-str (read-string (str "(^[" arg-tags "] " declaring-class ". " args ")"))
@@ -131,7 +134,7 @@
         new-instance (eval fun-call-str)]
     {:expected target-class :actual new-instance}))
 
-#_(defn exercise-static-method
+(defn exercise-static-method
   "Provided a map of data returned from a call to reflect representing a static class method.
    Call the static method providing the appropriate arg-tags and return a map containing
    the actual and expected response."
@@ -146,7 +149,7 @@
         response (eval fun-call-str)]
     {:expected expected-response :actual response}))
 
-#_(defn exercise-instance-method
+(defn exercise-instance-method
   "Provided a map of data returned from a call to reflect representing a class instance method.
    Call the method providing the appropriate arg-tags and return a map containing
    the actual and expected response."
@@ -160,7 +163,7 @@
         response (eval fun-call-str)]
     {:expected expected-response :actual response}))
 
-#_(deftest arg-tags-in-constructors-and-static-and-instance-methods
+(deftest arg-tags-in-constructors-and-static-and-instance-methods
   (doseq [m (get-methods 'clojure.test.SwissArmy)]
     (case (:type m)
       :constructor (let [{:keys [expected actual]} (exercise-constructor m)]
@@ -170,14 +173,14 @@
       :instance (let [{:keys [expected actual]} (exercise-instance-method m)]
                   (is (= expected actual))))))
 
-#_(defmacro arg-tags-called-in-macro
+(defmacro arg-tags-called-in-macro
   [a-type b-type a b]
   `(^[~a-type ~b-type] SwissArmy/staticArityOverloadMethod ~a ~b))
 
-#_(deftest arg-tags-in-macro
-  (is (= "int-int" (arg-tags-called-in-macro int int 1 2))))
+(deftest arg-tags-in-macro
+  (is (= "System.Int32-System.Int32" (arg-tags-called-in-macro int int 1 2))))                      ;;; "int-int"
 
-#_(deftest bridge-methods
+#_(deftest bridge-methods                                                                           ;;; no concept of bridge methods
   (testing "Allows correct intended usage."
     (let [concrete (ConcreteClass.)]
      (is (= 42 (^[Integer] ConcreteClass/.stampWidgets concrete (int 99))))))
@@ -187,10 +190,10 @@
                           (^[Object] ConcreteClass/.stampWidgets concrete (int 99))))))))
 
 
-#_(deftest incorrect-arity-invocation-error-messages
+(deftest incorrect-arity-invocation-error-messages
 
   (testing "Invocation with param-tags having incorrect number of args"
     (let [e (try
-              (eval '(^[long] Math/abs -1 -2 -3))
-              (catch Compiler$CompilerException e (str "-> " (.getMessage (.getCause e)))))]
+              (eval '(^[long] Math/Abs -1 -2 -3))                                                              ;;; Math/abs
+              (catch Compiler+CompilerException e (str "-> " (.Message (.InnerException e)))))]                ;;; Compiler$CompilerException .getMessage  .getCause
       (is (not (nil? (re-find #"expected 1.*received 3" e))) "Error message was expected to indicate 1 argument was expected but 2 were provided"))))

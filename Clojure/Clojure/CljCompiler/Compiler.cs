@@ -433,7 +433,7 @@ namespace clojure.lang
         static bool IsInstanceMethod(MethodBase method) => !(method is MethodInfo) || method.IsStatic;
         static bool IsConstructor(MethodBase method) => method is ConstructorInfo;
 
-        static void CheckMethodArity(MethodBase method, int argCount)
+        public static void CheckMethodArity(MethodBase method, int argCount)
         {
             ParameterInfo[] methodSig = method.GetParameters();
             if (methodSig.Length != argCount)
