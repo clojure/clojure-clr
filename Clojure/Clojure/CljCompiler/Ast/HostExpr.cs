@@ -35,7 +35,13 @@ namespace clojure.lang.CljCompiler.Ast
         {
             public Expr Parse(ParserContext pcon, object form)
             {
+                string source = (string)Compiler.SourceVar.deref();
+                IPersistentMap spanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();  // Compiler.GetSourceSpanMap(form);
+
                 ISeq sform = (ISeq)form;
+
+                Symbol tag = Compiler.TagOf(sform);
+                bool tailPosition = Compiler.InTailCall(pcon.Rhc);
 
                 // form is one of:
                 //  (. x fieldname-sym)
@@ -46,26 +52,75 @@ namespace clojure.lang.CljCompiler.Ast
                 //
                 //  args might have a first element of the form (type-args t1 ...) to supply types for generic method calls
 
+                // Parse into canonical form:
+                // Target + memberName + args
+                //
+                //  (. x fieldname-sym)             Target = x member-name = fieldname-sym, args = null
+                //  (. x 0-ary-method)              Target = x member-name = 0-ary-method, args = null
+                //  (. x propertyname-sym)          Target = x member-name = propertyname-sym, args = null
+                //  (. x methodname-sym args+)      Target = x member-name = methodname-sym, args = args+
+                //  (. x (methodname-sym args?))    Target = x member-name = methodname-sym, args = args?
+
+
                 if (RT.Length(sform) < 3)
-                    throw new ParseException("Malformed member expression, expecting (. target member ... )");
+                    throw new ParseException("Malformed member expression, expecting (. target member ... ) or  (. target (member ...))");
 
-                string source = (string)Compiler.SourceVar.deref();
-                IPersistentMap spanMap = (IPersistentMap)Compiler.SourceSpanVar.deref();  // Compiler.GetSourceSpanMap(form);
+                var target = RT.second(sform);
+                Symbol methodSym;
+                ISeq args;
 
-                Symbol tag = Compiler.TagOf(sform);
-                bool tailPosition = Compiler.InTailCall(pcon.Rhc);
+                if ( RT.third(sform) is Symbol s)
+                {
+                    methodSym = s;
+                    args = RT.next(RT.next(RT.next(sform)));
+                }
+                else if (RT.Length(sform) == 3  && RT.third(sform) is ISeq seq)
+                {
+                    var seqFirst = RT.first(seq);
+                    if (seqFirst is Symbol sym)
+                    {
+                        methodSym = sym;
+                        args = RT.next(seq);
+                    }
+                    else
+                        throw new ParseException("Malformed member expression, expecting (. target member-name args... )  or (. target (member-name args...), where member-name is a Symbol");
+                }
+                else
+                    throw new ParseException("Malformed member expression, expecting (. target member-name args... )  or (. target (member-name args...)");
 
-                // determine static or instance
+
+
+                // determine static or instance be examinung the target
                 // static target must be symbol, either fully.qualified.Typename or Typename that has been imported
-                 
-                Type t = HostExpr.MaybeType(RT.second(sform), false);
-                // at this point, t will be non-null if static
+                // If target does not resolve to a type, then it must be an instance call -- parse it.
 
-                Expr instance = null;
-                if (t == null)
-                    instance = Compiler.Analyze(pcon.EvalOrExpr(),RT.second(sform));
+                Type staticType = HostExpr.MaybeType(target, false);
+                Expr instance = staticType == null ? Compiler.Analyze(pcon.EvalOrExpr(), RT.second(sform)) : null;
 
-                bool isZeroArityCall = RT.Length(sform) == 3 && RT.third(sform) is Symbol;
+                // staticType not null => static method call, instance set to null.
+                // staticType null, instance is not null, set to an expression yielding the instance to make the call on.
+
+                // If there is a type-args form, it must be the first argument.
+                // Pull it out if it's there.
+
+                GenericTypeArgList typeArgs;
+
+                object firstArg = RT.first(args);
+                if (firstArg is ISeq && RT.first(firstArg) is Symbol symbol && symbol.Equals(TypeArgsSym))
+                {
+                    // We have a type args supplied for a generic method call
+                    // (. thing methodname (type-args type1 ... ) args ...)
+                    typeArgs = GenericTypeArgList.Create(RT.next(firstArg));
+                    args = args.next();
+                }
+                else
+                {
+                    typeArgs = GenericTypeArgList.Empty;
+                }
+
+                bool hasTypeArgs = !typeArgs.IsEmpty;
+
+                bool isZeroArityCall = RT.Length(args) == 0;
 
                 if (isZeroArityCall)
                 {
@@ -75,41 +130,45 @@ namespace clojure.lang.CljCompiler.Ast
                     // TODO: Figure out if we want to handle the -propname otherwise.
 
                     bool isPropName = false;
-                    Symbol sym = (Symbol)RT.third(sform);
-                    if (sym.Name[0] == '-')
+                    Symbol memberSym = methodSym;
+                    
+                    if (memberSym.Name[0] == '-')
                     {
                         isPropName = true;
-                        sym = Symbol.intern(sym.Name.Substring(1));
+                        memberSym = Symbol.intern(memberSym.Name.Substring(1));
                     }
 
-                    string fieldName = Compiler.munge(sym.Name);
+                    string memberName = Compiler.munge(memberSym.Name);
+
                     // The JVM version does not have to worry about Properties.  It captures 0-arity methods under fields.
                     // We have to put in special checks here for this.
                     // Also, when reflection is required, we have to capture 0-arity methods under the calls that
                     //   are generated by StaticFieldExpr and InstanceFieldExpr.
-                    if (t != null)
+                    if (staticType != null)
                     {
-                        if ((finfo = Reflector.GetField(t, fieldName, true)) != null)
-                            return new StaticFieldExpr(source, spanMap, tag, t, fieldName, finfo);
-                        if ((pinfo = Reflector.GetProperty(t, fieldName, true)) != null)
-                            return new StaticPropertyExpr(source, spanMap, tag, t, fieldName, pinfo);
-                        if (!isPropName && Reflector.GetArityZeroMethod(t, fieldName, true) != null)
-                            return new StaticMethodExpr(source, spanMap, tag, t, fieldName, null, new List<HostArg>(), tailPosition);
-                        throw new MissingMemberException(String.Format("No field, property, or method taking 0 args named {0} found for {1}", fieldName, t.Name));
+                        if ( ! hasTypeArgs && (finfo = Reflector.GetField(staticType, memberName, true)) != null)
+                            return new StaticFieldExpr(source, spanMap, tag, staticType, memberName, finfo);
+                        if ( ! hasTypeArgs && (pinfo = Reflector.GetProperty(staticType, memberName, true)) != null)
+                            return new StaticPropertyExpr(source, spanMap, tag, staticType, memberName, pinfo);
+                        if (!isPropName && Reflector.GetArityZeroMethod(staticType, memberName, typeArgs, true) != null)
+                            return new StaticMethodExpr(source, spanMap, tag, staticType, memberName, typeArgs, new List<HostArg>(), tailPosition);
+
+                        string typeArgsStr = hasTypeArgs ? $" and generic type args {typeArgs.GenerateGenericTypeArgsString()} " : "";
+                        throw new MissingMemberException($"No field, property, or method taking 0 args{typeArgsStr} named {memberName} found for {staticType.Name}");
                     }
                     else if (instance != null && instance.HasClrType && instance.ClrType != null)
                     {
                         Type instanceType = instance.ClrType;
-                        if ((finfo = Reflector.GetField(instanceType, fieldName, false)) != null)
-                            return new InstanceFieldExpr(source, spanMap, tag, instance, fieldName, finfo);
-                        if ((pinfo = Reflector.GetProperty(instanceType, fieldName, false)) != null)
-                            return new InstancePropertyExpr(source, spanMap, tag, instance, fieldName, pinfo);
-                        if (!isPropName && Reflector.GetArityZeroMethod(instanceType, fieldName, false) != null)
-                            return new InstanceMethodExpr(source, spanMap, tag, instance, instanceType, fieldName, null, new List<HostArg>(), tailPosition);
+                        if (!hasTypeArgs && (finfo = Reflector.GetField(instanceType, memberName, false)) != null)
+                            return new InstanceFieldExpr(source, spanMap, tag, instance, memberName, finfo);
+                        if (!hasTypeArgs && (pinfo = Reflector.GetProperty(instanceType, memberName, false)) != null)
+                            return new InstancePropertyExpr(source, spanMap, tag, instance, memberName, pinfo);
+                        if (!isPropName && Reflector.GetArityZeroMethod(instanceType, memberName, typeArgs, false) != null)
+                            return new InstanceMethodExpr(source, spanMap, tag, instance, instanceType, memberName, typeArgs, new List<HostArg>(), tailPosition);
                         if (pcon.IsAssignContext)
-                            return new InstanceFieldExpr(source, spanMap, tag, instance, fieldName, null); // same as InstancePropertyExpr when last arg is null
+                            return new InstanceFieldExpr(source, spanMap, tag, instance, memberName, null); // same as InstancePropertyExpr when last arg is null
                         else
-                            return new InstanceZeroArityCallExpr(source, spanMap, tag, instance, fieldName);
+                            return new InstanceZeroArityCallExpr(source, spanMap, tag, instance, memberName);
                     }
                     else
                     {
@@ -122,59 +181,24 @@ namespace clojure.lang.CljCompiler.Ast
                         //return new InstanceFieldExpr(source, spanMap, tag, instance, fieldName, null); // same as InstancePropertyExpr when last arg is null
                         //return new InstanceZeroArityCallExpr(source, spanMap, tag, instance, fieldName); 
                         if (pcon.IsAssignContext)
-                            return new InstanceFieldExpr(source, spanMap, tag, instance, fieldName, null); // same as InstancePropertyExpr when last arg is null
+                            return new InstanceFieldExpr(source, spanMap, tag, instance, memberName, null); // same as InstancePropertyExpr when last arg is null
                         else
-                            return new InstanceZeroArityCallExpr(source, spanMap, tag, instance, fieldName); 
+                            return new InstanceZeroArityCallExpr(source, spanMap, tag, instance, memberName); 
 
                     }
                 }
- 
-                //ISeq call = RT.third(form) is ISeq ? (ISeq)RT.third(form) : RT.next(RT.next(form));
 
-                ISeq call;
-                List<Type> typeArgs = null;
+                string methodName = Compiler.munge(methodSym.Name);
 
-                object fourth = RT.fourth(sform);
-                if (fourth is ISeq && RT.first(fourth) is Symbol symbol && symbol.Equals(TypeArgsSym))
-                 {
-                    // We have a type args supplied for a generic method call
-                    // (. thing methodname (type-args type1 ... ) args ...)
-                    typeArgs = ParseGenericMethodTypeArgs(RT.next(fourth));
-                    call = RT.listStar(RT.third(sform), RT.next(RT.next(RT.next(RT.next(sform)))));
-                }
-                else
-                    call = RT.third(sform) is ISeq seq ? seq : RT.next(RT.next(sform));
 
-                if (!(RT.first(call) is Symbol))
-                    throw new ParseException("Malformed member exception");
+                List<HostArg> hostArgs = ParseArgs(pcon, args);
 
-                string methodName = Compiler.munge(((Symbol)RT.first(call)).Name);
-
-                List<HostArg> args = ParseArgs(pcon, RT.next(call));
-
-                return t != null
-                    ? (MethodExpr)(new StaticMethodExpr(source, spanMap, tag, t, methodName, typeArgs, args, tailPosition))
-                    : (MethodExpr)(new InstanceMethodExpr(source, spanMap, tag, instance, t, methodName, typeArgs, args, tailPosition));
+                return staticType != null
+                    ? (MethodExpr)(new StaticMethodExpr(source, spanMap, tag, staticType, methodName, typeArgs, hostArgs, tailPosition))
+                    : (MethodExpr)(new InstanceMethodExpr(source, spanMap, tag, instance, staticType, methodName, typeArgs, hostArgs, tailPosition));
             }
         }
 
-        public static List<Type> ParseGenericMethodTypeArgs(ISeq targs)
-        {
-            List<Type> types = new List<Type>();
-
-            for (ISeq s = targs; s != null; s = s.next())
-            {
-                object arg = s.first();
-                if (!(arg is Symbol))
-                    throw new ArgumentException("Malformed generic method designator: type arg must be a Symbol");
-                Type t = HostExpr.MaybeType(arg, false);
-                if (t == null)
-                    throw new ArgumentException("Malformed generic method designator: invalid type arg");
-                types.Add(t);
-            }
-
-            return types;
-        }
 
         internal static List<HostArg> ParseArgs(ParserContext pcon, ISeq argSeq)
         {

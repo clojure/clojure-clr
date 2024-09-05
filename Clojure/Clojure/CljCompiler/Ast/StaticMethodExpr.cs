@@ -35,7 +35,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region Ctors
 
-        public StaticMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string methodName, IList<Type> typeArgs, IList<HostArg> args, bool tailPosition)
+        public StaticMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string methodName, GenericTypeArgList typeArgs, IList<HostArg> args, bool tailPosition)
             : base(source,spanMap,tag,methodName,typeArgs, args, tailPosition)
         {
             _type = type;
@@ -48,7 +48,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
         }
 
-        public StaticMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string methodName, MethodInfo resolvedMethod, IList<Type> typeArgs, IList<HostArg> args, bool tailPosition)
+        public StaticMethodExpr(string source, IPersistentMap spanMap, Symbol tag, Type type, string methodName, MethodInfo resolvedMethod, GenericTypeArgList typeArgs, IList<HostArg> args, bool tailPosition)
             : base(source, spanMap, tag, methodName, typeArgs, args, tailPosition)
         {
             Compiler.CheckMethodArity(resolvedMethod, RT.count(args));

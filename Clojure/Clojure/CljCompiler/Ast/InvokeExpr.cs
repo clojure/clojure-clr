@@ -93,7 +93,7 @@ namespace clojure.lang.CljCompiler.Ast
                         }
                         String mname = Compiler.munge(mmapVal.Symbol.ToString());
                        
-                        IList<MethodBase> methods = Reflector.GetMethods(_protocolOn, mname, null, args.count() - 1,  false);
+                        IList<MethodBase> methods = Reflector.GetMethods(_protocolOn, mname, GenericTypeArgList.Empty, args.count() - 1,  false);
                         if (methods.Count != 1)
                             throw new ArgumentException(String.Format("No single method: {0} of interface: {1} found for function: {2} of protocol: {3}",
                                 mname, _protocolOn.FullName, fvar.Symbol, pvar.Symbol));
@@ -262,6 +262,32 @@ namespace clojure.lang.CljCompiler.Ast
             // We check for the arg count before removing the type-args, so these will be handled by the non-zero-arity code.
             // That is okay -- because this is generic, it can't be a field or property access, so we can treat it as a method call.
 
+
+            object firstArg = RT.first(args);
+            GenericTypeArgList genericTypeArgs;
+
+            if (firstArg is ISeq && RT.first(firstArg) is Symbol symbol && symbol.Equals(HostExpr.TypeArgsSym))
+            {
+                // We have a type args supplied for a generic method call
+                // (. thing methodname (type-args type1 ... ) args ...)
+                genericTypeArgs = GenericTypeArgList.Create(RT.next(firstArg));
+                args = RT.next(args);
+            }
+            else
+            {
+                genericTypeArgs = GenericTypeArgList.Empty;
+            }
+
+            // Now we have a potential conflict.  What if we have a hinted signature on the QME?
+            // Who wins the type-arg battle?
+
+            // If the QME has a nonempty generic type args list, we us it in preference.
+
+            if ( qmfexpr.HintedSig != null && !qmfexpr.HintedSig.GenericTypeArgs.IsEmpty)
+                genericTypeArgs = qmfexpr.HintedSig.GenericTypeArgs;
+
+            bool hasGenericTypeArgs = !genericTypeArgs.IsEmpty;
+
             bool isZeroArity = RT.count(args) == 0 && qmfexpr.Kind != QualifiedMethodExpr.EMethodKind.CTOR;
 
             if (isZeroArity)
@@ -272,22 +298,26 @@ namespace clojure.lang.CljCompiler.Ast
                 switch (qmfexpr.Kind)
                 {
                     case QualifiedMethodExpr.EMethodKind.INSTANCE:
-                        if ( (finfo = Reflector.GetField(qmfexpr.MethodType, qmfexpr.MethodName,false)) != null)
+                        if (!hasGenericTypeArgs && (finfo = Reflector.GetField(qmfexpr.MethodType, qmfexpr.MethodName,false)) != null)
                             return new InstanceFieldExpr(source, spanMap, tag, instance, qmfexpr.MethodName, finfo, true);
-                        if ((pinfo = Reflector.GetProperty(qmfexpr.MethodType, qmfexpr.MethodName, false)) != null)
+                        if (!hasGenericTypeArgs && (pinfo = Reflector.GetProperty(qmfexpr.MethodType, qmfexpr.MethodName, false)) != null)
                             return new InstancePropertyExpr(source, spanMap, tag, instance, qmfexpr.MethodName, pinfo, true);
-                        if (Reflector.GetArityZeroMethod(qmfexpr.MethodType, qmfexpr.MethodName, false) != null)
-                            return new InstanceMethodExpr(source, spanMap, tag, instance, qmfexpr.MethodType, qmfexpr.MethodName, null, new List<HostArg>(), tailPosition);
-                        throw new MissingMemberException(String.Format("No instance field, property, or method taking 0 args named {0} found for {1}", qmfexpr.MethodName, qmfexpr.MethodType.Name));
+                        if (Reflector.GetArityZeroMethod(qmfexpr.MethodType, qmfexpr.MethodName, genericTypeArgs, false) != null)
+                            return new InstanceMethodExpr(source, spanMap, tag, instance, qmfexpr.MethodType, qmfexpr.MethodName, genericTypeArgs, new List<HostArg>(), tailPosition);
+
+                        string typeArgsStr = hasGenericTypeArgs ? $" and generic type args {genericTypeArgs.GenerateGenericTypeArgsString()}" : "";
+                        throw new MissingMemberException($"No instance field, property, or method taking 0 args{typeArgsStr} named {qmfexpr.MethodName} found for {qmfexpr.MethodType.Name}");
 
                     case QualifiedMethodExpr.EMethodKind.STATIC:
                         if ((finfo = Reflector.GetField(qmfexpr.MethodType, qmfexpr.MethodName, true)) != null)
                             return new StaticFieldExpr(source, spanMap, tag, qmfexpr.MethodType, qmfexpr.MethodName, finfo);
                         if ((pinfo = Reflector.GetProperty(qmfexpr.MethodType, qmfexpr.MethodName, true)) != null)
                             return new StaticPropertyExpr(source, spanMap, tag, qmfexpr.MethodType, qmfexpr.MethodName, pinfo);
-                        if (Reflector.GetArityZeroMethod(qmfexpr.MethodType, qmfexpr.MethodName, true) != null)
-                            return new StaticMethodExpr(source, spanMap, tag, qmfexpr.MethodType, qmfexpr.MethodName, null, new List<HostArg>(), tailPosition);
-                        throw new MissingMemberException(String.Format("No static field, property, or method taking 0 args named {0} found for {1}", qmfexpr.MethodName, qmfexpr.MethodType.Name));
+                        if (Reflector.GetArityZeroMethod(qmfexpr.MethodType, qmfexpr.MethodName, genericTypeArgs, true) != null)
+                            return new StaticMethodExpr(source, spanMap, tag, qmfexpr.MethodType, qmfexpr.MethodName, genericTypeArgs, new List<HostArg>(), tailPosition);
+
+                        typeArgsStr = hasGenericTypeArgs ? $" and generic type args {genericTypeArgs.GenerateGenericTypeArgsString()}" : "";
+                        throw new MissingMemberException($"No static field, property, or method taking 0 args{typeArgsStr} named {qmfexpr.MethodName} found for {qmfexpr.MethodType.Name}");
 
                     default:
                         // Constructor -- this won't happen, we fall through to the code below.
@@ -295,23 +325,11 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-
-            object firstArg = RT.first(args);
-            List<Type> genericTypeArgs = null;
-
-            if (firstArg is ISeq && RT.first(firstArg) is Symbol symbol && symbol.Equals(HostExpr.TypeArgsSym))
+            if (qmfexpr.HintedSig != null )
             {
-                // We have a type args supplied for a generic method call
-                // (. thing methodname (type-args type1 ... ) args ...)
-                genericTypeArgs = HostExpr.ParseGenericMethodTypeArgs(RT.next(firstArg));
-                args = RT.next(args);
-            }
+                //  What if there is a hinted signature AND the arguments have a type-args list?
+                //  In the same way that inferred and tagged types on the arguments are overridden by the hinted signature, we do the same with type-args -- ignore it.
 
-
-
-
-            if (!qmfexpr.HintedSig.IsEmpty )
-            {
                 MethodBase method = QualifiedMethodExpr.ResolveHintedMethod(qmfexpr.MethodType, qmfexpr.MethodName, qmfexpr.Kind, qmfexpr.HintedSig);
                 switch (qmfexpr.Kind)
                 {

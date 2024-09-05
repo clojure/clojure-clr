@@ -34,8 +34,8 @@ namespace clojure.lang.CljCompiler.Ast
         protected readonly IList<HostArg> _args;
         public IList<HostArg> Args { get { return _args; } }
         
-        protected readonly IList<Type> _typeArgs;
-        public IList<Type> TypeArgs { get { return _typeArgs; } }
+        protected readonly GenericTypeArgList _typeArgs;
+        public GenericTypeArgList TypeArgs { get { return _typeArgs; } }
         
         protected MethodInfo _method;
         public MethodInfo Method { get { return _method; } }
@@ -56,7 +56,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region C-tors
 
-        protected MethodExpr(string source, IPersistentMap spanMap, Symbol tag, string methodName, IList<Type> typeArgs, IList<HostArg> args, bool tailPosition)
+        protected MethodExpr(string source, IPersistentMap spanMap, Symbol tag, string methodName, GenericTypeArgList typeArgs, IList<HostArg> args, bool tailPosition)
         {
             _source = source;
             _spanMap = spanMap;
@@ -242,7 +242,8 @@ namespace clojure.lang.CljCompiler.Ast
 
             // Build dynamic call and lambda
             Type returnType = HasClrType ? ClrType : typeof(object);
-            InvokeMemberBinder binder = new ClojureInvokeMemberBinder(ClojureContext.Default, _methodName, paramExprs.Count, _typeArgs?.ToArray<Type>(), IsStaticCall);
+            var genericTypeArgsToPass = _typeArgs.ToArray();
+            InvokeMemberBinder binder = new ClojureInvokeMemberBinder(ClojureContext.Default, _methodName, paramExprs.Count, genericTypeArgsToPass, IsStaticCall);
 
             // This is what I want to do.
             //DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);

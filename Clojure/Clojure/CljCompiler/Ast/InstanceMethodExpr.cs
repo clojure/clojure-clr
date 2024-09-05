@@ -40,7 +40,7 @@ namespace clojure.lang.CljCompiler.Ast
             Expr target, 
             Type qualifyingType,
             string methodName, 
-            IList<Type> typeArgs, 
+            GenericTypeArgList typeArgs, 
             IList<HostArg> args, 
             bool tailPosition)
             : base(source,spanMap,tag,methodName,typeArgs,args,tailPosition)
@@ -69,7 +69,7 @@ namespace clojure.lang.CljCompiler.Ast
             Type qualifyingType,
             string methodName, 
             MethodInfo resolvedMethod, 
-            IList<Type> typeArgs, 
+            GenericTypeArgList typeArgs, 
             IList<HostArg> args, 
             bool tailPosition)
     : base(source, spanMap, tag, methodName, typeArgs, args, tailPosition)

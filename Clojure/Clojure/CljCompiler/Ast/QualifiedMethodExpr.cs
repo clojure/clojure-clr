@@ -32,19 +32,19 @@ namespace clojure.lang.CljCompiler.Ast
 
         public class SignatureHint
         {
-            public List<Type> GenericTypeArgs {  get; private set; }
+            public GenericTypeArgList GenericTypeArgs {  get; private set; }
             public List<Type> Args { get; private set; }
-            public bool IsEmpty { get; private set; }
 
             public int ArgCount => Args?.Count ?? 0;
 
-            public SignatureHint(IPersistentVector tagV)
+            private SignatureHint(IPersistentVector tagV)
             {
+                // tagV is not null, but might be empty.
+                // tagV == []  -> no type-args, zero-argument method or property or field.
                 if ( tagV == null || tagV.count() == 0)
                 {
-                    GenericTypeArgs = null;
+                    GenericTypeArgs = GenericTypeArgList.Empty;
                     Args = null;
-                    IsEmpty = true;
                     return;
                 }
 
@@ -53,21 +53,26 @@ namespace clojure.lang.CljCompiler.Ast
 
                 if (firstItem is ISeq && RT.first(firstItem) is Symbol symbol && symbol.Equals(HostExpr.TypeArgsSym))
                 {
-                    GenericTypeArgs = HostExpr.ParseGenericMethodTypeArgs(RT.next(firstItem));
+                    GenericTypeArgs = GenericTypeArgList.Create(RT.next(firstItem));
                     remainingTags = RT.next(tagV);
                 }
                 else
                 {
-                    GenericTypeArgs = null;
+                    GenericTypeArgs = GenericTypeArgList.Empty;
                     remainingTags = RT.seq(tagV);
                 }
 
-
                 Args = Compiler.TagsToClasses(remainingTags);
-
-                IsEmpty = Args is null && GenericTypeArgs is null;
             }
 
+
+            public static SignatureHint MaybeCreate(IPersistentVector tagV)
+            {
+                if (tagV == null)
+                    return null;
+
+                return new SignatureHint(tagV);
+            }
 
         }
 
@@ -92,7 +97,7 @@ namespace clojure.lang.CljCompiler.Ast
             MethodType = methodType;
             _methodSymbol = sym;
             _tagClass = Compiler.TagOf(sym) != null ? HostExpr.TagToType(Compiler.TagOf(sym)) : typeof(AFn);
-            HintedSig = new SignatureHint(Compiler.ParamTagsOf(sym));
+            HintedSig = SignatureHint.MaybeCreate(Compiler.ParamTagsOf(sym));
 
             if (sym.Name.StartsWith("."))
             {
@@ -158,7 +163,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             HashSet<int> arities;
 
-            if (!qmexpr.HintedSig.IsEmpty )
+            if (qmexpr.HintedSig != null )
             {
                 arities = new HashSet<int>();
                 arities.Add(qmexpr.HintedSig.ArgCount);
