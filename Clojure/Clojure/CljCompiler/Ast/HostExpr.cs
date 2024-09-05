@@ -45,7 +45,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 // form is one of:
                 //  (. x fieldname-sym)
-                //  (. x 0-ary-method)
+                //  (. x 0-ary-methodname-sym)
                 //  (. x propertyname-sym)
                 //  (. x methodname-sym args+)
                 //  (. x (methodname-sym args?))
@@ -56,10 +56,10 @@ namespace clojure.lang.CljCompiler.Ast
                 // Target + memberName + args
                 //
                 //  (. x fieldname-sym)             Target = x member-name = fieldname-sym, args = null
-                //  (. x 0-ary-method)              Target = x member-name = 0-ary-method, args = null
+                //  (. x 0-ary-methodname-sym)      Target = x member-name = 0-ary-method, args = null
                 //  (. x propertyname-sym)          Target = x member-name = propertyname-sym, args = null
                 //  (. x methodname-sym args+)      Target = x member-name = methodname-sym, args = args+
-                //  (. x (methodname-sym args?))    Target = x member-name = methodname-sym, args = args?
+                //  (. x (methodname-sym args?))    Target = x member-name = methodname-sym, args = args?  -- note: in this case, we explicity cannot be a field or property
 
 
                 if (RT.Length(sform) < 3)
@@ -68,6 +68,7 @@ namespace clojure.lang.CljCompiler.Ast
                 var target = RT.second(sform);
                 Symbol methodSym;
                 ISeq args;
+                bool methodRequired = false;
 
                 if ( RT.third(sform) is Symbol s)
                 {
@@ -81,6 +82,7 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         methodSym = sym;
                         args = RT.next(seq);
+                        methodRequired = true;
                     }
                     else
                         throw new ParseException("Malformed member expression, expecting (. target member-name args... )  or (. target (member-name args...), where member-name is a Symbol");
@@ -120,7 +122,7 @@ namespace clojure.lang.CljCompiler.Ast
 
                 bool hasTypeArgs = !typeArgs.IsEmpty;
 
-                bool isZeroArityCall = RT.Length(args) == 0;
+                bool isZeroArityCall = RT.Length(args) == 0 && !methodRequired;
 
                 if (isZeroArityCall)
                 {
