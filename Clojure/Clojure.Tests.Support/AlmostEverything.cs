@@ -19,7 +19,7 @@ namespace Clojure.Tests.Support
         // Other classes provide other definitions
 
         // here we have a field
-        public string ZeroMember = "field";
+        public string ZeroArityMember = "field";
 
         // Testing constructors
 
@@ -76,9 +76,10 @@ namespace Clojure.Tests.Support
 
         // Testing overloads
         public string Over() => "no-arg";
-        public int Over(int v) => v;
-        public double Over(double v) => v;
-        public object Over(object v) => v;
+        public string Over(int v) => "int";
+        public string Over(long v) => "long";
+        public string Over(double v) => "double";
+        public string Over(object v) => "object";
         public string Over(string format, object arg0) => String.Format(format, arg0);
         public string Over(string format, object arg0, object arg1) => String.Format(format, arg0, arg1);
         public string Over(string format, params object[] args) => String.Format(format, args);
@@ -119,7 +120,7 @@ namespace Clojure.Tests.Support
         // Other classes provide other definitions
 
         // here we have a property
-        public string ZeroMember { get; set; } =  "property";
+        public string ZeroArityMember { get; set; } =  "property";
     }
 
     // For testing reflection
@@ -130,7 +131,7 @@ namespace Clojure.Tests.Support
         // Other classes provide other definitions
 
         // here we have a zero-arity method
-        public string ZeroMember() => "method";
+        public string ZeroArityMember() => "method";
     }
 
         // All attempts at resolving members should fail here.

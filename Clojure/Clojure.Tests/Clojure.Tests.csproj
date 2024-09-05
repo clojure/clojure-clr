@@ -59,7 +59,7 @@
     <None Update="clojure\test_clojure\clr\added.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="clojure\test_clojure\clr\interop.cljr">
+    <None Update="clojure\test_clojure\clr\interop.clj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="clojure\test_clojure\clr\io.clj">
