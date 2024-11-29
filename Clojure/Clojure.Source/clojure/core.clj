@@ -5157,7 +5157,7 @@ Note that read can execute code (controlled by *read-eval*),
   {:private true}
   [^clojure.lang.Sorted sc test key]
   (fn [e]
-    (test (.. sc comparator (compare (. sc entryKey e) key)) 0)))
+    (test (.. sc comparator (Compare (. sc entryKey e) key)) 0)))                                 ;;; compare
 
 (defn subseq
   "sc must be a sorted collection, test(s) one of <, <=, > or
