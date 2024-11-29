@@ -234,7 +234,7 @@ namespace clojure.lang
 
         public static readonly Var WarnOnReflectionVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), RT.F);
-            = Var.intern(ClojureNamespace, Symbol.intern("*warn-on-reflection*"), false).setDynamic();
+            = Var.intern(ClojureNamespace, Symbol.intern("*warn-on-reflection*"), true).setDynamic();  // TODO: Temporary so that we get warnings when compiling clojure.core
 
         //public static readonly Var MACRO_META 
         //    = Var.intern(CLOJURE_NS, Symbol.intern("*macro-meta*"), null);
@@ -2839,6 +2839,13 @@ namespace clojure.lang
             return a.GetValue(idx);
         }
 
+
+        // Trying to avoid reflection in clojure.core aget inline.  Type-hinting didn't seem to do the trick.
+
+        public static object agetOnArray(Array a, int idx)
+        {
+            return a.GetValue(idx);
+        }
 
         public static object aset(Array a, int idx, object val)
         {

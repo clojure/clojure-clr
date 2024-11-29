@@ -350,7 +350,7 @@
   {:added "1.0"
    :static true}
   [^Type c x]   ;;; changed Class to Type
-   (if (clojure.lang.Util/identical x nil) nil (if (. c (IsInstanceOfType x)) x (throw  (InvalidCastException. (.ToString (.GetType x)))))))  ;;;  original (. c (cast x)))     
+   (if (clojure.lang.Util/identical x nil) nil (if (. c (IsInstanceOfType x)) x (throw  (InvalidCastException. (.ToString (.GetType ^Object x)))))))  ;;;  original (. c (cast x)))  ;; Added ^Object   
  
 (defn vector
   "Creates a new vector containing the args."
@@ -1381,9 +1381,9 @@
 
 (defn unsigned-bit-shift-right
   "Bitwise shift right, without sign-extension."
-  {:inline (fn [x n] `(. clojure.lang.Numbers (unsignedShiftRight ~x ~n)))
+  {:inline (fn [x n] `(. clojure.lang.Numbers (unsignedShiftRight ^Object ~x ^Object ~n)))   ;;; Added type hints
    :added "1.6"}
-  [x n] (. clojure.lang.Numbers unsignedShiftRight x n))
+  [x n] (. clojure.lang.Numbers unsignedShiftRight ^Object x ^Object n))                     ;;; Added type hints
 
  (defn integer?
   "Returns true if n is an integer"
@@ -1815,7 +1815,7 @@
   {:added "1.0"
    :static true}
  [multifn dispatch-val]
- (. multifn removeMethod dispatch-val))
+ (. ^clojure.lang.MultiFn multifn removeMethod dispatch-val))                          ;;; Added type hint
 
 (defn prefer-method
   "Causes the multimethod to prefer matches of dispatch-val-x over dispatch-val-y 
@@ -1823,7 +1823,7 @@
   {:added "1.0"
    :static true}
   [multifn dispatch-val-x dispatch-val-y]
-  (. multifn preferMethod dispatch-val-x dispatch-val-y))
+  (. ^clojure.lang.MultiFn multifn preferMethod dispatch-val-x dispatch-val-y))         ;;; Added type hint
 
 (defn methods
   "Given a multimethod, returns a map of dispatch values -> dispatch fns"
@@ -2489,7 +2489,7 @@
   {:added "1.1"
    :static true}
  ([^clojure.lang.Ref ref]
-   (.getMinHistory ref))
+   (.get_MinHistory ref))                                              ;;; .getMinHistory
  ([^clojure.lang.Ref ref n]
    (.setMinHistory ref n)))
 
@@ -2498,7 +2498,7 @@
   {:added "1.1"
    :static true}
  ([^clojure.lang.Ref ref]
-   (.getMaxHistory ref))
+   (.get_MaxHistory ref))                                              ;;; .getMaxHistory
  ([^clojure.lang.Ref ref n]
    (.setMaxHistory ref n)))
 
@@ -3682,7 +3682,7 @@
        (instance? clojure.lang.BigInt x) (.ToBigDecimal ^clojure.lang.BigInt x)           ;;; .ToBigDecimal
        (instance? BigInteger x) (BigDecimal/Create ^BigInteger x)                         ;;; (BigDecimal. ^BigInteger x)
        (number? x) (BigDecimal/Create (long x))                                           ;;; (BigDecimal/valueOf (long x))
-       :else  (BigDecimal/Create x)))                                                     ;;; (BigDecimal. x)))
+       :else  (BigDecimal/Create x)))                                                     ;;; (BigDecimal. x)))         -- will get a reflection warning -- we just have to wing it here.
 	   
 (def ^:dynamic ^{:private true} print-initialized false)
 
@@ -3938,25 +3938,25 @@ Note that read can execute code (controlled by *read-eval*),
 (defn aget
   "Returns the value at the index/indices. Works on Java arrays of all
   types."
-  {:inline (fn [a i] `(. clojure.lang.RT (aget ~a (int ~i))))
+  {:inline (fn [a i] `(. clojure.lang.RT (agetOnArray ~a (int ~i))))
    :inline-arities #{2}
    :added "1.0"}
   ([array idx]
-   (clojure.lang.Reflector/prepRet (.GetElementType (class array)) (. array (GetValue idx))))  ;;; was .getComponentType (. Array (get array idx)))  
+   (clojure.lang.Reflector/prepRet (.GetElementType (class array)) (. ^System.Array array (GetValue ^int idx))))  ;;; was .getComponentType (. Array (get array idx)))  
   ([array idx & idxs]
    (apply aget (aget array idx) idxs)))
 
 (defn aset
   "Sets the value at the index/indices. Works on Java arrays of
   reference types. Returns val."
-  {:inline (fn [a i v] `(. clojure.lang.RT (aset ~a (int ~i) ~v)))
+  {:inline (fn [^System.Array a i v] `(. clojure.lang.RT (aset ~a (int ~i) ~v)))
    :inline-arities #{3}
    :added "1.0"}
   ([array idx val]
-   (. array (SetValue val idx))  ;;; was     (. Array (set array idx val))
+   (. ^System.Array array (SetValue val (int idx)))  ;;; was     (. Array (set array idx val))
    val)
   ([array idx idx2 & idxv]
-   (apply aset (aget array idx) idx2 idxv)))
+   (apply aset (aget ^System.Array array idx) idx2 idxv)))
 
 (defmacro
   ^{:private true}
@@ -4034,7 +4034,7 @@ Note that read can execute code (controlled by *read-eval*),
    :added "1.0"
    :static true}
   [^System.Collections.ICollection coll]                                              ;;; ^java.util.Collection
-    (let [ret  (make-array Object (.Count coll))]      ;;; NEED BETTER TYPING HERE (make-array (. Class (forName "[Ljava.lang.Object;")) (. coll (size)))]
+    (let [^|System.Object[]| ret  (make-array Object (.Count coll))]      ;;; (make-array (. Class (forName "[Ljava.lang.Object;")) (. coll (size)))]  -- added type hint
       (loop [i 0 xs (seq coll)]
         (when xs
           (aset ret i (to-array (first xs)))
@@ -4218,7 +4218,7 @@ Note that read can execute code (controlled by *read-eval*),
    :static true}
   [ns]
   (let [ns (the-ns ns)]
-    (filter-key val (fn [ v] (and (instance? clojure.lang.Var v)    ;;;  removed the tag on v:  ^clojure.lang.Var
+    (filter-key val (fn [^clojure.lang.Var v] (and (instance? clojure.lang.Var v)
                                  (= ns (.ns v))
                                  (.isPublic v)))
                 (ns-map ns))))
@@ -4834,7 +4834,7 @@ Note that read can execute code (controlled by *read-eval*),
    that carries a map of additional data."
   {:added "1.4"}
   ([msg map]
-    (elide-top-frames (ExceptionInfo. msg map) "clojure.core$ex_info"))
+    (elide-top-frames (ExceptionInfo. ^String msg map) "clojure.core$ex_info"))                                ;;; Added type hint -- conflicting overload on 2 args
   ([msg map cause]
     (elide-top-frames (ExceptionInfo. msg map cause) "clojure.core$ex_info")))
 

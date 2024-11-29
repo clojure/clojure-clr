@@ -523,7 +523,7 @@
   [^System.Diagnostics.StackFrame o]
   (if (nil? o)
     nil
-    [(symbol (.FullName (.GetType o)))
+    [(symbol (.FullName (.GetType o))) ;;;;;;;;;;;;;;;;;;;TODO: Need to .GetMethod, then .DeclaringType, then .FullName
      (if-let [m (.GetMethod o)]
        (symbol (.Name m))
        "NO_METHOD")
