@@ -14,7 +14,7 @@
 
  (in-ns 'clojure.core)
  
- (import '(System.Reflection ConstructorInfo))
+ (import '(System.Reflection ConstructorInfo ParameterInfo))
 
  ;;; The options-handling code here is taken from the JVM version.  
  
@@ -22,7 +22,7 @@
  (defn- ctor-sigs [^Type super]
   (for [^ConstructorInfo ctor (.GetConstructors super)
         :when (not (.IsPrivate ctor))]
-    (apply vector (map #(.ParameterType %) (.GetParameters ctor)))))
+    (apply vector (map #(.ParameterType ^ParameterInfo %) (.GetParameters ctor)))))         ;;; Added type hint
  
  
  (def ^{:private true} prim->class

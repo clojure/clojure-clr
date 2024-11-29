@@ -3356,12 +3356,12 @@ namespace clojure.lang
             LoadCljScript(cljname, false);
         }
 
-        static void LoadCljScript(string cljname)
+        public static void LoadCljScript(string cljname)
         {
             LoadCljScript(cljname, true);
         }
 
-        static void LoadCljScript(string cljname, bool failIfNotFound)
+        public static void LoadCljScript(string cljname, bool failIfNotFound)
         {
             FileInfo cljInfo = FindFile(cljname);
             if (cljInfo != null)

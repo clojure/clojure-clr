@@ -52,7 +52,7 @@
         (concat
           [(.Name super)]                                              ;;; .getName
           (map #(subs % (inc (.LastIndexOf ^String % "."))) inames)       ;;; .lastIndexOf
-          [(.ToString (hash inames) "X")] [(clojure.lang.Compiler/IsCompilingSuffix)])))))                             ;;;[(Integer/toHexString (hash inames))])))))                   
+          [(.ToString ^int (hash inames) "X")] [(clojure.lang.Compiler/IsCompilingSuffix)])))))                             ;;;[(Integer/toHexString (hash inames))])))))   Added type hint                
 
 (defn- generate-proxy [^Type super interfaces attributes]     ;;; Class
   (clojure.lang.GenProxy/GenerateProxyClass super interfaces attributes (proxy-name super interfaces)))  ;;;DM;;

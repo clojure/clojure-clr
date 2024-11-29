@@ -362,7 +362,7 @@
 (def framework-description System.Runtime.InteropServices.RuntimeInformation/FrameworkDescription)
 
 (defn- parse-framework-description [] 
-    (let [descr framework-description
+    (let [^String descr framework-description
           prefixes '(( ".NET Framework " :framework)  (".NET Native "  :native) (".NET Core " :core)  (".NET " :dotnet))          
           try-parse (fn [[^String s k]] (when (.StartsWith descr s) [k (.Substring descr (.Length s))]))]
         (some try-parse prefixes)))

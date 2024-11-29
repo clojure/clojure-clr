@@ -4834,7 +4834,7 @@ Note that read can execute code (controlled by *read-eval*),
    that carries a map of additional data."
   {:added "1.4"}
   ([msg map]
-    (elide-top-frames (ExceptionInfo. ^String msg map) "clojure.core$ex_info"))                                ;;; Added type hint -- conflicting overload on 2 args
+    (elide-top-frames (ExceptionInfo. ^String msg ^clojure.lang.IPersistentMap map) "clojure.core$ex_info"))   ;;; Added type hints -- conflicting overload on 2 args
   ([msg map cause]
     (elide-top-frames (ExceptionInfo. msg map cause) "clojure.core$ex_info")))
 
