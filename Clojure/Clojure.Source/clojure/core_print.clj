@@ -514,8 +514,19 @@
 (defmethod print-method clojure.lang.IDeref [o ^System.IO.TextWriter w]
   (print-tagged-object o (deref-as-map o) w))
 
-(defmethod print-method  System.Diagnostics.StackFrame [^System.Diagnostics.StackFrame o ^System.IO.TextWriter w]                    ;;;  StackTraceElement  ^StackTraceElement
-  (print-method [(symbol (.FullName (.GetType o))) (symbol (.Name (.GetMethod o))) (.GetFileName o) (.GetFileLineNumber o)] w))      ;;; (.getClassName o)  (.getMethodName o) .getFileName .getLineNumber
+;;; DM:Added
+(defn- stack-frame-info [^System.Diagnostics.StackFrame sf]
+  (if (nil? sf)
+    nil
+    (if-let [m (.GetMethod sf)]
+      [(symbol (.FullName (.DeclaringType m)))
+       (symbol (.Name m))
+       (or (.GetFileName sf) "NO_FILE")
+       (.GetFileLineNumber sf)]
+      ["UNKNOWN" "NO_METHOD" "NO_FILE" -1])))
+
+(defmethod print-method  System.Diagnostics.StackFrame [^System.Diagnostics.StackFrame o ^System.IO.TextWriter w]       ;;;  StackTraceElement  ^StackTraceElement
+  (print-method (stack-frame-info o) w))                                                                            ;;;(print-method [(symbol (.getClassName o)) (symbol (.getMethodName o)) (.getFileName o) (.getLineNumber o)] w)) 
 
 (defn StackTraceElement->vec
   "Constructs a data representation for a StackTraceElement: [class method file line]"
@@ -523,12 +534,7 @@
   [^System.Diagnostics.StackFrame o]
   (if (nil? o)
     nil
-    [(symbol (.FullName (.GetType o))) ;;;;;;;;;;;;;;;;;;;TODO: Need to .GetMethod, then .DeclaringType, then .FullName
-     (if-let [m (.GetMethod o)]
-       (symbol (.Name m))
-       "NO_METHOD")
-     (or (.GetFileName o) "NO_FILE")
-     (.GetFileLineNumber o)]))
+    (stack-frame-info o)))
 
 (defn Throwable->map
   "Constructs a data representation for a Throwable with keys:
