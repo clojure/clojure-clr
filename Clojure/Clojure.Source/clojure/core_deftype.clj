@@ -668,8 +668,8 @@
 
 (defn- assert-same-protocol [protocol-var method-syms]
   (doseq [m method-syms]
-    (let [v (resolve m)
-          p (:protocol (meta v))]
+    (let [^clojure.lang.Var v (resolve m)                                        ;;; Added type hint. Though resolve can return many things, the usage below -- (.sym v) -- implies that it is a Var
+          ^clojure.lang.Var p (:protocol (meta v))]                              ;;; Similar.
       (when (and v (bound? v) (not= protocol-var p))
         (binding [*out* *err*]
           (println "Warning: protocol" protocol-var "is overwriting"

@@ -234,7 +234,7 @@ namespace clojure.lang
 
         public static readonly Var WarnOnReflectionVar
             //= Var.intern(CLOJURE_NS, Symbol.intern("*warn-on-reflection*"), RT.F);
-            = Var.intern(ClojureNamespace, Symbol.intern("*warn-on-reflection*"), true).setDynamic();  // TODO: Temporary so that we get warnings when compiling clojure.core
+            = Var.intern(ClojureNamespace, Symbol.intern("*warn-on-reflection*"), false).setDynamic();
 
         //public static readonly Var MACRO_META 
         //    = Var.intern(CLOJURE_NS, Symbol.intern("*macro-meta*"), null);

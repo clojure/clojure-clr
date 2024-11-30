@@ -134,7 +134,7 @@
   its behavior of both supporting .unread and collapsing all of CR, LF, and
   CRLF to a single \\newline."
   [s]
-  (let [c (.Read s)]                             ;;; .read
+  (let [c (.Read s)]                             ;;; .read          because of the indeterminate type of s, we can't type hint and thus can't get rid of reflection here and similar locations
     (cond
      (= c (int \newline)) :line-start
      (= c -1) :stream-end
