@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="clojure.data.priority-map" Version="1.1.0" />
+    <PackageReference Include="clojure.data.priority-map" Version="1.2.0" />
   </ItemGroup>
 
   <ItemGroup>
