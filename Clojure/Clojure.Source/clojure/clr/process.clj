@@ -9,24 +9,20 @@
 (ns clojure.clr.process
   "A process invocation API wrapping the Java System.Diagnostic.Process API.
 
-   The primary function here is 'start' which starts a process and handles the
-   streams as directed. It returns a map that contains keys to access the streams
-   (if available) and the Java Process object. It is also deref-able to wait for
-   process exit.
-
-   Use ‘slurp' to capture the output of a process stream, and 'ok?’ to wait for a
-   non-error exit. The 'exec' function handles the common case of `start'ing a
-   process, waiting for process exit, slurp, and return stdout."
+   The primary function is 'start' which starts a process and handles the
+   streams as directed. It returns the Process object. Use 'exit-ref' to wait
+   for completion and receive the exit value, and ‘stdout', 'stderr', 'stdin'
+   to access the process streams. The 'exec' function handles the common case
+   to 'start' a process, wait for process exit, and return stdout."
   (:require
    [clojure.clr.io :as cio]
    [clojure.string :as str])
   (:import
-    [System.IO StringWriter FileInfo]
+    [System.IO FileInfo StreamReader StreamWriter]
     [System.Diagnostics Process ProcessStartInfo]
     [clojure.lang IDeref IBlockingDeref]))
 
 (set! *warn-on-reflection* true)
-
 
 (def ^:private ^FileInfo null-file
   (delay
@@ -48,11 +44,9 @@
     :clear-env - if true, remove all inherited parent env vars
     :env - {env-var value} of environment variables to set (all strings)
 
-  Returns an ILookup containing the System.Diagnostics.Process in :process and the
-  streams :in :out :err. The map is also an IDeref that waits for process exit
-  and returns the exit code."
+  Returns the java.lang.Process."
   {:added "1.12"}
-  [& opts+args]
+  ^Process [& opts+args]
   (let [[opts command] (if (map? (first opts+args))
                          [(first opts+args) (rest opts+args)]
                          [{} opts+args])
@@ -71,43 +65,43 @@
     (when env
       (run! (fn [[k v]] (.Add si-env k v)) env))
 
-    (let [process (Process/Start si)
-          m {:process process
-             :in (when redirect-in (.get_StandardInput process))
-             :out (when redirect-out (.get_StandardOutput process))
-             :err (when redirect-err (.get_StandardError process))}]
-      (reify
-        clojure.lang.ILookup
-        (valAt [_ key] (get m key))
-        (valAt [_ key not-found] (get m key not-found))
+    (Process/Start si)))
 
-        IDeref
-        (deref [_] 
-          (.WaitForExit process)
-          (.ExitCode process))
+(defn stdin
+  "Given a process, return the stdin of the external process (an OutputStream)"
+  ^StreamWriter [^Process process]
+  (.get_StandardInput process))
 
-        IBlockingDeref
-        (deref [_ timeout timeout-value] 
-          (if (.WaitForExit process (int timeout))
-            (.ExitCode process)
-            timeout-value))))))
+(defn stdout
+  "Given a process, return the stdout of the external process (an InputStream)"
+  ^StreamReader [^Process process]
+  (.get_StandardOutput process))
 
-(defn ok?
-  "Given the map returned from 'start', wait for the process to exit
-  and then return true on success"
-  {:added "1.12"}
-  [process-map]
-  (let [p ^Process (:process process-map)]
-	(.WaitForExit p)
-	(zero? (.ExitCode p))))
+(defn stderr
+  "Given a process, return the stderr of the external process (an InputStream)"
+  ^StreamReader [^Process process]
+  (.get_StandardError process))
 
-
+(defn exit-ref
+  "Given a Process (the output of 'start'), return a reference that can be
+  used to wait for process completion then returns the exit value."
+  [^Process process]
+  (reify
+    IDeref
+      (deref [_] 
+        (.WaitForExit process)
+        (.ExitCode process))
+    IBlockingDeref
+      (deref [_ timeout timeout-value] 
+        (if (.WaitForExit process (int timeout))
+          (.ExitCode process)
+          timeout-value))))
 
 #_(defn io-task
   {:skip-wiki true}
-  [f]
+  [^Runnable f]
   (let [f (bound-fn* f)
-        fut (clojure.lang.Future f)]
+        fut (.submit ^ExecutorService io-executor ^Callable f)]
     (reify
       clojure.lang.IDeref
       (deref [_] (#'clojure.core/deref-future fut))
@@ -117,7 +111,7 @@
         (#'clojure.core/deref-future fut timeout-ms timeout-val))
       clojure.lang.IPending
       (isRealized [_] (.isDone fut))
-      clojure.lang.Future
+      java.util.concurrent.Future
       (get [_] (.get fut))
       (get [_ timeout unit] (.get fut timeout unit))
       (isCancelled [_] (.isCancelled fut))
@@ -138,8 +132,7 @@
         (.get fut timeout-ms timeout-val))
       clojure.lang.IPending
       (isRealized [_] (.isDone fut)))))
-  
-
+ 
 
 (defn exec
   "Execute a command and on successful exit, return the captured output,
@@ -150,26 +143,27 @@
   (let [[opts command] (if (map? (first opts+args))
                          [(first opts+args) (rest opts+args)]
                          [{} opts+args])
-        opts (merge {:redirect-err true :redirect-out true} opts)]
-    (let [state (apply start opts command)
-          captured (io-task #(slurp (:out state)))]
-      (if (ok? state)
+        opts (merge {:err :inherit} opts)]
+    (let [proc (apply start opts command)
+          captured (io-task #(slurp (stdout proc)))
+          exit (deref (exit-ref proc))]
+      (if (zero? exit)
         @captured
-        (throw (Exception. (str "Process failed with exit=" (.ExitCode ^Process (:process state)))))))))
+        (throw (Exception. (str "Process failed with exit=" exit)))))))
 
 (comment
   ;; shell out and inherit the i/o
   (start {:out :inherit, :err :stdout} "ls" "-l")
 
   ;; write out and err to files, wait for process to exit, return exit code
-  @(start {:out (to-file "out") :err (to-file "err")} "ls" "-l")
+  @(exit-ref (start {:out (to-file "out") :err (to-file "err")} "ls" "-l"))
 
   ;; capture output to string
-  (-> (start "ls" "-l") :out slurp)
+  (-> (start "ls" "-l") stdout slurp)
 
   ;; with exec
   (exec "ls" "-l")
 
   ;; read input from file
-  (exec {:in (from-file "deps.edn")} "wc" "-l")
+  (-> (exec {:in (from-file "deps.edn")} "wc" "-l") clojure.string/trim parse-long)
   )
