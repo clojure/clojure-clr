@@ -257,10 +257,36 @@
 ;;;;;;;;;;;;;;;;;;;; gen-interface ;;;;;;;;;;;;;;;;;;;;;;
 ;; based on original contribution by Chris Houser
 
+#_(defn- ^Type asm-type
+  "Returns an asm Type object for c, which may be a primitive class
+  (such as Integer/TYPE), any other class (such as Double), or a
+  fully-qualified class name given as a string or symbol
+  (such as 'java.lang.String)"
+  [c]
+  (let [c (or (and (symbol? c) (clojure.lang.Compiler$HostExpr/maybeArrayClass c)) c)]
+    (if (or (instance? Class c) (prim->class c))
+      (Type/getType (the-class c))
+      (let [strx (str c)]
+        (Type/getObjectType
+         (.replace (if (some #{\. \[} strx)
+                     strx
+                     (str "java.lang." strx))
+                   "." "/"))))))
+
+(defn- the-class-for-definterface [c]
+   (let [x (or (and (symbol? c) (clojure.lang.CljCompiler.Ast.HostExpr/MaybeArrayType c))
+               c)]
+    (the-class x)))
+
+(defn- the-class-maybe-by-ref-for-definterface [x]
+   (cond
+      (seq? x) (list (first x) (the-class-for-definterface (second x)))    ; (by-ref v)
+      :else (the-class-for-definterface x)))
+
 (defn- generate-interface
   [{:keys [name extends methods]}]
-  (let [extendTypes (map the-class extends)
-        methodSigs (map (fn [[mname pclasses rclass pmetas]] [mname (map the-class-maybe-by-ref pclasses) (the-class rclass) pmetas]) methods)]
+  (let [extendTypes (map the-class extends)        
+        methodSigs (map (fn [[mname pclasses rclass pmetas]] [mname (map the-class-maybe-by-ref-for-definterface pclasses) (the-class-for-definterface rclass) pmetas]) methods)]
 	(clojure.lang.GenInterface/GenerateInterface (str name) (extract-attributes (meta name)) extendTypes methodSigs)))
 
 
