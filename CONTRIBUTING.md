@@ -1,23 +1,12 @@
-Hi! Thanks for your interest in ClojureCLR!
+This is a [Clojure contrib] project.
 
-## I want to ask a question
+Under the Clojure contrib [guidelines], this project cannot accept
+pull requests. All patches must be submitted via [JIRA].
 
-If you have a question about ClojureCLR, please use the official Ask Clojure forum at https://ask.clojure.org,
-and the ClojureCLR [category](https://ask.clojure.org/index.php/clojureclr) specifically.
-This forum is monitored by the ClojureCLR maintainers.
+See [Contributing] on the Clojure website for
+more information on how to contribute.
 
-## I want to discuss an idea
-
-Great! Our preferred channel for discussions is the [#clr](https://clojurians.slack.com/archives/C060SFCPR) channel in the Clojurians Slack.
-
-## I want to file a bug / suggest an enhancement
-
-Please file it as a question in the ClojureCLR category on https://ask.clojure.org with the tag "problem" (possible bugs) or "request" (enhancements).
-
-## I want to provide a patch / PR
-
-If you would like to contribute patches, the Clojure dev process is described in detail at https://clojure.org/dev.
-
-In short, this process requires:
-
-- [Signing the Contributor Agreement](https://clojure.org/dev/contributor_agreement)
+[Clojure contrib]: https://clojure.org/community/contrib_libs
+[Contributing]: https://clojure.org/community/contributing
+[JIRA]: https://clojure.atlassian.net/browse/TNS
+[guidelines]: https://clojure.org/community/contrib_howto
