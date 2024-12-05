@@ -71,7 +71,7 @@
   Math/PI)
 
 
-(compile-when (>= (.CompareTo ^String dotnet-version "5") 0)
+(compile-when (>= (:major dotnet-version) 5)
 
 (def
   ^{:doc "Constant for tau, the number of radians in one turn.
@@ -506,7 +506,7 @@
   
 ) ;; compile-when
 
-(compile-when (>= (.CompareTo ^String dotnet-version "6") 0)
+(compile-when (>= (:major dotnet-version) 6)
 
 (defn reciprocal-estimate
   {:doc "Returns an estimate of the reciprocal of a specified number.

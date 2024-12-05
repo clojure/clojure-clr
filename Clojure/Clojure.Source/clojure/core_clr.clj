@@ -361,10 +361,16 @@
 
 (def framework-description System.Runtime.InteropServices.RuntimeInformation/FrameworkDescription)
 
+(defn- parse-version-string [^String s]
+  (let [[major minor build] (.Split s (char-array [\.]))]
+    {:major (when major (Int32/Parse ^String major))
+     :minor (when minor (Int32/Parse ^String minor))
+     :incremental (when build (Int32/Parse ^String build))}))
+
 (defn- parse-framework-description [] 
     (let [^String descr framework-description
           prefixes '(( ".NET Framework " :framework)  (".NET Native "  :native) (".NET Core " :core)  (".NET " :dotnet))          
-          try-parse (fn [[^String s k]] (when (.StartsWith descr s) [k (.Substring descr (.Length s))]))]
+          try-parse (fn [[^String s k]] (when (.StartsWith descr s) [k (parse-version-string (.Substring descr (.Length s)))]))]
         (some try-parse prefixes)))
 
 (def dotnet-platform (first (parse-framework-description)))

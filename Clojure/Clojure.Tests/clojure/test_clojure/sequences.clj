@@ -1640,7 +1640,7 @@
     (cycle [1])
     (repeat 1)))
 
-(compile-when (>= (.CompareTo dotnet-version "6") 0)
+(compile-when (>= (:major dotnet-version) 6)
 (defspec iteration-seq-equals-reduce 1000
   (prop/for-all [initk gen/int
                  seed gen/int]
