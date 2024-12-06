@@ -19,8 +19,14 @@
    [clojure.string :as str])
   (:import
     [System.IO FileInfo StreamReader StreamWriter]
-    [System.Diagnostics Process ProcessStartInfo]
+    #_[System.Diagnostics Process ProcessStartInfo]     ;;; defer until assembly loaded
     [clojure.lang IDeref IBlockingDeref]))
+
+(try 
+  (assembly-load-from (str clojure.lang.RT/SystemRuntimeDirectory "System.Diagnostics.Process.dll"))
+  (catch Exception e))  ;; failing silently okay -- if we need it and didn't find it, a type reference will fail later
+
+(import '[System.Diagnostics Process ProcessStartInfo])
 
 (set! *warn-on-reflection* true)
 

@@ -359,6 +359,11 @@
 
 ;; Framework version -- alpha
 
+(try 
+  (assembly-load-from (str clojure.lang.RT/SystemRuntimeDirectory "System.Runtime.InteropServices.RuntimeInformation.dll"))
+  (catch Exception e
+    (System.Console/WriteLine (str "Unable to load System.Runtime.InteropServices.RuntimeInformation.dll: " (.Message e)))))
+
 (def framework-description System.Runtime.InteropServices.RuntimeInformation/FrameworkDescription)
 
 (defn- parse-version-string [^String s]

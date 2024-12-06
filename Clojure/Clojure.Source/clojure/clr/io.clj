@@ -21,12 +21,22 @@
        StreamReader StreamWriter
        StringReader StringWriter 
        TextReader TextWriter)
-     (System.Net.Sockets 
+     #_(System.Net.Sockets  ;; Need to load the assembly first on later versions of .NET
        Socket NetworkStream) 
      (System.Text 
        Encoding UTF8Encoding UnicodeEncoding UTF32Encoding UTF7Encoding ASCIIEncoding Decoder Encoder)
      (System 
        Uri UriFormatException)))
+
+(try 
+  (assembly-load-from (str clojure.lang.RT/SystemRuntimeDirectory "System.Net.Sockets.dll"))
+  (catch Exception e))  ;; failing silently okay -- if we need it and didn't find it, a type reference will fail later
+
+(try 
+  (assembly-load-from (str clojure.lang.RT/SystemRuntimeDirectory "System.Net.WebClient.dll"))
+  (catch Exception e)) ;; failing silently okay -- if we need it and didn't find it, a type reference will fail later
+
+  (import '[System.Net.Sockets Socket NetworkStream])
      
 (set! *warn-on-reflection* true)
 

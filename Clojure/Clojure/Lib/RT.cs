@@ -18,8 +18,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -365,6 +368,8 @@ namespace clojure.lang
 #endif
 
         internal static volatile bool CHECK_SPECS = false;
+
+        public static string SystemRuntimeDirectory = RuntimeEnvironment.GetRuntimeDirectory();
 
         static RT()
         {

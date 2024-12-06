@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;net462</TargetFrameworks>
+		<TargetFrameworks>net60;net80;net90;net462</TargetFrameworks>
 		<NeutralLanguage></NeutralLanguage>
 		<RootNamespace>clojure.lang</RootNamespace>
 	</PropertyGroup>

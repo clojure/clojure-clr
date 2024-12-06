@@ -17,7 +17,14 @@
    [System.Net.Sockets Socket SocketException TcpListener TcpClient]                         ;;; [java.net InetAddress Socket ServerSocket SocketException]
    [System.IO StreamReader StreamWriter TextReader  IOException]                             ;;; [java.io Reader Writer PrintWriter BufferedWriter BufferedReader InputStreamReader OutputStreamWriter]
                                                                                              ;;; [java.util Properties]
-   [System.Net Dns IPAddress]))                                                              ;;; [java.util.concurrent.locks ReentrantLock]
+   [System.Net #_Dns IPAddress]))                                                            ;;; [java.util.concurrent.locks ReentrantLock]  -- defer Dns import until we load the proper assembly.
+
+(try 
+  (assembly-load-from (str clojure.lang.RT/SystemRuntimeDirectory "System.Net.NameResolution.dll"))
+  (catch Exception e))  ;; failing silently okay -- if we need it and didn't find it, a type reference will fail later
+
+
+(import '[System.Net Dns])
 
 (set! *warn-on-reflection* true)
 
