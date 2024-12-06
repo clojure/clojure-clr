@@ -156,6 +156,30 @@
   (is (unchecked-int (char 0xFFFF)))
   (is (let [c (char 0xFFFF)] (unchecked-int c)))) ; force primitive char
 
+(compile-when (>= (:major dotnet-version) 9)
+
+(def expected-casts   ;; for byte 127 => 255  (not signed), and other differences
+  [
+   [:input [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue Int64/MaxValue Single/MaxValue Double/MaxValue]]
+   [char [:error (char 0) (char 1) (char 255) (char 32767) :error :error :error :error]]
+   [unchecked-char [(char 65535) (char 0) (char 1) (char 255) (char 32767) (char 65535) (char 65535) (char 65535) (char 65535)]]
+   [byte [:error 0 1 Byte/MaxValue :error :error :error :error :error]]
+   [unchecked-byte [255 0 1 Byte/MaxValue 255 255 255 255 255]]
+   [short [-1 0 1 Byte/MaxValue Int16/MaxValue :error :error :error :error]]
+   [unchecked-short [-1 0 1 Byte/MaxValue Int16/MaxValue -1 -1 -1 -1]]
+   [int [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue :error :error :error]]
+   [unchecked-int [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue -1 Int32/MaxValue Int32/MaxValue]]
+   [long [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue Int64/MaxValue :error :error]]
+   [unchecked-long [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue Int64/MaxValue Int64/MaxValue Int64/MaxValue]]
+                                                                                             ;; 2.14748365E9 if when float/double conversion is avoided...
+   [float [-1.0 0.0 1.0 255.0 32767.0 2.147483648E9 9.223372036854776E18 Single/MaxValue :error]]
+   [unchecked-float [-1.0 0.0 1.0 255.0 32767.0 2.147483648E9 9.223372036854776E18 Single/MaxValue Single/PositiveInfinity]]
+   [double [-1.0 0.0 1.0 255.0 32767.0 2.147483647E9 9.223372036854776E18 Single/MaxValue Double/MaxValue]]
+   [unchecked-double [-1.0 0.0 1.0 255.0 32767.0 2.147483647E9 9.223372036854776E18 Single/MaxValue Double/MaxValue]]])
+)
+
+(compile-when (< (:major dotnet-version) 9)
+
 (def expected-casts   ;; for byte 127 => 255  (not signed), and other differences
   [
    [:input [-1 0 1 Byte/MaxValue Int16/MaxValue Int32/MaxValue Int64/MaxValue Single/MaxValue Double/MaxValue]]
@@ -174,6 +198,7 @@
    [unchecked-float [-1.0 0.0 1.0 255.0 32767.0 2.147483648E9 9.223372036854776E18 Single/MaxValue Single/PositiveInfinity]]
    [double [-1.0 0.0 1.0 255.0 32767.0 2.147483647E9 9.223372036854776E18 Single/MaxValue Double/MaxValue]]
    [unchecked-double [-1.0 0.0 1.0 255.0 32767.0 2.147483647E9 9.223372036854776E18 Single/MaxValue Double/MaxValue]]])
+)
 
 (deftest test-expected-casts
   (let [[[_ inputs] & expectations] expected-casts]
