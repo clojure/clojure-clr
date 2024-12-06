@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net60;net80;net90;net462</TargetFrameworks>
+		<LangVersion>12.0</LangVersion>
 		<NeutralLanguage></NeutralLanguage>
 		<RootNamespace>clojure.lang</RootNamespace>
 	</PropertyGroup>

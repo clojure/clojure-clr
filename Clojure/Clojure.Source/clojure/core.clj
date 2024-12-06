@@ -8085,7 +8085,7 @@ clojure.lang.IKVReduce
   "Return true if x is a java.net.URI"
   {:added "1.9"}
   [x] (instance? System.Uri x))                                                    ;;; java.net.URI
-
+(try   (assembly-load-from (str clojure.lang.RT/SystemRuntimeDirectory "System.Collections.Concurrent.dll")) (catch Exception e (System.Console/WriteLine (str "Missing System.Collections.Concurrent"))))
 (defonce ^:private tapset (atom #{}))
 (defonce ^:private ^|System.Collections.Concurrent.BlockingCollection`1[System.Object]| tapq (|System.Collections.Concurrent.BlockingCollection`1[System.Object]|. 1024))    ;;; ^java.util.concurrent.ArrayBlockingQueue   java.util.concurrent.ArrayBlockingQueue.
 
