@@ -5,6 +5,7 @@
 		<LangVersion>12.0</LangVersion>
 		<NeutralLanguage></NeutralLanguage>
 		<RootNamespace>clojure.lang</RootNamespace>
+		<EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -30,6 +31,10 @@
 		</EmbeddedResource>
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net90' ">
+		<PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.0-*" />
+	</ItemGroup>
+	
 
 	<!-- The following pieces are required to get Clojure.Source.dll included in the Nuget package -->
 	

@@ -12,7 +12,15 @@
 (ns clojure.test-clojure.serialization
   (:use clojure.test)
   (:import (System.IO MemoryStream)                                                 ;;;(java.io ObjectOutputStream ObjectInputStream
-           (System.Runtime.Serialization.Formatters.Binary BinaryFormatter)))        ;;; ByteArrayOutputStream ByteArrayInputStream)))
+           #_(System.Runtime.Serialization.Formatters.Binary BinaryFormatter)))        ;;; ByteArrayOutputStream ByteArrayInputStream)))   -- defer import until after load
+
+(compile-when (>= (:major clojure-version) 9)
+
+(assembly-load-from "System.Runtime.Serialization.Formatters.dll")
+
+)
+
+(import '(System.Runtime.Serialization.Formatters.Binary BinaryFormatter))
 
 (defn- serialize
   "Serializes a single object, returning a byte array."
@@ -48,7 +56,7 @@
       (= (hash v) (hash rt))
       (= (.GetHashCode v) (.GetHashCode rt)))))          ;;; .hashCode .hashCode
 
-#_(deftest sequable-serialization
+(deftest sequable-serialization
   (are [val] (roundtrip val)
     ; lists and related
     ;;; (list)                          <--- We cannot handle seq of this, which is nil.  Cannot serialize nil.
@@ -123,14 +131,14 @@
       (nth r 35)
       r)))
 
-#_(deftest misc-serialization
+(deftest misc-serialization
   (are [v] (= v (-> v serialize deserialize))
     25/3
     :keyword
     ::namespaced-keyword
     'symbol))
 
-#_(deftest tostringed-bytes
+(deftest tostringed-bytes
   (let [rt #(-> % serialize seq)
         s1 (rt 'sym123)
         k1 (rt :kw123)
@@ -141,7 +149,7 @@
     (is (= s1 s2))
     (is (= k1 k2))))
 
-#_(deftest interned-serializations
+(deftest interned-serializations
   (are [v] (identical? v (-> v serialize deserialize))
     clojure.lang.RT/DefaultComparerInstance                                       ;;; clojure.lang.RT/DEFAULT_COMPARATOR
 
@@ -152,7 +160,7 @@
      ; vars get serialized back into the same var in the present runtime
     #'clojure.core/conj))
  
- #_(deftest new-var-unbound-on-read
+ (deftest new-var-unbound-on-read
   (let [v (intern 'user 'foobarbaz 10)
         sv (serialize v)]
     (ns-unmap 'user 'foobarbaz) ;; unmap #'user.V
@@ -170,7 +178,7 @@
 ;;;      (fn [] capture)                                      <--- TODO: unable to find assembly eval
 )))  ;;;      #(do capture))))                                <--- TODO: unable to find assembly eval
 
-#_(deftest check-unserializable-objects
+(deftest check-unserializable-objects
   (are [t] (thrown?  System.Runtime.Serialization.SerializationException (serialize t))              ;;; java.io.NotSerializableException
     ;; transients
     (transient [])
@@ -187,7 +195,7 @@
     (iterator-seq (.GetEnumerator (range 50)))))               ;;; (.iterator (range 50)))))
     
 ;; necessary for CVE-2024-22871
-#_(deftest CLJ-2839
+(deftest CLJ-2839
   (are [e] (thrown? Exception (.GetHashCode ^Object (-> e serialize deserialize)))              ;;; .hashCode
     (repeat 1)
     (iterate identity nil)
