@@ -26,7 +26,7 @@
 	
 	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">net8.0</TestTargetFramework>
 	
-	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net8.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
+	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net9.0' AND '$(TestTargetFramework)' != 'net8.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
 		
 		
 	<TestLibraryFramework Condition=" '$(TestTargetFramework)' == 'net462' ">netstandard2.0</TestLibraryFramework>
@@ -247,6 +247,10 @@
    
   
   <Target Name="ZipAll" DependsOnTargets="PackAll;ILMerge462">
+  
+  	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net9.0\publish"
+	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net9.0.zip"
+				  Overwrite="true"/>	
 
 	<ZipDirectory SourceDirectory="$(RootDir)Clojure.Main\bin\$(Configuration)\net8.0\publish"
 	              DestinationFile ="$(StageDir)\clojure-clr-$(ZipVersion)-$(Configuration)-net8.0.zip"
@@ -274,14 +278,25 @@
   <!-- $$$$$$$$$$$$$$$$$$$$$$$$$$ -->
 	
   <!-- RJ: New build and clean targets for .Net Core 3.X and .Net 5-->
+  
+  
+  <Target Name="BuildD9">
+    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net9.0 -o clojure-clr-debug9" 
+          WorkingDirectory="$(OutputPath)" />
+  </Target>
+
+  <Target Name="BuildR9">
+    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net9.0 -o clojure-clr-release9" 
+          WorkingDirectory="$(OutputPath)" />
+  </Target>
 
   <Target Name="BuildD8">
-    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net8.0 -o clojure-clr-debug7" 
+    <Exec Command="dotnet build Clojure.sln -c Debug -p:Platform=&quot;Any CPU&quot; -f net8.0 -o clojure-clr-debug8" 
           WorkingDirectory="$(OutputPath)" />
   </Target>
 
   <Target Name="BuildR8">
-    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net8.0 -o clojure-clr-release7" 
+    <Exec Command="dotnet build Clojure.sln -c Release -p:Platform=&quot;Any CPU&quot; -f net8.0 -o clojure-clr-release8" 
           WorkingDirectory="$(OutputPath)" />
   </Target>
   
