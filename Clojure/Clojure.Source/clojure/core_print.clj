@@ -298,6 +298,7 @@
         [ns kvs]))))
 
 (defmethod print-method clojure.lang.IPersistentMap [m, ^System.IO.TextWriter w]
+  (print-meta m w)
   (let [[ns lift-kvs] (lift-ns m)]
     (if ns
       (print-prefix-map (str "#:" ns) lift-kvs pr-on w)
