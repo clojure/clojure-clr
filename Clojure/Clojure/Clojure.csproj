@@ -32,7 +32,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net90' ">
-		<PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.0-*" />
+		<PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.0" />
 	</ItemGroup>
 	
 
