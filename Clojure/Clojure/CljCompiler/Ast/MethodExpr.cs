@@ -121,8 +121,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if ( _method.IsGenericMethodDefinition )
             {
-                EmitComplexCall(objx, ilg);
-                return;
+                _method = _method.MakeGenericMethod(_typeArgs.ToArray());
             }
 
             if (!IsStaticCall)

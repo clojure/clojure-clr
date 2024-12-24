@@ -102,11 +102,12 @@ namespace clojure.lang.CljCompiler.Ast
             return ctx;
         }
 
-        public static GenContext CreateWithExternalAssembly(string sourceName, AssemblyName assemblyName, string extension, bool createDynInitHelper)
-        {
-            string path = Compiler.CompilePathVar.deref() as string;
-            return new GenContext(path ?? System.IO.Directory.GetCurrentDirectory(), assemblyName, extension, createDynInitHelper, sourceName);
-        }
+        // Doesn't appear to be used.
+        //public static GenContext CreateWithExternalAssembly(string sourceName, AssemblyName assemblyName, string extension, bool createDynInitHelper)
+        //{
+        //    string path = Compiler.CompilePathVar.deref() as string;
+        //    return new GenContext(path ?? System.IO.Directory.GetCurrentDirectory(), assemblyName, extension, createDynInitHelper, sourceName);
+        //}
 
         public static GenContext CreateWithExternalAssembly(string sourceName, string assyName, string extension, bool createDynInitHelper)
         {
