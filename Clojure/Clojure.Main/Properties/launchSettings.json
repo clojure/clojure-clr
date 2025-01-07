@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Clojure.Main": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "clojure.compiler.direct-linking": "true"
+      }
+    }
+  }
+}
