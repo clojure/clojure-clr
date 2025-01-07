@@ -1960,12 +1960,17 @@ namespace clojure.lang
                 //LOADER, RT.makeClassLoader(),
                 SourcePathVar, relativePath,
                 SourceVar, sourceName,
+                MethodVar, null,
+                LocalEnvVar, null,
+                LoopLocalsVar, null,
+                NextLocalNumVar, 0,
                 RT.ReadEvalVar, true /* RT.T */,
                 RT.CurrentNSVar, RT.CurrentNSVar.deref(),
                 RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
                 RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
                 RT.DataReadersVar, RT.DataReadersVar.deref(),
-                CompilerContextVar, EvalContext
+                CompilerContextVar, EvalContext,
+                CompilerActiveVar, false
                 //LINE_BEFORE, lntr.LineNumber,
                 //LINE_AFTER, lntr.LineNumber,
                 //COLUMN_BEFORE, lntr.ColumnNumber,
