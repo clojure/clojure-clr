@@ -205,7 +205,7 @@ namespace clojure.lang
             return RT.get(CompilerOptionsVar.deref(), k);
         }
 
-        static void InitializeCompilerOptions()
+        internal static void InitializeCompilerOptions()
         {
             Object compilerOptions = null;
 
@@ -469,7 +469,8 @@ namespace clojure.lang
             Methods_IFn_invoke[Compiler.MaxPositionalArity + 1]
                 = typeof(IFn).GetMethod("invoke", types);
 
-            InitializeCompilerOptions();
+            // Moved this to clojure.lang.RT's static constructor because we need to bind *compiler-options* there.
+            // InitializeCompilerOptions();
         }
 
         #endregion

@@ -442,8 +442,25 @@ namespace clojure.lang
                 // this is okay.  It just means that the assets clojure/core.clj and company are going to be somewhere else
             }
 
+            // Moved the intiailization of *compiler-options* from the clojure.lang.Compiler static constructor to here.
+            // We need to make sure direct linking is turned on for this load (and later on for the load of the spec files)
+
+            Compiler.InitializeCompilerOptions();
+
             if (RuntimeBootstrapFlag._doRTBootstrap)
-                load("clojure/core");
+            {
+                var optionsMapToUse = (Associative)Compiler.CompilerOptionsVar.deref() ?? PersistentHashMap.EMPTY;
+                Var.pushThreadBindings(RT.map(Compiler.CompilerOptionsVar, optionsMapToUse.assoc(Compiler.DirectLinkingKeyword, true)));
+
+                try
+                {
+                    load("clojure/core");
+                }
+                finally
+                {
+                    Var.popThreadBindings();
+                }
+            }
         }
 
         public static void LoadSpecCode()
@@ -478,11 +495,19 @@ namespace clojure.lang
 
 
             // load spec
+            var optionsMapToUse = (Associative)Compiler.CompilerOptionsVar.deref() ?? PersistentHashMap.EMPTY;
+            Var.pushThreadBindings(RT.map(Compiler.CompilerOptionsVar, optionsMapToUse.assoc(Compiler.DirectLinkingKeyword, true)));
+
+            try
             {
                 string baseDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
                 Assembly.LoadFile(Path.Combine(baseDir, "clojure.spec.alpha.dll"));
                 Assembly.LoadFile(Path.Combine(baseDir, "clojure.core.specs.alpha.dll"));
+            }
+            finally
+            {
+                Var.popThreadBindings();
             }
 
             PostBootstrapInit();
