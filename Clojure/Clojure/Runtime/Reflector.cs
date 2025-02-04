@@ -205,7 +205,7 @@ namespace clojure.lang
                     = targetType.GetMethods(flags).Where(info => info.Name == methodName && info.GetParameters().Length == arity);
                 infos = new List<MethodBase>();
                 foreach (MethodInfo minfo in einfos)
-                    if (!typeArgs.IsEmpty && minfo.ContainsGenericParameters)
+                    if (!typeArgs.IsEmpty && minfo.ContainsGenericParameters)   // TODO: Fix this -- should have match in number of type args and generic parameters  (CLJCLR-167)
                         infos.Add(minfo.MakeGenericMethod(typeArgs.ToArray()));
                     else
                         infos.Add(minfo);

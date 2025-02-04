@@ -610,7 +610,7 @@ namespace clojure.lang
                     ? MakeRed(app.Key, app.Val,
                                   MakeBlack(left.Key, left.Val, left.Left, app.Left),
                                   MakeBlack(right.Key, right.Val, app.Right, right.Right))
-                                  : BalanceLeftDel(left.Key, left.Val, left.Left, MakeBlack(right.Key, right.Val, app, right.Right));
+                    : BalanceLeftDel(left.Key, left.Val, left.Left, MakeBlack(right.Key, right.Val, app, right.Right));
             }
         }
 

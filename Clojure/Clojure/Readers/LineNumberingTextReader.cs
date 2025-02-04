@@ -96,7 +96,7 @@ namespace clojure.lang
             {
                 if (Peek() == '\n')
                 {
-                    ret = BaseReader.Read();
+                    ret = BaseReader.Read();  // TODO:  this should be base.read() okay for now with only a single character buffer, because we did a read at the top of this method, but will be wrong if we have multiple character buffer
                     ++_index;
                 }
                 else

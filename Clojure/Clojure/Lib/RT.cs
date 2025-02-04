@@ -2753,7 +2753,7 @@ namespace clojure.lang
 
         #region Locating types
 
-        static readonly char[] _triggerTypeChars = new char[] { '`', ',' };
+        static readonly char[] _triggerTypeChars = new char[] { '`', ',', '[' };
 
         public static Type classForName(string p)
         {

@@ -1314,10 +1314,12 @@ namespace Clojure.Tests.LibTests
         public void SQOnVectorMakesVector()
         {
             Object o1 = ReadFromString("`[:b 2]");
-            //  (clojure/apply 
-            //      clojure/vector 
-            //         (clojure/concat (clojure/list :b) 
-            //                         (clojure/list 2)))
+            //  (clojure.core/apply 
+            //      clojure.core/vector 
+            //         (clojure.core/seq
+            //             (clojure.core/concat (clojure.core/list :b) 
+            //                                  (clojure.core/list 2))))
+
 
             Expect(o1).To.Be.An.Instance.Of<ISeq>();
             ISeq s = o1 as ISeq;
@@ -1352,11 +1354,11 @@ namespace Clojure.Tests.LibTests
         public void SQOnSetMakesSet()
         {
             Object o1 = ReadFromString("`#{:b 2}");
-            //  (clojure/apply 
-            //      clojure/hash-set 
-            //         (clojure/seq
-            //             (clojure/concat (clojure/list :b) 
-            //                             (clojure/list 2))))
+            //  (clojure.core/apply 
+            //      clojure.core/hash-set 
+            //         (clojure.core/seq
+            //             (clojure.core/concat (clojure.core/list :b) 
+            //                                  (clojure.core/list 2))))
 
             Expect(o1).To.Be.An.Instance.Of<ISeq>();
             ISeq s = o1 as ISeq;
