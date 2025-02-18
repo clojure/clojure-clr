@@ -505,7 +505,7 @@ namespace clojure.lang
 
             Type ot = o as Type;
              if (ot != null)
-                return Symbol.intern(null, Util.NameForType(ot));
+                return Symbol.intern(null, ot.FullName);
 
             if (o is Var ov)
                 return Symbol.intern(ov.Namespace.Name.Name, ov.Symbol.Name);
