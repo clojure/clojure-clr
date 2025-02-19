@@ -223,6 +223,17 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 ilg.Emit(OpCodes.Call, Compiler.Method_Var_setDynamic0);
             }
+
+            if (_initProvided)
+            {
+                ilg.Emit(OpCodes.Dup);
+                if (_init is FnExpr expr)
+                    expr.EmitForDefn(objx, ilg);
+                else
+                    _init.Emit(RHC.Expression, objx, ilg);
+                ilg.Emit(OpCodes.Call,Compiler.Method_Var_bindRoot);
+            }
+
             if (_meta != null)
             {
                 if (_initProvided || true) //IncludesExplicitMetadata((MapExpr)_meta))
@@ -233,15 +244,7 @@ namespace clojure.lang.CljCompiler.Ast
                     ilg.Emit(OpCodes.Call, Compiler.Method_Var_setMeta);
                 }
             }
-            if (_initProvided)
-            {
-                ilg.Emit(OpCodes.Dup);
-                if (_init is FnExpr expr)
-                    expr.EmitForDefn(objx, ilg);
-                else
-                    _init.Emit(RHC.Expression, objx, ilg);
-                ilg.Emit(OpCodes.Call,Compiler.Method_Var_bindRoot);
-            }
+
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);
         }
