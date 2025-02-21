@@ -61,13 +61,13 @@ See: [CLJ-2761](https://clojure.atlassian.net/browse/CLJ-2761), [CLJ-2757](https
 
 ### 2.2 Invoke tool functions out of process
 
-There are many useful tools you can use at development time, but which are not part of your project's actual dependencies. The Clojure CLI provides explicit support for [tools](https://clojure.org/reference/clojure_cli#tool_install) with their own classpath, but there was not previously a way to invoke these interactively.
+There are many useful tools you can use at development time, but which are not part of your project's actual dependencies. The Clojure CLI provides explicit support for [tools](https://clojure.org/reference/clojure_cli#tools) with their own classpath, but there was not previously a way to invoke these interactively.
 
 Clojure now includes [clojure.tools.deps.interop/invoke-tool](https://clojure.github.io/clojure/branch-master/clojure.tools.deps.interop-api.html#clojure.tools.deps.interop/invoke-tool) to invoke a tool function out of process. The classpath for the tool is defined in deps.edn and you do not need to add the tool's dependencies to your project classpath.
 
 `add-lib` functionality is built using `invoke-tool` but you can also use it to build or invoke your own tools for interactive use. Find more about the function execution protocol on the [CLI reference](https://clojure.org/reference/clojure_cli#function_protocol).
 
-See: [CLJ-2760](https://clojure.atlassian.net/browse/CLJ-2760)
+See: [CLJ-2760](https://clojure.atlassian.net/browse/CLJ-2760), [CLJ-2819](https://clojure.atlassian.net/browse/CLJ-2819)
 
 ### 2.3 Start and control external processes
 
@@ -76,7 +76,7 @@ For a long time, we've had the `clojure.java.shell` namespace, but over time Jav
 * [start](https://clojure.github.io/clojure/branch-master/clojure.java.process-api.html#clojure.java.process/start) - full control over streams with access to the underlying Java objects for advanced usage
 * [exec](https://clojure.github.io/clojure/branch-master/clojure.java.process-api.html#clojure.java.process/exec) - covers the common case of executing an external process and returning its stdout on completion
 
-See: [CLJ-2759](https://clojure.atlassian.net/browse/CLJ-2759), [CLJ-2777](https://clojure.atlassian.net/browse/CLJ-2777), [CLJ-2828](https://clojure.atlassian.net/browse/CLJ-2828), [CLJ-2773](https://clojure.atlassian.net/browse/CLJ-2773), [CLJ-2776](https://clojure.atlassian.net/browse/CLJ-2776), [CLJ-2774](https://clojure.atlassian.net/browse/CLJ-2774), [CLJ-2778](https://clojure.atlassian.net/browse/CLJ-2778), [CLJ-2779](https://clojure.atlassian.net/browse/CLJ-2779)
+See: [CLJ-2759](https://clojure.atlassian.net/browse/CLJ-2759), [CLJ-2777](https://clojure.atlassian.net/browse/CLJ-2777), [CLJ-2828](https://clojure.atlassian.net/browse/CLJ-2828), [CLJ-2773](https://clojure.atlassian.net/browse/CLJ-2773), [CLJ-2776](https://clojure.atlassian.net/browse/CLJ-2776), [CLJ-2774](https://clojure.atlassian.net/browse/CLJ-2774), [CLJ-2778](https://clojure.atlassian.net/browse/CLJ-2778), [CLJ-2779](https://clojure.atlassian.net/browse/CLJ-2779), [CLJ-2865](https://clojure.atlassian.net/browse/CLJ-2865)
 
 ### 2.4 Method values
 
@@ -102,7 +102,7 @@ Qualified method invocations with [param-tags](#26-param-tags-metadata) use only
 
 Note: Static fields are values and should be referenced without parens unless they are intended as function calls, e.g `(System/out)` should be `System/out`. Future Clojure releases will treat the field's value as something invokable and invoke it.
 
-See: [CLJ-2844](https://clojure.atlassian.net/browse/CLJ-2844), [CLJ-2848](https://clojure.atlassian.net/browse/CLJ-2848), [CLJ-2847](https://clojure.atlassian.net/browse/CLJ-2847), [CLJ-2853](https://clojure.atlassian.net/browse/CLJ-2853)
+See: [CLJ-2844](https://clojure.atlassian.net/browse/CLJ-2844), [CLJ-2848](https://clojure.atlassian.net/browse/CLJ-2848), [CLJ-2847](https://clojure.atlassian.net/browse/CLJ-2847), [CLJ-2853](https://clojure.atlassian.net/browse/CLJ-2853), [CLJ-2867](https://clojure.atlassian.net/browse/CLJ-2867)
 
 ### 2.6 :param-tags metadata
 
@@ -130,7 +130,7 @@ Java programs define "functions" with Java functional interfaces (marked with th
 
 Clojure developers can now invoke Java methods taking functional interfaces by passing functions with matching arity. The Clojure compiler implicitly converts Clojure functions to the required functional interface by constructing a lambda adapter. You can explicitly coerce a Clojure function to a functional interface by hinting the binding name in a `let` binding, e.g. to avoid repeated adapter construction in a loop, e.g. `(let [^java.util.function.Predicate p even?] ...)`.
 
-See: [CLJ-2799](https://clojure.atlassian.net/browse/CLJ-2799), [CLJ-2858](https://clojure.atlassian.net/browse/CLJ-2858), [CLJ-2856](https://clojure.atlassian.net/browse/CLJ-2856)
+See: [CLJ-2799](https://clojure.atlassian.net/browse/CLJ-2799), [CLJ-2858](https://clojure.atlassian.net/browse/CLJ-2858), [CLJ-2856](https://clojure.atlassian.net/browse/CLJ-2856), [CLJ-2863](https://clojure.atlassian.net/browse/CLJ-2863), [CLJ-2864](https://clojure.atlassian.net/browse/CLJ-2864)
 
 ### 2.9 Java Supplier interop
 
@@ -182,6 +182,8 @@ See: [CLJ-2711](https://clojure.atlassian.net/browse/CLJ-2711)
 * [CLJ-2726](https://clojure.atlassian.net/browse/CLJ-2726) `#uuid` data reader - Fix exception on invalid input so it flows through reader
 * [CLJ-2813](https://clojure.atlassian.net/browse/CLJ-2813) anonymous function arg reader - no longer accepts invalid arg symbols
 * [CLJ-2843](https://clojure.atlassian.net/browse/CLJ-2843) Reflective calls to Java methods that take primitive long or double now work when passed a narrower boxed number at runtime (Integer, Short, Byte, Float). Previously, these methods were not matched during reflection and an error was thrown.
+* [CLJ-2145](https://clojure.atlassian.net/browse/CLJ-2145) - Fix clearing of closed overs in `^:once` fns
+* [CLJ-2317](https://clojure.atlassian.net/browse/CLJ-2317) - `recur` to head of `:once` fn cancels once
 
 ### 3.2 Core
 
@@ -207,6 +209,90 @@ See: [CLJ-2711](https://clojure.atlassian.net/browse/CLJ-2711)
 * [CLJ-2552](https://clojure.atlassian.net/browse/CLJ-2552) `reify` - improve docstring and fix example
 * [CLJ-1385](https://clojure.atlassian.net/browse/CLJ-1385) `transient` - include usage model from reference docs
 
+
+# Changes to ClojureCLR in Version 1.12.0
+
+* Fix order of operations in DefExpr.emit()
+* Fix incorrect handling oof compiler option environment variables
+* Make debug runs of Clojure.Main and Clojure.Main461 turn direct linking on
+* Make Compiler.load dynamically bind the same Vars as Compiler.Compile
+* Enable BinaryFormatter for .NET 9 version
+* Upgrade to C# Version 12
+* Use explicit netX.0 TargetFrameworks rather thatn netstandard2.1 in projects
+* Fix numbers test for casting that broke due to breaking change in .NET 9
+* Add hinting to remove some type reflection warnings in clojure.core
+* Code changes to handle generic type-args more consistently
+* Allow signature hints to contain (type-args ...)
+* Add tests for generic method calls
+* Add project to provide C# classes supporting tests in Clojure.Tests
+* Remove build support for .NET 7; make .NET 8 the default for testing, etc.
+* Fix passing of static/instance flag to MaybeReflectionWarn
+* Add processing of (type-args ...) to the new use of QualifiedMethodExpr
+* Modify error message being tested for in test_clojure/errors.clj
+* Replace clojure.java.io with clojure.clr.io in core-namespaces variable in main.clj
+* Fix reflection warning in test_helper
+* Add method for structured print-out of a PersistentHashMap tree -- for debugging purposes only
+* Fix PersistentQueue.SyncRoot
+* Fix edge cases for BigDecimal/Rescale in certain rounding modes
+* Fix reflection warning in process.clj (extra constructor in .NET 8)
+* Add support for .NET 8.0, drop support for coreapp3.1
+* Fix clojure.clr.process/null-file to work with Framework 4.x
+* Add tests for clojure.clr.io/as-file, as-dir, file-info, dir-info
+* Replace Path/Join (not in Framework) with Path/Combine and replace DirInfo with DirectoryInfo (tag in clojure.clr.io Coercions)
+* Add some type hints for the return types of new functions in clojure.clr.io
+* Tweak PeristentHashMap to have proper value for edit field in Transient operation
+* During default type loading for namespaces, skip an assembly if we cannot access its types
+* Conditional compilation for a few methods in math.clj that are not in earlier frameworks
+
+* [CLJCLR-167](https://clojure.atlassian.net/browse/CLJCLR-167) - Reflector.GetMethods should filter for generic methods with the appropriate number of type-args
+* [CLJCLR-168](https://clojure.atlassian.net/browse/CLJCLR-168) - Fix second error message in Reflector.InvokeMatchingMethod to say 'static'  or 'instance', depending
+* [CLJCLR-170](https://clojure.atlassian.net/browse/CLJCLR-170) - Fix syntax-quote on imported typename (should use Type.FullName)
+* [CLJCLR-169](https://clojure.atlassian.net/browse/CLJCLR-169) - include [ as a charcter triggering full ClrTypeSpec resolution
+* [CLJCLR-166](https://clojure.atlassian.net/browse/CLJCLR-166) - Loading of core.clj and related should use direct linking
+* [CLJCLR-165](https://clojure.atlassian.net/browse/CLJCLR-165) - Improve error message when no type-args supplied to generic method invocation
+* [CLJCLR-143](https://clojure.atlassian.net/browse/CLJCLR-143) - ensure pr-str prints metadata for maps when *print-meta is true
+* [CLJCLR-164](https://clojure.atlassian.net/browse/CLJCLR-164) - Change value of dotnet-version to be a map holding the component, :major, :mintor :incremental
+* [CLJCLR-162](https://clojure.atlassian.net/browse/CLJCLR-162) - make printing of StackFrame show the actual declaring method
+* [CLJCLR-159](https://clojure.atlassian.net/browse/CLJCLR-159) - Fix error in clojure.core/subseq (typo in host call method name in mk-bound-fn
+* [CLJCLR-158](https://clojure.atlassian.net/browse/CLJCLR-158) - Improve error reporting for file not found on load
+* [CLJCLR-157](https://clojure.atlassian.net/browse/CLJCLR-157) - make RT.GetFindFilePaths filter out null or empty pathnames
+* [CLJCLR-153](https://clojure.atlassian.net/browse/CLJCLR-153) - make sys-action properly handle no type-args
+* [CLJCLR-154](https://clojure.atlassian.net/browse/CLJCLR-154) - Fix error message on load failure (had repeated 'cljr' suffix)
+* [CLJCLR-155](https://clojure.atlassian.net/browse/CLJCLR-155) - find \<namespace\>.cljr embedded resource in loaded assemblies
+* [CLJCLR-156](https://clojure.atlassian.net/browse/CLJCLR-156) - enhance gen-delegate to type hint formal parameters
+* [CLJCLR-152](https://clojure.atlassian.net/browse/CLJCLR-152) - fix reflection errors in clojure/repl.clj
+* [CLJCLR-150](https://clojure.atlassian.net/browse/CLJCLR-150) - Make Printf (used by format) print booleans with lowercase
+* [CLJCLR-149](https://clojure.atlassian.net/browse/CLJCLR-149) - fix 2-arg clojure.string/split == more regular expression variation
+* [CLJCLR-147](https://clojure.atlassian.net/browse/CLJCLR-147) - set :file metadata on Vars to have relative paths, not absolute paths to match Clojure(JVM)
+* [CLJCLR-148](https://clojure.atlassian.net/browse/CLJCLR-148) - Make return tags on defn signatures have fully qualified type name symbols, i.e., System.String instead of just String
+* [CLJCLR-133](https://clojure.atlassian.net/browse/CLJCLR-133) - Fix semantics of clojure.clr.io/as-file.  It continues to return a FileInfo.  Add as-dir to return a DirectoryInfo object.
+* [CLJCLR-145](https://clojure.atlassian.net/browse/CLJCLR-145) - Fix (symbol :keyword) failure -- make Keyword.Symbol public
+* [CLJCLR-144](https://clojure.atlassian.net/browse/CLJCLR-144) - fix method invocation binder for dynamic call-sites to apply type-args to generic method bases before binding
+* [CLJCLR-142](https://clojure.atlassian.net/browse/CLJCLR-142) - rework hashing to provide stable hashing for strings and things that depend on them.  Allows the case macro to be stable.
+* [CLJCLR-141](https://clojure.atlassian.net/browse/CLJCLR-141) - RT.load not looking up .clj.dll files with correct name
+* [CLJCLR-140](https://clojure.atlassian.net/browse/CLJCLR-140) - Properly catch client closing connecction in clojure.core.server/accept-connection
+* [CLRCLR-138](https://clojure.atlassian.net/browse/CLRCLR-138) - at startup, loo for user.cljr + user.cljc + user.clj, in that order
+* [CLRCLR-131](https://clojure.atlassian.net/browse/CLRCLR-131) - Remove unnecessary call to Util.ConvertLong in Numbers.hasheq
+* [CLRCLR-134](https://clojure.atlassian.net/browse/CLRCLR-134) - APersistentVector+RSeq.reduce should check for Reduced value
+* [CLJCLR-135](https://clojure.atlassian.net/browse/CLJCLR-135) - Fix Numbers.minus(Object,Object) on ulong
+* [CLJCLR-136](https://clojure.atlassian.net/browse/CLJCLR-136) - Add case for CLR decimal to Numbers.ToBigDecimal
+* [CLJCLR-139](https://clojure.atlassian.net/browse/CLJCLR-139) - ArrayChunk.reduce should deref a Reduced value
+* [CLJCLR-130](https://clojure.atlassian.net/browse/CLJCLR-130) - Fix calculation of directory where the spec DLLs are loaded during Clojure.RT initialization
+* [CLJCLR-121](https://clojure.atlassian.net/browse/CLJCLR-121) - make RT.CulturToString call ToString on non-numeric arg
+* [CLJCLR-120](https://clojure.atlassian.net/browse/CLJCLR-120) - In clojure.lang.Future, replace to call Thread.Abort with Thread.Interrupt (Thread.Abbort not supported in recent .NET releases)
+* [CLJCLR-118](https://clojure.atlassian.net/browse/CLJCLR-118) - Remove .Net 5 build; add .Net 7 build
+* [CLJCLR-119](https://clojure.atlassian.net/browse/CLJCLR-119) - Clean up some reflection warnings in clojure.math
+* [CLJCLR-117](https://clojure.atlassian.net/browse/CLJCLR-117) - Flush() after calls to RT.ErrWriter() writes
+* [CLJCLR-116](https://clojure.atlassian.net/browse/CLJCLR-116) - Better handling of values of type System.Type during reflection
+* [CLJCLR-115](https://clojure.atlassian.net/browse/CLJCLR-115) - Bad value in Namespace.Mapping should be dealt with
+* [CLJCLR-114](https://clojure.atlassian.net/browse/CLJCLR-114) - Make clojure.reflect/property->map consult the getter of a property in order to pick up needed attributes
+* [CLJCLR-113](https://clojure.atlassian.net/browse/CLJCLR-113) - Fix recur sending vector into &rest param failing with cast exception
+
+# Changes to Clojure in Version 1.11.4
+
+* [CLJ-2145](https://clojure.atlassian.net/browse/CLJ-2145) - Fix clearing of closed overs in `^:once` fns
+* [CLJ-2317](https://clojure.atlassian.net/browse/CLJ-2317) - `recur` to head of `:once` fn cancels once
+
 # Changes to Clojure in Version 1.11.3
 
 * [CLJ-2843](https://clojure.atlassian.net/browse/CLJ-2843) - Reflective calls to Java methods that take primitive long or double now work when passed a narrower boxed number at runtime (Integer, Short, Byte, Float). Previously, these methods were not matched during reflection and an error was thrown.
@@ -221,7 +307,6 @@ Fixes [CVE-2024-22871](https://nvd.nist.gov/vuln/detail/CVE-2024-22871) detailed
 
 * [CLJ-2701](https://clojure.atlassian.net/browse/CLJ-2701)
   Pin serialVersionUID for Keyword and ArraySeq back to 1.10.3 values to retain binary serialization
-
 
 # Changes to Clojure in Version 1.11.0
 
