@@ -569,7 +569,7 @@ namespace clojure.lang
             }
 
             if (info == null)
-                throw new InvalidOperationException(string.Format("Cannot find static method named {0} for type: {1} with the correct argument type", methodName, t.Name));
+                throw new InvalidOperationException(string.Format("Cannot find {0|} method named {1} for type: {2} with the correct argument type", (t == null ? "instance" : "static"), methodName, t.Name));
 
             return InvokeMethod(info,target,args);
 
