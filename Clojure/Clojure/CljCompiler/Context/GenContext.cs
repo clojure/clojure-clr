@@ -8,22 +8,19 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
 
-using System.Reflection.Emit;
-using System.Reflection;
-using System.Linq.Expressions;
+using clojure.lang.Runtime;
 using Microsoft.Scripting.Generation;
 using System;
-using System.Diagnostics.SymbolStore;
-using clojure.lang.Runtime;
-using AstUtils = Microsoft.Scripting.Ast.Utils;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.SymbolStore;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Reflection.Emit;
+using AstUtils = Microsoft.Scripting.Ast.Utils;
 
-namespace clojure.lang.CljCompiler.Ast
+namespace clojure.lang.CljCompiler.Context
 {
     public sealed class GenContext
     {

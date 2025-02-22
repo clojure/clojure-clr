@@ -8,21 +8,19 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Dynamic;
-using Microsoft.Scripting.Runtime;
+using clojure.lang.CljCompiler.Ast;
+using clojure.lang.CljCompiler.Context;
 using Microsoft.Scripting.Actions;
 using Microsoft.Scripting.Actions.Calls;
+using Microsoft.Scripting.Runtime;
+using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-using clojure.lang.CljCompiler.Ast;
 
 namespace clojure.lang.Runtime.Binding
 {

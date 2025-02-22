@@ -8,23 +8,20 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
+using clojure.lang.CljCompiler.Ast;
+using clojure.lang.Runtime.Binding;
+using Microsoft.Scripting.Generation;
+using Microsoft.Scripting.Runtime;
+using Microsoft.Scripting.Utils;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Reflection.Emit;
-using System.Reflection;
 using System.Linq.Expressions;
-using Microsoft.Scripting.Generation;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using Microsoft.Scripting.Utils;
-using Microsoft.Scripting.Runtime;
-using clojure.lang.Runtime.Binding;
+using System.Text;
 
-namespace clojure.lang.CljCompiler.Ast
+namespace clojure.lang.CljCompiler.Context
 {
 
     class DynInitHelper
