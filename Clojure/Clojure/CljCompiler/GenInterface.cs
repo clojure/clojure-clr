@@ -37,8 +37,13 @@ namespace clojure.lang
             }
             else
                 // TODO: In CLR4, should create a collectible type?
-                context = GenContext.CreateWithExternalAssembly(iName+"_"+RT.nextID(), ".dll", false);
 
+                // TODO: This is temporry until we get things sorted out:  SAVE9 !!!
+#if NETFRAMEWORK
+                context = GenContext.CreateWithExternalAssembly(iName+"_"+RT.nextID(), ".dll", false);
+#else
+                context = GenContext.CreateWithInternalAssembly(iName + "_" + RT.nextID(), false);
+#endif
             for (ISeq s = RT.seq(extends); s != null; s = s.next())
             {
                 object f = s.first();
@@ -75,7 +80,7 @@ namespace clojure.lang
             return t;
         }
 
-        #endregion
+#endregion
 
         #region Fun with attributes
 

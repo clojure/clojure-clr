@@ -29,9 +29,9 @@ namespace clojure.lang.CljCompiler.Context
         #region Data
 
         int _id;
-        readonly AssemblyGen _assemblyGen;
+        readonly MyAssemblyGen _assemblyGen;
         TypeBuilder _typeBuilder;
-        TypeGen _typeGen;
+        MyTypeGen _typeGen;
 
         readonly string _typeName;
 
@@ -60,7 +60,7 @@ namespace clojure.lang.CljCompiler.Context
 
         #region Ctors and factories
 
-        public DynInitHelper(AssemblyGen ag, string typeName)
+        public DynInitHelper(MyAssemblyGen ag, string typeName)
         {
             _assemblyGen = ag;
             _typeName = typeName;
@@ -108,13 +108,13 @@ namespace clojure.lang.CljCompiler.Context
             if (_typeBuilder == null)
             {
                 _typeBuilder = _assemblyGen.DefinePublicType(_typeName, typeof(object), true);
-                _typeGen = new TypeGen(_assemblyGen, _typeBuilder);
+                _typeGen = new MyTypeGen(_assemblyGen, _typeBuilder);
                 _siteInfos = new List<SiteInfo>();
             }
         }
 
 
-        private Expression RewriteCallSite(CallSite site, TypeGen tg, Type delegateType, out SiteInfo siteInfo)
+        private Expression RewriteCallSite(CallSite site, MyTypeGen tg, Type delegateType, out SiteInfo siteInfo)
         {
             if (!(site.Binder is IExpressionSerializable))
             {

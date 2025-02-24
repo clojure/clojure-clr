@@ -8,11 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
-
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -25,9 +20,16 @@ namespace clojure.lang.CljCompiler.Ast
 {
     public class CljILGen : ILGen
     {
+        private readonly ILGenerator _ilGenerator;
+        public ILGenerator ILGenerator
+        {
+            get { return _ilGenerator; }
+        }
+
         public CljILGen(ILGenerator baseIlg)
             : base(baseIlg)
         {
+            _ilGenerator = baseIlg;
         }
 
         private static bool IsVolatile(FieldInfo fi)
