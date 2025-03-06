@@ -11,6 +11,7 @@
 using clojure.lang.CljCompiler.Context;
 using clojure.lang.Runtime;
 using Microsoft.Scripting.Hosting;
+using Microsoft.Scripting.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -59,7 +60,7 @@ namespace clojure.lang
                        .SelectMany(t => getTypes(t))
                        .Where(t => (t.IsClass || t.IsInterface || t.IsValueType) &&
                                     t.Namespace == nspace &&
-                                    t.IsPublic &&
+                                    (t.IsPublic || t.IsNestedPublic) &&
                                     !t.IsGenericTypeDefinition &&
                                     !t.Name.StartsWith("_") &&
                                     !t.Name.StartsWith("<"));
@@ -2772,12 +2773,16 @@ namespace clojure.lang
             // e.g. System.Environment in assemblies System.Private.CoreLib and System.Runtime.Exceptions.
             // It is private in the former and public in the latter.
             // Unfortunately, Type.GetType was finding the former.
-            if (t != null && t.IsPublic)
+            if (t != null && (t.IsPublic || t.IsNestedPublic))
+            {
                 return t;
+            }
 
             t = Compiler.FindDuplicateType(p);
             if (t != null)
+            {
                 return t;
+            }
 
             AppDomain domain = AppDomain.CurrentDomain;
             Assembly[] assys = domain.GetAssemblies();
@@ -2788,42 +2793,41 @@ namespace clojure.lang
             foreach (Assembly assy in assys)
             {
                 Type t1 = assy.GetType(p, false);
-                if (t1 != null && t1.IsPublic)
+                if (t1 != null && (t1.IsPublic || t1.IsNestedPublic))
+                {
                     return t1;
+                }
             }
 
             // slow path, will succeed for display names (returned by Type.Name)
             // e.g. "Transform"
             foreach (Assembly assy1 in assys)
             {
-                Type t1 = assy1.GetType(p, false);
+                Type t1 = null;
 
                 if (IsRunningOnMono)
                 {
                     // I do not know why Assembly.GetType fails to find types in our assemblies in Mono
-                    if (t1 == null)
+                    if (!assy1.IsDynamic)
                     {
-                        if (!assy1.IsDynamic)
+                        try
                         {
-                            try
-                            {
 
-                                foreach (Type tt in assy1.GetTypes())
+                            foreach (Type tt in assy1.GetTypes())
+                            {
+                                if (tt.Name.Equals(p))
                                 {
-                                    if (tt.Name.Equals(p))
-                                    {
-                                        t1 = tt;
-                                        break;
-                                    }
+                                    t1 = tt;
+                                    break;
                                 }
                             }
-                            catch (System.Reflection.ReflectionTypeLoadException)
-                            {
-                            }
+                        }
+                        catch (System.Reflection.ReflectionTypeLoadException)
+                        {
                         }
                     }
                 }
-
+               
                 if (t1 != null && !candidateTypes.Contains(t1))
                     candidateTypes.Add(t1);
             }
@@ -2836,7 +2840,13 @@ namespace clojure.lang
                 t = null;
 
             if (t == null && p.IndexOfAny(_triggerTypeChars) != -1)
+            {
                 t = ClrTypeSpec.GetTypeFromName(p);
+                if (t != null)
+                {
+                    return t;
+                }
+            }
 
             return t;
         }

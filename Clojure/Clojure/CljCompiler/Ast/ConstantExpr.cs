@@ -46,6 +46,7 @@ namespace clojure.lang.CljCompiler.Ast
             get 
             { 
                 return _v.GetType().IsPublic 
+                    || _v.GetType().IsNestedPublic
                     || typeof(Type).IsInstanceOfType(_v);   // This bit of hackery is due to the fact that RuntimeType is not public.  
                                                             // Without this, System.Int64 would be seen as only type System.Object, not System.RuntimeType.
             }
