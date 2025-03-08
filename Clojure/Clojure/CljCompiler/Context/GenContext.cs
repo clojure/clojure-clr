@@ -76,16 +76,44 @@ namespace clojure.lang.CljCompiler.Context
 
         #region C-tors & factory methods
 
-        private readonly static ConcurrentDictionary<Assembly, bool> _internalAssemblies = new ConcurrentDictionary<Assembly, bool>();
-        private static void AddInternalAssembly(Assembly a) => _internalAssemblies[a] = true;
-        public static bool IsInternalAssembly(Assembly a) => _internalAssemblies.ContainsKey(a);
+        private class DefaultAssemblyComparer : IEqualityComparer<Assembly>
+        {
+            public bool Equals(Assembly x, Assembly y) => Object.ReferenceEquals(x, y);
+            public int GetHashCode(Assembly obj) => obj.GetHashCode();
+        }
+
+        private readonly static ConcurrentDictionary<Assembly, bool> _internalAssemblies = new ConcurrentDictionary<Assembly, bool>(new DefaultAssemblyComparer());
+        public static bool IsInternalAssembly(Assembly a) => a is not null && _internalAssemblies.ContainsKey(a);
+
+        private static void AddInternalAssembly(GenContext ctx)
+        {
+            // Sometime we are looking up via the AssemblyBuilder.
+            // But sometimes we are accessing via a method on a type. The defining assembly is actually a RuntimeAssembly, not the AssemblyBuilder itself.
+            // I'm not sure how else to find out what that RuntimeAssembly is, other than creating a type and a method and getting its assembly.
+            // We'll then register both the RuntimeAssembly and the AssemblyBuilder.
+
+            var module = ctx.ModuleBuilder;
+            var dummyType = module.DefineType("__________________DummyType");
+            var method = dummyType.DefineMethod("__________________DummyMethod", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
+            var il = method.GetILGenerator();
+            il.Emit(OpCodes.Ret);
+
+            dummyType.CreateType();
+
+            var runtimeMethod = dummyType.GetMethod("__________________DummyMethod");
+            var runtimeAssembly = runtimeMethod.DeclaringType.Assembly;
+
+            _internalAssemblies[ctx.AssemblyBuilder] = true;
+            _internalAssemblies[runtimeAssembly] = true;
+        }
+
 
         enum AssemblyType { Internal, External }
 
         public static GenContext CreateWithInternalAssembly(string assyName, bool createDynInitHelper)
         {
             GenContext ctx = CreateGenContext(AssemblyType.Internal, assyName, assyName, ".dll", null, createDynInitHelper);
-            AddInternalAssembly(ctx.AssemblyBuilder);
+            AddInternalAssembly(ctx);
             return ctx;
         }
 
@@ -215,13 +243,10 @@ namespace clojure.lang.CljCompiler.Context
             if ( _dynInitHelper != null  )
                 _dynInitHelper.FinalizeType();
 
-#if NETFRAMEWORK
+#if NETFRAMEWORK || NET9_0_OR_GREATER
             _assyGen.SaveAssembly();
 #else
             Console.WriteLine("AOT-compilation not available");
-            //var assembly = AssemblyBuilder;
-            //var generator = new Lokad.ILPack.AssemblyGenerator();
-            //generator.GenerateAssembly(assembly,Path);
 #endif
         }
 
