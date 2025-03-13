@@ -398,6 +398,9 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     bool isExplicit = HasShadowedMethod(mi, impled);
 
+                    var attrs = mi.Attributes;
+                    var customs = mi.CustomAttributes;
+
                     EmitDummyMethod(tb, mi, isExplicit);
 
                     if (!impled.ContainsKey(mi.Name))
