@@ -1842,7 +1842,7 @@ namespace clojure.lang
         #region NodeSeq
 
         [Serializable]
-        sealed class NodeSeq : ASeq
+        public sealed class NodeSeq : ASeq
         {
 
             #region Data

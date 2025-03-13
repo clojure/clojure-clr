@@ -516,7 +516,7 @@ namespace clojure.lang
         /// for <see cref="PersistentArrayMap">PersistentArrayMap</see>s.
         /// </summary>
         [Serializable]
-        protected class Seq : ASeq, Counted, IReduce, IDrop, IEnumerable
+        public class Seq : ASeq, Counted, IReduce, IDrop, IEnumerable
         {
             #region Data
 

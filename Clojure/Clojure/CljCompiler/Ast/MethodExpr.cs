@@ -8,10 +8,6 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -168,7 +164,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void EmitComplexCall(ObjExpr objx, CljILGen ilg)
         {
-            // TOD: We have gotten rid of light-compile. Simplify this.
+            // TODO: We have gotten rid of light-compile. Simplify this.
             // This is made more complex than I'd like by light-compiling.
             // Without light-compile, we could just:
             //   Emit the target expression

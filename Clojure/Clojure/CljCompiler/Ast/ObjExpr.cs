@@ -64,38 +64,17 @@ namespace clojure.lang.CljCompiler.Ast
         public IPersistentVector KeywordCallsites { get; protected set; }
         public IPersistentVector ProtocolCallsites { get; protected set; }
         public IPersistentSet VarCallsites { get; protected set; }
-
-
-
         public IList<FieldBuilder> KeywordLookupSiteFields { get; protected set; }
-
         public IList<FieldBuilder> ThunkFields { get; protected set; }
-
         public IList<FieldBuilder> CachedTypeFields { get; protected set; }
 
-
-        internal FieldBuilder KeywordLookupSiteField(int i)
-        {
-            return KeywordLookupSiteFields[i];
-        }
-
-        internal FieldBuilder CachedTypeField(int i)
-        {
-            return CachedTypeFields[i];
-        }
-
-        internal FieldBuilder ThunkField(int i)
-        {
-            return ThunkFields[i];
-        }
-
+        internal FieldBuilder KeywordLookupSiteField(int i) => KeywordLookupSiteFields[i];
+        internal FieldBuilder CachedTypeField(int i) => CachedTypeFields[i];
+        internal FieldBuilder ThunkField(int i) => ThunkFields[i];
 
         public FieldBuilder MetaField { get; protected set; }
-
         public IList<FieldBuilder> ClosedOverFields { get; protected set; }
-
         public Dictionary<LocalBinding, FieldBuilder> ClosedOverFieldsMap { get; protected set; }
-
         public Dictionary<FieldBuilder, LocalBinding> ClosedOverFieldsToBindingsMap { get; protected set; }
         public IPersistentVector HintedFields { get; protected set; }
 
@@ -107,9 +86,8 @@ namespace clojure.lang.CljCompiler.Ast
         public bool OnceOnly { get; protected set; }
         public bool CanBeDirect { get; protected set; }
 
-        
-        protected bool IsDefType { get { return Fields != null; } }
-        protected virtual bool SupportsMeta { get { return !IsDefType; } }
+        protected bool IsDefType => Fields is not null;
+        protected virtual bool SupportsMeta => !IsDefType;
 
         internal bool IsVolatile(LocalBinding lb)
         {
@@ -127,41 +105,18 @@ namespace clojure.lang.CljCompiler.Ast
                 lb.IsByRef;
         }
 
-        static String SiteName(int n)
-        {
-            return "__site__" + n;
-        }
-
-        public static String SiteNameStatic(int n)
-        {
-            return SiteName(n) + "__";
-        }
-
-        static String ThunkName(int n)
-        {
-            return "__thunk__" + n;
-        }
-
-        public static String ThunkNameStatic(int n)
-        {
-            return ThunkName(n) + "__";
-        }
-
-        internal static String CachedClassName(int n)
-        {
-            return "__cached_class__" + n;
-        }
-
-        private static string ConstantName(int i)
-        {
-            return ConstPrefix + i;
-        }
+        static String SiteName(int n) => "__site__" + n;
+        public static String SiteNameStatic(int n) => SiteName(n) + "__";
+        static String ThunkName(int n) => "__thunk__" + n;
+        public static String ThunkNameStatic(int n) => ThunkName(n) + "__";
+        internal static String CachedClassName(int n) => "__cached_class__" + n;
+        private static string ConstantName(int i) => ConstPrefix + i;
 
         private Type ConstantType(int i)
         {
             object o = Constants.nth(i);
             Type t = o?.GetType();
-            if (t != null && t.IsPublic)
+            if (t != null && (t.IsPublic || t.IsNestedPublic))
             {
                 // Java: can't emit derived fn types due to visibility
                 if (typeof(LazySeq).IsAssignableFrom(t))
