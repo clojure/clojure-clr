@@ -74,7 +74,7 @@ namespace Clojure.Tests.LibTests
             }
         }
 
-#if NET462
+#if NETFRAMEWORK
         // Thread.Abort not supported in .Net Core
 
         [Test]
@@ -112,7 +112,7 @@ namespace Clojure.Tests.LibTests
             Expect(f.isCancelled()).To.Equal(false);
         }
 
-#if NET462
+#if NETFRAMEWORK
         // Thread.Abort not supported in .Net Core
         [Test]
         [ExpectedException(typeof(FutureAbortedException))]

@@ -441,7 +441,7 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         EmitTypedArg(objx, ilg, parms[i].ParameterType, args[i].ArgExpr);
                         LocalBuilder loc = ilg.DeclareLocal(pi.ParameterType);
-#if NET462
+#if NETFRAMEWORK
                         loc.SetLocalSymInfo("_byRef_temp" + i);
 #endif
                         ilg.Emit(OpCodes.Stloc, loc);

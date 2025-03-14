@@ -151,7 +151,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             Path = ComputeAssemblyPath(directory, aname.Name, extension);
 
-#if NET462
+#if NETFRAMEWORK
             if (_isDebuggable)
                 _docWriter = ModuleBuilder.DefineDocument(sourceName, ClojureContext.Default.LanguageGuid, ClojureContext.Default.VendorGuid, Guid.Empty);
 #endif
@@ -208,7 +208,7 @@ namespace clojure.lang.CljCompiler.Ast
             if ( _dynInitHelper != null  )
                 _dynInitHelper.FinalizeType();
 
-#if NET462                 
+#if NETFRAMEWORK                 
             _assyGen.SaveAssembly();
 #else
             Console.WriteLine("AOT-compilation not available");
@@ -251,7 +251,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void MaybeEmitDebugInfo(ILGen ilg, IPersistentMap spanMap)
         {
-#if NET462
+#if NETFRAMEWORK
             if ( _docWriter != null && spanMap != null )
             {
                 if (Compiler.GetLocations(spanMap, out int startLine, out int startCol, out int finishLine, out int finishCol))
@@ -277,7 +277,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void MaybSetLocalName(LocalBuilder lb, string name)
         {
-#if NET462
+#if NETFRAMEWORK
             if (_isDebuggable)
                 lb.SetLocalSymInfo(name);
 #endif
