@@ -36,21 +36,28 @@ namespace clojure.lang
 
         #region Duplicate types
 
-        static readonly Dictionary<String, Type> _duplicateTypeMap = new Dictionary<string, Type>();
+        static readonly Dictionary<String, Type> _evalTypeMap = new Dictionary<string, Type>();
+        static readonly Dictionary<String, Type> _compilerTypeMap = new Dictionary<string, Type>();
 
         internal static void RegisterDuplicateType(Type type)
         {
-            _duplicateTypeMap[type.FullName] = type;
+            if (Compiler.IsCompiling)
+                _compilerTypeMap[type.FullName] = type;
+            else
+                _evalTypeMap[type.FullName] = type;
         }
 
         internal static Type FindDuplicateType(string typename)
         {
-            _duplicateTypeMap.TryGetValue(typename, out Type type);
+            if (Compiler.IsCompiling && _compilerTypeMap.TryGetValue(typename, out Type compiledType))
+            { return compiledType; }
+
+            _evalTypeMap.TryGetValue(typename, out Type type);
             return type;
         }
 
         #endregion
-        
+
         #region Symbols
 
         public static readonly Symbol DefSym = Symbol.intern("def");
