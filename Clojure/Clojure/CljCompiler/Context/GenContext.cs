@@ -8,22 +8,18 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
-using System.Reflection.Emit;
-using System.Reflection;
-using System.Linq.Expressions;
+using clojure.lang.Runtime;
 using Microsoft.Scripting.Generation;
 using System;
-using System.Diagnostics.SymbolStore;
-using clojure.lang.Runtime;
-using AstUtils = Microsoft.Scripting.Ast.Utils;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.SymbolStore;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Reflection.Emit;
+using AstUtils = Microsoft.Scripting.Ast.Utils;
 
-namespace clojure.lang.CljCompiler.Ast
+namespace clojure.lang.CljCompiler.Context
 {
     public sealed class GenContext
     {
@@ -71,7 +67,7 @@ namespace clojure.lang.CljCompiler.Ast
         public TypeBuilder TB { get { return _tb; } }
 
 
-        public String Path { get; set; }
+        public string Path { get; set; }
 
         #endregion
 
@@ -112,7 +108,7 @@ namespace clojure.lang.CljCompiler.Ast
         public static GenContext CreateWithExternalAssembly(string sourceName, string assyName, string extension, bool createDynInitHelper)
         {
             string path = Compiler.CompilePathVar.deref() as string;
-            return CreateGenContext(sourceName, assyName, extension, path ?? System.IO.Directory.GetCurrentDirectory(),createDynInitHelper);
+            return CreateGenContext(sourceName, assyName, extension, path ?? System.IO.Directory.GetCurrentDirectory(), createDynInitHelper);
         }
 
         public static GenContext CreateWithExternalAssembly(string assyName, string extension, bool createDynInitHelper)
@@ -124,7 +120,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             if (directory != null)
             {
-                if (directory.Length > 0 ) //&& directory != ".")
+                if (directory.Length > 0) //&& directory != ".")
                     assyName = assyName.Replace("/", ".");
             }
 
@@ -166,7 +162,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         }
 
-         
+
         internal GenContext WithNewDynInitHelper()
         {
             return WithNewDynInitHelper(GenerateName());
@@ -188,7 +184,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         private GenContext Clone()
         {
-            return (GenContext) this.MemberwiseClone();
+            return (GenContext)MemberwiseClone();
         }
 
         public GenContext WithTypeBuilder(TypeBuilder tb)
@@ -198,14 +194,14 @@ namespace clojure.lang.CljCompiler.Ast
             return newContext;
         }
 
-#endregion
+        #endregion
 
         #region Other
 
         // DO not call context.AssmeblyGen.SaveAssembly() directly.
         internal void SaveAssembly()
         {
-            if ( _dynInitHelper != null  )
+            if (_dynInitHelper != null)
                 _dynInitHelper.FinalizeType();
 
 #if NETFRAMEWORK                 
@@ -220,7 +216,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-#region Debug info
+        #region Debug info
 
         public static Expression AddDebugInfo(Expression expr, IPersistentMap spanMap)
         {
@@ -252,7 +248,7 @@ namespace clojure.lang.CljCompiler.Ast
         public void MaybeEmitDebugInfo(ILGen ilg, IPersistentMap spanMap)
         {
 #if NETFRAMEWORK
-            if ( _docWriter != null && spanMap != null )
+            if (_docWriter != null && spanMap != null)
             {
                 if (Compiler.GetLocations(spanMap, out int startLine, out int startCol, out int finishLine, out int finishCol))
                 {

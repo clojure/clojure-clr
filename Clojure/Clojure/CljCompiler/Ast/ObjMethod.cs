@@ -15,6 +15,7 @@
 using System;
 using System.Reflection.Emit;
 using System.Reflection;
+using clojure.lang.CljCompiler.Context;
 
 
 namespace clojure.lang.CljCompiler.Ast
