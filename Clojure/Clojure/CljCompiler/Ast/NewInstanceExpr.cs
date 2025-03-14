@@ -12,7 +12,6 @@ using clojure.lang.CljCompiler.Context;
 using Microsoft.Scripting.Generation;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -167,7 +166,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             ret._methodMap = overrideables;
 
-#if NETFRAMEWORK
+  
             GenContext context = Compiler.IsCompiling
                 ? Compiler.CompilerContextVar.get() as GenContext
                 : (ret.IsDefType
@@ -175,15 +174,6 @@ namespace clojure.lang.CljCompiler.Ast
                     : (Compiler.CompilerContextVar.get() as GenContext
                         ??
                         Compiler.EvalContext));
-#else
-            GenContext context = Compiler.IsCompiling
-                ? Compiler.CompilerContextVar.get() as GenContext
-                : (ret.IsDefType
-                    ? GenContext.CreateWithInternalAssembly("deftype" + RT.nextID().ToString(), true)
-                    : (Compiler.CompilerContextVar.get() as GenContext
-                        ??
-                        Compiler.EvalContext));
-#endif
 
             GenContext genC = context.WithNewDynInitHelper(ret.InternalName + "__dynInitHelper_" + RT.nextID().ToString());
 
@@ -286,10 +276,6 @@ namespace clojure.lang.CljCompiler.Ast
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         Type CompileBaseClass(GenContext context, Type super, Type[] interfaces, Object frm)
         {
-
-            Console.WriteLine($"CompileBaseClass: super: {super.Name}, HasSecurity = {super.Attributes & TypeAttributes.HasSecurity}");
-            var customs = super.GetCustomAttributes().ToList();
-
             //TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.CompileStubPrefix + "." + InternalName + RT.nextID(), TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
             TypeBuilder tb = context.ModuleBuilder.DefineType(Compiler.DeftypeBaseClassNamePrefix + "." + InternalName + RT.nextID(), TypeAttributes.Public | TypeAttributes.Abstract, super, interfaces);
 
@@ -450,7 +436,7 @@ namespace clojure.lang.CljCompiler.Ast
         //    return t.FullName.Replace(',', '/');
         //}
 
-#endregion
+        #endregion
 
         #region Method reflection
 
