@@ -415,7 +415,7 @@ namespace clojure.lang
             gen.MarkLabel(endLabel);
             gen.Emit(OpCodes.Ret);
 
-#if NET462
+#if NETFRAMEWORK
             //context.AssyBldr.SetEntryPoint(cb);
             context.AssemblyBuilder.SetEntryPoint(cb);
 #endif
