@@ -448,17 +448,7 @@ namespace clojure.lang
 
                 try
                 {
-#if NETFRAMEWORK
-                    Console.WriteLine("Framework!");
-#elif NET9_0_OR_GREATER
-                    Console.WriteLine("Net 9! (or later)");
-#else
-                    Console.WriteLine("must be 6 or 8");
-#endif
-                    RT.StartStopwatch();
                     load("clojure/core");
-                    RT.StopStopwatch();
-                    Console.WriteLine("Clojure core loaded in " + _stopwatch.ElapsedMilliseconds + " milliseconds.");
                 }
                 finally
                 {

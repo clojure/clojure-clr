@@ -35,11 +35,8 @@ namespace clojure.lang
                 context = (GenContext)Compiler.CompilerContextVar.deref();
             }
             else
-#if NETFRAMEWORK
+                // TODO: In CLR4, should create a collectible type?
                 context = GenContext.CreateWithExternalAssembly(iName+"_"+RT.nextID(), ".dll", false);
-#else
-                context = GenContext.CreateWithInternalAssembly(iName + "_" + RT.nextID(), false);
-#endif
 
             for (ISeq s = RT.seq(extends); s != null; s = s.next())
             {

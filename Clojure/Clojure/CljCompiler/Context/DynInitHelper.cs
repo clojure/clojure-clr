@@ -37,9 +37,9 @@ namespace clojure.lang.CljCompiler.Context
         #region Data
 
         int _id;
-        readonly MyAssemblyGen _assemblyGen;
+        readonly AssemblyGen _assemblyGen;
         TypeBuilder _typeBuilder;
-        MyTypeGen _typeGen;
+        TypeGen _typeGen;
 
         readonly string _typeName;
 
@@ -68,7 +68,7 @@ namespace clojure.lang.CljCompiler.Context
 
         #region Ctors and factories
 
-        public DynInitHelper(MyAssemblyGen ag, string typeName)
+        public DynInitHelper(AssemblyGen ag, string typeName)
         {
             _assemblyGen = ag;
             _typeName = typeName;
@@ -116,13 +116,13 @@ namespace clojure.lang.CljCompiler.Context
             if (_typeBuilder == null)
             {
                 _typeBuilder = _assemblyGen.DefinePublicType(_typeName, typeof(object), true);
-                _typeGen = new MyTypeGen(_assemblyGen, _typeBuilder);
+                _typeGen = new TypeGen(_assemblyGen, _typeBuilder);
                 _siteInfos = new List<SiteInfo>();
             }
         }
 
 
-        private Expression RewriteCallSite(CallSite site, MyTypeGen tg, Type delegateType, out SiteInfo siteInfo)
+        private Expression RewriteCallSite(CallSite site, TypeGen tg, Type delegateType, out SiteInfo siteInfo)
         {
             if (!(site.Binder is IExpressionSerializable))
             {
@@ -163,7 +163,7 @@ namespace clojure.lang.CljCompiler.Context
             {
                 MethodInfo invoke = delegateType.GetMethod("Invoke");
 
-                newDelegateType = _typeGen.AssemblyGen.MakeDelegateType(
+                newDelegateType = /* _typeGen.AssemblyGen. */MakeDelegateType(
                     delegateType.Name,
                     invoke.GetParameters().Map(p => p.ParameterType),
                     invoke.ReturnType
@@ -215,45 +215,45 @@ namespace clojure.lang.CljCompiler.Context
             return false;
         }
 
-        //// From Microsoft.Scripting.Generation.AssemblyGen
-        //// Adapted to not being a method of AssemblyGen, which causes me to copy a WHOLE BUNCH of stuff.
+        // From Microsoft.Scripting.Generation.AssemblyGen
+        // Adapted to not being a method of AssemblyGen, which causes me to copy a WHOLE BUNCH of stuff.
 
-        //internal Type MakeDelegateType(string name, Type[] parameters, Type returnType)
-        //{
-        //    TypeBuilder builder = /* _assemblyGen. */DefineType(name, typeof(MulticastDelegate), DelegateAttributes, false);
-        //    builder.DefineConstructor(CtorAttributes, CallingConventions.Standard, _DelegateCtorSignature).SetImplementationFlags(ImplAttributes);
-        //    builder.DefineMethod("Invoke", InvokeAttributes, returnType, parameters).SetImplementationFlags(ImplAttributes);
-        //    return builder.CreateType();
-        //}
+        internal Type MakeDelegateType(string name, Type[] parameters, Type returnType)
+        {
+            TypeBuilder builder = /* _assemblyGen. */DefineType(name, typeof(MulticastDelegate), DelegateAttributes, false);
+            builder.DefineConstructor(CtorAttributes, CallingConventions.Standard, _DelegateCtorSignature).SetImplementationFlags(ImplAttributes);
+            builder.DefineMethod("Invoke", InvokeAttributes, returnType, parameters).SetImplementationFlags(ImplAttributes);
+            return builder.CreateType();
+        }
 
-        //// From Microsoft.Scripting.Generation.AssemblyGen
-        ////private int _index;
-        //internal TypeBuilder DefineType(string name, Type parent, TypeAttributes attr, bool preserveName)
-        //{
-        //    ContractUtils.RequiresNotNull(name, nameof(name));
-        //    ContractUtils.RequiresNotNull(parent, nameof(parent));
+        // From Microsoft.Scripting.Generation.AssemblyGen
+        //private int _index;
+        internal TypeBuilder DefineType(string name, Type parent, TypeAttributes attr, bool preserveName)
+        {
+            ContractUtils.RequiresNotNull(name, nameof(name));
+            ContractUtils.RequiresNotNull(parent, nameof(parent));
 
-        //    StringBuilder sb = new StringBuilder(name);
-        //    if (!preserveName)
-        //    {
-        //        int index = RT.nextID(); //Interlocked.Increment(ref _index);
-        //        sb.Append('$');
-        //        sb.Append(index);
-        //    }
+            StringBuilder sb = new StringBuilder(name);
+            if (!preserveName)
+            {
+                int index = RT.nextID(); //Interlocked.Increment(ref _index);
+                sb.Append('$');
+                sb.Append(index);
+            }
 
-        //    // There is a bug in Reflection.Emit that leads to 
-        //    // Unhandled Exception: System.Runtime.InteropServices.COMException (0x80131130): Record not found on lookup.
-        //    // if there is any of the characters []*&+,\ in the type name and a method defined on the type is called.
-        //    sb.Replace('+', '_').Replace('[', '_').Replace(']', '_').Replace('*', '_').Replace('&', '_').Replace(',', '_').Replace('\\', '_');
+            // There is a bug in Reflection.Emit that leads to 
+            // Unhandled Exception: System.Runtime.InteropServices.COMException (0x80131130): Record not found on lookup.
+            // if there is any of the characters []*&+,\ in the type name and a method defined on the type is called.
+            sb.Replace('+', '_').Replace('[', '_').Replace(']', '_').Replace('*', '_').Replace('&', '_').Replace(',', '_').Replace('\\', '_');
 
-        //    name = sb.ToString();
-        //    return /* _myModule */ _assemblyGen.ModuleBuilder.DefineType(name, attr, parent);
-        //}
-        //private const MethodAttributes CtorAttributes = MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public;
-        //private const MethodImplAttributes ImplAttributes = MethodImplAttributes.Runtime | MethodImplAttributes.Managed;
-        //private const MethodAttributes InvokeAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
-        //private const TypeAttributes DelegateAttributes = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass;
-        //private static readonly Type[] _DelegateCtorSignature = new Type[] { typeof(object), typeof(nint) };
+            name = sb.ToString();
+            return /* _myModule */ _assemblyGen.ModuleBuilder.DefineType(name, attr, parent);
+        }
+        private const MethodAttributes CtorAttributes = MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public;
+        private const MethodImplAttributes ImplAttributes = MethodImplAttributes.Runtime | MethodImplAttributes.Managed;
+        private const MethodAttributes InvokeAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
+        private const TypeAttributes DelegateAttributes = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass;
+        private static readonly Type[] _DelegateCtorSignature = new Type[] { typeof(object), typeof(nint) };
 
         #endregion
 
