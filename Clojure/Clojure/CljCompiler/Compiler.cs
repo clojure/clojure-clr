@@ -193,7 +193,8 @@ namespace clojure.lang
 
         internal static readonly Var CompilerContextVar = Var.create(null).setDynamic();
         internal static readonly Var CompilerActiveVar = Var.create(false).setDynamic();
-        
+        internal static readonly Var DirectLinkingMapVar = Var.create(null).setDynamic();
+
         public static Var CompilerOptionsVar;
 
         public static object GetCompilerOption(Keyword k)
@@ -1687,7 +1688,8 @@ namespace clojure.lang
                 RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
                 RT.DataReadersVar, RT.DataReadersVar.deref(),
                 CompilerContextVar, context,
-                CompilerActiveVar, true
+                CompilerActiveVar, true,
+                DirectLinkingMapVar, new Dictionary<Var, Type>()
                 ));
 
             try
@@ -1772,7 +1774,17 @@ namespace clojure.lang
                     objx.EmitConstantFieldDefs(tb);
                     expr.Emit(RHC.Expression,objx,ilg);
                     ilg.Emit(OpCodes.Pop);
+
+                    if (expr is DefExpr dex && dex.Init is FnExpr fnx)
+                    {
+                        ((Dictionary<Var, Type>)DirectLinkingMapVar.deref())[dex.Var] = fnx.CompiledType;
+                    }
+
+#if NET9_0_OR_GREATER
+                    DoSeparateEval(evPC, form);
+#else
                     expr.Eval();
+#endif
                 }
             }
             finally
@@ -1781,8 +1793,40 @@ namespace clojure.lang
             }
         }
 
+        private static void DoSeparateEval(ParserContext evPC, Object form)
+        {
+            // Reset the environment to avoid leaking the compile environment
+
+            Var.pushThreadBindings(RT.mapUniqueKeys(
+                MethodVar, null,
+                LocalEnvVar, null,
+                LoopLocalsVar, null,
+                NextLocalNumVar, 0,
+                //RT.ReadEvalVar, true /* RT.T */,
+                //RT.CurrentNSVar, RT.CurrentNSVar.deref(),  Do not reset this -- we need to see changes to this that might happen, e.g. with (ns ..) or (in-ns ...) calls
+                ConstantsVar, PersistentVector.EMPTY,
+                ConstantIdsVar, new IdentityHashMap(),
+                KeywordsVar, PersistentHashMap.EMPTY,
+                VarsVar, PersistentHashMap.EMPTY,
+                //RT.UncheckedMathVar, RT.UncheckedMathVar.deref(),
+                //RT.WarnOnReflectionVar, RT.WarnOnReflectionVar.deref(),
+                //RT.DataReadersVar, RT.DataReadersVar.deref(),
+                CompilerContextVar, null,
+                CompilerActiveVar, false,
+                DirectLinkingMapVar, null       // we do not want to have the evaluated version try to direct link to functions in the compile assembly
+                ));
+            try
+            {
+                Compiler.eval(form);
+            }
+            finally
+            {
+                Var.popThreadBindings();
+            }
+        }
+
         #endregion
-        
+
         #region Loading
 
         internal static void LoadAssembly(FileInfo assyInfo, string relativePath)

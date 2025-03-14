@@ -29,6 +29,14 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
 
+#if NETFRAMEWORK
+using AssemblyGenT = Microsoft.Scripting.Generation.AssemblyGen;
+using TypeGenT = Microsoft.Scripting.Generation.TypeGen;
+#else
+using AssemblyGenT = clojure.lang.CljCompiler.Context.MyAssemblyGen;
+using TypeGenT = clojure.lang.CljCompiler.Context.MyTypeGen;
+#endif
+
 namespace clojure.lang.CljCompiler.Context
 {
 
@@ -37,9 +45,9 @@ namespace clojure.lang.CljCompiler.Context
         #region Data
 
         int _id;
-        readonly AssemblyGen _assemblyGen;
+        readonly AssemblyGenT _assemblyGen;
         TypeBuilder _typeBuilder;
-        TypeGen _typeGen;
+        TypeGenT _typeGen;
 
         readonly string _typeName;
 
@@ -68,7 +76,7 @@ namespace clojure.lang.CljCompiler.Context
 
         #region Ctors and factories
 
-        public DynInitHelper(AssemblyGen ag, string typeName)
+        public DynInitHelper(AssemblyGenT ag, string typeName)
         {
             _assemblyGen = ag;
             _typeName = typeName;
@@ -116,13 +124,13 @@ namespace clojure.lang.CljCompiler.Context
             if (_typeBuilder == null)
             {
                 _typeBuilder = _assemblyGen.DefinePublicType(_typeName, typeof(object), true);
-                _typeGen = new TypeGen(_assemblyGen, _typeBuilder);
+                _typeGen = new TypeGenT(_assemblyGen, _typeBuilder);
                 _siteInfos = new List<SiteInfo>();
             }
         }
 
 
-        private Expression RewriteCallSite(CallSite site, TypeGen tg, Type delegateType, out SiteInfo siteInfo)
+        private Expression RewriteCallSite(CallSite site, TypeGenT tg, Type delegateType, out SiteInfo siteInfo)
         {
             if (!(site.Binder is IExpressionSerializable))
             {
