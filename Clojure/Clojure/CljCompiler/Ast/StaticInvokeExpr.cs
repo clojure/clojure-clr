@@ -13,6 +13,7 @@
  **/
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -82,6 +83,15 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             Type target = v.get().GetType();
+
+            {
+                var directLinkMap = Compiler.DirectLinkingMapVar.deref() as Dictionary<Var, Type>;
+                if (directLinkMap != null && directLinkMap.TryGetValue(v, out Type t))
+                {
+                    if (t != null)
+                        target = t;
+                }
+            }
 
             MethodInfo[] allMethods = target.GetMethods();
             bool variadic = false;

@@ -18,6 +18,15 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using AstUtils = Microsoft.Scripting.Ast.Utils;
+using System.Collections.Concurrent;
+using clojure.lang.CljCompiler.Ast;
+
+#if NETFRAMEWORK
+using AssemblyGenT = Microsoft.Scripting.Generation.AssemblyGen;
+#else
+using AssemblyGenT = clojure.lang.CljCompiler.Context.MyAssemblyGen;
+#endif
+
 
 namespace clojure.lang.CljCompiler.Context
 {
@@ -25,8 +34,8 @@ namespace clojure.lang.CljCompiler.Context
     {
         #region Data
 
-        readonly AssemblyGen _assyGen;
-        public AssemblyGen AssemblyGen
+        readonly AssemblyGenT _assyGen;
+        public AssemblyGenT AssemblyGen
         {
             get { return _assyGen; }
         }
@@ -73,28 +82,47 @@ namespace clojure.lang.CljCompiler.Context
 
         #region C-tors & factory methods
 
-        private readonly static Dictionary<Assembly, bool> InternalAssemblies = new Dictionary<Assembly, bool>();
-
-        private static void AddInternalAssembly(Assembly a)
+        private class DefaultAssemblyComparer : IEqualityComparer<Assembly>
         {
-            lock (((ICollection)InternalAssemblies).SyncRoot)
-            {
-                InternalAssemblies[a] = true;
-            }
+            public bool Equals(Assembly x, Assembly y) => Object.ReferenceEquals(x, y);
+            public int GetHashCode(Assembly obj) => obj.GetHashCode();
         }
 
-        public static bool IsInternalAssembly(Assembly a)
+        private readonly static ConcurrentDictionary<Assembly, bool> _internalAssemblies = new ConcurrentDictionary<Assembly, bool>(new DefaultAssemblyComparer());
+        public static bool IsInternalAssembly(Assembly a) => a is not null && _internalAssemblies.ContainsKey(a);
+
+        private static void AddInternalAssembly(GenContext ctx)
         {
-            lock (((ICollection)InternalAssemblies).SyncRoot)
-            {
-                return InternalAssemblies.ContainsKey(a);
-            }
+            // Sometime we are looking up via the AssemblyBuilder.
+            // But sometimes we are accessing via a method on a type. The defining assembly is actually a RuntimeAssembly, not the AssemblyBuilder itself.
+            // I'm not sure how else to find out what that RuntimeAssembly is, other than creating a type and a method and getting its assembly.
+            // We'll then register both the RuntimeAssembly and the AssemblyBuilder.
+
+            var module = ctx.ModuleBuilder;
+            var dummyType = module.DefineType("__________________DummyType");
+            var method = dummyType.DefineMethod("__________________DummyMethod", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
+            var il = method.GetILGenerator();
+            il.Emit(OpCodes.Ret);
+
+            dummyType.CreateType();
+
+            var runtimeMethod = dummyType.GetMethod("__________________DummyMethod");
+            var runtimeAssembly = runtimeMethod.DeclaringType.Assembly;
+
+            _internalAssemblies[ctx.AssemblyBuilder] = true;
+            _internalAssemblies[runtimeAssembly] = true;
         }
+
+
+
+
+
+        enum AssemblyType { Internal, External }
 
         public static GenContext CreateWithInternalAssembly(string assyName, bool createDynInitHelper)
         {
-            GenContext ctx = CreateGenContext(assyName, assyName, ".dll", null, createDynInitHelper);
-            AddInternalAssembly(ctx.AssemblyBuilder);
+            GenContext ctx = CreateGenContext(AssemblyType.Internal, assyName, assyName, ".dll", null, createDynInitHelper);
+            AddInternalAssembly(ctx);
             return ctx;
         }
 
@@ -108,7 +136,7 @@ namespace clojure.lang.CljCompiler.Context
         public static GenContext CreateWithExternalAssembly(string sourceName, string assyName, string extension, bool createDynInitHelper)
         {
             string path = Compiler.CompilePathVar.deref() as string;
-            return CreateGenContext(sourceName, assyName, extension, path ?? System.IO.Directory.GetCurrentDirectory(), createDynInitHelper);
+            return CreateGenContext(AssemblyType.External, sourceName, assyName, extension, path ?? System.IO.Directory.GetCurrentDirectory(), createDynInitHelper);
         }
 
         public static GenContext CreateWithExternalAssembly(string assyName, string extension, bool createDynInitHelper)
@@ -116,7 +144,7 @@ namespace clojure.lang.CljCompiler.Context
             return CreateWithExternalAssembly(assyName, assyName, extension, createDynInitHelper);
         }
 
-        private static GenContext CreateGenContext(string sourceName, string assyName, string extension, string directory, bool createDynInitHelper)
+        private static GenContext CreateGenContext(AssemblyType assemblyType, string sourceName, string assyName, string extension, string directory, bool createDynInitHelper)
         {
             if (directory != null)
             {
@@ -125,10 +153,10 @@ namespace clojure.lang.CljCompiler.Context
             }
 
             AssemblyName aname = new AssemblyName(assyName);
-            return new GenContext(directory, aname, extension, createDynInitHelper, sourceName);
+            return new GenContext(assemblyType, directory, aname, extension, createDynInitHelper, sourceName);
         }
 
-        private GenContext(string directory, AssemblyName aname, string extension, bool createDynInitHelper, string sourceName)
+        private GenContext(AssemblyType assemblyType, string directory, AssemblyName aname, string extension, bool createDynInitHelper, string sourceName)
         {
             // TODO: Make this settable from a *debug* flag
 #if DEBUG
@@ -137,7 +165,26 @@ namespace clojure.lang.CljCompiler.Context
             _isDebuggable = false;
 #endif
 
-            _assyGen = new AssemblyGen(aname, directory, extension, _isDebuggable);
+#if NETFRAMEWORK || NET9_0_OR_GREATER
+            switch (assemblyType)
+            {
+                case AssemblyType.Internal:
+#if NETFRAMEWORK
+                    _assyGen = new AssemblyGenT(aname, directory, extension, _isDebuggable);  // The Microsoft version has only the single 4-arg constructor
+#else
+                    _assyGen = new MyAssemblyGen(aname, _isDebuggable);   // MyAssemblyGen has a two-arg version -- this indicates Internal.
+#endif
+                    break;
+                case AssemblyType.External:
+                    _assyGen = new AssemblyGenT(aname, directory, extension, _isDebuggable);
+                    break;
+                default:
+                    throw new InvalidOperationException("Unknown AssemblyType");
+            }
+#else
+            _assyGen = new MyAssemblyGen(aname, _isDebuggable);
+#endif
+
             if (createDynInitHelper)
                 _dynInitHelper = new DynInitHelper(_assyGen, GenerateName());
 
@@ -150,6 +197,9 @@ namespace clojure.lang.CljCompiler.Context
 #if NETFRAMEWORK
             if (_isDebuggable)
                 _docWriter = ModuleBuilder.DefineDocument(sourceName, ClojureContext.Default.LanguageGuid, ClojureContext.Default.VendorGuid, Guid.Empty);
+#elif NET9_0_OR_GREATER
+            if (_isDebuggable && assemblyType == AssemblyType.External)
+                _docWriter = ModuleBuilder.DefineDocument(sourceName, ClojureContext.Default.LanguageGuid); 
 #endif
         }
 
@@ -194,7 +244,7 @@ namespace clojure.lang.CljCompiler.Context
             return newContext;
         }
 
-        #endregion
+#endregion
 
         #region Other
 
@@ -204,7 +254,7 @@ namespace clojure.lang.CljCompiler.Context
             if (_dynInitHelper != null)
                 _dynInitHelper.FinalizeType();
 
-#if NETFRAMEWORK                 
+#if NETFRAMEWORK  || NET9_0_OR_GREATER
             _assyGen.SaveAssembly();
 #else
             Console.WriteLine("AOT-compilation not available");
@@ -239,22 +289,22 @@ namespace clojure.lang.CljCompiler.Context
             return expr;
         }
 
-        public static void EmitDebugInfo(ILGen ilg, IPersistentMap spanMap)
+        public static void EmitDebugInfo(CljILGen ilg, IPersistentMap spanMap)
         {
             if (Compiler.CompilerContextVar.deref() is GenContext context)
                 context.MaybeEmitDebugInfo(ilg, spanMap);
         }
 
-        public void MaybeEmitDebugInfo(ILGen ilg, IPersistentMap spanMap)
+        public void MaybeEmitDebugInfo(CljILGen ilg, IPersistentMap spanMap)
         {
-#if NETFRAMEWORK
+#if NETFRAMEWORK || NET9_0_OR_GREATER
             if (_docWriter != null && spanMap != null)
             {
                 if (Compiler.GetLocations(spanMap, out int startLine, out int startCol, out int finishLine, out int finishCol))
                 {
                     try
                     {
-                        ilg.MarkSequencePoint(_docWriter, startLine, startCol, finishLine, finishCol);
+                        ilg.ILGenerator.MarkSequencePoint(_docWriter, startLine, startCol, finishLine, finishCol);
                     }
                     catch (NotSupportedException)
                     {

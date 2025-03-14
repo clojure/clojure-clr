@@ -167,15 +167,23 @@ namespace clojure.lang.CljCompiler.Ast
                     int arity = RT.count(form.next());
                     object sigtag = SigTag(arity, v);
                     object vtag = RT.get(RT.meta(v), RT.TagKey);
-                    if (StaticInvokeExpr.Parse(v, RT.next(form), formTag ?? sigtag ?? vtag) is StaticInvokeExpr ret && !((Compiler.IsCompiling || Compiler.IsCompilingDefType) && GenContext.IsInternalAssembly(ret.Method.DeclaringType.Assembly)))
+                    //if (StaticInvokeExpr.Parse(v, RT.next(form), formTag ?? sigtag ?? vtag) is StaticInvokeExpr ret && !((Compiler.IsCompiling || Compiler.IsCompilingDefType) && GenContext.IsInternalAssembly(ret.Method.DeclaringType.Assembly)))
+                    //{
+                    //    //Console.WriteLine("invoke direct: {0}", v);
+                    //    return ret;
+                    //}
+                    ////Console.WriteLine("NOT direct: {0}", v);
+                    if (StaticInvokeExpr.Parse(v, RT.next(form), formTag ?? sigtag ?? vtag) is StaticInvokeExpr ret)
                     {
-                        //Console.WriteLine("invoke direct: {0}", v);
-                        return ret;
+                        var isCompiling = Compiler.IsCompiling || Compiler.IsCompilingDefType;
+                        var retAssembly = ret.Method.DeclaringType.Assembly;
+                        var isInternal = GenContext.IsInternalAssembly(retAssembly);
+                        if (!(isCompiling && isInternal))
+                            return ret;
                     }
-                    //Console.WriteLine("NOT direct: {0}", v);
                 }
             }
-
+            
             if (varFexpr != null && pcon.Rhc != RHC.Eval)
             {
                 Var v = varFexpr.Var;
