@@ -39,6 +39,23 @@ namespace clojure.lang
         static readonly Dictionary<String, Type> _evalTypeMap = new Dictionary<string, Type>();
         static readonly Dictionary<String, Type> _compilerTypeMap = new Dictionary<string, Type>();
 
+#if NETFRAMEWORK
+
+        // preserve the original versions of these methods under NETFRAMEWORK.
+        // Otherwise, we viodate the tests of CLJ-979 in test_clojure/compilation2.
+        // This may be unavoidable in .Net 9.0 and later.
+
+        internal static void RegisterDuplicateType(Type type)
+        {
+                _evalTypeMap[type.FullName] = type;
+        }
+
+        internal static Type FindDuplicateType(string typename)
+        {
+            _evalTypeMap.TryGetValue(typename, out Type type);
+            return type;
+        }
+#else
         internal static void RegisterDuplicateType(Type type)
         {
             if (Compiler.IsCompiling)
@@ -55,6 +72,7 @@ namespace clojure.lang
             _evalTypeMap.TryGetValue(typename, out Type type);
             return type;
         }
+#endif
 
         #endregion
 
