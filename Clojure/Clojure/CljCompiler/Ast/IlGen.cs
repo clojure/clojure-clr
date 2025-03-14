@@ -25,9 +25,16 @@ namespace clojure.lang.CljCompiler.Ast
 {
     public class CljILGen : ILGen
     {
+        private readonly ILGenerator _ilGenerator;
+        public ILGenerator ILGenerator
+        {
+            get { return _ilGenerator; }
+        }
+
         public CljILGen(ILGenerator baseIlg)
             : base(baseIlg)
         {
+            _ilGenerator = baseIlg;
         }
 
         private static bool IsVolatile(FieldInfo fi)
