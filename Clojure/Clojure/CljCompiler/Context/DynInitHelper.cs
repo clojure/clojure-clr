@@ -8,23 +8,28 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
+/* Unmerged change from project 'Clojure (net90)'
+Added:
+using clojure;
+using clojure.lang;
+using clojure.lang.CljCompiler;
+using clojure.lang.CljCompiler.Ast;
+using clojure.lang.CljCompiler.Context;
+*/
+using clojure.lang.CljCompiler.Ast;
+using clojure.lang.Runtime.Binding;
+using Microsoft.Scripting.Generation;
+using Microsoft.Scripting.Runtime;
+using Microsoft.Scripting.Utils;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Reflection.Emit;
-using System.Reflection;
 using System.Linq.Expressions;
-using Microsoft.Scripting.Generation;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using Microsoft.Scripting.Utils;
-using Microsoft.Scripting.Runtime;
-using clojure.lang.Runtime.Binding;
+using System.Text;
 
-namespace clojure.lang.CljCompiler.Ast
+namespace clojure.lang.CljCompiler.Context
 {
 
     class DynInitHelper
@@ -125,7 +130,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             Type siteType = site.GetType();
-            FieldBuilder fb = tg.AddStaticField(siteType, "sf" + (_id++).ToString());
+            FieldBuilder fb = tg.AddStaticField(siteType, "sf" + _id++.ToString());
             siteInfo = new SiteInfo(fb, siteType, site.Binder, delegateType);
             _siteInfos.Add(siteInfo);
 
@@ -190,7 +195,7 @@ namespace clojure.lang.CljCompiler.Ast
             }
 
             var module = delegateType.Module as ModuleBuilder;
- 
+
             if (module == null)
             {
                 return false;
@@ -248,15 +253,15 @@ namespace clojure.lang.CljCompiler.Ast
         private const MethodImplAttributes ImplAttributes = MethodImplAttributes.Runtime | MethodImplAttributes.Managed;
         private const MethodAttributes InvokeAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
         private const TypeAttributes DelegateAttributes = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass;
-        private static readonly Type[] _DelegateCtorSignature = new Type[] { typeof(object), typeof(IntPtr) };
+        private static readonly Type[] _DelegateCtorSignature = new Type[] { typeof(object), typeof(nint) };
 
-#endregion
+        #endregion
 
         #region Finalizing
 
         public void FinalizeType()
         {
-            if (_typeBuilder != null && ! _typeBuilder.IsCreated())
+            if (_typeBuilder != null && !_typeBuilder.IsCreated())
             {
                 CreateStaticCtor();
                 _typeGen.FinishType();
@@ -270,7 +275,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             foreach (SiteInfo si in _siteInfos)
             {
-                string setterName = String.Format("{0}_setter", si.FieldBuilder.Name);
+                string setterName = string.Format("{0}_setter", si.FieldBuilder.Name);
 
                 MethodBuilder mbSetter = _typeBuilder.DefineMethod(
                     setterName,
@@ -291,7 +296,7 @@ namespace clojure.lang.CljCompiler.Ast
                 LocalBuilder v0 = setterIlg.DeclareLocal(si.FieldBuilder.FieldType);
                 setterIlg.Emit(OpCodes.Stloc, v0);
                 setterIlg.Emit(OpCodes.Stsfld, si.FieldBuilder);
-                setterIlg.Emit(OpCodes.Ldloc,v0);
+                setterIlg.Emit(OpCodes.Ldloc, v0);
                 setterIlg.Emit(OpCodes.Ret);
 
                 gen.EmitCall(mbSetter);
@@ -303,7 +308,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
- 
+
     }
 
     static class ClrExtensions
@@ -323,7 +328,7 @@ namespace clojure.lang.CljCompiler.Ast
         #region Stolen from the DLR
 
 
-        internal static U[] Map<T, U>(this ICollection<T> collection, System.Func<T, U> select)
+        internal static U[] Map<T, U>(this ICollection<T> collection, Func<T, U> select)
         {
             int count = collection.Count;
             U[] result = new U[count];

@@ -8,15 +8,15 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
+using clojure.lang.CljCompiler.Context;
+using clojure.lang.Runtime;
+using clojure.lang.Runtime.Binding;
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Dynamic;
+using System.Linq.Expressions;
 using System.Reflection;
-using clojure.lang.Runtime.Binding;
-using clojure.lang.Runtime;
 using System.Reflection.Emit;
-using System.Linq;
 
 namespace clojure.lang.CljCompiler.Ast
 {

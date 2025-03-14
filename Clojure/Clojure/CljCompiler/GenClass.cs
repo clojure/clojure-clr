@@ -19,10 +19,11 @@ using System.Reflection;
 using System.Reflection.Emit;
 using clojure.lang.CljCompiler;
 using clojure.lang.CljCompiler.Ast;
+using clojure.lang.CljCompiler.Context;
 using Microsoft.Scripting.Generation;
 
 namespace clojure.lang
-{  
+{
     public static class GenClass
     { 
         #region Data

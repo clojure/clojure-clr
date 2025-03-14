@@ -8,23 +8,19 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
+using clojure.lang.CljCompiler.Ast;
+using clojure.lang.CljCompiler.Context;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
 using System.IO;
-using System.Threading;
-using clojure.lang.CljCompiler.Ast;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text.RegularExpressions;
 using System.Runtime.Serialization;
-using System.Collections;
-using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace clojure.lang
 {

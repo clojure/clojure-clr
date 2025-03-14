@@ -8,15 +8,11 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
+using clojure.lang.CljCompiler.Context;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Linq.Expressions;
-using clojure.lang.CljCompiler.Ast;
+using System.Reflection;
 
 
 namespace clojure.lang
