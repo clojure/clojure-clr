@@ -118,6 +118,10 @@ namespace clojure.lang
             Type t = proxyTB.CreateType();
             //if (Compiler.IsCompiling)
             //    SaveProxyContext();
+
+            if (Compiler.IsCompiling)
+                Compiler.RegisterDuplicateType(t);
+
             return t;
         }
 
