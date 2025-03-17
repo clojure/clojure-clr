@@ -427,7 +427,7 @@
                 (setf :buffer []))
                (write-white-space this)))
 	  (Flush []                                    ;; flush
-             (.ppflush ^PrettyFlush this)
+             (.ppflush ^clojure.pprint.PrettyFlush this)
              (let [^TextWriter w (getf :base)]
                (.Flush w)))                        ;;; .flush
 

@@ -416,13 +416,23 @@ namespace clojure.lang
             }
 
             foreach (Type ifType in allInterfaces)
-                foreach (PropertyInfo p in ifType.GetProperties())
+            {
+                try
                 {
-                    MethodSignature sig = new MethodSignature(p);
-                    if (!considered.Contains(sig))
-                        properties.Add(p);
-                    considered.Add(sig);
+                    foreach (PropertyInfo p in ifType.GetProperties())
+                    {
+                        MethodSignature sig = new MethodSignature(p);
+                        if (!considered.Contains(sig))
+                            properties.Add(p);
+                        considered.Add(sig);
+                    }
+                } 
+                catch (NotSupportedException e)
+                {
+                    // do nothing
+                    // Types in PersistedAssemblyBuilders throw on GetProperties
                 }
+            }
             foreach (PropertyInfo pi in properties)
             {
                 PropertyBuilder pb = proxyTB.DefineProperty(pi.Name,

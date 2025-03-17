@@ -55,6 +55,9 @@ namespace clojure.lang
             _evalTypeMap.TryGetValue(typename, out Type type);
             return type;
         }
+
+        internal static Type FindDuplicateCompiledType(string typename) => null;
+
 #else
         internal static void RegisterDuplicateType(Type type)
         {
@@ -62,6 +65,7 @@ namespace clojure.lang
                 _compilerTypeMap[type.FullName] = type;
             else
                 _evalTypeMap[type.FullName] = type;
+            Console.WriteLine($"Register {type.FullName}, isCompilning = {Compiler.IsCompiling}");
         }
 
         internal static Type FindDuplicateType(string typename)
@@ -72,6 +76,15 @@ namespace clojure.lang
             _evalTypeMap.TryGetValue(typename, out Type type);
             return type;
         }
+
+        internal static Type FindDuplicateCompiledType(string typename)
+        {
+            if (_compilerTypeMap.TryGetValue(typename, out Type compiledType))
+                return compiledType;
+            else
+                return null;
+        }
+
 #endif
 
         #endregion
@@ -106,6 +119,8 @@ namespace clojure.lang
         public static readonly Symbol ThisSym = Symbol.intern("this");
         public static readonly Symbol ReifySym = Symbol.intern("reify*");
         public static readonly Symbol AmpersandSym = Symbol.intern("&");
+
+        public static readonly Symbol ParseEvalSym = Symbol.intern("parse-eval*");
 
         public static readonly Symbol IdentitySym = Symbol.intern("clojure.core", "identity");
 
@@ -301,7 +316,8 @@ namespace clojure.lang
             CatchSym, null,
             FinallySym, null,
             NewSym, new NewExpr.Parser(),
-            AmpersandSym, null
+            AmpersandSym, null,
+            ParseEvalSym, new ParseEvalExpr.Parser()
         );
 
         public static bool IsSpecial(Object sym)
@@ -620,7 +636,7 @@ namespace clojure.lang
         public static object maybeResolveIn(Namespace n, Symbol symbol)
         {
             // note: ns-qualified vars must already exist
-            if (symbol.Namespace != null)
+             if (symbol.Namespace != null)
             {
                 Namespace ns = namespaceFor(n, symbol);
                 if (ns == null)
@@ -641,7 +657,16 @@ namespace clojure.lang
             else
             {
                 object o = n.GetMapping(symbol);
+                if (o is Type type)
+                {
+                    var tName = type.FullName;
+                    var compiledType = Compiler.FindDuplicateCompiledType(tName);
+                    if ( compiledType is not null && Compiler.IsCompiling)
+                        return compiledType;                       
+                }
+
                 return o;
+
             }
         }
 
