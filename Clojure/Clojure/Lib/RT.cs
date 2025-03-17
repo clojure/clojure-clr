@@ -2763,10 +2763,22 @@ namespace clojure.lang
         public static Type classForName(string p)
         {
 
+            // This used to come later.  Moved it up to the top for compiling definterface, e.g.
+            //  (definterface IMyInterface ... )
+            //  First compiled create IMyInterface classs, gets stored in the compiled-types map.
+            //  Then eval'd so the we update the current environment and store the the eval-types map.
+            //  However, definterface does an import, it picks up the version in the eval-types map.
+            //  When a subsequent call tries to get IMyInterface, it was being found by Type.GetType.
+            //  So code being compiled was picking up the eval'd version instead of the compiled version.
+
+            Type t = Compiler.FindDuplicateType(p);
+            if (t != null)
+                return t;
+
             // fastest path, will succeed for assembly qualified names (returned by Type.AssemblyQualifiedName)
             // or namespace qualified names (returned by Type.FullName) in the executing assembly or mscorlib
             // e.g. "UnityEngine.Transform, UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"
-            Type t = Type.GetType(p, false);
+            t = Type.GetType(p, false);
 
             // Added the IsPublic check to deal with shadowed types in .Net Core,
             // e.g. System.Environment in assemblies System.Private.CoreLib and System.Runtime.Exceptions.
@@ -2775,9 +2787,8 @@ namespace clojure.lang
             if (t != null && (t.IsPublic || t.IsNestedPublic))
                 return t;
 
-            t = Compiler.FindDuplicateType(p);
-            if (t != null)
-                return t;
+
+
 
             AppDomain domain = AppDomain.CurrentDomain;
             Assembly[] assys = domain.GetAssemblies();

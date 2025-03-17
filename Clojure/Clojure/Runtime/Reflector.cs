@@ -61,9 +61,18 @@ namespace clojure.lang
 
             foreach (Type type in typesToCheck)
             {
-                IEnumerable<PropertyInfo> einfo
-                     = type.GetProperties(flags).Where(info => info.Name == name && info.GetIndexParameters().Length == 0);
-                pinfos.AddRange(einfo);
+                try
+                {
+
+                    IEnumerable<PropertyInfo> einfo
+                         = type.GetProperties(flags).Where(info => info.Name == name && info.GetIndexParameters().Length == 0);
+                    pinfos.AddRange(einfo);
+                }
+                catch (NotSupportedException)
+                {
+                    // do nothing
+                    // Types in PersistedAssemblyBuilders throw on GetProperties
+                }
             }
 
 
