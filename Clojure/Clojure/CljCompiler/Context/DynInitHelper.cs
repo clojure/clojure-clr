@@ -27,7 +27,11 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Xml.Serialization;
+
 
 #if NETFRAMEWORK
 using AssemblyGenT = Microsoft.Scripting.Generation.AssemblyGen;
@@ -223,19 +227,58 @@ namespace clojure.lang.CljCompiler.Context
             return false;
         }
 
-        // From Microsoft.Scripting.Generation.AssemblyGen
-        // Adapted to not being a method of AssemblyGen, which causes me to copy a WHOLE BUNCH of stuff.
+        //        // From Microsoft.Scripting.Generation.AssemblyGen
+        //        // Adapted to not being a method of AssemblyGen, which causes me to copy a WHOLE BUNCH of stuff.
 
-        internal Type MakeDelegateType(string name, Type[] parameters, Type returnType)
-        {
-            TypeBuilder builder = /* _assemblyGen. */DefineType(name, typeof(MulticastDelegate), DelegateAttributes, false);
-            builder.DefineConstructor(CtorAttributes, CallingConventions.Standard, _DelegateCtorSignature).SetImplementationFlags(ImplAttributes);
-            builder.DefineMethod("Invoke", InvokeAttributes, returnType, parameters).SetImplementationFlags(ImplAttributes);
-            return builder.CreateType();
-        }
+        //        internal Type MakeDelegateType(string name, Type[] parameters, Type returnType)
+        //        {
+        //            TypeBuilder builder = /* _assemblyGen. */DefineType(name, typeof(MulticastDelegate), DelegateAttributes, false);
+        //#if NET9_0_OR_GREATER
+        //            // cannot call SetImplementationFlags on a PersistedAssemblyBuilder
+        //            builder.DefineConstructor(CtorAttributes, CallingConventions.Standard, _DelegateCtorSignature);
+        //            builder.DefineMethod("Invoke", InvokeAttributes, returnType, parameters);
+        //#else
+        //            builder.DefineConstructor(CtorAttributes, CallingConventions.Standard, _DelegateCtorSignature).SetImplementationFlags(ImplAttributes);
+        //            builder.DefineMethod("Invoke", InvokeAttributes, returnType, parameters).SetImplementationFlags(ImplAttributes);
+        //#endif
+        //            return builder.CreateType();
+        //        }
 
-        // From Microsoft.Scripting.Generation.AssemblyGen
-        //private int _index;
+        //// From Microsoft.Scripting.Generation.AssemblyGen
+        ////private int _index;
+        //internal TypeBuilder DefineType(string name, Type parent, TypeAttributes attr, bool preserveName)
+        //{
+        //    ContractUtils.RequiresNotNull(name, nameof(name));
+        //    ContractUtils.RequiresNotNull(parent, nameof(parent));
+
+        //    StringBuilder sb = new StringBuilder(name);
+        //    if (!preserveName)
+        //    {
+        //        int index = RT.nextID(); //Interlocked.Increment(ref _index);
+        //        sb.Append('$');
+        //        sb.Append(index);
+        //    }
+
+        //    // There is a bug in Reflection.Emit that leads to 
+        //    // Unhandled Exception: System.Runtime.InteropServices.COMException (0x80131130): Record not found on lookup.
+        //    // if there is any of the characters []*&+,\ in the type name and a method defined on the type is called.
+        //    sb.Replace('+', '_').Replace('[', '_').Replace(']', '_').Replace('*', '_').Replace('&', '_').Replace(',', '_').Replace('\\', '_');
+
+        //    name = sb.ToString();
+        //    return /* _myModule */ _assemblyGen.ModuleBuilder.DefineType(name, attr, parent);
+        //}
+        //private const MethodAttributes CtorAttributes = MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public;
+        //private const MethodImplAttributes ImplAttributes = MethodImplAttributes.Runtime | MethodImplAttributes.Managed;
+        //private const MethodAttributes InvokeAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
+        //private const TypeAttributes DelegateAttributes = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass;
+        //private static readonly Type[] _DelegateCtorSignature = new Type[] { typeof(object), typeof(nint) };
+
+        // I had been using code (shown above) take from Microsoft.Scripting.Generation.AssemblyGen.
+        // Elsewhere (MethodExpr) I had been using similar code from Microsoft.Scripting.Generation.Snippets.
+        // I need to modify the Snippets code to work with PersistedAssemblyBuilder.  (There is a call to add MethodImplAttributes to the emthod metadata that fails.)
+
+        // The two code bases are almost identical.  THe code below combines them as appropriate and conditionalizes for PersistentAssemblyBuilder.
+
         internal TypeBuilder DefineType(string name, Type parent, TypeAttributes attr, bool preserveName)
         {
             ContractUtils.RequiresNotNull(name, nameof(name));
@@ -244,8 +287,8 @@ namespace clojure.lang.CljCompiler.Context
             StringBuilder sb = new StringBuilder(name);
             if (!preserveName)
             {
-                int index = RT.nextID(); //Interlocked.Increment(ref _index);
-                sb.Append('$');
+                int index = RT.nextID();
+                sb.Append("$");
                 sb.Append(index);
             }
 
@@ -255,15 +298,59 @@ namespace clojure.lang.CljCompiler.Context
             sb.Replace('+', '_').Replace('[', '_').Replace(']', '_').Replace('*', '_').Replace('&', '_').Replace(',', '_').Replace('\\', '_');
 
             name = sb.ToString();
-            return /* _myModule */ _assemblyGen.ModuleBuilder.DefineType(name, attr, parent);
+
+            return _assemblyGen.ModuleBuilder.DefineType(name, attr, parent);
         }
+
+
+        public Type MakeDelegateType(string name, Type[] parameters, Type returnType)
+        {
+            TypeBuilder builder = DefineType(name, typeof(MulticastDelegate), DelegateAttributes, false);
+            var ctor = builder.DefineConstructor(CtorAttributes, CallingConventions.Standard, _DelegateCtorSignature);
+            var method = builder.DefineMethod("Invoke", InvokeAttributes, returnType, parameters);
+
+#if NET9_0_OR_GREATER
+
+            if ( _assemblyGen.AssemblyBuilder is PersistedAssemblyBuilder)
+            {
+                // We cannot call SetImplementationFlags on a PersistedAssemblyBuilder -- trhows an error.
+                // Without doing this, we get a different error = .ctor does not have a body.
+                // That's be cause the MethodImplAttributes.Runtime flag indicates that the runtime should provide the implementation.
+                // Since we can't specify that the runtime should define the constructor body, we'll have to do it ourselves.
+                // Basically, all the superclass contstructor and return.
+
+                ////var baseCtor = typeof(MulticastDelegate).GetConstructor(_DelegateCtorSignature);
+                ////var allBaseCtors = typeof(MulticastDelegate).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                //CljILGen genCtor = new CljILGen(ctor.GetILGenerator());
+                ////gen.EmitLoadArg(0);
+                ////gen.EmitLoadArg(1);
+                ////gen.EmitLoadArg(2);
+                ////gen.Emit(OpCodes.Call, baseCtor);
+                //genCtor.Emit(OpCodes.Ret);
+
+                ctor.SetImplementationFlags(ImplAttributes);
+                method.SetImplementationFlags(ImplAttributes);
+            }
+            else
+            {
+                ctor.SetImplementationFlags(ImplAttributes);
+                method.SetImplementationFlags(ImplAttributes);
+            }
+#else
+            ctor.SetImplementationFlags(ImplAttributes);
+            method.SetImplementationFlags(ImplAttributes);
+#endif
+
+            return builder.CreateTypeInfo();
+        }
+
         private const MethodAttributes CtorAttributes = MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public;
         private const MethodImplAttributes ImplAttributes = MethodImplAttributes.Runtime | MethodImplAttributes.Managed;
         private const MethodAttributes InvokeAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual;
         private const TypeAttributes DelegateAttributes = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.AnsiClass | TypeAttributes.AutoClass;
-        private static readonly Type[] _DelegateCtorSignature = new Type[] { typeof(object), typeof(nint) };
+        private static readonly Type[] _DelegateCtorSignature = new Type[] { typeof(object), typeof(IntPtr) };
 
-        #endregion
+#endregion
 
         #region Finalizing
 

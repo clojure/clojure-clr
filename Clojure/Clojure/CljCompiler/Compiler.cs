@@ -74,6 +74,10 @@ namespace clojure.lang
             { return compiledType; }
 
             _evalTypeMap.TryGetValue(typename, out Type type);
+
+            if (Compiler.IsCompiling && type != null)
+                Console.WriteLine("Compiling, but found eval type!");
+
             return type;
         }
 

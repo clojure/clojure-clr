@@ -88,6 +88,11 @@ namespace clojure.lang.CljCompiler.Ast
                 RT.errPrintWriter().Flush();
             }
 
+#if NET9_0_OR_GREATER
+            if (_type != null && Compiler.IsCompiling && _type.Assembly.IsDynamic && _type.Assembly is not PersistedAssemblyBuilder)
+                Console.WriteLine($"Compiling, found constructor for dynamic, non-persisted type: {_type}");
+#endif
+
             return ctor;
         }
 

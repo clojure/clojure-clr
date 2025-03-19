@@ -159,6 +159,8 @@ namespace clojure.lang.CljCompiler.Context
         private GenContext(AssemblyType assemblyType, string directory, AssemblyName aname, string extension, bool createDynInitHelper, string sourceName)
         {
             // TODO: Make this settable from a *debug* flag
+
+            Console.WriteLine($"Creating GenContext for {aname.Name}, {sourceName}");
 #if DEBUG
             _isDebuggable = true;
 #else

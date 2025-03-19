@@ -250,7 +250,15 @@ namespace clojure.lang.CljCompiler.Ast
                 typeof(System.Runtime.CompilerServices.CallSite)
             };
             callsiteParamTypes.AddRange(paramTypes);
-            Type dynType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, callsiteParamTypes.ToArray());
+           
+            // PLAN9: Seeing if replacing this helps.
+            //Type dynType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, callsiteParamTypes.ToArray());
+            GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
+            DynInitHelper dih = context?.DynInitHelper;
+            if (dih is null)
+                throw new InvalidOperationException("Don't know how to handle callsite in this case");
+            Type dynType = dih.MakeDelegateType("__interop__", callsiteParamTypes.ToArray(), returnType);
+
             DynamicExpression dyn = Expression.MakeDynamic(dynType, binder, paramExprs);
             EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _methodName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda);
 
@@ -323,13 +331,18 @@ namespace clojure.lang.CljCompiler.Ast
             call = GenContext.AddDebugInfo(call, spanMap);
 
 
-            delType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, paramTypes);
-            lambda = Expression.Lambda(delType, call, paramExprs);
+            // PLAN9 : seeing if we can replace this
+            // delType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, paramTypes);
+            delType = context.DynInitHelper.MakeDelegateType("__interop__", paramTypes, returnType);
+
+            lambda = null;
             mbLambda = null;
             
             if (context == null)
             {
                 // light compile
+
+                lambda = Expression.Lambda(delType, call, paramExprs);
 
                 Delegate d = lambda.Compile();
                 int key = RT.nextID();
