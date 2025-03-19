@@ -303,6 +303,7 @@ namespace clojure.lang.CljCompiler.Ast
                 BaseClassAltCtorNoHash = GetConstructorWithArgCount(t, CtorTypes().Length - 2);
             }
 
+            Compiler.RegisterDuplicateType(t);
             return t;
         }
 

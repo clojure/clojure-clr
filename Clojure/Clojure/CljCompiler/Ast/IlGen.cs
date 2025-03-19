@@ -35,12 +35,16 @@ namespace clojure.lang.CljCompiler.Ast
 
         private static bool IsVolatile(FieldInfo fi)
         {
-            // Cannot work with signatures on uncreated types
+            // Cannot work with signatures on uncreated types or from PersistedAssemblyBuilders
             {
                 Type t = fi.DeclaringType;
                 TypeBuilder tb = t as TypeBuilder;
                 if (tb != null && !tb.IsCreated())
                     return false;
+#if NET9_0_OR_GREATER
+                if (tb != null && tb.Assembly is PersistedAssemblyBuilder)
+                    return false;
+#endif
             }
 
             if (RT.IsRunningOnMono)

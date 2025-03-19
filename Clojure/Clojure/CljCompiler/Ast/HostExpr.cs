@@ -316,7 +316,14 @@ namespace clojure.lang.CljCompiler.Ast
                     {
                         object o = Compiler.CurrentNamespace.GetMapping(sym);
                         if (o is Type type1)
+                        {
                             t = type1;
+
+                            var tName = type1.FullName;
+                            var compiledType = Compiler.FindDuplicateCompiledType(tName);
+                            if (compiledType is not null && Compiler.IsCompiling)
+                                t =  compiledType;
+                        }
                         else if (Compiler.LocalEnvVar.deref() != null && ((IPersistentMap)Compiler.LocalEnvVar.deref()).containsKey(form))  // JVM casts to java.util.Map
                             return null;
                         else
