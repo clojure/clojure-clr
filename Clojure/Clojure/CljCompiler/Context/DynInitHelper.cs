@@ -93,7 +93,7 @@ namespace clojure.lang.CljCompiler.Context
         /// <summary>
         /// Reduces the provided DynamicExpression into site.Target(site, *args).
         /// </summary>
-        public Expression ReduceDyn(DynamicExpression node, out SiteInfo siteInfo)
+        public SiteInfo ComputeSiteInfo(DynamicExpression node)
         {
             MaybeInit();
 
@@ -102,25 +102,20 @@ namespace clojure.lang.CljCompiler.Context
                 node = Expression.MakeDynamic(delegateType, node.Binder, node.Arguments);
             }
 
-            CallSite cs = CallSite.Create(node.DelegateType, node.Binder);
-            // TODO: fix this eventually to return the SiteInfo and not the Expression
+            var binder = node.Binder;
+            if (binder is not IExpressionSerializable)
+            {
+                throw new ArgumentException("Generating code from non-serializable CallSiteBinder.");
+            }
 
-            Expression access = RewriteCallSite(cs, _typeGen, delegateType ?? node.DelegateType, out siteInfo);
+            Type delegateToUse = delegateType ?? node.DelegateType;
+            Type siteType = typeof(CallSite<>).MakeGenericType(delegateToUse);
+            FieldBuilder fb = _typeGen.AddStaticField(siteType, "sf" + _id++.ToString());
 
-            // ($site = siteExpr).Target.Invoke($site, *args)
-            ParameterExpression site = Expression.Variable(cs.GetType(), "$site");
+            var siteInfo = new SiteInfo(fb, siteType, binder, delegateToUse);
+            _siteInfos.Add(siteInfo);
 
-            return Expression.Block(
-                new[] { site },
-                Expression.Call(
-                    Expression.Field(
-                        Expression.Assign(site, access),
-                        cs.GetType().GetField("Target")
-                    ),
-                    node.DelegateType.GetMethod("Invoke"),
-                    ClrExtensions.ArrayInsert(site, node.Arguments)
-                )
-            );
+            return siteInfo;
         }
 
         private void MaybeInit()
@@ -131,23 +126,6 @@ namespace clojure.lang.CljCompiler.Context
                 _typeGen = new TypeGenT(_assemblyGen, _typeBuilder);
                 _siteInfos = new List<SiteInfo>();
             }
-        }
-
-
-        private Expression RewriteCallSite(CallSite site, TypeGenT tg, Type delegateType, out SiteInfo siteInfo)
-        {
-            if (!(site.Binder is IExpressionSerializable))
-            {
-                throw new ArgumentException("Generating code from non-serializable CallSiteBinder.");
-            }
-
-            Type siteType = site.GetType();
-            FieldBuilder fb = tg.AddStaticField(siteType, "sf" + _id++.ToString());
-            siteInfo = new SiteInfo(fb, siteType, site.Binder, delegateType);
-            _siteInfos.Add(siteInfo);
-
-            // rewrite the node...
-            return Expression.Field(null, fb);
         }
 
         #endregion
@@ -341,7 +319,7 @@ namespace clojure.lang.CljCompiler.Context
             method.SetImplementationFlags(ImplAttributes);
 #endif
 
-            return builder.CreateTypeInfo();
+            return builder.CreateType();
         }
 
         private const MethodAttributes CtorAttributes = MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public;
@@ -362,6 +340,16 @@ namespace clojure.lang.CljCompiler.Context
                 _typeGen.FinishType();
             }
         }
+
+        static readonly MethodInfo MI_CallSite_Create = typeof(CallSite<>).GetMethod("Create", BindingFlags.Static | BindingFlags.Public);
+        static MethodInfo GetCallSiteCreateMethod(Type siteType)
+        {
+            if (siteType is TypeBuilder || siteType.GetGenericArguments()[0] is TypeBuilder)
+                return TypeBuilder.GetMethod(siteType, MI_CallSite_Create);
+            else
+                return siteType.GetMethod("Create", BindingFlags.Static | BindingFlags.Public);
+        }
+
 
         void CreateStaticCtor()
         {
@@ -386,7 +374,9 @@ namespace clojure.lang.CljCompiler.Context
                     throw new InvalidOperationException("Binder of unknown type");
                 b.GenerateCreationIL(mbSetter.GetILGenerator());
 
-                setterIlg.EmitCall(si.SiteType.GetMethod("Create"));
+                //setterIlg.EmitCall(si.SiteType.GetMethod("Create"));
+                setterIlg.EmitCall(GetCallSiteCreateMethod(si.SiteType));
+
                 setterIlg.Emit(OpCodes.Dup);
                 LocalBuilder v0 = setterIlg.DeclareLocal(si.FieldBuilder.FieldType);
                 setterIlg.Emit(OpCodes.Stloc, v0);

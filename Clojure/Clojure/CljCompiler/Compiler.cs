@@ -10,6 +10,7 @@
 
 using clojure.lang.CljCompiler.Ast;
 using clojure.lang.CljCompiler.Context;
+using Microsoft.Scripting.Runtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -1813,6 +1814,12 @@ namespace clojure.lang
 
             try
             {
+                {
+                    var item = RT.first(form);
+                    if (item is Symbol s && s.Name.Equals("definline"))
+                        Console.WriteLine("definline!");
+                }
+
                 form = Macroexpand(form);
                 if (form is ISeq && Util.Equals(RT.first(form), DoSym))
                 {

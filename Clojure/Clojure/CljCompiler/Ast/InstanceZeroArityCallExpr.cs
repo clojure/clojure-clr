@@ -133,13 +133,13 @@ namespace clojure.lang.CljCompiler.Ast
             DynamicExpression dyn = Expression.Dynamic(binder, returnType, paramExprs);
 
 
-            MethodExpr.EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _memberName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda);
+            MethodExpr.EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _memberName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out Type delType, out MethodBuilder mbLambda);
 
             //  Emit target + args (no args, actually)
 
             _target.Emit(RHC.Expression, objx, ilg);
 
-            MethodExpr.EmitDynamicCallPostlude(lambda, delType, mbLambda, ilg);
+            MethodExpr.EmitDynamicCallPostlude(mbLambda, ilg);
  
         }
 

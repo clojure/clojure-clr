@@ -17,6 +17,8 @@ using System.Dynamic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using static clojure.lang.CljCompiler.Context.DynInitHelper;
 
 namespace clojure.lang.CljCompiler.Ast
 {
@@ -164,31 +166,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         private void EmitComplexCall(ObjExpr objx, CljILGen ilg)
         {
-            // TODO: We have gotten rid of light-compile. Simplify this.
-            // This is made more complex than I'd like by light-compiling.
-            // Without light-compile, we could just:
-            //   Emit the target expression
-            //   Emit the arguments (and build up the parameter list for the lambda)
-            //   Create the lambda, compile to a methodbuilder, and call it.
-            // Light-compile forces us to 
-            //     create a lambda at the beginning because we must 
-            //     compile it to a delegate, to get the type
-            //     write code to grab the delegate from a cache
-            //     Then emit the target expression
-            //          emit the arguments (but note we need already to have built the parameter list)
-            //          Call the delegate
-            //  Combined, this becomes
-            //      Build the parameter list
-            //      Build the dynamic call and lambda  (slightly different for light-compile vs full)
-            //      if light-compile
-            //          build the delegate
-            //          cache it
-            //          emit code to retrieve and cast it
-            //       emit the target expression
-            //       emit the args
-            //       emit the call (slightly different for light compile vs full)
-            //
-
             //  Build the parameter list
 
             List<ParameterExpression> paramExprs = new List<ParameterExpression>(_args.Count + 1);
@@ -260,7 +237,7 @@ namespace clojure.lang.CljCompiler.Ast
             Type dynType = dih.MakeDelegateType("__interop__", callsiteParamTypes.ToArray(), returnType);
 
             DynamicExpression dyn = Expression.MakeDynamic(dynType, binder, paramExprs);
-            EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _methodName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda);
+            EmitDynamicCallPreamble(dyn, _spanMap, "__interop_" + _methodName + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out Type delType, out MethodBuilder mbLambda);
 
             //  Emit target + args
 
@@ -295,7 +272,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            EmitDynamicCallPostlude(lambda, delType, mbLambda, ilg);
+            EmitDynamicCallPostlude(mbLambda, ilg);
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         public static void EmitByRefArg(HostArg ha, ObjExpr objx, CljILGen ilg)
@@ -308,116 +285,71 @@ namespace clojure.lang.CljCompiler.Ast
                 ilg.Emit(OpCodes.Ldloca, ha.LocalBinding.LocalVar);
         }
 
-        static public void EmitDynamicCallPreamble(DynamicExpression dyn, IPersistentMap spanMap, string methodName, Type returnType, IList<ParameterExpression> paramExprs, Type[] paramTypes, CljILGen ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda)
+        static readonly FieldInfo FI_CallSite_Target = typeof(CallSite<>).GetField("Target", BindingFlags.Instance | BindingFlags.Public);
+        static FieldInfo GetCallSiteTarget(Type siteType)
+        {
+            if (siteType is TypeBuilder || siteType.GetGenericArguments()[0] is TypeBuilder )
+                return TypeBuilder.GetField(siteType, FI_CallSite_Target);
+            else
+                return siteType.GetField("Target", BindingFlags.Instance | BindingFlags.Public);
+        }
+
+
+        static public void EmitDynamicCallPreamble(DynamicExpression dyn, IPersistentMap spanMap, string methodName, Type returnType, IList<ParameterExpression> paramExprs, Type[] paramTypes, CljILGen ilg, out Type delType, out MethodBuilder mbLambda)
         {
             GenContext context = Compiler.CompilerContextVar.deref() as GenContext;
-            DynInitHelper.SiteInfo siteInfo;
-            Expression call;
-            if (context != null && context.DynInitHelper != null)
-                call = context.DynInitHelper.ReduceDyn(dyn, out siteInfo);
-            else
+            
+            if (context is null || context.DynInitHelper is null)
                 throw new InvalidOperationException("Don't know how to handle callsite in this case");
 
-            if (returnType == typeof(void))
-            {
-                call = Expression.Block(call, Expression.Default(typeof(object)));
-                returnType = typeof(object);
-            }
-            else if (returnType != call.Type)
-            {
-                call = Expression.Convert(call, returnType);
-            }
-
-            call = GenContext.AddDebugInfo(call, spanMap);
-
+            DynInitHelper.SiteInfo siteInfo = context.DynInitHelper.ComputeSiteInfo(dyn);
 
             // PLAN9 : seeing if we can replace this
             // delType = Microsoft.Scripting.Generation.Snippets.Shared.DefineDelegate("__interop__", returnType, paramTypes);
             delType = context.DynInitHelper.MakeDelegateType("__interop__", paramTypes, returnType);
 
-            lambda = null;
-            mbLambda = null;
-            
-            if (context == null)
+            mbLambda = context.TB.DefineMethod(methodName, MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, paramTypes);
+            //lambda.CompileToMethod(mbLambda);
+            // Now we get to do all this code create by hand.
+            // the primary code is
+            // (loc1 = fb).Target.Invoke(loc1,*args);
+            // if return type if void, pop the value and push a null
+            // if return type does not match the call site, add a conversion
+            CljILGen ilg2 = new CljILGen(mbLambda.GetILGenerator());
+            ilg2.EmitFieldGet(siteInfo.FieldBuilder);
+            ilg2.Emit(OpCodes.Dup);
+            LocalBuilder siteVar = ilg2.DeclareLocal(siteInfo.SiteType);
+            ilg2.Emit(OpCodes.Stloc, siteVar);
+
+            var targetFI = GetCallSiteTarget(siteInfo.SiteType);    //  siteInfo.SiteType.GetField("Target");
+
+            ilg2.EmitFieldGet(targetFI);
+
+            ilg2.Emit(OpCodes.Ldloc, siteVar);
+            for (int i = 0; i < paramExprs.Count; i++)
+                ilg2.EmitLoadArg(i);
+
+            var invokeMethod = siteInfo.DelegateType.GetMethod("Invoke");
+            ilg2.EmitCall(invokeMethod);
+            if (returnType == typeof(void))
             {
-                // light compile
-
-                lambda = Expression.Lambda(delType, call, paramExprs);
-
-                Delegate d = lambda.Compile();
-                int key = RT.nextID();
-                CacheDelegate(key, d);
- 
-                ilg.EmitInt(key);
-                ilg.Emit(OpCodes.Call, Method_MethodExpr_GetDelegate);
-                ilg.Emit(OpCodes.Castclass, delType);
+                ilg2.Emit(OpCodes.Pop);
+                ilg2.EmitNull();
             }
-            else
+            else if (returnType != invokeMethod.ReturnType)
             {
-                mbLambda = context.TB.DefineMethod(methodName, MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, returnType, paramTypes);
-                //lambda.CompileToMethod(mbLambda);
-                // Now we get to do all this code create by hand.
-                // the primary code is
-                // (loc1 = fb).Target.Invoke(loc1,*args);
-                // if return type if void, pop the value and push a null
-                // if return type does not match the call site, add a conversion
-                CljILGen ilg2 = new CljILGen(mbLambda.GetILGenerator());
-                ilg2.EmitFieldGet(siteInfo.FieldBuilder);
-                ilg2.Emit(OpCodes.Dup);
-                LocalBuilder siteVar = ilg2.DeclareLocal(siteInfo.SiteType);
-                ilg2.Emit(OpCodes.Stloc, siteVar);
-                ilg2.EmitFieldGet(siteInfo.SiteType.GetField("Target"));
-                ilg2.Emit(OpCodes.Ldloc, siteVar);
-                for (int i = 0; i < paramExprs.Count; i++)
-                    ilg2.EmitLoadArg(i);
-
-                var invokeMethod = siteInfo.DelegateType.GetMethod("Invoke");
-                ilg2.EmitCall(invokeMethod);
-                if (returnType == typeof(void))
-                {
-                    ilg2.Emit(OpCodes.Pop);
-                    ilg2.EmitNull();
-                }
-                else if (returnType != invokeMethod.ReturnType)
-                {
-                    EmitConvertToType(ilg2, invokeMethod.ReturnType, returnType, false);
-                }
-
-                ilg2.Emit(OpCodes.Ret);
-
-
-                    /*
-                     *             return Expression.Block(
-                new[] { site },
-                Expression.Call(
-                    Expression.Field(
-                        Expression.Assign(site, access),
-                        cs.GetType().GetField("Target")
-                    ),
-                    node.DelegateType.GetMethod("Invoke"),
-                    ClrExtensions.ArrayInsert(site, node.Arguments)
-                )
-                */
-
-
+                EmitConvertToType(ilg2, invokeMethod.ReturnType, returnType, false);
             }
+
+            ilg2.Emit(OpCodes.Ret);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
-        static public void EmitDynamicCallPostlude(LambdaExpression lambda, Type delType, MethodBuilder mbLambda, CljILGen ilg)
+        static public void EmitDynamicCallPostlude(MethodBuilder mbLambda, CljILGen ilg)
         {
-            if (!(Compiler.CompilerContextVar.deref() is GenContext))
-            {
-                // light compile
-
-                MethodInfo mi = delType.GetMethod("Invoke");
-                ilg.Emit(OpCodes.Callvirt, mi);
-            }
-            else
-            {
-                ilg.Emit(OpCodes.Call, mbLambda);
-            }
+            ilg.Emit(OpCodes.Call, mbLambda);
         }
+        
 
         internal static void EmitArgsAsArray(IPersistentVector args, ObjExpr objx, CljILGen ilg)
         {

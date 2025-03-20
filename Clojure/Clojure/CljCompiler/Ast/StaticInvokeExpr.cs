@@ -183,6 +183,7 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 MethodExpr.EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
 
+            Console.WriteLine($"{_method.DeclaringType.FullName} . {_method.Name}, {_method.ToString()}");
             ilg.EmitCall(_method);
         }
 
