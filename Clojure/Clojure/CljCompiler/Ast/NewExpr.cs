@@ -251,7 +251,7 @@ namespace clojure.lang.CljCompiler.Ast
             CreateInstanceBinder binder = new ClojureCreateInstanceBinder(ClojureContext.Default, _args.Count);
             DynamicExpression dyn = Expression.Dynamic(binder, typeof(object), paramExprs);
 
-            MethodExpr.EmitDynamicCallPreamble(dyn, _spanMap, "__interop_ctor_" + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out LambdaExpression lambda, out Type delType, out MethodBuilder mbLambda);
+            MethodExpr.EmitDynamicCallPreamble(dyn, _spanMap, "__interop_ctor_" + RT.nextID(), returnType, paramExprs, paramTypes.ToArray(), ilg, out Type delType, out MethodBuilder mbLambda);
 
             //  Emit target + args
 
@@ -286,7 +286,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
             
-            MethodExpr.EmitDynamicCallPostlude(lambda, delType, mbLambda, ilg); 
+            MethodExpr.EmitDynamicCallPostlude(mbLambda, ilg); 
         }
 
         private void EmitTargetExpression(ObjExpr objx, CljILGen ilg)
