@@ -12,6 +12,7 @@
  *   Author: David Miller
  **/
 
+using clojure.lang.CljCompiler.Context;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -85,8 +86,16 @@ namespace clojure.lang.CljCompiler.Ast
             Type target = v.get().GetType();
 
             {
-                var directLinkMap = Compiler.DirectLinkingMapVar.deref() as Dictionary<Var, Type>;
-                if (directLinkMap != null && directLinkMap.TryGetValue(v, out Type t))
+                // DirectLinkingMap only contains Var -> Type mappings for Types that have been compiled.
+                // That is, types that are residing in a PersistedAssemblyBuilder.
+                // We do not want to direct link to if we going into a non-PersistedAssemblyBuilder assembly --
+                //   this throws an exception when generating the method call IL in the StaticInvokeExpr.Emit
+
+                if ( Compiler.IsCompiling && 
+                     Compiler.DirectLinkingMapVar.deref() is  Dictionary<Var, Type> directLinkMap && 
+                     Compiler.CompilerContextVar.deref() is GenContext context &&
+                     ! GenContext.IsInternalAssembly(context.AssemblyBuilder) &&
+                     directLinkMap.TryGetValue(v, out Type t))
                 {
                     if (t != null)
                         target = t;
@@ -183,11 +192,19 @@ namespace clojure.lang.CljCompiler.Ast
             else
                 MethodExpr.EmitTypedArgs(objx, ilg, _method.GetParameters(), _args);
 
-            Console.WriteLine($"{_method.DeclaringType.FullName} . {_method.Name}, {_method.ToString()}");
-            ilg.EmitCall(_method);
+
+            //ilg.EmitCall(_method);
+            if (_method.IsVirtual)
+            {
+                ilg.Emit(OpCodes.Callvirt, _method);
+            }
+            else
+            {
+                ilg.Emit(OpCodes.Call, _method);
+            }
         }
 
-        #endregion
+#endregion
 
         #region MaybePrimitiveExpr Members
 

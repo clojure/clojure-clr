@@ -160,7 +160,6 @@ namespace clojure.lang.CljCompiler.Context
         {
             // TODO: Make this settable from a *debug* flag
 
-            Console.WriteLine($"Creating GenContext for {aname.Name}, {sourceName}");
 #if DEBUG
             _isDebuggable = true;
 #else

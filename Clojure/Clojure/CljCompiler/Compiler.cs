@@ -66,7 +66,6 @@ namespace clojure.lang
                 _compilerTypeMap[type.FullName] = type;
             else
                 _evalTypeMap[type.FullName] = type;
-            Console.WriteLine($"Register {type.FullName}, isCompilning = {Compiler.IsCompiling}");
         }
 
         internal static Type FindDuplicateType(string typename)
@@ -75,9 +74,6 @@ namespace clojure.lang
             { return compiledType; }
 
             _evalTypeMap.TryGetValue(typename, out Type type);
-
-            if (Compiler.IsCompiling && type != null)
-                Console.WriteLine("Compiling, but found eval type!");
 
             return type;
         }
@@ -1814,12 +1810,6 @@ namespace clojure.lang
 
             try
             {
-                {
-                    var item = RT.first(form);
-                    if (item is Symbol s && s.Name.Equals("definline"))
-                        Console.WriteLine("definline!");
-                }
-
                 form = Macroexpand(form);
                 if (form is ISeq && Util.Equals(RT.first(form), DoSym))
                 {
