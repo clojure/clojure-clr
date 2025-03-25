@@ -21,7 +21,7 @@
 		<PackageReference Include="clojure.core.specs.alpha" Version="0.4.74" />
 		<PackageReference Include="clojure.spec.alpha" Version="0.5.238" />
 		<PackageReference Include="clojure.tools.reader" Version="1.5.0" />
-		<PackageReference Include="DynamicLanguageRuntime" Version="1.3.4" />
+		<PackageReference Include="DynamicLanguageRuntime" Version="1.3.5" />
 	</ItemGroup>
 
 
@@ -32,7 +32,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net90' ">
-		<PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.0" />
+		<PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.3" />
 	</ItemGroup>
 	
 
