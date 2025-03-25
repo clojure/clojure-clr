@@ -257,7 +257,11 @@ namespace clojure.lang.CljCompiler.Ast
             if (CompiledType != null)
                 return CompiledType;
 
-            string publicTypeName = IsDefType /* || (CanBeDirect && Compiler.IsCompiling) */ ? InternalName : InternalName + "__" + RT.nextID();
+#if NET9_0_OR_GREATER
+            string publicTypeName = IsDefType || (CanBeDirect && Compiler.IsCompiling) ? InternalName : InternalName + "__" + RT.nextID();
+#else
+            string publicTypeName = IsDefType ? InternalName : InternalName + "__" + RT.nextID();
+#endif
 
             TypeBuilder = context.AssemblyGen.DefinePublicType(publicTypeName, superType, true);
             context = context.WithNewDynInitHelper().WithTypeBuilder(TypeBuilder);
@@ -761,7 +765,7 @@ namespace clojure.lang.CljCompiler.Ast
             return null;
         }
 
-        #endregion
+#endregion
 
         #region Direct code generation
 
@@ -1205,6 +1209,6 @@ namespace clojure.lang.CljCompiler.Ast
 
         #endregion
 
-        #endregion
+#endregion
     }
 }
