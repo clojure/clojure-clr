@@ -24,7 +24,7 @@
   
   <PropertyGroup>	
 	
-	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">net8.0</TestTargetFramework>
+	<TestTargetFramework Condition=" '$(TestTargetFramework)' == '' ">net9.0</TestTargetFramework>
 	
 	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net9.0' AND '$(TestTargetFramework)' != 'net8.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
 		
