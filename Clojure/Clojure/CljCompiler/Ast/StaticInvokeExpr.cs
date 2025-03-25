@@ -8,13 +8,8 @@
  *   You must not remove this notice, or any other, from this software.
  **/
 
-/**
- *   Author: David Miller
- **/
-
 using clojure.lang.CljCompiler.Context;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -91,11 +86,10 @@ namespace clojure.lang.CljCompiler.Ast
                 // We do not want to direct link to if we going into a non-PersistedAssemblyBuilder assembly --
                 //   this throws an exception when generating the method call IL in the StaticInvokeExpr.Emit
 
-                if ( Compiler.IsCompiling && 
-                     Compiler.DirectLinkingMapVar.deref() is  Dictionary<Var, Type> directLinkMap && 
+                if ( Compiler.IsCompiling &&
                      Compiler.CompilerContextVar.deref() is GenContext context &&
                      ! GenContext.IsInternalAssembly(context.AssemblyBuilder) &&
-                     directLinkMap.TryGetValue(v, out Type t))
+                     Compiler.TryGetDirectLink(v, out Type t))
                 {
                     if (t != null)
                         target = t;
