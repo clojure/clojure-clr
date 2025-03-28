@@ -363,6 +363,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Reflector_SetInstanceFieldOrProperty = typeof(Reflector).GetMethod("SetInstanceFieldOrProperty");
 
         internal static readonly MethodInfo Method_RT_classForName = typeof(RT).GetMethod("classForName");
+        internal static readonly MethodInfo Method_RT_classForNameE = typeof(RT).GetMethod("classForNameE");
         internal static readonly MethodInfo Method_RT_intCast_long = typeof(RT).GetMethod("intCast", new Type[] { typeof(long) });
         internal static readonly MethodInfo Method_RT_uncheckedIntCast_long = typeof(RT).GetMethod("uncheckedIntCast", new Type[] { typeof(long) });
         internal static readonly MethodInfo Method_RT_keyword = typeof(RT).GetMethod("keyword");
@@ -629,6 +630,15 @@ namespace clojure.lang
                     return CompileStubClassVar.get();
 
                 object o = n.GetMapping(symbol);
+
+                if (o is Type type)
+                {
+                    var tName = type.FullName;
+                    var compiledType = Compiler.FindDuplicateCompiledType(tName);
+                    if (compiledType is not null && Compiler.IsCompiling)
+                        return compiledType;
+                }
+
                 if (o == null)
                 {
                     if (RT.booleanCast(RT.AllowUnresolvedVarsVar.deref()))
