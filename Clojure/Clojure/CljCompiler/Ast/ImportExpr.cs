@@ -89,7 +89,7 @@ namespace clojure.lang.CljCompiler.Ast
             //ilg.Emit(OpCodes.Call, Compiler.Method_Namespace_importClass2);
 
             ilg.Emit(OpCodes.Ldstr, _typeName);
-            ilg.Emit(OpCodes.Call, Compiler.Method_RT_classForName);
+            ilg.Emit(OpCodes.Call, Compiler.Method_RT_classForNameE);
             ilg.Emit(OpCodes.Call, Compiler.Method_Namespace_importClass1);
             if (rhc == RHC.Statement)
                 ilg.Emit(OpCodes.Pop);

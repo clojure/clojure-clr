@@ -39,7 +39,7 @@
 	<ClojureMainBinDir Condition=" '$(TestTargetFramework)' != 'net462' ">$(RootDir)Clojure.Main\bin\$(Configuration)\$(TestTargetFramework)</ClojureMainBinDir>
     <clji Condition=" '$(TestTargetFramework)' == 'net462' ">Clojure.Main461.exe</clji>
     <clji Condition=" '$(TestTargetFramework)' != 'net462' ">Clojure.Main.exe</clji>		
-    <clji Condition=" '$(TestTargetFramework)' != 'net462' And '$(MSBuildRuntimeType)' == 'Core' ">dotnet run -p $(RootDir)Clojure.Main --framework $(TestTargetFramework) -c $(Configuration) --</clji>		
+    <clji Condition=" '$(TestTargetFramework)' != 'net462' And '$(MSBuildRuntimeType)' == 'Core' ">dotnet run --project $(RootDir)Clojure.Main --framework $(TestTargetFramework) -c $(Configuration) --</clji>		
 	
 	<ClojureCompileBinDir>$(RootDir)Clojure.Compile\bin\$(Configuration)\$(TestTargetFramework)</ClojureCompileBinDir>
 	<cljc>Clojure.Compile.exe</cljc>
@@ -138,6 +138,10 @@
 		<ClojureMainAssets Include="$(ClojureMainBinDir)\**\*" />
 		<ClojureTestsAssets Include="$(ClojureTestsBinDir)\**\*" />
 	</ItemGroup>	
+	<Message Importance="high" Text="ClojureCompileAssets = '$(ClojureCompileAssets)'"/>
+	<Message Importance="high" Text="ClojureMainAssets = '$(ClojureMainAssets)'"/>
+	<Message Importance="high" Text="ClojureTestsAssets = '$(ClojureTestsAssets)'"/>
+	
 	<Copy SkipUnchangedFiles="true"
 		  SourceFiles="@(ClojureCompileAssets)"
 		  DestinationFolder="$(TestDir)\%(RecursiveDir)" />
@@ -149,7 +153,7 @@
 		  DestinationFolder="$(TestDir)\%(RecursiveDir)" />	  
   </Target>  
   
-  <Target Name="CompileTest" DependsOnTargets="StageTest" Condition="'$(TestTargetFramework)' == 'net462'">
+  <Target Name="CompileTest" DependsOnTargets="StageTest" Condition="'$(TestTargetFramework)' == 'net462' OR '$(TestTargetFramework)' == 'net9.0'">
     <Exec Command="$(cljc) clojure.test-clojure.genclass.examples clojure.test-clojure.protocols.examples clojure.test-clojure.proxy.examples clojure.test-clojure.attributes clojure.test-clojure.compilation.load-ns clojure.test-clojure.compilation.line-number-examples" 
           WorkingDirectory="$(TestDir)"
            Condition=" '$(Runtime)' == '.Net' "/>
@@ -163,10 +167,10 @@
   
   <Target Name="Test" DependsOnTargets="StageTest;CompileTest">
     <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test.clj" DestinationFolder="$(TestDir)" />
-    <SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'net462'"
+    <SetEnvironmentVariable Condition="'$(TestTargetFramework)' == 'net462' OR '$(TestTargetFramework)' == 'net9.0'"
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.ns-libs-load-later}" />
-	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net462'"
+	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net9.0' "
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.ns-libs-load-later clojure.test-clojure.attributes clojure.test-clojure.compilation2 clojure.test-clojure.genclass}" />						
     <Exec Command="$(clji) run_test.clj"       WorkingDirectory="$(TestDir)" Condition=" '$(Runtime)' == '.Net' "/>
@@ -175,7 +179,7 @@
 
   <Target Name="TestGen" DependsOnTargets="StageTest;CompileTest">
     <Copy SkipUnchangedFiles="true" SourceFiles="Clojure.Tests\clojure\run_test_generative.clj" DestinationFolder="$(TestDir)" />
-	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net462'"
+	<SetEnvironmentVariable Condition="'$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net9.0'"
 							Name="clojure.test-clojure.exclude-namespaces" 
 							Value="#{clojure.test-clojure.compilation.load-ns clojure.test-clojure.attributes clojure.test-clojure.compilation2 clojure.test-clojure.genclass}" />						
     <Exec Command="$(clji) run_test_generative.clj"      WorkingDirectory="$(TestDir)"  Condition=" '$(Runtime)' == '.Net' "/>

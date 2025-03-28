@@ -261,13 +261,13 @@
 ;  FileIOPermission SecurityAction/Demand     =>  FileIOPermission #{ {:__args [SecurityAction/Demand]} }  =>  new FileIOPermission(SecurityAction/Demand)
 ;
 ;  FileIOPermission #{ SecurityAction/Demand SecurityAction/Deny }
-;              ==> FileIOPermission #{  {:__args [SecurityAction/Demand]} {:__args [SecurityAction/Deny]} 
+;              ==> FileIOPermission #{  {:__args [SecurityAction/Demand]} {:__args [SecurityAction/Deny]} }
 ;              ==> new FileIOPermission(SecurityAction/Demand) + new FileIOPermission(SecurityAction/Demand)  (multiple values for this attribute)
 ;
 ; FileIOPermission #{ SecurityAction/Demand { :__args [SecurityAction/Deny] :Read "abc" } }
 ;             ==> FileIOPermission #{  {:__args [SecurityAction/Demand]} {:__args [SecurityAction/Deny] :Read "abc"} 
 ;              ==> new FileIOPermission(SecurityAction/Demand) 
-;                  let x = new FileIOPermission(SecurityAction/Demand) + x.Read = "abc"
+;                  let x = new FileIOPermission(SecurityAction/Deny) + x.Read = "abc"
 ;			     (multiple values for this attribute, second has ctor call + property set)
 ;
 ;  Note that symbols are eval.  They must evaluate to either values of enums or to types.
