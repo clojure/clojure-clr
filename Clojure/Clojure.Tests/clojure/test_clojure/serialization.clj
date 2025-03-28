@@ -56,6 +56,8 @@
       (= (hash v) (hash rt))
       (= (.GetHashCode v) (.GetHashCode rt)))))          ;;; .hashCode .hashCode
 
+(compile-when (= :framework dotnet-version)
+
 (deftest sequable-serialization
   (are [val] (roundtrip val)
     ; lists and related
@@ -159,7 +161,8 @@
 
      ; vars get serialized back into the same var in the present runtime
     #'clojure.core/conj))
- 
+
+
  (deftest new-var-unbound-on-read
   (let [v (intern 'user 'foobarbaz 10)
         sv (serialize v)]
@@ -200,3 +203,6 @@
     (repeat 1)
     (iterate identity nil)
     (cycle [1])))    
+
+
+) ;; compile-when

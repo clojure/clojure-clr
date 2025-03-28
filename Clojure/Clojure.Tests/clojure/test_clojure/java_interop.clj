@@ -242,6 +242,8 @@
 
 )
 
+(compile-when (= dotnet-platform :framework)
+
 (deftest test-proxy-non-serializable
   (testing "That proxy classes refuse serialization and deserialization"
     ;; Serializable listed directly in interface list:
@@ -264,6 +266,8 @@
                          java.io.ByteArrayInputStream. java.io.ObjectInputStream.
                          .readObject)))
         (println "WARNING: Missing serialized proxy for Java" java-version "in test/clojure/test_clojure/java_interop.clj")))))
+
+)  ;; compile-when
 
 (deftest test-bases
   (are [x] (nil? (bases x))
