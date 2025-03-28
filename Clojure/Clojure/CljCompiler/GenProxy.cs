@@ -427,7 +427,7 @@ namespace clojure.lang
                         considered.Add(sig);
                     }
                 } 
-                catch (NotSupportedException e)
+                catch (NotSupportedException)
                 {
                     // do nothing
                     // Types in PersistedAssemblyBuilders throw on GetProperties

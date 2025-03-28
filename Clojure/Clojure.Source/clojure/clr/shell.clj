@@ -14,9 +14,16 @@ Halloway."}
   clojure.clr.shell
 (:use [clojure.clr.io :only (copy string->encoding)]
       [clojure.string :only (join)])
-(:import (System.Diagnostics Process ProcessStartInfo)
+(:import #_(System.Diagnostics Process ProcessStartInfo)  ;; defer until assembly loaded
          (System.IO MemoryStream StringWriter)
          (System.Text Encoding)))
+
+
+(try 
+  (assembly-load-from (str clojure.lang.RT/SystemRuntimeDirectory "System.Diagnostics.Process.dll"))
+  (catch Exception e))  ;; failing silently okay -- if we need it and didn't find it, a type reference will fail later
+
+(import '[System.Diagnostics Process ProcessStartInfo])
 
 (def ^:dynamic *sh-dir* nil)
 (def ^:dynamic *sh-env* nil)
