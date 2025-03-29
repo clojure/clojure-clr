@@ -804,13 +804,18 @@ namespace clojure.lang.CljCompiler.Ast
             }
             else if (value is Type t)
             {
-                if (t.IsValueType)
+                if (Compiler.IsCompiling)
                     ilg.EmitType(t);
                 else
                 {
-                    //ilg.EmitString(Compiler.DestubClassName(((Type)value).FullName));
-                    ilg.EmitString(((Type)value).FullName);
-                    ilg.EmitCall(Compiler.Method_RT_classForName);
+                    if (t.IsValueType)
+                        ilg.EmitType(t);
+                    else
+                    {
+                        //ilg.EmitString(Compiler.DestubClassName(((Type)value).FullName));
+                        ilg.EmitString(((Type)value).FullName);
+                        ilg.EmitCall(Compiler.Method_RT_classForName);
+                    }
                 }
             }
             else if (value is Symbol sym)
