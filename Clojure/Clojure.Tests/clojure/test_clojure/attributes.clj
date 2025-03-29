@@ -8,24 +8,13 @@
 
 ;;  Original authors: Stuart Halloway, Rich Hickey
 
-
-(println "Attributes 1")
-
 (ns clojure.test-clojure.attributes
   (:use clojure.test))
-
-(println "Attributes 2")
 
 (assembly-load-from "Clojure.Tests.Support.dll")
 (import '[Clojure.Tests.Support AnAttribute AnotherAttribute])
 
-
-(println "Attributes 3")
-
 (definterface Foo (foo []))
-
-
-(println "Attributes 4")
 
 (deftype ^{ObsoleteAttribute "abc"
            AnotherAttribute 7
@@ -43,19 +32,17 @@ Foo (^{ObsoleteAttribute "abc"
                       { :__args ["ghi"] :SecondaryValue "jkl" }}}
      foo [this] 42))
 
-
-(println "Attributes 5")
-
 (defn get-custom-attributes [x]
   (.GetCustomAttributes x false))
 
 (defn attribute->map [attr]
-	(cond 
-	  (instance? NonSerializedAttribute attr) {:type NonSerializedAttribute}
-	  (instance? ObsoleteAttribute attr) {:type ObsoleteAttribute :message (.Message attr)}
-	  (instance? AnotherAttribute attr) {:type AnotherAttribute :primary (.PrimaryValue attr)}
-	  (instance? AnAttribute attr) {:type AnAttribute :primary (.PrimaryValue attr) :secondary (.SecondaryValue attr)}
-	  :else {:type (class attr)}))
+  (cond 
+	(instance? NonSerializedAttribute attr) {:type NonSerializedAttribute}
+	(instance? ObsoleteAttribute attr) {:type ObsoleteAttribute :message (.Message attr)}
+	(instance? AnotherAttribute attr) {:type AnotherAttribute :primary (.PrimaryValue attr)}
+	(instance? AnAttribute attr) {:type AnAttribute :primary (.PrimaryValue attr) :secondary (.SecondaryValue attr)}
+	:else {:type (class attr)}))
+
 
 (def expected-attributes
  #{ {:type ObsoleteAttribute :message "abc"}
@@ -70,12 +57,12 @@ Foo (^{ObsoleteAttribute "abc"
 	{:type AnAttribute :primary "def" :secondary nil}
 	{:type AnAttribute :primary "ghi" :secondary "jkl"}})
 
+(println "expected-attributes:     " expected-attributes)
+(println "expected-attributes+ser: " expected-attributes+ser)
+
 (def expected-attributes-field
  #{ {:type NonSerializedAttribute}
     {:type ObsoleteAttribute :message "abc"}})
-
-
-(println "Attributes 6")
 
 (deftest test-attributes-on-type
   (is (=
@@ -93,9 +80,6 @@ Foo (^{ObsoleteAttribute "abc"
        expected-attributes
        (into #{} (map attribute->map (get-custom-attributes (.GetMethod Bar "foo")))))))
 
-
-(println "Attributes 7")
-
 (gen-class :name foo.Bar
            :extends clojure.lang.Box
            :constructors {^{ObsoleteAttribute "help"} [Object] [Object]}
@@ -110,13 +94,8 @@ Foo (^{ObsoleteAttribute "abc"
 (defn foo-init [obj]
   [[obj] nil])
 
-
-(println "Attributes 8")
-
 (assembly-load "foo.Bar")
 
-
-(println "Attributes 9")
 (deftest test-attributes-on-constructor
   (is (some #(instance? ObsoleteAttribute %)
             (for [ctor (.GetConstructors (clojure.lang.RT/classForName "foo.Bar"))
