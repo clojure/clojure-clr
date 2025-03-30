@@ -1737,6 +1737,13 @@ namespace clojure.lang
             MethodBuilder initMB = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
             CljILGen ilg = new CljILGen(initMB.GetILGenerator());
 
+            //// Print a little message, for debugging purposes
+            //ilg.Emit(OpCodes.Ldstr, $"Initializing {sourceDirectory} {relativePath} ");
+            //ilg.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine",
+            //    new Type[] { typeof(string) }));
+            //ilg.Emit(OpCodes.Call, typeof(Console).GetMethod("get_Out"));
+            //ilg.Emit(OpCodes.Call, typeof(System.IO.TextWriter).GetMethod("Flush"));
+
             LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
 
             Var.pushThreadBindings(RT.mapUniqueKeys(

@@ -31,7 +31,7 @@
 		</EmbeddedResource>
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net90' ">
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0' ">
 		<PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.3" />
 	</ItemGroup>
 	
@@ -66,7 +66,7 @@
 	</ItemGroup>
 	-->
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net462' OR '$(TargetFramework)' == 'net90'">
+	<ItemGroup Condition="'$(TargetFramework)' == 'net462' OR '$(TargetFramework)' == 'net9.0'">
 		<Parent Include="$(SolutionDir)Clojure.Compile\$(OutDir)\clojure.*.dll" /> 
 		<EmbeddedResource Include="@(Parent)">
 			<Link>%(Filename)$(Extension)</Link>
