@@ -3468,8 +3468,10 @@ namespace clojure.lang
             FileInfo fi;
 
             foreach (string path in GetFindFilePaths())
-                if ((fi = FindFile(path, fileName)) != null)
-                    return fi;
+            {
+                fi = FindFile(path, fileName);
+                if (fi is not null ) return fi;
+            }
 
             return FindRemappedFile(fileName);
         }

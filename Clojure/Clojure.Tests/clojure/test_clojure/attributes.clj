@@ -57,16 +57,12 @@ Foo (^{ObsoleteAttribute "abc"
 	{:type AnAttribute :primary "def" :secondary nil}
 	{:type AnAttribute :primary "ghi" :secondary "jkl"}})
 
-(println "expected-attributes:     " expected-attributes)
-(println "expected-attributes+ser: " expected-attributes+ser)
-
 (def expected-attributes-field
  #{ {:type NonSerializedAttribute}
     {:type ObsoleteAttribute :message "abc"}})
 
 (deftest test-attributes-on-type
   (is (=
-
        expected-attributes+ser
        (into #{} (map attribute->map (get-custom-attributes Bar))))))
 
