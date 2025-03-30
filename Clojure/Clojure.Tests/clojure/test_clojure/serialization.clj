@@ -56,8 +56,6 @@
       (= (hash v) (hash rt))
       (= (.GetHashCode v) (.GetHashCode rt)))))          ;;; .hashCode .hashCode
 
-(compile-when (= :framework dotnet-version)
-
 (deftest sequable-serialization
   (are [val] (roundtrip val)
     ; lists and related
@@ -203,6 +201,3 @@
     (repeat 1)
     (iterate identity nil)
     (cycle [1])))    
-
-
-) ;; compile-when
