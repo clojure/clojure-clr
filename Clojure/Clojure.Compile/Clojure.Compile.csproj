@@ -39,9 +39,10 @@
 		<ItemGroup>
 			<CljCoreBin Include="$(ProjectDir)$(OutDir)clojure*.dll" />
 		</ItemGroup>
-		<Message Importance="high" Text="SolutionDir = '$(SolutionDir), OutDir = '$(OutDir)'"/>
-		<Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main\$(OutDir)" />
-		<Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main\Content\$(OutDir)" />
+		<Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main461\$(OutDir)" Condition="  '$(TargetFramework)' == 'net462' "/>
+		<Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main461\Content\$(OutDir)" Condition="  '$(TargetFramework)' == 'net462' "/>
+	    <Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main\$(OutDir)" Condition="  '$(TargetFramework)' == 'net9.0' "/>
+	    <Copy SourceFiles="@(CljCoreBin)" DestinationFolder="$(SolutionDir)Clojure.Main\Content\$(OutDir)" Condition="  '$(TargetFramework)' == 'net462' "/>
 	</Target>
 
 
