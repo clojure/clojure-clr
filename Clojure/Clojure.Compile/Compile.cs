@@ -53,8 +53,10 @@ namespace BootstrapCompile
 
 #if NETFRAMEWORK
             Console.WriteLine("BootstrapCompile: .NET Framework detected.");
+            var which = "Framework";
 #else
             Console.WriteLine("BootstrapCompile: .NET Core detected.");
+            var which = "Core";
 #endif
 
             try
@@ -71,7 +73,7 @@ namespace BootstrapCompile
                 {
                     sw.Reset();
                     sw.Start();
-                    outTW.Write("Compiling {0} to {1}", lib, path);
+                    outTW.Write($"{which}: Compiling {lib} to {path}");
                     outTW.Flush();
                     Compiler.CompileVar.invoke(Symbol.intern(lib));
                     sw.Stop();

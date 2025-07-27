@@ -1246,7 +1246,7 @@ namespace clojure.lang
                         eval(RT.first(s));
                     return eval(RT.first(s));
                 }
-                else if ( (form is IType) ||
+                else if ((form is IType) ||
                     (form is IPersistentCollection && !(RT.first(form) is Symbol symbol && symbol.Name.StartsWith("def"))))
                 {
                     ObjExpr objx = (ObjExpr)Analyze(pconExpr, RT.list(FnSym, PersistentVector.EMPTY, form), "eval" + RT.nextID());
