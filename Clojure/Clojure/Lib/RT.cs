@@ -52,7 +52,8 @@ namespace clojure.lang
 
         static IEnumerable<Type> GetAllTypesInNamespace(string nspace)
         {
-            Func<Assembly, IEnumerable<Type>> getTypes = (Assembly a) => {
+            Func<Assembly, IEnumerable<Type>> getTypes = (Assembly a) =>
+            {
                 try { return a.GetTypes(); } catch (Exception) { return new Type[0]; }
             };
             var q = AppDomain.CurrentDomain.GetAssemblies()
@@ -74,7 +75,7 @@ namespace clojure.lang
 
         public static readonly object[] EmptyObjectArray = new Object[] { };
 
-        static readonly RTProperties _versionProperties = new RTProperties();
+        static readonly RTProperties _versionProperties = new();
 
         public static RTProperties GetVersionProperties() { return _versionProperties; }
 
@@ -83,7 +84,7 @@ namespace clojure.lang
         // for folks using Cygwin and its ilk.
         public const string ClojureLoadPathString = "CLOJURE_LOAD_PATH";
 
-        static public readonly Object REQUIRE_LOCK = new Object();
+        static public readonly Object REQUIRE_LOCK = new();
 
         #endregion
 
@@ -123,7 +124,7 @@ namespace clojure.lang
         public static readonly Keyword TagKey
             = Keyword.intern(null, "tag");
 
-        public static readonly Keyword ParamTagsKey 
+        public static readonly Keyword ParamTagsKey
             = Keyword.intern(null, "param-tags");
 
         public static readonly Keyword ConstKey
@@ -336,7 +337,7 @@ namespace clojure.lang
 
         static Assembly ResolveAssembly(object sender, ResolveEventArgs args)
         {
-            AssemblyName asmName = new AssemblyName(args.Name);
+            AssemblyName asmName = new(args.Name);
             var name = asmName.Name;
             var stream = GetEmbeddedResourceStream(name, out _);
             if (stream == null)
@@ -371,8 +372,8 @@ namespace clojure.lang
 
             // TODO: Check for existence of ClojureContext.Default before doing this?
 
-            ScriptRuntimeSetup setup = new ScriptRuntimeSetup();
-            LanguageSetup lsetup = new LanguageSetup(
+            ScriptRuntimeSetup setup = new();
+            LanguageSetup lsetup = new(
                 typeof(ClojureContext).AssemblyQualifiedName,
                 ClojureContext.ClojureDisplayName,
                 ClojureContext.ClojureNames.Split(new Char[] { ';' }),
@@ -380,7 +381,7 @@ namespace clojure.lang
 
 
             setup.LanguageSetups.Add(lsetup);
-            ScriptRuntime env = new ScriptRuntime(setup);
+            ScriptRuntime env = new(setup);
             env.GetEngine("clj");
 
 
@@ -2375,7 +2376,7 @@ namespace clojure.lang
 
         private static object[] IEnumToArray(IEnumerable e)
         {
-            List<object> list = new List<object>();
+            List<object> list = new();
             foreach (object o in e)
                 list.Add(o);
 
@@ -2503,7 +2504,7 @@ namespace clojure.lang
 
         static public string printString(object x)
         {
-            using (StringWriter sw = new StringWriter())
+            using (StringWriter sw = new())
             {
                 print(x, sw);
                 return sw.ToString();
@@ -2519,7 +2520,7 @@ namespace clojure.lang
 
         static public Object readString(String s, Object opts)
         {
-            using (PushbackTextReader r = new PushbackTextReader(new StringReader(s)))
+            using (PushbackTextReader r = new(new StringReader(s)))
                 return LispReader.read(r, opts);
         }
 
@@ -2784,7 +2785,7 @@ namespace clojure.lang
 
             AppDomain domain = AppDomain.CurrentDomain;
             Assembly[] assys = domain.GetAssemblies();
-            List<Type> candidateTypes = new List<Type>();
+            List<Type> candidateTypes = new();
 
             // fast path, will succeed for namespace qualified names (returned by Type.FullName)
             // e.g. "UnityEngine.Transform"
@@ -2864,9 +2865,9 @@ namespace clojure.lang
         }
 
 
-        public static Array aclone(Array a)
+        public static object aclone(Array a)
         {
-            return (Array)a.Clone();
+            return a.Clone();
         }
 
 
@@ -3141,7 +3142,7 @@ namespace clojure.lang
             return DateTime.Now.Ticks * 100;
         }
 
-        private static readonly Stopwatch _stopwatch = new Stopwatch();
+        private static readonly Stopwatch _stopwatch = new();
 
         public static object StartStopwatch()
         {
@@ -3209,7 +3210,7 @@ namespace clojure.lang
 
 
 
-        static readonly Random _random = new Random();
+        static readonly Random _random = new();
 
 
         public static double random()
@@ -3363,7 +3364,7 @@ namespace clojure.lang
 
             var embeddedCljName = relativePath.Replace("/", ".") + ".cljr";
             var stream = GetEmbeddedResourceStream(embeddedCljName, out Assembly containingAssembly);
-            if ( stream == null )
+            if (stream == null)
             {
                 embeddedCljName = relativePath.Replace("/", ".") + ".cljc";
                 stream = GetEmbeddedResourceStream(embeddedCljName, out containingAssembly);
@@ -3401,12 +3402,12 @@ namespace clojure.lang
         {
             FileInfo cljInfo = FindFile(cljname);
             if (cljInfo != null)
-                LoadScript(cljInfo,cljname);
+                LoadScript(cljInfo, cljname);
             else if (failIfNotFound)
                 throw new FileNotFoundException(String.Format("Could not locate Clojure resource on {0}", ClojureLoadPathString));
         }
 
-        public  static void LoadScript(FileInfo cljInfo, string relativePath)
+        public static void LoadScript(FileInfo cljInfo, string relativePath)
         {
             using (TextReader rdr = cljInfo.OpenText())
                 LoadScript(cljInfo.FullName, cljInfo.Name, rdr, relativePath);
@@ -3419,7 +3420,7 @@ namespace clojure.lang
 
         private static void Compile(FileInfo cljInfo, string relativePath)
         {
-            using ( TextReader rdr = cljInfo.OpenText() )
+            using (TextReader rdr = cljInfo.OpenText())
                 Compile(cljInfo.Directory.FullName, cljInfo.Name, rdr, relativePath);
         }
 
@@ -3450,7 +3451,7 @@ namespace clojure.lang
             yield return Path.GetDirectoryName(typeof(RT).Assembly.Location);
 
             Assembly assy = Assembly.GetEntryAssembly();
-            if ( assy != null )
+            if (assy != null)
                 yield return Path.GetDirectoryName(assy.Location);
 
             string rawpaths = (string)System.Environment.GetEnvironmentVariable(ClojureLoadPathString);
@@ -3470,7 +3471,7 @@ namespace clojure.lang
             foreach (string path in GetFindFilePaths())
             {
                 fi = FindFile(path, fileName);
-                if (fi is not null ) return fi;
+                if (fi is not null) return fi;
             }
 
             return FindRemappedFile(fileName);
@@ -3490,11 +3491,11 @@ namespace clojure.lang
                 if (!(x is PersistentVector mapping) || mapping.length() < 2) continue;
                 if (!(mapping[0] is string nsRoot)) continue;
                 nsRoot = nsRoot.Replace('.', '/');
-                if(fileName.StartsWith(nsRoot))
+                if (fileName.StartsWith(nsRoot))
                 {
                     var fsRoot = mapping[1] as string;
                     var probePath = ConvertPath(fsRoot) + ConvertPath(fileName.Substring(nsRoot.Length));
-                    if(File.Exists(probePath))
+                    if (File.Exists(probePath))
                         return new FileInfo(probePath);
                 }
             }
@@ -3621,7 +3622,7 @@ namespace clojure.lang
                     break;
                 i--;
             }
-            Array.Resize(ref arr,i + 1);
+            Array.Resize(ref arr, i + 1);
             return arr;
         }
 
