@@ -480,18 +480,40 @@ IMHO
 
 ## Some true breakage
 
+### aset
+
 My initial run of the tests indicate two places where ClojureCLR has non-trivial bugs.
 One is in the test for `aclone`.  I have done a little investigation and can reproduce the issue with a small piece of code.
 
 ```clojure
-`(defn bad-clone [a]
+(defn bad-clone [a]
     (aset a 0 1)
     (let [a' (aclone a)]
       (aset a' 0 2)
       a'))
 ```
 
-The second call to `aset` throws an exception.  This may be a problem with dynamic callsites.  THis will not be fun.
+Consider calling `(bad-clone (int-array 3))`.
+The first call to `aset` goes fine.  It resolves dynamically at run-time (no type information on `a` to avoid reflection = dynamic callsite) to a call to `RT.aset(int[],int,int)`.  That works.
+
+The second call to `aset` blows up with an exception relating to widening types.  Actually it's a problem with narrowing. Because the `aclone` calls inlines to a call to `Array RT.aclone(Array)`, we have an `Array` type hint on `a'`.  So the call to `aset` resolves to `RT.aset(Array,object,int)`.  This method calls `Array.SetValue`.  And that call chokes because the value being inserted into the array is an `Int64` and we have an array of `Int32`!
+
+If instead we define
+
+```clojure
+(def ok-clone [a]
+    (aset a 0 1)
+    (let [a' (aclone a)]
+      (aset a' 0 (int 2))
+      a'))
+```
+
+the call `(ok-clone (int-array 3))` works fine.
+
+I'm not sure what the best solution is here.  Forcing the user to know that the conversion is necessary in one call to `aset` but not the other strikes me as bad.  The easiest solution is change `RT.acline` to have return type `Object` instead of `Array`.  We get a dynamic callsite in the second `aset` call, but that's probably better than the reflection that takes place in `Array.SetValue`.  
+
+
+### case
 
 The other problem area is with `case`.   It should be noted that `case` passes all the tests that are in the test suite in the Clojure repo.  There is something about the specific cases in these tests that cause `case` to fail.  This will not be fun.
 
