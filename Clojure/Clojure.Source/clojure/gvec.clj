@@ -454,7 +454,7 @@ Object
   System.Collections.ICollection
   (CopyTo [this arr offset]
      (dotimes [i cnt]
-       (aset arr (+ i offset) (.nth this i))))
+       (.SetValue ^Array arr (.nth this i) (int (+ i offset)))))
           
   (get_Count [_] cnt)
   (get_IsSynchronized [_] true)
