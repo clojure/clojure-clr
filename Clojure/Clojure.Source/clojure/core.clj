@@ -8173,7 +8173,7 @@ clojure.lang.IKVReduce
   [^String s]                                                                ;;; ^Long  -- no equivalent since this can return nil  -- at least until we can return Nullable<long>
   (if (string? s)
     (try
-      (Int64/Parse s)                                                        ;;; Long/Parse
+      (Int64/Parse s (.NumberFormat System.Globalization.CultureInfo/InvariantCulture))                                                        ;;; Long/Parse
       (catch FormatException _ nil)(catch OverflowException _ nil))          ;;; NumberFormatException  -- and added other cases
     (throw (ArgumentException. (parsing-err s)))))                           ;;; IllegalArgumentException
 
@@ -8186,9 +8186,9 @@ clojure.lang.IKVReduce
   [^String s]                                                                ;;; ^Double  -- no equivalent since this can return nil  -- at least until we can return Nullable<double>
   (if (string? s)
     (try
-      (Double/Parse s)                                                       ;;; Double/valueOf
-      (catch FormatException _ nil)(catch OverflowException _ nil))          ;;; NumberFormatException  -- and added other cases
-    (throw (ArgumentException. (parsing-err s)))))                           ;;; IllegalArgumentException
+      (Double/Parse s (.NumberFormat System.Globalization.CultureInfo/InvariantCulture))       ;;; Double/valueOf, added InvariantCulture
+      (catch FormatException _ nil)(catch OverflowException _ nil))                            ;;; NumberFormatException  -- and added other cases
+    (throw (ArgumentException. (parsing-err s)))))                                             ;;; IllegalArgumentException
 
 (defn parse-uuid
   {:doc "Parse a string representing a UUID and return a java.util.UUID instance,
