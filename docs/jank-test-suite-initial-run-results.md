@@ -58,7 +58,7 @@ static public short shortCast(short x){
 // etc. for the remaining primitive numeric types
 ```
 
-Now, is it turns out, ClojureCLR is missing the overloads for `shortCast`, having only the one taking an `object`.  This is an efficiency matter, and I will fix it.  (For the majore conversions, `intCast`, `longCast`, `doubleCast`, and `floatCast`, the overloads are present.)  
+Now, is it turns out, ClojureCLR is missing the overloads for `shortCast`, having only the one taking an `object`.  This is an efficiency matter, and I will fix it.  (For the major conversions, `intCast`, `longCast`, `doubleCast`, and `floatCast`, the overloads are present.)  
 
 The variant of interest here is for the `Object` case.  In ClojureCLR, this is
 
@@ -189,7 +189,7 @@ The root cause here is that on the CLR, `System.String` implements `IConvertible
 ClojureCLR was failing the test for `(parse-double "Infinity")` and `(parse-double "-Infinity")`.
 `parse-double` mostly is a wrapper for `Double.Parse`.  Upon reading the doc for that method, one finds that it is indeed supposed to handle strings representing positive and negative infinity.  However, the values it looks for are culture-dependent, specifically the values of `NumberFormatInfo.PositiveInfinitySymbol` and `NumberFormatInfo.NegativeInfinitySymbol`.  In the `InvariantCulture`, these are "Infinity" and "-Infinity".  However, in my culture (en-US), they are "∞" and "-∞".   This is not the first time I've been bitten by this.   In fact, take a close look through the code above to see it in use.
 
-> Change the `Parse` calls to use `InvariantCulture`.
+> Change the `Parse` calls to use `InvariantCulture`.  (DONE!)
 
 ## Quot-idian problems
 
@@ -244,7 +244,7 @@ In both instances, `*math-context*` is null, so the difference will be found in 
 
 `java.math.BigDecimal` is defined by the JVM.  We can look at its doc:
 
-> Returns a BigDecimal whose value is the integer part of (this / divisor). Since the integer part of the exact quotient does not depend on the rounding mode, the rounding mode does not affect the values returned by this method. The preferred scale of the result is (this.scale() - divisor.scale()). An ArithmeticException is thrown if the integer part of the exact quotient needs more than mc.precision digits.
+> Returns a BigDecimal whose value is the integer part of (this / divisor). Since the integer part of the exact quotient does not depend on the rounding mode, the rounding mode does not affect the values returned by this method. The preferred scale of the result is (this.scale() - divisor.scale()). An ArithmeticException is thrown if the integer part of the exact quotient needs more than mc.precision digits.  (DONE!)
 
 For ClojureCLR, it defines its own `BigDecimal` class.  We can look at the source.  Bizarrely, or perhaps just ironically, I took the implementation of `DivideInteger` from the OpenJDK algorithm!
 
@@ -312,7 +312,7 @@ should be:
   if (quotient._exp < 0)
 ```
 
-> BUG: Fix the error.
+> BUG: Fix the error.  (DONE!)
 
 ## Rationalize this
 
@@ -376,7 +376,7 @@ BigDecimal bx = x as BigDecimal
 
 If you look around the code in this area, you'll see plenty of places where I do this properly.  This one just slipped through.
 
-> BUG: Fix the error.
+> BUG: Fix the error.  (DONE!)
 
 And while we are being rational:  
 
@@ -420,8 +420,7 @@ However, I chose to not to hid the difference in names.
 
 ## String tests
 
-ClojureCLR fails a number of tests for functions in `clojure.string`.  I argue below that these tests are semantically invalid.
-
+ClojureCLR fails a number of tests for functions in `clojure.string`.  
 These tests share the common feature that they pass into a `clojure.string` function such as `capitalize` arguments that are not strings.
 For example,
 
@@ -437,46 +436,11 @@ For example,
                     (is (= ":asdf/asdf" (str/capitalize :asDf/aSdf)))))
 ```
 
-Now I can just copy the `:cljs` tests for `:cljr` and be done.  My question is whether the `:default` tests are proper.
+My question is whether the `:default` tests are proper.
+I discussed the purpose of these test with Jeaye Wilkerson.  His intention that the tests should be descriptive of the behavior of each dialect; they are not normative.  
 
-I argue this based on the "Design notes for clojure.string" found in the source code.  The relevant points:
+Now I can just copy the `:cljs` tests for `:cljr` and be done.  
 
-> 1. Strings are objects (as opposed to sequences). As such, the
-   string being manipulated is the first argument to a function;
-   passing nil will result in a NullPointerException unless
-   documented otherwise. If you want sequence-y behavior instead,
-   use a sequence.
-
-I argue that this implies that the functions in this library are primarily for string (with one adjustment to this statement below).   
-
-> 2. Functions are generally not lazy, and call straight to host
-   methods where those are available and efficient.
-
-I argue that "calling straight to host methods" is referring to methods on the implementation of the string class in the platform.
-
-> 3. Functions take advantage of String implementation details to
-   write high-performing loop/recurs instead of using higher-order
-   functions. (This is not idiomatic in general-purpose application
-   code.)
-
-> 4. When a function is documented to accept a string argument, it
-   will take any implementation of the correct *interface* on the
-   host platform. In Java, this is CharSequence, which is more
-   general than String. In ordinary usage you will almost always
-   pass concrete strings. If you are doing something unusual,
-   e.g. passing a mutable implementation of CharSequence, then
-   thread-safety is your responsibility."
-
-I argue that "in ordinary usage you will almost always pass concrete strings" is a strong hint that passing non-strings is not ordinary usage.
-
-It is because the JVM version accepts `CharSequence` arguments that one can get away with passing something like an integer to `capitalize`. 
-`capitalize` first calls `toString()` on its argument hence it will work with _any_ argument.
-
-There is also a an arguments from consistency.  Not all functions in `clojure.string` are as permissive.  ClojureJVM throws an exception on `(clojure.string/trim-newline 1)`.  One has to inspect the code to determine for which functions ClojureJVM will accept non-string arguments.  Thus, this is an artifact of implementation, not part of the contract for the function.
-
-Given these arguments, should we be testing on non-string arguments at all?  Putting in a `(is (= "1" (str/capitalize 1))` seems to normalize the behavior of passing non-string arguments.  I claim that if the function implementations in `clojure.string` were to be changed to reject non-string arguments, the authors would not have broken any contract.
-
-IMHO
 
 ## Some true breakage
 
@@ -510,8 +474,22 @@ If instead we define
 
 the call `(ok-clone (int-array 3))` works fine.
 
-I'm not sure what the best solution is here.  Forcing the user to know that the conversion is necessary in one call to `aset` but not the other strikes me as bad.  The easiest solution is change `RT.acline` to have return type `Object` instead of `Array`.  We get a dynamic callsite in the second `aset` call, but that's probably better than the reflection that takes place in `Array.SetValue`.  
+I'm not sure what the best solution is here.  Forcing the user to know that the conversion is necessary in one call to `aset` but not the other strikes me as bad.  
+<strike>The easiest solution is change `RT.aclone` to have return type `Object` instead of `Array`.  We get a dynamic callsite in the second `aset` call, but that's probably better than the reflection that takes place in `Array.SetValue`.  </strike>
 
+Well, that definitely did not work.  The real solution has several parts. 
+
+- Get rid of `RT.aclone(Array)`
+- Add overloads for `RT.aclone` for all the basic array types used for the other operations: `object[]`, `int[]`, `long[]`, `float[]`, `double[]`, etc.
+- Get rid of `RT.aset(Array a, int idx, object val)`.
+
+We will get reflection warnings -- can't be helped.  So does ClojureJVM, on the same calls.  So I think we are good to go.
+
+Oh, and 'gvec.clj` compiles without any warnings.  That lib has always been a problem child, particularly for the array functions.  So, score.
+
+Oh, and all the standard Clojure tests run successfully and with no warnings.  Score again.
+
+DONE!
 
 ### case
 
