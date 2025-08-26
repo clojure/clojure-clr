@@ -162,10 +162,10 @@ namespace clojure.lang
         {
             Ops combine(Ops y);
             Ops opsWith(LongOps x);
-            Ops opsWith(ULongOps x); 
+            Ops opsWith(ULongOps x);
             Ops opsWith(DoubleOps x);
             Ops opsWith(RatioOps x);
-            Ops opsWith(ClrDecimalOps x); 
+            Ops opsWith(ClrDecimalOps x);
             Ops opsWith(BigIntOps x);
             Ops opsWith(BigDecimalOps x);
 
@@ -238,7 +238,7 @@ namespace clojure.lang
             {
                 return inc(x);
             }
-            
+
             public object unchecked_inc(object x)
             {
                 return inc(x);
@@ -274,7 +274,7 @@ namespace clojure.lang
             public abstract bool equiv(object x, object y);
             public abstract bool lt(object x, object y);
             public abstract bool lte(object x, object y);
-            public abstract bool gte(object x, object y); 
+            public abstract bool gte(object x, object y);
             public abstract object negate(object x);
             public abstract object inc(object x);
             public abstract object dec(object x);
@@ -302,7 +302,7 @@ namespace clojure.lang
         public static bool isZero(ulong x) { return x == 0; }
 
 
-        public static bool isZero(decimal x) { return x == 0m;  }
+        public static bool isZero(decimal x) { return x == 0m; }
 
 
 
@@ -584,7 +584,7 @@ namespace clojure.lang
 
 
         public static double minusP(double x) { return -x; }
-        
+
 
         public static object minusP(long x)
         {
@@ -680,7 +680,7 @@ namespace clojure.lang
 
         public static object minus(ulong x, long y) { return minus((Object)x, (Object)y); }
 
-        
+
 
         public static object minusP(object x, object y)
         {
@@ -1179,7 +1179,7 @@ namespace clojure.lang
 
 
         public static double quotient(long x, double y) { return quotient((double)x, y); }
-        
+
 
         public static object quotient(long x, Object y) { return quotient((Object)x, y); }
 
@@ -1227,7 +1227,7 @@ namespace clojure.lang
 
 
         public static object remainder(Object x, double y) { return remainder(x, (Object)y); }
-        
+
 
         public static double remainder(double x, long y) { return remainder(x, (double)y); }
 
@@ -1359,8 +1359,8 @@ namespace clojure.lang
 
 
 
-        public static double unchecked_inc(double x) { return inc(x); }       
-        
+        public static double unchecked_inc(double x) { return inc(x); }
+
 
 
         public static long unchecked_inc(long x) { return x + 1; }
@@ -1371,8 +1371,8 @@ namespace clojure.lang
 
 
 
-        public static decimal unchecked_inc(decimal x) { return inc(x); }  
-        
+        public static decimal unchecked_inc(decimal x) { return inc(x); }
+
 
 
         public static object unchecked_dec(object x) { return ops(x).unchecked_dec(x); }
@@ -1388,10 +1388,10 @@ namespace clojure.lang
 
 
         public static ulong unchecked_dec(ulong x) { return x - 1; }
-        
 
 
-        public static decimal unchecked_dec(decimal x) { return dec(x); }  
+
+        public static decimal unchecked_dec(decimal x) { return dec(x); }
 
         #endregion
 
@@ -1415,7 +1415,7 @@ namespace clojure.lang
             else
                 return 0;
         }
-        
+
         #endregion
 
         #region equiv, lt, lte, gt, gte
@@ -1478,7 +1478,7 @@ namespace clojure.lang
 
 
         public static bool lt(double x, double y) { return x < y; }
-      
+
 
         public static bool lt(long x, long y) { return x < y; }
 
@@ -1629,7 +1629,7 @@ namespace clojure.lang
 
 
         public static bool gt(ulong x, long y) { return gt((Object)x, (Object)y); }
-        
+
 
 
         public static bool gte(object x, object y) { return ops(x).combine(ops(y)).gte(x, y); }
@@ -1897,7 +1897,7 @@ namespace clojure.lang
 
         public static ulong min(ulong x, ulong y)
         {
-            return Math.Min(x, y);      
+            return Math.Min(x, y);
         }
 
 
@@ -2217,7 +2217,7 @@ namespace clojure.lang
                 return r;
 
             BigDecimal bx = x as BigDecimal;
-            if ( bx != null )
+            if (bx != null)
             {
                 int exp = bx.Exponent;
                 if (exp >= 0)
@@ -2233,13 +2233,13 @@ namespace clojure.lang
         [WarnBoxedMath(false)]
         public static object rationalize(object x)
         {
-            if (x is float f)                              
+            if (x is float f)
                 return rationalize(BigDecimal.Create(f));
 
-            if (x is double d)                        
+            if (x is double d)
                 return rationalize(BigDecimal.Create(d));
 
-            BigDecimal bx = (BigDecimal)x;
+            BigDecimal bx = x as BigDecimal;
             if (bx != null)
             {
                 int exp = bx.Exponent;
@@ -2296,7 +2296,7 @@ namespace clojure.lang
 
         public static object shiftLeft(object x, object n)
         {
-            return shiftLeft(bitOpsCast(x),bitOpsCast(n));
+            return shiftLeft(bitOpsCast(x), bitOpsCast(n));
         }
 
 
@@ -2458,7 +2458,7 @@ namespace clojure.lang
 
             public object add(object x, object y)
             {
-                 return num(Numbers.add( Util.ConvertToLong(x), Util.ConvertToLong(y)));
+                return num(Numbers.add(Util.ConvertToLong(x), Util.ConvertToLong(y)));
             }
 
             public object addP(object x, object y)
@@ -2517,7 +2517,7 @@ namespace clojure.lang
                 long n = Util.ConvertToLong(x);
                 long val = Util.ConvertToLong(y);
 
-                if ( n == long.MinValue || val == long.MinValue )
+                if (n == long.MinValue || val == long.MinValue)
                     return BIGINT_OPS.divide(x, y);
 
                 long gcd1 = gcd(n, val);
@@ -2565,7 +2565,7 @@ namespace clojure.lang
             {
                 return Util.ConvertToLong(x) >= Util.ConvertToLong(y);
             }
-            	
+
             public object negate(object x)
             {
                 long val = Util.ConvertToLong(x);
@@ -2710,9 +2710,9 @@ namespace clojure.lang
             {
                 ulong ulx = Util.ConvertToULong(x);
                 ulong uly = Util.ConvertToULong(y);
-                if ( ulx > ulong.MaxValue - uly )
+                if (ulx > ulong.MaxValue - uly)
                     return BIGINT_OPS.add(x, y);
-                return num(ulx+uly);
+                return num(ulx + uly);
             }
 
             public object unchecked_add(object x, object y)
@@ -2765,7 +2765,7 @@ namespace clojure.lang
                 ulong d = val / gcd1;
                 if (d == 1)
                     return num(n);
- 
+
                 return new Ratio(BigInteger.Create(n), BigInteger.Create(d));
             }
 
@@ -3135,7 +3135,7 @@ namespace clojure.lang
             {
                 Ratio rx = ToRatio(x);
                 Ratio ry = ToRatio(y);
-                
+
                 return rx.numerator.Equals(ry.numerator)
                     && rx.denominator.Equals(ry.denominator);
             }
@@ -3166,7 +3166,7 @@ namespace clojure.lang
 
             public override object negate(object x)
             {
-                Ratio rx = (Ratio)x;    
+                Ratio rx = (Ratio)x;
                 return new Ratio(-rx.numerator, rx.denominator);
             }
 
@@ -3338,7 +3338,7 @@ namespace clojure.lang
                 {
                     return BigDecimal.Create(dx).Divide(BigDecimal.Create(dy));
                 }
-          
+
             }
 
             public object quotient(object x, object y)
@@ -3384,20 +3384,20 @@ namespace clojure.lang
             public object negateP(object x)
             {
                 decimal val = Util.ConvertToDecimal(x);
-                return -val; 
+                return -val;
             }
 
             public object unchecked_negate(object x)
             {
                 decimal val = Util.ConvertToDecimal(x);
-                return -val; 
+                return -val;
             }
 
 
             public object inc(object x)
             {
                 decimal val = Util.ConvertToDecimal(x);
-                return val + 1; 
+                return val + 1;
             }
 
             public object incP(object x)
@@ -3421,7 +3421,7 @@ namespace clojure.lang
             public object dec(object x)
             {
                 decimal val = Util.ConvertToDecimal(x);
-                return val - 1; 
+                return val - 1;
             }
 
             public object decP(object x)
@@ -3536,7 +3536,7 @@ namespace clojure.lang
 
             public override object divide(object x, object y)
             {
-                return BIDivide(ToBigInteger(x),ToBigInteger(y));
+                return BIDivide(ToBigInteger(x), ToBigInteger(y));
             }
 
             public override object quotient(object x, object y)
@@ -3759,13 +3759,13 @@ namespace clojure.lang
 
         #region Ops/BitOps dispatching
 
-        static readonly LongOps LONG_OPS = new LongOps();
-        static readonly ULongOps ULONG_OPS = new ULongOps();
-        static readonly DoubleOps DOUBLE_OPS = new DoubleOps();
-        static readonly RatioOps RATIO_OPS = new RatioOps();
-        static readonly ClrDecimalOps CLRDECIMAL_OPS = new ClrDecimalOps();
-        static readonly BigIntOps BIGINT_OPS = new BigIntOps();
-        static readonly BigDecimalOps BIGDECIMAL_OPS = new BigDecimalOps();
+        static readonly LongOps LONG_OPS = new();
+        static readonly ULongOps ULONG_OPS = new();
+        static readonly DoubleOps DOUBLE_OPS = new();
+        static readonly RatioOps RATIO_OPS = new();
+        static readonly ClrDecimalOps CLRDECIMAL_OPS = new();
+        static readonly BigIntOps BIGINT_OPS = new();
+        static readonly BigDecimalOps BIGDECIMAL_OPS = new();
 
         public enum Category { Integer, Floating, Decimal, Ratio }  // TODO
 
@@ -3812,14 +3812,14 @@ namespace clojure.lang
         [WarnBoxedMath(false)]
         public static int hasheqFrom(object x, Type xc)
         {
-            if (   xc == typeof(int)
+            if (xc == typeof(int)
                 || xc == typeof(short)
                 || xc == typeof(byte)
                 || xc == typeof(ulong)
                 || xc == typeof(uint)
                 || xc == typeof(ushort)
                 || xc == typeof(sbyte)
-                || (xc == typeof(BigInteger) && lte(x,Int64.MaxValue) && gte(x,Int64.MinValue)))
+                || (xc == typeof(BigInteger) && lte(x, Int64.MaxValue) && gte(x, Int64.MinValue)))
             {
                 long lpart = Util.ConvertToLong(x);
                 return Murmur3.HashLong(lpart);
@@ -3850,7 +3850,7 @@ namespace clojure.lang
                 }
             }
 
-            if ( xc == typeof(float) && x.Equals(-0.0f))
+            if (xc == typeof(float) && x.Equals(-0.0f))
             {
                 return 0; // match 0.0f
             }
@@ -3867,7 +3867,7 @@ namespace clojure.lang
             if (xc == typeof(long))
             {
                 //return (int)(lpart ^ (lpart >> 32));
-                return Murmur3.HashLong((long) x);
+                return Murmur3.HashLong((long)x);
             }
             if (xc == typeof(double))
             {
@@ -3908,7 +3908,7 @@ namespace clojure.lang
         }
 
         #endregion
-       
+
         #region Array c-tors
 
 
@@ -4522,7 +4522,7 @@ namespace clojure.lang
 
         public static long or(object x, object y)
         {
-            return or(bitOpsCast(x),bitOpsCast(y));
+            return or(bitOpsCast(x), bitOpsCast(y));
         }
 
 
