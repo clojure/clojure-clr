@@ -101,7 +101,16 @@ namespace clojure.lang
             /// Do not do any rounding.
             /// </summary>
             /// <remarks>This value is not part of the GDAS, but is in java.math.BigDecimal.</remarks>
-            Unnecessary
+            Unnecessary,
+
+            UP = Up,
+            DOWN = Down,
+            CEILING = Ceiling,
+            FLOOR = Floor,
+            HALF_UP = HalfUp,
+            HALF_DOWN = HalfDown,
+            HALF_EVEN = HalfEven,
+            UNNECESSARY = Unnecessary
         }
 
         #endregion
