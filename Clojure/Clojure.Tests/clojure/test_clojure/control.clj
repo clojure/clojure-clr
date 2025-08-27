@@ -358,7 +358,18 @@
                                     :else))
          :small 1
          :big 1073741824
-         :else 2))
+         :else 2)
+  ;; DM: Added for CLJCLR-176 -- testing sparse mode
+  (testing "CLJCLR-176: Sparse mode for case"
+      (are [result input] (= result (case input
+                                    3.0 :double-result
+                                    true :true-result
+                                    false :false-result
+                                    :else))
+         :double-result 3.0
+         :true-result true
+         :false-result false
+         :else 2)))
   (testing "test emits return types"
     (should-not-reflect (clojure.lang.BigDecimal/Create (case 1 1 1)))                   ;;; (Long. (case 1 1 1)) ; new Long(long)
     (should-not-reflect (clojure.lang.BigDecimal/Create (case 1 1 "1"))))                ;;; (Long. (case 1 1 "1")) ; new Long(String)
