@@ -28,9 +28,13 @@
 	
 	<Error Condition=" '$(TestTargetFramework)' != 'net462' AND '$(TestTargetFramework)' != 'net9.0' AND '$(TestTargetFramework)' != 'net8.0' AND '$(TestTargetFramework)' != 'net6.0'"/>
 		
-		
+	<!--	
 	<TestLibraryFramework Condition=" '$(TestTargetFramework)' == 'net462' ">netstandard2.0</TestLibraryFramework>
 	<TestLibraryFramework Condition=" '$(TestTargetFramework)' != 'net462' ">netstandard2.1</TestLibraryFramework>
+	-->
+	
+	<!-- When I switched target frameworks for Clojure.Source and Clojure.Tests, needed to change TestLibraryFramework to match TestTargetFramework -->
+	<TestLibraryFramework>$(TestTargetFramework)</TestLibraryFramework>
 	
 
 	<TestDir>$(RootDir)Test\$(Configuration)\$(TestTargetFramework)</TestDir>

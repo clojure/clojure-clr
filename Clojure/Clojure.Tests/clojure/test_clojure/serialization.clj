@@ -14,13 +14,15 @@
   (:import (System.IO MemoryStream)                                                 ;;;(java.io ObjectOutputStream ObjectInputStream
            #_(System.Runtime.Serialization.Formatters.Binary BinaryFormatter)))        ;;; ByteArrayOutputStream ByteArrayInputStream)))   -- defer import until after load
 
-(compile-when (>= (:major clojure-version) 9)
+
+(compile-when (>= (:major dotnet-version) 9)
 
 (assembly-load-from "System.Runtime.Serialization.Formatters.dll")
 
 )
 
 (import '(System.Runtime.Serialization.Formatters.Binary BinaryFormatter))
+
 
 (defn- serialize
   "Serializes a single object, returning a byte array."

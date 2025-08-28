@@ -277,4 +277,16 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="System.Runtime.Serialization.Formatters">
+      <Version>9.0.8</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="System.Runtime.Serialization.Formatters">
+      <Version>9.0.8</Version>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>
