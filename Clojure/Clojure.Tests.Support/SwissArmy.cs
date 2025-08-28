@@ -1,4 +1,5 @@
-﻿using System;
+﻿using clojure.lang;
+using System;
 
 namespace clojure.test;
 
@@ -6,8 +7,10 @@ namespace clojure.test;
 
 public class SwissArmy
 {
+    // We cannot name this the same as the other doppelganggers (methods, static and instance) -- compiler error
+    public static String Doppelganger = "static-field";
     public string ctorId;
-
+    public static IFn idFn = clojure.clr.api.Clojure.var("clojure.core", "identity");
 
     public SwissArmy() { this.ctorId = "1"; }
     public SwissArmy(int a, long b) { this.ctorId = "2"; }
@@ -42,4 +45,5 @@ public class SwissArmy
     public static String staticArityOverloadMethod(int a, int b) { return "System.Int32-System.Int32"; }
     public static String staticArityOverloadMethod(int a, int b, int c) { return "System.Int32-System.Int32-System.Int32"; }
     public static String doppelganger(int a, int b, long c) { return "System.Int32-System.Int32-System.Int64"; }
+    public static String doppelganger() { return ""; }
 }

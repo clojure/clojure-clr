@@ -495,4 +495,22 @@ DONE!
 
 The other problem area is with `case`.   It should be noted that `case` passes all the tests that are in the test suite in the Clojure repo.  There is something about the specific cases in these tests that cause `case` to fail.  This will not be fun.
 
+The major test that fails is just a big case statement with lots of different types of test cases.  I started with an empty case statement and started adding test/then pairs until I got a failure, then started removing items until I got a minimal failure case.  Here it is:
 
+```clojure
+(defn f
+    [x]
+    (case x
+        3.0 :double-result      
+        true :boolean-true-result
+        false :boolean-false-result
+        :default))
+
+(map f '(3.0 true false)) ; => (:default :boolean-true-result :boolean-false-result)
+```
+The argument `3.0` does not match its case.
+
+Further investigation reveals that is related to the `:sparse-key` switch type in `case`.
+Looking at the compiled code, it is clearly hosed.
+
+> THe only solution is to hard-code binary search through the hash codes.  DONE!
