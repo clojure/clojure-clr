@@ -32,7 +32,7 @@ namespace clojure.lang.CljCompiler.Ast
 
         public class SignatureHint
         {
-            public GenericTypeArgList GenericTypeArgs {  get; private set; }
+            public GenericTypeArgList GenericTypeArgs { get; private set; }
             public List<Type> Args { get; private set; }
 
             public int ArgCount => Args?.Count ?? 0;
@@ -41,7 +41,7 @@ namespace clojure.lang.CljCompiler.Ast
             {
                 // tagV is not null, but might be empty.
                 // tagV == []  -> no type-args, zero-argument method or property or field.
-                if ( tagV == null || tagV.count() == 0)
+                if (tagV == null || tagV.count() == 0)
                 {
                     GenericTypeArgs = GenericTypeArgList.Empty;
                     Args = null;
@@ -49,7 +49,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
 
                 var firstItem = tagV.nth(0);
-                ISeq remainingTags = null;
+                ISeq remainingTags;
 
                 if (firstItem is ISeq && RT.first(firstItem) is Symbol symbol && symbol.Equals(HostExpr.TypeArgsSym))
                 {
@@ -87,17 +87,19 @@ namespace clojure.lang.CljCompiler.Ast
         public string MethodName { get; private set; }
         public EMethodKind Kind { get; private set; }
         readonly Type _tagClass;
+        readonly FieldOrPropertyExpr _fieldOrPropOverload;
 
         #endregion
 
         #region Ctors
 
-        public QualifiedMethodExpr(Type methodType, Symbol sym)
+        public QualifiedMethodExpr(Type methodType, Symbol sym, FieldOrPropertyExpr fieldOverload = null)
         {
             MethodType = methodType;
             _methodSymbol = sym;
             _tagClass = Compiler.TagOf(sym) != null ? HostExpr.TagToType(Compiler.TagOf(sym)) : typeof(AFn);
             HintedSig = SignatureHint.MaybeCreate(Compiler.ParamTagsOf(sym));
+            _fieldOrPropOverload = fieldOverload;
 
             if (sym.Name.StartsWith("."))
             {
@@ -114,6 +116,8 @@ namespace clojure.lang.CljCompiler.Ast
                 Kind = EMethodKind.STATIC;
                 MethodName = sym.Name;
             }
+
+            _fieldOrPropOverload = fieldOverload;
         }
 
         #endregion
@@ -129,9 +133,21 @@ namespace clojure.lang.CljCompiler.Ast
 
         #region eval
 
+        private bool PreferOverloadedField()
+        {
+            return _fieldOrPropOverload != null && Compiler.ParamTagsOf(_methodSymbol) is null;
+        }
+
         public object Eval()
         {
-            return BuildThunk(new ParserContext(RHC.Eval), this).Eval();
+            if (PreferOverloadedField())
+            {
+                return _fieldOrPropOverload.Eval();
+            }
+            else
+            {
+                return BuildThunk(new ParserContext(RHC.Eval), this).Eval();
+            }
         }
 
         #endregion
@@ -140,7 +156,14 @@ namespace clojure.lang.CljCompiler.Ast
 
         public void Emit(RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            BuildThunk(new ParserContext(rhc), this).Emit(rhc, objx, ilg);
+            if (PreferOverloadedField())
+            {
+                _fieldOrPropOverload.Emit(rhc, objx, ilg);
+            }
+            else
+            {
+                BuildThunk(new ParserContext(rhc), this).Emit(rhc, objx, ilg);
+            }
         }
 
         public bool HasNormalExit()
@@ -149,7 +172,7 @@ namespace clojure.lang.CljCompiler.Ast
         }
 
         // (Java) TBD: caching/reuse of thunks
-        private static FnExpr BuildThunk(ParserContext  pcon, QualifiedMethodExpr qmexpr)
+        private static FnExpr BuildThunk(ParserContext pcon, QualifiedMethodExpr qmexpr)
         {
             // When qualified symbol has param-tags:
             //   (fn invoke__Class_meth ([this? args*] (methodSymbol this? args*)))
@@ -163,10 +186,9 @@ namespace clojure.lang.CljCompiler.Ast
 
             HashSet<int> arities;
 
-            if (qmexpr.HintedSig != null )
+            if (qmexpr.HintedSig != null)
             {
-                arities = new HashSet<int>();
-                arities.Add(qmexpr.HintedSig.ArgCount);
+                arities = [qmexpr.HintedSig.ArgCount];
             }
             else
                 arities = AritySet(qmexpr.MethodType, qmexpr.MethodName, qmexpr.Kind);
@@ -178,8 +200,8 @@ namespace clojure.lang.CljCompiler.Ast
                 form = RT.conj(form, RT.list(parameters, body));
             }
 
-            ISeq thunkForm = RT.listStar(Symbol.intern("fn"),Symbol.intern(thunkName), RT.seq(form));
-            return (FnExpr) Compiler.AnalyzeSeq(pcon,thunkForm,thunkName);
+            ISeq thunkForm = RT.listStar(Symbol.intern("fn"), Symbol.intern(thunkName), RT.seq(form));
+            return (FnExpr)Compiler.AnalyzeSeq(pcon, thunkForm, thunkName);
         }
 
         private static IPersistentVector BuildParams(Symbol instanceParam, int arity)
@@ -201,11 +223,30 @@ namespace clojure.lang.CljCompiler.Ast
             var res = new HashSet<int>();
             List<MethodBase> methods = MethodsWithName(t, methodName, kind);
 
-            foreach ( var method in methods)
+            foreach (var method in methods)
                 res.Add(method.GetParameters().Length);
 
             return res;
         }
+
+        private static bool IsInstanceMethod(MethodBase mb) => mb is MethodInfo mi && !mi.IsStatic;
+        private static bool IsStaticMethod(MethodBase mb) => mb is MethodInfo mi && mi.IsStatic;
+
+
+        internal static List<MethodBase> MethodOverloads(Type t, string methodName, EMethodKind methodKind)
+        {
+            return t.GetMethods()
+                    .Where(m => m.Name == methodName)
+                    .Where(m =>
+                            methodKind switch
+                            {
+                                EMethodKind.STATIC => IsStaticMethod(m),
+                                EMethodKind.INSTANCE => IsInstanceMethod(m),
+                                _ => false
+                            })
+                    .ToList<MethodBase>();
+        }
+
 
         // Returns a list of methods or ctors matching the name and kind given.
         // Otherwise, will throw if the information provided results in no matches
@@ -219,9 +260,7 @@ namespace clojure.lang.CljCompiler.Ast
                 return ctors;
             }
 
-            var methods = t.GetMethods().ToList<MethodBase>()
-                .Where(m => m.Name.Equals(methodName) && (kind == EMethodKind.INSTANCE ? !m.IsStatic : m.IsStatic))
-                .ToList();
+            var methods = MethodOverloads(t, methodName, kind);
 
             if (methods.Count == 0)
                 throw NoMethodWithNameException(t, methodName, kind);
@@ -239,13 +278,12 @@ namespace clojure.lang.CljCompiler.Ast
             // If we have generic type args and the list is non-empty, we need to choose only methods that have the same number of generic type args, fully instantiated.
 
             int gtaCount = hint.GenericTypeArgs?.Count ?? 0;
-            if ( gtaCount > 0)
+            if (gtaCount > 0)
             {
-                methods = methods
+                methods = [.. methods
                     .Where(m => m.IsGenericMethod && m.GetGenericArguments().Length == gtaCount)
                     .Select(m => ((MethodInfo)m).MakeGenericMethod(hint.GenericTypeArgs.ToArray()))
-                    .Cast<MethodBase>()
-                    .ToList();
+                    .Cast<MethodBase>()];
             }
 
             int arity = hint.Args?.Count ?? 0;
@@ -259,7 +297,7 @@ namespace clojure.lang.CljCompiler.Ast
                 return filteredMethods[0];
             else
                 throw ParamTagsDontResolveException(t, methodName, hint);
-         
+
         }
 
         private static ArgumentException NoMethodWithNameException(Type t, string methodName, EMethodKind kind)
@@ -272,7 +310,7 @@ namespace clojure.lang.CljCompiler.Ast
         {
             List<Type> hintedSig = hint.Args;
 
-            IEnumerable<Object> tagNames = hintedSig.Cast<Object>().Select(tag => tag == null ? Compiler.ParamTagAny : tag);
+            IEnumerable<Object> tagNames = hintedSig.Cast<Object>().Select(tag => tag ?? Compiler.ParamTagAny);
             IPersistentVector paramTags = PersistentVector.create(tagNames);
 
             string genericTypeArgs = hint.GenericTypeArgs == null ? "" : $"<{hint.GenericTypeArgs}>";

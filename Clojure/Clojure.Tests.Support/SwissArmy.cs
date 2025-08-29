@@ -7,7 +7,8 @@ namespace clojure.test;
 
 public class SwissArmy
 {
-    // We cannot name this the same as the other doppelganggers (methods, static and instance) -- compiler error
+    // We cannot name this the same as the other doppelganggers (methods, static or instance) -- compiler error
+    // SO some of the tests that this was designed for are problems for the JMV only.
     public static String Doppelganger = "static-field";
     public string ctorId;
     public static IFn idFn = clojure.clr.api.Clojure.var("clojure.core", "identity");

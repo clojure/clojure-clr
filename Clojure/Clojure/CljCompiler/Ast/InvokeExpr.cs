@@ -25,16 +25,16 @@ namespace clojure.lang.CljCompiler.Ast
 
         readonly Object _tag;
         public Object Tag { get { return _tag; } }
-        
+
         readonly IPersistentVector _args;
         public IPersistentVector Args { get { return _args; } }
-        
+
         readonly string _source;
         public string Source { get { return _source; } }
-        
+
         readonly IPersistentMap _spanMap;
         public IPersistentMap SpanMap { get { return _spanMap; } }
-        
+
         readonly bool _tailPosition;
         public bool TailPosition { get { return _tailPosition; } }
 
@@ -89,12 +89,12 @@ namespace clojure.lang.CljCompiler.Ast
                                 _protocolOn.FullName, fvar.Symbol, pvar.Symbol));
                         }
                         String mname = Compiler.munge(mmapVal.Symbol.ToString());
-                       
-                        IList<MethodBase> methods = Reflector.GetMethods(_protocolOn, mname, GenericTypeArgList.Empty, args.count() - 1,  false);
+
+                        IList<MethodBase> methods = Reflector.GetMethods(_protocolOn, mname, GenericTypeArgList.Empty, args.count() - 1, false);
                         if (methods.Count != 1)
                             throw new ArgumentException(String.Format("No single method: {0} of interface: {1} found for function: {2} of protocol: {3}",
                                 mname, _protocolOn.FullName, fvar.Symbol, pvar.Symbol));
-                        _onMethod = (MethodInfo) methods[0];
+                        _onMethod = (MethodInfo)methods[0];
                     }
                 }
             }
@@ -183,7 +183,7 @@ namespace clojure.lang.CljCompiler.Ast
                     }
                 }
             }
-            
+
             if (varFexpr != null && pcon.Rhc != RHC.Eval)
             {
                 Var v = varFexpr.Var;
@@ -211,12 +211,33 @@ namespace clojure.lang.CljCompiler.Ast
                 return new KeywordInvokeExpr((string)Compiler.SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), Compiler.TagOf(form), kwFexpr, target);
             }
 
+
+            IPersistentVector args = PersistentVector.EMPTY;
+            for (ISeq s = RT.seq(form.next()); s != null; s = s.next())
+                args = args.cons(Compiler.Analyze(pcon, s.first()));
+
+
             // Preserving the existing static field bug that replaces a reference in parens with
             // the field itself rather than trying to invoke the value in the field. This is
             // an exception to the uniform Class/member qualification per CLJ-2806 ticket.
 
+
             if (fexpr is StaticFieldExpr || fexpr is StaticPropertyExpr)
-                return fexpr;
+            {
+                if (RT.count(args) == 0)
+                    return fexpr;
+                else
+                {
+                    (var fieldName, var type) =
+                        fexpr is StaticFieldExpr sfe
+                        ? (sfe.MemberName, sfe.MemberType)
+                        : fexpr is StaticPropertyExpr spe
+                        ? (spe.MemberName, spe.MemberType)
+                        : ("?", typeof(void));
+
+                    throw new ArgumentException($"No matching method {fieldName} found taking {RT.count(args)} args for {type}");
+                }
+            }
 
 
             if (fexpr is QualifiedMethodExpr qmfexpr)
@@ -226,10 +247,6 @@ namespace clojure.lang.CljCompiler.Ast
                     tailPosition,
                     form.next());
 
-
-            IPersistentVector args = PersistentVector.EMPTY;
-            for (ISeq s = RT.seq(form.next()); s != null; s = s.next())
-                args = args.cons(Compiler.Analyze(pcon, s.first()));
 
             //if (args.count() > Compiler.MAX_POSITIONAL_ARITY)
             //    throw new ArgumentException(String.Format("No more than {0} args supported", Compiler.MAX_POSITIONAL_ARITY));
@@ -241,7 +258,7 @@ namespace clojure.lang.CljCompiler.Ast
                 args,
                 tailPosition);
         }
-        
+
         static Expr ToHostExpr(ParserContext pcon, QualifiedMethodExpr qmfexpr, Symbol tag, bool tailPosition, ISeq args)
         {
             var source = (string)Compiler.SourceVar.deref();
@@ -288,7 +305,7 @@ namespace clojure.lang.CljCompiler.Ast
 
             // If the QME has a nonempty generic type args list, we us it in preference.
 
-            if ( qmfexpr.HintedSig != null && !qmfexpr.HintedSig.GenericTypeArgs.IsEmpty)
+            if (qmfexpr.HintedSig != null && !qmfexpr.HintedSig.GenericTypeArgs.IsEmpty)
                 genericTypeArgs = qmfexpr.HintedSig.GenericTypeArgs;
 
             bool hasGenericTypeArgs = !genericTypeArgs.IsEmpty;
@@ -303,7 +320,7 @@ namespace clojure.lang.CljCompiler.Ast
                 switch (qmfexpr.Kind)
                 {
                     case QualifiedMethodExpr.EMethodKind.INSTANCE:
-                        if (!hasGenericTypeArgs && (finfo = Reflector.GetField(qmfexpr.MethodType, qmfexpr.MethodName,false)) != null)
+                        if (!hasGenericTypeArgs && (finfo = Reflector.GetField(qmfexpr.MethodType, qmfexpr.MethodName, false)) != null)
                             return new InstanceFieldExpr(source, spanMap, tag, instance, qmfexpr.MethodName, finfo, true);
                         if (!hasGenericTypeArgs && (pinfo = Reflector.GetProperty(qmfexpr.MethodType, qmfexpr.MethodName, false)) != null)
                             return new InstancePropertyExpr(source, spanMap, tag, instance, qmfexpr.MethodName, pinfo, true);
@@ -330,7 +347,7 @@ namespace clojure.lang.CljCompiler.Ast
                 }
             }
 
-            if (qmfexpr.HintedSig != null )
+            if (qmfexpr.HintedSig != null)
             {
                 //  What if there is a hinted signature AND the arguments have a type-args list?
                 //  In the same way that inferred and tagged types on the arguments are overridden by the hinted signature, we do the same with type-args -- ignore it.
@@ -340,21 +357,21 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     case QualifiedMethodExpr.EMethodKind.CTOR:
                         return new NewExpr(
-                            qmfexpr.MethodType, 
-                            (ConstructorInfo)method, 
-                            HostExpr.ParseArgs(pcon, args), 
+                            qmfexpr.MethodType,
+                            (ConstructorInfo)method,
+                            HostExpr.ParseArgs(pcon, args),
                             spanMap);
 
                     case QualifiedMethodExpr.EMethodKind.INSTANCE:
                         return new InstanceMethodExpr(
-                            source, 
+                            source,
                             spanMap,
                             tag,
                             instance,
                             qmfexpr.MethodType,
-                            Compiler.munge(qmfexpr.MethodName), 
+                            Compiler.munge(qmfexpr.MethodName),
                             (MethodInfo)method,
-                            genericTypeArgs,                 
+                            genericTypeArgs,
                             HostExpr.ParseArgs(pcon, args),
                             tailPosition);
 
@@ -362,12 +379,12 @@ namespace clojure.lang.CljCompiler.Ast
                         return new StaticMethodExpr(
                             source,
                             spanMap,
-                            tag, 
+                            tag,
                              qmfexpr.MethodType,
-                             Compiler.munge(qmfexpr.MethodName), 
+                             Compiler.munge(qmfexpr.MethodName),
                              (MethodInfo)method,
                              genericTypeArgs,
-                             HostExpr.ParseArgs(pcon,args),
+                             HostExpr.ParseArgs(pcon, args),
                              tailPosition);
                 }
             }
@@ -377,8 +394,8 @@ namespace clojure.lang.CljCompiler.Ast
                 {
                     case QualifiedMethodExpr.EMethodKind.CTOR:
                         return new NewExpr(
-                            qmfexpr.MethodType, 
-                            HostExpr.ParseArgs(pcon, args), 
+                            qmfexpr.MethodType,
+                            HostExpr.ParseArgs(pcon, args),
                             (IPersistentMap)Compiler.SourceSpanVar.deref());
 
                     case QualifiedMethodExpr.EMethodKind.INSTANCE:
@@ -397,7 +414,7 @@ namespace clojure.lang.CljCompiler.Ast
                         return new StaticMethodExpr(
                             (string)Compiler.SourceVar.deref(),
                             (IPersistentMap)Compiler.SourceSpanVar.deref(),
-                            tag, 
+                            tag,
                             qmfexpr.MethodType,
                             Compiler.munge(qmfexpr.MethodName),
                             genericTypeArgs,
@@ -482,44 +499,44 @@ namespace clojure.lang.CljCompiler.Ast
 
             LocalBuilder targetTemp = ilg.DeclareLocal(typeof(Object));
             GenContext.SetLocalName(targetTemp, "target");
-            ilg.Emit(OpCodes.Stloc,targetTemp);                  // target
+            ilg.Emit(OpCodes.Stloc, targetTemp);                  // target
 
-            ilg.Emit(OpCodes.Call,Compiler.Method_Util_classOf);          // class
+            ilg.Emit(OpCodes.Call, Compiler.Method_Util_classOf);          // class
             ilg.EmitFieldGet(objx.CachedTypeField(_siteIndex));  // class, cached-class
             ilg.Emit(OpCodes.Beq, callLabel);                    // 
             if (_protocolOn != null)
             {
-                ilg.Emit(OpCodes.Ldloc,targetTemp);              // target
+                ilg.Emit(OpCodes.Ldloc, targetTemp);              // target
                 ilg.Emit(OpCodes.Isinst, _protocolOn);           // null or target
                 ilg.Emit(OpCodes.Ldnull);                        // (null or target), null
                 ilg.Emit(OpCodes.Cgt_Un);                        // (0 or 1)
                 ilg.Emit(OpCodes.Brtrue, onLabel);
             }
-            ilg.Emit(OpCodes.Ldloc,targetTemp);                  // target
-            ilg.Emit(OpCodes.Call,Compiler.Method_Util_classOf);          // class
-            
+            ilg.Emit(OpCodes.Ldloc, targetTemp);                  // target
+            ilg.Emit(OpCodes.Call, Compiler.Method_Util_classOf);          // class
+
             LocalBuilder typeTemp = ilg.DeclareLocal(typeof(Type));
             GenContext.SetLocalName(typeTemp, "type");
-            ilg.Emit(OpCodes.Stloc,typeTemp);                    //    (typeType <= class)
-            
-            
-            ilg.Emit(OpCodes.Ldloc,typeTemp);                    // this, class
+            ilg.Emit(OpCodes.Stloc, typeTemp);                    //    (typeType <= class)
+
+
+            ilg.Emit(OpCodes.Ldloc, typeTemp);                    // this, class
             ilg.EmitFieldSet(objx.CachedTypeField(_siteIndex));  // 
 
-            ilg.MarkLabel(callLabel);                       
-    
-            objx.EmitVar(ilg,v);                              // var
-            ilg.Emit(OpCodes.Call,Compiler.Method_Var_getRawRoot);         // proto-fn
-            ilg.Emit(OpCodes.Castclass, typeof(AFunction));
-                       
-            ilg.Emit(OpCodes.Ldloc,targetTemp);                  // proto-fn, target
+            ilg.MarkLabel(callLabel);
 
-            EmitArgsAndCall(1,rhc,objx,ilg);
-            ilg.Emit(OpCodes.Br,endLabel);
+            objx.EmitVar(ilg, v);                              // var
+            ilg.Emit(OpCodes.Call, Compiler.Method_Var_getRawRoot);         // proto-fn
+            ilg.Emit(OpCodes.Castclass, typeof(AFunction));
+
+            ilg.Emit(OpCodes.Ldloc, targetTemp);                  // proto-fn, target
+
+            EmitArgsAndCall(1, rhc, objx, ilg);
+            ilg.Emit(OpCodes.Br, endLabel);
 
             ilg.MarkLabel(onLabel);
-            ilg.Emit(OpCodes.Ldloc,targetTemp);                  // target
-            if ( _protocolOn != null )
+            ilg.Emit(OpCodes.Ldloc, targetTemp);                  // target
+            if (_protocolOn != null)
             {
                 ilg.Emit(OpCodes.Castclass, _protocolOn);
                 MethodExpr.EmitTypedArgs(objx, ilg, _onMethod.GetParameters(), RT.subvec(_args, 1, _args.count()));
@@ -530,7 +547,7 @@ namespace clojure.lang.CljCompiler.Ast
                 //    method.EmitClearThis(ilg);
                 //}
                 ilg.Emit(OpCodes.Callvirt, _onMethod);
-                HostExpr.EmitBoxReturn(objx, ilg, _onMethod.ReturnType);                
+                HostExpr.EmitBoxReturn(objx, ilg, _onMethod.ReturnType);
             }
             ilg.MarkLabel(endLabel);
         }
@@ -538,17 +555,17 @@ namespace clojure.lang.CljCompiler.Ast
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
         void EmitArgsAndCall(int firstArgToEmit, RHC rhc, ObjExpr objx, CljILGen ilg)
         {
-            for ( int i=firstArgToEmit; i< Math.Min(Compiler.MaxPositionalArity,_args.count()); i++ )
+            for (int i = firstArgToEmit; i < Math.Min(Compiler.MaxPositionalArity, _args.count()); i++)
             {
-                Expr e = (Expr) _args.nth(i);
-                e.Emit(RHC.Expression,objx,ilg);
+                Expr e = (Expr)_args.nth(i);
+                e.Emit(RHC.Expression, objx, ilg);
             }
-            if ( _args.count() > Compiler.MaxPositionalArity )
+            if (_args.count() > Compiler.MaxPositionalArity)
             {
                 IPersistentVector restArgs = PersistentVector.EMPTY;
-                for (int i=Compiler.MaxPositionalArity; i<_args.count(); i++ )
+                for (int i = Compiler.MaxPositionalArity; i < _args.count(); i++)
                     restArgs = restArgs.cons(_args.nth(i));
-                MethodExpr.EmitArgsAsArray(restArgs,objx,ilg);
+                MethodExpr.EmitArgsAsArray(restArgs, objx, ilg);
             }
 
             // In JVM.  No necessary here.
@@ -558,9 +575,9 @@ namespace clojure.lang.CljCompiler.Ast
             //    method.EmitClearThis(ilg);
             //}
 
-            MethodInfo mi = Compiler.Methods_IFn_invoke[Math.Min(Compiler.MaxPositionalArity+1,_args.count())];
+            MethodInfo mi = Compiler.Methods_IFn_invoke[Math.Min(Compiler.MaxPositionalArity + 1, _args.count())];
 
-           ilg.Emit(OpCodes.Callvirt,mi);
+            ilg.Emit(OpCodes.Callvirt, mi);
         }
 
         public bool HasNormalExit() { return true; }

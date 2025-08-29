@@ -109,7 +109,7 @@
 
 (defn is-static-method? [class method-name params]  
   (let [method (.GetMethod ^Type class ^String (name method-name)  ^|System.Type[]| params)]                      ;;;  getDeclaredMethod ^Class ^"[Ljava.lang.Object;"
-    (.IsStatic method)))                                                                                          ;;; (java.lang.reflect.Modifier/isStatic (.getModifiers method))
+    (and method (.IsStatic method))))                                                                             ;;; (java.lang.reflect.Modifier/isStatic (.getModifiers method))  also added the (and method ...)
 
 (defn get-methods
   "Reflect the class located at `path`, filter out the public members, add a :type
@@ -180,7 +180,7 @@
 
 (deftest field-overloads-method-CLJ-2899-regression
   (testing "overloaded in value position"
-    (is (= "static-field" clojure.test.SwissArmy/doppelganger)))
+    (is (= "static-field" clojure.test.SwissArmy/Doppelganger)))           ;;; doppelganger -- note: cannot name the field doppenganger, C# does not allow
 
   (testing "overloaded in value position, w/paramtags"
     (is (= "" (apply ^[] clojure.test.SwissArmy/doppelganger []))))
@@ -189,7 +189,7 @@
     (is (= "" (clojure.test.SwissArmy/doppelganger))))
 
   (testing "overloaded, invoke w/args"
-    (is (= "int-int-long" (clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42)))))
+    (is (= "System.Int32-System.Int32-System.Int64" (clojure.test.SwissArmy/doppelganger (int 1) (int 2) (long 42)))))        ;;; int-int-long
 
   (testing "non-overloaded, field holds IFn, invoke w/args fails"
     (is (thrown? Exception (eval '(clojure.test.SwissArmy/idFn 42))))
@@ -199,8 +199,8 @@
     (is (= #'clojure.core/identity (clojure.test.SwissArmy/idFn))))
 
   (testing "instance method overloads"
-    (is (= "int-int" (clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2))))
-    (is (= "int-int" (apply clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2) [])))))
+    (is (= "System.Int32-System.Int32" (clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2))))
+    (is (= "System.Int32-System.Int32" (apply clojure.test.SwissArmy/.doppelganger (clojure.test.SwissArmy/new) (int 1) (int 2) [])))))
     
 
 

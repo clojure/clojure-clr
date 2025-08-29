@@ -10,12 +10,12 @@
 
 using clojure.lang.CljCompiler.Ast;
 using clojure.lang.CljCompiler.Context;
-using Microsoft.Scripting.Runtime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.Serialization;
@@ -37,8 +37,8 @@ namespace clojure.lang
 
         #region Duplicate types
 
-        static readonly Dictionary<String, Type> _evalTypeMap = new Dictionary<string, Type>();
-        static readonly Dictionary<String, Type> _compilerTypeMap = new Dictionary<string, Type>();
+        static readonly Dictionary<String, Type> _evalTypeMap = new();
+        static readonly Dictionary<String, Type> _compilerTypeMap = new();
 
 #if NETFRAMEWORK
 
@@ -99,10 +99,10 @@ namespace clojure.lang
         public static readonly Symbol LetSym = Symbol.intern("let*");
         public static readonly Symbol LetfnSym = Symbol.intern("letfn*");
         public static readonly Symbol DoSym = Symbol.intern("do");
-    
+
         public static readonly Symbol FnSym = Symbol.intern("fn*");
-    
-        public static readonly Symbol FnOnceSym = (Symbol) Symbol.intern("fn*").withMeta(RT.map(Keyword.intern(null, "once"), true));
+
+        public static readonly Symbol FnOnceSym = (Symbol)Symbol.intern("fn*").withMeta(RT.map(Keyword.intern(null, "once"), true));
         public static readonly Symbol QuoteSym = Symbol.intern("quote");
         public static readonly Symbol TheVarSym = Symbol.intern("var");
         public static readonly Symbol DotSym = Symbol.intern(".");
@@ -113,7 +113,7 @@ namespace clojure.lang
         public static readonly Symbol ThrowSym = Symbol.intern("throw");
         public static readonly Symbol MonitorEnterSym = Symbol.intern("monitor-enter");
         public static readonly Symbol MonitorExitSym = Symbol.intern("monitor-exit");
-        public static readonly Symbol ImportSym = Symbol.intern("clojure.core","import*");
+        public static readonly Symbol ImportSym = Symbol.intern("clojure.core", "import*");
         public static readonly Symbol DeftypeSym = Symbol.intern("deftype*");
         public static readonly Symbol CaseSym = Symbol.intern("case*");
         public static readonly Symbol NewSym = Symbol.intern("new");
@@ -145,8 +145,8 @@ namespace clojure.lang
         internal static readonly Keyword ArglistsKeyword = Keyword.intern(null, "arglists");
 
         //static readonly Keyword VolatileKeyword = Keyword.intern(null,"volatile");
-        internal static readonly Keyword ImplementsKeyword = Keyword.intern(null,"implements");
-        internal static readonly Keyword ProtocolKeyword = Keyword.intern(null,"protocol");
+        internal static readonly Keyword ImplementsKeyword = Keyword.intern(null, "implements");
+        internal static readonly Keyword ProtocolKeyword = Keyword.intern(null, "protocol");
         //static readonly Keyword OnKeyword = Keyword.intern(null, "on");
         internal static readonly Keyword DynamicKeyword = Keyword.intern("dynamic");
         internal static readonly Keyword RedefKeyword = Keyword.intern("redef");
@@ -156,7 +156,7 @@ namespace clojure.lang
 
         internal static readonly Keyword DirectLinkingKeyword = Keyword.intern("direct-linking");
         internal static readonly Keyword ElideMetaKeyword = Keyword.intern("elide-meta");
- 
+
 
         #endregion
 
@@ -164,11 +164,11 @@ namespace clojure.lang
 
         //boolean
         internal static readonly Var CompileFilesVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                                                         Symbol.intern("*compile-files*"), false).setDynamic();  
+                                                         Symbol.intern("*compile-files*"), false).setDynamic();
 
 
         internal static readonly Var InstanceVar = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                                                         Symbol.intern("instance?"), false).setDynamic();  
+                                                         Symbol.intern("instance?"), false).setDynamic();
 
 
         //String
@@ -246,25 +246,25 @@ namespace clojure.lang
         {
             Object compilerOptions = null;
 
-			string nixPrefix = "CLOJURE_COMPILER_";
-			string winPrefix = "clojure.compiler.";
+            string nixPrefix = "CLOJURE_COMPILER_";
+            string winPrefix = "clojure.compiler.";
 
             IDictionary envVars = Environment.GetEnvironmentVariables();
             foreach (DictionaryEntry de in envVars)
             {
                 string name = (string)de.Key;
                 string v = (string)de.Value;
-				if (name.StartsWith(nixPrefix))
+                if (name.StartsWith(nixPrefix))
                 {
-					// compiler options on *nix need to be of the form
-					// CLOJURE_COMPILER_DIRECT_LINKING because most shells do not
-					// support hyphens in variable names
-					string optionName = name.Substring(nixPrefix.Length).Replace("_", "-").ToLower();
+                    // compiler options on *nix need to be of the form
+                    // CLOJURE_COMPILER_DIRECT_LINKING because most shells do not
+                    // support hyphens in variable names
+                    string optionName = name.Substring(nixPrefix.Length).Replace("_", "-").ToLower();
                     compilerOptions = RT.assoc(compilerOptions,
                         RT.keyword(null, optionName),
                         RT.readString(v));
                 }
-				if ( name.StartsWith(winPrefix))
+                if (name.StartsWith(winPrefix))
                 {
                     compilerOptions = RT.assoc(compilerOptions,
                         RT.keyword(null, name.Substring(winPrefix.Length)),
@@ -348,7 +348,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_IObj_withMeta = typeof(IObj).GetMethod("withMeta");
 
         internal static readonly MethodInfo Method_Keyword_intern_string = typeof(Keyword).GetMethod("intern", new Type[] { typeof(String) });
-        
+
         internal static readonly MethodInfo Method_Monitor_Enter = typeof(Monitor).GetMethod("Enter", new Type[] { typeof(Object) });
         internal static readonly MethodInfo Method_Monitor_Exit = typeof(Monitor).GetMethod("Exit", new Type[] { typeof(Object) });
 
@@ -368,12 +368,12 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_RT_uncheckedIntCast_long = typeof(RT).GetMethod("uncheckedIntCast", new Type[] { typeof(long) });
         internal static readonly MethodInfo Method_RT_keyword = typeof(RT).GetMethod("keyword");
         internal static readonly MethodInfo Method_RT_map = typeof(RT).GetMethod("map");
-        internal static readonly MethodInfo Method_RT_mapUniqueKeys = typeof(RT).GetMethod("mapUniqueKeys"); 
-        internal static readonly MethodInfo Method_RT_seq = typeof(RT).GetMethod("seq"); 
+        internal static readonly MethodInfo Method_RT_mapUniqueKeys = typeof(RT).GetMethod("mapUniqueKeys");
+        internal static readonly MethodInfo Method_RT_seq = typeof(RT).GetMethod("seq");
         internal static readonly MethodInfo Method_RT_seqOrElse = typeof(RT).GetMethod("seqOrElse");
         internal static readonly MethodInfo Method_RT_set = typeof(RT).GetMethod("set");
         internal static readonly MethodInfo Method_RT_vector = typeof(RT).GetMethod("vector");
-        internal static readonly MethodInfo Method_RT_readString = typeof(RT).GetMethod("readString", new Type[]{ typeof(String) });
+        internal static readonly MethodInfo Method_RT_readString = typeof(RT).GetMethod("readString", new Type[] { typeof(String) });
         internal static readonly MethodInfo Method_RT_var2 = typeof(RT).GetMethod("var", new Type[] { typeof(string), typeof(string) });
 
         internal static readonly MethodInfo Method_Symbol_intern2 = typeof(Symbol).GetMethod("intern", new Type[] { typeof(string), typeof(string) });
@@ -386,7 +386,7 @@ namespace clojure.lang
         internal static readonly MethodInfo Method_Util_equiv = typeof(Util).GetMethod("equiv", new Type[] { typeof(object), typeof(object) });
         internal static readonly MethodInfo Method_Util_hash = typeof(Util).GetMethod("hash");
         internal static readonly MethodInfo Method_Util_IsNonCharNumeric = typeof(Util).GetMethod("IsNonCharNumeric");
-        
+
         internal static readonly MethodInfo Method_Var_bindRoot = typeof(Var).GetMethod("bindRoot");
         internal static readonly MethodInfo Method_Var_get = typeof(Var).GetMethod("deref");
         internal static readonly MethodInfo Method_Var_set = typeof(Var).GetMethod("set");
@@ -401,7 +401,7 @@ namespace clojure.lang
         internal static readonly ConstructorInfo Ctor_Serializable = typeof(SerializableAttribute).GetConstructor(Type.EmptyTypes);
 
         internal static readonly MethodInfo[] Methods_IFn_invoke = new MethodInfo[MaxPositionalArity + 2];
-        internal static readonly MethodInfo[] Methods_CreateTuple = new MethodInfo[] { 
+        internal static readonly MethodInfo[] Methods_CreateTuple = new MethodInfo[] {
             typeof(Tuple).GetMethod("create",CreateObjectTypeArray(0)),
             typeof(Tuple).GetMethod("create",CreateObjectTypeArray(1)),
             typeof(Tuple).GetMethod("create",CreateObjectTypeArray(2)),
@@ -427,7 +427,7 @@ namespace clojure.lang
 
         internal static IPersistentVector ParamTagsOf(Symbol sym)
         {
-            var paramTags = RT.get(RT.meta(sym),RT.ParamTagsKey);
+            var paramTags = RT.get(RT.meta(sym), RT.ParamTagsKey);
 
             if (paramTags != null && !(paramTags is IPersistentVector))
                 throw new ArgumentException($"param-tags of symbol {sym} should be a vector.");
@@ -451,7 +451,7 @@ namespace clojure.lang
                 else
                     sig.Add(HostExpr.TagToType(t));
             }
-    
+
             return sig;
         }
 
@@ -459,7 +459,7 @@ namespace clojure.lang
         {
             ParameterInfo[] methodSig = method.GetParameters();
 
-            for ( int i=0; i<methodSig.Length; i++ )
+            for (int i = 0; i < methodSig.Length; i++)
             {
                 if (sig[i] != null && !sig[i].Equals(methodSig[i].ParameterType))
                     return false;
@@ -489,7 +489,7 @@ namespace clojure.lang
             string type = isCtor ? "constructor" : "method";
             return $"{type} {(isCtor ? "" : name)} in class {t.Name}";
         }
-      
+
 
 
         #endregion
@@ -519,14 +519,14 @@ namespace clojure.lang
         // Registry of Var -> Type
         // Where the key is a Var that has been def'd to a Type that was generated by compilation.
 
-        static Dictionary<Var, Type> _directLinkingMap = new Dictionary<Var, Type>();
+        static Dictionary<Var, Type> _directLinkingMap = new();
 
         public static void RegisterDirectLink(Var var, Type type) => _directLinkingMap[var] = type;
         public static bool TryGetDirectLink(Var var, out Type t) => _directLinkingMap.TryGetValue(var, out t);
 
-// TODO: we have duplicate code below.
+        // TODO: we have duplicate code below.
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static Symbol resolveSymbol(Symbol sym)
         {
             //already qualified or classname?
@@ -551,7 +551,7 @@ namespace clojure.lang
                 return Symbol.intern(CurrentNamespace.Name.Name, sym.Name);
 
             Type ot = o as Type;
-             if (ot != null)
+            if (ot != null)
                 return Symbol.intern(null, ot.FullName);
 
             if (o is Var ov)
@@ -606,7 +606,7 @@ namespace clojure.lang
                 if (ns == null)
                 {
                     Type at = HostExpr.MaybeArrayType(symbol);
-                    if ( at != null)
+                    if (at != null)
                         return at;
                     throw new InvalidOperationException("No such namespace: " + symbol.Namespace);
                 }
@@ -654,7 +654,7 @@ namespace clojure.lang
         public static object maybeResolveIn(Namespace n, Symbol symbol)
         {
             // note: ns-qualified vars must already exist
-             if (symbol.Namespace != null)
+            if (symbol.Namespace != null)
             {
                 Namespace ns = namespaceFor(n, symbol);
                 if (ns == null)
@@ -679,8 +679,8 @@ namespace clojure.lang
                 {
                     var tName = type.FullName;
                     var compiledType = Compiler.FindDuplicateCompiledType(tName);
-                    if ( compiledType is not null && Compiler.IsCompiling)
-                        return compiledType;                       
+                    if (compiledType is not null && Compiler.IsCompiling)
+                        return compiledType;
                 }
 
                 return o;
@@ -691,7 +691,7 @@ namespace clojure.lang
         #endregion
 
         #region Bindings, registration
-        
+
         public static void RegisterVar(Var v)
         {
             if (!VarsVar.isBound)
@@ -810,20 +810,20 @@ namespace clojure.lang
             //return varCallsites.count() - 1;
         }
 
-         internal static IPersistentCollection EmptyVarCallSites()
-         {
-             return PersistentHashSet.EMPTY;
-         }
-
-
-         internal static LocalBinding RegisterLocalThis(Symbol sym, Symbol tag, Expr init)
-         {
-             return RegisterLocalInternal(sym, tag, init, typeof(Object),  true, false, false);
-         }
-
-         internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init, Type declaredType, bool isArg)
+        internal static IPersistentCollection EmptyVarCallSites()
         {
-             return RegisterLocalInternal(sym, tag, init, declaredType, false, isArg, false);
+            return PersistentHashSet.EMPTY;
+        }
+
+
+        internal static LocalBinding RegisterLocalThis(Symbol sym, Symbol tag, Expr init)
+        {
+            return RegisterLocalInternal(sym, tag, init, typeof(Object), true, false, false);
+        }
+
+        internal static LocalBinding RegisterLocal(Symbol sym, Symbol tag, Expr init, Type declaredType, bool isArg)
+        {
+            return RegisterLocalInternal(sym, tag, init, declaredType, false, isArg, false);
         }
 
 
@@ -835,7 +835,7 @@ namespace clojure.lang
         private static LocalBinding RegisterLocalInternal(Symbol sym, Symbol tag, Expr init, Type declaredType, bool isThis, bool isArg, bool isByRef)
         {
             int num = GetAndIncLocalNum();
-            LocalBinding b = new LocalBinding(num, sym, tag, init, declaredType, isThis, isArg, isByRef);
+            LocalBinding b = new(num, sym, tag, init, declaredType, isThis, isArg, isByRef);
             IPersistentMap localsMap = (IPersistentMap)LocalEnvVar.deref();
             LocalEnvVar.set(RT.assoc(localsMap, b.Symbol, b));
             ObjMethod method = (ObjMethod)MethodVar.deref();
@@ -961,7 +961,7 @@ namespace clojure.lang
             return tc;
         }
 
-        private static Dictionary<Type,string> primTypeNamesMap = new Dictionary<Type,string>
+        private static Dictionary<Type, string> primTypeNamesMap = new()
         {
             { typeof(int), "int" },
             { typeof(long), "long" },
@@ -998,19 +998,19 @@ namespace clojure.lang
                 case "Int64":
                 case "System.Int64":
                     t = typeof(long); break;
-                case "float": 
+                case "float":
                 case "Single":
                 case "System.Single":
                     t = typeof(float); break;
-                case "double": 
+                case "double":
                 case "Double":
                 case "System.Double":
                     t = typeof(double); break;
-                case "char": 
+                case "char":
                 case "Char":
                 case "System.Char":
                     t = typeof(char); break;
-                case "short": 
+                case "short":
                 case "Int16":
                 case "System.Int16":
                     t = typeof(short); break;
@@ -1073,7 +1073,7 @@ namespace clojure.lang
         #region Name munging
 
         static readonly IPersistentMap _charMap = PersistentHashMap.create('-', "_",
-            //		                         '.', "_DOT_",
+             //		                         '.', "_DOT_",
              ':', "_COLON_",
              '+', "_PLUS_",
              '>', "_GT_",
@@ -1083,7 +1083,7 @@ namespace clojure.lang
              '!', "_BANG_",
              '@', "_CIRCA_",
              '#', "_SHARP_",
-             '\'',"_SINGLEQUOTE_",
+             '\'', "_SINGLEQUOTE_",
              '"', "_DOUBLEQUOTE_",
              '%', "_PERCENT_",
              '^', "_CARET_",
@@ -1127,7 +1127,7 @@ namespace clojure.lang
                 return ((String)y).Length - ((String)x).Length;
             }
         }
-    
+
         static readonly public Regex DEMUNGE_PATTERN = CreateDemungePattern();
 
         private static Regex CreateDemungePattern()
@@ -1142,12 +1142,12 @@ namespace clojure.lang
 
             object[] mungeStrs = RT.toArray(RT.keys(DEMUNGE_MAP));
             Array.Sort(mungeStrs, new LengthCmp());
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             bool first = true;
-            foreach (Object s in mungeStrs) 
+            foreach (Object s in mungeStrs)
             {
-                String escapeStr = (String) s;
-                if ( ! first )
+                String escapeStr = (String)s;
+                if (!first)
                     sb.Append("|");
                 first = false;
                 sb.Append(Regex.Escape(escapeStr));
@@ -1161,7 +1161,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static string munge(string name)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             foreach (char c in name)
             {
                 string sub = (string)_charMap.valAt(c);
@@ -1176,14 +1176,14 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static String demunge(string mungedNamed)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             int lastMatchEnd = 0;
-            for (Match m = DEMUNGE_PATTERN.Match(mungedNamed); m.Success; m = m.NextMatch() )
+            for (Match m = DEMUNGE_PATTERN.Match(mungedNamed); m.Success; m = m.NextMatch())
             {
                 int start = m.Index;
 
                 // Keep everything before the match
-                sb.Append(mungedNamed.Substring(lastMatchEnd, start-lastMatchEnd));
+                sb.Append(mungedNamed.Substring(lastMatchEnd, start - lastMatchEnd));
                 lastMatchEnd = start + m.Length;
                 // Replace the match with DEMUNGE_MAP result
                 Char origCh = (Char)DEMUNGE_MAP.valAt(m.Groups[0].Value);
@@ -1208,20 +1208,20 @@ namespace clojure.lang
         public static object eval(object form)
         {
             IPersistentMap meta = RT.meta(form);
-            object line = (meta != null ? meta.valAt(RT.LineKey,LineVarDeref()) : LineVarDeref());
+            object line = (meta != null ? meta.valAt(RT.LineKey, LineVarDeref()) : LineVarDeref());
             object column = (meta != null ? meta.valAt(RT.ColumnKey, ColumnVarDeref()) : ColumnVarDeref());
             object sourceSpan = (meta != null ? meta.valAt(RT.SourceSpanKey, SourceSpanVar.deref()) : SourceSpanVar.deref());
 
             IPersistentMap bindings = RT.mapUniqueKeys(LineVar, line, ColumnVar, column, SourceSpanVar, sourceSpan, CompilerContextVar, null);
-            if ( meta != null )
+            if (meta != null)
             {
                 object eval_file = meta.valAt(RT.EvalFileKey);
-                if ( eval_file != null )
+                if (eval_file != null)
                 {
                     bindings = bindings.assoc(SourcePathVar, eval_file);
                     try
                     {
-                        bindings  = bindings.assoc(SourceVar,new FileInfo((string)eval_file).Name);
+                        bindings = bindings.assoc(SourceVar, new FileInfo((string)eval_file).Name);
                     }
                     catch (Exception)
                     {
@@ -1230,14 +1230,14 @@ namespace clojure.lang
 
             }
 
-            ParserContext pconExpr = new ParserContext(RHC.Expression);
-            ParserContext pconEval = new ParserContext(RHC.Eval);
+            ParserContext pconExpr = new(RHC.Expression);
+            ParserContext pconEval = new(RHC.Eval);
 
             Var.pushThreadBindings(bindings);
             try
             {
                 form = Macroexpand(form);
-              
+
 
                 if (form is ISeq && Util.equals(RT.first(form), DoSym))
                 {
@@ -1272,13 +1272,13 @@ namespace clojure.lang
 
         private static volatile Var MacroCheckVar = null;
         private static volatile bool MacroCheckLoading = false;
-        private static readonly Object MacroCheckLock = new object();
+        private static readonly Object MacroCheckLock = new();
 
         public static Var EnsureMacroCheck()
         {
-            if ( MacroCheckVar == null)
+            if (MacroCheckVar == null)
             {
-                lock(MacroCheckLock)
+                lock (MacroCheckLock)
                 {
                     if (MacroCheckVar == null)
                     {
@@ -1295,13 +1295,13 @@ namespace clojure.lang
 
         public static void CheckSpecs(Var v, ISeq form)
         {
-            if ( RT.CHECK_SPECS && !MacroCheckLoading)
+            if (RT.CHECK_SPECS && !MacroCheckLoading)
             {
                 try
                 {
                     EnsureMacroCheck().applyTo(RT.cons(v, RT.list(form.next())));
                 }
-                catch ( Exception e)
+                catch (Exception e)
                 {
                     throw new CompilerException((string)SourcePathVar.deref(), LineVarDeref(), ColumnVarDeref(), v.ToSymbol(), CompilerException.PhaseMacroSyntaxCheckKeyword, e);
                 }
@@ -1333,8 +1333,8 @@ namespace clojure.lang
         }
 
         //public static Regex UnpackFnNameRE = new Regex("^(.+)/$([^_]+)(__[0-9]+)*$");
-    
-        public readonly static Regex FnNameSuffixRE = new Regex("__[0-9]+$");
+
+        public readonly static Regex FnNameSuffixRE = new("__[0-9]+$");
         static String RemoveFnSuffix(string s)
         {
             while (true)
@@ -1461,7 +1461,7 @@ namespace clojure.lang
 
             if (opAsSym != null || opAsVar != null)
             {
-                Var v = opAsVar ??  LookupVar(opAsSym, false,false);
+                Var v = opAsVar ?? LookupVar(opAsSym, false, false);
                 if (v != null && v.IsMacro)
                 {
                     if (v.Namespace != CurrentNamespace && !v.isPublic)
@@ -1530,7 +1530,7 @@ namespace clojure.lang
         static object PreserveTag(ISeq src, object dst)
         {
             Symbol tag = TagOf(src);
-            if (tag != null )
+            if (tag != null)
             {
                 if (dst is IObj iobj)
                 {
@@ -1549,7 +1549,7 @@ namespace clojure.lang
             return ts;
         }
 
-        static readonly Dictionary<Type, Symbol> TypeToTagDict = new Dictionary<Type, Symbol>()
+        static readonly Dictionary<Type, Symbol> TypeToTagDict = new()
         {
             { typeof(bool), Symbol.create(null,"bool") },
             { typeof(char), Symbol.create(null,"char") },
@@ -1602,7 +1602,7 @@ namespace clojure.lang
 
         public static int GetLineFromSpanMap(IPersistentMap spanMap)
         {
-            if (spanMap == null )
+            if (spanMap == null)
                 return 0;
 
             if (GetLocation(spanMap, RT.StartLineKey, out int line))
@@ -1686,7 +1686,7 @@ namespace clojure.lang
         {
             return "__Init__$" + sourcePath.Replace(".", "/").Replace("/", "$");
         }
-        
+
         public static void PushNS()
         {
             Var.pushThreadBindings(PersistentHashMap.create(Var.intern(Symbol.intern("clojure.core"),
@@ -1699,7 +1699,7 @@ namespace clojure.lang
             if (CompilePathVar.deref() == null)
                 throw new InvalidOperationException("*compile-path* not set");
 
-             string sourcePath = relativePath;
+            string sourcePath = relativePath;
             GenContext context = GenContext.CreateWithExternalAssembly(sourceName, sourcePath, ".dll", true);
 
             Compile(context, rdr, sourceDirectory, sourceName, relativePath);
@@ -1710,24 +1710,24 @@ namespace clojure.lang
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
-        public static object Compile(GenContext context,TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
+        public static object Compile(GenContext context, TextReader rdr, string sourceDirectory, string sourceName, string relativePath)
         {
-            object eofVal = new object();
+            object eofVal = new();
             object form;
 
             string sourcePath = relativePath;
 
             // generate loader class
-            ObjExpr objx = new ObjExpr(null);
+            ObjExpr objx = new(null);
 
             var internalName = sourcePath.Replace(Path.PathSeparator, '/');
-                
+
             {
                 int lastDotIndex = sourcePath.LastIndexOf('.');
-                if ( lastDotIndex > -1 )
-                    internalName = internalName.Substring(0, lastDotIndex); 
+                if (lastDotIndex > -1)
+                    internalName = internalName.Substring(0, lastDotIndex);
             }
-                
+
             objx.InternalName = internalName + "__init";
 
             TypeBuilder initTB = context.AssemblyGen.DefinePublicType(InitClassName(internalName), typeof(object), true);
@@ -1735,7 +1735,7 @@ namespace clojure.lang
 
             // static load method
             MethodBuilder initMB = initTB.DefineMethod("Initialize", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
-            CljILGen ilg = new CljILGen(initMB.GetILGenerator());
+            CljILGen ilg = new(initMB.GetILGenerator());
 
             //// Print a little message, for debugging purposes
             //ilg.Emit(OpCodes.Ldstr, $"Initializing {sourceDirectory} {relativePath} ");
@@ -1787,7 +1787,7 @@ namespace clojure.lang
 
                 cbGen.BeginExceptionBlock();
 
-                cbGen.Emit(OpCodes.Call,Method_Compiler_PushNS);
+                cbGen.Emit(OpCodes.Call, Method_Compiler_PushNS);
                 cbGen.Emit(OpCodes.Call, constInitsMB);
 
                 cbGen.BeginFinallyBlock();
@@ -1797,15 +1797,15 @@ namespace clojure.lang
                 cbGen.Emit(OpCodes.Ret);
 
                 var descAttrBuilder =
-                 new CustomAttributeBuilder(typeof (DescriptionAttribute).GetConstructor(new[] {typeof (String)}),
-                                           new [] {String.Format("{{:clojure-namespace {0}}}", CurrentNamespace)});
+                 new CustomAttributeBuilder(typeof(DescriptionAttribute).GetConstructor(new[] { typeof(String) }),
+                                           new[] { String.Format("{{:clojure-namespace {0}}}", CurrentNamespace) });
                 initTB.SetCustomAttribute(descAttrBuilder);
 
                 initTB.CreateType();
             }
             catch (LispReader.ReaderException e)
             {
-                throw new CompilerException(sourcePath, e.Line,  e.Column, e.InnerException);
+                throw new CompilerException(sourcePath, e.Line, e.Column, e.InnerException);
             }
             finally
             {
@@ -1815,7 +1815,7 @@ namespace clojure.lang
         }
 
 
-        private static void Compile1(TypeBuilder tb, CljILGen ilg,  ObjExpr objx, object form)
+        private static void Compile1(TypeBuilder tb, CljILGen ilg, ObjExpr objx, object form)
         {
             object line = LineVarDeref();
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.LineKey))
@@ -1827,8 +1827,8 @@ namespace clojure.lang
             if (RT.meta(form) != null && RT.meta(form).containsKey(RT.SourceSpanKey))
                 sourceSpan = (IPersistentMap)RT.meta(form).valAt(RT.SourceSpanKey);
 
-            ParserContext evPC = new ParserContext(RHC.Eval);
- 
+            ParserContext evPC = new(RHC.Eval);
+
             Var.pushThreadBindings(RT.map(LineVar, line, ColumnVar, column, SourceSpanVar, sourceSpan));
 
             try
@@ -1846,12 +1846,12 @@ namespace clojure.lang
                     objx.Vars = (IPersistentMap)VarsVar.deref();
                     objx.Constants = (PersistentVector)ConstantsVar.deref();
                     objx.EmitConstantFieldDefs(tb);
-                    expr.Emit(RHC.Expression,objx,ilg);
+                    expr.Emit(RHC.Expression, objx, ilg);
                     ilg.Emit(OpCodes.Pop);
 
                     if (expr is DefExpr dex && dex.Init is FnExpr fnx)
                     {
-                        RegisterDirectLink(dex.Var, fnx.CompiledType);                        
+                        RegisterDirectLink(dex.Var, fnx.CompiledType);
                     }
 
 #if NET9_0_OR_GREATER
@@ -1912,11 +1912,11 @@ namespace clojure.lang
             }
             catch (IOException e)
             {
-                throw new AssemblyNotFoundException(e.Message,e);
+                throw new AssemblyNotFoundException(e.Message, e);
             }
             catch (ArgumentException e)
             {
-                throw new AssemblyNotFoundException(e.Message,e);
+                throw new AssemblyNotFoundException(e.Message, e);
             }
             catch (BadImageFormatException e)
             {
@@ -1970,13 +1970,13 @@ namespace clojure.lang
 
         private static void InitAssembly(Assembly assy, string relativePath)
         {
-            Type initType = GetTypeFromAssy(assy,InitClassName(relativePath));
+            Type initType = GetTypeFromAssy(assy, InitClassName(relativePath));
             if (initType == null)
             {
                 initType = GetTypeFromAssy(assy, "__Init__"); // old init class name
                 if (initType == null)
                 {
-                    throw new AssemblyInitializationException(String.Format("Cannot find initializer for {0}.{1}",assy.FullName,relativePath));
+                    throw new AssemblyInitializationException(String.Format("Cannot find initializer for {0}.{1}", assy.FullName, relativePath));
                 }
             }
             InvokeInitType(assy, initType);
@@ -1990,7 +1990,7 @@ namespace clojure.lang
             }
             catch (Exception e)
             {
-                throw new AssemblyInitializationException(String.Format("Error initializing {0}: {1}", assy.FullName, e.Message),e);
+                throw new AssemblyInitializationException(String.Format("Error initializing {0}: {1}", assy.FullName, e.Message), e);
             }
         }
 
@@ -2016,7 +2016,7 @@ namespace clojure.lang
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "ClojureJVM name match")]
         public static object loadFile(string fileName)
         {
-            FileInfo finfo = new FileInfo(fileName);
+            FileInfo finfo = new(fileName);
             if (!finfo.Exists)
                 throw new FileNotFoundException($"Cannot find file to load: {fileName}", fileName);
 
@@ -2062,7 +2062,7 @@ namespace clojure.lang
         public static object load(TextReader rdr, string sourcePath, string sourceName, string relativePath)
         {
             object ret = null;
-            object eofVal = new object();
+            object eofVal = new();
             object form;
 
             LineNumberingTextReader lntr = rdr as LineNumberingTextReader ?? new LineNumberingTextReader(rdr);
@@ -2174,8 +2174,8 @@ namespace clojure.lang
                 else if (type == typeof(String))
                     return new StringExpr(String.Intern((String)form));
                 else if (form is IPersistentCollection collection
-                    && ! (form is IRecord)
-                    && ! (form is IType)
+                    && !(form is IRecord)
+                    && !(form is IType)
                     && collection.count() == 0)
                     return OptionallyGenerateMetaInit(pcontext, form, new EmptyExpr(form));
                 else if (form is ISeq seq)
@@ -2207,8 +2207,8 @@ namespace clojure.lang
         {
             Expr ret = expr;
 
-            if ( RT.meta(form) != null )
-                ret = new MetaExpr(ret, (MapExpr)MapExpr.Parse(pcon.EvalOrExpr(),((IObj)form).meta()));
+            if (RT.meta(form) != null)
+                ret = new MetaExpr(ret, (MapExpr)MapExpr.Parse(pcon.EvalOrExpr(), ((IObj)form).meta()));
 
             return ret;
         }
@@ -2231,13 +2231,30 @@ namespace clojure.lang
                     Type t = HostExpr.MaybeType(nsSym, false);
                     if (t != null)
                     {
+                        // I know C# does not allow a property or field with the same name as a method.  I'm not sure if that is C# or a CLR limitation.
+                        // So I'll go ahead and put in the same complication that the JVM code has.
+
                         FieldInfo finfo;
                         PropertyInfo pinfo;
 
                         if ((finfo = Reflector.GetField(t, symbol.Name, true)) != null)
-                            return new StaticFieldExpr((string)SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tag, t, symbol.Name, finfo);
+                        {
+                            var sfe = new StaticFieldExpr((string)SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tag, t, symbol.Name, finfo);
+                            var maybeOverloads = QualifiedMethodExpr.MethodOverloads(t, symbol.Name, QualifiedMethodExpr.EMethodKind.STATIC);
+                            if (maybeOverloads.Any())
+                                return new QualifiedMethodExpr(t, symbol, sfe);
+                            else
+                                return sfe;
+                        }
                         else if ((pinfo = Reflector.GetProperty(t, symbol.Name, true)) != null)
-                            return new StaticPropertyExpr((string)SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tag, t, symbol.Name, pinfo);
+                        {
+                            var spe = new StaticPropertyExpr((string)SourceVar.deref(), (IPersistentMap)Compiler.SourceSpanVar.deref(), tag, t, symbol.Name, pinfo);
+                            var maybeOverloads = QualifiedMethodExpr.MethodOverloads(t, symbol.Name, QualifiedMethodExpr.EMethodKind.STATIC);
+                            if (maybeOverloads.Any())
+                                return new QualifiedMethodExpr(t, symbol, spe);
+                            else
+                                return spe;
+                        }
                         else return new QualifiedMethodExpr(t, symbol);
                     }
                     //throw new InvalidOperationException(string.Format("Unable to find static field: {0} in {1}", symbol.Name, t));
@@ -2246,7 +2263,7 @@ namespace clojure.lang
 
             object o = Compiler.Resolve(symbol);
 
-           Symbol oAsSymbol;
+            Symbol oAsSymbol;
 
             if (o is Var oAsVar)
             {
@@ -2265,7 +2282,7 @@ namespace clojure.lang
             throw new InvalidOperationException(string.Format("Unable to resolve symbol: {0} in this context", symbol));
         }
 
-        internal static Expr AnalyzeSeq(ParserContext pcon, ISeq form, string name )
+        internal static Expr AnalyzeSeq(ParserContext pcon, ISeq form, string name)
         {
             object line = LineVarDeref();
             object column = ColumnVarDeref();
@@ -2320,7 +2337,7 @@ namespace clojure.lang
 
         internal static bool InTailCall(RHC context)
         {
-            return (context == RHC.Return) && (MethodReturnContextVar.deref() != null) &&  (InTryBlockVar.deref() == null);
+            return (context == RHC.Return) && (MethodReturnContextVar.deref() != null) && (InTryBlockVar.deref() == null);
         }
 
         #endregion
@@ -2340,11 +2357,11 @@ namespace clojure.lang
             public static readonly Keyword ErrorPhaseKeyword = Keyword.intern(ErrorNamespaceStr, "phase");
             public static readonly Keyword ErrorSymbolKeyword = Keyword.intern(ErrorNamespaceStr, "symbol");
 
-           // Compile error phases
+            // Compile error phases
             public static readonly Keyword PhaseReadKeyword = Keyword.intern(null, "read-source");
             public static readonly Keyword PhaseMacroSyntaxCheckKeyword = Keyword.intern(null, "macro-syntax-check");
             public static readonly Keyword PhaseMacroExpandKeyword = Keyword.intern(null, "macroexpand");
-            public static readonly Keyword PhaseCompileSyntaxCheckKeyword = Keyword.intern(null, "compile-syntax-check"); 
+            public static readonly Keyword PhaseCompileSyntaxCheckKeyword = Keyword.intern(null, "compile-syntax-check");
             public static readonly Keyword PhaseCompilationKeyword = Keyword.intern(null, "compilation");
             public static readonly Keyword PhaseExecutionKeyword = Keyword.intern(null, "execution");
 
@@ -2357,7 +2374,7 @@ namespace clojure.lang
             public string FileSource { get; private set; }
             public int Line { get; private set; }
             public IPersistentMap MyData { get; private set; }
-            
+
             #endregion
 
             #region C-tors
@@ -2374,18 +2391,18 @@ namespace clojure.lang
             }
 
             public CompilerException(string message, Exception innerException)
-                :base(message,innerException)
+                : base(message, innerException)
             {
                 FileSource = "<unknown>";
             }
 
             public CompilerException(string source, int line, int column, Exception cause)
-                :this(source,line,column, null, cause)
+                : this(source, line, column, null, cause)
             {
             }
 
             public CompilerException(string source, int line, int column, Symbol sym, Exception cause)
-                :this(source,line,column,sym,PhaseCompileSyntaxCheckKeyword,cause)
+                : this(source, line, column, sym, PhaseCompileSyntaxCheckKeyword, cause)
             {
             }
 
@@ -2408,21 +2425,21 @@ namespace clojure.lang
 
                 FileSource = info.GetString("FileSource");
                 Line = info.GetInt32("Line");
-                MyData = (IPersistentMap)info.GetValue("MyData",typeof(IPersistentMap));
+                MyData = (IPersistentMap)info.GetValue("MyData", typeof(IPersistentMap));
             }
 
             #endregion
 
             #region Support
 
-            private static String Verb(Keyword phase) 
-            {   
+            private static String Verb(Keyword phase)
+            {
                 if (PhaseReadKeyword.Equals(phase))
-			        return "reading source";
-                else if (PhaseCompileSyntaxCheckKeyword.Equals(phase))   
-			        return "compiling";
-                else 
-			        return "macroexpanding";
+                    return "reading source";
+                else if (PhaseCompileSyntaxCheckKeyword.Equals(phase))
+                    return "compiling";
+                else
+                    return "macroexpanding";
             }
 
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Standard API")]
@@ -2450,7 +2467,7 @@ namespace clojure.lang
                 }
                 return Message;
             }
-            
+
             // JVM has this deprecated
             //static string ErrorMsg(string source, int line, int column, string s)
             //{
