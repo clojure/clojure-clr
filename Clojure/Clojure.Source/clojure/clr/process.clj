@@ -75,22 +75,26 @@
 
 (defn stdin
   "Given a process, return the stdin of the external process (an OutputStream)"
+  {:added "1.12"}
   ^StreamWriter [^Process process]
   (.get_StandardInput process))
 
 (defn stdout
   "Given a process, return the stdout of the external process (an InputStream)"
+  {:added "1.12"}
   ^StreamReader [^Process process]
   (.get_StandardOutput process))
 
 (defn stderr
   "Given a process, return the stderr of the external process (an InputStream)"
+  {:added "1.12"}
   ^StreamReader [^Process process]
   (.get_StandardError process))
 
 (defn exit-ref
   "Given a Process (the output of 'start'), return a reference that can be
   used to wait for process completion then returns the exit value."
+  {:added "1.12"}
   [^Process process]
   (reify
     IDeref
