@@ -53,15 +53,26 @@
 	  'chars (Type/GetType "System.Char[]")})
 
  
- (defn- ^Type the-class [x]					;;; ^Class
-  (cond 
-   (class? x) x
-   (contains? prim->class x) (prim->class x)
-   :else (let [strx (str x)]
-           (clojure.lang.RT/classForName 
-            (if (some #{\. \[} strx)           
-              strx
-              (str "System." strx))))))         ;;;(str "java.lang." strx))))))
+(defn- the-array-class [sym]
+  (clojure.lang.RT/classForName
+   (let [cn (namespace sym)]
+     (clojure.lang.CljCompiler.Ast.HostExpr/BuildArrayTypeDescriptor                  ;;; clojure.lang.Compiler$HostExpr/buildArrayClassDescriptor 
+      (if (or (clojure.lang.Compiler/PrimType (symbol cn)) (some #{\.} cn))           ;;; primClass
+        sym
+        (symbol (str "System." cn) (name sym)))))))                                   ;;; "java.lang."
+
+(defn- ^Type the-class [x]                                                            ;;; ^Class
+  (cond
+    (class? x) x
+    (symbol? x) (cond (contains? prim->class x) (prim->class x)
+                      (clojure.lang.CljCompiler.Ast.HostExpr/LooksLikeArrayType x)   ;;; clojure.lang.Compiler$HostExpr/looksLikeArrayClass
+                        (the-array-class x)
+                      :else (let [strx (str x)]
+                              (clojure.lang.RT/classForName
+                               (if (some #{\. \[} strx)
+                                 strx
+                                 (str "System." strx)))))                             ;;; "java.lang."
+    :else (clojure.lang.RT/classForName x)))
  
  (defn- the-class-maybe-by-ref [x]
    (cond

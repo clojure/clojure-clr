@@ -149,3 +149,13 @@
 ;;;                        (visitSource [source debug] (.append sourceFile source)))]
 ;;;    (.accept classReader sourceVisitor 0)
 ;;;    (is (= "examples.clj" (str sourceFile)))))
+
+(deftest array-descriptors->class
+  (are [descr c] (= (#'clojure.core/the-class descr) c)
+    "System.Guid[]" System.Guid/1                           ;;; "[Ljava.util.UUID;" java.util.UUID/1
+    'String System.String                                   ;;; java.lang.String
+    'String/1 System.String/1                               ;;; java.lang.String/1
+    `System.Guid System.Guid                                ;;; 'java.util.UUID java.util.UUID
+    'System.Guid/2 System.Guid/2                            ;;; 'java.util.UUID/2 java.util.UUID/2
+    'int/1 int/1
+    'boolean/9 bool/9))
