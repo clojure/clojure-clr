@@ -3,7 +3,7 @@
   <PropertyGroup>
     <MajorVersion>1</MajorVersion>
     <MinorVersion>12</MinorVersion>
-    <PatchVersion>2</PatchVersion>
-    <VersionSuffix></VersionSuffix>
+    <PatchVersion>3</PatchVersion>
+    <VersionSuffix>SNAPSHOT</VersionSuffix>
   </PropertyGroup>
 </Project>
