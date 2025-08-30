@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -25,6 +24,12 @@ namespace clojure.lang
     {
         #region Data
 
+        // TODO: Making this field non-serialized is only part of the solution to CLJ-2916 LazySeq - realize before serializing and do not serialize IFn.
+        // Unfortunately, making the LazySeq realize before serializing requires implementatin ISerializable, then making Obj implement it also.
+        // And doing that causes 49 errors in the test suite -- we need to add an additional constructor and probably also GetObjectData for every class derived from Obj.
+        // That's too much.  Defer this until we decide what to do about BinaryFormatter being declared obsolete/unsafe.
+
+        [NonSerialized]
         private IFn _fn;
         private object _sv;
         private ISeq _s;
@@ -54,7 +59,7 @@ namespace clojure.lang
         // MUST be locked when called
         private void Force()
         {
-            if ( _fn != null )
+            if (_fn != null)
             {
                 _sv = _fn.invoke();
                 _fn = null;
@@ -100,7 +105,7 @@ namespace clojure.lang
         private void Realize()
         {
             var lk = _lock;
-            if ( lk != null)
+            if (lk != null)
             {
                 lk.EnterWriteLock();
                 try
@@ -154,7 +159,7 @@ namespace clojure.lang
             if (_meta == meta)
                 return this;
 
-           return new LazySeq(meta,seq());
+            return new LazySeq(meta, seq());
         }
 
         #endregion
@@ -173,7 +178,7 @@ namespace clojure.lang
         }
 
         #endregion
-        
+
         #region IPersistentCollection Members
 
         public int count()
@@ -204,7 +209,7 @@ namespace clojure.lang
         }
 
         #endregion
-        
+
         #region ISeq Members
 
         public object first()
@@ -333,7 +338,7 @@ namespace clojure.lang
             get
             {
                 if (index < 0)
-                    throw new ArgumentOutOfRangeException(nameof(index),"Index must be non-negative.");
+                    throw new ArgumentOutOfRangeException(nameof(index), "Index must be non-negative.");
 
                 ISeq s = seq();
                 for (int i = 0; s != null; s = s.next(), i++)
@@ -358,7 +363,7 @@ namespace clojure.lang
             if (arrayIndex < 0)
                 throw new ArgumentOutOfRangeException(nameof(arrayIndex), "must be non-negative.");
             if (array.Rank > 1)
-                throw new ArgumentException("must not be multidimensional",nameof(array));
+                throw new ArgumentException("must not be multidimensional", nameof(array));
             if (arrayIndex >= array.Length)
                 throw new ArgumentException("must be less than the length", nameof(arrayIndex));
             if (count() > array.Length - arrayIndex)
@@ -374,7 +379,7 @@ namespace clojure.lang
             if (array == null)
                 throw new ArgumentNullException(nameof(array));
             if (index < 0)
-                throw new ArgumentOutOfRangeException(nameof(index),"must be non-negative.");
+                throw new ArgumentOutOfRangeException(nameof(index), "must be non-negative.");
             if (array.Rank > 1)
                 throw new ArgumentException("must not be multidimensional.", nameof(array));
             if (index >= array.Length)
