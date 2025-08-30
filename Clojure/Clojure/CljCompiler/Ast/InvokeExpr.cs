@@ -241,11 +241,16 @@ namespace clojure.lang.CljCompiler.Ast
 
 
             if (fexpr is QualifiedMethodExpr qmfexpr)
+            {
+                if (qmfexpr.Kind == QualifiedMethodExpr.EMethodKind.INSTANCE && RT.count(args) == 0)
+                    throw QualifiedMethodExpr.InstanceNoTargetException(qmfexpr);
+
                 return ToHostExpr(pcon,
                     qmfexpr,
                     Compiler.TagOf(form),
                     tailPosition,
                     form.next());
+            }
 
 
             //if (args.count() > Compiler.MAX_POSITIONAL_ARITY)

@@ -318,6 +318,11 @@ namespace clojure.lang.CljCompiler.Ast
             return new ArgumentException($"Error - param-tags {genericTypeArgs}{paramTags} insufficient to resolve {Compiler.MethodDescription(t, methodName)}");
         }
 
+        internal static ArgumentException InstanceNoTargetException(QualifiedMethodExpr qme)
+        {
+            return new ArgumentException($"Malformed method expression, expecting ({qme.MethodType.Name}/.{qme.MethodName} target...)");
+        }
+
 
         #endregion
     }
