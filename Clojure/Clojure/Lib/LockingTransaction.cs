@@ -14,8 +14,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Runtime.Serialization;
+using System.Threading;
 
 namespace clojure.lang
 {
@@ -74,7 +74,7 @@ namespace clojure.lang
         /// The transaction has been committed.
         /// </summary>
         const int COMMITTED = 4;
-        
+
         #endregion
 
         #region supporting classes
@@ -178,7 +178,7 @@ namespace clojure.lang
             public CountDownLatch Latch
             {
                 get { return _latch; }
-            } 
+            }
 
 
             #endregion
@@ -287,7 +287,7 @@ namespace clojure.lang
         /// Transactions consume a point for init, for each retry, 
         /// and on commit if writing.</para>
         /// </remarks>
-        private static readonly AtomicLong _lastPoint = new AtomicLong();
+        private static readonly AtomicLong _lastPoint = new();
 
         /// <summary>
         ///  The state of the transaction.
@@ -313,32 +313,32 @@ namespace clojure.lang
         /// <summary>
         /// Cached retry exception.
         /// </summary>
-        readonly RetryEx _retryex = new RetryEx();
+        static readonly RetryEx _retryex = new();
 
         /// <summary>
         /// Agent actions pending on this thread.
         /// </summary>
-        readonly List<Agent.Action> _actions = new List<Agent.Action>();
+        readonly List<Agent.Action> _actions = new();
 
         /// <summary>
         /// Ref assignments made in this transaction (both sets and commutes).
         /// </summary>
-        readonly Dictionary<Ref, Object> _vals = new Dictionary<Ref, Object>();
+        readonly Dictionary<Ref, Object> _vals = new();
 
         /// <summary>
         /// Refs that have been set in this transaction.
         /// </summary>
-        readonly HashSet<Ref> _sets = new HashSet<Ref>();
+        readonly HashSet<Ref> _sets = new();
 
         /// <summary>
         /// Ref commutes that have been made in this transaction.
         /// </summary>
-        readonly SortedDictionary<Ref, List<CFn>> _commutes = new SortedDictionary<Ref, List<CFn>>();
+        readonly SortedDictionary<Ref, List<CFn>> _commutes = new();
 
         /// <summary>
         /// The set of Refs holding read locks.
         /// </summary>
-        readonly HashSet<Ref> _ensures = new HashSet<Ref>(); 
+        readonly HashSet<Ref> _ensures = new();
 
         #endregion
 
@@ -402,7 +402,7 @@ namespace clojure.lang
                 if (!r.TryEnterWriteLock(LockWaitMsecs))
                     throw _retryex;
             }
-            catch (ThreadInterruptedException )
+            catch (ThreadInterruptedException)
             {
                 throw _retryex;
             }
@@ -616,8 +616,8 @@ namespace clojure.lang
 
             bool done = false;
             object ret = null;
-            List<Ref> locked = new List<Ref>();
-            List<Notify> notify = new List<Notify>();
+            List<Ref> locked = new();
+            List<Notify> notify = new();
 
             for (int i = 0; !done && i < RetryLimit; i++)
             {
@@ -649,11 +649,11 @@ namespace clojure.lang
                             TryWriteLock(r);
                             locked.Add(r);
 
-                            if (wasEnsured && r.CurrentValPoint() > _readPoint )
+                            if (wasEnsured && r.CurrentValPoint() > _readPoint)
                                 throw _retryex;
 
                             Info refinfo = r.TInfo;
-                            if ( refinfo != null && refinfo != _info && refinfo.IsRunning)
+                            if (refinfo != null && refinfo != _info && refinfo.IsRunning)
                             {
                                 if (!Barge(refinfo))
                                 {
@@ -685,7 +685,7 @@ namespace clojure.lang
                             Ref r = pair.Key;
                             object oldval = r.TryGetVal();
                             object newval = pair.Value;
-                          
+
                             r.SetValue(newval, commitPoint);
                             if (r.getWatches().count() > 0)
                                 notify.Add(new Notify(r, oldval, newval));
