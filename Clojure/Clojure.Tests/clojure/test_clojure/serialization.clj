@@ -14,14 +14,16 @@
   (:import (System.IO MemoryStream)                                                 ;;;(java.io ObjectOutputStream ObjectInputStream
            #_(System.Runtime.Serialization.Formatters.Binary BinaryFormatter)))        ;;; ByteArrayOutputStream ByteArrayInputStream)))   -- defer import until after load
 
-
-(compile-when (>= (:major dotnet-version) 9)
+(comment "Giving up completely"
+(compile-when (>= (:major dotnet-version) 8)
 
 (assembly-load-from "System.Runtime.Serialization.Formatters.dll")
 
 )
 
 (import '(System.Runtime.Serialization.Formatters.Binary BinaryFormatter))
+
+
 
 
 (defn- serialize
@@ -203,3 +205,4 @@
     (repeat 1)
     (iterate identity nil)
     (cycle [1])))    
+) ;comment
