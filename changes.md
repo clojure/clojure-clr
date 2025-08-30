@@ -1,5 +1,22 @@
 ﻿<!-- -*- mode: markdown ; mode: visual-line ; coding: utf-8 -*- -->
 
+# Changes to Clojure in Version 1.12.2
+
+* [CLJ-2914](https://clojure.atlassian.net/browse/CLJ-2914) - Compiler - syntax error if qualified instance method expression is missing instance
+* [CLJ-1798](https://clojure.atlassian.net/browse/CLJ-1798) - Refs - avoid creating RetryEx in LockingTransaction on every transaction
+* [CLJ-2916](https://clojure.atlassian.net/browse/CLJ-2916) - LazySeq - realize before serializing and do not serialize IFn
+* [CLJ-2917](https://clojure.atlassian.net/browse/CLJ-2917) - Iterate - de/serialization no longer supported, throw
+
+# Changes to ClojureCLr in Version 1.12.2
+
+* [CLJCLR-175](https://clojure.atlassian.net/browse/CLJCLR-175)
+* [CLJCLR-174](https://clojure.atlassian.net/browse/CLJCLR-174) - Allow JVM precision names (such as HALF_EVEN) in macro with-precision
+* [CLJCLR-176](https://clojure.atlassian.net/browse/CLJCLR-176) - Fix code-gen for case expression in sparse mode
+* [CLJCLR-172](https://clojure.atlassian.net/browse/CLJCLR-172) - (quote 10.0M 3) should return 3.0M
+* [CLJCLR-173](https://clojure.atlassian.net/browse/CLJCLR-173) - Fix (rationalize 1)
+* [CLJCLR-171](https://clojure.atlassian.net/browse/CLJCLR-171) - Fix (parse-double "Infinity")
+* [CLJCLR-175](https://clojure.atlassian.net/browse/CLJCLR-175) - Fix aset throwing an exception when ar is type Array by inference (say by aclone)
+
 # Changes to Clojure in Version 1.12.1
 
 * [CLJ-2899](https://clojure.atlassian.net/browse/CLJ-2899) - Revert change in semantics of qualified symbol in invocation position if field and method of same name
